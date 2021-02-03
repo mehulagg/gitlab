@@ -46,7 +46,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-ml-3">
+  <div class="gl-ml-3 gl-display-flex gl-align-items-center">
     <gl-button
       v-gl-modal-directive="'board-config-modal'"
       v-gl-tooltip
