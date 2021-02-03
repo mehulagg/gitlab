@@ -164,15 +164,7 @@ Feature.disable(:merge_request_reviewers, Project.find(<project id>))
 #### Approval Rule information for Reviewers **(STARTER)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233736) in GitLab 13.8.
-> - It was [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51183) in GitLab 13.8.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - It can be enabled or disabled for a single project.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-approval-rule-information-for-reviewers). **(STARTER ONLY)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/293742) in GitLab 13.9.
 
 When editing the **Reviewers** field in a new or existing merge request, GitLab
 displays the name of the matching [approval rule](merge_request_approvals.md#approval-rules)
@@ -185,31 +177,6 @@ This example shows reviewers and approval rules when creating a new merge reques
 This example shows reviewers and approval rules in a merge request sidebar:
 
 ![Reviewer approval rules in sidebar](img/reviewer_approval_rules_sidebar_v13_8.png)
-
-##### Enable or disable Approval Rule information for Reviewers **(STARTER ONLY)**
-
-Merge Request Reviewers is under development and ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-# For the instance
-Feature.enable(:reviewer_approval_rules)
-# For a single project
-Feature.enable(:reviewer_approval_rules, Project.find(<project id>))
-```
-
-To disable it:
-
-```ruby
-# For the instance
-Feature.disable(:reviewer_approval_rules)
-# For a single project
-Feature.disable(:reviewer_approval_rules, Project.find(<project id>))
-```
 
 ### Merge requests to close issues
 
