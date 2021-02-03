@@ -107,6 +107,7 @@ export default function setupVueRepositoryList() {
             this.$route.params.path ? escapeFileUrl(this.$route.params.path) : ''
           }`,
           text: __('History'),
+          cssClass: 'btn-default',
         },
       });
     },
