@@ -10,7 +10,7 @@ GitLab administrators can modify user settings for the entire GitLab instance.
 
 ## Disallow users creating top-level groups
 
-By default, new users can create top-level groups. To disable this, modify the appropriate configuration file.
+By default, new users can create top-level groups. To disable this, modify the appropriate configuration file, then reconfigure and restart the application.
 
 For Omnibus installations, add the following to `/etc/gitlab/gitlab.rb`:
 
