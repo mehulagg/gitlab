@@ -242,7 +242,7 @@ For each runner, the following attributes are listed:
 | Projects     | Projects to which the runner is assigned |
 | Jobs         | Total of jobs run by the runner |
 | Tags         | Tags associated with the runner |
-| Last contact | Timestamp indicating when the GitLab instance last contacted the runner |
+| Last contact | Timestamp indicating when the GitLab Runner last contacted the GitLab instance |
 
 You can also edit, pause, or remove each runner.
 
@@ -314,7 +314,7 @@ For multi-node systems we recommend ingesting the logs into services like Elasti
 | `integrations_json.log` | Activity between GitLab and integrated systems |
 | `kubernetes.log`        | Kubernetes activity |
 
-The contents of these log files can be useful when troubleshooting a problem. 
+The contents of these log files can be useful when troubleshooting a problem.
 
 For details of these log files and their contents, see [Log system](../../administration/logs.md).
 
