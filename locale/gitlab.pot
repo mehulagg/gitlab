@@ -16102,7 +16102,31 @@ msgstr ""
 msgid "InviteEmail|%{inviter} invited you to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} as a %{role}"
 msgstr ""
 
+msgid "InviteEmail|Developers are direct contributors of a group. They have access to all the feature to go from idea to production. %{learn_more}."
+msgstr ""
+
+msgid "InviteEmail|Groups assemble related projects together and grant members access to several projects at once."
+msgstr ""
+
+msgid "InviteEmail|Guests are not active contributors in private projects. They can only see, and leave comments and issues. %{learn_more}."
+msgstr ""
+
 msgid "InviteEmail|Join now"
+msgstr ""
+
+msgid "InviteEmail|Maintainers are super-developers. They are able to push to master, deploy to production. %{learn_more}."
+msgstr ""
+
+msgid "InviteEmail|Projects can be used to host your code, track issues, collaborate on code, and continuously build, test, and deploy your app with built-in GitLab CI/CD."
+msgstr ""
+
+msgid "InviteEmail|Reporters are read-only contributors. They can't write to the repository, but can on issues. %{learn_more}."
+msgstr ""
+
+msgid "InviteEmail|What can I do as a %{role}?"
+msgstr ""
+
+msgid "InviteEmail|What is a GitLab %{project_or_group}?"
 msgstr ""
 
 msgid "InviteEmail|You are invited to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} as a %{role}"

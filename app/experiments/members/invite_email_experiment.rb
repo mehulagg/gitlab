@@ -13,7 +13,7 @@ module Members
       # we are overriding here so that when we add another experiment
       # we can merely add that variant and check of feature flag here
       if Feature.enabled?(feature_flag_name, self, type: :experiment, default_enabled: :yaml)
-        :avatar
+        :permission_info
       else
         nil # :control
       end
