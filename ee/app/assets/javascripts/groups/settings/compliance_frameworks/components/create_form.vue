@@ -43,7 +43,7 @@ export default {
       this.errorMessage = '';
 
       try {
-        const { name, description, color } = this.formData;
+        const { name, description, pipelineConfigurationFullPath, color } = this.formData;
         const { data } = await this.$apollo.mutate({
           mutation: createComplianceFrameworkMutation,
           variables: {
@@ -52,6 +52,7 @@ export default {
               params: {
                 name,
                 description,
+                pipelineConfigurationFullPath,
                 color,
               },
             },
@@ -81,6 +82,7 @@ export default {
       :group-edit-path="groupEditPath"
       :name.sync="formData.name"
       :description.sync="formData.description"
+      :pipeline-configuration-full-path.sync="formData.pipelineConfigurationFullPath"
       :color.sync="formData.color"
       @submit="onSubmit"
     />

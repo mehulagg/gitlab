@@ -36,6 +36,11 @@ export default {
       required: false,
       default: null,
     },
+    pipelineConfigurationFullPath: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   computed: {
     isValidColor() {
@@ -55,6 +60,13 @@ export default {
 
       return Boolean(this.description);
     },
+    isValidPipelineConfiguration() {
+      if (this.pipelineConfigurationFullPath === null) {
+        return null;
+      }
+
+      return Boolean(this.pipelineConfigurationFullPath);
+    },
     disableSubmitBtn() {
       return !this.isValidName || !this.isValidDescription || !this.isValidColor;
     },
@@ -64,9 +76,7 @@ export default {
   },
   methods: {
     onSubmit() {
-      const { name, description, color } = this;
-
-      this.$emit('submit', { name, description, color });
+      this.$emit('submit');
     },
   },
   i18n: {
@@ -77,6 +87,18 @@ export default {
     titleInputInvalid: __('A title is required'),
     descriptionInputLabel: __('Description'),
     descriptionInputInvalid: __('A description is required'),
+    pipelineConfigurationInputLabel: s__(
+      'ComplianceFrameworks|Compliance pipeline configuration location (optional)',
+    ),
+    pipelineConfigurationInputSubLabel: s__(
+      'ComplianceFrameworks|Combines with the CI configuration at runtime.',
+    ),
+    pipelineConfigurationInputDescription: s__(
+      'ComplianceFrameworks|e.g. include-gitlab.ci.yml@group-name/project-name',
+    ),
+    pipelineConfigurationInputInvalid: s__(
+      'ComplianceFrameworks|Could not find this configuration location, please try a different location',
+    ),
     colorInputLabel: __('Background color'),
     submitBtnText: __('Save changes'),
     cancelBtnText: __('Cancel'),
@@ -116,6 +138,21 @@ export default {
         :value="description"
         data-testid="description-input"
         @input="$emit('update:description', $event)"
+      />
+    </gl-form-group>
+
+    <gl-form-group
+      :label="$options.i18n.pipelineConfigurationInputLabel"
+      :description="$options.i18n.pipelineConfigurationInputDescription"
+      :invalid-feedback="$options.i18n.pipelineConfigurationInputInvalid"
+      :state="isValidPipelineConfiguration"
+      data-testid="pipeline-configuration-input-group"
+    >
+      <p class="col-form-label gl-font-weight-normal!">{{ $options.i18n.pipelineConfigurationInputSubLabel }}</p>
+      <gl-form-input
+        :value="pipelineConfigurationFullPath"
+        data-testid="pipeline-configuration-input"
+        @input="$emit('update:pipelineConfigurationFullPath', $event)"
       />
     </gl-form-group>
 

@@ -3,6 +3,7 @@ import { s__ } from '~/locale';
 export const initialiseFormData = () => ({
   name: null,
   description: null,
+  pipelineConfigurationFullPath: null,
   color: null,
 });
 
