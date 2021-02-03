@@ -10,8 +10,8 @@ workflow:
     - if: '$CI_COMMIT_BRANCH =~ /^[\d-]+-stable$/'
 
 .workhorse:rules:workhorse:
-  tags:
-    - 'workhorse-nop-tag'
+  before_script:
+    - 'echo workhorse standalone'
 
 changelog:
   image: golang:1.14
