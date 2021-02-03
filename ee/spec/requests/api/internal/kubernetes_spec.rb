@@ -67,17 +67,10 @@ RSpec.describe API::Internal::Kubernetes do
         stub_licensed_features(cilium_alerts: true)
       end
 
-      let(:payload) do
-        {
-          alert: {
-            title: 'minimal',
-            message: 'network problem'
-          }
-        }
-      end
+      let(:payload) { build(:network_alert_payload) }
 
       it 'returns no_content for valid alert payload' do
-        send_request(params: payload, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
+        send_request(params: { alert: payload }, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
 
         expect(AlertManagement::Alert.count).to eq(1)
         expect(AlertManagement::Alert.all.first.project).to eq(agent.project)
@@ -99,7 +92,7 @@ RSpec.describe API::Internal::Kubernetes do
         end
 
         it 'returns forbidden for non licensed project' do
-          send_request(params: payload, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
+          send_request(params: { alert: payload }, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
