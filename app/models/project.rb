@@ -1792,6 +1792,8 @@ class Project < ApplicationRecord
   # answer: we should just remove all of this
   # rubocop: disable CodeReuse/ServiceClass
   def remove_pages
+    return unless Feature.enabled?(:pages_update_legacy_storage, default_enabled: true)
+
     # Projects with a missing namespace cannot have their pages removed
     return unless namespace
 
