@@ -49,7 +49,7 @@ describe('Some component', () => {
 
     it('test', () => {
       createComponent();
-    //   wrapper.vm.mutate();
+      wrapper.vm.mutate();
       //   await wrapper.vm.$nextTick();
       // step 1 mutate callen wenn er redirected zu dem link oben ist fein....
       // step 2 redirect to muss wohl auch noch gemocked werden....
