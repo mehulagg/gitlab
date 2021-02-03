@@ -77,7 +77,7 @@ To enable a feature for 25% of all users, run the following in Slack:
 ### Enabling a feature for GitLab.com
 
 When a feature has successfully been
-[enabled on a pre-production](#enabling-a-feature-for-preproduction-testing)
+[enabled on a pre-production](#enabling-a-feature-for-pre-production-testing)
 environment and verified as safe and working, you can roll out the
 change to GitLab.com (production).
 
