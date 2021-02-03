@@ -3,14 +3,19 @@
   .suppressed-container
     %a.show-suppressed-diff.cursor-pointer.js-show-suppressed-diff= _("Changes suppressed. Click to show.")
 
+- last_line = diff_file.highlighted_diff_lines.last # has to happen here before it gets modified
+
 %table.text-file.diff-wrap-lines.code.code-commit.js-syntax-highlight.commit-diff{ data: diff_view_data, class: too_big ? 'hide' : '' }
-  = render partial: "projects/diffs/line",
-    collection: diff_file.highlighted_diff_lines,
-    as: :line,
-    locals: { diff_file: diff_file, discussions: @grouped_diff_discussions }
+  - if Feature.enabled?(:fast_text_file_line_rendering, @project, type: :ops)
+    = render_text_file_lines(diff_file, diff_file.highlighted_diff_lines, discussions: @grouped_diff_discussions)
+  - else
+    = "blorp"
+    = render partial: "projects/diffs/line",
+      collection: diff_file.highlighted_diff_lines,
+      as: :line,
+      locals: { diff_file: diff_file, discussions: @grouped_diff_discussions }
 
   - if !diff_file.new_file? && !diff_file.deleted_file? && diff_file.highlighted_diff_lines.any?
-    - last_line = diff_file.highlighted_diff_lines.last
     - if last_line.new_pos < total_lines
       %tr.line_holder
         = diff_match_line last_line.old_pos, last_line.new_pos, bottom: true

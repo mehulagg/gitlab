@@ -212,6 +212,83 @@ module DiffHelper
     ))
   end
 
+  def render_text_file_lines(diff_file, lines, discussions:, discussion_expanded: nil, plain: false, email: false)
+    lines.map! do |line|
+      line_code = diff_file.line_code(line)
+      line_discussions = discussions[line_code]
+
+      <<~HTML
+        <tr class="line_holder #{line.type}" id="#{line_code unless plain}">
+          #{render_line_columns(diff_file, line, line_code, plain: plain, email: email)}
+        </tr>
+
+        #{render_line_discussions(line_discussions, expanded: discussion_expanded)}
+      HTML
+    end.join.html_safe
+  end
+
+  def render_line_columns(diff_file, line, line_code, plain: false, email: false)
+    case line.type
+    when "match"
+      diff_match_line(line.old_pos, line.new_pos, text: line.text)
+    when "old-nonewline", "new-nonewline"
+      <<~HTML
+        <td class="old_line diff-line-num"></td>
+        <td class="new_line diff-line-num"></td>
+        <td class="line_content match">
+          #{line.text}
+        </td>
+      HTML
+    else
+      <<~HTML
+        <td class="old_line diff-line-num #{line.type} #{'js-avatar-container' if !plain}" data-linenumber="#{line.old_pos}">
+          #{render_line_old_line(diff_file, line, line_code, plain: plain)}
+        </td>
+
+        <td class="new_line diff-line-num #{line.type}" data-linenumber="#{line.new_pos}">
+          #{render_line_new_line(diff_file, line, line_code, plain: plain)}
+        </td>
+
+        <td class="line_content #{line.type}">#{render_line_content(line, email: email)}</td>
+      HTML
+    end
+  end
+
+  def render_line_old_line(diff_file, line, line_code, plain: false)
+    if plain
+      diff_link_number(line.type, "new", line.old_pos)
+    else
+      add_diff_note_button(line_code, diff_file.position(line), line.type) +
+        link_to("", "##{line_code}", data: { linenumber: diff_link_number(line.type, "new", line.old_pos) })
+    end
+  end
+
+  def render_line_new_line(diff_file, line, line_code, plain: false)
+    if plain
+      diff_link_number(line.type, "old", line.new_pos)
+    else
+      link_to("", "##{line_code}", data: { linenumber: diff_link_number(line.type, "old", line.new_pos) })
+    end
+  end
+
+  def render_line_content(line, email: false)
+    if email
+      tag.pre(line.rich_text)
+    else
+      diff_line_content(line.rich_text)
+    end
+  end
+
+  def render_line_discussions(discussions, expanded: nil)
+    return unless discussions&.any?
+
+    render(
+      "discussions/diff_discussion",
+      discussions: discussions,
+      expanded: (expanded.nil? ? discussions&.any?(&:expanded?) : expanded)
+    )
+  end
+
   private
 
   def diff_btn(title, name, selected)
