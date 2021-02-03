@@ -123,7 +123,6 @@ Parameters:
 | `tag_name`            | string         | yes      | The name of a tag                                                                                               |
 | `ref`                 | string         | yes      | Create tag using commit SHA, another tag name, or branch name                                                   |
 | `message`             | string         | no       | Creates annotated tag                                                                                           |
-| `release_description` | string         | no       | Add release notes to the Git tag and store it in the GitLab database                                            |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/tags?tag_name=test&ref=master"
@@ -183,72 +182,3 @@ Parameters:
 | ---------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
 | `id`       | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `tag_name` | string         | yes      | The name of a tag                                                                                               |
-
-## Create a new release
-
-Add release notes to the existing Git tag. If there
-already exists a release for the given tag, status code `409` is returned.
-
-```plaintext
-POST /projects/:id/repository/tags/:tag_name/release
-```
-
-Parameters:
-
-| Attribute  | Type           | Required | Description                                                                                                     |
-| ---------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| `id`       | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
-| `tag_name` | string         | yes      | The name of a tag                                                                                               |
-
-Request body:
-
-- `description` (required) - Release notes with Markdown support
-
-```json
-{
-  "description": "Amazing release. Wow"
-}
-```
-
-Response:
-
-```json
-{
-  "tag_name": "1.0.0",
-  "description": "Amazing release. Wow"
-}
-```
-
-## Update a release
-
-Updates the release notes of a given release.
-
-```plaintext
-PUT /projects/:id/repository/tags/:tag_name/release
-```
-
-Parameters:
-
-| Attribute  | Type           | Required | Description                                                                                                     |
-| ---------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| `id`       | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
-| `tag_name` | string         | yes      | The name of a tag                                                                                               |
-
-Request body:
-
-- `description` (required) - Release notes with Markdown support
-
-```json
-{
-  "description": "Amazing release. Wow"
-}
-```
-
-Response:
-
-```json
-{
-  "tag_name": "1.0.0",
-  "description": "Amazing release. Wow"
-}
-```
