@@ -1,14 +1,11 @@
 import { mount } from '@vue/test-utils';
 import EnvironmentAlert from 'ee/environments/components/environment_alert.vue';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
-import { useFakeDate } from 'helpers/fake_date';
 
 describe('Environment Alert', () => {
   let wrapper;
   const DEFAULT_PROVIDE = { projectPath: 'test-org/test' };
   const DEFAULT_PROPS = { environment: { name: 'staging' } };
-
-  useFakeDate();
 
   const factory = (props = {}, provide = {}) => {
     wrapper = mount(EnvironmentAlert, {

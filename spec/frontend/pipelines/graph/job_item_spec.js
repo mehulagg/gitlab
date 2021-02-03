@@ -143,10 +143,13 @@ describe('pipeline graph job item', () => {
   });
 
   describe('for delayed job', () => {
-    it('displays remaining time in tooltip', () => {
+    it('displays remaining time in tooltip', async () => {
       createWrapper({
         job: delayedJobFixture,
       });
+
+      // The remainingTime gets automatically updated, so let's wait for that...
+      await wrapper.vm.$nextTick();
 
       expect(findJobWithLink().attributes('title')).toBe(
         `delayed job - delayed manual action (${wrapper.vm.remainingTime})`,

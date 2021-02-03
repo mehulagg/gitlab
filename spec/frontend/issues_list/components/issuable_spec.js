@@ -12,9 +12,14 @@ import { simpleIssue, testAssignees, testLabels } from '../issuable_list_test_da
 
 jest.mock('~/user_popovers');
 
-const TEST_NOW = '2019-08-28T20:03:04.713Z';
-const TEST_MONTH_AGO = '2019-07-28';
-const TEST_MONTH_LATER = '2019-09-30';
+const TODAY = new Date();
+
+const createTestDateFromMonthsLater = (timeDelta) =>
+  formatDate(new Date(TODAY.getTime() + timeDelta), 'yyyy-mm-dd');
+
+// 3e9 is approx. 1 month in ms - https://www.wolframalpha.com/input/?i=1+month+in+ms
+const TEST_MONTH_AGO = createTestDateFromMonthsLater(-3e9);
+const TEST_MONTH_LATER = createTestDateFromMonthsLater(3e9);
 const DATE_FORMAT = 'mmm d, yyyy';
 const TEST_USER_NAME = 'Tyler Durden';
 const TEST_BASE_URL = `${TEST_HOST}/issues`;
@@ -26,16 +31,8 @@ const TEST_MILESTONE = {
 const TEXT_CLOSED = 'CLOSED';
 const TEST_META_COUNT = 100;
 
-// Use FixedDate so that time sensitive info in snapshots don't fail
-class FixedDate extends Date {
-  constructor(date = TEST_NOW) {
-    super(date);
-  }
-}
-
 describe('Issuable component', () => {
   let issuable;
-  let DateOrig;
   let wrapper;
 
   const factory = (props = {}, scopedLabelsAvailable = false) => {
@@ -61,15 +58,6 @@ describe('Issuable component', () => {
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
-  });
-
-  beforeAll(() => {
-    DateOrig = window.Date;
-    window.Date = FixedDate;
-  });
-
-  afterAll(() => {
-    window.Date = DateOrig;
   });
 
   const checkExists = (findFn) => () => findFn().exists();
