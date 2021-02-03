@@ -20,6 +20,7 @@ class License < ApplicationRecord
     contribution_analytics
     description_diffs
     elastic_search
+    full_codequality_report
     group_activity_analytics
     group_bulk_edit
     group_webhooks

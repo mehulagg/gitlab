@@ -199,6 +199,19 @@ RSpec.describe 'Pipeline', :js do
           expect(page).to have_selector('[data-track-label="get_codequality_report"]')
         end
       end
+
+      context 'when unlicensed' do
+        before do
+          stub_licensed_features(full_codequality_report: false)
+          create(:ee_ci_build, pipeline: pipeline)
+          visit project_pipeline_path(project, pipeline)
+        end
+
+        it 'does not show code quality tab' do
+          expect(page).not_to have_content('Code Quality')
+          expect(page).not_to have_css('#js-tab-codequality')
+        end
+      end
     end
 
     context 'for a branch pipeline' do
