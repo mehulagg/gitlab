@@ -1,5 +1,6 @@
-// Frida Kahlo's birthday (6 = July)
-const DEFAULT_ARGS = [2020, 6, 6];
+// Date used in `spec/support/helpers/javascript_fixtures_helpers.rb`
+// Also Franz Kafka's Birthday (6 = July)
+const DEFAULT_ARGS = [2015, 6, 3, 10];
 
 const RealDate = Date;
 
