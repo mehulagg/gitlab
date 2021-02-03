@@ -62,25 +62,25 @@ RSpec.describe API::Internal::Kubernetes do
       let!(:agent_token) { create(:cluster_agent_token) }
 
       it 'returns no_content for valid gitops_sync_count' do
-        send_request(params: { gitops_sync_count: 10 }, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
+        send_request(params: { gitops_sync_count: 10 })
 
         expect(response).to have_gitlab_http_status(:no_content)
       end
 
       it 'returns no_content 0 gitops_sync_count' do
-        send_request(params: { gitops_sync_count: 0 }, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
+        send_request(params: { gitops_sync_count: 0 })
 
         expect(response).to have_gitlab_http_status(:no_content)
       end
 
       it 'returns 400 for non number' do
-        send_request(params: { gitops_sync_count: 'string' }, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
+        send_request(params: { gitops_sync_count: 'string' })
 
         expect(response).to have_gitlab_http_status(:bad_request)
       end
 
       it 'returns 400 for negative number' do
-        send_request(params: { gitops_sync_count: '-1' }, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
+        send_request(params: { gitops_sync_count: '-1' })
 
         expect(response).to have_gitlab_http_status(:bad_request)
       end
