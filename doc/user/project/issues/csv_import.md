@@ -9,7 +9,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/23532) in GitLab 11.7.
 
 Issues can be imported to a project by uploading a CSV file with the columns
-`title` and `description`.
+`title` and `description`. Only these two columns will be imported. Consider
+using the [Move Issue feature](./managing_issues.md#moving-issues) if you want
+ to retain data such as labels and milestones.
+
 
 The user uploading the CSV file is set as the author of the imported issues.
 
