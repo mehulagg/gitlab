@@ -19,9 +19,21 @@ RSpec.describe MergeRequests::BuildService do
   let(:label_ids) { [] }
   let(:merge_request) { service.execute }
   let(:compare) { double(:compare, commits: commits) }
-  let(:commit_1) { double(:commit_3, sha: 'f00ba7', safe_message: 'Initial commit', gitaly_commit?: false) }
-  let(:commit_2) { double(:commit_2, sha: 'f00ba7', safe_message: "Second commit\n\nCreate the app", gitaly_commit?: false) }
-  let(:commit_3) { double(:commit_3, sha: 'f00ba7', safe_message: 'This is a bad commit message!', gitaly_commit?: false) }
+  let(:commit_1) do
+    double(:commit_3, sha: 'f00ba6', safe_message: 'Initial commit',
+                          gitaly_commit?: false, id: 'f00ba6', parent_ids: ['f00ba5'])
+  end
+
+  let(:commit_2) do
+    double(:commit_2, sha: 'f00ba7', safe_message: "Second commit\n\nCreate the app",
+                          gitaly_commit?: false, id: 'f00ba7', parent_ids: ['f00ba6'])
+  end
+
+  let(:commit_3) do
+    double(:commit_3, sha: 'f00ba8', safe_message: 'This is a bad commit message!',
+                          gitaly_commit?: false, id: 'f00ba8', parent_ids: ['f00ba7'])
+  end
+
   let(:commits) { nil }
 
   let(:params) do
