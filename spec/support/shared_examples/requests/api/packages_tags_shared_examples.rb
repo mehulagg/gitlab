@@ -134,7 +134,7 @@ RSpec.shared_examples 'accept create package tag request' do |user_type|
   end
 end
 
-RSpec.shared_examples 'delete package tag' do |user_type|
+RSpec.shared_examples 'accept delete package tag request' do |user_type|
   using RSpec::Parameterized::TableSyntax
 
   context 'with valid package name' do

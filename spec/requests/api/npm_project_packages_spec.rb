@@ -31,10 +31,10 @@ RSpec.describe API::NpmProjectPackages do
   end
 
   describe 'GET /api/v4/projects/:id/packages/npm/*package_name/-/*file_name' do
-    let_it_be(:package_file) { package.package_files.first }
+    let(:package_file) { package.package_files.first }
 
     let(:headers) { {} }
-    let(:url) { api("/projects/#{project.id}/packages/npm/#{package_file.package.name}/-/#{package_file.file_name}") }
+    let(:url) { api("/projects/#{project.id}/packages/npm/#{package.name}/-/#{package_file.file_name}") }
 
     subject { get(url, headers: headers) }
 

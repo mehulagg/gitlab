@@ -221,19 +221,9 @@ RSpec.shared_examples 'handling get metadata requests' do |scope: :project|
   end
 
   with_them do
+    include_context 'set package name from package name type'
+
     let(:anonymous) { user_role == :anonymous }
-    let(:package_name) do
-      case package_name_type
-      when :scoped_naming_convention
-        "@#{group.path}/scoped-package"
-      when :scoped_no_naming_convention
-        '@any-scope/scoped-package'
-      when :unscoped
-        'unscoped-package'
-      when :non_existing
-        'non-existing-package'
-      end
-    end
 
     let(:headers) do
       case auth
@@ -496,11 +486,84 @@ end
 
 RSpec.shared_examples 'handling delete dist tag requests' do |scope: :project|
   using RSpec::Parameterized::TableSyntax
+  include_context 'set package name from package name type'
 
   let_it_be(:package_tag) { create(:packages_tag, package: package) }
 
   let(:tag_name) { package_tag.name }
   let(:headers) { {} }
+
+  shared_examples 'reject delete package tag request' do |status:|
+    before do
+      package.update!(name: package_name) unless package_name == 'non-existing-package'
+    end
+
+    it_behaves_like 'returning response status', status
+  end
+
+  shared_examples 'handling different package names, visibilities and user roles' do
+    where(:package_name_type, :visibility, :user_role, :expected_result, :expected_status) do
+      :scoped_naming_convention    | 'PUBLIC'   | :anonymous | :reject | :forbidden
+      :scoped_naming_convention    | 'PUBLIC'   | :guest     | :reject | :forbidden
+      :scoped_naming_convention    | 'PUBLIC'   | :maintainer | :accept | :ok
+      :scoped_no_naming_convention | 'PUBLIC'   | :anonymous | :reject | :forbidden
+      :scoped_no_naming_convention | 'PUBLIC'   | :guest     | :reject | :forbidden
+      :scoped_no_naming_convention | 'PUBLIC'   | :maintainer | :accept | :ok
+      :unscoped                    | 'PUBLIC'   | :anonymous | :reject | :forbidden
+      :unscoped                    | 'PUBLIC'   | :guest     | :reject | :forbidden
+      :unscoped                    | 'PUBLIC'   | :maintainer | :accept | :ok
+      :non_existing                | 'PUBLIC'   | :anonymous | :reject | :forbidden
+      :non_existing                | 'PUBLIC'   | :guest     | :reject | :forbidden
+      :non_existing                | 'PUBLIC'   | :maintainer | :reject | :not_found
+
+      :scoped_naming_convention    | 'PRIVATE'  | :anonymous | :reject | :not_found
+      :scoped_naming_convention    | 'PRIVATE'  | :guest     | :reject | :forbidden
+      :scoped_naming_convention    | 'PRIVATE'  | :maintainer | :accept | :ok
+      :scoped_no_naming_convention | 'PRIVATE'  | :anonymous | :reject | :not_found
+      :scoped_no_naming_convention | 'PRIVATE'  | :guest     | :reject | :forbidden
+      :scoped_no_naming_convention | 'PRIVATE'  | :maintainer | :accept | :ok
+      :unscoped                    | 'PRIVATE'  | :anonymous | :reject | :not_found
+      :unscoped                    | 'PRIVATE'  | :guest     | :reject | :forbidden
+      :unscoped                    | 'PRIVATE'  | :maintainer | :accept | :ok
+      :non_existing                | 'PRIVATE'  | :anonymous | :reject | :not_found
+      :non_existing                | 'PRIVATE'  | :guest     | :reject | :forbidden
+      :non_existing                | 'PRIVATE'  | :maintainer | :reject | :not_found
+
+      :scoped_naming_convention    | 'INTERNAL'  | :anonymous | :reject | :forbidden
+      :scoped_naming_convention    | 'INTERNAL'  | :guest     | :reject | :forbidden
+      :scoped_naming_convention    | 'INTERNAL'  | :maintainer | :accept | :ok
+      :scoped_no_naming_convention | 'INTERNAL'  | :anonymous | :reject | :forbidden
+      :scoped_no_naming_convention | 'INTERNAL'  | :guest     | :reject | :forbidden
+      :scoped_no_naming_convention | 'INTERNAL'  | :maintainer | :accept | :ok
+      :unscoped                    | 'INTERNAL'  | :anonymous | :reject | :forbidden
+      :unscoped                    | 'INTERNAL'  | :guest     | :reject | :forbidden
+      :unscoped                    | 'INTERNAL'  | :maintainer | :accept | :ok
+      :non_existing                | 'INTERNAL'  | :anonymous | :reject | :forbidden
+      :non_existing                | 'INTERNAL'  | :guest     | :reject | :forbidden
+      :non_existing                | 'INTERNAL'  | :maintainer | :reject | :not_found
+    end
+
+    with_them do
+      let(:anonymous) { user_role == :anonymous }
+
+      subject { delete(url, headers: headers) }
+
+      before do
+        project.send("add_#{user_role}", user) unless anonymous
+        project.update!(visibility: Gitlab::VisibilityLevel.const_get(visibility, false))
+      end
+
+      example_name = "#{params[:expected_result]} delete package tag request"
+      status = params[:expected_status]
+
+      if scope == :instance && params[:package_name_type] != :scoped_naming_convention
+        example_name = 'reject delete package tag request'
+        status = :not_found
+      end
+
+      it_behaves_like example_name, status: status
+    end
+  end
 
   shared_examples 'handling different visibilities and user roles' do |accept_example: 'delete package tag', accept_status: :ok, reject_example: 'rejects package tags access', reject_status: nil|
     where(:visibility, :user_role, :example_name, :expected_status) do
@@ -577,12 +640,12 @@ RSpec.shared_examples 'handling delete dist tag requests' do |scope: :project|
   context 'with oauth token' do
     let(:headers) { build_token_auth_header(token.token) }
 
-    it_behaves_like 'handling different package names'
+    it_behaves_like 'handling different package names, visibilities and user roles'
   end
 
   context 'with personal access token' do
     let(:headers) { build_token_auth_header(personal_access_token.token) }
 
-    it_behaves_like 'handling different package names'
+    it_behaves_like 'handling different package names, visibilities and user roles'
   end
 end
