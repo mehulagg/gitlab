@@ -12373,10 +12373,25 @@ enum IssuableSeverity {
 State of a GitLab issue or merge request
 """
 enum IssuableState {
-  all
-  closed
-  locked
-  opened
+  """
+  All available
+  """
+  ALL
+
+  """
+  In closed state
+  """
+  CLOSED
+
+  """
+  Discussion has been locked
+  """
+  LOCKED
+
+  """
+  In open state
+  """
+  OPENED
 }
 
 type Issue implements CurrentUserTodos & Noteable {
@@ -13535,10 +13550,25 @@ enum IssueSort {
 State of a GitLab issue
 """
 enum IssueState {
-  all
-  closed
-  locked
-  opened
+  """
+  All available
+  """
+  ALL
+
+  """
+  In closed state
+  """
+  CLOSED
+
+  """
+  Discussion has been locked
+  """
+  LOCKED
+
+  """
+  In open state
+  """
+  OPENED
 }
 
 """
@@ -15693,11 +15723,26 @@ enum MergeRequestSort {
 State of a GitLab merge request
 """
 enum MergeRequestState {
-  all
-  closed
-  locked
+  """
+  All available
+  """
+  ALL
+
+  """
+  In closed state
+  """
+  CLOSED
+
+  """
+  Discussion has been locked
+  """
+  LOCKED
+
+  """
+  In open state
+  """
+  OPENED
   merged
-  opened
 }
 
 """

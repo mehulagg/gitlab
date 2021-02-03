@@ -4811,10 +4811,10 @@ State of a GitLab issue or merge request.
 
 | Value | Description |
 | ----- | ----------- |
-| `all` |  |
-| `closed` |  |
-| `locked` |  |
-| `opened` |  |
+| `ALL` | All available |
+| `CLOSED` | In closed state |
+| `LOCKED` | Discussion has been locked |
+| `OPENED` | In open state |
 
 ### IssueSort
 
@@ -4854,10 +4854,10 @@ State of a GitLab issue.
 
 | Value | Description |
 | ----- | ----------- |
-| `all` |  |
-| `closed` |  |
-| `locked` |  |
-| `opened` |  |
+| `ALL` | All available |
+| `CLOSED` | In closed state |
+| `LOCKED` | Discussion has been locked |
+| `OPENED` | In open state |
 
 ### IssueStateEvent
 
@@ -4988,11 +4988,11 @@ State of a GitLab merge request.
 
 | Value | Description |
 | ----- | ----------- |
-| `all` |  |
-| `closed` |  |
-| `locked` |  |
+| `ALL` | All available |
+| `CLOSED` | In closed state |
+| `LOCKED` | Discussion has been locked |
+| `OPENED` | In open state |
 | `merged` |  |
-| `opened` |  |
 
 ### MilestoneStateEnum
 

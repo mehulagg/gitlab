@@ -5,9 +5,9 @@ module Types
     graphql_name 'IssuableState'
     description 'State of a GitLab issue or merge request'
 
-    value 'opened'
-    value 'closed'
-    value 'locked'
-    value 'all'
+    value 'OPENED', description: "In open state", value: 'opened'
+    value 'CLOSED', description: "In closed state", value: 'closed'
+    value 'LOCKED', description: "Discussion has been locked", value: 'locked'
+    value 'ALL', description: 'All available', value: 'all'
   end
 end

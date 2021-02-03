@@ -33767,26 +33767,26 @@
           "interfaces": null,
           "enumValues": [
             {
-              "name": "opened",
-              "description": null,
+              "name": "OPENED",
+              "description": "In open state",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "closed",
-              "description": null,
+              "name": "CLOSED",
+              "description": "In closed state",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "locked",
-              "description": null,
+              "name": "LOCKED",
+              "description": "Discussion has been locked",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "all",
-              "description": null,
+              "name": "ALL",
+              "description": "All available",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -36911,26 +36911,26 @@
           "interfaces": null,
           "enumValues": [
             {
-              "name": "opened",
-              "description": null,
+              "name": "OPENED",
+              "description": "In open state",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "closed",
-              "description": null,
+              "name": "CLOSED",
+              "description": "In closed state",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "locked",
-              "description": null,
+              "name": "LOCKED",
+              "description": "Discussion has been locked",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "all",
-              "description": null,
+              "name": "ALL",
+              "description": "All available",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -43051,26 +43051,26 @@
           "interfaces": null,
           "enumValues": [
             {
-              "name": "opened",
-              "description": null,
+              "name": "OPENED",
+              "description": "In open state",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "closed",
-              "description": null,
+              "name": "CLOSED",
+              "description": "In closed state",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "locked",
-              "description": null,
+              "name": "LOCKED",
+              "description": "Discussion has been locked",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "all",
-              "description": null,
+              "name": "ALL",
+              "description": "All available",
               "isDeprecated": false,
               "deprecationReason": null
             },
