@@ -27,7 +27,8 @@ For source installations, uncomment the following line in `config/gitlab.yml`:
 
 ## Disallow users changing usernames
 
-By default, new users can change their usernames. To disable this, modify the appropriate configuration file.
+By default, new users can change their usernames. To disable this, modify the appropriate configuration file,
+and then [reconfigure and restart GitLab](restart_gitlab.md)..
 
 For Omnibus installations, add the following to `/etc/gitlab/gitlab.rb`:
 
