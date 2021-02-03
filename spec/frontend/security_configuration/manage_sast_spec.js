@@ -13,17 +13,19 @@ describe('Some component', () => {
   function createMockApolloProvider() {
     localVue.use(VueApollo);
 
+    const data = {
+      configureSast: {
+        successPath:
+          'http://gitlab.localdev:3000/testgroup/testproject-in-testgroup/-/merge_requests/new?merge_request%5Bdescription%5D=Set+.gitlab-ci.yml+to+enable+or+configure+SAST+security+scanning+using+the+GitLab+managed+template.+You+can+%5Badd+variable+overrides%5D%28https%3A%2F%2Fdocs.gitlab.com%2Fee%2Fuser%2Fapplication_security%2Fsast%2F%23customizing-the-sast-settings%29+to+customize+SAST+settings.&merge_request%5Bsource_branch%5D=set-sast-config-12',
+        errors: [],
+        __typename: 'ConfigureSastPayload',
+      },
+    };
+
     const requestHandlers = [
       [
         configureSastMutation,
-        jest.fn().mockResolvedValue({
-          configureSast: {
-            successPath:
-              'http://gitlab.localdev:3000/testgroup/testproject-in-testgroup/-/merge_requests/new?merge_request%5Bdescription%5D=Set+.gitlab-ci.yml+to+enable+or+configure+SAST+security+scanning+using+the+GitLab+managed+template.+You+can+%5Badd+variable+overrides%5D%28https%3A%2F%2Fdocs.gitlab.com%2Fee%2Fuser%2Fapplication_security%2Fsast%2F%23customizing-the-sast-settings%29+to+customize+SAST+settings.&merge_request%5Bsource_branch%5D=set-sast-config-12',
-            errors: [],
-            __typename: 'ConfigureSastPayload',
-          },
-        }),
+        async ()=> ({data}),
       ],
     ];
 

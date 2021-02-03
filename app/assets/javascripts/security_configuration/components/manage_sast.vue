@@ -30,7 +30,7 @@ export default {
           },
         });
         console.log('data', data);
-        const { errors, successPath } = data.configureSast;
+        // const { errors, successPath } = data.configureSast;
 
         if (errors.length > 0) {
           // eslint-disable-next-line @gitlab/require-i18n-strings
