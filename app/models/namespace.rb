@@ -336,9 +336,11 @@ class Namespace < ApplicationRecord
   end
 
   # Overridden in EE::Namespace
-  def feature_available?(_feature)
+  def licensed_feature_available?(_feature)
     false
   end
+  # Deprecated, use #licensed_feature_available? instead. Remove once Namespace#feature_available? isn't used anymore.
+  alias_method :feature_available?, :licensed_feature_available?
 
   def full_path_before_last_save
     if parent_id_before_last_save.nil?

@@ -22,7 +22,7 @@ module Gitlab
           end
 
           # Overridden in EE::Namespace
-          def feature_available?(_feature)
+          def licensed_feature_available?(_feature)
             false
           end
         end
