@@ -715,6 +715,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when external issue tracker is enabled' do
+      let(:project) { create(:project, :repository) }
+
+      subject { create(:merge_request, source_project: project) }
+
       before do
         subject.project.has_external_issue_tracker = true
         subject.project.save!
@@ -788,6 +792,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when only external issue tracker enabled' do
+      let(:project) { create(:project, :repository) }
+
+      subject { create(:merge_request, source_project: project) }
+
       before do
         subject.project.has_external_issue_tracker = true
         subject.project.issues_enabled = false
@@ -1274,8 +1282,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
     let(:mentioned_issue) { create :issue, project: subject.project }
     let(:commit) { double('commit', safe_message: "Fixes #{closing_issue.to_reference}") }
 
-    subject { create(:merge_request, source_project: create(:project)) }
-
     it 'detects issues mentioned in description but not closed' do
       subject.project.add_developer(subject.author)
       subject.description = "Is related to #{mentioned_issue.to_reference} and #{closing_issue.to_reference}"
@@ -1478,8 +1484,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
   end
 
   describe '#default_merge_commit_message' do
-    subject { create(:merge_request, source_project: create(:project)) }
-
     it 'includes merge information as the title' do
       request = build(:merge_request, source_branch: 'source', target_branch: 'target')
 
@@ -3352,6 +3356,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when resolve_outdated_diff_discussions is set' do
+      let(:project) { create(:project, :repository) }
+
+      subject { create(:merge_request, :with_diffs, source_project: project) }
+
       before do
         discussion
 
