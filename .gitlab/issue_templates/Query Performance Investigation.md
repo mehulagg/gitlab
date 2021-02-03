@@ -33,4 +33,4 @@ Please provide as many of these fields as possible when submitting a query perfo
 
 -->
 
-/label ~"group::database" ~"database::validation"
+/label ~"group::database" ~"database::triage" 
