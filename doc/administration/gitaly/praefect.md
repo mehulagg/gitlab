@@ -1111,7 +1111,7 @@ replication factor offers better redundancy and distribution of read workload, b
 in a higher storage cost. By default, Praefect replicates repositories to every storage in a
 virtual storage.
 
-### Variable replication factor
+### Configuring replication factors
 
 WARNING:
 The feature is not production ready yet. After you set a replication factor, you can't unset it
@@ -1122,16 +1122,29 @@ strategy is not production ready yet.
 Praefect supports configuring a replication factor on a per-repository basis, by assigning
 specific storage nodes to host a repository.
 
-[In an upcoming release](https://gitlab.com/gitlab-org/gitaly/-/issues/3362), we intend to
-support configuring a default replication factor for a virtual storage. The default replication factor
-is applied to every newly-created repository.
-
 Praefect does not store the actual replication factor, but assigns enough storages to host the repository
 so the desired replication factor is met. If a storage node is later removed from the virtual storage,
 the replication factor of repositories assigned to the storage is decreased accordingly.
 
-The only way to configure a repository's replication factor is the `set-replication-factor`
-sub-command. `set-replication-factor` automatically assigns or unassigns random storage nodes as necessary to
+You can configure a default replication factor for each virtual storage. The default replication factor
+gets applied to every newly created repository. Changing the default replication factor in the configuration
+does not affect replication factors of existing repositories. The option can be configured in `/etc/gitlab/gitlab.rb`:
+
+```ruby
+praefect['virtual_storages'] = {
+  'default' => {
+    'default_replication_factor' => 1,
+    # nodes...
+    'gitaly-1' => {
+      'address' => 'tcp://GITALY_HOST:8075',
+      'token'   => 'PRAEFECT_INTERNAL_TOKEN',
+    },
+  }
+}
+```
+
+To set a specific repository's replication factor, use the `set-replication-factor` sub-command.
+`set-replication-factor` automatically assigns or unassigns random storage nodes as necessary to
 reach the desired replication factor. The repository's primary node is always assigned
 first and is never unassigned.
 
