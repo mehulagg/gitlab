@@ -23777,6 +23777,48 @@ msgstr ""
 msgid "Push to create a project"
 msgstr ""
 
+msgid "PushRules|All branch names must match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, any branch name is allowed."
+msgstr ""
+
+msgid "PushRules|All commit author's email must match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, any email is allowed."
+msgstr ""
+
+msgid "PushRules|All commit messages must match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, commit messages are not required to match any expression."
+msgstr ""
+
+msgid "PushRules|All committed filenames cannot match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, any filename is allowed."
+msgstr ""
+
+msgid "PushRules|Commit messages cannot match this %{wiki_syntax_link_start}regular expression%{wiki_syntax_link_end}. If empty, commit messages are not rejected based on any expression."
+msgstr ""
+
+msgid "PushRules|Do not allow users to remove Git tags with %{code_block_start}git push%{code_block_end}"
+msgstr ""
+
+msgid "PushRules|Reject any files likely to contain secrets. %{secret_files_link_start}What secret files are rejected?%{secret_files_link_end}"
+msgstr ""
+
+msgid "PushRules|Reject file sizes equal to or greater than this size. If set to 0, files of any size are allowed. This rule does not apply to files tracked by Git LFS."
+msgstr ""
+
+msgid "PushRules|Restrict commits to existing GitLab users."
+msgstr ""
+
+msgid "PushRules|Restrict push operations for this project."
+msgstr ""
+
+msgid "PushRules|Save Push Rules"
+msgstr ""
+
+msgid "PushRules|Select push rules"
+msgstr ""
+
+msgid "PushRules|Users can still delete tags through the GitLab UI."
+msgstr ""
+
+msgid "PushRule|Push Rules"
+msgstr ""
+
 msgid "PushRule|Reject unverified users"
 msgstr ""
 
@@ -25268,9 +25310,6 @@ msgid "Save %{name} size limits"
 msgstr ""
 
 msgid "Save Changes"
-msgstr ""
-
-msgid "Save Push Rules"
 msgstr ""
 
 msgid "Save application"

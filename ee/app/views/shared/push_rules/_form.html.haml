@@ -59,6 +59,6 @@
   = f.label :max_file_size, "Maximum file size (MB)", class: "label-bold"
   = f.number_field :max_file_size, class: "form-control", min: 0, data: { qa_selector: 'file_size_field' }
   .form-text.text-muted
-    = s_('PushRules|Reject file sizes equal to or greater than this size.\n\nIf set to 0, files of any size are allowed.\n\nThis rule does not apply to files tracked by Git LFS.')
+    = s_('PushRules|Reject file sizes equal to or greater than this size. If set to 0, files of any size are allowed. This rule does not apply to files tracked by Git LFS.')
 
 = f.submit s_("PushRules|Save Push Rules"), class: "btn btn-success", data: { qa_selector: 'submit_settings_button' }
