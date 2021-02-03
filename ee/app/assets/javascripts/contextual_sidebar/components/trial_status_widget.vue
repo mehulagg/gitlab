@@ -28,7 +28,12 @@ export default {
 </script>
 
 <template>
-  <gl-link :title="title" :href="href">
+  <gl-link
+    :title="title"
+    :href="href"
+    data-track-event="click_link"
+    data-track-label="trial_status_widget"
+  >
     <div class="gl-display-flex gl-flex-direction-column gl-align-items-stretch gl-w-full">
       <span class="gl-display-flex gl-align-items-center">
         <span class="nav-icon-container svg-container">
