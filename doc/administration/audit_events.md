@@ -40,7 +40,7 @@ There are two kinds of events logged:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/536) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.0.
 
-Impersonation occurs when an administrator uses an [impersonation token](../../ee/api/README.html#impersonation-tokens) to perform an action as a different user. These actions are captured as audit events which are attributed to the different user, but include data on the impersonating administrator.
+Impersonation occurs when an administrator uses an [impersonation token](../../ee/api/README.md#impersonation-tokens) to perform an action as a different user. These actions are captured as audit events which are attributed to the different user, but include data on the impersonating administrator.
 
 ### Group events **(STARTER)**
 
