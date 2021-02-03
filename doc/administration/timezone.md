@@ -46,7 +46,7 @@ gitlab-ctl restart
 
 To allow users to change the time zone in their profile, the feature flag `user_time_settings` should be enabled. To do it:
 
-- [Start a Rails console session](./administration/operations/rails_console.md)
+- [Start a Rails console session](administration/operations/rails_console.md)
 - in the console, run `Feature.enable(:user_time_settings)`
 
 After that you should be able to see the timezone dropdown at Settings > Profile Page.
