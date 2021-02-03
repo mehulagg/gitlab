@@ -744,3 +744,11 @@ For administrator documentation on rate limit settings, see
 [Rate limits](../security/rate_limits.md). To find the settings that are
 specifically used by GitLab.com, see
 [GitLab.com-specific rate limits](../user/gitlab_com/index.md#gitlabcom-specific-rate-limits).
+
+## Content type
+
+By default GitLab will be serving `application/json` content type.
+However some of the API calls do support other content types like `text/plain`.
+
+Starting with 13.9, we no longer support `text/plain` for most API calls unless it's
+explicitly documented. See [the issue](https://gitlab.com/gitlab-org/gitlab/-/issues/250342) for more details.
