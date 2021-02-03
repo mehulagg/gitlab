@@ -3,6 +3,7 @@
 require 'fast_spec_helper'
 require 'rspec-parameterized'
 require 'fog/core'
+require 'addressable'
 
 RSpec.describe ObjectStorage::Config do
   using RSpec::Parameterized::TableSyntax
@@ -34,7 +35,9 @@ RSpec.describe ObjectStorage::Config do
     }
   end
 
-  subject { described_class.new(raw_config.as_json) }
+  subject do
+    described_class.new(raw_config.as_json)
+  end
 
   describe '#load_provider' do
     before do
@@ -44,6 +47,10 @@ RSpec.describe ObjectStorage::Config do
     context 'with AWS' do
       it 'registers AWS as a provider' do
         expect(Fog.providers.keys).to include(:aws)
+      end
+
+      describe '#fog_connection' do
+        it { expect(subject.fog_connection).to be_a_kind_of(Fog::AWS::Storage::Real) }
       end
     end
 
@@ -59,6 +66,10 @@ RSpec.describe ObjectStorage::Config do
       it 'registers Google as a provider' do
         expect(Fog.providers.keys).to include(:google)
       end
+
+      describe '#fog_connection' do
+        it { expect(subject.fog_connection).to be_a_kind_of(Fog::Storage::GoogleXML::Real) }
+      end
     end
 
     context 'with Azure' do
@@ -72,6 +83,10 @@ RSpec.describe ObjectStorage::Config do
 
       it 'registers AzureRM as a provider' do
         expect(Fog.providers.keys).to include(:azurerm)
+      end
+
+      describe '#fog_connection' do
+        it { expect(subject.fog_connection).to be_a_kind_of(Fog::Storage::AzureRM::Real) }
       end
     end
   end
@@ -170,6 +185,25 @@ RSpec.describe ObjectStorage::Config do
     it { expect(subject.provider).to eq('AWS') }
     it { expect(subject.aws?).to be true }
     it { expect(subject.google?).to be false }
+
+    it 'returns the default S3 endpoint' do
+      subject.load_provider
+
+      expect(subject.s3_endpoint).to eq("https://test-bucket.s3.amazonaws.com")
+    end
+
+    context 'with custom S3 host and port' do
+      before do
+        credentials[:host] = 's3.example.com'
+        credentials[:port] = 8080
+
+        subject.load_provider
+      end
+
+      it 'returns a custom host' do
+        expect(subject.s3_endpoint).to eq("https://test-bucket.s3.example.com:8080")
+      end
+    end
   end
 
   context 'with Google credentials' do

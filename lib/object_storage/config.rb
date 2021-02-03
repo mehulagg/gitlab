@@ -66,6 +66,28 @@ module ObjectStorage
     def provider
       credentials[:provider].to_s
     end
+
+    # This method converts fog-aws parameters for the Workhorse S3 client.
+    def s3_endpoint
+      # We could omit this line and let the following code handle this, but
+      # this will ensure that working configurations that use `endpoint`
+      # will continue to work.
+      return credentials[:endpoint] if credentials[:endpoint].present?
+
+      # fog-aws has special handling of the host, region, scheme, etc:
+      # https://github.com/fog/fog-aws/blob/c7a11ba377a76d147861d0e921eb1e245bc11b6c/lib/fog/aws/storage.rb#L440-L449
+      # Rather than reimplement this, we derive it from a sample GET URL.
+      url = fog_connection.get_object_url(bucket, "tmp", nil)
+      uri = ::Addressable::URI.parse(url)
+
+      return unless uri.scheme
+
+      endpoint = "#{uri.scheme}://#{uri.host}"
+      endpoint += ":#{uri.port}" if uri.port
+      endpoint
+    rescue ::Addressable::URI::InvalidURIError
+    end
+
     # End AWS-specific options
 
     # Begin Azure-specific options
@@ -89,6 +111,10 @@ module ObjectStorage
 
         aws_server_side_encryption_headers.compact
       end
+    end
+
+    def fog_connection
+      @connection ||= ::Fog::Storage.new(credentials)
     end
 
     private
