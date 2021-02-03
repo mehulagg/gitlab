@@ -31263,6 +31263,12 @@ msgstr ""
 msgid "UsageQuota|LFS Storage"
 msgstr ""
 
+msgid "UsageQuota|Learn more about excess storage usage"
+msgstr ""
+
+msgid "UsageQuota|Learn more about usage quotas"
+msgstr ""
+
 msgid "UsageQuota|Packages"
 msgstr ""
 
