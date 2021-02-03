@@ -65,6 +65,8 @@ The banner can be customized with a specific message.
 An error is displayed when a user tries to perform a write operation that isn't allowed.
 The API will return a 403 or 503 error for failed write requests.
 
+During Maintenance Mode, [Incident management](https://docs.gitlab.com/ee/operations/incident_management/) functions will be limited. The creation of [alerts](https://docs.gitlab.com/ee/operations/incident_management/alerts.html) and [incidents](https://docs.gitlab.com/ee/operations/incident_management/incidents.html#incident-creation) will be paused entirely. Notifications and paging on alerts and incidents will therefore be disabled. 
+
 NOTE:
 In some cases, the visual feedback from an action could be misleading, for example
 when starring a project, the **Star** button changes to show the **Unstar** action,
