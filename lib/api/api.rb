@@ -176,6 +176,7 @@ module API
       mount ::API::Features
       mount ::API::Files
       mount ::API::FreezePeriods
+      mount ::API::GemPackages
       mount ::API::GroupBoards
       mount ::API::GroupClusters
       mount ::API::GroupExport
