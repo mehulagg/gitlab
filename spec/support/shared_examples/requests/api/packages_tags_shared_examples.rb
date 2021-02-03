@@ -52,7 +52,7 @@ RSpec.shared_examples 'accept package tags request' do |status:|
   end
 end
 
-RSpec.shared_examples 'create package tag' do |user_type|
+RSpec.shared_examples 'accept create package tag request' do |user_type|
   using RSpec::Parameterized::TableSyntax
 
   context 'with valid package name' do

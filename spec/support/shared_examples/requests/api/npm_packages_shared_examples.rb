@@ -400,6 +400,7 @@ end
 
 RSpec.shared_examples 'handling create dist tag requests' do |scope: :project|
   using RSpec::Parameterized::TableSyntax
+  include_context 'set package name from package name type'
 
   let_it_be(:tag_name) { 'test' }
 
@@ -408,17 +409,54 @@ RSpec.shared_examples 'handling create dist tag requests' do |scope: :project|
   let(:env) { { 'api.request.body': version } }
   let(:headers) { {} }
 
-  shared_examples 'handling different visibilities and user roles' do |accept_example: 'create package tag', accept_status: :ok, reject_example: 'rejects package tags access', reject_status: nil|
-    where(:visibility, :user_role, :example_name, :expected_status) do
-      'PUBLIC'   | :anonymous | reject_example | (reject_status || :forbidden)
-      'PUBLIC'   | :guest     | reject_example | (reject_status || :forbidden)
-      'PUBLIC'   | :developer | accept_example | accept_status
-      'PRIVATE'  | :anonymous | reject_example | (reject_status || :not_found)
-      'PRIVATE'  | :guest     | reject_example | (reject_status || :forbidden)
-      'PRIVATE'  | :developer | accept_example | accept_status
-      'INTERNAL' | :anonymous | reject_example | (reject_status || :forbidden)
-      'INTERNAL' | :guest     | reject_example | (reject_status || :forbidden)
-      'INTERNAL' | :developer | accept_example | accept_status
+  shared_examples 'reject create package tag request' do |status:|
+    before do
+      package.update!(name: package_name) unless package_name == 'non-existing-package'
+    end
+
+    it_behaves_like 'returning response status', status
+  end
+
+  shared_examples 'handling different package names, visibilities and user roles' do
+    where(:package_name_type, :visibility, :user_role, :expected_result, :expected_status) do
+      :scoped_naming_convention    | 'PUBLIC'   | :anonymous | :reject | :forbidden
+      :scoped_naming_convention    | 'PUBLIC'   | :guest     | :reject | :forbidden
+      :scoped_naming_convention    | 'PUBLIC'   | :developer | :accept | :ok
+      :scoped_no_naming_convention | 'PUBLIC'   | :anonymous | :reject | :forbidden
+      :scoped_no_naming_convention | 'PUBLIC'   | :guest     | :reject | :forbidden
+      :scoped_no_naming_convention | 'PUBLIC'   | :developer | :accept | :ok
+      :unscoped                    | 'PUBLIC'   | :anonymous | :reject | :forbidden
+      :unscoped                    | 'PUBLIC'   | :guest     | :reject | :forbidden
+      :unscoped                    | 'PUBLIC'   | :developer | :accept | :ok
+      :non_existing                | 'PUBLIC'   | :anonymous | :reject | :forbidden
+      :non_existing                | 'PUBLIC'   | :guest     | :reject | :forbidden
+      :non_existing                | 'PUBLIC'   | :developer | :reject | :not_found
+
+      :scoped_naming_convention    | 'PRIVATE'  | :anonymous | :reject | :not_found
+      :scoped_naming_convention    | 'PRIVATE'  | :guest     | :reject | :forbidden
+      :scoped_naming_convention    | 'PRIVATE'  | :developer | :accept | :ok
+      :scoped_no_naming_convention | 'PRIVATE'  | :anonymous | :reject | :not_found
+      :scoped_no_naming_convention | 'PRIVATE'  | :guest     | :reject | :forbidden
+      :scoped_no_naming_convention | 'PRIVATE'  | :developer | :accept | :ok
+      :unscoped                    | 'PRIVATE'  | :anonymous | :reject | :not_found
+      :unscoped                    | 'PRIVATE'  | :guest     | :reject | :forbidden
+      :unscoped                    | 'PRIVATE'  | :developer | :accept | :ok
+      :non_existing                | 'PRIVATE'  | :anonymous | :reject | :not_found
+      :non_existing                | 'PRIVATE'  | :guest     | :reject | :forbidden
+      :non_existing                | 'PRIVATE'  | :developer | :reject | :not_found
+
+      :scoped_naming_convention    | 'INTERNAL'  | :anonymous | :reject | :forbidden
+      :scoped_naming_convention    | 'INTERNAL'  | :guest     | :reject | :forbidden
+      :scoped_naming_convention    | 'INTERNAL'  | :developer | :accept | :ok
+      :scoped_no_naming_convention | 'INTERNAL'  | :anonymous | :reject | :forbidden
+      :scoped_no_naming_convention | 'INTERNAL'  | :guest     | :reject | :forbidden
+      :scoped_no_naming_convention | 'INTERNAL'  | :developer | :accept | :ok
+      :unscoped                    | 'INTERNAL'  | :anonymous | :reject | :forbidden
+      :unscoped                    | 'INTERNAL'  | :guest     | :reject | :forbidden
+      :unscoped                    | 'INTERNAL'  | :developer | :accept | :ok
+      :non_existing                | 'INTERNAL'  | :anonymous | :reject | :forbidden
+      :non_existing                | 'INTERNAL'  | :guest     | :reject | :forbidden
+      :non_existing                | 'INTERNAL'  | :developer | :reject | :not_found
     end
 
     with_them do
@@ -431,65 +469,28 @@ RSpec.shared_examples 'handling create dist tag requests' do |scope: :project|
         project.update!(visibility: Gitlab::VisibilityLevel.const_get(visibility, false))
       end
 
-      it_behaves_like params[:example_name], status: params[:expected_status]
-    end
-  end
+      example_name = "#{params[:expected_result]} create package tag request"
+      status = params[:expected_status]
 
-  shared_examples 'handling different package names' do
-    context 'handling a scoped package following the naming convention' do
-      let(:package_name) { "@#{group.path}/scoped-package" }
-
-      it_behaves_like 'handling different visibilities and user roles'
-    end
-
-    context 'handling a scoped package not following the naming convention' do
-      let(:package_name) { '@any_scope/scope-package' }
-
-      params = {}
-      params = { accept_example: 'rejects package tags access', accept_status: :not_found, reject_status: :not_found } if scope == :instance
-
-      it_behaves_like 'handling different visibilities and user roles', **params
-    end
-
-    context 'handling an unscoped package' do
-      let(:package_name) { 'unscoped-package' }
-
-      params = {}
-      params = { accept_example: 'rejects package tags access', accept_status: :not_found, reject_status: :not_found } if scope == :instance
-
-      it_behaves_like 'handling different visibilities and user roles', **params
-    end
-
-    context 'handling a package name with a dot in the project path' do
-      let(:package_name) { "@#{group.path}/scoped-package" }
-
-      before do
-        project.update!(path: 'foo.bar')
+      if scope == :instance && params[:package_name_type] != :scoped_naming_convention
+        example_name = 'reject create package tag request'
+        status = :not_found
       end
 
-      it_behaves_like 'handling different visibilities and user roles'
-    end
-
-    context 'handling a non existing package' do
-      let(:package_name) { 'non-existing-package' }
-
-      params = { accept_example: 'rejects package tags access', accept_status: :not_found }
-      params = params.merge(reject_status: :not_found) if scope == :instance
-
-      it_behaves_like 'handling different visibilities and user roles', **params
+      it_behaves_like example_name, status: status
     end
   end
 
   context 'with oauth token' do
     let(:headers) { build_token_auth_header(token.token) }
 
-    it_behaves_like 'handling different package names'
+    it_behaves_like 'handling different package names, visibilities and user roles'
   end
 
   context 'with personal access token' do
     let(:headers) { build_token_auth_header(personal_access_token.token) }
 
-    it_behaves_like 'handling different package names'
+    it_behaves_like 'handling different package names, visibilities and user roles'
   end
 end
 
