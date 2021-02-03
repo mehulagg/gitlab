@@ -9,13 +9,15 @@ import {
   GlDropdownItem,
   GlModalDirective,
 } from '@gitlab/ui';
-import { mapState } from 'vuex';
+
+import httpStatusCodes from '~/lib/utils/http_status';
 
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import projectQuery from '../graphql/project_boards.query.graphql';
 import groupQuery from '../graphql/group_boards.query.graphql';
 
-import BoardForm from './board_form.vue';
+import boardsStore from '../stores/boards_store';
+import BoardForm from './board_form_deprecated.vue';
 
 const MIN_BOARDS_TO_VIEW_RECENT = 10;
 
@@ -93,23 +95,27 @@ export default {
     return {
       hasScrollFade: false,
       loadingBoards: 0,
+      loadingRecentBoards: false,
       scrollFadeInitialized: false,
       boards: [],
       recentBoards: [],
+      state: boardsStore.state,
       throttledSetScrollFade: throttle(this.setScrollFade, this.throttleDuration),
       contentClientHeight: 0,
       maxPosition: 0,
+      store: boardsStore,
       filterTerm: '',
-      currentPage: '',
     };
   },
   computed: {
-    ...mapState(['fullPath']),
     parentType() {
       return this.groupId ? 'group' : 'project';
     },
     loading() {
-      return Boolean(this.loadingBoards);
+      return this.loadingRecentBoards || Boolean(this.loadingBoards);
+    },
+    currentPage() {
+      return this.state.currentPage;
     },
     filteredBoards() {
       return this.boards.filter((board) =>
@@ -117,7 +123,7 @@ export default {
       );
     },
     board() {
-      return this.currentBoard;
+      return this.state.currentBoard;
     },
     showDelete() {
       return this.boards.length > 1;
@@ -142,11 +148,11 @@ export default {
     },
   },
   created() {
-    // boardsStore.setCurrentBoard(this.currentBoard);
+    boardsStore.setCurrentBoard(this.currentBoard);
   },
   methods: {
     showPage(page) {
-      this.currentPage = page;
+      boardsStore.showPage(page);
     },
     loadBoards(toggleDropdown = true) {
       if (toggleDropdown && this.boards.length > 0) {
@@ -155,7 +161,7 @@ export default {
 
       this.$apollo.addSmartQuery('boards', {
         variables() {
-          return { fullPath: this.fullPath };
+          return { fullPath: this.state.endpoints.fullPath };
         },
         query() {
           return this.groupId ? groupQuery : projectQuery;
@@ -171,6 +177,32 @@ export default {
           }));
         },
       });
+
+      this.loadingRecentBoards = true;
+      boardsStore
+        .recentBoards()
+        .then((res) => {
+          this.recentBoards = res.data;
+        })
+        .catch((err) => {
+          /**
+           *  If user is unauthorized we'd still want to resolve the
+           *  request to display all boards.
+           */
+          if (err?.response?.status === httpStatusCodes.UNAUTHORIZED) {
+            this.recentBoards = []; // recent boards are empty
+            return;
+          }
+          throw err;
+        })
+        .then(() => this.$nextTick()) // Wait for boards list in DOM
+        .then(() => {
+          this.setScrollFade();
+        })
+        .catch(() => {})
+        .finally(() => {
+          this.loadingRecentBoards = false;
+        });
     },
     isScrolledUp() {
       const { content } = this.$refs;
@@ -205,7 +237,7 @@ export default {
 </script>
 
 <template>
-  <div class="boards-switcher js-boards-selector gl-mr-3">
+  <div class="boards-switcher js-boards-selector gl-mr-3 deprecated">
     <span class="boards-selector-wrapper js-boards-selector-wrapper">
       <gl-dropdown
         data-qa-selector="boards_dropdown"
@@ -314,8 +346,6 @@ export default {
         :weights="weights"
         :enable-scoped-labels="enabledScopedLabels"
         :current-board="currentBoard"
-        :current-page="currentPage"
-        :cancel="() => showPage('')"
       />
     </span>
   </div>
