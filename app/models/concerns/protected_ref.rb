@@ -23,6 +23,8 @@ module ProtectedRef
   end
 
   class_methods do
+    include ::Gitlab::Utils::StrongMemoize
+
     def protected_ref_access_levels(*types)
       types.each do |type|
         # We need to set `inverse_of` to make sure the `belongs_to`-object is set
@@ -63,7 +65,9 @@ module ProtectedRef
     # This method optionally takes in a list of `protected_refs` to search
     # through, to avoid calling out to the database.
     def matching(ref_name, protected_refs: nil)
-      (protected_refs || self.all).select { |protected_ref| protected_ref.matches?(ref_name) }
+      strong_memoize(:matching_refs) do
+        (protected_refs || self.all).select { |protected_ref| protected_ref.matches?(ref_name) }
+      end
     end
   end
 
