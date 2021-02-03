@@ -8,7 +8,7 @@ module Pages
 
       DestroyPagesDeploymentsWorker.perform_async(project.id)
 
-      PagesRemoveWorker.perform_async(project.id)
+      PagesRemoveWorker.perform_async(project.id) if Feature.enabled?(:pages_update_legacy_storage, default_enabled: true)
     end
   end
 end

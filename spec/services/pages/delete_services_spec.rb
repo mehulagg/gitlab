@@ -13,13 +13,25 @@ RSpec.describe Pages::DeleteService do
     project.mark_pages_as_deployed
   end
 
-  it 'deletes published pages' do
+  it 'deletes published pages', :sidekiq_inline do
     expect(project.pages_deployed?).to be(true)
 
     expect_any_instance_of(Gitlab::PagesTransfer).to receive(:rename_project).and_return true
     expect(PagesWorker).to receive(:perform_in).with(5.minutes, :remove, project.namespace.full_path, anything)
 
-    Sidekiq::Testing.inline! { service.execute }
+    service.execute
+
+    expect(project.pages_deployed?).to be(false)
+  end
+
+  it "doesn't remove anything from the legacy storage if updates on it are disabled", :sidekiq_inline do
+    stub_feature_flags(pages_update_legacy_storage: false)
+
+    expect(project.pages_deployed?).to be(true)
+
+    expect(PagesWorker).not_to receive(:perform_in)
+
+    service.execute
 
     expect(project.pages_deployed?).to be(false)
   end
