@@ -25,7 +25,7 @@ RSpec.describe MergeRequests::BuildService do
   end
 
   let(:commit_2) do
-    double(:commit_2, sha: 'f00ba7', safe_message: "Second commit\n\nCreate the app",
+    double(:commit_2, sha: 'f00ba7', safe_message: "Closes #1234 Second commit\n\nCreate the app",
                           gitaly_commit?: false, id: 'f00ba7', parent_ids: ['f00ba6'])
   end
 
@@ -334,7 +334,7 @@ RSpec.describe MergeRequests::BuildService do
       it_behaves_like 'allows the merge request to be created'
 
       it 'uses the first line of the first multi-line commit message as the title' do
-        expect(merge_request.title).to eq('Second commit')
+        expect(merge_request.title).to eq('Closes #1234 Second commit')
       end
 
       it 'adds the remaining lines of the first multi-line commit message as the description' do
