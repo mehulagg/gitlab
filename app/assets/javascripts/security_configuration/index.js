@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
-import { parseBooleanDataAttributes } from '~/lib/utils/dom_utils';
 import SecurityConfigurationApp from './components/app.vue';
 
 export const initStaticSecurityConfiguration = (el) => {
@@ -21,10 +20,10 @@ export const initStaticSecurityConfiguration = (el) => {
     el,
     apolloProvider,
     provide: {
-      projectPath
+      projectPath,
     },
     render(createElement) {
       return createElement(SecurityConfigurationApp);
     },
   });
-}
+};

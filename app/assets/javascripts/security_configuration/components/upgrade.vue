@@ -10,7 +10,6 @@ export default {
 </script>
 
 <template>
-<!-- Testing, shallow mount and assert -->
   <span data-test-id="upgrade">
     <gl-sprintf :message="s__('Available with %{linkStart}upgrade or free trial%{linkEnd}')">
       <template #link="{ content }">
@@ -21,5 +20,3 @@ export default {
     </gl-sprintf>
   </span>
 </template>
-
-

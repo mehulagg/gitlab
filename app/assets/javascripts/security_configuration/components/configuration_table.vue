@@ -82,7 +82,12 @@ export default {
 
 <template>
   <div>
-    <gl-alert data-test-id="error-message" v-if="errorMessage" variant="danger" :dismissible="false">
+    <gl-alert
+      v-if="errorMessage"
+      data-test-id="error-message"
+      variant="danger"
+      :dismissible="false"
+    >
       {{ errorMessage }}
     </gl-alert>
     <gl-table ref="securityControlTable" :items="features" :fields="fields" stacked="md">
@@ -107,10 +112,10 @@ export default {
 
       <template #cell(manage)="{ item }">
         <component
-          :data-test-id="getIdForItem(item)"
           :is="getComponentForItem(item)"
+          :data-test-id="getIdForItem(item)"
           @error="onError"
-        ></component>
+        />
       </template>
     </gl-table>
   </div>

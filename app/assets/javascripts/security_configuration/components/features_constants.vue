@@ -43,7 +43,7 @@ import {
   REPORT_TYPE_COVERAGE_FUZZING,
   REPORT_TYPE_LICENSE_COMPLIANCE,
 } from './constants';
-import { __, s__ } from '~/locale';
+
 export default {
   features: [
     {
@@ -52,7 +52,7 @@ export default {
       description: SAST_DESCRIPTION,
       link: SAST_LINK,
       type: REPORT_TYPE_SAST,
-      id: SAST_ID
+      id: SAST_ID,
     },
     {
       manage: DAST_MANAGE,
@@ -60,7 +60,7 @@ export default {
       description: DAST_DESCRIPTION,
       link: DAST_LINK,
       type: REPORT_TYPE_DAST,
-      id: DAST_ID
+      id: DAST_ID,
     },
     {
       manage: SECRET_DETECTION_MANAGE,
@@ -68,7 +68,7 @@ export default {
       description: SECRET_DETECTION_DESCRIPTION,
       link: SECRET_DETECTION_LINK,
       type: REPORT_TYPE_SECRET_DETECTION,
-      id: SECRET_DETECTION_ID
+      id: SECRET_DETECTION_ID,
     },
     {
       manage: DEPENDENCY_SCANNING_MANAGE,
@@ -76,7 +76,7 @@ export default {
       description: DEPENDENCY_SCANNING_DESCRIPTION,
       link: DEPENDENCY_SCANNING_LINK,
       type: REPORT_TYPE_DEPENDENCY_SCANNING,
-      id: DEPENDENCY_SCANNING_ID
+      id: DEPENDENCY_SCANNING_ID,
     },
     {
       manage: CONTAINER_SCANNING_MANAGE,
@@ -84,7 +84,7 @@ export default {
       description: CONTAINER_SCANNING_DESCRIPTION,
       link: CONTAINER_SCANNING_LINK,
       type: REPORT_TYPE_CONTAINER_SCANNING,
-      id: CONTAINER_SCANNING_ID
+      id: CONTAINER_SCANNING_ID,
     },
     {
       manage: COVERAGE_FUZZING_MANAGE,
@@ -92,7 +92,7 @@ export default {
       description: COVERAGE_FUZZING_DESCRIPTION,
       link: COVERAGE_FUZZING_LINK,
       type: REPORT_TYPE_COVERAGE_FUZZING,
-      id: COVERAGE_FUZZING_ID
+      id: COVERAGE_FUZZING_ID,
     },
     {
       manage: LICENSE_COMPLIANCE_MANAGE,
@@ -100,7 +100,7 @@ export default {
       description: LICENSE_COMPLIANCE_DESCRIPTION,
       link: LICENSE_COMPLIANCE_LINK,
       type: REPORT_TYPE_LICENSE_COMPLIANCE,
-      id: LICENSE_COMPLIANCE_ID
+      id: LICENSE_COMPLIANCE_ID,
     },
   ],
 };

@@ -2,15 +2,16 @@
 import { GlButton } from '@gitlab/ui';
 import configureSastMutation from '~/security_configuration/graphql/configure_sast.mutation.graphql';
 import { redirectTo } from '~/lib/utils/url_utility';
+
 export default {
+  components: {
+    GlButton,
+  },
   inject: {
     projectPath: {
       from: 'projectPath',
       default: '',
     },
-  },
-  components: {
-    GlButton,
   },
   data: () => ({
     isLoading: false,
@@ -29,18 +30,16 @@ export default {
             },
           },
         });
-        console.log('data', data);
-        // const { errors, successPath } = data.configureSast;
+        const { errors, successPath } = data.configureSast;
 
         if (errors.length > 0) {
           // eslint-disable-next-line @gitlab/require-i18n-strings
           throw new Error(errors[0]);
         }
 
-        if (!successPath) {
-          throw new Error('SAST merge request creation mutation failed');
+        if (!successPath) {          
+          throw new Error(__('SAST merge request creation mutation failed'));
         }
-
 
         redirectTo(successPath);
       } catch (e) {
@@ -53,7 +52,7 @@ export default {
 </script>
 
 <template>
-  <gl-button :loading="isLoading" @click="mutate" variant="success" category="secondary"
-    >Configure via Merge Request</gl-button
+  <gl-button :loading="isLoading" variant="success" category="secondary" @click="mutate"
+    >{{ __("Configure via Merge Request") }}</gl-button
   >
 </template>

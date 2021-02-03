@@ -1,9 +1,15 @@
 import VueApollo from 'vue-apollo';
-import { shallowMount } from '@vue/test-utils';
-import { createLocalVue } from '@vue/test-utils';
-import manageSast from '~/security_configuration/components/manage_sast.vue';
+import { mount , createLocalVue } from '@vue/test-utils';
+
 import createMockApollo from 'helpers/mock_apollo_helper';
+import manageSast from '~/security_configuration/components/manage_sast.vue';
 import configureSastMutation from '~/security_configuration/graphql/configure_sast.mutation.graphql';
+import { redirectTo } from '~/lib/utils/url_utility';
+
+jest.mock('~/lib/utils/url_utility', () => ({
+  ...jest.requireActual('~/lib/utils/url_utility'),
+  redirectTo: jest.fn(),
+}));
 
 const localVue = createLocalVue();
 
@@ -15,19 +21,13 @@ describe('Some component', () => {
 
     const data = {
       configureSast: {
-        successPath:
-          'http://gitlab.localdev:3000/testgroup/testproject-in-testgroup/-/merge_requests/new?merge_request%5Bdescription%5D=Set+.gitlab-ci.yml+to+enable+or+configure+SAST+security+scanning+using+the+GitLab+managed+template.+You+can+%5Badd+variable+overrides%5D%28https%3A%2F%2Fdocs.gitlab.com%2Fee%2Fuser%2Fapplication_security%2Fsast%2F%23customizing-the-sast-settings%29+to+customize+SAST+settings.&merge_request%5Bsource_branch%5D=set-sast-config-12',
+        successPath: 'testSuccessPath',
         errors: [],
         __typename: 'ConfigureSastPayload',
       },
     };
 
-    const requestHandlers = [
-      [
-        configureSastMutation,
-        async ()=> ({data}),
-      ],
-    ];
+    const requestHandlers = [[configureSastMutation, async () => ({ data })]];
 
     return createMockApollo(requestHandlers);
   }
@@ -35,7 +35,7 @@ describe('Some component', () => {
   function createComponent(options = {}) {
     const { mockApollo } = options;
 
-    return shallowMount(manageSast, {
+    return mount(manageSast, {
       localVue,
       apolloProvider: mockApollo,
     });
@@ -49,14 +49,22 @@ describe('Some component', () => {
       wrapper = createComponent({ mockApollo });
     });
 
-    it('test', () => {
+    it('should call redirect helper with correct value', () => {
       createComponent();
       wrapper.vm.mutate();
+      debugger;
+      // wrapper.vm.onSubmit()
+      //   .then(() => {
+      //     expect(redirectTo).toHaveBeenCalledWith('responseURL');
+      //   })
+      //   .then(done)
+      //   .catch(done.fail);
+      // const somethingSpy = jest.spyOn(wrapper.vm.redirectTo);
       //   await wrapper.vm.$nextTick();
       // step 1 mutate callen wenn er redirected zu dem link oben ist fein....
       // step 2 redirect to muss wohl auch noch gemocked werden....
-
-      expect(true).toBe(true);
+      expect(somethingSpy).toBeCalled();
+      // expect(true).toBe(true);
     });
   });
 });
