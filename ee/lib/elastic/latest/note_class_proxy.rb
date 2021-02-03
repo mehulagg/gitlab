@@ -13,6 +13,7 @@ module Elastic
         options[:in] = ['note']
         query_hash = basic_query_hash(%w[note], query, count_only: options[:count_only])
 
+        options[:no_join_project] = Elastic::DataMigrationService.migration_has_finished?(:add_permissions_data_to_notes_documents)
         context.name(:note) do
           query_hash = context.name(:authorized) { project_ids_filter(query_hash, options) }
           query_hash = context.name(:confidentiality) { confidentiality_filter(query_hash, options) }
@@ -101,13 +102,15 @@ module Elastic
       override :project_ids_filter
       def project_ids_filter(query_hash, options)
         query_hash[:query][:bool][:filter] ||= []
+        no_join_project = options[:no_join_project]
 
         project_query = context.name(:project) do
           project_ids_query(
             options[:current_user],
             options[:project_ids],
             options[:public_and_internal_projects],
-            options[:features]
+            options[:features],
+            no_join_project
           )
         end
 
@@ -124,23 +127,30 @@ module Elastic
         project_query[:should].flatten.each do |condition|
           noteable_type = condition.delete(:noteable_type).to_s
 
-          filters[:bool][:should] << {
+          project_filter = {
             bool: {
               must: [
-                {
-                  has_parent: {
-                    parent_type: "project",
-                    query: {
-                      bool: {
-                        should: condition
-                      }
-                    }
-                  }
-                },
                 { term: { noteable_type: { _name: context.name(:noteable, :is_a, noteable_type), value: noteable_type } } }
               ]
             }
           }
+
+          project_filter[:bool][:must] << if no_join_project
+                                            condition
+                                          else
+                                            {
+                                              has_parent: {
+                                                parent_type: "project",
+                                                query: {
+                                                  bool: {
+                                                    should: condition
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          end
+
+          filters[:bool][:should] << project_filter
         end
 
         query_hash[:query][:bool][:filter] << filters
@@ -150,18 +160,19 @@ module Elastic
       # Query notes based on the various feature permission of the noteable_type.
       # Appends `noteable_type` (which will be removed in project_ids_filter)
       # for base model filtering.
-      # We do not implement `no_join_project` argument for notes class yet
-      # as this is not supported. This will need to be fixed when we move
-      # notes to a new index.
       override :pick_projects_by_membership
-      def pick_projects_by_membership(project_ids, user, _, _ = nil)
+      def pick_projects_by_membership(project_ids, user, no_join_project, _ = nil)
+        # support for notes being split into a separate index
+        # project joins will be referenced by id while notes use the reference project_id
+        id_field = no_join_project ? :project_id : :id
+
         noteable_type_to_feature.map do |noteable_type, feature|
           context.name(feature) do
             condition =
               if project_ids == :any
                 { term: { visibility_level: { _name: context.name(:any), value: Project::PRIVATE } } }
               else
-                { terms: { _name: context.name(:membership, :id), id: filter_ids_by_feature(project_ids, user, feature) } }
+                { terms: { _name: context.name(:membership, :id), id_field => filter_ids_by_feature(project_ids, user, feature) } }
               end
 
             limit =
