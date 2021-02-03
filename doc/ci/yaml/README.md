@@ -958,9 +958,19 @@ Note that in the example above:
 
 #### Use `extends` and `include` together
 
-`extends` works across configuration files imported with [`include`](#include).
+You can use `extends` and [`include`](#include) in combination to reuse configuration
+from different configuration files.
 
-This example uses `extends` to use the `script` defined in `included.yml`:
+This example defines a `script` in the `included.yml` file. Then the `.gitlab-ci.yml`
+file uses `extends` to use the same `script` in the `useTemplate` job:
+
+- `included.yml`:
+
+  ```yaml
+  .template:
+    script:
+      - echo Hello!
+  ```
 
 - `.gitlab-ci.yml`:
 
@@ -970,14 +980,6 @@ This example uses `extends` to use the `script` defined in `included.yml`:
   useTemplate:
     image: alpine
     extends: .template
-  ```
-
-- `included.yml`:
-
-  ```yaml
-  .template:
-    script:
-      - echo Hello!
   ```
 
 ### `rules`
@@ -1403,8 +1405,7 @@ job:
 Glob patterns are interpreted with Ruby [File.fnmatch](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-fnmatch)
 with the flags `File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB`.
 
-For performance reasons, pattern matching with `exists` is limited to 10,000
-checks. After the 10,000th check, rules with patterned globs always match.
+For performance reasons, GitLab matches a maximum of 10,000 `exists` patterns. After the 10,000th check, rules with patterned globs always match.
 
 #### `rules:allow_failure`
 
@@ -1527,8 +1528,8 @@ rules that use both `||` and `&&` may evaluate with an unexpected order of opera
 ### `only`/`except` (basic)
 
 NOTE:
-`only` and `except` are not being actively developed anymore. [`rules`](#rules) is
-now the standard keyword for defining when to add jobs to pipelines.
+`only` and `except` are not being actively developed. To define when
+to add jobs to pipelines, use [`rules`](#rules).
 
 `only` and `except` are two keywords that determine when to add jobs to pipelines:
 
@@ -1828,12 +1829,12 @@ You can configure jobs to use `only: changes` with other `only: refs` keywords. 
 those jobs ignore the changes and always run.
 
 In this example, when you push commits to an existing branch, the `docker build` job
-is created only if changes were made to any of the following:
+runs only if any of these files change:
 
 - The `Dockerfile` file.
-- Any of the files in the `docker/scripts/` directory.
-- Any of the files and subdirectories in the `dockerfiles` directory.
-- Any of the files with `rb`, `py`, `sh` extensions in the `more_scripts` directory.
+- Files in the `docker/scripts/` directory.
+- Files and subdirectories in the `dockerfiles` directory.
+- Files with `rb`, `py`, `sh` extensions in the `more_scripts` directory.
 
 ```yaml
 docker build:
