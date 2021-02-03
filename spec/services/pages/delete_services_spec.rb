@@ -32,6 +32,22 @@ RSpec.describe Pages::DeleteService do
     expect(project.reload.pages_domains.count).to eq(0)
   end
 
+  it 'schedules a destruction of pages deployments' do
+    expect(DestroyPagesDeploymentsWorker).to(
+      receive(:perform_async).with(project.id)
+    )
+
+    service.execute
+  end
+
+  it 'removes pages deployments', :sidekiq_inline do
+    create(:pages_deployment, project: project)
+
+    expect do
+      service.execute
+    end.to change { PagesDeployment.count }.by(-1)
+  end
+
   it 'marks pages as not deployed, deletes domains and schedules worker to remove pages from disk' do
     expect(project.pages_deployed?).to eq(true)
     expect(project.pages_domains.count).to eq(1)
