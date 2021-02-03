@@ -288,7 +288,7 @@ RSpec.describe 'Pipelines', :js do
         end
 
         it 'has a dropdown with play button' do
-          expect(page).to have_selector('.dropdown-new.btn.btn-default .icon-play')
+          expect(page).to have_selector('.js-pipeline-dropdown-manual-actions [data-testid="play-icon"]')
         end
 
         it 'has link to the manual action' do
@@ -304,7 +304,7 @@ RSpec.describe 'Pipelines', :js do
           end
 
           it 'enqueues manual action job' do
-            expect(page).to have_selector('.js-pipeline-dropdown-manual-actions:disabled')
+            expect(page).to have_selector('.js-pipeline-dropdown-manual-actions .gl-dropdown-toggle:disabled')
           end
         end
       end
@@ -322,7 +322,7 @@ RSpec.describe 'Pipelines', :js do
         end
 
         it 'has a dropdown for actionable jobs' do
-          expect(page).to have_selector('.dropdown-new.btn.btn-default .icon-play')
+          expect(page).to have_selector('.js-pipeline-dropdown-manual-actions [data-testid="play-icon"]')
         end
 
         it "has link to the delayed job's action" do
