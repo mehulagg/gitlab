@@ -3,13 +3,12 @@ import axios from '../lib/utils/axios_utils';
 import { __ } from '../locale';
 import { deprecatedCreateFlash as Flash } from '../flash';
 import LazyLoader from '../lazy_loader';
-import { togglePopover } from '../shared/popover';
 
 export const getSelector = (highlightId) => `.js-feature-highlight[data-highlight=${highlightId}]`;
 
-export function dismiss(highlightId) {
+export function dismiss(endpoint, highlightId) {
   axios
-    .post(this.attr('data-dismiss-endpoint'), {
+    .post(endpoint, {
       feature_name: highlightId,
     })
     .catch(() =>
@@ -19,9 +18,6 @@ export function dismiss(highlightId) {
         ),
       ),
     );
-
-  togglePopover.call(this, false);
-  this.hide();
 }
 
 export function inserted() {

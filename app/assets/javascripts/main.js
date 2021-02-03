@@ -27,7 +27,7 @@ import { deprecatedCreateFlash as Flash, removeFlashClickListener } from './flas
 import initTodoToggle from './header';
 import initLayoutNav from './layout_nav';
 import initAlertHandler from './alert_handler';
-import './feature_highlight/feature_highlight_options';
+import initFeatureHighlight from './feature_highlight';
 import LazyLoader from './lazy_loader';
 import initLogoAnimation from './logo';
 import initFrequentItemDropdowns from './frequent_items';
@@ -114,6 +114,7 @@ function deferredInitialisation() {
   initFrequentItemDropdowns();
   initPersistentUserCallouts();
   initDefaultTrackers();
+  initFeatureHighlight();
 
   const search = document.querySelector('#search');
   if (search) {
