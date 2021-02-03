@@ -42291,31 +42291,55 @@
           "enumValues": [
             {
               "name": "opened",
-              "description": "Merge Request is open",
+              "description": null,
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "closed",
-              "description": "Merge Request is closed, not merged",
+              "description": null,
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "locked",
-              "description": "Merge Request that has its discussion locked",
+              "description": null,
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "all",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "ALL",
               "description": "Merge Request is in any state",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "merged",
+              "name": "CLOSED",
+              "description": "Merge Request is closed, not merged",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "LOCKED",
+              "description": "Merge Request that has its discussion locked",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "MERGED",
               "description": "Merge Request has been merged",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "OPENED",
+              "description": "Merge Request is open",
               "isDeprecated": false,
               "deprecationReason": null
             }

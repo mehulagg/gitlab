@@ -4942,11 +4942,15 @@ State of a GitLab merge request.
 
 | Value | Description |
 | ----- | ----------- |
-| `all` | Merge Request is in any state |
-| `closed` | Merge Request is closed, not merged |
-| `locked` | Merge Request that has its discussion locked |
-| `merged` | Merge Request has been merged |
-| `opened` | Merge Request is open |
+| `ALL` | Merge Request is in any state |
+| `CLOSED` | Merge Request is closed, not merged |
+| `LOCKED` | Merge Request that has its discussion locked |
+| `MERGED` | Merge Request has been merged |
+| `OPENED` | Merge Request is open |
+| `all` |  |
+| `closed` |  |
+| `locked` |  |
+| `opened` |  |
 
 ### MilestoneStateEnum
 

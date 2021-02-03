@@ -15403,26 +15403,30 @@ enum MergeRequestState {
   """
   Merge Request is in any state
   """
-  all
+  ALL
 
   """
   Merge Request is closed, not merged
   """
-  closed
+  CLOSED
 
   """
   Merge Request that has its discussion locked
   """
-  locked
+  LOCKED
 
   """
   Merge Request has been merged
   """
-  merged
+  MERGED
 
   """
   Merge Request is open
   """
+  OPENED
+  all
+  closed
+  locked
   opened
 }
 
