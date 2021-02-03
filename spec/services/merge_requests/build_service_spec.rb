@@ -447,12 +447,12 @@ RSpec.describe MergeRequests::BuildService do
           project.team.truncate
         end
 
-        it 'uses branch title as the merge request title' do
-          expect(merge_request.title).to eq("#{issue.iid} fix issue")
+        it 'uses the first line of the first multi-line commit message as the title' do
+          expect(merge_request.title).to eq('Closes #1234 Second commit')
         end
 
-        it 'does not set a description' do
-          expect(merge_request.description).to be_nil
+        it 'adds the remaining lines of the first multi-line commit message as the description' do
+          expect(merge_request.description).to eq('Create the app')
         end
       end
 
@@ -460,12 +460,12 @@ RSpec.describe MergeRequests::BuildService do
         let(:source_branch) { "#{issue.iid}-fix-issue" }
         let(:issue_confidential) { true }
 
-        it 'uses the title of the branch as the merge request title' do
-          expect(merge_request.title).to eq("#{issue.iid} fix issue")
+        it 'uses the first line of the first multi-line commit message as the title' do
+          expect(merge_request.title).to eq('Closes #1234 Second commit')
         end
 
-        it 'does not set a description' do
-          expect(merge_request.description).to be_nil
+        it 'adds the remaining lines of the first multi-line commit message as the description' do
+          expect(merge_request.description).to eq('Create the app')
         end
       end
     end
