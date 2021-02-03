@@ -50,3 +50,5 @@ To allow users to change the time zone in their profile, the feature flag `user_
 - in the console, run `Feature.enable(:user_time_settings)`
 
 After that you should be able to see the timezone dropdown at Settings > Profile Page.
+
+![User Time Zone Settings](img/time_zone_settings.png)
