@@ -29,7 +29,6 @@ class ApplicationController < ActionController::Base
   before_action :validate_user_service_ticket!
   before_action :check_password_expiration, if: :html_request?
   before_action :ldap_security_check
-  around_action :sentry_context
   before_action :default_headers
   before_action :default_cache_headers
   before_action :add_gon_variables, if: :html_request?
@@ -526,10 +525,6 @@ class ApplicationController < ActionController::Base
     ApplicationSettings::UpdateService
       .new(settings, current_user, application_setting_params)
       .execute
-  end
-
-  def sentry_context(&block)
-    Gitlab::ErrorTracking.with_context(current_user, &block)
   end
 
   def allow_gitaly_ref_name_caching

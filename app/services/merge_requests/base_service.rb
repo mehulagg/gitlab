@@ -181,9 +181,7 @@ module MergeRequests
       }
 
       if exception
-        Gitlab::ErrorTracking.with_context(current_user) do
-          Gitlab::ErrorTracking.track_exception(exception, data)
-        end
+        Gitlab::ErrorTracking.track_exception(exception, data)
 
         data[:"exception.message"] = exception.message
       end

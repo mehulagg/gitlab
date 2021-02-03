@@ -27,31 +27,14 @@ module Gitlab
           config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
           config.processors << ::Gitlab::ErrorTracking::Processor::SidekiqProcessor
           config.processors << ::Gitlab::ErrorTracking::Processor::GrpcErrorProcessor
+          config.processors << ::Gitlab::ErrorTracking::Processor::ApplicationContextProcessor
 
           # Sanitize authentication headers
           config.sanitize_http_headers = %w[Authorization Private-Token]
-          config.tags = extra_tags_from_env.merge(program: Gitlab.process_name)
           config.before_send = method(:before_send)
 
           yield config if block_given?
         end
-      end
-
-      def with_context(current_user = nil)
-        last_user_context = Raven.context.user
-
-        user_context = {
-          id: current_user&.id,
-          email: current_user&.email,
-          username: current_user&.username
-        }.compact
-
-        Raven.tags_context(default_tags)
-        Raven.user_context(user_context)
-
-        yield
-      ensure
-        Raven.user_context(last_user_context)
       end
 
       # This should be used when you want to passthrough exception handling:
@@ -125,7 +108,7 @@ module Gitlab
         extra = sanitize_request_parameters(extra)
 
         if sentry && Raven.configuration.server
-          Raven.capture_exception(exception, tags: default_tags, extra: extra)
+          Raven.capture_exception(exception, extra: extra)
         end
 
         if logging
@@ -158,22 +141,6 @@ module Gitlab
 
       def should_raise_for_dev?
         Rails.env.development? || Rails.env.test?
-      end
-
-      def default_tags
-        {
-          Labkit::Correlation::CorrelationId::LOG_KEY.to_sym => Labkit::Correlation::CorrelationId.current_id,
-          locale: I18n.locale
-        }
-      end
-
-      # Static tags that are set on application start
-      def extra_tags_from_env
-        Gitlab::Json.parse(ENV.fetch('GITLAB_SENTRY_EXTRA_TAGS', '{}')).to_hash
-      rescue => e
-        Gitlab::AppLogger.debug("GITLAB_SENTRY_EXTRA_TAGS could not be parsed as JSON: #{e.class.name}: #{e.message}")
-
-        {}
       end
 
       # Group common, mostly non-actionable exceptions by type and message,
