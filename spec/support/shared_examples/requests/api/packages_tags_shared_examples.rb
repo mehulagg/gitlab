@@ -8,7 +8,7 @@ RSpec.shared_examples 'rejects package tags access' do |status:|
   it_behaves_like 'returning response status', status
 end
 
-RSpec.shared_examples 'returns package tags' do |status:|
+RSpec.shared_examples 'accept package tags request' do |status:|
   using RSpec::Parameterized::TableSyntax
 
   before do

@@ -16,3 +16,18 @@ RSpec.shared_context 'npm api setup' do
 
   let(:package_name) { package.name }
 end
+
+RSpec.shared_context 'set package name from package name type' do
+  let(:package_name) do
+    case package_name_type
+    when :scoped_naming_convention
+      "@#{group.path}/scoped-package"
+    when :scoped_no_naming_convention
+      '@any-scope/scoped-package'
+    when :unscoped
+      'unscoped-package'
+    when :non_existing
+      'non-existing-package'
+    end
+  end
+end
