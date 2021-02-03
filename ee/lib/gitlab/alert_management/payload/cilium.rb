@@ -16,11 +16,11 @@ module Gitlab
         private
 
         def plain_gitlab_fingerprint
-          payload = self.payload
-          payload = payload['flow'].except('time', 'Summary')
-          payload['l4']['TCP'].delete('flags') if payload.dig('l4', 'TCP', 'flags')
+          fpayload = self.payload.deep_dup
+          fpayload = fpayload['flow'].except('time', 'Summary')
+          fpayload['l4']['TCP'].delete('flags') if fpayload.dig('l4', 'TCP', 'flags')
 
-          payload.to_s
+          fpayload.to_s
         end
       end
     end

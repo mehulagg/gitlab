@@ -4,7 +4,6 @@ FactoryBot.define do
   factory :network_alert_payload, class: Hash do
     initialize_with do
       {
-        fingerprint: 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3',
         flow: {
           time: '2021-02-02T18:04:21.213587449Z',
           verdict: 'POLICY_DENIED',
