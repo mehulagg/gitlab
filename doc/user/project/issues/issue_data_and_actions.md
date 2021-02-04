@@ -161,7 +161,7 @@ or were mentioned in the description or threads.
 
 ### Notifications
 
-Click on the icon to enable/disable [notifications](../../profile/notifications.md#notifications-on-issues-merge-requests-epics)
+Click on the icon to enable/disable [notifications](../../profile/notifications.md#notifications-on-issues--merge-requests--epics)
 for the issue. Notifications are automatically enabled after you participate in the issue in any way.
 
 ### Reference
