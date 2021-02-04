@@ -45,7 +45,7 @@ enabled, they're presented with a page to sign into GitLab and verify they
 can access the website.
 
 NOTE:
-GitLab Pages uses a caching mechanism for efficiency. Due to this, changes made to access control might not be immediate, but might take some time (until the cache gets invalidated) to be in effect.
+GitLab Pages uses a caching mechanism for efficiency. Due to this, changes made to access control might not be immediate, but might take some time (until the cache gets invalidated, usually less than a minute) to be in effect.
 
 ## Terminating a Pages session
 
