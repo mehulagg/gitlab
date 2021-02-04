@@ -10996,6 +10996,26 @@ CREATE SEQUENCE ci_variables_id_seq
 
 ALTER SEQUENCE ci_variables_id_seq OWNED BY ci_variables.id;
 
+CREATE TABLE clients (
+    id bigint NOT NULL,
+    group_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    name text NOT NULL,
+    description text DEFAULT ''::text NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    CONSTRAINT check_aeb624e7f4 CHECK ((char_length(name) <= 255))
+);
+
+CREATE SEQUENCE clients_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE clients_id_seq OWNED BY clients.id;
+
 CREATE TABLE cluster_agent_tokens (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -18653,6 +18673,8 @@ ALTER TABLE ONLY ci_triggers ALTER COLUMN id SET DEFAULT nextval('ci_triggers_id
 
 ALTER TABLE ONLY ci_variables ALTER COLUMN id SET DEFAULT nextval('ci_variables_id_seq'::regclass);
 
+ALTER TABLE ONLY clients ALTER COLUMN id SET DEFAULT nextval('clients_id_seq'::regclass);
+
 ALTER TABLE ONLY cluster_agent_tokens ALTER COLUMN id SET DEFAULT nextval('cluster_agent_tokens_id_seq'::regclass);
 
 ALTER TABLE ONLY cluster_agents ALTER COLUMN id SET DEFAULT nextval('cluster_agents_id_seq'::regclass);
@@ -19784,6 +19806,9 @@ ALTER TABLE ONLY ci_triggers
 
 ALTER TABLE ONLY ci_variables
     ADD CONSTRAINT ci_variables_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY clients
+    ADD CONSTRAINT clients_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY cluster_agent_tokens
     ADD CONSTRAINT cluster_agent_tokens_pkey PRIMARY KEY (id);
@@ -21616,6 +21641,8 @@ CREATE INDEX index_ci_triggers_on_project_id ON ci_triggers USING btree (project
 CREATE INDEX index_ci_variables_on_key ON ci_variables USING btree (key);
 
 CREATE UNIQUE INDEX index_ci_variables_on_project_id_and_key_and_environment_scope ON ci_variables USING btree (project_id, key, environment_scope);
+
+CREATE INDEX index_clients_on_group_id ON clients USING btree (group_id);
 
 CREATE INDEX index_cluster_agent_tokens_on_agent_id ON cluster_agent_tokens USING btree (agent_id);
 
