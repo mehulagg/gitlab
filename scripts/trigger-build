@@ -214,15 +214,7 @@ module Trigger
     => If something doesn't work, drop a line in the #docs chat channel.
     MSG
 
-    # Create a remote branch in gitlab-docs and immediately cancel the pipeline
-    # to avoid race conditions, since a triggered pipeline will also run right
-    # after the branch creation. This only happens the very first time a branch
-    # is created and will be skipped in subsequent runs. Read more in
-    # https://gitlab.com/gitlab-org/gitlab-docs/issues/154.
-    #
     def deploy!
-      create_remote_branch!
-      cancel_latest_pipeline!
       invoke!.wait!
       display_success_message
     end
@@ -242,20 +234,10 @@ module Trigger
     end
 
     def ref
-      if ENV['CI_MERGE_REQUEST_IID'].nil?
-        "docs-preview-#{slug}-#{ENV['CI_COMMIT_REF_SLUG']}"
-      else
-        "docs-preview-#{slug}-#{ENV['CI_MERGE_REQUEST_IID']}"
-      end
+      'run-review-upon-trigger' # ENV['DOCS_BRANCH'] || 'master'
     end
 
-    def extra_variables
-      {
-        "BRANCH_#{slug.upcase}" => ENV['CI_COMMIT_REF_NAME']
-      }
-    end
-
-    def slug
+    def project_slug
       case ENV['CI_PROJECT_PATH']
       when 'gitlab-org/gitlab-foss'
         'ce'
@@ -270,33 +252,19 @@ module Trigger
       end
     end
 
+    def review_slug
+      "#{project_slug}-#{ENV['CI_MERGE_REQUEST_IID'] || ENV['CI_COMMIT_REF_SLUG']}"
+    end
+
+    def extra_variables
+      {
+        "BRANCH_#{project_slug.upcase}" => ENV['CI_COMMIT_REF_NAME'],
+        "REVIEW_SLUG" => review_slug
+      }
+    end
+
     def app_url
-      "http://#{ref}.#{ENV['DOCS_REVIEW_APPS_DOMAIN']}/#{slug}"
-    end
-
-    def create_remote_branch!
-      gitlab_client(:downstream).create_branch(downstream_project_path, ref, 'master')
-      puts "=> Remote branch '#{ref}' created"
-    rescue Gitlab::Error::BadRequest
-      puts "=> Remote branch '#{ref}' already exists!"
-    end
-
-    def cancel_latest_pipeline!
-      pipelines = nil
-
-      # Wait until the pipeline is started
-      loop do
-        sleep 1
-        puts "=> Waiting for pipeline to start..."
-        pipelines = gitlab_client(:downstream).pipelines(downstream_project_path, { ref: ref })
-        break if pipelines.any?
-      end
-
-      # Get the first pipeline ID which should be the only one for the branch
-      pipeline_id = pipelines.first.id
-
-      # Cancel the pipeline
-      gitlab_client(:downstream).cancel_pipeline(downstream_project_path, pipeline_id)
+      "http://#{review_slug}.#{ENV['DOCS_REVIEW_APPS_DOMAIN']}/#{project_slug}"
     end
 
     def display_success_message
