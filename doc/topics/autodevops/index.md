@@ -30,7 +30,6 @@ configuration. Automation enables consistency across your projects, seamless
 management of processes, and faster creation of new projects: push your code,
 and GitLab does the rest, improving your productivity and efficiency.
 
-
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an introduction to Auto DevOps, watch [AutoDevOps in GitLab 11.0](https://youtu.be/0Tc0YYBxqi4).
 
@@ -48,7 +47,7 @@ From [AlexJonesax](https://twitter.com/AlexJonesax) and [KaiPMDH](https://twitte
 
 ![Kai on Twitter](img/kai_autodevops_min.png)
 
-We welcome everyone to [share your experience](https://twitter.com/gitlab) by tagging "@gitlab" on Twitter or other social mediums.
+We welcome everyone to [share your experience by tagging GitLab on Twitter](https://twitter.com/gitlab).
 
 ## Enabled by default
 
