@@ -169,6 +169,64 @@ RSpec.describe Gitlab::Geo::VerificationState do
     end
   end
 
+  describe '.needs_reverification' do
+    before do
+      stub_current_geo_node(primary_node)
+    end
+
+    let!(:other_records) do
+      DummyModel.insert_all([
+        { verification_state: pending_value, verified_at: 7.days.ago },
+        { verification_state: failed_value, verified_at: 6.days.ago },
+        { verification_state: succeded_value, verified_at: 3.days.ago },
+        { verification_state: succeded_value, verified_at: 15.days.ago }
+      ])
+    end
+
+    let(:pending_value) { DummyModel.verification_state_value(:verification_pending) }
+    let(:failed_value) { DummyModel.verification_state_value(:verification_failed) }
+    let(:succeded_value) { DummyModel.verification_state_value(:verification_succeeded) }
+
+    it 'includes verification_succeeded with expired checksum' do
+      expect(subject.class.needs_reverification.count).to eq 1
+    end
+  end
+
+  describe '.reverify_batch' do
+    let!(:other_verified_records) do
+      DummyModel.insert_all([
+        { verification_state: succeeded_value, verified_at: 3.days.ago },
+        { verification_state: succeeded_value, verified_at: 4.days.ago }
+      ])
+    end
+
+    let(:succeeded_value) { DummyModel.verification_state_value(:verification_succeeded) }
+
+    before do
+      stub_current_geo_node(primary_node)
+
+      subject.verification_started
+
+      subject.track_checksum_attempt! do
+        'a_checksum_value'
+      end
+
+      subject.update!(verified_at: 15.days.ago)
+    end
+
+    it 'sets pending status to records with outdated verification' do
+      expect(subject.class.reverify_batch(batch_size: 100)).to eq 1
+
+      expect(subject.reload.verification_pending?).to be_truthy
+    end
+
+    it 'limits the update with batch_size' do
+      DummyModel.update_all(verified_at: 15.days.ago)
+
+      expect(subject.class.reverify_batch(batch_size: 2)).to eq 2
+    end
+  end
+
   describe '.fail_verification_timeouts' do
     before do
       subject.verification_started!

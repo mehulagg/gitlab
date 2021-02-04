@@ -137,6 +137,12 @@ RSpec.shared_examples 'a verifiable replicator' do
 
         described_class.trigger_background_verification
       end
+
+      it 'enqueues ReverificationBatchWorker' do
+        expect(::Geo::ReverificationBatchWorker).to receive(:perform_async).with(described_class.replicable_name)
+
+        described_class.trigger_background_verification
+      end
     end
 
     context 'when verification is disabled' do
@@ -182,6 +188,23 @@ RSpec.shared_examples 'a verifiable replicator' do
       expect(described_class).to receive(:needs_verification_count).with(limit: expected_limit).and_return(21)
 
       expect(described_class.remaining_verification_batch_count(max_batch_count: 4)).to eq(3)
+    end
+  end
+
+  describe '.remaining_reverification_batch_count' do
+    it 'converts needs_reverification_count to number of batches' do
+      expected_limit = 4000
+      expect(described_class).to receive(:needs_reverification_count).with(limit: expected_limit).and_return(1500)
+
+      expect(described_class.remaining_reverification_batch_count(max_batch_count: 4)).to eq(2)
+    end
+  end
+
+  describe '.reverify_batch!' do
+    it 'calls #reverify_batch' do
+      allow(described_class).to receive(:reverify_batch).with(batch_size: described_class::DEFAULT_REVERIFICATION_BATCH_SIZE)
+
+      described_class.reverify_batch!
     end
   end
 

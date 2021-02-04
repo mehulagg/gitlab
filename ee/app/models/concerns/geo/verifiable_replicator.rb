@@ -7,11 +7,19 @@ module Geo
     include Delay
 
     DEFAULT_VERIFICATION_BATCH_SIZE = 10
+    DEFAULT_REVERIFICATION_BATCH_SIZE = 1000
 
     class_methods do
       extend Gitlab::Utils::Override
 
-      delegate :verification_pending_batch, :verification_failed_batch, :needs_verification_count, :fail_verification_timeouts, to: :verification_query_class
+      delegate :verification_pending_batch,
+               :verification_failed_batch,
+               :needs_verification_count,
+               :needs_reverification_count,
+               :fail_verification_timeouts,
+               :reverifiable_batch,
+               :reverify_batch,
+               to: :verification_query_class
 
       # If replication is disabled, then so is verification.
       override :verification_enabled?
@@ -31,6 +39,8 @@ module Geo
         ::Geo::VerificationBatchWorker.perform_with_capacity(replicable_name)
 
         ::Geo::VerificationTimeoutWorker.perform_async(replicable_name)
+
+        ::Geo::ReverificationBatchWorker.perform_async(replicable_name)
       end
 
       # Called by VerificationBatchWorker.
@@ -54,6 +64,18 @@ module Geo
           .ceil
       end
 
+      # Called by ReverificationBatchWorker.
+      #
+      # - Asks the DB how many things still need to be reverified (with a limit)
+      # - Converts that to a number of batches
+      #
+      # @return [Integer] number of batches of reverification work remaining, up to the given maximum
+      def remaining_reverification_batch_count(max_batch_count:)
+        needs_reverification_count(limit: max_batch_count * reverification_batch_size)
+          .fdiv(reverification_batch_size)
+          .ceil
+      end
+
       # @return [Array<Gitlab::Geo::Replicator>] batch of replicators which need to be verified
       def replicator_batch_to_verify
         model_record_id_batch_to_verify.map do |id|
@@ -74,6 +96,11 @@ module Geo
         ids
       end
 
+      # @return [Integer] number of records set to be re-verified
+      def reverify_batch!
+        reverify_batch(batch_size: reverification_batch_size)
+      end
+
       # If primary, query the model table.
       # If secondary, query the registry table.
       def verification_query_class
@@ -83,6 +110,11 @@ module Geo
       # @return [Integer] number of records to verify per batch job
       def verification_batch_size
         DEFAULT_VERIFICATION_BATCH_SIZE
+      end
+
+      # @return [Integer] number of records to reverify per batch job
+      def reverification_batch_size
+        DEFAULT_REVERIFICATION_BATCH_SIZE
       end
 
       def checksummed_count
