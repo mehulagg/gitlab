@@ -42,7 +42,7 @@ For a developer's guide, read [Auto DevOps development guide](../../development/
 
 Auto DevOps continues to gain popularity and lower the barrier to entry for getting started with DevOps and CI/CD. See what our some of our wider community has to say below and [share your experience](https://twitter.com/gitlab) by tagging "@gitlab" on Twitter or other social mediums!
 
-From [AlexJonesax](https://twitter.com/AlexJonesax) and [KaiPMDH](https://twitter.com/KaiPMDH):
+From [AlexJonesax](https://twitter.com/AlexJonesax) and [KaiPMDH](https://twitter.com/KaiPMDH) on Twitter:
 
 ![Alex Jones on Twitter](p/doc/topics/autodevops/img/alexj_autodevops.png/)
 
