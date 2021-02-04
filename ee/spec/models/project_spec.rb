@@ -2638,8 +2638,8 @@ RSpec.describe Project do
       let!(:issue) { create(:issue, project: project) }
 
       context 'when updating the visibility_level' do
-        it 'triggers ElasticAssociationIndexerWorker to update issues and notes' do
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues notes])
+        it 'triggers ElasticAssociationIndexerWorker to update issues' do
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
 
           project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
         end

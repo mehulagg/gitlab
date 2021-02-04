@@ -14,22 +14,13 @@ module Elastic
           data[attr.to_s] = safely_read_attribute_for_elasticsearch(attr)
         end
 
-        if for_issue?
+        if noteable.is_a?(Issue)
           data['issue'] = {
             'assignee_id' => noteable.assignee_ids,
             'author_id' => noteable.author_id,
             'confidential' => noteable.confidential
           }
-          data['issues_access_level'] = safely_read_project_feature_for_elasticsearch(:issues_access_level)
-        elsif for_snippet?
-          data['snippets_access_level'] = safely_read_project_feature_for_elasticsearch(:snippets_access_level)
-        elsif for_merge_request?
-          data['merge_requests_access_level'] = safely_read_project_feature_for_elasticsearch(:merge_requests_access_level)
-        elsif for_commit?
-          data['repository_access_level'] = safely_read_project_feature_for_elasticsearch(:repository_access_level)
         end
-
-        data['visibility_level'] = target.project.visibility_level
 
         data.merge(generic_attributes)
       end

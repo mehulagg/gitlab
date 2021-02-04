@@ -28,14 +28,13 @@ RSpec.describe ProjectFeature do
       allow(project).to receive(:maintaining_elasticsearch?).and_return(true)
     end
 
-    where(:feature, :worker_expected, :associations) do
-      'issues'          | true        | %w[issues notes]
-      'wiki'            | false       | nil
-      'builds'          | false       | nil
-      'merge_requests'  | true        | %w[notes]
-      'repository'      | true        | %w[notes]
-      'snippets'        | true        | %w[notes]
-      'pages'           | false       | nil
+    where(:feature, :worker_expected) do
+      'issues'          | true
+      'wiki'            | false
+      'builds'          | false
+      'merge_requests'  | false
+      'repository'      | false
+      'pages'           | false
     end
 
     with_them do
@@ -43,7 +42,7 @@ RSpec.describe ProjectFeature do
         expect(project).to receive(:maintain_elasticsearch_update)
 
         if worker_expected
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, associations)
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
         else
           expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async)
         end

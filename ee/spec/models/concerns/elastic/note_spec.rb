@@ -88,12 +88,9 @@ RSpec.describe Note, :elastic do
   it "returns json with all needed elements" do
     assignee = create(:user)
     issue = create(:issue, assignees: [assignee])
-    issue_note = create(:note, noteable: issue, project: issue.project)
-    commit_note = create(:note_on_commit, project: issue.project)
-    merge_request_note = create(:note_on_merge_request, project: issue.project)
-    snippet_note = create(:note_on_project_snippet, project: issue.project)
+    note = create(:note, noteable: issue, project: issue.project)
 
-    expected_hash = issue_note.attributes.extract!(
+    expected_hash = note.attributes.extract!(
       'id',
       'note',
       'project_id',
@@ -108,19 +105,14 @@ RSpec.describe Note, :elastic do
         'author_id' => issue.author_id,
         'confidential' => issue.confidential
       },
-      'type' => issue_note.es_type,
+      'type' => note.es_type,
       'join_field' => {
-        'name' => issue_note.es_type,
-        'parent' => issue_note.es_parent
-      },
-      'visibility_level' => issue.project.visibility_level,
-      'issues_access_level' => issue.project.issues_access_level
+        'name' => note.es_type,
+        'parent' => note.es_parent
+      }
     })
 
-    expect(issue_note.__elasticsearch__.as_indexed_json).to eq(expected_hash)
-    expect(commit_note.__elasticsearch__.as_indexed_json).to have_key('repository_access_level')
-    expect(merge_request_note.__elasticsearch__.as_indexed_json).to have_key('merge_requests_access_level')
-    expect(snippet_note.__elasticsearch__.as_indexed_json).to have_key('snippets_access_level')
+    expect(note.__elasticsearch__.as_indexed_json).to eq(expected_hash)
   end
 
   it 'does not track system note updates' do

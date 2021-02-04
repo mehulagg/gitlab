@@ -67,11 +67,11 @@ RSpec.describe Groups::TransferService, '#execute' do
 
           expect(::Gitlab::CurrentSettings).not_to receive(:invalidate_elasticsearch_indexes_cache_for_project!)
           expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project1)
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project1.id, %w[issues notes])
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project1.id, ['issues'])
           expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project2)
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project2.id, %w[issues notes])
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project2.id, ['issues'])
           expect(Elastic::ProcessBookkeepingService).not_to receive(:track!).with(project3)
-          expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async).with('Project', project3.id, %w[issues notes])
+          expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async).with('Project', project3.id, ['issues'])
 
           transfer_service.execute(new_group)
 
