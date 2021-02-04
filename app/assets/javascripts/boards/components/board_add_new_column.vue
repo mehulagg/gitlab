@@ -50,7 +50,6 @@ export default {
     },
     highlight(listId) {
       if (this.shouldUseGraphQL) {
-        // TODO: should this be position??
         this.highlightList(listId);
       } else {
         const list = boardsStore.state.lists.find(({ id }) => id === listId);
@@ -72,7 +71,6 @@ export default {
       }
 
       if (this.columnExists({ id: this.selectedLabelId })) {
-        // TODO: maybe expand if collapsed?
         const listId = this.getListByLabel(label).id;
         this.highlight(listId);
         this.setAddColumnFormVisibility(false);
