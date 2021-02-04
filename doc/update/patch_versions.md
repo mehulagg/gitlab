@@ -7,7 +7,7 @@ comments: false
 
 # Universal update guide for patch versions
 
-## Select Version to Install
+## Select Source Version to Install
 
 Make sure you view [this update guide](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/update/patch_versions.md) from the tag (version) of GitLab you would like to install.
 In most cases this should be the highest numbered production tag (without `rc` in it).
