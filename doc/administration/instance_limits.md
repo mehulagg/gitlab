@@ -606,4 +606,4 @@ Set the limit to `0` to allow any file size.
 
 ### Package versions returned
 
-When asking for versions of a given NuGet package name, the GitLab Package Registry will return a maximum of 300 versions.
+When asking for versions of a given NuGet package name, the GitLab Package Registry returns a maximum of 300 versions.
