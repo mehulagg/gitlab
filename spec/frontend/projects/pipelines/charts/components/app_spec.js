@@ -9,7 +9,7 @@ import PipelineCharts from '~/projects/pipelines/charts/components/pipeline_char
 
 jest.mock('~/lib/utils/url_utility');
 
-const DeploymentFrequencyChartsStub = { name: 'DeploymentFrequencyCharts', render: () => {} };
+const DeploymentFrequencyChartsStub = { name: 'DeploymentFrequencyCharts', render: () => { } };
 
 describe('ProjectsPipelinesChartsApp', () => {
   let wrapper;
@@ -104,6 +104,38 @@ describe('ProjectsPipelinesChartsApp', () => {
       });
       createComponent({ provide: { shouldRenderDeploymentFrequencyCharts: true } });
       expect(findGlTabs().attributes('value')).toBe(tab);
+    });
+
+    it('should set the tab when the back button is clicked', async () => {
+      let popstateHandler;
+
+      window.addEventListener = jest.fn();
+
+      window.addEventListener.mockImplementation((event, handler) => {
+        if (event === 'popstate') {
+          popstateHandler = handler;
+        }
+      });
+
+      getParameterValues.mockImplementation((name) => {
+        expect(name).toBe('chart');
+        return [];
+      });
+
+      createComponent({ provide: { shouldRenderDeploymentFrequencyCharts: true } });
+
+      expect(findGlTabs().attributes('value')).toBe('0');
+
+      getParameterValues.mockImplementationOnce((name) => {
+        expect(name).toBe('chart');
+        return ['deployments'];
+      });
+
+      popstateHandler();
+
+      await wrapper.vm.$nextTick();
+
+      expect(findGlTabs().attributes('value')).toBe('1');
     });
   });
 
