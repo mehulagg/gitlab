@@ -1063,7 +1063,7 @@ See also [Notes on testing Vue components](../fe_guide/vue.md#testing-vue-compon
 ## Test helpers
 
 Test helpers can be found in [`spec/frontend/__helpers__`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/frontend/__helpers__).
-If you introduce new helpers, please place them in that directory.  
+If you introduce new helpers, please place them in that directory.
 
 ### Vuex Helper: `testAction`
 
