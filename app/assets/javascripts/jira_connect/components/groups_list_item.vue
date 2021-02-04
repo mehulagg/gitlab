@@ -1,7 +1,6 @@
 <script>
 import { GlAvatar, GlButton, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
-
 import { addSubscription } from '~/jira_connect/api';
 
 export default {
@@ -32,6 +31,10 @@ export default {
 
       addSubscription(this.subscriptionsPath, this.group.full_path)
         .then(() => {
+          localStorage.setItem(
+            'gitlab_alert',
+            JSON.stringify({ message: 'Namespace successfully added', variant: 'success' }),
+          );
           AP.navigator.reload();
         })
         .catch((error) => {

@@ -3,10 +3,10 @@ import { mapState, mapMutations } from 'vuex';
 import { GlAlert, GlButton, GlModal, GlModalDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { SET_ALERT } from '../store/mutation_types';
 
 import { getLocation } from '~/jira_connect/api';
 import GroupsList from './groups_list.vue';
+import { SET_ALERT } from '../store/mutation_types';
 
 export default {
   name: 'JiraConnectApp',
@@ -56,6 +56,14 @@ export default {
   },
   created() {
     this.setLocation();
+
+    const initialAlertJSON = window.localStoage.getItem('gitlab_alert');
+    window.localStorage.removeItem('gitlab_alert');
+
+    if (initialAlertJSON) {
+      const { message, variant } = JSON.parse(initialAlertJSON);
+      this.setAlert({ message, variant });
+    }
   },
   methods: {
     ...mapMutations({
