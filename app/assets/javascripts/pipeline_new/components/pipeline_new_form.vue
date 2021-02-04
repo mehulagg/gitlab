@@ -39,6 +39,9 @@ export default {
   errorTitle: __('Pipeline cannot be run.'),
   warningTitle: __('The form contains the following warning:'),
   maxWarningsSummary: __('%{total} warnings found: showing first %{warningsDisplayed}'),
+  // this height value is used inline on the textarea to match the input field height
+  // it's used to prevent the overwrite if 'gl-h-7' or 'gl-h-7!' were used
+  textAreaHeight: 'height: 32px',
   components: {
     GlAlert,
     GlIcon,
@@ -432,7 +435,7 @@ export default {
             v-model="variable.value"
             :placeholder="s__('CiVariables|Input variable value')"
             class="gl-mb-3"
-            style="height: 32px"
+            :style="$options.textAreaHeight"
             :no-resize="false"
             data-testid="pipeline-form-ci-variable-value"
           />

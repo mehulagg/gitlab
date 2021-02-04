@@ -264,7 +264,7 @@ describe('Pipeline New Form', () => {
       expect(findLoadingIcon().exists()).toBe(false);
     });
 
-    it('accepts new lines in textarea input', async () => {
+    it('multi-line strings are added to the value field without removing line breaks', async () => {
       createComponent('', mockParams, mount);
 
       mock.onGet(configVariablesPath).reply(httpStatusCodes.OK, {
