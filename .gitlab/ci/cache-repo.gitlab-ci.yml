@@ -38,6 +38,8 @@ cache-repo:
         echo "Cloning $CI_REPOSITORY_URL into $CI_PROJECT_NAME with commits from $one_year_ago.";
         time git clone --progress --no-checkout --shallow-since=$one_year_ago $CI_REPOSITORY_URL $CI_PROJECT_NAME;
         cd $CI_PROJECT_NAME;
+        # Work around a Git bug with shallow clones: https://gitlab.com/gitlab-org/git/-/issues/86
+        time git repack -a -d;
         echo "Archiving $CI_PROJECT_NAME into /tmp/$SHALLOW_CLONE_TAR_FILENAME.";
         time tar cf /tmp/$SHALLOW_CLONE_TAR_FILENAME .;
         echo "GZipping /tmp/$SHALLOW_CLONE_TAR_FILENAME.";
