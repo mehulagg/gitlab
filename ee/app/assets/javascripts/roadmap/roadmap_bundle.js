@@ -90,7 +90,7 @@ export default () => {
         allowSubEpics: parseBoolean(dataset.allowSubEpics),
         defaultInnerHeight: Number(dataset.innerHeight),
         isChildEpics: parseBoolean(dataset.childEpics),
-        currentGroupId: parseInt(dataset.groupId, 0),
+        currentGroupId: parseInt(dataset.groupId, 10),
         basePath: dataset.epicsPath,
         fullPath: dataset.fullPath,
         epicIid: dataset.iid,
