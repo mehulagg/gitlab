@@ -75,6 +75,7 @@ module Packages
     end
 
     def filter_by_package_name(packages)
+      packages.without_hidden
       return packages unless params[:status].present?
 
       packages.with_status(params[:status])
