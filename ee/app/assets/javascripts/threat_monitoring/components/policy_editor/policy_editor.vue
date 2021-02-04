@@ -27,6 +27,7 @@ import {
   EditorModeYAML,
   EndpointMatchModeAny,
   RuleTypeEndpoint,
+  ProjectIdLabel,
 } from './constants';
 import toYaml from './lib/to_yaml';
 import fromYaml from './lib/from_yaml';
@@ -64,6 +65,10 @@ export default {
       required: false,
       default: null,
     },
+    projectId: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     const policy = this.existingPolicy
@@ -76,8 +81,9 @@ export default {
           endpointLabels: '',
           rules: [],
           annotations: '',
+          labels: '',
         };
-
+    policy.labels = { [ProjectIdLabel]: `${this.projectId}` };
     return {
       editorMode: EditorModeRule,
       yamlEditorValue: '',
