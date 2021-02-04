@@ -21,16 +21,20 @@ module IncidentManagement
 
       # The first shift within the timeframe may begin before
       # the timeframe. We want to begin generating shifts
-      # based on the actual start time of the shift.
-      elapsed_shift_count = elapsed_whole_shifts(starts_at)
-      shift_starts_at = shift_start_time(elapsed_shift_count)
+      # based on the actual start time of the shift cycle.
+      elapsed_shift_cycle_count = elapsed_whole_shift_cycles(starts_at)
+      shift_cycle_starts_at = shift_cycle_start_time(elapsed_shift_cycle_count)
       shifts = []
 
-      while shift_starts_at < ends_at
-        shifts << shift_for(elapsed_shift_count, shift_starts_at)
+      while shift_cycle_starts_at < ends_at
+        new_shifts = Array(shift_cycle_for(elapsed_shift_cycle_count, shift_cycle_starts_at))
+        new_shifts.reject! { |shift| shift.ends_at < starts_at } if shift_cycle_starts_at < starts_at
+        new_shifts.reject! { |shift| shift.starts_at > ends_at } if (shift_cycle_starts_at + shift_cycle_duration) > ends_at
 
-        shift_starts_at += shift_duration
-        elapsed_shift_count += 1
+        shifts.concat(new_shifts)
+
+        shift_cycle_starts_at += shift_cycle_duration
+        elapsed_shift_cycle_count += 1
       end
 
       shifts
@@ -46,27 +50,29 @@ module IncidentManagement
       return if timestamp < rotation_starts_at
       return unless rotation.participants.any?
 
-      elapsed_shift_count = elapsed_whole_shifts(timestamp)
-      shift_starts_at = shift_start_time(elapsed_shift_count)
+      elapsed_shift_count = elapsed_whole_shift_cycles(timestamp)
+      shift_cycle_starts_at = shift_cycle_start_time(elapsed_shift_count)
 
-      shift_for(elapsed_shift_count, shift_starts_at)
+      participant = participants[participant_rank(elapsed_shift_count)]
+
+      shift_for(participant, shift_cycle_starts_at, shift_cycle_starts_at + shift_cycle_duration)
     end
 
     private
 
     attr_reader :rotation
-    delegate :shift_duration, to: :rotation
+    delegate :shift_cycle_duration, to: :rotation
 
     # Starting time of a shift which covers the timestamp.
     # @return [ActiveSupport::TimeWithZone]
-    def shift_start_time(elapsed_shift_count)
-      rotation_starts_at + (elapsed_shift_count * shift_duration)
+    def shift_cycle_start_time(elapsed_shift_count)
+      rotation_starts_at + (elapsed_shift_count * shift_cycle_duration)
     end
 
     # Total completed shifts passed between rotation start
     # time and the provided timestamp.
     # @return [Integer]
-    def elapsed_whole_shifts(timestamp)
+    def elapsed_whole_shift_cycles(timestamp)
       elapsed_duration = timestamp - rotation_starts_at
 
       unless rotation.hours?
@@ -101,18 +107,46 @@ module IncidentManagement
       end
 
       # Uses #round to account for floating point inconsistencies.
-      (elapsed_duration / shift_duration).round(5).floor
+      (elapsed_duration / shift_cycle_duration).round(5).floor
+    end
+
+    def shift_cycle_for(elapsed_shift_cycle_count, shift_cycle_starts_at)
+      participant = participants[participant_rank(elapsed_shift_cycle_count)]
+
+      if !rotation.hours? && rotation.has_shift_intervals?
+        # the number of shifts we expect to be included in the
+        # shift_cycle. 1.week is the same as 7.days.
+        expected_shift_count = rotation.weeks? ? (7 * rotation.length) : rotation.length
+        (0..expected_shift_count - 1).map do |shift_count|
+          # we know the start/end time of the intervals,
+          # so the date is dependent on the cycle start time
+          # and how many days have elapsed in the cycle.
+          # EX) shift_cycle_starts_at = Monday @ 8am
+          #     interval_starts_at = 8am
+          #     interval_ends_at = 5pm
+          #     expected_shift_count = 14          -> pretend it's a 2-week rotation
+          #     shift_count = 2                    -> we're calculating the shift for the 3rd day
+          # starts_at = Monday 00:00:00 + 8.hours + 2.days => Thursday 08:00:00
+          starts_at = shift_cycle_starts_at.beginning_of_day + rotation.interval_start.seconds_since_midnight + shift_count.days
+          ends_at = shift_cycle_starts_at.beginning_of_day + rotation.interval_end.seconds_since_midnight + shift_count.days
+
+          shift_for(participant, starts_at, ends_at)
+        end
+      else
+        # This is the normal shift start/end times
+        shift_for(participant, shift_cycle_starts_at, shift_cycle_starts_at + shift_cycle_duration)
+      end
     end
 
     # Returns an UNSAVED shift, as this shift won't necessarily
     # be persisted.
     # @return [IncidentManagement::OncallShift]
-    def shift_for(elapsed_shift_count, shift_starts_at)
+    def shift_for(participant, starts_at, ends_at)
       IncidentManagement::OncallShift.new(
         rotation: rotation,
-        participant: participants[participant_rank(elapsed_shift_count)],
-        starts_at: shift_starts_at,
-        ends_at: shift_starts_at + shift_duration
+        participant: participant,
+        starts_at: starts_at,
+        ends_at: ends_at
       )
     end
 

@@ -25,6 +25,7 @@ module IncidentManagement
 
     validates :interval_start, presence: true, if: :interval_end
     validates :interval_end, presence: true, if: :interval_start
+    validate :no_interval_for_hourly_shifts, if: :hours?
 
     scope :started, -> { where('starts_at < ?', Time.current) }
     scope :except_ids, -> (ids) { where.not(id: ids) }
@@ -41,17 +42,21 @@ module IncidentManagement
       joins(shifts: { participant: :user }).pluck(:id, 'users.id')
     end
 
-    def shift_duration
+    def shift_cycle_duration
       # As length_unit is an enum, input is guaranteed to be appropriate
       length.public_send(length_unit) # rubocop:disable GitlabSecurity/PublicSend
     end
 
-    def interval_start
-      self.read_attribute(:interval_start)&.strftime('%H:%M')
+    def has_shift_intervals?
+      interval_start.present?
     end
 
-    def interval_end
-      self.read_attribute(:interval_end)&.strftime('%H:%M')
+    private
+
+    def no_interval_for_hourly_shifts
+      if interval_start || interval_end
+        errors.add(:length_unit, _('Restricted shift times are not available for hourly shifts'))
+      end
     end
   end
 end

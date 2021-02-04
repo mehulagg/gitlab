@@ -3,11 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe IncidentManagement::OncallShiftGenerator do
+  let_it_be(:schedule) { create(:incident_management_oncall_schedule, timezone: 'Etc/UTC') }
   let_it_be(:rotation_start_time) { Time.parse('2020-12-08 00:00:00 UTC').utc }
-  let_it_be_with_reload(:rotation) { create(:incident_management_oncall_rotation, starts_at: rotation_start_time, length: 5, length_unit: :days) }
+  let_it_be_with_reload(:rotation) { create(:incident_management_oncall_rotation, starts_at: rotation_start_time, length: 5, length_unit: :days, schedule: schedule) }
 
   let(:current_time) { Time.parse('2020-12-08 15:00:00 UTC').utc }
-  let(:shift_length) { rotation.shift_duration }
+  let(:shift_length) { rotation.shift_cycle_duration }
 
   around do |example|
     travel_to(current_time) { example.run }
@@ -29,7 +30,7 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
   # Example) [[:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC']]
   #          :participant2 would reference `let(:participant2)`
   shared_examples 'unsaved shifts' do |description, shift_params|
-    it "returns #{description}" do
+    it "returns #{description}", :aggregate_failures do
       expect(shifts).to all(be_a(IncidentManagement::OncallShift))
       expect(shifts.length).to eq(shift_params.length)
 
@@ -75,6 +76,45 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
 
     context 'with many participants' do
       include_context 'with three participants'
+
+      it_behaves_like 'unsaved shifts',
+        'One shifts of 5 days long for each participant',
+        [[:participant1, '2020-12-08 00:00:00 UTC', '2020-12-13 00:00:00 UTC'],
+         [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC'],
+         [:participant3, '2020-12-18 00:00:00 UTC', '2020-12-23 00:00:00 UTC']]
+
+      context 'with shift interval times set' do
+        before do
+          rotation.update!(
+            interval_start: "08:00",
+            interval_end: "17:00"
+          )
+        end
+
+        after do
+          rotation.update!(
+            interval_start: nil,
+            interval_end: nil
+          )
+        end
+
+        it 'splits the shifts daily by each interval' do
+          expect(shifts.count).to eq (ends_at.to_date - starts_at.to_date).to_i
+        end
+
+        it_behaves_like 'unsaved shifts',
+          '5 shifts for each participant split by each day',
+          [[:participant1, '2020-12-08 08:00:00 UTC', '2020-12-08 17:00:00 UTC'],
+           [:participant1, '2020-12-09 08:00:00 UTC', '2020-12-09 17:00:00 UTC'],
+           [:participant1, '2020-12-10 08:00:00 UTC', '2020-12-10 17:00:00 UTC'],
+           [:participant1, '2020-12-11 08:00:00 UTC', '2020-12-11 17:00:00 UTC'],
+           [:participant1, '2020-12-12 08:00:00 UTC', '2020-12-12 17:00:00 UTC'],
+           [:participant2, '2020-12-13 08:00:00 UTC', '2020-12-13 17:00:00 UTC'],
+           [:participant2, '2020-12-14 08:00:00 UTC', '2020-12-14 17:00:00 UTC'],
+           [:participant2, '2020-12-15 08:00:00 UTC', '2020-12-15 17:00:00 UTC'],
+           [:participant2, '2020-12-16 08:00:00 UTC', '2020-12-16 17:00:00 UTC'],
+           [:participant2, '2020-12-17 08:00:00 UTC', '2020-12-17 17:00:00 UTC']]
+      end
 
       context 'when end time is earlier than start time' do
         let(:ends_at) { starts_at - 1.hour }

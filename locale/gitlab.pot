@@ -25272,6 +25272,9 @@ msgstr ""
 msgid "Restrict projects for this runner"
 msgstr ""
 
+msgid "Restricted shift times are not available for hourly shifts"
+msgstr ""
+
 msgid "Restricts sign-ups for email addresses that match the given regex. See the %{supported_syntax_link_start}supported syntax%{supported_syntax_link_end} for more information."
 msgstr ""
 

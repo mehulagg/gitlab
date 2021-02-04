@@ -76,10 +76,23 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
         end
 
         it 'saves the on-call rotation with interval times' do
-          rotation = expect(resolve)[:oncall_rotation]
+          rotation = resolve[:oncall_rotation]
 
-          expect(rotation).interval_start = "08:00"
-          expect(rotation).interval_end = "17:00"
+          expect(rotation.interval_start.strftime('%H:%M')).to eql('08:00')
+          expect(rotation.interval_end.strftime('%H:%M')).to eql('17:00')
+        end
+
+        context 'hours rotation length unit' do
+          before do
+            args[:rotation_length][:unit] = ::IncidentManagement::OncallRotation.length_units[:hours]
+          end
+
+          it 'returns errors' do
+            expect(resolve).to match(
+              oncall_rotation: nil,
+              errors: [/Restricted shift times are not available for hourly shifts/]
+            )
+          end
         end
       end
 

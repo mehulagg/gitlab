@@ -35,20 +35,34 @@ RSpec.describe IncidentManagement::OncallRotation do
     end
 
     describe 'interval start/end time' do
-      before do
-        allow(subject).to receive(stubbed_arg).and_return('08:00')
+      context 'missing values' do
+        before do
+          allow(subject).to receive(stubbed_field).and_return(Time.current)
+        end
+
+        context 'start time set' do
+          let(:stubbed_field) { :interval_start }
+
+          it { is_expected.to validate_presence_of(:interval_end) }
+        end
+
+        context 'end time set' do
+          let(:stubbed_field) { :interval_end }
+
+          it { is_expected.to validate_presence_of(:interval_start) }
+        end
       end
 
-      context 'start time set' do
-        let(:stubbed_field) { :interval_start }
+      context 'hourly shifts' do
+        subject { build(:incident_management_oncall_rotation, schedule: schedule, name: 'Test rotation', length_unit: :hours) }
 
-        it { is_expected.to validate_presence_of(:interval_end) }
-      end
+        it 'raises a validation error if an interval is set' do
+          subject.interval_start = Time.current
+          subject.interval_end = Time.current
 
-      context 'end time set' do
-        let(:stubbed_field) { :interval_end }
-
-        it { is_expected.to validate_presence_of(:interval_start) }
+          expect(subject.valid?).to eq(false)
+          expect(subject.errors.full_messages).to include(/Restricted shift times are not available for hourly shifts/)
+        end
       end
     end
   end
@@ -64,10 +78,10 @@ RSpec.describe IncidentManagement::OncallRotation do
     end
   end
 
-  describe '#shift_duration' do
+  describe '#shift_cycle_duration' do
     let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule, length: 5, length_unit: :days) }
 
-    subject { rotation.shift_duration }
+    subject { rotation.shift_cycle_duration }
 
     it { is_expected.to eq(5.days) }
 
