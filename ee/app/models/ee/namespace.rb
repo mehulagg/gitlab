@@ -101,9 +101,11 @@ module EE
     end
 
     def namespace_limit
-      limit = has_parent? ? root_ancestor.namespace_limit : super
+      strong_memoize(:namespace_limit) do
+        limit = has_parent? ? root_ancestor.namespace_limit : super
 
-      limit.presence || build_namespace_limit
+        limit.presence || build_namespace_limit
+      end
     end
 
     class_methods do
