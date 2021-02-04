@@ -18,7 +18,6 @@ export default {
   }),
   methods: {
     async mutate() {
-      console.log('mutate2');
       this.isLoading = true;
       try {
         const { data } = await this.$apollo.mutate({
@@ -37,7 +36,7 @@ export default {
           throw new Error(errors[0]);
         }
 
-        if (!successPath) {          
+        if (!successPath) {
           throw new Error(__('SAST merge request creation mutation failed'));
         }
 
@@ -52,7 +51,12 @@ export default {
 </script>
 
 <template>
-  <gl-button :loading="isLoading" variant="success" category="secondary" @click="mutate"
-    >{{ __("Configure via Merge Request") }}</gl-button
+  <gl-button
+    data-test-id="manage-sast-button"
+    :loading="isLoading"
+    variant="success"
+    category="secondary"
+    @click="mutate"
+    >{{ __('Configure via Merge Request') }}</gl-button
   >
 </template>
