@@ -34,8 +34,9 @@ and GitLab does the rest, improving your productivity and efficiency.
 
 Auto DevOps continues to gain popularity [placeholder to add more color]. See what our some of our wider community has to say below and share your experience or feedback with us via [social tag placeholder] to join in on the fun!
 
-- https://twitter.com/AlexJonesax/status/1356707305027436546 
-- https://twitter.com/KaiPMDH/status/1356912838288289792?s=20
+- From [AlexJonesax](https://twitter.com/AlexJonesax) and [KaiPMDH](https://twitter.com/KaiPMDH)
+  
+![image](filepath)
 
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
