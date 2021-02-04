@@ -173,7 +173,7 @@ index-servers =
     gitlab
 
 [gitlab]
-repository = https://gitlab.example.com/api/v4/projects/<project_id>/packages/pypi
+repository = https://gitlab.com/api/v4/projects/<project_id>/packages/pypi
 username = __token__
 password = <your personal access token>
 ```
@@ -191,7 +191,7 @@ index-servers =
     gitlab
 
 [gitlab]
-repository = https://gitlab.example.com/api/v4/projects/<project_id>/packages/pypi
+repository = https://gitlab.com/api/v4/projects/<project_id>/packages/pypi
 username = <deploy token username>
 password = <deploy token>
 ```
@@ -226,7 +226,7 @@ index-servers =
     gitlab
 
 [gitlab]
-repository = https://gitlab.example.com/api/v4/projects/${env.CI_PROJECT_ID}/packages/pypi
+repository = https://gitlab.com/api/v4/projects/${env.CI_PROJECT_ID}/packages/pypi
 username = gitlab-ci-token
 password = ${env.CI_JOB_TOKEN}
 ```
@@ -277,7 +277,7 @@ python3 -m twine upload --repository gitlab dist/*
 This message indicates that the package was published successfully:
 
 ```plaintext
-Uploading distributions to https://gitlab.example.com/api/v4/projects/<your_project_id>/packages/pypi
+Uploading distributions to https://gitlab.com/api/v4/projects/<your_project_id>/packages/pypi
 Uploading mypypipackage-0.0.1-py3-none-any.whl
 100%|███████████████████████████████████████████████████████████████████████████████████████████| 4.58k/4.58k [00:00<00:00, 10.9kB/s]
 Uploading mypypipackage-0.0.1.tar.gz
@@ -291,7 +291,7 @@ If you didn't use a `.pypirc` file to define your repository source, you can
 publish to the repository with the authentication inline:
 
 ```shell
-TWINE_PASSWORD=<personal_access_token or deploy_token> TWINE_USERNAME=<username or deploy_token_username> python3 -m twine upload --repository-url https://gitlab.example.com/api/v4/projects/<project_id>/packages/pypi dist/*
+TWINE_PASSWORD=<personal_access_token or deploy_token> TWINE_USERNAME=<username or deploy_token_username> python3 -m twine upload --repository-url https://gitlab.com/api/v4/projects/<project_id>/packages/pypi dist/*
 ```
 
 If you didn't follow the steps on this page, ensure your package was properly
@@ -334,9 +334,9 @@ pip install mypypipackage --no-deps --extra-index-url https://__token__:<persona
 This message indicates that the package was installed successfully:
 
 ```plaintext
-Looking in indexes: https://__token__:****@gitlab.example.com/api/v4/projects/<your_project_id>/packages/pypi/simple
+Looking in indexes: https://__token__:****@gitlab.com/api/v4/projects/<your_project_id>/packages/pypi/simple
 Collecting mypypipackage
-  Downloading https://gitlab.example.com/api/v4/projects/<your_project_id>/packages/pypi/files/d53334205552a355fee8ca35a164512ef7334f33d309e60240d57073ee4386e6/mypypipackage-0.0.1-py3-none-any.whl (1.6 kB)
+  Downloading https://gitlab.com/api/v4/projects/<your_project_id>/packages/pypi/files/d53334205552a355fee8ca35a164512ef7334f33d309e60240d57073ee4386e6/mypypipackage-0.0.1-py3-none-any.whl (1.6 kB)
 Installing collected packages: mypypipackage
 Successfully installed mypypipackage-0.0.1
 ```
