@@ -262,3 +262,41 @@ RSpec.shared_examples 'with versionless packages' do
     end
   end
 end
+
+RSpec.shared_examples 'with status param' do
+  context 'hidden packages' do
+    let!(:hidden_package) { create(:maven_package, :hidden, project: project) }
+
+    shared_examples 'not including the hidden package' do
+      it 'does not return the package' do
+        subject
+
+        expect(json_response.map { |package| package['id'] }).not_to include(hidden_package.id)
+      end
+    end
+
+    context 'no status param' do
+      it_behaves_like 'not including the hidden package'
+    end
+
+    context 'with hidden status param' do
+      let(:params) { super().merge(status: 'hidden') }
+
+      it 'returns the package' do
+        subject
+
+        expect(json_response.map { |package| package['id'] }).to include(hidden_package.id)
+      end
+    end
+  end
+
+  context 'bad status param' do
+    let(:params) { super().merge(status: 'invalid') }
+
+    it 'returns the package' do
+      subject
+
+      expect(response).to have_gitlab_http_status(:bad_request)
+    end
+  end
+end

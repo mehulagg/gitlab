@@ -4,6 +4,9 @@ module Packages
   class PackagesFinder
     attr_reader :params, :project
 
+    InvalidPackageTypeError = Class.new(StandardError)
+    InvalidStatusError = Class.new(StandardError)
+
     def initialize(project, params = {})
       @project = project
       @params = params
@@ -36,6 +39,7 @@ module Packages
 
     def filter_by_package_type(packages)
       return packages unless params[:package_type]
+      raise InvalidPackageTypeError unless Package.package_types.key?(params[:package_type])
 
       packages.with_package_type(params[:package_type])
     end
@@ -47,8 +51,8 @@ module Packages
     end
 
     def filter_by_status(packages)
-      packages.without_hidden
-      return packages unless params[:status]
+      return packages.without_hidden unless params[:status]
+      raise InvalidStatusError unless Package.statuses.key?(params[:status])
 
       packages.with_status(params[:status])
     end

@@ -281,6 +281,7 @@ RSpec.describe API::GenericPackages do
 
             package = project.packages.generic.last
             expect(package.name).to eq('mypackage')
+            expect(package.status).to eq('default')
             expect(package.version).to eq('0.0.1')
 
             if should_set_build_info
@@ -291,6 +292,23 @@ RSpec.describe API::GenericPackages do
 
             package_file = package.package_files.last
             expect(package_file.file_name).to eq('myfile.tar.gz')
+          end
+        end
+
+        context 'with a status' do
+          let(:params) { super().merge(status: 'hidden') }
+
+          it 'assigns the status to the package' do
+            headers = workhorse_header.merge(auth_header)
+
+            upload_file(params, headers)
+
+            aggregate_failures do
+              expect(response).to have_gitlab_http_status(:created)
+
+              package = project.packages.generic.last
+              expect(package.status).to eq('hidden')
+            end
           end
         end
       end

@@ -11,6 +11,7 @@ module Packages
         .safe_find_or_create_by!(name: name, version: version) do |package|
           package.creator = package_creator
           add_build_info(package)
+          add_status(package)
         end
     end
 
@@ -29,7 +30,8 @@ module Packages
       {
         creator: package_creator,
         name: params[:name],
-        version: params[:version]
+        version: params[:version],
+        status: params[:status]
       }.merge(attrs)
     end
 
@@ -41,6 +43,10 @@ module Packages
       if params[:build].present?
         package.build_infos.new(pipeline: params[:build].pipeline)
       end
+    end
+
+    def add_status(package)
+      package.status = params[:status] if params[:status].present?
     end
   end
 end

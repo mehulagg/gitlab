@@ -15,13 +15,14 @@ module Packages
         package_params = {
           name: params[:package_name],
           version: params[:package_version],
-          build: params[:build],
-          status: params[:status].to_sym
+          build: params[:build]
         }
 
         package = ::Packages::Generic::FindOrCreatePackageService
           .new(project, current_user, package_params)
           .execute
+
+        package.update(status: params[:status]) if params[:status]
 
         package.build_infos.safe_find_or_create_by!(pipeline: params[:build].pipeline) if params[:build].present?
         package

@@ -5,6 +5,7 @@ module Packages
     attr_reader :current_user, :group, :params
 
     InvalidPackageTypeError = Class.new(StandardError)
+    InvalidStatusError = Class.new(StandardError)
 
     def initialize(current_user, group, params = { exclude_subgroups: false, order_by: 'created_at', sort: 'asc' })
       @current_user = current_user
@@ -74,9 +75,9 @@ module Packages
       packages.search_by_name(params[:package_name])
     end
 
-    def filter_by_package_name(packages)
-      packages.without_hidden
-      return packages unless params[:status].present?
+    def filter_by_status(packages)
+      return packages.without_hidden unless params[:status].present?
+      raise InvalidStatusError unless Package.statuses.key?(params[:status])
 
       packages.with_status(params[:status])
     end

@@ -581,6 +581,26 @@ RSpec.describe Packages::Package, type: :model do
 
       it { is_expected.to match_array([pypi_package]) }
     end
+
+    describe '.without_hidden' do
+      let_it_be(:hidden_package) { create(:maven_package, :hidden) }
+
+      subject { described_class.without_hidden }
+
+      it 'does not include hidden packages' do
+        is_expected.not_to include(hidden_package)
+      end
+    end
+
+    describe '.with_status' do
+      let_it_be(:hidden_package) { create(:maven_package, :hidden) }
+
+      subject { described_class.with_status(:hidden) }
+
+      it 'returns packages with specified status' do
+        is_expected.to match_array([hidden_package])
+      end
+    end
   end
 
   describe '.select_distinct_name' do

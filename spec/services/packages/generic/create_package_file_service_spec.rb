@@ -19,7 +19,8 @@ RSpec.describe Packages::Generic::CreatePackageFileService do
         package_version: '0.0.1',
         file: file,
         file_name: 'myfile.tar.gz.1',
-        build: build
+        build: build,
+        status: 'hidden'
       }
     end
 
@@ -48,6 +49,7 @@ RSpec.describe Packages::Generic::CreatePackageFileService do
 
       package_file = package.package_files.last
       aggregate_failures do
+        expect(package_file.package.status).to eq(params[:status])
         expect(package_file.package).to eq(package)
         expect(package_file.file_name).to eq('myfile.tar.gz.1')
         expect(package_file.size).to eq(file.size)
