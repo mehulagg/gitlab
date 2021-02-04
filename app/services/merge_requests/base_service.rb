@@ -195,10 +195,6 @@ module MergeRequests
 
       merge_request.update(merge_error: message) if save_message_on_model
     end
-
-    def activity_counter
-      Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
-    end
   end
 end
 
