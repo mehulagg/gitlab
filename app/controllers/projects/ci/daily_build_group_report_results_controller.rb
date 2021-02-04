@@ -9,7 +9,7 @@ class Projects::Ci::DailyBuildGroupReportResultsController < Projects::Applicati
   before_action :authorize_read_build_report_results!
   before_action :validate_param_type!
 
-  feature_category :continuous_integration
+  feature_category :code_testing
 
   def index
     respond_to do |format|
@@ -40,7 +40,30 @@ class Projects::Ci::DailyBuildGroupReportResultsController < Projects::Applicati
   end
 
   def report_results
-    Ci::DailyBuildGroupReportResultsFinder.new(**finder_params).execute
+    if ::Gitlab::Ci::Features.use_coverage_data_new_finder?(project)
+      Ci::Testing::DailyBuildGroupReportResultsFinder.new(
+        params: new_finder_params,
+        current_user: current_user
+      ).execute
+    else
+      Ci::DailyBuildGroupReportResultsFinder.new(**finder_params).execute
+    end
+  end
+
+  def new_finder_params
+    params = {
+      project: project,
+      coverage: true,
+      start_date: start_date,
+      end_date: end_date,
+      limit: MAX_ITEMS
+    }
+
+    if params[:ref_path].present?
+      params[:ref_path] = ref_path
+    end
+
+    params
   end
 
   def finder_params

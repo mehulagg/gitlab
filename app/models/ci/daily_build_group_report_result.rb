@@ -17,6 +17,7 @@ module Ci
     scope :with_coverage, -> { where("(data->'coverage') IS NOT NULL") }
     scope :with_default_branch, -> { where(default_branch: true) }
     scope :by_date, -> (start_date) { where(date: report_window(start_date)..Date.current) }
+    scope :by_end_date, -> (end_date) { where(date: max_end_date(end_date)..end_date) }
 
     store_accessor :data, :coverage
 
@@ -34,6 +35,10 @@ module Ci
         date = Date.parse(start_date) rescue default_date
 
         [date, default_date].max
+      end
+
+      def max_end_date(end_date)
+        end_date - REPORT_WINDOW
       end
     end
   end
