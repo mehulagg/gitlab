@@ -19,8 +19,8 @@ operations, such as `git clone` or `git pull`.
 There are three ways to enable maintenance mode as an administrator:
 
 - **Web UI**:
-  1. Navigate to the **Admin Area > Application settings > General** and toggle
-     the maintenance mode. You can optionally add a message for the banner as well.
+  1. Go to **Admin Area > Settings > General**, expand **Maintenance mode**, and toggle **Enable maintenance mode**. 
+     You can optionally add a message for the banner as well.
   1. Click **Save** for the changes to take effect.
 
 - **API**:
@@ -41,8 +41,7 @@ There are three ways to enable maintenance mode as an administrator:
 There are three ways to disable maintenance mode:
 
 - **Web UI**:
-  1. Navigate to the **Admin Area > Application settings > General** and toggle
-     the maintenance mode. You can optionally add a message for the banner as well.
+  1. Go to **Admin Area > Settings > General**, expand **Maintenance mode**, and toggle **Enable maintenance mode**.
   1. Click **Save** for the changes to take effect.
 
 - **API**:
@@ -87,12 +86,13 @@ In maintenance mode:
 
 - No new jobs are started. Already running jobs stay in 'running'
   status but their logs are no longer updated.
-- Pipelines, including scheduled pipelines that were already running when maintenance mode was turned on will likely fail. You will need to restart them once maintenance mode is turned off.
+- Pipelines fail, including scheduled pipelines that are already running when maintenance
+  mode is turned on. You can restart them after maintenance mode is turned off.
 - If the job has been in 'running' state for longer than the project's time limit,
   it will **not** time out.
 - Pipelines cannot be started, retried or canceled in maintenance mode.
   No new jobs can be created either.
-- No new scheduled pipelines will start.
+- No new scheduled pipelines can start.
 Once maintenance mode is disabled, new jobs are picked up again. The jobs that were
 in the running state before enabling maintenance mode, will resume, and their logs
 will start getting updated again.
