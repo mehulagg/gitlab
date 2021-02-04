@@ -44,9 +44,9 @@ Auto DevOps continues to gain popularity and lower the barrier to entry for gett
 
 From [AlexJonesax](https://twitter.com/AlexJonesax) and [KaiPMDH](https://twitter.com/KaiPMDH) on Twitter:
 
-![Alex Jones on Twitter](p/doc/topics/autodevops/img/alexj_autodevops.png/)
+![Alex Jones on Twitter](/doc/topics/autodevops/img/alexj_autodevops.png)
 
-![Kai on Twitter](/doc/topics/autodevops/img/kai_autodevops.png/)
+![Kai on Twitter](/doc/topics/autodevops/img/kai_autodevops.png)
 
 ## Enabled by default
 
