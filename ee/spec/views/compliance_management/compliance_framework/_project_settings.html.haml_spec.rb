@@ -27,6 +27,28 @@ RSpec.describe 'projects/edit.html.haml' do
 
         expect(rendered).to match /Custom framework 23/
       end
+
+      it 'does not include warning message' do
+        render
+
+        expect(rendered).not_to match /Customizable by owners./
+      end
+
+      context 'user is group maintainer' do
+        let_it_be(:maintainer) { create(:user) }
+
+        before do
+          group.add_maintainer(maintainer)
+          allow(maintainer).to receive(:can?).and_return(false)
+          allow(view).to receive(:current_user).and_return(maintainer)
+        end
+
+        it 'includes warning message' do
+          render
+
+          expect(rendered).to match /Customizable by owners./
+        end
+      end
     end
 
     context 'group has no compliance frameworks' do

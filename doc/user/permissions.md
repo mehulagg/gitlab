@@ -183,6 +183,7 @@ The following table depicts the various user permission levels in a project.
 | Delete pipelines                                  |         |            |             |          | ✓      |
 | Delete merge request                              |         |            |             |          | ✓      |
 | Disable notification emails                       |         |            |             |          | ✓      |
+| Administer project compliance frameworks          |         |            |             |          | ✓      |
 | Force push to protected branches (*4*)            |         |            |             |          |        |
 | Remove protected branches (*4*)                   |         |            |             |          |        |
 

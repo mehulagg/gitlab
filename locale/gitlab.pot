@@ -7379,6 +7379,9 @@ msgstr ""
 msgid "Compliance Dashboard"
 msgstr ""
 
+msgid "Compliance framework"
+msgstr ""
+
 msgid "Compliance framework (optional)"
 msgstr ""
 
@@ -8714,6 +8717,9 @@ msgid "Customer Portal"
 msgstr ""
 
 msgid "Customizable by an administrator."
+msgstr ""
+
+msgid "Customizable by owners."
 msgstr ""
 
 msgid "Customize colors"
