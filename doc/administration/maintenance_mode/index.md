@@ -131,7 +131,7 @@ You can monitor queues and disable jobs in **Admin Area > Monitoring > Backgroun
 
 ### Incident management
 
-During Maintenance Mode, [Incident management](../../operations/incident_management/) functions will be limited. The creation of [alerts](../../operations/incident_management/alerts.md) and [incidents](../..//operations/incident_management/incidents.md#incident-creation) will be paused entirely. Notifications and paging on alerts and incidents will therefore be disabled. 
+During Maintenance Mode, [Incident management](../../operations/incident_management/index.md) functions will be limited. The creation of [alerts](../../operations/incident_management/alerts.md) and [incidents](../../operations/incident_management/incidents.md#incident-creation) will be paused entirely. Notifications and paging on alerts and incidents will therefore be disabled.
 
 ### Geo secondaries
 
