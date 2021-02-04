@@ -235,7 +235,7 @@ Methods to reduce Docker image size:
   to analyze and shrink images.
 
 To simplify Docker image management, you can create a dedicated group for managing
-[Docker images](../docker/README.md) and test, build and publish them with CI/CD pipelines.
+[Docker images](../docker/index.md) and test, build and publish them with CI/CD pipelines.
 
 ## Test, document, and learn
 

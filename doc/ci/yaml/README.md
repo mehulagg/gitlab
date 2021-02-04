@@ -542,7 +542,7 @@ Used to specify [a Docker image](../docker/using_docker_images.md#what-is-an-ima
 For:
 
 - Usage examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
-- Detailed usage information, refer to [Docker integration](../docker/README.md) documentation.
+- Detailed usage information, refer to [Docker integration](../docker/index.md) documentation.
 
 #### `image:name`
 
@@ -563,7 +563,7 @@ Used to specify a [service Docker image](../docker/using_docker_images.md#what-i
 For:
 
 - Usage examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
-- Detailed usage information, refer to [Docker integration](../docker/README.md) documentation.
+- Detailed usage information, refer to [Docker integration](../docker/index.md) documentation.
 - For example services, see [GitLab CI/CD Services](../services/README.md).
 
 ##### `services:name`
