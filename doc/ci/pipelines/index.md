@@ -8,8 +8,6 @@ type: reference
 
 # CI/CD pipelines
 
-> Introduced in GitLab 8.8.
-
 NOTE:
 Watch the
 ["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
