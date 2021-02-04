@@ -158,7 +158,7 @@ Its feature set is listed on the table below according to DevOps stages.
 ## Examples
 
 Find example project code and tutorials for using GitLab CI/CD with a variety of app frameworks, languages, and platforms
-on the [CI Examples](examples/README.md) page.
+on the [CI Examples](examples/index.md) page.
 
 ## Administration **(FREE SELF)**
 
