@@ -55,7 +55,7 @@ at the repository's root. This file creates a [pipeline](pipelines/index.md), wh
 To get started with GitLab CI/CD, we recommend you read through
 the following documents:
 
-- [Get started with GitLab CI/CD](quick_start/README.md).
+- [Get started with GitLab CI/CD](quick_start/index.md).
 - [Fundamental pipeline architectures](pipelines/pipeline_architectures.md).
 - [GitLab CI/CD basic workflow](introduction/index.md#basic-cicd-workflow).
 - [Step-by-step guide for writing `.gitlab-ci.yml` for the first time](../user/project/pages/getting_started/pages_from_scratch.md).
@@ -75,7 +75,7 @@ to your needs:
 
 While building your `.gitlab-ci.yml`, you can use the [CI/CD configuration visualization](pipeline_editor/index.md#visualize-ci-configuration) to facilitate your writing experience.
 
-For a broader overview, see the [CI/CD getting started](quick_start/README.md) guide.
+For a broader overview, see the [CI/CD getting started](quick_start/index.md) guide.
 
 After you're familiar with how GitLab CI/CD works, see the
 [`.gitlab-ci.yml` full reference](yaml/README.md)

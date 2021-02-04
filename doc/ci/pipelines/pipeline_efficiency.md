@@ -20,7 +20,7 @@ to use pipeline features that improve efficiency right away, and get a faster so
 development lifecycle earlier.
 
 First ensure you are familiar with [GitLab CI/CD fundamentals](../introduction/index.md)
-and understand the [quick start guide](../quick_start/README.md).
+and understand the [quick start guide](../quick_start/index.md).
 
 ## Identify bottlenecks and common failures
 
