@@ -16,7 +16,7 @@ Notifications are sent via email.
 You receive notifications for one of the following reasons:
 
 - You participate in an issue, merge request, epic or design. In this context, _participate_ means comment, or edit.
-- You [enable notifications in an issue, merge request, or epic](#notifications-on-issues--merge-requests--epics). 
+- You [enable notifications in an issue, merge request, or epic](#notifications-on-issues-merge-requests-epics). 
 - You configured notifications at the [Project](#project-notifications) and/or [Group](#group-notifications) level.
 
 While notifications are enabled, you receive notification of actions occurring in that issue, merge request, or epic.
@@ -124,6 +124,15 @@ You can select an email address to receive notifications for each group you belo
 1. Locate the project in the **Groups** section.
 1. Select the desired email address.
 
+#### Notifications on Issues / Merge Requests / Epics 
+
+To enable notifications on one specific Issue, Merge Request or Epic, you need to enable the **Notifications** toggle in the right sidebar.
+
+- **Enable**: If you are not a participant in the discussion on that issue, but
+  want to receive notifications on each update, subscribe to it.
+- **Disable**: If you are receiving notifications for updates to that issue but no
+  longer want to receive them, unsubscribe from it.
+
 ### Notification levels
 
 For each project and group you can select one of the following levels:
@@ -136,15 +145,6 @@ For each project and group you can select one of the following levels:
 | Participate | Receive notifications for threads you have participated in. |
 | Disabled    | Turns off notifications. |
 | Custom      | Receive notifications for custom selected events. |
-
-##### Notifications on Issues / Merge Requests / Epics 
-
-To enable notifications on one specific Issue, Merge Request or Epic, you need to enable the **Notifications** toggle in the right sidebar.
-
-- **Enable**: If you are not a participant in the discussion on that issue, but
-  want to receive notifications on each update, subscribe to it.
-- **Disable**: If you are receiving notifications for updates to that issue but no
-  longer want to receive them, unsubscribe from it.
 
 ## Notification events
 
@@ -179,7 +179,7 @@ In most of the below cases, the notification is sent to:
   - anyone mentioned by `@username` in the title or description of the issue, merge request or epic **(ULTIMATE)**
   - anyone with notification level "Participating" or higher that is mentioned by `@username` in any of the comments on the issue, merge request, or epic **(ULTIMATE)**
 - Watchers: users with notification level "Watch"
-- Subscribers: anyone who [manually subscribed to the issue, merge request, or epic](#notifications-on-issues--merge-requests--epics)
+- Subscribers: anyone who [manually subscribed to the issue, merge request, or epic](#notifications-on-issues-merge-requests-epics)
 - Custom: Users with notification level "custom" who turned on notifications for any of the events present in the table below
 
 NOTE:
