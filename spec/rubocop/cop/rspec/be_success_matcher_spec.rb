@@ -11,7 +11,7 @@ RSpec.describe RuboCop::Cop::RSpec::BeSuccessMatcher do
 
   shared_examples 'cop' do |good:, bad:|
     context "using #{bad} call" do
-      it 'registers an offense and corrects' do
+      it 'registers an offense and corrects', :aggregate_failures do
         expect_offense(<<~CODE, node: bad)
           %{node}
           ^{node} Do not use deprecated `success?` method, use `successful?` instead.

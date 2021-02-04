@@ -9,7 +9,7 @@ RSpec.describe RuboCop::Cop::IncludeSidekiqWorker do
   subject(:cop) { described_class.new }
 
   context 'when `Sidekiq::Worker` is included' do
-    it 'registers an offense and corrects' do
+    it 'registers an offense and corrects', :aggregate_failures do
       expect_offense(<<~CODE)
         include Sidekiq::Worker
                 ^^^^^^^^^^^^^^^ Include `ApplicationWorker`, not `Sidekiq::Worker`.

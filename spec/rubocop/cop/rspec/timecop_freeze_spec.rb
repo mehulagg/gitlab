@@ -9,7 +9,7 @@ RSpec.describe RuboCop::Cop::RSpec::TimecopFreeze do
   subject(:cop) { described_class.new }
 
   context 'when calling Timecop.freeze' do
-    it 'registers an offense and corrects' do
+    it 'registers an offense and corrects', :aggregate_failures do
       expect_offense(<<~CODE)
         Timecop.freeze(Time.current) { example.run }
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Do not use `Timecop.freeze`, use `freeze_time` instead. [...]

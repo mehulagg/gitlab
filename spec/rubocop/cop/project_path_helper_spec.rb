@@ -12,7 +12,7 @@ RSpec.describe RuboCop::Cop::ProjectPathHelper do
     let(:source) { 'edit_namespace_project_issue_path(@issue.project.namespace, @issue.project, @issue)' }
     let(:correct_source) { 'edit_project_issue_path(@issue.project, @issue)' }
 
-    it 'registers an offense and corrects' do
+    it 'registers an offense and corrects', :aggregate_failures do
       expect_offense(<<~CODE)
         #{source}
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use short project path helpers without explicitly passing the namespace[...]

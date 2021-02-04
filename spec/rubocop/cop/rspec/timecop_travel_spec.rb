@@ -9,7 +9,7 @@ RSpec.describe RuboCop::Cop::RSpec::TimecopTravel do
   subject(:cop) { described_class.new }
 
   context 'when calling Timecop.travel' do
-    it 'registers an offense and corrects' do
+    it 'registers an offense and corrects', :aggregate_failures do
       expect_offense(<<~CODE)
         Timecop.travel(1.day.ago) { create(:issue) }
         ^^^^^^^^^^^^^^^^^^^^^^^^^ Do not use `Timecop.travel`, use `travel_to` instead. [...]

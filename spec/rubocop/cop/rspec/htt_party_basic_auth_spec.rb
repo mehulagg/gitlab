@@ -8,7 +8,7 @@ RSpec.describe RuboCop::Cop::RSpec::HTTPartyBasicAuth do
   subject(:cop) { described_class.new }
 
   context 'when passing `basic_auth: { user: ... }`' do
-    it 'registers an offense and corrects' do
+    it 'registers an offense and corrects', :aggregate_failures do
       expect_offense(<<~SOURCE, 'spec/foo.rb')
         HTTParty.put(
           url,

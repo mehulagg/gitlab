@@ -36,7 +36,7 @@ RSpec.describe RuboCop::Cop::RSpec::FactoryBot::InlineAssociation do
       RUBY
     end
 
-    it 'registers an offense and corrects' do
+    it 'registers an offense and corrects', :aggregate_failures do
       expect_offense(source)
 
       expect_correction(corrected_source)
