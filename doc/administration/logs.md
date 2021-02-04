@@ -381,7 +381,7 @@ only. For example:
 }
 ```
 
-## `audit_json.log` **(PREMIUM)**
+## `audit_json.log` **(FREE)**
 
 NOTE:
 GitLab Core tracks a small number of different audit events.
