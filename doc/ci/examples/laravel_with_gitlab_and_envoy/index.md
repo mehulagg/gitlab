@@ -544,7 +544,7 @@ services:
 ...
 ```
 
-If you wish to test your app with different PHP versions and [database management systems](../../services/README.md), you can define different `image` and `services` keywords for each test job.
+If you wish to test your app with different PHP versions and [database management systems](../../services/index.md), you can define different `image` and `services` keywords for each test job.
 
 #### Variables
 

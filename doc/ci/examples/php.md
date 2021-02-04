@@ -250,7 +250,7 @@ run. If you're using the Docker executor, you can leverage Docker's ability to
 link to other containers. With GitLab Runner, this can be achieved by defining
 a `service`.
 
-This functionality is covered in [the CI services](../services/README.md)
+This functionality is covered in [the CI services](../services/index.md)
 documentation.
 
 ## Testing things locally

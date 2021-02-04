@@ -564,7 +564,7 @@ For:
 
 - Usage examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
 - Detailed usage information, refer to [Docker integration](../docker/index.md) documentation.
-- For example services, see [GitLab CI/CD Services](../services/README.md).
+- For example services, see [GitLab CI/CD Services](../services/index.md).
 
 ##### `services:name`
 
