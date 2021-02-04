@@ -30,6 +30,11 @@ Please provide as many of these fields as possible when submitting a query perfo
 
 - Examples of a postgres checkup report - https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/snippets/2056787
 - Epic - Improving the Database resource usage (&365) - https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/365#reports-of-database-performance-peak-investigation-analysis-executed
+- Past examples of query performance investigations that have led to this template creation. 
+ - Possible Index suggestion or query rewriting (#292454) - https://gitlab.com/gitlab-org/gitlab/-/issues/292454)
+ - High number of Sessions to the database with the value SET parameter (#292022) - https://gitlab.com/gitlab-org/gitlab/-/issues/292022)
+ - Query performance "Select 1" (#220055) - https://gitlab.com/gitlab-org/gitlab/-/issues/220055
+ - Select statements that are in execution during database CPU utilization peak times - licenses table (#292900)  - https://gitlab.com/gitlab-org/gitlab/-/issues/292900
 
 -->
 
