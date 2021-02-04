@@ -75,11 +75,7 @@ export default {
       return `ci-badge-${escape(group.name)}`;
     },
     isFadedOut(jobName) {
-      return (
-        this.jobHovered.length > 0 &&
-        this.highlightedJobs.length > 1 &&
-        !this.highlightedJobs.includes(jobName)
-      );
+      return this.highlightedJobs.length > 1 && !this.highlightedJobs.includes(jobName);
     },
   },
 };
