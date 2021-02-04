@@ -129,12 +129,6 @@ RSpec.describe IncidentManagement::OncallShift do
         # Notable excluded shift: tue_to_wed (Ends at timestamp)
       end
     end
-
-    describe '.for_rotation' do
-      subject(:shifts) { described_class.for_rotation(participant2.rotation) }
-
-      it { is_expected.to contain_exactly(mon_to_thu, fri_to_sun) }
-    end
   end
 
   private

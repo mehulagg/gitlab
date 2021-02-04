@@ -16,7 +16,6 @@ module IncidentManagement
     validate :timeframes_do_not_overlap, if: :rotation
 
     scope :order_starts_at_desc, -> { order(starts_at: :desc) }
-    scope :for_rotation, -> (rotation) { where(rotation: rotation) }
     scope :for_timeframe, -> (starts_at, ends_at) do
       return none unless starts_at.to_i < ends_at.to_i
 

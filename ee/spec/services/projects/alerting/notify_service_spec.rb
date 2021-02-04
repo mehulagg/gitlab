@@ -68,15 +68,14 @@ RSpec.describe Projects::Alerting::NotifyService do
       let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
       let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
       let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-
-      it_behaves_like 'Alert Notification Service sends notification email to on-call users' do
-        let(:notification_args) do
-          [
-            [participant.user],
-            having_attributes(class: AlertManagement::Alert, title: payload['title'])
-          ]
-        end
+      let(:notification_args) do
+        [
+          [participant.user],
+          having_attributes(class: AlertManagement::Alert, title: payload['title'])
+        ]
       end
+
+      it_behaves_like 'Alert Notification Service sends notification email to on-call users'
     end
   end
 end

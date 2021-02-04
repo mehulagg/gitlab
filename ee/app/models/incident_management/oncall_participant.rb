@@ -11,8 +11,6 @@ module IncidentManagement
     belongs_to :user, class_name: 'User', foreign_key: :user_id
     has_many :shifts, class_name: 'OncallShift', inverse_of: :participant, foreign_key: :participant_id
 
-    scope :with_users, -> { includes(:user) }
-
     # Uniqueness validations added here should be duplicated
     # in IncidentManagement::OncallRotation::CreateService
     # as bulk insertion skips validations

@@ -38,20 +38,6 @@ RSpec.describe IncidentManagement::OncallParticipant do
     end
   end
 
-  describe 'scopes' do
-    describe '.with_users' do
-      let_it_be(:participant1) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-      let_it_be(:participant2) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-      let_it_be(:participant3) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-
-      subject { described_class.with_users }
-
-      it 'uses a single user query when retrieving user information' do
-        expect { subject.map(&:user) }.not_to exceed_query_limit(2)
-      end
-    end
-  end
-
   private
 
   def remove_user_from_project(user, project)
