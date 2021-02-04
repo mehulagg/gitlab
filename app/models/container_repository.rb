@@ -49,10 +49,10 @@ class ContainerRepository < ApplicationRecord
 
   def self.sort_by_attribute(method)
     case method.to_s
-    when 'created_at_asc' then order_created_asc
-    when 'created_at_desc' then order_created_desc
-    when 'updated_at_asc' then order_updated_asc
-    when 'updated_at_desc' then order_updated_desc
+    when 'created_asc' then order_created_asc
+    when 'created_desc' then order_created_desc
+    when 'updated_asc' then order_updated_asc
+    when 'updated_desc' then order_updated_desc
     when 'name_asc' then order_name_asc
     when 'name_desc' then order_name_desc
     else
