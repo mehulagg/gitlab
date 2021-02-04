@@ -4,7 +4,7 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 import JiraConnectApp from '~/jira_connect/components/app.vue';
 import createStore from '~/jira_connect/store';
-import { SET_ERROR_MESSAGE } from '~/jira_connect/store/mutation_types';
+import { SET_ALERT } from '~/jira_connect/store/mutation_types';
 
 jest.mock('~/jira_connect/api');
 
@@ -85,22 +85,26 @@ describe('JiraConnectApp', () => {
     });
 
     it.each`
-      errorMessage    | errorShouldRender
-      ${'Test error'} | ${true}
-      ${''}           | ${false}
-      ${undefined}    | ${false}
+      message          | variant      | errorShouldRender
+      ${'Test error'}  | ${'danger'}  | ${true}
+      ${'Test notice'} | ${'info'}    | ${true}
+      ${''}            | ${undefined} | ${false}
+      ${undefined}     | ${undefined} | ${false}
     `(
-      'renders correct alert when errorMessage is `$errorMessage`',
-      async ({ errorMessage, errorShouldRender }) => {
+      'renders correct alert when message is `$message` and variant is `$variant`',
+      async ({ message, errorShouldRender, variant }) => {
         createComponent();
 
-        store.commit(SET_ERROR_MESSAGE, errorMessage);
+        store.commit(SET_ALERT, { message, variant });
         await wrapper.vm.$nextTick();
 
-        expect(findAlert().exists()).toBe(errorShouldRender);
+        const alert = findAlert();
+
+        expect(alert.exists()).toBe(errorShouldRender);
         if (errorShouldRender) {
-          expect(findAlert().isVisible()).toBe(errorShouldRender);
-          expect(findAlert().html()).toContain(errorMessage);
+          expect(alert.isVisible()).toBe(errorShouldRender);
+          expect(alert.html()).toContain(message);
+          expect(alert.props('variant')).toBe(variant);
         }
       },
     );

@@ -6,7 +6,7 @@ import GlFeatureFlagsPlugin from '~/vue_shared/gl_feature_flags_plugin';
 import { addSubscription, removeSubscription, getLocation } from '~/jira_connect/api';
 import JiraConnectApp from './components/app.vue';
 import createStore from './store';
-import { SET_ERROR_MESSAGE } from './store/mutation_types';
+import { SET_ALERT } from './store/mutation_types';
 
 const store = createStore();
 
@@ -17,7 +17,7 @@ const reqComplete = () => {
 const reqFailed = (res, fallbackErrorMessage) => {
   const { error = fallbackErrorMessage } = res || {};
 
-  store.commit(SET_ERROR_MESSAGE, error);
+  store.commit(SET_ALERT, { message: error, variant: 'danger' });
 };
 
 const updateSignInLinks = async () => {

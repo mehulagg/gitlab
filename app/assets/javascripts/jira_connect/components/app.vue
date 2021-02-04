@@ -1,8 +1,9 @@
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapMutations } from 'vuex';
 import { GlAlert, GlButton, GlModal, GlModalDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { SET_ALERT } from '../store/mutation_types';
 
 import { getLocation } from '~/jira_connect/api';
 import GroupsList from './groups_list.vue';
@@ -30,7 +31,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['errorMessage']),
+    ...mapState(['alert']),
     showNewUI() {
       return this.glFeatures.newJiraConnectUi;
     },
@@ -40,6 +41,12 @@ export default {
       }
 
       return this.usersPath;
+    },
+    alertMessage() {
+      return this.alert?.message;
+    },
+    alertVariant() {
+      return this.alert?.variant;
     },
   },
   modal: {
@@ -51,6 +58,9 @@ export default {
     this.setLocation();
   },
   methods: {
+    ...mapMutations({
+      setAlert: SET_ALERT,
+    }),
     async setLocation() {
       this.location = await getLocation();
     },
@@ -60,8 +70,8 @@ export default {
 
 <template>
   <div>
-    <gl-alert v-if="errorMessage" class="gl-mb-6" variant="danger" :dismissible="false">
-      {{ errorMessage }}
+    <gl-alert v-if="alertMessage" class="gl-mb-6" :variant="alertVariant" @dismiss="setAlert(null)">
+      {{ alertMessage }}
     </gl-alert>
 
     <h2>{{ s__('JiraService|GitLab for Jira Configuration') }}</h2>
