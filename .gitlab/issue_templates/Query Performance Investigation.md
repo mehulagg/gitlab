@@ -29,7 +29,7 @@ Please provide as many of these fields as possible when submitting a query perfo
 <!--
 
 - Example of a postgres checkup report - https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/snippets/2056787
-- Epic - Improving the Database resource usage (&365) - https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/365#reports-of-database-performance-peak-investigation-analysis-executed
+- Epic - Improving the Database resource usage (&365) - https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/365#short-term-query-improvements
 - Past examples of query performance investigations that have led to this template creation. 
  - Possible Index suggestion or query rewriting (#292454) - https://gitlab.com/gitlab-org/gitlab/-/issues/292454)
  - High number of Sessions to the database with the value SET parameter (#292022) - https://gitlab.com/gitlab-org/gitlab/-/issues/292022)
@@ -38,4 +38,4 @@ Please provide as many of these fields as possible when submitting a query perfo
 
 -->
 
-/label ~"group::database" ~"database::triage" 
+/label ~"group::database" ~"database::triage"
