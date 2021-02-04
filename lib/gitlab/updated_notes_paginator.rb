@@ -37,7 +37,7 @@ module Gitlab
     end
 
     def fetch_page(relation)
-      relation = relation.by_updated_at
+      relation = relation.without_order.updated_at_asc
       notes = relation.at_most(LIMIT + 1).to_a
 
       return [notes, false] unless notes.size > LIMIT

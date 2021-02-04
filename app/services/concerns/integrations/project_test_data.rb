@@ -14,7 +14,7 @@ module Integrations
 
     def note_events_data
       note = if use_optimal_query?
-               NotesFinder.new(current_user, project: project, target: project).execute.reorder(nil).last # rubocop: disable CodeReuse/ActiveRecord
+               NotesFinder.new(current_user, project: project, target: project, sort: 'created_at_desc').execute.first
              else
                project.notes.first
              end

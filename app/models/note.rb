@@ -107,7 +107,6 @@ class Note < ApplicationRecord
   scope :fresh, -> { order(created_at: :asc, id: :asc) }
   scope :updated_after, ->(time) { where('updated_at > ?', time) }
   scope :with_updated_at, ->(time) { where(updated_at: time) }
-  scope :by_updated_at, -> { reorder(:updated_at, :id) }
   scope :inc_author_project, -> { includes(:project, :author) }
   scope :inc_author, -> { includes(:author) }
   scope :inc_relations_for_view, -> do
@@ -139,6 +138,13 @@ class Note < ApplicationRecord
 
   scope :for_note_or_capitalized_note, ->(text) { where(note: [text, text.capitalize]) }
   scope :like_note_or_capitalized_note, ->(text) { where('(note LIKE ? OR note LIKE ?)', text, text.capitalize) }
+
+  # Sorting
+  scope :id_asc, -> { order(id: :asc) }
+  scope :updated_at_asc, -> { order(updated_at: :asc).id_asc }
+  scope :updated_at_desc, -> { order(updated_at: :desc).id_asc }
+  scope :created_at_desc, -> { order(created_at: :desc).id_asc }
+  scope :created_at_asc, -> { order(created_at: :asc).id_asc }
 
   before_validation :nullify_blank_type, :nullify_blank_line_code
   after_save :keep_around_commit, if: :for_project_noteable?, unless: :importing?
@@ -546,6 +552,20 @@ class Note < ApplicationRecord
   end
 
   private
+
+  def self.sort_by_attribute(sort)
+    sort_method = sort.presence || 'fresh'
+
+    case sort_method
+    when 'created_at_desc'  then created_at_desc
+    when 'created_at_asc'   then created_at_asc
+    when 'updated_at_asc'   then updated_at_asc
+    when 'updated_at_desc'  then updated_at_desc
+    when 'fresh'            then fresh
+    else
+      raise ArgumentError, "Unknown sort method: #{sort_method}"
+    end
+  end
 
   # Using this method followed by a call to *save* may result in *ActiveRecord::RecordNotUnique* exception
   # in a multi-threaded environment. Make sure to use it within a *safe_ensure_unique* block.
