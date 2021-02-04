@@ -1781,6 +1781,12 @@ class MergeRequest < ApplicationRecord
     merge_request_reviewers.find_by(user_id: user.id)
   end
 
+  def context_commits_diff
+    strong_memoize(:context_commits_diff) do
+      ContextCommitsDiff.new(self)
+    end
+  end
+
   private
 
   def with_rebase_lock

@@ -23,14 +23,18 @@ module DiffHelper
     end
   end
 
+  def show_only_context_commits?
+    !!params[:only_context_commits] || @merge_request&.commits&.empty?
+  end
+
   def diff_options
     options = { ignore_whitespace_change: hide_whitespace?, expanded: diffs_expanded? }
 
     if action_name == 'diff_for_path'
       options[:expanded] = true
       options[:paths] = params.values_at(:old_path, :new_path)
-    elsif action_name == 'show'
-      options[:include_context_commits] = true unless @project.context_commits_enabled?
+    elsif action_name == 'diffs_metadata' || action_name == 'diffs_batch'
+      options[:only_context_commits] = show_only_context_commits? 
     end
 
     options
