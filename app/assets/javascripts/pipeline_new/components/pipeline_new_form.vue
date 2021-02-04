@@ -41,7 +41,7 @@ export default {
   maxWarningsSummary: __('%{total} warnings found: showing first %{warningsDisplayed}'),
   // this height value is used inline on the textarea to match the input field height
   // it's used to prevent the overwrite if 'gl-h-7' or 'gl-h-7!' were used
-  textAreaHeight: 'height: 32px',
+  textAreaStyle: { height: '32px' },
   components: {
     GlAlert,
     GlIcon,
@@ -435,7 +435,7 @@ export default {
             v-model="variable.value"
             :placeholder="s__('CiVariables|Input variable value')"
             class="gl-mb-3"
-            :style="$options.textAreaHeight"
+            :style="$options.textAreaStyle"
             :no-resize="false"
             data-testid="pipeline-form-ci-variable-value"
           />
