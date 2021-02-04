@@ -31,11 +31,33 @@ class ContainerRepository < ApplicationRecord
   scope :search_by_name, ->(query) { fuzzy_search(query, [:name], use_minimum_char_limit: false) }
   scope :waiting_for_cleanup, -> { where(expiration_policy_cleanup_status: WAITING_CLEANUP_STATUSES) }
 
+  # sorting
+  scope :order_created_asc, -> { reorder('created_at ASC') }
+  scope :order_created_desc, -> { reorder('created_at DESC') }
+  scope :order_updated_asc, -> { reorder('updated_at ASC') }
+  scope :order_updated_desc, -> { reorder('updated_at DESC') }
+  scope :order_name_asc, -> { reorder('name ASC') }
+  scope :order_name_desc, -> { reorder('name DESC') }
+
+
   def self.exists_by_path?(path)
     where(
       project: path.repository_project,
       name: path.repository_name
     ).exists?
+  end
+
+  def self.sort_by_attribute(method)
+    case method.to_s
+    when 'created_at_asc' then order_created_asc
+    when 'created_at_desc' then order_created_desc
+    when 'updated_at_asc' then order_updated_asc
+    when 'updated_at_desc' then order_updated_desc
+    when 'name_asc' then order_name_asc
+    when 'name_desc' then order_name_desc
+    else
+      order_created_desc
+    end
   end
 
   # rubocop: disable CodeReuse/ServiceClass
