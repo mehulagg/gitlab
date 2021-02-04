@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlSprintf } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__ } from '~/locale';
 import { formatUsageSize } from '../utils';
@@ -8,7 +8,6 @@ import UsageStatisticsCard from './usage_statistics_card.vue';
 export default {
   components: {
     GlButton,
-    GlSprintf,
     UsageStatisticsCard,
   },
   props: {
@@ -101,16 +100,14 @@ export default {
       :link="totalUsage.link"
       :description="totalUsage.description"
       css-class="gl-mr-4"
-    >
-    </usage-statistics-card>
+    />
     <usage-statistics-card
       data-testid="excess-usage"
       :usage="excessUsage.usage"
       :link="excessUsage.link"
       :description="excessUsage.description"
       css-class="gl-mx-4"
-    >
-    </usage-statistics-card>
+    />
     <usage-statistics-card
       v-if="purchasedUsage"
       data-testid="purchased-usage"
