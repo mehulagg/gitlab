@@ -11,6 +11,7 @@ workhorse:
 
 workhorse:verify:
   extends: .workhorse:rules:workhorse
+  image: golang:1.15
   script:
   - make -C workhorse verify
 
