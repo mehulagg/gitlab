@@ -84,29 +84,43 @@ describe('JiraConnectApp', () => {
       });
     });
 
-    it.each`
-      message          | variant      | errorShouldRender
-      ${'Test error'}  | ${'danger'}  | ${true}
-      ${'Test notice'} | ${'info'}    | ${true}
-      ${''}            | ${undefined} | ${false}
-      ${undefined}     | ${undefined} | ${false}
-    `(
-      'renders correct alert when message is `$message` and variant is `$variant`',
-      async ({ message, errorShouldRender, variant }) => {
+    describe('alert', () => {
+      it.each`
+        message          | variant      | errorShouldRender
+        ${'Test error'}  | ${'danger'}  | ${true}
+        ${'Test notice'} | ${'info'}    | ${true}
+        ${''}            | ${undefined} | ${false}
+        ${undefined}     | ${undefined} | ${false}
+      `(
+        'renders correct alert when message is `$message` and variant is `$variant`',
+        async ({ message, errorShouldRender, variant }) => {
+          createComponent();
+
+          store.commit(SET_ALERT, { message, variant });
+          await wrapper.vm.$nextTick();
+
+          const alert = findAlert();
+
+          expect(alert.exists()).toBe(errorShouldRender);
+          if (errorShouldRender) {
+            expect(alert.isVisible()).toBe(errorShouldRender);
+            expect(alert.html()).toContain(message);
+            expect(alert.props('variant')).toBe(variant);
+          }
+        },
+      );
+
+      it('hides alert on @dismiss event', async () => {
         createComponent();
 
-        store.commit(SET_ALERT, { message, variant });
+        store.commit(SET_ALERT, { message: 'test message' });
         await wrapper.vm.$nextTick();
 
-        const alert = findAlert();
+        findAlert().vm.$emit('dismiss');
+        await wrapper.vm.$nextTick();
 
-        expect(alert.exists()).toBe(errorShouldRender);
-        if (errorShouldRender) {
-          expect(alert.isVisible()).toBe(errorShouldRender);
-          expect(alert.html()).toContain(message);
-          expect(alert.props('variant')).toBe(variant);
-        }
-      },
-    );
+        expect(findAlert().exists()).toBe(false);
+      });
+    });
   });
 });

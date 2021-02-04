@@ -70,7 +70,7 @@ export default {
 
 <template>
   <div>
-    <gl-alert v-if="alertMessage" class="gl-mb-6" :variant="alertVariant" @dismiss="setAlert(null)">
+    <gl-alert v-if="alertMessage" class="gl-mb-6" :variant="alertVariant" @dismiss="setAlert">
       {{ alertMessage }}
     </gl-alert>
 
