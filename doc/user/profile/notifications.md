@@ -16,7 +16,7 @@ Notifications are sent via email.
 You receive notifications for one of the following reasons:
 
 - You participate in an issue, merge request, epic or design. In this context, _participate_ means comment, or edit.
-- You [enable notifications in an issue, merge request, or epic](#notifications-on-issues-merge-requests-epics). 
+- You [enable notifications in an issue, merge request, or epic](#notifications-on-issues--merge-requests--epics). 
 - You configured notifications at the [Project](#project-notifications) and/or [Group](#group-notifications) level.
 
 While notifications are enabled, you receive notification of actions occurring in that issue, merge request, or epic.
@@ -179,7 +179,7 @@ In most of the below cases, the notification is sent to:
   - anyone mentioned by `@username` in the title or description of the issue, merge request or epic **(ULTIMATE)**
   - anyone with notification level "Participating" or higher that is mentioned by `@username` in any of the comments on the issue, merge request, or epic **(ULTIMATE)**
 - Watchers: users with notification level "Watch"
-- Subscribers: anyone who [manually subscribed to the issue, merge request, or epic](#notifications-on-issues-merge-requests-epics)
+- Subscribers: anyone who [manually subscribed to the issue, merge request, or epic](#notifications-on-issues--merge-requests--epics)
 - Custom: Users with notification level "custom" who turned on notifications for any of the events present in the table below
 
 NOTE:
