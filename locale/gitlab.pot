@@ -1713,7 +1713,7 @@ msgstr ""
 msgid "Add deploy freeze"
 msgstr ""
 
-msgid "Add deploy keys to grant read/write access to this repository. %{link_start}What are Deploy Keys?%{link_end}"
+msgid "Add deploy keys to grant read/write access to this repository. %{link_start}What are deploy keys?%{link_end}"
 msgstr ""
 
 msgid "Add domain"
@@ -9264,9 +9264,6 @@ msgstr ""
 msgid "Decompressed archive size validation failed."
 msgstr ""
 
-msgid "Default Branch"
-msgstr ""
-
 msgid "Default CI configuration path"
 msgstr ""
 
@@ -9609,6 +9606,9 @@ msgstr ""
 msgid "Deploy key was successfully updated."
 msgstr ""
 
+msgid "Deploy keys"
+msgstr ""
+
 msgid "Deploy keys grant read/write access to all repositories in your instance"
 msgstr ""
 
@@ -9687,7 +9687,7 @@ msgstr ""
 msgid "DeployTokens|Active Deploy Tokens (%{active_tokens})"
 msgstr ""
 
-msgid "DeployTokens|Add a Deploy Token"
+msgid "DeployTokens|Add a deploy token"
 msgstr ""
 
 msgid "DeployTokens|Allows read access to the package registry."
@@ -9717,16 +9717,16 @@ msgstr ""
 msgid "DeployTokens|Created"
 msgstr ""
 
-msgid "DeployTokens|Deploy Tokens"
+msgid "DeployTokens|Deploy tokens"
 msgstr ""
 
-msgid "DeployTokens|Deploy Tokens allow access to packages, your repository, and registry images."
+msgid "DeployTokens|Deploy tokens allow access to packages, your repository, and registry images."
 msgstr ""
 
 msgid "DeployTokens|Expires"
 msgstr ""
 
-msgid "DeployTokens|Group Deploy Tokens allow access to the packages, repositories, and registry images within the group."
+msgid "DeployTokens|Group deploy tokens allow access to the packages, repositories, and registry images within the group."
 msgstr ""
 
 msgid "DeployTokens|Name"
@@ -23579,9 +23579,6 @@ msgstr ""
 msgid "Protected Environment"
 msgstr ""
 
-msgid "Protected Environments"
-msgstr ""
-
 msgid "Protected Paths"
 msgstr ""
 
@@ -23592,6 +23589,9 @@ msgid "Protected Tags"
 msgstr ""
 
 msgid "Protected branches"
+msgstr ""
+
+msgid "Protected environments"
 msgstr ""
 
 msgid "ProtectedBranch|%{wildcards_link_start}Wildcards%{wildcards_link_end} such as %{code_tag_start}*-stable%{code_tag_end} or %{code_tag_start}production/*%{code_tag_end} are supported."
@@ -23822,7 +23822,7 @@ msgstr ""
 msgid "PushRules|Users can still delete tags through the GitLab UI."
 msgstr ""
 
-msgid "PushRule|Push Rules"
+msgid "PushRule|Push rules"
 msgstr ""
 
 msgid "PushRule|Reject unverified users"
