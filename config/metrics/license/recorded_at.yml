@@ -10,4 +10,4 @@ group: group::product analytics
 time_frame: none
 data_source: ruby
 distribution: [ee, ce]
-tier: ['free', 'starter', 'premium', 'ultimate', 'bronze', 'silver', 'gold']
+tier: ['free', 'premium', 'ultimate', 'bronze', 'silver', 'gold']
