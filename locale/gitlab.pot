@@ -24596,6 +24596,12 @@ msgstr ""
 msgid "RepositoriesAnalytics|Average Coverage by Job"
 msgstr ""
 
+msgid "RepositoriesAnalytics|Average coverage"
+msgstr ""
+
+msgid "RepositoriesAnalytics|Average test coverage last 30 days"
+msgstr ""
+
 msgid "RepositoriesAnalytics|Coverage"
 msgstr ""
 

@@ -139,7 +139,7 @@ export default {
         <h5>{{ $options.text.graphCardHeader }}</h5>
       </template>
 
-      <chart-skeleton-loader v-if="isLoading" />
+      <chart-skeleton-loader v-if="isLoading" data-testid="group-coverage-chart-loading" />
 
       <gl-area-chart
         v-else
@@ -147,6 +147,7 @@ export default {
         :option="chartOptions"
         :include-legend-avg-max="false"
         :format-tooltip-text="formatTooltipText"
+        data-testid="group-coverage-chart"
       >
         <template #tooltip-title>
           {{ tooltipTitle }}

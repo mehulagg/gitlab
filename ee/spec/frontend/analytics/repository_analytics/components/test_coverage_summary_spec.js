@@ -17,6 +17,8 @@ describe('Test coverage table component', () => {
   const findProjectsWithTests = () => wrapper.find('.js-metric-card-item:nth-child(1) h3');
   const findAverageCoverage = () => wrapper.find('.js-metric-card-item:nth-child(2) h3');
   const findTotalCoverages = () => wrapper.find('.js-metric-card-item:nth-child(3) h3');
+  const findGroupCoverageChart = () => wrapper.find('[data-testid="group-coverage-chart"]');
+  const findChartLoadingState = () => wrapper.find('[data-testid="group-coverage-chart-loading"]');
   const findLoadingState = () => wrapper.find(GlSkeletonLoading);
 
   const createComponent = ({ data = {} } = {}, withApollo = false) => {
@@ -73,6 +75,7 @@ describe('Test coverage table component', () => {
       createComponent({ data: { isLoading: true } });
 
       expect(findLoadingState().exists()).toBe(true);
+      expect(findChartLoadingState().exists()).toBe(true);
     });
   });
 
@@ -93,6 +96,25 @@ describe('Test coverage table component', () => {
       expect(findProjectsWithTests().text()).toBe(projectCount);
       expect(findAverageCoverage().text()).toBe(`${averageCoverage} %`);
       expect(findTotalCoverages().text()).toBe(coverageCount);
+    });
+
+    it('renders area chart', () => {
+      createComponent({
+        data: {
+          groupCoverageChartData: [
+            {
+              name: 'test',
+              data: [
+                ['Jan 10', 77.9],
+                ['Jan 11', 78.7],
+                ['Jan 12', 79.6],
+              ],
+            },
+          ],
+        },
+      });
+
+      expect(findGroupCoverageChart().exists()).toBe(true);
     });
   });
 
