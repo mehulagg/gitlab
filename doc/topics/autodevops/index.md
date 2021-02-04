@@ -44,9 +44,9 @@ As Auto DevOps continues to gain popularity and lowers the barrier to entry for 
 
 From [AlexJonesax](https://twitter.com/AlexJonesax) and [KaiPMDH](https://twitter.com/KaiPMDH) on Twitter:
 
-![Alex on Twitter](/img/alexj_autodevops_min.png)
+![Alex on Twitter](img/alexj_autodevops_min.png)
 
-![Kai on Twitter](/img/kai_autodevops_min.png)
+![Kai on Twitter](img/kai_autodevops_min.png)
 
 We welcome everyone to [share your experience](https://twitter.com/gitlab) by tagging "@gitlab" on Twitter or other social mediums.
 
