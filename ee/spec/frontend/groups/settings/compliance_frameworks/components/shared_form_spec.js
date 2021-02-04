@@ -9,7 +9,6 @@ import { frameworkFoundResponse, suggestedLabelColors } from '../mock_data';
 
 describe('SharedForm', () => {
   let wrapper;
-  const defaultPropsData = { groupEditPath: 'group-1' };
 
   const findForm = () => wrapper.findComponent(GlForm);
   const findNameGroup = () => wrapper.find('[data-testid="name-input-group"]');
@@ -22,12 +21,21 @@ describe('SharedForm', () => {
 
   function createComponent(props = {}) {
     return shallowMount(SharedForm, {
+      provide: { groupEditPath: 'group-1/edit' },
       propsData: {
-        ...defaultPropsData,
         ...props,
       },
       stubs: {
         GlFormGroup,
+        GlFormInput: {
+          name: 'gl-form-input-stub',
+          props: ['state'],
+          template: `
+            <div>
+              <slot></slot>
+            </div>
+          `,
+        },
         GlSprintf,
       },
     });
@@ -67,10 +75,11 @@ describe('SharedForm', () => {
       ${null}     | ${null}
       ${''}       | ${false}
       ${'foobar'} | ${true}
-    `('sets the correct state to the name input group', ({ name, validity }) => {
+    `('sets the correct state to the name input and group', ({ name, validity }) => {
       wrapper = createComponent({ name });
 
       expect(findNameGroup().props('state')).toBe(validity);
+      expect(findNameInput().props('state')).toBe(validity);
     });
 
     it.each`
@@ -78,10 +87,11 @@ describe('SharedForm', () => {
       ${null}     | ${null}
       ${''}       | ${false}
       ${'foobar'} | ${true}
-    `('sets the correct state to the description input group', ({ description, validity }) => {
+    `('sets the correct state to the description input and group', ({ description, validity }) => {
       wrapper = createComponent({ description });
 
       expect(findDescriptionGroup().props('state')).toBe(validity);
+      expect(findDescriptionInput().props('state')).toBe(validity);
     });
 
     it.each`

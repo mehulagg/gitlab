@@ -2,7 +2,8 @@
 import { visitUrl } from '~/lib/utils/url_utility';
 import * as Sentry from '~/sentry/wrapper';
 import createComplianceFrameworkMutation from '../graphql/queries/create_compliance_framework.mutation.graphql';
-import { initialiseFormData, SAVE_ERROR } from '../constants';
+import { SAVE_ERROR } from '../constants';
+import { initialiseFormData } from '../utils';
 import SharedForm from './shared_form.vue';
 import FormStatus from './form_status.vue';
 
@@ -11,16 +12,7 @@ export default {
     FormStatus,
     SharedForm,
   },
-  props: {
-    groupEditPath: {
-      type: String,
-      required: true,
-    },
-    groupPath: {
-      type: String,
-      required: true,
-    },
-  },
+  inject: ['groupEditPath', 'groupPath'],
   data() {
     return {
       errorMessage: '',
@@ -78,7 +70,6 @@ export default {
 <template>
   <form-status :loading="isLoading" :error="errorMessage">
     <shared-form
-      :group-edit-path="groupEditPath"
       :name.sync="formData.name"
       :description.sync="formData.description"
       :color.sync="formData.color"

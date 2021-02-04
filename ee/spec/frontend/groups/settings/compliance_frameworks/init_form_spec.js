@@ -9,8 +9,6 @@ describe('createComplianceFrameworksFormApp', () => {
   let wrapper;
   let el;
 
-  const groupEditPath = 'group-1/edit';
-  const groupPath = 'group-1';
   const graphqlFieldName = 'field';
   const testId = '1';
 
@@ -18,8 +16,8 @@ describe('createComplianceFrameworksFormApp', () => {
 
   const setUpDocument = (id = null) => {
     el = document.createElement('div');
-    el.setAttribute('data-group-edit-path', groupEditPath);
-    el.setAttribute('data-group-path', groupPath);
+    el.setAttribute('data-group-edit-path', 'group-1/edit');
+    el.setAttribute('data-group-path', 'group-1');
 
     if (id) {
       el.setAttribute('data-graphql-field-name', graphqlFieldName);
@@ -48,10 +46,7 @@ describe('createComplianceFrameworksFormApp', () => {
     });
 
     it('parses and passes props', () => {
-      expect(findFormApp(CreateForm).props()).toMatchObject({
-        groupEditPath,
-        groupPath,
-      });
+      expect(findFormApp(CreateForm).props()).toStrictEqual({});
     });
   });
 
@@ -61,10 +56,9 @@ describe('createComplianceFrameworksFormApp', () => {
     });
 
     it('parses and passes props', () => {
-      expect(findFormApp(EditForm).props()).toMatchObject({
-        groupEditPath,
-        groupPath,
+      expect(findFormApp(EditForm).props()).toStrictEqual({
         id: testId,
+        graphqlFieldName,
       });
     });
   });

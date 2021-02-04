@@ -16,6 +16,7 @@ export default {
     GlLink,
     GlSprintf,
   },
+  inject: ['groupEditPath'],
   props: {
     color: {
       type: String,
@@ -26,10 +27,6 @@ export default {
       type: String,
       required: false,
       default: null,
-    },
-    groupEditPath: {
-      type: String,
-      required: true,
     },
     name: {
       type: String,
@@ -103,7 +100,12 @@ export default {
         </gl-sprintf>
       </template>
 
-      <gl-form-input :value="name" data-testid="name-input" @input="$emit('update:name', $event)" />
+      <gl-form-input
+        :value="name"
+        :state="isValidName"
+        data-testid="name-input"
+        @input="$emit('update:name', $event)"
+      />
     </gl-form-group>
 
     <gl-form-group
@@ -114,6 +116,7 @@ export default {
     >
       <gl-form-input
         :value="description"
+        :state="isValidDescription"
         data-testid="description-input"
         @input="$emit('update:description', $event)"
       />

@@ -5,7 +5,8 @@ import { convertToGraphQLId } from '~/graphql_shared/utils';
 
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
 import updateComplianceFrameworkMutation from '../graphql/queries/update_compliance_framework.mutation.graphql';
-import { initialiseFormData, FETCH_ERROR, SAVE_ERROR } from '../constants';
+import { FETCH_ERROR, SAVE_ERROR } from '../constants';
+import { initialiseFormData } from '../utils';
 import SharedForm from './shared_form.vue';
 import FormStatus from './form_status.vue';
 
@@ -14,16 +15,9 @@ export default {
     FormStatus,
     SharedForm,
   },
+  inject: ['groupEditPath', 'groupPath'],
   props: {
     graphqlFieldName: {
-      type: String,
-      required: true,
-    },
-    groupEditPath: {
-      type: String,
-      required: true,
-    },
-    groupPath: {
       type: String,
       required: true,
     },
@@ -35,6 +29,7 @@ export default {
   },
   data() {
     return {
+      dataRetrieved: false,
       errorMessage: '',
       formData: initialiseFormData(),
       saving: false,
@@ -51,6 +46,10 @@ export default {
       },
       result({ data }) {
         this.formData = this.extractComplianceFramework(data);
+
+        if (!this.errorMessage) {
+          this.dataRetrieved = true;
+        }
       },
       error(error) {
         this.setError(error, FETCH_ERROR);
@@ -65,7 +64,7 @@ export default {
       return this.$apollo.loading || this.saving;
     },
     hasFormData() {
-      return Boolean(this.formData?.name);
+      return this.dataRetrieved;
     },
   },
   methods: {
@@ -131,7 +130,6 @@ export default {
   <form-status :loading="isLoading" :error="errorMessage">
     <shared-form
       v-if="hasFormData"
-      :group-edit-path="groupEditPath"
       :name.sync="formData.name"
       :description.sync="formData.description"
       :color.sync="formData.color"

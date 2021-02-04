@@ -21,13 +21,11 @@ jest.mock('~/lib/utils/url_utility');
 
 describe('CreateForm', () => {
   let wrapper;
+  const groupPath = 'group-1';
+  const groupEditPath = 'group-1/edit';
+
   const sentryError = new Error('Network error');
   const sentrySaveError = new Error('Invalid values given');
-  const propsData = {
-    groupPath: 'group-1',
-    groupEditPath: 'group-1/edit',
-    scopedLabelsHelpPath: 'help/scoped-labels',
-  };
 
   const create = jest.fn().mockResolvedValue(validCreateResponse);
   const createWithNetworkErrors = jest.fn().mockRejectedValue(sentryError);
@@ -46,7 +44,7 @@ describe('CreateForm', () => {
     return shallowMount(CreateForm, {
       localVue,
       apolloProvider: createMockApolloProvider(requestHandlers),
-      propsData,
+      provide: { groupPath, groupEditPath },
     });
   }
 
@@ -123,7 +121,7 @@ describe('CreateForm', () => {
 
       expect(create).toHaveBeenCalledWith(creationProps);
       expect(findFormStatus().props('loading')).toBe(false);
-      expect(visitUrl).toHaveBeenCalledWith(propsData.groupEditPath);
+      expect(visitUrl).toHaveBeenCalledWith(groupEditPath);
     });
   });
 });

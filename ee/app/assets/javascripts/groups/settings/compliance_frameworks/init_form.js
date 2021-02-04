@@ -21,13 +21,17 @@ const createComplianceFrameworksFormApp = (el) => {
   return new Vue({
     el,
     apolloProvider,
+    provide: {
+      groupEditPath,
+      groupPath,
+    },
     render(createElement) {
       let element = CreateForm;
-      let props = { groupEditPath, groupPath };
+      let props = {};
 
       if (id) {
         element = EditForm;
-        props = { ...props, graphqlFieldName, id };
+        props = { graphqlFieldName, id };
       }
 
       return createElement(element, {

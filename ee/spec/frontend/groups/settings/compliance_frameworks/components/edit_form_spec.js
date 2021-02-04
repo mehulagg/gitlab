@@ -28,15 +28,15 @@ jest.mock('~/lib/utils/url_utility');
 
 describe('EditForm', () => {
   let wrapper;
-  const sentryError = new Error('Network error');
-  const sentrySaveError = new Error('Invalid values given');
+  const groupPath = 'group-1';
+  const groupEditPath = 'group-1/edit';
   const propsData = {
     graphqlFieldName: 'ComplianceManagement::Framework',
-    groupPath: 'group-1',
-    groupEditPath: 'group-1/edit',
     id: '1',
-    scopedLabelsHelpPath: 'help/scoped-labels',
   };
+
+  const sentryError = new Error('Network error');
+  const sentrySaveError = new Error('Invalid values given');
 
   const fetchOne = jest.fn().mockResolvedValue(validFetchOneResponse);
   const fetchEmpty = jest.fn().mockResolvedValue(emptyFetchResponse);
@@ -60,6 +60,7 @@ describe('EditForm', () => {
     return shallowMount(EditForm, {
       localVue,
       apolloProvider: createMockApolloProvider(requestHandlers),
+      provide: { groupEditPath, groupPath },
       propsData,
     });
   }
@@ -100,7 +101,6 @@ describe('EditForm', () => {
         name: frameworkFoundResponse.name,
         description: frameworkFoundResponse.description,
         color: frameworkFoundResponse.color,
-        groupEditPath: propsData.groupEditPath,
       });
       expect(findForm().exists()).toBe(true);
     });
@@ -188,7 +188,7 @@ describe('EditForm', () => {
 
       expect(update).toHaveBeenCalledWith(updateProps);
       expect(findFormStatus().props('loading')).toBe(false);
-      expect(visitUrl).toHaveBeenCalledWith(propsData.groupEditPath);
+      expect(visitUrl).toHaveBeenCalledWith(groupEditPath);
     });
   });
 });
