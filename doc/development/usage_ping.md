@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Usage Ping Guide
 
-> - Updated to add more statistics in GitLab Ultimate 11.2.
+> Updated to add more statistics in GitLab Ultimate 11.2.
 
 This guide describes Usage Ping's purpose and how it's implemented.
 
