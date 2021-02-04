@@ -56,6 +56,8 @@ docs-lint links:
   image: "registry.gitlab.com/gitlab-org/gitlab-docs/lint-html:alpine-3.12-ruby-2.7.2"
   stage: test
   needs: []
+  variables:
+    GIT_DEPTH: 1
   script:
     # Prepare docs for build
     # The path must be 'ee/' because we have hardcoded links relying on it
@@ -83,5 +85,7 @@ ui-docs-links lint:
     - .static-analysis-base
   stage: test
   needs: []
+  variables:
+    GIT_DEPTH: 1
   script:
     - bundle exec haml-lint -i DocumentationLinks
