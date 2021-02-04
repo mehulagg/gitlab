@@ -48,44 +48,6 @@ module Gitlab
         raise NotImplementedError, 'There is no Replicator defined for this model'
       end
 
-      # Returns a checksum of the file (assumed to be a "blob" type)
-      #
-      # @return [String] SHA256 hash of the carrierwave file
-      def calculate_checksum
-        return unless checksummable?
-
-        self.class.hexdigest(replicator.carrierwave_uploader.path)
-      end
-
-      # Checks whether model needs checksum to be performed
-      #
-      # Conditions:
-      # - No checksum is present
-      # - It's capable of generating a checksum of itself
-      #
-      # @return [Boolean]
-      def needs_checksum?
-        verification_checksum.nil? && checksummable?
-      end
-
-      # Return whether its capable of generating a checksum of itself
-      #
-      # @return [Boolean] whether it can generate a checksum
-      def checksummable?
-        local? && file_exist?
-      end
-
-      # This checks for existence of the file on storage
-      #
-      # @return [Boolean] whether the file exists on storage
-      def file_exist?
-        if local?
-          File.exist?(replicator.carrierwave_uploader.path)
-        else
-          replicator.carrierwave_uploader.exists?
-        end
-      end
-
       def in_replicables_for_current_secondary?
         self.class.replicables_for_current_secondary(self).exists?
       end
