@@ -7,7 +7,8 @@ require_relative '../../../tooling/danger/changelog'
 RSpec.describe Tooling::Danger::Changelog do
   include DangerSpecHelper
 
-  let(:added_files) { nil }
+  let(:added_files) { [] }
+  let(:removed_feature_flag_files) { [] }
   let(:fake_git) { double('fake-git', added_files: added_files) }
 
   let(:mr_labels) { nil }
@@ -19,9 +20,57 @@ RSpec.describe Tooling::Danger::Changelog do
   let(:ee?) { false }
   let(:fake_helper) { double('fake-helper', changes_by_category: changes_by_category, sanitize_mr_title: sanitize_mr_title, ee?: ee?) }
 
+  let(:fake_feature_flag) { double('feature-flag', feature_flag_files: removed_feature_flag_files) }
   let(:fake_danger) { new_fake_danger.include(described_class) }
 
   subject(:changelog) { fake_danger.new(git: fake_git, gitlab: fake_gitlab, helper: fake_helper) }
+
+  describe '#required_reason' do
+    subject { changelog.required_reason }
+
+    [
+      'db/migrate/20200000000000_new_migration.rb',
+      'db/post_migrate/20200000000000_new_migration.rb'
+    ].each do |file_path|
+      context "added files contain a migration (#{file_path})" do
+        let(:added_files) { [file_path] }
+
+        it { is_expected.to eq(:db_changes) }
+      end
+    end
+
+    [
+      'config/feature_flags/foo.yml',
+      'ee/config/feature_flags/foo.yml'
+    ].each do |file_path|
+      context "removed files contains a feature flag (#{file_path})" do
+        before do
+          expect(changelog).to receive(:feature_flag).and_return(fake_feature_flag)
+        end
+
+        let(:removed_feature_flag_files) { [file_path] }
+
+        it { is_expected.to eq(:feature_flag_removed) }
+      end
+    end
+
+    [
+      'app/models/model.rb',
+      'app/assets/javascripts/file.js'
+    ].each do |file_path|
+      context "added files do not contain a migration (#{file_path})" do
+        let(:added_files) { [file_path] }
+
+        it { is_expected.to be_nil }
+      end
+    end
+
+    context "removed files do not contain a feature flag" do
+      let(:removed_feature_flag_files) { [] }
+
+      it { is_expected.to be_nil }
+    end
+  end
 
   describe '#required?' do
     subject { changelog.required? }
@@ -176,6 +225,7 @@ RSpec.describe Tooling::Danger::Changelog do
 
   describe '#required_text' do
     let(:mr_json) { { "iid" => 1234, "title" => sanitize_mr_title } }
+    let(:added_files) { ['db/migrate/20200000000000_new_migration.rb'] }
 
     subject { changelog.required_text }
 
