@@ -3,6 +3,7 @@
 module Projects
   module Security
     class ConfigurationController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
       include SecurityDashboardsPermissions
 
       alias_method :vulnerable, :project
