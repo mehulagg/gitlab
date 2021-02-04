@@ -7361,7 +7361,7 @@ msgstr ""
 msgid "CompareRevisions|Tags"
 msgstr ""
 
-msgid "CompareRevisions|There was an error while updating the branch/tag list. Please try again."
+msgid "CompareRevisions|There was an error while loading the branch/tag list. Please try again."
 msgstr ""
 
 msgid "CompareRevisions|View open merge request"

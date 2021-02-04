@@ -39,6 +39,7 @@ export default {
   methods: {
     onClick(repo) {
       this.selectedRepo = repo;
+      this.emitTargetProject(repo.name);
     },
     setSelectedRepo(project) {
       this.selectedRepo = project;
@@ -47,7 +48,19 @@ export default {
       const projectJson = this.isSourceRevision ? this.projectTo : this.projectsFrom;
       const project = JSON.parse(projectJson);
 
-      this.selectedRepo = this.isSourceRevision ? project : project[0];
+      if (this.isSourceRevision) {
+        this.selectedRepo = project;
+        return;
+      }
+
+      const defaultTargetProject = project[0];
+      this.emitTargetProject(defaultTargetProject.name);
+      this.selectedRepo = defaultTargetProject;
+    },
+    emitTargetProject(name) {
+      if (!this.isSourceRevision) {
+        this.$emit('changeTargetProject', name);
+      }
     },
   },
 };

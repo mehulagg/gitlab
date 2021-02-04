@@ -1013,6 +1013,7 @@ pre.light-well {
     .gl-card {
       width: calc(50% - 15px);
     }
+
     .compare-ellipsis {
       width: 30px;
     }
@@ -1026,6 +1027,7 @@ pre.light-well {
 }
 
 // Move to gitlab/ui
+// Issue: https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1168
 .gl-sm-pr-3 {
   @media (min-width: $breakpoint-sm) {
     padding-right: $gl-spacing-scale-3;

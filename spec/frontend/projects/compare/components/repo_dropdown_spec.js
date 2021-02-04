@@ -52,6 +52,12 @@ describe('RepoDropdown component', () => {
       expect(findGlDropdown().props('text')).toBe(projectToName);
       expect(findGlDropdown().props('disabled')).toBe(true);
     });
+
+    it('does not emit `changeTargetProject` event', async () => {
+      wrapper.vm.emitTargetProject('foo');
+      await wrapper.vm.$nextTick();
+      expect(wrapper.emitted('changeTargetProject')).toBeUndefined();
+    });
   });
 
   describe('Target Revision', () => {
@@ -72,6 +78,17 @@ describe('RepoDropdown component', () => {
       wrapper.vm.onClick({ id: repoId });
       await wrapper.vm.$nextTick();
       expect(wrapper.find('input[type="hidden"]').attributes('value')).toBe(repoId);
+    });
+
+    it('emits initial `changeTargetProject` event with target project', () => {
+      expect(wrapper.emitted('changeTargetProject')).toEqual([[projectFromName]]);
+    });
+
+    it('emits `changeTargetProject` event when another target project is selected', async () => {
+      const newTargetProject = 'new-from-name';
+      wrapper.vm.$emit('changeTargetProject', newTargetProject);
+      await wrapper.vm.$nextTick();
+      expect(wrapper.emitted('changeTargetProject')[1]).toEqual([newTargetProject]);
     });
   });
 });

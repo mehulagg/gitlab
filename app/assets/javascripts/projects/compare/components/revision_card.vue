@@ -28,6 +28,18 @@ export default {
       default: null,
     },
   },
+  data() {
+    return {
+      selectedRefsProjectPath: this.refsProjectPath,
+    };
+  },
+  methods: {
+    onChangeTargetProject(targetProjectName) {
+      if (this.paramsName === 'from') {
+        this.selectedRefsProjectPath = `/${targetProjectName}/refs`;
+      }
+    },
+  },
 };
 </script>
 
@@ -39,10 +51,10 @@ export default {
       </div>
     </template>
     <div class="gl-sm-display-flex gl-align-items-center">
-      <repo-dropdown :params-name="paramsName" />
+      <repo-dropdown :params-name="paramsName" @changeTargetProject="onChangeTargetProject" />
       <revision-dropdown
         class="gl-mt-3 gl-sm-mt-0"
-        :refs-project-path="refsProjectPath"
+        :refs-project-path="selectedRefsProjectPath"
         :params-name="paramsName"
         :params-branch="paramsBranch"
       />
