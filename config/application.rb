@@ -176,12 +176,15 @@ module Gitlab
     config.assets.precompile << "notify.css"
     config.assets.precompile << "mailers/*.css"
     config.assets.precompile << "page_bundles/_mixins_and_variables_and_functions.css"
+    config.assets.precompile << "page_bundles/admin/application_settings_metrics_and_profiling.css"
+    config.assets.precompile << "page_bundles/admin/jobs_index.css"
     config.assets.precompile << "page_bundles/alert_management_details.css"
     config.assets.precompile << "page_bundles/alert_management_settings.css"
     config.assets.precompile << "page_bundles/boards.css"
     config.assets.precompile << "page_bundles/build.css"
     config.assets.precompile << "page_bundles/ci_status.css"
     config.assets.precompile << "page_bundles/cycle_analytics.css"
+    config.assets.precompile << "page_bundles/security_discover.css"
     config.assets.precompile << "page_bundles/dev_ops_report.css"
     config.assets.precompile << "page_bundles/environments.css"
     config.assets.precompile << "page_bundles/epics.css"
@@ -286,6 +289,14 @@ module Gitlab
           headers: :any,
           methods: :any,
           expose: headers_to_expose
+      end
+
+      # Cross-origin requests must be enabled for the Authorization code with PKCE OAuth flow when used from a browser.
+      allow do
+        origins '*'
+        resource '/oauth/token',
+          credentials: false,
+          methods: [:post]
       end
     end
 

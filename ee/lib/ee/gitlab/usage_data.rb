@@ -363,8 +363,9 @@ module EE
                                                                           finish: user_maximum_id)
           end
 
+          results.merge!(count_secure_user_scans(time_period))
           results.merge!(count_secure_pipelines(time_period))
-          results.merge!(count_secure_jobs(time_period))
+          results.merge!(count_secure_scans(time_period))
 
           results[:"#{prefix}unique_users_all_secure_scanners"] = distinct_count(::Ci::Build.where(name: SECURE_PRODUCT_TYPES.keys).where(time_period), :user_id)
 
@@ -379,9 +380,34 @@ module EE
 
         private
 
+        # rubocop:disable UsageData/LargeTable
+        # rubocop:disable CodeReuse/ActiveRecord
+        def count_secure_user_scans(time_period)
+          return {} if time_period.blank?
+          return {} unless ::Feature.enabled?(:postgres_hll_batch_counting)
+
+          user_scans = {}
+          start_id, finish_id = min_max_security_scan_id(time_period)
+
+          ::Security::Scan.scan_types.each do |name, scan_type|
+            relation = ::Security::Scan
+                         .latest_successful_by_build
+                         .by_scan_types(scan_type)
+                         .where(security_scans: time_period)
+
+            if start_id && finish_id
+              user_scans["user_#{name}_scans".to_sym] = estimate_batch_distinct_count(relation, :user_id, batch_size: 1000, start: start_id, finish: finish_id)
+            end
+          end
+
+          user_scans
+        end
+        # rubocop:enable UsageData/LargeTable
+        # rubocop:enable CodeReuse/ActiveRecord
+
         # rubocop:disable CodeReuse/ActiveRecord
         # rubocop: disable UsageData/LargeTable
-        def count_secure_jobs(time_period)
+        def count_secure_scans(time_period)
           start = ::Security::Scan.minimum(:build_id)
           finish = ::Security::Scan.maximum(:build_id)
 
@@ -407,39 +433,28 @@ module EE
           # time outing batch queries, to avoid that
           # different join strategy is used for HLL counter
           if ::Feature.enabled?(:postgres_hll_batch_counting)
-            scans_table = ::Security::Scan.arel_table
-            inner_relation = ::Security::Scan.select(:id)
-                               .where(
-                                 to_date_arel_node(Arel.sql('date_range_source'))
-                                   .eq(to_date_arel_node(scans_table[time_period.keys[0]]))
-                               )
-
-            outer_relation = ::Security::Scan
-                               .from("generate_series(
-                                '#{time_period.values[0].first.to_time.to_s(:db)}'::timestamp,
-                                '#{time_period.values[0].last.to_time.to_s(:db)}'::timestamp,
-                                '1 day'::interval) date_range_source")
-
-            start_id = outer_relation
-                         .select("(#{inner_relation.order(id: :asc).limit(1).to_sql})")
-                         .order('1 ASC NULLS LAST')
-                         .first&.id
-
-            finish_id = outer_relation
-                          .select("(#{inner_relation.order(id: :desc).limit(1).to_sql})")
-                          .order('1 DESC NULLS LAST')
-                          .first&.id
+            start_id, finish_id = min_max_security_scan_id(time_period)
 
             ::Security::Scan.scan_types.each do |name, scan_type|
-              relation = ::Security::Scan.joins(:build)
-                           .where(ci_builds: { status: 'success', retried: [nil, false] })
-                           .where('security_scans.scan_type = ?', scan_type)
+              relation = ::Security::Scan
+                           .latest_successful_by_build
+                           .by_scan_types(scan_type)
                            .where(security_scans: time_period)
 
-              pipelines_with_secure_jobs["#{name}_pipeline".to_sym] =
+              metric_name = "#{name}_pipeline"
+              aggregated_metrics_params = {
+                metric_name: metric_name,
+                recorded_at_timestamp: recorded_at,
+                time_period: time_period
+              }
+
+              pipelines_with_secure_jobs[metric_name.to_sym] =
                 if start_id && finish_id
-                  estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start_id, finish: finish_id)
+                  estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start_id, finish: finish_id) do |result|
+                    save_aggregated_metrics(**aggregated_metrics_params.merge({ data: result }))
+                  end
                 else
+                  save_aggregated_metrics(**aggregated_metrics_params.merge({ data: ::Gitlab::Database::PostgresHll::Buckets.new }))
                   0
                 end
             end
@@ -457,6 +472,33 @@ module EE
           end
 
           pipelines_with_secure_jobs
+        end
+
+        def min_max_security_scan_id(time_period)
+          scans_table = ::Security::Scan.arel_table
+          inner_relation = ::Security::Scan.select(:id)
+                             .where(
+                               to_date_arel_node(Arel.sql('date_range_source'))
+                                 .eq(to_date_arel_node(scans_table[time_period.keys[0]]))
+                             )
+
+          outer_relation = ::Security::Scan
+                             .from("generate_series(
+                                '#{time_period.values[0].first.to_time.to_s(:db)}'::timestamp,
+                                '#{time_period.values[0].last.to_time.to_s(:db)}'::timestamp,
+                                '1 day'::interval) date_range_source")
+
+          start_id = outer_relation
+                       .select("(#{inner_relation.order(id: :asc).limit(1).to_sql})")
+                       .order('1 ASC NULLS LAST')
+                       .first&.id
+
+          finish_id = outer_relation
+                        .select("(#{inner_relation.order(id: :desc).limit(1).to_sql})")
+                        .order('1 DESC NULLS LAST')
+                        .first&.id
+
+          [start_id, finish_id]
         end
         # rubocop: enable UsageData/LargeTable
 
@@ -500,29 +542,29 @@ module EE
         def merge_requests_with_overridden_project_rules(time_period = nil)
           sql =
             <<~SQL
-          (EXISTS (
-            SELECT
-              1
-            FROM
-              approval_merge_request_rule_sources
-            WHERE
-              approval_merge_request_rule_sources.approval_merge_request_rule_id = approval_merge_request_rules.id
-              AND NOT EXISTS (
+              (EXISTS (
                 SELECT
                   1
                 FROM
-                  approval_project_rules
+                  approval_merge_request_rule_sources
                 WHERE
-                  approval_project_rules.id = approval_merge_request_rule_sources.approval_project_rule_id
-                  AND EXISTS (
+                  approval_merge_request_rule_sources.approval_merge_request_rule_id = approval_merge_request_rules.id
+                  AND NOT EXISTS (
                     SELECT
                       1
                     FROM
-                      projects
+                      approval_project_rules
                     WHERE
-                      projects.id = approval_project_rules.project_id
-                      AND projects.disable_overriding_approvers_per_merge_request = FALSE))))
-              OR("approval_merge_request_rules"."modified_from_project_rule" = TRUE)
+                      approval_project_rules.id = approval_merge_request_rule_sources.approval_project_rule_id
+                      AND EXISTS (
+                        SELECT
+                          1
+                        FROM
+                          projects
+                        WHERE
+                          projects.id = approval_project_rules.project_id
+                          AND projects.disable_overriding_approvers_per_merge_request = FALSE))))
+                  OR("approval_merge_request_rules"."modified_from_project_rule" = TRUE)
             SQL
 
           distinct_count(

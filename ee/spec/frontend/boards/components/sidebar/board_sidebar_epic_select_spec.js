@@ -5,13 +5,13 @@ import BoardSidebarEpicSelect from 'ee/boards/components/sidebar/board_sidebar_e
 import { stubComponent } from 'helpers/stub_component';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import getters from '~/boards/stores/getters';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import createFlash from '~/flash';
 import {
   mockIssue3 as mockIssueWithoutEpic,
   mockIssueWithEpic,
   mockAssignedEpic,
 } from '../../mock_data';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import createFlash from '~/flash';
 
 jest.mock('~/flash');
 

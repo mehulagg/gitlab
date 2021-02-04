@@ -141,6 +141,7 @@
 setup-test-env:
   extends:
     - .rails-job-base
+    - .setup-test-env-cache
     - .rails:rules:default-refs-code-backstage-qa
     - .use-pg11
   stage: prepare
@@ -180,13 +181,19 @@ setup-test-env:
       - tmp/tests/second_storage/
     when: always
 
-update-rails-cache:
+update-setup-test-env-cache:
   extends:
     - setup-test-env
     - .shared:rules:update-cache
-  artifacts: {}  # This job's purpose is only to update the cache.
+  artifacts:
+    paths: []  # This job's purpose is only to update the cache.
   cache:
     policy: push  # We want to rebuild the cache from scratch to ensure stale dependencies are cleaned up.
+
+update-rails-cache:
+  extends:
+    - update-setup-test-env-cache
+    - .rails-cache
 
 .coverage-base:
   extends:
@@ -375,6 +382,17 @@ db:rollback:
   script:
     - bundle exec rake db:migrate VERSION=20181228175414
     - bundle exec rake db:migrate SKIP_SCHEMA_VERSION_CHECK=true
+
+db:gitlabcom-database-testing:
+  extends: .rails:rules:db:gitlabcom-database-testing
+  stage: test
+  image: ruby:2.7-alpine
+  needs: []
+  allow_failure: true
+  script:
+    - source scripts/utils.sh
+    - install_gitlab_gem
+    - ./scripts/trigger-build gitlab-com-database-testing
 
 gitlab:setup:
   extends: .db-job-base

@@ -11,14 +11,9 @@ module EE
 
     class_methods do
       def inverse_link_type(type)
-        case type
-        when ::IssueLink::TYPE_BLOCKS
-          ::IssueLink::TYPE_IS_BLOCKED_BY
-        when ::IssueLink::TYPE_IS_BLOCKED_BY
-          ::IssueLink::TYPE_BLOCKS
-        else
-          type
-        end
+        return ::IssueLink::TYPE_IS_BLOCKED_BY if type == ::IssueLink::TYPE_BLOCKS
+
+        type
       end
 
       def blocked_issue_ids(issue_ids)

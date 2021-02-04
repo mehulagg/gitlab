@@ -1,6 +1,6 @@
 ---
 stage: none
-group: unassigned
+group: Engineering Productivity
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -44,7 +44,7 @@ The source of truth for these workflow rules is defined in [`.gitlab-ci.yml`](ht
 In general, pipelines for an MR fall into one or more of the following types,
 depending on the changes made in the MR:
 
-- [Docs-only MR pipeline](#docs-only-mr-pipeline): This is typically created for an MR that only changes documentation.
+- [Documentation only MR pipeline](#documentation-only-mr-pipeline): This is typically created for an MR that only changes documentation.
 - [Code-only MR pipeline](#code-only-mr-pipeline): This is typically created for an MR that only changes code, either backend or frontend.
 - [Frontend-only MR pipeline](#frontend-only-mr-pipeline): This is typically created for an MR that only changes frontend code.
 - [QA-only MR pipeline](#qa-only-mr-pipeline): This is typically created for an MR that only changes end to end tests related code.
@@ -53,18 +53,22 @@ We use the [`rules:`](../ci/yaml/README.md#rules) and [`needs:`](../ci/yaml/READ
 to determine the jobs that need to be run in a pipeline. Note that an MR that includes multiple types of changes would
 have a pipelines that include jobs from multiple types (e.g. a combination of docs-only and code-only pipelines).
 
-#### Docs-only MR pipeline
+#### Documentation only MR pipeline
 
-[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/pipelines/135236627):
+[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/-/pipelines/250546928):
 
 ```mermaid
 graph LR
   subgraph "No needed jobs";
     1-1["danger-review (2.3 minutes)"];
     click 1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8100542&udv=0"
-    1-50["docs lint (9 minutes)"];
-    click 1-50 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356757&udv=0"
-  end
+    1-2["docs-lint markdown (1.5 minutes)"];
+    click 1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=10224335&udv=0"
+    1-3["docs-lint links (6 minutes)"];
+    click 1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356757&udv=0"
+    1-4["ui-docs-links lint (2.5 minutes)"];
+    click 1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=10823717&udv=1020379"
+   end
 ```
 
 #### Code-only MR pipeline
@@ -493,6 +497,7 @@ request, be sure to start the `dont-interrupt-me` job before pushing.
 1. We currently have several different caches defined in
    [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/global.gitlab-ci.yml),
    with fixed keys:
+   - `.setup-test-env-cache`.
    - `.rails-cache`.
    - `.static-analysis-cache`.
    - `.coverage-cache`
@@ -500,6 +505,7 @@ request, be sure to start the `dont-interrupt-me` job before pushing.
    - `.yarn-cache`.
    - `.assets-compile-cache` (the key includes `${NODE_ENV}` so it's actually two different caches).
 1. Only 6 specific jobs, running in 2-hourly scheduled pipelines, are pushing (i.e. updating) to the caches:
+   - `update-setup-test-env-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-rails-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-static-analysis-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-coverage-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
@@ -642,6 +648,7 @@ that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-key
 |------------------|-------------|
 | `.default-retry` | Allows a job to [retry](../ci/yaml/README.md#retry) upon `unknown_failure`, `api_failure`, `runner_system_failure`, `job_execution_timeout`, or `stuck_or_timeout_failure`. |
 | `.default-before_script` | Allows a job to use a default `before_script` definition suitable for Ruby/Rails tasks that may need a database running (e.g. tests). |
+| `.setup-test-env-cache` | Allows a job to use a default `cache` definition suitable for setting up test environment for subsequent Ruby/Rails tasks. |
 | `.rails-cache` | Allows a job to use a default `cache` definition suitable for Ruby/Rails tasks. |
 | `.static-analysis-cache` | Allows a job to use a default `cache` definition suitable for static analysis tasks. |
 | `.coverage-cache` | Allows a job to use a default `cache` definition suitable for coverage tasks. |

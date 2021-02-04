@@ -4,7 +4,7 @@ module EE
   module ProjectFeature
     extend ActiveSupport::Concern
 
-    EE_FEATURES = %i(requirements).freeze
+    EE_FEATURES = %i(requirements security_and_compliance).freeze
 
     prepended do
       set_available_features(EE_FEATURES)
@@ -19,6 +19,7 @@ module EE
       end
 
       default_value_for :requirements_access_level, value: Featurable::ENABLED, allows_nil: false
+      default_value_for :security_and_compliance_access_level, value: Featurable::PRIVATE, allows_nil: false
 
       private
 

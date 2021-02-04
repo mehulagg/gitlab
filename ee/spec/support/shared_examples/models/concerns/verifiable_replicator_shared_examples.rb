@@ -18,7 +18,7 @@ RSpec.shared_examples 'a verifiable replicator' do
         expect(described_class).to receive(:enabled?).and_return(true)
       end
 
-      context 'when the verification feature flag is enabled' do
+      context 'when verification_feature_flag_enabled? returns true' do
         it 'returns true' do
           allow(described_class).to receive(:verification_feature_flag_enabled?).and_return(true)
 
@@ -26,7 +26,7 @@ RSpec.shared_examples 'a verifiable replicator' do
         end
       end
 
-      context 'when geo_framework_verification feature flag is disabled' do
+      context 'when verification_feature_flag_enabled? returns false' do
         it 'returns false' do
           allow(described_class).to receive(:verification_feature_flag_enabled?).and_return(false)
 

@@ -2,7 +2,7 @@
   - if params[:glm_source] == 'gitlab.com'
     = link_to s_('Trials|Go back to GitLab'), dashboard_projects_path, class: 'block center py-2'
     .label
-      = s_("Trials|You can always resume this process by selecting your avatar and choosing 'Start a Gold trial'")
+      = s_("Trials|You can always resume this process by selecting your avatar and choosing 'Start an Ultimate trial'")
   - else
     - trial_text = experiment_enabled?(:trimmed_skip_trial_copy) ? s_('Trials|Skip Trial') : s_('Trials|Skip Trial (Continue with Free Account)')
     = link_to trial_text, dashboard_projects_path, class: 'block center py-2'

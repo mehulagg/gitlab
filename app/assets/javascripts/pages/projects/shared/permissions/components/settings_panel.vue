@@ -3,9 +3,8 @@ import { GlIcon, GlSprintf, GlLink, GlFormCheckbox } from '@gitlab/ui';
 
 import settingsMixin from 'ee_else_ce/pages/projects/shared/permissions/mixins/settings_pannel_mixin';
 import { s__ } from '~/locale';
-import projectFeatureSetting from './project_feature_setting.vue';
 import projectFeatureToggle from '~/vue_shared/components/toggle_button.vue';
-import projectSettingRow from './project_setting_row.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   visibilityOptions,
   visibilityLevelDescriptions,
@@ -15,7 +14,8 @@ import {
   featureAccessLevelNone,
 } from '../constants';
 import { toggleHiddenClassBySelector } from '../external';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import projectFeatureSetting from './project_feature_setting.vue';
+import projectSettingRow from './project_setting_row.vue';
 
 const PAGE_FEATURE_ACCESS_LEVEL = s__('ProjectSettings|Everyone');
 
@@ -71,6 +71,11 @@ export default {
       default: false,
     },
     requirementsAvailable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    securityAndComplianceAvailable: {
       type: Boolean,
       required: false,
       default: false,
@@ -141,6 +146,7 @@ export default {
       metricsDashboardAccessLevel: featureAccessLevel.PROJECT_MEMBERS,
       analyticsAccessLevel: featureAccessLevel.EVERYONE,
       requirementsAccessLevel: featureAccessLevel.EVERYONE,
+      securityAndComplianceAccessLevel: featureAccessLevel.PROJECT_MEMBERS,
       operationsAccessLevel: featureAccessLevel.EVERYONE,
       containerRegistryEnabled: true,
       lfsEnabled: true,
@@ -263,6 +269,10 @@ export default {
         this.requirementsAccessLevel = Math.min(
           featureAccessLevel.PROJECT_MEMBERS,
           this.requirementsAccessLevel,
+        );
+        this.securityAndComplianceAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.securityAndComplianceAccessLevel,
         );
         this.operationsAccessLevel = Math.min(
           featureAccessLevel.PROJECT_MEMBERS,
@@ -550,6 +560,17 @@ export default {
           v-model="requirementsAccessLevel"
           :options="featureAccessLevelOptions"
           name="project[project_feature_attributes][requirements_access_level]"
+        />
+      </project-setting-row>
+      <project-setting-row
+        v-if="securityAndComplianceAvailable"
+        :label="s__('ProjectSettings|Security & Compliance')"
+        :help-text="s__('ProjectSettings|Security & Compliance for this project')"
+      >
+        <project-feature-setting
+          v-model="securityAndComplianceAccessLevel"
+          :options="featureAccessLevelOptions"
+          name="project[project_feature_attributes][security_and_compliance_access_level]"
         />
       </project-setting-row>
       <project-setting-row

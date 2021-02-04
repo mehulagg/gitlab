@@ -1,5 +1,4 @@
 <script>
-import Api from 'ee/api';
 import { debounce } from 'lodash';
 import {
   GlDropdown,
@@ -10,6 +9,7 @@ import {
   GlSearchBoxByType,
 } from '@gitlab/ui';
 import { mapGetters } from 'vuex';
+import Api from 'ee/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import { removeFlash } from '../utils';

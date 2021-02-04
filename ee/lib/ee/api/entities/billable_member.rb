@@ -5,6 +5,7 @@ module EE
     module Entities
       class BillableMember < ::API::Entities::UserBasic
         expose :public_email, as: :email
+        expose :last_activity_on
       end
     end
   end

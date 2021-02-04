@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class MergeRequestDiffCommit < ApplicationRecord
+  extend SuppressCompositePrimaryKeyWarning
+
   include BulkInsertSafe
   include ShaAttribute
   include CachedCommit
@@ -32,5 +34,24 @@ class MergeRequestDiffCommit < ApplicationRecord
     end
 
     Gitlab::Database.bulk_insert(self.table_name, rows) # rubocop:disable Gitlab/BulkInsert
+  end
+
+  def self.oldest_merge_request_id_per_commit(project_id, shas)
+    # This method is defined here and not on MergeRequest, otherwise the SHA
+    # values used in the WHERE below won't be encoded correctly.
+    select(['merge_request_diff_commits.sha AS sha', 'min(merge_requests.id) AS merge_request_id'])
+      .joins(:merge_request_diff)
+      .joins(
+        'INNER JOIN merge_requests ' \
+          'ON merge_requests.latest_merge_request_diff_id = merge_request_diffs.id'
+      )
+      .where(sha: shas)
+      .where(
+        merge_requests: {
+          target_project_id: project_id,
+          state_id: MergeRequest.available_states[:merged]
+        }
+      )
+      .group(:sha)
   end
 end

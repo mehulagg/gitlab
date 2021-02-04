@@ -48,6 +48,16 @@ module EE
 
       private
 
+      override :after_default_branch_change
+      def after_default_branch_change(previous_default_branch)
+        ::AuditEventService.new(
+          current_user,
+          project,
+          action: :custom,
+          custom_message: "Default branch changed from #{previous_default_branch} to #{project.default_branch}"
+        ).for_project.security_event
+      end
+
       # A user who changes any aspect of pull mirroring settings must be made
       # into the mirror user, to prevent them from acquiring capabilities
       # owned by the previous user, such as writing to a protected branch.
@@ -71,6 +81,8 @@ module EE
           framework_identifier = settings.delete(:framework)
           if framework_identifier.blank?
             settings.merge!(_destroy: true)
+          elsif ::Feature.enabled?(:ff_custom_compliance_frameworks)
+            settings[:compliance_management_framework] = project.namespace.root_ancestor.compliance_management_frameworks.find(framework_identifier)
           else
             settings[:compliance_management_framework] = ComplianceManagement::Framework.find_or_create_legacy_default_framework(project, framework_identifier)
           end

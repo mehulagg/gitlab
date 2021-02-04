@@ -55,10 +55,6 @@ module Gitlab
         ::Feature.enabled?(:ci_trace_log_invalid_chunks, project, type: :ops, default_enabled: false)
       end
 
-      def self.pipeline_open_merge_requests?(project)
-        ::Feature.enabled?(:ci_pipeline_open_merge_requests, project, default_enabled: true)
-      end
-
       def self.ci_pipeline_editor_page_enabled?(project)
         ::Feature.enabled?(:ci_pipeline_editor_page, project, default_enabled: :yaml)
       end
@@ -70,6 +66,10 @@ module Gitlab
       def self.validate_build_dependencies?(project)
         ::Feature.enabled?(:ci_validate_build_dependencies, default_enabled: :yaml) &&
           ::Feature.disabled?(:ci_validate_build_dependencies_override, project)
+      end
+
+      def self.display_quality_on_mr_diff?(project)
+        ::Feature.enabled?(:codequality_mr_diff, project, default_enabled: false)
       end
     end
   end

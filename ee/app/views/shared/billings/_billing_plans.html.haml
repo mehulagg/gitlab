@@ -1,6 +1,9 @@
 - support_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: EE::CUSTOMER_SUPPORT_URL }
 - support_link_end   = '</a>'.html_safe
 
+= content_for :flash_message do
+  = render_if_exists 'shared/billings/eoa_bronze_plan_banner', namespace: namespace, eoa_bronze_plan_end_date: eoa_bronze_plan_end_date
+
 - if current_plan
   = render 'shared/billings/billing_plan_header', namespace: namespace, plan: current_plan
 

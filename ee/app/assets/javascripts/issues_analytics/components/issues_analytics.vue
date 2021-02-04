@@ -7,9 +7,9 @@ import { s__ } from '~/locale';
 import { getMonthNames } from '~/lib/utils/datetime_utility';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
-import IssuesAnalyticsTable from './issues_analytics_table.vue';
 import FilteredSearchIssueAnalytics from '../filtered_search_issues_analytics';
 import { transformFilters } from '../utils';
+import IssuesAnalyticsTable from './issues_analytics_table.vue';
 
 export default {
   components: {

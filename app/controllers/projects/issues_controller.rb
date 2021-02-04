@@ -9,6 +9,7 @@ class Projects::IssuesController < Projects::ApplicationController
   include IssuesCalendar
   include SpammableActions
   include RecordUserLastActivity
+  include CommentAndCloseFlag
 
   ISSUES_EXCEPT_ACTIONS = %i[index calendar new create bulk_update import_csv export_csv service_desk].freeze
   SET_ISSUEABLES_INDEX_ONLY_ACTIONS = %i[index calendar service_desk].freeze
@@ -59,8 +60,7 @@ class Projects::IssuesController < Projects::ApplicationController
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
 
   before_action :run_null_hypothesis_experiment,
-                only: [:index, :new, :create],
-                if: -> { Feature.enabled?(:gitlab_experiments) }
+                only: [:index, :new, :create]
 
   respond_to :html
 
@@ -105,7 +105,7 @@ class Projects::IssuesController < Projects::ApplicationController
     build_params = issue_create_params.merge(
       merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
       discussion_to_resolve: params[:discussion_to_resolve],
-      confidential: !!Gitlab::Utils.to_boolean(params[:issue][:confidential])
+      confidential: !!Gitlab::Utils.to_boolean(issue_create_params[:confidential])
     )
     service = ::Issues::BuildService.new(project, current_user, build_params)
 

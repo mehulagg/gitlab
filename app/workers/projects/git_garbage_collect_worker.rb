@@ -7,11 +7,6 @@ module Projects
 
     private
 
-    override :default_lease_key
-    def default_lease_key(task, resource)
-      "git_gc:#{task}:#{resource.id}"
-    end
-
     override :find_resource
     def find_resource(id)
       Project.find(id)

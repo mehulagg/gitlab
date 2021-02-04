@@ -1,4 +1,5 @@
 <script>
+import Vue from 'vue';
 import { mapGetters, mapState } from 'vuex';
 import { isEqual } from 'lodash';
 import {
@@ -10,11 +11,11 @@ import {
   GlButton,
 } from '@gitlab/ui';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
+import { STAGE_ACTIONS } from '../constants';
+import { getAllowedEndEvents, getLabelEventsIdentifiers, isLabelEvent } from '../utils';
 import CustomStageFormFields from './create_value_stream_form/custom_stage_fields.vue';
 import { validateStage, initializeFormData } from './create_value_stream_form/utils';
 import { defaultFields, ERRORS, I18N } from './create_value_stream_form/constants';
-import { STAGE_ACTIONS } from '../constants';
-import { getAllowedEndEvents, getLabelEventsIdentifiers, isLabelEvent } from '../utils';
 
 export default {
   components: {
@@ -163,7 +164,7 @@ export default {
         this.fields.startEventIdentifier && this.eventMismatchError
           ? [ERRORS.INVALID_EVENT_PAIRS]
           : newErrors.endEventIdentifier;
-      this.errors = { ...this.errors, ...newErrors };
+      Vue.set(this, 'errors', newErrors);
     },
   },
   I18N,

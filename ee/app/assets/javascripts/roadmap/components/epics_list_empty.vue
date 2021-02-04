@@ -1,19 +1,20 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlSafeHtmlDirective } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 
 import CommonMixin from '../mixins/common_mixin';
 import { emptyStateDefault, emptyStateWithFilters } from '../constants';
 
-import initEpicCreate from '../../epic/epic_bundle';
-
 export default {
   components: {
     GlButton,
   },
+  directives: {
+    SafeHtml: GlSafeHtmlDirective,
+  },
   mixins: [CommonMixin],
+  inject: ['newEpicPath', 'listEpicsPath', 'epicsDocsPath'],
   props: {
     presetType: {
       type: String,
@@ -29,10 +30,6 @@ export default {
     },
     hasFiltersApplied: {
       type: Boolean,
-      required: true,
-    },
-    newEpicEndpoint: {
-      type: String,
       required: true,
     },
     emptyStateIllustrationPath: {
@@ -96,8 +93,7 @@ export default {
             'GroupRoadmap|To view the roadmap, add a start or due date to one of the %{linkStart}child epics%{linkEnd}.',
           ),
           {
-            linkStart:
-              '<a href="https://docs.gitlab.com/ee/user/group/epics/#multi-level-child-epics" target="_blank" rel="noopener noreferrer nofollow">',
+            linkStart: `<a href="${this.epicsDocsPath}#multi-level-child-epics" target="_blank" rel="noopener noreferrer nofollow">`,
             linkEnd: '</a>',
           },
           false,
@@ -116,36 +112,38 @@ export default {
       });
     },
   },
-  mounted() {
-    // If filters are not applied and yet user
-    // is seeing empty state, we need to show
-    // `New epic` button, so boot-up Epic app
-    // in create mode.
-    if (!this.hasFiltersApplied) {
-      initEpicCreate(true);
-    }
-  },
 };
 </script>
 
 <template>
   <div class="row empty-state">
     <div class="col-12">
-      <div class="svg-content"><img :src="emptyStateIllustrationPath" /></div>
+      <div class="svg-content">
+        <img :src="emptyStateIllustrationPath" data-testid="illustration" />
+      </div>
     </div>
     <div class="col-12">
       <div class="text-content">
-        <h4>{{ message }}</h4>
-        <p v-html="subMessage"></p>
-        <div class="text-center">
-          <div
+        <h4 data-testid="title">{{ message }}</h4>
+        <p v-safe-html="subMessage" data-testid="sub-title"></p>
+
+        <div class="gl-text-center">
+          <gl-button
             v-if="!hasFiltersApplied"
-            id="epic-create-root"
-            :data-endpoint="newEpicEndpoint"
-          ></div>
-          <gl-button :title="__('List')" :href="newEpicEndpoint">{{
-            s__('View epics list')
-          }}</gl-button>
+            :href="newEpicPath"
+            variant="success"
+            class="gl-mt-3 gl-sm-mt-0! gl-w-full gl-sm-w-auto!"
+            data-testid="new-epic-button"
+          >
+            {{ __('New epic') }}
+          </gl-button>
+          <gl-button
+            :href="listEpicsPath"
+            class="gl-mt-3 gl-sm-mt-0! gl-sm-ml-3 gl-w-full gl-sm-w-auto!"
+            data-testid="list-epics-button"
+          >
+            {{ __('View epics list') }}
+          </gl-button>
         </div>
       </div>
     </div>

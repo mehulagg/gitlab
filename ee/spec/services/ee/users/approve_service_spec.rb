@@ -23,12 +23,14 @@ RSpec.describe Users::ApproveService do
             expect { operation }.to change { AuditEvent.count }.by(1)
           end
 
-          it 'logs the audit event info' do
+          it 'logs the audit event info', :aggregate_failures do
             operation
 
-            expect(AuditEvent.last).to have_attributes(
-              details: hash_including(custom_message: 'Approved user')
-            )
+            audit_event = AuditEvent.where(author_id: current_user.id).last
+
+            expect(audit_event.ip_address).to eq(current_user.current_sign_in_ip)
+            expect(audit_event.details[:target_details]).to eq(user.username)
+            expect(audit_event.details[:custom_message]).to eq('Instance access request approved')
           end
         end
 
@@ -40,18 +42,6 @@ RSpec.describe Users::ApproveService do
           it 'does not log any audit event' do
             expect { operation }.not_to change { AuditEvent.count }
           end
-        end
-      end
-
-      context 'when not licensed' do
-        before do
-          stub_licensed_features(
-            admin_audit_log: false
-          )
-        end
-
-        it 'does not log any audit event' do
-          expect { operation }.not_to change(AuditEvent, :count)
         end
       end
     end

@@ -1,3 +1,4 @@
+import { GlSprintf, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { useFakeDate } from 'helpers/fake_date';
@@ -44,6 +45,7 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
       provide: {
         projectPath: 'test/project',
       },
+      stubs: { GlSprintf },
     });
   };
 
@@ -56,6 +58,7 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
           environment: 'production',
           interval: 'daily',
           per_page: 100,
+          to: '2015-07-04T00:00:00+0000',
           from,
         },
       })
@@ -68,13 +71,25 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
     mock.restore();
   });
 
+  const findHelpText = () => wrapper.find('[data-testid="help-text"]');
+  const findDocLink = () => findHelpText().find(GlLink);
+
   describe('when there are no network errors', () => {
     beforeEach(async () => {
       mock = new MockAdapter(axios);
 
-      setUpMockDeploymentFrequencies({ from: '2015-06-26T00:00:00+0000', data: lastWeekData });
-      setUpMockDeploymentFrequencies({ from: '2015-06-03T00:00:00+0000', data: lastMonthData });
-      setUpMockDeploymentFrequencies({ from: '2015-04-04T00:00:00+0000', data: last90DaysData });
+      setUpMockDeploymentFrequencies({
+        from: '2015-06-27T00:00:00+0000',
+        data: lastWeekData,
+      });
+      setUpMockDeploymentFrequencies({
+        from: '2015-06-04T00:00:00+0000',
+        data: lastMonthData,
+      });
+      setUpMockDeploymentFrequencies({
+        from: '2015-04-05T00:00:00+0000',
+        data: last90DaysData,
+      });
 
       createComponent();
 
@@ -93,6 +108,18 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
 
     it('does not show a flash message', () => {
       expect(createFlash).not.toHaveBeenCalled();
+    });
+
+    it('renders description text', () => {
+      expect(findHelpText().text()).toMatchInterpolatedText(
+        'These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named production for its data to appear in these charts. Learn more.',
+      );
+    });
+
+    it('renders a link to the documentation', () => {
+      expect(findDocLink().attributes().href).toBe(
+        '/help/user/analytics/ci_cd_analytics.html#deployment-frequency-charts',
+      );
     });
   });
 

@@ -116,6 +116,20 @@ module EE
       tag.div(message.html_safe, data: { testid: 'es-status-marker', enabled: enabled })
     end
 
+    override :search_sort_options
+    def search_sort_options
+      options = []
+      if search_service.use_elasticsearch?
+        options << {
+          title: _('Most relevant'),
+          sortable: false,
+          sortParam: 'relevant'
+        }
+      end
+
+      options + super
+    end
+
     private
 
     def recent_epics_autocomplete(term)

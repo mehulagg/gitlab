@@ -33,7 +33,9 @@ module Pages
       Array.new(@migration_threads) do
         Thread.new do
           while batch = @queue.pop
-            process_batch(batch)
+            Rails.application.executor.wrap do
+              process_batch(batch)
+            end
           end
         end
       end
@@ -47,6 +49,11 @@ module Pages
       end
 
       @logger.info("#{@migrated} projects are migrated successfully, #{@errored} projects failed to be migrated")
+    rescue => e
+      # This method should never raise exception otherwise all threads might be killed
+      # and this will result in queue starving (and deadlock)
+      Gitlab::ErrorTracking.track_exception(e)
+      @logger.error("failed processing a batch: #{e.message}")
     end
 
     def migrate_project(project)

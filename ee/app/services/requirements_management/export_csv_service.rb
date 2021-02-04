@@ -17,14 +17,12 @@ module RequirementsManagement
         'Requirement ID' => 'iid',
         'Title' => 'title',
         'Description' => 'description',
+        'Author' => -> (requirement) { requirement.author&.name },
         'Author Username' => -> (requirement) { requirement.author&.username },
-        'Latest Test Report State' => -> (requirement) { requirement.last_test_report_state&.capitalize },
-        'Latest Test Report Created At (UTC)' => -> (requirement) { latest_test_report_time(requirement) }
+        'Created At (UTC)' => -> (requirement) { requirement.created_at.utc },
+        'State' => -> (requirement) { requirement.last_test_report_state == 'passed' ? 'Satisfied' : '' },
+        'State Updated At (UTC)' => -> (requirement) { requirement.latest_report&.created_at&.utc }
       }
-    end
-
-    def latest_test_report_time(requirement)
-      requirement.test_reports.last&.created_at
     end
   end
 end

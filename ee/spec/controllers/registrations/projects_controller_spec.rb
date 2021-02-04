@@ -72,7 +72,6 @@ RSpec.describe Registrations::ProjectsController do
         expect(subject).to have_gitlab_http_status(:redirect)
         expect(subject).to redirect_to(users_sign_up_experience_level_path(namespace_path: namespace.to_param))
         expect(namespace.projects.find_by_name(s_('Learn GitLab'))).to be_import_finished
-        expect(cookies[:onboarding_issues_settings]).not_to be_nil
       end
 
       context 'when the trial onboarding is active' do
@@ -84,11 +83,10 @@ RSpec.describe Registrations::ProjectsController do
           { learn_gitlab_project_id: project.id, namespace_id: project.namespace_id, project_id: first_project.id }
         end
 
-        it 'creates a new project, a "Learn GitLab - Gold trial" project, does not set a cookie' do
-          expect { subject }.to change { namespace.projects.pluck(:name) }.from([]).to(['New project', s_('Learn GitLab - Gold trial')])
+        it 'creates a new project, a "Learn GitLab - Ultimate trial" project, does not set a cookie' do
+          expect { subject }.to change { namespace.projects.pluck(:name) }.from([]).to(['New project', s_('Learn GitLab - Ultimate trial')])
           expect(subject).to have_gitlab_http_status(:redirect)
-          expect(namespace.projects.find_by_name(s_('Learn GitLab - Gold trial'))).to be_import_finished
-          expect(cookies[:onboarding_issues_settings]).to be_nil
+          expect(namespace.projects.find_by_name(s_('Learn GitLab - Ultimate trial'))).to be_import_finished
         end
 
         it 'records context and redirects to the trial getting started page' do

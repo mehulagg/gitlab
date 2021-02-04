@@ -1,5 +1,5 @@
-import * as types from './mutation_types';
 import { chartKeys } from '../../../constants';
+import * as types from './mutation_types';
 
 export const setInitialData = ({ commit, dispatch }, { skipFetch = false, data }) => {
   commit(types.SET_INITIAL_DATA, data);

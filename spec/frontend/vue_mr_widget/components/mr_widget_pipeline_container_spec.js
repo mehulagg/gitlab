@@ -3,8 +3,8 @@ import MockAdapter from 'axios-mock-adapter';
 import MrWidgetPipelineContainer from '~/vue_merge_request_widget/components/mr_widget_pipeline_container.vue';
 import MrWidgetPipeline from '~/vue_merge_request_widget/components/mr_widget_pipeline.vue';
 import ArtifactsApp from '~/vue_merge_request_widget/components/artifacts_list_app.vue';
-import { mockStore } from '../mock_data';
 import axios from '~/lib/utils/axios_utils';
+import { mockStore } from '../mock_data';
 
 describe('MrWidgetPipelineContainer', () => {
   let wrapper;
@@ -76,6 +76,18 @@ describe('MrWidgetPipelineContainer', () => {
         sourceBranch: mockStore.targetBranch,
         sourceBranchLink: mockStore.targetBranch,
       });
+    });
+
+    it('sanitizes the targetBranch', () => {
+      factory({
+        isPostMerge: true,
+        mr: {
+          ...mockStore,
+          targetBranch: 'Foo<script>alert("XSS")</script>',
+        },
+      });
+
+      expect(wrapper.find(MrWidgetPipeline).props().sourceBranchLink).toBe('Foo');
     });
 
     it('renders deployments', () => {

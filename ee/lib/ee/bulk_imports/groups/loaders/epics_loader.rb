@@ -5,24 +5,26 @@ module EE
     module Groups
       module Loaders
         class EpicsLoader
+          NotAllowedError = Class.new(StandardError)
+
           def initialize(options = {})
             @options = options
           end
 
           def load(context, data)
-            Array.wrap(data['nodes']).each do |args|
-              ::Epics::CreateService.new(
-                context.entity.group,
-                context.current_user,
-                args
-              ).execute
-            end
+            raise NotAllowedError unless authorized?(context)
 
-            context.entity.update_tracker_for(
-              relation: :epics,
-              has_next_page: data.dig('page_info', 'has_next_page'),
-              next_page: data.dig('page_info', 'end_cursor')
-            )
+            # Use `Epic` directly when creating new epics
+            # instead of `Epics::CreateService` since several
+            # attributes like author_id (which might not be current_user),
+            # group_id, parent, children need to be custom set
+            ::Epic.create!(data)
+          end
+
+          private
+
+          def authorized?(context)
+            Ability.allowed?(context.current_user, :admin_epic, context.group)
           end
         end
       end

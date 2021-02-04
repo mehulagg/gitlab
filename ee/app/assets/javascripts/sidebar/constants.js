@@ -1,4 +1,4 @@
-import { __ } from '~/locale';
+import { s__, __ } from '~/locale';
 
 export const healthStatus = {
   ON_TRACK: 'onTrack',
@@ -29,3 +29,10 @@ export const healthStatusForRestApi = {
 };
 
 export const MAX_DISPLAY_WEIGHT = 99999;
+
+export const I18N_DROPDOWN = {
+  dropdownHeaderText: s__('Sidebar|Assign health status'),
+  noStatusText: s__('Sidebar|No status'),
+  noneText: s__('Sidebar|None'),
+  selectPlaceholderText: s__('Select health status'),
+};

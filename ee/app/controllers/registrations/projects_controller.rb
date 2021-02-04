@@ -40,7 +40,7 @@ module Registrations
 
     def create_learn_gitlab_project
       title, filename = if helpers.in_trial_onboarding_flow?
-                          [s_('Learn GitLab - Gold trial'), 'learn_gitlab_gold_trial.tar.gz']
+                          [s_('Learn GitLab - Ultimate trial'), 'learn_gitlab_gold_trial.tar.gz']
                         else
                           [s_('Learn GitLab'), 'learn_gitlab.tar.gz']
                         end
@@ -55,8 +55,6 @@ module Registrations
           name: title
         ).execute
       end
-
-      cookies[:onboarding_issues_settings] = { 'groups#show' => true, 'projects#show' => true, 'issues#index' => true }.to_json if learn_gitlab_project.saved? && !helpers.in_trial_onboarding_flow?
 
       learn_gitlab_project
     end

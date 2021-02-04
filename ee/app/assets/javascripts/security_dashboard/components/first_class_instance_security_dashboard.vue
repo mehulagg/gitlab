@@ -4,11 +4,11 @@ import Filters from 'ee/security_dashboard/components/first_class_vulnerability_
 import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_security_dashboard_projects.query.graphql';
 import createFlash from '~/flash';
 import { createProjectLoadingError } from '../helpers';
+import { vulnerabilitiesSeverityCountScopes } from '../constants';
 import InstanceSecurityVulnerabilities from './first_class_instance_security_dashboard_vulnerabilities.vue';
 import CsvExportButton from './csv_export_button.vue';
 import DashboardNotConfigured from './empty_states/instance_dashboard_not_configured.vue';
 import VulnerabilitiesCountList from './vulnerability_count_list.vue';
-import { vulnerabilitiesSeverityCountScopes } from '../constants';
 
 export default {
   components: {

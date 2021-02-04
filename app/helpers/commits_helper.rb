@@ -105,7 +105,7 @@ module CommitsHelper
       tooltip = _("Browse Directory")
     end
 
-    link_to url, class: "btn btn-default has-tooltip", title: tooltip, data: { container: "body" } do
+    link_to url, class: "btn gl-button btn-default has-tooltip", title: tooltip, data: { container: "body" } do
       sprite_icon('folder-open')
     end
   end
@@ -177,7 +177,7 @@ module CommitsHelper
     external_url = environment.external_url_for(diff_new_path, commit_sha)
     return unless external_url
 
-    link_to(external_url, class: 'btn btn-file-option has-tooltip', target: '_blank', rel: 'noopener noreferrer', title: "View on #{environment.formatted_external_url}", data: { container: 'body' }) do
+    link_to(external_url, class: 'btn gl-button btn-default btn-file-option has-tooltip', target: '_blank', rel: 'noopener noreferrer', title: "View on #{environment.formatted_external_url}", data: { container: 'body' }) do
       sprite_icon('external-link')
     end
   end

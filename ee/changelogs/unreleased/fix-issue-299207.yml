@@ -1,5 +1,0 @@
----
-title: Fix rendering of requirements page for unauthenticated users
-merge_request: 52069
-author:
-type: fixed

@@ -10,6 +10,7 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
 
   before do
     stub_feature_flags(invite_members_group_modal: false)
+    stub_feature_flags(vue_project_members_list: false)
   end
 
   describe 'Share group lock' do

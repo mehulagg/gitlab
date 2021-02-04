@@ -294,6 +294,13 @@ module Gitlab
         end
       end
 
+      # handles unreachable hosts and any other exceptions that may be raised
+      def ping?
+        client.ping
+      rescue
+        false
+      end
+
       private
 
       def additional_index_options

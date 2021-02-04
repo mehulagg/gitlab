@@ -97,7 +97,7 @@ Any settings or feature limits not listed here are using the defaults listed in 
 | -----------             | ----------------- | ------------- |
 | Artifacts maximum size (compressed) | 1G                | 100M          |
 | Artifacts [expiry time](../../ci/yaml/README.md#artifactsexpire_in)   | From June 22, 2020, deleted after 30 days unless otherwise specified (artifacts created before that date have no expiry).           | deleted after 30 days unless otherwise specified    |
-| Scheduled Pipeline Cron | `*/5 * * * *` | `19 * * * *` |
+| Scheduled Pipeline Cron | `*/5 * * * *` | `3-59/10 * * * *` |
 | [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited
 | [Max CI/CD subscriptions to a project](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) | `2` | Unlimited |
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
@@ -170,7 +170,7 @@ Linux shared runners on GitLab.com run in autoscale mode and are powered by Goog
 
 Autoscaling means reduced queue times to spin up CI/CD jobs, and isolated VMs for each project, thus maximizing security. These shared runners are available for users and customers on GitLab.com.
 
-GitLab offers Gold tier capabilities and included CI/CD minutes per group per month for our [Open Source](https://about.gitlab.com/solutions/open-source/join/), [Education](https://about.gitlab.com/solutions/education/), and [Startups](https://about.gitlab.com/solutions/startups/) programs. For private projects, GitLab offers various [plans](https://about.gitlab.com/pricing/), starting with a Free tier.
+GitLab offers Ultimate tier capabilities and included CI/CD minutes per group per month for our [Open Source](https://about.gitlab.com/solutions/open-source/join/), [Education](https://about.gitlab.com/solutions/education/), and [Startups](https://about.gitlab.com/solutions/startups/) programs. For private projects, GitLab offers various [plans](https://about.gitlab.com/pricing/), starting with a Free tier.
 
 All your CI/CD jobs run on [n1-standard-1 instances](https://cloud.google.com/compute/docs/machine-types) with 3.75GB of RAM, CoreOS and the latest Docker Engine
 installed. Instances provide 1 vCPU and 25GB of HDD disk space. The default
@@ -632,7 +632,7 @@ rate limits that are not configurable, and therefore also used on GitLab.com.
 We use [Fluentd](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#fluentd) to parse our logs. Fluentd sends our logs to
 [Stackdriver Logging](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#stackdriver) and [Cloud Pub/Sub](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#cloud-pubsub).
 Stackdriver is used for storing logs long-term in Google Cold Storage (GCS). Cloud Pub/Sub
-is used to forward logs to an [Elastic cluster](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#elastic) using [pubsubbeat](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#pubsubbeat-vms).
+is used to forward logs to an [Elastic cluster](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#elastic) using [`pubsubbeat`](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#pubsubbeat-vms).
 
 You can view more information in our runbooks such as:
 

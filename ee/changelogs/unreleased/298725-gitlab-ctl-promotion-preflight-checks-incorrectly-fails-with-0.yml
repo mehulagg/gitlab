@@ -1,0 +1,6 @@
+---
+title: Fix Geo replication and verification status for replicables with no data to
+  sync
+merge_request: 52253
+author:
+type: fixed

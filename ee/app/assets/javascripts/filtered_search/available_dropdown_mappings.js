@@ -1,8 +1,8 @@
 import DropdownUser from '~/filtered_search/dropdown_user';
 import DropdownNonUser from '~/filtered_search/dropdown_non_user';
-import DropdownWeight from './dropdown_weight';
 import DropdownAjaxFilter from '~/filtered_search/dropdown_ajax_filter';
 import AvailableDropdownMappingsCE from '~/filtered_search/available_dropdown_mappings';
+import DropdownWeight from './dropdown_weight';
 
 export default class AvailableDropdownMappings {
   constructor({

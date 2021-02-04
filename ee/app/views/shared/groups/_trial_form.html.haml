@@ -1,11 +1,11 @@
 .row
   .form-group.col-sm-12
-    = label_tag :trial_toggle, s_('Trial|GitLab Gold trial (optional)'), for: :trial_toggle, class: 'col-form-label'
+    = label_tag :trial_toggle, s_('Trial|GitLab Ultimate trial (optional)'), for: :trial_toggle, class: 'col-form-label'
     %p= html_escape(('Try all GitLab features for free for 30 days.%{br_tag}No credit card required.')) % { br_tag: '<br/>'.html_safe }
     .js-trial-toggle{ data: { active: params[:trial] == 'true' } }
     %p.gl-text-gray-500.gl-mt-3= s_('Trial|We will activate your trial on your group after you complete this step. After 30 days, you can:')
     %ul.gl-pl-5
-      %li.gl-text-gray-500= s_('Trial|Upgrade to Gold to keep using GitLab with advanced features.')
+      %li.gl-text-gray-500= s_('Trial|Upgrade to Ultimate to keep using GitLab with advanced features.')
       %li.gl-text-gray-500= s_('Trial|Continue using the basic features of GitLab for free.')
 .js-trial-form.hidden
   .row

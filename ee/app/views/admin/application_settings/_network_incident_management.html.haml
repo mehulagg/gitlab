@@ -11,9 +11,9 @@
           = _('Helps reduce alert volume (e.g. if creating too many issues)')
     .form-group
       = f.label :throttle_incident_management_notification_period_in_seconds, 'Max requests per period per project', class: 'label-bold'
-      = f.number_field :throttle_incident_management_notification_period_in_seconds, class: 'form-control'
+      = f.number_field :throttle_incident_management_notification_period_in_seconds, class: 'form-control gl-form-input'
     .form-group
       = f.label :throttle_incident_management_notification_per_period, 'Rate limit period in seconds', class: 'label-bold'
-      = f.number_field :throttle_incident_management_notification_per_period, class: 'form-control'
+      = f.number_field :throttle_incident_management_notification_per_period, class: 'form-control gl-form-input'
 
   = f.submit 'Save changes', class: "gl-button btn btn-success"

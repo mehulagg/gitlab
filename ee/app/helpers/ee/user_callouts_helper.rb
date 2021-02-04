@@ -13,6 +13,7 @@ module EE
     NEW_USER_SIGNUPS_CAP_REACHED   = 'new_user_signups_cap_reached'
     PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
     THREAT_MONITORING_INFO         = 'threat_monitoring_info'
+    EOA_BRONZE_PLAN_BANNER         = 'eoa_bronze_plan_banner'
 
     def render_enable_hashed_storage_warning
       return unless show_enable_hashed_storage_warning?
@@ -93,7 +94,20 @@ module EE
       new_user_signups_cap.to_i <= ::User.billable.count
     end
 
+    def show_eoa_bronze_plan_banner?(namespace)
+      return false unless ::Feature.enabled?(:show_billing_eoa_banner)
+      return false unless Date.current < eoa_bronze_plan_end_date
+      return false unless namespace.bronze_plan?
+      return false if user_dismissed?(EOA_BRONZE_PLAN_BANNER)
+
+      (namespace.group? && namespace.has_owner?(current_user.id)) || !namespace.group?
+    end
+
     private
+
+    def eoa_bronze_plan_end_date
+      Date.parse('2022-01-26')
+    end
 
     def hashed_storage_enabled?
       ::Gitlab::CurrentSettings.current_application_settings.hashed_storage_enabled

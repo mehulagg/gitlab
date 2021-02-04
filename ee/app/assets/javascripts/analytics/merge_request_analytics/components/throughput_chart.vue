@@ -6,7 +6,8 @@ import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleto
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import throughputChartQueryBuilder from '../graphql/throughput_chart_query_builder';
 import { THROUGHPUT_CHART_STRINGS } from '../constants';
-import { formatThroughputChartData } from '../utils';
+import { formatThroughputChartData, computeMttmData } from '../utils';
+import ThroughputStats from './throughput_stats.vue';
 
 export default {
   name: 'ThroughputChart',
@@ -14,6 +15,7 @@ export default {
     GlAreaChart,
     GlAlert,
     ChartSkeletonLoader,
+    ThroughputStats,
   },
   inject: ['fullPath'],
   props: {
@@ -88,7 +90,7 @@ export default {
     formattedThroughputChartData() {
       return formatThroughputChartData(this.throughputChartData);
     },
-    chartDataLoading() {
+    isLoading() {
       return !this.hasError && this.$apollo.queries.throughputChartData.loading;
     },
     chartDataAvailable() {
@@ -102,6 +104,9 @@ export default {
           : THROUGHPUT_CHART_STRINGS.NO_DATA,
       };
     },
+    singleStatsValues() {
+      return [computeMttmData(this.throughputChartData)];
+    },
   },
   strings: {
     chartTitle: THROUGHPUT_CHART_STRINGS.CHART_TITLE,
@@ -111,11 +116,12 @@ export default {
 </script>
 <template>
   <div>
+    <throughput-stats :stats="singleStatsValues" :is-loading="isLoading" />
     <h4 data-testid="chartTitle">{{ $options.strings.chartTitle }}</h4>
     <div class="gl-text-gray-500" data-testid="chartDescription">
       {{ $options.strings.chartDescription }}
     </div>
-    <chart-skeleton-loader v-if="chartDataLoading" />
+    <chart-skeleton-loader v-if="isLoading" />
     <gl-area-chart
       v-else-if="chartDataAvailable"
       :data="formattedThroughputChartData"

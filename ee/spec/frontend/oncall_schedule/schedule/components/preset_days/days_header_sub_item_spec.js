@@ -6,11 +6,14 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('ee/oncall_schedules/components/schedule/components/preset_days/days_header_sub_item.vue', () => {
   let wrapper;
+  const mockTimeframeItem = new Date(2021, 0, 13);
 
-  function mountComponent() {
+  function mountComponent({ timeframeItem }) {
     wrapper = extendedWrapper(
       shallowMount(DaysHeaderSubItem, {
-        propsData: {},
+        propsData: {
+          timeframeItem,
+        },
         directives: {
           GlResizeObserver: createMockDirective(),
         },
@@ -24,7 +27,7 @@ describe('ee/oncall_schedules/components/schedule/components/preset_days/days_he
   }
 
   beforeEach(() => {
-    mountComponent();
+    mountComponent({ timeframeItem: mockTimeframeItem });
   });
 
   afterEach(() => {
@@ -46,7 +49,8 @@ describe('ee/oncall_schedules/components/schedule/components/preset_days/days_he
       expect(wrapper.find('.sublabel-value').exists()).toBe(true);
     });
 
-    it('renders element with class `current-day-indicator-header`', () => {
+    it('renders element with class `current-day-indicator-header` when the date is today', () => {
+      mountComponent({ timeframeItem: new Date() });
       expect(findDaysHeaderCurrentIndicator().exists()).toBe(true);
     });
   });

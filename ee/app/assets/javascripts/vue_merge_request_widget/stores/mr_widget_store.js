@@ -1,7 +1,7 @@
 import CEMergeRequestStore from '~/vue_merge_request_widget/stores/mr_widget_store';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { mapApprovalsResponse, mapApprovalRulesResponse } from '../mappers';
 import { s__ } from '~/locale';
+import { mapApprovalsResponse, mapApprovalRulesResponse } from '../mappers';
 
 export default class MergeRequestStore extends CEMergeRequestStore {
   constructor(data) {

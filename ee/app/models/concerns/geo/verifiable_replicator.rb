@@ -19,17 +19,9 @@ module Geo
         enabled? && verification_feature_flag_enabled?
       end
 
-      # Overridden by PackageFileReplicator with its own feature flag so we can
-      # release verification for PackageFileReplicator alone, at first.
-      # This feature flag name is not dynamic like the replication feature flag,
-      # because Geo is proliferating too many permanent feature flags, and if
-      # there is a serious bug with verification that needs to be shut off
-      # immediately, then the replication feature flag can be disabled until it
-      # is fixed. This feature flag is intended to be removed after it is
-      # defaulted on.
-      # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46998 for more
+      # Override this to check a feature flag
       def verification_feature_flag_enabled?
-        Feature.enabled?(:geo_framework_verification)
+        false
       end
 
       # Called every minute by VerificationCronWorker
@@ -107,6 +99,22 @@ module Geo
         return unless verification_enabled?
 
         model.available_replicables.verification_failed.count
+      end
+
+      def verified_count
+        # When verification is disabled, this returns nil.
+        # Bonus: This causes the progress bar to be hidden.
+        return unless verification_enabled?
+
+        registry_class.synced.verification_succeeded.count
+      end
+
+      def verification_failed_count
+        # When verification is disabled, this returns nil.
+        # Bonus: This causes the progress bar to be hidden.
+        return unless verification_enabled?
+
+        registry_class.synced.verification_failed.count
       end
     end
 
