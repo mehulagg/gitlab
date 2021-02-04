@@ -59,12 +59,10 @@ Dark mode is available as a navigation theme, for MVC and compatibility reasons.
 the future, we plan to make it configurable in its own section along with support for
 [different navigation themes](https://gitlab.com/gitlab-org/gitlab/-/issues/219512).
 
-NOTE:
-Dark theme currently only works with the 'Dark' syntax highlighting.
+The Dark theme only works with the Dark syntax highlighting.
 
 ## Syntax highlighting theme
 
-NOTE:
 GitLab uses the [rouge Ruby library](http://rouge.jneen.net/ "Rouge website")
 for syntax highlighting outside of any Editor context. The WebIDE (like Snippets)
 uses [Monaco Editor](https://microsoft.github.io/monaco-editor/) and it's provided [Monarch](https://microsoft.github.io/monaco-editor/monarch.html) library for
@@ -88,8 +86,7 @@ The default syntax theme is White, and you can choose among 5 different themes:
 
 ![Profile preferences syntax highlighting themes](img/profile-preferences-syntax-themes.png)
 
-[Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2389) in 13.0, the theme
-you choose also applies to the [Web IDE](../project/web_ide/index.md)'s entire screen and [Snippets](../snippets.md).
+Introduced in GitLab 13.6, the themes [Solarized](https://gitlab.com/gitlab-org/gitlab/-/issues/221034) and [Monokai](https://gitlab.com/gitlab-org/gitlab/-/issues/221034) also apply to the [Web IDE](../project/web_ide/index.md) and [Snippets](../snippets.md).
 
 ## Behavior
 
