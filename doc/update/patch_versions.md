@@ -5,9 +5,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 comments: false
 ---
 
-# Universal update guide for patch versions
+# Universal update guide for patch versions of source installations
 
-## Select Source Version to Install
+## Select Version to Install
 
 Make sure you view [this update guide](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/update/patch_versions.md) from the tag (version) of GitLab you would like to install.
 In most cases this should be the highest numbered production tag (without `rc` in it).
