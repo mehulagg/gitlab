@@ -483,8 +483,8 @@ POST /namespaces/:id/gitlab_subscription
 
 | Attribute   | Type    | Required | Description |
 |:------------|:--------|:---------|:------------|
-| `start_date` | date   | yes       | Start date of current subscription |
-| `end_date`  | date    | no       | End date of current subscription |
+| `start_date` | date   | yes       | Start date of subscription |
+| `end_date`  | date    | no       | End date of subscription |
 | `plan_code` | string  | no       | Name of plan |
 | `seats`     | integer | no       | Number of seats in subscription |
 | `max_seats_used` | integer | no  | Highest number of active users in the last month |
@@ -534,8 +534,8 @@ PUT /namespaces/:id/gitlab_subscription
 
 | Attribute   | Type    | Required | Description |
 |:------------|:--------|:---------|:------------|
-| `start_date` | date   | no       | Start date of current subscription |
-| `end_date`  | date    | no       | End date of current subscription |
+| `start_date` | date   | no       | Start date of subscription |
+| `end_date`  | date    | no       | End date of subscription |
 | `plan_code` | string  | no       | Name of plan |
 | `seats`     | integer | no       | Number of seats in subscription |
 | `max_seats_used` | integer | no  | Highest number of active users in the last month |
