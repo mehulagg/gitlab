@@ -15,7 +15,8 @@ module Packages
         package_params = {
           name: params[:package_name],
           version: params[:package_version],
-          build: params[:build]
+          build: params[:build],
+          status: params[:status].to_sym
         }
 
         package = ::Packages::Generic::FindOrCreatePackageService

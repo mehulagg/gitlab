@@ -32,6 +32,7 @@ module Packages
       packages = filter_with_version(packages)
       packages = filter_by_package_type(packages)
       packages = filter_by_package_name(packages)
+      packages = filter_by_status(packages)
       packages
     end
 
@@ -71,6 +72,12 @@ module Packages
       return packages unless params[:package_name].present?
 
       packages.search_by_name(params[:package_name])
+    end
+
+    def filter_by_package_name(packages)
+      return packages unless params[:status].present?
+
+      packages.with_status(params[:status])
     end
 
     def filter_with_version(packages)

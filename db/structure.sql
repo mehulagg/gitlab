@@ -15160,7 +15160,8 @@ CREATE TABLE packages_packages (
     name character varying NOT NULL,
     version character varying,
     package_type smallint NOT NULL,
-    creator_id integer
+    creator_id integer,
+    status smallint DEFAULT 1 NOT NULL
 );
 
 CREATE SEQUENCE packages_packages_id_seq
