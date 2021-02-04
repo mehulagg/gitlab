@@ -384,7 +384,7 @@ only. For example:
 ## `audit_json.log` **(FREE)**
 
 NOTE:
-GitLab Core tracks a small number of different audit events.
+GitLab Free tracks a small number of different audit events.
 [GitLab Premium](https://about.gitlab.com/pricing/) tracks many more.
 
 This file lives in `/var/log/gitlab/gitlab-rails/audit_json.log` for
