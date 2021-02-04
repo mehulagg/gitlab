@@ -3,24 +3,26 @@
 require 'spec_helper'
 
 RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
+  let(:cursor) { 'cursor' }
   let(:user) { create(:user) }
   let(:group) { create(:group) }
-  let(:cursor) { 'cursor' }
+  let(:bulk_import) { create(:bulk_import, user: user) }
   let(:entity) do
     create(
       :bulk_import_entity,
+      group: group,
+      bulk_import: bulk_import,
       source_full_path: 'source/full/path',
       destination_name: 'My Destination Group',
-      destination_namespace: group.full_path,
-      group: group
+      destination_namespace: group.full_path
     )
   end
 
-  let(:context) do
-    BulkImports::Pipeline::Context.new(
-      current_user: user,
-      entity: entity
-    )
+  let(:context) { BulkImports::Pipeline::Context.new(entity) }
+
+  before do
+    stub_licensed_features(epics: true)
+    group.add_owner(user)
   end
 
   describe '#run' do
@@ -87,7 +89,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
     it 'has transformers' do
       expect(described_class.transformers)
         .to contain_exactly(
-          { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil }
+          { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil },
+          { klass: EE::BulkImports::Groups::Transformers::EpicAttributesTransformer, options: nil }
         )
     end
 
@@ -101,7 +104,10 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
       {
         'title' => 'epic1',
         'state' => 'closed',
-        'confidential' => true
+        'confidential' => true,
+        'labels' => {
+          'nodes' => []
+        }
       }
     ]
 

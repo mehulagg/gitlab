@@ -288,23 +288,23 @@ RSpec.describe 'Pipelines', :js do
         end
 
         it 'has a dropdown with play button' do
-          expect(page).to have_selector('.dropdown-new.btn.btn-default .icon-play')
+          expect(page).to have_selector('[data-testid="pipelines-manual-actions-dropdown"] [data-testid="play-icon"]')
         end
 
         it 'has link to the manual action' do
-          find('.js-pipeline-dropdown-manual-actions').click
+          find('[data-testid="pipelines-manual-actions-dropdown"]').click
 
           expect(page).to have_button('manual build')
         end
 
         context 'when manual action was played' do
           before do
-            find('.js-pipeline-dropdown-manual-actions').click
+            find('[data-testid="pipelines-manual-actions-dropdown"]').click
             click_button('manual build')
           end
 
           it 'enqueues manual action job' do
-            expect(page).to have_selector('.js-pipeline-dropdown-manual-actions:disabled')
+            expect(page).to have_selector('[data-testid="pipelines-manual-actions-dropdown"] .gl-dropdown-toggle:disabled')
           end
         end
       end
@@ -322,11 +322,11 @@ RSpec.describe 'Pipelines', :js do
         end
 
         it 'has a dropdown for actionable jobs' do
-          expect(page).to have_selector('.dropdown-new.btn.btn-default .icon-play')
+          expect(page).to have_selector('[data-testid="pipelines-manual-actions-dropdown"] [data-testid="play-icon"]')
         end
 
         it "has link to the delayed job's action" do
-          find('.js-pipeline-dropdown-manual-actions').click
+          find('[data-testid="pipelines-manual-actions-dropdown"]').click
 
           time_diff = [0, delayed_job.scheduled_at - Time.now].max
           expect(page).to have_button('delayed job 1')
@@ -342,7 +342,7 @@ RSpec.describe 'Pipelines', :js do
           end
 
           it "shows 00:00:00 as the remaining time" do
-            find('.js-pipeline-dropdown-manual-actions').click
+            find('[data-testid="pipelines-manual-actions-dropdown"]').click
 
             expect(page).to have_content("00:00:00")
           end
@@ -350,7 +350,7 @@ RSpec.describe 'Pipelines', :js do
 
         context 'when user played a delayed job immediately' do
           before do
-            find('.js-pipeline-dropdown-manual-actions').click
+            find('[data-testid="pipelines-manual-actions-dropdown"]').click
             page.accept_confirm { click_button('delayed job 1') }
             wait_for_requests
           end
@@ -525,24 +525,26 @@ RSpec.describe 'Pipelines', :js do
                                       name: 'build')
         end
 
+        dropdown_toggle_selector = '[data-testid="mini-pipeline-graph-dropdown-toggle"]'
+
         before do
           visit_project_pipelines
         end
 
         it 'renders a mini pipeline graph' do
           expect(page).to have_selector('[data-testid="widget-mini-pipeline-graph"]')
-          expect(page).to have_selector('.js-builds-dropdown-button')
+          expect(page).to have_selector(dropdown_toggle_selector)
         end
 
         context 'when clicking a stage badge' do
           it 'opens a dropdown' do
-            find('.js-builds-dropdown-button').click
+            find(dropdown_toggle_selector).click
 
             expect(page).to have_link build.name
           end
 
           it 'is possible to cancel pending build' do
-            find('.js-builds-dropdown-button').click
+            find(dropdown_toggle_selector).click
             find('.js-ci-action').click
             wait_for_requests
 
@@ -558,7 +560,7 @@ RSpec.describe 'Pipelines', :js do
           end
 
           it 'displays the failure reason' do
-            find('.js-builds-dropdown-button').click
+            find(dropdown_toggle_selector).click
 
             within('.js-builds-dropdown-list') do
               build_element = page.find('.mini-pipeline-graph-dropdown-item')

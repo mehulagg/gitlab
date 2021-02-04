@@ -3,19 +3,19 @@ import VueApollo from 'vue-apollo';
 import TestCoverageTable from 'ee/analytics/repository_analytics/components/test_coverage_table.vue';
 import getGroupProjects from 'ee/analytics/repository_analytics/graphql/queries/get_group_projects.query.graphql';
 import getProjectsTestCoverage from 'ee/analytics/repository_analytics/graphql/queries/get_projects_test_coverage.query.graphql';
-import { useFakeDate } from 'helpers/fake_date';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import { getTimeago } from '~/lib/utils/datetime_utility';
 import Api from '~/api';
+import { defaultTestCoverageTable, projects } from '../mock_data';
 
 jest.mock('~/api.js');
 
 const localVue = createLocalVue();
 
 describe('Test coverage table component', () => {
-  useFakeDate();
   let wrapper;
-  let fakeApollo;
+  const timeago = getTimeago();
 
   const findEmptyState = () => wrapper.find('[data-testid="test-coverage-table-empty-state"]');
   const findLoadingState = () => wrapper.find('[data-testid="test-coverage-loading-state"');
@@ -26,70 +26,35 @@ describe('Test coverage table component', () => {
   const findProjectCountById = (id) => wrapper.find(`[data-testid="${id}-count"`);
   const findProjectDateById = (id) => wrapper.find(`[data-testid="${id}-date"`);
 
-  const mockQueryDataNode = {
-    fullPath: 'test/test',
-    name: 'test',
-    id: 1,
-    repository: {
-      rootRef: 'master',
-    },
-    codeCoverageSummary: {
-      averageCoverage: '1.45',
-      coverageCount: '1',
-      lastUpdatedOn: new Date().toISOString(),
-    },
-  };
-
-  const createComponent = ({ data = {}, mountFn = shallowMount } = {}) => {
-    wrapper = mountFn(TestCoverageTable, {
-      localVue,
-      data() {
-        return {
-          allCoverageData: [],
-          allProjectsSelected: false,
-          hasError: false,
-          isLoading: false,
-          projectIds: {},
-          ...data,
-        };
-      },
-      mocks: {
-        $apollo: {
-          queries: {
-            projects: {
-              query: jest.fn().mockResolvedValue(),
-            },
-          },
-        },
-      },
-    });
-  };
-
-  const createComponentWithApollo = ({
-    data = {},
-    mountFn = shallowMount,
-    queryData = {},
-    glFeatures = {},
-  } = {}) => {
+  const createMockApolloProvider = () => {
     localVue.use(VueApollo);
-    fakeApollo = createMockApollo([
-      [getGroupProjects, jest.fn().mockResolvedValue()],
-      [getProjectsTestCoverage, jest.fn().mockResolvedValue(queryData)],
-    ]);
 
+    return createMockApollo([
+      [getGroupProjects, jest.fn().mockResolvedValue()],
+      [
+        getProjectsTestCoverage,
+        jest.fn().mockResolvedValue({
+          data: { projects: { nodes: projects } },
+        }),
+      ],
+    ]);
+  };
+
+  const createComponent = ({
+    glFeatures = {},
+    mockApollo,
+    mockData = {},
+    mountFn = shallowMount,
+  } = {}) => {
     wrapper = mountFn(TestCoverageTable, {
       localVue,
       data() {
         return {
-          allCoverageData: [],
-          allProjectsSelected: false,
-          hasError: false,
-          isLoading: false,
-          projectIds: {},
-          ...data,
+          ...defaultTestCoverageTable,
+          ...mockData,
         };
       },
-      apolloProvider: fakeApollo,
+      apolloProvider: mockApollo,
       provide: {
         glFeatures,
       },
@@ -104,13 +69,14 @@ describe('Test coverage table component', () => {
   describe('when code coverage is empty', () => {
     it('renders empty state', () => {
       createComponent();
+
       expect(findEmptyState().exists()).toBe(true);
     });
   });
 
   describe('when query is loading', () => {
     it('renders loading state', () => {
-      createComponent({ data: { isLoading: true } });
+      createComponent({ mockData: { isLoading: true } });
 
       expect(findLoadingState().exists()).toBe(true);
     });
@@ -118,36 +84,15 @@ describe('Test coverage table component', () => {
 
   describe('when code coverage is available', () => {
     it('renders coverage table', () => {
-      const fullPath = 'gitlab-org/gitlab';
-      const id = 'gid://gitlab/Project/1';
-      const name = 'GitLab';
-      const rootRef = 'master';
-      const averageCoverage = '74.35';
-      const coverageCount = '5';
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-
+      const {
+        id,
+        name,
+        codeCoverageSummary: { averageCoverage, coverageCount, lastUpdatedOn },
+      } = projects[0];
       createComponent({
-        data: {
-          allCoverageData: [
-            {
-              fullPath,
-              id,
-              name,
-              repository: {
-                rootRef,
-              },
-              codeCoveragePath: '#',
-              codeCoverageSummary: {
-                averageCoverage,
-                coverageCount,
-                lastUpdatedOn: yesterday.toISOString(),
-              },
-            },
-          ],
-          projectIds: {
-            [id]: true,
-          },
+        mockData: {
+          allCoverageData: projects,
+          projectIds: { [id]: true },
         },
         mountFn: mount,
       });
@@ -156,35 +101,35 @@ describe('Test coverage table component', () => {
       expect(findProjectNameById(id).text()).toBe(name);
       expect(findProjectAverageById(id).text()).toBe(`${averageCoverage}%`);
       expect(findProjectCountById(id).text()).toBe(coverageCount);
-      expect(findProjectDateById(id).text()).toBe('1 day ago');
+      expect(findProjectDateById(id).text()).toBe(timeago.format(lastUpdatedOn));
     });
 
     it('sorts the table by the most recently updated report', () => {
-      const today = new Date();
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const allCoverageData = [
-        {
-          ...mockQueryDataNode,
-          name: 'should be last',
-          codeCoverageSummary: {
-            ...mockQueryDataNode.codeCoverageSummary,
-            lastUpdatedOn: yesterday.toISOString(),
-          },
-        },
-        {
-          ...mockQueryDataNode,
-          name: 'should be first',
-          id: 2,
-          codeCoverageSummary: {
-            ...mockQueryDataNode.codeCoverageSummary,
-            lastUpdatedOn: today.toISOString(),
-          },
-        },
-      ];
+      const project = projects[0];
+      const today = '2021-01-30T20:34:14.302Z';
+      const yesterday = '2021-01-29T20:34:14.302Z';
       createComponent({
-        data: {
-          allCoverageData,
+        mockData: {
+          allCoverageData: [
+            {
+              ...project,
+              name: 'should be last',
+              id: 1,
+              codeCoverageSummary: {
+                ...project.codeCoverageSummary,
+                lastUpdatedOn: yesterday,
+              },
+            },
+            {
+              ...project,
+              name: 'should be first',
+              id: 2,
+              codeCoverageSummary: {
+                ...project.codeCoverageSummary,
+                lastUpdatedOn: today,
+              },
+            },
+          ],
           projectIds: {
             1: true,
             2: true,
@@ -199,32 +144,22 @@ describe('Test coverage table component', () => {
     });
 
     it('renders the correct link', async () => {
-      const id = 1;
-      const fullPath = 'test/test';
-      const rootRef = 'master';
+      const {
+        id,
+        fullPath,
+        repository: { rootRef },
+      } = projects[0];
       const expectedPath = `/${fullPath}/-/graphs/${rootRef}/charts`;
-      createComponentWithApollo({
-        data: {
+      createComponent({
+        mockApollo: createMockApolloProvider(),
+        mockData: {
           projectIds: { [id]: true },
-        },
-        queryData: {
-          data: {
-            projects: {
-              nodes: [
-                {
-                  ...mockQueryDataNode,
-                  fullPath,
-                  id,
-                  repository: {
-                    rootRef,
-                  },
-                },
-              ],
-            },
-          },
         },
         mountFn: mount,
       });
+      // We have to wait for apollo to make the mock query and fill the table before
+      // we can click on the project link inside the table. Neither `runOnlyPendingTimers`
+      // nor `waitForPromises` work on their own to accomplish this.
       jest.runOnlyPendingTimers();
       await waitForPromises();
 
@@ -235,25 +170,14 @@ describe('Test coverage table component', () => {
     describe('with usage metrics', () => {
       describe('with :usageDataITestingGroupCodeCoverageProjectClickTotal enabled', () => {
         it('tracks i_testing_group_code_coverage_project_click_total metric', async () => {
-          const id = 1;
-          createComponentWithApollo({
-            data: {
+          const { id } = projects[0];
+          createComponent({
+            glFeatures: { usageDataITestingGroupCodeCoverageProjectClickTotal: true },
+            mockApollo: createMockApolloProvider(),
+            mockData: {
               projectIds: { [id]: true },
             },
-            queryData: {
-              data: {
-                projects: {
-                  nodes: [
-                    {
-                      ...mockQueryDataNode,
-                      id,
-                    },
-                  ],
-                },
-              },
-            },
             mountFn: mount,
-            glFeatures: { usageDataITestingGroupCodeCoverageProjectClickTotal: true },
           });
           // We have to wait for apollo to make the mock query and fill the table before
           // we can click on the project link inside the table. Neither `runOnlyPendingTimers`
@@ -271,25 +195,14 @@ describe('Test coverage table component', () => {
 
       describe('with :usageDataITestingGroupCodeCoverageProjectClickTotal disabled', () => {
         it('does not track i_testing_group_code_coverage_project_click_total metric', async () => {
-          const id = 1;
-          createComponentWithApollo({
-            data: {
+          const { id } = projects[0];
+          createComponent({
+            glFeatures: { usageDataITestingGroupCodeCoverageProjectClickTotal: false },
+            mockApollo: createMockApolloProvider(),
+            mockData: {
               projectIds: { [id]: true },
             },
-            queryData: {
-              data: {
-                projects: {
-                  nodes: [
-                    {
-                      ...mockQueryDataNode,
-                      id,
-                    },
-                  ],
-                },
-              },
-            },
             mountFn: mount,
-            glFeatures: { usageDataITestingGroupCodeCoverageProjectClickTotal: false },
           });
           // We have to wait for apollo to make the mock query and fill the table before
           // we can click on the project link inside the table. Neither `runOnlyPendingTimers`
@@ -301,35 +214,6 @@ describe('Test coverage table component', () => {
           expect(Api.trackRedisHllUserEvent).not.toHaveBeenCalled();
         });
       });
-    });
-  });
-
-  describe('when selected project has no coverage', () => {
-    it('does not render the table', async () => {
-      const id = 1;
-      createComponentWithApollo({
-        data: {
-          projectIds: { [id]: true },
-        },
-        queryData: {
-          data: {
-            projects: {
-              nodes: [
-                {
-                  ...mockQueryDataNode,
-                  id,
-                  codeCoverageSummary: null,
-                },
-              ],
-            },
-          },
-        },
-        mountFn: mount,
-      });
-      jest.runOnlyPendingTimers();
-      await waitForPromises();
-
-      expect(findTable().exists()).toBe(false);
     });
   });
 });

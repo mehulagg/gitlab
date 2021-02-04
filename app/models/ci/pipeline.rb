@@ -803,7 +803,7 @@ module Ci
           variables.concat(merge_request.predefined_variables)
         end
 
-        if Gitlab::Ci::Features.pipeline_open_merge_requests?(project) && open_merge_requests_refs.any?
+        if open_merge_requests_refs.any?
           variables.append(key: 'CI_OPEN_MERGE_REQUESTS', value: open_merge_requests_refs.join(','))
         end
 
@@ -960,7 +960,7 @@ module Ci
 
     def detailed_status(current_user)
       Gitlab::Ci::Status::Pipeline::Factory
-        .new(self, current_user)
+        .new(self.present, current_user)
         .fabricate!
     end
 
@@ -1003,8 +1003,8 @@ module Ci
       has_reports?(Ci::JobArtifact.coverage_reports)
     end
 
-    def has_codequality_reports?
-      pipeline_artifacts&.has_report?(:code_quality)
+    def has_codequality_mr_diff_report?
+      pipeline_artifacts&.has_report?(:code_quality_mr_diff)
     end
 
     def can_generate_codequality_reports?

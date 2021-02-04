@@ -58,6 +58,7 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
           environment: 'production',
           interval: 'daily',
           per_page: 100,
+          to: '2015-07-04T00:00:00+0000',
           from,
         },
       })
@@ -77,9 +78,18 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
     beforeEach(async () => {
       mock = new MockAdapter(axios);
 
-      setUpMockDeploymentFrequencies({ from: '2015-06-26T00:00:00+0000', data: lastWeekData });
-      setUpMockDeploymentFrequencies({ from: '2015-06-03T00:00:00+0000', data: lastMonthData });
-      setUpMockDeploymentFrequencies({ from: '2015-04-04T00:00:00+0000', data: last90DaysData });
+      setUpMockDeploymentFrequencies({
+        from: '2015-06-27T00:00:00+0000',
+        data: lastWeekData,
+      });
+      setUpMockDeploymentFrequencies({
+        from: '2015-06-04T00:00:00+0000',
+        data: lastMonthData,
+      });
+      setUpMockDeploymentFrequencies({
+        from: '2015-04-05T00:00:00+0000',
+        data: last90DaysData,
+      });
 
       createComponent();
 

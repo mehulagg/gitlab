@@ -7,11 +7,13 @@ import Api from 'ee/api';
 import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Poll from '~/lib/utils/poll';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
 import RelatedIssues from './related_issues.vue';
+import RelatedJiraIssues from './related_jira_issues.vue';
 import HistoryEntry from './history_entry.vue';
 import StatusDescription from './status_description.vue';
 
@@ -22,8 +24,15 @@ export default {
     MergeRequestNote,
     HistoryEntry,
     RelatedIssues,
+    RelatedJiraIssues,
     GlIcon,
     StatusDescription,
+  },
+  mixins: [glFeatureFlagMixin()],
+  inject: {
+    createJiraIssueUrl: {
+      default: '',
+    },
   },
   props: {
     vulnerability: {
@@ -207,7 +216,9 @@ export default {
       />
     </div>
 
+    <related-jira-issues v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl" />
     <related-issues
+      v-else
       :endpoint="issueLinksEndpoint"
       :can-modify-related-issues="vulnerability.canModifyRelatedIssues"
       :project-path="project.url"

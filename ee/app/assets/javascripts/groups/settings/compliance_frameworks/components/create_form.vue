@@ -1,12 +1,14 @@
 <script>
 import { visitUrl } from '~/lib/utils/url_utility';
-import { s__ } from '~/locale';
 import * as Sentry from '~/sentry/wrapper';
 import createComplianceFrameworkMutation from '../graphql/queries/create_compliance_framework.mutation.graphql';
+import { initialiseFormData, SAVE_ERROR } from '../constants';
 import SharedForm from './shared_form.vue';
+import FormStatus from './form_status.vue';
 
 export default {
   components: {
+    FormStatus,
     SharedForm,
   },
   props: {
@@ -22,11 +24,13 @@ export default {
   data() {
     return {
       errorMessage: '',
+      formData: initialiseFormData(),
+      saving: false,
     };
   },
   computed: {
     isLoading() {
-      return this.$apollo.loading;
+      return this.$apollo.loading || this.saving;
     },
   },
   methods: {
@@ -34,17 +38,21 @@ export default {
       this.errorMessage = userFriendlyText;
       Sentry.captureException(error);
     },
-    async onSubmit(formData) {
+    async onSubmit() {
+      this.saving = true;
+      this.errorMessage = '';
+
       try {
+        const { name, description, color } = this.formData;
         const { data } = await this.$apollo.mutate({
           mutation: createComplianceFrameworkMutation,
           variables: {
             input: {
               namespacePath: this.groupPath,
               params: {
-                name: formData.name,
-                description: formData.description,
-                color: formData.color,
+                name,
+                description,
+                color,
               },
             },
           },
@@ -55,26 +63,26 @@ export default {
         if (error) {
           this.setError(new Error(error), error);
         } else {
+          this.saving = false;
           visitUrl(this.groupEditPath);
         }
       } catch (e) {
-        this.setError(e, this.$options.i18n.saveError);
+        this.setError(e, SAVE_ERROR);
       }
+
+      this.saving = false;
     },
-  },
-  i18n: {
-    saveError: s__(
-      'ComplianceFrameworks|Unable to save this compliance framework. Please try again',
-    ),
   },
 };
 </script>
 <template>
-  <shared-form
-    :group-edit-path="groupEditPath"
-    :loading="isLoading"
-    :render-form="!isLoading"
-    :error="errorMessage"
-    @submit="onSubmit"
-  />
+  <form-status :loading="isLoading" :error="errorMessage">
+    <shared-form
+      :group-edit-path="groupEditPath"
+      :name.sync="formData.name"
+      :description.sync="formData.description"
+      :color.sync="formData.color"
+      @submit="onSubmit"
+    />
+  </form-status>
 </template>

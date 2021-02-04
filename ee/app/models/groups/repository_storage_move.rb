@@ -17,7 +17,11 @@ module Groups
 
     override :schedule_repository_storage_update_worker
     def schedule_repository_storage_update_worker
-      # No-op. It will be implemented in https://gitlab.com/gitlab-org/gitlab/-/issues/299059
+      Groups::UpdateRepositoryStorageWorker.perform_async(
+        group_id,
+        destination_storage_name,
+        id
+      )
     end
 
     private

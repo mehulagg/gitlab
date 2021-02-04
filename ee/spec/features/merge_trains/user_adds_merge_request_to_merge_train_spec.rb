@@ -69,11 +69,11 @@ RSpec.describe 'User adds a merge request to a merge train', :js do
       end
 
       it 'displays pipeline control' do
-        expect(page).to have_selector('.mini-pipeline-graph-dropdown-toggle')
+        expect(page).to have_selector('[data-testid="mini-pipeline-graph-dropdown-toggle"]')
       end
 
       it 'does not allow retry for merge train pipeline' do
-        find('.mini-pipeline-graph-dropdown-toggle').click
+        find('[data-testid="mini-pipeline-graph-dropdown-toggle"]').click
         page.within '.ci-job-component' do
           expect(page).to have_selector('.ci-status-icon')
           expect(page).not_to have_selector('.retry')

@@ -13,6 +13,7 @@ RSpec.describe GitlabSchema.types['Epic'] do
       notes discussions relative_position subscribed participants
       descendant_counts descendant_weight_sum upvotes downvotes
       user_notes_count user_discussions_count health_status current_user_todos
+      award_emoji
     ]
   end
 
@@ -29,4 +30,6 @@ RSpec.describe GitlabSchema.types['Epic'] do
   it { expect(described_class).to have_graphql_field(:subscribed, complexity: 5) }
 
   it { expect(described_class).to have_graphql_field(:participants, complexity: 5) }
+
+  it { expect(described_class).to have_graphql_field(:award_emoji) }
 end

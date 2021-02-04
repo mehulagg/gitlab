@@ -1,18 +1,16 @@
-import { GlAlert, GlLoadingIcon, GlForm, GlSprintf } from '@gitlab/ui';
+import { GlForm, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { GlFormGroup } from 'jest/registry/shared/stubs';
 
 import SharedForm from 'ee/groups/settings/compliance_frameworks/components/shared_form.vue';
 import ColorPicker from '~/vue_shared/components/color_picker/color_picker.vue';
 
-import { frameworkFoundResponse } from '../mock_data';
+import { frameworkFoundResponse, suggestedLabelColors } from '../mock_data';
 
-describe('Form', () => {
+describe('SharedForm', () => {
   let wrapper;
   const defaultPropsData = { groupEditPath: 'group-1' };
 
-  const findAlert = () => wrapper.findComponent(GlAlert);
-  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
   const findForm = () => wrapper.findComponent(GlForm);
   const findNameGroup = () => wrapper.find('[data-testid="name-input-group"]');
   const findNameInput = () => wrapper.find('[data-testid="name-input"]');
@@ -29,12 +27,15 @@ describe('Form', () => {
         ...props,
       },
       stubs: {
-        GlLoadingIcon,
         GlFormGroup,
         GlSprintf,
       },
     });
   }
+
+  beforeAll(() => {
+    gon.suggested_label_colors = suggestedLabelColors;
+  });
 
   afterEach(() => {
     if (wrapper) {
@@ -42,46 +43,10 @@ describe('Form', () => {
     }
   });
 
-  describe('Loading', () => {
-    it.each`
-      loading
-      ${true}
-      ${false}
-    `('renders the app correctly', ({ loading }) => {
-      wrapper = createComponent({ loading });
-
-      expect(findLoadingIcon().exists()).toBe(loading);
-      expect(findAlert().exists()).toBe(false);
-    });
-  });
-
-  describe('Rendering the form', () => {
-    it.each`
-      renderForm
-      ${true}
-      ${false}
-    `('renders the app correctly when the renderForm prop is passed', ({ renderForm }) => {
-      wrapper = createComponent({ renderForm });
-
-      expect(findLoadingIcon().exists()).toBe(false);
-      expect(findAlert().exists()).toBe(false);
-      expect(findForm().exists()).toBe(renderForm);
-    });
-  });
-
-  describe('Error alert', () => {
-    it('shows the alert when an error are passed in', () => {
-      wrapper = createComponent({ error: 'Bad things happened' });
-
-      expect(findAlert().text()).toBe('Bad things happened');
-    });
-  });
-
   describe('Fields', () => {
     it('shows the correct input and button fields', () => {
       wrapper = createComponent();
 
-      expect(findLoadingIcon().exists()).toBe(false);
       expect(findNameInput()).toExist();
       expect(findDescriptionInput()).toExist();
       expect(findColorPicker()).toExist();
@@ -97,19 +62,14 @@ describe('Form', () => {
   });
 
   describe('Validation', () => {
-    it('throws an error if the provided compliance framework is invalid', () => {
-      expect(SharedForm.props.complianceFramework.validator({ foo: 'bar' })).toBe(false);
-    });
-
     it.each`
       name        | validity
       ${null}     | ${null}
       ${''}       | ${false}
       ${'foobar'} | ${true}
-    `('sends the correct state to the name input group', async ({ name, validity }) => {
-      wrapper = createComponent();
+    `('sets the correct state to the name input group', ({ name, validity }) => {
+      wrapper = createComponent({ name });
 
-      await findNameInput().vm.$emit('input', name);
       expect(findNameGroup().props('state')).toBe(validity);
     });
 
@@ -118,15 +78,11 @@ describe('Form', () => {
       ${null}     | ${null}
       ${''}       | ${false}
       ${'foobar'} | ${true}
-    `(
-      'sends the correct state to the description input group',
-      async ({ description, validity }) => {
-        wrapper = createComponent();
+    `('sets the correct state to the description input group', ({ description, validity }) => {
+      wrapper = createComponent({ description });
 
-        await findDescriptionInput().vm.$emit('input', description);
-        expect(findDescriptionGroup().props('state')).toBe(validity);
-      },
-    );
+      expect(findDescriptionGroup().props('state')).toBe(validity);
+    });
 
     it.each`
       color        | validity
@@ -136,12 +92,10 @@ describe('Form', () => {
       ${'#00'}     | ${false}
       ${'#000'}    | ${true}
       ${'#000000'} | ${true}
-    `('sends the correct state to the color picker', async ({ color, validity }) => {
-      wrapper = createComponent();
-      const colorPicker = findColorPicker();
+    `('sets the correct state to the color picker', ({ color, validity }) => {
+      wrapper = createComponent({ color });
 
-      await colorPicker.vm.$emit('input', color);
-      expect(colorPicker.props('state')).toBe(validity);
+      expect(findColorPicker().props('state')).toBe(validity);
     });
 
     it.each`
@@ -154,12 +108,8 @@ describe('Form', () => {
       ${'Foo'} | ${'Bar'}    | ${'#000'} | ${undefined}
     `(
       'should set the submit buttons disabled attribute to $disabled',
-      async ({ name, description, color, disabled }) => {
-        wrapper = createComponent();
-
-        await findNameInput().vm.$emit('input', name);
-        await findDescriptionInput().vm.$emit('input', description);
-        await findColorPicker().vm.$emit('input', color);
+      ({ name, description, color, disabled }) => {
+        wrapper = createComponent({ name, description, color });
 
         expect(findSubmitBtn().attributes('disabled')).toBe(disabled);
       },
@@ -167,50 +117,31 @@ describe('Form', () => {
   });
 
   describe('Updating data', () => {
-    it('updates the initial form data when the compliance framework prop is updated', async () => {
+    it('updates the initial form data when the props are updated', async () => {
+      const { name, description, color } = frameworkFoundResponse;
       wrapper = createComponent();
 
       expect(findNameInput().attributes('value')).toBe(undefined);
       expect(findDescriptionInput().attributes('value')).toBe(undefined);
       expect(findColorPicker().attributes('value')).toBe(undefined);
 
-      await wrapper.setProps({ complianceFramework: frameworkFoundResponse });
+      await wrapper.setProps({ name, description, color });
 
-      expect(findNameInput().attributes('value')).toBe(frameworkFoundResponse.name);
-      expect(findDescriptionInput().attributes('value')).toBe(frameworkFoundResponse.description);
-      expect(findColorPicker().attributes('value')).toBe(frameworkFoundResponse.color);
+      expect(findNameInput().attributes('value')).toBe(name);
+      expect(findDescriptionInput().attributes('value')).toBe(description);
+      expect(findColorPicker().attributes('value')).toBe(color);
     });
   });
 
   describe('On form submission', () => {
-    it('emits the entered form data', async () => {
-      wrapper = createComponent();
-
-      await findNameInput().vm.$emit('input', 'Foo');
-      await findDescriptionInput().vm.$emit('input', 'Bar');
-      await findColorPicker().vm.$emit('input', '#000');
+    it('emits a submit event', async () => {
+      const { name, description, color } = frameworkFoundResponse;
+      wrapper = createComponent({ name, description, color });
 
       await findForm().vm.$emit('submit', { preventDefault: () => {} });
 
       expect(wrapper.emitted('submit')).toHaveLength(1);
-      expect(wrapper.emitted('submit')[0]).toEqual([
-        { name: 'Foo', description: 'Bar', color: '#000' },
-      ]);
-    });
-
-    it('does not emit the initial form data if editing has taken place', async () => {
-      wrapper = createComponent({ complianceFramework: frameworkFoundResponse });
-
-      await findNameInput().vm.$emit('input', 'Foo');
-      await findDescriptionInput().vm.$emit('input', 'Bar');
-      await findColorPicker().vm.$emit('input', '#000');
-
-      await findForm().vm.$emit('submit', { preventDefault: () => {} });
-
-      expect(wrapper.emitted('submit')).toHaveLength(1);
-      expect(wrapper.emitted('submit')[0]).toEqual([
-        { name: 'Foo', description: 'Bar', color: '#000' },
-      ]);
+      expect(wrapper.emitted('submit')[0]).toEqual([{ name, description, color }]);
     });
   });
 });

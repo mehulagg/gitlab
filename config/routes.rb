@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sidekiq/web'
 require 'sidekiq/cron/web'
 require 'product_analytics/collector_app'
@@ -277,6 +279,7 @@ Rails.application.routes.draw do
   draw :dashboard
   draw :user
   draw :project
+  draw :unmatched_project
 
   # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/210024
   scope as: 'deprecated' do

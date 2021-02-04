@@ -133,7 +133,7 @@ describe('CustomStageForm', () => {
       it('clears the error when the field changes', async () => {
         await setNameField('not an issue');
 
-        expect(findFieldErrors('name')).not.toContain('Stage name already exists');
+        expect(findFieldErrors('name')).toBeUndefined();
       });
     });
   });

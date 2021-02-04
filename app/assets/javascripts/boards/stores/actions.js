@@ -16,6 +16,7 @@ import {
   formatIssue,
   formatIssueInput,
   updateListPosition,
+  transformNotFilters,
 } from '../boards_util';
 import listsIssuesQuery from '../graphql/lists_issues.query.graphql';
 import boardLabelsQuery from '../graphql/board_labels.query.graphql';
@@ -66,6 +67,7 @@ export default {
       'releaseTag',
       'search',
     ]);
+    filterParams.not = transformNotFilters(filters);
     commit(types.SET_FILTERS, filterParams);
   },
 
@@ -543,6 +545,10 @@ export default {
     } else {
       commit(types.REMOVE_BOARD_ITEM_FROM_SELECTION, boardItem);
     }
+  },
+
+  setAddColumnFormVisibility: ({ commit }, visible) => {
+    commit(types.SET_ADD_COLUMN_FORM_VISIBLE, visible);
   },
 
   fetchBacklog: () => {

@@ -35,7 +35,7 @@ export default {
   },
   computed: {
     currentTimeframeEndsAt() {
-      return new Date(nDaysAfter(this.timeframeItem, 1));
+      return nDaysAfter(this.timeframeItem, 1);
     },
     hoursUntilEndOfTimeFrame() {
       return HOURS_IN_DAY - new Date(this.shiftRangeOverlap.overlapStartDate).getHours();

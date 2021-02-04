@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Set default values for object_store settings
 class ObjectStoreSettings
   SUPPORTED_TYPES = %w(artifacts external_diffs lfs uploads packages dependency_proxy terraform_state pages).freeze
@@ -124,9 +126,12 @@ class ObjectStoreSettings
       target_config = common_config.merge(overrides.slice(*ALLOWED_OBJECT_STORE_OVERRIDES))
       section = settings.try(store_type)
 
-      next unless uses_object_storage?(section)
+      # Admins can selectively disable object storage for a specific
+      # type as an override in the consolidated settings.
+      next unless overrides.fetch('enabled', true)
+      next unless section
 
-      if target_config['bucket'].blank?
+      if section['enabled'] && target_config['bucket'].blank?
         missing_bucket_for(store_type)
         next
       end
@@ -145,20 +150,6 @@ class ObjectStoreSettings
   end
 
   private
-
-  # Admins can selectively disable object storage for a specific type. If
-  # this hasn't been set, we assume that the consolidated settings
-  # should be used.
-  def uses_object_storage?(section)
-    # Use to_h to avoid https://gitlab.com/gitlab-org/gitlab/-/issues/286873
-    section = section.to_h
-
-    enabled_globally = section.fetch('enabled', false)
-    object_store_settings = section.fetch('object_store', {})
-    os_enabled = object_store_settings.fetch('enabled', true)
-
-    enabled_globally && os_enabled
-  end
 
   # We only can use the common object storage settings if:
   # 1. The common settings are defined

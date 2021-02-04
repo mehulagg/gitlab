@@ -54,7 +54,8 @@
             "id",
             "title",
             "description",
-            "state"
+            "state",
+            "web_url"
           ],
           "properties": {
             "id": {
@@ -71,6 +72,9 @@
             },
             "state": {
               "type": "integer"
+            },
+            "web_url": {
+              "type": "string"
             }
           }
         }

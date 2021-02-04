@@ -38,10 +38,10 @@ export default {
   },
   async mounted() {
     const results = await Promise.allSettled(
-      allChartDefinitions.map(async ({ id, requestParams, startDate }) => {
+      allChartDefinitions.map(async ({ id, requestParams, startDate, endDate }) => {
         const { data: apiData } = await Api.deploymentFrequencies(this.projectPath, requestParams);
 
-        this.chartData[id] = apiDataToChartSeries(apiData, startDate);
+        this.chartData[id] = apiDataToChartSeries(apiData, startDate, endDate);
       }),
     );
 

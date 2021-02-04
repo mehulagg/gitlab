@@ -12,6 +12,7 @@ class License < ApplicationRecord
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
 
   EES_FEATURES = %i[
+    security_and_compliance
     audit_events
     blocked_issues
     board_iteration_lists

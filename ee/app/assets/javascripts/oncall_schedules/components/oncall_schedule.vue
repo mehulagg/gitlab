@@ -20,14 +20,14 @@ import {
   nDaysBefore,
   nDaysAfter,
 } from '~/lib/utils/datetime_utility';
+import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
+import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
 import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
-import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
-import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 
 export const i18n = {
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{timezone}'),
@@ -76,7 +76,7 @@ export default {
       query: getShiftsForRotations,
       variables() {
         const startsAt = this.timeframeStartDate;
-        const endsAt = new Date(nWeeksAfter(startsAt, 2));
+        const endsAt = nWeeksAfter(startsAt, 2);
 
         return {
           projectPath: this.projectPath,
@@ -116,7 +116,7 @@ export default {
         case PRESET_TYPES.WEEKS: {
           const firstDayOfTheLastWeek = this.timeframe[this.timeframe.length - 1];
           const firstDayOfTheNextTimeframe = nWeeksAfter(firstDayOfTheLastWeek, 1);
-          const lastDayOfTimeframe = nDaysBefore(new Date(firstDayOfTheNextTimeframe), 1);
+          const lastDayOfTimeframe = nDaysBefore(firstDayOfTheNextTimeframe, 1);
 
           return `${formatDate(this.timeframe[0], 'mmmm d')} - ${formatDate(
             lastDayOfTimeframe,
@@ -142,10 +142,10 @@ export default {
     updateToViewPreviousTimeframe() {
       switch (this.presetType) {
         case PRESET_TYPES.DAYS:
-          this.timeframeStartDate = new Date(nDaysBefore(this.timeframeStartDate, 1));
+          this.timeframeStartDate = nDaysBefore(this.timeframeStartDate, 1);
           break;
         case PRESET_TYPES.WEEKS:
-          this.timeframeStartDate = new Date(nWeeksBefore(this.timeframeStartDate, 2));
+          this.timeframeStartDate = nWeeksBefore(this.timeframeStartDate, 2);
           break;
         default:
           break;
@@ -154,10 +154,10 @@ export default {
     updateToViewNextTimeframe() {
       switch (this.presetType) {
         case PRESET_TYPES.DAYS:
-          this.timeframeStartDate = new Date(nDaysAfter(this.timeframeStartDate, 1));
+          this.timeframeStartDate = nDaysAfter(this.timeframeStartDate, 1);
           break;
         case PRESET_TYPES.WEEKS:
-          this.timeframeStartDate = new Date(nWeeksAfter(this.timeframeStartDate, 2));
+          this.timeframeStartDate = nWeeksAfter(this.timeframeStartDate, 2);
           break;
         default:
           break;

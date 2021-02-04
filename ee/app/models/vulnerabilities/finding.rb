@@ -372,6 +372,10 @@ module Vulnerabilities
       Gitlab::UUID.v5?(uuid) ? uuid : Gitlab::UUID.v5(uuid_v5_name)
     end
 
+    def pipeline_branch
+      pipelines&.last&.sha || project.default_branch
+    end
+
     protected
 
     def first_fingerprint

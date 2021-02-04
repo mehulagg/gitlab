@@ -15,6 +15,7 @@ import {
   formatListIssues,
   formatListsPageInfo,
   fullBoardId,
+  transformNotFilters,
 } from '~/boards/boards_util';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
@@ -87,6 +88,8 @@ export default {
       'weight',
     ]);
 
+    filterParams.not = transformNotFilters(filters);
+
     if (filters.groupBy === GroupByParamType.epic) {
       dispatch('setEpicSwimlanes');
     }
@@ -96,6 +99,9 @@ export default {
       filterParams.epicId = undefined;
     } else if (filterParams.epicId) {
       filterParams.epicId = fullEpicId(filterParams.epicId);
+    }
+    if (filterParams.not.epicId) {
+      filterParams.not.epicId = fullEpicId(filterParams.not.epicId);
     }
 
     if (

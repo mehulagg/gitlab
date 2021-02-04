@@ -273,6 +273,11 @@
   redis_slot: testing
   aggregation: weekly
   feature_flag: usage_data_i_testing_group_code_coverage_project_click_total
+- name: i_testing_load_performance_widget_total
+  category: testing
+  redis_slot: testing
+  aggregation: weekly
+  feature_flag: usage_data_i_testing_load_performance_widget_total
 # Project Management group
 - name: g_project_management_issue_title_changed
   category: issues_edit
@@ -603,3 +608,9 @@
   redis_slot: ci_templates
   aggregation: weekly
   feature_flag: usage_data_track_ci_templates_unique_projects
+# Pipeline Authoring
+- name: o_pipeline_authoring_unique_users_committing_ciconfigfile
+  category: pipeline_authoring
+  redis_slot: pipeline_authoring
+  aggregation: weekly
+  feature_flag: usage_data_unique_users_committing_ciconfigfile

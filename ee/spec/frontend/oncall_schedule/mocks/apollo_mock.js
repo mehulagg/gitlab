@@ -1,5 +1,5 @@
-import mockRotations from './mock_rotation.json';
 import invalidUrl from '~/lib/utils/invalid_url';
+import mockRotations from './mock_rotation.json';
 
 export const scheduleIid = '37';
 

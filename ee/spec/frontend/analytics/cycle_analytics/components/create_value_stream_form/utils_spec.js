@@ -111,7 +111,7 @@ describe('validateStage', () => {
 
 describe('validateValueStreamName,', () => {
   it('with valid data returns an empty array', () => {
-    expect(validateValueStreamName({ name: 'Cool stream name' })).toEqual({ name: [] });
+    expect(validateValueStreamName({ name: 'Cool stream name' })).toEqual([]);
   });
 
   it.each`
@@ -120,6 +120,6 @@ describe('validateValueStreamName,', () => {
     ${''}                              | ${ERRORS.VALUE_STREAM_NAME_MIN_LENGTH} | ${'too short'}
   `('returns "$error" if name is $msg', ({ name, error }) => {
     const result = validateValueStreamName({ name });
-    expectFieldError({ result, error, field: 'name' });
+    expect(result).toEqual([error]);
   });
 });

@@ -350,7 +350,7 @@ type AlertManagementAlert implements Noteable {
   title: String
 
   """
-  Todos of the current user for the alert.
+  To-dos of the current user for the alert.
   """
   todos(
     """
@@ -743,6 +743,26 @@ enum AlertManagementIntegrationType {
 }
 
 """
+Parsed field from an alert used for custom mappings
+"""
+type AlertManagementPayloadAlertField {
+  """
+  Human-readable label of the payload path.
+  """
+  label: String
+
+  """
+  Path to value inside payload JSON.
+  """
+  path: [String!]
+
+  """
+  Type of the parsed value.
+  """
+  type: AlertManagementPayloadAlertFieldType
+}
+
+"""
 Field that are available while modifying the custom mapping attributes for an HTTP integration
 """
 input AlertManagementPayloadAlertFieldInput {
@@ -1092,12 +1112,12 @@ type AwardEmoji {
   name: String!
 
   """
-  The emoji in unicode.
+  The emoji in Unicode.
   """
   unicode: String!
 
   """
-  The unicode version for this emoji.
+  The Unicode version for this emoji.
   """
   unicodeVersion: String!
 
@@ -1145,6 +1165,41 @@ type AwardEmojiAddPayload {
   Errors encountered during execution of the mutation.
   """
   errors: [String!]!
+}
+
+"""
+The connection type for AwardEmoji.
+"""
+type AwardEmojiConnection {
+  """
+  A list of edges.
+  """
+  edges: [AwardEmojiEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [AwardEmoji]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type AwardEmojiEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: AwardEmoji
 }
 
 """
@@ -1287,7 +1342,7 @@ type Blob implements Entry {
   path: String!
 
   """
-  Last commit sha for the entry
+  Last commit SHA for the entry
   """
   sha: String!
 
@@ -1536,12 +1591,37 @@ Represents an epic on an issue board
 """
 type BoardEpic implements CurrentUserTodos & Noteable {
   """
-  Author of the epic
+  Author of the epic.
   """
   author: User!
 
   """
-  Children (sub-epics) of the epic
+  A list of award emojis associated with the epic.
+  """
+  awardEmoji(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): AwardEmojiConnection
+
+  """
+  Children (sub-epics) of the epic.
   """
   children(
     """
@@ -1639,17 +1719,17 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   ): EpicConnection
 
   """
-  Timestamp of when the epic was closed
+  Timestamp of when the epic was closed.
   """
   closedAt: Time
 
   """
-  Indicates if the epic is confidential
+  Indicates if the epic is confidential.
   """
   confidential: Boolean
 
   """
-  Timestamp of when the epic was created
+  Timestamp of when the epic was created.
   """
   createdAt: Time
 
@@ -1684,17 +1764,17 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   ): TodoConnection!
 
   """
-  Number of open and closed descendant epics and issues
+  Number of open and closed descendant epics and issues.
   """
   descendantCounts: EpicDescendantCount
 
   """
-  Total weight of open and closed issues in the epic and its descendants
+  Total weight of open and closed issues in the epic and its descendants.
   """
   descendantWeightSum: EpicDescendantWeights
 
   """
-  Description of the epic
+  Description of the epic.
   """
   description: String
 
@@ -1724,67 +1804,67 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   ): DiscussionConnection!
 
   """
-  Number of downvotes the epic has received
+  Number of downvotes the epic has received.
   """
   downvotes: Int!
 
   """
-  Due date of the epic
+  Due date of the epic.
   """
   dueDate: Time
 
   """
-  Fixed due date of the epic
+  Fixed due date of the epic.
   """
   dueDateFixed: Time
 
   """
-  Inherited due date of the epic from milestones
+  Inherited due date of the epic from milestones.
   """
   dueDateFromMilestones: Time
 
   """
-  Indicates if the due date has been manually set
+  Indicates if the due date has been manually set.
   """
   dueDateIsFixed: Boolean
 
   """
-  Group to which the epic belongs
+  Group to which the epic belongs.
   """
   group: Group!
 
   """
-  Indicates if the epic has children
+  Indicates if the epic has children.
   """
   hasChildren: Boolean!
 
   """
-  Indicates if the epic has direct issues
+  Indicates if the epic has direct issues.
   """
   hasIssues: Boolean!
 
   """
-  Indicates if the epic has a parent epic
+  Indicates if the epic has a parent epic.
   """
   hasParent: Boolean!
 
   """
-  Current health status of the epic
+  Current health status of the epic.
   """
   healthStatus: EpicHealthStatus
 
   """
-  ID of the epic
+  ID of the epic.
   """
   id: ID!
 
   """
-  Internal ID of the epic
+  Internal ID of the epic.
   """
   iid: ID!
 
   """
-  A list of issues associated with the epic
+  A list of issues associated with the epic.
   """
   issues(
     """
@@ -1809,7 +1889,7 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   ): EpicIssueConnection
 
   """
-  Labels assigned to the epic
+  Labels assigned to the epic.
   """
   labels(
     """
@@ -1859,12 +1939,12 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   ): NoteConnection!
 
   """
-  Parent epic of the epic
+  Parent epic of the epic.
   """
   parent: Epic
 
   """
-  List of participants for the epic
+  List of participants for the epic.
   """
   participants(
     """
@@ -1889,77 +1969,77 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   ): UserConnection
 
   """
-  Internal reference of the epic. Returned in shortened format by default
+  Internal reference of the epic. Returned in shortened format by default.
   """
   reference(
     """
-    Indicates if the reference should be returned in full
+    Indicates if the reference should be returned in full.
     """
     full: Boolean = false
   ): String!
 
   """
-  URI path of the epic-issue relationship
+  URI path of the epic-issue relationship.
   """
   relationPath: String
 
   """
-  The relative position of the epic in the epic tree
+  The relative position of the epic in the epic tree.
   """
   relativePosition: Int
 
   """
-  Start date of the epic
+  Start date of the epic.
   """
   startDate: Time
 
   """
-  Fixed start date of the epic
+  Fixed start date of the epic.
   """
   startDateFixed: Time
 
   """
-  Inherited start date of the epic from milestones
+  Inherited start date of the epic from milestones.
   """
   startDateFromMilestones: Time
 
   """
-  Indicates if the start date has been manually set
+  Indicates if the start date has been manually set.
   """
   startDateIsFixed: Boolean
 
   """
-  State of the epic
+  State of the epic.
   """
   state: EpicState!
 
   """
-  Indicates the currently logged in user is subscribed to the epic
+  Indicates the currently logged in user is subscribed to the epic.
   """
   subscribed: Boolean!
 
   """
-  Title of the epic
+  Title of the epic.
   """
   title: String
 
   """
-  Timestamp of when the epic was updated
+  Timestamp of when the epic was updated.
   """
   updatedAt: Time
 
   """
-  Number of upvotes the epic has received
+  Number of upvotes the epic has received.
   """
   upvotes: Int!
 
   """
-  Number of user discussions in the epic
+  Number of user discussions in the epic.
   """
   userDiscussionsCount: Int!
 
   """
-  Number of user notes of the epic
+  Number of user notes of the epic.
   """
   userNotesCount: Int!
 
@@ -1974,12 +2054,12 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   userPreferences: BoardEpicUserPreferences
 
   """
-  Web path of the epic
+  Web path of the epic.
   """
   webPath: String!
 
   """
-  Web URL of the epic
+  Web URL of the epic.
   """
   webUrl: String!
 }
@@ -2487,7 +2567,7 @@ type CiConfig {
   errors: [String!]
 
   """
-  Merged CI config YAML.
+  Merged CI configuration YAML.
   """
   mergedYaml: String
 
@@ -5255,6 +5335,13 @@ input CreateSnippetInput {
   blobActions: [SnippetBlobActionInputType!]
 
   """
+  A valid CAPTCHA response value obtained by using the provided captchaSiteKey
+  with a CAPTCHA API to present a challenge to be solved on the client. Required
+  to resubmit if the previous operation returned "NeedsCaptchaResponse: true".
+  """
+  captchaResponse: String
+
+  """
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
@@ -5268,6 +5355,13 @@ input CreateSnippetInput {
   The project full path the snippet is associated with.
   """
   projectPath: ID
+
+  """
+  The spam log ID which must be passed along with a valid CAPTCHA response for
+  the operation to be completed. Required to resubmit if the previous operation
+  returned "NeedsCaptchaResponse: true".
+  """
+  spamLogId: Int
 
   """
   Title of the snippet.
@@ -5290,6 +5384,13 @@ Autogenerated return type of CreateSnippet
 """
 type CreateSnippetPayload {
   """
+  The CAPTCHA site key which must be used to render a challenge for the user to
+  solve to obtain a valid captchaResponse value. Included only when an operation
+  was not completed because "NeedsCaptchaResponse" is true.
+  """
+  captchaSiteKey: String
+
+  """
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
@@ -5300,14 +5401,31 @@ type CreateSnippetPayload {
   errors: [String!]!
 
   """
+  Indicates whether the operation was detected as possible spam and not
+  completed. If CAPTCHA is enabled, the request must be resubmitted with a valid
+  CAPTCHA response and spam_log_id included for the operation to be completed.
+  Included only when an operation was not completed because
+  "NeedsCaptchaResponse" is true.
+  """
+  needsCaptchaResponse: Boolean
+
+  """
   The snippet after mutation.
   """
   snippet: Snippet
 
   """
-  Indicates whether the operation returns a record detected as spam.
+  Indicates whether the operation was detected as definite spam. There is no
+  option to resubmit the request with a CAPTCHA response.
   """
   spam: Boolean
+
+  """
+  The spam log ID which must be passed along with a valid CAPTCHA response for
+  an operation to be completed. Included only when an operation was not
+  completed because "NeedsCaptchaResponse" is true.
+  """
+  spamLogId: Int
 }
 
 """
@@ -5501,6 +5619,81 @@ type DastOnDemandScanCreatePayload {
   """
   pipelineUrl: String
 }
+
+"""
+Represents a DAST Profile
+"""
+type DastProfile {
+  """
+  The associated scanner profile.
+  """
+  dastScannerProfile: DastScannerProfile
+
+  """
+  The associated site profile.
+  """
+  dastSiteProfile: DastSiteProfile
+
+  """
+  The description of the scan.
+  """
+  description: String
+
+  """
+  Relative web path to the edit page of a profile.
+  """
+  editPath: String
+
+  """
+  ID of the profile.
+  """
+  id: DastProfileID!
+
+  """
+  The name of the profile.
+  """
+  name: String
+}
+
+"""
+The connection type for DastProfile.
+"""
+type DastProfileConnection {
+  """
+  A list of edges.
+  """
+  edges: [DastProfileEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [DastProfile]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type DastProfileEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: DastProfile
+}
+
+"""
+Identifier of Dast::Profile.
+"""
+scalar DastProfileID
 
 enum DastScanTypeEnum {
   """
@@ -8105,7 +8298,7 @@ interface Entry {
   path: String!
 
   """
-  Last commit sha for the entry
+  Last commit SHA for the entry
   """
   sha: String!
 
@@ -8244,12 +8437,37 @@ Represents an epic
 """
 type Epic implements CurrentUserTodos & Noteable {
   """
-  Author of the epic
+  Author of the epic.
   """
   author: User!
 
   """
-  Children (sub-epics) of the epic
+  A list of award emojis associated with the epic.
+  """
+  awardEmoji(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): AwardEmojiConnection
+
+  """
+  Children (sub-epics) of the epic.
   """
   children(
     """
@@ -8347,17 +8565,17 @@ type Epic implements CurrentUserTodos & Noteable {
   ): EpicConnection
 
   """
-  Timestamp of when the epic was closed
+  Timestamp of when the epic was closed.
   """
   closedAt: Time
 
   """
-  Indicates if the epic is confidential
+  Indicates if the epic is confidential.
   """
   confidential: Boolean
 
   """
-  Timestamp of when the epic was created
+  Timestamp of when the epic was created.
   """
   createdAt: Time
 
@@ -8392,17 +8610,17 @@ type Epic implements CurrentUserTodos & Noteable {
   ): TodoConnection!
 
   """
-  Number of open and closed descendant epics and issues
+  Number of open and closed descendant epics and issues.
   """
   descendantCounts: EpicDescendantCount
 
   """
-  Total weight of open and closed issues in the epic and its descendants
+  Total weight of open and closed issues in the epic and its descendants.
   """
   descendantWeightSum: EpicDescendantWeights
 
   """
-  Description of the epic
+  Description of the epic.
   """
   description: String
 
@@ -8432,67 +8650,67 @@ type Epic implements CurrentUserTodos & Noteable {
   ): DiscussionConnection!
 
   """
-  Number of downvotes the epic has received
+  Number of downvotes the epic has received.
   """
   downvotes: Int!
 
   """
-  Due date of the epic
+  Due date of the epic.
   """
   dueDate: Time
 
   """
-  Fixed due date of the epic
+  Fixed due date of the epic.
   """
   dueDateFixed: Time
 
   """
-  Inherited due date of the epic from milestones
+  Inherited due date of the epic from milestones.
   """
   dueDateFromMilestones: Time
 
   """
-  Indicates if the due date has been manually set
+  Indicates if the due date has been manually set.
   """
   dueDateIsFixed: Boolean
 
   """
-  Group to which the epic belongs
+  Group to which the epic belongs.
   """
   group: Group!
 
   """
-  Indicates if the epic has children
+  Indicates if the epic has children.
   """
   hasChildren: Boolean!
 
   """
-  Indicates if the epic has direct issues
+  Indicates if the epic has direct issues.
   """
   hasIssues: Boolean!
 
   """
-  Indicates if the epic has a parent epic
+  Indicates if the epic has a parent epic.
   """
   hasParent: Boolean!
 
   """
-  Current health status of the epic
+  Current health status of the epic.
   """
   healthStatus: EpicHealthStatus
 
   """
-  ID of the epic
+  ID of the epic.
   """
   id: ID!
 
   """
-  Internal ID of the epic
+  Internal ID of the epic.
   """
   iid: ID!
 
   """
-  A list of issues associated with the epic
+  A list of issues associated with the epic.
   """
   issues(
     """
@@ -8517,7 +8735,7 @@ type Epic implements CurrentUserTodos & Noteable {
   ): EpicIssueConnection
 
   """
-  Labels assigned to the epic
+  Labels assigned to the epic.
   """
   labels(
     """
@@ -8567,12 +8785,12 @@ type Epic implements CurrentUserTodos & Noteable {
   ): NoteConnection!
 
   """
-  Parent epic of the epic
+  Parent epic of the epic.
   """
   parent: Epic
 
   """
-  List of participants for the epic
+  List of participants for the epic.
   """
   participants(
     """
@@ -8597,77 +8815,77 @@ type Epic implements CurrentUserTodos & Noteable {
   ): UserConnection
 
   """
-  Internal reference of the epic. Returned in shortened format by default
+  Internal reference of the epic. Returned in shortened format by default.
   """
   reference(
     """
-    Indicates if the reference should be returned in full
+    Indicates if the reference should be returned in full.
     """
     full: Boolean = false
   ): String!
 
   """
-  URI path of the epic-issue relationship
+  URI path of the epic-issue relationship.
   """
   relationPath: String
 
   """
-  The relative position of the epic in the epic tree
+  The relative position of the epic in the epic tree.
   """
   relativePosition: Int
 
   """
-  Start date of the epic
+  Start date of the epic.
   """
   startDate: Time
 
   """
-  Fixed start date of the epic
+  Fixed start date of the epic.
   """
   startDateFixed: Time
 
   """
-  Inherited start date of the epic from milestones
+  Inherited start date of the epic from milestones.
   """
   startDateFromMilestones: Time
 
   """
-  Indicates if the start date has been manually set
+  Indicates if the start date has been manually set.
   """
   startDateIsFixed: Boolean
 
   """
-  State of the epic
+  State of the epic.
   """
   state: EpicState!
 
   """
-  Indicates the currently logged in user is subscribed to the epic
+  Indicates the currently logged in user is subscribed to the epic.
   """
   subscribed: Boolean!
 
   """
-  Title of the epic
+  Title of the epic.
   """
   title: String
 
   """
-  Timestamp of when the epic was updated
+  Timestamp of when the epic was updated.
   """
   updatedAt: Time
 
   """
-  Number of upvotes the epic has received
+  Number of upvotes the epic has received.
   """
   upvotes: Int!
 
   """
-  Number of user discussions in the epic
+  Number of user discussions in the epic.
   """
   userDiscussionsCount: Int!
 
   """
-  Number of user notes of the epic
+  Number of user notes of the epic.
   """
   userNotesCount: Int!
 
@@ -8677,12 +8895,12 @@ type Epic implements CurrentUserTodos & Noteable {
   userPermissions: EpicPermissions!
 
   """
-  Web path of the epic
+  Web path of the epic.
   """
   webPath: String!
 
   """
-  Web URL of the epic
+  Web URL of the epic.
   """
   webUrl: String!
 }
@@ -8805,6 +9023,56 @@ type EpicBoardConnection {
   Information to aid in pagination.
   """
   pageInfo: PageInfo!
+}
+
+"""
+Autogenerated input type of EpicBoardCreate
+"""
+input EpicBoardCreateInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Full path of the group with which the resource is associated.
+  """
+  groupPath: ID
+
+  """
+  Whether or not backlog list is hidden.
+  """
+  hideBacklogList: Boolean
+
+  """
+  Whether or not closed list is hidden.
+  """
+  hideClosedList: Boolean
+
+  """
+  The board name.
+  """
+  name: String
+}
+
+"""
+Autogenerated return type of EpicBoardCreate
+"""
+type EpicBoardCreatePayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  The created epic board.
+  """
+  epicBoard: EpicBoard
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
 }
 
 """
@@ -11729,7 +11997,7 @@ type IncidentManagementOncallRotation {
   ): OncallParticipantTypeConnection
 
   """
-  Blocks of time for which a participant is on-call within a given timeframe. Timeframe cannot exceed one month.
+  Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month.
   """
   shifts(
     """
@@ -15032,6 +15300,51 @@ type MergeRequestPermissions {
 }
 
 """
+Autogenerated input type of MergeRequestReviewerRereview
+"""
+input MergeRequestReviewerRereviewInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  The IID of the merge request to mutate.
+  """
+  iid: String!
+
+  """
+  The project the merge request to mutate is in.
+  """
+  projectPath: ID!
+
+  """
+  The user ID for the user that has been requested for a new review.
+  """
+  userId: UserID!
+}
+
+"""
+Autogenerated return type of MergeRequestReviewerRereview
+"""
+type MergeRequestReviewerRereviewPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The merge request after mutation.
+  """
+  mergeRequest: MergeRequest
+}
+
+"""
 Autogenerated input type of MergeRequestSetAssignees
 """
 input MergeRequestSetAssigneesInput {
@@ -15403,6 +15716,10 @@ enum MergeRequestState {
   all
   closed
   locked
+
+  """
+  Merge Request has been merged
+  """
   merged
   opened
 }
@@ -15846,6 +16163,7 @@ type Mutation {
   dismissVulnerability(input: DismissVulnerabilityInput!): DismissVulnerabilityPayload @deprecated(reason: "Use vulnerabilityDismiss. Deprecated in 13.5.")
   environmentsCanaryIngressUpdate(input: EnvironmentsCanaryIngressUpdateInput!): EnvironmentsCanaryIngressUpdatePayload
   epicAddIssue(input: EpicAddIssueInput!): EpicAddIssuePayload
+  epicBoardCreate(input: EpicBoardCreateInput!): EpicBoardCreatePayload
   epicSetSubscription(input: EpicSetSubscriptionInput!): EpicSetSubscriptionPayload
   epicTreeReorder(input: EpicTreeReorderInput!): EpicTreeReorderPayload
   exportRequirements(input: ExportRequirementsInput!): ExportRequirementsPayload
@@ -15870,6 +16188,7 @@ type Mutation {
   labelCreate(input: LabelCreateInput!): LabelCreatePayload
   markAsSpamSnippet(input: MarkAsSpamSnippetInput!): MarkAsSpamSnippetPayload
   mergeRequestCreate(input: MergeRequestCreateInput!): MergeRequestCreatePayload
+  mergeRequestReviewerRereview(input: MergeRequestReviewerRereviewInput!): MergeRequestReviewerRereviewPayload
   mergeRequestSetAssignees(input: MergeRequestSetAssigneesInput!): MergeRequestSetAssigneesPayload
   mergeRequestSetLabels(input: MergeRequestSetLabelsInput!): MergeRequestSetLabelsPayload
   mergeRequestSetLocked(input: MergeRequestSetLockedInput!): MergeRequestSetLockedPayload
@@ -17460,7 +17779,7 @@ type Pipeline {
   committedAt: Time
 
   """
-  Config source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE,
+  Configuration source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE,
   AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE,
   BRIDGE_SOURCE, PARAMETER_SOURCE)
   """
@@ -18014,6 +18333,16 @@ type Project {
   ): AlertManagementIntegrationConnection
 
   """
+  Extract alert fields from payload for custom mapping
+  """
+  alertManagementPayloadFields(
+    """
+    Sample payload for extracting alert fields for custom mappings.
+    """
+    payloadExample: String!
+  ): [AlertManagementPayloadAlertField!]
+
+  """
   If `only_allow_merge_if_pipeline_succeeds` is true, indicates if merge
   requests of the project can also be merged with skipped jobs
   """
@@ -18195,7 +18524,32 @@ type Project {
   createdAt: Time
 
   """
-  The DAST scanner profiles associated with the project
+  DAST Profiles associated with the project. Always returns no nodes if `dast_saved_scans` is disabled.
+  """
+  dastProfiles(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): DastProfileConnection
+
+  """
+  The DAST scanner profiles associated with the project.
   """
   dastScannerProfiles(
     """
@@ -18220,7 +18574,7 @@ type Project {
   ): DastScannerProfileConnection
 
   """
-  DAST Site Profile associated with the project
+  DAST Site Profile associated with the project.
   """
   dastSiteProfile(
     """
@@ -18230,7 +18584,7 @@ type Project {
   ): DastSiteProfile
 
   """
-  DAST Site Profiles associated with the project
+  DAST Site Profiles associated with the project.
   """
   dastSiteProfiles(
     """
@@ -18255,8 +18609,8 @@ type Project {
   ): DastSiteProfileConnection
 
   """
-  DAST Site Validations associated with the project. Will always return no nodes
-  if `security_on_demand_scans_site_validation` is disabled
+  DAST Site Validations associated with the project. Always returns no nodes if
+  `security_on_demand_scans_site_validation` is disabled.
   """
   dastSiteValidations(
     """
@@ -19505,7 +19859,7 @@ type Project {
   snippetsEnabled: Boolean
 
   """
-  Indicates if squash readonly is enabled
+  Indicates if `squashReadOnly` is enabled
   """
   squashReadOnly: Boolean!
 
@@ -22721,37 +23075,37 @@ Represents summary of a security report
 """
 type SecurityReportSummary {
   """
-  Aggregated counts for the api_fuzzing scan
+  Aggregated counts for the `api_fuzzing` scan
   """
   apiFuzzing: SecurityReportSummarySection
 
   """
-  Aggregated counts for the container_scanning scan
+  Aggregated counts for the `container_scanning` scan
   """
   containerScanning: SecurityReportSummarySection
 
   """
-  Aggregated counts for the coverage_fuzzing scan
+  Aggregated counts for the `coverage_fuzzing` scan
   """
   coverageFuzzing: SecurityReportSummarySection
 
   """
-  Aggregated counts for the dast scan
+  Aggregated counts for the `dast` scan
   """
   dast: SecurityReportSummarySection
 
   """
-  Aggregated counts for the dependency_scanning scan
+  Aggregated counts for the `dependency_scanning` scan
   """
   dependencyScanning: SecurityReportSummarySection
 
   """
-  Aggregated counts for the sast scan
+  Aggregated counts for the `sast` scan
   """
   sast: SecurityReportSummarySection
 
   """
-  Aggregated counts for the secret_detection scan
+  Aggregated counts for the `secret_detection` scan
   """
   secretDetection: SecurityReportSummarySection
 }
@@ -23724,7 +24078,7 @@ type SnippetBlobViewer {
   fileType: String!
 
   """
-  Shows whether the blob content is loaded async
+  Shows whether the blob content is loaded asynchronously
   """
   loadAsync: Boolean!
 
@@ -23995,7 +24349,7 @@ type Submodule implements Entry {
   path: String!
 
   """
-  Last commit sha for the entry
+  Last commit SHA for the entry
   """
   sha: String!
 
@@ -25035,7 +25389,7 @@ type TreeEntry implements Entry {
   path: String!
 
   """
-  Last commit sha for the entry
+  Last commit SHA for the entry
   """
   sha: String!
 
@@ -25953,6 +26307,13 @@ input UpdateSnippetInput {
   blobActions: [SnippetBlobActionInputType!]
 
   """
+  A valid CAPTCHA response value obtained by using the provided captchaSiteKey
+  with a CAPTCHA API to present a challenge to be solved on the client. Required
+  to resubmit if the previous operation returned "NeedsCaptchaResponse: true".
+  """
+  captchaResponse: String
+
+  """
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
@@ -25966,6 +26327,13 @@ input UpdateSnippetInput {
   The global ID of the snippet to update.
   """
   id: SnippetID!
+
+  """
+  The spam log ID which must be passed along with a valid CAPTCHA response for
+  the operation to be completed. Required to resubmit if the previous operation
+  returned "NeedsCaptchaResponse: true".
+  """
+  spamLogId: Int
 
   """
   Title of the snippet.
@@ -25983,6 +26351,13 @@ Autogenerated return type of UpdateSnippet
 """
 type UpdateSnippetPayload {
   """
+  The CAPTCHA site key which must be used to render a challenge for the user to
+  solve to obtain a valid captchaResponse value. Included only when an operation
+  was not completed because "NeedsCaptchaResponse" is true.
+  """
+  captchaSiteKey: String
+
+  """
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
@@ -25993,14 +26368,31 @@ type UpdateSnippetPayload {
   errors: [String!]!
 
   """
+  Indicates whether the operation was detected as possible spam and not
+  completed. If CAPTCHA is enabled, the request must be resubmitted with a valid
+  CAPTCHA response and spam_log_id included for the operation to be completed.
+  Included only when an operation was not completed because
+  "NeedsCaptchaResponse" is true.
+  """
+  needsCaptchaResponse: Boolean
+
+  """
   The snippet after mutation.
   """
   snippet: Snippet
 
   """
-  Indicates whether the operation returns a record detected as spam.
+  Indicates whether the operation was detected as definite spam. There is no
+  option to resubmit the request with a CAPTCHA response.
   """
   spam: Boolean
+
+  """
+  The spam log ID which must be passed along with a valid CAPTCHA response for
+  an operation to be completed. Included only when an operation was not
+  completed because "NeedsCaptchaResponse" is true.
+  """
+  spamLogId: Int
 }
 
 scalar Upload
@@ -27784,6 +28176,11 @@ Represents the location of a vulnerability found by a Coverage Fuzzing scan
 """
 type VulnerabilityLocationCoverageFuzzing {
   """
+  Blob path to the vulnerable file
+  """
+  blobPath: String
+
+  """
   Number of the last relevant line in the vulnerable file
   """
   endLine: String
@@ -27839,6 +28236,11 @@ Represents the location of a vulnerability found by a dependency security scan
 """
 type VulnerabilityLocationDependencyScanning {
   """
+  Blob path to the vulnerable file
+  """
+  blobPath: String
+
+  """
   Dependency containing the vulnerability
   """
   dependency: VulnerableDependency
@@ -27853,6 +28255,11 @@ type VulnerabilityLocationDependencyScanning {
 Represents the location of a vulnerability found by a SAST scan
 """
 type VulnerabilityLocationSast {
+  """
+  Blob path to the vulnerable file
+  """
+  blobPath: String
+
   """
   Number of the last relevant line in the vulnerable file
   """
@@ -27883,6 +28290,11 @@ type VulnerabilityLocationSast {
 Represents the location of a vulnerability found by a secret detection scan
 """
 type VulnerabilityLocationSecretDetection {
+  """
+  Blob path to the vulnerable file
+  """
+  blobPath: String
+
   """
   Number of the last relevant line in the vulnerable file
   """

@@ -11,7 +11,6 @@ import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 import projectRequirements from '../queries/projectRequirements.query.graphql';
 import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
@@ -47,7 +46,7 @@ export default {
     ImportRequirementsModal,
     ExportRequirementsModal,
   },
-  mixins: [glFeatureFlagsMixin(), Tracking.mixin()],
+  mixins: [Tracking.mixin()],
   props: {
     projectPath: {
       type: String,
@@ -633,7 +632,6 @@ export default {
       :filter-by="filterBy"
       :requirements-count="requirementsCount"
       :show-create-form="showRequirementCreateDrawer"
-      :show-upload-csv="glFeatures.importRequirementsCsv"
       :can-create-requirement="canCreateRequirement"
       @click-tab="handleTabClick"
       @click-new-requirement="handleNewRequirementClick"
@@ -674,7 +672,6 @@ export default {
       :empty-state-path="emptyStatePath"
       :requirements-count="requirementsCount"
       :can-create-requirement="canCreateRequirement"
-      :show-upload-csv="glFeatures.importRequirementsCsv"
       @click-new-requirement="handleNewRequirementClick"
       @click-import-requirements="handleImportRequirementsClick"
     />
@@ -710,14 +707,8 @@ export default {
       class="gl-pagination gl-mt-3"
       @input="handlePageChange"
     />
-    <import-requirements-modal
-      v-if="glFeatures.importRequirementsCsv"
-      ref="modal"
-      :project-path="projectPath"
-      @import="importCsv"
-    />
+    <import-requirements-modal ref="modal" :project-path="projectPath" @import="importCsv" />
     <export-requirements-modal
-      v-if="glFeatures.importRequirementsCsv"
       ref="exportModal"
       :requirement-count="totalRequirementsForCurrentTab"
       :email="currentUserEmail"

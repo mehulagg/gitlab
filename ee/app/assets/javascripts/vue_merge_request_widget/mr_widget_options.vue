@@ -2,6 +2,7 @@
 import { GlSafeHtmlDirective } from '@gitlab/ui';
 import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
 import GroupedBrowserPerformanceReportsApp from 'ee/reports/browser_performance_report/grouped_browser_performance_reports_app.vue';
+import GroupedLoadPerformanceReportsApp from 'ee/reports/load_performance_report/grouped_load_performance_reports_app.vue';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import { componentNames } from 'ee/reports/components/issue_body';
 import MrWidgetLicenses from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
@@ -22,6 +23,7 @@ export default {
       import('ee/vue_shared/security_reports/grouped_security_reports_app.vue'),
     GroupedMetricsReportsApp,
     GroupedBrowserPerformanceReportsApp,
+    GroupedLoadPerformanceReportsApp,
     ReportSection,
   },
   directives: {
@@ -292,7 +294,7 @@ export default {
         :neutral-issues="mr.browserPerformanceMetrics.same"
         :has-issues="hasBrowserPerformanceMetrics"
       />
-      <report-section
+      <grouped-load-performance-reports-app
         v-if="hasLoadPerformancePaths"
         :status="loadPerformanceStatus"
         :loading-text="translateText('load-performance').loading"
@@ -302,8 +304,6 @@ export default {
         :resolved-issues="mr.loadPerformanceMetrics.improved"
         :neutral-issues="mr.loadPerformanceMetrics.same"
         :has-issues="hasLoadPerformanceMetrics"
-        :component="$options.componentNames.PerformanceIssueBody"
-        class="js-load-performance-widget mr-widget-border-top mr-report"
       />
       <grouped-metrics-reports-app
         v-if="mr.metricsReportsPath"

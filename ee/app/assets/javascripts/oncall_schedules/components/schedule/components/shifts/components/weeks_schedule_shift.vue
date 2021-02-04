@@ -35,7 +35,7 @@ export default {
   },
   computed: {
     currentTimeframeEndsAt() {
-      return new Date(nDaysAfter(this.timeframeItem, DAYS_IN_DATE_WEEK));
+      return nDaysAfter(this.timeframeItem, DAYS_IN_DATE_WEEK);
     },
     daysUntilEndOfTimeFrame() {
       return (

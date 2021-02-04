@@ -5,10 +5,11 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference
 ---
 
-# Code Owners **(STARTER)**
+# Code Owners **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6916) in GitLab 11.3.
 > - Code Owners for Merge Request approvals was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4418) in GitLab Premium 11.9.
+> - Moved to GitLab Premium in 13.9.
 
 ## Introduction
 
@@ -230,6 +231,7 @@ the rules for "Groups" and "Documentation" sections:
 #### Optional Code Owners Sections **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232995) in GitLab Premium 13.8 behind a feature flag, enabled by default.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/53227) in GitLab 13.9.
 
 To make a certain section optional, add a code owners section prepended with the
 caret `^` character. Approvals from owners listed in the section are **not** required. For example:

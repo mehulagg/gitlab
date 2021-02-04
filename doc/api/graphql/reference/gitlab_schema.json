@@ -953,7 +953,7 @@
             },
             {
               "name": "todos",
-              "description": "Todos of the current user for the alert.",
+              "description": "To-dos of the current user for the alert.",
               "args": [
                 {
                   "name": "action",
@@ -1910,6 +1910,69 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "AlertManagementPayloadAlertField",
+          "description": "Parsed field from an alert used for custom mappings",
+          "fields": [
+            {
+              "name": "label",
+              "description": "Human-readable label of the payload path.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "path",
+              "description": "Path to value inside payload JSON.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "type",
+              "description": "Type of the parsed value.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "ENUM",
+                "name": "AlertManagementPayloadAlertFieldType",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "INPUT_OBJECT",
           "name": "AlertManagementPayloadAlertFieldInput",
           "description": "Field that are available while modifying the custom mapping attributes for an HTTP integration",
@@ -2699,7 +2762,7 @@
             },
             {
               "name": "unicode",
-              "description": "The emoji in unicode.",
+              "description": "The emoji in Unicode.",
               "args": [
 
               ],
@@ -2717,7 +2780,7 @@
             },
             {
               "name": "unicodeVersion",
-              "description": "The unicode version for this emoji.",
+              "description": "The Unicode version for this emoji.",
               "args": [
 
               ],
@@ -2863,6 +2926,118 @@
                     }
                   }
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "AwardEmojiConnection",
+          "description": "The connection type for AwardEmoji.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "AwardEmojiEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "AwardEmoji",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "AwardEmojiEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "AwardEmoji",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -3297,7 +3472,7 @@
             },
             {
               "name": "sha",
-              "description": "Last commit sha for the entry",
+              "description": "Last commit SHA for the entry",
               "args": [
 
               ],
@@ -3985,7 +4160,7 @@
           "fields": [
             {
               "name": "author",
-              "description": "Author of the epic",
+              "description": "Author of the epic.",
               "args": [
 
               ],
@@ -4002,8 +4177,61 @@
               "deprecationReason": null
             },
             {
+              "name": "awardEmoji",
+              "description": "A list of award emojis associated with the epic.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "AwardEmojiConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "children",
-              "description": "Children (sub-epics) of the epic",
+              "description": "Children (sub-epics) of the epic.",
               "args": [
                 {
                   "name": "startDate",
@@ -4212,7 +4440,7 @@
             },
             {
               "name": "closedAt",
-              "description": "Timestamp of when the epic was closed",
+              "description": "Timestamp of when the epic was closed.",
               "args": [
 
               ],
@@ -4226,7 +4454,7 @@
             },
             {
               "name": "confidential",
-              "description": "Indicates if the epic is confidential",
+              "description": "Indicates if the epic is confidential.",
               "args": [
 
               ],
@@ -4240,7 +4468,7 @@
             },
             {
               "name": "createdAt",
-              "description": "Timestamp of when the epic was created",
+              "description": "Timestamp of when the epic was created.",
               "args": [
 
               ],
@@ -4321,7 +4549,7 @@
             },
             {
               "name": "descendantCounts",
-              "description": "Number of open and closed descendant epics and issues",
+              "description": "Number of open and closed descendant epics and issues.",
               "args": [
 
               ],
@@ -4335,7 +4563,7 @@
             },
             {
               "name": "descendantWeightSum",
-              "description": "Total weight of open and closed issues in the epic and its descendants",
+              "description": "Total weight of open and closed issues in the epic and its descendants.",
               "args": [
 
               ],
@@ -4349,7 +4577,7 @@
             },
             {
               "name": "description",
-              "description": "Description of the epic",
+              "description": "Description of the epic.",
               "args": [
 
               ],
@@ -4420,7 +4648,7 @@
             },
             {
               "name": "downvotes",
-              "description": "Number of downvotes the epic has received",
+              "description": "Number of downvotes the epic has received.",
               "args": [
 
               ],
@@ -4438,7 +4666,7 @@
             },
             {
               "name": "dueDate",
-              "description": "Due date of the epic",
+              "description": "Due date of the epic.",
               "args": [
 
               ],
@@ -4452,7 +4680,7 @@
             },
             {
               "name": "dueDateFixed",
-              "description": "Fixed due date of the epic",
+              "description": "Fixed due date of the epic.",
               "args": [
 
               ],
@@ -4466,7 +4694,7 @@
             },
             {
               "name": "dueDateFromMilestones",
-              "description": "Inherited due date of the epic from milestones",
+              "description": "Inherited due date of the epic from milestones.",
               "args": [
 
               ],
@@ -4480,7 +4708,7 @@
             },
             {
               "name": "dueDateIsFixed",
-              "description": "Indicates if the due date has been manually set",
+              "description": "Indicates if the due date has been manually set.",
               "args": [
 
               ],
@@ -4494,7 +4722,7 @@
             },
             {
               "name": "group",
-              "description": "Group to which the epic belongs",
+              "description": "Group to which the epic belongs.",
               "args": [
 
               ],
@@ -4512,7 +4740,7 @@
             },
             {
               "name": "hasChildren",
-              "description": "Indicates if the epic has children",
+              "description": "Indicates if the epic has children.",
               "args": [
 
               ],
@@ -4530,7 +4758,7 @@
             },
             {
               "name": "hasIssues",
-              "description": "Indicates if the epic has direct issues",
+              "description": "Indicates if the epic has direct issues.",
               "args": [
 
               ],
@@ -4548,7 +4776,7 @@
             },
             {
               "name": "hasParent",
-              "description": "Indicates if the epic has a parent epic",
+              "description": "Indicates if the epic has a parent epic.",
               "args": [
 
               ],
@@ -4566,7 +4794,7 @@
             },
             {
               "name": "healthStatus",
-              "description": "Current health status of the epic",
+              "description": "Current health status of the epic.",
               "args": [
 
               ],
@@ -4580,7 +4808,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the epic",
+              "description": "ID of the epic.",
               "args": [
 
               ],
@@ -4598,7 +4826,7 @@
             },
             {
               "name": "iid",
-              "description": "Internal ID of the epic",
+              "description": "Internal ID of the epic.",
               "args": [
 
               ],
@@ -4616,7 +4844,7 @@
             },
             {
               "name": "issues",
-              "description": "A list of issues associated with the epic",
+              "description": "A list of issues associated with the epic.",
               "args": [
                 {
                   "name": "after",
@@ -4669,7 +4897,7 @@
             },
             {
               "name": "labels",
-              "description": "Labels assigned to the epic",
+              "description": "Labels assigned to the epic.",
               "args": [
                 {
                   "name": "after",
@@ -4779,7 +5007,7 @@
             },
             {
               "name": "parent",
-              "description": "Parent epic of the epic",
+              "description": "Parent epic of the epic.",
               "args": [
 
               ],
@@ -4793,7 +5021,7 @@
             },
             {
               "name": "participants",
-              "description": "List of participants for the epic",
+              "description": "List of participants for the epic.",
               "args": [
                 {
                   "name": "after",
@@ -4846,11 +5074,11 @@
             },
             {
               "name": "reference",
-              "description": "Internal reference of the epic. Returned in shortened format by default",
+              "description": "Internal reference of the epic. Returned in shortened format by default.",
               "args": [
                 {
                   "name": "full",
-                  "description": "Indicates if the reference should be returned in full",
+                  "description": "Indicates if the reference should be returned in full.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -4873,7 +5101,7 @@
             },
             {
               "name": "relationPath",
-              "description": "URI path of the epic-issue relationship",
+              "description": "URI path of the epic-issue relationship.",
               "args": [
 
               ],
@@ -4887,7 +5115,7 @@
             },
             {
               "name": "relativePosition",
-              "description": "The relative position of the epic in the epic tree",
+              "description": "The relative position of the epic in the epic tree.",
               "args": [
 
               ],
@@ -4901,7 +5129,7 @@
             },
             {
               "name": "startDate",
-              "description": "Start date of the epic",
+              "description": "Start date of the epic.",
               "args": [
 
               ],
@@ -4915,7 +5143,7 @@
             },
             {
               "name": "startDateFixed",
-              "description": "Fixed start date of the epic",
+              "description": "Fixed start date of the epic.",
               "args": [
 
               ],
@@ -4929,7 +5157,7 @@
             },
             {
               "name": "startDateFromMilestones",
-              "description": "Inherited start date of the epic from milestones",
+              "description": "Inherited start date of the epic from milestones.",
               "args": [
 
               ],
@@ -4943,7 +5171,7 @@
             },
             {
               "name": "startDateIsFixed",
-              "description": "Indicates if the start date has been manually set",
+              "description": "Indicates if the start date has been manually set.",
               "args": [
 
               ],
@@ -4957,7 +5185,7 @@
             },
             {
               "name": "state",
-              "description": "State of the epic",
+              "description": "State of the epic.",
               "args": [
 
               ],
@@ -4975,7 +5203,7 @@
             },
             {
               "name": "subscribed",
-              "description": "Indicates the currently logged in user is subscribed to the epic",
+              "description": "Indicates the currently logged in user is subscribed to the epic.",
               "args": [
 
               ],
@@ -4993,7 +5221,7 @@
             },
             {
               "name": "title",
-              "description": "Title of the epic",
+              "description": "Title of the epic.",
               "args": [
 
               ],
@@ -5007,7 +5235,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "Timestamp of when the epic was updated",
+              "description": "Timestamp of when the epic was updated.",
               "args": [
 
               ],
@@ -5021,7 +5249,7 @@
             },
             {
               "name": "upvotes",
-              "description": "Number of upvotes the epic has received",
+              "description": "Number of upvotes the epic has received.",
               "args": [
 
               ],
@@ -5039,7 +5267,7 @@
             },
             {
               "name": "userDiscussionsCount",
-              "description": "Number of user discussions in the epic",
+              "description": "Number of user discussions in the epic.",
               "args": [
 
               ],
@@ -5057,7 +5285,7 @@
             },
             {
               "name": "userNotesCount",
-              "description": "Number of user notes of the epic",
+              "description": "Number of user notes of the epic.",
               "args": [
 
               ],
@@ -5107,7 +5335,7 @@
             },
             {
               "name": "webPath",
-              "description": "Web path of the epic",
+              "description": "Web path of the epic.",
               "args": [
 
               ],
@@ -5125,7 +5353,7 @@
             },
             {
               "name": "webUrl",
-              "description": "Web URL of the epic",
+              "description": "Web URL of the epic.",
               "args": [
 
               ],
@@ -6584,7 +6812,7 @@
             },
             {
               "name": "mergedYaml",
-              "description": "Merged CI config YAML.",
+              "description": "Merged CI configuration YAML.",
               "args": [
 
               ],
@@ -14282,6 +14510,26 @@
           "fields": null,
           "inputFields": [
             {
+              "name": "captchaResponse",
+              "description": "A valid CAPTCHA response value obtained by using the provided captchaSiteKey with a CAPTCHA API to present a challenge to be solved on the client. Required to resubmit if the previous operation returned \"NeedsCaptchaResponse: true\".",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "spamLogId",
+              "description": "The spam log ID which must be passed along with a valid CAPTCHA response for the operation to be completed. Required to resubmit if the previous operation returned \"NeedsCaptchaResponse: true\".",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "title",
               "description": "Title of the snippet.",
               "type": {
@@ -14386,6 +14634,20 @@
           "description": "Autogenerated return type of CreateSnippet",
           "fields": [
             {
+              "name": "captchaSiteKey",
+              "description": "The CAPTCHA site key which must be used to render a challenge for the user to solve to obtain a valid captchaResponse value. Included only when an operation was not completed because \"NeedsCaptchaResponse\" is true.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "clientMutationId",
               "description": "A unique identifier for the client performing the mutation.",
               "args": [
@@ -14426,6 +14688,20 @@
               "deprecationReason": null
             },
             {
+              "name": "needsCaptchaResponse",
+              "description": "Indicates whether the operation was detected as possible spam and not completed. If CAPTCHA is enabled, the request must be resubmitted with a valid CAPTCHA response and spam_log_id included for the operation to be completed. Included only when an operation was not completed because \"NeedsCaptchaResponse\" is true.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "snippet",
               "description": "The snippet after mutation.",
               "args": [
@@ -14441,13 +14717,27 @@
             },
             {
               "name": "spam",
-              "description": "Indicates whether the operation returns a record detected as spam.",
+              "description": "Indicates whether the operation was detected as definite spam. There is no option to resubmit the request with a CAPTCHA response.",
               "args": [
 
               ],
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "spamLogId",
+              "description": "The spam log ID which must be passed along with a valid CAPTCHA response for an operation to be completed. Included only when an operation was not completed because \"NeedsCaptchaResponse\" is true.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -15044,6 +15334,229 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DastProfile",
+          "description": "Represents a DAST Profile",
+          "fields": [
+            {
+              "name": "dastScannerProfile",
+              "description": "The associated scanner profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastScannerProfile",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "dastSiteProfile",
+              "description": "The associated site profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastSiteProfile",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "description",
+              "description": "The description of the scan.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "editPath",
+              "description": "Relative web path to the edit page of a profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "ID of the profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "DastProfileID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "The name of the profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DastProfileConnection",
+          "description": "The connection type for DastProfile.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "DastProfileEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "DastProfile",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DastProfileEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastProfile",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "DastProfileID",
+          "description": "Identifier of Dast::Profile.",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -22436,7 +22949,7 @@
             },
             {
               "name": "sha",
-              "description": "Last commit sha for the entry",
+              "description": "Last commit SHA for the entry",
               "args": [
 
               ],
@@ -22878,7 +23391,7 @@
           "fields": [
             {
               "name": "author",
-              "description": "Author of the epic",
+              "description": "Author of the epic.",
               "args": [
 
               ],
@@ -22895,8 +23408,61 @@
               "deprecationReason": null
             },
             {
+              "name": "awardEmoji",
+              "description": "A list of award emojis associated with the epic.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "AwardEmojiConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "children",
-              "description": "Children (sub-epics) of the epic",
+              "description": "Children (sub-epics) of the epic.",
               "args": [
                 {
                   "name": "startDate",
@@ -23105,7 +23671,7 @@
             },
             {
               "name": "closedAt",
-              "description": "Timestamp of when the epic was closed",
+              "description": "Timestamp of when the epic was closed.",
               "args": [
 
               ],
@@ -23119,7 +23685,7 @@
             },
             {
               "name": "confidential",
-              "description": "Indicates if the epic is confidential",
+              "description": "Indicates if the epic is confidential.",
               "args": [
 
               ],
@@ -23133,7 +23699,7 @@
             },
             {
               "name": "createdAt",
-              "description": "Timestamp of when the epic was created",
+              "description": "Timestamp of when the epic was created.",
               "args": [
 
               ],
@@ -23214,7 +23780,7 @@
             },
             {
               "name": "descendantCounts",
-              "description": "Number of open and closed descendant epics and issues",
+              "description": "Number of open and closed descendant epics and issues.",
               "args": [
 
               ],
@@ -23228,7 +23794,7 @@
             },
             {
               "name": "descendantWeightSum",
-              "description": "Total weight of open and closed issues in the epic and its descendants",
+              "description": "Total weight of open and closed issues in the epic and its descendants.",
               "args": [
 
               ],
@@ -23242,7 +23808,7 @@
             },
             {
               "name": "description",
-              "description": "Description of the epic",
+              "description": "Description of the epic.",
               "args": [
 
               ],
@@ -23313,7 +23879,7 @@
             },
             {
               "name": "downvotes",
-              "description": "Number of downvotes the epic has received",
+              "description": "Number of downvotes the epic has received.",
               "args": [
 
               ],
@@ -23331,7 +23897,7 @@
             },
             {
               "name": "dueDate",
-              "description": "Due date of the epic",
+              "description": "Due date of the epic.",
               "args": [
 
               ],
@@ -23345,7 +23911,7 @@
             },
             {
               "name": "dueDateFixed",
-              "description": "Fixed due date of the epic",
+              "description": "Fixed due date of the epic.",
               "args": [
 
               ],
@@ -23359,7 +23925,7 @@
             },
             {
               "name": "dueDateFromMilestones",
-              "description": "Inherited due date of the epic from milestones",
+              "description": "Inherited due date of the epic from milestones.",
               "args": [
 
               ],
@@ -23373,7 +23939,7 @@
             },
             {
               "name": "dueDateIsFixed",
-              "description": "Indicates if the due date has been manually set",
+              "description": "Indicates if the due date has been manually set.",
               "args": [
 
               ],
@@ -23387,7 +23953,7 @@
             },
             {
               "name": "group",
-              "description": "Group to which the epic belongs",
+              "description": "Group to which the epic belongs.",
               "args": [
 
               ],
@@ -23405,7 +23971,7 @@
             },
             {
               "name": "hasChildren",
-              "description": "Indicates if the epic has children",
+              "description": "Indicates if the epic has children.",
               "args": [
 
               ],
@@ -23423,7 +23989,7 @@
             },
             {
               "name": "hasIssues",
-              "description": "Indicates if the epic has direct issues",
+              "description": "Indicates if the epic has direct issues.",
               "args": [
 
               ],
@@ -23441,7 +24007,7 @@
             },
             {
               "name": "hasParent",
-              "description": "Indicates if the epic has a parent epic",
+              "description": "Indicates if the epic has a parent epic.",
               "args": [
 
               ],
@@ -23459,7 +24025,7 @@
             },
             {
               "name": "healthStatus",
-              "description": "Current health status of the epic",
+              "description": "Current health status of the epic.",
               "args": [
 
               ],
@@ -23473,7 +24039,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the epic",
+              "description": "ID of the epic.",
               "args": [
 
               ],
@@ -23491,7 +24057,7 @@
             },
             {
               "name": "iid",
-              "description": "Internal ID of the epic",
+              "description": "Internal ID of the epic.",
               "args": [
 
               ],
@@ -23509,7 +24075,7 @@
             },
             {
               "name": "issues",
-              "description": "A list of issues associated with the epic",
+              "description": "A list of issues associated with the epic.",
               "args": [
                 {
                   "name": "after",
@@ -23562,7 +24128,7 @@
             },
             {
               "name": "labels",
-              "description": "Labels assigned to the epic",
+              "description": "Labels assigned to the epic.",
               "args": [
                 {
                   "name": "after",
@@ -23672,7 +24238,7 @@
             },
             {
               "name": "parent",
-              "description": "Parent epic of the epic",
+              "description": "Parent epic of the epic.",
               "args": [
 
               ],
@@ -23686,7 +24252,7 @@
             },
             {
               "name": "participants",
-              "description": "List of participants for the epic",
+              "description": "List of participants for the epic.",
               "args": [
                 {
                   "name": "after",
@@ -23739,11 +24305,11 @@
             },
             {
               "name": "reference",
-              "description": "Internal reference of the epic. Returned in shortened format by default",
+              "description": "Internal reference of the epic. Returned in shortened format by default.",
               "args": [
                 {
                   "name": "full",
-                  "description": "Indicates if the reference should be returned in full",
+                  "description": "Indicates if the reference should be returned in full.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -23766,7 +24332,7 @@
             },
             {
               "name": "relationPath",
-              "description": "URI path of the epic-issue relationship",
+              "description": "URI path of the epic-issue relationship.",
               "args": [
 
               ],
@@ -23780,7 +24346,7 @@
             },
             {
               "name": "relativePosition",
-              "description": "The relative position of the epic in the epic tree",
+              "description": "The relative position of the epic in the epic tree.",
               "args": [
 
               ],
@@ -23794,7 +24360,7 @@
             },
             {
               "name": "startDate",
-              "description": "Start date of the epic",
+              "description": "Start date of the epic.",
               "args": [
 
               ],
@@ -23808,7 +24374,7 @@
             },
             {
               "name": "startDateFixed",
-              "description": "Fixed start date of the epic",
+              "description": "Fixed start date of the epic.",
               "args": [
 
               ],
@@ -23822,7 +24388,7 @@
             },
             {
               "name": "startDateFromMilestones",
-              "description": "Inherited start date of the epic from milestones",
+              "description": "Inherited start date of the epic from milestones.",
               "args": [
 
               ],
@@ -23836,7 +24402,7 @@
             },
             {
               "name": "startDateIsFixed",
-              "description": "Indicates if the start date has been manually set",
+              "description": "Indicates if the start date has been manually set.",
               "args": [
 
               ],
@@ -23850,7 +24416,7 @@
             },
             {
               "name": "state",
-              "description": "State of the epic",
+              "description": "State of the epic.",
               "args": [
 
               ],
@@ -23868,7 +24434,7 @@
             },
             {
               "name": "subscribed",
-              "description": "Indicates the currently logged in user is subscribed to the epic",
+              "description": "Indicates the currently logged in user is subscribed to the epic.",
               "args": [
 
               ],
@@ -23886,7 +24452,7 @@
             },
             {
               "name": "title",
-              "description": "Title of the epic",
+              "description": "Title of the epic.",
               "args": [
 
               ],
@@ -23900,7 +24466,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "Timestamp of when the epic was updated",
+              "description": "Timestamp of when the epic was updated.",
               "args": [
 
               ],
@@ -23914,7 +24480,7 @@
             },
             {
               "name": "upvotes",
-              "description": "Number of upvotes the epic has received",
+              "description": "Number of upvotes the epic has received.",
               "args": [
 
               ],
@@ -23932,7 +24498,7 @@
             },
             {
               "name": "userDiscussionsCount",
-              "description": "Number of user discussions in the epic",
+              "description": "Number of user discussions in the epic.",
               "args": [
 
               ],
@@ -23950,7 +24516,7 @@
             },
             {
               "name": "userNotesCount",
-              "description": "Number of user notes of the epic",
+              "description": "Number of user notes of the epic.",
               "args": [
 
               ],
@@ -23986,7 +24552,7 @@
             },
             {
               "name": "webPath",
-              "description": "Web path of the epic",
+              "description": "Web path of the epic.",
               "args": [
 
               ],
@@ -24004,7 +24570,7 @@
             },
             {
               "name": "webUrl",
-              "description": "Web URL of the epic",
+              "description": "Web URL of the epic.",
               "args": [
 
               ],
@@ -24357,6 +24923,134 @@
                   "kind": "OBJECT",
                   "name": "PageInfo",
                   "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "EpicBoardCreateInput",
+          "description": "Autogenerated input type of EpicBoardCreate",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "name",
+              "description": "The board name.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "hideBacklogList",
+              "description": "Whether or not backlog list is hidden.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "hideClosedList",
+              "description": "Whether or not closed list is hidden.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "groupPath",
+              "description": "Full path of the group with which the resource is associated.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "EpicBoardCreatePayload",
+          "description": "Autogenerated return type of EpicBoardCreate",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "epicBoard",
+              "description": "The created epic board.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "EpicBoard",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
                 }
               },
               "isDeprecated": false,
@@ -32009,7 +32703,7 @@
             },
             {
               "name": "shifts",
-              "description": "Blocks of time for which a participant is on-call within a given timeframe. Timeframe cannot exceed one month.",
+              "description": "Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month.",
               "args": [
                 {
                   "name": "startTime",
@@ -41364,6 +42058,136 @@
         },
         {
           "kind": "INPUT_OBJECT",
+          "name": "MergeRequestReviewerRereviewInput",
+          "description": "Autogenerated input type of MergeRequestReviewerRereview",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "projectPath",
+              "description": "The project the merge request to mutate is in.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "iid",
+              "description": "The IID of the merge request to mutate.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "userId",
+              "description": "The user ID for the user that has been requested for a new review.\n",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "UserID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "MergeRequestReviewerRereviewPayload",
+          "description": "Autogenerated return type of MergeRequestReviewerRereview",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mergeRequest",
+              "description": "The merge request after mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "MergeRequest",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
           "name": "MergeRequestSetAssigneesInput",
           "description": "Autogenerated input type of MergeRequestSetAssignees",
           "fields": null,
@@ -42315,7 +43139,7 @@
             },
             {
               "name": "merged",
-              "description": null,
+              "description": "Merge Request has been merged",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -45004,6 +45828,33 @@
               "deprecationReason": null
             },
             {
+              "name": "epicBoardCreate",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "EpicBoardCreateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "EpicBoardCreatePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "epicSetSubscription",
               "description": null,
               "args": [
@@ -45646,6 +46497,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "MergeRequestCreatePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mergeRequestReviewerRereview",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "MergeRequestReviewerRereviewInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "MergeRequestReviewerRereviewPayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -51473,7 +52351,7 @@
             },
             {
               "name": "configSource",
-              "description": "Config source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE)",
+              "description": "Configuration source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE)",
               "args": [
 
               ],
@@ -53154,6 +54032,41 @@
               "deprecationReason": null
             },
             {
+              "name": "alertManagementPayloadFields",
+              "description": "Extract alert fields from payload for custom mapping",
+              "args": [
+                {
+                  "name": "payloadExample",
+                  "description": "Sample payload for extracting alert fields for custom mappings.",
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AlertManagementPayloadAlertField",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "allowMergeOnSkippedPipeline",
               "description": "If `only_allow_merge_if_pipeline_succeeds` is true, indicates if merge requests of the project can also be merged with skipped jobs",
               "args": [
@@ -53584,8 +54497,61 @@
               "deprecationReason": null
             },
             {
+              "name": "dastProfiles",
+              "description": "DAST Profiles associated with the project. Always returns no nodes if `dast_saved_scans` is disabled.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastProfileConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "dastScannerProfiles",
-              "description": "The DAST scanner profiles associated with the project",
+              "description": "The DAST scanner profiles associated with the project.",
               "args": [
                 {
                   "name": "after",
@@ -53638,7 +54604,7 @@
             },
             {
               "name": "dastSiteProfile",
-              "description": "DAST Site Profile associated with the project",
+              "description": "DAST Site Profile associated with the project.",
               "args": [
                 {
                   "name": "id",
@@ -53665,7 +54631,7 @@
             },
             {
               "name": "dastSiteProfiles",
-              "description": "DAST Site Profiles associated with the project",
+              "description": "DAST Site Profiles associated with the project.",
               "args": [
                 {
                   "name": "after",
@@ -53718,7 +54684,7 @@
             },
             {
               "name": "dastSiteValidations",
-              "description": "DAST Site Validations associated with the project. Will always return no nodes if `security_on_demand_scans_site_validation` is disabled",
+              "description": "DAST Site Validations associated with the project. Always returns no nodes if `security_on_demand_scans_site_validation` is disabled.",
               "args": [
                 {
                   "name": "normalizedTargetUrls",
@@ -56689,7 +57655,7 @@
             },
             {
               "name": "squashReadOnly",
-              "description": "Indicates if squash readonly is enabled",
+              "description": "Indicates if `squashReadOnly` is enabled",
               "args": [
 
               ],
@@ -65713,7 +66679,7 @@
           "fields": [
             {
               "name": "apiFuzzing",
-              "description": "Aggregated counts for the api_fuzzing scan",
+              "description": "Aggregated counts for the `api_fuzzing` scan",
               "args": [
 
               ],
@@ -65727,7 +66693,7 @@
             },
             {
               "name": "containerScanning",
-              "description": "Aggregated counts for the container_scanning scan",
+              "description": "Aggregated counts for the `container_scanning` scan",
               "args": [
 
               ],
@@ -65741,7 +66707,7 @@
             },
             {
               "name": "coverageFuzzing",
-              "description": "Aggregated counts for the coverage_fuzzing scan",
+              "description": "Aggregated counts for the `coverage_fuzzing` scan",
               "args": [
 
               ],
@@ -65755,7 +66721,7 @@
             },
             {
               "name": "dast",
-              "description": "Aggregated counts for the dast scan",
+              "description": "Aggregated counts for the `dast` scan",
               "args": [
 
               ],
@@ -65769,7 +66735,7 @@
             },
             {
               "name": "dependencyScanning",
-              "description": "Aggregated counts for the dependency_scanning scan",
+              "description": "Aggregated counts for the `dependency_scanning` scan",
               "args": [
 
               ],
@@ -65783,7 +66749,7 @@
             },
             {
               "name": "sast",
-              "description": "Aggregated counts for the sast scan",
+              "description": "Aggregated counts for the `sast` scan",
               "args": [
 
               ],
@@ -65797,7 +66763,7 @@
             },
             {
               "name": "secretDetection",
-              "description": "Aggregated counts for the secret_detection scan",
+              "description": "Aggregated counts for the `secret_detection` scan",
               "args": [
 
               ],
@@ -68825,7 +69791,7 @@
             },
             {
               "name": "loadAsync",
-              "description": "Shows whether the blob content is loaded async",
+              "description": "Shows whether the blob content is loaded asynchronously",
               "args": [
 
               ],
@@ -69636,7 +70602,7 @@
             },
             {
               "name": "sha",
-              "description": "Last commit sha for the entry",
+              "description": "Last commit SHA for the entry",
               "args": [
 
               ],
@@ -72848,7 +73814,7 @@
             },
             {
               "name": "sha",
-              "description": "Last commit sha for the entry",
+              "description": "Last commit SHA for the entry",
               "args": [
 
               ],
@@ -75317,6 +76283,26 @@
           "fields": null,
           "inputFields": [
             {
+              "name": "captchaResponse",
+              "description": "A valid CAPTCHA response value obtained by using the provided captchaSiteKey with a CAPTCHA API to present a challenge to be solved on the client. Required to resubmit if the previous operation returned \"NeedsCaptchaResponse: true\".",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "spamLogId",
+              "description": "The spam log ID which must be passed along with a valid CAPTCHA response for the operation to be completed. Required to resubmit if the previous operation returned \"NeedsCaptchaResponse: true\".",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "id",
               "description": "The global ID of the snippet to update.",
               "type": {
@@ -75399,6 +76385,20 @@
           "description": "Autogenerated return type of UpdateSnippet",
           "fields": [
             {
+              "name": "captchaSiteKey",
+              "description": "The CAPTCHA site key which must be used to render a challenge for the user to solve to obtain a valid captchaResponse value. Included only when an operation was not completed because \"NeedsCaptchaResponse\" is true.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "clientMutationId",
               "description": "A unique identifier for the client performing the mutation.",
               "args": [
@@ -75439,6 +76439,20 @@
               "deprecationReason": null
             },
             {
+              "name": "needsCaptchaResponse",
+              "description": "Indicates whether the operation was detected as possible spam and not completed. If CAPTCHA is enabled, the request must be resubmitted with a valid CAPTCHA response and spam_log_id included for the operation to be completed. Included only when an operation was not completed because \"NeedsCaptchaResponse\" is true.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "snippet",
               "description": "The snippet after mutation.",
               "args": [
@@ -75454,13 +76468,27 @@
             },
             {
               "name": "spam",
-              "description": "Indicates whether the operation returns a record detected as spam.",
+              "description": "Indicates whether the operation was detected as definite spam. There is no option to resubmit the request with a CAPTCHA response.",
               "args": [
 
               ],
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "spamLogId",
+              "description": "The spam log ID which must be passed along with a valid CAPTCHA response for an operation to be completed. Included only when an operation was not completed because \"NeedsCaptchaResponse\" is true.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -80666,6 +81694,20 @@
           "description": "Represents the location of a vulnerability found by a Coverage Fuzzing scan",
           "fields": [
             {
+              "name": "blobPath",
+              "description": "Blob path to the vulnerable file",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "endLine",
               "description": "Number of the last relevant line in the vulnerable file",
               "args": [
@@ -80818,6 +81860,20 @@
           "description": "Represents the location of a vulnerability found by a dependency security scan",
           "fields": [
             {
+              "name": "blobPath",
+              "description": "Blob path to the vulnerable file",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "dependency",
               "description": "Dependency containing the vulnerability",
               "args": [
@@ -80858,6 +81914,20 @@
           "name": "VulnerabilityLocationSast",
           "description": "Represents the location of a vulnerability found by a SAST scan",
           "fields": [
+            {
+              "name": "blobPath",
+              "description": "Blob path to the vulnerable file",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "endLine",
               "description": "Number of the last relevant line in the vulnerable file",
@@ -80941,6 +82011,20 @@
           "name": "VulnerabilityLocationSecretDetection",
           "description": "Represents the location of a vulnerability found by a secret detection scan",
           "fields": [
+            {
+              "name": "blobPath",
+              "description": "Blob path to the vulnerable file",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "endLine",
               "description": "Number of the last relevant line in the vulnerable file",

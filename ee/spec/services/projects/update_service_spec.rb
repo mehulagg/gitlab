@@ -108,6 +108,25 @@ RSpec.describe Projects::UpdateService, '#execute' do
       end
     end
 
+    describe '#default_branch' do
+      include_examples 'audit event logging' do
+        let(:operation) { update_project(project, user, default_branch: 'feature') }
+        let(:fail_condition!) do
+          allow_next_instance_of(Project) do |project|
+            allow(project).to receive(:change_head).and_return(false)
+          end
+        end
+
+        let(:attributes) do
+          audit_event_params.tap do |param|
+            param[:details].merge!(
+              custom_message: "Default branch changed from master to feature"
+            )
+          end
+        end
+      end
+    end
+
     describe '#visibility' do
       include_examples 'audit event logging' do
         let(:operation) do

@@ -1,15 +1,17 @@
 <script>
 import { visitUrl } from '~/lib/utils/url_utility';
-import { s__ } from '~/locale';
 import * as Sentry from '~/sentry/wrapper';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
 import updateComplianceFrameworkMutation from '../graphql/queries/update_compliance_framework.mutation.graphql';
+import { initialiseFormData, FETCH_ERROR, SAVE_ERROR } from '../constants';
 import SharedForm from './shared_form.vue';
+import FormStatus from './form_status.vue';
 
 export default {
   components: {
+    FormStatus,
     SharedForm,
   },
   props: {
@@ -33,66 +35,76 @@ export default {
   },
   data() {
     return {
-      complianceFramework: {},
       errorMessage: '',
+      formData: initialiseFormData(),
+      saving: false,
     };
   },
   apollo: {
-    complianceFramework: {
+    namespace: {
       query: getComplianceFrameworkQuery,
       variables() {
         return {
           fullPath: this.groupPath,
-          complianceFramework: convertToGraphQLId(this.graphqlFieldName, this.id),
+          complianceFramework: this.graphqlId,
         };
       },
-      update(data) {
-        const complianceFrameworks = data.namespace?.complianceFrameworks?.nodes || [];
-
-        if (!complianceFrameworks.length) {
-          this.setError(new Error(this.$options.i18n.fetchError), this.$options.i18n.fetchError);
-
-          return {};
-        }
-
-        const { id, name, description, color } = complianceFrameworks[0];
-
-        return {
-          id,
-          name,
-          description,
-          color,
-        };
+      result({ data }) {
+        this.formData = this.extractComplianceFramework(data);
       },
       error(error) {
-        this.setError(error, this.$options.i18n.fetchError);
+        this.setError(error, FETCH_ERROR);
       },
     },
   },
   computed: {
-    isLoading() {
-      return this.$apollo.loading;
+    graphqlId() {
+      return convertToGraphQLId(this.graphqlFieldName, this.id);
     },
-    isFormReady() {
-      return Object.keys(this.complianceFramework).length > 0 && !this.isLoading;
+    isLoading() {
+      return this.$apollo.loading || this.saving;
+    },
+    hasFormData() {
+      return Boolean(this.formData?.name);
     },
   },
   methods: {
+    extractComplianceFramework(data) {
+      const complianceFrameworks = data.namespace?.complianceFrameworks?.nodes || [];
+
+      if (!complianceFrameworks.length) {
+        this.setError(new Error(FETCH_ERROR), FETCH_ERROR);
+
+        return initialiseFormData();
+      }
+
+      const { name, description, color } = complianceFrameworks[0];
+
+      return {
+        name,
+        description,
+        color,
+      };
+    },
     setError(error, userFriendlyText) {
       this.errorMessage = userFriendlyText;
       Sentry.captureException(error);
     },
-    async onSubmit(formData) {
+    async onSubmit() {
+      this.saving = true;
+      this.errorMessage = '';
+
       try {
+        const { name, description, color } = this.formData;
         const { data } = await this.$apollo.mutate({
           mutation: updateComplianceFrameworkMutation,
           variables: {
             input: {
-              id: this.complianceFramework.id,
+              id: this.graphqlId,
               params: {
-                name: formData.name,
-                description: formData.description,
-                color: formData.color,
+                name,
+                description,
+                color,
               },
             },
           },
@@ -103,30 +115,27 @@ export default {
         if (error) {
           this.setError(new Error(error), error);
         } else {
+          this.saving = false;
           visitUrl(this.groupEditPath);
         }
       } catch (e) {
-        this.setError(e, this.$options.i18n.saveError);
+        this.setError(e, SAVE_ERROR);
       }
+
+      this.saving = false;
     },
-  },
-  i18n: {
-    fetchError: s__(
-      'ComplianceFrameworks|Error fetching compliance frameworks data. Please refresh the page',
-    ),
-    saveError: s__(
-      'ComplianceFrameworks|Unable to save this compliance framework. Please try again',
-    ),
   },
 };
 </script>
 <template>
-  <shared-form
-    :group-edit-path="groupEditPath"
-    :loading="isLoading"
-    :render-form="isFormReady"
-    :error="errorMessage"
-    :compliance-framework="complianceFramework"
-    @submit="onSubmit"
-  />
+  <form-status :loading="isLoading" :error="errorMessage">
+    <shared-form
+      v-if="hasFormData"
+      :group-edit-path="groupEditPath"
+      :name.sync="formData.name"
+      :description.sync="formData.description"
+      :color.sync="formData.color"
+      @submit="onSubmit"
+    />
+  </form-status>
 </template>

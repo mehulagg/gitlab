@@ -1,4 +1,4 @@
-import { makeEntities } from './helpers';
+import { makeEntities } from '../helpers';
 
 export const sastCiConfigurationQueryResponse = {
   data: {

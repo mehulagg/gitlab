@@ -1,5 +1,5 @@
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { transformRawStages } from '../utils';
+import { transformRawStages, prepareStageErrors } from '../utils';
 import * as types from './mutation_types';
 
 export default {
@@ -67,7 +67,8 @@ export default {
     state.stages = [];
   },
   [types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages) {
-    state.stages = transformRawStages(stages);
+    const transformedStages = transformRawStages(stages);
+    state.stages = transformedStages.sort((a, b) => a?.id > b?.id);
   },
   [types.REQUEST_UPDATE_STAGE](state) {
     state.isLoading = true;
@@ -120,9 +121,10 @@ export default {
     state.isCreatingValueStream = true;
     state.createValueStreamErrors = {};
   },
-  [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { errors } = {}) {
+  [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { data: { stages = [] }, errors = {} }) {
+    const { stages: stageErrors = {}, ...rest } = errors;
+    state.createValueStreamErrors = { ...rest, stages: prepareStageErrors(stages, stageErrors) };
     state.isCreatingValueStream = false;
-    state.createValueStreamErrors = errors;
   },
   [types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS](state, valueStream) {
     state.isCreatingValueStream = false;

@@ -220,7 +220,7 @@ RSpec.configure do |config|
 
       # Merge request widget GraphQL requests are disabled in the tests
       # for now whilst we migrate as much as we can over the GraphQL
-      stub_feature_flags(merge_request_widget_graphql: false)
+      # stub_feature_flags(merge_request_widget_graphql: false)
 
       # Using FortiAuthenticator as OTP provider is disabled by default in
       # tests, until we introduce it in user settings
@@ -284,6 +284,8 @@ RSpec.configure do |config|
         current_user_mode.send(:user)&.admin?
       end
     end
+
+    allow(Gitlab::CurrentSettings).to receive(:current_application_settings?).and_return(false)
   end
 
   config.around(:example, :quarantine) do |example|
