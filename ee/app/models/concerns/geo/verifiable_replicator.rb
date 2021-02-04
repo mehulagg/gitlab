@@ -11,7 +11,14 @@ module Geo
     class_methods do
       extend Gitlab::Utils::Override
 
-      delegate :verification_pending_batch, :verification_failed_batch, :needs_verification_count, :fail_verification_timeouts, to: :verification_query_class
+      delegate :verification_pending_batch,
+               :verification_failed_batch,
+               :needs_verification_count,
+               :needs_reverification_count,
+               :fail_verification_timeouts,
+               :reverifiable_batch,
+               :reverify_batch,
+               to: :verification_query_class
 
       # If replication is disabled, then so is verification.
       override :verification_enabled?
@@ -31,6 +38,8 @@ module Geo
         ::Geo::VerificationBatchWorker.perform_with_capacity(replicable_name)
 
         ::Geo::VerificationTimeoutWorker.perform_async(replicable_name)
+
+        ::Geo::ReverificationBatchWorker.perform_async(replicable_name)
       end
 
       # Called by VerificationBatchWorker.
@@ -54,6 +63,18 @@ module Geo
           .ceil
       end
 
+      # Called by ReverificationBatchWorker.
+      #
+      # - Asks the DB how many things still need to be reverified (with a limit)
+      # - Converts that to a number of batches
+      #
+      # @return [Integer] number of batches of reverification work remaining, up to the given maximum
+      def remaining_reverification_batch_count(max_batch_count:)
+        needs_reverification_count(limit: max_batch_count * verification_batch_size)
+          .fdiv(verification_batch_size)
+          .ceil
+      end
+
       # @return [Array<Gitlab::Geo::Replicator>] batch of replicators which need to be verified
       def replicator_batch_to_verify
         model_record_id_batch_to_verify.map do |id|
@@ -72,6 +93,11 @@ module Geo
         end
 
         ids
+      end
+
+      # @return [Array<Gitlab::Geo::Replicator>] batch of replicators which need to be re-verified
+      def reverify_batch!
+        reverify_batch(batch_size: verification_batch_size)
       end
 
       # If primary, query the model table.
