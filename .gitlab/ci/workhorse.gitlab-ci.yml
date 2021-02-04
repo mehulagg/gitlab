@@ -15,7 +15,7 @@ workhorse:verify:
   stage: test
   needs: []
   script:
-  - make -C workhorse verify
+    - make -C workhorse verify
 
 .workhorse:test:
   extends: .workhorse:rules:workhorse
