@@ -8,7 +8,7 @@ As the name implies, the purpose of the template is to detail underperforming qu
   - For example - `Query Performance Investigation - SELECT "namespaces".* FROM "namespaces" WHERE "namespaces"."id" = $1 LIMIT $2`
 - [ ] Provide information in the Requested Data Points table
 - [ ] Provide [priority and severity labels](https://about.gitlab.com/handbook/engineering/quality/issue-triage/#availability)
-- [ ] If this requires immediate attention cc (at)gitlab-org/database-team and reach out in the #g_database slack channel
+- [ ] If this requires immediate attention cc `@gitlab-org/database-team` and reach out in the #g_database slack channel
 
 ### Requested Data points
 
@@ -28,7 +28,7 @@ Please provide as many of these fields as possible when submitting a query perfo
 
 <!--
 
-- Examples of a postgres checkup report - https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/snippets/2056787
+- Example of a postgres checkup report - https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/snippets/2056787
 - Epic - Improving the Database resource usage (&365) - https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/365#reports-of-database-performance-peak-investigation-analysis-executed
 - Past examples of query performance investigations that have led to this template creation. 
  - Possible Index suggestion or query rewriting (#292454) - https://gitlab.com/gitlab-org/gitlab/-/issues/292454)
@@ -38,4 +38,4 @@ Please provide as many of these fields as possible when submitting a query perfo
 
 -->
 
-/label ~"group::database" ~"database::validation"
+/label ~"group::database" ~"database::triage" 
