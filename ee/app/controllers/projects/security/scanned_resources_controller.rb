@@ -3,6 +3,8 @@
 module Projects
   module Security
     class ScannedResourcesController < ::Projects::ApplicationController
+      include SecurityAndCompliancePermissions
+
       before_action :authorize_read_vulnerability!
       before_action :scanned_resources
 

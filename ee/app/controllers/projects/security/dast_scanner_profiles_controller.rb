@@ -3,6 +3,8 @@
 module Projects
   module Security
     class DastScannerProfilesController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
+
       before_action :authorize_read_on_demand_scans!
 
       feature_category :dynamic_application_security_testing
