@@ -107,7 +107,7 @@ GitLab CI/CD supports numerous configuration options:
 | [Schedule pipelines](pipelines/schedules.md)                                            | Schedule pipelines to run as often as you need.                                           |
 | [Custom path for `.gitlab-ci.yml`](pipelines/settings.md#custom-cicd-configuration-path) | Define a custom path for the CI/CD configuration file.                                   |
 | [Git submodules for CI/CD](git_submodules.md)                                           | Configure jobs for using Git submodules.                                                  |
-| [SSH keys for CI/CD](ssh_keys/README.md)                                                | Using SSH keys in your CI pipelines.                                                      |
+| [SSH keys for CI/CD](ssh_keys/index.md)                                                | Using SSH keys in your CI pipelines.                                                      |
 | [Pipeline triggers](triggers/README.md)                                                 | Trigger pipelines through the API.                                                        |
 | [Pipelines for Merge Requests](merge_request_pipelines/index.md)                        | Design a pipeline structure for running a pipeline in merge requests.                     |
 | [Integrate with Kubernetes clusters](../user/project/clusters/index.md)                 | Connect your project to Google Kubernetes Engine (GKE) or an existing Kubernetes cluster. |
