@@ -26162,7 +26162,7 @@ type User {
   avatarUrl: String
 
   """
-  If the user is a bot.
+  Indicates if the user is a bot.
   """
   bot: Boolean!
 

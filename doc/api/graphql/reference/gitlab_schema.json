@@ -75850,7 +75850,7 @@
             },
             {
               "name": "bot",
-              "description": "If the user is a bot.",
+              "description": "Indicates if the user is a bot.",
               "args": [
 
               ],
