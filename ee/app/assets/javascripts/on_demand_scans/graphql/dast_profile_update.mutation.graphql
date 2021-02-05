@@ -1,6 +1,6 @@
 mutation dastProfileUpdate($input: DastProfileUpdateInput!, $runAfterCreate: Boolean!) {
   dastProfileUpdate(input: $input) {
-    dastScan {
+    dastProfile {
       editPath
     }
     pipelineUrl @include(if: $runAfterCreate)
