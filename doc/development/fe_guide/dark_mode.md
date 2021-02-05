@@ -9,7 +9,7 @@ This page is about developing dark mode for GitLab. For how to enable dark mode,
 
 # How dark mode works
 
-TLDR: We reverse the color palette and override a few bootstrap variables.
+Short version: Reverse the color palette and override a few Bootstrap variables.
 
 Note the following:
 
@@ -20,11 +20,12 @@ Note the following:
     - CSS variables are used for any colors within the `app/assets/stylesheets/page_bundles` directory.
 - `app/views/layouts/_head.html.haml` then loads application or application_dark based on the user's theme preference.
 
-Because we didn't want to generate separate `_dark.css` variants of every page_bundle file,
+As we do not want to generate separate `_dark.css` variants of every page_bundle file,
 we use CSS variables with SCSS variables as fallbacks. This is because when we generate the `page_bundles`
 CSS, we get the variable values from `_variables.scss`, so any SCSS variables have light mode values.
 
-The CSS variables defined in `_dark.scss` are available in the browser though, so those will have the correct colors.
+As the CSS variables defined in `_dark.scss` are available in the browser, they have the
+correct colors for dark mode.
 
 ```scss
 color: var(--gray-500, $gray-500);
@@ -33,17 +34,16 @@ color: var(--gray-500, $gray-500);
 ## Utility classes
 
 We generate a separate `utilities_dark.css` file for utility classes containing the inverted values. So a class
-such as `gl-text-white` will give text color of `#333` in dark mode. This is done intentionally so you are not
-required to add multiple classes every time you want to add a color.
+such as `gl-text-white` specifies a text color of `#333` in dark mode. This means you do not have to
+add multiple classes every time you want to add a color.
 
-There is currently not a way to use a utility class only in dark mode, there is [an issue](https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1141)
-to add support for this.
+Currently, we cannot set up a utility class only in dark mode. We hope to address that
+[issue](https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1141) soon.
 
 ## Using different values in light and dark mode
 
-Ideally we use the same values for both light and dark mode, for most things this works. There are some cases where we need a different value for dark mode.
-
-You can add am override using the `.gl-dark` class that dark mode adds to `body`
+In most cases, we can use the same values for light and dark mode. If that is not possible, you
+can add an override using the `.gl-dark` class that dark mode adds to `body`:
 
 ```scss
 color: $gray-700;
@@ -64,12 +64,22 @@ color: var(--gray-500, $gray-700);
 
 We [plan to add](https://gitlab.com/gitlab-org/gitlab/-/issues/301147) the CSS variables to light mode. When that happens, different values for the SCSS fallback will no longer work.
 
-## Why don't we use CSS variables everywhere
+## When to use SCSS variables
 
-We probably will. But there are still a few things we do in SCSS that we cannot (easily) do with CSS. Some examples are the `lighten`, `darken` and `color-yiq` (color contrast) functions. There are also some tricky gotchas. For example, the following will not work:
+There are a few things we do in SCSS that we cannot (easily) do with CSS, such as the following
+functions: 
+
+- `lighten`
+- `darken`
+- `color-yiq` (color contrast)
+
+Not all SCSS variables, even if they compile, are valid. For example, the following SCSS variable
+does not work:
 
 ```scss
 color: rgba(var(--black), 0.5);
 ```
 
-It will compile, and in devtools it will appear as a valid style. But because our CSS variables are defined as hex (ie. `--black: #222`), then that style computes to `rgba(#222, 0.5)`, which is _not_ valid CSS!
+It compiles. It even appears as a valid style in your browser's developer tools. However, since
+our CSS variables are defined in hex format, such as `--black: #222`, that style
+computes to `rgba(#222, 0.5)`, which is _not_ valid CSS!
