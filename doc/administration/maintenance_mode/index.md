@@ -60,6 +60,7 @@ There are three ways to disable maintenance mode:
 ## Behavior of GitLab features in maintenance mode
 
 ### Overview
+
 When maintenance mode is enabled, a banner is displayed at the top of the page.
 The banner can be customized with a specific message.
 
@@ -143,6 +144,7 @@ it is recommended that you disable all cron jobs except for those related to Geo
 You can monitor queues and disable jobs in **Admin Area > Monitoring > Background Jobs**.
 
 ### Feature flags 
+
 ### Geo secondaries
 
 The maintenance mode setting will be propagated to the secondary as they sync up.
@@ -151,5 +153,7 @@ It is important that you do not disable replication before enabling maintenance 
 Replication and verification will continue to work in maintenance mode.
 
 ### Secure features
+
 #### Fuzz testing
+
 #### Network policy management
