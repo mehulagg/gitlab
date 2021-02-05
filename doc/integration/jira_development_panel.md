@@ -249,7 +249,10 @@ resynchronize the information. To do so:
 
 ### GitLab for Jira app
 
-You can integrate GitLab.com and Jira Cloud using the [GitLab for Jira](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud) app in the Atlassian Marketplace.
+You can integrate GitLab.com and Jira Cloud using the
+[GitLab for Jira](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud)
+app in the Atlassian Marketplace. The user configuring GitLab for Jira must have
+[Maintainer](../user/permissions.md) permissions in the GitLab namespace.
 
 This method is recommended when using GitLab.com and Jira Cloud because data is synchronized in real-time. The DVCS connector updates data only once per hour. If you are not using both of these environments, use the [Jira DVCS Connector](#jira-dvcs-configuration) method.
 
@@ -263,11 +266,14 @@ For a walkthrough of the integration with GitLab for Jira, watch [Configure GitL
 1. After installing, click **Get started** to go to the configurations page. This page is always available under **Jira Settings > Apps > Manage apps**.
 
    ![Start GitLab App configuration on Jira](img/jira_dev_panel_setup_com_2.png)
-1. If not already signed in to GitLab.com, you will need to sign in to add namespaces. The user setting up *GitLab for Jira* must have *Maintainer* access to the GitLab namespace.
+1. If not already signed in to GitLab.com, you must sign in as a user with
+   [Maintainer](../user/permissions.md) permissions to add namespaces.
 
-   ![Sign in to GitLab.com in GitLab Jira App](img/jira_dev_panel_setup_com_3.png)
-1. Click **Add namespace** to open the list of available namespaces. Then click **Link** next to the namespace that you want to add.
-   ![Link namespace in GitLab Jira App](img/jira_dev_panel_setup_com_4.png)
+   ![Sign in to GitLab.com in GitLab Jira App](img/jira_dev_panel_setup_com_3_v13_9.png)
+1. To open the list of available namespaces, click **Add namespace**. Identify the
+   namespace you want to add, and click **Link**.
+
+   ![Link namespace in GitLab Jira App](img/jira_dev_panel_setup_com_4_v13_9.png)
 
 NOTE:
 The GitLab user only needs access when adding a new namespace. For syncing with Jira, we do not depend on the user's token.
