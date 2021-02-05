@@ -8,8 +8,8 @@ RSpec.describe 'Projects > Files > User wants to add a .gitlab-ci.yml file' do
   before do
     project = create(:project, :repository)
     sign_in project.owner
-    stub_experiment(ci_syntax_templates: experiment_active)
-    stub_experiment_for_subject(ci_syntax_templates: in_experiment_group)
+    stub_experiment(ci_syntax_templates_b: experiment_active)
+    stub_experiment_for_subject(ci_syntax_templates_b: in_experiment_group)
 
     visit project_new_blob_path(project, 'master', file_name: '.gitlab-ci.yml')
   end

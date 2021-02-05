@@ -20,8 +20,8 @@ RSpec.describe Projects::BlobController do
         project.add_maintainer(user)
         sign_in(user)
 
-        stub_experiment(ci_syntax_templates: experiment_active)
-        stub_experiment_for_subject(ci_syntax_templates: in_experiment_group)
+        stub_experiment(ci_syntax_templates_b: experiment_active)
+        stub_experiment_for_subject(ci_syntax_templates_b: in_experiment_group)
       end
 
       context 'when the experiment is not active' do
@@ -41,7 +41,7 @@ RSpec.describe Projects::BlobController do
 
         it 'records the experiment user in the control group' do
           expect(Experiment).to receive(:add_user)
-            .with(:ci_syntax_templates, :control, user, namespace_id: project.namespace_id)
+            .with(:ci_syntax_templates_b, :control, user, namespace_id: project.namespace_id)
 
           request
         end
@@ -53,7 +53,7 @@ RSpec.describe Projects::BlobController do
 
         it 'records the experiment user in the experimental group' do
           expect(Experiment).to receive(:add_user)
-            .with(:ci_syntax_templates, :experimental, user, namespace_id: project.namespace_id)
+            .with(:ci_syntax_templates_b, :experimental, user, namespace_id: project.namespace_id)
 
           request
         end
@@ -64,7 +64,7 @@ RSpec.describe Projects::BlobController do
 
           it 'records the experiment user in the experimental group' do
             expect(Experiment).to receive(:add_user)
-            .with(:ci_syntax_templates, :experimental, user, namespace_id: project.namespace_id)
+            .with(:ci_syntax_templates_b, :experimental, user, namespace_id: project.namespace_id)
 
             request
           end
