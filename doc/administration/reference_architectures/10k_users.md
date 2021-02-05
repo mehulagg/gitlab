@@ -1493,7 +1493,7 @@ The password for the user is the same as the one you configured earlier - `<prae
 
 An example of how this would work with a Omnibus GitLab PostgreSQL set up is below.
 
-1. SSH in to the PostgreSQL node.
+1. SSH in to the Praefect PostgreSQL node.
 
 1. Connect to the PostgreSQL server with administrative access.
    The `gitlab-psql` user should be used here for this as it's added by default in Omnibus.
