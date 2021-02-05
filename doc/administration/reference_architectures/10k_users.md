@@ -54,7 +54,7 @@ together {
 
 card "Gitaly Cluster" as gitaly_cluster {
   collections "**Praefect** x3" as praefect #FF8C00
-  collections "**Gitaly Cluster** x3" as gitaly #FF8C00
+  collections "**Gitaly** x3" as gitaly #FF8C00
   card "**Praefect PostgreSQL***\n//Non fault-tolerant//" as praefect_postgres #FF8C00
   
   praefect -[#FF8C00]-> gitaly
