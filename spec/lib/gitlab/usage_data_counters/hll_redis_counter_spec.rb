@@ -46,6 +46,45 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
     end
   end
 
+  describe '.feature_enabled?' do
+    let(:feature) { 'test_hll_redis_counter_ff_check' }
+
+    before do
+      allow(described_class).to receive(:known_events).and_return(known_events)
+      skip_feature_flags_yaml_validation
+      skip_default_enabled_yaml_check
+    end
+
+    let(:known_events) do
+      [
+        { name: "analytics_event1", redis_slot: "analytics", category: "analytics", aggregation: "weekly" },
+        { name: "analytics_event2", redis_slot: "analytics", category: "analytics", aggregation: "weekly", feature_flag: feature }
+      ]
+    end
+
+    it 'tracks event with no feature flag set' do
+      expect(Gitlab::Redis::HLL).to receive(:add)
+
+      described_class.track_event(:analytics_event1, values: 1)
+    end
+
+    it 'tracks event with feature flag enabled' do
+      stub_feature_flags(feature => true)
+
+      expect(Gitlab::Redis::HLL).to receive(:add)
+
+      described_class.track_event(:analytics_event2, values: 1)
+    end
+
+    it 'tracks event with feature flag disabled' do
+      stub_feature_flags(feature => false)
+
+      expect(Gitlab::Redis::HLL).not_to receive(:add)
+
+      described_class.track_event(:analytics_event2, values: 1)
+    end
+  end
+
   describe 'known_events' do
     let(:weekly_event) { 'g_analytics_contribution' }
     let(:daily_event) { 'g_analytics_search' }
