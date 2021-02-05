@@ -8,7 +8,7 @@
 
 ## Related issues
 
-<!-- Mention the issue(s) this MR is related to -->
+<!-- Link related issues below. -->
 
 ## Moving docs to a new location?
 
