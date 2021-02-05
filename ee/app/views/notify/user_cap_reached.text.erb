@@ -1,0 +1,12 @@
+<%= _('This is a notification to make you aware that your GitLab instance has reached the maximum allowed %{user_doc_link} set by an instance admin.') % { user_doc_link: "#{_('user cap')} #{@url_to_user_cap}" } %>
+
+<%= _('What does this mean?') %>
+<%= _('Users can still be invited to your instance and/or add themselves if permitted based on your settings. However, they will not have access to your instance, nor count towards your subscribed seat count until you %{approve_link}.') % { approve_link: "#{_('approve them')} #{@url_to_approve}" } %>
+
+<%= _('Here are some helpful links to help you manage your instance:') %>
+
+<%= _('View pending member requests') %> <%= @url_to_pending_users %>
+<%= _('Manage (accept/reject) pending member requests') %> <%= @url_to_approve %>
+<%= _('Adjust the user cap setting on your instance') %> <%= @url_to_user_cap %>
+
+<%= _('If you have any questions about this process please consults our %{doc_link} or %{support_link}.') % { doc_link: "#{_('docs')} #{@url_to_docs}", support_link: "#{_('contact our support team')} #{@url_to_support}" } %>
