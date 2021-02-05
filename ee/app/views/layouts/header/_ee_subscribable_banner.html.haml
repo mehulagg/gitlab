@@ -7,7 +7,7 @@
       %button.gl-alert-dismiss{ type: 'button', 'aria-label' => 'Dismiss', data: { track_event: 'click_button', track_label: 'dismiss_subscribable_banner' } }
         = sprite_icon('close', css_class: 'gl-icon js-close')
       .gl-display-flex.gl-flex-direction-row
-        .gl-pr-6.gl-pl-5.gl-pt-3.gl-display-none.gl-display-sm-block
+        .gl-pr-6.gl-pl-5.gl-pt-3.gl-display-none.gl-sm-display-block
           - if subscribable.expired?
             - if subscribable.block_changes?
               = image_tag('illustrations/subscription-downgraded.svg')

@@ -2,8 +2,9 @@
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Approvals from '~/vue_merge_request_widget/components/approvals/approvals.vue';
 import approvalsMixin from '~/vue_merge_request_widget/mixins/approvals';
-import ApprovalsAuth from './approvals_auth.vue';
+import { BV_HIDE_MODAL } from '~/lib/utils/constants';
 import { FETCH_ERROR } from '~/vue_merge_request_widget/components/approvals/messages';
+import ApprovalsAuth from './approvals_auth.vue';
 import ApprovalsFooter from './approvals_footer.vue';
 
 export default {
@@ -72,7 +73,7 @@ export default {
     refreshRules() {
       if (this.isBasic) return Promise.resolve();
 
-      this.$root.$emit('bv::hide::modal', this.modalId);
+      this.$root.$emit(BV_HIDE_MODAL, this.modalId);
 
       this.isLoadingRules = true;
 

@@ -10,11 +10,6 @@ module EE
               description: 'Information about security analyzers used in the project',
               method: :itself
 
-        field :dast_scanner_profiles,
-              ::Types::DastScannerProfileType.connection_type,
-              null: true,
-              description: 'The DAST scanner profiles associated with the project'
-
         field :vulnerabilities,
               ::Types::VulnerabilityType.connection_type,
               null: true,
@@ -24,7 +19,7 @@ module EE
         field :vulnerability_scanners,
               ::Types::VulnerabilityScannerType.connection_type,
               null: true,
-              description: 'Vulnerability scanners reported on the project vulnerabilties',
+              description: 'Vulnerability scanners reported on the project vulnerabilities',
               resolver: ::Resolvers::Vulnerabilities::ScannersResolver
 
         field :vulnerabilities_count_by_day,
@@ -61,24 +56,35 @@ module EE
               description: 'Find iterations',
               resolver: ::Resolvers::IterationsResolver
 
+        field :dast_profiles,
+              ::Types::Dast::ProfileType.connection_type,
+              null: true,
+              description: 'DAST Profiles associated with the project. Always returns no nodes ' \
+                           'if `dast_saved_scans` is disabled.'
+
         field :dast_site_profile,
               ::Types::DastSiteProfileType,
               null: true,
               resolver: ::Resolvers::DastSiteProfileResolver.single,
-              description: 'DAST Site Profile associated with the project'
+              description: 'DAST Site Profile associated with the project.'
 
         field :dast_site_profiles,
               ::Types::DastSiteProfileType.connection_type,
               null: true,
-              description: 'DAST Site Profiles associated with the project',
+              description: 'DAST Site Profiles associated with the project.',
               resolver: ::Resolvers::DastSiteProfileResolver
+
+        field :dast_scanner_profiles,
+              ::Types::DastScannerProfileType.connection_type,
+              null: true,
+              description: 'The DAST scanner profiles associated with the project.'
 
         field :dast_site_validations,
               ::Types::DastSiteValidationType.connection_type,
               null: true,
               resolver: ::Resolvers::DastSiteValidationResolver,
-              description: 'DAST Site Validations associated with the project. Will always return no nodes ' \
-                           'if `security_on_demand_scans_site_validation` is disabled'
+              description: 'DAST Site Validations associated with the project. Always returns no nodes ' \
+                           'if `security_on_demand_scans_site_validation` is disabled.'
 
         field :cluster_agent,
               ::Types::Clusters::AgentType,
@@ -110,11 +116,23 @@ module EE
               description: 'Code coverage summary associated with the project',
               resolver: ::Resolvers::Ci::CodeCoverageSummaryResolver
 
+        field :alert_management_payload_fields,
+              [::Types::AlertManagement::PayloadAlertFieldType],
+              null: true,
+              description: 'Extract alert fields from payload for custom mapping',
+              resolver: ::Resolvers::AlertManagement::PayloadAlertFieldResolver
+
         field :incident_management_oncall_schedules,
               ::Types::IncidentManagement::OncallScheduleType.connection_type,
               null: true,
               description: 'Incident Management On-call schedules of the project',
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
+      end
+
+      def dast_profiles
+        return Dast::Profile.none unless ::Feature.enabled?(:dast_saved_scans, object, default_enabled: :yaml)
+
+        Dast::ProfilesFinder.new(project_id: object.id).execute
       end
 
       def dast_scanner_profiles

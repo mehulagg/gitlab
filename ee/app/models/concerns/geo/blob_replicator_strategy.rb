@@ -56,6 +56,26 @@ module Geo
       ).execute
     end
 
+    # Returns a checksum of the file
+    #
+    # @return [String] SHA256 hash of the carrierwave file
+    def calculate_checksum
+      raise 'File is not checksummable' unless checksummable?
+
+      model.hexdigest(carrierwave_uploader.path)
+    end
+
+    # Returns whether the file exists on disk or in remote storage
+    #
+    # Does a hard check because we are doing these checks for replication or
+    # verification purposes, so we should not just trust the data in the DB if
+    # we don't absolutely have to.
+    #
+    # @return [Boolean] whether the file exists on disk or in remote storage
+    def file_exists?
+      carrierwave_uploader.file.exists?
+    end
+
     private
 
     def download
@@ -64,6 +84,13 @@ module Geo
 
     def deleted_params
       { model_record_id: model_record.id, blob_path: blob_path }
+    end
+
+    # Return whether it's capable of generating a checksum of itself
+    #
+    # @return [Boolean] whether it can generate a checksum
+    def checksummable?
+      carrierwave_uploader.file_storage? && file_exists?
     end
   end
 end

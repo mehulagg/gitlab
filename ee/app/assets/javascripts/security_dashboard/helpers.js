@@ -38,6 +38,20 @@ export const scannerFilter = {
   defaultOptions: [],
 };
 
+export const activityOptions = {
+  NO_ACTIVITY: { id: 'NO_ACTIVITY', name: s__('SecurityReports|No activity') },
+  WITH_ISSUES: { id: 'WITH_ISSUES', name: s__('SecurityReports|With issues') },
+  NO_LONGER_DETECTED: { id: 'NO_LONGER_DETECTED', name: s__('SecurityReports|No longer detected') },
+};
+
+export const activityFilter = {
+  name: s__('Reports|Activity'),
+  id: 'activity',
+  options: Object.values(activityOptions),
+  allOption: BASE_FILTERS.activity,
+  defaultOptions: [],
+};
+
 export const getProjectFilter = (projects) => {
   return {
     name: s__('SecurityReports|Project'),

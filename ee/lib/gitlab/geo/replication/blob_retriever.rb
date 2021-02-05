@@ -19,7 +19,7 @@ module Gitlab
 
         def execute
           return error("#{replicator.replicable_name} not found") unless recorded_file
-          return file_not_found(recorded_file) unless recorded_file.file_exist?
+          return file_not_found(recorded_file) unless replicator.file_exists?
           return error('Checksum mismatch') unless matches_checksum?
 
           success(replicator.carrierwave_uploader)

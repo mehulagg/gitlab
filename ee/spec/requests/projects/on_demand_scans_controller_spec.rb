@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Projects::OnDemandScansController, type: :request do
+  include GraphqlHelpers
+
   let_it_be(:project) { create(:project) }
   let(:user) { create(:user) }
 
@@ -70,9 +72,51 @@ RSpec.describe Projects::OnDemandScansController, type: :request do
   end
 
   describe 'GET #edit' do
+    let_it_be(:dast_profile) { create(:dast_profile, project: project) }
+
+    let(:dast_profile_id) { dast_profile.id }
+    let(:edit_path) { edit_project_on_demand_scan_path(project, id: dast_profile_id) }
+
     it_behaves_like 'on-demand scans page' do
-      # This should be improved as part of https://gitlab.com/gitlab-org/gitlab/-/issues/295242
-      let(:path) { edit_project_on_demand_scan_path(project, id: 1) }
+      let(:path) { edit_path }
+    end
+
+    context 'feature available and user can access page' do
+      before do
+        stub_licensed_features(security_on_demand_scans: true)
+
+        project.add_developer(user)
+
+        login_as(user)
+      end
+
+      context 'dast_profile exists in the database' do
+        it 'includes a serialized dast_profile in the response body' do
+          get edit_path
+
+          json_data = {
+            id: global_id_of(dast_profile),
+            name: dast_profile.name,
+            description: dast_profile.description,
+            site_profile_id: global_id_of(DastSiteProfile.new(id: dast_profile.dast_site_profile_id)),
+            scanner_profile_id: global_id_of(DastScannerProfile.new(id: dast_profile.dast_scanner_profile_id))
+          }.to_json
+
+          on_demand_div = Nokogiri::HTML.parse(response.body).at_css('div#js-on-demand-scans-app')
+
+          expect(on_demand_div.attributes['data-dast-scan'].value).to include(json_data)
+        end
+      end
+
+      context 'dast_profile does not exist in the database' do
+        let(:dast_profile_id) { 0 }
+
+        it 'sees a 404 error' do
+          get edit_path
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
     end
   end
 end

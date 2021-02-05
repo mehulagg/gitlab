@@ -1,3 +1,5 @@
+import { urlParamsToObject } from '~/lib/utils/common_utils';
+import { objectToQuery } from '~/lib/utils/url_utility';
 import {
   IterationFilterType,
   IterationIDs,
@@ -6,8 +8,6 @@ import {
   WeightFilterType,
   WeightIDs,
 } from './constants';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
-import { objectToQuery } from '~/lib/utils/url_utility';
 
 export function getMilestone({ milestone }) {
   return milestone || null;

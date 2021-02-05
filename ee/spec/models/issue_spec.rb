@@ -696,9 +696,8 @@ RSpec.describe Issue do
     where(:id, :issue_link_source_id, :issue_link_type_value, :expected) do
       1 | 1   | 0 | 'relates_to'
       1 | 1   | 1 | 'blocks'
-      1 | 2   | 3 | 'relates_to'
+      1 | 2   | 2 | 'relates_to'
       1 | 2   | 1 | 'is_blocked_by'
-      1 | 2   | 2 | 'blocks'
     end
 
     with_them do

@@ -3,10 +3,6 @@
 exports[`ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue when there are no network errors converts the data from the API into data usable by the chart component 1`] = `
 Array [
   Array [
-    "Jun 26",
-    0,
-  ],
-  Array [
     "Jun 27",
     0,
   ],
@@ -34,19 +30,11 @@ Array [
     "Jul 3",
     1,
   ],
-  Array [
-    "Jul 4",
-    0,
-  ],
 ]
 `;
 
 exports[`ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue when there are no network errors converts the data from the API into data usable by the chart component 2`] = `
 Array [
-  Array [
-    "Jun 3",
-    0,
-  ],
   Array [
     "Jun 4",
     0,
@@ -167,19 +155,11 @@ Array [
     "Jul 3",
     1,
   ],
-  Array [
-    "Jul 4",
-    0,
-  ],
 ]
 `;
 
 exports[`ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue when there are no network errors converts the data from the API into data usable by the chart component 3`] = `
 Array [
-  Array [
-    "Apr 4",
-    0,
-  ],
   Array [
     "Apr 5",
     0,
@@ -539,10 +519,6 @@ Array [
   Array [
     "Jul 3",
     1,
-  ],
-  Array [
-    "Jul 4",
-    0,
   ],
 ]
 `;

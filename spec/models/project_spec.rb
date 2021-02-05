@@ -21,6 +21,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:services) }
     it { is_expected.to have_many(:events) }
     it { is_expected.to have_many(:merge_requests) }
+    it { is_expected.to have_many(:merge_request_metrics).class_name('MergeRequest::Metrics') }
     it { is_expected.to have_many(:issues) }
     it { is_expected.to have_many(:milestones) }
     it { is_expected.to have_many(:iterations) }
@@ -1256,7 +1257,7 @@ RSpec.describe Project, factory_default: :keep do
 
     it 'is false if avatar is html page' do
       project.update_attribute(:avatar, 'uploads/avatar.html')
-      expect(project.avatar_type).to eq(['file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico'])
+      expect(project.avatar_type).to eq(['file format is not supported. Please try one of the following supported formats: png, jpg, jpeg, gif, bmp, tiff, ico, webp'])
     end
   end
 
@@ -1551,10 +1552,7 @@ RSpec.describe Project, factory_default: :keep do
     let(:project) { build(:project) }
 
     it 'picks storage from ApplicationSetting' do
-      expect_next_instance_of(ApplicationSetting) do |instance|
-        expect(instance).to receive(:pick_repository_storage).and_return('picked')
-      end
-      expect(described_class).to receive(:pick_repository_storage).and_call_original
+      expect(Repository).to receive(:pick_storage_shard).and_return('picked')
 
       expect(project.repository_storage).to eq('picked')
     end
@@ -2249,8 +2247,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#ci_config_path=' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:project) { build_stubbed(:project) }
 
     where(:default_ci_config_path, :project_ci_config_path, :expected_ci_config_path) do
@@ -3002,6 +2998,7 @@ RSpec.describe Project, factory_default: :keep do
   it_behaves_like 'can housekeep repository' do
     let(:resource) { build_stubbed(:project) }
     let(:resource_key) { 'projects' }
+    let(:expected_worker_class) { Projects::GitGarbageCollectWorker }
   end
 
   describe '#deployment_variables' do
@@ -3948,7 +3945,6 @@ RSpec.describe Project, factory_default: :keep do
   describe '.filter_by_feature_visibility' do
     include_context 'ProjectPolicyTable context'
     include ProjectHelpers
-    using RSpec::Parameterized::TableSyntax
 
     let_it_be(:group) { create(:group) }
     let!(:project) { create(:project, project_level, namespace: group ) }
@@ -4198,8 +4194,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#git_transfer_in_progress?' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:project) { build(:project) }
 
     subject { project.git_transfer_in_progress? }
@@ -5090,10 +5084,8 @@ RSpec.describe Project, factory_default: :keep do
     it 'executes services with the specified scope' do
       data = 'any data'
 
-      expect(SlackService).to receive(:allocate).and_wrap_original do |method|
-        method.call.tap do |instance|
-          expect(instance).to receive(:async_execute).with(data).once
-        end
+      expect_next_found_instance_of(SlackService) do |instance|
+        expect(instance).to receive(:async_execute).with(data).once
       end
 
       service.project.execute_services(data, :push_hooks)
@@ -5823,8 +5815,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe 'validation #changing_shared_runners_enabled_is_allowed' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:shared_runners_setting, :project_shared_runners_enabled, :valid_record) do
       'enabled'                    | true  | true
       'enabled'                    | false | true
@@ -6047,8 +6037,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#closest_setting' do
-    using RSpec::Parameterized::TableSyntax
-
     shared_examples_for 'fetching closest setting' do
       let!(:namespace) { create(:namespace) }
       let!(:project) { create(:project, namespace: namespace) }

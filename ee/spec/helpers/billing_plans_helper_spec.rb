@@ -8,7 +8,7 @@ RSpec.describe BillingPlansHelper do
 
     let(:group) { build(:group) }
     let(:plan) do
-      Hashie::Mash.new(id: 'external-paid-plan-hash-code', name: 'Bronze Plan')
+      OpenStruct.new(id: 'external-paid-plan-hash-code', name: 'Bronze Plan')
     end
 
     context 'when group and plan with ID present' do
@@ -61,7 +61,7 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when plan with ID not present' do
-      let(:plan) { Hashie::Mash.new(id: nil, name: 'Bronze Plan') }
+      let(:plan) { OpenStruct.new(id: nil, name: 'Bronze Plan') }
 
       it 'returns data attributes without upgrade href' do
         add_seats_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"
@@ -149,16 +149,77 @@ RSpec.describe BillingPlansHelper do
     end
   end
 
+  describe '#upgrade_offer_type' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:plan) { OpenStruct.new({ id: '123456789' }) }
+
+    context 'when plan has a valid property' do
+      where(:plan_name, :for_free, :plan_id, :result) do
+        Plan::BRONZE | true  | '123456789'  | :upgrade_for_free
+        Plan::BRONZE | true  | '987654321'  | :no_offer
+        Plan::BRONZE | true  | nil          | :no_offer
+        Plan::BRONZE | false | '123456789'  | :upgrade_for_offer
+        Plan::BRONZE | false | nil          | :no_offer
+        Plan::BRONZE | nil   | nil          | :no_offer
+        Plan::SILVER | nil   | nil          | :no_offer
+        nil          | true  | nil          | :no_offer
+      end
+
+      with_them do
+        let(:namespace) do
+          OpenStruct.new(
+            {
+              actual_plan_name: plan_name,
+              id: '000000000'
+            }
+          )
+        end
+
+        before do
+          allow_next_instance_of(GitlabSubscriptions::PlanUpgradeService) do |instance|
+            expect(instance).to receive(:execute).once.and_return({
+             upgrade_for_free: for_free,
+             upgrade_plan_id: plan_id
+            })
+          end
+        end
+
+        subject { helper.upgrade_offer_type(namespace, plan) }
+
+        it { is_expected.to eq(result) }
+      end
+    end
+  end
+
+  describe '#has_upgrade?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:offer_type, :result) do
+      :no_offer          | false
+      :upgrade_for_free  | true
+      :upgrade_for_offer | true
+    end
+
+    with_them do
+      subject { helper.has_upgrade?(offer_type) }
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
   describe '#show_contact_sales_button?' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:experiment_enabled, :link_action, :result) do
-      true | 'downgrade' | false
-      true | 'current' | false
-      true | 'upgrade' | true
-      false | 'downgrade' | false
-      false | 'current' | false
-      false | 'upgrade' | false
+    where(:experiment_enabled, :link_action, :upgrade_offer, :result) do
+      true  | 'upgrade'     | :no_offer           | true
+      true  | 'upgrade'     | :upgrade_for_offer  | true
+      true  | 'no_upgrade'  | :no_offer           | false
+      true  | 'no_upgrade'  | :upgrade_for_offer  | false
+      false | 'upgrade'     | :no_offer           | false
+      false | 'upgrade'     | :upgrade_for_offer  | true
+      false | 'no_upgrade'  | :no_offer           | false
+      false | 'no_upgrade'  | :upgrade_for_offer  | false
     end
 
     with_them do
@@ -166,7 +227,26 @@ RSpec.describe BillingPlansHelper do
         allow(helper).to receive(:experiment_enabled?).with(:contact_sales_btn_in_app).and_return(experiment_enabled)
       end
 
-      subject { helper.show_contact_sales_button?(link_action) }
+      subject { helper.show_contact_sales_button?(link_action, upgrade_offer) }
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#show_upgrade_button?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:link_action, :upgrade_offer, :result) do
+      'upgrade'     | :no_offer          | true
+      'upgrade'     | :upgrade_for_free  | true
+      'upgrade'     | :upgrade_for_offer | false
+      'no_upgrade'  | :no_offer          | false
+      'no_upgrade'  | :upgrade_for_free  | false
+      'no_upgrade'  | :upgrade_for_offer | false
+    end
+
+    with_them do
+      subject { helper.show_upgrade_button?(link_action, upgrade_offer) }
 
       it { is_expected.to eq(result) }
     end
@@ -277,7 +357,7 @@ RSpec.describe BillingPlansHelper do
     end
 
     with_them do
-      let(:namespace) { Hashie::Mash.new(trial_active: trial_active) }
+      let(:namespace) { OpenStruct.new(trial_active: trial_active) }
 
       subject { helper.upgrade_button_css_classes(namespace, plan, is_current_plan) }
 
@@ -305,7 +385,7 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when namespace is on an active plan' do
-      let(:current_plan) { Hashie::Mash.new(code: 'silver') }
+      let(:current_plan) { OpenStruct.new(code: 'silver') }
 
       it 'returns plans without deprecated' do
         expect(helper.billing_available_plans(plans_data, nil)).to eq([plan])
@@ -313,7 +393,7 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when namespace is on a deprecated plan' do
-      let(:current_plan) { Hashie::Mash.new(code: 'bronze') }
+      let(:current_plan) { OpenStruct.new(code: 'bronze') }
 
       it 'returns plans with a deprecated plan' do
         expect(helper.billing_available_plans(plans_data, current_plan)).to eq(plans_data)
@@ -321,7 +401,7 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when namespace is on a deprecated plan that has hide_deprecated_card set to true' do
-      let(:current_plan) { Hashie::Mash.new(code: 'bronze') }
+      let(:current_plan) { OpenStruct.new(code: 'bronze') }
       let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_deprecated_card?: true) }
 
       it 'returns plans without the deprecated plan' do
@@ -330,7 +410,7 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when namespace is on a plan that has hide_deprecated_card set to true, but deprecated? is false' do
-      let(:current_plan) { Hashie::Mash.new(code: 'silver') }
+      let(:current_plan) { OpenStruct.new(code: 'silver') }
       let(:plan) { double('Plan', deprecated?: false, code: 'silver', hide_deprecated_card?: true) }
 
       it 'returns plans with the deprecated plan' do

@@ -1,3 +1,4 @@
+import { isToday } from '~/lib/utils/datetime_utility';
 import { DAYS_IN_WEEK, HOURS_IN_DAY, PRESET_TYPES } from '../constants';
 
 export default {
@@ -20,6 +21,9 @@ export default {
         this.$options.currentDate.getTime() >= headerSubItems[0].getTime() &&
         this.$options.currentDate.getTime() <= headerSubItems[headerSubItems.length - 1].getTime()
       );
+    },
+    isToday() {
+      return isToday(this.timeframeItem);
     },
   },
   beforeCreate() {

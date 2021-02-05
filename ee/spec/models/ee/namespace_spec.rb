@@ -22,6 +22,9 @@ RSpec.describe Namespace do
   it { is_expected.to delegate_method(:shared_runners_seconds_last_reset).to(:namespace_statistics) }
   it { is_expected.to delegate_method(:trial?).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:trial_ends_on).to(:gitlab_subscription) }
+  it { is_expected.to delegate_method(:trial_starts_on).to(:gitlab_subscription) }
+  it { is_expected.to delegate_method(:trial_days_remaining).to(:gitlab_subscription) }
+  it { is_expected.to delegate_method(:trial_percentage_complete).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:upgradable?).to(:gitlab_subscription) }
   it { is_expected.to delegate_method(:email).to(:owner).with_prefix.allow_nil }
   it { is_expected.to delegate_method(:additional_purchased_storage_size).to(:namespace_limit) }
@@ -1599,12 +1602,49 @@ RSpec.describe Namespace do
     end
   end
 
-  describe 'ensure namespace limit' do
-    it 'has namespace limit upon namespace initialization' do
-      namespace = build(:namespace)
+  describe '#namespace_limit' do
+    let(:namespace) { create(:namespace, parent: parent) }
 
-      expect(namespace.namespace_limit).to be_present
-      expect(namespace.namespace_limit).not_to be_persisted
+    subject(:namespace_limit) { namespace.namespace_limit }
+
+    context 'when there is a parent namespace' do
+      let_it_be(:parent) { create(:namespace) }
+
+      context 'with a namespace limit' do
+        it 'returns the parent namespace limit' do
+          parent_limit = create(:namespace_limit, namespace: parent)
+
+          expect(namespace_limit).to eq parent_limit
+          expect(namespace_limit).to be_persisted
+        end
+      end
+
+      context 'with no namespace limit' do
+        it 'builds namespace limit' do
+          expect(namespace_limit).to be_present
+          expect(namespace_limit).not_to be_persisted
+        end
+      end
+    end
+
+    context 'when there is no parent ancestor' do
+      let(:parent) { nil }
+
+      context 'with a namespace limit' do
+        it 'returns the namespace limit' do
+          limit = create(:namespace_limit, namespace: namespace)
+
+          expect(namespace_limit).to be_persisted
+          expect(namespace_limit).to eq limit
+        end
+      end
+
+      context 'with no namespace limit' do
+        it 'builds namespace limit' do
+          expect(namespace_limit).to be_present
+          expect(namespace_limit).not_to be_persisted
+        end
+      end
     end
   end
 

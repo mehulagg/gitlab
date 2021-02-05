@@ -4,7 +4,7 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Incidents **(CORE)**
+# Incidents **(FREE)**
 
 Incidents are critical entities in incident management workflows. They represent
 a service disruption or outage that needs to be restored urgently. GitLab provides
@@ -24,7 +24,7 @@ Incident, you have two options to do this manually.
 
 **From the Incidents List:**
 
-> [Moved](https://gitlab.com/gitlab-org/monitor/health/-/issues/24) to GitLab core in 13.3.
+> [Moved](https://gitlab.com/gitlab-org/monitor/health/-/issues/24) to GitLab Free in 13.3.
 
 - Navigate to **Operations > Incidents** and click **Create Incident**.
 - Create a new issue using the `incident` template available when creating it.
@@ -36,9 +36,11 @@ Incident, you have two options to do this manually.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230857) in GitLab 13.4.
 
-- Navigate to **Issues > List** and click **Create Issue**.
-- Create a new issue using the `type` drop-down and select `Incident`.
-- The page refreshes and the page only displays fields relevant to Incidents.
+1. Go to **Issues > List**, and select **New issue**.
+1. In the **Type** dropdown, select **Incident**. Only fields relevant to
+   incidents are displayed on the page.
+1. Create the incident as needed, and select **Submit issue** to save the
+   incident.
 
 ![Incident List Create](img/new_incident_create_v13_4.png)
 
@@ -115,7 +117,7 @@ in your project's sidebar. The list contains the following metrics:
   to a [Status Page](status_page.md). **(ULTIMATE)**
 
 The Incident list displays incidents sorted by incident created date.
-([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229534) to GitLab core in 13.3.)
+([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229534) to GitLab Free in 13.3.)
 To see if a column is sortable, point your mouse at the header. Sortable columns
 display an arrow next to the column name.
 
@@ -224,6 +226,10 @@ There are different actions available to help triage and respond to incidents.
 
 Assign incidents to users that are actively responding. Select **Edit** in the
 right-hand side bar to select or deselect assignees.
+
+### Associate a milestone
+
+Associate an incident to a milestone by selecting **Edit** next to the milestone feature in the right-hand side bar.
 
 ### Change severity
 

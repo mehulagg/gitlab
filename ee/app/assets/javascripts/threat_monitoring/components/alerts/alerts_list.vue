@@ -13,12 +13,13 @@ import produce from 'immer';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
-import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES } from './constants';
+import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES, DOMAIN } from './constants';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
 
 export default {
   PAGE_SIZE,
+  DOMAIN,
   i18n: {
     FIELDS,
     MESSAGES,
@@ -48,6 +49,7 @@ export default {
           firstPageSize: this.$options.PAGE_SIZE,
           projectPath: this.projectPath,
           sort: this.sort,
+          domain: this.$options.DOMAIN,
           ...this.filters,
         };
       },

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Groups > Billing', :js do
   include StubRequests
+  include SubscriptionPortalHelpers
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
@@ -18,6 +19,7 @@ RSpec.describe 'Groups > Billing', :js do
   end
 
   before do
+    stub_eoa_eligibility_request(group.id)
     stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan}&namespace_id=#{group.id}")
       .with(headers: { 'Accept' => 'application/json' })
       .to_return(status: 200, body: File.new(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json')))
@@ -76,7 +78,6 @@ RSpec.describe 'Groups > Billing', :js do
 
     context 'with disabled feature flags' do
       before do
-        stub_feature_flags(saas_manual_renew_button: false)
         stub_feature_flags(saas_add_seats_button: false)
         visit group_billings_path(group)
       end
@@ -84,7 +85,6 @@ RSpec.describe 'Groups > Billing', :js do
       it 'does not show "Add Seats" button' do
         within subscription_table do
           expect(page).not_to have_link("Add seats")
-          expect(page).not_to have_link("Renew")
         end
       end
     end
@@ -109,13 +109,10 @@ RSpec.describe 'Groups > Billing', :js do
   end
 
   context 'with feature flags' do
-    using RSpec::Parameterized::TableSyntax
-
-    where(:saas_manual_renew_button, :saas_add_seats_button) do
-      true | true
-      true | false
-      false | true
-      false | false
+    where(:saas_add_seats_button) do
+      [
+        true, false
+      ]
     end
 
     let(:plan) { 'bronze' }
@@ -126,7 +123,6 @@ RSpec.describe 'Groups > Billing', :js do
 
     with_them do
       before do
-        stub_feature_flags(saas_manual_renew_button: saas_manual_renew_button)
         stub_feature_flags(saas_add_seats_button: saas_add_seats_button)
       end
 
@@ -134,8 +130,7 @@ RSpec.describe 'Groups > Billing', :js do
         visit group_billings_path(group)
 
         expect(page).to have_pushed_frontend_feature_flags(
-          saasAddSeatsButton: saas_add_seats_button,
-          saasManualRenewButton: saas_manual_renew_button
+          saasAddSeatsButton: saas_add_seats_button
         )
       end
     end

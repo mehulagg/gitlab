@@ -1,5 +1,5 @@
-import OpenTimeboxSummary from 'ee/burndown_chart/components/open_timebox_summary.vue';
 import { shallowMount } from '@vue/test-utils';
+import OpenTimeboxSummary from 'ee/burndown_chart/components/open_timebox_summary.vue';
 
 describe('Iterations report summary', () => {
   let wrapper;

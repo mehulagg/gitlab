@@ -44,6 +44,10 @@ export default {
       type: Array,
       required: true,
     },
+    scheduleIid: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -121,6 +125,7 @@ export default {
       >
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
         <schedule-shift-wrapper
+          v-if="rotation.shifts"
           :preset-type="presetType"
           :timeframe-item="timeframeItem"
           :timeframe="timeframe"
@@ -130,6 +135,7 @@ export default {
     </div>
     <delete-rotation-modal
       :rotation="rotationToUpdate"
+      :schedule-iid="scheduleIid"
       :modal-id="$options.deleteRotationModalId"
       @set-rotation-to-update="setRotationToUpdate"
     />

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module BillingPlansHelper
+  include Gitlab::Utils::StrongMemoize
+
   def subscription_plan_info(plans_data, current_plan_code)
     current_plan = plans_data.find { |plan| plan.code == current_plan_code && plan.current_subscription_plan? }
     current_plan || plans_data.find { |plan| plan.code == current_plan_code }
@@ -8,6 +10,28 @@ module BillingPlansHelper
 
   def number_to_plan_currency(value)
     number_to_currency(value, unit: '$', strip_insignificant_zeros: true, format: "%u%n")
+  end
+
+  def upgrade_offer_type(namespace, plan)
+    return :no_offer if namespace.actual_plan_name != Plan::BRONZE || !offer_from_previous_tier?(namespace.id, plan.id)
+
+    upgrade_for_free?(namespace.id) ? :upgrade_for_free : :upgrade_for_offer
+  end
+
+  def has_upgrade?(upgrade_offer)
+    upgrade_offer == :upgrade_for_free || upgrade_offer == :upgrade_for_offer
+  end
+
+  def show_contact_sales_button?(purchase_link_action, upgrade_offer)
+    return false unless purchase_link_action == 'upgrade'
+
+    upgrade_offer == :upgrade_for_offer ||
+      (experiment_enabled?(:contact_sales_btn_in_app) && upgrade_offer == :no_offer)
+  end
+
+  def show_upgrade_button?(purchase_link_action, upgrade_offer)
+    purchase_link_action == 'upgrade' &&
+      (upgrade_offer == :no_offer || upgrade_offer == :upgrade_for_free)
   end
 
   def subscription_plan_data_attributes(namespace, plan)
@@ -32,11 +56,6 @@ module BillingPlansHelper
     return false unless current_user.last_name.present?
 
     namespace.group? && (namespace.actual_plan_name == Plan::FREE || namespace.trial_active?)
-  end
-
-  def show_contact_sales_button?(purchase_link_action)
-    experiment_enabled?(:contact_sales_btn_in_app) &&
-      purchase_link_action == 'upgrade'
   end
 
   def experiment_tracking_data_for_button_click(button_label)
@@ -138,5 +157,25 @@ module BillingPlansHelper
 
   def billable_seats_href(group)
     group_seat_usage_path(group)
+  end
+
+  def offer_from_previous_tier?(namespace_id, plan_id)
+    upgrade_plan_id = upgrade_plan_data(namespace_id)[:upgrade_plan_id]
+
+    return false unless upgrade_plan_id
+
+    upgrade_plan_id == plan_id
+  end
+
+  def upgrade_for_free?(namespace_id)
+    !!upgrade_plan_data(namespace_id)[:upgrade_for_free]
+  end
+
+  def upgrade_plan_data(namespace_id)
+    strong_memoize(:upgrade_plan_data) do
+      GitlabSubscriptions::PlanUpgradeService
+        .new(namespace_id: namespace_id)
+        .execute
+    end
   end
 end

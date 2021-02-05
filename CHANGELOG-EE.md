@@ -1,5 +1,29 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.8.3 (2021-02-05)
+
+### Fixed (2 changes)
+
+- Fix Geo replication and verification status for replicables with no data to sync. !52253
+- Handle network unreachable for ES settings check. !52586
+
+
+## 13.8.2 (2021-02-01)
+
+### Security (2 changes)
+
+- Remove Kubernetes IP address from error messages returned in Threat Monitoring.
+- Sanitize XSS in Epic milestone due date.
+
+
+## 13.8.1 (2021-01-26)
+
+### Fixed (2 changes)
+
+- Fix rendering of requirements page for unauthenticated users. !52069
+- Fix browser performance widget issue body. !52088
+
+
 ## 13.8.0 (2021-01-22)
 
 ### Fixed (24 changes, 3 of them are from the community)
@@ -109,6 +133,14 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Update repository mirroring UI text. !51311
 - Update what's new UI text. !51422
 - Enable DevOps Adoption Report feature flag if any Segments already exist. !51602
+
+
+## 13.7.6 (2021-02-01)
+
+### Security (2 changes)
+
+- Remove Kubernetes IP address from error messages returned in Threat Monitoring.
+- Sanitize XSS in Epic milestone due date.
 
 
 ## 13.7.5 (2021-01-25)
@@ -290,6 +322,14 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Convert group saml buttons to gl-button styles. !49852
 - Convert group settings expand button to gl-button. !49857
 - Rename code coverage analytics sections. !49931
+
+
+## 13.6.6 (2021-02-01)
+
+### Security (2 changes)
+
+- Remove Kubernetes IP address from error messages returned in Threat Monitoring.
+- Sanitize XSS in Epic milestone due date.
 
 
 ## 13.6.5 (2021-01-13)

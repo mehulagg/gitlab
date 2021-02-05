@@ -382,7 +382,7 @@ Snowplow Micro is a Docker-based solution for testing frontend and backend event
 
 - Read [Introducing Snowplow Micro](https://snowplowanalytics.com/blog/2019/07/17/introducing-snowplow-micro/)
 - Look at the [Snowplow Micro repository](https://github.com/snowplow-incubator/snowplow-micro)
-- Watch our [installation guide recording](https://www.youtube.com/watch?v=OX46fo_A0Ag)
+- Watch our <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [installation guide recording](https://www.youtube.com/watch?v=OX46fo_A0Ag)
 
 1. Ensure Docker is installed and running.
 
@@ -483,12 +483,16 @@ For GitLab.com, we're setting up a [QA and Testing environment](https://gitlab.c
 
 ### `gitlab_standard`
 
-The [`gitlab_standard` schema](https://gitlab.com/gitlab-org/iglu/-/blob/master/public/schemas/com.gitlab/gitlab_standard/jsonschema/1-0-0) is available.
+We are currently working towards including the [`gitlab_standard` schema](https://gitlab.com/gitlab-org/iglu/-/blob/master/public/schemas/com.gitlab/gitlab_standard/jsonschema/) with every event. See [Standardize Snowplow Schema](https://gitlab.com/groups/gitlab-org/-/epics/5218) for details.
 
-| Field Name   | Required            | Type    | Description                    |
-|--------------|---------------------|---------|--------------------------------|
-| project_id   | **{dotted-circle}** | integer | ID of the associated project   |
-| namespace_id | **{dotted-circle}** | integer | ID of the associated namespace |
+The [`StandardContext`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/tracking/standard_context.rb) class represents this schema in the application. 
+
+| Field Name     | Required            | Type                  | Description                                                                                 |
+|----------------|---------------------|-----------------------|---------------------------------------------------------------------------------------------|
+| `project_id`   | **{dotted-circle}** | integer               |                                                                 |
+| `namespace_id` | **{dotted-circle}** | integer               |                                                               |
+| `environment`  | **{check-circle}**  | string (max 32 chars) | Name of the source environment, such as `production` or `staging`             |
+| `source`       | **{check-circle}**  | string (max 32 chars) | Name of the source application, such as  `gitlab-rails` or `gitlab-javascript` |
 
 ### Default Schema
 

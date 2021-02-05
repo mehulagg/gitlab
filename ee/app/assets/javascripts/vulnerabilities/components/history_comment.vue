@@ -100,6 +100,8 @@ export default {
       this.isSavingComment = true;
       const { method, url, data, emitName } = this.getSaveConfig(note);
 
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios({ method, url, data })
         .then(({ data: responseData }) => {
           this.isEditingComment = false;

@@ -27,12 +27,16 @@ module EE
       # rubocop: disable CodeReuse/ActiveRecord
       def override
         member = membershipable_members.find_by!(id: params[:id])
-        updated_member = ::Members::UpdateService.new(current_user, override_params)
-          .execute(member, permission: :override)
 
-        if updated_member.valid?
-          respond_to do |format|
-            format.js { head :ok }
+        result = ::Members::UpdateService.new(current_user, override_params).execute(member, permission: :override)
+
+        respond_to do |format|
+          format.js do
+            if result[:status] == :success
+              head :ok
+            else
+              render json: result[:message], status: :unprocessable_entity
+            end
           end
         end
       end

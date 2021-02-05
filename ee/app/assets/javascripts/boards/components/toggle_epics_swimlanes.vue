@@ -50,7 +50,7 @@ export default {
 
 <template>
   <div
-    class="board-swimlanes-toggle-wrapper gl-display-md-flex gl-align-items-center gl-ml-3"
+    class="board-swimlanes-toggle-wrapper gl-md-display-flex gl-align-items-center gl-ml-3"
     data-testid="toggle-swimlanes"
   >
     <span

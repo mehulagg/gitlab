@@ -86,11 +86,11 @@ export default {
     reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
   mounted() {
-    this.measurements = this.getMeasurements();
+    this.getMeasurements();
   },
   methods: {
     getMeasurements() {
-      return {
+      this.measurements = {
         width: this.$refs[this.containerId].scrollWidth,
         height: this.$refs[this.containerId].scrollHeight,
       };
@@ -161,6 +161,7 @@ export default {
                 :pipeline-id="pipeline.id"
                 @refreshPipelineGraph="$emit('refreshPipelineGraph')"
                 @jobHover="setJob"
+                @updateMeasurements="getMeasurements"
               />
             </links-layer>
           </div>
@@ -168,6 +169,7 @@ export default {
         <template #downstream>
           <linked-pipelines-column
             v-if="showDownstreamPipelines"
+            class="gl-mr-6"
             :linked-pipelines="downstreamPipelines"
             :column-title="__('Downstream')"
             :type="$options.pipelineTypeConstants.DOWNSTREAM"

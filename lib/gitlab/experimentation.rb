@@ -70,10 +70,6 @@ module Gitlab
         tracking_category: 'Growth::Conversion::Experiment::GroupOnlyTrials',
         use_backwards_compatible_subject_index: true
       },
-      default_to_issues_board: {
-        tracking_category: 'Growth::Conversion::Experiment::DefaultToIssuesBoard',
-        use_backwards_compatible_subject_index: true
-      },
       jobs_empty_state: {
         tracking_category: 'Growth::Activation::Experiment::JobsEmptyState'
       },
@@ -96,10 +92,6 @@ module Gitlab
         tracking_category: 'Growth::Activation::Experiment::CiSyntaxTemplates',
         rollout_strategy: :user
       },
-      pipelines_empty_state: {
-        tracking_category: 'Growth::Activation::Experiment::PipelinesEmptyState',
-        rollout_strategy: :user
-      },
       invite_members_new_dropdown: {
         tracking_category: 'Growth::Expansion::Experiment::InviteMembersNewDropdown'
       },
@@ -109,6 +101,9 @@ module Gitlab
       },
       trial_onboarding_issues: {
         tracking_category: 'Growth::Conversion::Experiment::TrialOnboardingIssues'
+      },
+      in_product_marketing_emails: {
+        tracking_category: 'Growth::Activation::Experiment::InProductMarketingEmails'
       }
     }.freeze
 

@@ -3,11 +3,12 @@ require 'spec_helper'
 
 RSpec.describe DesignManagement::SaveDesignsService do
   include DesignManagementTestHelpers
+  using FixtureFileRefinements
 
   let_it_be(:project) { create(:project) }
   let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:design_file) { fixture_file_upload('spec/fixtures/rails_sample.jpg') }
+  let_it_be(:design_file) { fixture_file_upload('spec/fixtures/rails_sample.jpg').to_gitlab_uploaded_file }
   let_it_be(:design_repository) { ::Gitlab::GlRepository::DESIGN.repository_resolver.call(project)}
 
   subject { described_class.new(project, user, issue: issue, files: [design_file]) }

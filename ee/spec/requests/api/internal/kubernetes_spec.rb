@@ -71,18 +71,47 @@ RSpec.describe API::Internal::Kubernetes do
         {
           alert: {
             title: 'minimal',
-            message: 'network problem',
-            evalMatches: [{ value: 1, metric: 'Count', tags: {} }]
+            message: 'network problem'
           }
         }
       end
 
-      it 'returns no_content for valid alert payload' do
+      it 'returns success for valid alert payload' do
         send_request(params: payload, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
 
         expect(AlertManagement::Alert.count).to eq(1)
         expect(AlertManagement::Alert.all.first.project).to eq(agent.project)
-        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to have_gitlab_http_status(:success)
+      end
+
+      context 'on GitLab.com' do
+        before do
+          allow(::Gitlab).to receive(:com?).and_return(true)
+        end
+
+        context 'kubernetes_agent_on_gitlab_com feature flag disabled' do
+          before do
+            stub_feature_flags(kubernetes_agent_on_gitlab_com: false)
+          end
+
+          it 'returns 403' do
+            send_request(params: payload, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
+
+            expect(response).to have_gitlab_http_status(:forbidden)
+          end
+        end
+
+        context 'kubernetes_agent_on_gitlab_com feature flag enabled' do
+          before do
+            stub_feature_flags(kubernetes_agent_on_gitlab_com: agent_token.agent.project)
+          end
+
+          it 'returns success' do
+            send_request(params: payload, headers: { 'Authorization' => "Bearer #{agent_token.token}" })
+
+            expect(response).to have_gitlab_http_status(:success)
+          end
+        end
       end
 
       context 'when payload is invalid' do

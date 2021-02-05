@@ -1,7 +1,12 @@
 import Vuex from 'vuex';
-import { mount, createLocalVue } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 
 import RoadmapShell from 'ee/roadmap/components/roadmap_shell.vue';
+import RoadmapTimelineSection from 'ee/roadmap/components/roadmap_timeline_section.vue';
+import MilestonesListSection from 'ee/roadmap/components/milestones_list_section.vue';
+import EpicsListSection from 'ee/roadmap/components/epics_list_section.vue';
+import MonthsHeaderItem from 'ee/roadmap/components/preset_months/months_header_item.vue';
+import MonthsHeaderSubItem from 'ee/roadmap/components/preset_months/months_header_sub_item.vue';
 import { PRESET_TYPES } from 'ee/roadmap/constants';
 import eventHub from 'ee/roadmap/event_hub';
 import createStore from 'ee/roadmap/store';
@@ -41,7 +46,7 @@ describe('RoadmapShell', () => {
     },
     el,
   ) => {
-    wrapper = mount(RoadmapShell, {
+    wrapper = shallowMount(RoadmapShell, {
       localVue,
       store,
       attachTo: el,
@@ -52,6 +57,13 @@ describe('RoadmapShell', () => {
         timeframe,
         currentGroupId,
         hasFiltersApplied,
+      },
+      stubs: {
+        RoadmapTimelineSection,
+        MilestonesListSection,
+        EpicsListSection,
+        MonthsHeaderItem,
+        MonthsHeaderSubItem,
       },
     });
   };

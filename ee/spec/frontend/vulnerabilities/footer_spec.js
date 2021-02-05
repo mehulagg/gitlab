@@ -6,6 +6,7 @@ import SolutionCard from 'ee/vue_shared/security_reports/components/solution_car
 import VulnerabilityFooter from 'ee/vulnerabilities/components/footer.vue';
 import HistoryEntry from 'ee/vulnerabilities/components/history_entry.vue';
 import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
+import RelatedJiraIssues from 'ee/vulnerabilities/components/related_jira_issues.vue';
 import StatusDescription from 'ee/vulnerabilities/components/status_description.vue';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
@@ -33,9 +34,10 @@ describe('Vulnerability Footer', () => {
     pipeline: {},
   };
 
-  const createWrapper = (properties = {}) => {
+  const createWrapper = (properties = {}, mountOptions = {}) => {
     wrapper = shallowMount(VulnerabilityFooter, {
       propsData: { vulnerability: { ...vulnerability, ...properties } },
+      ...mountOptions,
     });
   };
 
@@ -274,6 +276,38 @@ describe('Vulnerability Footer', () => {
         canModifyRelatedIssues: vulnerability.canModifyRelatedIssues,
         projectPath: vulnerability.project.fullPath,
         helpPath: vulnerability.relatedIssuesHelpPath,
+      });
+    });
+  });
+
+  describe('related jira issues', () => {
+    const relatedJiraIssues = () => wrapper.find(RelatedJiraIssues);
+
+    describe('with `createJiraIssueUrl` not provided', () => {
+      beforeEach(() => {
+        createWrapper();
+      });
+
+      it('does not show related jira issues', () => {
+        expect(relatedJiraIssues().exists()).toBe(false);
+      });
+    });
+
+    describe('with `createJiraIssueUrl` provided', () => {
+      beforeEach(() => {
+        createWrapper(
+          {},
+          {
+            provide: {
+              createJiraIssueUrl: 'http://foo',
+              glFeatures: { jiraForVulnerabilities: true },
+            },
+          },
+        );
+      });
+
+      it('shows related jira issues', () => {
+        expect(relatedJiraIssues().exists()).toBe(true);
       });
     });
   });

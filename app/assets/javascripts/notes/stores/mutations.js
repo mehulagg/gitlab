@@ -1,8 +1,8 @@
 import { isEqual } from 'lodash';
-import * as utils from './utils';
-import * as types from './mutation_types';
 import * as constants from '../constants';
 import { isInMRPage } from '../../lib/utils/common_utils';
+import * as utils from './utils';
+import * as types from './mutation_types';
 
 export default {
   [types.ADD_NEW_NOTE](state, data) {
@@ -30,6 +30,20 @@ export default {
           discussion.resolve_with_issue_path = note.resolve_with_issue_path;
           discussion.diff_discussion = false;
         }
+      }
+
+      if (window.gon?.features?.paginatedNotes && note.base_discussion) {
+        if (discussion.diff_file) {
+          discussion.file_hash = discussion.diff_file.file_hash;
+
+          discussion.truncated_diff_lines = utils.prepareDiffLines(
+            discussion.truncated_diff_lines || [],
+          );
+        }
+
+        discussion.resolvable = note.resolvable;
+        discussion.expanded = note.base_discussion.expanded;
+        discussion.resolved = note.resolved;
       }
 
       // note.base_discussion = undefined; // No point keeping a reference to this
@@ -321,6 +335,10 @@ export default {
 
   [types.SET_NOTES_LOADING_STATE](state, value) {
     state.isLoading = value;
+  },
+
+  [types.SET_NOTES_FETCHING_STATE](state, value) {
+    state.isFetching = value;
   },
 
   [types.SET_DISCUSSION_DIFF_LINES](state, { discussionId, diffLines }) {

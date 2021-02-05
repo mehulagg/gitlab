@@ -31,7 +31,7 @@ RSpec.describe 'Issue Boards', :js do
     project.add_maintainer(user)
     project.team.add_developer(user2)
 
-    gitlab_sign_in(user)
+    sign_in user
 
     visit project_board_path(project, board)
     wait_for_requests
@@ -152,6 +152,7 @@ RSpec.describe 'Issue Boards', :js do
     before do
       stub_licensed_features(epics: true)
       group.add_owner(user)
+
       visit project_board_path(project, board)
       wait_for_requests
     end
@@ -185,7 +186,7 @@ RSpec.describe 'Issue Boards', :js do
           page.find('.sidebar-dropdown-toggle').click
           wait_for_requests
 
-          click_link epic2.title
+          find('.gl-new-dropdown-item', text: epic2.title).click
           wait_for_requests
 
           expect(page.find('.value')).to have_content(epic2.title)

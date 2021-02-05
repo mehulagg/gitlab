@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Managed Apps
+# GitLab Managed Apps **(CORE)**
 
 GitLab provides **GitLab Managed Apps** for various
 applications which can be added directly to your configured cluster. These
@@ -20,10 +20,9 @@ have been deprecated, and are scheduled for removal in GitLab 14.0.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20822) in GitLab 12.6.
 
 WARNING:
-This is an _alpha_ feature, and is subject to change at any time without
-prior notice.
+This is a _beta_ feature, and some applications might miss features to provide full integration with GitLab.
 
-This alternative method allows users to install GitLab-managed
+This primary method for installing applications to clusters allows users to install GitLab-managed
 applications using GitLab CI/CD. It also allows customization of the
 install using Helm `values.yaml` files.
 

@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Package Registry
 
-> [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
+> [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
 With the GitLab Package Registry, you can use GitLab as a private or public registry
 for a variety of common package managers. You can publish and share
@@ -20,6 +20,12 @@ You can view packages for your project or group.
 1. Go to **Packages & Registries > Package Registry**.
 
 You can search, sort, and filter packages on this page.
+
+When you view packages in a group:
+
+- All projects published to the group and its projects are displayed.
+- Only the projects you can access are displayed.
+- If a project is private, or you are not a member of the project, it is not displayed.
 
 For information on how to create and upload a package, view the GitLab documentation for your package type.
 

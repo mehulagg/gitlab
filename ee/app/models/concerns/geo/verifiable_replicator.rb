@@ -19,17 +19,9 @@ module Geo
         enabled? && verification_feature_flag_enabled?
       end
 
-      # Overridden by PackageFileReplicator with its own feature flag so we can
-      # release verification for PackageFileReplicator alone, at first.
-      # This feature flag name is not dynamic like the replication feature flag,
-      # because Geo is proliferating too many permanent feature flags, and if
-      # there is a serious bug with verification that needs to be shut off
-      # immediately, then the replication feature flag can be disabled until it
-      # is fixed. This feature flag is intended to be removed after it is
-      # defaulted on.
-      # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46998 for more
+      # Override this to check a feature flag
       def verification_feature_flag_enabled?
-        Feature.enabled?(:geo_framework_verification)
+        false
       end
 
       # Called every minute by VerificationCronWorker
@@ -108,10 +100,27 @@ module Geo
 
         model.available_replicables.verification_failed.count
       end
+
+      def verified_count
+        # When verification is disabled, this returns nil.
+        # Bonus: This causes the progress bar to be hidden.
+        return unless verification_enabled?
+
+        registry_class.synced.verification_succeeded.count
+      end
+
+      def verification_failed_count
+        # When verification is disabled, this returns nil.
+        # Bonus: This causes the progress bar to be hidden.
+        return unless verification_enabled?
+
+        registry_class.synced.verification_failed.count
+      end
     end
 
+    # Schedules a verification job after a model record is created/updated
     def after_verifiable_update
-      verify_async if needs_checksum?
+      verify_async if should_primary_verify?
     end
 
     def verify_async
@@ -129,7 +138,7 @@ module Geo
     # state.
     def verify
       verification_state_tracker.track_checksum_attempt! do
-        model_record.calculate_checksum
+        calculate_checksum
       end
     end
 
@@ -138,14 +147,7 @@ module Geo
     # @param [String] checksum
     # @return [Boolean] whether checksum matches
     def matches_checksum?(checksum)
-      model_record.verification_checksum == checksum
-    end
-
-    def needs_checksum?
-      return false unless self.class.verification_enabled?
-      return true unless model_record.respond_to?(:needs_checksum?)
-
-      model_record.needs_checksum?
+      primary_checksum == checksum
     end
 
     # Checksum value from the main database
@@ -161,6 +163,26 @@ module Geo
 
     def verification_state_tracker
       Gitlab::Geo.secondary? ? registry : model_record
+    end
+
+    # @abstract
+    # @return [String] a checksum representing the data
+    def calculate_checksum
+      raise NotImplementedError, "#{self.class} does not implement #{__method__}"
+    end
+
+    private
+
+    def should_primary_verify?
+      self.class.verification_enabled? &&
+       primary_checksum.nil? && # Some models may populate this as part of creating the record
+       checksummable?
+    end
+
+    # @abstract
+    # @return [Boolean] whether the replicable is capable of checksumming itself
+    def checksummable?
+      raise NotImplementedError, "#{self.class} does not implement #{__method__}"
     end
   end
 end

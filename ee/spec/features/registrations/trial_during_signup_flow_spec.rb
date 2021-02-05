@@ -18,7 +18,7 @@ RSpec.describe 'User sees new onboarding flow', :js do
     choose 'Just me'
     click_on 'Continue'
 
-    expect(page).to have_content('GitLab Gold trial (optional)')
+    expect(page).to have_content('GitLab Ultimate trial (optional)')
   end
 
   it 'shows the expected behavior with no trial chosen' do

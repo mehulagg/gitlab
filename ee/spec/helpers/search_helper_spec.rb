@@ -247,4 +247,43 @@ RSpec.describe SearchHelper do
       end
     end
   end
+
+  describe '#search_sort_options_json' do
+    let(:user) { create(:user) }
+
+    mock_relevant_sort = {
+      title: _('Most relevant'),
+      sortable: false,
+      sortParam: 'relevant'
+    }
+
+    mock_created_sort = {
+      title: _('Created date'),
+      sortable: true,
+      sortParam: {
+        asc: 'created_asc',
+        desc: 'created_desc'
+      }
+    }
+
+    before do
+      allow(self).to receive(:current_user).and_return(user)
+    end
+
+    context 'with advanced search enabled' do
+      before do
+        stub_ee_application_setting(search_using_elasticsearch: true)
+      end
+
+      it 'returns the correct data' do
+        expect(search_sort_options).to eq([mock_relevant_sort, mock_created_sort])
+      end
+    end
+
+    context 'with basic search enabled' do
+      it 'returns the correct data' do
+        expect(search_sort_options).to eq([mock_created_sort])
+      end
+    end
+  end
 end

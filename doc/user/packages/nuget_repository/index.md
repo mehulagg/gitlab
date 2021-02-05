@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # NuGet packages in the Package Registry
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/20050) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.8.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
 Publish NuGet packages in your project’s Package Registry. Then, install the
 packages whenever you need to use them as a dependency.
@@ -68,7 +68,7 @@ To use the GitLab endpoint for NuGet Packages, choose an option:
 
 - **Project-level**: Use when you have few NuGet packages and they are not in
   the same GitLab group.
-- **Group-level**: Use when you have many NuGet packages in different within the
+- **Group-level**: Use when you have many NuGet packages in different projects within the
   same GitLab group.
 
 Some features such as [publishing](#publish-a-nuget-package) a package are only available on the project-level endpoint.

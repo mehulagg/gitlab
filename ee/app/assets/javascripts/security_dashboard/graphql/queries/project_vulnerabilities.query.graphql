@@ -10,6 +10,8 @@ query project(
   $scanner: [String!]
   $state: [VulnerabilityState!]
   $sort: VulnerabilitySort
+  $hasIssues: Boolean
+  $hasResolution: Boolean
 ) {
   project(fullPath: $fullPath) {
     vulnerabilities(
@@ -20,9 +22,18 @@ query project(
       scanner: $scanner
       state: $state
       sort: $sort
+      hasIssues: $hasIssues
+      hasResolution: $hasResolution
     ) {
       nodes {
         ...Vulnerability
+        hasSolutions
+        mergeRequest {
+          webUrl
+          state
+          securityAutoFix
+          iid
+        }
       }
       pageInfo {
         ...PageInfo

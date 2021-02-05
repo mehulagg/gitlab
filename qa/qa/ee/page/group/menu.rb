@@ -53,6 +53,12 @@ module QA
               view 'ee/app/views/layouts/nav/sidebar/_group_iterations_link.html.haml' do
                 element :group_iterations_link
               end
+
+              view 'ee/app/views/groups/sidebar/_packages.html.haml' do
+                element :group_packages_item
+                element :group_packages_link
+                element :group_packages_submenu
+              end
             end
           end
 
@@ -136,6 +142,14 @@ module QA
             hover_element(:security_compliance_link) do
               within_submenu(:group_secure_submenu) do
                 click_element(:vulnerability_report_link)
+              end
+            end
+          end
+
+          def go_to_group_packages
+            hover_element(:group_packages_item) do
+              within_submenu(:group_packages_submenu) do
+                click_element(:group_packages_link)
               end
             end
           end

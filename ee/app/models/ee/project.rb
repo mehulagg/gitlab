@@ -46,7 +46,7 @@ module EE
 
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
-      has_many :compliance_management_frameworks, through: :compliance_framework_setting, source: 'compliance_management_framework'
+      has_one :compliance_management_framework, through: :compliance_framework_setting, source: 'compliance_management_framework'
       has_one :security_setting, class_name: 'ProjectSecuritySetting'
       has_one :vulnerability_statistic, class_name: 'Vulnerabilities::Statistic'
 
@@ -199,7 +199,9 @@ module EE
       delegate :closest_gitlab_subscription, to: :namespace
       delegate :jira_vulnerabilities_integration_enabled?, to: :jira_service, allow_nil: true
 
-      delegate :requirements_access_level, to: :project_feature, allow_nil: true
+      delegate :requirements_access_level, :security_and_compliance_access_level, to: :project_feature, allow_nil: true
+      delegate :pipeline_configuration_full_path, to: :compliance_management_framework, allow_nil: true
+      alias_attribute :compliance_pipeline_configuration_full_path, :pipeline_configuration_full_path
 
       validates :repository_size_limit,
         numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }

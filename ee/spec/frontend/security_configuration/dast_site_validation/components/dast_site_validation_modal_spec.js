@@ -1,16 +1,16 @@
 import { within } from '@testing-library/dom';
 import { createLocalVue, mount, shallowMount, createWrapper } from '@vue/test-utils';
 import merge from 'lodash/merge';
-import createApolloProvider from 'helpers/mock_apollo_helper';
 import VueApollo from 'vue-apollo';
+import { GlAlert, GlFormGroup, GlModal, GlSkeletonLoader } from '@gitlab/ui';
+import createApolloProvider from 'helpers/mock_apollo_helper';
 import dastSiteValidationCreateMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validation_create.mutation.graphql';
 import dastSiteTokenCreateMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_token_create.mutation.graphql';
 import waitForPromises from 'helpers/wait_for_promises';
-import { GlAlert, GlFormGroup, GlModal, GlSkeletonLoader } from '@gitlab/ui';
 import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
-import * as responses from '../mock_data/apollo_mock';
 import download from '~/lib/utils/downloader';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
+import * as responses from '../mock_data/apollo_mock';
 
 jest.mock('~/lib/utils/downloader');
 

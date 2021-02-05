@@ -1,19 +1,21 @@
 <script>
 import Visibility from 'visibilityjs';
+import { GlIcon } from '@gitlab/ui';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import Api from 'ee/api';
 import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
-import { GlIcon } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Poll from '~/lib/utils/poll';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, __ } from '~/locale';
+import initUserPopovers from '~/user_popovers';
 import RelatedIssues from './related_issues.vue';
+import RelatedJiraIssues from './related_jira_issues.vue';
 import HistoryEntry from './history_entry.vue';
 import StatusDescription from './status_description.vue';
-import initUserPopovers from '~/user_popovers';
 
 export default {
   name: 'VulnerabilityFooter',
@@ -22,8 +24,15 @@ export default {
     MergeRequestNote,
     HistoryEntry,
     RelatedIssues,
+    RelatedJiraIssues,
     GlIcon,
     StatusDescription,
+  },
+  mixins: [glFeatureFlagMixin()],
+  inject: {
+    createJiraIssueUrl: {
+      default: '',
+    },
   },
   props: {
     vulnerability: {
@@ -103,6 +112,8 @@ export default {
       return Date.parse(date) / 1000;
     },
     fetchDiscussions() {
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios
         .get(this.vulnerability.discussionsUrl)
         .then(({ data, headers: { date } }) => {
@@ -137,6 +148,8 @@ export default {
         });
     },
     createNotesPoll() {
+      // note: this polling call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       this.poll = new Poll({
         resource: {
           fetchNotes: () =>
@@ -207,7 +220,9 @@ export default {
       />
     </div>
 
+    <related-jira-issues v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl" />
     <related-issues
+      v-else
       :endpoint="issueLinksEndpoint"
       :can-modify-related-issues="vulnerability.canModifyRelatedIssues"
       :project-path="project.url"

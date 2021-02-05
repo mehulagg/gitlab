@@ -10,9 +10,6 @@ import { redirectTo } from '~/lib/utils/url_utility';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
 import UsersCache from '~/lib/utils/users_cache';
-import ResolutionAlert from './resolution_alert.vue';
-import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
-import StatusDescription from './status_description.vue';
 import { normalizeGraphQLVulnerability } from '../helpers';
 import {
   VULNERABILITY_STATE_OBJECTS,
@@ -20,6 +17,9 @@ import {
   HEADER_ACTION_BUTTONS,
   gidPrefix,
 } from '../constants';
+import ResolutionAlert from './resolution_alert.vue';
+import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
+import StatusDescription from './status_description.vue';
 
 export default {
   name: 'VulnerabilityHeader',
@@ -208,6 +208,8 @@ export default {
         projectFingerprint,
       } = this.vulnerability;
 
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios
         .post(this.vulnerability.createMrUrl, {
           vulnerability_feedback: {

@@ -18,7 +18,7 @@ RSpec.shared_examples 'a verifiable replicator' do
         expect(described_class).to receive(:enabled?).and_return(true)
       end
 
-      context 'when the verification feature flag is enabled' do
+      context 'when verification_feature_flag_enabled? returns true' do
         it 'returns true' do
           allow(described_class).to receive(:verification_feature_flag_enabled?).and_return(true)
 
@@ -26,7 +26,7 @@ RSpec.shared_examples 'a verifiable replicator' do
         end
       end
 
-      context 'when geo_framework_verification feature flag is disabled' do
+      context 'when verification_feature_flag_enabled? returns false' do
         it 'returns false' do
           allow(described_class).to receive(:verification_feature_flag_enabled?).and_return(false)
 
@@ -299,8 +299,11 @@ RSpec.shared_examples 'a verifiable replicator' do
 
   describe '#after_verifiable_update' do
     it 'calls verify_async if needed' do
+      allow(described_class).to receive(:verification_enabled?).and_return(true)
+      allow(replicator).to receive(:primary_checksum).and_return(nil)
+      allow(replicator).to receive(:checksummable?).and_return(true)
+
       expect(replicator).to receive(:verify_async)
-      expect(replicator).to receive(:needs_checksum?).and_return(true)
 
       replicator.after_verifiable_update
     end
@@ -329,8 +332,8 @@ RSpec.shared_examples 'a verifiable replicator' do
     it 'wraps the checksum calculation in track_checksum_attempt!' do
       tracker = double('tracker')
       allow(replicator).to receive(:verification_state_tracker).and_return(tracker)
+      allow(replicator).to receive(:calculate_checksum).and_return('abc123')
 
-      expect(model_record).to receive(:calculate_checksum)
       expect(tracker).to receive(:track_checksum_attempt!).and_yield
 
       replicator.verify

@@ -1,6 +1,11 @@
 import * as utils from 'ee/analytics/merge_request_analytics/utils';
 import { useFakeDate } from 'helpers/fake_date';
-import { expectedMonthData, throughputChartData, formattedThroughputChartData } from './mock_data';
+import {
+  expectedMonthData,
+  throughputChartData,
+  formattedThroughputChartData,
+  formattedMttmData,
+} from './mock_data';
 
 describe('computeMonthRangeData', () => {
   const start = new Date('2020-05-17T00:00:00.000Z');
@@ -30,6 +35,14 @@ describe('formatThroughputChartData', () => {
     const chartData = utils.formatThroughputChartData();
 
     expect(chartData).toStrictEqual([]);
+  });
+});
+
+describe('computeMttmData', () => {
+  it('returns the data as expected', () => {
+    const mttmData = utils.computeMttmData(throughputChartData);
+
+    expect(mttmData).toStrictEqual(formattedMttmData);
   });
 });
 

@@ -73,34 +73,10 @@ RSpec.describe GroupWiki do
     end
 
     describe '#repository_storage' do
-      context 'when a tracking entry does not exist' do
-        let(:wiki_container) { wiki_container_without_repo }
+      it 'gets the repository storage from the container' do
+        expect(wiki.container).to receive(:repository_storage).and_return('foo')
 
-        it 'returns the default shard' do
-          expect(subject.repository_storage).to eq('default')
-        end
-
-        context 'when multiple shards are configured' do
-          let(:shards) { (1..).each }
-
-          before do
-            # Force pick_repository_storage to always return a different value
-            allow(Gitlab::CurrentSettings).to receive(:pick_repository_storage) { "storage-#{shards.next}" }
-          end
-
-          it 'always returns the same shard when called repeatedly' do
-            shard = subject.repository_storage
-
-            expect(subject.repository_storage).to eq(shard)
-          end
-        end
-      end
-
-      context 'when a tracking entry exists' do
-        it 'returns the persisted shard if the repository is tracked' do
-          expect(wiki_container.group_wiki_repository).to receive(:shard_name).and_return('foo')
-          expect(subject.repository_storage).to eq('foo')
-        end
+        expect(subject.repository_storage).to eq 'foo'
       end
     end
 
@@ -133,5 +109,6 @@ RSpec.describe GroupWiki do
     let_it_be(:resource) { create(:group_wiki) }
 
     let(:resource_key) { 'group_wikis' }
+    let(:expected_worker_class) { ::GroupWikis::GitGarbageCollectWorker }
   end
 end
