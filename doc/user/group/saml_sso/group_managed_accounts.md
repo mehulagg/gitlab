@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 WARNING:
 This [Closed Beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#sts=Closed%20Beta) feature is being re-evaluated in favor of a different
-[approachl](https://gitlab.com/groups/gitlab-org/-/epics/4786) that aligns more closely with our [Subscription Agreement](https://about.gitlab.com/handbook/legal/subscription-agreement/).
+[approach](https://gitlab.com/groups/gitlab-org/-/epics/4786) that aligns more closely with our [Subscription Agreement](https://about.gitlab.com/handbook/legal/subscription-agreement/).
 We recommend that group administrators who haven't yet implemented this feature wait for
 the new solution.
 
