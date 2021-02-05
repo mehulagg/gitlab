@@ -337,7 +337,7 @@ export default {
 <template>
   <gl-form novalidate @submit.prevent="onSubmit()">
     <local-storage-sync
-      v-if="glFeatures.dastSavedScans"
+      v-if="glFeatures.dastSavedScans && !isEdit"
       as-json
       :storage-key="$options.ON_DEMAND_SCANS_STORAGE_KEY"
       :clear="clearStorage"
