@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: howto, reference
 ---
 
-# Use SSH keys to connect to GitLab
+# GitLab and SSH keys
 
 Git is a distributed version control system, which means you can work locally.
 In addition, you can also share or "push" your changes to other servers.
