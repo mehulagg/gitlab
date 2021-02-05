@@ -609,7 +609,7 @@ If you see the following message:
 
 Check the regex patterns to ensure they are valid.
 
-GitLab uses [RE2 syntax](https://github.com/google/re2/wiki/Syntax) for regular expressions in the cleanup policy, and you can test them at the [regex101 regex tester](https://regex101.com/)
+GitLab uses [RE2 syntax](https://github.com/google/re2/wiki/Syntax) for regular expressions in the cleanup policy. You can test them with the [regex101 regex tester](https://regex101.com/).
 View some common [regex pattern examples](#regex-pattern-examples).
 
 ## Use the Container Registry to store Helm Charts
