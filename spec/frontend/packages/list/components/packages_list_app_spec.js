@@ -93,6 +93,7 @@ describe('packages_list_app', () => {
 
   it('call requestPackagesList on page:changed', () => {
     mountComponent();
+    store.dispatch.mockClear();
 
     const list = findListComponent();
     list.vm.$emit('page:changed', 1);
@@ -136,6 +137,7 @@ describe('packages_list_app', () => {
 
     it('on update fetches data from the store', () => {
       mountComponent();
+      store.dispatch.mockClear();
 
       findPackageSearch().vm.$emit('update');
 
