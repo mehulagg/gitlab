@@ -12,9 +12,9 @@ Maintenance mode **only** blocks database write requests at the application leve
 
 The guards are placed in the following places in the code:
 
-1. in the read-only middleware, where the database writes causing HTTP requests are blocked unless explicitly allowed.
-1. Git pushes are blocked in
-1. container registry updates are blocked in
+1. [the read-only middleware](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/ee/gitlab/middleware/read_only/controller.rb), where the HTTP requests that cause database writes are blocked, unless explicitly allowed.
+1. [Git push access is denied](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/ee/gitlab/git_access.rb#L13) by returning 401 when `gitlab-shell` POSTs to `/internal/allowed` to check if access is allowed.
+1. [Container registry authentication service](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/services/ee/auth/container_registry_authentication_service.rb#L12), where updates to the container registry are blocked.
 
 Users with access to the database via the rails console or write access directly to the database can still write to it.
 
