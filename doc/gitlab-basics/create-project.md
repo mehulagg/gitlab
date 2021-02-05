@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: howto
 ---
 
-# Create a project
+# Create a project **(FREE)**
 
 Most work in GitLab is done within a [Project](../user/project/index.md). Files and
 code are saved in projects, and most features are used within the scope of projects.

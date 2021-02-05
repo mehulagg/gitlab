@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: howto
 ---
 
-# How to fork a project
+# How to fork a project **(FREE)**
 
 A fork is a copy of an original repository that you put in another namespace
 where you can experiment and apply changes that you can later decide whether or
