@@ -37,21 +37,23 @@ export default class EditBlob {
     const form = document.querySelector('.js-edit-blob-form');
 
     const rootEditor = new EditorLite();
+setTimeout(() => {
+  this.editor = rootEditor.createInstance({
+    el: editorEl,
+    blobPath: fileNameEl.value,
+    blobContent: editorEl.innerText,
+  });
+  this.editor.use(new FileTemplateExtension());
 
-    this.editor = rootEditor.createInstance({
-      el: editorEl,
-      blobPath: fileNameEl.value,
-      blobContent: editorEl.innerText,
-    });
-    this.editor.use(new FileTemplateExtension());
+  fileNameEl.addEventListener('change', () => {
+    this.editor.updateModelLanguage(fileNameEl.value);
+  });
 
-    fileNameEl.addEventListener('change', () => {
-      this.editor.updateModelLanguage(fileNameEl.value);
-    });
+  form.addEventListener('submit', () => {
+    fileContentEl.value = insertFinalNewline(this.editor.getValue());
+  });
+}, 3000);
 
-    form.addEventListener('submit', () => {
-      fileContentEl.value = insertFinalNewline(this.editor.getValue());
-    });
   }
 
   initFileSelectors() {
