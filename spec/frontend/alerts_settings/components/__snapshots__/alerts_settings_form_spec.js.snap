@@ -47,6 +47,12 @@ exports[`AlertsSettingsForm with default values renders the initial template 1`]
       </select>
        
       <!---->
+         
+      <!---->
+       
+      <!---->
+       
+      <!---->
       <!---->
       <!---->
       <!---->
@@ -90,6 +96,12 @@ exports[`AlertsSettingsForm with default values renders the initial template 1`]
               placeholder="Enter integration name"
               type="text"
             />
+               
+            <!---->
+             
+            <!---->
+             
+            <!---->
             <!---->
             <!---->
             <!---->
@@ -304,6 +316,12 @@ exports[`AlertsSettingsForm with default values renders the initial template 1`]
                
               <!---->
             </div>
+               
+            <!---->
+             
+            <!---->
+             
+            <!---->
             <!---->
             <!---->
             <!---->
@@ -337,6 +355,12 @@ exports[`AlertsSettingsForm with default values renders the initial template 1`]
               style="resize: none; overflow-y: scroll;"
               wrap="soft"
             />
+               
+            <!---->
+             
+            <!---->
+             
+            <!---->
             <!---->
             <!---->
             <!---->

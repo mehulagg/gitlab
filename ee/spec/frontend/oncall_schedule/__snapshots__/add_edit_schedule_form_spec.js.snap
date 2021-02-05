@@ -5,7 +5,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
   modalid="modalId"
 >
   <gl-form-group-stub
-    invalid-feedback="Can't be empty"
+    invalidfeedback="Can't be empty"
     label="Name"
     label-for="schedule-name"
     label-size="sm"
@@ -31,7 +31,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
    
   <gl-form-group-stub
     description="Sets the default timezone for the schedule, for all participants"
-    invalid-feedback="Can't be empty"
+    invalidfeedback="Can't be empty"
     label="Timezone"
     label-for="schedule-timezone"
     label-size="sm"

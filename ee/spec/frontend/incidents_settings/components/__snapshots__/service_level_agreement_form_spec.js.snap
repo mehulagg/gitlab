@@ -36,7 +36,7 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
     </gl-form-checkbox-stub>
      
     <gl-form-group-stub
-      invalid-feedback=""
+      invalidfeedback=""
       label="Time limit"
       label-for="sla-duration"
       state="true"
