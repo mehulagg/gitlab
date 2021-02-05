@@ -13,8 +13,8 @@ Maintenance mode **only** blocks database write requests at the application leve
 The guards are placed in the following places in the code:
 
 1. in the read-only middleware, where the database writes causing HTTP requests are blocked unless explicitly allowed.
-2. git pushes are blocked in
-3. container registry updates are blocked in
+1. Git pushes are blocked in
+1. container registry updates are blocked in
 
 Users with access to the database via the rails console or write access directly to the database can still write to it.
 
@@ -38,11 +38,10 @@ The resulting database writes are acceptable. The trade-off is between more serv
 
 That said, we give the users the option to turn off cron jobs manually, that would stop new background jobs. 
 
-However, during a planned failover, we ask users to keep the Geo related cron jobs running. In the absence of new database writes and non-geo cron jobs, new background jobs would either not be created at all or be minimal.
+However, during a planned failover, we ask users to keep the Geo related cron jobs running. In the absence of new database writes and non-Geo cron jobs, new background jobs would either not be created at all or be minimal.
 
 Unfortunately a complete disabling of database writes would involve categorizing and analyzing every background job we have, and understanding it's significance and what it means to stop it during maintenance mode.
 
 Maintenance mode is aimed at offering a viable solution that is a trade-off between continued service and limiting writes to the database so that some important use cases are resolved, even though not all.
 
 ## How does maintenance mode affect services that GitLab relies on?
-
