@@ -223,7 +223,7 @@ ul.related-merge-requests > li {
     color: $gl-text-color-secondary;
 
     &.disabled {
-      color: $gray-400;
+      color: $gl-text-color-disabled;
     }
   }
 }
