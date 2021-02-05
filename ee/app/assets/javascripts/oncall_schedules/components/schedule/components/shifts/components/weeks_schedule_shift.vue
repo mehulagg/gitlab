@@ -1,7 +1,11 @@
 <script>
 import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { DAYS_IN_WEEK, DAYS_IN_DATE_WEEK, ASSIGNEE_SPACER } from 'ee/oncall_schedules/constants';
-import { getOverlapDateInPeriods, nDaysAfter } from '~/lib/utils/datetime_utility';
+import {
+  getOverlapDateInPeriods,
+  nDaysAfter,
+  getDayDifference,
+} from '~/lib/utils/datetime_utility';
 
 export default {
   components: {
@@ -38,9 +42,17 @@ export default {
       return new Date(nDaysAfter(this.timeframeItem, DAYS_IN_DATE_WEEK));
     },
     daysUntilEndOfTimeFrame() {
-     if(this.currentTimeframeEndsAt.getMonth() !== this.timeframeItem.getMonth()) {
-       // TODO: Handle Edge case where timeframe spans two different months
-     }
+      if (
+        this.currentTimeframeEndsAt.getMonth() !==
+        new Date(this.shiftRangeOverlap.overlapStartDate).getMonth()
+      ) {
+        return Math.abs(
+          getDayDifference(
+            this.currentTimeframeEndsAt,
+            new Date(this.shiftRangeOverlap.overlapStartDate),
+          ),
+        );
+      }
 
       return (
         this.currentTimeframeEndsAt.getDate() -
@@ -59,7 +71,7 @@ export default {
           (DAYS_IN_WEEK - this.daysUntilEndOfTimeFrame) * this.shiftTimeUnitWidth + ASSIGNEE_SPACER;
       }
 
-      const width = this.shiftTimeUnitWidth * this.shiftWidth;
+      const width = this.shiftTimeUnitWidth * this.shiftWidth - ASSIGNEE_SPACER;
 
       return {
         left: `${left}px`,
@@ -77,15 +89,14 @@ export default {
     },
     shiftShouldRender() {
       if (this.timeFrameIndex !== 0) {
-        // TDOD: Handle edge case where this.shiftRangeOverlap.overlapStartDate is the same as this.timeframeItem
-
         return (
-          new Date(this.shiftRangeOverlap.overlapStartDate) > this.timeframeItem &&
+          (nDaysAfter(this.shiftStartsAt, 1) >= this.timeframeItem ||
+            new Date(this.shiftRangeOverlap.overlapStartDate) > this.timeframeItem) &&
           new Date(this.shiftRangeOverlap.overlapStartDate) < this.currentTimeframeEndsAt
         );
       }
 
-      return Boolean(this.shiftRangeOverlap.daysOverlap);
+      return Boolean(this.shiftRangeOverlap.hoursOverlap);
     },
     shiftRangeOverlap() {
       return getOverlapDateInPeriods(
@@ -94,13 +105,7 @@ export default {
       );
     },
     shiftWidth() {
-      const offset = this.shiftStartDateOutOfRange ? 0 : 1;
-      const baseWidth =
-        this.timeFrameIndex === 0
-          ? this.totalShiftRangeOverlap.daysOverlap
-          : this.shiftRangeOverlap.daysOverlap + offset;
-
-      return baseWidth;
+      return this.totalShiftRangeOverlap.daysOverlap + 1;
     },
     timeFrameIndex() {
       return this.timeframe.indexOf(this.timeframeItem);

@@ -199,15 +199,17 @@ export default {
           <template #timezone>{{ schedule.timezone }}</template>
         </gl-sprintf>
         | {{ offset }}
-         <gl-button-group data-testid="shift-preset-change">
-            <gl-button
-              v-for="type in $options.PRESET_TYPES"
-              :key="type"
-              :selected="type === presetType"
-              :title="formatPresetType(type)"
-              @click="switchPresetType(type)"
-            > {{ formatPresetType(type) }} </gl-button>
-          </gl-button-group>
+        <gl-button-group data-testid="shift-preset-change">
+          <gl-button
+            v-for="type in $options.PRESET_TYPES"
+            :key="type"
+            :selected="type === presetType"
+            :title="formatPresetType(type)"
+            @click="switchPresetType(type)"
+          >
+            {{ formatPresetType(type) }}
+          </gl-button>
+        </gl-button-group>
       </p>
       <div class="gl-w-full gl-display-flex gl-align-items-center gl-pb-3">
         <gl-button-group>
@@ -256,9 +258,13 @@ export default {
       :modal-id="$options.editScheduleModalId"
       is-edit-mode
     />
-    <add-edit-rotation-modal :schedule="schedule" :modal-id="$options.addRotationModalId" @fetchRotationShifts="fetchRotationShifts" />
     <add-edit-rotation-modal
-      :schedule="schedule" 
+      :schedule="schedule"
+      :modal-id="$options.addRotationModalId"
+      @fetchRotationShifts="fetchRotationShifts"
+    />
+    <add-edit-rotation-modal
+      :schedule="schedule"
       :modal-id="$options.editRotationModalId"
       is-edit-mode
     />

@@ -71,7 +71,10 @@ describe('AddScheduleModal', () => {
     updateScheduleHandler = updateHandler;
 
     const requestHandlers = [
-      [getOncallSchedulesWithRotationsQuery, jest.fn().mockResolvedValue(getOncallSchedulesQueryResponse)],
+      [
+        getOncallSchedulesWithRotationsQuery,
+        jest.fn().mockResolvedValue(getOncallSchedulesQueryResponse),
+      ],
       [updateOncallScheduleMutation, updateScheduleHandler],
     ];
 

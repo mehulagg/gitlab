@@ -1,6 +1,6 @@
 <script>
 import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
-import { HOURS_IN_DAY, ASSIGNEE_SPACER } from 'ee/oncall_schedules/constants';
+import { HOURS_IN_DAY, HOURS_IN_DATE_DAY, ASSIGNEE_SPACER } from 'ee/oncall_schedules/constants';
 import { getOverlapDateInPeriods, nDaysAfter } from '~/lib/utils/datetime_utility';
 
 export default {
@@ -44,19 +44,21 @@ export default {
       const startHour = this.shiftStartsAt.getHours();
       const isFirstCell = startHour === 0;
       const shouldStartAtBeginningOfCell = isFirstCell || this.shiftStartHourOutOfRange;
-      const widthOffset = shouldStartAtBeginningOfCell ? 0 : 1;
       const width =
-        this.shiftEndsAt.getTime() > this.currentTimeframeEndsAt.getTime()
+        this.shiftEndsAt.getTime() >= this.currentTimeframeEndsAt.getTime()
           ? HOURS_IN_DAY
-          : this.shiftRangeOverlap.hoursOverlap + widthOffset;
+          : this.shiftRangeOverlap.hoursOverlap;
 
       const left = shouldStartAtBeginningOfCell
         ? '0px'
-        : `${(23 - this.hoursUntilEndOfTimeFrame) * this.shiftTimeUnitWidth + ASSIGNEE_SPACER}px`;
+        : `${
+            (HOURS_IN_DATE_DAY - this.hoursUntilEndOfTimeFrame) * this.shiftTimeUnitWidth +
+            ASSIGNEE_SPACER
+          }px`;
 
       return {
         left,
-        width: `${this.shiftTimeUnitWidth * width}px`,
+        width: `${this.shiftTimeUnitWidth * width - ASSIGNEE_SPACER}px`,
       };
     },
     shiftStartsAt() {
@@ -75,10 +77,7 @@ export default {
       return this.shiftStartsAt.getTime() < this.timeframeItem.getTime();
     },
     shiftShouldRender() {
-      return Boolean(
-        this.shiftRangeOverlap.hoursOverlap &&
-          !(this.shiftStartsAt.getDate() > this.timeframeItem.getDate()),
-      );
+      return Boolean(this.shiftRangeOverlap.hoursOverlap);
     },
   },
 };

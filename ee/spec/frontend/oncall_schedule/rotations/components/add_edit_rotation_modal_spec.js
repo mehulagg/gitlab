@@ -80,7 +80,10 @@ describe('AddEditRotationModal', () => {
     localVue.use(VueApollo);
 
     fakeApollo = createMockApollo([
-      [getOncallSchedulesWithRotationsQuery, jest.fn().mockResolvedValue(getOncallSchedulesQueryResponse)],
+      [
+        getOncallSchedulesWithRotationsQuery,
+        jest.fn().mockResolvedValue(getOncallSchedulesQueryResponse),
+      ],
       [usersSearchQuery, userSearchQueryHandler],
       [createOncallScheduleRotationMutation, createRotationHandler],
     ]);

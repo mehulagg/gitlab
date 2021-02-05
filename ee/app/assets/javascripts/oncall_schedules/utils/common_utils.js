@@ -1,4 +1,7 @@
-import { CHEVRON_SKIPPING_PALETTE_ENUM, CHEVRON_SKIPPING_SHADE_ENUM } from 'ee/oncall_schedules/constants';
+import {
+  CHEVRON_SKIPPING_PALETTE_ENUM,
+  CHEVRON_SKIPPING_SHADE_ENUM,
+} from 'ee/oncall_schedules/constants';
 import { sprintf, __ } from '~/locale';
 
 /**
@@ -36,5 +39,7 @@ export const isNameFieldValid = (nameField) => {
  *
  * @returns {Array}
  */
-export const assigneeColorCombo = () => CHEVRON_SKIPPING_SHADE_ENUM.map(shade => CHEVRON_SKIPPING_PALETTE_ENUM.map(color => ({ shade, color }))).flat();
-
+export const assigneeColorCombo = () =>
+  CHEVRON_SKIPPING_SHADE_ENUM.map((shade) =>
+    CHEVRON_SKIPPING_PALETTE_ENUM.map((color) => ({ shade, color })),
+  ).flat();

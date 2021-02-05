@@ -22,7 +22,10 @@ const addScheduleToStore = (store, query, { oncallScheduleCreate }, variables) =
   });
 
   const data = produce(sourceData, (draftData) => {
-    draftData.project.incidentManagementOncallSchedules.nodes.push({ ...schedule, rotations: { nodes: [], __typename: ROTATION_CONNECTION_TYPE }});
+    draftData.project.incidentManagementOncallSchedules.nodes.push({
+      ...schedule,
+      rotations: { nodes: [], __typename: ROTATION_CONNECTION_TYPE },
+    });
   });
 
   store.writeQuery({
@@ -70,7 +73,11 @@ const updateScheduleFromStore = (store, query, { oncallScheduleUpdate }, variabl
 
   const data = produce(sourceData, (draftData) => {
     // eslint-disable-next-line no-param-reassign
-    draftData.project.incidentManagementOncallSchedules.nodes = draftData.project.incidentManagementOncallSchedules.nodes.map((scheduleToUpdate) => { return scheduleToUpdate.iid === schedule.iid ? schedule : scheduleToUpdate; });
+    draftData.project.incidentManagementOncallSchedules.nodes = draftData.project.incidentManagementOncallSchedules.nodes.map(
+      (scheduleToUpdate) => {
+        return scheduleToUpdate.iid === schedule.iid ? schedule : scheduleToUpdate;
+      },
+    );
   });
 
   store.writeQuery({
@@ -80,7 +87,12 @@ const updateScheduleFromStore = (store, query, { oncallScheduleUpdate }, variabl
   });
 };
 
-const updateRotationFromStore = (store, query, { oncallRotationUpdate, scheduleIid }, variables) => {
+const updateRotationFromStore = (
+  store,
+  query,
+  { oncallRotationUpdate, scheduleIid },
+  variables,
+) => {
   const rotation = oncallRotationUpdate?.oncallRotation;
   if (!rotation) {
     return;
@@ -96,7 +108,9 @@ const updateRotationFromStore = (store, query, { oncallRotationUpdate, scheduleI
       ({ iid }) => iid === scheduleIid,
     );
 
-    const updatedRotations = scheduleToUpdate.rotations.nodes.map((rotationToUpdate) => { return rotationToUpdate.id === rotation.id ? rotation : rotationToUpdate; });
+    const updatedRotations = scheduleToUpdate.rotations.nodes.map((rotationToUpdate) => {
+      return rotationToUpdate.id === rotation.id ? rotation : rotationToUpdate;
+    });
 
     // eslint-disable-next-line no-param-reassign
     draftData.project.incidentManagementOncallSchedules.nodes.find(
@@ -132,7 +146,9 @@ const deleteRotationFromStore = (
       ({ iid }) => iid === scheduleIid,
     );
 
-    const updatedRotations = scheduleToUpdate.rotations.nodes.filter(({ id }) => id !== rotation.id);
+    const updatedRotations = scheduleToUpdate.rotations.nodes.filter(
+      ({ id }) => id !== rotation.id,
+    );
 
     // eslint-disable-next-line no-param-reassign
     draftData.project.incidentManagementOncallSchedules.nodes.find(

@@ -43,7 +43,9 @@ describe('On-call schedule wrapper', () => {
   let getOncallSchedulesQuerySpy;
 
   function mountComponentWithApollo() {
-    const fakeApollo = createMockApollo([[getOncallSchedulesWithRotationsQuery, getOncallSchedulesQuerySpy]]);
+    const fakeApollo = createMockApollo([
+      [getOncallSchedulesWithRotationsQuery, getOncallSchedulesQuerySpy],
+    ]);
     localVue.use(VueApollo);
 
     wrapper = shallowMount(OnCallScheduleWrapper, {

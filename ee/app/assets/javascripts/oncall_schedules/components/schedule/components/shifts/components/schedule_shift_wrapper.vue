@@ -44,13 +44,20 @@ export default {
   },
   computed: {
     currentTimeframeEndsAt() {
-      return new Date(nDaysAfter(this.timeframeItem, this.presetType === PRESET_TYPES.DAYS ? 1 : DAYS_IN_DATE_WEEK));
+      return new Date(
+        nDaysAfter(
+          this.timeframeItem,
+          this.presetType === PRESET_TYPES.DAYS ? 1 : DAYS_IN_DATE_WEEK,
+        ),
+      );
     },
     shiftsToRender() {
-      const validShifts = this.rotation.shifts.nodes.filter(({ startsAt, endsAt }) => this.shiftRangeOverlap(startsAt, endsAt).hoursOverlap > 0);
+      const validShifts = this.rotation.shifts.nodes.filter(
+        ({ startsAt, endsAt }) => this.shiftRangeOverlap(startsAt, endsAt).hoursOverlap > 0,
+      );
       // TODO: If week view and on same day, dont show more than 1 assignee or use CSS to limit their size to be readable
       return Object.freeze(validShifts);
-    }
+    },
   },
   methods: {
     shiftRangeOverlap(shiftStartsAt, shiftEndsAt) {
@@ -59,7 +66,7 @@ export default {
         { start: shiftStartsAt, end: shiftEndsAt },
       );
     },
-  }
+  },
 };
 </script>
 

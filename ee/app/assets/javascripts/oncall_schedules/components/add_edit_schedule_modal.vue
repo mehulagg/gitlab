@@ -143,7 +143,9 @@ export default {
           mutation: updateOncallScheduleMutation,
           variables: this.editScheduleVariables,
           update(store, { data }) {
-            updateStoreAfterScheduleEdit(store, getOncallSchedulesWithRotationsQuery, data, { projectPath });
+            updateStoreAfterScheduleEdit(store, getOncallSchedulesWithRotationsQuery, data, {
+              projectPath,
+            });
           },
         })
         .then(

@@ -21,7 +21,6 @@ describe('On-call schedule', () => {
 
   const mockWeeksTimeFrame = ['31 Dec 2020', '7 Jan 2021', '14 Jan 2021'];
   const formattedTimezone = '(UTC-09:00) AKST Alaska';
-  
 
   function createComponent({ schedule, loading = false } = {}) {
     const $apollo = {
@@ -68,7 +67,6 @@ describe('On-call schedule', () => {
   const findAddRotationsBtn = () => findRotationsHeader().find(GlButton);
   const findScheduleTimeline = () => findRotations().find(ScheduleTimelineSection);
   const findRotationsList = () => findRotations().find(RotationsListSection);
-
 
   it('shows schedule title', () => {
     expect(findScheduleHeader().text()).toBe(mockSchedule.name);

@@ -5,9 +5,7 @@ import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/qu
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
-import {
-  updateStoreAfterRotationEdit,
-} from 'ee/oncall_schedules/utils/cache_updates';
+import { updateStoreAfterRotationEdit } from 'ee/oncall_schedules/utils/cache_updates';
 import { isNameFieldValid, assigneeColorCombo } from 'ee/oncall_schedules/utils/common_utils';
 import { s__, __ } from '~/locale';
 import createFlash, { FLASH_TYPES } from '~/flash';
@@ -147,17 +145,11 @@ export default {
   methods: {
     createRotation() {
       this.loading = true;
-      const { projectPath, schedule } = this;
 
       this.$apollo
         .mutate({
           mutation: createOncallScheduleRotationMutation,
           variables: { OncallRotationCreateInput: this.rotationVariables },
-          update(store, { data }) {
-            updateStoreAfterRotationAdd(store, getOncallSchedulesWithRotationsQuery, { ...data, scheduleIid: schedule.iid }, {
-              projectPath,
-            });
-          },
         })
         .then(
           ({
@@ -195,9 +187,14 @@ export default {
           mutation: updateOncallScheduleRotationMutation,
           variables: { OncallRotationUpdateInput: this.rotationVariables },
           update(store, { data }) {
-            updateStoreAfterRotationEdit(store, getOncallSchedulesWithRotationsQuery,  { ...data, scheduleIid: schedule.iid }, {
-              projectPath,
-            });
+            updateStoreAfterRotationEdit(
+              store,
+              getOncallSchedulesWithRotationsQuery,
+              { ...data, scheduleIid: schedule.iid },
+              {
+                projectPath,
+              },
+            );
           },
         })
         .then(
