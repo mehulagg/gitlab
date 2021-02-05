@@ -75,6 +75,8 @@ module MergeRequests
       commit_ids = @commits.map(&:id)
       merge_requests = @project.merge_requests.opened
         .preload(:latest_merge_request_diff)
+        .includes(latest_merge_request_diff: :merge_request_diff_commits)
+        .includes(:source_project)
         .where(target_branch: @push.branch_name).to_a
         .select(&:diff_head_commit)
         .select do |merge_request|
@@ -114,13 +116,14 @@ module MergeRequests
 
     # Refresh merge request diff if we push to source or target branch of merge request
     # Note: we should update merge requests from forks too
+    # rubocop: disable CodeReuse/ActiveRecord
     def reload_merge_requests
       merge_requests = @project.merge_requests.opened
-        .by_source_or_target_branch(@push.branch_name).to_a
+        .by_source_or_target_branch(@push.branch_name).includes(:source_project).includes(:latest_merge_request_diff)
 
-      merge_requests += merge_requests_for_forks.to_a
+      merge_requests_array = merge_requests.to_a + merge_requests_for_forks.includes(:source_project).includes(:latest_merge_request_diff).to_a
 
-      filter_merge_requests(merge_requests).each do |merge_request|
+      filter_merge_requests(merge_requests_array).each do |merge_request|
         if branch_and_project_match?(merge_request) || @push.force_push?
           merge_request.reload_diff(current_user)
           # Clear existing merge error if the push were directed at the
@@ -138,6 +141,7 @@ module MergeRequests
       # @source_merge_requests diffs (for MergeRequest#commit_shas for instance).
       merge_requests_for_source_branch(reload: true)
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def push_commit_ids
       @push_commit_ids ||= @commits.map(&:id)
