@@ -47,6 +47,8 @@ class SlackService < ChatNotificationService
         attachments: message.attachments,
         fallback: message.fallback
       )
+
+      Gitlab::UsageDataCounters::ChatNotificationServicesCounter.count(to_param)
     end
 
     class HTTPClient

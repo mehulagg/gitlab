@@ -520,6 +520,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
     before do
       allow(described_class).to receive(:grafana_embed_usage_data).and_return(2)
+      allow(Gitlab::UsageDataCounters::ChatNotificationServicesCounter).to receive(:events_for_category).with('search').and_return(5)
     end
 
     subject { described_class.data }
@@ -745,6 +746,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     it { is_expected.to include(:package_events_i_package_pull_package) }
     it { is_expected.to include(:package_events_i_package_delete_package_by_user) }
     it { is_expected.to include(:package_events_i_package_conan_push_package) }
+    it { is_expected.to include(:chat_notifications_slack) }
   end
 
   describe '.usage_data_counters' do
