@@ -4312,6 +4312,9 @@ msgstr ""
 msgid "Available specific runners"
 msgstr ""
 
+msgid "Available with %{linkStart}upgrade or free trial%{linkEnd}"
+msgstr ""
+
 msgid "Avatar for %{assigneeName}"
 msgstr ""
 
@@ -7494,6 +7497,9 @@ msgid "Configure the %{link} integration."
 msgstr ""
 
 msgid "Configure the way a user creates a new account."
+msgstr ""
+
+msgid "Configure via Merge Request"
 msgstr ""
 
 msgid "Configure which lists are shown for anyone who visits this board"
@@ -25318,6 +25324,9 @@ msgstr ""
 msgid "SAST Configuration"
 msgstr ""
 
+msgid "SAST merge request creation mutation failed"
+msgstr ""
+
 msgid "SHA256"
 msgstr ""
 
@@ -25742,22 +25751,55 @@ msgstr ""
 msgid "SecurityConfiguration|An error occurred while creating the merge request."
 msgstr ""
 
+msgid "SecurityConfiguration|Analyze a review version of your web application."
+msgstr ""
+
+msgid "SecurityConfiguration|Analyze your dependencies for known vulnerabilities."
+msgstr ""
+
+msgid "SecurityConfiguration|Analyze your source code and git history for secrets."
+msgstr ""
+
+msgid "SecurityConfiguration|Analyze your source code for known vulnerabilities."
+msgstr ""
+
 msgid "SecurityConfiguration|Available for on-demand DAST"
+msgstr ""
+
+msgid "SecurityConfiguration|Available with upgrade or free trial"
 msgstr ""
 
 msgid "SecurityConfiguration|By default, all analyzers are applied in order to cover all languages across your project, and only run if the language is detected in the Merge Request."
 msgstr ""
 
+msgid "SecurityConfiguration|Check your Docker images for known vulnerabilities."
+msgstr ""
+
 msgid "SecurityConfiguration|Configure"
 msgstr ""
 
+msgid "SecurityConfiguration|Configure via Merge Request"
+msgstr ""
+
+msgid "SecurityConfiguration|Container Scanning"
+msgstr ""
+
 msgid "SecurityConfiguration|Could not retrieve configuration data. Please refresh the page, or try again later."
+msgstr ""
+
+msgid "SecurityConfiguration|Coverage Fuzzing"
 msgstr ""
 
 msgid "SecurityConfiguration|Create Merge Request"
 msgstr ""
 
 msgid "SecurityConfiguration|Customize common SAST settings to suit your requirements. Configuration changes made here override those provided by GitLab and are excluded from updates. For details of more advanced configuration options, see the %{linkStart}GitLab SAST documentation%{linkEnd}."
+msgstr ""
+
+msgid "SecurityConfiguration|Dependency Scanning"
+msgstr ""
+
+msgid "SecurityConfiguration|Dynamic Application Security Testing (DAST)"
 msgstr ""
 
 msgid "SecurityConfiguration|Enable"
@@ -25775,6 +25817,12 @@ msgstr ""
 msgid "SecurityConfiguration|Feature documentation for %{featureName}"
 msgstr ""
 
+msgid "SecurityConfiguration|Find bugs in your code with coverage-guided fuzzing."
+msgstr ""
+
+msgid "SecurityConfiguration|License Compliance"
+msgstr ""
+
 msgid "SecurityConfiguration|Manage"
 msgstr ""
 
@@ -25790,7 +25838,16 @@ msgstr ""
 msgid "SecurityConfiguration|SAST Configuration"
 msgstr ""
 
+msgid "SecurityConfiguration|Search your project dependencies for their licenses and apply policies."
+msgstr ""
+
+msgid "SecurityConfiguration|Secret Detection"
+msgstr ""
+
 msgid "SecurityConfiguration|Security Control"
+msgstr ""
+
+msgid "SecurityConfiguration|Static Application Security Testing (SAST)"
 msgstr ""
 
 msgid "SecurityConfiguration|Status"
