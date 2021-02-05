@@ -43,12 +43,12 @@ export default {
       return field ? field.label : '';
     },
     isSortAscending() {
-      return this.sorting.sort === ASCENDING_ODER;
+      return this.sorting.sort === ASCENDING_ORDER;
     },
   },
   methods: {
     onDirectionChange() {
-      const sort = this.isSortAscending ? DESCENDING_ORDER : ASCENDING_ODER;
+      const sort = this.isSortAscending ? DESCENDING_ORDER : ASCENDING_ORDER;
       this.$emit('sorting:changed', { sort });
     },
     onSortItemClick(item) {
