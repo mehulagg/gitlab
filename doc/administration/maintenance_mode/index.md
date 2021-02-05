@@ -101,6 +101,10 @@ All write actions except those mentioned above will fail. So, in maintenance mod
 
 Creating issue comments or new Service Desk issues via email will also fail.
 
+### REST API
+
+### GraphQL API
+
 ### CI/CD
 
 In maintenance mode:
