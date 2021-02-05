@@ -5,7 +5,7 @@ group: Development
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-This page is about developing dark mode for GitLab. For how to enable dark mode, see the [dark mode user docs](https://docs.gitlab.com/ee/user/profile/preferences.html#dark-mode).
+This page is about developing dark mode for GitLab. For how to enable dark mode, see the [dark mode user docs](../../user/profile/preferences.md#dark-mode).
 
 # How dark mode works
 
