@@ -39,6 +39,9 @@ describe('AlertsSettingsForm', () => {
         multiIntegrations,
       },
       mocks: {
+        $apollo: {
+          query: jest.fn(),
+        },
         $toast: {
           show: mockToastShow,
         },
@@ -278,12 +281,13 @@ describe('AlertsSettingsForm', () => {
     beforeEach(() => {
       createComponent({
         multipleHttpIntegrationsCustomMapping: true,
-        props: {
+        data: {
           currentIntegration: {
             type: typeSet.http,
+            samplePayload: true,
           },
-          alertFields,
         },
+        props: { alertFields },
       });
     });
 
@@ -300,8 +304,11 @@ describe('AlertsSettingsForm', () => {
 
       it(`textarea should be ${enabledState} when payload reset ${payloadResetMsg} and current integration is ${activeState}`, async () => {
         wrapper.setData({
-          customMapping: { samplePayload: true },
-          active,
+          currentIntegration: {
+            active,
+            type: typeSet.http,
+            samplePayload: true,
+          },
           resetSamplePayloadConfirmed,
         });
         await wrapper.vm.$nextTick();
@@ -323,7 +330,7 @@ describe('AlertsSettingsForm', () => {
         it(`shows ${caption} button when sample payload ${samplePayloadMsg} and payload reset ${payloadResetMsg}`, async () => {
           wrapper.setData({
             selectedIntegration: typeSet.http,
-            customMapping: { samplePayload },
+            currentIntegration: { samplePayload, type: typeSet.http, active: true },
             resetSamplePayloadConfirmed,
           });
           await wrapper.vm.$nextTick();
@@ -334,21 +341,36 @@ describe('AlertsSettingsForm', () => {
 
     describe('Parsing payload', () => {
       it('displays a toast message on successful parse', async () => {
-        jest.useFakeTimers();
+        jest.spyOn(wrapper.vm.$apollo, 'query').mockResolvedValue({
+          data: {
+            project: { alertManagementPayloadFields: [] },
+          },
+        });
         wrapper.setData({
           selectedIntegration: typeSet.http,
-          customMapping: { samplePayload: false },
         });
         await wrapper.vm.$nextTick();
-
         findActionBtn().vm.$emit('click');
-        jest.advanceTimersByTime(1000);
 
         await waitForPromises();
 
         expect(mockToastShow).toHaveBeenCalledWith(
           'Sample payload has been parsed. You can now map the fields.',
         );
+      });
+
+      it('displays aa error message under payload field on unsuccessful parse', async () => {
+        const errorMessage = 'Error parsing paylod';
+        jest.spyOn(wrapper.vm.$apollo, 'query').mockRejectedValue({ message: errorMessage });
+        wrapper.setData({
+          selectedIntegration: typeSet.http,
+        });
+        await wrapper.vm.$nextTick();
+        findActionBtn().vm.$emit('click');
+
+        await waitForPromises();
+
+        expect(findTestPayloadSection().find('.invalid-feedback').text()).toBe(errorMessage);
       });
     });
   });

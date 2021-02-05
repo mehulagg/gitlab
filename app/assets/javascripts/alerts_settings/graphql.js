@@ -3,6 +3,8 @@ import produce from 'immer';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import getCurrentIntegrationQuery from './graphql/queries/get_current_integration.query.graphql';
+import { typeSet } from './constants';
+import mockedCustomMapping from './mocks/parsedMapping.json';
 
 Vue.use(VueApollo);
 
@@ -29,6 +31,11 @@ const resolvers = {
             url,
             apiUrl,
           };
+
+          if (type === typeSet.http && gon?.features?.multipleHttpIntegrationsCustomMapping) {
+            // eslint-disable-next-line no-param-reassign
+            draftData.currentIntegration.samplePaylaod = mockedCustomMapping.samplePayload.body;
+          }
         }
       });
       cache.writeQuery({ query: getCurrentIntegrationQuery, data });

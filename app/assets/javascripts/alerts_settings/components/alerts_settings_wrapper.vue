@@ -247,6 +247,7 @@ export default {
           type: currentIntegration.type,
           url: currentIntegration.url,
           apiUrl: currentIntegration.apiUrl,
+          samplePaylaod: currentIntegration.samplePaylaod,
         },
       });
     },

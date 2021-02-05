@@ -3,7 +3,7 @@ import {
   getPayloadFields,
   transformForSave,
 } from '~/alerts_settings/utils/mapping_transformations';
-import parsedMapping from '~/alerts_settings/components/mocks/parsedMapping.json';
+import parsedMapping from '~/alerts_settings/mocks/parsedMapping.json';
 import alertFields from '../mocks/alertFields.json';
 
 describe('Mapping Transformation Utilities', () => {

@@ -16,6 +16,7 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
+import parseSamplePayload from '../graphql/queries/parse_sample_payload.query.graphql';
 import {
   integrationTypes,
   JSON_VALIDATE_DELAY,
@@ -24,10 +25,6 @@ import {
 } from '../constants';
 import MappingBuilder from './alert_mapping_builder.vue';
 import AlertSettingsFormHelpBlock from './alert_settings_form_help_block.vue';
-// Mocks will be removed when integrating with BE is ready
-// data format is defined and will be the same as mocked (maybe with some minor changes)
-// feature rollout plan - https://gitlab.com/gitlab-org/gitlab/-/issues/262707#note_442529171
-import mockedCustomMapping from './mocks/parsedMapping.json';
 
 export const i18n = {
   integrationFormSteps: {
@@ -128,6 +125,9 @@ export default {
     multiIntegrations: {
       default: false,
     },
+    projectPath: {
+      default: '',
+    },
   },
   props: {
     loading: {
@@ -163,6 +163,7 @@ export default {
       mapping: [],
       parsingPayload: false,
       currentIntegration: null,
+      parsedPayload: [],
     };
   },
   computed: {
@@ -210,14 +211,8 @@ export default {
         this.alertFields?.length
       );
     },
-    parsedSamplePayload() {
-      return this.customMapping?.samplePayload?.payloadAlerFields?.nodes;
-    },
-    savedMapping() {
-      return this.customMapping?.storedMapping?.nodes;
-    },
     hasSamplePayload() {
-      return Boolean(this.customMapping?.samplePayload);
+      return Boolean(this.currentIntegration?.samplePaylaod);
     },
     canEditPayload() {
       return this.hasSamplePayload && !this.resetSamplePayloadConfirmed;
@@ -240,6 +235,9 @@ export default {
     isSelectDisabled() {
       return this.currentIntegration !== null || !this.canAddIntegration;
     },
+    savedMapping() {
+      return this.currentIntegration?.savedMapping;
+    },
   },
   watch: {
     currentIntegration(val) {
@@ -248,7 +246,9 @@ export default {
       }
       this.selectedIntegration = val.type;
       this.active = val.active;
-      if (val.type === typeSet.http && this.showMappingBuilder) this.getIntegrationMapping(val.id);
+      if (val.type === typeSet.http && this.showMappingBuilder) {
+        this.integrationTestPayload.json = val.samplePaylaod;
+      }
       return this.integrationTypeSelect();
     },
   },
@@ -293,6 +293,7 @@ export default {
     reset() {
       this.selectedIntegration = integrationTypes[0].value;
       this.integrationTypeSelect();
+      this.parsedPayload = [];
 
       if (this.currentIntegration) {
         return this.$emit('clear-current-integration');
@@ -332,31 +333,31 @@ export default {
       }
     },
     parseMapping() {
-      // TODO: replace with real BE mutation when ready;
       this.parsingPayload = true;
 
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(mockedCustomMapping), 1000);
-      })
-        .then((res) => {
-          const mapping = { ...res };
-          delete mapping.storedMapping;
-          this.customMapping = res;
-          this.integrationTestPayload.json = res?.samplePayload.body;
-          this.resetSamplePayloadConfirmed = false;
+      return this.$apollo
+        .query({
+          query: parseSamplePayload,
+          variables: { projectPath: this.projectPath, payload: this.integrationTestPayload.json },
+        })
+        .then(
+          ({
+            data: {
+              project: { alertManagementPayloadFields },
+            },
+          }) => {
+            this.parsedPayload = alertManagementPayloadFields;
+            this.resetSamplePayloadConfirmed = false;
 
-          this.$toast.show(this.$options.i18n.integrationFormSteps.step4.payloadParsedSucessMsg);
+            this.$toast.show(this.$options.i18n.integrationFormSteps.step4.payloadParsedSucessMsg);
+          },
+        )
+        .catch(({ message }) => {
+          this.integrationTestPayload.error = message;
         })
         .finally(() => {
           this.parsingPayload = false;
         });
-    },
-    getIntegrationMapping() {
-      // TODO: replace with real BE mutation when ready;
-      return Promise.resolve(mockedCustomMapping).then((res) => {
-        this.customMapping = res;
-        this.integrationTestPayload.json = res?.samplePayload.body;
-      });
     },
     updateMapping(mapping) {
       this.mapping = mapping;
@@ -566,7 +567,7 @@ export default {
         >
           <span>{{ $options.i18n.integrationFormSteps.step5.intro }}</span>
           <mapping-builder
-            :parsed-payload="parsedSamplePayload"
+            :parsed-payload="parsedPayload"
             :saved-mapping="savedMapping"
             :alert-fields="alertFields"
             @onMappingUpdate="updateMapping"

@@ -57,5 +57,10 @@ export const transformForSave = (mappingData) => {
  * @return {Object} same as input with an extra `name` property which basically serves as a key to make a match
  */
 export const getPayloadFields = (payload) => {
-  return payload.map((field) => ({ ...field, name: field.path.join('_') }));
+  return payload.map(({ label, type, path }) => ({
+    label,
+    path,
+    type: type.toLowerCase(),
+    name: path.join('_'),
+  }));
 };
