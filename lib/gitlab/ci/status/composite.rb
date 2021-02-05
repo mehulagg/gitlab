@@ -32,7 +32,7 @@ module Gitlab
           return if none?
 
           strong_memoize(:status) do
-            if @dag && any_of?(:skipped)
+            if @dag && (any_of?(:skipped) || any_of?(:ignored))
               # The DAG job is skipped if one of the needs does not run at all.
               'skipped'
             elsif @dag && !only_of?(:success, :failed, :canceled, :skipped, :success_with_warnings)

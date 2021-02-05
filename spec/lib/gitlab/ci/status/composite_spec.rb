@@ -69,6 +69,8 @@ RSpec.describe Gitlab::Ci::Status::Composite do
         %i(manual)           | false | 'skipped'   | false
         %i(skipped failed)   | false | 'success'   | true
         %i(skipped failed)   | true  | 'skipped'   | true
+        %i(success manual)   | true  | 'skipped'   | false
+        %i(success manual)   | false | 'success'   | false
         %i(created failed)   | false | 'created'   | true
         %i(preparing manual) | false | 'preparing' | false
       end
