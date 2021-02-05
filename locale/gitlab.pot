@@ -17419,9 +17419,6 @@ msgstr ""
 msgid "KeyboardShortcuts|Copy source branch name"
 msgstr ""
 
-msgid "KeyboardShortcuts|Copy two-factor authentication codes"
-msgstr ""
-
 msgid "KeyboardShortcuts|Download CSV"
 msgstr ""
 
