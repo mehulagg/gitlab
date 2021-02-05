@@ -4,7 +4,8 @@ require 'spec_helper'
 
 RSpec.describe CustomEmoji do
   describe 'Associations' do
-    it { is_expected.to belong_to(:namespace) }
+    it { is_expected.to belong_to(:namespace).inverse_of(:custom_emoji) }
+    it { is_expected.to belong_to(:creator).inverse_of(:created_custom_emoji) }
     it { is_expected.to have_db_column(:file) }
     it { is_expected.to validate_length_of(:name).is_at_most(36) }
     it { is_expected.to validate_presence_of(:name) }
