@@ -58,8 +58,8 @@ Available documentation suggests that ED25519 is more secure than RSA.
 
 If you use an RSA key, the US National Institute of Science and Technology in
 [Publication 800-57 Part 3 (PDF)](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57Pt3r1.pdf)
-recommends a key size of at least 2048 bits. By default, the `ssh-keygen` command
-creates an 1024-bit RSA key.
+recommends a key size of at least 2048 bits. The default key size depends on your version of `ssh-keygen`.
+Review the `man` page for your installed `ssh-keygen` command for details.
 
 ## See if you have an existing SSH key pair
 
