@@ -116,6 +116,19 @@ variables:
   SAST_EXCLUDED_ANALYZERS: "eslint"
 ```
 
+## Post Analyzers **(ULTIMATE)**
+
+While analyzers are thin wrappers for executing scanners, post analyzers work to
+enrich the data generated within our reports.
+
+GitLab SAST post analyzers never modify report contents directly but work by
+augmenting results with additional properties (such as CWEs), location tracking fields,
+and a means of identifying false-positives or insignificant findings.
+
+The implementation of post analyzers is determined by feature availability tiers, where
+simple data enrichment may occur within our free tier and most advanced processing is split
+into separate binaries or pipeline jobs.
+
 ## Custom Analyzers
 
 You can provide your own analyzers by
