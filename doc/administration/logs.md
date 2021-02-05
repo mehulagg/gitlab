@@ -390,7 +390,8 @@ This file lives in `/var/log/gitlab/gitlab-rails/audit_json.log` for
 Omnibus GitLab packages or in `/home/git/gitlab/log/audit_json.log` for
 installations from source.
 
-Changes to group or project settings and memberships are logged to this file. For example:
+Changes to group or project settings and memberships (`target_details`) are logged to this file.
+For example:
 
 ```json
 {
