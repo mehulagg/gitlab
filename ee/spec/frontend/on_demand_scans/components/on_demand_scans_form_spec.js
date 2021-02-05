@@ -6,8 +6,8 @@ import createApolloProvider from 'helpers/mock_apollo_helper';
 import OnDemandScansForm from 'ee/on_demand_scans/components/on_demand_scans_form.vue';
 import ScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
 import SiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
-import dastScanCreateMutation from 'ee/on_demand_scans/graphql/dast_scan_create.mutation.graphql';
-import dastScanUpdateMutation from 'ee/on_demand_scans/graphql/dast_scan_update.mutation.graphql';
+import dastProfileCreateMutation from 'ee/on_demand_scans/graphql/dast_profile_create.mutation.graphql';
+import dastProfileUpdateMutation from 'ee/on_demand_scans/graphql/dast_profile_update.mutation.graphql';
 import dastOnDemandScanCreateMutation from 'ee/on_demand_scans/graphql/dast_on_demand_scan_create.mutation.graphql';
 import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
 import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
@@ -79,8 +79,8 @@ describe('OnDemandScansForm', () => {
   const setupSuccess = ({ edit = false } = {}) => {
     jest.spyOn(subject.vm.$apollo, 'mutate').mockResolvedValue({
       data: {
-        [edit ? 'dastScanUpdate' : 'dastScanCreate']: {
-          dastScan: { editPath },
+        [edit ? 'dastProfileUpdate' : 'dastProfileCreate']: {
+          dastProfile: { editPath },
           pipelineUrl,
           errors: [],
         },
@@ -265,9 +265,9 @@ describe('OnDemandScansForm', () => {
             expect(saveButton.props('disabled')).toBe(!saveButtonLoading);
           });
 
-          it(`triggers dastScanCreateMutation mutation with runAfterCreate set to ${runAfterCreate}`, async () => {
+          it(`triggers dastProfileCreateMutation mutation with runAfterCreate set to ${runAfterCreate}`, async () => {
             expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
-              mutation: dastScanCreateMutation,
+              mutation: dastProfileCreateMutation,
               variables: {
                 input: {
                   name: 'My daily scan',
@@ -277,6 +277,7 @@ describe('OnDemandScansForm', () => {
                   fullPath: projectPath,
                   runAfterCreate,
                 },
+                runAfterCreate,
               },
             });
           });
@@ -301,9 +302,9 @@ describe('OnDemandScansForm', () => {
             actionFunction();
           });
 
-          it(`triggers dastScanUpdateMutation mutation with runAfterCreate set to ${runAfterCreate}`, async () => {
+          it(`triggers dastProfileUpdateMutation mutation with runAfterCreate set to ${runAfterCreate}`, async () => {
             expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
-              mutation: dastScanUpdateMutation,
+              mutation: dastProfileUpdateMutation,
               variables: {
                 input: {
                   id: 1,
@@ -314,6 +315,7 @@ describe('OnDemandScansForm', () => {
                   fullPath: projectPath,
                   runAfterCreate,
                 },
+                runAfterCreate,
               },
             });
           });
@@ -356,7 +358,7 @@ describe('OnDemandScansForm', () => {
         mountShallowSubject();
         jest
           .spyOn(subject.vm.$apollo, 'mutate')
-          .mockResolvedValue({ data: { dastScanCreate: { pipelineUrl: null, errors } } });
+          .mockResolvedValue({ data: { dastProfileCreate: { pipelineUrl: null, errors } } });
         await setValidFormData();
         submitForm();
       });

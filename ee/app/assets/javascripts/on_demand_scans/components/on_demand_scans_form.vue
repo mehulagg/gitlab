@@ -35,8 +35,8 @@ import {
   TYPE_SITE_PROFILE,
   TYPE_SCANNER_PROFILE,
 } from '../settings';
-import dastScanCreateMutation from '../graphql/dast_scan_create.mutation.graphql';
-import dastScanUpdateMutation from '../graphql/dast_scan_update.mutation.graphql';
+import dastProfileCreateMutation from '../graphql/dast_profile_create.mutation.graphql';
+import dastProfileUpdateMutation from '../graphql/dast_profile_update.mutation.graphql';
 import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
 import ProfileSelectorSummaryCell from './profile_selector/summary_cell.vue';
 import ScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
@@ -259,8 +259,8 @@ export default {
         dastSiteProfileId: this.selectedSiteProfile.id,
       };
       if (this.glFeatures.dastSavedScans) {
-        mutation = this.isEdit ? dastScanUpdateMutation : dastScanCreateMutation;
-        reponseType = this.isEdit ? 'dastScanUpdate' : 'dastScanCreate';
+        mutation = this.isEdit ? dastProfileUpdateMutation : dastProfileCreateMutation;
+        reponseType = this.isEdit ? 'dastProfileUpdate' : 'dastProfileCreate';
         input = {
           ...input,
           ...(this.isEdit ? { id: this.dastScan.id } : {}),
@@ -275,6 +275,7 @@ export default {
           mutation,
           variables: {
             input,
+            ...(this.glFeatures.dastSavedScans ? { runAfterCreate } : {}),
           },
         })
         .then(({ data }) => {
@@ -284,7 +285,7 @@ export default {
             this.showErrors(ERROR_RUN_SCAN, errors);
             this.loading = false;
           } else if (this.glFeatures.dastSavedScans && !runAfterCreate) {
-            redirectTo(response.dastScan.editPath);
+            redirectTo(response.dastProfile.editPath);
           } else {
             redirectTo(response.pipelineUrl);
           }

@@ -1,0 +1,9 @@
+mutation dastProfileCreate($input: DastProfileCreateInput!, $runAfterCreate: Boolean!) {
+  dastProfileCreate(input: $input) {
+    dastProfile {
+      editPath
+    }
+    errors
+    pipelineUrl @include(if: $runAfterCreate)
+  }
+}

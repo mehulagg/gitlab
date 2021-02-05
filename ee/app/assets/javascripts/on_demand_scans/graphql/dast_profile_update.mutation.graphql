@@ -1,0 +1,9 @@
+mutation dastProfileUpdate($input: DastProfileUpdateInput!, $runAfterCreate: Boolean!) {
+  dastProfileUpdate(input: $input) {
+    dastScan {
+      editPath
+    }
+    pipelineUrl @include(if: $runAfterCreate)
+    errors
+  }
+}
