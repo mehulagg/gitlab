@@ -34,7 +34,7 @@ For the same reason we don't automatically block background jobs when maintenanc
 
 The resulting database writes are acceptable. The trade-off is between more service degradation and the completion of replication. 
 
-However, during a planned failover, we ask users to turn off non-geo cron jobs manually. In the absence of new database writes and non-Geo cron jobs, new background jobs would either not be created at all or be minimal.
+However, during a planned failover, we ask users to turn off cron jobs that are not related to Geo, manually. In the absence of new database writes and non-Geo cron jobs, new background jobs would either not be created at all or be minimal.
 
 Unfortunately a complete disabling of database writes would involve categorizing and analyzing every background job, and understanding it's significance and what it means to stop it during maintenance mode.
 
