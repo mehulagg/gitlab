@@ -194,9 +194,9 @@ The following list includes descriptions of each server and its assigned IP:
 - `10.6.0.81`: Sentinel - Queues 1
 - `10.6.0.82`: Sentinel - Queues 2
 - `10.6.0.83`: Sentinel - Queues 3
-- `10.6.0.91`: Gitaly Cluster 1
-- `10.6.0.92`: Gitaly Cluster 2
-- `10.6.0.93`: Gitaly Cluster 3
+- `10.6.0.91`: Gitaly 1
+- `10.6.0.92`: Gitaly 2
+- `10.6.0.93`: Gitaly 3
 - `10.6.0.131`: Praefect 1
 - `10.6.0.132`: Praefect 2
 - `10.6.0.134`: Praefect 3
@@ -1377,36 +1377,10 @@ The following IPs will be used as an example:
 - `10.6.0.141`: PostgreSQL
 
 First, make sure to [install](https://about.gitlab.com/install/)
-the Linux GitLab package **on each node**. Following the steps,
+the Linux GitLab package the node. Following the steps,
 install the necessary dependencies from step 1, and add the
 GitLab package repository from step 2. When installing GitLab
 in the second step, do not supply the `EXTERNAL_URL` value.
-
-```ruby
-# Disable all components except PostgreSQL and Consul
-roles ['postgres_role']
-repmgr['enable'] = false
-patroni['enable'] = false
-
-# PostgreSQL configuration
-postgresql['listen_address'] = '0.0.0.0'
-postgresql['sql_user_password'] = "<praefect_postgres_user_password>"
-# Replace XXX.XXX.XXX.XXX/YY with Network Address
-postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/24)
-
-gitlab_rails['auto_migrate'] = false
-
-# Enable service discovery for Prometheus
-consul['enable'] = true
-consul['monitoring_service_discovery'] =  true
-consul['configuration'] = {
-   retry_join: %w(10.6.0.11 10.6.0.12 10.6.0.13)
-}
-
-# Set the network addresses that the exporters will listen on for monitoring
-node_exporter['listen_address'] = '0.0.0.0:9100'
-postgres_exporter['listen_address'] = '0.0.0.0:9187'
-```
 
 1. SSH in to the PostgreSQL node.
 1. Create a strong password to be used for the Praefect PostgreSQL user. Take note of this password as `<praefect_postgresql_password>`.
