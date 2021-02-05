@@ -22,8 +22,6 @@
 $atlaskit-border-color: #dfe1e6;
 
 .ac-content {
-  margin: 20px;
-
   .subscription-form {
     margin-bottom: 20px;
 
@@ -43,13 +41,7 @@ $atlaskit-border-color: #dfe1e6;
 $header-height: 40px;
 
 .jira-connect-header {
-  border-bottom: 1px solid $gray-100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: $header-height;
-  padding-left: 16px;
-  padding-right: 16px;
   position: fixed;
   top: 0;
   left: 0;
@@ -65,18 +57,14 @@ $header-height: 40px;
 
 .jira-connect-app {
   margin-top: $header-height;
-  max-width: 600px;
   min-height: 95vh;
-  padding-top: 48px;
-  padding-left: 16px;
-  padding-right: 16px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
+  max-width: 1000px;
 }
 
-.gl-mt-5 {
-  margin-top: 16px;
+.jira-connect-app-body {
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 svg {
@@ -114,13 +102,4 @@ svg {
       padding: $gl-padding-8;
     }
   }
-}
-
-.empty-subscriptions {
-  color: $gray-900;
-}
-
-.browser-limitations-notice {
-  font-size: $gl-font-size;
-  margin-top: 32px;
 }

@@ -13453,6 +13453,9 @@ msgstr ""
 msgid "GitLab metadata URL"
 msgstr ""
 
+msgid "GitLab namespace"
+msgstr ""
+
 msgid "GitLab project export"
 msgstr ""
 
@@ -15823,10 +15826,19 @@ msgstr ""
 msgid "Integrations|Add namespace"
 msgstr ""
 
+msgid "Integrations|Added"
+msgstr ""
+
+msgid "Integrations|Adding a namespace currently works only in browsers that allow cross‑site cookies. Please make sure to use %{firefox_link_start}Firefox%{firefox_link_end} or enable cross‑site cookies in your browser when adding a namespace."
+msgstr ""
+
 msgid "Integrations|All details"
 msgstr ""
 
 msgid "Integrations|All projects inheriting these settings will also be reset."
+msgstr ""
+
+msgid "Integrations|Browser limitations"
 msgstr ""
 
 msgid "Integrations|Comment detail:"
@@ -15868,6 +15880,9 @@ msgstr ""
 msgid "Integrations|Issues created in Jira are shown here once you have created the issues in project setup in Jira."
 msgstr ""
 
+msgid "Integrations|Link namespace to Jira"
+msgstr ""
+
 msgid "Integrations|Link namespaces"
 msgstr ""
 
@@ -15878,6 +15893,12 @@ msgid "Integrations|Namespaces are your GitLab groups and subgroups that will be
 msgstr ""
 
 msgid "Integrations|No available namespaces."
+msgstr ""
+
+msgid "Integrations|No linked namespaces"
+msgstr ""
+
+msgid "Integrations|Note: this integration only works with accounts on GitLab.com (SaaS)."
 msgstr ""
 
 msgid "Integrations|Projects using custom settings will not be affected."
