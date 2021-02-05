@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require File.expand_path('ee/elastic/migrate/20210205133500_add_permissions_data_to_notes_documents.rb')
+require File.expand_path('ee/elastic/migrate/20210127154600_remove_permissions_data_from_notes_documents.rb')
 
-RSpec.describe AddPermissionsDataToNotesDocuments, :elastic, :sidekiq_inline do
+RSpec.describe RemovePermissionsDataFromNotesDocuments, :elastic, :sidekiq_inline do
   let(:version) { 20210128163600 }
   let(:migration) { described_class.new(version) }
   let(:helper) { Gitlab::Elastic::Helper.new }

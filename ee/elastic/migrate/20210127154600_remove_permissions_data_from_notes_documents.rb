@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AddPermissionsDataToNotesDocuments < Elastic::Migration
+class RemovePermissionsDataFromNotesDocuments < Elastic::Migration
   batched!
   throttle_delay 1.minute
 
@@ -9,11 +9,11 @@ class AddPermissionsDataToNotesDocuments < Elastic::Migration
 
   def migrate
     if completed?
-      log "Skipping adding permission data to notes documents migration since it is already applied"
+      log "Skipping removing permission data from notes documents migration since it is already applied"
       return
     end
 
-    log "Adding permission data to notes documents for batch of #{QUERY_BATCH_SIZE} documents"
+    log "Removing permission data from notes documents for batch of #{QUERY_BATCH_SIZE} documents"
 
     # use filter query to prevent scores from being calculated
     query = {
@@ -24,11 +24,11 @@ class AddPermissionsDataToNotesDocuments < Elastic::Migration
             bool: {
               must: note_type_filter,
               should: [
-                field_does_not_exist('visibility_level'),
-                field_does_not_exist_for_type('issues_access_level', 'Issue'),
-                field_does_not_exist_for_type('repository_access_level', 'Commit'),
-                field_does_not_exist_for_type('merge_requests_access_level', 'MergeRequest'),
-                field_does_not_exist_for_type('snippets_access_level', 'Snippet')
+                field_exists('visibility_level'),
+                field_exists_for_type('issues_access_level', 'Issue'),
+                field_exists_for_type('repository_access_level', 'Commit'),
+                field_exists_for_type('merge_requests_access_level', 'MergeRequest'),
+                field_exists_for_type('snippets_access_level', 'Snippet')
               ],
               minimum_should_match: 1
             }
@@ -69,11 +69,11 @@ class AddPermissionsDataToNotesDocuments < Elastic::Migration
           filter: {
             bool: {
               should: [
-                field_does_not_exist('visibility_level'),
-                field_does_not_exist_for_type('issues_access_level', 'Issue'),
-                field_does_not_exist_for_type('repository_access_level', 'Commit'),
-                field_does_not_exist_for_type('merge_requests_access_level', 'MergeRequest'),
-                field_does_not_exist_for_type('snippets_access_level', 'Snippet')
+                field_exists('visibility_level'),
+                field_exists_for_type('issues_access_level', 'Issue'),
+                field_exists_for_type('repository_access_level', 'Commit'),
+                field_exists_for_type('merge_requests_access_level', 'MergeRequest'),
+                field_exists_for_type('snippets_access_level', 'Snippet')
               ],
               minimum_should_match: 1
             }
@@ -101,10 +101,10 @@ class AddPermissionsDataToNotesDocuments < Elastic::Migration
     }
   end
 
-  def field_does_not_exist(field)
+  def field_exists(field)
     {
       bool: {
-        must_not: {
+        must: {
           exists: {
             field: field
           }
@@ -113,8 +113,8 @@ class AddPermissionsDataToNotesDocuments < Elastic::Migration
     }
   end
 
-  def field_does_not_exist_for_type(field, type)
-    query = field_does_not_exist(field)
+  def field_exists_for_type(field, type)
+    query = field_exists(field)
     query[:bool][:must] = {
       term: {
         noteable_type: {
