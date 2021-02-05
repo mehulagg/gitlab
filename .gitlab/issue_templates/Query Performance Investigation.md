@@ -14,17 +14,15 @@ As the name implies, the purpose of the template is to detail underperforming qu
 
 Please provide as many of these fields as possible when submitting a query performance report.
 
-| Metric | Measurement |
-|--------|-------------|
-| TPS |  |
-| Duration |  |
-| Source of calls | Sidekiq, WebAPI, etc |
-| Query ID | | 
-| SQL Statement | | 
-| Query Plan | | 
-| Query Example | | 
-| Total number of calls (relative) |  |
-| % of Total time |  |
+- TPS
+- Duration
+- Source of calls (Sidekiq, WebAPI, etc)
+- Query ID
+- SQL Statement
+- Query Plan
+- Query Example
+- Total number of calls (relative)
+- % of Total time
 
 <!--
 
