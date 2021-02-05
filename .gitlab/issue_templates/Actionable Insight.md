@@ -12,9 +12,9 @@
 ### Resources
  <!--Add resources as links below or as related issues. -->
 
-- **Dovetail link:** [{Paste URL here}](url)
-- **Research issue link:** [{Paste URL here}](url)
-- **Follow-up issue:** [{Paste URL here}](url)
+- :dove: [Dovetail project](Paste URL for Dovetail project here)
+- :mag: [Research issue](Paste URL for research issue here)
+- :footprints: [Follow-up issue or epic](Paste URL for follow-up issue or epic here)
 
 ### Tasks
 - [ ] Assign this issue to the appropriate Product Manager, Product Designer, or UX Researcher.
