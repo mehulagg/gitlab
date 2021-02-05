@@ -10,6 +10,12 @@ RSpec.describe Resolvers::ExternalIssueResolver do
   context 'when Jira issues are requested' do
     let_it_be(:vulnerability_external_issue_link) { create(:vulnerabilities_external_issue_link) }
 
+    before do
+      allow_next_instance_of(::Integrations::Jira::IssueSerializer) do |serializer|
+        allow(serializer).to receive(:represent).and_return(serialized_result)
+      end
+    end
+
     let(:jira_issue) do
       double(
         id: vulnerability_external_issue_link.external_issue_key,
@@ -26,7 +32,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
       )
     end
 
-    let(:expected_result) do
+    let(:serialized_result) do
       {
         'project_id' => vulnerability_external_issue_link.vulnerability.project_id,
         'title' => 'Issue Title',
@@ -88,7 +94,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
 
       it 'returns serialized Jira issues' do
         result = batch_sync { resolve_external_issue({}) }
-        expect(result.as_json).to eq(expected_result)
+        expect(result.as_json).to eq(serialized_result)
       end
     end
 
