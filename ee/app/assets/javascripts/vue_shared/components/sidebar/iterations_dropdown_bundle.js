@@ -6,7 +6,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 
 Vue.use(VueApollo);
 
-export default function () {
+export default function initIterationsDropdownBundle() {
   const el = document.querySelector('#js-iteration-dropdown');
   const iterationField = document.getElementById('issue_iteration_id');
 
