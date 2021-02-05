@@ -131,7 +131,10 @@ module MergeRequests
           merge_request.reload_diff(current_user)
         end
 
-        merge_request.mark_as_unchecked
+        state_change = merge_request.merge_status_transitions.find { |x| x.event == :mark_as_unchecked }
+        unless state_change.from == merge_request.merge_status && state_change.to == merge_request.merge_status
+          merge_request.mark_as_unchecked
+        end
       end
 
       # Upcoming method calls need the refreshed version of
