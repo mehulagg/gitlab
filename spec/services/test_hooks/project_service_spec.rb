@@ -175,6 +175,7 @@ RSpec.describe TestHooks::ProjectService do
     context 'job_events' do
       let(:trigger) { 'job_events' }
       let(:trigger_key) { :job_hooks }
+      let(:ci_job) { build(:ci_build) }
 
       it 'returns error message if not enough data' do
         expect(hook).not_to receive(:execute)
@@ -182,17 +183,35 @@ RSpec.describe TestHooks::ProjectService do
       end
 
       it 'executes hook' do
-        create(:ci_build, project: project)
         allow(Gitlab::DataBuilder::Build).to receive(:build).and_return(sample_data)
+        allow_next_instance_of(Ci::JobsFinder) do |finder|
+          allow(finder).to receive(:execute).and_return([ci_job])
+        end
 
         expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
         expect(service.execute).to include(success_result)
+      end
+
+      context 'when the reorder feature flag is disabled' do
+        before do
+          stub_feature_flags(integrations_test_webhook_reorder: false)
+        end
+
+        it 'executes the old query' do
+          allow(Gitlab::DataBuilder::Build).to receive(:build).and_return(sample_data)
+
+          expect(Ci::JobsFinder).not_to receive(:new)
+          expect(project).to receive(:builds).and_return([ci_job])
+          expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
+          expect(service.execute).to include(success_result)
+        end
       end
     end
 
     context 'pipeline_events' do
       let(:trigger) { 'pipeline_events' }
       let(:trigger_key) { :pipeline_hooks }
+      let(:pipeline) { build(:ci_empty_pipeline) }
 
       it 'returns error message if not enough data' do
         expect(hook).not_to receive(:execute)
@@ -200,11 +219,28 @@ RSpec.describe TestHooks::ProjectService do
       end
 
       it 'executes hook' do
-        create(:ci_empty_pipeline, project: project)
         allow(Gitlab::DataBuilder::Pipeline).to receive(:build).and_return(sample_data)
+        allow_next_instance_of(Ci::PipelinesFinder) do |finder|
+          allow(finder).to receive(:execute).and_return([pipeline])
+        end
 
         expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
         expect(service.execute).to include(success_result)
+      end
+
+      context 'when the reorder feature flag is disabled' do
+        before do
+          stub_feature_flags(integrations_test_webhook_reorder: false)
+        end
+
+        it 'executes the old query' do
+          create(:ci_empty_pipeline, project: project)
+          allow(Gitlab::DataBuilder::Pipeline).to receive(:build).and_return(sample_data)
+
+          expect(Ci::PipelinesFinder).not_to receive(:new)
+          expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
+          expect(service.execute).to include(success_result)
+        end
       end
     end
 
@@ -237,6 +273,7 @@ RSpec.describe TestHooks::ProjectService do
     context 'releases_events' do
       let(:trigger) { 'releases_events' }
       let(:trigger_key) { :release_hooks }
+      let(:release) { build(:release) }
 
       it 'returns error message if not enough data' do
         expect(hook).not_to receive(:execute)
@@ -244,11 +281,28 @@ RSpec.describe TestHooks::ProjectService do
       end
 
       it 'executes hook' do
-        allow(project).to receive(:releases).and_return([Release.new])
-        allow_any_instance_of(Release).to receive(:to_hook_data).and_return(sample_data)
+        allow(release).to receive(:to_hook_data).and_return(sample_data)
+        allow_next_instance_of(ReleasesFinder) do |finder|
+          allow(finder).to receive(:execute).and_return([release])
+        end
 
         expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
         expect(service.execute).to include(success_result)
+      end
+
+      context 'when the reorder feature flag is disabled' do
+        before do
+          stub_feature_flags(integrations_test_webhook_reorder: false)
+        end
+
+        it 'executes the old query' do
+          allow(release).to receive(:to_hook_data).and_return(sample_data)
+
+          expect(ReleasesFinder).not_to receive(:new)
+          expect(project).to receive(:releases).and_return([release])
+          expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
+          expect(service.execute).to include(success_result)
+        end
       end
     end
   end

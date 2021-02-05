@@ -12,6 +12,10 @@ module Integrations
       Feature.enabled?(:integrations_test_webhook_optimizations, project)
     end
 
+    def use_newest_record?
+      Feature.enabled?(:integrations_test_webhook_reorder, project)
+    end
+
     def note_events_data
       note = if use_optimal_query?
                NotesFinder.new(current_user, project: project, target: project).execute.reorder(nil).last # rubocop: disable CodeReuse/ActiveRecord
@@ -49,21 +53,36 @@ module Integrations
     end
 
     def job_events_data
-      build = project.builds.first
+      build = if use_newest_record?
+                Ci::JobsFinder.new(current_user: current_user, project: project).execute.first
+              else
+                project.builds.first
+              end
+
       return { error: s_('TestHooks|Ensure the project has CI jobs.') } unless build.present?
 
       Gitlab::DataBuilder::Build.build(build)
     end
 
     def pipeline_events_data
-      pipeline = project.ci_pipelines.newest_first.first
+      pipeline = if use_newest_record?
+                   Ci::PipelinesFinder.new(project, current_user, order_by: 'id', sort: 'desc').execute.first
+                 else
+                   project.ci_pipelines.newest_first.first
+                 end
+
       return { error: s_('TestHooks|Ensure the project has CI pipelines.') } unless pipeline.present?
 
       Gitlab::DataBuilder::Pipeline.build(pipeline)
     end
 
     def wiki_page_events_data
-      page = project.wiki.list_pages(limit: 1).first
+      page = if use_newest_record?
+               project.wiki.list_pages(limit: 1, direction: Wiki::DIRECTION_DESC).first
+             else
+               project.wiki.list_pages(limit: 1).first
+             end
+
       if !project.wiki_enabled? || page.blank?
         return { error: s_('TestHooks|Ensure the wiki is enabled and has pages.') }
       end
@@ -72,14 +91,24 @@ module Integrations
     end
 
     def deployment_events_data
-      deployment = project.deployments.first
+      deployment = if use_newest_record?
+                     DeploymentsFinder.new(project, order_by: 'created_at', sort: 'desc').execute.first
+                   else
+                     project.deployments.first
+                   end
+
       return { error: s_('TestHooks|Ensure the project has deployments.') } unless deployment.present?
 
       Gitlab::DataBuilder::Deployment.build(deployment)
     end
 
     def releases_events_data
-      release = project.releases.first
+      release = if use_newest_record?
+                  ReleasesFinder.new(project, current_user, order_by: :created_at, sort: :desc).execute.first
+                else
+                  project.releases.first
+                end
+
       return { error: s_('TestHooks|Ensure the project has releases.') } unless release.present?
 
       release.to_hook_data('create')

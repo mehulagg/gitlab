@@ -181,6 +181,7 @@ RSpec.describe Integrations::Test::ProjectService do
 
       context 'deployment' do
         let_it_be(:project) { create(:project, :test_repo) }
+        let(:deployment) { build(:deployment) }
         let(:event) { 'deployment' }
 
         it 'returns error message if not enough data' do
@@ -189,16 +190,34 @@ RSpec.describe Integrations::Test::ProjectService do
         end
 
         it 'executes integration' do
-          create(:deployment, project: project)
           allow(Gitlab::DataBuilder::Deployment).to receive(:build).and_return(sample_data)
+          allow_next_instance_of(DeploymentsFinder) do |finder|
+            allow(finder).to receive(:execute).and_return([deployment])
+          end
 
           expect(integration).to receive(:test).with(sample_data).and_return(success_result)
           expect(subject).to eq(success_result)
+        end
+
+        context 'when the reorder feature flag is disabled' do
+          before do
+            stub_feature_flags(integrations_test_webhook_reorder: false)
+          end
+
+          it 'executes the old query' do
+            allow(Gitlab::DataBuilder::Deployment).to receive(:build).and_return(sample_data)
+
+            expect(DeploymentsFinder).not_to receive(:new)
+            expect(project).to receive(:deployments).and_return([deployment])
+            expect(integration).to receive(:test).with(sample_data).and_return(success_result)
+            expect(subject).to eq(success_result)
+          end
         end
       end
 
       context 'pipeline' do
         let(:event) { 'pipeline' }
+        let(:pipeline) { build(:ci_pipeline) }
 
         it 'returns error message if not enough data' do
           expect(integration).not_to receive(:test)
@@ -206,11 +225,28 @@ RSpec.describe Integrations::Test::ProjectService do
         end
 
         it 'executes integration' do
-          create(:ci_empty_pipeline, project: project)
           allow(Gitlab::DataBuilder::Pipeline).to receive(:build).and_return(sample_data)
+          allow_next_instance_of(Ci::PipelinesFinder) do |finder|
+            allow(finder).to receive(:execute).and_return([pipeline])
+          end
 
           expect(integration).to receive(:test).with(sample_data).and_return(success_result)
           expect(subject).to eq(success_result)
+        end
+
+        context 'when the reorder feature flag is disabled' do
+          before do
+            stub_feature_flags(integrations_test_webhook_reorder: false)
+          end
+
+          it 'executes the old query' do
+            create(:ci_empty_pipeline, project: project)
+            allow(Gitlab::DataBuilder::Pipeline).to receive(:build).and_return(sample_data)
+
+            expect(Ci::PipelinesFinder).not_to receive(:new)
+            expect(integration).to receive(:test).with(sample_data).and_return(success_result)
+            expect(subject).to eq(success_result)
+          end
         end
       end
 
