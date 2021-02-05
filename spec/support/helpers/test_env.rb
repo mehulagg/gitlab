@@ -168,6 +168,11 @@ module TestEnv
       version: Gitlab::GitalyClient.expected_server_version,
       task: "gitlab:gitaly:install[#{install_gitaly_args}]") do
         Gitlab::SetupHelper::Gitaly.create_configuration(gitaly_dir, { 'default' => repos_path }, force: true)
+        Gitlab::SetupHelper::Gitaly.create_configuration(
+          gitaly_dir,
+          { 'default' => repos_path }, force: true,
+          options: { gitaly_socket: "gitaly2.socket", config_filename: "gitaly2.config.toml" }
+        )
         Gitlab::SetupHelper::Praefect.create_configuration(gitaly_dir, { 'praefect' => repos_path }, force: true)
       end
 
@@ -198,10 +203,13 @@ module TestEnv
     end
 
     gitaly_pid = Integer(File.read(TMP_TEST_PATH.join('gitaly.pid')))
+    gitaly2_pid = Integer(File.read(TMP_TEST_PATH.join('gitaly2.pid')))
     praefect_pid = Integer(File.read(TMP_TEST_PATH.join('praefect.pid')))
 
-    Kernel.at_exit { stop(gitaly_pid) }
-    Kernel.at_exit { stop(praefect_pid) }
+    Kernel.at_exit do
+      pids = [gitaly_pid, gitaly2_pid, praefect_pid]
+      pids.each { |pid| stop(pid) }
+    end
 
     wait('gitaly')
     wait('praefect')
@@ -279,11 +287,11 @@ module TestEnv
     @workhorse_path ||= File.join('tmp', 'tests', 'gitlab-workhorse')
   end
 
-  def with_workhorse(workhorse_dir, host, port, upstream, &blk)
+  def with_workhorse(host, port, upstream, &blk)
     host = "[#{host}]" if host.include?(':')
     listen_addr = [host, port].join(':')
 
-    config_path = Gitlab::SetupHelper::Workhorse.get_config_path(workhorse_dir)
+    config_path = Gitlab::SetupHelper::Workhorse.get_config_path(workhorse_dir, {})
 
     # This should be set up in setup_workhorse, but since
     # component_needs_update? only checks that versions are consistent,

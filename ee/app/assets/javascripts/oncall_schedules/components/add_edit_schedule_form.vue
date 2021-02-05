@@ -38,7 +38,6 @@ export const i18n = {
 
 export default {
   i18n,
-  inject: ['projectPath', 'timezones'],
   components: {
     GlForm,
     GlFormGroup,
@@ -47,17 +46,14 @@ export default {
     GlDropdownItem,
     GlSearchBoxByType,
   },
+  inject: ['projectPath', 'timezones'],
   props: {
     form: {
       type: Object,
       required: true,
     },
-    isNameInvalid: {
-      type: Boolean,
-      required: true,
-    },
-    isTimezoneInvalid: {
-      type: Boolean,
+    validationState: {
+      type: Object,
       required: true,
     },
     schedule: {
@@ -69,15 +65,14 @@ export default {
   data() {
     return {
       tzSearchTerm: '',
+      selectedDropdownTimezone: null,
     };
   },
   computed: {
     filteredTimezones() {
       const lowerCaseTzSearchTerm = this.tzSearchTerm.toLowerCase();
-      return this.timezones.filter(tz =>
-        this.getFormattedTimezone(tz)
-          .toLowerCase()
-          .includes(lowerCaseTzSearchTerm),
+      return this.timezones.filter((tz) =>
+        this.getFormattedTimezone(tz).toLowerCase().includes(lowerCaseTzSearchTerm),
       );
     },
     noResults() {
@@ -96,6 +91,9 @@ export default {
     isTimezoneSelected(tz) {
       return isEqual(tz, this.form.timezone);
     },
+    setTimezone(timezone) {
+      this.selectedDropdownTimezone = timezone;
+    },
   },
 };
 </script>
@@ -107,12 +105,13 @@ export default {
       :invalid-feedback="$options.i18n.fields.name.validation.empty"
       label-size="sm"
       label-for="schedule-name"
+      :state="validationState.name"
+      requried
     >
       <gl-form-input
         id="schedule-name"
         :value="form.name"
-        :state="!isNameInvalid"
-        @input="$emit('update-schedule-form', { type: 'name', value: $event })"
+        @blur="$emit('update-schedule-form', { type: 'name', value: $event.target.value })"
       />
     </gl-form-group>
 
@@ -124,7 +123,7 @@ export default {
       <gl-form-input
         id="schedule-description"
         :value="form.description"
-        @input="$emit('update-schedule-form', { type: 'description', value: $event })"
+        @blur="$emit('update-schedule-form', { type: 'description', value: $event.target.value })"
       />
     </gl-form-group>
 
@@ -133,15 +132,17 @@ export default {
       label-size="sm"
       label-for="schedule-timezone"
       :description="$options.i18n.fields.timezone.description"
-      :state="!isTimezoneInvalid"
+      :state="validationState.timezone"
       :invalid-feedback="$options.i18n.fields.timezone.validation.empty"
+      requried
     >
       <gl-dropdown
         id="schedule-timezone"
         :text="selectedTimezone"
         class="timezone-dropdown gl-w-full"
         :header-text="$options.i18n.selectTimezone"
-        :class="{ 'invalid-dropdown': isTimezoneInvalid }"
+        :class="{ 'invalid-dropdown': !validationState.timezone }"
+        @hide="$emit('update-schedule-form', { type: 'timezone', value: selectedDropdownTimezone })"
       >
         <gl-search-box-by-type v-model.trim="tzSearchTerm" />
         <gl-dropdown-item
@@ -149,7 +150,7 @@ export default {
           :key="getFormattedTimezone(tz)"
           :is-checked="isTimezoneSelected(tz)"
           is-check-item
-          @click="$emit('update-schedule-form', { type: 'timezone', value: tz })"
+          @click="setTimezone(tz)"
         >
           <span class="gl-white-space-nowrap"> {{ getFormattedTimezone(tz) }}</span>
         </gl-dropdown-item>

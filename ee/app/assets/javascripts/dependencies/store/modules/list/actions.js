@@ -1,10 +1,10 @@
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { __ } from '~/locale';
 import { FETCH_ERROR_MESSAGE } from './constants';
 import { isValidResponse } from './utils';
 import * as types from './mutation_types';
-import axios from '~/lib/utils/axios_utils';
-import { __ } from '~/locale';
 
 export const setDependenciesEndpoint = ({ commit }, endpoint) =>
   commit(types.SET_DEPENDENCIES_ENDPOINT, endpoint);
@@ -41,14 +41,14 @@ export const fetchDependencies = ({ state, dispatch }, params = {}) => {
         ...params,
       },
     })
-    .then(response => {
+    .then((response) => {
       if (isValidResponse(response)) {
         dispatch('receiveDependenciesSuccess', response);
       } else {
         throw new Error(__('Invalid server response'));
       }
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveDependenciesError', error);
       createFlash(FETCH_ERROR_MESSAGE);
     });

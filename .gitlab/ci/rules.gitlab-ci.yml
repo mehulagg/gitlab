@@ -123,9 +123,12 @@
   - ".gitlab/route-map.yml"
   - "doc/**/*"
   - ".markdownlint.json"
+  - "scripts/lint-doc.sh"
 
 .frontend-dependency-patterns: &frontend-dependency-patterns
   - "{package.json,yarn.lock}"
+  - "config/webpack.config.js"
+  - "config/helpers/*.js"
 
 .frontend-patterns: &frontend-patterns
   - "{package.json,yarn.lock}"
@@ -155,8 +158,14 @@
   - "{,ee/}{,spec/}lib/{,ee/}gitlab/database{,_spec}.rb"
   - "{,ee/}{,spec/}lib/{,ee/}gitlab/background_migration/**/*"
   - "{,ee/}{,spec/}lib/{,ee/}gitlab/background_migration{,_spec}.rb"
+  - "{,ee/}spec/support/helpers/database/**/*"
   - "config/prometheus/common_metrics.yml"  # Used by Gitlab::DatabaseImporters::CommonMetrics::Importer
   - "{,ee/}app/models/project_statistics.rb"  # Used to calculate sizes in migration specs
+
+.db-library-patterns: &db-library-patterns
+  - "{,ee/}{,spec/}lib/{,ee/}gitlab/database/**/*"
+  - "{,ee/}{,spec/}lib/{,ee/}gitlab/database{,_spec}.rb"
+  - "{,ee/}spec/support/helpers/database/**/*"
 
 .backstage-patterns: &backstage-patterns
   - "Dangerfile"
@@ -349,7 +358,11 @@
       changes: *docs-patterns
       when: on_success
 
-.docs:rules:graphql-reference-verify:
+##################
+# GraphQL rules  #
+##################
+
+.graphql:rules:graphql-verify:
   rules:
     - <<: *if-not-ee
       when: never
@@ -503,6 +516,19 @@
       when: never
     - <<: *if-merge-request
       changes: *ci-patterns
+      when: never
+    - <<: *if-merge-request
+      changes: *db-patterns
+
+.rails:rules:ee-and-foss-mr-with-migration:
+  rules:
+    - <<: *if-merge-request
+      changes: *db-patterns
+    - <<: *if-merge-request-title-run-all-rspec
+
+.rails:rules:db:gitlabcom-database-testing:
+  rules:
+    - if: '$GITLABCOM_DATABASE_TESTING_TRIGGER_TOKEN == null'
       when: never
     - <<: *if-merge-request
       changes: *db-patterns
@@ -765,6 +791,11 @@
     - <<: *if-merge-request-title-as-if-foss
       changes: *code-backstage-patterns
 
+.rails:rules:ee-and-foss-db-library-code:
+  rules:
+    - changes: *db-library-patterns
+    - <<: *if-merge-request-title-run-all-rspec
+
 .rails:rules:ee-mr-and-master-only:
   rules:
     - <<: *if-not-ee
@@ -825,6 +856,13 @@
     - <<: *if-merge-request
       changes: *code-backstage-patterns
 
+.rails:rules:deprecations:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-master-schedule-nightly
+    - <<: *if-merge-request-title-run-all-rspec
+
 .rails:rules:rspec-coverage:
   rules:
     - <<: *if-not-ee
@@ -841,6 +879,7 @@
     - <<: *if-not-ee
       when: never
     - <<: *if-master-schedule-2-hourly
+      allow_failure: true
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:master-schedule-nightly--code-backstage:

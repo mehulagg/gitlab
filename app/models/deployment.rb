@@ -109,6 +109,20 @@ class Deployment < ApplicationRecord
         Deployments::ExecuteHooksWorker.perform_async(id)
       end
     end
+
+    after_transition any => any - [:skipped] do |deployment, transition|
+      next if transition.loopback?
+
+      deployment.run_after_commit do
+        ::JiraConnect::SyncDeploymentsWorker.perform_async(id)
+      end
+    end
+  end
+
+  after_create unless: :importing? do |deployment|
+    run_after_commit do
+      ::JiraConnect::SyncDeploymentsWorker.perform_async(deployment.id)
+    end
   end
 
   enum status: {
@@ -334,6 +348,13 @@ class Deployment < ApplicationRecord
 
   def ref_path
     File.join(environment.ref_path, 'deployments', iid.to_s)
+  end
+
+  def equal_to?(params)
+    ref == params[:ref] &&
+      tag == params[:tag] &&
+      sha == params[:sha] &&
+      status == params[:status]
   end
 
   private

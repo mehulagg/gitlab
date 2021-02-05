@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 ---
@@ -96,7 +96,7 @@ sudo -u git -H git checkout v$(</home/git/gitlab/GITLAB_PAGES_VERSION)
 sudo -u git -H make
 ```
 
-### 8. Install/Update `gitlab-elasticsearch-indexer` **(STARTER ONLY)**
+### 8. Install/Update `gitlab-elasticsearch-indexer` **(PREMIUM SELF)**
 
 Please follow the [install instruction](../integration/elasticsearch.md#installing-elasticsearch).
 

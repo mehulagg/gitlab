@@ -62,7 +62,7 @@ export const generateReportGroup = ({ status = 'some-status', numberOfLicenses =
   status,
   name: `${status} group-name`,
   description: `${status} group-description`,
-  licenses: range(numberOfLicenses).map(i => ({
+  licenses: range(numberOfLicenses).map((i) => ({
     name: `${status} license-name-${i}`,
     status,
   })),

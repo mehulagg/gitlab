@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Serverless
+# Serverless **(CORE)**
 
 > Introduced in GitLab 11.5.
 
@@ -450,7 +450,6 @@ To run a function locally:
 
 > Introduced in GitLab 11.5.
 
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
 Serverless applications are an alternative to [serverless functions](#deploying-functions).
 They're useful in scenarios where an existing runtime does not meet the needs of
 an application, such as one written in a language that has no runtime available.
@@ -561,7 +560,6 @@ Or:
 By default, a GitLab serverless deployment is served over `http`. To serve
 over `https`, you must manually obtain and install TLS certificates.
 
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
 The simplest way to accomplish this is to use Certbot to
 [manually obtain Let's Encrypt certificates](https://knative.dev/docs/serving/using-a-tls-cert/#using-certbot-to-manually-obtain-let-s-encrypt-certificates).
 Certbot is a free, open source software tool for automatically using Let’s Encrypt

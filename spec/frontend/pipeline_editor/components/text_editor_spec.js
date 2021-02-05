@@ -1,44 +1,120 @@
 import { shallowMount } from '@vue/test-utils';
-import EditorLite from '~/vue_shared/components/editor_lite.vue';
-import { mockCiYml } from '../mock_data';
 
+import { EDITOR_READY_EVENT } from '~/editor/constants';
 import TextEditor from '~/pipeline_editor/components/text_editor.vue';
+import {
+  mockCiConfigPath,
+  mockCiYml,
+  mockCommitSha,
+  mockProjectPath,
+  mockProjectNamespace,
+} from '../mock_data';
 
-describe('~/pipeline_editor/components/text_editor.vue', () => {
+describe('Pipeline Editor | Text editor component', () => {
   let wrapper;
-  const editorReadyListener = jest.fn();
 
-  const createComponent = (attrs = {}, mountFn = shallowMount) => {
+  let editorReadyListener;
+  let mockUse;
+  let mockRegisterCiSchema;
+
+  const MockEditorLite = {
+    template: '<div/>',
+    props: ['value', 'fileName'],
+    mounted() {
+      this.$emit(EDITOR_READY_EVENT);
+    },
+    methods: {
+      getEditor: () => ({
+        use: mockUse,
+        registerCiSchema: mockRegisterCiSchema,
+      }),
+    },
+  };
+
+  const createComponent = (opts = {}, mountFn = shallowMount) => {
     wrapper = mountFn(TextEditor, {
+      provide: {
+        projectPath: mockProjectPath,
+        projectNamespace: mockProjectNamespace,
+        ciConfigPath: mockCiConfigPath,
+      },
       attrs: {
         value: mockCiYml,
-        ...attrs,
+      },
+      // Simulate graphQL client query result
+      data() {
+        return {
+          commitSha: mockCommitSha,
+        };
       },
       listeners: {
-        'editor-ready': editorReadyListener,
+        [EDITOR_READY_EVENT]: editorReadyListener,
       },
+      stubs: {
+        EditorLite: MockEditorLite,
+      },
+      ...opts,
     });
   };
 
-  const findEditor = () => wrapper.find(EditorLite);
+  const findEditor = () => wrapper.findComponent(MockEditorLite);
 
-  it('contains an editor', () => {
-    createComponent();
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
 
-    expect(findEditor().exists()).toBe(true);
+    mockUse.mockClear();
+    mockRegisterCiSchema.mockClear();
   });
 
-  it('editor contains the value provided', () => {
-    expect(findEditor().props('value')).toBe(mockCiYml);
+  describe('template', () => {
+    beforeEach(() => {
+      editorReadyListener = jest.fn();
+      mockUse = jest.fn();
+      mockRegisterCiSchema = jest.fn();
+
+      createComponent();
+    });
+
+    it('contains an editor', () => {
+      expect(findEditor().exists()).toBe(true);
+    });
+
+    it('editor contains the value provided', () => {
+      expect(findEditor().props('value')).toBe(mockCiYml);
+    });
+
+    it('editor is configured for the CI config path', () => {
+      expect(findEditor().props('fileName')).toBe(mockCiConfigPath);
+    });
+
+    it('bubbles up events', () => {
+      findEditor().vm.$emit(EDITOR_READY_EVENT);
+
+      expect(editorReadyListener).toHaveBeenCalled();
+    });
   });
 
-  it('editor is configured for .yml', () => {
-    expect(findEditor().props('fileName')).toBe('*.yml');
-  });
+  describe('register CI schema', () => {
+    beforeEach(async () => {
+      createComponent();
 
-  it('bubbles up events', () => {
-    findEditor().vm.$emit('editor-ready');
+      // Since the editor will have already mounted, the event will have fired.
+      // To ensure we properly test this, we clear the mock and re-remit the event.
+      mockRegisterCiSchema.mockClear();
+      mockUse.mockClear();
 
-    expect(editorReadyListener).toHaveBeenCalled();
+      findEditor().vm.$emit(EDITOR_READY_EVENT);
+    });
+
+    it('configures editor with syntax highlight', async () => {
+      expect(mockUse).toHaveBeenCalledTimes(1);
+      expect(mockRegisterCiSchema).toHaveBeenCalledTimes(1);
+      expect(mockRegisterCiSchema).toHaveBeenCalledWith({
+        projectNamespace: mockProjectNamespace,
+        projectPath: mockProjectPath,
+        ref: mockCommitSha,
+      });
+    });
   });
 });

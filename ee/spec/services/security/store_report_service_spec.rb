@@ -62,8 +62,26 @@ RSpec.describe Security::StoreReportService, '#execute' do
         expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
       end
 
-      it 'inserts all vulnerabilties' do
+      it 'inserts all vulnerabilities' do
         expect { subject }.to change { Vulnerability.count }.by(findings)
+      end
+    end
+
+    context 'when report data includes all raw_metadata' do
+      let(:trait) { :dependency_scanning_remediation }
+
+      it 'inserts top level finding data', :aggregate_failures do
+        subject
+
+        finding = Vulnerabilities::Finding.last
+        finding.raw_metadata = nil
+
+        expect(finding.metadata).to be_blank
+        expect(finding.cve).not_to be_nil
+        expect(finding.description).not_to be_nil
+        expect(finding.location).not_to be_nil
+        expect(finding.message).not_to be_nil
+        expect(finding.solution).not_to be_nil
       end
     end
 
@@ -152,7 +170,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       let!(:existing_vulnerability) { create(:vulnerability, report_type: report_type, project: project) }
 
       it 'marks the vulnerability as resolved on default branch' do
-        expect { subject }.to change { existing_vulnerability.reload[:resolved_on_default_branch] }.from(false).to(true)
+        expect { subject }.to change { existing_vulnerability.reload.resolved_on_default_branch }.from(false).to(true)
       end
     end
 
@@ -162,7 +180,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'marks the vulnerability as not resolved on default branch' do
-        expect { subject }.to change { vulnerability.reload[:resolved_on_default_branch] }.from(true).to(false)
+        expect { subject }.to change { vulnerability.reload.resolved_on_default_branch }.from(true).to(false)
       end
     end
 
@@ -252,6 +270,18 @@ RSpec.describe Security::StoreReportService, '#execute' do
             expect(Security::AutoFixWorker).not_to receive(:perform_async)
 
             subject
+          end
+        end
+
+        context 'when security setting is not created' do
+          before do
+            project.security_setting.destroy!
+            project.reload
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+            expect(subject[:status]).to eq(:success)
           end
         end
       end

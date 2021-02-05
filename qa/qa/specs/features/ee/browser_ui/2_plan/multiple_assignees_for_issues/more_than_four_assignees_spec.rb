@@ -39,7 +39,7 @@ module QA
         end
       end
 
-      it 'shows the first three assignees and a +n sign in the issues list', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/580' do
+      it 'shows the first three assignees and a +n sign in the issues list', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1149' do
         project.visit!
 
         Page::Project::Menu.perform(&:click_issues)
@@ -51,7 +51,7 @@ module QA
         end
       end
 
-      it 'shows the first five assignees and a +n more link in the issue page', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/582' do
+      it 'shows the first five assignees and a +n more link in the issue page', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1150' do
         @issue.visit!
 
         Page::Project::Issue::Show.perform do |show|

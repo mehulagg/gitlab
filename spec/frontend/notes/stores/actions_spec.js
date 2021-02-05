@@ -1,5 +1,6 @@
-import { TEST_HOST } from 'spec/test_constants';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { TEST_HOST } from 'spec/test_constants';
+import testAction from 'helpers/vuex_action_helper';
 import Api from '~/api';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import * as actions from '~/notes/stores/actions';
@@ -8,8 +9,11 @@ import * as mutationTypes from '~/notes/stores/mutation_types';
 import * as notesConstants from '~/notes/constants';
 import createStore from '~/notes/stores';
 import mrWidgetEventHub from '~/vue_merge_request_widget/event_hub';
-import testAction from '../../helpers/vuex_action_helper';
-import { resetStore } from '../helpers';
+import axios from '~/lib/utils/axios_utils';
+import * as utils from '~/notes/stores/utils';
+import updateIssueConfidentialMutation from '~/sidebar/components/confidential/mutations/update_issue_confidential.mutation.graphql';
+import updateMergeRequestLockMutation from '~/sidebar/components/lock/mutations/update_merge_request_lock.mutation.graphql';
+import updateIssueLockMutation from '~/sidebar/components/lock/mutations/update_issue_lock.mutation.graphql';
 import {
   discussionMock,
   notesDataMock,
@@ -18,11 +22,7 @@ import {
   individualNote,
   batchSuggestionsInfoMock,
 } from '../mock_data';
-import axios from '~/lib/utils/axios_utils';
-import * as utils from '~/notes/stores/utils';
-import updateIssueConfidentialMutation from '~/sidebar/components/confidential/mutations/update_issue_confidential.mutation.graphql';
-import updateMergeRequestLockMutation from '~/sidebar/components/lock/mutations/update_merge_request_lock.mutation.graphql';
-import updateIssueLockMutation from '~/sidebar/components/lock/mutations/update_issue_lock.mutation.graphql';
+import { resetStore } from '../helpers';
 
 const TEST_ERROR_MESSAGE = 'Test error message';
 jest.mock('~/flash');
@@ -53,7 +53,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('setNotesData', () => {
-    it('should set received notes data', done => {
+    it('should set received notes data', (done) => {
       testAction(
         actions.setNotesData,
         notesDataMock,
@@ -66,7 +66,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('setNoteableData', () => {
-    it('should set received issue data', done => {
+    it('should set received issue data', (done) => {
       testAction(
         actions.setNoteableData,
         noteableDataMock,
@@ -79,7 +79,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('setUserData', () => {
-    it('should set received user data', done => {
+    it('should set received user data', (done) => {
       testAction(
         actions.setUserData,
         userDataMock,
@@ -92,7 +92,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('setLastFetchedAt', () => {
-    it('should set received timestamp', done => {
+    it('should set received timestamp', (done) => {
       testAction(
         actions.setLastFetchedAt,
         'timestamp',
@@ -105,7 +105,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('setInitialNotes', () => {
-    it('should set initial notes', done => {
+    it('should set initial notes', (done) => {
       testAction(
         actions.setInitialNotes,
         [individualNote],
@@ -118,7 +118,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('setTargetNoteHash', () => {
-    it('should set target note hash', done => {
+    it('should set target note hash', (done) => {
       testAction(
         actions.setTargetNoteHash,
         'hash',
@@ -131,7 +131,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('toggleDiscussion', () => {
-    it('should toggle discussion', done => {
+    it('should toggle discussion', (done) => {
       testAction(
         actions.toggleDiscussion,
         { discussionId: discussionMock.id },
@@ -144,7 +144,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('expandDiscussion', () => {
-    it('should expand discussion', done => {
+    it('should expand discussion', (done) => {
       testAction(
         actions.expandDiscussion,
         { discussionId: discussionMock.id },
@@ -157,7 +157,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('collapseDiscussion', () => {
-    it('should commit collapse discussion', done => {
+    it('should commit collapse discussion', (done) => {
       testAction(
         actions.collapseDiscussion,
         { discussionId: discussionMock.id },
@@ -175,7 +175,7 @@ describe('Actions Notes Store', () => {
     });
 
     describe('closeMergeRequest', () => {
-      it('sets state as closed', done => {
+      it('sets state as closed', (done) => {
         store
           .dispatch('closeIssuable', { notesData: { closeIssuePath: '' } })
           .then(() => {
@@ -188,7 +188,7 @@ describe('Actions Notes Store', () => {
     });
 
     describe('reopenMergeRequest', () => {
-      it('sets state as reopened', done => {
+      it('sets state as reopened', (done) => {
         store
           .dispatch('reopenIssuable', { notesData: { reopenIssuePath: '' } })
           .then(() => {
@@ -203,7 +203,7 @@ describe('Actions Notes Store', () => {
 
   describe('emitStateChangedEvent', () => {
     it('emits an event on the document', () => {
-      document.addEventListener('issuable_vue_app:change', event => {
+      document.addEventListener('issuable_vue_app:change', (event) => {
         expect(event.detail.data).toEqual({ id: '1', state: 'closed' });
         expect(event.detail.isClosed).toEqual(false);
       });
@@ -213,7 +213,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('toggleStateButtonLoading', () => {
-    it('should set loading as true', done => {
+    it('should set loading as true', (done) => {
       testAction(
         actions.toggleStateButtonLoading,
         true,
@@ -224,7 +224,7 @@ describe('Actions Notes Store', () => {
       );
     });
 
-    it('should set loading as false', done => {
+    it('should set loading as false', (done) => {
       testAction(
         actions.toggleStateButtonLoading,
         false,
@@ -237,11 +237,11 @@ describe('Actions Notes Store', () => {
   });
 
   describe('toggleIssueLocalState', () => {
-    it('sets issue state as closed', done => {
+    it('sets issue state as closed', (done) => {
       testAction(actions.toggleIssueLocalState, 'closed', {}, [{ type: 'CLOSE_ISSUE' }], [], done);
     });
 
-    it('sets issue state as reopened', done => {
+    it('sets issue state as reopened', (done) => {
       testAction(
         actions.toggleIssueLocalState,
         'reopened',
@@ -291,30 +291,63 @@ describe('Actions Notes Store', () => {
           [
             { type: 'updateOrCreateNotes', payload: discussionMock.notes },
             { type: 'startTaskList' },
+            { type: 'updateResolvableDiscussionsCounts' },
           ],
         ));
+    });
+
+    describe('paginated notes feature flag enabled', () => {
+      const lastFetchedAt = '12358';
+
+      beforeEach(() => {
+        window.gon = { features: { paginatedNotes: true } };
+
+        axiosMock.onGet(notesDataMock.notesPath).replyOnce(200, {
+          notes: discussionMock.notes,
+          more: false,
+          last_fetched_at: lastFetchedAt,
+        });
+      });
+
+      afterEach(() => {
+        window.gon = null;
+      });
+
+      it('should dispatch setFetchingState, setNotesFetchedState, setLoadingState, updateOrCreateNotes, startTaskList and commit SET_LAST_FETCHED_AT', () => {
+        return testAction(
+          actions.fetchData,
+          null,
+          { notesData: notesDataMock, isFetching: true },
+          [{ type: 'SET_LAST_FETCHED_AT', payload: lastFetchedAt }],
+          [
+            { type: 'setFetchingState', payload: false },
+            { type: 'setNotesFetchedState', payload: true },
+            { type: 'setLoadingState', payload: false },
+            { type: 'updateOrCreateNotes', payload: discussionMock.notes },
+            { type: 'startTaskList' },
+            { type: 'updateResolvableDiscussionsCounts' },
+          ],
+        );
+      });
     });
   });
 
   describe('poll', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       axiosMock
         .onGet(notesDataMock.notesPath)
         .reply(200, { notes: [], last_fetched_at: '123456' }, { 'poll-interval': '1000' });
 
-      store
-        .dispatch('setNotesData', notesDataMock)
-        .then(done)
-        .catch(done.fail);
+      store.dispatch('setNotesData', notesDataMock).then(done).catch(done.fail);
     });
 
-    it('calls service with last fetched state', done => {
+    it('calls service with last fetched state', (done) => {
       store
         .dispatch('poll')
         .then(() => {
           jest.advanceTimersByTime(2);
         })
-        .then(() => new Promise(resolve => requestAnimationFrame(resolve)))
+        .then(() => new Promise((resolve) => requestAnimationFrame(resolve)))
         .then(() => {
           expect(store.state.lastFetchedAt).toBe('123456');
 
@@ -322,7 +355,7 @@ describe('Actions Notes Store', () => {
         })
         .then(
           () =>
-            new Promise(resolve => {
+            new Promise((resolve) => {
               requestAnimationFrame(resolve);
             }),
         )
@@ -340,7 +373,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('setNotesFetchedState', () => {
-    it('should set notes fetched state', done => {
+    it('should set notes fetched state', (done) => {
       testAction(
         actions.setNotesFetchedState,
         true,
@@ -367,7 +400,7 @@ describe('Actions Notes Store', () => {
       document.body.setAttribute('data-page', '');
     });
 
-    it('commits DELETE_NOTE and dispatches updateMergeRequestWidget', done => {
+    it('commits DELETE_NOTE and dispatches updateMergeRequestWidget', (done) => {
       const note = { path: endpoint, id: 1 };
 
       testAction(
@@ -392,7 +425,7 @@ describe('Actions Notes Store', () => {
       );
     });
 
-    it('dispatches removeDiscussionsFromDiff on merge request page', done => {
+    it('dispatches removeDiscussionsFromDiff on merge request page', (done) => {
       const note = { path: endpoint, id: 1 };
 
       document.body.setAttribute('data-page', 'projects:merge_requests:show');
@@ -438,7 +471,7 @@ describe('Actions Notes Store', () => {
       document.body.setAttribute('data-page', '');
     });
 
-    it('dispatches removeNote', done => {
+    it('dispatches removeNote', (done) => {
       const note = { path: endpoint, id: 1 };
 
       testAction(
@@ -471,7 +504,7 @@ describe('Actions Notes Store', () => {
         axiosMock.onAny().reply(200, res);
       });
 
-      it('commits ADD_NEW_NOTE and dispatches updateMergeRequestWidget', done => {
+      it('commits ADD_NEW_NOTE and dispatches updateMergeRequestWidget', (done) => {
         testAction(
           actions.createNewNote,
           { endpoint: `${TEST_HOST}`, data: {} },
@@ -507,7 +540,7 @@ describe('Actions Notes Store', () => {
         axiosMock.onAny().replyOnce(200, res);
       });
 
-      it('does not commit ADD_NEW_NOTE or dispatch updateMergeRequestWidget', done => {
+      it('does not commit ADD_NEW_NOTE or dispatch updateMergeRequestWidget', (done) => {
         testAction(
           actions.createNewNote,
           { endpoint: `${TEST_HOST}`, data: {} },
@@ -530,7 +563,7 @@ describe('Actions Notes Store', () => {
     });
 
     describe('as note', () => {
-      it('commits UPDATE_NOTE and dispatches updateMergeRequestWidget', done => {
+      it('commits UPDATE_NOTE and dispatches updateMergeRequestWidget', (done) => {
         testAction(
           actions.toggleResolveNote,
           { endpoint: `${TEST_HOST}`, isResolved: true, discussion: false },
@@ -555,7 +588,7 @@ describe('Actions Notes Store', () => {
     });
 
     describe('as discussion', () => {
-      it('commits UPDATE_DISCUSSION and dispatches updateMergeRequestWidget', done => {
+      it('commits UPDATE_DISCUSSION and dispatches updateMergeRequestWidget', (done) => {
         testAction(
           actions.toggleResolveNote,
           { endpoint: `${TEST_HOST}`, isResolved: true, discussion: true },
@@ -591,7 +624,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('setCommentsDisabled', () => {
-    it('should set comments disabled state', done => {
+    it('should set comments disabled state', (done) => {
       testAction(
         actions.setCommentsDisabled,
         true,
@@ -604,7 +637,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('updateResolvableDiscussionsCounts', () => {
-    it('commits UPDATE_RESOLVABLE_DISCUSSIONS_COUNTS', done => {
+    it('commits UPDATE_RESOLVABLE_DISCUSSIONS_COUNTS', (done) => {
       testAction(
         actions.updateResolvableDiscussionsCounts,
         null,
@@ -617,7 +650,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('convertToDiscussion', () => {
-    it('commits CONVERT_TO_DISCUSSION with noteId', done => {
+    it('commits CONVERT_TO_DISCUSSION with noteId', (done) => {
       const noteId = 'dummy-note-id';
       testAction(
         actions.convertToDiscussion,
@@ -721,7 +754,7 @@ describe('Actions Notes Store', () => {
   describe('replyToDiscussion', () => {
     const payload = { endpoint: TEST_HOST, data: {} };
 
-    it('updates discussion if response contains disussion', done => {
+    it('updates discussion if response contains disussion', (done) => {
       const discussion = { notes: [] };
       axiosMock.onAny().reply(200, { discussion });
 
@@ -741,7 +774,7 @@ describe('Actions Notes Store', () => {
       );
     });
 
-    it('adds a reply to a discussion', done => {
+    it('adds a reply to a discussion', (done) => {
       const res = {};
       axiosMock.onAny().reply(200, res);
 
@@ -759,7 +792,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('removeConvertedDiscussion', () => {
-    it('commits CONVERT_TO_DISCUSSION with noteId', done => {
+    it('commits CONVERT_TO_DISCUSSION with noteId', (done) => {
       const noteId = 'dummy-id';
       testAction(
         actions.removeConvertedDiscussion,
@@ -784,7 +817,7 @@ describe('Actions Notes Store', () => {
       };
     });
 
-    it('when unresolved, dispatches action', done => {
+    it('when unresolved, dispatches action', (done) => {
       testAction(
         actions.resolveDiscussion,
         { discussionId },
@@ -804,8 +837,8 @@ describe('Actions Notes Store', () => {
       );
     });
 
-    it('when resolved, does nothing', done => {
-      getters.isDiscussionResolved = id => id === discussionId;
+    it('when resolved, does nothing', (done) => {
+      getters.isDiscussionResolved = (id) => id === discussionId;
 
       testAction(
         actions.resolveDiscussion,
@@ -826,7 +859,7 @@ describe('Actions Notes Store', () => {
       const res = { errors: { something: ['went wrong'] } };
       const error = { message: 'Unprocessable entity', response: { data: res } };
 
-      it('throws an error', done => {
+      it('throws an error', (done) => {
         actions
           .saveNote(
             {
@@ -836,7 +869,7 @@ describe('Actions Notes Store', () => {
             payload,
           )
           .then(() => done.fail('Expected error to be thrown!'))
-          .catch(err => {
+          .catch((err) => {
             expect(err).toBe(error);
             expect(Flash).not.toHaveBeenCalled();
           })
@@ -849,7 +882,7 @@ describe('Actions Notes Store', () => {
       const res = { errors: { base: ['something went wrong'] } };
       const error = { message: 'Unprocessable entity', response: { data: res } };
 
-      it('sets flash alert using errors.base message', done => {
+      it('sets flash alert using errors.base message', (done) => {
         actions
           .saveNote(
             {
@@ -858,7 +891,7 @@ describe('Actions Notes Store', () => {
             },
             { ...payload, flashContainer },
           )
-          .then(resp => {
+          .then((resp) => {
             expect(resp.hasFlash).toBe(true);
             expect(Flash).toHaveBeenCalledWith(
               'Your comment could not be submitted because something went wrong',
@@ -875,7 +908,7 @@ describe('Actions Notes Store', () => {
     describe('if response contains no errors', () => {
       const res = { valid: true };
 
-      it('returns the response', done => {
+      it('returns the response', (done) => {
         actions
           .saveNote(
             {
@@ -884,7 +917,7 @@ describe('Actions Notes Store', () => {
             },
             payload,
           )
-          .then(data => {
+          .then((data) => {
             expect(data).toBe(res);
             expect(Flash).not.toHaveBeenCalled();
           })
@@ -917,11 +950,10 @@ describe('Actions Notes Store', () => {
         .catch(done.fail);
     };
 
-    it('when service success, commits and resolves discussion', done => {
+    it('when service success, commits and resolves discussion', (done) => {
       testSubmitSuggestion(done, () => {
         expect(commit.mock.calls).toEqual([
           [mutationTypes.SET_RESOLVING_DISCUSSION, true],
-          [mutationTypes.APPLY_SUGGESTION, { discussionId, noteId, suggestionId }],
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],
         ]);
 
@@ -934,7 +966,7 @@ describe('Actions Notes Store', () => {
       });
     });
 
-    it('when service fails, flashes error message', done => {
+    it('when service fails, flashes error message', (done) => {
       const response = { response: { data: { message: TEST_ERROR_MESSAGE } } };
 
       Api.applySuggestion.mockReturnValue(Promise.reject(response));
@@ -949,7 +981,7 @@ describe('Actions Notes Store', () => {
       });
     });
 
-    it('when service fails, and no error message available, uses default message', done => {
+    it('when service fails, and no error message available, uses default message', (done) => {
       const response = { response: 'foo' };
 
       Api.applySuggestion.mockReturnValue(Promise.reject(response));
@@ -968,7 +1000,7 @@ describe('Actions Notes Store', () => {
       });
     });
 
-    it('when resolve discussion fails, fail gracefully', done => {
+    it('when resolve discussion fails, fail gracefully', (done) => {
       dispatch.mockReturnValue(Promise.reject());
 
       testSubmitSuggestion(done, () => {
@@ -999,13 +1031,11 @@ describe('Actions Notes Store', () => {
         .catch(done.fail);
     };
 
-    it('when service succeeds, commits, resolves discussions, resets batch and applying batch state', done => {
+    it('when service succeeds, commits, resolves discussions, resets batch and applying batch state', (done) => {
       testSubmitSuggestionBatch(done, () => {
         expect(commit.mock.calls).toEqual([
           [mutationTypes.SET_APPLYING_BATCH_STATE, true],
           [mutationTypes.SET_RESOLVING_DISCUSSION, true],
-          [mutationTypes.APPLY_SUGGESTION, batchSuggestionsInfo[0]],
-          [mutationTypes.APPLY_SUGGESTION, batchSuggestionsInfo[1]],
           [mutationTypes.CLEAR_SUGGESTION_BATCH],
           [mutationTypes.SET_APPLYING_BATCH_STATE, false],
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],
@@ -1022,7 +1052,7 @@ describe('Actions Notes Store', () => {
       });
     });
 
-    it('when service fails, flashes error message, resets applying batch state', done => {
+    it('when service fails, flashes error message, resets applying batch state', (done) => {
       const response = { response: { data: { message: TEST_ERROR_MESSAGE } } };
 
       Api.applySuggestionBatch.mockReturnValue(Promise.reject(response));
@@ -1040,7 +1070,7 @@ describe('Actions Notes Store', () => {
       });
     });
 
-    it('when service fails, and no error message available, uses default message', done => {
+    it('when service fails, and no error message available, uses default message', (done) => {
       const response = { response: 'foo' };
 
       Api.applySuggestionBatch.mockReturnValue(Promise.reject(response));
@@ -1062,15 +1092,13 @@ describe('Actions Notes Store', () => {
       });
     });
 
-    it('when resolve discussions fails, fails gracefully, resets batch and applying batch state', done => {
+    it('when resolve discussions fails, fails gracefully, resets batch and applying batch state', (done) => {
       dispatch.mockReturnValue(Promise.reject());
 
       testSubmitSuggestionBatch(done, () => {
         expect(commit.mock.calls).toEqual([
           [mutationTypes.SET_APPLYING_BATCH_STATE, true],
           [mutationTypes.SET_RESOLVING_DISCUSSION, true],
-          [mutationTypes.APPLY_SUGGESTION, batchSuggestionsInfo[0]],
-          [mutationTypes.APPLY_SUGGESTION, batchSuggestionsInfo[1]],
           [mutationTypes.CLEAR_SUGGESTION_BATCH],
           [mutationTypes.SET_APPLYING_BATCH_STATE, false],
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],
@@ -1084,7 +1112,7 @@ describe('Actions Notes Store', () => {
   describe('addSuggestionInfoToBatch', () => {
     const suggestionInfo = batchSuggestionsInfoMock[0];
 
-    it("adds a suggestion's info to the current batch", done => {
+    it("adds a suggestion's info to the current batch", (done) => {
       testAction(
         actions.addSuggestionInfoToBatch,
         suggestionInfo,
@@ -1099,7 +1127,7 @@ describe('Actions Notes Store', () => {
   describe('removeSuggestionInfoFromBatch', () => {
     const suggestionInfo = batchSuggestionsInfoMock[0];
 
-    it("removes a suggestion's info the current batch", done => {
+    it("removes a suggestion's info the current batch", (done) => {
       testAction(
         actions.removeSuggestionInfoFromBatch,
         suggestionInfo.suggestionId,
@@ -1139,7 +1167,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('setDiscussionSortDirection', () => {
-    it('calls the correct mutation with the correct args', done => {
+    it('calls the correct mutation with the correct args', (done) => {
       testAction(
         actions.setDiscussionSortDirection,
         { direction: notesConstants.DESC, persist: false },
@@ -1157,7 +1185,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('setSelectedCommentPosition', () => {
-    it('calls the correct mutation with the correct args', done => {
+    it('calls the correct mutation with the correct args', (done) => {
       testAction(
         actions.setSelectedCommentPosition,
         {},
@@ -1178,7 +1206,7 @@ describe('Actions Notes Store', () => {
     };
 
     describe('if response contains no errors', () => {
-      it('dispatches requestDeleteDescriptionVersion', done => {
+      it('dispatches requestDeleteDescriptionVersion', (done) => {
         axiosMock.onDelete(endpoint).replyOnce(200);
         testAction(
           actions.softDeleteDescriptionVersion,
@@ -1201,7 +1229,7 @@ describe('Actions Notes Store', () => {
 
     describe('if response contains errors', () => {
       const errorMessage = 'Request failed with status code 503';
-      it('dispatches receiveDeleteDescriptionVersionError and throws an error', done => {
+      it('dispatches receiveDeleteDescriptionVersionError and throws an error', (done) => {
         axiosMock.onDelete(endpoint).replyOnce(503);
         testAction(
           actions.softDeleteDescriptionVersion,
@@ -1236,7 +1264,7 @@ describe('Actions Notes Store', () => {
   });
 
   describe('updateAssignees', () => {
-    it('update the assignees state', done => {
+    it('update the assignees state', (done) => {
       testAction(
         actions.updateAssignees,
         [userDataMock.id],
@@ -1351,13 +1379,26 @@ describe('Actions Notes Store', () => {
   });
 
   describe('updateDiscussionPosition', () => {
-    it('update the assignees state', done => {
+    it('update the assignees state', (done) => {
       const updatedPosition = { discussionId: 1, position: { test: true } };
       testAction(
         actions.updateDiscussionPosition,
         updatedPosition,
         { state: { discussions: [] } },
         [{ type: mutationTypes.UPDATE_DISCUSSION_POSITION, payload: updatedPosition }],
+        [],
+        done,
+      );
+    });
+  });
+
+  describe('setFetchingState', () => {
+    it('commits SET_NOTES_FETCHING_STATE', (done) => {
+      testAction(
+        actions.setFetchingState,
+        true,
+        null,
+        [{ type: mutationTypes.SET_NOTES_FETCHING_STATE, payload: true }],
         [],
         done,
       );

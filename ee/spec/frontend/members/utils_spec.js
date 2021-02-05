@@ -1,12 +1,18 @@
-import { member as memberMock } from 'jest/members/mock_data';
-import { generateBadges, canOverride } from 'ee/members/utils';
+import {
+  member as memberMock,
+  directMember,
+  inheritedMember,
+  membersJsonString,
+  members,
+} from 'jest/members/mock_data';
+import { generateBadges, canOverride, parseDataAttributes } from 'ee/members/utils';
 
 describe('Members Utils', () => {
   describe('generateBadges', () => {
     it('has correct properties for each badge', () => {
       const badges = generateBadges(memberMock, true);
 
-      badges.forEach(badge => {
+      badges.forEach((badge) => {
         expect(badge).toEqual(
           expect.objectContaining({
             show: expect.any(Boolean),
@@ -30,11 +36,43 @@ describe('Members Utils', () => {
 
   describe('canOverride', () => {
     test.each`
-      member                                  | expected
-      ${{ ...memberMock, canOverride: true }} | ${true}
-      ${memberMock}                           | ${false}
+      member                                        | expected
+      ${{ ...directMember, canOverride: true }}     | ${true}
+      ${{ ...inheritedMember, canOverride: true }}  | ${false}
+      ${{ ...directMember, canOverride: false }}    | ${false}
+      ${{ ...inheritedMember, canOverride: false }} | ${false}
     `('returns $expected', ({ member, expected }) => {
       expect(canOverride(member)).toBe(expected);
+    });
+  });
+
+  describe('group member utils', () => {
+    describe('parseDataAttributes', () => {
+      let el;
+
+      beforeEach(() => {
+        el = document.createElement('div');
+        el.setAttribute('data-members', membersJsonString);
+        el.setAttribute('data-source-id', '234');
+        el.setAttribute('data-can-manage-members', 'true');
+        el.setAttribute(
+          'data-ldap-override-path',
+          '/groups/ldap-group/-/group_members/:id/override',
+        );
+      });
+
+      afterEach(() => {
+        el = null;
+      });
+
+      it('correctly parses the data attributes', () => {
+        expect(parseDataAttributes(el)).toEqual({
+          members,
+          sourceId: 234,
+          canManageMembers: true,
+          ldapOverridePath: '/groups/ldap-group/-/group_members/:id/override',
+        });
+      });
     });
   });
 });

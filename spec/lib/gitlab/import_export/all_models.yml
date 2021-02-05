@@ -87,6 +87,7 @@ label:
 - merge_requests
 - priorities
 - epic_board_labels
+- epic_lists
 milestone:
 - group
 - project
@@ -107,6 +108,7 @@ snippets:
 - user_mentions
 - snippet_repository
 - statistics
+- repository_storage_moves
 releases:
 - author
 - project
@@ -144,6 +146,7 @@ merge_requests:
 - merge_user
 - merge_request_diffs
 - merge_request_diff
+- merge_head_diff
 - merge_request_context_commits
 - merge_request_context_commit_diff_files
 - events
@@ -523,7 +526,6 @@ project:
 - designs
 - project_aliases
 - external_pull_requests
-- alerts_service
 - grafana_integration
 - remove_source_branch_after_merge
 - deleting_user
@@ -543,7 +545,7 @@ project:
 - daily_build_group_report_results
 - jira_imports
 - compliance_framework_setting
-- compliance_management_frameworks
+- compliance_management_framework
 - metrics_users_starred_dashboards
 - alert_management_alerts
 - repository_storage_moves
@@ -559,6 +561,8 @@ project:
 - alert_management_http_integrations
 - exported_protected_branches
 - incident_management_oncall_schedules
+- debian_distributions
+- merge_request_metrics
 award_emoji:
 - awardable
 - user
@@ -587,6 +591,7 @@ lfs_file_locks:
 project_badges:
 - project
 metrics:
+- target_project
 - merge_request
 - latest_closed_by
 - merged_by
@@ -721,6 +726,7 @@ epic:
 - user_mentions
 - note_authors
 - boards_epic_user_preferences
+- epic_board_positions
 epic_issue:
 - epic
 - issue

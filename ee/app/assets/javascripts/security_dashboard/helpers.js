@@ -5,14 +5,14 @@ import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { s__, __ } from '~/locale';
 
-const parseOptions = obj =>
+const parseOptions = (obj) =>
   Object.entries(obj).map(([id, name]) => ({ id: id.toUpperCase(), name }));
 
-export const mapProjects = projects =>
-  projects.map(p => ({ id: p.id.split('/').pop(), name: p.name }));
+export const mapProjects = (projects) =>
+  projects.map((p) => ({ id: p.id.split('/').pop(), name: p.name }));
 
 const stateOptions = parseOptions(VULNERABILITY_STATES);
-const defaultStateOptions = stateOptions.filter(x => ['DETECTED', 'CONFIRMED'].includes(x.id));
+const defaultStateOptions = stateOptions.filter((x) => ['DETECTED', 'CONFIRMED'].includes(x.id));
 
 export const stateFilter = {
   name: s__('SecurityReports|Status'),
@@ -38,7 +38,21 @@ export const scannerFilter = {
   defaultOptions: [],
 };
 
-export const getProjectFilter = projects => {
+export const activityOptions = {
+  NO_ACTIVITY: { id: 'NO_ACTIVITY', name: s__('SecurityReports|No activity') },
+  WITH_ISSUES: { id: 'WITH_ISSUES', name: s__('SecurityReports|With issues') },
+  NO_LONGER_DETECTED: { id: 'NO_LONGER_DETECTED', name: s__('SecurityReports|No longer detected') },
+};
+
+export const activityFilter = {
+  name: s__('Reports|Activity'),
+  id: 'activity',
+  options: Object.values(activityOptions),
+  allOption: BASE_FILTERS.activity,
+  defaultOptions: [],
+};
+
+export const getProjectFilter = (projects) => {
   return {
     name: s__('SecurityReports|Project'),
     id: 'projectId',
@@ -92,7 +106,7 @@ export const getFormattedSummary = (rawSummary = {}) => {
     return name ? [name, scanSummary] : null;
   });
   // Filter out keys that could not be matched with any translation and are thus considered invalid
-  return formattedEntries.filter(entry => entry !== null);
+  return formattedEntries.filter((entry) => entry !== null);
 };
 
 /**
@@ -103,7 +117,7 @@ export const getFormattedSummary = (rawSummary = {}) => {
  * @param {Object} pageInfo
  * @returns {Object}
  */
-export const preparePageInfo = pageInfo => {
+export const preparePageInfo = (pageInfo) => {
   return { ...pageInfo, hasNextPage: Boolean(pageInfo?.endCursor) };
 };
 

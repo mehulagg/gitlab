@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module VulnerabilitiesHelper
-  FINDING_FIELDS = %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner].freeze
+  FINDING_FIELDS = %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid].freeze
 
   def vulnerability_details_json(vulnerability, pipeline)
     vulnerability_details(vulnerability, pipeline).to_json
@@ -15,7 +15,8 @@ module VulnerabilitiesHelper
       new_issue_url: new_issue_url_for(vulnerability),
       create_jira_issue_url: create_jira_issue_url_for(vulnerability),
       related_jira_issues_path: project_integrations_jira_issues_path(vulnerability.project, vulnerability_ids: [vulnerability.id]),
-      has_mr: !!vulnerability.finding.merge_request_feedback.try(:merge_request_iid),
+      jira_integration_settings_path: edit_project_service_path(vulnerability.project, ::JiraService),
+      has_mr: !!vulnerability.finding.merge_request_feedback.try(:merge_request_id),
       create_mr_url: create_vulnerability_feedback_merge_request_path(vulnerability.finding.project),
       discussions_url: discussions_project_security_vulnerability_path(vulnerability.project, vulnerability),
       notes_url: project_security_vulnerability_notes_path(vulnerability.project, vulnerability),
@@ -63,14 +64,7 @@ module VulnerabilitiesHelper
 
   def vulnerability_finding_data(vulnerability)
     data = Vulnerabilities::FindingSerializer.new(current_user: current_user).represent(vulnerability.finding, only: FINDING_FIELDS)
-
-    if data[:location]['file']
-      branch = vulnerability.finding.pipelines&.last&.sha || vulnerability.project.default_branch
-      path = project_blob_path(vulnerability.project, tree_join(branch, data[:location]['file']))
-
-      data[:location]['blob_path'] = path
-    end
-
+    data[:location].merge!('blob_path' => vulnerability.blob_path).compact!
     data
   end
 end

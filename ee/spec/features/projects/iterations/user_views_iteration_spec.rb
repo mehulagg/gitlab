@@ -10,22 +10,21 @@ RSpec.describe 'User views iteration' do
   let_it_be(:user) { create(:group_member, :maintainer, user: create(:user), group: group).user }
   let_it_be(:iteration) { create(:iteration, :skip_future_date_validation, iid: 1, id: 2, group: group, title: 'Correct Iteration', start_date: now - 1.day, due_date: now) }
   let_it_be(:other_iteration) { create(:iteration, :skip_future_date_validation, iid: 2, id: 1, group: group, title: 'Wrong Iteration', start_date: now - 4.days, due_date: now - 3.days) }
-  let_it_be(:issue) { create(:issue, project: project, iteration: iteration) }
-  let_it_be(:assigned_issue) { create(:issue, project: project_2, iteration: iteration, assignees: [user]) }
+  let_it_be(:label1) { create(:label, project: project) }
+  let_it_be(:issue) { create(:issue, project: project, iteration: iteration, labels: [label1]) }
+  let_it_be(:assigned_issue) { create(:issue, project: project, iteration: iteration, assignees: [user], labels: [label1]) }
   let_it_be(:closed_issue) { create(:closed_issue, project: project, iteration: iteration) }
-  let_it_be(:other_issue) { create(:issue, project: project, iteration: other_iteration) }
+  let_it_be(:other_iteration_issue) { create(:issue, project: project, iteration: other_iteration) }
+  let_it_be(:other_project_issue) { create(:issue, project: project_2, iteration: iteration, assignees: [user], labels: [label1]) }
 
-  context 'with license' do
+  context 'with license', :js do
     before do
       stub_licensed_features(iterations: true)
       sign_in(user)
+      visit project_iterations_inherited_path(project, iteration.id)
     end
 
-    context 'view an iteration', :js do
-      before do
-        visit project_iterations_inherited_path(project, iteration.id)
-      end
-
+    context 'view an iteration' do
       it 'shows iteration info' do
         aggregate_failures 'shows iteration info and dates' do
           expect(page).to have_content(iteration.title)
@@ -46,15 +45,20 @@ RSpec.describe 'User views iteration' do
 
         aggregate_failures 'shows only issues that are part of the project' do
           expect(page).to have_content(issue.title)
-          expect(page).not_to have_content(assigned_issue.title)
+          expect(page).to have_content(assigned_issue.title)
           expect(page).to have_content(closed_issue.title)
-          expect(page).not_to have_content(other_issue.title)
+          expect(page).to have_no_content(other_project_issue.title)
+          expect(page).to have_no_content(other_iteration_issue.title)
         end
 
         aggregate_failures 'hides action dropdown for editing the iteration' do
           expect(page).not_to have_button('Actions')
         end
       end
+    end
+
+    context 'when grouping by label' do
+      it_behaves_like 'iteration report group by label'
     end
   end
 

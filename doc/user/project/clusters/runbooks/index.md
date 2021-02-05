@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Runbooks
+# Runbooks **(CORE)**
 
 Runbooks are a collection of documented procedures that explain how to
 carry out a particular process, be it starting, stopping, debugging,
@@ -103,7 +103,7 @@ the components outlined above and the pre-loaded demo runbook.
       Enter these values, maintaining the single quotes as follows:
 
       ```sql
-      PRIVATE_TOKEN = 'n671WNGecHugsdEDPsyo'
+      PRIVATE_TOKEN = '<your_access_token>'
       PROJECT_ID = '1234567'
       ```
 

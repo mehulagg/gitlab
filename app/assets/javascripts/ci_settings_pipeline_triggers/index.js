@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import TriggersList from './components/triggers_list.vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import TriggersList from './components/triggers_list.vue';
 
-const parseJsonArray = triggers => {
+const parseJsonArray = (triggers) => {
   try {
     return convertObjectPropsToCamelCase(JSON.parse(triggers), { deep: true });
   } catch {

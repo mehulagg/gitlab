@@ -1,28 +1,13 @@
 import Vuex from 'vuex';
 import { shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { setTestTimeout } from 'helpers/timeout';
 import { GlDropdownItem } from '@gitlab/ui';
+import { setTestTimeout } from 'helpers/timeout';
 import invalidUrl from '~/lib/utils/invalid_url';
 import axios from '~/lib/utils/axios_utils';
 import AlertWidget from '~/monitoring/components/alert_widget.vue';
 
 import DashboardPanel from '~/monitoring/components/dashboard_panel.vue';
-import {
-  mockAlert,
-  mockLogsHref,
-  mockLogsPath,
-  mockNamespace,
-  mockNamespacedData,
-  mockTimeRange,
-} from '../mock_data';
-import { dashboardProps, graphData, graphDataEmpty } from '../fixture_data';
-import {
-  anomalyGraphData,
-  singleStatGraphData,
-  heatmapGraphData,
-  barGraphData,
-} from '../graph_data';
 
 import { panelTypes } from '~/monitoring/constants';
 
@@ -37,6 +22,21 @@ import MonitorStackedColumnChart from '~/monitoring/components/charts/stacked_co
 
 import { createStore, monitoringDashboard } from '~/monitoring/stores';
 import { createStore as createEmbedGroupStore } from '~/monitoring/stores/embed_group';
+import {
+  anomalyGraphData,
+  singleStatGraphData,
+  heatmapGraphData,
+  barGraphData,
+} from '../graph_data';
+import { dashboardProps, graphData, graphDataEmpty } from '../fixture_data';
+import {
+  mockAlert,
+  mockLogsHref,
+  mockLogsPath,
+  mockNamespace,
+  mockNamespacedData,
+  mockTimeRange,
+} from '../mock_data';
 
 const mocks = {
   $toast: {
@@ -57,7 +57,7 @@ describe('Dashboard Panel', () => {
   const findTitle = () => wrapper.find({ ref: 'graphTitle' });
   const findCtxMenu = () => wrapper.find({ ref: 'contextualMenu' });
   const findMenuItems = () => wrapper.findAll(GlDropdownItem);
-  const findMenuItemByText = text => findMenuItems().filter(i => i.text() === text);
+  const findMenuItemByText = (text) => findMenuItems().filter((i) => i.text() === text);
   const findAlertsWidget = () => wrapper.find(AlertWidget);
 
   const createWrapper = (props, { mountFn = shallowMount, ...options } = {}) => {
@@ -82,7 +82,7 @@ describe('Dashboard Panel', () => {
     });
   };
 
-  const setMetricsSavedToDb = val =>
+  const setMetricsSavedToDb = (val) =>
     monitoringDashboard.getters.metricsSavedToDb.mockReturnValue(val);
 
   beforeEach(() => {
@@ -214,7 +214,7 @@ describe('Dashboard Panel', () => {
     });
 
     describe('Supports different panel types', () => {
-      const dataWithType = type => {
+      const dataWithType = (type) => {
         return {
           ...graphData,
           type,
@@ -777,11 +777,7 @@ describe('Dashboard Panel', () => {
         await wrapper.vm.$nextTick();
 
         expect(findRunbookLinks().length).toBe(1);
-        expect(
-          findRunbookLinks()
-            .at(0)
-            .attributes('href'),
-        ).toBe(invalidUrl);
+        expect(findRunbookLinks().at(0).attributes('href')).toBe(invalidUrl);
       });
     });
   });

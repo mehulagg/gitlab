@@ -61,10 +61,10 @@ must be enabled, only the following providers can be used:
 - [Google Cloud Storage](#google-cloud-storage-gcs)
 - [Azure Blob storage](#azure-blob-storage)
 
-Background upload isn't supported with the consolidated object storage
-configuration. We recommend enabling direct upload mode because it doesn't
-require a shared folder, and [this setting may become the
-default](https://gitlab.com/gitlab-org/gitlab/-/issues/27331).
+When consolidated object storage is used, direct upload is enabled
+automatically. Background upload is not supported. For storage-specific
+configuration, [direct upload may become the default](https://gitlab.com/gitlab-org/gitlab/-/issues/27331)
+because it does not require a shared folder.
 
 Consolidated object storage configuration can't be used for backups or
 Mattermost. See the [full table for a complete list](#storage-specific-configuration).
@@ -232,7 +232,7 @@ The connection settings match those provided by [fog-aws](https://github.com/fog
 | `aws_secret_access_key` | AWS credentials, or compatible | |
 | `aws_signature_version` | AWS signature version to use. `2` or `4` are valid options. Digital Ocean Spaces and other providers may need `2`. | `4` |
 | `enable_signature_v4_streaming` | Set to `true` to enable HTTP chunked transfers with [AWS v4 signatures](https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html). Oracle Cloud S3 needs this to be `false`. | `true` |
-| `region` | AWS region | us-east-1 |
+| `region` | AWS region. | |
 | `host` | S3 compatible host for when not using AWS, e.g. `localhost` or `storage.example.com`. HTTPS and port 443 is assumed. | `s3.amazonaws.com` |
 | `endpoint` | Can be used when configuring an S3 compatible service such as [MinIO](https://min.io), by entering a URL such as `http://127.0.0.1:9000`. This takes precedence over `host`. | (optional) |
 | `path_style` | Set to `true` to use `host/bucket_name/object` style paths instead of `bucket_name.host/object`. Leave as `false` for AWS S3. | `false` |
@@ -543,7 +543,7 @@ supported by consolidated configuration form, refer to the following guides:
 
 |Object storage type|Supported by consolidated configuration?|
 |-------------------|----------------------------------------|
-| [Backups](../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage)|No|
+| [Backups](../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage) | No |
 | [Job artifacts](job_artifacts.md#using-object-storage) including archived job logs | Yes |
 | [LFS objects](lfs/index.md#storing-lfs-objects-in-remote-object-storage) | Yes |
 | [Uploads](uploads.md#using-object-storage) | Yes |
@@ -551,17 +551,17 @@ supported by consolidated configuration form, refer to the following guides:
 | [Merge request diffs](merge_request_diffs.md#using-object-storage) | Yes |
 | [Mattermost](https://docs.mattermost.com/administration/config-settings.html#file-storage)| No |
 | [Packages](packages/index.md#using-object-storage) (optional feature) | Yes |
-| [Dependency Proxy](packages/dependency_proxy.md#using-object-storage) (optional feature) **(PREMIUM ONLY)** | Yes |
-| [Pseudonymizer](pseudonymizer.md#configuration) (optional feature) **(ULTIMATE ONLY)** | No |
+| [Dependency Proxy](packages/dependency_proxy.md#using-object-storage) (optional feature) **(PREMIUM SELF)** | Yes |
+| [Pseudonymizer](pseudonymizer.md#configuration) (optional feature) **(ULTIMATE SELF)** | No |
 | [Autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
 | [Terraform state files](terraform_state.md#using-object-storage) | Yes |
 | [GitLab Pages content](pages/index.md#using-object-storage) | Yes |
 
-### Other alternatives to filesystem storage
+### Other alternatives to file system storage
 
 If you're working to [scale out](reference_architectures/index.md) your GitLab implementation,
 or add fault tolerance and redundancy, you may be
-looking at removing dependencies on block or network filesystems.
+looking at removing dependencies on block or network file systems.
 See the following additional guides and
 [note that Pages requires disk storage](#gitlab-pages-requires-nfs):
 

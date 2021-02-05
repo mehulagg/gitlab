@@ -74,7 +74,7 @@ describe('parseProjects', () => {
       totalRepositorySizeExcess: 5000,
     });
 
-    projects.forEach(project => {
+    projects.forEach((project) => {
       expect(project).toMatchObject({
         totalCalculatedUsedStorage: expect.any(Number),
         totalCalculatedStorageLimit: expect.any(Number),

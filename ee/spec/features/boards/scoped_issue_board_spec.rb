@@ -271,6 +271,30 @@ RSpec.describe 'Scoped issue boards', :js do
         end
       end
 
+      context 'iteration' do
+        context 'board not scoped to iteration' do
+          it 'sets board to current iteration' do
+            expect(page).to have_selector('.board-card', count: 3)
+
+            update_board_scope('current_iteration', true)
+
+            expect(page).to have_selector('.board-card', count: 0)
+          end
+        end
+
+        context 'board scoped to current iteration' do
+          it 'removes current iteration from board' do
+            create_board_scope('current_iteration', true)
+
+            expect(page).to have_selector('.board-card', count: 0)
+
+            update_board_scope('current_iteration', false)
+
+            expect(page).to have_selector('.board-card', count: 3)
+          end
+        end
+      end
+
       context 'labels' do
         let!(:label_1) { create(:label, project: project, name: 'Label 1') }
         let!(:label_2) { create(:label, project: project, name: 'Label 2') }
@@ -526,19 +550,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
     click_button 'Expand'
 
-    page.within(".#{filter}") do
-      click_button 'Edit'
-
-      if value.is_a?(Array)
-        value.each { |value| click_link value }
-      elsif filter == 'weight'
-        page.within(".dropdown-menu") do
-          click_button value
-        end
-      else
-        click_link value
-      end
-    end
+    click_value(filter, value)
 
     click_on_board_modal
 
@@ -547,6 +559,31 @@ RSpec.describe 'Scoped issue boards', :js do
     wait_for_requests
 
     expect(page).not_to have_selector('.board-list-loading')
+  end
+
+  def click_value(filter, value)
+    if filter == 'current_iteration'
+      current_iteration_checkbox = 'Scope board to current iteration'
+      if value
+        check(current_iteration_checkbox)
+      else
+        uncheck(current_iteration_checkbox)
+      end
+    else
+      page.within(".#{filter}") do
+        click_button 'Edit'
+
+        if value.is_a?(Array)
+          value.each { |value| click_link value }
+        elsif filter == 'weight'
+          page.within(".dropdown-menu") do
+            click_button value
+          end
+        else
+          click_link value
+        end
+      end
+    end
   end
 
   def click_on_create_new_board
@@ -561,13 +598,7 @@ RSpec.describe 'Scoped issue boards', :js do
   def update_board_scope(filter, value)
     edit_board.click
 
-    page.within(".#{filter}") do
-      click_button 'Edit'
-
-      page.within(".dropdown-menu") do
-        filter == 'weight' ? click_button(value) : click_link(value)
-      end
-    end
+    click_value(filter, value)
 
     click_on_board_modal
 

@@ -130,20 +130,14 @@ describe('Visual Review App Link', () => {
         });
 
         it('with review app split dropdown', () => {
-          expect(
-            wrapper
-              .find(GlDropdown)
-              .find(`a[href='${propsData.link}']`)
-              .exists(),
-          ).toEqual(true);
+          expect(wrapper.find(GlDropdown).find(`a[href='${propsData.link}']`).exists()).toEqual(
+            true,
+          );
         });
 
         it('contains a list of changed pages', () => {
           expect(
-            wrapper
-              .find(GlDropdown)
-              .find(`a[href='${propsData.link}/example-path']`)
-              .exists(),
+            wrapper.find(GlDropdown).find(`a[href='${propsData.link}/example-path']`).exists(),
           ).toEqual(true);
         });
 

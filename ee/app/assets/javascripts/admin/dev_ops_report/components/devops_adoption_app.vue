@@ -11,9 +11,6 @@ import {
 import * as Sentry from '~/sentry/wrapper';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
-import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
-import DevopsAdoptionSegmentModal from './devops_adoption_segment_modal.vue';
-import DevopsAdoptionTable from './devops_adoption_table.vue';
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
@@ -22,6 +19,9 @@ import {
   DATE_TIME_FORMAT,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
 } from '../constants';
+import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
+import DevopsAdoptionSegmentModal from './devops_adoption_segment_modal.vue';
+import DevopsAdoptionTable from './devops_adoption_table.vue';
 
 export default {
   name: 'DevopsAdoptionApp',
@@ -74,7 +74,7 @@ export default {
       return Boolean(this.devopsAdoptionSegments?.nodes?.length);
     },
     hasLoadingError() {
-      return Object.values(this.errors).some(error => error === true);
+      return Object.values(this.errors).some((error) => error === true);
     },
     timestamp() {
       return dateformat(
@@ -128,7 +128,7 @@ export default {
             this.isLoadingGroups = false;
           }
         })
-        .catch(error => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
+        .catch((error) => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
     },
     setSelectedSegment(segment) {
       this.selectedSegment = segment;

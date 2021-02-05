@@ -26,7 +26,6 @@ RSpec.describe Ci::CompareSecurityReportsService do
       it 'reports new vulnerabilities' do
         expect(subject[:status]).to eq(:parsed)
         expect(subject[:data]['added'].count).to eq(4)
-        expect(subject[:data]['existing'].count).to eq(0)
         expect(subject[:data]['fixed'].count).to eq(0)
       end
     end
@@ -40,7 +39,7 @@ RSpec.describe Ci::CompareSecurityReportsService do
       end
 
       it 'populates fields based on current_user' do
-        payload = subject[:data]['existing'].first
+        payload = subject[:data]['added'].first
 
         expect(payload['create_vulnerability_feedback_issue_path']).to be_present
         expect(payload['create_vulnerability_feedback_merge_request_path']).to be_present
@@ -52,10 +51,6 @@ RSpec.describe Ci::CompareSecurityReportsService do
       it 'reports fixed vulnerability' do
         expect(subject[:data]['added'].count).to eq(1)
         expect(subject[:data]['added'].first['identifiers']).to include(a_hash_including('external_id' => 'CVE-2017-5946'))
-      end
-
-      it 'reports existing dependency vulenerabilities' do
-        expect(subject[:data]['existing'].count).to eq(3)
       end
 
       it 'reports fixed dependency scanning vulnerabilities' do
@@ -97,10 +92,9 @@ RSpec.describe Ci::CompareSecurityReportsService do
       let_it_be(:base_pipeline) { create(:ee_ci_pipeline) }
       let_it_be(:head_pipeline) { create(:ee_ci_pipeline, :with_container_scanning_report, project: project) }
 
-      it 'reports new, existing and fixed vulnerabilities' do
+      it 'reports new and fixed vulnerabilities' do
         expect(subject[:status]).to eq(:parsed)
         expect(subject[:data]['added'].count).to eq(8)
-        expect(subject[:data]['existing'].count).to eq(0)
         expect(subject[:data]['fixed'].count).to eq(0)
       end
     end
@@ -121,10 +115,6 @@ RSpec.describe Ci::CompareSecurityReportsService do
       it 'reports new vulnerability' do
         expect(subject[:data]['added'].count).to eq(1)
         expect(subject[:data]['added'].first['identifiers']).to include(a_hash_including('external_id' => 'CVE-2017-15650'))
-      end
-
-      it 'reports existing container vulnerabilities' do
-        expect(subject[:data]['existing'].count).to eq(0)
       end
 
       it 'reports fixed container scanning vulnerabilities' do
@@ -149,10 +139,9 @@ RSpec.describe Ci::CompareSecurityReportsService do
       let_it_be(:base_pipeline) { create(:ee_ci_pipeline) }
       let_it_be(:head_pipeline) { create(:ee_ci_pipeline, :with_dast_report, project: project) }
 
-      it 'reports the new vulnerabilities, while not changing the counts of existing and fixed vulnerabilities' do
+      it 'reports the new vulnerabilities, while not changing the counts of fixed vulnerabilities' do
         expect(subject[:status]).to eq(:parsed)
         expect(subject[:data]['added'].count).to eq(20)
-        expect(subject[:data]['existing'].count).to eq(0)
         expect(subject[:data]['fixed'].count).to eq(0)
       end
     end
@@ -175,11 +164,6 @@ RSpec.describe Ci::CompareSecurityReportsService do
       it 'reports new vulnerability' do
         expect(subject[:data]['added'].count).to eq(1)
         expect(subject[:data]['added'].last['identifiers']).to include(a_hash_including('name' => 'CWE-201'))
-      end
-
-      it 'reports existing DAST vulnerabilities' do
-        expect(subject[:data]['existing'].count).to eq(1)
-        expect(subject[:data]['existing'].last['identifiers']).to include(a_hash_including('name' => 'CWE-120'))
       end
 
       it 'reports fixed DAST vulnerabilities' do
@@ -214,7 +198,6 @@ RSpec.describe Ci::CompareSecurityReportsService do
       it 'reports new vulnerabilities' do
         expect(subject[:status]).to eq(:parsed)
         expect(subject[:data]['added'].count).to eq(33)
-        expect(subject[:data]['existing'].count).to eq(0)
         expect(subject[:data]['fixed'].count).to eq(0)
       end
     end
@@ -224,7 +207,7 @@ RSpec.describe Ci::CompareSecurityReportsService do
       let_it_be(:head_pipeline) { create(:ee_ci_pipeline, :with_sast_feature_branch, project: project) }
 
       it 'populates fields based on current_user' do
-        payload = subject[:data]['existing'].first
+        payload = subject[:data]['added'].first
 
         expect(payload['create_vulnerability_feedback_issue_path']).to be_present
         expect(payload['create_vulnerability_feedback_merge_request_path']).to be_present
@@ -236,10 +219,6 @@ RSpec.describe Ci::CompareSecurityReportsService do
       it 'reports new vulnerability' do
         expect(subject[:data]['added'].count).to eq(1)
         expect(subject[:data]['added'].first['identifiers']).to include(a_hash_including('name' => 'CWE-120'))
-      end
-
-      it 'reports existing sast vulnerabilities' do
-        expect(subject[:data]['existing'].count).to eq(29)
       end
 
       it 'reports fixed sast vulnerabilities' do
@@ -267,7 +246,6 @@ RSpec.describe Ci::CompareSecurityReportsService do
       it 'reports new vulnerabilities' do
         expect(subject[:status]).to eq(:parsed)
         expect(subject[:data]['added'].count).to eq(1)
-        expect(subject[:data]['existing'].count).to eq(0)
         expect(subject[:data]['fixed'].count).to eq(0)
       end
     end
@@ -277,17 +255,13 @@ RSpec.describe Ci::CompareSecurityReportsService do
       let_it_be(:head_pipeline) { create(:ee_ci_pipeline, :with_secret_detection_feature_branch, project: project) }
 
       it 'populates fields based on current_user' do
-        payload = subject[:data]['existing'].first
+        payload = subject[:data]['added'].first
         expect(payload).to be_nil
         expect(service.current_user).to eq(current_user)
       end
 
       it 'does not report any new vulnerability' do
         expect(subject[:data]['added'].count).to eq(0)
-      end
-
-      it 'removes existing secret_detection vulnerabilities' do
-        expect(subject[:data]['existing'].count).to eq(0)
       end
 
       it 'reports fixed secret_detection vulnerabilities' do

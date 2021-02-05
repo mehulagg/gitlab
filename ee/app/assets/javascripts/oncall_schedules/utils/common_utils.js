@@ -10,9 +10,20 @@ import { sprintf, __ } from '~/locale';
  *
  * @returns {String}
  */
-export const getFormattedTimezone = tz => {
+export const getFormattedTimezone = (tz) => {
   return sprintf(__('(UTC %{offset}) %{timezone}'), {
     offset: tz.formatted_offset,
     timezone: `${tz.abbr} ${tz.name}`,
   });
+};
+
+/**
+ * Returns `true` for non-empty string, otherwise returns `false`
+ *
+ * @param {String} startDate
+ *
+ * @returns {Boolean}
+ */
+export const isNameFieldValid = (nameField) => {
+  return Boolean(nameField?.length);
 };

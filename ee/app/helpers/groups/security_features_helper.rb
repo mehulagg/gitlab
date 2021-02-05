@@ -27,7 +27,14 @@ module Groups::SecurityFeaturesHelper
       group_security_compliance_dashboard_path(group)
     elsif group_level_credentials_inventory_available?(group)
       group_security_credentials_path(group)
+    elsif group_level_audit_events_available?(group)
+      group_audit_events_path(group)
     end
+  end
+
+  def group_level_audit_events_available?(group)
+    group.feature_available?(:audit_events) &&
+      can?(current_user, :read_group_audit_events, group)
   end
 
   def group_level_security_dashboard_data(group)
@@ -37,7 +44,8 @@ module Groups::SecurityFeaturesHelper
       no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
       empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
       dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
-      vulnerabilities_export_endpoint: expose_path(api_v4_security_groups_vulnerability_exports_path(id: group.id))
+      vulnerabilities_export_endpoint: expose_path(api_v4_security_groups_vulnerability_exports_path(id: group.id)),
+      scanners: VulnerabilityScanners::ListService.new(group).execute.to_json
     }
   end
 end

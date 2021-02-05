@@ -9,6 +9,7 @@ query epicChildEpics(
   $dueDate: Time
   $labelName: [String!] = []
   $authorUsername: String = ""
+  $confidential: Boolean
   $search: String = ""
 ) {
   group(fullPath: $fullPath) {
@@ -25,6 +26,7 @@ query epicChildEpics(
         endDate: $dueDate
         labelName: $labelName
         authorUsername: $authorUsername
+        confidential: $confidential
         search: $search
       ) {
         edges {

@@ -1,9 +1,9 @@
 import API from 'ee/api';
-import * as types from './mutation_types';
 import { __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import * as types from './mutation_types';
 
 export const setProjectId = ({ commit }, projectId) => commit(types.SET_PROJECT_ID, projectId);
 
@@ -29,7 +29,7 @@ export const fetchMergeRequests = ({ commit, state, rootState }) => {
   };
 
   return API.codeReviewAnalytics(params)
-    .then(response => {
+    .then((response) => {
       const { headers, data } = response;
       const normalizedHeaders = normalizeHeaders(headers);
       commit(types.RECEIVE_MERGE_REQUESTS_SUCCESS, {

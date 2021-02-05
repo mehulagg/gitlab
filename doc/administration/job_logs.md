@@ -50,7 +50,7 @@ these steps to move the logs to a new location without losing any data.
    Jobs in progress are not affected, based on how [data flow](#data-flow) works.
 
    ```ruby
-   sidekiq['experimental_queue_selector'] = true
+   sidekiq['queue_selector'] = true
    sidekiq['queue_groups'] = [
      "feature_category!=continuous_integration"
    ]
@@ -73,7 +73,7 @@ these steps to move the logs to a new location without losing any data.
    ```
 
    Use `--ignore-existing` so you don't override new job logs with older versions of the same log.
-1. Unpause continuous integration data processing by editing `/etc/gitlab/gitlab.rb` and removing the `sidekiq` setting you updated earlier.
+1. Resume continuous integration data processing by editing `/etc/gitlab/gitlab.rb` and removing the `sidekiq` setting you updated earlier.
 1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the
    changes to take effect.
 1. Remove the old job logs storage location:
@@ -185,7 +185,7 @@ Feature.enable(:ci_enable_live_trace)
 ```
 
 NOTE:
-The transition period is handled gracefully. Upcoming logs are 
+The transition period is handled gracefully. Upcoming logs are
 generated with the incremental architecture, and on-going logs stay with the
 legacy architecture, which means that on-going logs aren't forcibly
 re-generated with the incremental architecture.

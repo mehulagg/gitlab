@@ -140,6 +140,20 @@ RSpec.describe IterationsFinder do
 
           expect(subject).to match_array([iteration])
         end
+
+        describe 'when one of the timeframe params are missing' do
+          it 'does not filter by timeframe if start_date is missing' do
+            only_end_date = described_class.new(user, params.merge(end_date: 1.year.ago)).execute
+
+            expect(only_end_date).to eq(subject)
+          end
+
+          it 'does not filter by timeframe if end_date is missing' do
+            only_start_date = described_class.new(user, params.merge(start_date: 1.year.from_now)).execute
+
+            expect(only_start_date).to eq(subject)
+          end
+        end
       end
     end
 

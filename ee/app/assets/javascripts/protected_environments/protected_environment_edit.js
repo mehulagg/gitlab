@@ -3,8 +3,8 @@ import { find } from 'lodash';
 import AccessDropdown from '~/projects/settings/access_dropdown';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 import { __ } from '~/locale';
+import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 
 export default class ProtectedEnvironmentEdit {
   constructor(options) {
@@ -60,7 +60,7 @@ export default class ProtectedEnvironmentEdit {
       .then(({ data }) => {
         this.hasChanges = false;
 
-        Object.keys(ACCESS_LEVELS).forEach(level => {
+        Object.keys(ACCESS_LEVELS).forEach((level) => {
           const accessLevelName = ACCESS_LEVELS[level];
 
           // The data coming from server will be the new persisted *state* for each dropdown
@@ -75,7 +75,7 @@ export default class ProtectedEnvironmentEdit {
   }
 
   setSelectedItemsToDropdown(items = [], dropdownName) {
-    const itemsToAdd = items.map(currentItem => {
+    const itemsToAdd = items.map((currentItem) => {
       if (currentItem.user_id) {
         // Do this only for users for now
         // get the current data for selected items

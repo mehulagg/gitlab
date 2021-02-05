@@ -48,6 +48,11 @@ Cop/StaticTranslationDefinition:
     - 'spec/**/*'
     - 'ee/spec/**/*'
 
+InternalAffairs/DeprecateCopHelper:
+  Enabled: true
+  Include:
+    - spec/rubocop/**/*.rb
+
 Lint/LastKeywordArgument:
   Enabled: true
   Safe: false
@@ -73,21 +78,7 @@ Style/AccessModifierDeclarations:
 # Frozen String Literal
 Style/FrozenStringLiteralComment:
   Enabled: true
-  Exclude:
-    - 'config.ru'
-    - 'Dangerfile'
-    - 'Gemfile'
-    - 'Rakefile'
-    - 'app/views/**/*'
-    - 'config/**/*'
-    - 'danger/**/*'
-    - 'db/**/*'
-    - 'ee/db/**/*'
-    - 'ee/lib/tasks/**/*'
-    - 'lib/tasks/**/*'
-    - 'qa/**/*'
-    - 'rubocop/**/*'
-    - 'scripts/**/*'
+  EnforcedStyle: always_true
 
 RSpec/FilePath:
   Exclude:
@@ -251,7 +242,7 @@ Gitlab/Json:
     - 'scripts/**/*'
     - 'lib/rspec_flaky/**/*'
     - 'lib/quality/**/*'
-    - 'lib/gitlab/danger/**/*'
+    - 'tooling/danger/**/*'
 
 Gitlab/AvoidUploadedFileFromParams:
   Enabled: true
@@ -320,6 +311,14 @@ RSpec/TimecopTravel:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
     - 'qa/spec/**/*.rb'
+
+RSpec/WebMockEnable:
+  Enabled: true
+  Include:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+  Exclude:
+    - 'spec/support/webmock.rb'
 
 Naming/PredicateName:
   Enabled: true
@@ -439,9 +438,6 @@ Graphql/Descriptions:
   Include:
     - 'app/graphql/**/*'
     - 'ee/app/graphql/**/*'
-
-RSpec/AnyInstanceOf:
-  Enabled: false
 
 # Cops for upgrade to gitlab-styles 3.1.0
 RSpec/ImplicitSubject:

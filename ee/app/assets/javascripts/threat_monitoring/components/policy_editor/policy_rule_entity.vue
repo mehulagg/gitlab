@@ -40,7 +40,7 @@ export default {
       const { value } = this;
       let entitiesList = [];
       if (value.includes(entity)) {
-        entitiesList = value.filter(e => e !== entity);
+        entitiesList = value.filter((e) => e !== entity);
       } else {
         entitiesList = [...value, entity];
       }
@@ -61,7 +61,7 @@ export default {
       return value.includes(entity);
     },
   },
-  entities: Object.keys(EntityTypes).map(type => ({
+  entities: Object.keys(EntityTypes).map((type) => ({
     value: EntityTypes[type],
     text: EntityTypes[type],
   })),

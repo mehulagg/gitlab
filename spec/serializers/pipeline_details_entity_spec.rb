@@ -10,8 +10,8 @@ RSpec.describe PipelineDetailsEntity do
     described_class.represent(pipeline, request: request)
   end
 
-  it 'inherrits from PipelineEntity' do
-    expect(described_class).to be < PipelineEntity
+  it 'inherits from PipelineEntity' do
+    expect(described_class).to be < Ci::PipelineEntity
   end
 
   before do
@@ -183,5 +183,7 @@ RSpec.describe PipelineDetailsEntity do
         expect(source_jobs[child_pipeline.id][:name]).to eq('child')
       end
     end
+
+    it_behaves_like 'public artifacts'
   end
 end

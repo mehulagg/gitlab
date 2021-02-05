@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Translate from '~/vue_shared/translate';
 import initLabels from '~/init_labels';
+import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import eventHub from '../event_hub';
 import PromoteLabelModal from '../components/promote_label_modal.vue';
 
@@ -19,7 +20,7 @@ const initLabelIndex = () => {
     }
   };
 
-  const onRequestStarted = labelUrl => {
+  const onRequestStarted = (labelUrl) => {
     const button = document.querySelector(
       `.js-promote-project-label-button[data-url="${labelUrl}"]`,
     );
@@ -46,10 +47,10 @@ const initLabelIndex = () => {
       eventHub.$on('promoteLabelModal.props', this.setModalProps);
       eventHub.$emit('promoteLabelModal.mounted');
 
-      promoteLabelButtons.forEach(button => {
+      promoteLabelButtons.forEach((button) => {
         button.removeAttribute('disabled');
         button.addEventListener('click', () => {
-          this.$root.$emit('bv::show::modal', 'promote-label-modal');
+          this.$root.$emit(BV_SHOW_MODAL, 'promote-label-modal');
           eventHub.$once('promoteLabelModal.requestStarted', onRequestStarted);
 
           this.setModalProps({
@@ -77,5 +78,4 @@ const initLabelIndex = () => {
     },
   });
 };
-
-document.addEventListener('DOMContentLoaded', initLabelIndex);
+initLabelIndex();

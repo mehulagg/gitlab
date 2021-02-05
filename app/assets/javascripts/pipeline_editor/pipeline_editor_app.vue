@@ -1,78 +1,59 @@
 <script>
-import { GlAlert, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
-import { mergeUrlParams, redirectTo, refreshCurrentPage } from '~/lib/utils/url_utility';
+import httpStatusCodes from '~/lib/utils/http_status';
 
-import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
-import CommitForm from './components/commit/commit_form.vue';
-import TextEditor from './components/text_editor.vue';
-
-import commitCiFileMutation from './graphql/mutations/commit_ci_file.mutation.graphql';
+import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
+import ConfirmUnsavedChangesDialog from './components/ui/confirm_unsaved_changes_dialog.vue';
+import {
+  COMMIT_FAILURE,
+  COMMIT_SUCCESS,
+  DEFAULT_FAILURE,
+  LOAD_FAILURE_NO_FILE,
+  LOAD_FAILURE_UNKNOWN,
+} from './constants';
 import getBlobContent from './graphql/queries/blob_content.graphql';
 import getCiConfigData from './graphql/queries/ci_config.graphql';
-
-const MR_SOURCE_BRANCH = 'merge_request[source_branch]';
-const MR_TARGET_BRANCH = 'merge_request[target_branch]';
-
-const COMMIT_FAILURE = 'COMMIT_FAILURE';
-const DEFAULT_FAILURE = 'DEFAULT_FAILURE';
-const LOAD_FAILURE_NO_FILE = 'LOAD_FAILURE_NO_FILE';
-const LOAD_FAILURE_NO_REF = 'LOAD_FAILURE_NO_REF';
-const LOAD_FAILURE_UNKNOWN = 'LOAD_FAILURE_UNKNOWN';
+import PipelineEditorHome from './pipeline_editor_home.vue';
 
 export default {
   components: {
-    CommitForm,
+    ConfirmUnsavedChangesDialog,
     GlAlert,
     GlLoadingIcon,
-    GlTab,
-    GlTabs,
-    PipelineGraph,
-    TextEditor,
+    PipelineEditorHome,
   },
-  props: {
-    projectPath: {
-      type: String,
-      required: true,
+  inject: {
+    ciConfigPath: {
+      default: '',
     },
     defaultBranch: {
-      type: String,
-      required: false,
       default: null,
     },
-    commitId: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    ciConfigPath: {
-      type: String,
-      required: true,
-    },
-    newMergeRequestPath: {
-      type: String,
-      required: true,
+    projectFullPath: {
+      default: '',
     },
   },
   data() {
     return {
       ciConfigData: {},
-      content: '',
-      contentModel: '',
-      currentTabIndex: 0,
-      editorIsReady: false,
+      // Success and failure state
       failureType: null,
       failureReasons: [],
-      isSaving: false,
+      initialCiFileContent: '',
+      lastCommittedContent: '',
+      currentCiFileContent: '',
       showFailureAlert: false,
+      showSuccessAlert: false,
+      successType: null,
     };
   },
   apollo: {
-    content: {
+    initialCiFileContent: {
       query: getBlobContent,
       variables() {
         return {
-          projectPath: this.projectPath,
+          projectPath: this.projectFullPath,
           path: this.ciConfigPath,
           ref: this.defaultBranch,
         };
@@ -81,7 +62,10 @@ export default {
         return data?.blobContent?.rawData;
       },
       result({ data }) {
-        this.contentModel = data?.blobContent?.rawData ?? '';
+        const fileContent = data?.blobContent?.rawData ?? '';
+
+        this.lastCommittedContent = fileContent;
+        this.currentCiFileContent = fileContent;
       },
       error(error) {
         this.handleBlobContentError(error);
@@ -90,16 +74,21 @@ export default {
     ciConfigData: {
       query: getCiConfigData,
       // If content is not loaded, we can't lint the data
-      skip: ({ contentModel }) => {
-        return !contentModel;
+      skip: ({ currentCiFileContent }) => {
+        return !currentCiFileContent;
       },
       variables() {
         return {
-          content: this.contentModel,
+          projectPath: this.projectFullPath,
+          content: this.currentCiFileContent,
         };
       },
       update(data) {
-        return data?.ciConfig ?? {};
+        const { ciConfig } = data || {};
+        const stageNodes = ciConfig?.stages?.nodes || [];
+        const stages = unwrapStagesWithNeeds(stageNodes);
+
+        return { ...ciConfig, stages };
       },
       error() {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
@@ -107,25 +96,25 @@ export default {
     },
   },
   computed: {
+    hasUnsavedChanges() {
+      return this.lastCommittedContent !== this.currentCiFileContent;
+    },
     isBlobContentLoading() {
-      return this.$apollo.queries.content.loading;
+      return this.$apollo.queries.initialCiFileContent.loading;
     },
-    isVisualizeTabActive() {
-      return this.currentTabIndex === 1;
+    isBlobContentError() {
+      return this.failureType === LOAD_FAILURE_NO_FILE;
     },
-    defaultCommitMessage() {
-      return sprintf(this.$options.i18n.defaultCommitMessage, { sourcePath: this.ciConfigPath });
+    isCiConfigDataLoading() {
+      return this.$apollo.queries.ciConfigData.loading;
     },
     failure() {
       switch (this.failureType) {
-        case LOAD_FAILURE_NO_REF:
-          return {
-            text: this.$options.errorTexts[LOAD_FAILURE_NO_REF],
-            variant: 'danger',
-          };
         case LOAD_FAILURE_NO_FILE:
           return {
-            text: this.$options.errorTexts[LOAD_FAILURE_NO_FILE],
+            text: sprintf(this.$options.errorTexts[LOAD_FAILURE_NO_FILE], {
+              filePath: this.ciConfigPath,
+            }),
             variant: 'danger',
           };
         case LOAD_FAILURE_UNKNOWN:
@@ -145,94 +134,80 @@ export default {
           };
       }
     },
+    success() {
+      switch (this.successType) {
+        case COMMIT_SUCCESS:
+          return {
+            text: this.$options.successTexts[COMMIT_SUCCESS],
+            variant: 'info',
+          };
+        default:
+          return null;
+      }
+    },
   },
   i18n: {
-    defaultCommitMessage: __('Update %{sourcePath} file'),
     tabEdit: s__('Pipelines|Write pipeline configuration'),
     tabGraph: s__('Pipelines|Visualize'),
+    tabLint: s__('Pipelines|Lint'),
   },
   errorTexts: {
-    [LOAD_FAILURE_NO_REF]: s__(
-      'Pipelines|Repository does not have a default branch, please set one.',
-    ),
-    [LOAD_FAILURE_NO_FILE]: s__('Pipelines|No CI file found in this repository, please add one.'),
-    [LOAD_FAILURE_UNKNOWN]: s__('Pipelines|The CI configuration was not loaded, please try again.'),
     [COMMIT_FAILURE]: s__('Pipelines|The GitLab CI configuration could not be updated.'),
+    [DEFAULT_FAILURE]: __('Something went wrong on our end.'),
+    [LOAD_FAILURE_NO_FILE]: s__(
+      'Pipelines|There is no %{filePath} file in this repository, please add one and visit the Pipeline Editor again.',
+    ),
+    [LOAD_FAILURE_UNKNOWN]: s__('Pipelines|The CI configuration was not loaded, please try again.'),
+  },
+  successTexts: {
+    [COMMIT_SUCCESS]: __('Your changes have been successfully committed.'),
   },
   methods: {
     handleBlobContentError(error = {}) {
       const { networkError } = error;
 
       const { response } = networkError;
-      if (response?.status === 404) {
-        // 404 for missing CI file
+      // 404 for missing CI file
+      // 400 for blank projects with no repository
+      if (
+        response?.status === httpStatusCodes.NOT_FOUND ||
+        response?.status === httpStatusCodes.BAD_REQUEST
+      ) {
         this.reportFailure(LOAD_FAILURE_NO_FILE);
-      } else if (response?.status === 400) {
-        // 400 for a missing ref when no default branch is set
-        this.reportFailure(LOAD_FAILURE_NO_REF);
       } else {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
       }
     },
+
     dismissFailure() {
       this.showFailureAlert = false;
+    },
+    dismissSuccess() {
+      this.showSuccessAlert = false;
     },
     reportFailure(type, reasons = []) {
       this.showFailureAlert = true;
       this.failureType = type;
       this.failureReasons = reasons;
     },
-    redirectToNewMergeRequest(sourceBranch) {
-      const url = mergeUrlParams(
-        {
-          [MR_SOURCE_BRANCH]: sourceBranch,
-          [MR_TARGET_BRANCH]: this.defaultBranch,
-        },
-        this.newMergeRequestPath,
-      );
-      redirectTo(url);
+    reportSuccess(type) {
+      this.showSuccessAlert = true;
+      this.successType = type;
     },
-    async onCommitSubmit(event) {
-      this.isSaving = true;
-      const { message, branch, openMergeRequest } = event;
-
-      try {
-        const {
-          data: {
-            commitCreate: { errors },
-          },
-        } = await this.$apollo.mutate({
-          mutation: commitCiFileMutation,
-          variables: {
-            projectPath: this.projectPath,
-            branch,
-            startBranch: this.defaultBranch,
-            message,
-            filePath: this.ciConfigPath,
-            content: this.contentModel,
-            lastCommitId: this.commitId,
-          },
-        });
-
-        if (errors?.length) {
-          this.reportFailure(COMMIT_FAILURE, errors);
-          return;
-        }
-
-        if (openMergeRequest) {
-          this.redirectToNewMergeRequest(branch);
-        } else {
-          // Refresh the page to ensure commit is updated
-          refreshCurrentPage();
-        }
-      } catch (error) {
-        this.reportFailure(COMMIT_FAILURE, [error?.message]);
-      } finally {
-        this.isSaving = false;
-      }
+    resetContent() {
+      this.currentCiFileContent = this.lastCommittedContent;
     },
-    onCommitCancel() {
-      this.contentModel = this.content;
+    showErrorAlert({ type, reasons = [] }) {
+      this.reportFailure(type, reasons);
+    },
+    updateCiConfig(ciFileContent) {
+      this.currentCiFileContent = ciFileContent;
+    },
+    updateOnCommit({ type }) {
+      this.reportSuccess(type);
+      // Keep track of the latest commited content to know
+      // if the user has made changes to the file that are unsaved.
+      this.lastCommittedContent = this.currentCiFileContent;
     },
   },
 };
@@ -240,39 +215,27 @@ export default {
 
 <template>
   <div class="gl-mt-4">
-    <gl-alert
-      v-if="showFailureAlert"
-      :variant="failure.variant"
-      :dismissible="true"
-      @dismiss="dismissFailure"
-    >
+    <gl-alert v-if="showSuccessAlert" :variant="success.variant" @dismiss="dismissSuccess">
+      {{ success.text }}
+    </gl-alert>
+    <gl-alert v-if="showFailureAlert" :variant="failure.variant" @dismiss="dismissFailure">
       {{ failure.text }}
       <ul v-if="failureReasons.length" class="gl-mb-0">
         <li v-for="reason in failureReasons" :key="reason">{{ reason }}</li>
       </ul>
     </gl-alert>
-    <div class="gl-mt-4">
-      <gl-loading-icon v-if="isBlobContentLoading" size="lg" class="gl-m-3" />
-      <div v-else class="file-editor gl-mb-3">
-        <gl-tabs v-model="currentTabIndex">
-          <!-- editor should be mounted when its tab is visible, so the container has a size -->
-          <gl-tab :title="$options.i18n.tabEdit" :lazy="!editorIsReady">
-            <!-- editor should be mounted only once, when the tab is displayed -->
-            <text-editor v-model="contentModel" @editor-ready="editorIsReady = true" />
-          </gl-tab>
-
-          <gl-tab :title="$options.i18n.tabGraph" :lazy="!isVisualizeTabActive">
-            <pipeline-graph :pipeline-data="ciConfigData" />
-          </gl-tab>
-        </gl-tabs>
-      </div>
-      <commit-form
-        :default-branch="defaultBranch"
-        :default-message="defaultCommitMessage"
-        :is-saving="isSaving"
-        @cancel="onCommitCancel"
-        @submit="onCommitSubmit"
+    <gl-loading-icon v-if="isBlobContentLoading" size="lg" class="gl-m-3" />
+    <div v-else-if="!isBlobContentError" class="gl-mt-4">
+      <pipeline-editor-home
+        :is-ci-config-data-loading="isCiConfigDataLoading"
+        :ci-config-data="ciConfigData"
+        :ci-file-content="currentCiFileContent"
+        @commit="updateOnCommit"
+        @resetContent="resetContent"
+        @showError="showErrorAlert"
+        @updateCiConfig="updateCiConfig"
       />
     </div>
+    <confirm-unsaved-changes-dialog :has-unsaved-changes="hasUnsavedChanges" />
   </div>
 </template>

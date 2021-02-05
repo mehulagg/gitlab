@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # PyPI packages in the Package Registry
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208747) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
 Publish PyPI packages in your project’s Package Registry. Then install the
 packages whenever you need to use them as a dependency.
@@ -233,11 +233,16 @@ password = ${env.CI_JOB_TOKEN}
 
 ## Publish a PyPI package
 
-When publishing packages, note that:
+Prerequisites:
 
-- The maximum allowed size is 50 MB.
+- You must [authenticate with the Package Registry](#authenticate-with-the-package-registry).
+- Your [version string must be valid](#ensure-your-version-string-is-valid).
+- The maximum allowed package size is 5 GB.
 - You can't upload the same version of a package multiple times. If you try,
-  you receive the error `Validation failed: File name has already been taken`.
+  you receive the error `400 Bad Request`.
+- You cannot publish PyPI packages to a group, only to a project.
+
+You can then [publish a package by using twine](#publish-a-pypi-package-by-using-twine).
 
 ### Ensure your version string is valid
 
@@ -300,6 +305,12 @@ python -m twine upload --repository <source_name> dist/<package_file>
 
 - `<package_file>` is your package filename, ending in `.tar.gz` or `.whl`.
 - `<source_name>` is the [source name used during setup](#authenticate-with-the-package-registry).
+
+### Publishing packages with the same name or version
+
+You cannot publish a package if a package of the same name and version already exists.
+You must delete the existing package first. If you attempt to publish the same package
+more than once, a `404 Bad Request` error occurs.
 
 ## Install a PyPI package
 

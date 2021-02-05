@@ -1,11 +1,11 @@
 ---
 stage: Create
-group: Knowledge
+group: Editor
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, how-to
 ---
 
-# Wiki **(CORE)**
+# Wiki **(FREE)**
 
 A separate system for documentation called Wiki, is built right into each
 GitLab project. It is enabled by default on all new projects and you can find
@@ -64,7 +64,7 @@ When you're ready, click the **Create page** and the new page will be created.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/33475) in GitLab 11.3.
 
-Starting with GitLab 11.3, any file that is uploaded to the wiki via GitLab's
+Starting with GitLab 11.3, any file that is uploaded to the wiki via the GitLab
 interface will be stored in the wiki Git repository, and it will be available
 if you clone the wiki repository locally. All uploaded files prior to GitLab
 11.3 are stored in GitLab itself. If you want them to be part of the wiki's Git
@@ -204,13 +204,11 @@ otherwise they will not display when pushed to GitLab:
 
 ## Customizing sidebar
 
-On the project's Wiki page, there is a right side navigation that renders the full Wiki pages list by default, with hierarchy.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23109) in GitLab 13.8, the sidebar can be customized by clicking the **Edit sidebar** button.
 
-To customize the sidebar, you can create a file named `_sidebar` to fully replace the default navigation.
+To customize the Wiki's navigation sidebar, you need Developer permissions to the project.
 
-WARNING:
-Unless you link the `_sidebar` file from your custom nav, to edit it you'll have to access it directly
-from the browser's address bar by typing: `https://gitlab.com/<namespace>/<project_name>/-/wikis/_sidebar` (for self-managed GitLab instances, replace `gitlab.com` with your instance's URL).
+On the top-right, click **Edit sidebar** and make your changes. This creates a wiki page named `_sidebar` which fully replaces the default sidebar navigation.
 
 Example for `_sidebar` (using Markdown format):
 

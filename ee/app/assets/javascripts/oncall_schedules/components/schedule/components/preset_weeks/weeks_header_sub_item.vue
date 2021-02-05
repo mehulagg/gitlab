@@ -1,7 +1,14 @@
 <script>
-import CommonMixin from '../../mixins/common_mixin';
+import { GlResizeObserverDirective } from '@gitlab/ui';
+import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
+import updateShiftTimeUnitWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_shift_time_unit_width.mutation.graphql';
+import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 
 export default {
+  PRESET_TYPES,
+  directives: {
+    GlResizeObserver: GlResizeObserverDirective,
+  },
   mixins: [CommonMixin],
   props: {
     timeframeItem: {
@@ -26,6 +33,9 @@ export default {
       return headerSubItems;
     },
   },
+  mounted() {
+    this.updateShiftStyles();
+  },
   methods: {
     getSubItemValueClass(subItem) {
       // Show dark color text only for current & upcoming dates
@@ -36,23 +46,39 @@ export default {
       }
       return '';
     },
+    getSubItemValue(subItem) {
+      return subItem.getDate();
+    },
+    updateShiftStyles() {
+      this.$apollo.mutate({
+        mutation: updateShiftTimeUnitWidthMutation,
+        variables: {
+          shiftTimeUnitWidth: this.$refs.weeklyDayCell[0].offsetWidth,
+        },
+      });
+    },
   },
 };
 </script>
 
 <template>
-  <div class="item-sublabel">
+  <div
+    v-gl-resize-observer="updateShiftStyles"
+    class="item-sublabel"
+    data-testid="week-item-sublabel"
+  >
     <span
       v-for="(subItem, index) in headerSubItems"
       :key="index"
+      ref="weeklyDayCell"
       :class="getSubItemValueClass(subItem)"
       class="sublabel-value"
       data-testid="sublabel-value"
-      >{{ subItem.getDate() }}</span
+      >{{ getSubItemValue(subItem) }}</span
     >
     <span
       v-if="hasToday"
-      :style="getIndicatorStyles()"
+      :style="getIndicatorStyles($options.PRESET_TYPES.WEEKS)"
       class="current-day-indicator-header preset-weeks"
     ></span>
   </div>

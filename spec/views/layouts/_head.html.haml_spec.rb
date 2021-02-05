@@ -59,7 +59,7 @@ RSpec.describe 'layouts/_head' do
 
     render
 
-    expect(rendered).to match('<link rel="stylesheet" media="all" href="/stylesheets/highlight/themes/solarised-light.css" />')
+    expect(rendered).to match('<link rel="stylesheet" media="print" href="/stylesheets/highlight/themes/solarised-light.css" />')
   end
 
   context 'when an asset_host is set and snowplow url is set' do
@@ -101,6 +101,44 @@ RSpec.describe 'layouts/_head' do
 
       expect(rendered).to match(/<script.*>.*var u="\/\/#{matomo_host}\/".*<\/script>/m)
       expect(rendered).to match(%r(<noscript>.*<img src="//#{matomo_host}/matomo.php.*</noscript>))
+    end
+
+    context 'matomo_disable_cookies' do
+      context 'when true' do
+        before do
+          stub_config(extra: { matomo_url: matomo_host, matomo_site_id: 12345, matomo_disable_cookies: true })
+        end
+
+        it 'disables cookies' do
+          render
+
+          expect(rendered).to include('_paq.push(["disableCookies"])')
+        end
+      end
+
+      context 'when false' do
+        before do
+          stub_config(extra: { matomo_url: matomo_host, matomo_site_id: 12345, matomo_disable_cookies: false })
+        end
+
+        it 'does not disable cookies' do
+          render
+
+          expect(rendered).not_to include('_paq.push(["disableCookies"])')
+        end
+      end
+
+      context 'when absent' do
+        before do
+          stub_config(extra: { matomo_url: matomo_host, matomo_site_id: 12345 })
+        end
+
+        it 'does not disable cookies' do
+          render
+
+          expect(rendered).not_to include('_paq.push(["disableCookies"])')
+        end
+      end
     end
   end
 

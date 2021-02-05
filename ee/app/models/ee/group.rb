@@ -14,6 +14,7 @@ module EE
       include InsightsFeature
       include HasTimelogsReport
       include HasWiki
+      include CanMoveRepositoryStorage
 
       add_authentication_token_field :saml_discovery_token, unique: false, token_generator: -> { Devise.friendly_token(8) }
 
@@ -44,12 +45,15 @@ module EE
       has_many :provisioned_users, through: :provisioned_user_details, source: :user
       has_many :cycle_analytics_stages, class_name: 'Analytics::CycleAnalytics::GroupStage'
       has_many :value_streams, class_name: 'Analytics::CycleAnalytics::GroupValueStream'
+      has_one :group_merge_request_approval_setting, inverse_of: :group
 
       has_one :deletion_schedule, class_name: 'GroupDeletionSchedule'
       delegate :deleting_user, :marked_for_deletion_on, to: :deletion_schedule, allow_nil: true
       delegate :enforced_group_managed_accounts?, :enforced_sso?, to: :saml_provider, allow_nil: true
+      delegate :repository_read_only, :repository_read_only?, to: :namespace_settings, allow_nil: true
 
       has_one :group_wiki_repository
+      has_many :repository_storage_moves, class_name: 'Groups::RepositoryStorageMove', inverse_of: :container
 
       belongs_to :file_template_project, class_name: "Project"
 
@@ -161,13 +165,6 @@ module EE
 
       def groups_user_can_read_epics(groups, user, same_root: false)
         groups_user_can(groups, user, :read_epic, same_root: same_root)
-      end
-
-      def preset_root_ancestor_for(groups)
-        return groups if groups.size < 2
-
-        root = groups.first.root_ancestor
-        groups.drop(1).each { |group| group.root_ancestor = root }
       end
     end
 
@@ -448,7 +445,57 @@ module EE
       )
     end
 
+    override :execute_hooks
+    def execute_hooks(data, hooks_scope)
+      super
+
+      return unless feature_available?(:group_webhooks)
+
+      self_and_ancestor_hooks = GroupHook.where(group_id: self.self_and_ancestors)
+      self_and_ancestor_hooks.hooks_for(hooks_scope).each do |hook|
+        hook.async_execute(data, hooks_scope.to_s)
+      end
+    end
+
+    override :git_transfer_in_progress?
+    def git_transfer_in_progress?
+      reference_counter(type: ::Gitlab::GlRepository::WIKI).value > 0
+    end
+
+    def repository_storage
+      group_wiki_repository&.shard_name || ::Repository.pick_storage_shard
+    end
+
     private
+
+    override :post_create_hook
+    def post_create_hook
+      super
+
+      execute_subgroup_hooks(:create)
+    end
+
+    override :post_destroy_hook
+    def post_destroy_hook
+      super
+
+      execute_subgroup_hooks(:destroy)
+    end
+
+    def execute_subgroup_hooks(event)
+      return unless subgroup?
+      return unless parent.group? # TODO: Remove this after fixing https://gitlab.com/gitlab-org/gitlab/-/issues/301013
+      return unless feature_available?(:group_webhooks)
+
+      run_after_commit do
+        data = ::Gitlab::HookData::SubgroupBuilder.new(self).build(event)
+        # Imagine a case where a subgroup has a webhook with `subgroup_events` enabled.
+        # When this subgroup is removed, there is no point in this subgroup's webhook itself being notified
+        # that `self` was removed. Rather, we should only care about notifying its ancestors
+        # and hence we need to trigger the hooks starting only from its `parent` group.
+        parent.execute_hooks(data, :subgroup_hooks)
+      end
+    end
 
     def custom_project_templates_group_allowed
       return if custom_project_templates_group_id.blank?
@@ -509,6 +556,18 @@ module EE
 
     def invited_or_shared_group_members(groups)
       ::GroupMember.active_without_invites_and_requests.where(source_id: ::Gitlab::ObjectHierarchy.new(groups).base_and_ancestors)
+    end
+
+    override :_safe_read_repository_read_only_column
+    def _safe_read_repository_read_only_column
+      ::NamespaceSetting.where(namespace: self).pick(:repository_read_only)
+    end
+
+    override :_update_repository_read_only_column
+    def _update_repository_read_only_column(value)
+      settings = namespace_settings || create_namespace_settings
+
+      settings.update_column(:repository_read_only, value)
     end
   end
 end

@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import FilterableList from '~/filterable_list';
-import eventHub from './event_hub';
 import { normalizeHeaders, getParameterByName } from '../lib/utils/common_utils';
+import eventHub from './event_hub';
 
 export default class GroupFilterableList extends FilterableList {
   constructor({
@@ -65,10 +65,7 @@ export default class GroupFilterableList extends FilterableList {
 
   setDefaultFilterOption() {
     const defaultOption = $.trim(
-      this.$dropdown
-        .find('.dropdown-menu li.js-filter-sort-order a')
-        .first()
-        .text(),
+      this.$dropdown.find('.dropdown-menu li.js-filter-sort-order a').first().text(),
     );
     this.$dropdown.find('.dropdown-label').text(defaultOption);
   }

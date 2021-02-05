@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
+  using RSpec::Parameterized::TableSyntax
+
   let_it_be(:repository, reload: true) { create(:container_repository, :cleanup_scheduled) }
   let_it_be(:project) { repository.project }
   let_it_be(:policy) { project.container_expiration_policy }
@@ -19,22 +21,54 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
 
     RSpec.shared_examples 'handling all repository conditions' do
       it 'sends the repository for cleaning' do
+        service_response = cleanup_service_response(repository: repository)
         expect(ContainerExpirationPolicies::CleanupService)
-          .to receive(:new).with(repository).and_return(double(execute: cleanup_service_response(repository: repository)))
-        expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_status, :finished)
-        expect(worker).to receive(:log_extra_metadata_on_done).with(:container_repository_id, repository.id)
+          .to receive(:new).with(repository).and_return(double(execute: service_response))
+        expect_log_extra_metadata(service_response: service_response)
 
         subject
       end
 
       context 'with unfinished cleanup' do
         it 'logs an unfinished cleanup' do
+          service_response = cleanup_service_response(status: :unfinished, repository: repository)
           expect(ContainerExpirationPolicies::CleanupService)
-            .to receive(:new).with(repository).and_return(double(execute: cleanup_service_response(status: :unfinished, repository: repository)))
-          expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_status, :unfinished)
-          expect(worker).to receive(:log_extra_metadata_on_done).with(:container_repository_id, repository.id)
+            .to receive(:new).with(repository).and_return(double(execute: service_response))
+          expect_log_extra_metadata(service_response: service_response, cleanup_status: :unfinished)
 
           subject
+        end
+
+        context 'with a truncated list of tags to delete' do
+          it 'logs an unfinished cleanup' do
+            service_response = cleanup_service_response(status: :unfinished, repository: repository, cleanup_tags_service_after_truncate_size: 10, cleanup_tags_service_before_delete_size: 5)
+            expect(ContainerExpirationPolicies::CleanupService)
+              .to receive(:new).with(repository).and_return(double(execute: service_response))
+            expect_log_extra_metadata(service_response: service_response, cleanup_status: :unfinished, truncated: true)
+
+            subject
+          end
+        end
+
+        context 'the truncated log field' do
+          where(:before_truncate_size, :after_truncate_size, :truncated) do
+            100 | 100 | false
+            100 | 80  | true
+            nil | 100 | false
+            100 | nil | false
+            nil | nil | false
+          end
+
+          with_them do
+            it 'is logged properly' do
+              service_response = cleanup_service_response(status: :unfinished, repository: repository, cleanup_tags_service_after_truncate_size: after_truncate_size, cleanup_tags_service_before_truncate_size: before_truncate_size)
+              expect(ContainerExpirationPolicies::CleanupService)
+                .to receive(:new).with(repository).and_return(double(execute: service_response))
+              expect_log_extra_metadata(service_response: service_response, cleanup_status: :unfinished, truncated: truncated)
+
+              subject
+            end
+          end
         end
       end
 
@@ -48,6 +82,7 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
         it 'skips the repository' do
           expect(ContainerExpirationPolicies::CleanupService).not_to receive(:new)
           expect(worker).to receive(:log_extra_metadata_on_done).with(:container_repository_id, repository.id)
+          expect(worker).to receive(:log_extra_metadata_on_done).with(:project_id, repository.project.id)
           expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_status, :skipped)
 
           expect { subject }.to change { ContainerRepository.waiting_for_cleanup.count }.from(1).to(0)
@@ -87,10 +122,10 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
       let_it_be(:another_repository) { create(:container_repository, :cleanup_unfinished) }
 
       it 'process the cleanup scheduled repository first' do
+        service_response = cleanup_service_response(repository: repository)
         expect(ContainerExpirationPolicies::CleanupService)
-          .to receive(:new).with(repository).and_return(double(execute: cleanup_service_response(repository: repository)))
-        expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_status, :finished)
-        expect(worker).to receive(:log_extra_metadata_on_done).with(:container_repository_id, repository.id)
+          .to receive(:new).with(repository).and_return(double(execute: service_response))
+        expect_log_extra_metadata(service_response: service_response)
 
         subject
       end
@@ -105,10 +140,10 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
       end
 
       it 'process the repository with the oldest expiration_policy_started_at' do
+        service_response = cleanup_service_response(repository: repository)
         expect(ContainerExpirationPolicies::CleanupService)
-          .to receive(:new).with(repository).and_return(double(execute: cleanup_service_response(repository: repository)))
-        expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_status, :finished)
-        expect(worker).to receive(:log_extra_metadata_on_done).with(:container_repository_id, repository.id)
+          .to receive(:new).with(repository).and_return(double(execute: service_response))
+        expect_log_extra_metadata(service_response: service_response)
 
         subject
       end
@@ -164,8 +199,30 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
       end
     end
 
-    def cleanup_service_response(status: :finished, repository:)
-      ServiceResponse.success(message: "cleanup #{status}", payload: { cleanup_status: status, container_repository_id: repository.id })
+    def cleanup_service_response(status: :finished, repository:, cleanup_tags_service_original_size: 100, cleanup_tags_service_before_truncate_size: 80, cleanup_tags_service_after_truncate_size: 80, cleanup_tags_service_before_delete_size: 50)
+      ServiceResponse.success(
+        message: "cleanup #{status}",
+        payload: {
+          cleanup_status: status,
+          container_repository_id: repository.id,
+          cleanup_tags_service_original_size: cleanup_tags_service_original_size,
+          cleanup_tags_service_before_truncate_size: cleanup_tags_service_before_truncate_size,
+          cleanup_tags_service_after_truncate_size: cleanup_tags_service_after_truncate_size,
+          cleanup_tags_service_before_delete_size: cleanup_tags_service_before_delete_size
+        }.compact
+      )
+    end
+
+    def expect_log_extra_metadata(service_response:, cleanup_status: :finished, truncated: false)
+      expect(worker).to receive(:log_extra_metadata_on_done).with(:container_repository_id, repository.id)
+      expect(worker).to receive(:log_extra_metadata_on_done).with(:project_id, repository.project.id)
+      expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_status, cleanup_status)
+
+      %i[cleanup_tags_service_original_size cleanup_tags_service_before_truncate_size cleanup_tags_service_after_truncate_size cleanup_tags_service_before_delete_size].each do |field|
+        value = service_response.payload[field]
+        expect(worker).to receive(:log_extra_metadata_on_done).with(field, value) unless value.nil?
+      end
+      expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_tags_service_truncated, truncated)
     end
   end
 

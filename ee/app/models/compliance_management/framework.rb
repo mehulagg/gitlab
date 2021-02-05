@@ -68,6 +68,7 @@ module ComplianceManagement
     validates :color, color: true, allow_blank: false, length: { maximum: 10 }
     validates :regulated, presence: true
     validates :namespace_id, uniqueness: { scope: :name }
+    validates :pipeline_configuration_full_path, length: { maximum: 255 }
 
     scope :with_projects, ->(project_ids) { includes(:projects).where(projects: { id: project_ids }) }
     scope :with_namespaces, ->(namespace_ids) { includes(:namespace).where(namespaces: { id: namespace_ids })}

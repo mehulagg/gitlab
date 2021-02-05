@@ -29,7 +29,7 @@ describe('Severity Badge', () => {
   const findIcon = () => wrapper.find(GlIcon);
   const findTooltip = () => getBinding(findIcon().element, 'tooltip').value;
 
-  describe.each(SEVERITY_LEVELS)('given a valid severity "%s"', severity => {
+  describe.each(SEVERITY_LEVELS)('given a valid severity "%s"', (severity) => {
     beforeEach(() => {
       createWrapper({ severity });
     });
@@ -54,7 +54,7 @@ describe('Severity Badge', () => {
     });
   });
 
-  describe.each(['foo', '', ' '])('given an invalid severity "%s"', invalidSeverity => {
+  describe.each(['foo', '', ' '])('given an invalid severity "%s"', (invalidSeverity) => {
     beforeEach(() => {
       createWrapper({ severity: invalidSeverity });
     });

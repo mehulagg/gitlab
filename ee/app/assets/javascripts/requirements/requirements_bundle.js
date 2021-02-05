@@ -24,7 +24,7 @@ export default () => {
       {},
       {
         cacheConfig: {
-          dataIdFromObject: object =>
+          dataIdFromObject: (object) =>
             // eslint-disable-next-line no-underscore-dangle, @gitlab/require-i18n-strings
             object.__typename === 'Requirement' ? object.iid : defaultDataIdFromObject(object),
         },
@@ -58,6 +58,8 @@ export default () => {
         all,
         canCreateRequirement,
         requirementsWebUrl,
+        requirementsImportCsvPath: importCsvPath,
+        currentUserEmail,
       } = el.dataset;
       const stateFilterBy = filterBy ? FilterState[filterBy] : FilterState.opened;
 
@@ -82,6 +84,8 @@ export default () => {
         projectPath,
         canCreateRequirement,
         requirementsWebUrl,
+        importCsvPath,
+        currentUserEmail,
       };
     },
     render(createElement) {
@@ -99,6 +103,8 @@ export default () => {
           emptyStatePath: this.emptyStatePath,
           canCreateRequirement: parseBoolean(this.canCreateRequirement),
           requirementsWebUrl: this.requirementsWebUrl,
+          importCsvPath: this.importCsvPath,
+          currentUserEmail: this.currentUserEmail,
         },
       });
     },

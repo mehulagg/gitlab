@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe DastSiteProfile, type: :model do
-  subject { create(:dast_site_profile) }
+  subject { create(:dast_site_profile, :with_dast_site_validation) }
 
   describe 'associations' do
     it { is_expected.to belong_to(:project) }

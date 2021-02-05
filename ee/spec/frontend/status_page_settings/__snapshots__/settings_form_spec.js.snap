@@ -8,9 +8,7 @@ exports[`Status Page settings form default state should match the default snapsh
   <div
     class="settings-header"
   >
-    <h4
-      class="gl-my-3! gl-py-1"
-    >
+    <h4>
       
       Status page
     

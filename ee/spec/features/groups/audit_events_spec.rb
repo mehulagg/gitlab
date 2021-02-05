@@ -29,14 +29,14 @@ RSpec.describe 'Groups > Audit Events', :js do
     end
 
     it 'does not have Audit Events button in head nav bar' do
-      visit edit_group_path(group)
+      visit group_security_dashboard_path(group)
 
       expect(page).not_to have_link('Audit Events')
     end
   end
 
   it 'has Audit Events button in head nav bar' do
-    visit edit_group_path(group)
+    visit group_security_dashboard_path(group)
 
     expect(page).to have_link('Audit Events')
   end
@@ -52,9 +52,10 @@ RSpec.describe 'Groups > Audit Events', :js do
         click_button 'Maintainer'
       end
 
-      find(:link, text: 'Settings').click
-
-      click_link 'Audit Events'
+      page.within('.qa-group-sidebar') do
+        find(:link, text: 'Security & Compliance').click
+        click_link 'Audit Events'
+      end
 
       page.within('.audit-log-table') do
         expect(page).to have_content 'Changed access level from Developer to Maintainer'

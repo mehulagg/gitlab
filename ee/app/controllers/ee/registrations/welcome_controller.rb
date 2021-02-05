@@ -5,6 +5,13 @@ module EE
     module WelcomeController
       extend ::Gitlab::Utils::Override
 
+      def trial_getting_started
+        project = learn_gitlab_project
+        return access_denied! unless current_user.id == project.creator_id
+
+        render locals: { learn_gitlab_project: learn_gitlab_project }
+      end
+
       private
 
       override :update_params
@@ -20,6 +27,10 @@ module EE
         end
 
         clean_params
+      end
+
+      def learn_gitlab_project
+        ::Project.find(params[:learn_gitlab_project_id])
       end
     end
   end

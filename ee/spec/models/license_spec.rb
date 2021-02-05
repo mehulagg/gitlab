@@ -368,7 +368,7 @@ RSpec.describe License do
 
       it 'returns features for premium plan' do
         expect(described_class.features_for_plan('premium'))
-          .to include(:multiple_issue_assignees, :deploy_board, :file_locks, :group_wikis)
+          .to include(:multiple_issue_assignees, :cluster_deployments, :file_locks, :group_wikis)
       end
 
       it 'returns empty array if no features for given plan' do
@@ -377,7 +377,7 @@ RSpec.describe License do
     end
 
     describe '.plan_includes_feature?' do
-      let(:feature) { :deploy_board }
+      let(:feature) { :cluster_deployments }
 
       subject { described_class.plan_includes_feature?(plan, feature) }
 
@@ -415,7 +415,7 @@ RSpec.describe License do
       end
     end
 
-    describe '.current' do
+    describe '.current', :request_store, :use_clean_rails_memory_store_caching do
       context 'when licenses table does not exist' do
         it 'returns nil' do
           allow(described_class).to receive(:table_exists?).and_return(false)
@@ -442,11 +442,27 @@ RSpec.describe License do
       end
 
       context 'when the license is valid' do
+        let!(:current_license) { create_list(:license, 2).last }
+
         it 'returns the license' do
-          current_license = create_list(:license, 2).last
           create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export)
 
           expect(described_class.current).to eq(current_license)
+        end
+
+        it 'caches the license' do
+          described_class.reset_current
+
+          expect(described_class).to receive(:load_license).once.and_call_original
+
+          2.times do
+            expect(described_class.current).to eq(current_license)
+          end
+
+          travel_to(61.seconds.from_now) do
+            expect(described_class).to receive(:load_license).once.and_call_original
+            expect(described_class.current).to eq(current_license)
+          end
         end
       end
     end
@@ -719,15 +735,15 @@ RSpec.describe License do
 
       context 'with add-ons' do
         it 'returns all available add-ons' do
-          license = build_license_with_add_ons({ 'GitLab_DeployBoard' => 1, 'GitLab_FileLocks' => 2 })
+          license = build_license_with_add_ons({ 'GitLab_FileLocks' => 2 })
 
-          expect(license.features_from_add_ons).to match_array([:deploy_board, :file_locks])
+          expect(license.features_from_add_ons).to eq([:file_locks])
         end
       end
 
       context 'with nil add-ons' do
         it 'returns an empty array' do
-          license = build_license_with_add_ons({ 'GitLab_DeployBoard' => nil, 'GitLab_FileLocks' => nil })
+          license = build_license_with_add_ons({ 'GitLab_FileLocks' => nil })
 
           expect(license.features_from_add_ons).to eq([])
         end
@@ -736,9 +752,9 @@ RSpec.describe License do
 
     describe '#feature_available?' do
       it 'returns true if add-on exists and have a quantity greater than 0' do
-        license = build_license_with_add_ons({ 'GitLab_DeployBoard' => 1 })
+        license = build_license_with_add_ons({ 'GitLab_FileLocks' => 1 })
 
-        expect(license.feature_available?(:deploy_board)).to eq(true)
+        expect(license.feature_available?(:file_locks)).to eq(true)
       end
 
       it 'returns true if the feature is included in the plan do' do
@@ -748,16 +764,15 @@ RSpec.describe License do
       end
 
       it 'returns false if add-on exists but have a quantity of 0' do
-        license = build_license_with_add_ons({ 'GitLab_DeployBoard' => 0 })
+        license = build_license_with_add_ons({ 'GitLab_FileLocks' => 0 })
 
-        expect(license.feature_available?(:deploy_board)).to eq(false)
+        expect(license.feature_available?(:file_locks)).to eq(false)
       end
 
       it 'returns false if add-on does not exists' do
         license = build_license_with_add_ons({})
 
-        expect(license.feature_available?(:deploy_board)).to eq(false)
-        expect(license.feature_available?(:auditor_user)).to eq(false)
+        expect(license.feature_available?(:file_locks)).to eq(false)
       end
 
       context 'with an expired trial license' do
@@ -798,6 +813,15 @@ RSpec.describe License do
     def build_license_with_add_ons(add_ons, plan: nil)
       gl_license = build(:gitlab_license, restrictions: { add_ons: add_ons, plan: plan })
       build(:license, data: gl_license.export)
+    end
+  end
+
+  describe '#subscription_id' do
+    it 'has correct subscription_id' do
+      gl_license = build(:gitlab_license, restrictions: { subscription_id: "1111" })
+      license = build(:license, data: gl_license.export)
+
+      expect(license.subscription_id).to eq("1111")
     end
   end
 
@@ -855,21 +879,91 @@ RSpec.describe License do
   end
 
   describe '#maximum_user_count' do
-    subject { license.maximum_user_count }
+    let(:now) { Date.current }
 
-    where(:daily_billable_users_count, :historical_max, :expected) do
-      100 | 50  | 100
-      50  | 100 | 100
-      50  | 50  | 50
+    it 'returns zero when there is no data' do
+      expect(license.maximum_user_count).to eq(0)
     end
 
-    with_them do
-      before do
-        allow(license).to receive(:daily_billable_users_count) { daily_billable_users_count }
-        allow(license).to receive(:historical_max) { historical_max }
-      end
+    it 'returns historical data' do
+      create(:historical_data, active_user_count: 1)
 
-      it { is_expected.to eq(expected) }
+      expect(license.maximum_user_count).to eq(1)
+    end
+
+    it 'returns the billable users count' do
+      create(:instance_statistics_measurement, identifier: :billable_users, count: 2)
+
+      expect(license.maximum_user_count).to eq(2)
+    end
+
+    it 'returns the daily billable users count when it is higher than historical data' do
+      create(:historical_data, active_user_count: 50)
+      create(:instance_statistics_measurement, identifier: :billable_users, count: 100)
+
+      expect(license.maximum_user_count).to eq(100)
+    end
+
+    it 'returns historical data when it is higher than the billable users count' do
+      create(:historical_data, active_user_count: 100)
+      create(:instance_statistics_measurement, identifier: :billable_users, count: 50)
+
+      expect(license.maximum_user_count).to eq(100)
+    end
+
+    it 'returns the correct value when historical data and billable users are equal' do
+      create(:historical_data, active_user_count: 100)
+      create(:instance_statistics_measurement, identifier: :billable_users, count: 100)
+
+      expect(license.maximum_user_count).to eq(100)
+    end
+
+    it 'returns the highest value from historical data' do
+      create(:historical_data, recorded_at: license.expires_at - 4.months, active_user_count: 130)
+      create(:historical_data, recorded_at: license.expires_at - 3.months, active_user_count: 250)
+      create(:historical_data, recorded_at: license.expires_at - 1.month, active_user_count: 215)
+
+      expect(license.maximum_user_count).to eq(250)
+    end
+
+    it 'uses only the most recent billable users entry' do
+      create(:instance_statistics_measurement, recorded_at: license.expires_at - 3.months, identifier: :billable_users, count: 150)
+      create(:historical_data, recorded_at: license.expires_at - 3.months, active_user_count: 140)
+      create(:instance_statistics_measurement, recorded_at: license.expires_at - 2.months, identifier: :billable_users, count: 100)
+
+      expect(license.maximum_user_count).to eq(140)
+    end
+
+    it 'returns the highest historical data since the license started for a 1 year license' do
+      license = build(:license, starts_at: now - 4.months, expires_at: now + 8.months )
+      create(:historical_data, recorded_at: license.starts_at - 1.day, active_user_count: 100)
+      create(:historical_data, recorded_at: now, active_user_count: 40)
+
+      expect(license.maximum_user_count).to eq(40)
+    end
+
+    it 'returns the highest historical data since the license started for a license that lasts 6 months' do
+      license = build(:license, starts_at: now - 4.months, expires_at: now + 2.months )
+      create(:historical_data, recorded_at: license.starts_at - 1.day, active_user_count: 80)
+      create(:historical_data, recorded_at: now, active_user_count: 30)
+
+      expect(license.maximum_user_count).to eq(30)
+    end
+
+    it 'returns the highest historical data since the license started for a license that lasts two years' do
+      license = build(:license, starts_at: now - 6.months, expires_at: now + 18.months )
+      create(:historical_data, recorded_at: license.starts_at - 1.day, active_user_count: 400)
+      create(:historical_data, recorded_at: now, active_user_count: 300)
+
+      expect(license.maximum_user_count).to eq(300)
+    end
+
+    it 'returns the highest historical data during the license period for an expired license' do
+      license = build(:license, starts_at: now - 14.months, expires_at: now - 2.months )
+      create(:historical_data, recorded_at: license.expires_at - 1.month, active_user_count: 400)
+      create(:historical_data, recorded_at: now, active_user_count: 500)
+
+      expect(license.maximum_user_count).to eq(400)
     end
   end
 

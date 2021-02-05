@@ -795,11 +795,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       ]
     end
 
-    context 'when pipeline is merge request' do
-      let(:pipeline) do
-        create(:ci_pipeline, :detached_merge_request_pipeline, merge_request: merge_request)
-      end
-
+    context 'when merge request is present' do
       let(:merge_request) do
         create(:merge_request,
                source_project: project,
@@ -815,57 +811,106 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       let(:milestone) { create(:milestone, project: project) }
       let(:labels) { create_list(:label, 2) }
 
-      it 'exposes merge request pipeline variables' do
-        expect(subject.to_hash)
-          .to include(
-            'CI_MERGE_REQUEST_ID' => merge_request.id.to_s,
-            'CI_MERGE_REQUEST_IID' => merge_request.iid.to_s,
-            'CI_MERGE_REQUEST_REF_PATH' => merge_request.ref_path.to_s,
-            'CI_MERGE_REQUEST_PROJECT_ID' => merge_request.project.id.to_s,
-            'CI_MERGE_REQUEST_PROJECT_PATH' => merge_request.project.full_path,
-            'CI_MERGE_REQUEST_PROJECT_URL' => merge_request.project.web_url,
-            'CI_MERGE_REQUEST_TARGET_BRANCH_NAME' => merge_request.target_branch.to_s,
-            'CI_MERGE_REQUEST_TARGET_BRANCH_SHA' => '',
-            'CI_MERGE_REQUEST_SOURCE_PROJECT_ID' => merge_request.source_project.id.to_s,
-            'CI_MERGE_REQUEST_SOURCE_PROJECT_PATH' => merge_request.source_project.full_path,
-            'CI_MERGE_REQUEST_SOURCE_PROJECT_URL' => merge_request.source_project.web_url,
-            'CI_MERGE_REQUEST_SOURCE_BRANCH_NAME' => merge_request.source_branch.to_s,
-            'CI_MERGE_REQUEST_SOURCE_BRANCH_SHA' => '',
-            'CI_MERGE_REQUEST_TITLE' => merge_request.title,
-            'CI_MERGE_REQUEST_ASSIGNEES' => merge_request.assignee_username_list,
-            'CI_MERGE_REQUEST_MILESTONE' => milestone.title,
-            'CI_MERGE_REQUEST_LABELS' => labels.map(&:title).sort.join(','),
-            'CI_MERGE_REQUEST_EVENT_TYPE' => 'detached')
-      end
+      context 'when pipeline for merge request is created' do
+        let(:pipeline) do
+          create(:ci_pipeline, :detached_merge_request_pipeline,
+            ci_ref_presence: false,
+            user: user,
+            merge_request: merge_request)
+        end
 
-      it 'exposes diff variables' do
-        expect(subject.to_hash)
-          .to include(
-            'CI_MERGE_REQUEST_DIFF_ID' => merge_request.merge_request_diff.id.to_s,
-            'CI_MERGE_REQUEST_DIFF_BASE_SHA' => merge_request.merge_request_diff.base_commit_sha)
-      end
+        before do
+          project.add_developer(user)
+        end
 
-      context 'without assignee' do
-        let(:assignees) { [] }
+        it 'exposes merge request pipeline variables' do
+          expect(subject.to_hash)
+            .to include(
+              'CI_MERGE_REQUEST_ID' => merge_request.id.to_s,
+              'CI_MERGE_REQUEST_IID' => merge_request.iid.to_s,
+              'CI_MERGE_REQUEST_REF_PATH' => merge_request.ref_path.to_s,
+              'CI_MERGE_REQUEST_PROJECT_ID' => merge_request.project.id.to_s,
+              'CI_MERGE_REQUEST_PROJECT_PATH' => merge_request.project.full_path,
+              'CI_MERGE_REQUEST_PROJECT_URL' => merge_request.project.web_url,
+              'CI_MERGE_REQUEST_TARGET_BRANCH_NAME' => merge_request.target_branch.to_s,
+              'CI_MERGE_REQUEST_TARGET_BRANCH_SHA' => '',
+              'CI_MERGE_REQUEST_SOURCE_PROJECT_ID' => merge_request.source_project.id.to_s,
+              'CI_MERGE_REQUEST_SOURCE_PROJECT_PATH' => merge_request.source_project.full_path,
+              'CI_MERGE_REQUEST_SOURCE_PROJECT_URL' => merge_request.source_project.web_url,
+              'CI_MERGE_REQUEST_SOURCE_BRANCH_NAME' => merge_request.source_branch.to_s,
+              'CI_MERGE_REQUEST_SOURCE_BRANCH_SHA' => '',
+              'CI_MERGE_REQUEST_TITLE' => merge_request.title,
+              'CI_MERGE_REQUEST_ASSIGNEES' => merge_request.assignee_username_list,
+              'CI_MERGE_REQUEST_MILESTONE' => milestone.title,
+              'CI_MERGE_REQUEST_LABELS' => labels.map(&:title).sort.join(','),
+              'CI_MERGE_REQUEST_EVENT_TYPE' => 'detached',
+              'CI_OPEN_MERGE_REQUESTS' => merge_request.to_reference(full: true))
+        end
 
-        it 'does not expose assignee variable' do
-          expect(subject.to_hash.keys).not_to include('CI_MERGE_REQUEST_ASSIGNEES')
+        it 'exposes diff variables' do
+          expect(subject.to_hash)
+            .to include(
+              'CI_MERGE_REQUEST_DIFF_ID' => merge_request.merge_request_diff.id.to_s,
+              'CI_MERGE_REQUEST_DIFF_BASE_SHA' => merge_request.merge_request_diff.base_commit_sha)
+        end
+
+        context 'without assignee' do
+          let(:assignees) { [] }
+
+          it 'does not expose assignee variable' do
+            expect(subject.to_hash.keys).not_to include('CI_MERGE_REQUEST_ASSIGNEES')
+          end
+        end
+
+        context 'without milestone' do
+          let(:milestone) { nil }
+
+          it 'does not expose milestone variable' do
+            expect(subject.to_hash.keys).not_to include('CI_MERGE_REQUEST_MILESTONE')
+          end
+        end
+
+        context 'without labels' do
+          let(:labels) { [] }
+
+          it 'does not expose labels variable' do
+            expect(subject.to_hash.keys).not_to include('CI_MERGE_REQUEST_LABELS')
+          end
         end
       end
 
-      context 'without milestone' do
-        let(:milestone) { nil }
-
-        it 'does not expose milestone variable' do
-          expect(subject.to_hash.keys).not_to include('CI_MERGE_REQUEST_MILESTONE')
+      context 'when pipeline on branch is created' do
+        let(:pipeline) do
+          create(:ci_pipeline, project: project, user: user, ref: 'feature')
         end
-      end
 
-      context 'without labels' do
-        let(:labels) { [] }
+        context 'when a merge request is created' do
+          before do
+            merge_request
+          end
 
-        it 'does not expose labels variable' do
-          expect(subject.to_hash.keys).not_to include('CI_MERGE_REQUEST_LABELS')
+          context 'when user has access to project' do
+            before do
+              project.add_developer(user)
+            end
+
+            it 'merge request references are returned matching the pipeline' do
+              expect(subject.to_hash).to include(
+                'CI_OPEN_MERGE_REQUESTS' => merge_request.to_reference(full: true))
+            end
+          end
+
+          context 'when user does not have access to project' do
+            it 'CI_OPEN_MERGE_REQUESTS is not returned' do
+              expect(subject.to_hash).not_to have_key('CI_OPEN_MERGE_REQUESTS')
+            end
+          end
+        end
+
+        context 'when no a merge request is created' do
+          it 'CI_OPEN_MERGE_REQUESTS is not returned' do
+            expect(subject.to_hash).not_to have_key('CI_OPEN_MERGE_REQUESTS')
+          end
         end
       end
 
@@ -1215,26 +1260,6 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
             expect(worker).to receive(:perform_async).with(pipeline.id, Integer)
 
             pipeline.send(event)
-          end
-
-          context 'the feature is disabled' do
-            it 'does not trigger a worker' do
-              stub_feature_flags(jira_sync_builds: false)
-
-              expect(worker).not_to receive(:perform_async)
-
-              pipeline.send(event)
-            end
-          end
-
-          context 'the feature is enabled for this project' do
-            it 'does trigger a worker' do
-              stub_feature_flags(jira_sync_builds: pipeline.project)
-
-              expect(worker).to receive(:perform_async)
-
-              pipeline.send(event)
-            end
           end
         end
       end
@@ -1971,13 +1996,34 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         is_expected.to be_falsey
       end
     end
+
+    context 'bridge which is allowed to fail fails' do
+      before do
+        create :ci_bridge, :allowed_to_fail, :failed, pipeline: pipeline, name: 'rubocop'
+      end
+
+      it 'returns true' do
+        is_expected.to be_truthy
+      end
+    end
+
+    context 'bridge which is allowed to fail is successful' do
+      before do
+        create :ci_bridge, :allowed_to_fail, :success, pipeline: pipeline, name: 'rubocop'
+      end
+
+      it 'returns false' do
+        is_expected.to be_falsey
+      end
+    end
   end
 
   describe '#number_of_warnings' do
     it 'returns the number of warnings' do
       create(:ci_build, :allowed_to_fail, :failed, pipeline: pipeline, name: 'rubocop')
+      create(:ci_bridge, :allowed_to_fail, :failed, pipeline: pipeline, name: 'rubocop')
 
-      expect(pipeline.number_of_warnings).to eq(1)
+      expect(pipeline.number_of_warnings).to eq(2)
     end
 
     it 'supports eager loading of the number of warnings' do
@@ -2275,7 +2321,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
     context 'on waiting for resource' do
       before do
-        allow(build).to receive(:requires_resource?) { true }
+        allow(build).to receive(:with_resource_group?) { true }
         allow(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).to receive(:perform_async)
 
         build.enqueue
@@ -2862,6 +2908,93 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     end
   end
 
+  describe '#related_merge_requests' do
+    let(:project) { create(:project, :repository) }
+    let(:merge_request) { create(:merge_request, source_project: project, source_branch: 'feature', target_branch: 'master') }
+    let(:other_merge_request) { create(:merge_request, source_project: project, source_branch: 'feature', target_branch: 'stable') }
+    let(:branch_pipeline) { create(:ci_pipeline, project: project, ref: 'feature') }
+    let(:merge_pipeline) { create(:ci_pipeline, :detached_merge_request_pipeline, merge_request: merge_request) }
+
+    context 'for a branch pipeline' do
+      subject { branch_pipeline.related_merge_requests }
+
+      it 'when no merge request is created' do
+        is_expected.to be_empty
+      end
+
+      it 'when another merge requests are created' do
+        merge_request
+        other_merge_request
+
+        is_expected.to contain_exactly(merge_request, other_merge_request)
+      end
+    end
+
+    context 'for a merge pipeline' do
+      subject { merge_pipeline.related_merge_requests }
+
+      it 'when only merge pipeline is created' do
+        merge_pipeline
+
+        is_expected.to contain_exactly(merge_request)
+      end
+
+      it 'when a merge request is created' do
+        merge_pipeline
+        other_merge_request
+
+        is_expected.to contain_exactly(merge_request, other_merge_request)
+      end
+    end
+  end
+
+  describe '#open_merge_requests_refs' do
+    let(:project) { create(:project) }
+    let(:user) { create(:user) }
+    let!(:pipeline) { create(:ci_pipeline, user: user, project: project, ref: 'feature') }
+    let!(:merge_request) { create(:merge_request, source_project: project, source_branch: 'feature', target_branch: 'master') }
+
+    subject { pipeline.open_merge_requests_refs }
+
+    context 'when user is a developer' do
+      before do
+        project.add_developer(user)
+      end
+
+      it 'returns open merge requests' do
+        is_expected.to eq([merge_request.to_reference(full: true)])
+      end
+
+      it 'does not return closed merge requests' do
+        merge_request.close!
+
+        is_expected.to be_empty
+      end
+
+      context 'limits amount of returned merge requests' do
+        let!(:other_merge_requests) do
+          Array.new(4) do |idx|
+            create(:merge_request, source_project: project, source_branch: 'feature', target_branch: "master-#{idx}")
+          end
+        end
+
+        let(:other_merge_requests_refs) do
+          other_merge_requests.map { |mr| mr.to_reference(full: true) }
+        end
+
+        it 'returns only last 4 in a reverse order' do
+          is_expected.to eq(other_merge_requests_refs.reverse)
+        end
+      end
+    end
+
+    context 'when user does not have permissions' do
+      it 'does not return any merge requests' do
+        is_expected.to be_empty
+      end
+    end
+  end
+
   describe '#same_family_pipeline_ids' do
     subject { pipeline.same_family_pipeline_ids.map(&:id) }
 
@@ -3255,7 +3388,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
   describe '#batch_lookup_report_artifact_for_file_type' do
     context 'with code quality report artifact' do
-      let(:pipeline) { create(:ci_pipeline, :with_codequality_report, project: project) }
+      let(:pipeline) { create(:ci_pipeline, :with_codequality_reports, project: project) }
 
       it "returns the code quality artifact" do
         expect(pipeline.batch_lookup_report_artifact_for_file_type(:codequality)).to eq(pipeline.job_artifacts.sample)
@@ -3367,6 +3500,66 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     end
 
     context 'when pipeline does not have builds with coverage reports' do
+      before do
+        create(:ci_build, :artifacts, pipeline: pipeline, project: project)
+      end
+
+      let(:pipeline) { create(:ci_pipeline, :success, project: project) }
+
+      it { expect(subject).to be_falsey }
+    end
+  end
+
+  describe '#has_codequality_mr_diff_report?' do
+    subject { pipeline.has_codequality_mr_diff_report? }
+
+    context 'when pipeline has a codequality mr diff report' do
+      let(:pipeline) { create(:ci_pipeline, :with_codequality_mr_diff_report, :running, project: project) }
+
+      it { expect(subject).to be_truthy }
+    end
+
+    context 'when pipeline does not have a codequality mr diff report' do
+      let(:pipeline) { create(:ci_pipeline, :success, project: project) }
+
+      it { expect(subject).to be_falsey }
+    end
+  end
+
+  describe '#can_generate_codequality_reports?' do
+    subject { pipeline.can_generate_codequality_reports? }
+
+    context 'when pipeline has builds with codequality reports' do
+      before do
+        create(:ci_build, :codequality_reports, pipeline: pipeline, project: project)
+      end
+
+      context 'when pipeline status is running' do
+        let(:pipeline) { create(:ci_pipeline, :running, project: project) }
+
+        it { expect(subject).to be_falsey }
+      end
+
+      context 'when pipeline status is success' do
+        let(:pipeline) { create(:ci_pipeline, :success, project: project) }
+
+        it 'can generate a codequality report' do
+          expect(subject).to be_truthy
+        end
+
+        context 'when feature is disabled' do
+          before do
+            stub_feature_flags(codequality_mr_diff: false)
+          end
+
+          it 'can not generate a codequality report' do
+            expect(subject).to be_falsey
+          end
+        end
+      end
+    end
+
+    context 'when pipeline does not have builds with codequality reports' do
       before do
         create(:ci_build, :artifacts, pipeline: pipeline, project: project)
       end

@@ -18,7 +18,7 @@ RSpec.shared_examples 'a verifiable replicator' do
         expect(described_class).to receive(:enabled?).and_return(true)
       end
 
-      context 'when the verification feature flag is enabled' do
+      context 'when verification_feature_flag_enabled? returns true' do
         it 'returns true' do
           allow(described_class).to receive(:verification_feature_flag_enabled?).and_return(true)
 
@@ -26,7 +26,7 @@ RSpec.shared_examples 'a verifiable replicator' do
         end
       end
 
-      context 'when geo_framework_verification feature flag is disabled' do
+      context 'when verification_feature_flag_enabled? returns false' do
         it 'returns false' do
           allow(described_class).to receive(:verification_feature_flag_enabled?).and_return(false)
 
@@ -326,30 +326,94 @@ RSpec.shared_examples 'a verifiable replicator' do
   end
 
   describe '#verify' do
+    it 'wraps the checksum calculation in track_checksum_attempt!' do
+      tracker = double('tracker')
+      allow(replicator).to receive(:verification_state_tracker).and_return(tracker)
+
+      expect(model_record).to receive(:calculate_checksum)
+      expect(tracker).to receive(:track_checksum_attempt!).and_yield
+
+      replicator.verify
+    end
+  end
+
+  describe '#verification_state_tracker' do
     context 'on a Geo primary' do
       before do
         stub_primary_node
       end
 
-      context 'when the checksum succeeds' do
-        it 'delegates checksum calculation and the state change to model_record' do
-          expect(model_record).to receive(:calculate_checksum).and_return('abc123')
-          expect(model_record).to receive(:verification_succeeded_with_checksum!).with('abc123', kind_of(Time))
+      it 'returns model_record' do
+        expect(replicator.verification_state_tracker).to eq(model_record)
+      end
+    end
 
-          replicator.verify
+    context 'on a Geo secondary' do
+      before do
+        stub_secondary_node
+      end
+
+      it 'returns registry' do
+        registry = double('registry')
+        allow(replicator).to receive(:registry).and_return(registry)
+
+        expect(replicator.verification_state_tracker).to eq(registry)
+      end
+    end
+  end
+
+  context 'integration tests' do
+    before do
+      model_record.save!
+    end
+
+    context 'on a primary' do
+      before do
+        stub_primary_node
+      end
+
+      describe 'background backfill' do
+        it 'verifies model records' do
+          expect do
+            Geo::VerificationBatchWorker.new.perform(replicator.replicable_name)
+          end.to change { model_record.reload.verification_succeeded? }.from(false).to(true)
         end
       end
 
-      context 'when an error is raised during calculate_checksum' do
-        it 'passes the error message' do
-          error = StandardError.new('Some exception')
-          allow(model_record).to receive(:calculate_checksum) do
-            raise error
-          end
+      describe 'triggered by events' do
+        it 'verifies model records' do
+          expect do
+            Geo::VerificationWorker.new.perform(replicator.replicable_name, replicator.model_record_id)
+          end.to change { model_record.reload.verification_succeeded? }.from(false).to(true)
+        end
+      end
+    end
 
-          expect(model_record).to receive(:verification_failed_with_message!).with('Error calculating the checksum', error)
+    context 'on a secondary' do
+      before do
+        stub_secondary_node
+      end
 
-          replicator.verify
+      describe 'background backfill' do
+        it 'verifies registries' do
+          registry = replicator.registry
+          registry.start
+          registry.synced!
+
+          expect do
+            Geo::VerificationBatchWorker.new.perform(replicator.replicable_name)
+          end.to change { registry.reload.verification_succeeded? }.from(false).to(true)
+        end
+      end
+
+      describe 'triggered by events' do
+        it 'verifies registries' do
+          registry = replicator.registry
+          registry.save!
+
+          expect do
+            Geo::VerificationWorker.new.perform(replicator.replicable_name, replicator.model_record_id)
+          end.to change { registry.reload.verification_succeeded? }.from(false).to(true)
         end
       end
     end

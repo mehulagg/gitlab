@@ -3,8 +3,8 @@ import { GlEmptyState } from '@gitlab/ui';
 import { isUndefined } from 'lodash';
 import { mapActions, mapState } from 'vuex';
 
-import InsightsChart from './insights_chart.vue';
 import { __ } from '~/locale';
+import InsightsChart from './insights_chart.vue';
 
 export default {
   components: {
@@ -35,7 +35,7 @@ export default {
       return this.pageConfig.charts;
     },
     chartKeys() {
-      return this.charts.map(chart => chart.title);
+      return this.charts.map((chart) => chart.title);
     },
     hasChartsConfigured() {
       return !isUndefined(this.charts) && this.charts.length > 0;
@@ -55,7 +55,9 @@ export default {
       if (this.hasChartsConfigured) {
         this.initChartData(this.chartKeys);
 
-        this.charts.forEach(chart => this.fetchChartData({ endpoint: this.queryEndpoint, chart }));
+        this.charts.forEach((chart) =>
+          this.fetchChartData({ endpoint: this.queryEndpoint, chart }),
+        );
       }
     },
   },

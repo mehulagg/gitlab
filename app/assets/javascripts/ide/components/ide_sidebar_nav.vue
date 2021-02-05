@@ -1,5 +1,6 @@
 <script>
 import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { otherSide } from '../utils';
 import { SIDE_RIGHT } from '../constants';
 
@@ -37,7 +38,7 @@ export default {
   },
   methods: {
     isActiveTab(tab) {
-      return this.isOpen && tab.views.some(view => view.name === this.currentView);
+      return this.isOpen && tab.views.some((view) => view.name === this.currentView);
     },
     buttonClasses(tab) {
       return [
@@ -50,7 +51,7 @@ export default {
     },
     clickTab(e, tab) {
       e.currentTarget.blur();
-      this.$root.$emit('bv::hide::tooltip');
+      this.$root.$emit(BV_HIDE_TOOLTIP);
 
       if (this.isActiveTab(tab)) {
         this.$emit('close');

@@ -35,7 +35,7 @@ module Gitlab
         print_design_repositories_status
         print_replicators_status
         print_repositories_checked_status
-        print_replicators_checked_status
+        print_replicators_verification_status
 
         print_sync_settings
         print_db_replication_lag
@@ -57,48 +57,67 @@ module Gitlab
         print_design_repositories_status
         print_replicators_status
         print_repositories_checked_status
-        print_replicators_checked_status
+        print_replicators_verification_status
       end
 
       def replication_verification_complete?
-        success_status = [
-          current_node_status.repositories_synced_in_percentage,
-          current_node_status.repositories_checksummed_in_percentage,
-          current_node_status.wikis_synced_in_percentage,
-          current_node_status.wikis_checksummed_in_percentage,
-          current_node_status.lfs_objects_synced_in_percentage,
-          current_node_status.job_artifacts_synced_in_percentage,
-          current_node_status.attachments_synced_in_percentage,
-          current_node_status.replication_slots_used_in_percentage,
-          current_node_status.design_repositories_synced_in_percentage
-        ] + conditional_checks_status
+        checks_status =
+          legacy_replication_and_verification_checks_status +
+          replication_and_verification_checks_status +
+          conditional_replication_and_verification_checks_status
 
-        success_status.all? { |percentage| percentage == 100 }
+        checks_status.compact.all? { |percentage| percentage == 100 }
       end
 
       private
 
-      def conditional_checks_status
+      # rubocop:disable GitlabSecurity/PublicSend
+      def legacy_replication_and_verification_checks_status
+        replicables = [
+          ["repositories", Gitlab::Geo.repository_verification_enabled?],
+          ["wikis", Gitlab::Geo.repository_verification_enabled?],
+          ["lfs_objects", false],
+          ["job_artifacts", false],
+          ["attachments", false],
+          ["design_repositories", false]
+        ]
+
+        [].tap do |status|
+          replicables.each do |replicable_name, verification_enabled|
+            next unless current_node_status.public_send("#{replicable_name}_count").to_i > 0
+
+            status.push current_node_status.public_send("#{replicable_name}_synced_in_percentage")
+
+            if verification_enabled
+              status.push current_node_status.public_send("#{replicable_name}_verified_in_percentage")
+            end
+          end
+        end
+      end
+      # rubocop:enable GitlabSecurity/PublicSend
+
+      def replication_and_verification_checks_status
         [].tap do |status|
           Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
+            next unless current_node_status.count_for(replicator_class).to_i > 0
+
             status.push current_node_status.synced_in_percentage_for(replicator_class)
 
             if replicator_class.verification_enabled?
-              status.push current_node_status.checksummed_in_percentage_for(replicator_class)
+              status.push current_node_status.verified_in_percentage_for(replicator_class)
             end
           end
+        end
+      end
 
-          if Gitlab::Geo.repository_verification_enabled?
-            status.push current_node_status.repositories_verified_in_percentage
-            status.push current_node_status.wikis_verified_in_percentage
-          end
-
-          if ::Geo::ContainerRepositoryRegistry.replication_enabled?
-            status.push current_node_status.container_repositories_synced_in_percentage
-          end
-
-          if Gitlab::CurrentSettings.repository_checks_enabled
+      def conditional_replication_and_verification_checks_status
+        [].tap do |status|
+          if Gitlab::CurrentSettings.repository_checks_enabled && current_node_status.repositories_count.to_i > 0
             status.push current_node_status.repositories_checked_in_percentage
+          end
+
+          if ::Geo::ContainerRepositoryRegistry.replication_enabled? && current_node_status.container_repositories_count.to_i > 0
+            status.push current_node_status.container_repositories_synced_in_percentage
           end
         end
       end
@@ -282,14 +301,14 @@ module Gitlab
         end
       end
 
-      def print_replicators_checked_status
-        verifiable_replicator_classes = Gitlab::Geo.enabled_replicator_classes.select(&:verification_enabled?)
+      def print_replicators_verification_status
+        verifiable_replicator_classes = Gitlab::Geo.verification_enabled_replicator_classes
 
         verifiable_replicator_classes.each do |replicator_class|
-          print "#{replicator_class.replicable_title_plural} Checked: ".rjust(GEO_STATUS_COLUMN_WIDTH)
-          show_failed_value(replicator_class.checksum_failed_count)
-          print "#{replicator_class.checksummed_count}/#{replicator_class.registry_count} "
-          puts using_percentage(current_node_status.checksummed_in_percentage_for(replicator_class))
+          print "#{replicator_class.replicable_title_plural} Verified: ".rjust(GEO_STATUS_COLUMN_WIDTH)
+          show_failed_value(replicator_class.verification_failed_count)
+          print "#{replicator_class.verified_count}/#{replicator_class.registry_count} "
+          puts using_percentage(current_node_status.verified_in_percentage_for(replicator_class))
         end
       end
 

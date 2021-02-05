@@ -1,5 +1,0 @@
----
-title: Show an error when failing to save a merge request dependency
-merge_request: 48237
-author:
-type: changed

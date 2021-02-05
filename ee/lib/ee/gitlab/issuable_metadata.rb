@@ -7,8 +7,6 @@ module EE
 
       override :metadata_for_issuable
       def metadata_for_issuable(id)
-        return super unless ::Feature.enabled?(:blocking_issues_counts)
-
         super.tap do |data|
           blocking_count =
             grouped_blocking_issues_count.find do |issue_link|

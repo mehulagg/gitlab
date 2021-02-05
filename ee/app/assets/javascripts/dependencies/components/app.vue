@@ -1,20 +1,13 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import {
-  GlEmptyState,
-  GlIcon,
-  GlLoadingIcon,
-  GlSprintf,
-  GlLink,
-  GlDeprecatedButton,
-} from '@gitlab/ui';
+import { GlEmptyState, GlIcon, GlLoadingIcon, GlSprintf, GlLink, GlButton } from '@gitlab/ui';
 import { __ } from '~/locale';
+import { DEPENDENCY_LIST_TYPES } from '../store/constants';
+import { REPORT_STATUS } from '../store/modules/list/constants';
 import DependenciesActions from './dependencies_actions.vue';
 import DependencyListIncompleteAlert from './dependency_list_incomplete_alert.vue';
 import DependencyListJobFailedAlert from './dependency_list_job_failed_alert.vue';
 import PaginatedDependenciesTable from './paginated_dependencies_table.vue';
-import { DEPENDENCY_LIST_TYPES } from '../store/constants';
-import { REPORT_STATUS } from '../store/modules/list/constants';
 
 export default {
   name: 'DependenciesApp',
@@ -25,7 +18,7 @@ export default {
     GlLoadingIcon,
     GlSprintf,
     GlLink,
-    GlDeprecatedButton,
+    GlButton,
     DependencyListIncompleteAlert,
     DependencyListJobFailedAlert,
     PaginatedDependenciesTable,
@@ -133,9 +126,9 @@ export default {
     :svg-path="emptyStateSvgPath"
   >
     <template #actions>
-      <gl-deprecated-button variant="info" :href="emptyStateOptions.link">
+      <gl-button variant="info" :href="emptyStateOptions.link">
         {{ emptyStateOptions.buttonLabel }}
-      </gl-deprecated-button>
+      </gl-button>
     </template>
   </gl-empty-state>
 

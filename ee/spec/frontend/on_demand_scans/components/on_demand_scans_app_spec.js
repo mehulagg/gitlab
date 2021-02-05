@@ -19,7 +19,7 @@ describe('OnDemandScansApp', () => {
     expect(wrapper.find(OnDemandScansForm).exists()).toBe(true);
   };
 
-  const createComponent = options => {
+  const createComponent = (options) => {
     wrapper = shallowMount(
       OnDemandScansApp,
       merge(

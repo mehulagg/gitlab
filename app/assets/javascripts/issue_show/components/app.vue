@@ -5,16 +5,16 @@ import { __, s__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import Poll from '~/lib/utils/poll';
+import recaptchaModalImplementor from '~/vue_shared/mixins/recaptcha_modal_implementor';
 import eventHub from '../event_hub';
 import Service from '../services/index';
 import Store from '../stores';
+import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
 import titleComponent from './title.vue';
 import descriptionComponent from './description.vue';
 import editedComponent from './edited.vue';
 import formComponent from './form.vue';
 import PinnedLinks from './pinned_links.vue';
-import recaptchaModalImplementor from '~/vue_shared/mixins/recaptcha_modal_implementor';
-import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
 
 export default {
   components: {
@@ -250,7 +250,7 @@ export default {
     this.poll = new Poll({
       resource: this.service,
       method: 'getData',
-      successCallback: res => this.store.updateState(res.data),
+      successCallback: (res) => this.store.updateState(res.data),
       errorCallback(err) {
         throw new Error(err);
       },
@@ -294,8 +294,8 @@ export default {
     updateStoreState() {
       return this.service
         .getData()
-        .then(res => res.data)
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => {
           this.store.updateState(data);
         })
         .catch(() => {
@@ -320,7 +320,7 @@ export default {
     requestTemplatesAndShowForm() {
       return this.service
         .loadTemplates(this.issuableTemplateNamesPath)
-        .then(res => {
+        .then((res) => {
           this.updateAndShowForm(res.data);
         })
         .catch(() => {
@@ -345,9 +345,9 @@ export default {
     updateIssuable() {
       return this.service
         .updateIssuable(this.store.formState)
-        .then(res => res.data)
-        .then(data => this.checkForSpam(data))
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => this.checkForSpam(data))
+        .then((data) => {
           if (!window.location.pathname.includes(data.web_url)) {
             visitUrl(data.web_url);
           }
@@ -384,8 +384,8 @@ export default {
     deleteIssuable(payload) {
       return this.service
         .deleteIssuable(payload)
-        .then(res => res.data)
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => {
           // Stop the poll so we don't get 404's with the issuable not existing
           this.poll.stop();
 

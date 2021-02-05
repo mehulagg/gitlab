@@ -550,7 +550,7 @@ in the default execution mode - using
 does not account for weights.
 
 As we are [moving towards using `sidekiq-cluster` in
-Core](https://gitlab.com/gitlab-org/gitlab/-/issues/34396), newly-added
+Free](https://gitlab.com/gitlab-org/gitlab/-/issues/34396), newly-added
 workers do not need to have weights specified. They can simply use the
 default weight, which is 1.
 
@@ -825,7 +825,7 @@ For the same reasons that removing workers is dangerous, care should be taken
 when renaming queues.
 
 When renaming queues, use the `sidekiq_queue_migrate` helper migration method,
-as show in this example:
+as shown in this example:
 
 ```ruby
 class MigrateTheRenamedSidekiqQueue < ActiveRecord::Migration[5.0]

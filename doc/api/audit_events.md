@@ -1,12 +1,12 @@
 ---
-stage: none
-group: unassigned
+stage: Manage
+group: Compliance
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Audit Events API
 
-## Instance Audit Events **(PREMIUM ONLY)**
+## Instance Audit Events **(PREMIUM SELF)**
 
 The Audit Events API allows you to retrieve [instance audit events](../administration/audit_events.md#instance-events).
 
@@ -126,7 +126,7 @@ Example response:
 }
 ```
 
-## Group Audit Events **(STARTER)**
+## Group Audit Events **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34078) in GitLab 12.5.
 
@@ -233,7 +233,7 @@ Example response:
 }
 ```
 
-## Project Audit Events **(STARTER)**
+## Project Audit Events **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/219238) in GitLab 13.1.
 

@@ -34,7 +34,7 @@ export default () => {
             reportSectionClass: 'split-report-section',
           },
           on: {
-            updateBadgeCount: count => {
+            updateBadgeCount: (count) => {
               updateBadgeCount('.js-licenses-counter', count);
             },
           },

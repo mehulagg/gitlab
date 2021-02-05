@@ -9,7 +9,7 @@ describe('EpicsSelect', () => {
   describe('store', () => {
     describe('getters', () => {
       let state;
-      const normalizedEpics = mockEpics.map(rawEpic =>
+      const normalizedEpics = mockEpics.map((rawEpic) =>
         convertObjectPropsToCamelCase(Object.assign(rawEpic, { url: rawEpic.web_edit_url }), {
           dropKeys: ['web_edit_url'],
         }),

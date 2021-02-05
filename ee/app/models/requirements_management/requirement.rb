@@ -60,12 +60,16 @@ module RequirementsManagement
       project
     end
 
+    def latest_report
+      test_reports.last
+    end
+
     def last_test_report_state
-      test_reports.last&.state
+      latest_report&.state
     end
 
     def last_test_report_manually_created?
-      test_reports.last&.build.nil?
+      latest_report&.build.nil?
     end
   end
 end

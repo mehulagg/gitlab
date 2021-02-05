@@ -1,3 +1,4 @@
+import { mergeUrlParams } from '../lib/utils/url_utility';
 import DropdownHint from './dropdown_hint';
 import DropdownUser from './dropdown_user';
 import DropdownNonUser from './dropdown_non_user';
@@ -6,7 +7,6 @@ import NullDropdown from './null_dropdown';
 import DropdownAjaxFilter from './dropdown_ajax_filter';
 import DropdownOperator from './dropdown_operator';
 import DropdownUtils from './dropdown_utils';
-import { mergeUrlParams } from '../lib/utils/url_utility';
 
 export default class AvailableDropdownMappings {
   constructor({
@@ -50,7 +50,7 @@ export default class AvailableDropdownMappings {
       },
     };
 
-    supportedTokens.forEach(type => {
+    supportedTokens.forEach((type) => {
       if (availableMappings[type]) {
         allowedMappings[type] = availableMappings[type];
       }
@@ -99,7 +99,7 @@ export default class AvailableDropdownMappings {
 
           // The DropdownNonUser class is hardcoded to look for and display a
           // "title" property, so we need to add this property to each release object
-          preprocessing: releases => releases.map(r => ({ ...r, title: r.tag })),
+          preprocessing: (releases) => releases.map((r) => ({ ...r, title: r.tag })),
         },
         element: this.container.querySelector('#js-dropdown-release'),
       },
@@ -162,7 +162,7 @@ export default class AvailableDropdownMappings {
         extraArguments: {
           endpoint: this.getEnvironmentsEndpoint(),
           symbol: '',
-          preprocessing: data => data.map(env => ({ title: env })),
+          preprocessing: (data) => data.map((env) => ({ title: env })),
         },
         element: this.container.querySelector('#js-dropdown-environment'),
       },
@@ -200,8 +200,9 @@ export default class AvailableDropdownMappings {
   }
 
   getMergeRequestTargetBranchesEndpoint() {
-    const endpoint = `${gon.relative_url_root ||
-      ''}/autocomplete/merge_request_target_branches.json`;
+    const endpoint = `${
+      gon.relative_url_root || ''
+    }/autocomplete/merge_request_target_branches.json`;
 
     const params = {
       group_id: this.getGroupId(),

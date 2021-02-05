@@ -17,10 +17,10 @@ export default {
   computed: {
     ...mapState(['settings']),
     ...mapState({
-      resetToDefault: state => state.approvals.resetToDefault,
-      rules: state => state.approvals.rules,
-      rulesToDelete: state => state.approvals.rulesToDelete,
-      fallbackApprovalsRequired: state => state.approvals.fallbackApprovalsRequired,
+      resetToDefault: (state) => state.approvals.resetToDefault,
+      rules: (state) => state.approvals.rules,
+      rulesToDelete: (state) => state.approvals.rulesToDelete,
+      fallbackApprovalsRequired: (state) => state.approvals.fallbackApprovalsRequired,
     }),
   },
   INPUT_ID,

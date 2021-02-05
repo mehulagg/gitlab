@@ -181,7 +181,7 @@ module ApplicationSettingsHelper
       :asset_proxy_enabled,
       :asset_proxy_secret_key,
       :asset_proxy_url,
-      :asset_proxy_whitelist,
+      :asset_proxy_allowlist,
       :static_objects_external_storage_auth_token,
       :static_objects_external_storage_url,
       :authorized_keys_enabled,
@@ -242,6 +242,7 @@ module ApplicationSettingsHelper
       :housekeeping_incremental_repack_period,
       :html_emails_enabled,
       :import_sources,
+      :invisible_captcha_enabled,
       :max_artifacts_size,
       :max_attachment_size,
       :max_import_size,
@@ -255,6 +256,7 @@ module ApplicationSettingsHelper
       :password_authentication_enabled_for_git,
       :performance_bar_allowed_group_path,
       :performance_bar_enabled,
+      :personal_access_token_prefix,
       :kroki_enabled,
       :kroki_url,
       :plantuml_enabled,
@@ -334,7 +336,10 @@ module ApplicationSettingsHelper
       :group_export_limit,
       :group_download_export_limit,
       :wiki_page_max_content_bytes,
-      :container_registry_delete_tags_service_timeout
+      :container_registry_delete_tags_service_timeout,
+      :rate_limiting_response_text,
+      :container_registry_expiration_policies_worker_capacity,
+      :container_registry_cleanup_tags_service_max_list_size
     ]
   end
 
@@ -350,9 +355,11 @@ module ApplicationSettingsHelper
     ]
   end
 
+  # ok to remove in REST API v5
   def deprecated_attributes
     [
-      :admin_notification_email # ok to remove in REST API v5
+      :admin_notification_email,
+      :asset_proxy_whitelist
     ]
   end
 

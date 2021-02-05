@@ -19,7 +19,7 @@ describe('AuditFilterToken', () => {
   ];
 
   const findFilteredSearchToken = () => wrapper.find('#filtered-search-token');
-  const findLoadingIcon = type => wrapper.find(type).find(GlLoadingIcon);
+  const findLoadingIcon = (type) => wrapper.find(type).find(GlLoadingIcon);
 
   const tokenMethods = {
     fetchItem: jest.fn().mockResolvedValue(item),

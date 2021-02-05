@@ -30,9 +30,6 @@ export default {
     };
   },
   translations: {
-    legacyFlagAlert: s__(
-      'FeatureFlags|GitLab is moving to a new way of managing feature flags, and in 13.4, this feature flag will become read-only. Please create a new feature flag.',
-    ),
     legacyReadOnlyFlagAlert: s__(
       'FeatureFlags|GitLab is moving to a new way of managing feature flags. This feature flag is read-only, and it will be removed in 14.0. Please create a new feature flag.',
     ),
@@ -59,18 +56,6 @@ export default {
     deprecated() {
       return this.version === LEGACY_FLAG;
     },
-    deprecatedAndEditable() {
-      return this.deprecated && !this.hasLegacyReadOnlyFlags;
-    },
-    deprecatedAndReadOnly() {
-      return this.deprecated && this.hasLegacyReadOnlyFlags;
-    },
-    hasLegacyReadOnlyFlags() {
-      return (
-        this.glFeatures.featureFlagsLegacyReadOnly &&
-        !this.glFeatures.featureFlagsLegacyReadOnlyOverride
-      );
-    },
   },
   created() {
     return this.fetchFeatureFlag();
@@ -91,12 +76,9 @@ export default {
     <gl-loading-icon v-if="isLoading" size="xl" class="gl-mt-7" />
 
     <template v-else-if="!isLoading && !hasError">
-      <gl-alert v-if="deprecatedAndEditable" variant="warning" :dismissible="false" class="gl-my-5">
-        {{ $options.translations.legacyFlagAlert }}
-      </gl-alert>
-      <gl-alert v-if="deprecatedAndReadOnly" variant="warning" :dismissible="false" class="gl-my-5">
-        {{ $options.translations.legacyReadOnlyFlagAlert }}
-      </gl-alert>
+      <gl-alert v-if="deprecated" variant="warning" :dismissible="false" class="gl-my-5">{{
+        $options.translations.legacyReadOnlyFlagAlert
+      }}</gl-alert>
       <div class="gl-display-flex gl-align-items-center gl-mb-4 gl-mt-4">
         <gl-toggle
           :value="active"
@@ -109,9 +91,9 @@ export default {
         <h3 class="page-title gl-m-0">{{ title }}</h3>
       </div>
 
-      <div v-if="error.length" class="alert alert-danger">
+      <gl-alert v-if="error.length" variant="warning" class="gl-mb-5" :dismissible="false">
         <p v-for="(message, index) in error" :key="index" class="gl-mb-0">{{ message }}</p>
-      </div>
+      </gl-alert>
 
       <feature-flag-form
         :name="name"
@@ -122,7 +104,7 @@ export default {
         :submit-text="__('Save changes')"
         :active="active"
         :version="version"
-        @handleSubmit="data => updateFeatureFlag(data)"
+        @handleSubmit="(data) => updateFeatureFlag(data)"
       />
     </template>
   </div>

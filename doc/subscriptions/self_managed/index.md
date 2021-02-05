@@ -1,15 +1,25 @@
 ---
-stage: none
-group: unassigned
+stage: Fulfillment
+group: Purchase
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: index, reference
 ---
 
-# GitLab self-managed subscription **(STARTER ONLY)**
+# GitLab self-managed subscription **(PREMIUM SELF)**
 
 You can install, administer, and maintain your own GitLab instance.
 
 This page covers the details of your GitLab self-managed subscription.
+
+GitLab subscription management requires access to the Customers Portal.
+
+## Customers Portal
+
+GitLab provides the [Customers Portal](../index.md#customers-portal) where you can
+manage your subscriptions and your account details.
+
+Customers of resellers do not have access to this portal and should contact their reseller for any
+changes to their subscription.
 
 ## Subscription
 
@@ -27,10 +37,10 @@ at each tier, see the
 
 ## Subscription seats
 
-A self-managed subscription uses a hybrid model. You pay for a subscription
+A GitLab self-managed subscription uses a hybrid model. You pay for a subscription
 according to the maximum number of users enabled during the subscription period.
 For instances that aren't offline or on a closed network, the maximum number of
-simultaneous users in the self-managed installation is checked each quarter,
+simultaneous users in the GitLab self-managed installation is checked each quarter,
 using [Seat Link](#seat-link).
 
 ### Billable users
@@ -43,7 +53,7 @@ billable user, with the following exceptions:
   count toward overages in the subscribed seat count.
 - Users who are [pending approval](../../user/admin_area/approving_users.md).
 - Members with Guest permissions on an Ultimate subscription.
-- GitLab-created service accounts: `Ghost User` and bots (`Support Bot`, [`Project bot users`](../../user/project/settings/project_access_tokens.md#project-bot-users), and so on).
+- GitLab-created service accounts: `Ghost User` and bots [(`Support Bot`](../../user/project/service_desk.md#support-bot-user), [`Project bot users`](../../user/project/settings/project_access_tokens.md#project-bot-users), and so on).
 
 ### Tips for managing users and subscription seats
 
@@ -59,22 +69,21 @@ GitLab has several features which can help you manage the number of users:
 - Enable the [**Require administrator approval for new sign ups**](../../user/admin_area/settings/sign_up_restrictions.md#require-administrator-approval-for-new-sign-ups)
   option.
 - Enable the [User cap](../../user/admin_area/settings/sign_up_restrictions.md#user-cap)
-  option. **Available in GitLab 13.6 and later**.
+  option. **Available in GitLab 13.7 and later**.
 - [Disable new sign-ups](../../user/admin_area/settings/sign_up_restrictions.md), and instead manage new
   users manually.
 - View a breakdown of users by role in the [Users statistics](../../user/admin_area/index.md#users-statistics) page.
 
 ## Obtain a subscription
 
-To subscribe to GitLab through a self-managed installation:
+To subscribe to GitLab through a GitLab self-managed installation:
 
-1. Go to the [Customers Portal](https://customers.gitlab.com/) and purchase a
-   **Starter**, **Premium**, or **Ultimate** self-managed plan.
+1. Go to the [Customers Portal](https://customers.gitlab.com/) and purchase a GitLab self-managed plan.
 1. After purchase, a license file is sent to the email address associated to the Customers Portal account,
    which must be [uploaded to your GitLab instance](../../user/admin_area/license.md#uploading-your-license).
 
 NOTE:
-If you're purchasing a subscription for an existing **Core** self-managed
+If you're purchasing a subscription for an existing **Free** GitLab self-managed
 instance, ensure you're purchasing enough seats to
 [cover your users](../../user/admin_area/index.md#administering-users).
 
@@ -95,16 +104,16 @@ It also displays the following important statistics:
 
 | Field              | Description |
 |:-------------------|:------------|
-| Users in License   | The number of users you've paid for in the current license loaded on the system. This does not include the amount you've paid for `Users over license` during renewal. |
-| Billable users     | The daily count of billable users on your system. |
-| Maximum users      | The highest number of billable users on your system during the term of the loaded license. If this number exceeds your users in license count at any point, you incur users over license. |
-| Users over license | The number of users that exceed the `Users in License` for the current license term. Charges for this number of users are incurred at the next renewal. |
+| Users in License   | The number of users you've paid for in the current license loaded on the system. The number does not change unless you [add seats](#add-seats-to-a-subscription) during your current subscription period. |
+| Billable users     | The daily count of billable users on your system. The count may change as you block or add users to your instance. |
+| Maximum users      | The highest number of billable users on your system during the term of the loaded license. |
+| Users over license | Calculated as `Maximum users` - `Users in License` for the current license term. This number incurs a retroactive charge that needs to be paid for at renewal. |
 
 ## Renew your subscription
 
 To renew your subscription,
 [prepare for renewal by reviewing your account](#prepare-for-renewal-by-reviewing-your-account),
-then [renew your self-managed subscription](#renew-a-subscription).
+then [renew your GitLab self-managed subscription](#renew-a-subscription).
 
 ### Prepare for renewal by reviewing your account
 
@@ -122,28 +131,38 @@ the contact person who manages your subscription.
 
 It's important to regularly review your user accounts, because:
 
-- A GitLab subscription is based on the number of users. You pay more than you should if you renew
-  for too many users, while the renewal fails if you attempt to renew a subscription for too few
-  users.
+- Stale user accounts that are not blocked count as billable users. You may pay more than you should
+  if you renew for too many users.
 - Stale user accounts can be a security risk. A regular review helps reduce this risk.
 
 #### Users over License
 
-A GitLab subscription is valid for a specific number of users. For details, see
-[Billable users](#billable-users). If the billable user
-count exceeds the number included in the subscription, known as the number of
-_users over license_, you must pay for the excess number of users either before
-renewal, or at the time of renewal. This is also known as the _true up_ process.
+A GitLab subscription is valid for a specific number of seats. The number of users over license
+is the number of _Maximum users_ that exceed the _Users in License_ for the current license term.
+You must pay for this number of users either before renewal, or at the time of renewal. This is
+known as the _true up_ process.
 
-To view the number of _Users over License_ go to the **Admin Area**.
+To view the number of _users over license_ go to the **Admin Area**.
 
-### Add users to a subscription
+##### Users over license example
 
-Self-managed instances can add users to a subscription any time during the
-subscription period. The cost of additional users added during the subscription
+You purchase a license for 10 users.
+
+| Event                                              | Billable members | Maximum users |
+|:---------------------------------------------------|:-----------------|:--------------|
+| Ten people (users) occupy all 10 seats.            | 10               | 10            |
+| Two new people join.                               | 12               | 12            |
+| Three people leave and their accounts are removed. | 9                | 12            |
+
+Users over license = 12 - 10 (Maximum users - users in license)
+
+### Add seats to a subscription
+
+The users in license count can be increased by adding seats to a subscription any time during the
+subscription period. The cost of seats added during the subscription
 period is prorated from the date of purchase through the end of the subscription period.
 
-To add users to a subscription:
+To add seats to a subscription:
 
 1. Log in to the [Customers Portal](https://customers.gitlab.com/).
 1. Navigate to the **Manage Purchases** page.
@@ -183,9 +202,9 @@ An invoice is generated for the renewal and available for viewing or download on
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208832) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.9.
 
-Seat Link allows GitLab Inc. to provide our self-managed customers with prorated charges for user growth throughout the year using a quarterly reconciliation process.
+Seat Link allows GitLab Inc. to provide our GitLab self-managed customers with prorated charges for user growth throughout the year using a quarterly reconciliation process.
 
-Seat Link daily sends a count of all users in connected self-managed instances to GitLab. That information is used to automate prorated reconciliations. The data is sent securely through an encrypted HTTPS connection.
+Seat Link daily sends a count of all users in connected GitLab self-managed instances to GitLab. That information is used to automate prorated reconciliations. The data is sent securely through an encrypted HTTPS connection to `customers.gitlab.com` on port `443`.
 
 Seat Link provides **only** the following information to GitLab:
 
@@ -305,17 +324,12 @@ behave as expected if you're not prepared for the expiry. For example,
 [environment specific variables not being passed](https://gitlab.com/gitlab-org/gitlab/-/issues/24759).
 If you renew or upgrade, your data is again accessible.
 
-For self-managed customers, there is a 14-day grace period when your features
+For GitLab self-managed customers, there is a 14-day grace period when your features
 continue to work as-is, after which the entire instance becomes read
 only.
 
-However, if you remove the license, you immediately revert to Core
+However, if you remove the license, you immediately revert to Free
 features, and the instance become read / write again.
-
-## Customers Portal
-
-GitLab provides the [Customers Portal](../index.md#customers-portal) where you can
-manage your subscriptions and your account details.
 
 ## Contact Support
 

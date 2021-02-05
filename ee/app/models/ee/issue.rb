@@ -157,6 +157,7 @@ module EE
       !incident?
     end
 
+    override :supports_iterations?
     def supports_iterations?
       !incident?
     end
@@ -249,6 +250,11 @@ module EE
     override :relocation_target
     def relocation_target
       super || promoted_to_epic
+    end
+
+    override :supports_epic?
+    def supports_epic?
+      issue_type_supports?(:epics) && project.group.present?
     end
 
     private

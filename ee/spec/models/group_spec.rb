@@ -26,6 +26,8 @@ RSpec.describe Group do
     it { is_expected.to have_many(:epic_boards).inverse_of(:group) }
     it { is_expected.to have_many(:provisioned_user_details).inverse_of(:provisioned_by_group) }
     it { is_expected.to have_many(:provisioned_users) }
+    it { is_expected.to have_one(:group_merge_request_approval_setting) }
+    it { is_expected.to have_many(:repository_storage_moves) }
 
     it_behaves_like 'model with wiki' do
       let(:container) { create(:group, :nested, :wiki_repo) }
@@ -898,6 +900,169 @@ RSpec.describe Group do
     end
   end
 
+  describe "#execute_hooks" do
+    context "group_webhooks", :request_store do
+      let_it_be(:parent_group) { create(:group) }
+      let_it_be(:group) { create(:group, parent: parent_group) }
+      let_it_be(:group_hook) { create(:group_hook, group: group, member_events: true) }
+      let_it_be(:parent_group_hook) { create(:group_hook, group: parent_group, member_events: true) }
+      let(:data) { { some: 'info' } }
+
+      before do
+        group.clear_memoization(:feature_available)
+      end
+
+      context 'when group_webhooks feature is enabled' do
+        before do
+          stub_licensed_features(group_webhooks: true)
+        end
+
+        context 'execution' do
+          it 'executes the hook for self and ancestor groups by default' do
+            expect(WebHookService).to receive(:new)
+                                        .with(group_hook, data, 'member_hooks').and_call_original
+            expect(WebHookService).to receive(:new)
+                                        .with(parent_group_hook, data, 'member_hooks').and_call_original
+
+            group.execute_hooks(data, :member_hooks)
+          end
+        end
+      end
+
+      context 'when group_webhooks feature is disabled' do
+        before do
+          stub_licensed_features(group_webhooks: false)
+        end
+
+        it 'does not execute the hook' do
+          expect(WebHookService).not_to receive(:new)
+
+          group.execute_hooks(data, :member_hooks)
+        end
+      end
+    end
+  end
+
+  context 'subgroup hooks', :sidekiq_inline do
+    let_it_be(:grandparent_group) { create(:group) }
+    let_it_be(:parent_group) { create(:group, parent: grandparent_group) }
+    let_it_be(:subgroup) { create(:group, parent: parent_group) }
+    let_it_be(:parent_group_hook) { create(:group_hook, group: parent_group, subgroup_events: true) }
+
+    def webhook_body(subgroup:, parent_group:, event_name:)
+      {
+        created_at: subgroup.created_at.xmlschema,
+        updated_at: subgroup.updated_at.xmlschema,
+        name: subgroup.name,
+        path: subgroup.path,
+        full_path: subgroup.full_path,
+        group_id: subgroup.id,
+        parent_name: parent_group.name,
+        parent_path: parent_group.path,
+        parent_full_path: parent_group.full_path,
+        parent_group_id: parent_group.id,
+        event_name: event_name
+      }
+    end
+
+    def webhook_headers
+      {
+        'Content-Type' => 'application/json',
+        'User-Agent' => "GitLab/#{Gitlab::VERSION}",
+        'X-Gitlab-Event' => 'Subgroup Hook'
+      }
+    end
+
+    before do
+      WebMock.stub_request(:post, parent_group_hook.url)
+    end
+
+    context 'when a subgroup is added to the parent group' do
+      it 'executes the webhook' do
+        subgroup = create(:group, parent: parent_group)
+
+        expect(WebMock).to have_requested(:post, parent_group_hook.url).with(
+          headers: webhook_headers,
+          body: webhook_body(subgroup: subgroup, parent_group: parent_group, event_name: 'subgroup_create')
+        )
+      end
+    end
+
+    context 'when a subgroup is removed from the parent group' do
+      it 'executes the webhook' do
+        subgroup.destroy!
+
+        expect(WebMock).to have_requested(:post, parent_group_hook.url).with(
+          headers: webhook_headers,
+          body: webhook_body(subgroup: subgroup, parent_group: parent_group, event_name: 'subgroup_destroy')
+        )
+      end
+    end
+
+    context 'when the subgroup has subgroup webhooks enabled' do
+      let_it_be(:subgroup_hook) { create(:group_hook, group: subgroup, subgroup_events: true) }
+
+      it 'does not execute the webhook on itself' do
+        subgroup.destroy!
+
+        expect(WebMock).not_to have_requested(:post, subgroup_hook.url)
+      end
+    end
+
+    context 'ancestor groups' do
+      let_it_be(:grand_parent_group_hook) { create(:group_hook, group: grandparent_group, subgroup_events: true) }
+
+      before do
+        WebMock.stub_request(:post, grand_parent_group_hook.url)
+      end
+
+      it 'fires webhook twice when both parent & grandparent group has subgroup_events enabled' do
+        subgroup.destroy!
+
+        expect(WebMock).to have_requested(:post, grand_parent_group_hook.url)
+        expect(WebMock).to have_requested(:post, parent_group_hook.url)
+      end
+
+      context 'when parent group does not have subgroup_events enabled' do
+        before do
+          parent_group_hook.update!(subgroup_events: false)
+        end
+
+        it 'fires webhook once for the grandparent group when it has subgroup_events enabled' do
+          subgroup.destroy!
+
+          expect(WebMock).to have_requested(:post, grand_parent_group_hook.url)
+          expect(WebMock).not_to have_requested(:post, parent_group_hook.url)
+        end
+      end
+    end
+
+    context 'when the group is not a subgroup' do
+      let_it_be(:grand_parent_group_hook) { create(:group_hook, group: grandparent_group, subgroup_events: true) }
+
+      it 'does not proceed to firing any webhooks' do
+        allow(grandparent_group).to receive(:execute_hooks)
+
+        grandparent_group.destroy!
+
+        expect(grandparent_group).not_to have_received(:execute_hooks)
+      end
+    end
+
+    context 'when group webhooks are unlicensed' do
+      before do
+        subgroup.clear_memoization(:feature_available)
+        stub_licensed_features(group_webhooks: false)
+      end
+
+      it 'does not execute the webhook' do
+        subgroup.destroy!
+
+        expect(WebMock).not_to have_requested(:post, parent_group_hook.url)
+      end
+    end
+  end
+
   describe '#self_or_ancestor_marked_for_deletion' do
     context 'delayed deletion feature is not available' do
       before do
@@ -1222,5 +1387,30 @@ RSpec.describe Group do
         end
       end
     end
+  end
+
+  describe '#repository_storage', :aggregated_failures do
+    context 'when wiki does not have a tracked repository storage' do
+      it 'returns the default shard' do
+        expect(::Repository).to receive(:pick_storage_shard).and_call_original
+        expect(subject.repository_storage).to eq('default')
+      end
+    end
+
+    context 'when wiki has a tracked repository storage' do
+      it 'returns the persisted shard' do
+        group.wiki.create_wiki_repository
+
+        expect(group.group_wiki_repository).to receive(:shard_name).and_return('foo')
+
+        expect(group.repository_storage).to eq('foo')
+      end
+    end
+  end
+
+  it_behaves_like 'can move repository storage' do
+    let_it_be(:container) { create(:group, :wiki_repo) }
+
+    let(:repository) { container.wiki.repository }
   end
 end

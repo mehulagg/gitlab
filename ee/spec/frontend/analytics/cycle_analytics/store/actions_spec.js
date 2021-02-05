@@ -948,7 +948,7 @@ describe('Value Stream Analytics actions', () => {
             { type: types.REQUEST_CREATE_VALUE_STREAM },
             {
               type: types.RECEIVE_CREATE_VALUE_STREAM_ERROR,
-              payload: { message, errors },
+              payload: { message, data: payload, errors },
             },
           ],
           [],
@@ -1020,7 +1020,6 @@ describe('Value Stream Analytics actions', () => {
         currentGroup,
         featureFlags: {
           ...state.featureFlags,
-          hasCreateMultipleValueStreams: true,
         },
       };
       mock = new MockAdapter(axios);
@@ -1102,21 +1101,6 @@ describe('Value Stream Analytics actions', () => {
         );
       });
     });
-
-    describe('with hasCreateMultipleValueStreams disabled', () => {
-      beforeEach(() => {
-        state = {
-          ...state,
-          featureFlags: {
-            ...state.featureFlags,
-            hasCreateMultipleValueStreams: false,
-          },
-        };
-      });
-
-      it(`will dispatch the 'fetchGroupStagesAndEvents' request`, () =>
-        testAction(actions.fetchValueStreams, null, state, [], [{ type: 'fetchValueStreamData' }]));
-    });
   });
 
   describe('fetchValueStreamData', () => {
@@ -1127,7 +1111,6 @@ describe('Value Stream Analytics actions', () => {
         currentGroup,
         featureFlags: {
           ...state.featureFlags,
-          hasCreateMultipleValueStreams: true,
         },
       };
       mock = new MockAdapter(axios);

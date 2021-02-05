@@ -1,15 +1,15 @@
 import MockAdapter from 'axios-mock-adapter';
 import Api from '~/api';
+import httpStatus from '~/lib/utils/http_status';
+import axios from '~/lib/utils/axios_utils';
+import { resolvers } from '~/pipeline_editor/graphql/resolvers';
 import {
   mockCiConfigPath,
   mockCiYml,
   mockDefaultBranch,
   mockLintResponse,
-  mockProjectPath,
+  mockProjectFullPath,
 } from '../mock_data';
-import httpStatus from '~/lib/utils/http_status';
-import axios from '~/lib/utils/axios_utils';
-import { resolvers } from '~/pipeline_editor/graphql/resolvers';
 
 jest.mock('~/api', () => {
   return {
@@ -32,12 +32,12 @@ describe('~/pipeline_editor/graphql/resolvers', () => {
 
       it('resolves lint data with type names', async () => {
         const result = resolvers.Query.blobContent(null, {
-          projectPath: mockProjectPath,
+          projectPath: mockProjectFullPath,
           path: mockCiConfigPath,
           ref: mockDefaultBranch,
         });
 
-        expect(Api.getRawFile).toHaveBeenCalledWith(mockProjectPath, mockCiConfigPath, {
+        expect(Api.getRawFile).toHaveBeenCalledWith(mockProjectFullPath, mockCiConfigPath, {
           ref: mockDefaultBranch,
         });
 

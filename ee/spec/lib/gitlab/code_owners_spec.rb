@@ -71,6 +71,35 @@ RSpec.describe Gitlab::CodeOwners do
     end
   end
 
+  describe '.optional_section?' do
+    subject { described_class.optional_section?(project, branch, 'codeowners') }
+
+    let(:branch) { TestEnv::BRANCH_SHA['with-codeowners'] }
+    let(:codeowner_lookup_ref) { branch }
+
+    context 'when the feature is available' do
+      before do
+        stub_licensed_features(code_owners: true)
+      end
+
+      it 'returns the optionality of the section' do
+        is_expected.to eq(false)
+      end
+    end
+
+    context 'when the feature is not available' do
+      before do
+        stub_licensed_features(code_owners: false)
+      end
+
+      it 'does not call Loader' do
+        expect(Gitlab::CodeOwners::Loader).not_to receive(:new)
+
+        subject
+      end
+    end
+  end
+
   describe ".fast_path_lookup and .slow_path_lookup" do
     let(:codeowner_lookup_ref) { merge_request.target_branch }
     let(:codeowner_content) { 'files/ruby/feature.rb @owner-1' }

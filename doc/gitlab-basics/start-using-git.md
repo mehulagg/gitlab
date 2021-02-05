@@ -22,7 +22,7 @@ the command line and then push your changes to the remote server.
 
 This guide will help you get started with Git through the command line and can be your reference
 for Git commands in the future. If you're only looking for a quick reference of Git commands, you
-can download GitLab's [Git Cheat Sheet](https://about.gitlab.com/images/press/git-cheat-sheet.pdf).
+can download the GitLab [Git Cheat Sheet](https://about.gitlab.com/images/press/git-cheat-sheet.pdf).
 
 > For more information about the advantages of working with Git and GitLab:
 >
@@ -51,7 +51,7 @@ prompt, terminal, and command line) of your preference. Here are some suggestion
   - Built-in: [Terminal](https://blog.teamtreehouse.com/introduction-to-the-mac-os-x-command-line). Press <kbd>⌘ command</kbd> + <kbd>space</kbd> and type "terminal" to find it.
   - [iTerm2](https://iterm2.com/), which you can integrate with [zsh](https://git-scm.com/book/id/v2/Appendix-A%3A-Git-in-Other-Environments-Git-in-Zsh) and [oh my zsh](https://ohmyz.sh/) for color highlighting, among other handy features for Git users.
 - For Windows users:
-  - Built-in: **cmd**. Click the search icon on the bottom navbar on Windows and type "cmd" to find it.
+  - Built-in: `cmd`. Click the search icon on the bottom navigation bar on Windows and type `cmd` to find it.
   - [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/windows-powershell/install/installing-windows-powershell?view=powershell-7): a Windows "powered up" shell, from which you can execute a greater number of commands.
   - Git Bash: it comes built into [Git for Windows](https://gitforwindows.org/).
 - For Linux users:
@@ -128,7 +128,7 @@ to our computer:
   - If you don't have 2FA enabled, use your account's password.
 
 NOTE:
-Authenticating via SSH is GitLab's recommended method. You can read more about credential storage
+Authenticating via SSH is the GitLab recommended method. You can read more about credential storage
 in the [Git Credentials documentation](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage).
 
 ## Git terminology
@@ -152,8 +152,12 @@ Your files in GitLab live in a **repository**, similar to how you have them in a
 directory in your computer. **Remote** repository refers to the files in
 GitLab and the copy in your computer is called **local** copy.
 A **project** in GitLab is what holds a repository, which holds your files.
-Often, the word "repository" is shortened to "repo".
 
+<!-- vale gitlab.Spelling = NO -->
+<!-- vale gitlab.SubstitutionWarning = NO -->
+Often, the word "repository" is shortened to "repo".
+<!-- vale gitlab.Spelling = YES -->
+<!-- vale gitlab.SubstitutionWarning = YES -->
 ### Fork
 
 When you want to copy someone else's repository, you [**fork**](../user/project/repository/forking_workflow.md#creating-a-fork)
@@ -167,14 +171,13 @@ original repository if you'd like.
 
 ### Download vs clone
 
-To create a copy of a remote repository files on your computer, you can either
-**download** or **clone** it. If you download it, you cannot sync it with the
+To create a copy of a remote repository's files on your computer, you can either
+**download** or **clone**. If you download, you cannot sync it with the
 remote repository on GitLab.
 
-On the other hand, by cloning a repository, you'll download a copy of its
-files to your local computer, but preserve the Git connection with the remote
-repository, so that you can work on the its files on your computer and then
-upload the changes to GitLab.
+Cloning a repository is the same as downloading, except it preserves the Git connection
+with the remote repository. This allows you to modify the files locally and
+upload the changes to the remote repository on GitLab.
 
 ### Pull and push
 

@@ -282,10 +282,26 @@ RSpec.describe ProjectImportState, type: :model do
       end
 
       before do
-        import_state.project.update!(archived: true)
+        import_state.project.update_column(:archived, true)
       end
 
       it 'returns false' do
+        expect(import_state.mirror_update_due?).to be false
+      end
+    end
+
+    context 'when the project pending_delete' do
+      let(:import_state) do
+        create(:import_state,
+               :finished,
+               :mirror,
+               :repository,
+               next_execution_timestamp: Time.current - 2.minutes)
+      end
+
+      it 'returns false' do
+        import_state.project.update_column(:pending_delete, true)
+
         expect(import_state.mirror_update_due?).to be false
       end
     end

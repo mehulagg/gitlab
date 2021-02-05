@@ -12,7 +12,7 @@ localVue.use(Vuex);
 describe('EpicLane', () => {
   let wrapper;
 
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
   const updateBoardEpicUserPreferencesSpy = jest.fn();
 

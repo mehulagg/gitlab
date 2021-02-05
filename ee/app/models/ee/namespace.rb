@@ -23,8 +23,6 @@ module EE
     prepended do
       include EachBatch
 
-      attr_writer :root_ancestor
-
       has_one :namespace_statistics
       has_one :namespace_limit, inverse_of: :namespace
       has_one :gitlab_subscription
@@ -92,7 +90,9 @@ module EE
                 numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true,
                                 less_than: ::Gitlab::Pages::MAX_SIZE / 1.megabyte }
 
-      delegate :trial?, :trial_ends_on, :trial_starts_on, :upgradable?, to: :gitlab_subscription, allow_nil: true
+      delegate :trial?, :trial_ends_on, :trial_starts_on, :trial_days_remaining,
+        :trial_percentage_complete, :upgradable?,
+        to: :gitlab_subscription, allow_nil: true
 
       before_create :sync_membership_lock_with_parent
 
@@ -243,10 +243,6 @@ module EE
 
     def ci_minutes_quota
       @ci_minutes_quota ||= ::Ci::Minutes::Quota.new(self)
-    end
-
-    def root?
-      !has_parent?
     end
 
     # The same method name is used also at project and job level

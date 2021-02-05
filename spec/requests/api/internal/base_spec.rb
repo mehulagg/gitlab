@@ -220,6 +220,8 @@ RSpec.describe API::Internal::Base do
     end
 
     it 'returns a token without expiry when the expires_at parameter is missing' do
+      token_size = (PersonalAccessToken.token_prefix || '').size + 20
+
       post api('/internal/personal_access_token'),
            params: {
              secret_token: secret_token,
@@ -229,12 +231,14 @@ RSpec.describe API::Internal::Base do
            }
 
       expect(json_response['success']).to be_truthy
-      expect(json_response['token']).to match(/\A\S{20}\z/)
+      expect(json_response['token']).to match(/\A\S{#{token_size}}\z/)
       expect(json_response['scopes']).to match_array(%w(read_api read_repository))
       expect(json_response['expires_at']).to be_nil
     end
 
     it 'returns a token with expiry when it receives a valid expires_at parameter' do
+      token_size = (PersonalAccessToken.token_prefix || '').size + 20
+
       post api('/internal/personal_access_token'),
            params: {
              secret_token: secret_token,
@@ -245,7 +249,7 @@ RSpec.describe API::Internal::Base do
            }
 
       expect(json_response['success']).to be_truthy
-      expect(json_response['token']).to match(/\A\S{20}\z/)
+      expect(json_response['token']).to match(/\A\S{#{token_size}}\z/)
       expect(json_response['scopes']).to match_array(%w(read_api read_repository))
       expect(json_response['expires_at']).to eq('9001-11-17')
     end
@@ -1088,6 +1092,104 @@ RSpec.describe API::Internal::Base do
              })
 
         expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context 'admin mode' do
+      shared_examples 'pushes succeed for ssh and http' do
+        it 'accepts the SSH push' do
+          push(key, project)
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+
+        it 'accepts the HTTP push' do
+          push(key, project, 'http')
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
+
+      shared_examples 'pushes fail for ssh and http' do
+        it 'rejects the SSH push' do
+          push(key, project)
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+
+        it 'rejects the HTTP push' do
+          push(key, project, 'http')
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+
+      context 'feature flag :user_mode_in_session is enabled' do
+        context 'with an admin user' do
+          let(:user) { create(:admin) }
+
+          context 'is member of the project' do
+            before do
+              project.add_developer(user)
+            end
+
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+
+          context 'is not member of the project' do
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+        end
+
+        context 'with a regular user' do
+          context 'is member of the project' do
+            before do
+              project.add_developer(user)
+            end
+
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+
+          context 'is not member of the project' do
+            it_behaves_like 'pushes fail for ssh and http'
+          end
+        end
+      end
+
+      context 'feature flag :user_mode_in_session is disabled' do
+        before do
+          stub_feature_flags(user_mode_in_session: false)
+        end
+
+        context 'with an admin user' do
+          let(:user) { create(:admin) }
+
+          context 'is member of the project' do
+            before do
+              project.add_developer(user)
+            end
+
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+
+          context 'is not member of the project' do
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+        end
+
+        context 'with a regular user' do
+          context 'is member of the project' do
+            before do
+              project.add_developer(user)
+            end
+
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+
+          context 'is not member of the project' do
+            it_behaves_like 'pushes fail for ssh and http'
+          end
+        end
       end
     end
   end

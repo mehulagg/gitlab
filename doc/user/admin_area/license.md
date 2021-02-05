@@ -25,14 +25,14 @@ by **signing into your GitLab instance as an admin** or adding it at
 installation time.
 
 As of GitLab Enterprise Edition 9.4.0, a newly-installed instance without an
-uploaded license only has the Core features active. A trial license
+uploaded license only has the Free features active. A trial license
 activates all Ultimate features, but after
 [the trial expires](#what-happens-when-your-license-expires), some functionality
 is locked.
 
 ## Uploading your license
 
-The very first time you visit your GitLab EE installation signed in as an administrator,
+The first time you visit your GitLab EE installation signed in as an administrator,
 you should see a note urging you to upload a license with a link that takes you
 to **Admin Area > License**.
 
@@ -42,18 +42,21 @@ Otherwise, you can:
 
 1. Navigate to the **License** tab, and click **Upload New License**.
 
-   ![License Admin Area](img/license_admin_area.png)
+   - *If you've received a `.gitlab-license` file:*
+     1. Download the license file to your local machine.
+     1. Select **Upload `.gitlab-license` file**.
+     1. Select **Choose File** and select the license file.
+        In this example the license file is named `GitLab.gitlab-license`.
+     1. Check the **Subscription Agreement** checkbox.
+     1. Select **Upload License**.
 
-   - *If you've received a `.gitlab-license` file,* you should have already downloaded
-     it in your local machine. You can then upload it directly by choosing the
-     license file and clicking the **Upload license** button. In the image below,
-     the selected license file is named `GitLab.gitlab-license`.
+     ![Upload license](img/license_upload_v13_8.png)
 
-     ![Upload license](img/license_upload.png)
-
-   - *If you've received your license as plain text,* select the
-     **Enter license key** option, copy the license, paste it into the **License key**
-     field, and click **Upload license**.
+   - *If you've received your license as plain text:*
+     1. Select **Enter license key**.
+     1. Copy the license and paste it into the **License key** field.
+     1. Check the **Subscription Agreement** checkbox.
+     1. Select **Upload License**.
 
 ## Add your license at install time
 
@@ -83,13 +86,13 @@ These methods only add a license at the time of installation. Use the
 
 After the license is uploaded, all GitLab Enterprise Edition functionality
 is active until the end of the license period. When that period ends, the
-instance will [fall back](#what-happens-when-your-license-expires) to Core-only
+instance will [fall back](#what-happens-when-your-license-expires) to Free-only
 functionality.
 
 You can review the license details at any time in the **License** section of the
 **Admin Area**.
 
-![License details](img/license_details.png)
+![License details](img/license_details_v13_8.png)
 
 ## Notification before the license expires
 
@@ -103,7 +106,7 @@ In case your license expires, GitLab locks down some features like Git pushes,
 and issue creation, and displays a message to all administrators to inform of the expired license.
 
 To get back all the previous functionality, you must upload a new license.
-To fall back to having only the Core features active, you must delete the
+To fall back to having only the Free features active, you must delete the
 expired license(s).
 
 ### Remove a license
@@ -119,6 +122,11 @@ To remove a license from a self-managed instance:
 You can upload and view more than one license, but only the latest license in the current date
 range is used as the active license. When you upload a future-dated license, it
 doesn't take effect until its applicable date.
+
+NOTE:
+In GitLab 13.6 and earlier, a notification banner about an expiring license may continue to be displayed even after a new license has been uploaded.
+This happens when the newly uploaded license's start date is in the future and the expiring one is still active.
+The banner disappears after the new license becomes active.
 
 ## Troubleshooting
 

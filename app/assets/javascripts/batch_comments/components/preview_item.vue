@@ -3,13 +3,13 @@ import { mapGetters } from 'vuex';
 import { GlSprintf, GlIcon } from '@gitlab/ui';
 import { IMAGE_DIFF_POSITION_TYPE } from '~/diffs/constants';
 import { sprintf, __ } from '~/locale';
-import resolvedStatusMixin from '../mixins/resolved_status';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   getStartLineNumber,
   getEndLineNumber,
   getLineClasses,
 } from '~/notes/components/multiline_comment_utils';
+import resolvedStatusMixin from '../mixins/resolved_status';
 
 export default {
   components: {
@@ -47,7 +47,7 @@ export default {
       }
 
       return sprintf(__("%{authorsName}'s thread"), {
-        authorsName: this.discussion.notes.find(note => !note.system).author.name,
+        authorsName: this.discussion.notes.find((note) => !note.system).author.name,
       });
     },
     linePosition() {
@@ -98,9 +98,7 @@ export default {
           {{ titleText }}
         </span>
         <template v-if="showLinePosition">
-          <template v-if="!glFeatures.multilineComments"
-            >:{{ linePosition }}</template
-          >
+          <template v-if="!glFeatures.multilineComments">:{{ linePosition }}</template>
           <template v-else-if="startLineNumber === endLineNumber">
             :<span :class="getLineClasses(startLineNumber)">{{ startLineNumber }}</span>
           </template>

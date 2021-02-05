@@ -27,6 +27,8 @@ exceptions:
   - CNA
   - CNAME
   - CORE
+  - CVS
+  - FREE
   - CPU
   - CRIME
   - CSRF
@@ -47,6 +49,7 @@ exceptions:
   - FAQ
   - FOSS
   - FQDN
+  - FREE
   - GCP
   - GDK
   - GDPR
@@ -58,6 +61,7 @@ exceptions:
   - GPL
   - GUI
   - HAML
+  - HEAD
   - HIPAA
   - HTML
   - HTTP
@@ -90,6 +94,7 @@ exceptions:
   - NGINX
   - NOTE
   - NPM
+  - NTP
   - ONLY
   - OWASP
   - PAT
@@ -114,11 +119,13 @@ exceptions:
   - RSS
   - RVM
   - SAML
+  - SAAS
   - SAST
   - SCIM
   - SCP
   - SCSS
   - SDK
+  - SELF
   - SEO
   - SHA
   - SLA
@@ -141,6 +148,8 @@ exceptions:
   - TLS
   - TODO
   - TOML
+  - TTL
+  - UDP
   - UNIX
   - URI
   - URL
@@ -155,3 +164,4 @@ exceptions:
   - XML
   - XSS
   - YAML
+  - ZIP

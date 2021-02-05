@@ -10,7 +10,7 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
   end
 
   describe '#execute' do
-    let(:service) { described_class.new(project, nil, payload) }
+    let(:service) { described_class.new(project, payload) }
     let(:auto_close_incident) { true }
     let(:create_issue) { true }
     let(:send_email) { true }
@@ -158,7 +158,7 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
 
             it 'writes a warning to the log' do
               expect(Gitlab::AppLogger).to receive(:warn).with(
-                message: 'Unable to create AlertManagement::Alert',
+                message: 'Unable to create AlertManagement::Alert from Prometheus',
                 project_id: project.id,
                 alert_errors: { hosts: ['hosts array is over 255 chars'] }
               )

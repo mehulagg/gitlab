@@ -8,7 +8,7 @@ module Resolvers
 
     when_single do
       argument :id, ::Types::GlobalIDType[::DastSiteProfile], required: true,
-               description: "ID of the site profile"
+               description: "ID of the site profile."
     end
 
     def resolve(**args)

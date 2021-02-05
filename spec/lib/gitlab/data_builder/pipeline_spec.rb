@@ -41,6 +41,7 @@ RSpec.describe Gitlab::DataBuilder::Pipeline do
       expect(project_data).to eq(project.hook_attrs(backward: false))
       expect(data[:merge_request]).to be_nil
       expect(data[:user]).to eq({
+        id: user.id,
         name: user.name,
         username: user.username,
         avatar_url: user.avatar_url(only_path: false),
@@ -50,13 +51,15 @@ RSpec.describe Gitlab::DataBuilder::Pipeline do
 
     context 'build with runner' do
       let!(:build) { create(:ci_build, pipeline: pipeline, runner: ci_runner) }
-      let(:ci_runner) { create(:ci_runner) }
+      let!(:tag_names) { %w(tag-1 tag-2) }
+      let(:ci_runner) { create(:ci_runner, tag_list: tag_names.map { |n| ActsAsTaggableOn::Tag.create!(name: n)}) }
 
       it 'has runner attributes', :aggregate_failures do
         expect(runner_data[:id]).to eq(ci_runner.id)
         expect(runner_data[:description]).to eq(ci_runner.description)
         expect(runner_data[:active]).to eq(ci_runner.active)
         expect(runner_data[:is_shared]).to eq(ci_runner.instance_type?)
+        expect(runner_data[:tags]).to match_array(tag_names)
       end
     end
 

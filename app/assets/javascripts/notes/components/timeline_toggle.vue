@@ -2,9 +2,9 @@
 import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapGetters } from 'vuex';
 import { s__ } from '~/locale';
+import TrackEventDirective from '~/vue_shared/directives/track_event';
 import { COMMENTS_ONLY_FILTER_VALUE, DESC } from '../constants';
 import notesEventHub from '../event_hub';
-import TrackEventDirective from '~/vue_shared/directives/track_event';
 import { trackToggleTimelineView } from '../utils';
 
 export const timelineEnabledTooltip = s__('Timeline|Turn timeline view off');
@@ -50,7 +50,6 @@ export default {
     v-gl-tooltip
     v-track-event="trackToggleTimelineView(timelineEnabled)"
     icon="comments"
-    size="small"
     :selected="timelineEnabled"
     :title="tooltip"
     :aria-label="tooltip"

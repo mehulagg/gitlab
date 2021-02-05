@@ -2,11 +2,10 @@
 
 FactoryBot.define do
   factory :dast_site_token do
-    token { SecureRandom.uuid }
-    url { generate(:url) }
+    project
 
-    before(:create) do |dast_site_token|
-      dast_site_token.project ||= FactoryBot.create(:project)
-    end
+    token { SecureRandom.uuid }
+
+    url { generate(:url) }
   end
 end

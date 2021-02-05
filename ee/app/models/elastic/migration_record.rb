@@ -4,7 +4,7 @@ module Elastic
   class MigrationRecord
     attr_reader :version, :name, :filename
 
-    delegate :migrate, :skip_migration?, :completed?, :batched?, :throttle_delay, to: :migration
+    delegate :migrate, :skip_migration?, :completed?, :batched?, :throttle_delay, :pause_indexing?, to: :migration
 
     def initialize(version:, name:, filename:)
       @version = version
@@ -16,9 +16,15 @@ module Elastic
     def save!(completed:)
       raise 'Migrations index is not found' unless helper.index_exists?(index_name: index_name)
 
-      data = { completed: completed }.merge(timestamps(completed: completed))
+      data = { completed: completed, state: load_state }.merge(timestamps(completed: completed))
 
       client.index index: index_name, type: '_doc', id: version, body: data
+    end
+
+    def save_state!(state)
+      completed = load_from_index&.dig('_source', 'completed')
+
+      client.index index: index_name, type: '_doc', id: version, body: { completed: completed, state: load_state.merge(state) }
     end
 
     def persisted?
@@ -29,6 +35,18 @@ module Elastic
       client.get(index: index_name, id: version)
     rescue Elasticsearch::Transport::Transport::Errors::NotFound
       nil
+    end
+
+    def load_state
+      load_from_index&.dig('_source', 'state')&.with_indifferent_access || {}
+    end
+
+    def halted?
+      !!load_state&.dig('halted')
+    end
+
+    def name_for_key
+      name.underscore
     end
 
     def self.persisted_versions(completed:)

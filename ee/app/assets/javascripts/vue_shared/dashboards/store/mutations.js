@@ -2,8 +2,8 @@ import Vue from 'vue';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
-import * as types from './mutation_types';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
+import * as types from './mutation_types';
 
 export const updatePageInfo = (state, headers) => {
   const pageInfo = parseIntPagination(normalizeHeaders(headers));
@@ -24,7 +24,10 @@ export default {
     state.projects = projects;
     state.isLoadingProjects = false;
     if (AccessorUtilities.isLocalStorageAccessSafe()) {
-      localStorage.setItem(state.projectEndpoints.list, state.projects.map(p => p.id));
+      localStorage.setItem(
+        state.projectEndpoints.list,
+        state.projects.map((p) => p.id),
+      );
     } else {
       createFlash(
         __('Project order will not be saved as local storage is not available.'),
@@ -41,12 +44,12 @@ export default {
   },
 
   [types.ADD_SELECTED_PROJECT](state, project) {
-    if (!state.selectedProjects.some(p => p.id === project.id)) {
+    if (!state.selectedProjects.some((p) => p.id === project.id)) {
       state.selectedProjects.push(project);
     }
   },
   [types.REMOVE_SELECTED_PROJECT](state, project) {
-    state.selectedProjects = state.selectedProjects.filter(p => p.id !== project.id);
+    state.selectedProjects = state.selectedProjects.filter((p) => p.id !== project.id);
   },
 
   [types.REQUEST_PROJECTS](state) {
@@ -63,7 +66,10 @@ export default {
     );
     state.isLoadingProjects = false;
     if (AccessorUtilities.isLocalStorageAccessSafe()) {
-      localStorage.setItem(state.projectEndpoints.list, state.projects.map(p => p.id));
+      localStorage.setItem(
+        state.projectEndpoints.list,
+        state.projects.map((p) => p.id),
+      );
     }
 
     const pageInfo = parseIntPagination(normalizeHeaders(headers));

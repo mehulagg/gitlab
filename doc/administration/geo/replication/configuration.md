@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Geo configuration **(PREMIUM ONLY)**
+# Geo configuration **(PREMIUM SELF)**
 
 ## Configuring a new **secondary** node
 
@@ -169,6 +169,11 @@ keys must be manually replicated to the **secondary** node.
    # CentOS installations
    sudo service sshd reload
    ```
+
+1. Verify SSH is still functional.
+
+   SSH into your GitLab **secondary** server in a new terminal. If you are unable to connect,
+   verify the permissions are correct according to the previous steps.
 
 ### Step 3. Add the **secondary** node
 

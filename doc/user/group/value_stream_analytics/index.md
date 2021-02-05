@@ -22,7 +22,7 @@ For information on how to contribute to the development of Value Stream Analytic
 
 Group-level Value Stream Analytics is available via **Group > Analytics > Value Stream**.
 
-Note: [Project-level Value Stream Analytics](../../analytics/value_stream_analytics.md) is also available.
+[Project-level Value Stream Analytics](../../analytics/value_stream_analytics.md) is also available.
 
 ## Default stages
 
@@ -316,15 +316,6 @@ To delete a custom value stream:
 
 ![Delete value stream](img/delete_value_stream_v13.4.png "Deleting a custom value stream")
 
-### Disabling custom value streams
-
-Custom value streams are enabled by default. If you have a self-managed instance, an
-administrator can open a Rails console and disable them with the following command:
-
-```ruby
-Feature.disable(:value_stream_analytics_create_multiple_value_streams)
-```
-
 ## Days to completion chart
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21631) in GitLab 12.6.
@@ -333,7 +324,7 @@ Feature.disable(:value_stream_analytics_create_multiple_value_streams)
 This chart visually depicts the total number of days it takes for cycles to be completed. (Totals are being replaced with averages in [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/262070).)
 
 This chart uses the global page filters for displaying data based on the selected
-group, projects, and timeframe. In addition, specific stages can be selected
+group, projects, and time frame. In addition, specific stages can be selected
 from within the chart itself.
 
 The chart data is limited to the last 500 items.
@@ -354,7 +345,7 @@ Feature.disable(:cycle_analytics_scatterplot_enabled)
 This chart shows a cumulative count of issues and merge requests per day.
 
 This chart uses the global page filters for displaying data based on the selected
-group, projects, and timeframe. The chart defaults to showing counts for issues but can be
+group, projects, and time frame. The chart defaults to showing counts for issues but can be
 toggled to show data for merge requests and further refined for specific group-level labels.
 
 By default the top group-level labels (max. 10) are pre-selected, with the ability to

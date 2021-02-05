@@ -62,16 +62,15 @@ RSpec.describe 'GFM autocomplete EE', :js do
       it 'only lists users who are currently assigned to the issue when using /unassign' do
         note = find('#note-body')
         page.within '.timeline-content-form' do
-          note.native.send_keys('/una')
+          note.native.send_keys('/unassign ')
+          # The `/unassign` ajax response might replace the one by `@` below causing a failed test
+          # so we need to wait for the `/assign` ajax request to finish first
+          wait_for_requests
+          note.native.send_keys('@')
+          wait_for_requests
         end
 
-        find('.atwho-view li', text: '/unassign')
-        note.native.send_keys(:tab)
-        note.native.send_keys(:right)
-
-        wait_for_requests
-
-        users = find('.tribute-container ul')
+        users = find('.tribute-container ul', visible: true)
         expect(users).to have_content(user.username)
         expect(users).not_to have_content(another_user.username)
       end

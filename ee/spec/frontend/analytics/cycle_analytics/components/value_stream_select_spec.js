@@ -52,10 +52,10 @@ describe('ValueStreamSelect', () => {
       },
     });
 
-  const findModal = modal => wrapper.find(`[data-testid="${modal}-value-stream-modal"]`);
-  const submitModal = modal => findModal(modal).vm.$emit('primary', mockEvent);
+  const findModal = (modal) => wrapper.find(`[data-testid="${modal}-value-stream-modal"]`);
+  const submitModal = (modal) => findModal(modal).vm.$emit('primary', mockEvent);
   const findSelectValueStreamDropdown = () => wrapper.find(GlDropdown);
-  const findSelectValueStreamDropdownOptions = _wrapper => findDropdownItemText(_wrapper);
+  const findSelectValueStreamDropdownOptions = (_wrapper) => findDropdownItemText(_wrapper);
   const findCreateValueStreamButton = () => wrapper.find(GlButton);
   const findDeleteValueStreamButton = () => wrapper.find('[data-testid="delete-value-stream"]');
 
@@ -82,7 +82,7 @@ describe('ValueStreamSelect', () => {
 
     it('renders each value stream including a create button', () => {
       const opts = findSelectValueStreamDropdownOptions(wrapper);
-      [...valueStreams.map(v => v.name), 'Create new Value Stream'].forEach(vs => {
+      [...valueStreams.map((v) => v.name), 'Create new Value Stream'].forEach((vs) => {
         expect(opts).toContain(vs);
       });
     });

@@ -9,8 +9,10 @@ import RequirementsTabs from 'ee/requirements/components/requirements_tabs.vue';
 
 import createRequirement from 'ee/requirements/queries/createRequirement.mutation.graphql';
 import updateRequirement from 'ee/requirements/queries/updateRequirement.mutation.graphql';
+import exportRequirement from 'ee/requirements/queries/exportRequirements.mutation.graphql';
 
 import { TEST_HOST } from 'helpers/test_constants';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import createFlash from '~/flash';
 import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
@@ -44,6 +46,8 @@ const createComponent = ({
   loading = false,
   canCreateRequirement = true,
   requirementsWebUrl = '/gitlab-org/gitlab-shell/-/requirements',
+  importCsvPath = '/gitlab-org/gitlab-shell/-/requirements/import_csv',
+  currentUserEmail = 'admin@example.com',
 } = {}) =>
   shallowMount(RequirementsRoot, {
     propsData: {
@@ -54,6 +58,8 @@ const createComponent = ({
       emptyStatePath,
       canCreateRequirement,
       requirementsWebUrl,
+      importCsvPath,
+      currentUserEmail,
     },
     mocks: {
       $apollo: {
@@ -77,13 +83,17 @@ const createComponent = ({
 
 describe('RequirementsRoot', () => {
   let wrapper;
+  let trackingSpy;
 
   beforeEach(() => {
     wrapper = createComponent();
+    trackingSpy = mockTracking('_category_', wrapper.element, jest.spyOn);
+    trackingSpy.mockImplementation(() => {});
   });
 
   afterEach(() => {
     wrapper.destroy();
+    unmockTracking();
   });
 
   describe('computed', () => {
@@ -250,6 +260,14 @@ describe('RequirementsRoot', () => {
       },
     };
 
+    const mockExportRequirementsMutationResult = {
+      data: {
+        exportRequirements: {
+          errors: [],
+        },
+      },
+    };
+
     describe('getFilteredSearchValue', () => {
       it('returns array containing applied filter search values', () => {
         wrapper.setData({
@@ -279,6 +297,42 @@ describe('RequirementsRoot', () => {
 
           expect(global.window.location.href).toBe(
             `${TEST_HOST}/?page=2&next=${mockPageInfo.endCursor}&state=all&search=foo&sort=updated_asc&author_username%5B%5D=root&author_username%5B%5D=john.doe`,
+          );
+        });
+      });
+    });
+
+    describe('exportCsv', () => {
+      it('calls `$apollo.mutate` with `exportRequirement` mutation and variables', () => {
+        jest
+          .spyOn(wrapper.vm.$apollo, 'mutate')
+          .mockResolvedValue(mockExportRequirementsMutationResult);
+
+        wrapper.vm.exportCsv();
+
+        expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            mutation: exportRequirement,
+            variables: {
+              projectPath: wrapper.vm.projectPath,
+              state: wrapper.vm.filterBy,
+              authorUsername: wrapper.vm.authorUsernames,
+              search: wrapper.vm.textSearch,
+              sortBy: wrapper.vm.sortBy,
+            },
+          }),
+        );
+      });
+
+      it('calls `createFlash` when request fails', () => {
+        jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(new Error({}));
+
+        return wrapper.vm.exportCsv().catch(() => {
+          expect(createFlash).toHaveBeenCalledWith(
+            expect.objectContaining({
+              message: 'Something went wrong while exporting requirements',
+              captureError: true,
+            }),
           );
         });
       });
@@ -781,6 +835,13 @@ describe('RequirementsRoot', () => {
         expect(global.window.location.href).toBe(
           `${TEST_HOST}/?page=1&state=opened&search=foo&sort=created_desc&author_username%5B%5D=root&author_username%5B%5D=john.doe`,
         );
+        expect(trackingSpy).toHaveBeenCalledWith(undefined, 'filter', {
+          property: JSON.stringify([
+            { type: 'author_username', value: { data: 'root' } },
+            { type: 'author_username', value: { data: 'john.doe' } },
+            'foo',
+          ]),
+        });
       });
 
       it('updates props `textSearch` and `authorUsernames` with empty values when passed filters param is empty', () => {
@@ -793,6 +854,7 @@ describe('RequirementsRoot', () => {
 
         expect(wrapper.vm.authorUsernames).toEqual([]);
         expect(wrapper.vm.textSearch).toBe('');
+        expect(trackingSpy).not.toHaveBeenCalled();
       });
     });
 
@@ -828,6 +890,9 @@ describe('RequirementsRoot', () => {
         expect(global.window.location.href).toBe(
           `${TEST_HOST}/?page=2&state=opened&sort=created_desc&next=${mockPageInfo.endCursor}`,
         );
+        expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_navigation', {
+          label: 'next',
+        });
       });
 
       it('sets data prop `nextPageCursor` to empty string and `prevPageCursor` to `requirements.pageInfo.startCursor` when provided page param is less than currentPage', () => {
@@ -847,6 +912,9 @@ describe('RequirementsRoot', () => {
         expect(global.window.location.href).toBe(
           `${TEST_HOST}/?page=1&state=opened&sort=created_desc&prev=${mockPageInfo.startCursor}`,
         );
+        expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_navigation', {
+          label: 'prev',
+        });
       });
     });
   });

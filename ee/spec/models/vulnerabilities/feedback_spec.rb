@@ -11,6 +11,7 @@ RSpec.describe Vulnerabilities::Feedback do
     )
   }
   it { is_expected.to define_enum_for(:category) }
+  it { is_expected.to define_enum_for(:dismissal_reason) }
 
   describe 'associations' do
     it { is_expected.to belong_to(:project) }

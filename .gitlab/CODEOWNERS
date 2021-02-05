@@ -173,7 +173,7 @@
 /.gitlab/CODEOWNERS @gl-quality/eng-prod
 Dangerfile @gl-quality/eng-prod
 /danger/ @gl-quality/eng-prod
-/lib/gitlab/danger/ @gl-quality/eng-prod
+/tooling/danger/ @gl-quality/eng-prod
 /scripts/ @gl-quality/eng-prod
 /scripts/frontend/ @gl-quality/eng-prod @gitlab-org/maintainers/frontend
 /scripts/review_apps/seed-dast-test-data.sh @dappelt @ngeorge1 @gl-quality/eng-prod
@@ -250,10 +250,28 @@ Dangerfile @gl-quality/eng-prod
 /ee/spec/lib/gitlab/code_owners/ @reprazent @kerrizor @garyh
 /doc/user/project/code_owners.md @reprazent @kerrizor @garyh
 
-[Product Analytics]
-/ee/lib/gitlab/usage_data_counters/ @gitlab-org/growth/product_analytics/engineers
-/ee/lib/ee/gitlab/usage_data.rb @gitlab-org/growth/product_analytics/engineers
-/lib/gitlab/grafana_embed_usage_data.rb @gitlab-org/growth/product_analytics/engineers
-/lib/gitlab/usage_data.rb @gitlab-org/growth/product_analytics/engineers
-/lib/gitlab/cycle_analytics/usage_data.rb @gitlab-org/growth/product_analytics/engineers
-/lib/gitlab/usage_data_counters/ @gitlab-org/growth/product_analytics/engineers
+[Product Intelligence]
+/ee/lib/gitlab/usage_data_counters/ @gitlab-org/growth/product-intelligence/engineers
+/ee/lib/ee/gitlab/usage_data.rb @gitlab-org/growth/product-intelligence/engineers
+/lib/gitlab/grafana_embed_usage_data.rb @gitlab-org/growth/product-intelligence/engineers
+/lib/gitlab/usage_data.rb @gitlab-org/growth/product_intelligence/engineers
+/lib/gitlab/cycle_analytics/usage_data.rb @gitlab-org/growth/product-intelligence/engineers
+/lib/gitlab/usage_data_counters/ @gitlab-org/growth/product-intelligence/engineers
+
+[Growth Experiments]
+/app/assets/javascripts/lib/utils/experimentation.js @gitlab-org/growth/experiment-devs
+/app/experiments/ @gitlab-org/growth/experiment-devs
+/app/models/experiment.rb @gitlab-org/growth/experiment-devs
+/app/models/experiment_subject.rb @gitlab-org/growth/experiment-devs
+/app/models/experiment_user.rb @gitlab-org/growth/experiment-devs
+/app/workers/experiments/ @gitlab-org/growth/experiment-devs
+/config/feature_flags/experiment/ @gitlab-org/growth/experiment-devs
+/ee/config/feature_flags/experiment/ @gitlab-org/growth/experiment-devs
+/ee/lib/api/experiments.rb @gitlab-org/growth/experiment-devs
+/ee/lib/ee/api/entities/experiment.rb @gitlab-org/growth/experiment-devs
+/lib/gitlab/experimentation/ @gitlab-org/growth/experiment-devs
+/lib/gitlab/experimentation.rb @gitlab-org/growth/experiment-devs
+/lib/gitlab/experimentation_logger.rb @gitlab-org/growth/experiment-devs
+
+[Legal]
+/config/dependency_decisions.yml @gitlab-org/legal-reviewers

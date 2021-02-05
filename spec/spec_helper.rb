@@ -13,6 +13,7 @@ end
 Warning[:deprecated] = true unless ENV.key?('SILENCE_DEPRECATIONS')
 
 require './spec/deprecation_toolkit_env'
+DeprecationToolkitEnv.configure!
 
 require './spec/simplecov_env'
 SimpleCovEnv.start!
@@ -142,7 +143,9 @@ RSpec.configure do |config|
   config.include TestEnv
   config.include FileReadHelpers
   config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include Devise::Test::ControllerHelpers, type: :view
   config.include Devise::Test::IntegrationHelpers, type: :feature
+  config.include Devise::Test::IntegrationHelpers, type: :request
   config.include LoginHelpers, type: :feature
   config.include SearchHelpers, type: :feature
   config.include WaitHelpers, type: :feature
@@ -150,7 +153,6 @@ RSpec.configure do |config|
   config.include EmailHelpers, :mailer, type: :mailer
   config.include Warden::Test::Helpers, type: :request
   config.include Gitlab::Routing, type: :routing
-  config.include Devise::Test::ControllerHelpers, type: :view
   config.include ApiHelpers, :api
   config.include CookieHelper, :js
   config.include InputHelper, :js
@@ -173,6 +175,7 @@ RSpec.configure do |config|
   if ENV['CI'] || ENV['RETRIES']
     # This includes the first try, i.e. tests will be run 4 times before failing.
     config.default_retry_count = ENV.fetch('RETRIES', 3).to_i + 1
+    config.exceptions_to_hard_fail = [DeprecationToolkitEnv::DeprecationBehaviors::SelectiveRaise::RaiseDisallowedDeprecation]
   end
 
   if ENV['FLAKY_RSPEC_GENERATE_REPORT']
@@ -215,16 +218,9 @@ RSpec.configure do |config|
       # (ie. ApplicationSetting#auto_devops_enabled)
       stub_feature_flags(force_autodevops_on_by_default: false)
 
-      # The following can be removed once Vue Issuable Sidebar
-      # is feature-complete and can be made default in place
-      # of older sidebar.
-      # See https://gitlab.com/groups/gitlab-org/-/epics/1863
-      stub_feature_flags(vue_issuable_sidebar: false)
-      stub_feature_flags(vue_issuable_epic_sidebar: false)
-
       # Merge request widget GraphQL requests are disabled in the tests
       # for now whilst we migrate as much as we can over the GraphQL
-      stub_feature_flags(merge_request_widget_graphql: false)
+      # stub_feature_flags(merge_request_widget_graphql: false)
 
       # Using FortiAuthenticator as OTP provider is disabled by default in
       # tests, until we introduce it in user settings
@@ -271,41 +267,6 @@ RSpec.configure do |config|
 
     Sidekiq::Worker.clear_all
 
-    # Temporary patch to force admin mode to be active by default in tests when
-    # using the feature flag :user_mode_in_session, since this will require
-    # modifying a significant number of specs to test both states for admin
-    # mode enabled / disabled.
-    #
-    # This will only be applied to specs below dirs in `admin_mode_mock_dirs`
-    #
-    # See ongoing migration: https://gitlab.com/gitlab-org/gitlab/-/issues/31511
-    #
-    # Until the migration is finished, if it is required to have the real
-    # behaviour in any of the mocked dirs specs that an admin is signed in
-    # with normal user mode and needs to switch to admin mode, it is possible to
-    # mark such tests with the `do_not_mock_admin_mode` metadata tag, e.g:
-    #
-    # context 'some test in mocked dir', :do_not_mock_admin_mode do ... end
-    admin_mode_mock_dirs = %w(
-      ./ee/spec/elastic_integration
-      ./ee/spec/finders
-      ./ee/spec/lib
-      ./ee/spec/serializers
-      ./ee/spec/support/shared_examples/finders/geo
-      ./ee/spec/support/shared_examples/graphql/geo
-      ./spec/finders
-      ./spec/lib
-      ./spec/serializers
-      ./spec/support/shared_examples/lib/gitlab
-      ./spec/workers
-    )
-
-    if !example.metadata[:do_not_mock_admin_mode] && example.metadata[:file_path].start_with?(*admin_mode_mock_dirs)
-      allow_any_instance_of(Gitlab::Auth::CurrentUserMode).to receive(:admin_mode?) do |current_user_mode|
-        current_user_mode.send(:user)&.admin?
-      end
-    end
-
     # Administrators have to re-authenticate in order to access administrative
     # functionality when feature flag :user_mode_in_session is active. Any spec
     # that requires administrative access can use the tag :enable_admin_mode
@@ -313,12 +274,18 @@ RSpec.configure do |config|
     #
     # context 'some test that requires admin mode', :enable_admin_mode do ... end
     #
+    # Some specs do get admin mode enabled automatically (e.g. `spec/controllers/admin`).
+    # In this case, specs that need to test both admin mode states can use the
+    # :do_not_mock_admin_mode tag to disable auto admin mode.
+    #
     # See also spec/support/helpers/admin_mode_helpers.rb
     if example.metadata[:enable_admin_mode] && !example.metadata[:do_not_mock_admin_mode]
       allow_any_instance_of(Gitlab::Auth::CurrentUserMode).to receive(:admin_mode?) do |current_user_mode|
         current_user_mode.send(:user)&.admin?
       end
     end
+
+    allow(Gitlab::CurrentSettings).to receive(:current_application_settings?).and_return(false)
   end
 
   config.around(:example, :quarantine) do |example|
@@ -398,9 +365,6 @@ end
 
 # Prevent Rugged from picking up local developer gitconfig.
 Rugged::Settings['search_path_global'] = Rails.root.join('tmp/tests').to_s
-
-# Disable timestamp checks for invisible_captcha
-InvisibleCaptcha.timestamp_enabled = false
 
 # Initialize FactoryDefault to use create_default helper
 TestProf::FactoryDefault.init

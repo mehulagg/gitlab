@@ -14,7 +14,19 @@ export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
     return null;
   }
 
-  const { ciConfigPath, commitId, defaultBranch, newMergeRequestPath, projectPath } = el?.dataset;
+  const {
+    // Add to apollo cache as it can be updated by future queries
+    commitSha,
+    // Add to provide/inject API for static values
+    ciConfigPath,
+    defaultBranch,
+    lintHelpPagePath,
+    newMergeRequestPath,
+    projectFullPath,
+    projectPath,
+    projectNamespace,
+    ymlHelpPagePath,
+  } = el?.dataset;
 
   Vue.use(VueApollo);
 
@@ -22,19 +34,27 @@ export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
     defaultClient: createDefaultClient(resolvers, { typeDefs }),
   });
 
+  apolloProvider.clients.defaultClient.cache.writeData({
+    data: {
+      commitSha,
+    },
+  });
+
   return new Vue({
     el,
     apolloProvider,
+    provide: {
+      ciConfigPath,
+      defaultBranch,
+      lintHelpPagePath,
+      newMergeRequestPath,
+      projectFullPath,
+      projectPath,
+      projectNamespace,
+      ymlHelpPagePath,
+    },
     render(h) {
-      return h(PipelineEditorApp, {
-        props: {
-          ciConfigPath,
-          commitId,
-          defaultBranch,
-          newMergeRequestPath,
-          projectPath,
-        },
-      });
+      return h(PipelineEditorApp);
     },
   });
 };

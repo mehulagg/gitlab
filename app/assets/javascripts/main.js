@@ -12,6 +12,8 @@ import './behaviors';
 import applyGitLabUIConfig from '@gitlab/ui/dist/config';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { initRails } from '~/lib/utils/rails_ujs';
+import * as tooltips from '~/tooltips';
+import * as popovers from '~/popovers';
 import {
   handleLocationHash,
   addSelectOnFocusBehaviour,
@@ -38,9 +40,6 @@ import initPersistentUserCallouts from './persistent_user_callouts';
 import { initUserTracking, initDefaultTrackers } from './tracking';
 import { __ } from './locale';
 
-import * as tooltips from '~/tooltips';
-import * as popovers from '~/popovers';
-
 import 'ee_else_ce/main_ee';
 
 applyGitLabUIConfig();
@@ -53,7 +52,7 @@ window.$ = jQuery;
 jQuery.ajaxSetup({
   converters: {
     // eslint-disable-next-line @gitlab/require-i18n-strings, func-names
-    'text script': function(text) {
+    'text script': function (text) {
       jQuery.globalEval(text, { nonce: getCspNonceValue() });
       return text;
     },
@@ -137,9 +136,7 @@ function deferredInitialisation() {
   $('.remove-row').on('ajax:success', function removeRowAjaxSuccessCallback() {
     tooltips.dispose(this);
 
-    $(this)
-      .closest('li')
-      .addClass('gl-display-none!');
+    $(this).closest('li').addClass('gl-display-none!');
   });
 
   $('.js-remove-tr').on('ajax:before', function removeTRAjaxBeforeCallback() {
@@ -147,9 +144,7 @@ function deferredInitialisation() {
   });
 
   $('.js-remove-tr').on('ajax:success', function removeTRAjaxSuccessCallback() {
-    $(this)
-      .closest('tr')
-      .addClass('gl-display-none!');
+    $(this).closest('tr').addClass('gl-display-none!');
   });
 
   const glTooltipDelay = localStorage.getItem('gl-tooltip-delay');
@@ -278,15 +273,9 @@ document.addEventListener('DOMContentLoaded', () => {
     $this.toggleClass('active');
 
     if ($this.hasClass('active')) {
-      notesHolders
-        .show()
-        .find('.hide, .content')
-        .show();
+      notesHolders.show().find('.hide, .content').show();
     } else {
-      notesHolders
-        .hide()
-        .find('.content')
-        .hide();
+      notesHolders.hide().find('.content').hide();
     }
 
     $(document).trigger('toggle.comments');
@@ -308,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (flashContainer && flashContainer.children.length) {
     flashContainer
       .querySelectorAll('.flash-alert, .flash-notice, .flash-success')
-      .forEach(flashEl => {
+      .forEach((flashEl) => {
         removeFlashClickListener(flashEl);
       });
   }

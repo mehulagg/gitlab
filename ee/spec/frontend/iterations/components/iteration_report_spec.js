@@ -1,8 +1,6 @@
 import { GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import IterationForm from 'ee/iterations/components/iteration_form.vue';
-import IterationReportSummaryOpen from 'ee/iterations/components/iteration_report_summary_open.vue';
-import IterationReportSummaryClosed from 'ee/iterations/components/iteration_report_summary_closed.vue';
 import IterationReport from 'ee/iterations/components/iteration_report.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';
@@ -12,6 +10,7 @@ describe('Iterations report', () => {
   const defaultProps = {
     fullPath: 'gitlab-org',
     iterationIid: '3',
+    labelsFetchPath: '/gitlab-org/gitlab-test/-/labels.json?include_ancestor_groups=true',
   };
 
   const findTopbar = () => wrapper.find({ ref: 'topbar' });
@@ -107,33 +106,13 @@ describe('Iterations report', () => {
         expect(findActionsDropdown().exists()).toBe(false);
       });
 
-      it('renders IterationReportSummaryOpen for open iteration', () => {
-        expect(wrapper.find(IterationReportSummaryOpen).props()).toEqual({
-          iterationId: iteration.id,
-          namespaceType: Namespace.Group,
-          fullPath: defaultProps.fullPath,
-        });
-      });
-
-      it('renders IterationReportSummaryClosed for closed iteration', async () => {
-        await wrapper.setData({
-          iteration: {
-            ...iteration,
-            state: 'closed',
-          },
-        });
-
-        expect(wrapper.find(IterationReportSummaryClosed).props()).toEqual({
-          iterationId: iteration.id,
-        });
-      });
-
       it('shows IterationReportTabs component', () => {
         const iterationReportTabs = wrapper.find(IterationReportTabs);
 
         expect(iterationReportTabs.props()).toEqual({
           fullPath: defaultProps.fullPath,
           iterationId: iteration.id,
+          labelsFetchPath: defaultProps.labelsFetchPath,
           namespaceType: Namespace.Group,
         });
       });

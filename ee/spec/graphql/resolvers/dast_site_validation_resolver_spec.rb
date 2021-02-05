@@ -23,17 +23,10 @@ RSpec.describe Resolvers::DastSiteValidationResolver do
     expect(described_class).to have_nullable_graphql_type(Types::DastSiteValidationType.connection_type)
   end
 
-  subject { sync(resolver) }
-
-  context 'when resolving a single DAST site validation' do
-    let(:resolver) { dast_site_validations(target_url: target_url) }
-
-    it { is_expected.to contain_exactly(dast_site_validation1) }
-  end
-
   context 'when resolving multiple DAST site validations' do
+    subject { dast_site_validations(**args) }
+
     let(:args) { {} }
-    let(:resolver) { dast_site_validations(args) }
 
     it { is_expected.to contain_exactly(dast_site_validation3, dast_site_validation2, dast_site_validation1) }
 
@@ -43,7 +36,7 @@ RSpec.describe Resolvers::DastSiteValidationResolver do
       it { is_expected.to contain_exactly(dast_site_validation3, dast_site_validation1) }
     end
 
-    context 'when one normalized_target_urls is specified' do
+    context 'when one normalized_target_url is specified' do
       let(:args) { { normalized_target_urls: [dast_site_validation2.url_base] } }
 
       it { is_expected.to contain_exactly(dast_site_validation2) }
@@ -58,7 +51,8 @@ RSpec.describe Resolvers::DastSiteValidationResolver do
 
   private
 
-  def dast_site_validations(args = {}, context = { current_user: current_user })
+  def dast_site_validations(**args)
+    context = { current_user: current_user }
     resolve(described_class, obj: project, args: args, ctx: context)
   end
 end

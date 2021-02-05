@@ -6,7 +6,7 @@ import { humanize } from '~/lib/utils/text_utility';
  * @param {string} reportType that is not human-readable
  * @returns {string} a human-readable version of the report type
  */
-const convertReportType = reportType => {
+const convertReportType = (reportType) => {
   if (!reportType) return '';
   const lowerCaseType = reportType.toLowerCase();
   return REPORT_TYPES[lowerCaseType] || humanize(lowerCaseType);

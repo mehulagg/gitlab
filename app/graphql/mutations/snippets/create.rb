@@ -3,7 +3,8 @@
 module Mutations
   module Snippets
     class Create < BaseMutation
-      include SpammableMutationFields
+      include ServiceCompatibility
+      include CanMutateSpammable
 
       authorize :create_snippet
 
@@ -12,30 +13,30 @@ module Mutations
       field :snippet,
             Types::SnippetType,
             null: true,
-            description: 'The snippet after mutation'
+            description: 'The snippet after mutation.'
 
       argument :title, GraphQL::STRING_TYPE,
                required: true,
-               description: 'Title of the snippet'
+               description: 'Title of the snippet.'
 
       argument :description, GraphQL::STRING_TYPE,
                required: false,
-               description: 'Description of the snippet'
+               description: 'Description of the snippet.'
 
       argument :visibility_level, Types::VisibilityLevelsEnum,
-               description: 'The visibility level of the snippet',
+               description: 'The visibility level of the snippet.',
                required: true
 
       argument :project_path, GraphQL::ID_TYPE,
                required: false,
-               description: 'The project full path the snippet is associated with'
+               description: 'The project full path the snippet is associated with.'
 
       argument :uploaded_files, [GraphQL::STRING_TYPE],
                required: false,
-               description: 'The paths to files uploaded in the snippet description'
+               description: 'The paths to files uploaded in the snippet description.'
 
       argument :blob_actions, [Types::Snippets::BlobActionInputType],
-               description: 'Actions to perform over the snippet repository and blobs',
+               description: 'Actions to perform over the snippet repository and blobs.',
                required: false
 
       def resolve(project_path: nil, **args)
@@ -45,18 +46,17 @@ module Mutations
           authorize!(:global)
         end
 
-        service_response = ::Snippets::CreateService.new(project,
-                                                         current_user,
-                                                         create_params(args)).execute
+        process_args_for_params!(args)
 
-        snippet = service_response.payload[:snippet]
+        service_response = ::Snippets::CreateService.new(project, current_user, args).execute
 
         # Only when the user is not an api user and the operation was successful
         if !api_user? && service_response.success?
           ::Gitlab::UsageDataCounters::EditorUniqueCounter.track_snippet_editor_edit_action(author: current_user)
         end
 
-        with_spam_fields(snippet) do
+        snippet = service_response.payload[:snippet]
+        with_spam_action_fields(snippet) do
           {
             snippet: service_response.success? ? snippet : nil,
             errors: errors_on_object(snippet)
@@ -70,18 +70,25 @@ module Mutations
         Project.find_by_full_path(full_path)
       end
 
-      def create_params(args)
-        with_spam_params do
-          args.tap do |create_args|
-            # We need to rename `blob_actions` into `snippet_actions` because
-            # it's the expected key param
-            create_args[:snippet_actions] = create_args.delete(:blob_actions)&.map(&:to_h)
+      # process_args_for_params!(args)    -> nil
+      #
+      # Modifies/adds/deletes mutation resolve args as necessary to be passed as params to service layer.
+      def process_args_for_params!(args)
+        convert_blob_actions_to_snippet_actions!(args)
 
-            # We need to rename `uploaded_files` into `files` because
-            # it's the expected key param
-            create_args[:files] = create_args.delete(:uploaded_files)
-          end
+        # We need to rename `uploaded_files` into `files` because
+        # it's the expected key param
+        args[:files] = args.delete(:uploaded_files)
+
+        if Feature.enabled?(:snippet_spam)
+          args.merge!(additional_spam_params)
+        else
+          args[:disable_spam_action_service] = true
         end
+
+        # Return nil to make it explicit that this method is mutating the args parameter, and that
+        # the return value is not relevant and is not to be used.
+        nil
       end
     end
   end

@@ -62,7 +62,7 @@ describe('BoardSettingsWipLimit', () => {
     });
   };
 
-  const triggerBlur = type => {
+  const triggerBlur = (type) => {
     if (type === 'blur') {
       findInput().vm.$emit('blur');
     }
@@ -186,7 +186,7 @@ describe('BoardSettingsWipLimit', () => {
 
     afterEach(() => {
       flash.mockReset();
-      boardsStore.removeList(listId, 'label');
+      boardsStore.removeList(listId);
     });
 
     describe.each`

@@ -11,7 +11,7 @@ export default () => {
 
     if (!toggleBtn) return;
 
-    toggleBtn.addEventListener('click', e => {
+    toggleBtn.addEventListener('click', (e) => {
       e.preventDefault();
 
       toggleBtn.setAttribute('disabled', 'disabled');

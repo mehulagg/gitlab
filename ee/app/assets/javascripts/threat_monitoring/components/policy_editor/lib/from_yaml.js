@@ -1,5 +1,4 @@
 import { safeLoad } from 'js-yaml';
-import { buildRule } from './rules';
 import {
   DisabledByLabel,
   EndpointMatchModeAny,
@@ -13,6 +12,7 @@ import {
   RuleTypeCIDR,
   RuleTypeFQDN,
 } from '../constants';
+import { buildRule } from './rules';
 
 /*
   Convert list of matchLabel selectors used by the endpoint rule to an
@@ -27,7 +27,7 @@ function ruleTypeEndpointFunc(items) {
   const labels = items
     .reduce(
       (acc, { matchLabels }) =>
-        acc.concat(Object.keys(matchLabels).map(key => `${key}:${matchLabels[key]}`)),
+        acc.concat(Object.keys(matchLabels).map((key) => `${key}:${matchLabels[key]}`)),
       [],
     )
     .join(' ');
@@ -113,7 +113,7 @@ function parseRule(item, direction) {
 */
 export default function fromYaml(manifest) {
   const { description, metadata, spec } = safeLoad(manifest, { json: true });
-  const { name, resourceVersion } = metadata;
+  const { name, resourceVersion, annotations } = metadata;
   const { endpointSelector = {}, ingress = [], egress = [] } = spec;
   const matchLabels = endpointSelector.matchLabels || {};
 
@@ -125,15 +125,16 @@ export default function fromYaml(manifest) {
 
   const rules = []
     .concat(
-      ingress.map(item => parseRule(item, RuleDirectionInbound)),
-      egress.map(item => parseRule(item, RuleDirectionOutbound)),
+      ingress.map((item) => parseRule(item, RuleDirectionInbound)),
+      egress.map((item) => parseRule(item, RuleDirectionOutbound)),
     )
-    .filter(rule => Boolean(rule));
+    .filter((rule) => Boolean(rule));
 
   return {
     name,
     resourceVersion,
     description,
+    annotations,
     isEnabled: !Object.keys(matchLabels).includes(DisabledByLabel),
     endpointMatchMode: endpointLabels.length > 0 ? EndpointMatchModeLabel : EndpointMatchModeAny,
     endpointLabels: endpointLabels.join(' '),

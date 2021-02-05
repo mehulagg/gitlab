@@ -45,6 +45,7 @@ separately configured [Slack slash commands](slack_slash_commands.md).
 1. Select the **Notify only broken pipelines** check box to only notify on failures.
 1. In the **Branches to be notified** select box, choose which types of branches
    to send notifications for.
+1. Leave the **Labels to be notified** field blank to get all notifications or add labels that the issue or merge request must have in order to trigger a notification.
 1. Click **Test settings and save changes**.
 
 Your Slack team now starts receiving GitLab event notifications as configured.
@@ -110,7 +111,7 @@ result = Net::HTTP.get(URI('https://<GITLAB URL>'));0
 ```
 
 If GitLab is not trusting HTTPS connections to itself, then you may
-need to [add your certificate to GitLab's trusted certificates](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
+need to [add your certificate to the GitLab trusted certificates](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
 
 If GitLab is not trusting connections to Slack, then the GitLab
 OpenSSL trust store is incorrect. Some typical causes: overriding

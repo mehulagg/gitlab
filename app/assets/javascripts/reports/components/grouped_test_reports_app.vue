@@ -3,20 +3,19 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { once } from 'lodash';
 import { GlButton } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
-import { componentNames } from './issue_body';
-import ReportSection from './report_section.vue';
-import SummaryRow from './summary_row.vue';
-import IssuesList from './issues_list.vue';
-import Modal from './modal.vue';
-import createStore from '../store';
 import Tracking from '~/tracking';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import createStore from '../store';
 import {
   summaryTextBuilder,
   reportTextBuilder,
   statusIcon,
   recentFailuresTextBuilder,
 } from '../store/utils';
+import { componentNames } from './issue_body';
+import ReportSection from './report_section.vue';
+import SummaryRow from './summary_row.vue';
+import IssuesList from './issues_list.vue';
+import Modal from './modal.vue';
 
 export default {
   name: 'GroupedTestReportsApp',
@@ -28,7 +27,7 @@ export default {
     Modal,
     GlButton,
   },
-  mixins: [glFeatureFlagsMixin(), Tracking.mixin()],
+  mixins: [Tracking.mixin()],
   props: {
     endpoint: {
       type: String,
@@ -44,8 +43,9 @@ export default {
   computed: {
     ...mapState(['reports', 'isLoading', 'hasError', 'summary']),
     ...mapState({
-      modalTitle: state => state.modal.title || '',
-      modalData: state => state.modal.data || {},
+      modalTitle: (state) => state.modal.title || '',
+      modalData: (state) => state.modal.data || {},
+      modalOpen: (state) => state.modal.open || false,
     }),
     ...mapGetters(['summaryStatus']),
     groupedSummaryText() {
@@ -77,7 +77,7 @@ export default {
     this.fetchReports();
   },
   methods: {
-    ...mapActions(['setEndpoint', 'fetchReports']),
+    ...mapActions(['setEndpoint', 'fetchReports', 'closeModal']),
     reportText(report) {
       const { name, summary } = report || {};
 
@@ -92,7 +92,7 @@ export default {
       return reportTextBuilder(name, summary);
     },
     hasRecentFailures(summary) {
-      return this.glFeatures.testFailureHistory && summary?.recentlyFailed > 0;
+      return summary?.recentlyFailed > 0;
     },
     recentFailuresText(summary) {
       return recentFailuresTextBuilder(summary);
@@ -171,8 +171,12 @@ export default {
             class="report-block-group-list"
           />
         </template>
-
-        <modal :title="modalTitle" :modal-data="modalData" />
+        <modal
+          :visible="modalOpen"
+          :title="modalTitle"
+          :modal-data="modalData"
+          @hide="closeModal"
+        />
       </div>
     </template>
   </report-section>

@@ -67,7 +67,7 @@ export default {
           name: TIME,
           type: 'time',
           axisLabel: {
-            formatter: value => dateFormat(value, DATE_FORMATS.defaultDate),
+            formatter: (value) => dateFormat(value, DATE_FORMATS.defaultDate),
           },
           min: from,
           max: to,

@@ -11,6 +11,7 @@ RSpec.describe Analytics::DevopsAdoption::Snapshots::CreateService do
       result[attribute] = rand(2).odd?
     end
     params[:recorded_at] = Time.zone.now
+    params[:end_time] = 1.month.ago.end_of_month
     params[:segment] = segment
     params
   end

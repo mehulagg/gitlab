@@ -27,7 +27,7 @@ RSpec.describe "Admin::Users" do
         it "shows the 'Send email to users' link" do
           visit admin_users_path
 
-          expect(page).to have_link('Send email to users', href: admin_email_path)
+          expect(page).to have_link(href: admin_email_path)
         end
       end
 
@@ -39,7 +39,33 @@ RSpec.describe "Admin::Users" do
         it "does not show the 'Send email to users' link" do
           visit admin_users_path
 
-          expect(page).not_to have_link('Send email to users', href: admin_email_path)
+          expect(page).not_to have_link(href: admin_email_path)
+        end
+      end
+    end
+
+    describe 'user permission export' do
+      context 'when `export_user_permissions` feature is available' do
+        before do
+          stub_licensed_features(export_user_permissions: true)
+        end
+
+        it "shows the 'Export Permissions' link" do
+          visit admin_users_path
+
+          expect(page).to have_link(href: admin_user_permission_exports_path(format: :csv))
+        end
+      end
+
+      context 'when `export_user_permissions` feature is disabled' do
+        before do
+          stub_licensed_features(export_user_permissions: false)
+        end
+
+        it "does not show the 'Export Permissions' link" do
+          visit admin_users_path
+
+          expect(page).not_to have_link(href: admin_user_permission_exports_path(format: :csv))
         end
       end
     end

@@ -7,13 +7,27 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
   include_context 'with a mocked GitLab instance'
 
   before do
-    stub_application_setting(maintenance_mode: true)
+    stub_maintenance_mode_setting(true)
   end
 
   context 'normal requests to a read-only GitLab instance' do
     let(:fake_app) { lambda { |env| [200, { 'Content-Type' => 'text/plain' }, ['OK']] } }
 
     it_behaves_like 'allowlisted /admin/geo requests'
+
+    it "expects a PUT request to /api/v4/application/settings to be allowed" do
+      response = request.send(:put, "/api/v4/application/settings")
+
+      expect(response).not_to be_redirect
+      expect(subject).not_to disallow_request
+    end
+
+    it "expects a POST request to /admin/application_settings/general to be allowed" do
+      response = request.send(:post, "/admin/application_settings/general")
+
+      expect(response).not_to be_redirect
+      expect(subject).not_to disallow_request
+    end
 
     context 'on Geo secondary' do
       before do
@@ -39,6 +53,7 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
         'LFS request to locks create' | '/root/rouge.git/info/lfs/locks'
         'LFS request to locks unlock' | '/root/rouge.git/info/lfs/locks/1/unlock'
         'git-receive-pack'            | '/root/rouge.git/git-receive-pack'
+        'application settings'        | '/admin/application_settings/general'
       end
 
       with_them do
@@ -48,6 +63,13 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
           expect(response).to be_redirect
           expect(subject).to disallow_request
         end
+      end
+
+      it "expects a PUT request to /api/v4/application/settings to not be allowed" do
+        response = request.send(:put, "/api/v4/application/settings")
+
+        expect(response).to be_redirect
+        expect(subject).to disallow_request
       end
     end
 
@@ -68,6 +90,20 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
 
           expect(response).to be_redirect
           expect(subject).to disallow_request
+        end
+      end
+
+      where(:description, :path) do
+        'sign in route'     | '/users/sign_in'
+        'oauth token route' | '/oauth/token'
+      end
+
+      with_them do
+        it "expects a POST to #{description} URL to be allowed" do
+          response = request.post(path)
+
+          expect(response).not_to be_redirect
+          expect(subject).not_to disallow_request
         end
       end
     end

@@ -5,7 +5,7 @@ import component from 'ee/vue_shared/security_reports/components/dismiss_button.
 describe('DismissalButton', () => {
   let wrapper;
 
-  const mountComponent = options => {
+  const mountComponent = (options) => {
     wrapper = mount(component, options);
   };
 

@@ -1,6 +1,6 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { member as memberMock } from 'jest/members/mock_data';
+import { member as memberMock, directMember } from 'jest/members/mock_data';
 import MembersTableCell from 'ee/members/components/table/members_table_cell.vue';
 
 describe('MemberTableCell', () => {
@@ -30,7 +30,7 @@ describe('MemberTableCell', () => {
 
   const localVue = createLocalVue();
   localVue.use(Vuex);
-  localVue.component('wrapped-component', WrappedComponent);
+  localVue.component('WrappedComponent', WrappedComponent);
 
   const createStore = (state = {}) => {
     return new Vuex.Store({
@@ -80,7 +80,7 @@ describe('MemberTableCell', () => {
     describe('canOverride', () => {
       it('returns `true` when `canOverride` is `true`', () => {
         createComponent({
-          member: { memberMock, canOverride: true },
+          member: { ...directMember, canOverride: true },
         });
 
         expect(findWrappedComponent().props('permissions').canOverride).toBe(true);
@@ -88,7 +88,7 @@ describe('MemberTableCell', () => {
 
       it('returns `false` when `canOverride` is `false`', () => {
         createComponent({
-          member: { memberMock, canOverride: false },
+          member: { ...directMember, canOverride: false },
         });
 
         expect(findWrappedComponent().props('permissions').canOverride).toBe(false);

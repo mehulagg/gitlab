@@ -1,7 +1,7 @@
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { getJSONFixture } from 'helpers/fixtures';
 import { GlButton, GlFriendlyWrap, GlPagination } from '@gitlab/ui';
+import { getJSONFixture } from 'helpers/fixtures';
 import SuiteTable from '~/pipelines/components/test_reports/test_suite_table.vue';
 import * as getters from '~/pipelines/stores/test_reports/getters';
 import { TestStatus } from '~/pipelines/constants';
@@ -23,7 +23,7 @@ describe('Test reports suite table', () => {
 
   const noCasesMessage = () => wrapper.find('.js-no-test-cases');
   const allCaseRows = () => wrapper.findAll('.js-case-row');
-  const findCaseRowAtIndex = index => wrapper.findAll('.js-case-row').at(index);
+  const findCaseRowAtIndex = (index) => wrapper.findAll('.js-case-row').at(index);
   const findIconForRow = (row, status) => row.find(`.ci-status-icon-${status}`);
 
   const createComponent = (suite = testSuite, perPage = 20) => {
@@ -73,8 +73,8 @@ describe('Test reports suite table', () => {
       TestStatus.SKIPPED,
       TestStatus.SUCCESS,
       'unknown',
-    ])('renders the correct icon for test case with %s status', status => {
-      const test = testCases.findIndex(x => x.status === status);
+    ])('renders the correct icon for test case with %s status', (status) => {
+      const test = testCases.findIndex((x) => x.status === status);
       const row = findCaseRowAtIndex(test);
 
       expect(findIconForRow(row, status).exists()).toBe(true);

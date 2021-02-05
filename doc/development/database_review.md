@@ -25,9 +25,9 @@ A database review is required for:
   generally up to the author of a merge request to decide whether or
   not complex queries are being introduced and if they require a
   database review.
-- Changes in usage data metrics that use `count` and `distinct_count`.
+- Changes in usage data metrics that use `count`, `distinct_count` and `estimate_batch_distinct_count`.
   These metrics could have complex queries over large tables.
-  See the [Product Analytics Guide](https://about.gitlab.com/handbook/product/product-analytics-guide/)
+  See the [Product Intelligence Guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
   for implementation details.
 
 A database reviewer is expected to look out for obviously complex
@@ -48,7 +48,7 @@ If new migrations are introduced, in the MR **you are required to provide**:
 If new queries have been introduced or existing queries have been updated, **you are required to provide**:
 
 - [Query plans](#query-plans) for each raw SQL query included in the merge request along with the link to the query plan following each raw SQL snippet.
-- [Raw SQL](#raw-sql) for all queries (as translated from ActiveRecord queries).
+- [Raw SQL](#raw-sql) for all changed or added queries (as translated from ActiveRecord queries).
   - In case of updating an existing query, the raw SQL of both the old and the new version of the query should be provided together with their query plans.
 
 Refer to [Preparation when adding or modifying queries](#preparation-when-adding-or-modifying-queries) for how to provide this information.
@@ -147,7 +147,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
 - Provide the link to the plan at: [explain.depesz.com](https://explain.depesz.com). Paste both the plan and the query used in the form.
 - When providing query plans, make sure it hits enough data:
   - You can use a GitLab production replica to test your queries on a large scale,
-  through the `#database-lab` Slack channel or through [chatops](understanding_explain_plans.md#chatops).
+  through the `#database-lab` Slack channel or through [ChatOps](understanding_explain_plans.md#chatops).
   - Usually, the `gitlab-org` namespace (`namespace_id = 9970`) and the
   `gitlab-org/gitlab-foss` (`project_id = 13083`) or the `gitlab-org/gitlab` (`project_id = 278964`)
    projects provide enough data to serve as a good example.
@@ -220,13 +220,13 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
   - Check for any obviously complex queries and queries the author specifically
     points out for review (if any)
   - If not present yet, ask the author to provide SQL queries and query plans
-    (for example, by using [chatops](understanding_explain_plans.md#chatops) or direct
+    (for example, by using [ChatOps](understanding_explain_plans.md#chatops) or direct
     database access)
   - For given queries, review parameters regarding data distribution
   - [Check query plans](understanding_explain_plans.md) and suggest improvements
     to queries (changing the query, schema or adding indexes and similar)
   - General guideline is for queries to come in below [100ms execution time](query_performance.md#timing-guidelines-for-queries)
-  - Avoid N+1 problems and minimalize the [query count](merge_request_performance_guidelines.md#query-counts).
+  - Avoid N+1 problems and minimize the [query count](merge_request_performance_guidelines.md#query-counts).
 
 ### Timing guidelines for migrations
 

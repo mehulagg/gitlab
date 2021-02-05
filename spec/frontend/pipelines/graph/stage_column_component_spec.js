@@ -30,6 +30,7 @@ const mockGroups = Array(4)
 const defaultProps = {
   title: 'Fish',
   groups: mockGroups,
+  pipelineId: 159,
 };
 
 describe('stage column component', () => {
@@ -67,6 +68,10 @@ describe('stage column component', () => {
     it('should render the provided groups', () => {
       expect(findAllStageColumnGroups().length).toBe(mockGroups.length);
     });
+
+    it('should emit updateMeasurements event on mount', () => {
+      expect(wrapper.emitted().updateMeasurements).toHaveLength(1);
+    });
   });
 
   describe('when job notifies action is complete', () => {
@@ -92,36 +97,51 @@ describe('stage column component', () => {
   });
 
   describe('job', () => {
-    beforeEach(() => {
-      createComponent({
-        method: mount,
-        props: {
-          groups: [
-            {
-              id: 4259,
-              name: '<img src=x onerror=alert(document.domain)>',
-              status: {
-                icon: 'status_success',
-                label: 'success',
-                tooltip: '<img src=x onerror=alert(document.domain)>',
+    describe('text handling', () => {
+      beforeEach(() => {
+        createComponent({
+          method: mount,
+          props: {
+            groups: [
+              {
+                id: 4259,
+                name: '<img src=x onerror=alert(document.domain)>',
+                status: {
+                  icon: 'status_success',
+                  label: 'success',
+                  tooltip: '<img src=x onerror=alert(document.domain)>',
+                },
               },
-            },
-          ],
-          title: 'test <img src=x onerror=alert(document.domain)>',
-        },
+            ],
+            title: 'test <img src=x onerror=alert(document.domain)>',
+          },
+        });
+      });
+
+      it('capitalizes and escapes name', () => {
+        expect(findStageColumnTitle().text()).toBe(
+          'Test &lt;img src=x onerror=alert(document.domain)&gt;',
+        );
+      });
+
+      it('escapes id', () => {
+        expect(findStageColumnGroup().attributes('id')).toBe(
+          'ci-badge-&lt;img src=x onerror=alert(document.domain)&gt;',
+        );
       });
     });
 
-    it('capitalizes and escapes name', () => {
-      expect(findStageColumnTitle().text()).toBe(
-        'Test &lt;img src=x onerror=alert(document.domain)&gt;',
-      );
-    });
+    describe('interactions', () => {
+      beforeEach(() => {
+        createComponent({ method: mount });
+      });
 
-    it('escapes id', () => {
-      expect(findStageColumnGroup().attributes('id')).toBe(
-        'ci-badge-&lt;img src=x onerror=alert(document.domain)&gt;',
-      );
+      it('emits jobHovered event on mouseenter and mouseleave', async () => {
+        await findStageColumnGroup().trigger('mouseenter');
+        expect(wrapper.emitted().jobHover).toEqual([[defaultProps.groups[0].name]]);
+        await findStageColumnGroup().trigger('mouseleave');
+        expect(wrapper.emitted().jobHover).toEqual([[defaultProps.groups[0].name], ['']]);
+      });
     });
   });
 

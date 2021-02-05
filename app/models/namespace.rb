@@ -28,7 +28,7 @@ class Namespace < ApplicationRecord
 
   has_many :runner_namespaces, inverse_of: :namespace, class_name: 'Ci::RunnerNamespace'
   has_many :runners, through: :runner_namespaces, source: :runner, class_name: 'Ci::Runner'
-  has_many :namespace_onboarding_actions
+  has_one :onboarding_progress
 
   # This should _not_ be `inverse_of: :namespace`, because that would also set
   # `user.namespace` when this user creates a group with themselves as `owner`.
@@ -40,6 +40,7 @@ class Namespace < ApplicationRecord
   has_one :chat_team, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_one :root_storage_statistics, class_name: 'Namespace::RootStorageStatistics'
   has_one :aggregation_schedule, class_name: 'Namespace::AggregationSchedule'
+  has_one :package_setting_relation, inverse_of: :namespace, class_name: 'PackageSetting'
 
   validates :owner, presence: true, unless: ->(n) { n.type == "Group" }
   validates :name,
@@ -102,6 +103,10 @@ class Namespace < ApplicationRecord
       )
   end
 
+  # Make sure that the name is same as strong_memoize name in root_ancestor
+  # method
+  attr_writer :root_ancestor
+
   class << self
     def by_path(path)
       find_by('lower(path) = :value', value: path.downcase)
@@ -158,6 +163,10 @@ class Namespace < ApplicationRecord
       name = host.delete_suffix(gitlab_host)
       Namespace.where(parent_id: nil).by_path(name)
     end
+  end
+
+  def package_settings
+    package_setting_relation || build_package_setting_relation
   end
 
   def default_branch_protection
@@ -310,6 +319,8 @@ class Namespace < ApplicationRecord
   def root_ancestor
     return self if persisted? && parent_id.nil?
 
+    # Make sure that strong_memoize name is in sync with root_ancestor's
+    # attr_writer name
     strong_memoize(:root_ancestor) do
       self_and_ancestors.reorder(nil).find_by(parent_id: nil)
     end
@@ -436,6 +447,10 @@ class Namespace < ApplicationRecord
     else
       raise ArgumentError
     end
+  end
+
+  def root?
+    !has_parent?
   end
 
   private

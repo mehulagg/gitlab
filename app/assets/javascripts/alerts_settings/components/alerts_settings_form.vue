@@ -15,18 +15,15 @@ import {
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import MappingBuilder from './alert_mapping_builder.vue';
-import AlertSettingsFormHelpBlock from './alert_settings_form_help_block.vue';
 import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
-import service from '../services';
 import {
-  integrationTypesNew,
+  integrationTypes,
   JSON_VALIDATE_DELAY,
   targetPrometheusUrlPlaceholder,
-  targetOpsgenieUrlPlaceholder,
   typeSet,
-  sectionHash,
 } from '../constants';
+import MappingBuilder from './alert_mapping_builder.vue';
+import AlertSettingsFormHelpBlock from './alert_settings_form_help_block.vue';
 // Mocks will be removed when integrating with BE is ready
 // data format is defined and will be the same as mocked (maybe with some minor changes)
 // feature rollout plan - https://gitlab.com/gitlab-org/gitlab/-/issues/262707#note_442529171
@@ -91,20 +88,13 @@ export const i18n = {
         'AlertSettings|Resetting the authorization key for this project will require updating the authorization key in every alert source it is enabled in.',
       ),
     },
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    opsgenie: {
-      label: s__('AlertSettings|2. Add link to your Opsgenie alert list'),
-      info: s__(
-        'AlertSettings|Utilizing this option will link the GitLab Alerts navigation item to your existing Opsgenie instance. By selecting this option, you cannot receive alerts from any other source in GitLab; it will effectively be turning Alerts within GitLab off as a feature.',
-      ),
-    },
   },
 };
 
 export default {
+  integrationTypes,
   placeholders: {
     prometheus: targetPrometheusUrlPlaceholder,
-    opsgenie: targetOpsgenieUrlPlaceholder,
   },
   JSON_VALIDATE_DELAY,
   typeSet,
@@ -127,6 +117,7 @@ export default {
   directives: {
     GlModal: GlModalDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   inject: {
     generic: {
       default: {},
@@ -134,12 +125,10 @@ export default {
     prometheus: {
       default: {},
     },
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    opsgenie: {
-      default: {},
+    multiIntegrations: {
+      default: false,
     },
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     loading: {
       type: Boolean,
@@ -149,11 +138,10 @@ export default {
       type: Boolean,
       required: true,
     },
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    canManageOpsgenie: {
-      type: Boolean,
+    alertFields: {
+      type: Array,
       required: false,
-      default: false,
+      default: null,
     },
   },
   apollo: {
@@ -163,7 +151,7 @@ export default {
   },
   data() {
     return {
-      selectedIntegration: integrationTypesNew[0].value,
+      selectedIntegration: integrationTypes[0].value,
       active: false,
       formVisible: false,
       integrationTestPayload: {
@@ -172,10 +160,9 @@ export default {
       },
       resetSamplePayloadConfirmed: false,
       customMapping: null,
+      mapping: [],
       parsingPayload: false,
       currentIntegration: null,
-      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-      isManagingOpsgenie: false,
     };
   },
   computed: {
@@ -185,32 +172,12 @@ export default {
     jsonIsValid() {
       return this.integrationTestPayload.error === null;
     },
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    disabledIntegrations() {
-      const options = [];
-      if (this.opsgenie.active) {
-        options.push(typeSet.http, typeSet.prometheus);
-      } else if (!this.canManageOpsgenie) {
-        options.push(typeSet.opsgenie);
-      }
-
-      return options;
-    },
-    options() {
-      return integrationTypesNew.map(el => ({
-        ...el,
-        disabled: this.disabledIntegrations.includes(el.value),
-      }));
-    },
     selectedIntegrationType() {
       switch (this.selectedIntegration) {
         case typeSet.http:
           return this.generic;
         case typeSet.prometheus:
           return this.prometheus;
-        // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-        case typeSet.opsgenie:
-          return this.opsgenie;
         default:
           return {};
       }
@@ -237,14 +204,16 @@ export default {
     },
     showMappingBuilder() {
       return (
+        this.multiIntegrations &&
         this.glFeatures.multipleHttpIntegrationsCustomMapping &&
-        this.selectedIntegration === typeSet.http
+        this.selectedIntegration === typeSet.http &&
+        this.alertFields?.length
       );
     },
-    mappingBuilderFields() {
+    parsedSamplePayload() {
       return this.customMapping?.samplePayload?.payloadAlerFields?.nodes;
     },
-    mappingBuilderMapping() {
+    savedMapping() {
       return this.customMapping?.storedMapping?.nodes;
     },
     hasSamplePayload() {
@@ -285,53 +254,32 @@ export default {
   },
   methods: {
     integrationTypeSelect() {
-      if (this.selectedIntegration === integrationTypesNew[0].value) {
+      if (this.selectedIntegration === integrationTypes[0].value) {
         this.formVisible = false;
       } else {
         this.formVisible = true;
       }
-
-      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-      if (this.canManageOpsgenie && this.selectedIntegration === typeSet.opsgenie) {
-        this.isManagingOpsgenie = true;
-        this.active = this.opsgenie.active;
-        this.integrationForm.apiUrl = this.opsgenie.opsgenieMvcTargetUrl;
-      } else {
-        // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-        this.isManagingOpsgenie = false;
-      }
-    },
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    submitWithOpsgenie() {
-      return service
-        .updateGenericActive({
-          endpoint: this.opsgenie.formPath,
-          params: {
-            service: {
-              opsgenie_mvc_target_url: this.integrationForm.apiUrl,
-              opsgenie_mvc_enabled: this.active,
-            },
-          },
-        })
-        .then(() => {
-          window.location.hash = sectionHash;
-          window.location.reload();
-        });
     },
     submitWithTestPayload() {
       this.$emit('set-test-alert-payload', this.testAlertPayload);
       this.submit();
     },
     submit() {
-      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-      if (this.isManagingOpsgenie) {
-        return this.submitWithOpsgenie();
-      }
-
       const { name, apiUrl } = this.integrationForm;
+      const customMappingVariables = this.glFeatures.multipleHttpIntegrationsCustomMapping
+        ? {
+            payloadAttributeMappings: this.mapping,
+            payloadExample: this.integrationTestPayload.json,
+          }
+        : {};
+
       const variables =
         this.selectedIntegration === typeSet.http
-          ? { name, active: this.active }
+          ? {
+              name,
+              active: this.active,
+              ...customMappingVariables,
+            }
           : { apiUrl, active: this.active };
       const integrationPayload = { type: this.selectedIntegration, variables };
 
@@ -343,7 +291,7 @@ export default {
       return this.$emit('create-new-integration', integrationPayload);
     },
     reset() {
-      this.selectedIntegration = integrationTypesNew[0].value;
+      this.selectedIntegration = integrationTypes[0].value;
       this.integrationTypeSelect();
 
       if (this.currentIntegration) {
@@ -360,9 +308,6 @@ export default {
         error: null,
       };
       this.active = false;
-
-      // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-      this.isManagingOpsgenie = false;
     },
     resetAuthKey() {
       if (!this.currentIntegration) {
@@ -390,10 +335,10 @@ export default {
       // TODO: replace with real BE mutation when ready;
       this.parsingPayload = true;
 
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         setTimeout(() => resolve(mockedCustomMapping), 1000);
       })
-        .then(res => {
+        .then((res) => {
           const mapping = { ...res };
           delete mapping.storedMapping;
           this.customMapping = res;
@@ -408,10 +353,13 @@ export default {
     },
     getIntegrationMapping() {
       // TODO: replace with real BE mutation when ready;
-      return Promise.resolve(mockedCustomMapping).then(res => {
+      return Promise.resolve(mockedCustomMapping).then((res) => {
         this.customMapping = res;
         this.integrationTestPayload.json = res?.samplePayload.body;
       });
+    },
+    updateMapping(mapping) {
+      this.mapping = mapping;
     },
   },
 };
@@ -428,8 +376,8 @@ export default {
       <gl-form-select
         v-model="selectedIntegration"
         :disabled="isSelectDisabled"
-        :class="{ 'gl-bg-gray-100!': isSelectDisabled }"
-        :options="options"
+        class="mw-100"
+        :options="$options.integrationTypes"
         @change="integrationTypeSelect"
       />
 
@@ -441,37 +389,7 @@ export default {
       </div>
     </gl-form-group>
     <gl-collapse v-model="formVisible" class="gl-mt-3">
-      <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
-      <div v-if="isManagingOpsgenie">
-        <gl-form-group
-          id="integration-webhook"
-          :label="$options.i18n.integrationFormSteps.opsgenie.label"
-          label-for="integration-webhook"
-        >
-          <span class="gl-my-4">
-            {{ $options.i18n.integrationFormSteps.opsgenie.info }}
-          </span>
-
-          <gl-toggle
-            v-model="active"
-            :is-loading="loading"
-            :label="__('Active')"
-            class="gl-my-4 gl-font-weight-normal"
-          />
-
-          <gl-form-input
-            id="opsgenie-opsgenieMvcTargetUrl"
-            v-model="integrationForm.apiUrl"
-            type="text"
-            :placeholder="$options.placeholders.opsgenie"
-          />
-
-          <span class="gl-text-gray-400 gl-my-1">
-            {{ $options.i18n.integrationFormSteps.prometheusFormUrl.help }}
-          </span>
-        </gl-form-group>
-      </div>
-      <div v-else>
+      <div>
         <gl-form-group
           id="name-integration"
           :label="$options.i18n.integrationFormSteps.step2.label"
@@ -648,8 +566,10 @@ export default {
         >
           <span>{{ $options.i18n.integrationFormSteps.step5.intro }}</span>
           <mapping-builder
-            :payload-fields="mappingBuilderFields"
-            :mapping="mappingBuilderMapping"
+            :parsed-payload="parsedSamplePayload"
+            :saved-mapping="savedMapping"
+            :alert-fields="alertFields"
+            @onMappingUpdate="updateMapping"
           />
         </gl-form-group>
       </div>
@@ -661,9 +581,7 @@ export default {
           data-testid="integration-form-submit"
           >{{ s__('AlertSettings|Save integration') }}
         </gl-button>
-        <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
         <gl-button
-          v-if="!isManagingOpsgenie"
           data-testid="integration-test-and-submit"
           :disabled="isSubmitTestPayloadDisabled"
           category="secondary"
@@ -672,12 +590,7 @@ export default {
           @click="submitWithTestPayload"
           >{{ s__('AlertSettings|Save and test payload') }}</gl-button
         >
-        <gl-button
-          type="reset"
-          class="js-no-auto-disable"
-          :class="{ 'gl-ml-3': isManagingOpsgenie }"
-          >{{ __('Cancel') }}</gl-button
-        >
+        <gl-button type="reset" class="js-no-auto-disable">{{ __('Cancel') }}</gl-button>
       </div>
     </gl-collapse>
   </gl-form>

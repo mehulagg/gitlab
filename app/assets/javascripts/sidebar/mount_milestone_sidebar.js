@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import timeTracker from './components/time_tracking/time_tracker.vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import timeTracker from './components/time_tracking/time_tracker.vue';
 
 export default class SidebarMilestone {
   constructor() {
@@ -16,7 +16,7 @@ export default class SidebarMilestone {
       components: {
         timeTracker,
       },
-      render: createElement =>
+      render: (createElement) =>
         createElement('timeTracker', {
           props: {
             timeEstimate: parseInt(timeEstimate, 10),

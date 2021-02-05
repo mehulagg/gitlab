@@ -29,12 +29,18 @@ RSpec.describe 'epics swimlanes filtering', :js do
   let_it_be(:issue7) { create(:labeled_issue, project: project, title: 'ggg', description: '777', labels: [development], relative_position: 2) }
   let_it_be(:issue8) { create(:closed_issue, project: project, title: 'hhh', description: '888') }
 
+  let(:all_issues) { [confidential_issue, issue1, issue2, issue3, issue4, issue5, issue6, issue7, issue8] }
+
+  before_all do
+    project.add_maintainer(user)
+    project.add_maintainer(user2)
+  end
+
   context 'filtering' do
     before do
-      project.add_maintainer(user)
-      project.add_maintainer(user2)
-
+      stub_const("Gitlab::QueryLimiting::Transaction::THRESHOLD", 200)
       stub_licensed_features(epics: true, swimlanes: true)
+
       sign_in(user)
       visit_board_page
 
@@ -43,45 +49,32 @@ RSpec.describe 'epics swimlanes filtering', :js do
         page.find('.dropdown-item', text: 'Epic').click
       end
 
-      wait_for_all_requests
-
-      stub_const("Gitlab::QueryLimiting::Transaction::THRESHOLD", 200)
+      wait_for_all_issues
     end
 
     it 'filters by author' do
-      wait_for_all_requests
-
       set_filter("author", user2.username)
       click_filter_link(user2.username)
 
       submit_filter
 
-      wait_for_all_requests
       wait_for_board_cards(2, 1)
       wait_for_empty_boards((3..4))
     end
 
-    it 'filters by assignee', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/266990' do
-      wait_for_all_requests
-
+    it 'filters by assignee' do
       set_filter("assignee", user.username)
       click_filter_link(user.username)
       submit_filter
-
-      wait_for_all_requests
 
       wait_for_board_cards(2, 1)
       wait_for_empty_boards((3..4))
     end
 
     it 'filters by milestone' do
-      wait_for_all_requests
-
       set_filter("milestone", "\"#{milestone.title}")
       click_filter_link(milestone.title)
       submit_filter
-
-      wait_for_all_requests
 
       wait_for_board_cards(2, 1)
       wait_for_board_cards(3, 0)
@@ -89,13 +82,9 @@ RSpec.describe 'epics swimlanes filtering', :js do
     end
 
     it 'filters by label' do
-      wait_for_all_requests
-
       set_filter("label", testing.title)
       click_filter_link(testing.title)
       submit_filter
-
-      wait_for_all_requests
 
       wait_for_board_cards(2, 1)
       wait_for_empty_boards((3..4))
@@ -104,7 +93,7 @@ RSpec.describe 'epics swimlanes filtering', :js do
 
   def visit_board_page
     visit project_boards_path(project)
-    wait_for_all_requests
+    wait_for_all_issues
   end
 
   def wait_for_board_cards(board_number, expected_cards)
@@ -120,6 +109,12 @@ RSpec.describe 'epics swimlanes filtering', :js do
   def wait_for_empty_boards(board_numbers)
     board_numbers.each do |board|
       wait_for_board_cards(board, 0)
+    end
+  end
+
+  def wait_for_all_issues
+    all_issues.each do |i|
+      page.has_content?(i.title)
     end
   end
 

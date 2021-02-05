@@ -4,7 +4,7 @@ import Vue from 'vue';
 import actionsMixin from '../mixins/line_conflict_actions';
 import utilsMixin from '../mixins/line_conflict_utils';
 
-(global => {
+((global) => {
   global.mergeConflicts = global.mergeConflicts || {};
 
   global.mergeConflicts.parallelConflictLines = Vue.extend({
@@ -15,6 +15,9 @@ import utilsMixin from '../mixins/line_conflict_utils';
         required: true,
       },
     },
+    // This is a true violation of @gitlab/no-runtime-template-compiler, as it
+    // has a template string.
+    // eslint-disable-next-line @gitlab/no-runtime-template-compiler
     template: `
       <table class="diff-wrap-lines code js-syntax-highlight">
         <tr class="line_holder parallel" v-for="section in file.parallelLines">

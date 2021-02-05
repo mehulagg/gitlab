@@ -105,15 +105,13 @@ module API
             requires :from, type: DateTime, desc: 'Datetime to start from, inclusive'
             optional :to, type: DateTime, desc: 'Datetime to end at, exclusive'
             optional :interval, type: String, desc: 'Interval to roll-up data by', values: VALID_INTERVALS
-            use :pagination
           end
 
           get 'deployment_frequency' do
             bad_request!("Parameter `to` is before the `from` date") if start_date > end_date
             bad_request!("Date range is greater than #{QUARTER_DAYS} days") if days_between > QUARTER_DAYS
             authorize! :read_project_activity_analytics, user_project
-            present paginate(::Kaminari.paginate_array(deployment_frequencies)),
-                    with: EE::API::Entities::Analytics::DeploymentFrequency
+            present deployment_frequencies, with: EE::API::Entities::Analytics::DeploymentFrequency
           end
         end
       end

@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
 class Import::BulkImportsController < ApplicationController
+  include ActionView::Helpers::SanitizeHelper
+
   before_action :ensure_group_import_enabled
   before_action :verify_blocked_uri, only: :status
 
   feature_category :importers
+
+  POLLING_INTERVAL = 3_000
 
   rescue_from BulkImports::Clients::Http::ConnectionError, with: :bulk_import_connection_error
 
@@ -18,10 +22,17 @@ class Import::BulkImportsController < ApplicationController
   def status
     respond_to do |format|
       format.json do
-        render json: { importable_data: serialized_importable_data }
-      end
+        data = importable_data
 
-      format.html
+        pagination_headers.each do |header|
+          response.set_header(header, data.headers[header])
+        end
+
+        render json: { importable_data: serialized_data(data.parsed_response) }
+      end
+      format.html do
+        @source_url = session[url_key]
+      end
     end
   end
 
@@ -31,10 +42,20 @@ class Import::BulkImportsController < ApplicationController
     render json: :ok
   end
 
+  def realtime_changes
+    Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
+
+    render json: current_user_bulk_imports.to_json(only: [:id], methods: [:status_name])
+  end
+
   private
 
-  def serialized_importable_data
-    serializer.represent(importable_data, {}, Import::BulkImportEntity)
+  def pagination_headers
+    %w[x-next-page x-page x-per-page x-prev-page x-total x-total-pages]
+  end
+
+  def serialized_data(data)
+    serializer.represent(data, {}, Import::BulkImportEntity)
   end
 
   def serializer
@@ -42,13 +63,30 @@ class Import::BulkImportsController < ApplicationController
   end
 
   def importable_data
-    client.get('groups', top_level_only: true).parsed_response
+    client.get('groups', query_params)
+  end
+
+  # Default query string params used to fetch groups from GitLab source instance
+  #
+  # top_level_only: fetch only top level groups (subgroups are fetched during import itself)
+  # min_access_level: fetch only groups user has maintainer or above permissions
+  # search: optional search param to search user's groups by a keyword
+  def query_params
+    query_params = {
+      top_level_only: true,
+      min_access_level: Gitlab::Access::MAINTAINER
+    }
+
+    query_params[:search] = sanitized_filter_param if sanitized_filter_param
+    query_params
   end
 
   def client
     @client ||= BulkImports::Clients::Http.new(
       uri: session[url_key],
-      token: session[access_token_key]
+      token: session[access_token_key],
+      per_page: params[:per_page],
+      page: params[:page]
     )
   end
 
@@ -129,5 +167,13 @@ class Import::BulkImportsController < ApplicationController
       url: session[url_key],
       access_token: session[access_token_key]
     }
+  end
+
+  def sanitized_filter_param
+    @filter ||= sanitize(params[:filter])&.downcase
+  end
+
+  def current_user_bulk_imports
+    current_user.bulk_imports.gitlab
   end
 end

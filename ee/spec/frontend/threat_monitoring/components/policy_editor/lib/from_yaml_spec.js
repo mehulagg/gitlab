@@ -288,4 +288,24 @@ spec:
       });
     });
   });
+
+  describe('when annotations is not empty', () => {
+    it('returns policy object', () => {
+      const manifest = `apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: test-policy
+  annotations:
+    app.gitlab.com/alert: 'true'
+spec:
+  endpointSelector:
+    matchLabels:
+      {}
+`;
+
+      expect(fromYaml(manifest)).toMatchObject({
+        annotations: { 'app.gitlab.com/alert': 'true' },
+      });
+    });
+  });
 });

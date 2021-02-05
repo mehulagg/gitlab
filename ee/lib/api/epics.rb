@@ -39,6 +39,7 @@ module API
         optional :include_ancestor_groups, type: Boolean, default: false, desc: 'Include epics from ancestor groups'
         optional :include_descendant_groups, type: Boolean, default: true, desc: 'Include epics from descendant groups'
         optional :my_reaction_emoji, type: String, desc: 'Return epics reacted by the authenticated user by the given emoji'
+        optional :confidential, type: Boolean, desc: 'Return epics with given confidentiality'
         use :pagination
       end
       [':id/epics', ':id/-/epics'].each do |path|

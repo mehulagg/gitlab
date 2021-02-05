@@ -123,7 +123,7 @@ RSpec.describe Repository do
           options = { message: 'test tag message\n',
                       tagger: { name: 'John Smith', email: 'john@gmail.com' } }
 
-          rugged_repo(repository).tags.create(annotated_tag_name, 'a48e4fc218069f68ef2e769dd8dfea3991362175', options)
+          rugged_repo(repository).tags.create(annotated_tag_name, 'a48e4fc218069f68ef2e769dd8dfea3991362175', **options)
 
           double_first = double(committed_date: Time.current - 1.second)
           double_last = double(committed_date: Time.current)
@@ -481,12 +481,6 @@ RSpec.describe Repository do
       subject { repository.blob_at(repository.head_commit.sha, '.gitignore') }
 
       it { is_expected.to be_an_instance_of(::Blob) }
-    end
-
-    context 'readme blob on HEAD' do
-      subject { repository.blob_at(repository.head_commit.sha, 'README.md') }
-
-      it { is_expected.to be_an_instance_of(::ReadmeBlob) }
     end
 
     context 'readme blob not on HEAD' do
@@ -1142,11 +1136,11 @@ RSpec.describe Repository do
       expect(repository.license_key).to be_nil
     end
 
-    it 'returns nil when the content is not recognizable' do
+    it 'returns other when the content is not recognizable' do
       repository.create_file(user, 'LICENSE', 'Gitlab B.V.',
         message: 'Add LICENSE', branch_name: 'master')
 
-      expect(repository.license_key).to be_nil
+      expect(repository.license_key).to eq('other')
     end
 
     it 'returns nil when the commit SHA does not exist' do
@@ -1186,11 +1180,12 @@ RSpec.describe Repository do
       expect(repository.license).to be_nil
     end
 
-    it 'returns nil when the content is not recognizable' do
+    it 'returns other when the content is not recognizable' do
+      license = Licensee::License.new('other')
       repository.create_file(user, 'LICENSE', 'Gitlab B.V.',
         message: 'Add LICENSE', branch_name: 'master')
 
-      expect(repository.license).to be_nil
+      expect(repository.license).to eq(license)
     end
 
     it 'returns the license' do
@@ -1938,7 +1933,6 @@ RSpec.describe Repository do
       expect(repository).to receive(:expire_method_caches).with([
         :size,
         :commit_count,
-        :rendered_readme,
         :readme_path,
         :contribution_guide,
         :changelog,
@@ -2025,6 +2019,22 @@ RSpec.describe Repository do
       expect(repository).not_to receive(:expire_branches_cache)
 
       repository.after_remove_branch(expire_cache: false)
+    end
+  end
+
+  describe '#lookup' do
+    before do
+      allow(repository.raw_repository).to receive(:lookup).and_return('interesting_blob')
+    end
+
+    it 'uses the lookup cache' do
+      2.times.each { repository.lookup('sha1') }
+
+      expect(repository.raw_repository).to have_received(:lookup).once
+    end
+
+    it 'returns the correct value' do
+      expect(repository.lookup('sha1')).to eq('interesting_blob')
     end
   end
 
@@ -2298,14 +2308,6 @@ RSpec.describe Repository do
           expect(repository.readme).to be_nil
         end
       end
-
-      context 'when a README exists' do
-        let(:project) { create(:project, :repository) }
-
-        it 'returns the README' do
-          expect(repository.readme).to be_an_instance_of(ReadmeBlob)
-        end
-      end
     end
   end
 
@@ -2511,9 +2513,8 @@ RSpec.describe Repository do
   describe '#refresh_method_caches' do
     it 'refreshes the caches of the given types' do
       expect(repository).to receive(:expire_method_caches)
-        .with(%i(rendered_readme readme_path license_blob license_key license))
+        .with(%i(readme_path license_blob license_key license))
 
-      expect(repository).to receive(:rendered_readme)
       expect(repository).to receive(:readme_path)
       expect(repository).to receive(:license_blob)
       expect(repository).to receive(:license_key)
@@ -3031,6 +3032,53 @@ RSpec.describe Repository do
 
         is_expected.to be_falsy
       end
+    end
+  end
+
+  describe '.pick_storage_shard', :request_store do
+    before do
+      storages = {
+        'default' => Gitlab::GitalyClient::StorageSettings.new('path' => 'tmp/tests/repositories'),
+        'picked'  => Gitlab::GitalyClient::StorageSettings.new('path' => 'tmp/tests/repositories')
+      }
+
+      allow(Gitlab.config.repositories).to receive(:storages).and_return(storages)
+      stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
+      Gitlab::CurrentSettings.current_application_settings
+
+      update_storages({ 'picked' => 0, 'default' => 100 })
+    end
+
+    context 'when expire is false' do
+      it 'does not expire existing repository storage value' do
+        previous_storage = described_class.pick_storage_shard
+        expect(previous_storage).to eq('default')
+        expect(Gitlab::CurrentSettings).not_to receive(:expire_current_application_settings)
+
+        update_storages({ 'picked' => 100, 'default' => 0 })
+
+        new_storage = described_class.pick_storage_shard(expire: false)
+        expect(new_storage).to eq(previous_storage)
+      end
+    end
+
+    context 'when expire is true' do
+      it 'expires existing repository storage value' do
+        previous_storage = described_class.pick_storage_shard
+        expect(previous_storage).to eq('default')
+        expect(Gitlab::CurrentSettings).to receive(:expire_current_application_settings).and_call_original
+
+        update_storages({ 'picked' => 100, 'default' => 0 })
+
+        new_storage = described_class.pick_storage_shard(expire: true)
+        expect(new_storage).to eq('picked')
+      end
+    end
+
+    def update_storages(storage_hash)
+      settings = ApplicationSetting.last
+      settings.repository_storages_weighted = storage_hash
+      settings.save!
     end
   end
 end

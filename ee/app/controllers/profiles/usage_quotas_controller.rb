@@ -13,6 +13,6 @@ class Profiles::UsageQuotasController < Profiles::ApplicationController
   private
 
   def push_additional_repo_storage_by_namespace_feature
-    push_to_gon_features(:additional_repo_storage_by_namespace, current_user.namespace.additional_repo_storage_by_namespace_enabled?)
+    push_to_gon_attributes(:features, :additional_repo_storage_by_namespace, current_user.namespace.additional_repo_storage_by_namespace_enabled?)
   end
 end

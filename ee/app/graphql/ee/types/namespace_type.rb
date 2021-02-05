@@ -57,8 +57,12 @@ module EE
         field :compliance_frameworks,
               ::Types::ComplianceManagement::ComplianceFrameworkType.connection_type,
               null: true,
-              description: 'Compliance frameworks available to projects in this namespace',
-              feature_flag: :ff_custom_compliance_frameworks
+              description: 'Compliance frameworks available to projects in this namespace.',
+              feature_flag: :ff_custom_compliance_frameworks do
+                argument :id, ::Types::GlobalIDType[::ComplianceManagement::Framework],
+                         description: 'Global ID of a specific compliance framework to return.',
+                         required: false
+              end
 
         def additional_purchased_storage_size
           object.additional_purchased_storage_size.megabytes
@@ -68,12 +72,22 @@ module EE
           object.root_storage_size.limit
         end
 
-        def compliance_frameworks
-          BatchLoader::GraphQL.for(object.id).batch(default_value: []) do |namespace_ids, loader|
-            results = ::ComplianceManagement::Framework.with_namespaces(namespace_ids)
+        def compliance_frameworks(id: nil)
+          id = ::Types::GlobalIDType[::ComplianceManagement::Framework].coerce_isolated_input(id) unless id.nil?
+          BatchLoader::GraphQL
+            .for([object.id, id&.model_id])
+            .batch(default_value: []) do |keys, loader|
+            namespace_ids = keys.map(&:first).uniq
+            by_namespace_id = keys.group_by(&:first).transform_values { |k| k.map(&:second) }
+            frameworks = ::ComplianceManagement::Framework.with_namespaces(namespace_ids)
+            frameworks.group_by(&:namespace_id).each do |ns_id, group|
+              by_namespace_id[ns_id].each do |fw_id|
+                group.each do |fw|
+                  next unless fw_id.nil? || fw_id.to_i == fw.id
 
-            results.each do |framework|
-              loader.call(framework.namespace.id) { |xs| xs << framework }
+                  loader.call([ns_id, fw_id]) { |array| array << fw }
+                end
+              end
             end
           end
         end

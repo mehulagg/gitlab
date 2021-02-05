@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 You can set up GitLab on a single server or scale it up to serve many users.
 This page details the recommended Reference Architectures that were built and
-verified by GitLab's Quality and Support teams.
+verified by the GitLab Quality and Support teams.
 
 Below is a chart representing each architecture tier and the number of users
 they can handle. As your number of users grow with time, it’s recommended that
@@ -18,8 +18,8 @@ you scale GitLab accordingly.
 ![Reference Architectures](img/reference-architectures.png)
 <!-- Internal link: https://docs.google.com/spreadsheets/d/1obYP4fLKkVVDOljaI3-ozhmCiPtEeMblbBKkf2OADKs/edit#gid=1403207183 -->
 
-Testing on these reference architectures were performed with
-[GitLab's Performance Tool](https://gitlab.com/gitlab-org/quality/performance)
+Testing on these reference architectures was performed with the
+[GitLab Performance Tool](https://gitlab.com/gitlab-org/quality/performance)
 at specific coded workloads, and the throughputs used for testing were
 calculated based on sample customer data. Select the
 [reference architecture](#available-reference-architectures) that matches your scale.
@@ -36,8 +36,8 @@ the [default setup](#automated-backups) by
 [installing GitLab](../../install/README.md) on a single machine to minimize
 maintenance and resource costs.
 
-If your organization has more than 2,000 users, the recommendation is to scale
-GitLab's components to multiple machine nodes. The machine nodes are grouped by
+If your organization has more than 2,000 users, the recommendation is to scale the
+GitLab components to multiple machine nodes. The machine nodes are grouped by
 components. The addition of these nodes increases the performance and
 scalability of to your GitLab instance.
 
@@ -68,6 +68,11 @@ The following reference architectures are available:
 - [Up to 25,000 users](25k_users.md)
 - [Up to 50,000 users](50k_users.md)
 
+A GitLab [Premium or Ultimate](https://about.gitlab.com/pricing/#self-managed) license is required
+to get assistance from Support with troubleshooting the [2,000 users](2k_users.md)
+and higher reference architectures.
+[Read more about our definition of scaled architectures](https://about.gitlab.com/support/#definition-of-scaled-architecture).
+
 ## Availability Components
 
 GitLab comes with the following components for your use, listed from least to
@@ -86,11 +91,10 @@ Also, not implementing extra servers for GitLab doesn't necessarily mean that yo
 more downtime. Depending on your needs and experience level, single servers can
 have more actual perceived uptime for your users.
 
-### Automated backups **(CORE ONLY)**
+### Automated backups **(FREE SELF)**
 
 > - Level of complexity: **Low**
 > - Required domain knowledge: PostgreSQL, GitLab configurations, Git
-> - Supported tiers: [GitLab Core, Starter, Premium, and Ultimate](https://about.gitlab.com/pricing/)
 
 This solution is appropriate for many teams that have the default GitLab installation.
 With automatic backups of the GitLab repositories, configuration, and the database,
@@ -98,11 +102,10 @@ this can be an optimal solution if you don't have strict requirements.
 [Automated backups](../../raketasks/backup_restore.md#configuring-cron-to-make-daily-backups)
 is the least complex to setup. This provides a point-in-time recovery of a predetermined schedule.
 
-### Traffic load balancer **(STARTER ONLY)**
+### Traffic load balancer **(PREMIUM SELF)**
 
 > - Level of complexity: **Medium**
 > - Required domain knowledge: HAProxy, shared storage, distributed systems
-> - Supported tiers: [GitLab Starter, Premium, and Ultimate](https://about.gitlab.com/pricing/)
 
 This requires separating out GitLab into multiple application nodes with an added
 [load balancer](../load_balancer.md). The load balancer will distribute traffic
@@ -118,22 +121,23 @@ to the default installation:
 - Enable zero-downtime upgrades.
 - Increase availability.
 
-### Zero downtime updates **(STARTER ONLY)**
+For more details on how to configure a traffic load balancer with GitLab, you can refer
+to any of the [available reference architectures](#available-reference-architectures) with more than 1,000 users.
+
+### Zero downtime updates **(PREMIUM SELF)**
 
 > - Level of complexity: **Medium**
 > - Required domain knowledge: PostgreSQL, HAProxy, shared storage, distributed systems
-> - Supported tiers: [GitLab Starter, Premium, and Ultimate](https://about.gitlab.com/pricing/)
 
 GitLab supports [zero-downtime updates](https://docs.gitlab.com/omnibus/update/#zero-downtime-updates).
 Single GitLab nodes can be updated with only a [few minutes of downtime](https://docs.gitlab.com/omnibus/update/README.html#single-node-deployment).
 To avoid this, we recommend to separate GitLab into several application nodes.
 As long as at least one of each component is online and capable of handling the instance's usage load, your team's productivity will not be interrupted during the update.
 
-### Automated database failover **(PREMIUM ONLY)**
+### Automated database failover **(PREMIUM SELF)**
 
 > - Level of complexity: **High**
 > - Required domain knowledge: PgBouncer, Repmgr or Patroni, shared storage, distributed systems
-> - Supported tiers: [GitLab Premium and Ultimate](https://about.gitlab.com/pricing/)
 
 By adding automatic failover for database systems, you can enable higher uptime
 with additional database nodes. This extends the default database with
@@ -141,11 +145,10 @@ cluster management and failover policies.
 [PgBouncer in conjunction with Repmgr or Patroni](../postgresql/replication_and_failover.md)
 is recommended.
 
-### Instance level replication with GitLab Geo **(PREMIUM ONLY)**
+### Instance level replication with GitLab Geo **(PREMIUM SELF)**
 
 > - Level of complexity: **Very High**
 > - Required domain knowledge: Storage replication
-> - Supported tiers: [GitLab Premium and Ultimate](https://about.gitlab.com/pricing/)
 
 [GitLab Geo](../geo/index.md) allows you to replicate your GitLab
 instance to other geographical locations as a read-only fully operational instance

@@ -3,6 +3,7 @@ import VueApollo from 'vue-apollo';
 import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import { PAGE_CONFIG } from '~/vue_shared/alert_details/constants';
 import AlertManagementList from './components/alert_management_list_wrapper.vue';
 
 Vue.use(VueApollo);
@@ -17,12 +18,10 @@ export default () => {
     emptyAlertSvgPath,
     populatingAlertsHelpUrl,
     alertsHelpUrl,
-    opsgenieMvcTargetUrl,
     textQuery,
     assigneeUsernameQuery,
     alertManagementEnabled,
     userCanEnableAlertManagement,
-    opsgenieMvcEnabled,
   } = domEl.dataset;
 
   const apolloProvider = new VueApollo({
@@ -30,7 +29,7 @@ export default () => {
       {},
       {
         cacheConfig: {
-          dataIdFromObject: object => {
+          dataIdFromObject: (object) => {
             // eslint-disable-next-line no-underscore-dangle
             if (object.__typename === 'AlertManagementAlert') {
               return object.iid;
@@ -50,6 +49,9 @@ export default () => {
 
   return new Vue({
     el: selector,
+    components: {
+      AlertManagementList,
+    },
     provide: {
       projectPath,
       textQuery,
@@ -57,15 +59,11 @@ export default () => {
       enableAlertManagementPath,
       populatingAlertsHelpUrl,
       emptyAlertSvgPath,
-      opsgenieMvcTargetUrl,
       alertManagementEnabled: parseBoolean(alertManagementEnabled),
+      trackAlertStatusUpdateOptions: PAGE_CONFIG.OPERATIONS.TRACK_ALERT_STATUS_UPDATE_OPTIONS,
       userCanEnableAlertManagement: parseBoolean(userCanEnableAlertManagement),
-      opsgenieMvcEnabled: parseBoolean(opsgenieMvcEnabled),
     },
     apolloProvider,
-    components: {
-      AlertManagementList,
-    },
     render(createElement) {
       return createElement('alert-management-list');
     },

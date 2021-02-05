@@ -16,7 +16,7 @@ as the hardware requirements that are needed to install and use GitLab.
 
 - Ubuntu (16.04/18.04/20.04)
 - Debian (9/10)
-- CentOS (6/7/8)
+- CentOS (7/8)
 - openSUSE (Leap 15.1/Enterprise Server 12.2)
 - Red Hat Enterprise Linux (please use the CentOS packages and instructions)
 - Scientific Linux (please use the CentOS packages and instructions)
@@ -34,6 +34,9 @@ For the installation options, see [the main installation page](README.md).
 
 Installation of GitLab on these operating systems is possible, but not supported.
 Please see the [installation from source guide](installation.md) and the [installation guides](https://about.gitlab.com/install/) for more information.
+
+Please see [OS versions that are no longer supported](https://docs.gitlab.com/omnibus/package-information/deprecated_os.html) for Omnibus installs page
+for a list of supported and unsupported OS versions as well as the last support GitLab version for that OS.
 
 ### Microsoft Windows
 
@@ -107,7 +110,7 @@ Apart from a local hard drive you can also mount a volume that supports the netw
 If you have enough RAM and a recent CPU the speed of GitLab is mainly limited by hard drive seek times. Having a fast drive (7200 RPM and up) or a solid state drive (SSD) will improve the responsiveness of GitLab.
 
 NOTE:
-Since file system performance may affect GitLab's overall performance, [we don't recommend using AWS EFS for storage](../administration/nfs.md#avoid-using-awss-elastic-file-system-efs).
+Since file system performance may affect the overall performance of GitLab, [we don't recommend using AWS EFS for storage](../administration/nfs.md#avoid-using-awss-elastic-file-system-efs).
 
 ### CPU
 
@@ -163,11 +166,11 @@ Support for [PostgreSQL 9.6 and 10 has been removed in GitLab 13.0](https://abou
 
 #### Additional requirements for GitLab Geo
 
-If you're using [GitLab Geo](../administration/geo/index.md):
-
-- We strongly recommend running Omnibus-managed instances as they are actively
-  developed and tested. We aim to be compatible with most external (not managed
-  by Omnibus) databases (for example, [AWS Relational Database Service (RDS)](https://aws.amazon.com/rds/)) but we don't guarantee compatibility.
+If you're using [GitLab Geo](../administration/geo/index.md), we strongly
+recommend running Omnibus GitLab-managed instances, as we actively develop and
+test based on those. We try to be compatible with most external (not managed by
+Omnibus GitLab) databases (for example, [AWS Relational Database Service (RDS)](https://aws.amazon.com/rds/)),
+but we can't guarantee compatibility.
 
 ## Puma settings
 
@@ -176,7 +179,7 @@ Omnibus GitLab defaults to the recommended Puma settings. Regardless of installa
 tune the Puma settings.
 
 If you're using Omnibus GitLab, see [Puma settings](https://docs.gitlab.com/omnibus/settings/puma.html)
-for instructions on changing the Puma settings. If you're using the GitLab Helm chart, see the [Webservice chart](https://docs.gitlab.com/charts/charts/gitlab/webservice/index.html).
+for instructions on changing the Puma settings. If you're using the GitLab Helm chart, see the [`webservice` chart](https://docs.gitlab.com/charts/charts/gitlab/webservice/index.html).
 
 ### Puma workers
 
@@ -224,7 +227,7 @@ recommendation above) please see [the Unicorn settings in the Omnibus GitLab doc
 
 Redis stores all user sessions and the background task queue.
 The storage requirements for Redis are minimal, about 25kB per user.
-Sidekiq processes the background jobs with a multithreaded process.
+Sidekiq processes the background jobs with a multi-threaded process.
 This process starts with the entire Rails stack (200MB+) but it can grow over time due to memory leaks.
 On a very active server (10,000 billable users) the Sidekiq process can use 1GB+ of memory.
 

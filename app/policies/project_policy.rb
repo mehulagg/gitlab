@@ -30,6 +30,9 @@ class ProjectPolicy < BasePolicy
   desc "User has maintainer access"
   condition(:maintainer) { team_access_level >= Gitlab::Access::MAINTAINER }
 
+  desc "User is a project bot"
+  condition(:project_bot) { user.project_bot? && team_member? }
+
   desc "Project is public"
   condition(:public_project, scope: :subject, score: 0) { project.public? }
 
@@ -135,6 +138,10 @@ class ProjectPolicy < BasePolicy
     ::Feature.enabled?(:build_service_proxy, @subject)
   end
 
+  condition(:user_defined_variables_allowed) do
+    !@subject.restrict_user_defined_variables?
+  end
+
   with_scope :subject
   condition(:packages_disabled) { !@subject.packages_enabled }
 
@@ -147,6 +154,7 @@ class ProjectPolicy < BasePolicy
     builds
     pages
     metrics_dashboard
+    analytics
     operations
   ]
 
@@ -212,6 +220,7 @@ class ProjectPolicy < BasePolicy
     enable :award_emoji
     enable :read_pages_content
     enable :read_release
+    enable :read_analytics
   end
 
   # These abilities are not allowed to admins that are not members of the project,
@@ -234,6 +243,7 @@ class ProjectPolicy < BasePolicy
     enable :read_commit_status
     enable :read_build
     enable :read_container_image
+    enable :read_deploy_board
     enable :read_pipeline
     enable :read_pipeline_schedule
     enable :read_environment
@@ -438,6 +448,10 @@ class ProjectPolicy < BasePolicy
     prevent(*create_read_update_admin_destroy(:snippet))
   end
 
+  rule { analytics_disabled }.policy do
+    prevent(:read_analytics)
+  end
+
   rule { wiki_disabled }.policy do
     prevent(*create_read_update_admin_destroy(:wiki))
     prevent(:download_wiki_code)
@@ -508,6 +522,7 @@ class ProjectPolicy < BasePolicy
     enable :download_wiki_code
     enable :read_cycle_analytics
     enable :read_pages_content
+    enable :read_analytics
 
     # NOTE: may be overridden by IssuePolicy
     enable :read_issue
@@ -566,6 +581,10 @@ class ProjectPolicy < BasePolicy
     enable :read_issue_link
   end
 
+  rule { can?(:developer_access) }.policy do
+    enable :read_security_configuration
+  end
+
   # Design abilities could also be prevented in the issue policy.
   rule { design_management_disabled }.policy do
     prevent :read_design
@@ -604,8 +623,16 @@ class ProjectPolicy < BasePolicy
     prevent :read_project
   end
 
+  rule { project_bot }.enable :project_bot_access
+
   rule { resource_access_token_available & can?(:admin_project) }.policy do
     enable :admin_resource_access_tokens
+  end
+
+  rule { can?(:project_bot_access) }.prevent :admin_resource_access_tokens
+
+  rule { user_defined_variables_allowed | can?(:maintainer_access) }.policy do
+    enable :set_pipeline_variables
   end
 
   private

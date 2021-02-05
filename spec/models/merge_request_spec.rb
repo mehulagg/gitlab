@@ -271,8 +271,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
         stub_feature_flags(stricter_mr_branch_name: false)
       end
 
-      using RSpec::Parameterized::TableSyntax
-
       where(:branch_name, :valid) do
         'foo' | true
         'foo:bar' | false
@@ -411,6 +409,59 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
+  describe '.by_squash_commit_sha' do
+    subject { described_class.by_squash_commit_sha(sha) }
+
+    let(:sha) { '123abc' }
+    let(:merge_request) { create(:merge_request, :merged, squash_commit_sha: sha) }
+
+    it 'returns merge requests that match the given squash commit' do
+      is_expected.to eq([merge_request])
+    end
+  end
+
+  describe '.by_related_commit_sha' do
+    subject { described_class.by_related_commit_sha(sha) }
+
+    context 'when commit is a squash commit' do
+      let!(:merge_request) { create(:merge_request, :merged, squash_commit_sha: sha) }
+      let(:sha) { '123abc' }
+
+      it { is_expected.to eq([merge_request]) }
+    end
+
+    context 'when commit is a part of the merge request' do
+      let!(:merge_request) { create(:merge_request, :with_diffs) }
+      let(:sha) { 'b83d6e391c22777fca1ed3012fce84f633d7fed0' }
+
+      it { is_expected.to eq([merge_request]) }
+    end
+
+    context 'when commit is a merge commit' do
+      let!(:merge_request) { create(:merge_request, :merged, merge_commit_sha: sha) }
+      let(:sha) { '123abc' }
+
+      it { is_expected.to eq([merge_request]) }
+    end
+
+    context 'when commit is not found' do
+      let(:sha) { '0000' }
+
+      it { is_expected.to be_empty }
+    end
+
+    context 'when commit is part of the merge request and a squash commit at the same time' do
+      let!(:merge_request) { create(:merge_request, :with_diffs) }
+      let(:sha) { merge_request.commits.first.id }
+
+      before do
+        merge_request.update!(squash_commit_sha: sha)
+      end
+
+      it { is_expected.to eq([merge_request]) }
+    end
+  end
+
   describe '.by_cherry_pick_sha' do
     it 'returns merge requests that match the given merge commit' do
       note = create(:track_mr_picking_note, commit_id: '456abc')
@@ -438,6 +489,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
       create(:merge_request, params).tap do |mr|
         diffs.times { mr.merge_request_diffs.create }
+        mr.create_merge_head_diff
       end
     end
 
@@ -663,6 +715,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when external issue tracker is enabled' do
+      let(:project) { create(:project, :repository) }
+
+      subject { create(:merge_request, source_project: project) }
+
       before do
         subject.project.has_external_issue_tracker = true
         subject.project.save!
@@ -712,9 +768,8 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
     context 'when both internal and external issue trackers are enabled' do
       before do
-        subject.project.has_external_issue_tracker = true
-        subject.project.save!
         create(:jira_service, project: subject.project)
+        subject.project.reload
       end
 
       it 'does not cache issues from external trackers' do
@@ -737,6 +792,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when only external issue tracker enabled' do
+      let(:project) { create(:project, :repository) }
+
+      subject { create(:merge_request, source_project: project) }
+
       before do
         subject.project.has_external_issue_tracker = true
         subject.project.issues_enabled = false
@@ -1221,7 +1280,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
   describe '#issues_mentioned_but_not_closing' do
     let(:closing_issue) { create :issue, project: subject.project }
     let(:mentioned_issue) { create :issue, project: subject.project }
-
     let(:commit) { double('commit', safe_message: "Fixes #{closing_issue.to_reference}") }
 
     it 'detects issues mentioned in description but not closed' do
@@ -1237,13 +1295,12 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when the project has an external issue tracker' do
-      subject { create(:merge_request, source_project: create(:project, :repository)) }
-
       before do
         subject.project.add_developer(subject.author)
         commit = double(:commit, safe_message: 'Fixes TEST-3')
 
         create(:jira_service, project: subject.project)
+        subject.project.reload
 
         allow(subject).to receive(:commits).and_return([commit])
         allow(subject).to receive(:description).and_return('Is related to TEST-2 and TEST-3')
@@ -1603,7 +1660,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
   end
 
   it_behaves_like 'an editable mentionable' do
-    subject { create(:merge_request, :simple) }
+    subject { create(:merge_request, :simple, source_project: create(:project, :repository)) }
 
     let(:backref_text) { "merge request #{subject.to_reference}" }
     let(:set_mentionable_text) { ->(txt) { subject.description = txt } }
@@ -1929,6 +1986,30 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
+  describe '#has_codequality_mr_diff_report?' do
+    subject { merge_request.has_codequality_mr_diff_report? }
+
+    context 'when head pipeline has codequality mr diff report' do
+      let(:merge_request) { create(:merge_request, :with_codequality_mr_diff_reports) }
+
+      it { is_expected.to be_truthy }
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(codequality_mr_diff: false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when head pipeline does not have codeqquality mr diff report' do
+      let(:merge_request) { create(:merge_request) }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
   describe '#has_codequality_reports?' do
     subject { merge_request.has_codequality_reports? }
 
@@ -1941,7 +2022,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
       context 'when feature flag is disabled' do
         before do
-          stub_feature_flags(codequality_mr_diff: false)
+          stub_feature_flags(codequality_backend_comparison: false)
         end
 
         it { is_expected.to be_falsey }
@@ -2096,6 +2177,54 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
           it 'raises and InvalidateReactiveCache error' do
             expect { subject }.to raise_error(ReactiveCaching::InvalidateReactiveCache)
+          end
+        end
+      end
+    end
+  end
+
+  describe '#find_codequality_mr_diff_reports' do
+    let(:project) { create(:project, :repository) }
+    let(:merge_request) { create(:merge_request, :with_codequality_mr_diff_reports, source_project: project) }
+    let(:pipeline) { merge_request.head_pipeline }
+
+    subject(:mr_diff_report) { merge_request.find_codequality_mr_diff_reports }
+
+    context 'when head pipeline has coverage reports' do
+      context 'when reactive cache worker is parsing results asynchronously' do
+        it 'returns status' do
+          expect(mr_diff_report[:status]).to eq(:parsing)
+        end
+      end
+
+      context 'when reactive cache worker is inline' do
+        before do
+          synchronous_reactive_cache(merge_request)
+        end
+
+        it 'returns status and data' do
+          expect(mr_diff_report[:status]).to eq(:parsed)
+        end
+
+        context 'when an error occurrs' do
+          before do
+            merge_request.update!(head_pipeline: nil)
+          end
+
+          it 'returns an error message' do
+            expect(mr_diff_report[:status]).to eq(:error)
+          end
+        end
+
+        context 'when cached results is not latest' do
+          before do
+            allow_next_instance_of(Ci::GenerateCodequalityMrDiffReportService) do |service|
+              allow(service).to receive(:latest?).and_return(false)
+            end
+          end
+
+          it 'raises and InvalidateReactiveCache error' do
+            expect { mr_diff_report }.to raise_error(ReactiveCaching::InvalidateReactiveCache)
           end
         end
       end
@@ -2723,8 +2852,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'with skip_ci_check option' do
-      using RSpec::Parameterized::TableSyntax
-
       before do
         allow(subject).to receive_messages(check_mergeability: nil,
                                            can_be_merged?: true,
@@ -2748,8 +2875,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'with skip_discussions_check option' do
-      using RSpec::Parameterized::TableSyntax
-
       before do
         allow(subject).to receive_messages(mergeable_ci_state?: true,
                                            check_mergeability: nil,
@@ -3303,6 +3428,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when resolve_outdated_diff_discussions is set' do
+      let(:project) { create(:project, :repository) }
+
+      subject { create(:merge_request, source_project: project) }
+
       before do
         discussion
 
@@ -3323,7 +3452,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
   describe '#branch_merge_base_commit' do
     let(:project) { create(:project, :repository) }
 
-    subject { create(:merge_request, :with_diffs, source_project: project) }
+    subject { create(:merge_request, source_project: project) }
 
     context 'source and target branch exist' do
       it { expect(subject.branch_merge_base_commit.sha).to eq('ae73cb07c9eeaf35924a10f713b364d32b2dd34f') }
@@ -3346,7 +3475,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     context "with diffs" do
       let(:project) { create(:project, :repository) }
 
-      subject { create(:merge_request, :with_diffs, source_project: project) }
+      subject { create(:merge_request, source_project: project) }
 
       let(:expected_diff_refs) do
         Gitlab::Diff::DiffRefs.new(
@@ -3555,112 +3684,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
-  describe '#mergeable_with_quick_action?' do
-    def create_pipeline(status)
-      pipeline = create(:ci_pipeline,
-        project: project,
-        ref:     merge_request.source_branch,
-        sha:     merge_request.diff_head_sha,
-        status:  status,
-        head_pipeline_of: merge_request)
-
-      pipeline
-    end
-
-    let_it_be(:project) { create(:project, :public, :repository, only_allow_merge_if_pipeline_succeeds: true) }
-
-    let(:developer)     { create(:user) }
-    let(:user)          { create(:user) }
-    let(:merge_request) { create(:merge_request, source_project: project) }
-    let(:mr_sha)        { merge_request.diff_head_sha }
-
-    before do
-      project.add_developer(developer)
-    end
-
-    context 'when autocomplete_precheck is set to true' do
-      it 'is mergeable by developer' do
-        expect(merge_request.mergeable_with_quick_action?(developer, autocomplete_precheck: true)).to be_truthy
-      end
-
-      it 'is not mergeable by normal user' do
-        expect(merge_request.mergeable_with_quick_action?(user, autocomplete_precheck: true)).to be_falsey
-      end
-    end
-
-    context 'when autocomplete_precheck is set to false' do
-      it 'is mergeable by developer' do
-        expect(merge_request.mergeable_with_quick_action?(developer, last_diff_sha: mr_sha)).to be_truthy
-      end
-
-      it 'is not mergeable by normal user' do
-        expect(merge_request.mergeable_with_quick_action?(user, last_diff_sha: mr_sha)).to be_falsey
-      end
-
-      context 'closed MR' do
-        before do
-          merge_request.update_attribute(:state_id, described_class.available_states[:closed])
-        end
-
-        it 'is not mergeable' do
-          expect(merge_request.mergeable_with_quick_action?(developer, last_diff_sha: mr_sha)).to be_falsey
-        end
-      end
-
-      context 'MR with WIP' do
-        before do
-          merge_request.update_attribute(:title, 'WIP: some MR')
-        end
-
-        it 'is not mergeable' do
-          expect(merge_request.mergeable_with_quick_action?(developer, last_diff_sha: mr_sha)).to be_falsey
-        end
-      end
-
-      context 'sha differs from the MR diff_head_sha' do
-        it 'is not mergeable' do
-          expect(merge_request.mergeable_with_quick_action?(developer, last_diff_sha: 'some other sha')).to be_falsey
-        end
-      end
-
-      context 'sha is not provided' do
-        it 'is not mergeable' do
-          expect(merge_request.mergeable_with_quick_action?(developer)).to be_falsey
-        end
-      end
-
-      context 'with pipeline ok' do
-        before do
-          create_pipeline(:success)
-        end
-
-        it 'is mergeable' do
-          expect(merge_request.mergeable_with_quick_action?(developer, last_diff_sha: mr_sha)).to be_truthy
-        end
-      end
-
-      context 'with failing pipeline' do
-        before do
-          create_pipeline(:failed)
-        end
-
-        it 'is not mergeable' do
-          expect(merge_request.mergeable_with_quick_action?(developer, last_diff_sha: mr_sha)).to be_falsey
-        end
-      end
-
-      context 'with running pipeline' do
-        before do
-          create_pipeline(:running)
-        end
-
-        it 'is mergeable' do
-          expect(merge_request.mergeable_with_quick_action?(developer, last_diff_sha: mr_sha)).to be_truthy
-        end
-      end
-    end
-  end
-
   describe '#pipeline_coverage_delta' do
     let!(:merge_request) { create(:merge_request) }
 
@@ -3856,7 +3879,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
   describe '#fetch_ref!' do
     let(:project) { create(:project, :repository) }
 
-    subject { create(:merge_request, :with_diffs, source_project: project) }
+    subject { create(:merge_request, source_project: project) }
 
     it 'fetches the ref correctly' do
       expect { subject.target_project.repository.delete_refs(subject.ref_path) }.not_to raise_error
@@ -4431,37 +4454,41 @@ RSpec.describe MergeRequest, factory_default: :keep do
   end
 
   describe '#diffable_merge_ref?' do
+    let(:merge_request) { create(:merge_request) }
+
     context 'merge request can be merged' do
-      context 'merge_to_ref is not calculated' do
+      context 'merge_head diff is not created' do
         it 'returns true' do
-          expect(subject.diffable_merge_ref?).to eq(false)
+          expect(merge_request.diffable_merge_ref?).to eq(false)
         end
       end
 
-      context 'merge_to_ref is calculated' do
+      context 'merge_head diff is created' do
         before do
-          MergeRequests::MergeToRefService.new(subject.project, subject.author).execute(subject)
+          create(:merge_request_diff, :merge_head, merge_request: merge_request)
         end
 
         it 'returns true' do
-          expect(subject.diffable_merge_ref?).to eq(true)
+          expect(merge_request.diffable_merge_ref?).to eq(true)
         end
 
         context 'merge request is merged' do
-          subject { build_stubbed(:merge_request, :merged, project: project) }
+          before do
+            merge_request.mark_as_merged!
+          end
 
           it 'returns false' do
-            expect(subject.diffable_merge_ref?).to eq(false)
+            expect(merge_request.diffable_merge_ref?).to eq(false)
           end
         end
 
         context 'merge request cannot be merged' do
           before do
-            subject.mark_as_unchecked!
+            merge_request.mark_as_unchecked!
           end
 
           it 'returns false' do
-            expect(subject.diffable_merge_ref?).to eq(true)
+            expect(merge_request.diffable_merge_ref?).to eq(true)
           end
 
           context 'display_merge_conflicts_in_diff is disabled' do
@@ -4470,7 +4497,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
             end
 
             it 'returns false' do
-              expect(subject.diffable_merge_ref?).to eq(false)
+              expect(merge_request.diffable_merge_ref?).to eq(false)
             end
           end
         end

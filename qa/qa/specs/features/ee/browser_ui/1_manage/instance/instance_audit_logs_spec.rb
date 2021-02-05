@@ -61,7 +61,7 @@ module QA
         it_behaves_like 'audit event', ["Added SSH key"]
       end
 
-      context 'Add and delete email', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/217831', type: :bug }, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/741' do
+      context 'Add and delete email', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/741' do
         before do
           sign_in
           new_email_address = 'new_email@example.com'

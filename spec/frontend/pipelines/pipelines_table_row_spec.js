@@ -5,7 +5,7 @@ import eventHub from '~/pipelines/event_hub';
 describe('Pipelines Table Row', () => {
   const jsonFixtureName = 'pipelines/pipelines.json';
 
-  const createWrapper = pipeline =>
+  const createWrapper = (pipeline) =>
     mount(PipelinesTableRowComponent, {
       propsData: {
         pipeline,
@@ -24,9 +24,9 @@ describe('Pipelines Table Row', () => {
   beforeEach(() => {
     const { pipelines } = getJSONFixture(jsonFixtureName);
 
-    pipeline = pipelines.find(p => p.user !== null && p.commit !== null);
-    pipelineWithoutAuthor = pipelines.find(p => p.user === null && p.commit !== null);
-    pipelineWithoutCommit = pipelines.find(p => p.user === null && p.commit === null);
+    pipeline = pipelines.find((p) => p.user !== null && p.commit !== null);
+    pipelineWithoutAuthor = pipelines.find((p) => p.user === null && p.commit !== null);
+    pipelineWithoutCommit = pipelines.find((p) => p.user === null && p.commit === null);
   });
 
   afterEach(() => {
@@ -82,10 +82,7 @@ describe('Pipelines Table Row', () => {
         ).toEqual(pipeline.user.path);
 
         expect(
-          wrapper
-            .find('.table-section:nth-child(3) .js-user-avatar-image-toolip')
-            .text()
-            .trim(),
+          wrapper.find('.table-section:nth-child(3) .js-user-avatar-image-tooltip').text().trim(),
         ).toEqual(pipeline.user.name);
       });
     });
@@ -112,7 +109,7 @@ describe('Pipelines Table Row', () => {
 
       const commitAuthorLink = commitAuthorElement.attributes('href');
       const commitAuthorName = commitAuthorElement
-        .find('.js-user-avatar-image-toolip')
+        .find('.js-user-avatar-image-tooltip')
         .text()
         .trim();
 
@@ -158,7 +155,9 @@ describe('Pipelines Table Row', () => {
 
     it('should render an icon for each stage', () => {
       expect(
-        wrapper.findAll('.table-section:nth-child(4) .js-builds-dropdown-button').length,
+        wrapper.findAll(
+          '.table-section:nth-child(4) [data-testid="mini-pipeline-graph-dropdown-toggle"]',
+        ).length,
       ).toEqual(pipeline.details.stages.length);
     });
   });
@@ -190,7 +189,7 @@ describe('Pipelines Table Row', () => {
     });
 
     it('emits `retryPipeline` event when retry button is clicked and toggles loading', () => {
-      eventHub.$on('retryPipeline', endpoint => {
+      eventHub.$on('retryPipeline', (endpoint) => {
         expect(endpoint).toBe('/retry');
       });
 
@@ -199,7 +198,7 @@ describe('Pipelines Table Row', () => {
     });
 
     it('emits `openConfirmationModal` event when cancel button is clicked and toggles loading', () => {
-      eventHub.$once('openConfirmationModal', data => {
+      eventHub.$once('openConfirmationModal', (data) => {
         const { id, ref, commit } = pipeline;
 
         expect(data.endpoint).toBe('/cancel');
@@ -215,7 +214,7 @@ describe('Pipelines Table Row', () => {
       wrapper.find('.js-pipelines-cancel-button').trigger('click');
     });
 
-    it('renders a loading icon when `cancelingPipeline` matches pipeline id', done => {
+    it('renders a loading icon when `cancelingPipeline` matches pipeline id', (done) => {
       wrapper.setProps({ cancelingPipeline: pipeline.id });
       wrapper.vm
         .$nextTick()

@@ -8,7 +8,7 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Create do
   let(:params) { valid_params }
   let(:mutation) { described_class.new(object: nil, context: { current_user: current_user }, field: nil) }
 
-  subject { mutation.resolve(params) }
+  subject { mutation.resolve(**params) }
 
   describe '#resolve' do
     context 'feature is unlicensed' do
@@ -84,7 +84,7 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Create do
         end
 
         context 'framework parameters are invalid' do
-          let(:params) { valid_params.merge(color: 'notacolor') }
+          subject { mutation.resolve(**invalid_color_params) }
 
           it 'does not create a new compliance framework' do
             expect { subject }.not_to change { namespace.compliance_management_frameworks.count }
@@ -103,9 +103,23 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Create do
   def valid_params
     {
       namespace_path: namespace.full_path,
-      name: 'GDPR',
-      description: 'Example description',
-      color: '#abc123'
+      params: {
+        name: 'GDPR',
+        description: 'Example description',
+        color: '#abc123',
+        pipeline_configuration_full_path: 'compliance/.gitlab-ci.yml'
+      }
+    }
+  end
+
+  def invalid_color_params
+    {
+      namespace_path: namespace.full_path,
+      params: {
+        name: 'GDPR',
+        description: 'Example description',
+        color: '#notacolor'
+      }
     }
   end
 end

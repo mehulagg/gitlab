@@ -5,6 +5,7 @@ module EE
 
     prepended do
       expose :milestone_id
+      expose :iteration_id
       expose :weight
       expose :label_ids
       expose :milestone, using: BoardMilestoneEntity

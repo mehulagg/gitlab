@@ -6,9 +6,8 @@ import { s__, __ } from '~/locale';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { formatDate, timeFor } from '~/lib/utils/datetime_utility';
 
-import * as types from './mutation_types';
-
 import boardsStore from '~/boards/stores/boards_store';
+import * as types from './mutation_types';
 
 export const setInitialData = ({ commit }, data) => commit(types.SET_INITIAL_DATA, data);
 export const setIssueId = ({ commit }, issueId) => commit(types.SET_ISSUE_ID, issueId);
@@ -24,7 +23,7 @@ export const setSelectedEpicIssueId = ({ commit }, selectedEpicIssueId) =>
 
 export const requestEpics = ({ commit }) => commit(types.REQUEST_EPICS);
 export const receiveEpicsSuccess = ({ commit }, data) => {
-  const epics = data.map(rawEpic =>
+  const epics = data.map((rawEpic) =>
     convertObjectPropsToCamelCase(
       { ...rawEpic, url: rawEpic.web_edit_url },
       {

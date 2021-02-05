@@ -1,11 +1,11 @@
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters, mapState, mapActions } from 'vuex';
 import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import DraftNote from '~/batch_comments/components/draft_note.vue';
+import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
 import DiffRow from './diff_row.vue';
 import DiffCommentCell from './diff_comment_cell.vue';
 import DiffExpansionCell from './diff_expansion_cell.vue';
-import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
 
 export default {
   components: {
@@ -35,6 +35,12 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      dragStart: null,
+      updatedLineRange: null,
+    };
+  },
   computed: {
     ...mapGetters('diffs', ['commitId']),
     ...mapState({
@@ -52,11 +58,38 @@ export default {
     },
   },
   methods: {
+    ...mapActions(['setSelectedCommentPosition']),
+    ...mapActions('diffs', ['showCommentForm']),
     showCommentLeft(line) {
-      return !this.inline || line.left;
+      return line.left && !line.right;
     },
     showCommentRight(line) {
-      return !this.inline || (line.right && !line.left);
+      return line.right && !line.left;
+    },
+    onStartDragging(line) {
+      this.dragStart = line;
+    },
+    onDragOver(line) {
+      if (line.chunk !== this.dragStart.chunk) return;
+
+      let start = this.dragStart;
+      let end = line;
+
+      if (this.dragStart.index >= line.index) {
+        start = line;
+        end = this.dragStart;
+      }
+
+      this.updatedLineRange = { start, end };
+
+      this.setSelectedCommentPosition(this.updatedLineRange);
+    },
+    onStopDragging() {
+      this.showCommentForm({
+        lineCode: this.updatedLineRange?.end?.line_code,
+        fileHash: this.diffFile.file_hash,
+      });
+      this.dragStart = null;
     },
   },
   userColorScheme: window.gon.user_color_scheme,
@@ -94,6 +127,10 @@ export default {
         :is-bottom="index + 1 === diffLinesLength"
         :is-commented="index >= commentedLines.startLine && index <= commentedLines.endLine"
         :inline="inline"
+        :index="index"
+        @enterdragging="onDragOver"
+        @startdragging="onStartDragging"
+        @stopdragging="onStopDragging"
       />
       <div
         v-if="line.renderCommentRow"
@@ -101,24 +138,30 @@ export default {
         :class="line.commentRowClasses"
         class="diff-grid-comments diff-tr notes_holder"
       >
-        <div v-if="showCommentLeft(line)" class="diff-td notes-content parallel old">
+        <div
+          v-if="line.left || !inline"
+          :class="{ parallel: !inline }"
+          class="diff-td notes-content old"
+        >
           <diff-comment-cell
-            v-if="line.left"
+            v-if="line.left && (line.left.renderDiscussion || line.left.hasCommentForm)"
             :line="line.left"
             :diff-file-hash="diffFile.file_hash"
             :help-page-path="helpPagePath"
-            :has-draft="line.left.hasDraft"
             line-position="left"
           />
         </div>
-        <div v-if="showCommentRight(line)" class="diff-td notes-content parallel new">
+        <div
+          v-if="line.right || !inline"
+          :class="{ parallel: !inline }"
+          class="diff-td notes-content new"
+        >
           <diff-comment-cell
-            v-if="line.right"
+            v-if="line.right && (line.right.renderDiscussion || line.right.hasCommentForm)"
             :line="line.right"
             :diff-file-hash="diffFile.file_hash"
             :line-index="index"
             :help-page-path="helpPagePath"
-            :has-draft="line.right.hasDraft"
             line-position="right"
           />
         </div>

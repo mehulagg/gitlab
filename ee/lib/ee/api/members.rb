@@ -19,11 +19,17 @@ module EE
           post ":id/members/:user_id/override" do
             member = find_member(params)
 
-            updated_member = ::Members::UpdateService
+            result = ::Members::UpdateService
               .new(current_user, { override: true })
               .execute(member, permission: :override)
 
-            present_member(updated_member)
+            updated_member = result[:member]
+
+            if result[:status] == :success
+              present_member(updated_member)
+            else
+              render_validation_error!(updated_member)
+            end
           end
 
           desc 'Remove an LDAP group member access level override.' do
@@ -35,11 +41,17 @@ module EE
           delete ":id/members/:user_id/override" do
             member = find_member(params)
 
-            updated_member = ::Members::UpdateService
+            result = ::Members::UpdateService
               .new(current_user, { override: false })
               .execute(member, permission: :override)
 
-            present_member(updated_member)
+            updated_member = result[:member]
+
+            if result[:status] == :success
+              present_member(updated_member)
+            else
+              render_validation_error!(updated_member)
+            end
           end
 
           desc 'Gets a list of billable users of root group.' do
@@ -57,9 +69,13 @@ module EE
             bad_request!(nil) unless ::Ability.allowed?(current_user, :admin_group_member, group)
 
             sorting = params[:sort] || 'id_asc'
-            users = paginate(billed_users_for(group, params[:search], sorting))
+            users = paginate(
+              BilledUsersFinder.new(group,
+                                    search_term: params[:search],
+                                    order_by: sorting).execute
+            )
 
-            present users, with: ::API::Entities::UserBasic, current_user: current_user
+            present users, with: ::EE::API::Entities::BillableMember, current_user: current_user
           end
         end
       end

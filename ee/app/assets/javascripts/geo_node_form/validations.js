@@ -1,7 +1,7 @@
 import { sprintf, s__ } from '~/locale';
 import { isSafeURL } from '~/lib/utils/url_utility';
 
-export const validateName = data => {
+export const validateName = (data) => {
   if (!data) {
     return s__("Geo|Node name can't be blank");
   } else if (data.length > 255) {
@@ -11,7 +11,7 @@ export const validateName = data => {
   return '';
 };
 
-export const validateUrl = data => {
+export const validateUrl = (data) => {
   if (!data) {
     return s__("Geo|URL can't be blank");
   } else if (!isSafeURL(data)) {

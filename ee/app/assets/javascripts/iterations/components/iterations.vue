@@ -1,9 +1,9 @@
 <script>
 import { GlAlert, GlButton, GlLoadingIcon, GlPagination, GlTab, GlTabs } from '@gitlab/ui';
 import { __ } from '~/locale';
-import IterationsList from './iterations_list.vue';
 import IterationsQuery from '../queries/iterations.query.graphql';
 import { Namespace } from '../constants';
+import IterationsList from './iterations_list.vue';
 
 const pageSize = 20;
 
@@ -31,7 +31,7 @@ export default {
       type: String,
       required: false,
       default: Namespace.Group,
-      validator: value => Object.values(Namespace).includes(value),
+      validator: (value) => Object.values(Namespace).includes(value),
     },
     newIterationPath: {
       type: String,

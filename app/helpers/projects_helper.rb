@@ -139,6 +139,10 @@ module ProjectsHelper
     project_nav_tabs.include? name
   end
 
+  def any_project_nav_tab?(tabs)
+    tabs.any? { |tab| project_nav_tab?(tab) }
+  end
+
   def project_for_deploy_key(deploy_key)
     if deploy_key.has_access_to?(@project)
       @project
@@ -150,13 +154,7 @@ module ProjectsHelper
   end
 
   def can_change_visibility_level?(project, current_user)
-    return false unless can?(current_user, :change_visibility_level, project)
-
-    if project.fork_source
-      project.fork_source.visibility_level > Gitlab::VisibilityLevel::PRIVATE
-    else
-      true
-    end
+    can?(current_user, :change_visibility_level, project)
   end
 
   def can_disable_emails?(project, current_user)
@@ -273,10 +271,6 @@ module ProjectsHelper
     "xcode://clone?repo=#{CGI.escape(default_url_to_repo(project))}"
   end
 
-  def link_to_filter_repo
-    link_to 'git filter-repo', 'https://github.com/newren/git-filter-repo', target: '_blank', rel: 'noopener noreferrer'
-  end
-
   def explore_projects_tab?
     current_page?(explore_projects_path) ||
       current_page?(trending_explore_projects_path) ||
@@ -384,6 +378,20 @@ module ProjectsHelper
 
   private
 
+  def can_read_security_configuration?(project, current_user)
+    ::Feature.enabled?(:secure_security_and_compliance_configuration_page_on_ce, @subject, default_enabled: :yaml) &&
+      can?(current_user, :read_security_configuration, project)
+  end
+
+  def get_project_security_nav_tabs(project, current_user)
+    if can_read_security_configuration?(project, current_user)
+      [:security_and_compliance, :security_configuration]
+    else
+      []
+    end
+  end
+
+  # rubocop:disable Metrics/CyclomaticComplexity
   def get_project_nav_tabs(project, current_user)
     nav_tabs = [:home]
 
@@ -391,6 +399,8 @@ module ProjectsHelper
       nav_tabs += [:files, :commits, :network, :graphs, :forks] if can?(current_user, :download_code, project)
       nav_tabs << :releases if can?(current_user, :read_release, project)
     end
+
+    nav_tabs += get_project_security_nav_tabs(project, current_user)
 
     if project.repo_exists? && can?(current_user, :read_merge_request, project)
       nav_tabs << :merge_requests
@@ -425,6 +435,7 @@ module ProjectsHelper
 
     nav_tabs
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
 
   def package_nav_tabs(project, current_user)
     [].tap do |tabs|
@@ -463,7 +474,8 @@ module ProjectsHelper
       issues:             :read_issue,
       project_members:    :read_project_member,
       wiki:               :read_wiki,
-      feature_flags:      :read_feature_flag
+      feature_flags:      :read_feature_flag,
+      analytics:          :read_analytics
     }
   end
 
@@ -625,6 +637,7 @@ module ProjectsHelper
       wikiAccessLevel: feature.wiki_access_level,
       snippetsAccessLevel: feature.snippets_access_level,
       pagesAccessLevel: feature.pages_access_level,
+      analyticsAccessLevel: feature.analytics_access_level,
       containerRegistryEnabled: !!project.container_registry_enabled,
       lfsEnabled: !!project.lfs_enabled,
       emailsDisabled: project.emails_disabled?,
@@ -703,6 +716,12 @@ module ProjectsHelper
     "#{request.path}?#{options.to_param}"
   end
 
+  def sidebar_security_configuration_paths
+    %w[
+      projects/security/configuration#show
+    ]
+  end
+
   def sidebar_projects_paths
     %w[
       projects#show
@@ -765,6 +784,10 @@ module ProjectsHelper
       tracings
       terraform
     ]
+  end
+
+  def sidebar_security_paths
+    %w[projects/security/configuration#show]
   end
 
   def user_can_see_auto_devops_implicitly_enabled_banner?(project, user)

@@ -13,13 +13,10 @@ import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
-import IterationReportSummaryCards from './iteration_report_summary_cards.vue';
-import IterationReportSummaryClosed from './iteration_report_summary_closed.vue';
-import IterationReportSummaryOpen from './iteration_report_summary_open.vue';
-import IterationForm from './iteration_form.vue';
-import IterationReportTabs from './iteration_report_tabs.vue';
 import query from '../queries/iteration.query.graphql';
 import { Namespace } from '../constants';
+import IterationForm from './iteration_form.vue';
+import IterationReportTabs from './iteration_report_tabs.vue';
 
 const iterationStates = {
   closed: 'closed',
@@ -43,9 +40,6 @@ export default {
     GlEmptyState,
     GlLoadingIcon,
     IterationForm,
-    IterationReportSummaryCards,
-    IterationReportSummaryClosed,
-    IterationReportSummaryOpen,
     IterationReportTabs,
   },
   apollo: {
@@ -94,11 +88,16 @@ export default {
       required: false,
       default: false,
     },
+    labelsFetchPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     namespaceType: {
       type: String,
       required: false,
       default: Namespace.Group,
-      validator: value => Object.values(Namespace).includes(value),
+      validator: (value) => Object.values(Namespace).includes(value),
     },
     previewMarkdownPath: {
       type: String,
@@ -137,11 +136,6 @@ export default {
         default:
           return { text: __('Open'), variant: 'success' };
       }
-    },
-    summaryComponent() {
-      return this.iteration.state === 'closed'
-        ? IterationReportSummaryClosed
-        : IterationReportSummaryOpen;
     },
   },
   mounted() {
@@ -226,35 +220,18 @@ export default {
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
       <div ref="description" v-html="iteration.descriptionHtml"></div>
-
-      <component
-        :is="summaryComponent"
-        :full-path="fullPath"
-        :iteration-id="iteration.id"
-        :namespace-type="namespaceType"
-      >
-        <iteration-report-summary-cards
-          slot-scope="{ columns, loading: summaryLoading, total }"
-          :columns="columns"
-          :loading="summaryLoading"
-          :total="total"
-        />
-      </component>
-      <!-- <iteration-report-summary-closed
-        v-if="iteration.state === 'closed'"
-        :iteration-id="iteration.id"
-      />
-      <iteration-report-summary-open
-        v-else
-      /> -->
       <burn-charts
         :start-date="iteration.startDate"
         :due-date="iteration.dueDate"
         :iteration-id="iteration.id"
+        :iteration-state="iteration.state"
+        :full-path="fullPath"
+        :namespace-type="namespaceType"
       />
       <iteration-report-tabs
         :full-path="fullPath"
         :iteration-id="iteration.id"
+        :labels-fetch-path="labelsFetchPath"
         :namespace-type="namespaceType"
       />
     </template>

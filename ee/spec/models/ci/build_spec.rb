@@ -98,7 +98,7 @@ RSpec.describe Ci::Build do
 
     %w(success drop cancel).each do |event|
       it "for event #{event}", :sidekiq_might_not_need_inline do
-        expect(UpdateBuildMinutesService)
+        expect(Ci::Minutes::UpdateBuildMinutesService)
           .to receive(:new).and_call_original
 
         job.public_send(event)
@@ -468,12 +468,6 @@ RSpec.describe Ci::Build do
 
       it { is_expected.to be true }
     end
-
-    context 'with pipeline for merge train' do
-      let(:merge_request) { create(:merge_request, :on_train, :with_merge_train_pipeline) }
-
-      it { is_expected.to be false }
-    end
   end
 
   describe ".license_scan" do
@@ -578,7 +572,7 @@ RSpec.describe Ci::Build do
           it 'tracks unique users' do
             ci_build = build(:ci_build, secrets: valid_secrets)
 
-            expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(ci_build.user_id, 'i_ci_secrets_management_vault_build_created')
+            expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with('i_ci_secrets_management_vault_build_created', values: ci_build.user_id)
 
             ci_build.save!
           end

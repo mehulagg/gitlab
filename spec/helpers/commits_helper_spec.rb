@@ -3,6 +3,58 @@
 require 'spec_helper'
 
 RSpec.describe CommitsHelper do
+  describe '#revert_commit_link' do
+    context 'when current_user exists' do
+      before do
+        allow(helper).to receive(:current_user).and_return(double('User'))
+      end
+
+      it 'renders a div for Vue' do
+        result = helper.revert_commit_link
+
+        expect(result).to include('js-revert-commit-trigger')
+      end
+    end
+
+    context 'when current_user does not exist' do
+      before do
+        allow(helper).to receive(:current_user).and_return(nil)
+      end
+
+      it 'does not render anything' do
+        result = helper.revert_commit_link
+
+        expect(result).to be_nil
+      end
+    end
+  end
+
+  describe '#cherry_pick_commit_link' do
+    context 'when current_user exists' do
+      before do
+        allow(helper).to receive(:current_user).and_return(double('User'))
+      end
+
+      it 'renders a div for Vue' do
+        result = helper.cherry_pick_commit_link
+
+        expect(result).to include('js-cherry-pick-commit-trigger')
+      end
+    end
+
+    context 'when current_user does not exist' do
+      before do
+        allow(helper).to receive(:current_user).and_return(nil)
+      end
+
+      it 'does not render anything' do
+        result = helper.cherry_pick_commit_link
+
+        expect(result).to be_nil
+      end
+    end
+  end
+
   describe 'commit_author_link' do
     it 'escapes the author email' do
       commit = double(

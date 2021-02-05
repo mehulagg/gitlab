@@ -1,8 +1,8 @@
 import { mount, createWrapper } from '@vue/test-utils';
 import { within } from '@testing-library/dom';
 import { GlAvatarLink, GlBadge } from '@gitlab/ui';
-import { member as memberMock, orphanedMember } from '../../mock_data';
 import UserAvatar from '~/members/components/avatars/user_avatar.vue';
+import { member as memberMock, orphanedMember } from '../../mock_data';
 
 describe('UserAvatar', () => {
   let wrapper;
@@ -22,7 +22,7 @@ describe('UserAvatar', () => {
   const getByText = (text, options) =>
     createWrapper(within(wrapper.element).findByText(text, options));
 
-  const findStatusEmoji = emoji => wrapper.find(`gl-emoji[data-name="${emoji}"]`);
+  const findStatusEmoji = (emoji) => wrapper.find(`gl-emoji[data-name="${emoji}"]`);
 
   afterEach(() => {
     wrapper.destroy();

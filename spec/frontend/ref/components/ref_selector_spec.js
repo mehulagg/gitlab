@@ -37,7 +37,7 @@ describe('Ref selector component', () => {
       attrs,
       listeners: {
         // simulate a parent component v-model binding
-        input: selectedRef => {
+        input: (selectedRef) => {
           wrapper.setProps({ value: selectedRef });
         },
       },
@@ -61,13 +61,13 @@ describe('Ref selector component', () => {
 
     mock
       .onGet(`/api/v4/projects/${projectId}/repository/branches`)
-      .reply(config => branchesApiCallSpy(config));
+      .reply((config) => branchesApiCallSpy(config));
     mock
       .onGet(`/api/v4/projects/${projectId}/repository/tags`)
-      .reply(config => tagsApiCallSpy(config));
+      .reply((config) => tagsApiCallSpy(config));
     mock
       .onGet(new RegExp(`/api/v4/projects/${projectId}/repository/commits/.*`))
-      .reply(config => commitApiCallSpy(config));
+      .reply((config) => commitApiCallSpy(config));
   });
 
   afterEach(() => {
@@ -122,20 +122,23 @@ describe('Ref selector component', () => {
   //
   // Convenience methods
   //
-  const updateQuery = newQuery => {
+  const updateQuery = (newQuery) => {
     findSearchBox().vm.$emit('input', newQuery);
   };
 
   const selectFirstBranch = () => {
     findFirstBranchDropdownItem().vm.$emit('click');
+    return wrapper.vm.$nextTick();
   };
 
   const selectFirstTag = () => {
     findFirstTagDropdownItem().vm.$emit('click');
+    return wrapper.vm.$nextTick();
   };
 
   const selectFirstCommit = () => {
     findFirstCommitDropdownItem().vm.$emit('click');
+    return wrapper.vm.$nextTick();
   };
 
   const waitForRequests = ({ andClearMocks } = { andClearMocks: false }) =>
@@ -310,9 +313,7 @@ describe('Ref selector component', () => {
 
         it('renders the "Branches" heading with a total number indicator', () => {
           expect(
-            findBranchesSection()
-              .find('[data-testid="section-header"]')
-              .text(),
+            findBranchesSection().find('[data-testid="section-header"]').text(),
           ).toMatchInterpolatedText('Branches 123');
         });
 
@@ -333,7 +334,7 @@ describe('Ref selector component', () => {
         it('renders the default branch as a selectable item with a "default" badge', () => {
           const dropdownItems = findBranchDropdownItems();
 
-          const defaultBranch = fixtures.branches.find(b => b.default);
+          const defaultBranch = fixtures.branches.find((b) => b.default);
           const defaultBranchIndex = fixtures.branches.indexOf(defaultBranch);
 
           expect(trimText(dropdownItems.at(defaultBranchIndex).text())).toBe(
@@ -389,9 +390,7 @@ describe('Ref selector component', () => {
 
         it('renders the "Tags" heading with a total number indicator', () => {
           expect(
-            findTagsSection()
-              .find('[data-testid="section-header"]')
-              .text(),
+            findTagsSection().find('[data-testid="section-header"]').text(),
           ).toMatchInterpolatedText('Tags 456');
         });
 
@@ -457,9 +456,7 @@ describe('Ref selector component', () => {
 
         it('renders the "Commits" heading with a total number indicator', () => {
           expect(
-            findCommitsSection()
-              .find('[data-testid="section-header"]')
-              .text(),
+            findCommitsSection().find('[data-testid="section-header"]').text(),
           ).toMatchInterpolatedText('Commits 1');
         });
 
@@ -522,75 +519,73 @@ describe('Ref selector component', () => {
         return waitForRequests();
       });
 
-      it('renders a checkmark by the selected item', () => {
+      it('renders a checkmark by the selected item', async () => {
         expect(findFirstBranchDropdownItem().find(GlIcon).element).toHaveClass(
           'gl-visibility-hidden',
         );
 
-        selectFirstBranch();
+        await selectFirstBranch();
 
-        return localVue.nextTick().then(() => {
-          expect(findFirstBranchDropdownItem().find(GlIcon).element).not.toHaveClass(
-            'gl-visibility-hidden',
-          );
-        });
+        expect(findFirstBranchDropdownItem().find(GlIcon).element).not.toHaveClass(
+          'gl-visibility-hidden',
+        );
       });
 
       describe('when a branch is seleceted', () => {
-        it("displays the branch name in the dropdown's button", () => {
+        it("displays the branch name in the dropdown's button", async () => {
           expect(findButtonContent().text()).toBe(DEFAULT_I18N.noRefSelected);
 
-          selectFirstBranch();
+          await selectFirstBranch();
 
           return localVue.nextTick().then(() => {
             expect(findButtonContent().text()).toBe(fixtures.branches[0].name);
           });
         });
 
-        it("updates the v-model binding with the branch's name", () => {
+        it("updates the v-model binding with the branch's name", async () => {
           expect(wrapper.vm.value).toEqual('');
 
-          selectFirstBranch();
+          await selectFirstBranch();
 
           expect(wrapper.vm.value).toEqual(fixtures.branches[0].name);
         });
       });
 
       describe('when a tag is seleceted', () => {
-        it("displays the tag name in the dropdown's button", () => {
+        it("displays the tag name in the dropdown's button", async () => {
           expect(findButtonContent().text()).toBe(DEFAULT_I18N.noRefSelected);
 
-          selectFirstTag();
+          await selectFirstTag();
 
           return localVue.nextTick().then(() => {
             expect(findButtonContent().text()).toBe(fixtures.tags[0].name);
           });
         });
 
-        it("updates the v-model binding with the tag's name", () => {
+        it("updates the v-model binding with the tag's name", async () => {
           expect(wrapper.vm.value).toEqual('');
 
-          selectFirstTag();
+          await selectFirstTag();
 
           expect(wrapper.vm.value).toEqual(fixtures.tags[0].name);
         });
       });
 
       describe('when a commit is selected', () => {
-        it("displays the full SHA in the dropdown's button", () => {
+        it("displays the full SHA in the dropdown's button", async () => {
           expect(findButtonContent().text()).toBe(DEFAULT_I18N.noRefSelected);
 
-          selectFirstCommit();
+          await selectFirstCommit();
 
           return localVue.nextTick().then(() => {
             expect(findButtonContent().text()).toBe(fixtures.commit.id);
           });
         });
 
-        it("updates the v-model binding with the commit's full SHA", () => {
+        it("updates the v-model binding with the commit's full SHA", async () => {
           expect(wrapper.vm.value).toEqual('');
 
-          selectFirstCommit();
+          await selectFirstCommit();
 
           expect(wrapper.vm.value).toEqual(fixtures.commit.id);
         });

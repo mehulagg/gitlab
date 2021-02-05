@@ -76,11 +76,15 @@ syntax highlighted code on GitLab.
 
 The default syntax theme is White, and you can choose among 5 different themes:
 
+<!-- vale gitlab.Spelling = NO -->
+
 - White
 - Dark
 - Solarized light
 - Solarized dark
 - Monokai
+
+<!-- vale gitlab.Spelling = YES -->
 
 ![Profile preferences syntax highlighting themes](img/profile-preferences-syntax-themes.png)
 
@@ -92,7 +96,7 @@ which apply to the entire Web IDE screen.
 
 ## Behavior
 
-The following settings allow you to customize the behavior of GitLab's layout
+The following settings allow you to customize the behavior of the GitLab layout
 and default views of your dashboard and the projects' landing pages.
 
 ### Layout width

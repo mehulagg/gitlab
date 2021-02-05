@@ -1,16 +1,13 @@
 /* eslint no-param-reassign: "off" */
 
 import $ from 'jquery';
+import MockAdapter from 'axios-mock-adapter';
 import { emojiFixtureMap, initEmojiMock, describeEmojiFields } from 'helpers/emoji';
 import '~/lib/utils/jquery_at_who';
 import GfmAutoComplete, { membersBeforeSave } from 'ee_else_ce/gfm_auto_complete';
-
 import { TEST_HOST } from 'helpers/test_constants';
 import { getJSONFixture } from 'helpers/fixtures';
-
-import waitForPromises from 'jest/helpers/wait_for_promises';
-
-import MockAdapter from 'axios-mock-adapter';
+import waitForPromises from 'helpers/wait_for_promises';
 import AjaxCache from '~/lib/utils/ajax_cache';
 import axios from '~/lib/utils/axios_utils';
 
@@ -164,7 +161,7 @@ describe('GfmAutoComplete', () => {
           });
         });
 
-        it.each([200, 500])('should set the loading state', async responseStatus => {
+        it.each([200, 500])('should set the loading state', async (responseStatus) => {
           mock.onGet('vulnerabilities_autocomplete_url').replyOnce(responseStatus);
 
           fetchData.call(context, {}, '[vulnerability:', 'query');
@@ -371,9 +368,9 @@ describe('GfmAutoComplete', () => {
     const jointAllowedSymbols = allowedSymbols.join('');
 
     describe('should match regular symbols', () => {
-      flagsUseDefaultMatcher.forEach(flag => {
-        allowedSymbols.forEach(symbol => {
-          argumentSize.forEach(size => {
+      flagsUseDefaultMatcher.forEach((flag) => {
+        allowedSymbols.forEach((symbol) => {
+          argumentSize.forEach((size) => {
             const query = new Array(size + 1).join(symbol);
             const subtext = flag + query;
 
@@ -395,8 +392,8 @@ describe('GfmAutoComplete', () => {
       const shouldNotBeFollowedBy = flags.concat(['\x00', '\x10', '\x3f', '\n', ' ']);
       const shouldNotBePrependedBy = ['`'];
 
-      flagsUseDefaultMatcher.forEach(atSign => {
-        shouldNotBeFollowedBy.forEach(followedSymbol => {
+      flagsUseDefaultMatcher.forEach((atSign) => {
+        shouldNotBeFollowedBy.forEach((followedSymbol) => {
           const seq = atSign + followedSymbol;
 
           it(`should not match ${JSON.stringify(seq)}`, () => {
@@ -404,7 +401,7 @@ describe('GfmAutoComplete', () => {
           });
         });
 
-        shouldNotBePrependedBy.forEach(prependedSymbol => {
+        shouldNotBePrependedBy.forEach((prependedSymbol) => {
           const seq = prependedSymbol + atSign;
 
           it(`should not match "${seq}"`, () => {
@@ -493,7 +490,7 @@ describe('GfmAutoComplete', () => {
           username: 'my-group',
           avatarTag: '<div class="avatar rect-avatar center avatar-inline s26">M</div>',
           title: 'My Group (2)',
-          search: 'my-group My Group',
+          search: 'MyGroup my-group',
           icon: '',
         },
       ]);
@@ -506,7 +503,7 @@ describe('GfmAutoComplete', () => {
           avatarTag:
             '<img src="./group.jpg" alt="my-group" class="avatar rect-avatar avatar-inline center s26"/>',
           title: 'My Group (2)',
-          search: 'my-group My Group',
+          search: 'MyGroup my-group',
           icon: '',
         },
       ]);
@@ -519,7 +516,7 @@ describe('GfmAutoComplete', () => {
           avatarTag:
             '<img src="./group.jpg" alt="my-group" class="avatar rect-avatar avatar-inline center s26"/>',
           title: 'My Group',
-          search: 'my-group My Group',
+          search: 'MyGroup my-group',
           icon:
             '<svg class="s16 vertical-align-middle gl-ml-2"><use xlink:href="undefined#notifications-off" /></svg>',
         },
@@ -537,7 +534,7 @@ describe('GfmAutoComplete', () => {
           avatarTag:
             '<img src="./users.jpg" alt="my-user" class="avatar  avatar-inline center s26"/>',
           title: 'My User',
-          search: 'my-user My User',
+          search: 'MyUser my-user',
           icon: '',
         },
       ]);
@@ -638,8 +635,8 @@ describe('GfmAutoComplete', () => {
     };
 
     const allLabels = labelsFixture;
-    const assignedLabels = allLabels.filter(label => label.set);
-    const unassignedLabels = allLabels.filter(label => !label.set);
+    const assignedLabels = allLabels.filter((label) => label.set);
+    const unassignedLabels = allLabels.filter((label) => !label.set);
 
     let autocomplete;
     let $textarea;
@@ -655,11 +652,8 @@ describe('GfmAutoComplete', () => {
       autocomplete.destroy();
     });
 
-    const triggerDropdown = text => {
-      $textarea
-        .trigger('focus')
-        .val(text)
-        .caret('pos', -1);
+    const triggerDropdown = (text) => {
+      $textarea.trigger('focus').val(text).caret('pos', -1);
       $textarea.trigger('keyup');
 
       return new Promise(window.requestAnimationFrame);
@@ -668,12 +662,12 @@ describe('GfmAutoComplete', () => {
     const getDropdownItems = () => {
       const dropdown = document.getElementById('at-view-labels');
       const items = dropdown.getElementsByTagName('li');
-      return [].map.call(items, item => item.textContent.trim());
+      return [].map.call(items, (item) => item.textContent.trim());
     };
 
     const expectLabels = ({ input, output }) =>
       triggerDropdown(input).then(() => {
-        expect(getDropdownItems()).toEqual(output.map(label => label.title));
+        expect(getDropdownItems()).toEqual(output.map((label) => label.title));
       });
 
     describe('with no labels assigned', () => {
@@ -742,9 +736,9 @@ describe('GfmAutoComplete', () => {
     });
 
     describe.each`
-      name                        | inputFormat           | assert
-      ${'insertTemplateFunction'} | ${name => ({ name })} | ${assertInserted}
-      ${'templateFunction'}       | ${name => name}       | ${assertTemplated}
+      name                        | inputFormat             | assert
+      ${'insertTemplateFunction'} | ${(name) => ({ name })} | ${assertInserted}
+      ${'templateFunction'}       | ${(name) => name}       | ${assertTemplated}
     `('Emoji.$name', ({ name, inputFormat, assert }) => {
       const execute = (accessor, input, emoji) =>
         assert({
@@ -811,7 +805,7 @@ describe('GfmAutoComplete', () => {
 
         const item = GfmAutoComplete.Emoji.templateFunction('heart')
           .replace(/(<gl-emoji)\s+(data-name)/, '$1 $2')
-          .replace(/>\s+|\s+</g, s => s.trim());
+          .replace(/>\s+|\s+</g, (s) => s.trim());
         expect(item).toEqual(
           `<li>${heart.name}<gl-emoji data-name="${heart.name}"></gl-emoji></li>`,
         );
@@ -823,7 +817,7 @@ describe('GfmAutoComplete', () => {
 
         const item = GfmAutoComplete.Emoji.templateFunction('star')
           .replace(/(<gl-emoji)\s+(data-name)/, '$1 $2')
-          .replace(/>\s+|\s+</g, s => s.trim());
+          .replace(/>\s+|\s+</g, (s) => s.trim());
         expect(item).toEqual(`<li>${star.name}<gl-emoji data-name="${star.name}"></gl-emoji></li>`);
       });
     });

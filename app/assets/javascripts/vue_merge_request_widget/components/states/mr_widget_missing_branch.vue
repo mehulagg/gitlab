@@ -1,8 +1,8 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
-import statusIcon from '../mr_widget_status_icon.vue';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import statusIcon from '../mr_widget_status_icon.vue';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
 import missingBranchQuery from '../../queries/states/missing_branch.query.graphql';
 
@@ -25,7 +25,7 @@ export default {
       variables() {
         return this.mergeRequestQueryVariables;
       },
-      update: data => data.project.mergeRequest,
+      update: (data) => data.project.mergeRequest,
     },
   },
   props: {

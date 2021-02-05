@@ -1,6 +1,6 @@
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { transformRawStages, prepareStageErrors } from '../utils';
 import * as types from './mutation_types';
-import { transformRawStages } from '../utils';
 
 export default {
   [types.SET_FEATURE_FLAGS](state, featureFlags) {
@@ -33,7 +33,7 @@ export default {
     state.selectedStageError = '';
   },
   [types.RECEIVE_STAGE_DATA_SUCCESS](state, events = []) {
-    state.currentStageEvents = events.map(fields =>
+    state.currentStageEvents = events.map((fields) =>
       convertObjectPropsToCamelCase(fields, { deep: true }),
     );
     state.isEmptyStage = !events.length;
@@ -67,7 +67,8 @@ export default {
     state.stages = [];
   },
   [types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages) {
-    state.stages = transformRawStages(stages);
+    const transformedStages = transformRawStages(stages);
+    state.stages = transformedStages.sort((a, b) => a?.id > b?.id);
   },
   [types.REQUEST_UPDATE_STAGE](state) {
     state.isLoading = true;
@@ -120,9 +121,10 @@ export default {
     state.isCreatingValueStream = true;
     state.createValueStreamErrors = {};
   },
-  [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { errors } = {}) {
+  [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { data: { stages = [] }, errors = {} }) {
+    const { stages: stageErrors = {}, ...rest } = errors;
+    state.createValueStreamErrors = { ...rest, stages: prepareStageErrors(stages, stageErrors) };
     state.isCreatingValueStream = false;
-    state.createValueStreamErrors = errors;
   },
   [types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS](state, valueStream) {
     state.isCreatingValueStream = false;

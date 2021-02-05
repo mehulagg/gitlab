@@ -1,8 +1,8 @@
 import { mount } from '@vue/test-utils';
 import DesignOverlay from '~/design_management/components/design_overlay.vue';
 import updateActiveDiscussion from '~/design_management/graphql/mutations/update_active_discussion.mutation.graphql';
-import notes from '../mock_data/notes';
 import { ACTIVE_DISCUSSION_SOURCE_TYPES } from '~/design_management/constants';
+import notes from '../mock_data/notes';
 
 const mutate = jest.fn(() => Promise.resolve());
 
@@ -13,7 +13,7 @@ describe('Design overlay component', () => {
 
   const findAllNotes = () => wrapper.findAll('.js-image-badge');
   const findCommentBadge = () => wrapper.find('.comment-indicator');
-  const findBadgeAtIndex = noteIndex => findAllNotes().at(noteIndex);
+  const findBadgeAtIndex = (noteIndex) => findAllNotes().at(noteIndex);
   const findFirstBadge = () => findBadgeAtIndex(0);
   const findSecondBadge = () => findBadgeAtIndex(1);
 
@@ -108,7 +108,7 @@ describe('Design overlay component', () => {
       describe('when no discussion is active', () => {
         it('should not apply inactive class to any pins', () => {
           expect(
-            findAllNotes(0).wrappers.every(designNote => designNote.classes('gl-bg-blue-50')),
+            findAllNotes(0).wrappers.every((designNote) => designNote.classes('gl-bg-blue-50')),
           ).toBe(false);
         });
       });
@@ -116,7 +116,7 @@ describe('Design overlay component', () => {
       describe('when a discussion is active', () => {
         it.each([notes[0].discussion.notes.nodes[1], notes[0].discussion.notes.nodes[0]])(
           'should not apply inactive class to the pin for the active discussion',
-          note => {
+          (note) => {
             wrapper.setData({
               activeDiscussion: {
                 id: note.id,

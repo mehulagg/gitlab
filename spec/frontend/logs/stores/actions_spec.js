@@ -19,6 +19,7 @@ import { defaultTimeRange } from '~/vue_shared/constants';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as flash } from '~/flash';
 
+import { TOKEN_TYPE_POD_NAME } from '~/logs/constants';
 import {
   mockPodName,
   mockEnvironmentsEndpoint,
@@ -34,7 +35,6 @@ import {
   mockManagedApps,
   mockManagedAppsEndpoint,
 } from '../mock_data';
-import { TOKEN_TYPE_POD_NAME } from '~/logs/constants';
 
 jest.mock('~/flash');
 jest.mock('~/lib/utils/datetime_range');
@@ -62,7 +62,7 @@ describe('Logs Store actions', () => {
 
   const latestGetParams = () => mock.history.get[mock.history.get.length - 1].params;
 
-  convertToFixedRange.mockImplementation(range => {
+  convertToFixedRange.mockImplementation((range) => {
     if (range === defaultTimeRange) {
       return { ...mockDefaultRange };
     }

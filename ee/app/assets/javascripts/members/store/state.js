@@ -1,6 +1,6 @@
 import createState from '~/members/store/state';
 
-export default initialState => {
+export default (initialState) => {
   const { ldapOverridePath } = initialState;
 
   return {

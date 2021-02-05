@@ -839,4 +839,27 @@ RSpec.describe EE::NotificationService, :mailer do
       issuable.subscriptions.create(user: @watcher_and_subscriber, project: project, subscribed: true)
     end
   end
+
+  context 'Members' do
+    describe '#new_group_member_with_confirmation' do
+      let(:added_user) { create(:user) }
+      let(:group) { create(:group) }
+
+      around do |example|
+        perform_enqueued_jobs do
+          example.run
+        end
+      end
+
+      before do
+        reset_delivered_emails!
+        added_user.user_detail.update!(provisioned_by_group_id: group.id)
+      end
+
+      it 'sends a notification' do
+        group.add_guest(added_user)
+        should_only_email(added_user)
+      end
+    end
+  end
 end

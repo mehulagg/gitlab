@@ -9,6 +9,7 @@ const MonacoWebpackPlugin = require('./plugins/monaco_webpack');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const vendorDllHash = require('./helpers/vendor_dll_hash');
+const createIncrementalWebpackCompiler = require('./helpers/incremental_webpack_compiler');
 
 const ROOT_PATH = path.resolve(__dirname, '..');
 const VENDOR_DLL = process.env.WEBPACK_VENDOR_DLL && process.env.WEBPACK_VENDOR_DLL !== 'false';
@@ -23,6 +24,10 @@ const DEV_SERVER_ALLOWED_HOSTS =
   process.env.DEV_SERVER_ALLOWED_HOSTS && process.env.DEV_SERVER_ALLOWED_HOSTS.split(',');
 const DEV_SERVER_HTTPS = process.env.DEV_SERVER_HTTPS && process.env.DEV_SERVER_HTTPS !== 'false';
 const DEV_SERVER_LIVERELOAD = IS_DEV_SERVER && process.env.DEV_SERVER_LIVERELOAD !== 'false';
+const INCREMENTAL_COMPILER_ENABLED =
+  IS_DEV_SERVER &&
+  process.env.DEV_SERVER_INCREMENTAL &&
+  process.env.DEV_SERVER_INCREMENTAL !== 'false';
 const WEBPACK_REPORT = process.env.WEBPACK_REPORT && process.env.WEBPACK_REPORT !== 'false';
 const WEBPACK_MEMORY_TEST =
   process.env.WEBPACK_MEMORY_TEST && process.env.WEBPACK_MEMORY_TEST !== 'false';
@@ -48,6 +53,11 @@ let autoEntriesCount = 0;
 let watchAutoEntries = [];
 const defaultEntries = ['./main'];
 
+const incrementalCompiler = createIncrementalWebpackCompiler(
+  INCREMENTAL_COMPILER_ENABLED,
+  path.join(CACHE_PATH, 'incremental-webpack-compiler-history.json'),
+);
+
 function generateEntries() {
   // generate automatic entry points
   const autoEntries = {};
@@ -63,13 +73,13 @@ function generateEntries() {
     autoEntriesMap[chunkName] = `${prefix}/${path}`;
   }
 
-  pageEntries.forEach(path => generateAutoEntries(path));
+  pageEntries.forEach((path) => generateAutoEntries(path));
 
   if (IS_EE) {
     const eePageEntries = glob.sync('pages/**/index.js', {
       cwd: path.join(ROOT_PATH, 'ee/app/assets/javascripts'),
     });
-    eePageEntries.forEach(path => generateAutoEntries(path, 'ee'));
+    eePageEntries.forEach((path) => generateAutoEntries(path, 'ee'));
     watchAutoEntries.push(path.join(ROOT_PATH, 'ee/app/assets/javascripts/pages/'));
   }
 
@@ -77,7 +87,7 @@ function generateEntries() {
   autoEntriesCount = autoEntryKeys.length;
 
   // import ancestor entrypoints within their children
-  autoEntryKeys.forEach(entry => {
+  autoEntryKeys.forEach((entry) => {
     const entryPaths = [autoEntriesMap[entry]];
     const segments = entry.split('.');
     while (segments.pop()) {
@@ -97,7 +107,7 @@ function generateEntries() {
     jira_connect_app: './jira_connect/index.js',
   };
 
-  return Object.assign(manualEntries, autoEntries);
+  return Object.assign(manualEntries, incrementalCompiler.filterEntryPoints(autoEntries));
 }
 
 const alias = {
@@ -188,7 +198,7 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        exclude: path =>
+        exclude: (path) =>
           /node_modules\/(?!tributejs)|node_modules|vendor[\\/]assets/.test(path) &&
           !/\.vue\.js/.test(path),
         loader: 'babel-loader',
@@ -344,7 +354,7 @@ module.exports = {
     // webpack-rails only needs assetsByChunkName to function properly
     new StatsWriterPlugin({
       filename: 'manifest.json',
-      transform: function(data, opts) {
+      transform: function (data, opts) {
         const stats = opts.compiler.getStats().toJson({
           chunkModules: false,
           source: false,
@@ -448,7 +458,7 @@ module.exports = {
       ]),
 
     !IS_EE &&
-      new webpack.NormalModuleReplacementPlugin(/^ee_component\/(.*)\.vue/, resource => {
+      new webpack.NormalModuleReplacementPlugin(/^ee_component\/(.*)\.vue/, (resource) => {
         resource.request = path.join(
           ROOT_PATH,
           'app/assets/javascripts/vue_shared/components/empty_component.js',
@@ -485,19 +495,23 @@ module.exports = {
           const missingDeps = Array.from(compilation.missingDependencies);
           const nodeModulesPath = path.join(ROOT_PATH, 'node_modules');
           const hasMissingNodeModules = missingDeps.some(
-            file => file.indexOf(nodeModulesPath) !== -1,
+            (file) => file.indexOf(nodeModulesPath) !== -1,
           );
 
           // watch for changes to missing node_modules
           if (hasMissingNodeModules) compilation.contextDependencies.add(nodeModulesPath);
 
           // watch for changes to automatic entrypoints
-          watchAutoEntries.forEach(watchPath => compilation.contextDependencies.add(watchPath));
+          watchAutoEntries.forEach((watchPath) => compilation.contextDependencies.add(watchPath));
 
           // report our auto-generated bundle count
-          console.log(
-            `${autoEntriesCount} entries from '/pages' automatically added to webpack output.`,
-          );
+          if (incrementalCompiler.enabled) {
+            incrementalCompiler.logStatus(autoEntriesCount);
+          } else {
+            console.log(
+              `${autoEntriesCount} entries from '/pages' automatically added to webpack output.`,
+            );
+          }
 
           callback();
         });
@@ -518,7 +532,7 @@ module.exports = {
             );
           }
           const memoryUsage = process.memoryUsage().heapUsed;
-          const toMB = bytes => Math.floor(bytes / 1024 / 1024);
+          const toMB = (bytes) => Math.floor(bytes / 1024 / 1024);
 
           console.log(`Webpack heap size: ${toMB(memoryUsage)} MB`);
 
@@ -576,8 +590,10 @@ module.exports = {
     */
     new webpack.IgnorePlugin(/moment/, /pikaday/),
   ].filter(Boolean),
-
   devServer: {
+    before(app, server) {
+      incrementalCompiler.setupMiddleware(app, server);
+    },
     host: DEV_SERVER_HOST,
     port: DEV_SERVER_PORT,
     public: DEV_SERVER_PUBLIC_ADDR,

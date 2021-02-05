@@ -12,8 +12,6 @@ import itemStats from './item_stats.vue';
 import itemStatsValue from './item_stats_value.vue';
 import itemActions from './item_actions.vue';
 
-import { showLearnGitLabGroupItemPopover } from '~/onboarding_issues';
-
 export default {
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -78,11 +76,6 @@ export default {
       return this.group.microdata || {};
     },
   },
-  mounted() {
-    if (this.group.name === 'Learn GitLab') {
-      showLearnGitLabGroupItemPopover(this.group.id);
-    }
-  },
   methods: {
     onClickRowGroup(e) {
       const NO_EXPAND_CLS = 'no-expand';
@@ -126,7 +119,7 @@ export default {
       />
       <div
         :class="{ 'd-sm-flex': !group.isChildrenLoading }"
-        class="avatar-container rect-avatar s32 d-none flex-grow-0 flex-shrink-0 "
+        class="avatar-container rect-avatar s32 d-none flex-grow-0 flex-shrink-0"
       >
         <a :href="group.relativePath" class="no-expand">
           <img
@@ -179,7 +172,12 @@ export default {
         <div
           class="metadata align-items-md-center d-flex flex-grow-1 flex-shrink-0 flex-wrap justify-content-md-between"
         >
-          <item-actions v-if="isGroup" :group="group" :parent-group="parentGroup" />
+          <item-actions
+            v-if="isGroup"
+            :group="group"
+            :parent-group="parentGroup"
+            :action="action"
+          />
           <item-stats :item="group" class="group-stats gl-mt-2 d-none d-md-flex" />
         </div>
       </div>

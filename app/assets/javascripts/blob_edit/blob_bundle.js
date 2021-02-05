@@ -1,12 +1,12 @@
 /* eslint-disable no-new */
 
 import $ from 'jquery';
-import NewCommitForm from '../new_commit_form';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import BlobFileDropzone from '../blob/blob_file_dropzone';
 import initPopover from '~/blob/suggest_gitlab_ci_yml';
 import { disableButtonIfEmptyField, setCookie } from '~/lib/utils/common_utils';
 import Tracking from '~/tracking';
+import BlobFileDropzone from '../blob/blob_file_dropzone';
+import NewCommitForm from '../new_commit_form';
 
 const initPopovers = () => {
   const suggestEl = document.querySelector('.js-suggest-gitlab-ci-yml');
@@ -38,9 +38,20 @@ const initPopovers = () => {
   }
 };
 
+export const initUploadForm = () => {
+  const uploadBlobForm = $('.js-upload-blob-form');
+  if (uploadBlobForm.length) {
+    const method = uploadBlobForm.data('method');
+
+    new BlobFileDropzone(uploadBlobForm, method);
+    new NewCommitForm(uploadBlobForm);
+
+    disableButtonIfEmptyField(uploadBlobForm.find('.js-commit-message'), '.btn-upload-file');
+  }
+};
+
 export default () => {
   const editBlobForm = $('.js-edit-blob-form');
-  const uploadBlobForm = $('.js-upload-blob-form');
   const deleteBlobForm = $('.js-delete-blob-form');
 
   if (editBlobForm.length) {
@@ -64,7 +75,7 @@ export default () => {
         });
         initPopovers();
       })
-      .catch(e => createFlash(e));
+      .catch((e) => createFlash(e));
 
     cancelLink.on('click', () => {
       window.onbeforeunload = null;
@@ -80,14 +91,7 @@ export default () => {
     window.onbeforeunload = () => '';
   }
 
-  if (uploadBlobForm.length) {
-    const method = uploadBlobForm.data('method');
-
-    new BlobFileDropzone(uploadBlobForm, method);
-    new NewCommitForm(uploadBlobForm);
-
-    disableButtonIfEmptyField(uploadBlobForm.find('.js-commit-message'), '.btn-upload-file');
-  }
+  initUploadForm();
 
   if (deleteBlobForm.length) {
     new NewCommitForm(deleteBlobForm);

@@ -3,10 +3,10 @@
 import $ from 'jquery';
 import Sortable from 'sortablejs';
 
+import { hide, dispose } from '~/tooltips';
 import { deprecatedCreateFlash as flash } from './flash';
 import axios from './lib/utils/axios_utils';
 import { __ } from './locale';
-import { hide, dispose } from '~/tooltips';
 
 export default class LabelManager {
   constructor({ togglePriorityButton, prioritizedLabels, otherLabels } = {}) {
@@ -135,7 +135,7 @@ export default class LabelManager {
 
   getSortedLabelsIds() {
     const sortedIds = [];
-    this.prioritizedLabels.find('> li').each(function() {
+    this.prioritizedLabels.find('> li').each(function () {
       const id = $(this).data('id');
 
       if (id) {

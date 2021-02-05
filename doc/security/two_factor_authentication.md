@@ -113,7 +113,7 @@ but commented out to help encourage others to add to it in the future. -->
 ## Two-factor Authentication (2FA) for Git over SSH operations
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/270554) in GitLab 13.7.
-> - It's [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default.
+> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-two-factor-authentication-2fa-for-git-operations).
@@ -135,7 +135,7 @@ with the associated SSH key.
 
 Two-factor Authentication (2FA) for Git operations is under development and not
 ready for production use. It is deployed behind a feature flag that is
-**disabled by default**. [GitLab administrators with access to the GitLab Rails console](<replace with path to>/administration/feature_flags.md)
+**disabled by default**. [GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
 can enable it.
 
 To enable it:
@@ -149,14 +149,3 @@ To disable it:
 ```ruby
 Feature.disable(:two_factor_for_cli)
 ```
-
-## Two-factor Authentication (2FA) for Git over HTTP operations
-
-> - Introduced in [GitLab 13.7](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/48943)
-
-When 2FA is enabled, users must either:
-
-- Use a [personal access token](../user/profile/personal_access_tokens.md) with
-  the `read_repository` or `write_repository` scope, in place of a password.
-- Append a [One-time password](../user/profile/account/two_factor_authentication.md#enabling-2fa),
-  directly to the end of the regular password (no spaces).

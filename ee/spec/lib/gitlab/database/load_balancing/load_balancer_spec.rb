@@ -50,29 +50,24 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
       host = double(:host)
 
       allow(lb).to receive(:host).and_return(host)
+      allow(host).to receive(:query_cache_enabled).and_return(true)
+
       expect(host).to receive(:connection).and_return(connection)
-      expect(host).to receive(:enable_query_cache!).once
 
       expect { |b| lb.read(&b) }.to yield_with_args(connection)
-
-      expect(RequestStore[described_class::ENSURE_CACHING_KEY]).to be true
     end
 
-    context 'when :query_cache_for_load_balancing feature flag is disabled' do
-      before do
-        stub_feature_flags(query_cache_for_load_balancing: false)
-      end
+    it 'ensures that query cache is enabled' do
+      connection = double(:connection)
+      host = double(:host)
 
-      it 'yields a connection for a read without enabling query cache' do
-        connection = double(:connection)
-        host = double(:host)
+      allow(lb).to receive(:host).and_return(host)
+      allow(host).to receive(:query_cache_enabled).and_return(false)
+      allow(host).to receive(:connection).and_return(connection)
 
-        allow(lb).to receive(:host).and_return(host)
-        expect(host).to receive(:connection).and_return(connection)
-        expect(host).not_to receive(:enable_query_cache!)
+      expect(host).to receive(:enable_query_cache!).once
 
-        expect { |b| lb.read(&b) }.to yield_with_args(connection)
-      end
+      lb.read { 10 }
     end
 
     it 'marks hosts that are offline' do
@@ -168,7 +163,6 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
       lb.release_host
 
       expect(RequestStore[described_class::CACHE_KEY]).to be_nil
-      expect(RequestStore[described_class::ENSURE_CACHING_KEY]).to be_nil
     end
   end
 

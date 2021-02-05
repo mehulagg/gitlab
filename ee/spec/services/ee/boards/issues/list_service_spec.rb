@@ -22,6 +22,7 @@ RSpec.describe Boards::Issues::ListService, services: true do
     let_it_be(:p3) { create(:group_label, title: 'P3', group: group) }
 
     let_it_be(:milestone) { create(:milestone, group: group) }
+    let_it_be(:iteration) { create(:iteration, group: group) }
 
     let_it_be(:opened_issue1) { create(:labeled_issue, project: project, milestone: m1, weight: 9, title: 'Issue 1', labels: [bug]) }
     let_it_be(:opened_issue2) { create(:labeled_issue, project: project, milestone: m2, weight: 1, title: 'Issue 2', labels: [p2]) }
@@ -42,15 +43,16 @@ RSpec.describe Boards::Issues::ListService, services: true do
     let(:parent) { group }
 
     before do
-      stub_licensed_features(board_assignee_lists: true, board_milestone_lists: true)
+      stub_licensed_features(board_assignee_lists: true, board_milestone_lists: true, board_iteration_lists: true)
 
       parent.add_developer(user)
       opened_issue3.assignees.push(user_list.user)
     end
 
-    context 'with assignee, milestone and label lists present' do
+    context 'with assignee, milestone, iteration and label lists present' do
       let!(:user_list) { create(:user_list, board: board, position: 2) }
       let!(:milestone_list) { create(:milestone_list, board: board, position: 3, milestone: milestone) }
+      let!(:iteration_list) { create(:iteration_list, board: board, position: 4, iteration: iteration) }
       let!(:backlog)   { create(:backlog_list, board: board) }
       let!(:list1)     { create(:list, board: board, label: development, position: 0) }
       let!(:list2)     { create(:list, board: board, label: testing, position: 1) }
@@ -76,6 +78,46 @@ RSpec.describe Boards::Issues::ListService, services: true do
             expect(issues).to contain_exactly(opened_issue1, # milestone from this issue is not in a list
                                               opened_issue2, # milestone from this issue is not in a list
                                               reopened_issue1) # has no milestone
+          end
+        end
+      end
+
+      context 'iteration lists' do
+        let!(:iteration_issue) { create(:labeled_issue, project: project, iteration: iteration, labels: [p3]) }
+
+        let(:params) { { board_id: board.id, id: iteration_list.id } }
+
+        subject(:issues) { described_class.new(parent.class.find(parent.id), user, params).execute }
+
+        it 'returns issues from iteration persisted in the list' do
+          expect(issues).to contain_exactly(iteration_issue)
+        end
+
+        context 'backlog list' do
+          let(:params) { { board_id: board.id, id: backlog.id } }
+
+          it 'excludes issues in the iteration list' do
+            expect(issues).not_to include(iteration_issue)
+          end
+
+          context 'when feature is disabled' do
+            before do
+              stub_licensed_features(board_iteration_lists: false)
+            end
+
+            it 'includes issues in the iteration list' do
+              expect(issues).to include(iteration_issue)
+            end
+          end
+
+          context 'when feature flag is disabled' do
+            before do
+              stub_feature_flags(iteration_board_lists: false)
+            end
+
+            it 'includes issues in the iteration list' do
+              expect(issues).to include(iteration_issue)
+            end
           end
         end
       end

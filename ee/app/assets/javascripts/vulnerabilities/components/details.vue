@@ -2,6 +2,7 @@
 import { GlLink, GlSprintf, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
+import { bodyWithFallBack } from 'ee/vue_shared/security_reports/components/helpers';
 import CodeBlock from '~/vue_shared/components/code_block.vue';
 import { __ } from '~/locale';
 import DetailItem from './detail_item.vue';
@@ -62,7 +63,7 @@ export default {
     },
     recordedMessage() {
       return this.vulnerability?.supportingMessages?.find(
-        msg => msg.name === SUPPORTING_MESSAGE_TYPES.RECORDED,
+        (msg) => msg.name === SUPPORTING_MESSAGE_TYPES.RECORDED,
       )?.response;
     },
     constructedRequest() {
@@ -85,7 +86,7 @@ export default {
           content: this.constructedRequest,
           isCode: true,
         },
-      ].filter(x => x.content);
+      ].filter((x) => x.content);
     },
     responseData() {
       if (!this.vulnerability.response) {
@@ -98,7 +99,7 @@ export default {
           content: this.constructedResponse,
           isCode: true,
         },
-      ].filter(x => x.content);
+      ].filter((x) => x.content);
     },
     recordedResponseData() {
       if (!this.recordedMessage) {
@@ -111,7 +112,7 @@ export default {
           content: this.constructedRecordedResponse,
           isCode: true,
         },
-      ].filter(x => x.content);
+      ].filter((x) => x.content);
     },
     shouldShowLocation() {
       return (
@@ -143,11 +144,11 @@ export default {
         : '';
     },
     constructResponse(response) {
-      const { body, statusCode, reasonPhrase, headers = [] } = response;
+      const { body, statusCode, reasonPhrase = '', headers = [] } = response;
       const headerLines = this.getHeadersAsCodeBlockLines(headers);
 
-      return statusCode && reasonPhrase && headerLines
-        ? [`${statusCode} ${reasonPhrase}\n`, headerLines, '\n\n', body].join('')
+      return statusCode && headerLines
+        ? [`${statusCode} ${reasonPhrase}\n`, headerLines, '\n\n', bodyWithFallBack(body)].join('')
         : '';
     },
     constructRequest(request) {
@@ -155,7 +156,7 @@ export default {
       const headerLines = this.getHeadersAsCodeBlockLines(headers);
 
       return method && url && headerLines
-        ? [`${method} ${url}\n`, headerLines, '\n\n', body].join('')
+        ? [`${method} ${url}\n`, headerLines, '\n\n', bodyWithFallBack(body)].join('')
         : '';
     },
   },
@@ -375,6 +376,25 @@ export default {
         <detail-item :sprintf-message="__('%{labelStart}Assert:%{labelEnd} %{assertion}')">
           {{ assertion }}
         </detail-item>
+      </ul>
+    </template>
+
+    <template v-if="vulnerability.assets && vulnerability.assets.length">
+      <h3>{{ s__('Vulnerability|Reproduction Assets') }}</h3>
+      <ul>
+        <li
+          v-for="(asset, index) in vulnerability.assets"
+          :key="`${index}:${asset.url}`"
+          class="gl-ml-0! gl-list-style-position-inside"
+        >
+          <component
+            :is="asset.url ? 'gl-link' : 'span'"
+            v-bind="asset.url && { href: asset.url, target: '_blank' }"
+            data-testid="asset"
+          >
+            {{ asset.name }}
+          </component>
+        </li>
       </ul>
     </template>
   </div>

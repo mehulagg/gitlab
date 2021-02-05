@@ -5,8 +5,8 @@ import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 
-import InsightsChartError from './insights_chart_error.vue';
 import { CHART_TYPES } from '../constants';
+import InsightsChartError from './insights_chart_error.vue';
 
 const CHART_HEIGHT = 300;
 
@@ -100,12 +100,12 @@ export default {
   methods: {
     setSvg(name) {
       return getSvgIconPathContent(name)
-        .then(path => {
+        .then((path) => {
           if (path) {
             this.$set(this.svgs, name, `path://${path}`);
           }
         })
-        .catch(e => {
+        .catch((e) => {
           // eslint-disable-next-line no-console, @gitlab/require-i18n-strings
           console.error('SVG could not be rendered correctly: ', e);
         });

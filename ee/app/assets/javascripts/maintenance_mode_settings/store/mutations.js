@@ -1,5 +1,5 @@
-import * as types from './mutation_types';
 import { DEFAULT_MAINTENANCE_ENABLED, DEFAULT_BANNER_MESSAGE } from '../constants';
+import * as types from './mutation_types';
 
 export default {
   [types.REQUEST_UPDATE_MAINTENANCE_MODE_SETTINGS](state) {

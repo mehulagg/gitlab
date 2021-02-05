@@ -1,10 +1,11 @@
 /* eslint-disable class-methods-use-this */
 import { __ } from '~/locale';
-import ListLabel from './label';
-import ListAssignee from './assignee';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import boardsStore from '../stores/boards_store';
+import ListLabel from './label';
+import ListAssignee from './assignee';
 import ListMilestone from './milestone';
+import ListIteration from './iteration';
 import 'ee_else_ce/boards/models/issue';
 
 const TYPES = {
@@ -35,7 +36,7 @@ class List {
   constructor(obj) {
     this.id = obj.id;
     this.position = obj.position;
-    this.title = (obj.list_type || obj.listType) === 'backlog' ? __('Open') : obj.title;
+    this.title = obj.title;
     this.type = obj.list_type || obj.listType;
 
     const typeInfo = this.getTypeInfo(this.type);
@@ -57,6 +58,9 @@ class List {
     } else if (IS_EE && obj.milestone) {
       this.milestone = new ListMilestone(obj.milestone);
       this.title = this.milestone.title;
+    } else if (IS_EE && obj.iteration) {
+      this.iteration = new ListIteration(obj.iteration);
+      this.title = this.iteration.title;
     }
 
     // doNotFetchIssues is a temporary workaround until issues are fetched using GraphQL on issue boards
@@ -134,7 +138,7 @@ class List {
   updateMultipleIssues(issues, listFrom, moveBeforeId, moveAfterId) {
     boardsStore
       .moveMultipleIssues({
-        ids: issues.map(issue => issue.id),
+        ids: issues.map((issue) => issue.id),
         fromListId: listFrom.id,
         toListId: this.id,
         moveBeforeId,

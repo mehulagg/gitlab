@@ -6,8 +6,8 @@ import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import { __ } from '~/locale';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { getDatesInRange } from '~/lib/utils/datetime_utility';
-import { xAxisLabelFormatter, dateFormatter } from '../utils';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
+import { xAxisLabelFormatter, dateFormatter } from '../utils';
 
 export default {
   components: {
@@ -39,7 +39,7 @@ export default {
     ...mapGetters(['showChart', 'parsedData']),
     masterChartData() {
       const data = {};
-      this.xAxisRange.forEach(date => {
+      this.xAxisRange.forEach((date) => {
         data[date] = this.parsedData.total[date] || 0;
       });
       return [
@@ -67,7 +67,7 @@ export default {
       const maxNumberOfIndividualContributorsCharts = 100;
 
       return Object.keys(this.parsedData.byAuthorEmail)
-        .map(email => {
+        .map((email) => {
           const author = this.parsedData.byAuthorEmail[email];
           return {
             name: author.name,
@@ -76,7 +76,7 @@ export default {
             dates: [
               {
                 name: __('Commits'),
-                data: this.xAxisRange.map(date => [date, author.dates[date] || 0]),
+                data: this.xAxisRange.map((date) => [date, author.dates[date] || 0]),
               },
             ],
           };
@@ -101,7 +101,7 @@ export default {
     },
     individualChartYAxisMax() {
       return this.individualChartsData.reduce((acc, item) => {
-        const values = item.dates[0].data.map(value => value[1]);
+        const values = item.dates[0].data.map((value) => value[1]);
         return Math.max(acc, ...values);
       }, 0);
     },
@@ -150,7 +150,7 @@ export default {
     },
     setSvg(name) {
       return getSvgIconPathContent(name)
-        .then(path => {
+        .then((path) => {
           if (path) {
             this.$set(this.svgs, name, `path://${path}`);
           }
@@ -177,7 +177,7 @@ export default {
       this.individualCharts.push(chart);
     },
     setIndividualChartsZoom(options) {
-      this.charts.forEach(chart =>
+      this.charts.forEach((chart) =>
         chart.setOption(
           {
             dataZoom: {

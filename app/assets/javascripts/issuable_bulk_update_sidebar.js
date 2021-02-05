@@ -39,9 +39,9 @@ export default class IssuableBulkUpdateSidebar {
   }
 
   bindEvents() {
-    this.$bulkUpdateEnableBtn.on('click', e => this.toggleBulkEdit(e, true));
-    this.$bulkEditCancelBtn.on('click', e => this.toggleBulkEdit(e, false));
-    this.$checkAllContainer.on('click', e => this.selectAll(e));
+    this.$bulkUpdateEnableBtn.on('click', (e) => this.toggleBulkEdit(e, true));
+    this.$bulkEditCancelBtn.on('click', (e) => this.toggleBulkEdit(e, false));
+    this.$checkAllContainer.on('click', (e) => this.selectAll(e));
     this.$issuesList.on('change', () => this.updateFormState());
     this.$bulkEditSubmitBtn.on('click', () => this.prepForSubmit());
     this.$checkAllContainer.on('click', () => this.updateFormState());
@@ -78,6 +78,16 @@ export default class IssuableBulkUpdateSidebar {
           EpicSelect();
         })
         .catch(() => {});
+    }
+
+    if (IS_EE) {
+      import('ee/vue_shared/components/sidebar/iterations_dropdown_bundle')
+        .then(({ default: iterationsDropdown }) => {
+          iterationsDropdown();
+        })
+        .catch((e) => {
+          throw e;
+        });
     }
   }
 
@@ -159,7 +169,7 @@ export default class IssuableBulkUpdateSidebar {
     const $checkedIssues = $('.selected-issuable:checked');
 
     if ($checkedIssues.length > 0) {
-      return $.map($checkedIssues, value => $(value).data('id'));
+      return $.map($checkedIssues, (value) => $(value).data('id'));
     }
 
     return [];

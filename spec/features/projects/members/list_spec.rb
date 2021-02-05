@@ -12,8 +12,17 @@ RSpec.describe 'Project members list' do
   let(:project) { create(:project, namespace: group) }
 
   before do
+    stub_feature_flags(invite_members_group_modal: false)
+    stub_feature_flags(vue_project_members_list: false)
+
     sign_in(user1)
     group.add_owner(user1)
+  end
+
+  it 'pushes `vue_project_members_list` feature flag to the frontend' do
+    visit_members_page
+
+    expect(page).to have_pushed_frontend_feature_flags(vueProjectMembersList: false)
   end
 
   it 'show members from project and group' do
@@ -82,7 +91,9 @@ RSpec.describe 'Project members list' do
 
     add_user('test@example.com', 'Reporter')
 
-    page.within(second_row) do
+    click_link 'Invited'
+
+    page.within(first_row) do
       expect(page).to have_content('test@example.com')
       expect(page).to have_content('Invited')
       expect(page).to have_button('Reporter')

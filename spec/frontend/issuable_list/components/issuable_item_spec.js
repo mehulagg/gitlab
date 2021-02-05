@@ -252,12 +252,26 @@ describe('IssuableItem', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(
-        wrapper
-          .find('[data-testid="issuable-title"]')
-          .find(GlLink)
-          .attributes('target'),
-      ).toBe('_blank');
+      expect(wrapper.find('[data-testid="issuable-title"]').find(GlLink).attributes('target')).toBe(
+        '_blank',
+      );
+    });
+
+    it('renders issuable confidential icon when issuable is confidential', async () => {
+      wrapper.setProps({
+        issuable: {
+          ...mockIssuable,
+          confidential: true,
+        },
+      });
+
+      await wrapper.vm.$nextTick();
+
+      const confidentialEl = wrapper.find('[data-testid="issuable-title"]').find(GlIcon);
+
+      expect(confidentialEl.exists()).toBe(true);
+      expect(confidentialEl.props('name')).toBe('eye-slash');
+      expect(confidentialEl.attributes('title')).toBe('Confidential');
     });
 
     it('renders issuable reference', () => {

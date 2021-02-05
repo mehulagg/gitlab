@@ -53,7 +53,7 @@ module EE
 
         state_machine :status do
           after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
-            next unless pipeline.has_reports?(::Ci::JobArtifact.security_reports.or(::Ci::JobArtifact.license_scanning_reports))
+            next unless pipeline.can_store_security_reports?
 
             pipeline.run_after_commit do
               StoreSecurityReportsWorker.perform_async(pipeline.id) if pipeline.default_branch?
@@ -87,10 +87,6 @@ module EE
       def triggers_subscriptions?
         # Currently we trigger subscriptions only for tags.
         tag? && project_has_subscriptions?
-      end
-
-      def retryable?
-        !merge_train_pipeline? && super
       end
 
       def batch_lookup_report_artifact_for_file_type(file_type)
@@ -158,6 +154,7 @@ module EE
         end
       end
 
+      override :merge_train_pipeline?
       def merge_train_pipeline?
         merge_request_pipeline? && merge_train_ref?
       end

@@ -11,6 +11,8 @@ RSpec.describe 'Projects > Settings > User manages project members' do
   let(:user_mike) { create(:user, name: 'Mike') }
 
   before do
+    stub_feature_flags(vue_project_members_list: false)
+
     project.add_maintainer(user)
     project.add_developer(user_dmitriy)
     sign_in(user)
@@ -37,6 +39,8 @@ RSpec.describe 'Projects > Settings > User manages project members' do
   end
 
   it 'imports a team from another project' do
+    stub_feature_flags(invite_members_group_modal: false)
+
     project2.add_maintainer(user)
     project2.add_reporter(user_mike)
 
@@ -57,7 +61,7 @@ RSpec.describe 'Projects > Settings > User manages project members' do
     end
   end
 
-  it 'shows all members of project shared group' do
+  it 'shows all members of project shared group', :js do
     group.add_owner(user)
     group.add_developer(user_dmitriy)
 
@@ -67,7 +71,9 @@ RSpec.describe 'Projects > Settings > User manages project members' do
 
     visit(project_project_members_path(project))
 
-    page.within('.project-members-groups') do
+    click_link 'Groups'
+
+    page.within('[data-testid="project-member-groups"]') do
       expect(page).to have_content('OpenSource')
       expect(first('.group_member')).to have_content('Maintainer')
     end

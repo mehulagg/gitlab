@@ -21,8 +21,8 @@ It deprecates these endpoints, which will be removed for API version 5.
 In addition to templates common to the entire instance, project-specific
 templates are also available from this API endpoint.
 
-Support for [Group-level file templates](../user/group/index.md#group-file-templates)
-**(PREMIUM)** was [added](https://gitlab.com/gitlab-org/gitlab/-/issues/5987)
+Support for [Group-level file templates](../user/group/index.md#group-file-templates) **(PREMIUM)**
+was [added](https://gitlab.com/gitlab-org/gitlab/-/issues/5987)
 in GitLab 11.5
 
 ## Get all templates of a particular type
@@ -34,7 +34,7 @@ GET /projects/:id/templates/:type
 | Attribute  | Type   | Required | Description |
 | ---------- | ------ | -------- | ----------- |
 | `id`      | integer / string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
-| `type`     | string | yes| The type `(dockerfiles|gitignores|gitlab_ci_ymls|licenses|issues|merge_requests)` of the template |
+| `type`     | string | yes | The type `(dockerfiles|gitignores|gitlab_ci_ymls|licenses|issues|merge_requests)` of the template |
 
 Example response (licenses):
 

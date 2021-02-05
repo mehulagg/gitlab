@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::DataBuilder::Build do
-  let(:runner) { create(:ci_runner, :instance) }
+  let!(:tag_names) { %w(tag-1 tag-2) }
+  let(:runner) { create(:ci_runner, :instance, tag_list: tag_names.map { |n| ActsAsTaggableOn::Tag.create!(name: n)}) }
   let(:user) { create(:user) }
   let(:build) { create(:ci_build, :running, runner: runner, user: user) }
 
@@ -26,6 +27,7 @@ RSpec.describe Gitlab::DataBuilder::Build do
     it {
       expect(data[:user]).to eq(
         {
+            id: user.id,
             name: user.name,
             username: user.username,
             avatar_url: user.avatar_url(only_path: false),
@@ -34,6 +36,7 @@ RSpec.describe Gitlab::DataBuilder::Build do
     }
     it { expect(data[:commit][:id]).to eq(build.pipeline.id) }
     it { expect(data[:runner][:id]).to eq(build.runner.id) }
+    it { expect(data[:runner][:tags]).to match_array(tag_names) }
     it { expect(data[:runner][:description]).to eq(build.runner.description) }
 
     context 'commit author_url' do

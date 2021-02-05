@@ -26,4 +26,18 @@ export default {
     state.isLoading = false;
     state.hasError = true;
   },
+
+  [types.SET_SEARCH](state, searchString) {
+    state.search = searchString ?? '';
+  },
+
+  [types.RESET_MEMBERS](state) {
+    state.members = [];
+
+    state.total = null;
+    state.page = null;
+    state.perPage = null;
+
+    state.isLoading = false;
+  },
 };

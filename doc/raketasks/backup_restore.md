@@ -1,10 +1,10 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Back up and restore GitLab **(CORE ONLY)**
+# Back up and restore GitLab **(FREE SELF)**
 
 GitLab provides Rake tasks for backing up and restoring GitLab instances.
 
@@ -16,7 +16,7 @@ of GitLab on which it was created. The best way to migrate your repositories
 from one server to another is through backup restore.
 
 WARNING:
-GitLab doesn't back up items that aren't stored in the filesystem. If you're
+GitLab doesn't back up items that aren't stored in the file system. If you're
 using [object storage](../administration/object_storage.md), be sure to enable
 backups with your object storage provider, if desired.
 
@@ -61,6 +61,7 @@ including:
 - Container Registry images
 - GitLab Pages content
 - Snippets
+- Group wikis **(PREMIUM)**
 
 WARNING:
 GitLab does not back up any configuration files, SSL certificates, or system
@@ -99,7 +100,7 @@ the host, based on your installed version of GitLab:
 - GitLab 12.1 and earlier:
 
   ```shell
-  gitlab-rake gitlab:backup:create
+  docker exec -t <container name> gitlab-rake gitlab:backup:create
   ```
 
 If you're using the [GitLab Helm chart](https://gitlab.com/gitlab-org/charts/gitlab)
@@ -239,7 +240,7 @@ The resulting file is named `dump_gitlab_backup.tar`. This is useful for
 systems that make use of rsync and incremental backups, and results in
 considerably faster transfer speeds.
 
-#### Rsyncable
+#### Confirm archive can be transferred
 
 To ensure the generated archive is transferable by rsync, you can set the `GZIP_RSYNCABLE=yes`
 option. This sets the `--rsyncable` option to `gzip`, which is useful only in
@@ -268,10 +269,10 @@ You can exclude specific directories from the backup by adding the environment v
 - `pages` (Pages content)
 - `repositories` (Git repositories data)
 
-All wikis will be backed up as part of the `repositories` group. Non-existent wikis will be skipped during a backup.
-  
+All wikis are backed up as part of the `repositories` group. Non-existent wikis are skipped during a backup.
+
 NOTE:
-When [backing up and restoring Helm Charts](https://docs.gitlab.com/charts/architecture/backup-restore.html), there is an additional option `packages`, which refers to any packages managed by the GitLab [package registry](../user/packages/package_registry/index.md).   
+When [backing up and restoring Helm Charts](https://docs.gitlab.com/charts/architecture/backup-restore.html), there is an additional option `packages`, which refers to any packages managed by the GitLab [package registry](../user/packages/package_registry/index.md).
 For more information see [command line arguments](https://docs.gitlab.com/charts/architecture/backup-restore.html#command-line-arguments).
 
 All wikis are backed up as part of the `repositories` group. Non-existent
@@ -627,7 +628,7 @@ backups are copied to, and is created if it does not exist. If the
 directory that you want to copy the tarballs to is the root of your mounted
 directory, use `.` instead.
 
-Because file system performance may affect GitLab's overall performance,
+Because file system performance may affect overall GitLab performance,
 [GitLab doesn't recommend using EFS for storage](../administration/nfs.md#avoid-using-awss-elastic-file-system-efs).
 
 For Omnibus GitLab packages:
@@ -671,7 +672,7 @@ For installations from source:
 
 The backup archives created by GitLab (`1393513186_2014_02_27_gitlab_backup.tar`)
 have the owner/group `git`/`git` and 0600 permissions by default. This is
-meant to avoid other system users reading GitLab's data. If you need the backup
+meant to avoid other system users reading GitLab data. If you need the backup
 archives to have different permissions, you can use the `archive_permissions`
 setting.
 
@@ -890,7 +891,7 @@ Restoring repositories:
 Deleting tmp directories...[DONE]
 ```
 
-Next, restore `/home/git/gitlab/.secret` if necessary, as previously mentioned.
+Next, restore `/home/git/gitlab/.secret` if necessary, [as previously mentioned](#restore-prerequisites).
 
 Restart GitLab:
 
@@ -943,8 +944,16 @@ permissions on your Registry directory. This is a [known issue](https://gitlab.c
 On GitLab 12.2 or later, you can use `gitlab-backup restore` to avoid this
 issue.
 
-Next, restore `/etc/gitlab/gitlab-secrets.json` if necessary, as previously
-mentioned.
+If there's a GitLab version mismatch between your backup tar file and the
+installed version of GitLab, the restore command aborts with an error
+message. Install the [correct GitLab version](https://packages.gitlab.com/gitlab/),
+and then try again.
+
+NOTE:
+There is a known issue with restore not working with `pgbouncer`. [Read more about backup and restore with `pgbouncer`](#backup-and-restore-for-installations-using-pgbouncer).
+
+Next, restore `/etc/gitlab/gitlab-secrets.json` if necessary,
+[as previously mentioned](#restore-prerequisites).
 
 Reconfigure, restart and check GitLab:
 
@@ -954,13 +963,13 @@ sudo gitlab-ctl restart
 sudo gitlab-rake gitlab:check SANITIZE=true
 ```
 
-If there's a GitLab version mismatch between your backup tar file and the
-installed version of GitLab, the restore command aborts with an error
-message. Install the [correct GitLab version](https://packages.gitlab.com/gitlab/),
-and then try again.
+On GitLab 13.1 and later, check [database values can be decrypted](../administration/raketasks/doctor.md)
+especially if `/etc/gitlab/gitlab-secrets.json` was restored, or if a different server is
+the target for the restore.
 
-NOTE:
-There is a known issue with restore not working with `pgbouncer`. [Read more about backup and restore with `pgbouncer`](#backup-and-restore-for-installations-using-pgbouncer).
+```shell
+sudo gitlab-rake gitlab:doctor:secrets
+```
 
 ### Restore for Docker image and GitLab Helm chart installations
 
@@ -1033,12 +1042,12 @@ is being discussed in [issue #17517](https://gitlab.com/gitlab-org/gitlab/-/issu
 
 If your GitLab server contains a lot of Git repository data, you may find the
 GitLab backup script to be too slow. In this case you can consider using
-filesystem snapshots as part of your backup strategy.
+file system snapshots as part of your backup strategy.
 
 Example: Amazon EBS
 
 > A GitLab server using Omnibus GitLab hosted on Amazon AWS.
-> An EBS drive containing an ext4 filesystem is mounted at `/var/opt/gitlab`.
+> An EBS drive containing an ext4 file system is mounted at `/var/opt/gitlab`.
 > In this case you could make an application backup by taking an EBS snapshot.
 > The backup includes all repositories, uploads and PostgreSQL data.
 
@@ -1046,7 +1055,7 @@ Example: LVM snapshots + rsync
 
 > A GitLab server using Omnibus GitLab, with an LVM logical volume mounted at `/var/opt/gitlab`.
 > Replicating the `/var/opt/gitlab` directory using rsync would not be reliable because too many files would change while rsync is running.
-> Instead of rsync-ing `/var/opt/gitlab`, we create a temporary LVM snapshot, which we mount as a read-only filesystem at `/mnt/gitlab_backup`.
+> Instead of rsync-ing `/var/opt/gitlab`, we create a temporary LVM snapshot, which we mount as a read-only file system at `/mnt/gitlab_backup`.
 > Now we can have a longer running rsync job which creates a consistent replica on the remote server.
 > The replica includes all repositories, uploads and PostgreSQL data.
 
@@ -1066,6 +1075,13 @@ following error message is shown:
 
 ```ruby
 ActiveRecord::StatementInvalid: PG::UndefinedTable
+```
+
+Each time the GitLab backup runs, GitLab will start generating 500 errors and errors about missing
+tables will [be logged by PostgreSQL](../administration/logs.md#postgresql-logs):
+
+```plaintext
+ERROR: relation "tablename" does not exist at character 123
 ```
 
 This happens because the task uses `pg_dump`, which [sets a null search
@@ -1188,9 +1204,9 @@ and the jobs begin running again.
 
 Use the information in the following sections at your own risk.
 
-#### Check for undecryptable values
+#### Verify that all values can be decrypted
 
-You can determine if you have undecryptable values in the database by using the
+You can determine if your database contains values that can't be decrypted by using the
 [Secrets Doctor Rake task](../administration/raketasks/doctor.md).
 
 #### Take a backup
@@ -1354,7 +1370,7 @@ To get your registry working again:
 sudo chown -R registry:registry /var/opt/gitlab/gitlab-rails/shared/registry/docker
 ```
 
-If you changed the default filesystem location for the registry, run `chown`
+If you changed the default file system location for the registry, run `chown`
 against your custom location, instead of `/var/opt/gitlab/gitlab-rails/shared/registry/docker`.
 
 ### Backup fails to complete with Gzip error

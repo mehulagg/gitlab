@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_24_184638) do
+ActiveRecord::Schema.define(version: 2020_12_08_031224) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -119,9 +119,14 @@ ActiveRecord::Schema.define(version: 2020_09_24_184638) do
     t.integer "verification_retry_count"
     t.datetime_with_timezone "verified_at"
     t.datetime_with_timezone "verification_retry_at"
+    t.integer "verification_state", limit: 2, default: 0, null: false
+    t.datetime_with_timezone "verification_started_at"
     t.index ["package_file_id"], name: "index_package_file_registry_on_repository_id"
     t.index ["retry_at"], name: "index_package_file_registry_on_retry_at"
     t.index ["state"], name: "index_package_file_registry_on_state"
+    t.index ["verification_retry_at"], name: "package_file_registry_failed_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 3))"
+    t.index ["verification_state"], name: "package_file_registry_needs_verification", where: "((state = 2) AND (verification_state = ANY (ARRAY[0, 3])))"
+    t.index ["verified_at"], name: "package_file_registry_pending_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 0))"
   end
 
   create_table "project_registry", id: :serial, force: :cascade do |t|

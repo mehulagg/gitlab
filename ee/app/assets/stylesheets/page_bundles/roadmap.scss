@@ -179,7 +179,7 @@ html.group-epics-roadmap-html {
       font-weight: 400;
 
       &.label-dark {
-        color: $gray-900;
+        color: var(--gray-900, $gray-900);
       }
 
       &.label-bold {

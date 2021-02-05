@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Adding and removing Kubernetes clusters
+# Adding and removing Kubernetes clusters **(CORE)**
 
 GitLab offers integrated cluster creation for the following Kubernetes providers:
 
@@ -40,7 +40,7 @@ Before [adding a Kubernetes cluster](#create-new-cluster) using GitLab, you need
   - [Maintainer access to a group](../../permissions.md#group-members-permissions) for a
     group-level cluster.
   - [Admin Area access](../../admin_area/index.md) for a self-managed instance-level
-    cluster. **(CORE ONLY)**
+    cluster. **(FREE SELF)**
 
 ## Access controls
 
@@ -189,7 +189,7 @@ To add a Kubernetes cluster to your project, group, or instance:
       Get the API URL by running this command:
 
       ```shell
-      kubectl cluster-info | grep 'Kubernetes master' | awk '/http/ {print $NF}'
+      kubectl cluster-info | grep -E 'Kubernetes master|Kubernetes control plane' | awk '/http/ {print $NF}'
       ```
 
    1. **CA certificate** (required) - A valid Kubernetes certificate is needed to authenticate to the cluster. We use the certificate created by default.

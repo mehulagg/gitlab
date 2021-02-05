@@ -69,16 +69,11 @@ module QA
         end
       end
 
-      # This was originally quarantined only on staging
-      # against the issue https://gitlab.com/gitlab-org/gitlab/-/issues/228624
-      # Now quarantining against a new issue due to failures on master
-      # If dequarantining, the original staging quarantine should be reverted
-      # if still applicable.
-      context 'instance level', :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/247874', type: :bug } do
+      context 'instance level', :requires_admin do
         before do
           Flow::Login.sign_in_as_admin
 
-          Support::Retrier.retry_until do
+          Support::Retrier.retry_until(retry_on_exception: true) do
             Page::Main::Menu.perform(&:go_to_admin_area)
             Page::Admin::Menu.perform(&:go_to_template_settings)
 
@@ -89,7 +84,7 @@ module QA
             Page::Admin::Menu.perform(&:go_to_template_settings)
 
             EE::Page::Admin::Settings::Templates.perform do |templates|
-              templates.current_custom_project_template.include? @template_container_group_name
+              Support::Waiter.wait_until(max_duration: 10) { templates.current_custom_project_template.include? @template_container_group_name }
             end
           end
 
@@ -100,9 +95,10 @@ module QA
           QA::Flow::Project.go_to_create_project_from_template
         end
 
-        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/914' do
+        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1233' do
           Page::Project::New.perform do |new_page|
-            new_page.retry_until do
+            # TODO: Remove `reload true` once this bug is fixed: https://gitlab.com/gitlab-org/gitlab/-/issues/247874
+            new_page.retry_until(reload: true) do
               new_page.go_to_create_from_template_instance_tab
               expect(new_page.instance_template_tab_badge_text).to eq "1"
               new_page.has_text?(@template_project.name)
@@ -152,7 +148,7 @@ module QA
           Page::Project::New.perform(&:go_to_create_from_template_group_tab)
         end
 
-        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/915' do
+        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1273' do
           Page::Project::New.perform do |new_page|
             expect(new_page.group_template_tab_badge_text).to eq "1"
             expect(new_page).to have_text(@template_container_group_name)

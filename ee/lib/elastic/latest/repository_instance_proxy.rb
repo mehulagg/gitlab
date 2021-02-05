@@ -8,8 +8,8 @@ module Elastic
       delegate :project, to: :target
       delegate :id, to: :project, prefix: true
 
-      def find_commits_by_message_with_elastic(query, page: 1, per_page: 20, preload_method: nil)
-        response = elastic_search(query, type: 'commit', page: page, per: per_page)[:commits][:results]
+      def find_commits_by_message_with_elastic(query, page: 1, per_page: 20, options: {}, preload_method: nil)
+        response = elastic_search(query, type: 'commit', options: options, page: page, per: per_page)[:commits][:results]
 
         commits = response.map do |result|
           commit result["_source"]["commit"]["sha"]

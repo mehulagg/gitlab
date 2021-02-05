@@ -1,12 +1,14 @@
 <script>
 import Vue from 'vue';
 import { GlCard, GlEmptyState, GlLink, GlSkeletonLoader, GlTable } from '@gitlab/ui';
+import api from '~/api';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __, s__ } from '~/locale';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import SelectProjectsDropdown from './select_projects_dropdown.vue';
 import getProjectsTestCoverage from '../graphql/queries/get_projects_test_coverage.query.graphql';
+import SelectProjectsDropdown from './select_projects_dropdown.vue';
 
 export default {
   name: 'TestCoverageTable',
@@ -19,6 +21,7 @@ export default {
     SelectProjectsDropdown,
     TimeAgoTooltip,
   },
+  mixins: [glFeatureFlagsMixin()],
   apollo: {
     projects: {
       query: getProjectsTestCoverage,
@@ -36,7 +39,7 @@ export default {
           // Remove the projects that don't have any code coverage
           ...data.projects.nodes
             .filter(({ codeCoverageSummary }) => Boolean(codeCoverageSummary))
-            .map(project => ({
+            .map((project) => ({
               ...project,
               codeCoveragePath: joinPaths(
                 gon.relative_url_root || '',
@@ -76,7 +79,7 @@ export default {
     selectedProjectIds() {
       // Get the IDs of the projects that we haven't requested yet
       return Object.keys(this.projectIds).filter(
-        id => !this.allCoverageData.some(project => project.id === id),
+        (id) => !this.allCoverageData.some((project) => project.id === id),
       );
     },
     selectedCoverageData() {
@@ -97,6 +100,11 @@ export default {
   methods: {
     handleError() {
       this.hasError = true;
+    },
+    onProjectClick() {
+      if (this.glFeatures.usageDataITestingGroupCodeCoverageProjectClickTotal) {
+        api.trackRedisHllUserEvent(this.$options.usagePingProjectEvent);
+      }
     },
     selectAllProjects(allProjects) {
       this.projectIds = Object.fromEntries(allProjects.map(({ id }) => [id, true]));
@@ -154,6 +162,7 @@ export default {
     totalHeight: 15,
   },
   averageCoverageFormatter: getFormatter(SUPPORTED_FORMATS.percentHundred),
+  usagePingProjectEvent: 'i_testing_group_code_coverage_project_click_total',
 };
 </script>
 <template>
@@ -211,7 +220,12 @@ export default {
       </template>
 
       <template #cell(project)="{ item }">
-        <gl-link target="_blank" :href="item.codeCoveragePath" :data-testid="`${item.id}-name`">
+        <gl-link
+          target="_blank"
+          :href="item.codeCoveragePath"
+          :data-testid="`${item.id}-name`"
+          @click.once="onProjectClick"
+        >
           {{ item.name }}
         </gl-link>
       </template>

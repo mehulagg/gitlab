@@ -10,10 +10,10 @@ import {
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { __, sprintf } from '~/locale';
+import { CLUSTER_TYPES, STATUSES } from '../constants';
 import AncestorNotice from './ancestor_notice.vue';
 import NodeErrorHelpText from './node_error_help_text.vue';
-import { CLUSTER_TYPES, STATUSES } from '../constants';
-import { __, sprintf } from '~/locale';
 
 export default {
   nodeMemoryText: __('%{totalMemory} (%{freeSpacePercentage}%{percentSymbol} free)'),
@@ -79,7 +79,7 @@ export default {
         {
           key: 'cluster_type',
           label: __('Cluster level'),
-          formatter: value => CLUSTER_TYPES[value],
+          formatter: (value) => CLUSTER_TYPES[value],
         },
       ];
     },
@@ -254,9 +254,7 @@ export default {
             <template #freeSpacePercentage>{{
               totalCpuAndUsage(item.nodes).freeSpacePercentage
             }}</template>
-            <template #percentSymbol
-              >%</template
-            >
+            <template #percentSymbol>%</template>
           </gl-sprintf>
         </span>
 
@@ -277,9 +275,7 @@ export default {
             <template #freeSpacePercentage>{{
               totalMemoryAndUsage(item.nodes).freeSpacePercentage
             }}</template>
-            <template #percentSymbol
-              >%</template
-            >
+            <template #percentSymbol>%</template>
           </gl-sprintf>
         </span>
 
@@ -293,7 +289,7 @@ export default {
         />
       </template>
 
-      <template #cell(cluster_type)="{value}">
+      <template #cell(cluster_type)="{ value }">
         <gl-badge variant="muted">
           {{ value }}
         </gl-badge>

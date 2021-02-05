@@ -4,6 +4,11 @@ import {
   FEEDBACK_TYPE_MERGE_REQUEST,
 } from '~/vue_shared/security_reports/constants';
 
+const falsePositiveMessage = s__('VulnerabilityManagement|Will not fix or a false-positive');
+
+export const gidPrefix = 'gid://gitlab/Vulnerability/';
+export const uidPrefix = 'gid://gitlab/User/';
+
 export const VULNERABILITY_STATE_OBJECTS = {
   detected: {
     action: 'revert',
@@ -16,7 +21,10 @@ export const VULNERABILITY_STATE_OBJECTS = {
     action: 'dismiss',
     state: 'dismissed',
     displayName: s__('Dismiss'),
-    description: s__('VulnerabilityManagement|Will not fix or a false-positive'),
+    description: falsePositiveMessage,
+    payload: {
+      comment: falsePositiveMessage,
+    },
   },
   confirmed: {
     action: 'confirm',

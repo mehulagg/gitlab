@@ -4,14 +4,51 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Infrastructure as code with Terraform and GitLab
+# Infrastructure as code with Terraform and GitLab **(CORE)**
 
 ## Motivation
 
-The Terraform integration features within GitLab enable your GitOps / Infrastructure-as-Code (IaC)
+The Terraform integration features in GitLab enable your GitOps / Infrastructure-as-Code (IaC)
 workflows to tie into GitLab authentication and authorization. These features focus on
-lowering the barrier to entry for teams to adopt Terraform, collaborate effectively within
+lowering the barrier to entry for teams to adopt Terraform, collaborate effectively in
 GitLab, and support Terraform best practices.
+
+## Quick Start
+
+Use the following `.gitlab-ci.yml` to set up a basic Terraform project integration
+for GitLab versions 13.5 and later:
+
+```yaml
+include:
+  - template: Terraform.latest.gitlab-ci.yml
+
+variables:
+  # If not using GitLab's HTTP backend, remove this line and specify TF_HTTP_* variables
+  TF_STATE_NAME: default
+  TF_CACHE_KEY: default
+  # If your terraform files are in a subdirectory, set TF_ROOT accordingly
+  # TF_ROOT: terraform/production
+```
+
+This template uses `.latest.`, instead of stable, and may include breaking changes.
+This template also includes some opinionated decisions, which you can override:
+
+- Including the latest [GitLab Terraform Image](https://gitlab.com/gitlab-org/terraform-images).
+- Using the [GitLab managed Terraform State](#gitlab-managed-terraform-state) as
+  the Terraform state storage backend.
+- Creating [four pipeline stages](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform.latest.gitlab-ci.yml):
+  `init`, `validate`, `build`, and `deploy`. These stages
+  [run the Terraform commands](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform/Base.latest.gitlab-ci.yml)
+  `init`, `validate`, `plan`, `plan-json`, and `apply`. The `apply` command only runs on `master`.
+
+This video from January 2021 walks you through all the GitLab Terraform integration features:
+
+<div class="video-fallback">
+  See the video: <a href="https://www.youtube.com/watch?v=iGXjUrkkzDI">Terraform with GitLab</a>.
+</div>
+<figure class="video-container">
+  <iframe src="https://www.youtube.com/embed/iGXjUrkkzDI" frameborder="0" allowfullscreen="true"> </iframe>
+</figure>
 
 ## GitLab Managed Terraform state
 
@@ -22,7 +59,7 @@ to securely store the state files in local storage (the default) or
 [the remote store of your choice](../../administration/terraform_state.md).
 
 The GitLab managed Terraform state backend can store your Terraform state easily and
-securely, and spares you from setting up additional remote resources like
+securely. It spares you from setting up additional remote resources like
 Amazon S3 or Google Cloud Storage. Its features include:
 
 - Supporting encryption of the state file both in transit and at rest.
@@ -39,32 +76,23 @@ recommends encrypting plan output or modifying the project visibility settings.
 
 ## Terraform integration in Merge Requests
 
-Collaborating around Infrastructure as Code (IaC) changes requires both code changes and expected infrastructure changes to be checked and approved. GitLab provides a solution to help collaboration around Terraform code changes and their expected effects using the Merge Request pages. This way users don't have to build custom tools or rely on 3rd party solutions to streamline their IaC workflows.
+Collaborating around Infrastructure as Code (IaC) changes requires both code changes
+and expected infrastructure changes to be checked and approved. GitLab provides a
+solution to help collaboration around Terraform code changes and their expected
+effects using the Merge Request pages. This way users don't have to build custom
+tools or rely on 3rd party solutions to streamline their IaC workflows.
 
 Read more on setting up and [using the merge request integrations](mr_integration.md).
 
-## Quick Start
+## The GitLab terraform provider
 
-Use the following `.gitlab-ci.yml` to set up a simple Terraform project integration
-for GitLab versions 13.5 and greater:
+WARNING:
+The GitLab Terraform provider is released separately from GitLab.
+We are working on migrating the GitLab Terraform provider for GitLab.com.
 
-```yaml
-include:
-  - template: Terraform.latest.gitlab-ci.yml
+You can use the [GitLab Terraform provider](https://github.com/gitlabhq/terraform-provider-gitlab)
+to manage various aspects of GitLab using Terraform. The provider is an open source project,
+owned by GitLab, where everyone can contribute.
 
-variables:
-  # If not using GitLab's HTTP backend, remove this line and specify TF_HTTP_* variables
-  TF_STATE_NAME: default
-  TF_CACHE_KEY: default
-```
-
-This template uses `.latest.`, instead of stable, and may include breaking changes.
-This template also includes some opinionated decisions, which you can override:
-
-- Including the latest [GitLab Terraform Image](https://gitlab.com/gitlab-org/terraform-images).
-- Using the [GitLab managed Terraform State](#gitlab-managed-terraform-state) as
-  the Terraform state storage backend.
-- Creating [four pipeline stages](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform.latest.gitlab-ci.yml):
-  `init`, `validate`, `build`, and `deploy`. These stages
-  [run the Terraform commands](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform/Base.latest.gitlab-ci.yml)
-  `init`, `validate`, `plan`, `plan-json`, and `apply`. The `apply` command only runs on `master`.
+The [documentation of the provider](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs)
+is available as part of the official Terraform provider documentations.

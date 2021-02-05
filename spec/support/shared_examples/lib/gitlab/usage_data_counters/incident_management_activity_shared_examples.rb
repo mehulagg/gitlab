@@ -3,8 +3,8 @@
 RSpec.shared_examples 'an incident management tracked event' do |event|
   describe ".track_event", :clean_gitlab_redis_shared_state do
     let(:counter) { Gitlab::UsageDataCounters::HLLRedisCounter }
-    let(:start_time) { 1.minute.ago }
-    let(:end_time) { 1.minute.from_now }
+    let(:start_time) { 1.week.ago }
+    let(:end_time) { 1.week.from_now }
 
     it "tracks the event using redis" do
       # Allow other subsequent calls
@@ -13,7 +13,7 @@ RSpec.shared_examples 'an incident management tracked event' do |event|
 
       expect(Gitlab::UsageDataCounters::HLLRedisCounter)
         .to receive(:track_event)
-        .with(current_user.id, event.to_s)
+        .with(event.to_s, values: current_user.id)
         .and_call_original
 
       expect { subject }

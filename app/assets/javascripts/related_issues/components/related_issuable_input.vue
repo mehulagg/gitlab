@@ -1,13 +1,13 @@
 <script>
 import $ from 'jquery';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
-import issueToken from './issue_token.vue';
 import {
   autoCompleteTextMap,
   inputPlaceholderConfidentialTextMap,
   inputPlaceholderTextMap,
   issuableTypesMap,
 } from '../constants';
+import issueToken from './issue_token.vue';
 
 const SPACE_FACTOR = 1;
 
@@ -118,7 +118,7 @@ export default {
       let position = 0;
 
       const untouchedRawRefs = rawRefs
-        .filter(ref => {
+        .filter((ref) => {
           let isTouched = false;
 
           if (caretPos >= position && caretPos <= position + ref.length) {
@@ -130,7 +130,7 @@ export default {
 
           return !isTouched;
         })
-        .filter(ref => ref.trim().length > 0);
+        .filter((ref) => ref.trim().length > 0);
 
       this.$emit('addIssuableFormInput', {
         newValue: value,
@@ -208,7 +208,7 @@ export default {
           :path-id-separator="pathIdSeparator"
           event-namespace="pendingIssuable"
           @pendingIssuableRemoveRequest="
-            params => {
+            (params) => {
               $emit('pendingIssuableRemoveRequest', params);
             }
           "

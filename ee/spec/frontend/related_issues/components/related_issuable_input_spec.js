@@ -77,7 +77,7 @@ describe('RelatedIssuableInput', () => {
           references: ['foo', 'bar'],
         },
         // We need to attach to document, so that `document.activeElement` is properly set in jsdom
-        attachToDocument: true,
+        attachTo: document.body,
       });
 
       wrapper.find('li').trigger('click');

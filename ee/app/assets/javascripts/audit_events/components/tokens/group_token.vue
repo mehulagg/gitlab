@@ -23,7 +23,7 @@ export default {
 
 <template>
   <audit-filter-token v-bind="{ ...this.$attrs, ...this.$options.tokenMethods }" v-on="$listeners">
-    <template #suggestion="{item: group}">
+    <template #suggestion="{ item: group }">
       <p class="m-0">{{ group.full_name }}</p>
       <p class="m-0">{{ group.full_path }}</p>
     </template>

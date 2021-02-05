@@ -227,6 +227,36 @@ RSpec.describe Deployment do
         deployment.skip!
       end
     end
+
+    describe 'synching status to Jira' do
+      let(:deployment) { create(:deployment) }
+
+      let(:worker) { ::JiraConnect::SyncDeploymentsWorker }
+
+      it 'calls the worker on creation' do
+        expect(worker).to receive(:perform_async).with(Integer)
+
+        deployment
+      end
+
+      it 'does not call the worker for skipped deployments' do
+        expect(deployment).to be_present # warm-up, ignore the creation trigger
+
+        expect(worker).not_to receive(:perform_async)
+
+        deployment.skip!
+      end
+
+      %i[run! succeed! drop! cancel!].each do |event|
+        context "when we call pipeline.#{event}" do
+          it 'triggers a Jira synch worker' do
+            expect(worker).to receive(:perform_async).with(deployment.id)
+
+            deployment.send(event)
+          end
+        end
+      end
+    end
   end
 
   describe '#success?' do

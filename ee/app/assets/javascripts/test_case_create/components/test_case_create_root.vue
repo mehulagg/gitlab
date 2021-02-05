@@ -37,7 +37,7 @@ export default {
               projectPath: this.projectFullPath,
               title: issuableTitle,
               description: issuableDescription,
-              labelIds: selectedLabels.map(label => label.id),
+              labelIds: selectedLabels.map((label) => label.id),
             },
           },
         })
@@ -48,7 +48,7 @@ export default {
           }
           redirectTo(this.projectTestCasesPath);
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash({
             message: s__('TestCases|Something went wrong while creating a test case.'),
             captureError: true,

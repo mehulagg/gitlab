@@ -10,20 +10,16 @@ module BulkImports
 
       private
 
-      def extractors
-        @extractors ||= self.class.extractors.map(&method(:instantiate))
+      def extractor
+        @extractor ||= instantiate(self.class.get_extractor)
       end
 
       def transformers
         @transformers ||= self.class.transformers.map(&method(:instantiate))
       end
 
-      def loaders
-        @loaders ||= self.class.loaders.map(&method(:instantiate))
-      end
-
-      def after_run
-        @after_run ||= self.class.after_run_callback
+      def loader
+        @loaders ||= instantiate(self.class.get_loader)
       end
 
       def pipeline
@@ -41,7 +37,7 @@ module BulkImports
 
     class_methods do
       def extractor(klass, options = nil)
-        add_attribute(:extractors, klass, options)
+        class_attributes[:extractor] = { klass: klass, options: options }
       end
 
       def transformer(klass, options = nil)
@@ -49,27 +45,19 @@ module BulkImports
       end
 
       def loader(klass, options = nil)
-        add_attribute(:loaders, klass, options)
+        class_attributes[:loader] = { klass: klass, options: options }
       end
 
-      def after_run(&block)
-        class_attributes[:after_run] = block
-      end
-
-      def extractors
-        class_attributes[:extractors]
+      def get_extractor
+        class_attributes[:extractor]
       end
 
       def transformers
         class_attributes[:transformers]
       end
 
-      def loaders
-        class_attributes[:loaders]
-      end
-
-      def after_run_callback
-        class_attributes[:after_run]
+      def get_loader
+        class_attributes[:loader]
       end
 
       def abort_on_failure!

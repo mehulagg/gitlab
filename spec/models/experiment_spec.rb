@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Experiment do
+  include AfterNextHelpers
+
   subject { build(:experiment) }
 
   describe 'associations' do
@@ -64,6 +66,33 @@ RSpec.describe Experiment do
       end
 
       expect { described_class.add_user(experiment_name, group, user) }.not_to raise_error
+    end
+  end
+
+  describe '.add_group' do
+    let_it_be(:experiment_name) { :experiment_key }
+    let_it_be(:variant) { :control }
+    let_it_be(:group) { build(:group) }
+
+    subject(:add_group) { described_class.add_group(experiment_name, variant: variant, group: group) }
+
+    context 'when an experiment with the provided name does not exist' do
+      it 'creates a new experiment record' do
+        allow_next(described_class, name: :experiment_key)
+          .to receive(:record_group_and_variant!).with(group, variant)
+
+        expect { add_group }.to change(described_class, :count).by(1)
+      end
+    end
+
+    context 'when an experiment with the provided name already exists' do
+      before do
+        create(:experiment, name: experiment_name)
+      end
+
+      it 'does not create a new experiment record' do
+        expect { add_group }.not_to change(described_class, :count)
+      end
     end
   end
 
@@ -136,6 +165,34 @@ RSpec.describe Experiment do
     end
   end
 
+  describe '#record_group_and_variant!' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:variant) { :control }
+    let_it_be(:experiment) { create(:experiment) }
+
+    subject(:record_group_and_variant!) { experiment.record_group_and_variant!(group, variant) }
+
+    context 'when no existing experiment_subject record exists for the given group' do
+      it 'creates an experiment_subject record' do
+        expect_next(ExperimentSubject).to receive(:update!).with(variant: variant).and_call_original
+
+        expect { record_group_and_variant! }.to change(ExperimentSubject, :count).by(1)
+      end
+    end
+
+    context 'when an existing experiment_subject exists for the given group' do
+      context 'but it belonged to a different variant' do
+        let!(:experiment_subject) do
+          create(:experiment_subject, experiment: experiment, group: group, user: nil, variant: :experimental)
+        end
+
+        it 'updates the variant value' do
+          expect { record_group_and_variant! }.to change { experiment_subject.reload.variant }.to('control')
+        end
+      end
+    end
+  end
+
   describe '#record_user_and_group' do
     let_it_be(:experiment) { create(:experiment) }
     let_it_be(:user) { create(:user) }
@@ -164,7 +221,7 @@ RSpec.describe Experiment do
     context 'when an experiment_user already exists for the given user' do
       before do
         # Create an existing experiment_user for this experiment and the :control group
-        experiment.record_user_and_group(user, :control, context)
+        experiment.record_user_and_group(user, :control)
       end
 
       it 'does not create a new experiment_user record' do
@@ -173,15 +230,65 @@ RSpec.describe Experiment do
 
       context 'but the group_type and context has changed' do
         let(:group) { :experimental }
-        let(:context) { { b: 37 } }
 
         it 'updates the existing experiment_user record with group_type' do
           expect { record_user_and_group }.to change { ExperimentUser.last.group_type }
         end
+      end
+    end
 
-        it 'updates the existing experiment_user record with context' do
+    context 'when a context already exists' do
+      let_it_be(:context) { { a: 42, 'b' => 34, 'c': { c1: 100, c2: 'c2', e: :e }, d: [1, 3] } }
+      let_it_be(:initial_expected_context) { { 'a' => 42, 'b' => 34, 'c' => { 'c1' => 100, 'c2' => 'c2', 'e' => 'e' }, 'd' => [1, 3] } }
+
+      before do
+        record_user_and_group
+        experiment.record_user_and_group(user, :control, {})
+      end
+
+      it 'has an initial context with stringified keys' do
+        expect(ExperimentUser.last.context).to eq(initial_expected_context)
+      end
+
+      context 'when updated' do
+        before do
           record_user_and_group
-          expect(ExperimentUser.last.context).to eq({ 'b' => 37 })
+          experiment.record_user_and_group(user, :control, new_context)
+        end
+
+        context 'with an empty context' do
+          let_it_be(:new_context) { {} }
+
+          it 'keeps the initial context' do
+            expect(ExperimentUser.last.context).to eq(initial_expected_context)
+          end
+        end
+
+        context 'with string keys' do
+          let_it_be(:new_context) { { f: :some_symbol } }
+
+          it 'adds new symbols stringified' do
+            expected_context = initial_expected_context.merge('f' => 'some_symbol')
+            expect(ExperimentUser.last.context).to eq(expected_context)
+          end
+        end
+
+        context 'with atomic values or array values' do
+          let_it_be(:new_context) { { b: 97, d: [99] } }
+
+          it 'overrides the values' do
+            expected_context = { 'a' => 42, 'b' => 97, 'c' => { 'c1' => 100, 'c2' => 'c2', 'e' => 'e' }, 'd' => [99] }
+            expect(ExperimentUser.last.context).to eq(expected_context)
+          end
+        end
+
+        context 'with nested hashes' do
+          let_it_be(:new_context) { { c: { g: 107 } } }
+
+          it 'inserts nested additional values in the same keys' do
+            expected_context = initial_expected_context.deep_merge('c' => { 'g' => 107 })
+            expect(ExperimentUser.last.context).to eq(expected_context)
+          end
         end
       end
     end

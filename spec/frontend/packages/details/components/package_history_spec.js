@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlLink, GlSprintf } from '@gitlab/ui';
+import { stubComponent } from 'helpers/stub_component';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import HistoryItem from '~/vue_shared/components/registry/history_item.vue';
 import { HISTORY_PIPELINES_LIMIT } from '~/packages/details/constants';
@@ -14,17 +15,16 @@ describe('Package History', () => {
     packageEntity: { ...mavenPackage },
   };
 
-  const createPipelines = amount =>
+  const createPipelines = (amount) =>
     [...Array(amount)].map((x, index) => ({ ...mockPipelineInfo, id: index + 1 }));
 
-  const mountComponent = props => {
+  const mountComponent = (props) => {
     wrapper = shallowMount(component, {
       propsData: { ...defaultProps, ...props },
       stubs: {
-        HistoryItem: {
-          props: HistoryItem.props,
+        HistoryItem: stubComponent(HistoryItem, {
           template: '<div data-testid="history-element"><slot></slot></div>',
-        },
+        }),
         GlSprintf,
       },
     });
@@ -35,9 +35,9 @@ describe('Package History', () => {
     wrapper = null;
   });
 
-  const findHistoryElement = testId => wrapper.find(`[data-testid="${testId}"]`);
-  const findElementLink = container => container.find(GlLink);
-  const findElementTimeAgo = container => container.find(TimeAgoTooltip);
+  const findHistoryElement = (testId) => wrapper.find(`[data-testid="${testId}"]`);
+  const findElementLink = (container) => container.find(GlLink);
+  const findElementTimeAgo = (container) => container.find(TimeAgoTooltip);
   const findTitle = () => wrapper.find('[data-testid="title"]');
   const findTimeline = () => wrapper.find('[data-testid="timeline"]');
 

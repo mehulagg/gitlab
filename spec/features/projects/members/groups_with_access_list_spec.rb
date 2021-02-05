@@ -11,11 +11,14 @@ RSpec.describe 'Projects > Members > Groups with access list', :js do
   let!(:group_link) { create(:project_group_link, project: project, group: group, **additional_link_attrs) }
 
   before do
+    stub_feature_flags(vue_project_members_list: false)
+
     travel_to Time.now.utc.beginning_of_day
 
     project.add_maintainer(user)
     sign_in(user)
     visit project_project_members_path(project)
+    click_groups_tab
   end
 
   it 'updates group access level' do
@@ -28,6 +31,8 @@ RSpec.describe 'Projects > Members > Groups with access list', :js do
     wait_for_requests
 
     visit project_project_members_path(project)
+
+    click_groups_tab
 
     expect(first('.group_member')).to have_content('Guest')
   end
@@ -71,23 +76,31 @@ RSpec.describe 'Projects > Members > Groups with access list', :js do
     expect(page).not_to have_selector('.group_member')
   end
 
-  context 'search in existing members (yes, this filters the groups list as well)' do
+  context 'search in existing members' do
     it 'finds no results' do
       page.within '.user-search-form' do
-        fill_in 'search', with: 'testing 123'
+        fill_in 'search_groups', with: 'testing 123'
         find('.user-search-btn').click
       end
+
+      click_groups_tab
 
       expect(page).not_to have_selector('.group_member')
     end
 
     it 'finds results' do
       page.within '.user-search-form' do
-        fill_in 'search', with: group.name
+        fill_in 'search_groups', with: group.name
         find('.user-search-btn').click
       end
 
+      click_groups_tab
+
       expect(page).to have_selector('.group_member', count: 1)
     end
+  end
+
+  def click_groups_tab
+    click_link 'Groups'
   end
 end

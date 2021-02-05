@@ -161,7 +161,6 @@ module API
 
       def self.services
         {
-          'alerts' => [],
           'asana' => [
             {
               required: true,
@@ -807,7 +806,6 @@ module API
 
       def self.service_classes
         [
-          ::AlertsService,
           ::AsanaService,
           ::AssemblaService,
           ::BambooService,
@@ -847,7 +845,6 @@ module API
       def self.development_service_classes
         [
           ::MockCiService,
-          ::MockDeploymentService,
           ::MockMonitoringService
         ]
       end

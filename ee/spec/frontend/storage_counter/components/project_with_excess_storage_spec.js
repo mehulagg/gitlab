@@ -1,4 +1,4 @@
-import { GlLink } from '@gitlab/ui';
+import { GlIcon, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import ProjectWithExcessStorage from 'ee/storage_counter/components/project_with_excess_storage.vue';
 import { formatUsageSize } from 'ee/storage_counter/utils';
@@ -22,7 +22,8 @@ const createComponent = (propsData = {}) => {
 };
 
 const findTableRow = () => wrapper.find('[data-testid="projectTableRow"]');
-const findWarningIcon = () => wrapper.find({ name: 'status_warning' });
+const findWarningIcon = () =>
+  wrapper.findAll(GlIcon).wrappers.find((w) => w.props('name') === 'status_warning');
 const findProjectLink = () => wrapper.find(GlLink);
 const getWarningIconTooltipText = () => getBinding(findWarningIcon().element, 'gl-tooltip').value;
 
@@ -49,7 +50,7 @@ describe('Storage Counter project component', () => {
     });
 
     it('does not render the warning icon if project is not in error state', () => {
-      expect(findWarningIcon().exists()).toBe(false);
+      expect(findWarningIcon()).toBe(undefined);
     });
 
     it('render row without error state background', () => {

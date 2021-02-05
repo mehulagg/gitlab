@@ -5,26 +5,27 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Reference architecture: up to 2,000 users **(CORE ONLY)**
+# Reference architecture: up to 2,000 users **(FREE SELF)**
 
 This page describes GitLab reference architecture for up to 2,000 users.
 For a full list of reference architectures, see
 [Available reference architectures](index.md#available-reference-architectures).
 
 > - **Supported users (approximate):** 2,000
-> - **High Availability:** No
+> - **High Availability:** No. For a highly-available environment, you can
+>   follow the [3K reference architecture](3k_users.md).
 > - **Test requests per second (RPS) rates:** API: 40 RPS, Web: 4 RPS, Git: 4 RPS
 
 | Service                                  | Nodes  | Configuration           | GCP            | AWS          | Azure   |
 |------------------------------------------|--------|-------------------------|----------------|--------------|---------|
-| Load balancer                            | 1      | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | c5.large     | F2s v2  |
-| PostgreSQL                               | 1      | 2 vCPU, 7.5 GB memory   | n1-standard-2  | m5.large     | D2s v3  |
-| Redis                                    | 1      | 1 vCPU, 3.75 GB memory  | n1-standard-1  | m5.large     | D2s v3  |
-| Gitaly                                   | 1      | 4 vCPU, 15 GB memory    | n1-standard-4  | m5.xlarge    | D4s v3  |
-| GitLab Rails                             | 2      | 8 vCPU, 7.2 GB memory   | n1-highcpu-8   | c5.2xlarge   | F8s v2  |
-| Monitoring node                          | 1      | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | c5.large     | F2s v2  |
+| Load balancer                            | 1      | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`     | F2s v2  |
+| PostgreSQL                               | 1      | 2 vCPU, 7.5 GB memory   | n1-standard-2  | `m5.large`     | D2s v3  |
+| Redis                                    | 1      | 1 vCPU, 3.75 GB memory  | n1-standard-1  | `m5.large`     | D2s v3  |
+| Gitaly                                   | 1      | 4 vCPU, 15 GB memory    | n1-standard-4  | `m5.xlarge`    | D4s v3  |
+| GitLab Rails                             | 2      | 8 vCPU, 7.2 GB memory   | n1-highcpu-8   | `c5.2xlarge`   | F8s v2  |
+| Monitoring node                          | 1      | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`     | F2s v2  |
 | Object storage                           | n/a    | n/a                     | n/a            | n/a          | n/a     |
-| NFS server (optional, not recommended)   | 1      | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | c5.xlarge    | F4s v2  |
+| NFS server (optional, not recommended)   | 1      | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | `c5.xlarge`    | F4s v2  |
 
 ```mermaid
 stateDiagram-v2
@@ -271,7 +272,7 @@ further configuration steps.
    ```ruby
    # Disable all components except PostgreSQL
    roles ['postgres_role']
-   repmgr['enable'] = false
+   patroni['enable'] = false
    consul['enable'] = false
    prometheus['enable'] = false
    alertmanager['enable'] = false
@@ -788,7 +789,7 @@ running [Prometheus](../monitoring/prometheus/index.md) and
    gitlab_exporter['enable'] = false
    ```
 
-1. Prometheus also needs some scrape configs to pull all the data from the various
+1. Prometheus also needs some scrape configurations to pull all the data from the various
    nodes where we configured exporters. Assuming that your nodes' IPs are:
 
    ```plaintext
@@ -878,7 +879,7 @@ GitLab has been tested on a number of object storage providers:
 - [Google Cloud Storage](https://cloud.google.com/storage)
 - [Digital Ocean Spaces](https://www.digitalocean.com/products/spaces/)
 - [Oracle Cloud Infrastructure](https://docs.cloud.oracle.com/en-us/iaas/Content/Object/Tasks/s3compatibleapi.htm)
-- [Openstack Swift](https://docs.openstack.org/swift/latest/s3_compat.html)
+- [OpenStack Swift](https://docs.openstack.org/swift/latest/s3_compat.html)
 - [Azure Blob storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction)
 - On-premises hardware and appliances from various storage vendors.
 - MinIO. We have [a guide to deploying this](https://docs.gitlab.com/charts/advanced/external-object-storage/minio.html) within our Helm Chart documentation.
@@ -898,7 +899,7 @@ on what features you intend to use:
 
 |Object storage type|Supported by consolidated configuration?|
 |-------------------|----------------------------------------|
-| [Backups](../../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage)|No|
+| [Backups](../../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage) | No |
 | [Job artifacts](../job_artifacts.md#using-object-storage) including archived job logs | Yes |
 | [LFS objects](../lfs/index.md#storing-lfs-objects-in-remote-object-storage) | Yes |
 | [Uploads](../uploads.md#using-object-storage) | Yes |
@@ -907,7 +908,7 @@ on what features you intend to use:
 | [Mattermost](https://docs.mattermost.com/administration/config-settings.html#file-storage)| No |
 | [Packages](../packages/index.md#using-object-storage) (optional feature) | Yes |
 | [Dependency Proxy](../packages/dependency_proxy.md#using-object-storage) (optional feature) | Yes |
-| [Pseudonymizer](../pseudonymizer.md#configuration) (optional feature) **(ULTIMATE ONLY)** | No |
+| [Pseudonymizer](../pseudonymizer.md#configuration) (optional feature) **(ULTIMATE SELF)** | No |
 | [Autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
 | [Terraform state files](../terraform_state.md#using-object-storage) | Yes |
 
@@ -931,7 +932,7 @@ functioning backups is encountered.
   </a>
 </div>
 
-## Configure Advanced Search **(STARTER ONLY)**
+## Configure Advanced Search **(PREMIUM SELF)**
 
 You can leverage Elasticsearch and [enable Advanced Search](../../integration/elasticsearch.md)
 for faster, more advanced code search across your entire GitLab instance.
@@ -954,7 +955,13 @@ along with [Gitaly](#configure-gitaly), are recommended over using NFS whenever
 possible. However, if you intend to use GitLab Pages,
 [you must use NFS](troubleshooting.md#gitlab-pages-requires-nfs).
 
-For information about configuring NFS, see the [NFS documentation page](../nfs.md).
+See how to [configure NFS](../nfs.md).
+
+WARNING:
+From GitLab 13.0, using NFS for Git repositories is deprecated.
+From GitLab 14.0, technical support for NFS for Git repositories
+will no longer be provided. Upgrade to [Gitaly Cluster](../gitaly/praefect.md)
+as soon as possible.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

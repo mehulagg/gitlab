@@ -97,7 +97,7 @@ Any settings or feature limits not listed here are using the defaults listed in 
 | -----------             | ----------------- | ------------- |
 | Artifacts maximum size (compressed) | 1G                | 100M          |
 | Artifacts [expiry time](../../ci/yaml/README.md#artifactsexpire_in)   | From June 22, 2020, deleted after 30 days unless otherwise specified (artifacts created before that date have no expiry).           | deleted after 30 days unless otherwise specified    |
-| Scheduled Pipeline Cron | `*/5 * * * *` | `19 * * * *` |
+| Scheduled Pipeline Cron | `*/5 * * * *` | `3-59/10 * * * *` |
 | [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited
 | [Max CI/CD subscriptions to a project](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) | `2` | Unlimited |
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
@@ -114,7 +114,7 @@ or over the repository size limit, you can [reduce your repository size with Git
 | Setting                       | GitLab.com  | Default       |
 | -----------                   | ----------- | ------------- |
 | [Repository size including LFS](../admin_area/settings/account_and_limit_settings.md) | 10 GB       | Unlimited     |
-| Maximum import size           | 5 GB        | 50 MB         |
+| Maximum import size           | 5 GB        | Unlimited ([Modified](https://gitlab.com/gitlab-org/gitlab/-/issues/251106) from 50MB to unlimited in GitLab 13.8.    |
 
 NOTE:
 `git push` and GitLab project imports are limited to 5 GB per request through Cloudflare. Git LFS and imports other than a file upload are not affected by this limit.
@@ -131,6 +131,23 @@ For outgoing connections from CI/CD runners we are not providing static IP addre
 All our runners are deployed into Google Cloud Platform (GCP) - any IP based
 firewall can be configured by looking up all
 [IP address ranges or CIDR blocks for GCP](https://cloud.google.com/compute/docs/faq#where_can_i_find_product_name_short_ip_ranges).
+
+## Hostname list
+
+To configure allow-lists in local HTTP(S) proxies, or other
+web-blocking software that govern end-user machines,
+pages on GitLab.com will attempt to load content from
+the following hostnames:
+
+- `gitlab.com`
+- `*.gitlab.com`
+- `*.gitlab-static.net`
+- `*.gitlab.io`
+- `*.gitlab.net`
+
+Documentation and Company pages served over `docs.gitlab.com`
+and `about.gitlab.com` will attempt to also load certain page
+content directly from common public CDN hostnames.
 
 ## Webhooks
 
@@ -153,7 +170,7 @@ Linux shared runners on GitLab.com run in autoscale mode and are powered by Goog
 
 Autoscaling means reduced queue times to spin up CI/CD jobs, and isolated VMs for each project, thus maximizing security. These shared runners are available for users and customers on GitLab.com.
 
-GitLab offers Gold tier capabilities and included CI/CD minutes per group per month for our [Open Source](https://about.gitlab.com/solutions/open-source/join/), [Education](https://about.gitlab.com/solutions/education/), and [Startups](https://about.gitlab.com/solutions/startups/) programs. For private projects, GitLab offers various [plans](https://about.gitlab.com/pricing/), starting with a Free tier.
+GitLab offers Ultimate tier capabilities and included CI/CD minutes per group per month for our [Open Source](https://about.gitlab.com/solutions/open-source/join/), [Education](https://about.gitlab.com/solutions/education/), and [Startups](https://about.gitlab.com/solutions/startups/) programs. For private projects, GitLab offers various [plans](https://about.gitlab.com/pricing/), starting with a Free tier.
 
 All your CI/CD jobs run on [n1-standard-1 instances](https://cloud.google.com/compute/docs/machine-types) with 3.75GB of RAM, CoreOS and the latest Docker Engine
 installed. Instances provide 1 vCPU and 25GB of HDD disk space. The default
@@ -509,50 +526,35 @@ NOTE:
 See [Rate limits](../../security/rate_limits.md) for administrator
 documentation.
 
-IP blocks usually happen when GitLab.com receives unusual traffic from a single
-IP address that the system views as potentially malicious based on rate limit
-settings. After the unusual traffic ceases, the IP address is automatically
-released depending on the type of block, as described below.
+When a request is rate limited, GitLab responds with a `429` status
+code. The client should wait before attempting the request again. There
+are also informational headers with this response detailed in [rate
+limiting responses](#rate-limiting-responses).
 
-If you receive a `403 Forbidden` error for all requests to GitLab.com, please
-check for any automated processes that may be triggering a block. For
-assistance, contact [GitLab Support](https://support.gitlab.com/hc/en-us)
-with details, such as the affected IP address.
+The following table describes the rate limits for GitLab.com, both before and
+after the limits change in January, 2021:
 
-### HAProxy API throttle
+| Rate limit                                                                | Before 2021-01-18           | From 2021-01-18               |
+|:--------------------------------------------------------------------------|:----------------------------|:------------------------------|
+| **Protected paths** (for a given **IP address**)                          | **10** requests per minute  | **10** requests per minute    |
+| **Raw endpoint** traffic (for a given **project, commit, and file path**) | **300** requests per minute | **300** requests per minute   |
+| **Unauthenticated** traffic (from a given **IP address**)                 | No specific limit           | **500** requests per minute   |
+| **Authenticated** API traffic (for a given **user**)                      | No specific limit           | **2,000** requests per minute |
+| **Authenticated** non-API HTTP traffic (for a given **user**)             | No specific limit           | **1,000** requests per minute |
+| **All** traffic (from a given **IP address**)                             | **600** requests per minute | **2,000** requests per minute |
 
-GitLab.com responds with HTTP status code `429` to API requests that exceed 10
-requests
-per second per IP address.
+More details are available on the rate limits for [protected
+paths](#protected-paths-throttle) and [raw
+endpoints](../../user/admin_area/settings/rate_limits_on_raw_endpoints.md).
 
-The following example headers are included for all API requests:
+### Rate limiting responses
 
-```plaintext
-RateLimit-Limit: 600
-RateLimit-Observed: 6
-RateLimit-Remaining: 594
-RateLimit-Reset: 1563325137
-RateLimit-ResetTime: Wed, 17 Jul 2019 00:58:57 GMT
-```
+For information on rate limiting responses, see:
 
-Source:
+- [List of headers on responses to blocked requests](../admin_area/settings/user_and_ip_rate_limits.md#response-headers).
+- [Customizable response text](../admin_area/settings/user_and_ip_rate_limits.md#response-text).
 
-- Search for `rate_limit_http_rate_per_minute` and `rate_limit_sessions_per_second` in [GitLab.com's current HAProxy settings](https://gitlab.com/gitlab-cookbooks/gitlab-haproxy/blob/master/attributes/default.rb).
-
-### Pagination response headers
-
-For performance reasons, if a query returns more than 10,000 records, GitLab
-doesn't return the following headers:
-
-- `x-total`.
-- `x-total-pages`.
-- `rel="last"` `link`.
-
-### Rack Attack initializer
-
-Details of rate limits enforced by [Rack Attack](../../security/rack_attack.md).
-
-#### Protected paths throttle
+### Protected paths throttle
 
 GitLab.com responds with HTTP status code `429` to POST requests at protected
 paths that exceed 10 requests per **minute** per IP address.
@@ -560,13 +562,21 @@ paths that exceed 10 requests per **minute** per IP address.
 See the source below for which paths are protected. This includes user creation,
 user confirmation, user sign in, and password reset.
 
-This header is included in responses to blocked requests:
-
-```plaintext
-Retry-After: 60
-```
+[User and IP rate limits](../admin_area/settings/user_and_ip_rate_limits.md#response-headers) includes a list of the headers responded to blocked requests.
 
 See [Protected Paths](../admin_area/settings/protected_paths.md) for more details.
+
+### IP blocks
+
+IP blocks can occur when GitLab.com receives unusual traffic from a single
+IP address that the system views as potentially malicious, based on rate limit
+settings. After the unusual traffic ceases, the IP address is automatically
+released depending on the type of block, as described in a following section.
+
+If you receive a `403 Forbidden` error for all requests to GitLab.com,
+check for any automated processes that may be triggering a block. For
+assistance, contact [GitLab Support](https://support.gitlab.com/hc/en-us)
+with details, such as the affected IP address.
 
 #### Git and container registry failed authentication ban
 
@@ -585,13 +595,14 @@ This limit:
 
 No response headers are provided.
 
-### Admin Area settings
+### Pagination response headers
 
-GitLab.com:
+For performance reasons, if a query returns more than 10,000 records, GitLab
+doesn't return the following headers:
 
-- Has [rate limits on raw endpoints](../../user/admin_area/settings/rate_limits_on_raw_endpoints.md)
-  set to the default.
-- Does not have the user and IP rate limits settings enabled.
+- `x-total`.
+- `x-total-pages`.
+- `rel="last"` `link`.
 
 ### Visibility settings
 
@@ -621,7 +632,7 @@ rate limits that are not configurable, and therefore also used on GitLab.com.
 We use [Fluentd](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#fluentd) to parse our logs. Fluentd sends our logs to
 [Stackdriver Logging](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#stackdriver) and [Cloud Pub/Sub](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#cloud-pubsub).
 Stackdriver is used for storing logs long-term in Google Cold Storage (GCS). Cloud Pub/Sub
-is used to forward logs to an [Elastic cluster](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#elastic) using [pubsubbeat](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#pubsubbeat-vms).
+is used to forward logs to an [Elastic cluster](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#elastic) using [`pubsubbeat`](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#pubsubbeat-vms).
 
 You can view more information in our runbooks such as:
 

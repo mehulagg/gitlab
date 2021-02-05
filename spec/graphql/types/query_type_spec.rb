@@ -94,4 +94,10 @@ RSpec.describe GitlabSchema.types['Query'] do
 
     it { is_expected.to have_graphql_type(Types::ContainerRepositoryDetailsType) }
   end
+
+  describe 'package field' do
+    subject { described_class.fields['package'] }
+
+    it { is_expected.to have_graphql_type(Types::Packages::PackageType) }
+  end
 end

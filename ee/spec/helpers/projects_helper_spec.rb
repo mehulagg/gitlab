@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe ProjectsHelper do
-  let(:project) { create(:project) }
+  let_it_be_with_refind(:project) { create(:project) }
 
   before do
     helper.instance_variable_set(:@project, project)
@@ -40,13 +40,11 @@ RSpec.describe ProjectsHelper do
 
   describe '#show_compliance_framework_badge?' do
     it 'returns false if compliance framework setting is not present' do
-      project = build(:project)
-
       expect(helper.show_compliance_framework_badge?(project)).to be_falsey
     end
 
     it 'returns true if compliance framework setting is present' do
-      project = build(:project, :with_compliance_framework)
+      project = build_stubbed(:project, :with_compliance_framework)
 
       expect(helper.show_compliance_framework_badge?(project)).to be_truthy
     end
@@ -102,7 +100,7 @@ RSpec.describe ProjectsHelper do
       allow(helper).to receive(:current_user).and_return(user)
     end
 
-    it do
+    specify do
       expect(helper.group_project_templates_count(parent_group.id)).to eq 1
     end
 
@@ -111,7 +109,7 @@ RSpec.describe ProjectsHelper do
         template_project.update!(marked_for_deletion_at: Date.current)
       end
 
-      it do
+      specify do
         expect(helper.group_project_templates_count(parent_group.id)).to eq 0
       end
     end
@@ -157,12 +155,15 @@ RSpec.describe ProjectsHelper do
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
           auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
-          auto_fix_mrs_path: end_with('/merge_requests?label_name=GitLab-auto-fix')
+          auto_fix_mrs_path: end_with('/merge_requests?label_name=GitLab-auto-fix'),
+          scanners: '[{"external_id":"security_vendor","vendor":"Security Vendor","report_type":"SAST"}]'
         }
       end
 
       before do
         create(:vulnerability, project: project)
+        scanner = create(:vulnerabilities_scanner, project: project, external_id: 'security_vendor')
+        create(:vulnerabilities_finding, project: project, scanner: scanner)
       end
 
       context 'without pipeline' do
@@ -206,10 +207,13 @@ RSpec.describe ProjectsHelper do
       %w[
         projects/security/configuration#show
         projects/security/sast_configuration#show
+        projects/security/api_fuzzing_configuration#show
         projects/security/vulnerabilities#show
         projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
+        projects/on_demand_scans#new
+        projects/on_demand_scans#edit
         projects/security/dast_profiles#show
         projects/security/dast_site_profiles#new
         projects/security/dast_site_profiles#edit
@@ -220,6 +224,7 @@ RSpec.describe ProjectsHelper do
         projects/threat_monitoring#show
         projects/threat_monitoring#new
         projects/threat_monitoring#edit
+        projects/audit_events#index
       ]
     end
 
@@ -232,6 +237,8 @@ RSpec.describe ProjectsHelper do
     let(:expected_on_demand_scans_paths) do
       %w[
         projects/on_demand_scans#index
+        projects/on_demand_scans#new
+        projects/on_demand_scans#edit
       ]
     end
 
@@ -245,6 +252,7 @@ RSpec.describe ProjectsHelper do
       %w[
         projects/security/configuration#show
         projects/security/sast_configuration#show
+        projects/security/api_fuzzing_configuration#show
         projects/security/dast_profiles#show
         projects/security/dast_site_profiles#new
         projects/security/dast_site_profiles#edit
@@ -261,56 +269,201 @@ RSpec.describe ProjectsHelper do
   describe '#get_project_nav_tabs' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:ability, :nav_tabs) do
-      :read_dependencies                          | [:dependencies]
-      :read_feature_flag                          | [:operations]
-      :read_licenses                              | [:licenses]
-      :read_project_security_dashboard            | [:security, :security_configuration]
-      :read_threat_monitoring                     | [:threat_monitoring]
-      :read_incident_management_oncall_schedule   | [:oncall_schedule]
+    let_it_be(:user) { create(:user) }
+
+    subject { helper.get_project_nav_tabs(project, user) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).and_return(false)
+      allow(helper).to receive(:can?).with(user, ability, project).and_return(feature_available?)
     end
 
-    with_them do
-      let(:project) { create(:project) }
-      let(:user)    { create(:user) }
-
-      before do
-        allow(helper).to receive(:can?) { false }
+    describe 'tabs' do
+      where(:ability, :nav_tabs) do
+        :read_feature_flag                        | [:operations]
+        :read_incident_management_oncall_schedule | [:oncall_schedule]
       end
 
-      subject do
-        helper.send(:get_project_nav_tabs, project, user)
+      with_them do
+        context 'when the feature is available' do
+          let(:feature_available?) { true }
+
+          it { is_expected.to include(*nav_tabs) }
+        end
+
+        context 'when the feature is not available' do
+          let(:feature_available?) { false }
+
+          it { is_expected.not_to include(*nav_tabs) }
+        end
+      end
+    end
+
+    describe 'Security & Compliance tabs' do
+      where(:ability, :nav_tabs) do
+        :read_project_security_dashboard          | [:security]
+        :read_security_configuration              | [:security_configuration]
+        :read_on_demand_scans                     | [:on_demand_scans]
+        :read_dependencies                        | [:dependencies]
+        :read_licenses                            | [:licenses]
+        :read_threat_monitoring                   | [:threat_monitoring]
       end
 
-      context 'when the feature is not available' do
+      with_them do
         before do
-          allow(helper).to receive(:can?).with(user, ability, project).and_return(false)
+          allow(helper).to receive(:can?).with(user, :access_security_and_compliance, project).and_return(security_compliance_available?)
         end
 
-        it 'does not include the nav tabs' do
-          is_expected.not_to include(*nav_tabs)
-        end
-      end
+        context 'when the "Security & Compliance" is accessible' do
+          let(:security_compliance_available?) { true }
 
-      context 'when the feature is available' do
-        before do
-          allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
+          context 'when the feature is not available' do
+            let(:feature_available?) { false }
+
+            it { is_expected.not_to include(*nav_tabs) }
+          end
+
+          context 'when the feature is available' do
+            let(:feature_available?) { true }
+
+            it { is_expected.to include(*nav_tabs) }
+          end
         end
 
-        it 'includes the nav tabs' do
-          is_expected.to include(*nav_tabs)
+        context 'when the "Security & Compliance" is not accessible' do
+          let(:security_compliance_available?) { false }
+
+          context 'when the feature is not available' do
+            let(:feature_available?) { false }
+
+            it { is_expected.not_to include(*nav_tabs) }
+          end
+
+          context 'when the feature is available' do
+            let(:feature_available?) { true }
+
+            it { is_expected.not_to include(*nav_tabs) }
+          end
         end
       end
     end
   end
 
+  describe '#top_level_link' do
+    let(:user) { build(:user) }
+
+    subject { helper.top_level_link(project) }
+
+    before do
+      allow(helper).to receive(:can?).and_return(false)
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).with(user, :access_security_and_compliance, project).and_return(true)
+    end
+
+    context 'when user can read project security dashboard and audit events' do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(true)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(true)
+      end
+
+      it { is_expected.to eq("/#{project.full_path}/-/security/dashboard") }
+    end
+
+    context 'when user can read audit events' do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(false)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(true)
+      end
+
+      context 'when the feature is enabled' do
+        before do
+          stub_licensed_features(audit_events: true)
+        end
+
+        it { is_expected.to eq("/#{project.full_path}/-/audit_events") }
+      end
+
+      context 'when the feature is disabled' do
+        before do
+          stub_licensed_features(audit_events: false)
+        end
+
+        it { is_expected.to eq("/#{project.full_path}/-/dependencies") }
+      end
+    end
+
+    context "when user can't read both project security dashboard and audit events" do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(false)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(false)
+      end
+
+      it { is_expected.to eq("/#{project.full_path}/-/dependencies") }
+    end
+  end
+
+  describe '#top_level_qa_selector' do
+    let(:user) { build(:user) }
+
+    subject { helper.top_level_qa_selector(project) }
+
+    before do
+      allow(helper).to receive(:can?).and_return(false)
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).with(user, :access_security_and_compliance, project).and_return(true)
+    end
+
+    context 'when user can read project security dashboard and audit events' do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(true)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(true)
+      end
+
+      it { is_expected.to eq('security_dashboard_link') }
+    end
+
+    context 'when user can read audit events' do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(false)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(true)
+      end
+
+      context 'when the feature is enabled' do
+        before do
+          stub_licensed_features(audit_events: true)
+        end
+
+        it { is_expected.to eq('audit_events_settings_link') }
+      end
+
+      context 'when the feature is disabled' do
+        before do
+          stub_licensed_features(audit_events: false)
+        end
+
+        it { is_expected.to eq('dependency_list_link') }
+      end
+    end
+
+    context "when user can't read both project security dashboard and audit events" do
+      before do
+        allow(helper).to receive(:can?).with(user, :read_project_security_dashboard, project).and_return(false)
+        allow(helper).to receive(:can?).with(user, :read_project_audit_events, project).and_return(false)
+      end
+
+      it { is_expected.to eq('dependency_list_link') }
+    end
+  end
+
   describe '#show_discover_project_security?' do
     using RSpec::Parameterized::TableSyntax
-    let(:user) { create(:user) }
+
+    let_it_be(:user) { create(:user) }
 
     where(
       gitlab_com?: [true, false],
-       user?: [true, false],
+      user?: [true, false],
       security_dashboard_feature_available?: [true, false],
       can_admin_namespace?: [true, false]
     )
@@ -339,7 +492,7 @@ RSpec.describe ProjectsHelper do
     context 'when project has delayed deletion enabled' do
       let(:enabled) { true }
 
-      it do
+      specify do
         deletion_date = helper.permanent_deletion_date(Time.now.utc)
 
         expect(subject).to eq "Deleting a project places it into a read-only state until #{deletion_date}, at which point the project will be permanently deleted. Are you ABSOLUTELY sure?"
@@ -349,7 +502,7 @@ RSpec.describe ProjectsHelper do
     context 'when project has delayed deletion disabled' do
       let(:enabled) { false }
 
-      it do
+      specify do
         expect(subject).to eq "You are going to delete #{project.full_name}. Deleted projects CANNOT be restored! Are you ABSOLUTELY sure?"
       end
     end
@@ -399,5 +552,27 @@ RSpec.describe ProjectsHelper do
         end
       end
     end
+  end
+
+  describe '#project_permissions_settings' do
+    let(:expected_settings) { { requirementsAccessLevel: 20, securityAndComplianceAccessLevel: 10 } }
+
+    subject { helper.project_permissions_settings(project) }
+
+    it { is_expected.to include(expected_settings) }
+  end
+
+  describe '#project_permissions_panel_data' do
+    let(:user) { instance_double(User, admin?: false) }
+    let(:expected_data) { { requirementsAvailable: false, securityAndComplianceAvailable: true } }
+
+    subject { helper.project_permissions_panel_data(project) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).and_return(false)
+    end
+
+    it { is_expected.to include(expected_data) }
   end
 end

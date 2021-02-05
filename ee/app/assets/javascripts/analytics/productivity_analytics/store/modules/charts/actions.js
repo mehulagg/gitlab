@@ -1,14 +1,14 @@
 import axios from '~/lib/utils/axios_utils';
-import * as types from './mutation_types';
 import { getDateInPast } from '~/lib/utils/datetime_utility';
 import { chartKeys, scatterPlotAddonQueryDays } from '../../../constants';
 import { transformScatterData } from '../../../utils';
+import * as types from './mutation_types';
 
 /**
  * Fetches data for all charts except for the main chart
  */
 export const fetchSecondaryChartData = ({ state, dispatch }) => {
-  Object.keys(state.charts).forEach(chartKey => {
+  Object.keys(state.charts).forEach((chartKey) => {
     if (chartKey !== chartKeys.main) {
       dispatch('fetchChartData', chartKey);
     }
@@ -27,7 +27,7 @@ export const fetchChartData = ({ dispatch, getters, state, rootState }, chartKey
 
     axios
       .get(rootState.endpoint, { params })
-      .then(response => {
+      .then((response) => {
         const { data } = response;
 
         if (chartKey === chartKeys.scatterplot) {
@@ -42,7 +42,7 @@ export const fetchChartData = ({ dispatch, getters, state, rootState }, chartKey
           dispatch('receiveChartDataSuccess', { chartKey, data });
         }
       })
-      .catch(error => dispatch('receiveChartDataError', { chartKey, error }));
+      .catch((error) => dispatch('receiveChartDataError', { chartKey, error }));
   }
 };
 

@@ -103,7 +103,7 @@ module Ci
     end
 
     def valid_local?
-      return true if Feature.enabled?(:ci_disable_validates_dependencies)
+      return true unless Gitlab::Ci::Features.validate_build_dependencies?(project)
 
       local.all?(&:valid_dependency?)
     end
@@ -143,7 +143,7 @@ module Ci
 
     def specified_cross_pipeline_dependencies
       strong_memoize(:specified_cross_pipeline_dependencies) do
-        next [] unless Feature.enabled?(:ci_cross_pipeline_artifacts_download, processable.project, default_enabled: false)
+        next [] unless Feature.enabled?(:ci_cross_pipeline_artifacts_download, processable.project, default_enabled: true)
 
         specified_cross_dependencies.select { |dep| dep[:pipeline] && dep[:artifacts] }
       end

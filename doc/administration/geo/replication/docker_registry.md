@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Docker Registry for a secondary node **(PREMIUM ONLY)**
+# Docker Registry for a secondary node **(PREMIUM SELF)**
 
 You can set up a [Docker Registry](https://docs.docker.com/registry/) on your
 **secondary** Geo node that mirrors the one on the **primary** Geo node.
@@ -17,7 +17,7 @@ distributed storage (`azure`, `gcs`, `s3`, `swift`, or `oss`) for your Docker
 Registry on the **primary** node, you can use the same storage for a **secondary**
 Docker Registry as well. For more information, read the
 [Load balancing considerations](https://docs.docker.com/registry/deploying/#load-balancing-considerations)
-when deploying the Registry, and how to set up the storage driver for GitLab's
+when deploying the Registry, and how to set up the storage driver for the GitLab
 integrated [Container Registry](../../packages/container_registry.md#use-object-storage).
 
 ## Replicating Docker Registry

@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon, GlTooltipDirective, GlLink } from '@gitlab/ui';
 import {
   DAST_SITE_VALIDATION_STATUS,
   DAST_SITE_VALIDATION_STATUS_PROPS,
@@ -7,10 +7,11 @@ import {
 } from 'ee/security_configuration/dast_site_validation/constants';
 import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
 import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validations.query.graphql';
-import { updateSiteProfilesStatuses } from '../graphql/cache_utils';
-import ProfilesList from './dast_profiles_list.vue';
+import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { fetchPolicies } from '~/lib/graphql';
+import { updateSiteProfilesStatuses } from '../graphql/cache_utils';
+import ProfilesList from './dast_profiles_list.vue';
 
 const { NONE, PENDING, INPROGRESS, FAILED } = DAST_SITE_VALIDATION_STATUS;
 
@@ -18,6 +19,7 @@ export default {
   components: {
     GlButton,
     GlIcon,
+    GlLink,
     DastSiteValidationModal,
     ProfilesList,
   },
@@ -80,10 +82,7 @@ export default {
   computed: {
     urlsPendingValidation() {
       return this.profiles.reduce((acc, { validationStatus, normalizedTargetUrl }) => {
-        if (
-          [PENDING, INPROGRESS].includes(validationStatus) &&
-          !acc.includes(normalizedTargetUrl)
-        ) {
+        if (this.isPendingValidation(validationStatus) && !acc.includes(normalizedTargetUrl)) {
           return [...acc, normalizedTargetUrl];
         }
         return acc;
@@ -91,11 +90,16 @@ export default {
     },
   },
   methods: {
-    shouldShowValidationBtn(status) {
-      return (
-        this.glFeatures.securityOnDemandScansSiteValidation &&
-        (status === NONE || status === FAILED)
-      );
+    isPendingValidation(status) {
+      return [PENDING, INPROGRESS].includes(status);
+    },
+    shouldShowValidateBtn(status) {
+      return [NONE, FAILED].includes(status);
+    },
+    validateBtnLabel(status) {
+      return status === FAILED
+        ? s__('DastSiteValidation|Retry validation')
+        : s__('DastSiteValidation|Validate');
     },
     shouldShowValidationStatus(status) {
       return this.glFeatures.securityOnDemandScansSiteValidation && status !== NONE;
@@ -122,28 +126,33 @@ export default {
 </script>
 <template>
   <profiles-list :full-path="fullPath" :profiles="profiles" v-bind="$attrs" v-on="$listeners">
+    <template #head(validationStatus)="{ label }">
+      {{ label }}
+      <gl-link
+        href="https://docs.gitlab.com/ee/user/application_security/dast/#site-profile-validation"
+        target="_blank"
+        class="gl-text-gray-300 gl-ml-2"
+      >
+        <gl-icon name="question-o" />
+      </gl-link>
+    </template>
     <template #cell(validationStatus)="{ value }">
       <template v-if="shouldShowValidationStatus(value)">
-        <span :class="$options.statuses[value].cssClass">
-          {{ $options.statuses[value].label }}
-        </span>
-        <gl-icon
-          v-gl-tooltip
-          name="question-o"
-          class="gl-vertical-align-text-bottom gl-text-gray-300 gl-ml-2"
-          :title="$options.statuses[value].tooltipText"
-        />
+        <gl-icon v-gl-tooltip v-bind="$options.statuses[value]" :size="12" class="gl-mr-3" /><span
+          >{{ $options.statuses[value].labelText }}</span
+        >
       </template>
     </template>
 
     <template #actions="{ profile }">
       <gl-button
-        v-if="shouldShowValidationBtn(profile.validationStatus)"
+        v-if="glFeatures.securityOnDemandScansSiteValidation"
+        :disabled="!shouldShowValidateBtn(profile.validationStatus)"
         variant="info"
-        category="secondary"
+        category="tertiary"
         size="small"
         @click="setValidatingProfile(profile)"
-        >{{ s__('DastSiteValidation|Validate target site') }}</gl-button
+        >{{ validateBtnLabel(profile.validationStatus) }}</gl-button
       >
     </template>
 

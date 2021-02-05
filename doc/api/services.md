@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Create
+group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -645,7 +645,7 @@ GET /projects/:id/services/github
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20290) in GitLab 11.2.
 
-Google GSuite team collaboration tool.
+Google Workspace team collaboration tool.
 
 ### Create/Edit Hangouts Chat service
 
@@ -747,7 +747,8 @@ Send IRC messages, on update, to a list of recipients through an Irker gateway.
 
 Set Irker (IRC gateway) service for a project.
 
-> NOTE: Irker does NOT have built-in authentication, which makes it vulnerable to spamming IRC channels if it is hosted outside of a firewall. Please make sure you run the daemon within a secured network to prevent abuse. For more details, read: <http://www.catb.org/~esr/irker/security.html>.
+NOTE:
+Irker does NOT have built-in authentication, which makes it vulnerable to spamming IRC channels if it is hosted outside of a firewall. Please make sure you run the daemon within a secured network to prevent abuse. For more details, read [Security analysis of `irker`](http://www.catb.org/~esr/irker/security.html).
 
 ```plaintext
 PUT /projects/:id/services/irker
@@ -1357,7 +1358,7 @@ Get JetBrains TeamCity CI service settings for a project.
 GET /projects/:id/services/teamcity
 ```
 
-## Jenkins CI **(STARTER)**
+## Jenkins CI
 
 A continuous integration and build server
 

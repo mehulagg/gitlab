@@ -6,8 +6,8 @@ import { numberToHumanSize } from '~/lib/utils/number_utils';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import ListItem from '~/vue_shared/components/registry/list_item.vue';
-import DeleteButton from '../delete_button.vue';
 import DetailsRow from '~/vue_shared/components/registry/details_row.vue';
+import DeleteButton from '../delete_button.vue';
 import {
   REMOVE_TAG_BUTTON_TITLE,
   DIGEST_LABEL,
@@ -63,7 +63,9 @@ export default {
   },
   computed: {
     formattedSize() {
-      return this.tag.totalSize ? numberToHumanSize(this.tag.totalSize) : NOT_AVAILABLE_SIZE;
+      return this.tag.totalSize
+        ? numberToHumanSize(Number(this.tag.totalSize))
+        : NOT_AVAILABLE_SIZE;
     },
     layers() {
       return this.tag.layers ? n__('%d layer', '%d layers', this.tag.layers) : '';
@@ -138,9 +140,7 @@ export default {
     <template #left-secondary>
       <span data-testid="size">
         {{ formattedSize }}
-        <template v-if="formattedSize && layers"
-          >&middot;</template
-        >
+        <template v-if="formattedSize && layers">&middot;</template>
         {{ layers }}
       </span>
     </template>

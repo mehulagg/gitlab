@@ -149,8 +149,8 @@ RSpec.describe 'Update Epic', :js do
       it 'opens datepicker when clicking Edit button' do
         page.within('.issuable-sidebar .block.start-date') do
           click_button('Edit')
-          expect(find('.value-type-fixed')).to have_selector('.pikaday-container')
-          expect(find('.value-type-fixed')).to have_selector('.pikaday-container .pika-single.is-bound')
+          expect(find('.value-type-fixed')).to have_selector('.gl-datepicker')
+          expect(find('.value-type-fixed')).to have_selector('.gl-datepicker .pika-single.is-bound')
         end
       end
     end

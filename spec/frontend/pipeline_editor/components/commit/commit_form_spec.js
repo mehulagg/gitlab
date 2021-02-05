@@ -5,7 +5,7 @@ import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
 
 import { mockCommitMessage, mockDefaultBranch } from '../../mock_data';
 
-describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
+describe('Pipeline Editor | Commit Form', () => {
   let wrapper;
 
   const createComponent = ({ props = {} } = {}, mountFn = shallowMount) => {
@@ -16,13 +16,13 @@ describe('~/pipeline_editor/pipeline_editor_app.vue', () => {
         ...props,
       },
 
-      // attachToDocument is required for input/submit events
-      attachToDocument: mountFn === mount,
+      // attachTo is required for input/submit events
+      attachTo: mountFn === mount ? document.body : null,
     });
   };
 
-  const findCommitTextarea = () => wrapper.find(GlFormTextarea);
-  const findBranchInput = () => wrapper.find(GlFormInput);
+  const findCommitTextarea = () => wrapper.findComponent(GlFormTextarea);
+  const findBranchInput = () => wrapper.findComponent(GlFormInput);
   const findNewMrCheckbox = () => wrapper.find('[data-testid="new-mr-checkbox"]');
   const findSubmitBtn = () => wrapper.find('[type="submit"]');
   const findCancelBtn = () => wrapper.find('[type="reset"]');

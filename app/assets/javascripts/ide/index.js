@@ -3,11 +3,11 @@ import { mapActions } from 'vuex';
 import { identity } from 'lodash';
 import Translate from '~/vue_shared/translate';
 import PerformancePlugin from '~/performance/vue_performance_plugin';
+import { parseBoolean } from '../lib/utils/common_utils';
+import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
 import ide from './components/ide.vue';
 import { createStore } from './stores';
 import { createRouter } from './ide_router';
-import { parseBoolean } from '../lib/utils/common_utils';
-import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
 import { DEFAULT_THEME } from './lib/themes';
 
 Vue.use(Translate);
@@ -62,6 +62,10 @@ export function initIde(el, options = {}) {
         editorTheme: window.gon?.user_color_scheme || DEFAULT_THEME,
         codesandboxBundlerUrl: el.dataset.codesandboxBundlerUrl,
       });
+    },
+    beforeDestroy() {
+      // This helps tests do Singleton cleanups which we don't really have responsibility to know about here.
+      this.$emit('destroy');
     },
     methods: {
       ...mapActions(['setEmptyStateSvgs', 'setLinks', 'setInitialData']),

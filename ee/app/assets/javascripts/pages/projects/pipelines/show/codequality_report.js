@@ -21,7 +21,7 @@ export default () => {
     if (isCodequalityTabActive) {
       store.dispatch(fetchReportAction);
     } else {
-      const tabClickHandler = e => {
+      const tabClickHandler = (e) => {
         if (e.target.className === 'codequality-tab') {
           store.dispatch(fetchReportAction);
           tabsElement.removeEventListener('click', tabClickHandler);
@@ -38,7 +38,7 @@ export default () => {
         CodequalityReportApp,
       },
       store,
-      render: createElement => createElement('codequality-report-app'),
+      render: (createElement) => createElement('codequality-report-app'),
     });
   }
 };

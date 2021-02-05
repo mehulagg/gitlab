@@ -1,6 +1,7 @@
 import Vue from 'vue';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import apolloProvider from './graphql/provider';
-import OnDemandScansApp from './components/on_demand_scans_app.vue';
+import OnDemandScansForm from './components/on_demand_scans_form.vue';
 
 export default () => {
   const el = document.querySelector('#js-on-demand-scans-app');
@@ -10,20 +11,22 @@ export default () => {
 
   const {
     dastSiteValidationDocsPath,
-    emptyStateSvgPath,
     projectPath,
     defaultBranch,
+    profilesLibraryPath,
     scannerProfilesLibraryPath,
     siteProfilesLibraryPath,
     newSiteProfilePath,
     newScannerProfilePath,
     helpPagePath,
+    dastScan,
   } = el.dataset;
 
   return new Vue({
     el,
     apolloProvider,
     provide: {
+      profilesLibraryPath,
       scannerProfilesLibraryPath,
       siteProfilesLibraryPath,
       newScannerProfilePath,
@@ -31,12 +34,12 @@ export default () => {
       dastSiteValidationDocsPath,
     },
     render(h) {
-      return h(OnDemandScansApp, {
+      return h(OnDemandScansForm, {
         props: {
           helpPagePath,
-          emptyStateSvgPath,
           projectPath,
           defaultBranch,
+          dastScan: dastScan ? convertObjectPropsToCamelCase(JSON.parse(dastScan)) : null,
         },
       });
     },

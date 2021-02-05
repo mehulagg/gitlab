@@ -19,12 +19,15 @@ RSpec.describe Project do
 
     it { is_expected.to delegate_method(:closest_gitlab_subscription).to(:namespace) }
 
+    it { is_expected.to delegate_method(:pipeline_configuration_full_path).to(:compliance_management_framework) }
+
     it { is_expected.to belong_to(:deleting_user) }
 
     it { is_expected.to have_one(:import_state).class_name('ProjectImportState') }
     it { is_expected.to have_one(:repository_state).class_name('ProjectRepositoryState').inverse_of(:project) }
     it { is_expected.to have_one(:status_page_setting).class_name('StatusPage::ProjectSetting') }
     it { is_expected.to have_one(:compliance_framework_setting).class_name('ComplianceManagement::ComplianceFramework::ProjectSettings') }
+    it { is_expected.to have_one(:compliance_management_framework).class_name('ComplianceManagement::Framework') }
     it { is_expected.to have_one(:security_setting).class_name('ProjectSecuritySetting') }
     it { is_expected.to have_one(:vulnerability_statistic).class_name('Vulnerabilities::Statistic') }
 
@@ -896,7 +899,7 @@ RSpec.describe Project do
       let(:project) { build(:project, :mirror, import_url: import_url, import_data_attributes: { auth_method: auth_method } ) }
 
       specify do
-        expect(project.repository).to receive(:fetch_upstream).with(expected, forced: false)
+        expect(project.repository).to receive(:fetch_upstream).with(expected, forced: false, check_tags_changed: false)
 
         project.fetch_mirror
       end
@@ -2257,8 +2260,6 @@ RSpec.describe Project do
   end
 
   describe '#repository_size_excess' do
-    using RSpec::Parameterized::TableSyntax
-
     subject { project.repository_size_excess }
 
     let_it_be(:statistics) { create(:project_statistics) }
@@ -2491,8 +2492,6 @@ RSpec.describe Project do
   end
 
   describe '#adjourned_deletion?' do
-    using RSpec::Parameterized::TableSyntax
-
     subject { project.adjourned_deletion? }
 
     where(:licensed?, :feature_enabled_on_group?, :adjourned_period, :result) do

@@ -1,37 +1,54 @@
-import { prepareRawDiffFile } from '~/diffs/utils/diff_file';
+import { prepareRawDiffFile, getShortShaFromFile } from '~/diffs/utils/diff_file';
 
 function getDiffFiles() {
+  const loadFull = 'namespace/project/-/merge_requests/12345/diff_for_path?file_identifier=abc';
+
   return [
     {
+      blob: {
+        id: 'C0473471',
+      },
       file_hash: 'ABC', // This file is just a normal file
       file_identifier_hash: 'ABC1',
-      content_sha: 'C047347',
+      load_collapsed_diff_url: loadFull,
     },
     {
+      blob: {
+        id: 'C0473472',
+      },
       file_hash: 'DEF', // This file replaces a symlink
       file_identifier_hash: 'DEF1',
-      content_sha: 'C047347',
+      load_collapsed_diff_url: loadFull,
       a_mode: '0',
       b_mode: '0755',
     },
     {
+      blob: {
+        id: 'C0473473',
+      },
       file_hash: 'DEF', // This symlink is replaced by a file
       file_identifier_hash: 'DEF2',
-      content_sha: 'C047347',
+      load_collapsed_diff_url: loadFull,
       a_mode: '120000',
       b_mode: '0',
     },
     {
+      blob: {
+        id: 'C0473474',
+      },
       file_hash: 'GHI', // This symlink replaces a file
       file_identifier_hash: 'GHI1',
-      content_sha: 'C047347',
+      load_collapsed_diff_url: loadFull,
       a_mode: '0',
       b_mode: '120000',
     },
     {
+      blob: {
+        id: 'C0473475',
+      },
       file_hash: 'GHI', // This file is replaced by a symlink
       file_identifier_hash: 'GHI2',
-      content_sha: 'C047347',
+      load_collapsed_diff_url: loadFull,
       a_mode: '0755',
       b_mode: '0',
     },
@@ -76,11 +93,11 @@ describe('diff_file utilities', () => {
 
     it.each`
       fileIndex | id
-      ${0}      | ${'e075da30-4ec7-4e1c-a505-fe0fb0efe2d8'}
-      ${1}      | ${'5ab05419-123e-4d18-8454-0b8c3d9f3f91'}
-      ${2}      | ${'94eb6bba-575c-4504-bd8e-5d302364d31e'}
-      ${3}      | ${'06d669b2-29b7-4f47-9731-33fc38a8db61'}
-      ${4}      | ${'edd3e8f9-07f9-4647-8171-544c72e5a175'}
+      ${0}      | ${'68296a4f-f1c7-445a-bd0e-6e3b02c4eec0'}
+      ${1}      | ${'051c9bb8-cdba-4eb7-b8d1-508906e6d8ba'}
+      ${2}      | ${'ed3d53d5-5da0-412d-a3c6-7213f84e88d3'}
+      ${3}      | ${'39d998dc-bc69-4b19-a6af-41e4369c2bd5'}
+      ${4}      | ${'7072d115-ce39-423c-8346-9fcad58cd68e'}
     `('sets the file id properly { id: $id } on normal diff files', ({ fileIndex, id }) => {
       const preppedFile = prepareRawDiffFile({
         file: files[fileIndex],
@@ -100,10 +117,10 @@ describe('diff_file utilities', () => {
       expect(preppedFile).not.toHaveProp('id');
     });
 
-    it('does not set the id property if the file is missing a `content_sha`', () => {
+    it('does not set the id property if the file is missing a `blob.id`', () => {
       const fileMissingContentSha = { ...files[0] };
 
-      delete fileMissingContentSha.content_sha;
+      delete fileMissingContentSha.blob.id;
 
       const preppedFile = prepareRawDiffFile({
         file: fileMissingContentSha,
@@ -111,6 +128,30 @@ describe('diff_file utilities', () => {
       });
 
       expect(preppedFile).not.toHaveProp('id');
+    });
+
+    it('does not set the id property if the file is missing a `load_collapsed_diff_url` property', () => {
+      const fileMissingContentSha = { ...files[0] };
+
+      delete fileMissingContentSha.load_collapsed_diff_url;
+
+      const preppedFile = prepareRawDiffFile({
+        file: fileMissingContentSha,
+        allFiles: files,
+      });
+
+      expect(preppedFile).not.toHaveProp('id');
+    });
+  });
+
+  describe('getShortShaFromFile', () => {
+    it.each`
+      response      | cs
+      ${'12345678'} | ${'12345678abcdogcat'}
+      ${null}       | ${undefined}
+      ${'hidogcat'} | ${'hidogcatmorethings'}
+    `('returns $response for a file with { content_sha: $cs }', ({ response, cs }) => {
+      expect(getShortShaFromFile({ content_sha: cs })).toBe(response);
     });
   });
 });

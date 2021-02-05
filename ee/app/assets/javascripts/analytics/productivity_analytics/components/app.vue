@@ -14,12 +14,12 @@ import dateFormat from 'dateformat';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { beginOfDayTime, endOfDayTime } from '~/lib/utils/datetime_utility';
-import MetricChart from './metric_chart.vue';
 import Scatterplot from '../../shared/components/scatterplot.vue';
-import MergeRequestTable from './mr_table.vue';
 import { chartKeys } from '../constants';
 import { dateFormats } from '../../shared/constants';
 import urlSyncMixin from '../../shared/mixins/url_sync_mixin';
+import MergeRequestTable from './mr_table.vue';
+import MetricChart from './metric_chart.vue';
 
 export default {
   components: {
@@ -141,7 +141,7 @@ export default {
       return {
         yAxis: {
           axisLabel: {
-            formatter: value => value,
+            formatter: (value) => value,
           },
           minInterval: 1,
         },
@@ -177,7 +177,7 @@ export default {
       :svg-path="noAccessSvgPath"
       :description="
         __(
-          'Only ‘Reporter’ roles and above on tiers Premium / Silver and above can see Productivity Analytics.',
+          'Only ‘Reporter’ roles and above on tiers Premium and above can see Productivity Analytics.',
         )
       "
     />
@@ -227,7 +227,7 @@ export default {
             :chart-data="getScatterPlotMainData"
             :selected-metric="getSelectedMetric(chartKeys.scatterplot)"
             @metricTypeChange="
-              metric => setMetricType({ metricType: metric, chartKey: chartKeys.scatterplot })
+              (metric) => setMetricType({ metricType: metric, chartKey: chartKeys.scatterplot })
             "
           >
             <scatterplot
@@ -252,7 +252,7 @@ export default {
               :selected-metric="getSelectedMetric(chartKeys.timeBasedHistogram)"
               :chart-data="getColumnChartData(chartKeys.timeBasedHistogram)"
               @metricTypeChange="
-                metric =>
+                (metric) =>
                   setMetricType({ metricType: metric, chartKey: chartKeys.timeBasedHistogram })
               "
             >
@@ -278,7 +278,7 @@ export default {
               :selected-metric="getSelectedMetric(chartKeys.commitBasedHistogram)"
               :chart-data="getColumnChartData(chartKeys.commitBasedHistogram)"
               @metricTypeChange="
-                metric =>
+                (metric) =>
                   setMetricType({ metricType: metric, chartKey: chartKeys.commitBasedHistogram })
               "
             >

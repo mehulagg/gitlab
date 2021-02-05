@@ -4,8 +4,8 @@ import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
 import { initIssuableApp } from '~/issue_show/issue';
 import * as parseData from '~/issue_show/utils/parse_data';
-import { appProps } from './mock_data';
 import createStore from '~/notes/stores';
+import { appProps } from './mock_data';
 
 const mock = new MockAdapter(axios);
 mock.onGet().reply(200);
@@ -14,7 +14,7 @@ useMockIntersectionObserver();
 
 jest.mock('~/lib/utils/poll');
 
-const setupHTML = initialData => {
+const setupHTML = (initialData) => {
   document.body.innerHTML = `<div id="js-issuable-app"></div>`;
   document.getElementById('js-issuable-app').dataset.initial = JSON.stringify(initialData);
 };

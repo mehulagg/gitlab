@@ -3,10 +3,10 @@ import { mapGetters, mapState } from 'vuex';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import DraftNote from '~/batch_comments/components/draft_note.vue';
+import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
 import inlineDiffTableRow from './inline_diff_table_row.vue';
 import DiffCommentCell from './diff_comment_cell.vue';
 import DiffExpansionCell from './diff_expansion_cell.vue';
-import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
 
 export default {
   components: {
@@ -58,9 +58,9 @@ export default {
     class="code diff-wrap-lines js-syntax-highlight text-file js-diff-inline-view"
   >
     <colgroup>
-      <col style="width: 50px;" />
-      <col style="width: 50px;" />
-      <col style="width: 8px;" />
+      <col style="width: 50px" />
+      <col style="width: 50px" />
+      <col style="width: 8px" />
       <col />
     </colgroup>
     <tbody>

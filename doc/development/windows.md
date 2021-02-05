@@ -13,7 +13,7 @@ This is a guide for how to get a Windows development virtual machine on Google C
 
 ## Why Windows in Google Cloud?
 
-Use of Microsoft Windows operating systems on company laptops is banned under GitLab's [Approved Operating Systems policy](https://about.gitlab.com/handbook/security/approved_os.html#windows).
+Use of Microsoft Windows operating systems on company laptops is banned under the GitLab [Approved Operating Systems policy](https://about.gitlab.com/handbook/security/approved_os.html#windows).
 
 This can make it difficult to develop features for the Windows platforms. Using GCP allows us to have a temporary Windows machine that can be removed once we're done with it.
 
@@ -63,7 +63,7 @@ Build a Google Cloud image with the above shared runners repository by doing the
 
 ## How to use a Windows image in GCP
 
-1. In a web browser, go to <https://console.cloud.google.com/compute/images>.
+1. In a web browser, go to the [Google Cloud Platform console](https://console.cloud.google.com/compute/images).
 1. Filter images by the name you used when creating image, `windows` is likely all you need to filter by.
 1. Click the image's name.
 1. Click the **CREATE INSTANCE** link.
@@ -81,7 +81,7 @@ Build a Google Cloud image with the above shared runners repository by doing the
 1. Click **Continue** to accept the certificate.
 1. Enter the password and click **Next**.
 
-You should now be remoted into a Windows machine with a command prompt.
+You should now be connected into a Windows machine with a command prompt.
 
 ### Optional: Use GCP VM Instance as a runner
 

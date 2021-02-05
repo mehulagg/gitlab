@@ -1,19 +1,21 @@
 <script>
 import Visibility from 'visibilityjs';
+import { GlIcon } from '@gitlab/ui';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import Api from 'ee/api';
 import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
-import { GlIcon } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Poll from '~/lib/utils/poll';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, __ } from '~/locale';
+import initUserPopovers from '~/user_popovers';
 import RelatedIssues from './related_issues.vue';
+import RelatedJiraIssues from './related_jira_issues.vue';
 import HistoryEntry from './history_entry.vue';
 import StatusDescription from './status_description.vue';
-import initUserPopovers from '~/user_popovers';
 
 export default {
   name: 'VulnerabilityFooter',
@@ -22,8 +24,15 @@ export default {
     MergeRequestNote,
     HistoryEntry,
     RelatedIssues,
+    RelatedJiraIssues,
     GlIcon,
     StatusDescription,
+  },
+  mixins: [glFeatureFlagMixin()],
+  inject: {
+    createJiraIssueUrl: {
+      default: '',
+    },
   },
   props: {
     vulnerability: {
@@ -43,7 +52,7 @@ export default {
     },
     noteDictionary() {
       return this.discussions
-        .flatMap(x => x.notes)
+        .flatMap((x) => x.notes)
         .reduce((acc, note) => {
           acc[note.id] = note;
           return acc;
@@ -156,11 +165,11 @@ export default {
     updateNotes(notes) {
       let isVulnerabilityStateChanged = false;
 
-      notes.forEach(note => {
+      notes.forEach((note) => {
         // If the note exists, update it.
         if (this.noteDictionary[note.id]) {
           const updatedDiscussion = { ...this.discussionsDictionary[note.discussionId] };
-          updatedDiscussion.notes = updatedDiscussion.notes.map(curr =>
+          updatedDiscussion.notes = updatedDiscussion.notes.map((curr) =>
             curr.id === note.id ? note : curr,
           );
           this.discussionsDictionary[note.discussionId] = updatedDiscussion;
@@ -207,7 +216,9 @@ export default {
       />
     </div>
 
+    <related-jira-issues v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl" />
     <related-issues
+      v-else
       :endpoint="issueLinksEndpoint"
       :can-modify-related-issues="vulnerability.canModifyRelatedIssues"
       :project-path="project.url"

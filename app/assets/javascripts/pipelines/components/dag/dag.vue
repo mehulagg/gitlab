@@ -4,11 +4,11 @@ import { isEmpty } from 'lodash';
 import { __ } from '~/locale';
 import { fetchPolicies } from '~/lib/graphql';
 import getDagVisData from '../../graphql/queries/get_dag_vis_data.query.graphql';
+import { parseData } from '../parsing_utils';
+import { DEFAULT, PARSE_FAILURE, LOAD_FAILURE, UNSUPPORTED_DATA } from '../../constants';
 import DagGraph from './dag_graph.vue';
 import DagAnnotations from './dag_annotations.vue';
 import { ADD_NOTE, REMOVE_NOTE, REPLACE_NOTES } from './constants';
-import { parseData } from '../parsing_utils';
-import { DEFAULT, PARSE_FAILURE, LOAD_FAILURE, UNSUPPORTED_DATA } from '../../constants';
 
 export default {
   // eslint-disable-next-line @gitlab/require-i18n-strings
@@ -56,15 +56,15 @@ export default {
 
         const unwrappedGroups = stages
           .map(({ name, groups: { nodes: groups } }) => {
-            return groups.map(group => {
+            return groups.map((group) => {
               return { category: name, ...group };
             });
           })
           .flat(2);
 
-        const nodes = unwrappedGroups.map(group => {
+        const nodes = unwrappedGroups.map((group) => {
           const jobs = group.jobs.nodes.map(({ name, needs }) => {
-            return { name, needs: needs.nodes.map(need => need.name) };
+            return { name, needs: needs.nodes.map((need) => need.name) };
           });
 
           return { ...group, jobs };

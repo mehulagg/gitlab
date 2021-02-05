@@ -4,12 +4,15 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Stages of Auto DevOps
+# Stages of Auto DevOps **(CORE)**
 
 The following sections describe the stages of [Auto DevOps](index.md).
 Read them carefully to understand how each one works.
 
 ## Auto Build
+
+NOTE:
+Auto Build is not supported if Docker in Docker is not available for your GitLab Runners, like in OpenShift clusters. The OpenShift support in GitLab is tracked [in a dedicated epic](https://gitlab.com/groups/gitlab-org/-/epics/2068).
 
 Auto Build creates a build of the application using an existing `Dockerfile` or
 Heroku buildpacks. The resulting Docker image is pushed to the
@@ -132,7 +135,7 @@ might want to use a [custom buildpack](customize.md#custom-buildpacks).
 
 ## Auto Code Quality
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in [GitLab](https://about.gitlab.com/pricing/) 9.3.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in GitLab 13.2.
 
 Auto Code Quality uses the

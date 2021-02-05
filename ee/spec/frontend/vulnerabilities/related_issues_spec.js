@@ -54,7 +54,7 @@ describe('Vulnerability related issues component', () => {
   };
 
   const relatedIssuesBlock = () => wrapper.find(RelatedIssuesBlock);
-  const blockProp = prop => relatedIssuesBlock().props(prop);
+  const blockProp = (prop) => relatedIssuesBlock().props(prop);
   const blockEmit = (eventName, data) => relatedIssuesBlock().vm.$emit(eventName, data);
   const findCreateIssueButton = () => wrapper.find({ ref: 'createIssue' });
 

@@ -7,6 +7,10 @@ import { visitUrl } from '~/lib/utils/url_utility';
 import '~/behaviors/markdown/render_gfm';
 import IssuableApp from '~/issue_show/components/app.vue';
 import eventHub from '~/issue_show/event_hub';
+import IncidentTabs from '~/issue_show/components/incidents/incident_tabs.vue';
+import DescriptionComponent from '~/issue_show/components/description.vue';
+import PinnedLinks from '~/issue_show/components/pinned_links.vue';
+import { IssuableStatus, IssuableStatusText } from '~/issue_show/constants';
 import {
   appProps,
   initialRequest,
@@ -14,10 +18,6 @@ import {
   secondRequest,
   zoomMeetingUrl,
 } from '../mock_data';
-import IncidentTabs from '~/issue_show/components/incidents/incident_tabs.vue';
-import DescriptionComponent from '~/issue_show/components/description.vue';
-import PinnedLinks from '~/issue_show/components/pinned_links.vue';
-import { IssuableStatus, IssuableStatusText } from '~/issue_show/constants';
 
 function formatText(text) {
   return text.trim().replace(/\s\s+/g, ' ');
@@ -47,6 +47,7 @@ describe('Issuable output', () => {
       provide: {
         fullPath: 'gitlab-org/incidents',
         iid: '19',
+        uploadMetricsFeatureAvailable: false,
       },
       stubs: {
         HighlightBar: true,
@@ -398,8 +399,8 @@ describe('Issuable output', () => {
 
           wrapper.vm.poll.makeRequest();
 
-          return new Promise(resolve => {
-            wrapper.vm.$watch('formState.lockedWarningVisible', value => {
+          return new Promise((resolve) => {
+            wrapper.vm.$watch('formState.lockedWarningVisible', (value) => {
               if (value) {
                 resolve();
               }
@@ -503,13 +504,6 @@ describe('Issuable output', () => {
 
     it('returns false when title is empty null', () => {
       wrapper.vm.store.formState.title = null;
-
-      expect(wrapper.vm.issueChanged).toBe(false);
-    });
-
-    it('returns false when `initialTitleText` is null and `formState.title` is empty string', () => {
-      wrapper.vm.store.formState.title = '';
-      wrapper.setProps({ initialTitleText: null });
 
       expect(wrapper.vm.issueChanged).toBe(false);
     });

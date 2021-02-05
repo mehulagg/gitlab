@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
-import WeightSelect from 'ee/boards/components/weight_select.vue';
 import { GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import WeightSelect from 'ee/boards/components/weight_select.vue';
 
 describe('WeightSelect', () => {
   let wrapper;
@@ -8,10 +8,7 @@ describe('WeightSelect', () => {
   const editButton = () => wrapper.find(GlButton);
   const valueContainer = () => wrapper.find('.value');
   const weightDropdown = () => wrapper.find(GlDropdown);
-  const getWeightItemAtIndex = index =>
-    weightDropdown()
-      .findAll(GlDropdownItem)
-      .at(index);
+  const getWeightItemAtIndex = (index) => weightDropdown().findAll(GlDropdownItem).at(index);
   const defaultProps = {
     weights: ['Any', 'None', 0, 1, 2, 3],
     board: {

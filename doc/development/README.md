@@ -66,14 +66,14 @@ Complementary reads:
 - [Guidelines for implementing Enterprise Edition features](ee_features.md)
 - [Danger bot](dangerbot.md)
 - [Generate a changelog entry with `bin/changelog`](changelog.md)
-- [Requesting access to Chatops on GitLab.com](chatops_on_gitlabcom.md#requesting-access) (for GitLab team members)
+- [Requesting access to ChatOps on GitLab.com](chatops_on_gitlabcom.md#requesting-access) (for GitLab team members)
 - [Patch release process for developers](https://gitlab.com/gitlab-org/release/docs/blob/master/general/patch/process.md#process-for-developers)
 - [Adding a new service component to GitLab](adding_service_component.md)
 
 ### Development guidelines review
 
-When you submit a change to GitLab's development guidelines, the people
-you ask for reviews from depend on the level of change, as described below.
+When you submit a change to the GitLab development guidelines, who
+you ask for reviews depends on the level of change.
 
 #### Wording, style, or link changes
 
@@ -88,7 +88,7 @@ maintainer or Technical Writer. These can include:
 
 #### Specific changes
 
-If the MR proposes changes limited to a particular stage, group, or team,
+If the MR proposes changes that are limited to a particular stage, group, or team,
 request a review and approval from an experienced GitLab Team Member in that
 group. For example, if you're documenting a new internal API used exclusively by
 a given group, request an engineering review from one of the group's members.
@@ -132,7 +132,7 @@ In these cases, use the following workflow:
 
 1. After completing the reviews, consult with the EM/Staff Engineer
    author / approver of the MR.
-   
+
    If this is a significant change across multiple areas, request final review
    and approval from the VP of Development, the DRI for Development Guidelines,
    @clefelhocz1.
@@ -151,6 +151,7 @@ In these cases, use the following workflow:
 
 ## Backend guides
 
+- [Directory structure](directory_structure.md)
 - [GitLab utilities](utilities.md)
 - [Issuable-like Rails models](issuable-like-models.md)
 - [Logging](logging.md)
@@ -229,7 +230,7 @@ See [database guidelines](database/index.md).
 - [Security Scanners](integrations/secure.md)
 - [Secure Partner Integration](integrations/secure_partner_integration.md)
 - [How to run Jenkins in development environment](integrations/jenkins.md)
-- [How to run local Codesandbox integration for Web IDE Live Preview](integrations/codesandbox.md)
+- [How to run local `Codesandbox` integration for Web IDE Live Preview](integrations/codesandbox.md)
 
 ## Testing guides
 
@@ -256,11 +257,11 @@ See [database guidelines](database/index.md).
 - [Externalization](i18n/externalization.md)
 - [Translation](i18n/translation.md)
 
-## Product Analytics guides
+## Product Intelligence guides
 
-- [Product Analytics guide](https://about.gitlab.com/handbook/product/product-analytics-guide/)
-- [Usage Ping guide](product_analytics/usage_ping.md)
-- [Snowplow guide](product_analytics/snowplow.md)
+- [Product Intelligence guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
+- [Usage Ping guide](usage_ping.md)
+- [Snowplow guide](snowplow.md)
 
 ## Experiment guide
 
@@ -292,6 +293,7 @@ See [database guidelines](database/index.md).
 - [Reference processing](reference_processing.md)
 - [Compatibility with multiple versions of the application running at the same time](multi_version_compatibility.md)
 - [Features inside `.gitlab/`](features_inside_dot_gitlab.md)
+- [Dashboards for stage groups](stage_group_dashboards.md)
 
 ## Other GitLab Development Kit (GDK) guides
 

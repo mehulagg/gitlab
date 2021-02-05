@@ -38,10 +38,11 @@ RSpec.describe VulnerabilitiesHelper do
                     :issue_feedback,
                     :project,
                     :remediations,
-                    :solution)
+                    :solution,
+                    :uuid)
     end
 
-    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner] }
+    let(:desired_serializer_fields) { %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid] }
 
     before do
       vulnerability_serializer_stub = instance_double("VulnerabilitySerializer")
@@ -63,6 +64,7 @@ RSpec.describe VulnerabilitiesHelper do
         new_issue_url: "/#{project.full_path}/-/issues/new?vulnerability_id=#{vulnerability.id}",
         create_jira_issue_url: nil,
         related_jira_issues_path: "/#{project.full_path}/-/integrations/jira/issues?vulnerability_ids%5B%5D=#{vulnerability.id}",
+        jira_integration_settings_path: "/#{project.full_path}/-/services/jira/edit",
         has_mr: anything,
         create_mr_url: "/#{project.full_path}/-/vulnerability_feedback",
         discussions_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/discussions",
@@ -141,6 +143,22 @@ RSpec.describe VulnerabilitiesHelper do
 
       it 'returns no pipeline data' do
         expect(subject[:pipeline]).to be_nil
+      end
+    end
+
+    describe '[:has_mr]' do
+      subject { helper.vulnerability_details(vulnerability, pipeline)[:has_mr] }
+
+      context 'with existing merge request feedback' do
+        before do
+          create(:vulnerability_feedback, :merge_request, project: project, pipeline: pipeline, project_fingerprint: finding.project_fingerprint)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'without feedback' do
+        it { is_expected.to be_falsey }
       end
     end
   end
@@ -247,7 +265,8 @@ RSpec.describe VulnerabilitiesHelper do
         response: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
         evidence_source: anything,
         assets: kind_of(Array),
-        supporting_messages: kind_of(Array)
+        supporting_messages: kind_of(Array),
+        uuid: kind_of(String)
       )
 
       expect(subject[:location]['blob_path']).to match(kind_of(String))

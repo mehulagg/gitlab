@@ -16,6 +16,10 @@ module Types
     field :path, GraphQL::STRING_TYPE, null: false,
           description: 'Path of the project'
 
+    field :sast_ci_configuration, Types::CiConfiguration::Sast::Type, null: true,
+      calls_gitaly: true,
+      description: 'SAST CI configuration for the project'
+
     field :name_with_namespace, GraphQL::STRING_TYPE, null: false,
           description: 'Full name of the project with its namespace'
     field :name, GraphQL::STRING_TYPE, null: false,
@@ -108,7 +112,7 @@ module Types
     field :suggestion_commit_message, GraphQL::STRING_TYPE, null: true,
           description: 'The commit message used to apply merge request suggestions'
     field :squash_read_only, GraphQL::BOOLEAN_TYPE, null: false, method: :squash_readonly?,
-          description: 'Indicates if squash readonly is enabled'
+          description: 'Indicates if `squashReadOnly` is enabled'
 
     field :namespace, Types::NamespaceType, null: true,
           description: 'Namespace of the project'
@@ -175,7 +179,7 @@ module Types
           description: 'A single issue of the project',
           resolver: Resolvers::IssuesResolver.single
 
-    field :packages, Types::PackageType.connection_type, null: true,
+    field :packages,
          description: 'Packages of the project',
          resolver: Resolvers::PackagesResolver
 
@@ -305,18 +309,21 @@ module Types
               description: 'Title of the label'
           end
 
+    field :terraform_state,
+          Types::Terraform::StateType,
+          null: true,
+          description: 'Find a single Terraform state by name.',
+          resolver: Resolvers::Terraform::StatesResolver.single
+
     field :terraform_states,
           Types::Terraform::StateType.connection_type,
           null: true,
-          description: 'Terraform states associated with the project',
+          description: 'Terraform states associated with the project.',
           resolver: Resolvers::Terraform::StatesResolver
 
     field :pipeline_analytics, Types::Ci::AnalyticsType, null: true,
           description: 'Pipeline analytics',
           resolver: Resolvers::ProjectPipelineStatisticsResolver
-
-    field :total_pipeline_duration, GraphQL::INT_TYPE, null: true,
-          description: 'Total pipeline duration for all of the pipelines in a project'
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|
@@ -362,8 +369,10 @@ module Types
       project.container_repositories.size
     end
 
-    def total_pipeline_duration
-      object.all_pipelines.total_duration
+    def sast_ci_configuration
+      return unless Ability.allowed?(current_user, :download_code, object)
+
+      ::Security::CiConfiguration::SastParserService.new(object).configuration
     end
 
     private

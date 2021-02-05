@@ -31,13 +31,13 @@ function getApprovalRuleNamesLeft(data) {
     return [];
   }
 
-  const rulesLeft = groupBy(data.approval_rules_left, x => x.rule_type);
+  const rulesLeft = groupBy(data.approval_rules_left, (x) => x.rule_type);
 
   // Filter out empty names (fallback rule has no name) because the empties would look weird.
-  const regularRules = (rulesLeft[RULE_TYPE_REGULAR] || []).map(x => x.name).filter(x => x);
+  const regularRules = (rulesLeft[RULE_TYPE_REGULAR] || []).map((x) => x.name).filter((x) => x);
 
   // Report Approvals
-  const reportApprovalRules = (rulesLeft[RULE_TYPE_REPORT_APPROVER] || []).map(x => x.name);
+  const reportApprovalRules = (rulesLeft[RULE_TYPE_REPORT_APPROVER] || []).map((x) => x.name);
 
   // If there are code owners that need to approve, only mention that once.
   // As the names of code owner rules are patterns that don't mean much out of context.
@@ -50,7 +50,7 @@ function getApprovalRuleNamesLeft(data) {
  * Map the approval rules response for use by the MR widget
  */
 export function mapApprovalRulesResponse(rules, settings) {
-  return rules.map(x => mapApprovalRule(x, settings));
+  return rules.map((x) => mapApprovalRule(x, settings));
 }
 
 /**

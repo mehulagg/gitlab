@@ -176,39 +176,43 @@ module Gitlab
     config.assets.precompile << "notify.css"
     config.assets.precompile << "mailers/*.css"
     config.assets.precompile << "page_bundles/_mixins_and_variables_and_functions.css"
+    config.assets.precompile << "page_bundles/admin/application_settings_metrics_and_profiling.css"
+    config.assets.precompile << "page_bundles/admin/jobs_index.css"
     config.assets.precompile << "page_bundles/alert_management_details.css"
+    config.assets.precompile << "page_bundles/alert_management_settings.css"
     config.assets.precompile << "page_bundles/boards.css"
     config.assets.precompile << "page_bundles/build.css"
     config.assets.precompile << "page_bundles/ci_status.css"
     config.assets.precompile << "page_bundles/cycle_analytics.css"
+    config.assets.precompile << "page_bundles/security_discover.css"
     config.assets.precompile << "page_bundles/dev_ops_report.css"
     config.assets.precompile << "page_bundles/environments.css"
     config.assets.precompile << "page_bundles/epics.css"
     config.assets.precompile << "page_bundles/error_tracking_details.css"
     config.assets.precompile << "page_bundles/error_tracking_index.css"
-    config.assets.precompile << "page_bundles/signup.css"
     config.assets.precompile << "page_bundles/ide.css"
     config.assets.precompile << "page_bundles/import.css"
+    config.assets.precompile << "page_bundles/incident_management_list.css"
     config.assets.precompile << "page_bundles/issues_list.css"
     config.assets.precompile << "page_bundles/jira_connect.css"
     config.assets.precompile << "page_bundles/jira_connect_users.css"
     config.assets.precompile << "page_bundles/merge_conflicts.css"
     config.assets.precompile << "page_bundles/merge_requests.css"
     config.assets.precompile << "page_bundles/milestone.css"
+    config.assets.precompile << "page_bundles/oncall_schedules.css"
     config.assets.precompile << "page_bundles/pipeline.css"
-    config.assets.precompile << "page_bundles/pipelines.css"
     config.assets.precompile << "page_bundles/pipeline_schedules.css"
+    config.assets.precompile << "page_bundles/pipelines.css"
     config.assets.precompile << "page_bundles/productivity_analytics.css"
     config.assets.precompile << "page_bundles/profile_two_factor_auth.css"
-    config.assets.precompile << "page_bundles/security_dashboard.css"
-    config.assets.precompile << "page_bundles/terminal.css"
-    config.assets.precompile << "page_bundles/todos.css"
     config.assets.precompile << "page_bundles/reports.css"
     config.assets.precompile << "page_bundles/roadmap.css"
+    config.assets.precompile << "page_bundles/security_dashboard.css"
+    config.assets.precompile << "page_bundles/signup.css"
+    config.assets.precompile << "page_bundles/terminal.css"
+    config.assets.precompile << "page_bundles/todos.css"
     config.assets.precompile << "page_bundles/wiki.css"
     config.assets.precompile << "page_bundles/xterm.css"
-    config.assets.precompile << "page_bundles/alert_management_settings.css"
-    config.assets.precompile << "page_bundles/oncall_schedules.css"
     config.assets.precompile << "lazy_bundles/cropper.css"
     config.assets.precompile << "lazy_bundles/select2.css"
     config.assets.precompile << "performance_bar.css"
@@ -228,11 +232,6 @@ module Gitlab
     config.assets.precompile << "icons.svg"
     config.assets.precompile << "icons.json"
     config.assets.precompile << "illustrations/*.svg"
-
-    # Import Fontawesome fonts
-    config.assets.paths << "#{config.root}/node_modules/font-awesome/fonts"
-    config.assets.precompile << "fontawesome-webfont.woff2"
-    config.assets.precompile << "fontawesome-webfont.woff"
 
     # Import css for xterm
     config.assets.paths << "#{config.root}/node_modules/xterm/src/"
@@ -290,6 +289,14 @@ module Gitlab
           headers: :any,
           methods: :any,
           expose: headers_to_expose
+      end
+
+      # Cross-origin requests must be enabled for the Authorization code with PKCE OAuth flow when used from a browser.
+      allow do
+        origins '*'
+        resource '/oauth/token',
+          credentials: false,
+          methods: [:post]
       end
     end
 
@@ -371,31 +378,6 @@ module Gitlab
           app.config.assets.paths.unshift("#{config.root}/ee/app/assets/#{path}")
         end
       end
-    end
-
-    config.after_initialize do
-      # Devise (see initializers/8_devise.rb) already reloads routes if
-      # eager loading is enabled, so don't do this twice since it's
-      # expensive.
-      Rails.application.reload_routes! unless config.eager_load
-
-      project_url_helpers = Module.new do
-        extend ActiveSupport::Concern
-
-        Gitlab::Application.routes.named_routes.helper_names.each do |name|
-          next unless name.include?('namespace_project')
-
-          define_method(name.sub('namespace_project', 'project')) do |project, *args|
-            send(name, project&.namespace, project, *args)
-          end
-        end
-      end
-
-      # We add the MilestonesRoutingHelper because we know that this does not
-      # conflict with the methods defined in `project_url_helpers`, and we want
-      # these methods available in the same places.
-      Gitlab::Routing.add_helpers(project_url_helpers)
-      Gitlab::Routing.add_helpers(TimeboxesRoutingHelper)
     end
   end
 end

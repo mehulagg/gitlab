@@ -4,18 +4,22 @@ import { escape, template } from 'lodash';
 import { s__ } from '~/locale';
 import SidebarMediator from '~/sidebar/sidebar_mediator';
 import { isUserBusy } from '~/set_status_modal/utils';
+import axios from '~/lib/utils/axios_utils';
+import * as Emoji from '~/emoji';
 import glRegexp from './lib/utils/regexp';
 import AjaxCache from './lib/utils/ajax_cache';
-import axios from '~/lib/utils/axios_utils';
 import { spriteIcon } from './lib/utils/common_utils';
-import * as Emoji from '~/emoji';
 
 function sanitize(str) {
   return str.replace(/<(?:.|\n)*?>/gm, '');
 }
 
+function createMemberSearchString(member) {
+  return `${member.name.replace(/ /g, '')} ${member.username}`;
+}
+
 export function membersBeforeSave(members) {
-  return members.map(member => {
+  return members.map((member) => {
     const GROUP_TYPE = 'Group';
 
     let title = '';
@@ -40,7 +44,7 @@ export function membersBeforeSave(members) {
       username: member.username,
       avatarTag: autoCompleteAvatar.length === 1 ? txtAvatar : imgAvatar,
       title: sanitize(title),
-      search: sanitize(`${member.username} ${member.name}`),
+      search: sanitize(createMemberSearchString(member)),
       icon: avatarIcon,
       availability: member?.availability,
     };
@@ -103,6 +107,7 @@ class GfmAutoComplete {
       at: '/',
       alias: 'commands',
       searchKey: 'search',
+      limit: 100,
       skipSpecialCharacterTest: true,
       skipMarkdownCharacterTest: true,
       data: GfmAutoComplete.defaultLoadingData,
@@ -156,7 +161,7 @@ class GfmAutoComplete {
         ...this.getDefaultCallbacks(),
         beforeSave(commands) {
           if (GfmAutoComplete.isLoading(commands)) return commands;
-          return $.map(commands, c => {
+          return $.map(commands, (c) => {
             let search = c.name;
             if (c.aliases.length > 0) {
               search = `${search} ${c.aliases.join(' ')}`;
@@ -237,7 +242,7 @@ class GfmAutoComplete {
           });
 
           // return to the form atwho wants
-          return results.map(name => ({ name }));
+          return results.map((name) => ({ name }));
         },
       },
     });
@@ -285,13 +290,10 @@ class GfmAutoComplete {
         ...this.getDefaultCallbacks(),
         beforeSave: membersBeforeSave,
         matcher(flag, subtext) {
-          const subtextNodes = subtext
-            .split(/\n+/g)
-            .pop()
-            .split(GfmAutoComplete.regexSubtext);
+          const subtextNodes = subtext.split(/\n+/g).pop().split(GfmAutoComplete.regexSubtext);
 
           // Check if @ is followed by '/assign', '/reassign', '/unassign' or '/cc' commands.
-          command = subtextNodes.find(node => {
+          command = subtextNodes.find((node) => {
             if (Object.values(MEMBER_COMMAND).includes(node)) {
               return node;
             }
@@ -300,9 +302,7 @@ class GfmAutoComplete {
 
           // Cache assignees list for easier filtering later
           assignees =
-            SidebarMediator.singleton?.store?.assignees?.map(
-              assignee => `${assignee.username} ${assignee.name}`,
-            ) || [];
+            SidebarMediator.singleton?.store?.assignees?.map(createMemberSearchString) || [];
 
           const match = GfmAutoComplete.defaultMatcher(flag, subtext, this.app.controllers);
           return match && match.length ? match[1] : null;
@@ -319,10 +319,10 @@ class GfmAutoComplete {
 
           if (command === MEMBER_COMMAND.ASSIGN) {
             // Only include members which are not assigned to Issuable currently
-            return data.filter(member => !assignees.includes(member.search));
+            return data.filter((member) => !assignees.includes(member.search));
           } else if (command === MEMBER_COMMAND.UNASSIGN) {
             // Only include members which are assigned to Issuable currently
-            return data.filter(member => assignees.includes(member.search));
+            return data.filter((member) => assignees.includes(member.search));
           }
 
           return data;
@@ -349,7 +349,7 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(issues) {
-          return $.map(issues, i => {
+          return $.map(issues, (i) => {
             if (i.title == null) {
               return i;
             }
@@ -383,7 +383,7 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(milestones) {
-          return $.map(milestones, m => {
+          return $.map(milestones, (m) => {
             if (m.title == null) {
               return m;
             }
@@ -416,7 +416,7 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(merges) {
-          return $.map(merges, m => {
+          return $.map(merges, (m) => {
             if (m.title == null) {
               return m;
             }
@@ -457,7 +457,7 @@ class GfmAutoComplete {
         ...this.getDefaultCallbacks(),
         beforeSave(merges) {
           if (GfmAutoComplete.isLoading(merges)) return merges;
-          return $.map(merges, m => ({
+          return $.map(merges, (m) => ({
             title: sanitize(m.title),
             color: m.color,
             search: m.title,
@@ -465,13 +465,10 @@ class GfmAutoComplete {
           }));
         },
         matcher(flag, subtext) {
-          const subtextNodes = subtext
-            .split(/\n+/g)
-            .pop()
-            .split(GfmAutoComplete.regexSubtext);
+          const subtextNodes = subtext.split(/\n+/g).pop().split(GfmAutoComplete.regexSubtext);
 
           // Check if ~ is followed by '/label', '/relabel' or '/unlabel' commands.
-          command = subtextNodes.find(node => {
+          command = subtextNodes.find((node) => {
             if (
               node === LABEL_COMMAND.LABEL ||
               node === LABEL_COMMAND.RELABEL ||
@@ -492,7 +489,7 @@ class GfmAutoComplete {
               return null;
             }
             const lastCandidate = subtext.split(flag).pop();
-            if (labels.find(label => label.title.startsWith(lastCandidate))) {
+            if (labels.find((label) => label.title.startsWith(lastCandidate))) {
               return lastCandidate;
             }
           } else {
@@ -519,10 +516,10 @@ class GfmAutoComplete {
           // because we want to return all the labels (unfiltered) for that command.
           if (command === LABEL_COMMAND.LABEL) {
             // Return labels with set: undefined.
-            return data.filter(label => !label.set);
+            return data.filter((label) => !label.set);
           } else if (command === LABEL_COMMAND.UNLABEL) {
             // Return labels with set: true.
-            return data.filter(label => label.set);
+            return data.filter((label) => label.set);
           }
 
           return data;
@@ -549,7 +546,7 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         beforeSave(snippets) {
-          return $.map(snippets, m => {
+          return $.map(snippets, (m) => {
             if (m.title == null) {
               return m;
             }
@@ -654,7 +651,7 @@ class GfmAutoComplete {
       this.loadEmojiData($input, at).catch(() => {});
     } else if (dataSource) {
       AjaxCache.retrieve(dataSource, true)
-        .then(data => {
+        .then((data) => {
           this.loadData($input, at, data);
         })
         .catch(() => {
@@ -696,11 +693,11 @@ class GfmAutoComplete {
       }
       lookup[key].push({ kind, emoji });
     };
-    Object.values(emojis).forEach(emoji => {
+    Object.values(emojis).forEach((emoji) => {
       add(emoji.name, 'name', emoji);
       add(emoji.d, 'description', emoji);
       add(emoji.e, 'unicode', emoji);
-      emoji.aliases.forEach(a => add(a, 'alias', emoji));
+      emoji.aliases.forEach((a) => add(a, 'alias', emoji));
     });
     this.emojiLookup = lookup;
 
@@ -772,7 +769,7 @@ GfmAutoComplete.atTypeMap = {
 };
 
 GfmAutoComplete.typesWithBackendFiltering = ['vulnerabilities'];
-GfmAutoComplete.isTypeWithBackendFiltering = type =>
+GfmAutoComplete.isTypeWithBackendFiltering = (type) =>
   GfmAutoComplete.typesWithBackendFiltering.includes(GfmAutoComplete.atTypeMap[type]);
 
 function findEmoji(name) {

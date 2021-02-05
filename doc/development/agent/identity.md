@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Kubernetes Agent identity and authentication **(PREMIUM ONLY)**
+# Kubernetes Agent identity and authentication **(PREMIUM SELF)**
 
 This page uses the word `agent` to describe the concept of the
 GitLab Kubernetes Agent. The program that implements the concept is called `agentk`.
@@ -37,9 +37,9 @@ has a different configuration. Some may enable features A and B, and some may
 enable features B and C. This flexibility enables different groups of people to
 use different features of the agent in the same cluster.
 
-For example, [Priyanka (Platform Engineer)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#priyanka-platform-engineer)
+For example, [Priyanka (Platform Engineer)](https://about.gitlab.com/handbook/marketing/strategic-marketing/roles-personas/#priyanka-platform-engineer)
 may want to use cluster-wide features of the agent, while
-[Sasha (Software Developer)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#sasha-software-developer)
+[Sasha (Software Developer)](https://about.gitlab.com/handbook/marketing/strategic-marketing/roles-personas/#sasha-software-developer)
 uses the agent that only has access to a particular namespace.
 
 Each agent is likely running using a

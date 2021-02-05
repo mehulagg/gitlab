@@ -9,12 +9,12 @@ module Mutations
 
       field :vulnerability, Types::VulnerabilityType,
             null: true,
-            description: 'The vulnerability after state change'
+            description: 'The vulnerability after state change.'
 
       argument :id,
                ::Types::GlobalIDType[::Vulnerability],
                required: true,
-               description: 'ID of the vulnerability to be resolved'
+               description: 'ID of the vulnerability to be resolved.'
 
       def resolve(id:)
         vulnerability = authorized_find!(id: id)

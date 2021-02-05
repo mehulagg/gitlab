@@ -2,10 +2,9 @@
 import { GlPopover, GlLink, GlAvatar, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
-import RequirementStatusBadge from './requirement_status_badge.vue';
-
 import RequirementMeta from '../mixins/requirement_meta';
 import { FilterState } from '../constants';
+import RequirementStatusBadge from './requirement_status_badge.vue';
 
 export default {
   components: {
@@ -23,7 +22,7 @@ export default {
     requirement: {
       type: Object,
       required: true,
-      validator: value =>
+      validator: (value) =>
         [
           'iid',
           'state',
@@ -33,7 +32,7 @@ export default {
           'updatedAt',
           'author',
           'testReports',
-        ].every(prop => value[prop]),
+        ].every((prop) => value[prop]),
     },
     stateChangeRequestActive: {
       type: Boolean,

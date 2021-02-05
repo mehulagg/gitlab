@@ -1,15 +1,15 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
 import { PROJECTS_PER_PAGE } from '../constants';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import DateRange from '../../shared/components/daterange.vue';
+import { toYmd } from '../../shared/utils';
 import StageTable from './stage_table.vue';
 import DurationChart from './duration_chart.vue';
 import TypeOfWorkCharts from './type_of_work_charts.vue';
-import UrlSync from '~/vue_shared/components/url_sync.vue';
-import { toYmd } from '../../shared/utils';
 import StageTableNav from './stage_table_nav.vue';
 import CustomStageForm from './custom_stage_form.vue';
 import PathNavigation from './path_navigation.vue';
@@ -96,9 +96,7 @@ export default {
       return this.featureFlags.hasPathNavigation && !this.hasNoAccessError && this.selectedStage;
     },
     shouldDisplayCreateMultipleValueStreams() {
-      return Boolean(
-        this.featureFlags.hasCreateMultipleValueStreams && !this.isLoadingValueStreams,
-      );
+      return Boolean(!this.shouldRenderEmptyState && !this.isLoadingValueStreams);
     },
     hasDateRangeSet() {
       return this.startDate && this.endDate;
@@ -179,6 +177,7 @@ export default {
       <value-stream-select
         v-if="shouldDisplayCreateMultipleValueStreams"
         class="gl-align-self-start gl-sm-align-self-start gl-mt-0 gl-sm-mt-5"
+        :has-extended-form-fields="featureFlags.hasExtendedFormFields"
       />
     </div>
     <gl-empty-state
@@ -193,6 +192,7 @@ export default {
       <div class="gl-mt-3 gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
         <div v-if="shouldDisplayPathNavigation" class="gl-w-full gl-pb-2">
           <path-navigation
+            :key="`path_navigation_key_${pathNavigationData.length}`"
             class="js-path-navigation"
             :loading="isLoading"
             :stages="pathNavigationData"
@@ -238,7 +238,7 @@ export default {
         :svg-path="noAccessSvgPath"
         :description="
           __(
-            'Only \'Reporter\' roles and above on tiers Premium / Silver and above can see Value Stream Analytics.',
+            'Only \'Reporter\' roles and above on tiers Premium and above can see Value Stream Analytics.',
           )
         "
       />

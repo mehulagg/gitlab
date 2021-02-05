@@ -7,7 +7,7 @@ import Pipeline from 'ee/compliance_dashboard/components/merge_requests/statuses
 describe('Status component', () => {
   let wrapper;
 
-  const createComponent = status => {
+  const createComponent = (status) => {
     return shallowMount(Status, {
       propsData: { status },
     });
@@ -34,7 +34,7 @@ describe('Status component', () => {
       ${'approval'} | ${null}
       ${'approval'} | ${''}
       ${'pipeline'} | ${{}}
-    `('does not render if given the status $value', status => {
+    `('does not render if given the status $value', (status) => {
       wrapper = createComponent(status);
 
       checkStatusComponentExists(status, false);
@@ -44,7 +44,7 @@ describe('Status component', () => {
       type          | data
       ${'approval'} | ${'success'}
       ${'pipeline'} | ${{ group: 'warning' }}
-    `('renders if given the status $value', status => {
+    `('renders if given the status $value', (status) => {
       wrapper = createComponent(status);
 
       checkStatusComponentExists(status, true);

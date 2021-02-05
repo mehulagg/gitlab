@@ -9,6 +9,7 @@ module Projects
         include SortingPreference
 
         before_action :check_feature_enabled!
+        before_action :check_issues_show_enabled!, only: :show
 
         before_action do
           push_frontend_feature_flag(:jira_issues_integration, project, type: :licensed, default_enabled: true)
@@ -31,23 +32,55 @@ module Projects
           end
         end
 
+        def show
+          respond_to do |format|
+            format.html
+            format.json do
+              render json: issue_json
+            end
+          end
+        end
+
         private
 
         def issues_json
-          jira_issues = finder.execute
-          jira_issues = Kaminari.paginate_array(jira_issues, limit: finder.per_page, total_count: finder.total_count)
+          jira_issues = Kaminari.paginate_array(
+            finder.execute,
+            limit: finder.per_page,
+            total_count: finder.total_count
+          )
 
           ::Integrations::Jira::IssueSerializer.new
             .with_pagination(request, response)
             .represent(jira_issues, project: project)
         end
 
-        def finder
-          @finder ||= finder_type.new(project, finder_options)
+        def issue_json
+          {
+            title_html: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
+            description_html: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
+            created_at: 2.hours.ago,
+            author: {
+              id: 2,
+              username: 'justin_ho',
+              name: 'Justin Ho',
+              web_url: 'http://127.0.0.1:3000/root',
+              avatar_url: 'http://127.0.0.1:3000/uploads/-/system/user/avatar/1/avatar.png?width=90'
+            },
+            labels: [
+              {
+                title: 'In Progress',
+                description: 'Work that is still in progress',
+                color: '#EBECF0',
+                text_color: '#283856'
+              }
+            ],
+            state: 'opened'
+          }
         end
 
-        def finder_type
-          ::Projects::Integrations::Jira::IssuesFinder
+        def finder
+          @finder ||= ::Projects::Integrations::Jira::IssuesFinder.new(project, finder_options)
         end
 
         def finder_options
@@ -56,7 +89,7 @@ module Projects
           # Used by view to highlight active option
           @sort = options[:sort]
 
-          params.permit(finder_type.valid_params).merge(options)
+          params.permit(::Projects::Integrations::Jira::IssuesFinder.valid_params).merge(options)
         end
 
         def default_state
@@ -74,7 +107,11 @@ module Projects
         protected
 
         def check_feature_enabled!
-          return render_404 unless project.jira_issues_integration_available? && project.external_issue_tracker
+          return render_404 unless project.jira_issues_integration_available? && project.jira_service.issues_enabled
+        end
+
+        def check_issues_show_enabled!
+          render_404 unless ::Feature.enabled?(:jira_issues_show_integration, @project, default_enabled: :yaml)
         end
 
         # Return the informational message to the user

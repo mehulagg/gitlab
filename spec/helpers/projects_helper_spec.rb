@@ -92,36 +92,10 @@ RSpec.describe ProjectsHelper do
       expect(helper.can_change_visibility_level?(project, user)).to be_falsey
     end
 
-    it "returns true if there are permissions and it is not fork" do
+    it "returns true if there are permissions" do
       allow(helper).to receive(:can?) { true }
 
       expect(helper.can_change_visibility_level?(project, user)).to be_truthy
-    end
-
-    it 'allows visibility level to be changed if the project is forked' do
-      allow(helper).to receive(:can?).with(user, :change_visibility_level, project) { true }
-      project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-      fork_project(project)
-
-      expect(helper.can_change_visibility_level?(project, user)).to be_truthy
-    end
-
-    context "forks" do
-      it "returns false if there are permissions and origin project is PRIVATE" do
-        allow(helper).to receive(:can?) { true }
-
-        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-
-        expect(helper.can_change_visibility_level?(forked_project, user)).to be_falsey
-      end
-
-      it "returns true if there are permissions and origin project is INTERNAL" do
-        allow(helper).to receive(:can?) { true }
-
-        project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
-
-        expect(helper.can_change_visibility_level?(forked_project, user)).to be_truthy
-      end
     end
   end
 
@@ -416,11 +390,51 @@ RSpec.describe ProjectsHelper do
 
   describe '#get_project_nav_tabs' do
     before do
+      allow(helper).to receive(:current_user).and_return(user)
       allow(helper).to receive(:can?) { true }
     end
 
     subject do
       helper.send(:get_project_nav_tabs, project, user)
+    end
+
+    context 'Security & Compliance tabs' do
+      before do
+        stub_feature_flags(secure_security_and_compliance_configuration_page_on_ce: feature_flag_enabled)
+        allow(helper).to receive(:can?).with(user, :read_security_configuration, project).and_return(can_read_security_configuration)
+      end
+
+      context 'when user cannot read security configuration' do
+        let(:can_read_security_configuration) { false }
+
+        context 'when feature flag is disabled' do
+          let(:feature_flag_enabled) { false }
+
+          it { is_expected.not_to include(:security_configuration) }
+        end
+
+        context 'when feature flag is enabled' do
+          let(:feature_flag_enabled) { true }
+
+          it { is_expected.not_to include(:security_configuration) }
+        end
+      end
+
+      context 'when user can read security configuration' do
+        let(:can_read_security_configuration) { true }
+
+        context 'when feature flag is disabled' do
+          let(:feature_flag_enabled) { false }
+
+          it { is_expected.not_to include(:security_configuration) }
+        end
+
+        context 'when feature flag is enabled' do
+          let(:feature_flag_enabled) { true }
+
+          it { is_expected.to include(:security_configuration) }
+        end
+      end
     end
 
     context 'when builds feature is enabled' do
@@ -458,6 +472,7 @@ RSpec.describe ProjectsHelper do
     context 'when project has external wiki' do
       it 'includes external wiki tab' do
         project.create_external_wiki_service(active: true, properties: { 'external_wiki_url' => 'https://gitlab.com' })
+        project.reload
 
         is_expected.to include(:external_wiki)
       end
@@ -681,31 +696,6 @@ RSpec.describe ProjectsHelper do
     end
   end
 
-  describe 'link_to_filter_repo' do
-    subject { helper.link_to_filter_repo }
-
-    it 'generates a hardcoded link to git filter-repo' do
-      result = helper.link_to_filter_repo
-      doc = Nokogiri::HTML.fragment(result)
-
-      expect(doc.children.size).to eq(1)
-
-      link = doc.children.first
-
-      aggregate_failures do
-        expect(result).to be_html_safe
-
-        expect(link.name).to eq('a')
-        expect(link[:target]).to eq('_blank')
-        expect(link[:rel]).to eq('noopener noreferrer')
-        expect(link[:href]).to eq('https://github.com/newren/git-filter-repo')
-        expect(link.inner_html).to eq('git filter-repo')
-
-        expect(result).to be_html_safe
-      end
-    end
-  end
-
   describe '#explore_projects_tab?' do
     subject { helper.explore_projects_tab? }
 
@@ -878,16 +868,36 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#can_import_members?' do
-    let(:owner) { project.owner }
+    context 'when user is project owner' do
+      before do
+        allow(helper).to receive(:current_user) { project.owner }
+      end
 
-    it 'returns false if user cannot admin_project_member' do
-      allow(helper).to receive(:current_user) { user }
-      expect(helper.can_import_members?).to eq false
+      it 'returns true for owner of project' do
+        expect(helper.can_import_members?).to eq true
+      end
     end
 
-    it 'returns true if user can admin_project_member' do
-      allow(helper).to receive(:current_user) { owner }
-      expect(helper.can_import_members?).to eq true
+    context 'when user is not a project owner' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:user_project_role, :can_import) do
+        :maintainer | true
+        :developer | false
+        :reporter | false
+        :guest | false
+      end
+
+      with_them do
+        before do
+          project.add_role(user, user_project_role)
+          allow(helper).to receive(:current_user) { user }
+        end
+
+        it 'resolves if the user can import members' do
+          expect(helper.can_import_members?).to eq can_import
+        end
+      end
     end
   end
 

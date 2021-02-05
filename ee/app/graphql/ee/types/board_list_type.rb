@@ -8,6 +8,8 @@ module EE
       prepended do
         field :milestone, ::Types::MilestoneType, null: true,
               description: 'Milestone of the list'
+        field :iteration, ::Types::IterationType, null: true,
+              description: 'Iteration of the list'
         field :max_issue_count, GraphQL::INT_TYPE, null: true,
               description: 'Maximum number of issues in the list'
         field :max_issue_weight, GraphQL::INT_TYPE, null: true,
@@ -21,6 +23,10 @@ module EE
 
         def milestone
           ::Gitlab::Graphql::Loaders::BatchModelLoader.new(::Milestone, object.milestone_id).find
+        end
+
+        def iteration
+          ::Gitlab::Graphql::Loaders::BatchModelLoader.new(::Iteration, object.iteration_id).find
         end
 
         def assignee

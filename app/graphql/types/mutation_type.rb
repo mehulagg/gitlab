@@ -15,6 +15,7 @@ module Types
     mount_mutation Mutations::AlertManagement::HttpIntegration::Update
     mount_mutation Mutations::AlertManagement::HttpIntegration::ResetToken
     mount_mutation Mutations::AlertManagement::HttpIntegration::Destroy
+    mount_mutation Mutations::Security::CiConfiguration::ConfigureSast
     mount_mutation Mutations::AlertManagement::PrometheusIntegration::Create
     mount_mutation Mutations::AlertManagement::PrometheusIntegration::Update
     mount_mutation Mutations::AlertManagement::PrometheusIntegration::ResetToken
@@ -50,6 +51,7 @@ module Types
     mount_mutation Mutations::MergeRequests::SetSubscription
     mount_mutation Mutations::MergeRequests::SetWip, calls_gitaly: true
     mount_mutation Mutations::MergeRequests::SetAssignees
+    mount_mutation Mutations::MergeRequests::ReviewerRereview
     mount_mutation Mutations::Metrics::Dashboard::Annotations::Create
     mount_mutation Mutations::Metrics::Dashboard::Annotations::Delete
     mount_mutation Mutations::Notes::Create::Note, calls_gitaly: true
@@ -88,12 +90,13 @@ module Types
     mount_mutation Mutations::ContainerExpirationPolicies::Update
     mount_mutation Mutations::ContainerRepositories::Destroy
     mount_mutation Mutations::ContainerRepositories::DestroyTags
-    mount_mutation Mutations::Ci::PipelineCancel
-    mount_mutation Mutations::Ci::PipelineDestroy
-    mount_mutation Mutations::Ci::PipelineRetry
+    mount_mutation Mutations::Ci::Pipeline::Cancel
+    mount_mutation Mutations::Ci::Pipeline::Destroy
+    mount_mutation Mutations::Ci::Pipeline::Retry
+    mount_mutation Mutations::Ci::CiCdSettingsUpdate
+    mount_mutation Mutations::Namespace::PackageSettings::Update
   end
 end
 
 ::Types::MutationType.prepend(::Types::DeprecatedMutations)
-::Types::MutationType.prepend_if_ee('EE::Types::DeprecatedMutations')
 ::Types::MutationType.prepend_if_ee('::EE::Types::MutationType')

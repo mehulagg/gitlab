@@ -7,9 +7,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Conan packages in the Package Registry
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8248) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.6.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
-Publish Conan packages in your project’s Package Registry. Then install the
+Publish Conan packages in your project's Package Registry. Then install the
 packages whenever you need to use them as a dependency.
 
 To publish Conan packages to the Package Registry, add the Package Registry as a
@@ -47,7 +47,7 @@ Conan version 1.20.5
 ### Install CMake
 
 When you develop with C++ and Conan, you can select from many available
-compilers. This example uses the CMake compiler.
+compilers. This example uses the CMake build system generator.
 
 To install CMake:
 
@@ -98,7 +98,8 @@ For more details about creating and managing Conan packages, see the
 ## Add the Package Registry as a Conan remote
 
 To run `conan` commands, you must add the Package Registry as a Conan remote for
-your project or instance.
+your project or instance. Then you can publish packages to
+and install packages from the Package Registry.
 
 ### Add a remote for your project
 
@@ -170,13 +171,13 @@ convention.
 
 ## Authenticate to the Package Registry
 
-To authenticate to the Package Registry, you need either a personal access token
-or deploy token.
+To authenticate to the Package Registry, you need one of the following:
 
-- If you use a [personal access token](../../../user/profile/personal_access_tokens.md),
-  set the scope to `api`.
-- If you use a [deploy token](../../project/deploy_tokens/index.md), set the
-  scope to `read_package_registry`, `write_package_registry`, or both.
+- A [personal access token](../../../user/profile/personal_access_tokens.md)
+  with the scope set to `api`.
+- A [deploy token](../../project/deploy_tokens/index.md) with the
+  scope set to `read_package_registry`, `write_package_registry`, or both.
+- A [CI job token](#publish-a-conan-package-by-using-cicd).
 
 ### Add your credentials to the GitLab remote
 
@@ -278,10 +279,22 @@ create_package:
 Additional Conan images to use as the basis of your CI file are available in the
 [Conan docs](https://docs.conan.io/en/latest/howtos/run_conan_in_docker.html#available-docker-images).
 
+### Re-publishing a package with the same recipe
+
+When you publish a package that has the same recipe (`package-name/version@user/channel`)
+as an existing package, the duplicate files are uploaded successfully and
+are accessible through the UI. However, when the package is installed,
+only the most recently-published package is returned.
+
 ## Install a Conan package
 
 Install a Conan package from the Package Registry so you can use it as a
-dependency.
+dependency. You can install a package from the scope of your instance or your project.
+If multiple packages have the same recipe, when you install
+a package, the most recently-published package is retrieved.
+
+WARNING:
+Project-level packages [cannot be downloaded currently](https://gitlab.com/gitlab-org/gitlab/-/issues/270129).
 
 Conan packages are often installed as dependencies by using the `conanfile.txt`
 file.
@@ -384,3 +397,16 @@ The GitLab Conan repository supports the following Conan CLI commands:
   packages you have permission to view.
 - `conan info`: View the information on a given package from the Package Registry.
 - `conan remove`: Delete the package from the Package Registry.
+
+## Troubleshooting Conan packages
+
+### `ERROR: <package> was not found in remote <remote>`
+
+When you attempt to install a Conan package, you might receive a `404` error
+like `ERROR: <package> was not found in remote <remote>`.
+
+This issue occurs when you request a download from the project-level Conan API.
+The resulting URL is missing is project's `/<id>` and Conan commands, like
+`conan install`, fail.
+
+For more information, see [issue 270129](https://gitlab.com/gitlab-org/gitlab/-/issues/270129).

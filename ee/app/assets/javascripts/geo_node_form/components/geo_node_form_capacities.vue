@@ -57,7 +57,7 @@ export default {
   computed: {
     ...mapState(['formErrors']),
     visibleFormGroups() {
-      return this.formGroups.filter(group => {
+      return this.formGroups.filter((group) => {
         if (group.conditional) {
           return this.nodeData.primary
             ? group.conditional === 'primary'
@@ -105,6 +105,7 @@ export default {
       :state="Boolean(formErrors[formGroup.key])"
       :invalid-feedback="formErrors[formGroup.key]"
     >
+      <!-- eslint-disable vue/no-mutating-props -->
       <gl-form-input
         :id="formGroup.id"
         v-model="nodeData[formGroup.key]"
@@ -113,6 +114,7 @@ export default {
         type="number"
         @update="checkCapacity(formGroup)"
       />
+      <!-- eslint-enable vue/no-mutating-props -->
     </gl-form-group>
   </div>
 </template>

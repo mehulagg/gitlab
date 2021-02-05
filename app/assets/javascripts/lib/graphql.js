@@ -35,14 +35,24 @@ export default (resolvers = {}, config = {}) => {
     batchMax: config.batchMax || 10,
   };
 
+  const requestCounterLink = new ApolloLink((operation, forward) => {
+    window.pendingApolloRequests = window.pendingApolloRequests || 0;
+    window.pendingApolloRequests += 1;
+
+    return forward(operation).map((response) => {
+      window.pendingApolloRequests -= 1;
+      return response;
+    });
+  });
+
   const uploadsLink = ApolloLink.split(
-    operation => operation.getContext().hasUpload || operation.getContext().isSingleRequest,
+    (operation) => operation.getContext().hasUpload || operation.getContext().isSingleRequest,
     createUploadLink(httpOptions),
     new BatchHttpLink(httpOptions),
   );
 
   const performanceBarLink = new ApolloLink((operation, forward) => {
-    return forward(operation).map(response => {
+    return forward(operation).map((response) => {
       const httpResponse = operation.getContext().response;
 
       if (PerformanceBarService.interceptor) {
@@ -63,7 +73,12 @@ export default (resolvers = {}, config = {}) => {
 
   return new ApolloClient({
     typeDefs: config.typeDefs,
-    link: ApolloLink.from([performanceBarLink, new StartupJSLink(), uploadsLink]),
+    link: ApolloLink.from([
+      requestCounterLink,
+      performanceBarLink,
+      new StartupJSLink(),
+      uploadsLink,
+    ]),
     cache: new InMemoryCache({
       ...config.cacheConfig,
       freezeResults: config.assumeImmutableResults,

@@ -1,4 +1,4 @@
-import { s__ } from '~/locale';
+import { s__, __ } from '~/locale';
 
 /*
   Update the counterparts in roadmap.scss when making changes.
@@ -60,16 +60,17 @@ export const PRESET_DEFAULTS = {
   },
 };
 
-export const PAST_DATE = new Date(new Date().getFullYear() - 100, 0, 1);
-
-export const FUTURE_DATE = new Date(new Date().getFullYear() + 100, 0, 1);
-
 export const EPIC_LEVEL_MARGIN = {
   1: 'ml-4',
   2: 'ml-6',
   3: 'ml-8',
   4: 'ml-10',
 };
+
+export const FilterTokenOperators = [
+  { value: '=', description: __('is'), default: 'true' },
+  // { value: '!=', description: __('is not') },
+];
 
 export const EPICS_LIMIT_DISMISSED_COOKIE_NAME = 'epics_limit_warning_dismissed';
 

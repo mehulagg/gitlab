@@ -33,7 +33,7 @@ RSpec.describe Resolvers::Boards::EpicBoardsResolver do
       end
 
       it 'raises an error if user cannot read epic boards' do
-        expect { result}.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+        expect { result }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
       end
 
       context 'when user is member of the group' do
@@ -42,7 +42,9 @@ RSpec.describe Resolvers::Boards::EpicBoardsResolver do
         end
 
         it 'returns epic boards in the group ordered by name' do
-          expect(result).to match_array([epic_board2, epic_board1])
+          expect(result)
+            .to contain_exactly(epic_board2, epic_board1)
+            .and be_sorted(:name, :asc)
         end
 
         context 'when epic_boards flag is disabled' do

@@ -20,6 +20,7 @@ class Snippet < ApplicationRecord
   extend ::Gitlab::Utils::Override
 
   MAX_FILE_COUNT = 10
+  MASTER_BRANCH = 'master'
 
   cache_markdown_field :title, pipeline: :single_line
   cache_markdown_field :description
@@ -44,6 +45,7 @@ class Snippet < ApplicationRecord
   has_many :notes, as: :noteable, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :user_mentions, class_name: "SnippetUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
   has_one :snippet_repository, inverse_of: :snippet
+  has_many :repository_storage_moves, class_name: 'SnippetRepositoryStorageMove', inverse_of: :container
 
   # We need to add the `dependent` in order to call the after_destroy callback
   has_one :statistics, class_name: 'SnippetStatistics', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
@@ -81,6 +83,7 @@ class Snippet < ApplicationRecord
   scope :inc_author, -> { includes(:author) }
   scope :inc_relations_for_view, -> { includes(author: :status) }
   scope :with_statistics, -> { joins(:statistics) }
+  scope :inc_projects_namespace_route, -> { includes(project: [:route, :namespace]) }
 
   attr_mentionable :description
 
@@ -310,11 +313,25 @@ class Snippet < ApplicationRecord
 
   override :default_branch
   def default_branch
-    super || 'master'
+    super || MASTER_BRANCH
   end
 
   def repository_storage
-    snippet_repository&.shard_name || self.class.pick_repository_storage
+    snippet_repository&.shard_name || Repository.pick_storage_shard
+  end
+
+  # Repositories are created by default with the `master` branch.
+  # This method changes the `HEAD` file to point to the existing
+  # default branch in case it's not master.
+  def change_head_to_default_branch
+    return unless repository.exists?
+    return if default_branch == MASTER_BRANCH
+    # All snippets must have at least 1 file. Therefore, if
+    # `HEAD` is empty is because it's pointing to the wrong
+    # default branch
+    return unless repository.empty? || list_files('HEAD').empty?
+
+    repository.raw_repository.write_ref('HEAD', "refs/heads/#{default_branch}")
   end
 
   def create_repository

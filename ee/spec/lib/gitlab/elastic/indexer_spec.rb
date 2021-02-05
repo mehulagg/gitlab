@@ -396,13 +396,14 @@ RSpec.describe Gitlab::Elastic::Indexer do
     before do
       allow(Gitlab::Elasticsearch::Logger).to receive(:build).and_return(logger_double)
       allow(indexer).to receive(:run_indexer!) { Project.where(id: project.id).delete_all }
+      allow(logger_double).to receive(:debug)
     end
 
     it 'does not raises an exception and prints log message' do
       expect(logger_double).to receive(:debug).with(
         message: 'Index status could not be updated as the project does not exist',
         project_id: project.id,
-        wiki: false
+        index_wiki: false
       )
       expect(IndexStatus).not_to receive(:safe_find_or_create_by!).with(project_id: project.id)
       expect { indexer.run }.not_to raise_error

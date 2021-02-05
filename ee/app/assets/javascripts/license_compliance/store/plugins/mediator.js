@@ -2,7 +2,7 @@ import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/const
 import * as licenseMangementMutationTypes from 'ee/vue_shared/license_compliance/store/mutation_types';
 import { LICENSE_LIST } from '../constants';
 
-export default store => {
+export default (store) => {
   store.subscribe(({ type }) => {
     switch (type) {
       case `${LICENSE_MANAGEMENT}/${licenseMangementMutationTypes.RECEIVE_SET_LICENSE_APPROVAL}`:

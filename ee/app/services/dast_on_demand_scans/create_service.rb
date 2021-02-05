@@ -76,7 +76,7 @@ module DastOnDemandScans
 
     def create_pipeline
       params = default_config.merge(scanner_profile_config)
-      result = ::Ci::RunDastScanService.new(container, current_user).execute(params)
+      result = ::Ci::RunDastScanService.new(container, current_user).execute(**params)
 
       return success_response(result.payload) if result.success?
 

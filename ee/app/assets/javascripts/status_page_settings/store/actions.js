@@ -34,7 +34,7 @@ export const updateStatusPageSettings = ({ state, dispatch, commit }) => {
       },
     })
     .then(() => dispatch('receiveStatusPageSettingsUpdateSuccess'))
-    .catch(error => dispatch('receiveStatusPageSettingsUpdateError', error))
+    .catch((error) => dispatch('receiveStatusPageSettingsUpdateError', error))
     .finally(() => commit(mutationTypes.LOADING, false));
 };
 

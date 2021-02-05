@@ -95,6 +95,26 @@ RSpec.describe TrialsController do
       let(:create_lead_result) { true }
 
       it { is_expected.to redirect_to(select_trials_url) }
+
+      context 'coming from about.gitlab.com' do
+        let(:post_params) { { glm_source: 'about.gitlab.com' } }
+
+        it 'records trial_onboarding_issues experiment users but does not redirect to onboarding' do
+          expect(controller).to receive(:record_experiment_user).with(:trial_onboarding_issues)
+          is_expected.to redirect_to(select_trials_url(glm_source: 'about.gitlab.com'))
+        end
+
+        context 'when experiment trial_onboarding_issues is enabled' do
+          before do
+            stub_experiment_for_subject(trial_onboarding_issues: true)
+          end
+
+          it 'records trial_onboarding_issues experiment users and redirects to onboarding' do
+            expect(controller).to receive(:record_experiment_user).with(:trial_onboarding_issues)
+            is_expected.to redirect_to(new_users_sign_up_group_path(glm_source: 'about.gitlab.com', trial_onboarding_flow: true))
+          end
+        end
+      end
     end
 
     context 'on failure' do
@@ -206,6 +226,9 @@ RSpec.describe TrialsController do
 
       it { is_expected.to redirect_to("/#{namespace.path}?trial=true") }
       it 'calls the record conversion method for the experiments' do
+        expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields, namespace_id: namespace.id)
+        expect(controller).to receive(:record_experiment_user).with(:trimmed_skip_trial_copy, namespace_id: namespace.id)
+        expect(controller).to receive(:record_experiment_user).with(:trial_registration_with_social_signin, namespace_id: namespace.id)
         expect(controller).to receive(:record_experiment_conversion_event).with(:remove_known_trial_form_fields)
         expect(controller).to receive(:record_experiment_conversion_event).with(:trimmed_skip_trial_copy)
         expect(controller).to receive(:record_experiment_conversion_event).with(:trial_registration_with_social_signin)

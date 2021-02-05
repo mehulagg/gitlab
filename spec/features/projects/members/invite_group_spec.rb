@@ -8,6 +8,11 @@ RSpec.describe 'Project > Members > Invite group', :js do
 
   let(:maintainer) { create(:user) }
 
+  before do
+    stub_feature_flags(invite_members_group_modal: false)
+    stub_feature_flags(vue_project_members_list: false)
+  end
+
   describe 'Share with group lock' do
     shared_examples 'the project can be shared with groups' do
       it 'the "Invite group" tab exists' do
@@ -39,7 +44,7 @@ RSpec.describe 'Project > Members > Invite group', :js do
         it 'the project can be shared with another group' do
           visit project_project_members_path(project)
 
-          expect(page).not_to have_css('.project-members-groups')
+          expect(page).not_to have_link 'Groups'
 
           click_on 'invite-group-tab'
 
@@ -47,7 +52,9 @@ RSpec.describe 'Project > Members > Invite group', :js do
           page.find('body').click
           find('.btn-success').click
 
-          page.within('.project-members-groups') do
+          click_link 'Groups'
+
+          page.within('[data-testid="project-member-groups"]') do
             expect(page).to have_content(group_to_share_with.name)
           end
         end
@@ -132,7 +139,9 @@ RSpec.describe 'Project > Members > Invite group', :js do
     end
 
     it 'the group link shows the expiration time with a warning class' do
-      page.within('.project-members-groups') do
+      click_link 'Groups'
+
+      page.within('[data-testid="project-member-groups"]') do
         # Using distance_of_time_in_words_to_now because it is not the same as
         # subtraction, and this way avoids time zone issues as well
         expires_in_text = distance_of_time_in_words_to_now(project.project_group_links.first.expires_at)

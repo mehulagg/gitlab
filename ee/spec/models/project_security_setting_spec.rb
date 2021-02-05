@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe ProjectSecuritySetting do
+  using RSpec::Parameterized::TableSyntax
+
   describe 'associations' do
     subject { create(:project).security_setting }
 
@@ -12,55 +14,29 @@ RSpec.describe ProjectSecuritySetting do
   describe '#auto_fix_enabled?' do
     subject { setting.auto_fix_enabled? }
 
-    let_it_be(:setting) { build(:project_security_setting) }
+    let(:setting) { build(:project_security_setting) }
 
-    context 'when licensed feature is enabled' do
-      before do
-        stub_licensed_features(vulnerability_auto_fix: true)
-      end
-
-      context 'when auto fix is enabled for available feature' do
-        before do
-          setting.auto_fix_container_scanning = false
-          setting.auto_fix_dependency_scanning = true
-        end
-
-        it 'marks auto_fix as enabled' do
-          is_expected.to be_truthy
-        end
-      end
-
-      context 'when a auto_fix setting is disabled for available features' do
-        before do
-          setting.auto_fix_container_scanning = false
-          setting.auto_fix_dependency_scanning = false
-          setting.auto_fix_sast = false
-        end
-
-        it 'marks auto_fix as disabled' do
-          is_expected.to be_falsey
-        end
-      end
-
-      context 'when feature is disabled' do
-        before do
-          stub_feature_flags(security_auto_fix: false)
-        end
-
-        it 'marks auto_fix as disabled' do
-          is_expected.to be_falsey
-        end
-      end
+    where(:license, :feature_flag, :auto_fix_container_scanning, :auto_fix_dependency_scanning, :auto_fix_sast, :auto_fix_enabled?) do
+      true   | true  | true  | true  | true  | true
+      false  | true  | true  | true  | true  | false
+      true   | false | true  | true  | true  | false
+      true   | true  | false | true  | true  | true
+      true   | true  | true  | false | true  | true
+      true   | true  | false | false | true  | false
+      true   | true  | true  | true  | false | true
     end
 
-    context 'when license feature is disabled' do
+    with_them do
       before do
-        stub_licensed_features(vulnerability_auto_fix: false)
+        stub_licensed_features(vulnerability_auto_fix: license)
+        stub_feature_flags(security_auto_fix: feature_flag)
+
+        setting.auto_fix_container_scanning = auto_fix_container_scanning
+        setting.auto_fix_dependency_scanning = auto_fix_dependency_scanning
+        setting.auto_fix_sast = auto_fix_sast
       end
 
-      it 'marks auto_fix as disabled' do
-        is_expected.to be_falsey
-      end
+      it { is_expected.to eq(auto_fix_enabled?) }
     end
   end
 

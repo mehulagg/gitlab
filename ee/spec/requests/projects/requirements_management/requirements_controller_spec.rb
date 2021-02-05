@@ -24,10 +24,6 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
 
     subject { upload_file(file, workhorse_headers, params) }
 
-    before do
-      stub_feature_flags(import_requirements_csv: true)
-    end
-
     context 'unauthorized' do
       context 'when user is not signed in' do
         it_behaves_like 'response with 404 status'
@@ -54,22 +50,21 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
           stub_licensed_features(requirements: true)
         end
 
-        shared_examples 'response with 302 status' do
-          it 'returns 302 status and redirects to the correct path' do
+        shared_examples 'response with success status' do
+          it 'returns 200 status and success message' do
             subject
 
-            expect(flash[:notice]).to eq(_("Your requirements are being imported. Once finished, you'll receive a confirmation email."))
-            expect(response).to redirect_to(project_requirements_management_requirements_path(project))
-            expect(response).to have_gitlab_http_status(:found)
+            expect(response).to have_gitlab_http_status(:success)
+            expect(json_response).to eq('message' => "Your requirements are being imported. Once finished, you'll receive a confirmation email.")
           end
         end
 
-        it_behaves_like 'response with 302 status'
+        it_behaves_like 'response with success status'
 
         context 'when file extension is in upper case' do
           let(:file) { fixture_file_upload('spec/fixtures/csv_uppercase.CSV') }
 
-          it_behaves_like 'response with 302 status'
+          it_behaves_like 'response with success status'
         end
 
         it 'shows error when upload fails' do
@@ -79,8 +74,18 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
 
           subject
 
-          expect(flash[:alert]).to include(_('File upload error.'))
-          expect(response).to redirect_to(project_requirements_management_requirements_path(project))
+          expect(json_response).to eq('message' => 'File upload error.')
+        end
+
+        context 'when file extension is not csv' do
+          let(:file) { fixture_file_upload('spec/fixtures/sample_doc.md') }
+
+          it 'returns error message' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:success)
+            expect(json_response).to eq('message' => "The uploaded file was invalid. Supported file extensions are .csv.")
+          end
         end
       end
 
@@ -91,14 +96,6 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
 
         it_behaves_like 'response with 404 status'
       end
-    end
-
-    context 'when requirements import FF is disabled' do
-      before do
-        stub_feature_flags(import_requirements_csv: false)
-      end
-
-      it_behaves_like 'response with 404 status'
     end
 
     def upload_file(file, headers = {}, params = {})
@@ -119,34 +116,33 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
         headers: workhorse_headers
     end
 
-    context 'with an authorized user' do
+    before do
+      login_as(user)
+      stub_licensed_features(requirements: true)
+    end
+
+    context 'with authorized user' do
       before do
         project.add_reporter(user)
       end
 
-      context 'when feature is available' do
-        before do
-          stub_licensed_features(requirements: true)
-          stub_feature_flags(import_requirements_csv: true)
-        end
-
+      context 'when requirements feature is enabled' do
         it_behaves_like 'handle uploads authorize request' do
           let(:uploader_class) { FileUploader }
           let(:maximum_size) { Gitlab::CurrentSettings.max_attachment_size.megabytes }
         end
       end
 
-      context 'when feature is disabled' do
+      context 'when requirements feature is disabled' do
         before do
-          stub_licensed_features(requirements: true)
-          stub_feature_flags(import_requirements_csv: true)
+          stub_licensed_features(requirements: false)
         end
 
         it_behaves_like 'response with 404 status'
       end
     end
 
-    context 'with an authorized user' do
+    context 'with unauthorized user' do
       it_behaves_like 'response with 404 status'
     end
   end

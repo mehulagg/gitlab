@@ -8,22 +8,22 @@ module Mutations
       argument :board_id,
                ::Types::GlobalIDType[::Board],
                required: true,
-               description: 'The board global ID'
+               description: 'The board global ID.'
 
       argument :epic_id,
                ::Types::GlobalIDType[::Epic],
                required: true,
-               description: 'ID of an epic to set preferences for'
+               description: 'ID of an epic to set preferences for.'
 
       argument :collapsed,
                GraphQL::BOOLEAN_TYPE,
                required: true,
-               description: 'Whether the epic should be collapsed in the board'
+               description: 'Whether the epic should be collapsed in the board.'
 
       field :epic_user_preferences,
             Types::Boards::EpicUserPreferencesType,
             null: true,
-            description: 'User preferences for the epic in the board after mutation'
+            description: 'User preferences for the epic in the board after mutation.'
 
       authorize :read_board
 

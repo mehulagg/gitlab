@@ -17,6 +17,9 @@ module EE
             override :_available_servers
             def _available_servers
               ::License.feature_available?(:multiple_ldap_servers) ? servers : super
+            rescue ActiveRecord::NoDatabaseError
+              # Rake is probably trying to initialize the DB
+              []
             end
           end
         end

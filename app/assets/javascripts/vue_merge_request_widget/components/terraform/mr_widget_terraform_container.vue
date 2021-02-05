@@ -2,8 +2,8 @@
 import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlSprintf } from '@gitlab/ui';
 import { n__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import MrWidgetExpanableSection from '../mr_widget_expandable_section.vue';
 import Poll from '~/lib/utils/poll';
+import MrWidgetExpanableSection from '../mr_widget_expandable_section.vue';
 import TerraformPlan from './terraform_plan.vue';
 
 export default {
@@ -40,7 +40,7 @@ export default {
       );
     },
     numberOfInvalidPlans() {
-      return Object.values(this.plansObject).filter(plan => plan.tf_report_error).length;
+      return Object.values(this.plansObject).filter((plan) => plan.tf_report_error).length;
     },
     numberOfPlans() {
       return Object.keys(this.plansObject).length;

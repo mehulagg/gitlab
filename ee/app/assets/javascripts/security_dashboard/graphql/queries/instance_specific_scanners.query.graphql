@@ -1,0 +1,11 @@
+#import "ee/security_dashboard/graphql/fragments/vulnerability_scanner.fragment.graphql"
+
+query instanceSpecificScanners {
+  instanceSecurityDashboard {
+    vulnerabilityScanners {
+      nodes {
+        ...VulnerabilityScanner
+      }
+    }
+  }
+}

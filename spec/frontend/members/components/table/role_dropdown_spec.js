@@ -6,6 +6,7 @@ import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import waitForPromises from 'helpers/wait_for_promises';
 import RoleDropdown from '~/members/components/table/role_dropdown.vue';
+import { BV_DROPDOWN_SHOW } from '~/lib/utils/constants';
 import { member } from '../../mock_data';
 
 const localVue = createLocalVue();
@@ -44,7 +45,7 @@ describe('RoleDropdown', () => {
   const getDropdownMenu = () => within(wrapper.element).getByRole('menu');
   const getByTextInDropdownMenu = (text, options = {}) =>
     createWrapper(within(getDropdownMenu()).getByText(text, options));
-  const getDropdownItemByText = text =>
+  const getDropdownItemByText = (text) =>
     createWrapper(
       within(getDropdownMenu())
         .getByText(text, { selector: '[role="menuitem"] p' })
@@ -53,7 +54,7 @@ describe('RoleDropdown', () => {
   const getCheckedDropdownItem = () =>
     wrapper
       .findAll(GlDropdownItem)
-      .wrappers.find(dropdownItemWrapper => dropdownItemWrapper.props('isChecked'));
+      .wrappers.find((dropdownItemWrapper) => dropdownItemWrapper.props('isChecked'));
 
   const findDropdownToggle = () => wrapper.find('button[aria-haspopup="true"]');
   const findDropdown = () => wrapper.find(GlDropdown);
@@ -63,17 +64,17 @@ describe('RoleDropdown', () => {
   });
 
   describe('when dropdown is open', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       createComponent();
 
       findDropdownToggle().trigger('click');
-      wrapper.vm.$root.$on('bv::dropdown::shown', () => {
+      wrapper.vm.$root.$on(BV_DROPDOWN_SHOW, () => {
         done();
       });
     });
 
     it('renders all valid roles', () => {
-      Object.keys(member.validRoles).forEach(role => {
+      Object.keys(member.validRoles).forEach((role) => {
         expect(getDropdownItemByText(role).exists()).toBe(true);
       });
     });

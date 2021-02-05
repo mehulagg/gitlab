@@ -3,6 +3,7 @@
 module Elastic
   class Migration
     include Elastic::MigrationOptions
+    include Elastic::MigrationState
 
     attr_reader :version
 
@@ -28,8 +29,25 @@ module Elastic
       helper.client
     end
 
+    def migration_record
+      Elastic::DataMigrationService[version]
+    end
+
+    def fail_migration_halt_error!(retry_attempt: 0)
+      set_migration_state(
+        retry_attempt: retry_attempt,
+        halted: true,
+        halted_indexing_unpaused: false
+      )
+    end
+
     def log(message)
       logger.info "[Elastic::Migration: #{self.version}] #{message}"
+    end
+
+    def log_raise(message)
+      logger.error "[Elastic::Migration: #{self.version}] #{message}"
+      raise message
     end
 
     def logger

@@ -8,6 +8,7 @@ class GitalyTestSpawn
   include GitalyTest
 
   def run
+    install_gitaly_gems if ENV['CI']
     check_gitaly_config!
 
     # # Uncomment line below to see all gitaly logs merged into CI trace
@@ -15,6 +16,7 @@ class GitalyTestSpawn
 
     # In local development this pid file is used by rspec.
     IO.write(File.expand_path('../tmp/tests/gitaly.pid', __dir__), start_gitaly)
+    IO.write(File.expand_path('../tmp/tests/gitaly2.pid', __dir__), start_gitaly2)
     IO.write(File.expand_path('../tmp/tests/praefect.pid', __dir__), start_praefect)
   end
 end

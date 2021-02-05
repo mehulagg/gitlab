@@ -1,15 +1,16 @@
 - page_title _('Your GitLab group')
+- form_params = { trial_onboarding_flow: params[:trial_onboarding_flow], glm_source: params[:glm_source], glm_content: params[:glm_content] }
 
 .row.flex-grow-1
   .d-flex.flex-column.align-items-center.w-100.p-3.gl-bg-gray-10
     .edit-group.d-flex.flex-column.align-items-center.pt-5
-      #progress-bar
+      - unless in_trial_onboarding_flow?
+        #progress-bar
       %h2.center= _('Create your group')
-      %p
-        %div= _('A group represents your organization in GitLab. Groups allow you to manage users and collaborate across multiple projects.')
-
-      = form_for @group, url: users_sign_up_groups_path, html: { class: 'gl-show-field-errors card w-100 p-3' } do |f|
+      %p= _('A group represents your organization in GitLab. Groups allow you to manage users and collaborate across multiple projects.')
+      = form_for @group, url: users_sign_up_groups_path(form_params), html: { class: 'gl-show-field-errors card gl-w-full gl-p-4' } do |f|
         = form_errors(@group)
+        = render 'layouts/flash'
         .row
           .form-group.group-name-holder.col-sm-12
             = f.label :name, class: 'label-bold' do
@@ -40,7 +41,10 @@
         .row
           .form-group.col-sm-12
             = render partial: 'shared/groups/visibility_level', locals: { f: f }
-        = render partial: 'shared/groups/invite_members'
+        - if !in_trial_onboarding_flow? && experiment_enabled?(:trial_during_signup)
+          = render partial: 'shared/groups/trial_form'
+        - else
+          = render partial: 'shared/groups/invite_members'
         .row
           .form-group.col-sm-12.mb-0
             = button_tag class: %w[btn btn-success w-100] do

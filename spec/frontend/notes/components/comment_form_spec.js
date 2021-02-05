@@ -9,7 +9,6 @@ import CommentForm from '~/notes/components/comment_form.vue';
 import * as constants from '~/notes/constants';
 import eventHub from '~/notes/event_hub';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import { loggedOutnoteableData, notesDataMock, userDataMock, noteableDataMock } from '../mock_data';
 
 jest.mock('autosize');
@@ -64,14 +63,6 @@ describe('issue_comment_form component', () => {
   });
 
   describe('user is logged in', () => {
-    describe('avatar', () => {
-      it('should render user avatar with link', () => {
-        mountComponent({ mountFunction: mount });
-
-        expect(wrapper.find(UserAvatarLink).attributes('href')).toBe(userDataMock.path);
-      });
-    });
-
     describe('handleSave', () => {
       it('should request to save note when note is entered', () => {
         mountComponent({ mountFunction: mount, initialData: { note: 'hello world' } });
@@ -181,7 +172,7 @@ describe('issue_comment_form component', () => {
 
       describe('edit mode', () => {
         beforeEach(() => {
-          mountComponent();
+          mountComponent({ mountFunction: mount });
         });
 
         it('should enter edit mode when arrow up is pressed', () => {
@@ -200,7 +191,7 @@ describe('issue_comment_form component', () => {
 
       describe('event enter', () => {
         beforeEach(() => {
-          mountComponent();
+          mountComponent({ mountFunction: mount });
         });
 
         it('should save note when cmd+enter is pressed', () => {
@@ -366,17 +357,6 @@ describe('issue_comment_form component', () => {
 
           expect(refreshUserMergeRequestCounts).toHaveBeenCalled();
         });
-      });
-    });
-
-    describe('issue is confidential', () => {
-      it('shows information warning', () => {
-        mountComponent({
-          noteableData: { ...noteableDataMock, confidential: true },
-          mountFunction: mount,
-        });
-
-        expect(wrapper.find('[data-testid="confidential-warning"]').exists()).toBe(true);
       });
     });
   });

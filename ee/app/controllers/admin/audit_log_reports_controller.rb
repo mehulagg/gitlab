@@ -12,11 +12,7 @@ class Admin::AuditLogReportsController < Admin::ApplicationController
 
     respond_to do |format|
       format.csv do
-        no_cache_headers
-        stream_headers
-
-        headers['Content-Type'] = 'text/csv; charset=utf-8; header=present'
-        headers['Content-Disposition'] = "attachment; filename=\"#{csv_filename}\""
+        stream_csv_headers(csv_filename)
 
         self.response_body = csv_data
       end

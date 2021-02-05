@@ -1,5 +1,5 @@
 import { newDate } from '~/lib/utils/datetime_utility';
-import { PRESET_DEFAULTS, DAYS_IN_WEEK } from './constants';
+import { PRESET_DEFAULTS, DAYS_IN_WEEK } from '../../constants';
 
 /**
  * This method returns array of Dates representing 2-weeks timeframe based on provided initialDate

@@ -2,22 +2,23 @@ import Vue from 'vue';
 import $ from 'jquery';
 import Visibility from 'visibilityjs';
 import axios from '~/lib/utils/axios_utils';
-import TaskList from '../../task_list';
-import { deprecatedCreateFlash as Flash } from '../../flash';
-import Poll from '../../lib/utils/poll';
-import * as types from './mutation_types';
-import * as utils from './utils';
-import * as constants from '../constants';
-import loadAwardsHandler from '../../awards_handler';
-import sidebarTimeTrackingEventHub from '../../sidebar/event_hub';
-import { isInViewport, scrollToElement, isInMRPage } from '../../lib/utils/common_utils';
-import { mergeUrlParams } from '../../lib/utils/url_utility';
-import mrWidgetEventHub from '../../vue_merge_request_widget/event_hub';
 import updateIssueConfidentialMutation from '~/sidebar/components/confidential/mutations/update_issue_confidential.mutation.graphql';
 import updateMergeRequestLockMutation from '~/sidebar/components/lock/mutations/update_merge_request_lock.mutation.graphql';
 import updateIssueLockMutation from '~/sidebar/components/lock/mutations/update_issue_lock.mutation.graphql';
 import { __, sprintf } from '~/locale';
 import Api from '~/api';
+import TaskList from '../../task_list';
+import { deprecatedCreateFlash as Flash } from '../../flash';
+import Poll from '../../lib/utils/poll';
+import * as constants from '../constants';
+import loadAwardsHandler from '../../awards_handler';
+import sidebarTimeTrackingEventHub from '../../sidebar/event_hub';
+import { isInViewport, scrollToElement, isInMRPage } from '../../lib/utils/common_utils';
+import { mergeUrlParams } from '../../lib/utils/url_utility';
+import eventHub from '../event_hub';
+import mrWidgetEventHub from '../../vue_merge_request_widget/event_hub';
+import * as utils from './utils';
+import * as types from './mutation_types';
 
 let eTagPoll;
 
@@ -141,7 +142,7 @@ export const updateNote = ({ commit, dispatch }, { endpoint, note }) =>
 
 export const updateOrCreateNotes = ({ commit, state, getters, dispatch }, notes) => {
   const { notesById } = getters;
-  const debouncedFetchDiscussions = isFetching => {
+  const debouncedFetchDiscussions = (isFetching) => {
     if (!isFetching) {
       commit(types.SET_FETCHING_DISCUSSIONS, true);
       dispatch('fetchDiscussions', { path: state.notesData.discussionsPath });
@@ -159,7 +160,7 @@ export const updateOrCreateNotes = ({ commit, state, getters, dispatch }, notes)
     }
   };
 
-  notes.forEach(note => {
+  notes.forEach((note) => {
     if (notesById[note.id]) {
       commit(types.UPDATE_NOTE, note);
     } else if (note.type === constants.DISCUSSION_NOTE || note.type === constants.DIFF_NOTE) {
@@ -329,7 +330,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     }
   }
 
-  const processQuickActions = res => {
+  const processQuickActions = (res) => {
     const { errors: { commands_only: message } = { commands_only: null } } = res;
     /*
      The following reply means that quick actions have been successfully applied:
@@ -347,7 +348,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     return res;
   };
 
-  const processEmojiAward = res => {
+  const processEmojiAward = (res) => {
     const { commands_changes: commandsChanges } = res;
     const { emoji_award: emojiAward } = commandsChanges || {};
     if (!emojiAward) {
@@ -357,7 +358,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     const votesBlock = $('.js-awards-block').eq(0);
 
     return loadAwardsHandler()
-      .then(awardsHandler => {
+      .then((awardsHandler) => {
         awardsHandler.addAwardToEmojiBar(votesBlock, emojiAward);
         awardsHandler.scrollToAwards();
       })
@@ -371,7 +372,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
       .then(() => res);
   };
 
-  const processTimeTracking = res => {
+  const processTimeTracking = (res) => {
     const { commands_changes: commandsChanges } = res;
     const { spend_time: spendTime, time_estimate: timeEstimate } = commandsChanges || {};
     if (spendTime != null || timeEstimate != null) {
@@ -383,7 +384,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     return res;
   };
 
-  const removePlaceholder = res => {
+  const removePlaceholder = (res) => {
     if (replyId) {
       commit(types.REMOVE_PLACEHOLDER_NOTES);
     }
@@ -391,7 +392,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     return res;
   };
 
-  const processErrors = error => {
+  const processErrors = (error) => {
     if (error.response) {
       const {
         response: { data = {} },
@@ -420,14 +421,25 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     .catch(processErrors);
 };
 
-const pollSuccessCallBack = (resp, commit, state, getters, dispatch) => {
+export const setFetchingState = ({ commit }, fetchingState) =>
+  commit(types.SET_NOTES_FETCHING_STATE, fetchingState);
+
+const pollSuccessCallBack = async (resp, commit, state, getters, dispatch) => {
   if (state.isResolvingDiscussion) {
     return null;
   }
 
+  if (window.gon?.features?.paginatedNotes && !resp.more && state.isFetching) {
+    eventHub.$emit('fetchedNotesData');
+    dispatch('setFetchingState', false);
+    dispatch('setNotesFetchedState', true);
+    dispatch('setLoadingState', false);
+  }
+
   if (resp.notes?.length) {
-    dispatch('updateOrCreateNotes', resp.notes);
+    await dispatch('updateOrCreateNotes', resp.notes);
     dispatch('startTaskList');
+    dispatch('updateResolvableDiscussionsCounts');
   }
 
   commit(types.SET_LAST_FETCHED_AT, resp.last_fetched_at);
@@ -435,7 +447,7 @@ const pollSuccessCallBack = (resp, commit, state, getters, dispatch) => {
   return resp;
 };
 
-const getFetchDataParams = state => {
+const getFetchDataParams = (state) => {
   const endpoint = state.notesData.notesPath;
   const options = {
     headers: {
@@ -559,7 +571,7 @@ export const updateResolvableDiscussionsCounts = ({ commit }) =>
 
 export const submitSuggestion = (
   { commit, dispatch },
-  { discussionId, noteId, suggestionId, flashContainer },
+  { discussionId, suggestionId, flashContainer, message },
 ) => {
   const dispatchResolveDiscussion = () =>
     dispatch('resolveDiscussion', { discussionId }).catch(() => {});
@@ -567,10 +579,9 @@ export const submitSuggestion = (
   commit(types.SET_RESOLVING_DISCUSSION, true);
   dispatch('stopPolling');
 
-  return Api.applySuggestion(suggestionId)
-    .then(() => commit(types.APPLY_SUGGESTION, { discussionId, noteId, suggestionId }))
+  return Api.applySuggestion(suggestionId, message)
     .then(dispatchResolveDiscussion)
-    .catch(err => {
+    .catch((err) => {
       const defaultMessage = __(
         'Something went wrong while applying the suggestion. Please try again.',
       );
@@ -590,13 +601,8 @@ export const submitSuggestion = (
 export const submitSuggestionBatch = ({ commit, dispatch, state }, { flashContainer }) => {
   const suggestionIds = state.batchSuggestionsInfo.map(({ suggestionId }) => suggestionId);
 
-  const applyAllSuggestions = () =>
-    state.batchSuggestionsInfo.map(suggestionInfo =>
-      commit(types.APPLY_SUGGESTION, suggestionInfo),
-    );
-
   const resolveAllDiscussions = () =>
-    state.batchSuggestionsInfo.map(suggestionInfo => {
+    state.batchSuggestionsInfo.map((suggestionInfo) => {
       const { discussionId } = suggestionInfo;
       return dispatch('resolveDiscussion', { discussionId }).catch(() => {});
     });
@@ -606,10 +612,9 @@ export const submitSuggestionBatch = ({ commit, dispatch, state }, { flashContai
   dispatch('stopPolling');
 
   return Api.applySuggestionBatch(suggestionIds)
-    .then(() => Promise.all(applyAllSuggestions()))
     .then(() => Promise.all(resolveAllDiscussions()))
     .then(() => commit(types.CLEAR_SUGGESTION_BATCH))
-    .catch(err => {
+    .catch((err) => {
       const defaultMessage = __(
         'Something went wrong while applying the batch of suggestions. Please try again.',
       );
@@ -652,10 +657,10 @@ export const fetchDescriptionVersion = ({ dispatch }, { endpoint, startingVersio
 
   return axios
     .get(requestUrl)
-    .then(res => {
+    .then((res) => {
       dispatch('receiveDescriptionVersion', { descriptionVersion: res.data, versionId });
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveDescriptionVersionError', error);
       Flash(__('Something went wrong while fetching description changes. Please try again.'));
     });
@@ -687,7 +692,7 @@ export const softDeleteDescriptionVersion = (
     .then(() => {
       dispatch('receiveDeleteDescriptionVersion', versionId);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveDeleteDescriptionVersionError', error);
       Flash(__('Something went wrong while deleting description changes. Please try again.'));
 

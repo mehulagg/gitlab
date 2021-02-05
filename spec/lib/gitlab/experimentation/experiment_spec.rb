@@ -9,13 +9,16 @@ RSpec.describe Gitlab::Experimentation::Experiment do
   let(:params) do
     {
       tracking_category: 'Category1',
-      use_backwards_compatible_subject_index: true
+      use_backwards_compatible_subject_index: true,
+      rollout_strategy: nil
     }
   end
 
   before do
-    feature = double('FeatureFlag', percentage_of_time_value: percentage )
-    expect(Feature).to receive(:get).with(:experiment_key_experiment_percentage).and_return(feature)
+    skip_feature_flags_yaml_validation
+    skip_default_enabled_yaml_check
+    feature = double('FeatureFlag', percentage_of_time_value: percentage, enabled?: true)
+    allow(Feature).to receive(:get).with(:experiment_key_experiment_percentage).and_return(feature)
   end
 
   subject(:experiment) { described_class.new(:experiment_key, **params) }

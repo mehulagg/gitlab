@@ -3,8 +3,8 @@
 import { mapGetters } from 'vuex';
 import { capitalize, lowerCase, isEmpty } from 'lodash';
 import { GlFormGroup, GlFormCheckbox, GlFormInput, GlFormSelect, GlFormTextarea } from '@gitlab/ui';
-import eventHub from '../event_hub';
 import { __, sprintf } from '~/locale';
+import eventHub from '../event_hub';
 
 export default {
   name: 'DynamicField',
@@ -92,7 +92,7 @@ export default {
       return isEmpty(this.value) && this.required;
     },
     options() {
-      return this.choices.map(choice => {
+      return this.choices.map((choice) => {
         return {
           value: choice[1],
           text: choice[0],

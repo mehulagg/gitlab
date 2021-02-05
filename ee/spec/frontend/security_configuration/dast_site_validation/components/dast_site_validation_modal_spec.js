@@ -1,16 +1,16 @@
 import { within } from '@testing-library/dom';
 import { createLocalVue, mount, shallowMount, createWrapper } from '@vue/test-utils';
 import merge from 'lodash/merge';
-import createApolloProvider from 'helpers/mock_apollo_helper';
 import VueApollo from 'vue-apollo';
+import { GlAlert, GlFormGroup, GlModal, GlSkeletonLoader } from '@gitlab/ui';
+import createApolloProvider from 'helpers/mock_apollo_helper';
 import dastSiteValidationCreateMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validation_create.mutation.graphql';
 import dastSiteTokenCreateMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_token_create.mutation.graphql';
-import waitForPromises from 'jest/helpers/wait_for_promises';
-import { GlAlert, GlFormGroup, GlModal, GlSkeletonLoader } from '@gitlab/ui';
+import waitForPromises from 'helpers/wait_for_promises';
 import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
-import * as responses from '../mock_data/apollo_mock';
 import download from '~/lib/utils/downloader';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
+import * as responses from '../mock_data/apollo_mock';
 
 jest.mock('~/lib/utils/downloader');
 
@@ -71,16 +71,16 @@ describe('DastSiteValidationModal', () => {
   const createFullComponent = componentFactory(mount);
 
   const withinComponent = () => within(wrapper.find(GlModal).element);
-  const findByTestId = id => wrapper.find(`[data-testid="${id}"`);
+  const findByTestId = (id) => wrapper.find(`[data-testid="${id}"`);
   const findDownloadButton = () => findByTestId('download-dast-text-file-validation-button');
   const findValidationPathPrefix = () => findByTestId('dast-site-validation-path-prefix');
   const findValidationPathInput = () => findByTestId('dast-site-validation-path-input');
   const findValidateButton = () => findByTestId('validate-dast-site-button');
-  const findRadioInputForValidationMethod = validationMethod =>
+  const findRadioInputForValidationMethod = (validationMethod) =>
     withinComponent().queryByRole('radio', {
       name: new RegExp(`${validationMethod} validation`, 'i'),
     });
-  const enableValidationMethod = validationMethod =>
+  const enableValidationMethod = (validationMethod) =>
     createWrapper(findRadioInputForValidationMethod(validationMethod)).trigger('click');
 
   afterEach(() => {
@@ -155,9 +155,12 @@ describe('DastSiteValidationModal', () => {
         expect(downloadButton).not.toBeNull();
       });
 
-      it.each(validationMethods)('renders a radio input for "%s" validation', validationMethod => {
-        expect(findRadioInputForValidationMethod(validationMethod)).not.toBe(null);
-      });
+      it.each(validationMethods)(
+        'renders a radio input for "%s" validation',
+        (validationMethod) => {
+          expect(findRadioInputForValidationMethod(validationMethod)).not.toBe(null);
+        },
+      );
 
       it('renders an input group with the target URL prepended', () => {
         const inputGroup = withinComponent().getByRole('group', {
@@ -179,7 +182,7 @@ describe('DastSiteValidationModal', () => {
   });
 
   describe('validation methods', () => {
-    describe.each(validationMethods)('common behaviour', validationMethod => {
+    describe.each(validationMethods)('common behaviour', (validationMethod) => {
       const expectedFileName = `GitLab-DAST-Site-Validation-${token}.txt`;
 
       describe.each`
@@ -260,7 +263,7 @@ describe('DastSiteValidationModal', () => {
       it.each([
         /step 2 - add following http header to your site/i,
         /step 3 - confirm header location and validate/i,
-      ])('shows the correct descriptions', descriptionText => {
+      ])('shows the correct descriptions', (descriptionText) => {
         expect(withinComponent().getByText(descriptionText)).not.toBe(null);
       });
 
@@ -284,7 +287,7 @@ describe('DastSiteValidationModal', () => {
     });
   });
 
-  describe.each(validationMethods)('"%s" validation submission', validationMethod => {
+  describe.each(validationMethods)('"%s" validation submission', (validationMethod) => {
     beforeEach(async () => {
       createFullComponent();
       await waitForPromises();

@@ -90,10 +90,4 @@ describe('EE Boards Store Getters', () => {
       ).toEqual([mockIssue3, mockIssue4]);
     });
   });
-
-  describe('getEpicById', () => {
-    it('returns epic for a given id', () => {
-      expect(getters.getEpicById(boardsState)(mockEpics[0].id)).toEqual(mockEpics[0]);
-    });
-  });
 });

@@ -1,5 +1,4 @@
 <script>
-import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { fetchPolicies } from '~/lib/graphql';
 import createFlash, { FLASH_TYPES } from '~/flash';
@@ -13,8 +12,6 @@ import destroyHttpIntegrationMutation from '../graphql/mutations/destroy_http_in
 import resetHttpTokenMutation from '../graphql/mutations/reset_http_token.mutation.graphql';
 import resetPrometheusTokenMutation from '../graphql/mutations/reset_prometheus_token.mutation.graphql';
 import updateCurrentIntergrationMutation from '../graphql/mutations/update_current_intergration.mutation.graphql';
-import IntegrationsList from './alerts_integrations_list.vue';
-import AlertSettingsForm from './alerts_settings_form.vue';
 import service from '../services';
 import { typeSet } from '../constants';
 import {
@@ -28,6 +25,8 @@ import {
   UPDATE_INTEGRATION_ERROR,
   INTEGRATION_PAYLOAD_TEST_ERROR,
 } from '../utils/error_messages';
+import AlertSettingsForm from './alerts_settings_form.vue';
+import IntegrationsList from './alerts_integrations_list.vue';
 
 export default {
   typeSet,
@@ -41,10 +40,6 @@ export default {
     ),
   },
   components: {
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    GlAlert,
-    GlLink,
-    GlSprintf,
     IntegrationsList,
     AlertSettingsForm,
   },
@@ -55,15 +50,18 @@ export default {
     prometheus: {
       default: {},
     },
-    // TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657
-    opsgenie: {
-      default: {},
-    },
     projectPath: {
       default: '',
     },
     multiIntegrations: {
       default: false,
+    },
+  },
+  props: {
+    alertFields: {
+      type: Array,
+      required: false,
+      default: null,
     },
   },
   apollo: {
@@ -104,13 +102,6 @@ export default {
     },
     canAddIntegration() {
       return this.multiIntegrations || this.integrations?.list?.length < 2;
-    },
-    canManageOpsgenie() {
-      return (
-        this.opsgenie.active ||
-        this.integrations?.list?.every(({ active }) => active === false) ||
-        this.integrations?.list?.length === 0
-      );
     },
   },
   methods: {
@@ -243,7 +234,9 @@ export default {
         });
     },
     editIntegration({ id }) {
-      const currentIntegration = this.integrations.list.find(integration => integration.id === id);
+      const currentIntegration = this.integrations.list.find(
+        (integration) => integration.id === id,
+      );
       this.$apollo.mutate({
         mutation: updateCurrentIntergrationMutation,
         variables: {
@@ -317,27 +310,7 @@ export default {
 
 <template>
   <div>
-    <!-- TODO: Will be removed in 13.7 as part of: https://gitlab.com/gitlab-org/gitlab/-/issues/273657 -->
-    <gl-alert v-if="opsgenie.active" :dismissible="false" variant="tip">
-      <gl-sprintf
-        :message="
-          s__(
-            'AlertSettings|We will soon be introducing the ability to create multiple unique HTTP endpoints. When this functionality is live,  you will be able to configure an integration with Opsgenie to surface Opsgenie alerts in GitLab. This will replace the current Opsgenie integration which will be deprecated. %{linkStart}More Information%{linkEnd}',
-          )
-        "
-      >
-        <template #link="{ content }">
-          <gl-link
-            class="gl-display-inline-block"
-            href="https://gitlab.com/gitlab-org/gitlab/-/issues/273657"
-            target="_blank"
-            >{{ content }}</gl-link
-          >
-        </template>
-      </gl-sprintf>
-    </gl-alert>
     <integrations-list
-      v-else
       :integrations="integrations.list"
       :loading="loading"
       @edit-integration="editIntegration"
@@ -346,7 +319,7 @@ export default {
     <alert-settings-form
       :loading="isUpdating"
       :can-add-integration="canAddIntegration"
-      :can-manage-opsgenie="canManageOpsgenie"
+      :alert-fields="alertFields"
       @create-new-integration="createNewIntegration"
       @update-integration="updateIntegration"
       @reset-token="resetToken"

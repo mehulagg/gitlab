@@ -68,8 +68,6 @@ export default {
     >
       <gl-avatar :src="firstApprover.avatar_url" :size="$options.avatarSize" />
     </gl-avatar-link>
-    <template v-else>
-      &ndash;
-    </template>
+    <template v-else> &ndash; </template>
   </div>
 </template>

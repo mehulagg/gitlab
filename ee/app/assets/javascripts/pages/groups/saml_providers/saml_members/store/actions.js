@@ -10,7 +10,7 @@ export function fetchPage({ commit, state }, newPage) {
     page: newPage || state.pageInfo.page,
     per_page: state.pageInfo.perPage,
   })
-    .then(response => {
+    .then((response) => {
       const { headers, data } = response;
       const pageInfo = parseIntPagination(normalizeHeaders(headers));
       commit(types.RECEIVE_SAML_MEMBERS_SUCCESS, {

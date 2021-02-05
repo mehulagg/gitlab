@@ -38,22 +38,22 @@ which you can set it up:
 - Run the Pages daemon in the same server as GitLab, listening on a **secondary IP**.
 - Run the Pages daemon in a [separate server](#running-gitlab-pages-on-a-separate-server). In that case, the
    [Pages path](#change-storage-path) must also be present in the server that
-   the Pages daemon is installed, so you will have to share it via network.
+   the Pages daemon is installed, so you must share it through the network.
 - Run the Pages daemon in the same server as GitLab, listening on the same IP
-   but on different ports. In that case, you will have to proxy the traffic with
+   but on different ports. In that case, you must proxy the traffic with
    a load balancer. If you choose that route note that you should use TCP load
-   balancing for HTTPS. If you use TLS-termination (HTTPS-load balancing) the
-   pages will not be able to be served with user provided certificates. For
+   balancing for HTTPS. If you use TLS-termination (HTTPS-load balancing), the
+   pages can't be served with user-provided certificates. For
    HTTP it's OK to use HTTP or TCP load balancing.
 
-In this document, we will proceed assuming the first option. If you are not
+In this document, we proceed assuming the first option. If you are not
 supporting custom domains a secondary IP is not needed.
 
 ## Prerequisites
 
-Before proceeding with the Pages configuration, you will need to:
+Before proceeding with the Pages configuration, you must:
 
-1. Have a domain for Pages that is not a subdomain of your GitLab's instance domain.
+1. Have a domain for Pages that is not a subdomain of your GitLab instance domain.
 
    | GitLab domain | Pages domain | Does it work? |
    | :---: | :---: | :---: |
@@ -69,7 +69,7 @@ Before proceeding with the Pages configuration, you will need to:
 1. (Only for custom domains) Have a **secondary IP**.
 
 NOTE:
-If your GitLab instance and the Pages daemon are deployed in a private network or behind a firewall, your GitLab Pages websites will only be accessible to devices/users that have access to the private network.
+If your GitLab instance and the Pages daemon are deployed in a private network or behind a firewall, your GitLab Pages websites are only accessible to devices/users that have access to the private network.
 
 ### Add the domain to the Public Suffix List
 
@@ -94,12 +94,33 @@ host that GitLab runs. For example, an entry would look like this:
 
 ```plaintext
 *.example.io. 1800 IN A    192.0.2.1
-*.example.io. 1800 IN AAAA 2001::1
+*.example.io. 1800 IN AAAA 2001:db8::1
 ```
 
-where `example.io` is the domain under which GitLab Pages will be served
-and `192.0.2.1` is the IPv4 address of your GitLab instance and `2001::1` is the
+Where `example.io` is the domain GitLab Pages is served from,
+`192.0.2.1` is the IPv4 address of your GitLab instance, and `2001:db8::1` is the
 IPv6 address. If you don't have IPv6, you can omit the AAAA record.
+
+#### Custom domains
+
+If support for custom domains is needed, the Pages root domain and its subdomains should point to
+the secondary IP (which is dedicated for the Pages daemon). `<namespace>.<pages root domain>` should
+point at Pages directly. Without this, users aren't able to use `CNAME` records to point their
+custom domains to their GitLab Pages.
+
+For example, an entry could look like this:
+
+```plaintext
+example.com   1800 IN A    192.0.2.1
+*.example.io. 1800 IN A    192.0.2.2
+```
+
+This example contains the following:
+
+- `example.com`: The GitLab domain.
+- `example.io`: The domain GitLab Pages is served from.
+- `192.0.2.1`: The primary IP of your GitLab instance.
+- `192.0.2.2`: The secondary IP, which is dedicated to GitLab Pages.
 
 NOTE:
 You should not use the GitLab domain to serve user pages. For more information see the [security section](#security).
@@ -123,7 +144,7 @@ since that is needed in all configurations.
 URL scheme: `http://<namespace>.example.io/<project_slug>`
 
 This is the minimum setup that you can use Pages with. It is the base for all
-other setups as described below. NGINX will proxy all requests to the daemon.
+other setups as described below. NGINX proxies all requests to the daemon.
 The Pages daemon doesn't listen to the outside world.
 
 1. Set the external URL for GitLab Pages in `/etc/gitlab/gitlab.rb`:
@@ -147,7 +168,7 @@ Watch the [video tutorial](https://youtu.be/dD8c7WNcc6s) for this configuration.
 
 URL scheme: `https://<namespace>.example.io/<project_slug>`
 
-NGINX will proxy all requests to the daemon. Pages daemon doesn't listen to the
+NGINX proxies all requests to the daemon. Pages daemon doesn't listen to the
 outside world.
 
 1. Place the certificate and key inside `/etc/gitlab/ssl`
@@ -168,8 +189,8 @@ outside world.
 
 ### Additional configuration for Docker container
 
-The GitLab Pages daemon will not have permissions to bind mounts when it runs
-in a Docker container. To overcome this issue you'll need to change the chroot
+The GitLab Pages daemon doesn't have permissions to bind mounts when it runs
+in a Docker container. To overcome this issue, you must change the `chroot`
 behavior:
 
 1. Edit `/etc/gitlab/gitlab.rb`.
@@ -189,7 +210,7 @@ The [GitLab Pages README](https://gitlab.com/gitlab-org/gitlab-pages#caveats) ha
 
 Below is a table of all configuration settings known to Pages in Omnibus GitLab,
 and what they do. These options can be adjusted in `/etc/gitlab/gitlab.rb`,
-and will take effect after you [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+and take effect after you [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 Most of these settings don't need to be configured manually unless you need more granular
 control over how the Pages daemon runs and serves content in your environment.
 
@@ -201,7 +222,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `api_secret_key`  | Full path to file with secret key used to authenticate with the GitLab API. Auto-generated when left unset.
 | `artifacts_server` |  Enable viewing [artifacts](../job_artifacts.md) in GitLab Pages.
 | `artifacts_server_timeout` |  Timeout (in seconds) for a proxied request to the artifacts server.
-| `artifacts_server_url` |  API URL to proxy artifact requests to. Defaults to GitLab `external URL` + `/api/v4`, for example `https://gitlab.com/api/v4`.
+| `artifacts_server_url` |  API URL to proxy artifact requests to. Defaults to GitLab `external URL` + `/api/v4`, for example `https://gitlab.com/api/v4`. When running a [separate Pages server](#running-gitlab-pages-on-a-separate-server), this URL must point to the main GitLab server's API.
 | `auth_redirect_uri` |  Callback URL for authenticating with GitLab. Defaults to project's subdomain of `pages_external_url` + `/auth`.
 | `auth_secret` |  Secret key for signing authentication requests. Leave blank to pull automatically from GitLab during OAuth registration.
 | `dir` |  Working directory for configuration and secrets files.
@@ -215,10 +236,10 @@ control over how the Pages daemon runs and serves content in your environment.
 | `gitlab_secret` |  The OAuth application secret. Leave blank to automatically fill when Pages authenticates with GitLab.
 | `gitlab_server` |  Server to use for authentication when access control is enabled; defaults to GitLab `external_url`.
 | `headers` |  Specify any additional http headers that should be sent to the client with each response.
-| `inplace_chroot` |  On [systems that don't support bind-mounts](index.md#additional-configuration-for-docker-container), this instructs GitLab Pages to chroot into its `pages_path` directory. Some caveats exist when using inplace chroot; refer to the GitLab Pages [README](https://gitlab.com/gitlab-org/gitlab-pages/blob/master/README.md#caveats) for more information.
+| `inplace_chroot` |  On [systems that don't support bind-mounts](index.md#additional-configuration-for-docker-container), this instructs GitLab Pages to `chroot` into its `pages_path` directory. Some caveats exist when using in-place `chroot`; refer to the GitLab Pages [README](https://gitlab.com/gitlab-org/gitlab-pages/blob/master/README.md#caveats) for more information.
 | `insecure_ciphers` |  Use default list of cipher suites, may contain insecure ones like 3DES and RC4.
 | `internal_gitlab_server` | Internal GitLab server address used exclusively for API requests. Useful if you want to send that traffic over an internal load balancer. Defaults to GitLab `external_url`.
-| `listen_proxy` |  The addresses to listen on for reverse-proxy requests. Pages will bind to these addresses' network socket and receives incoming requests from it. Sets the value of `proxy_pass` in `$nginx-dir/conf/gitlab-pages.conf`.
+| `listen_proxy` |  The addresses to listen on for reverse-proxy requests. Pages binds to these addresses' network sockets and receives incoming requests from them. Sets the value of `proxy_pass` in `$nginx-dir/conf/gitlab-pages.conf`.
 | `log_directory` |  Absolute path to a log directory.
 | `log_format` |  The log output format: `text` or `json`.
 | `log_verbose` |  Verbose logging, true/false.
@@ -250,7 +271,7 @@ control over how the Pages daemon runs and serves content in your environment.
 In addition to the wildcard domains, you can also have the option to configure
 GitLab Pages to work with custom domains. Again, there are two options here:
 support custom domains with and without TLS certificates. The easiest setup is
-that without TLS certificates. In either case, you'll need a **secondary IP**. If
+that without TLS certificates. In either case, you need a **secondary IP**. If
 you have IPv6 as well as IPv4 addresses, you can use them both.
 
 ### Custom domains
@@ -274,11 +295,11 @@ world. Custom domains are supported, but no TLS.
    pages_external_url "http://example.io"
    nginx['listen_addresses'] = ['192.0.2.1']
    pages_nginx['enable'] = false
-   gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001::2]:80']
+   gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001:db8::2]:80']
    ```
 
    where `192.0.2.1` is the primary IP address that GitLab is listening to and
-   `192.0.2.2` and `2001::2` are the secondary IPs the GitLab Pages daemon
+   `192.0.2.2` and `2001:db8::2` are the secondary IPs the GitLab Pages daemon
    listens on. If you don't have IPv6, you can omit the IPv6 address.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
@@ -307,12 +328,12 @@ world. Custom domains and TLS are supported.
    pages_nginx['enable'] = false
    gitlab_pages['cert'] = "/etc/gitlab/ssl/example.io.crt"
    gitlab_pages['cert_key'] = "/etc/gitlab/ssl/example.io.key"
-   gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001::2]:80']
-   gitlab_pages['external_https'] = ['192.0.2.2:443', '[2001::2]:443']
+   gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001:db8::2]:80']
+   gitlab_pages['external_https'] = ['192.0.2.2:443', '[2001:db8::2]:443']
    ```
 
    where `192.0.2.1` is the primary IP address that GitLab is listening to and
-   `192.0.2.2` and `2001::2` are the secondary IPs where the GitLab Pages daemon
+   `192.0.2.2` and `2001:db8::2` are the secondary IPs where the GitLab Pages daemon
    listens on. If you don't have IPv6, you can omit the IPv6 address.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
@@ -321,7 +342,7 @@ world. Custom domains and TLS are supported.
 
 To prevent malicious users from hijacking domains that don't belong to them,
 GitLab supports [custom domain verification](../../user/project/pages/custom_domains_ssl_tls_certification/index.md#steps).
-When adding a custom domain, users will be required to prove they own it by
+When adding a custom domain, users are required to prove they own it by
 adding a GitLab-controlled verification code to the DNS records for that domain.
 
 If your user base is private or otherwise trusted, you can disable the
@@ -337,11 +358,11 @@ This setting is enabled by default.
 allows users to add Let's Encrypt SSL certificates for GitLab Pages
 sites served under a custom domain.
 
-To enable it, you'll need to:
+To enable it, you must:
 
-1. Choose an email on which you will receive notifications about expiring domains.
+1. Choose an email address on which you want to receive notifications about expiring domains.
 1. Navigate to your instance's **Admin Area > Settings > Preferences** and expand **Pages** settings.
-1. Enter the email for receiving notifications and accept Let's Encrypt's Terms of Service as shown below.
+1. Enter the email address for receiving notifications and accept Let's Encrypt's Terms of Service as shown below.
 1. Click **Save changes**.
 
 ![Let's Encrypt settings](img/lets_encrypt_integration_v12_1.png)
@@ -384,7 +405,7 @@ all the App nodes and Sidekiq nodes.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32095) in GitLab 12.7.
 
 You can enforce [Access Control](#access-control) for all GitLab Pages websites hosted
-on your GitLab instance. By doing so, only logged-in users will have access to them.
+on your GitLab instance. By doing so, only logged-in users have access to them.
 This setting overrides Access Control set by users in individual projects.
 
 This can be useful to preserve information published with Pages websites to the users
@@ -417,7 +438,7 @@ internet connectivity is gated by a proxy. To use a proxy for GitLab Pages:
 
 When using certificates issued by a custom CA, [Access Control](../../user/project/pages/pages_access_control.md#gitlab-pages-access-control) and
 the [online view of HTML job artifacts](../../ci/pipelines/job_artifacts.md#browsing-artifacts)
-will fail to work if the custom CA is not recognized.
+fails to work if the custom CA is not recognized.
 
 This usually results in this error:
 `Post /oauth/token: x509: certificate signed by unknown authority`.
@@ -501,7 +522,7 @@ the below steps to do a no downtime transfer to a new storage location.
 1. Pause Pages deployments by setting the following in `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   sidekiq['experimental_queue_selector'] = true
+   sidekiq['queue_selector'] = true
    sidekiq['queue_groups'] = [
      "feature_category!=pages"
    ]
@@ -517,7 +538,7 @@ the below steps to do a no downtime transfer to a new storage location.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 1. Verify Pages are still being served up as expected.
-1. Unpause Pages deployments by removing from `/etc/gitlab/gitlab.rb` the `sidekiq` setting set above.
+1. Resume Pages deployments by removing from `/etc/gitlab/gitlab.rb` the `sidekiq` setting set above.
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 1. Trigger a new Pages deployment and verify it's working as expected.
 1. Remove the old Pages storage location: `sudo rm -rf /var/opt/gitlab/gitlab-rails/shared/pages`
@@ -552,7 +573,7 @@ You can configure the maximum size of the unpacked archive per project in
 **Admin Area > Settings > Preferences > Pages**, in **Maximum size of pages (MB)**.
 The default is 100MB.
 
-### Override maximum pages size per project or group **(PREMIUM ONLY)**
+### Override maximum pages size per project or group **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16610) in GitLab 12.7.
 
@@ -602,13 +623,13 @@ database encryption. Proceed with caution.
    changes to take effect. The `gitlab-secrets.json` file is now updated with the
    new configuration.
 
-1. Set up a new server. This will become the **Pages server**.
+1. Set up a new server. This becomes the **Pages server**.
 
 1. Create an [NFS share](../nfs.md)
    on the **Pages server** and configure this share to
    allow access from your main **GitLab server**.
    Note that the example there is more general and
-   shares several sub-directories from `/home` to several `/nfs/home` mountpoints.
+   shares several sub-directories from `/home` to several `/nfs/home` mount points.
    For our Pages-specific example here, we instead share only the
    default GitLab Pages folder `/var/opt/gitlab/gitlab-rails/shared/pages`
    from the **Pages server** and we mount it to `/mnt/pages`
@@ -668,7 +689,7 @@ Pages server.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217912) in GitLab 13.3.
 
 GitLab Pages can use different sources to get domain configuration.
-The default value is `nil`; however, GitLab Pages will default to `auto`.
+The default value is `nil`. However, GitLab Pages defaults to `auto`.
 
    ```ruby
    gitlab_pages['domain_config_source'] = nil
@@ -708,6 +729,13 @@ or report an issue.
 [Read more about using object storage with GitLab](../object_storage.md).
 
 ### Object storage settings
+
+WARNING:
+With the following settings, Pages uses both NFS and Object Storage locations when deploying the
+site. **Do not remove the existing NFS mount used by Pages** when applying these settings. For more
+information, see the epics
+[3901](https://gitlab.com/groups/gitlab-org/-/epics/3901#how-to-test-object-storage-integration-in-beta)
+and [3910](https://gitlab.com/groups/gitlab-org/-/epics/3910).
 
 The following settings are:
 
@@ -797,7 +825,7 @@ but commented out to help encourage others to add to it in the future. -->
 
 ### `open /etc/ssl/ca-bundle.pem: permission denied`
 
-GitLab Pages runs inside a chroot jail, usually in a uniquely numbered directory like
+GitLab Pages runs inside a `chroot` jail, usually in a uniquely numbered directory like
 `/tmp/gitlab-pages-*`.
 
 Within the jail, a bundle of trusted certificates is
@@ -806,18 +834,18 @@ provided at `/etc/ssl/ca-bundle.pem`. It's
 from `/opt/gitlab/embedded/ssl/certs/cacert.pem`
 as part of starting up Pages.
 
-If the permissions on the source file are incorrect (they should be `0644`) then
-the file inside the chroot jail will also be wrong.
+If the permissions on the source file are incorrect (they should be `0644`), then
+the file inside the `chroot` jail is also wrong.
 
-Pages will log errors in `/var/log/gitlab/gitlab-pages/current` like:
+Pages logs errors in `/var/log/gitlab/gitlab-pages/current` like:
 
 ```plaintext
 x509: failed to load system roots and no roots provided
 open /etc/ssl/ca-bundle.pem: permission denied
 ```
 
-The use of a chroot jail makes this error misleading, as it is not
-referring to `/etc/ssl` on the root filesystem.
+The use of a `chroot` jail makes this error misleading, as it is not
+referring to `/etc/ssl` on the root file system.
 
 The fix is to correct the source file permissions and restart Pages:
 
@@ -841,8 +869,8 @@ open /opt/gitlab/embedded/ssl/certs/cacert.pem: no such file or directory
 x509: certificate signed by unknown authority
 ```
 
-The reason for those errors is that the files `resolv.conf` and `ca-bundle.pem` are missing inside the chroot.
-The fix is to copy the host's `/etc/resolv.conf` and GitLab's certificate bundle inside the chroot:
+The reason for those errors is that the files `resolv.conf` and `ca-bundle.pem` are missing inside the `chroot`.
+The fix is to copy the host's `/etc/resolv.conf` and the GitLab certificate bundle inside the `chroot`:
 
 ```shell
 sudo mkdir -p /var/opt/gitlab/gitlab-rails/shared/pages/etc/ssl
@@ -874,7 +902,7 @@ gitlab_pages['listen_proxy'] = '127.0.0.1:8090'
 ### 404 error after transferring project to a different group or user
 
 If you encounter a `404 Not Found` error a Pages site after transferring a project to
-another group or user, you must trigger adomain configuration update for Pages. To do
+another group or user, you must trigger a domain configuration update for Pages. To do
 so, write something in the `.update` file. The Pages daemon monitors for changes to this
 file, and reloads the configuration when changes occur.
 
@@ -907,11 +935,25 @@ For example, if there is a connection timeout:
 error="failed to connect to internal Pages API: Get \"https://gitlab.example.com:3000/api/v4/internal/pages/status\": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)"
 ```
 
+### Pages cannot communicate with an instance of the GitLab API
+
+If you use the default value for `domain_config_source=auto` and run multiple instances of GitLab
+Pages, you may see intermittent 502 error responses while serving Pages content. You may also see
+the following warning in the Pages logs:
+
+```plaintext
+WARN[0010] Pages cannot communicate with an instance of the GitLab API. Please sync your gitlab-secrets.json file https://gitlab.com/gitlab-org/gitlab-pages/-/issues/535#workaround. error="pages endpoint unauthorized"
+```
+
+This can happen if your `gitlab-secrets.json` file is out of date between GitLab Rails and GitLab
+Pages. Follow steps 8-10 of [Running GitLab Pages on a separate server](#running-gitlab-pages-on-a-separate-server),
+in all of your GitLab Pages instances.
+
 ### 500 error with `securecookie: failed to generate random iv` and `Failed to save the session`
 
 This problem most likely results from an [out-dated operating system](https://docs.gitlab.com/omnibus/package-information/deprecated_os.html).
-The [Pages daemon uses the `securecookie` library](https://gitlab.com/search?group_id=9970&project_id=734943&repository_ref=master&scope=blobs&search=securecookie&snippets=false) to get random strings via [crypto/rand in Go](https://golang.org/pkg/crypto/rand/#pkg-variables).
-This requires the `getrandom` syscall or `/dev/urandom` to be available on the host OS.
+The [Pages daemon uses the `securecookie` library](https://gitlab.com/search?group_id=9970&project_id=734943&repository_ref=master&scope=blobs&search=securecookie&snippets=false) to get random strings via [`crypto/rand` in Go](https://golang.org/pkg/crypto/rand/#pkg-variables).
+This requires the `getrandom` system call or `/dev/urandom` to be available on the host OS.
 Upgrading to an [officially supported operating system](https://about.gitlab.com/install/) is recommended.
 
 ### The requested scope is invalid, malformed, or unknown
@@ -919,6 +961,8 @@ Upgrading to an [officially supported operating system](https://about.gitlab.com
 This problem comes from the permissions of the GitLab Pages OAuth application. To fix it, go to
 **Admin > Applications > GitLab Pages** and edit the application. Under **Scopes**, ensure that the
 `api` scope is selected and save your changes.
+When running a [separate Pages server](#running-gitlab-pages-on-a-separate-server),
+this setting needs to be configured on the main GitLab server.
 
 ### Workaround in case no wildcard DNS entry can be set
 
@@ -927,3 +971,21 @@ If the wildcard DNS [prerequisite](#prerequisites) can't be met, you can still u
 1. [Move](../../user/project/settings/index.md#transferring-an-existing-project-into-another-namespace)
    all projects you need to use Pages with into a single group namespace, for example `pages`.
 1. Configure a [DNS entry](#dns-configuration) without the `*.`-wildcard, for example `pages.example.io`.
+
+### Pages daemon fails with permission denied errors
+
+If `/tmp` is mounted with `noexec`, the Pages daemon fails to start with an error like:
+
+```plaintext
+{"error":"fork/exec /gitlab-pages: permission denied","level":"fatal","msg":"could not create pages daemon","time":"2021-02-02T21:54:34Z"}
+```
+
+In this case, change `TMPDIR` to a location that is not mounted with `noexec`. Add the following to
+`/etc/gitlab/gitlab.rb`:
+
+```ruby
+gitlab_pages['env'] = {'TMPDIR' => '<new_tmp_path>'}
+```
+
+Once added, reconfigure with `sudo gitlab-ctl reconfigure` and restart GitLab with
+`sudo gitlab-ctl restart`.

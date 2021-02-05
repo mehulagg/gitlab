@@ -9,14 +9,13 @@ import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 
-import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
-
 import {
   IssuableStates,
   IssuableListTabs,
   AvailableSortOptions,
   DEFAULT_PAGE_SIZE,
 } from '~/issuable_list/constants';
+import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
 
 export default {
   name: 'JiraIssuesList',
@@ -106,7 +105,7 @@ export default {
             search: this.filterParams.search,
           },
         })
-        .then(res => {
+        .then((res) => {
           const { headers, data } = res;
           this.currentPage = parseInt(headers['x-page'], 10);
           this.totalIssues = parseInt(headers['x-total'], 10);
@@ -126,7 +125,7 @@ export default {
           });
           this.issuesCount[this.currentState] = this.issues.length;
         })
-        .catch(error => {
+        .catch((error) => {
           this.issuesListLoadFailed = true;
           createFlash({
             message: __('An error occurred while loading issues'),
@@ -156,7 +155,7 @@ export default {
       const filterParams = {};
       const plainText = [];
 
-      filters.forEach(filter => {
+      filters.forEach((filter) => {
         if (filter.type === 'filtered-search-term' && filter.value.data) {
           plainText.push(filter.value.data);
         }

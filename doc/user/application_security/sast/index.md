@@ -8,7 +8,7 @@ type: reference, howto
 # Static Application Security Testing (SAST)
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3775) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.3.
-> - All open source (OSS) analyzers were moved to GitLab Core in GitLab 13.3.
+> - All open source (OSS) analyzers were moved to GitLab Free in GitLab 13.3.
 
 NOTE:
 The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
@@ -94,16 +94,41 @@ Note that the Java analyzers can also be used for variants like the
 [Grails](https://grails.org/),
 and the [Maven wrapper](https://github.com/takari/maven-wrapper).
 
+### Multi-project support
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4895) in GitLab 13.7.
+
+GitLab SAST can scan repositories that contain multiple projects. All projects must be in the same
+language.
+
+The following analyzers have multi-project support:
+
+- Bandit
+- ESLint
+- Gosec
+- Kubesec
+- NodeJsScan
+- MobSF
+- PMD
+- Security Code Scan
+- SpotBugs
+- Sobelow
+
+#### Enable multi-project support for Security Code Scan
+
+Multi-project support in the Security Code Scan requires a Solution (`.sln`) file in the root of
+the repository. For details on the Solution format, see the Microsoft reference [Solution (`.sln`) file](https://docs.microsoft.com/en-us/visualstudio/extensibility/internals/solution-dot-sln-file?view=vs-2019).
+
 ### Making SAST analyzers available to all GitLab tiers
 
-All open source (OSS) analyzers have been moved to the GitLab Core tier as of GitLab 13.3.
+All open source (OSS) analyzers have been moved to the GitLab Free tier as of GitLab 13.3.
 
 #### Summary of features per tier
 
 Different features are available in different [GitLab tiers](https://about.gitlab.com/pricing/),
 as shown in the following table:
 
-| Capability                                                                         | In Core             | In Ultimate        |
+| Capability                                                                         | In Free             | In Ultimate        |
 |:-----------------------------------------------------------------------------------|:--------------------|:-------------------|
 | [Configure SAST Scanners](#configuration)                                          | **{check-circle}**  | **{check-circle}** |
 | [Customize SAST Settings](#customizing-the-sast-settings)                          | **{check-circle}**  | **{check-circle}** |
@@ -310,7 +335,7 @@ it via [custom environment variables](#custom-environment-variables).
 If your private Maven repository requires login credentials,
 you can use the `MAVEN_CLI_OPTS` environment variable.
 
-Read more on [how to use private Maven repositories](../index.md#using-private-maven-repos).
+Read more on [how to use private Maven repositories](../index.md#using-private-maven-repositories).
 
 ### Enabling Kubesec analyzer
 
@@ -406,7 +431,8 @@ The following are Docker image-related variables.
 |---------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | `SECURE_ANALYZERS_PREFIX` | Override the name of the Docker registry providing the default images (proxy). Read more about [customizing analyzers](analyzers.md). |
 | `SAST_ANALYZER_IMAGE_TAG` | **DEPRECATED:** Override the Docker tag of the default images. Read more about [customizing analyzers](analyzers.md).                 |
-| `SAST_DEFAULT_ANALYZERS`  | Override the names of default images. Read more about [customizing analyzers](analyzers.md).                                          |
+| `SAST_DEFAULT_ANALYZERS`  | **DEPRECATED:** Override the names of default images. Scheduled for [removal in GitLab 14.0](https://gitlab.com/gitlab-org/gitlab/-/issues/290777).                          |
+| `SAST_EXCLUDED_ANALYZERS` | Names of default images that should never run. Read more about [customizing analyzers](analyzers.md).                                 |
 
 #### Vulnerability filters
 
@@ -486,7 +512,7 @@ The SAST tool emits a JSON report file. For more information, see the
 [schema for this report](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/sast-report-format.json).
 
 The JSON report file can be downloaded from the CI pipelines page, or the
-pipelines tab on merge requests. For more information see [Downloading artifacts](../../../ci/pipelines/job_artifacts.md).
+pipelines tab on merge requests by [setting `artifacts: paths`](../../../ci/pipelines/job_artifacts.md#defining-artifacts-in-gitlab-ciyml) to `gl-sast-report.json`. For more information see [Downloading artifacts](../../../ci/pipelines/job_artifacts.md).
 
 Here's an example SAST report:
 
@@ -694,6 +720,10 @@ affected. Read more in
 
 For information on this, see the [general Application Security troubleshooting section](../../../ci/pipelines/job_artifacts.md#error-message-no-files-to-upload).
 
+### Error: `sast is used for configuration only, and its script should not be executed`
+
+For information on this, see the [GitLab Secure troubleshooting section](../index.md#error-job-is-used-for-configuration-only-and-its-script-should-not-be-executed).
+
 ### Limitation when using rules:exists
 
 The [SAST CI template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml)
@@ -702,3 +732,29 @@ against the given glob pattern. If the number of matches exceeds the maximum, th
 parameter returns `true`. Depending on the number of files in your repository, a SAST job might be
 triggered even if the scanner doesn't support your project. For more details about this issue, see
 the [`rules:exists` documentation](../../../ci/yaml/README.md#rulesexists).
+
+### SpotBugs UTF-8 unmappable character errors
+
+These errors occur when UTF-8 encoding isn't enabled on a SpotBugs build and there are UTF-8
+characters in the source code. To fix this error, enable UTF-8 for your project's build tool.
+
+For Gradle builds, add the following to your `build.gradle` file:
+
+```gradle
+compileJava.options.encoding = 'UTF-8'
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+```
+
+For Maven builds, add the following to your `pom.xml` file:
+
+```xml
+<properties>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+</properties>
+```
+
+### Flawfinder encoding error
+
+This occurs when Flawfinder encounters an invalid UTF-8 character. To fix this, convert all source code in your project to UTF-8 character encoding. This can be done with [`cvt2utf`](https://github.com/x1angli/cvt2utf) or [`iconv`](https://www.gnu.org/software/libiconv/documentation/libiconv-1.13/iconv.1.html) either over the entire project or per job using the [`before_script`](../../../ci/yaml/README.md#before_script) feature.

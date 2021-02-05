@@ -15,15 +15,15 @@ export default {
     GlTooltip,
   },
   mixins: [TimeagoMixin],
+  inject: {
+    projectPath: {
+      default: '',
+    },
+  },
   props: {
     environment: {
       required: true,
       type: Object,
-    },
-  },
-  inject: {
-    projectPath: {
-      default: '',
     },
   },
   data() {

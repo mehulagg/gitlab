@@ -2,7 +2,7 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import Component from 'ee/subscriptions/new/components/checkout/zuora.vue';
-import createStore from 'ee/subscriptions/new/store';
+import { getStoreConfig } from 'ee/subscriptions/new/store';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
 
 describe('Zuora', () => {
@@ -12,21 +12,30 @@ describe('Zuora', () => {
   let store;
   let wrapper;
 
-  const methodMocks = {
-    loadZuoraScript: jest.fn(),
-    renderZuoraIframe: jest.fn(),
+  const actionMocks = {
+    startLoadingZuoraScript: jest.fn(),
+    fetchPaymentFormParams: jest.fn(),
+    zuoraIframeRendered: jest.fn(),
+    paymentFormSubmitted: jest.fn(),
   };
 
   const createComponent = (props = {}) => {
+    const { actions, ...storeConfig } = getStoreConfig();
+    store = new Vuex.Store({
+      ...storeConfig,
+      actions: {
+        ...actions,
+        ...actionMocks,
+      },
+    });
+
     wrapper = shallowMount(Component, {
       propsData: {
         active: true,
         ...props,
       },
       localVue,
-      sync: false,
       store,
-      methods: methodMocks,
     });
   };
 
@@ -34,18 +43,24 @@ describe('Zuora', () => {
   const findZuoraPayment = () => wrapper.find('#zuora_payment');
 
   beforeEach(() => {
-    store = createStore();
+    window.Z = {
+      runAfterRender(fn) {
+        return Promise.resolve().then(fn);
+      },
+      render() {},
+    };
   });
 
   afterEach(() => {
+    delete window.Z;
     wrapper.destroy();
   });
 
   describe('mounted', () => {
-    it('should call loadZuoraScript', () => {
+    it('starts loading zuora script', () => {
       createComponent();
 
-      expect(methodMocks.loadZuoraScript).toHaveBeenCalled();
+      expect(actionMocks.startLoadingZuoraScript).toHaveBeenCalled();
     });
   });
 
@@ -97,12 +112,12 @@ describe('Zuora', () => {
     it('is called when the paymentFormParams are updated', () => {
       createComponent();
 
-      expect(methodMocks.renderZuoraIframe).not.toHaveBeenCalled();
+      expect(actionMocks.zuoraIframeRendered).not.toHaveBeenCalled();
 
       store.commit(types.UPDATE_PAYMENT_FORM_PARAMS, {});
 
       return localVue.nextTick().then(() => {
-        expect(methodMocks.renderZuoraIframe).toHaveBeenCalled();
+        expect(actionMocks.zuoraIframeRendered).toHaveBeenCalled();
       });
     });
   });

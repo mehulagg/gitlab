@@ -30,19 +30,17 @@ See how to document them below, according to the state of the flag:
 - [Features that can be enabled or disabled for a single project](#features-enabled-by-project).
 - [Features with the feature flag removed](#features-with-flag-removed).
 
-The [`**(CORE ONLY)**`](styleguide/index.md#product-tier-badges) badge or equivalent for
+The [`**(FREE SELF)**`](styleguide/index.md#product-tier-badges) badge or equivalent for
 the feature's tier should be added to the line and heading that refers to
 enabling/disabling feature flags as Admin access is required to do so,
 therefore, it indicates that it cannot be done by regular users of GitLab.com.
 
 ### Features disabled by default
 
-For features disabled by default, if they cannot be used yet due to lack of
-completeness, or if they're still under internal evaluation (for example, for
-performance implications) do **not document them**: add (or merge) the docs
-only when the feature is safe and ready to use and test by end-users.
+For features disabled by default, add or improve the docs with every change in line with the
+[definition of done](../contributing/merge_request_workflow.md#definition-of-done).
 
-For feature flags disabled by default, if they can be used by end users:
+Include details of the feature flag in the documentation:
 
 - Say that it's disabled by default.
 - Say whether it's enabled on GitLab.com.
@@ -63,7 +61,7 @@ be enabled for a single project, and is not ready for production use:
 > - It's [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(CORE ONLY)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -72,7 +70,7 @@ This feature might not be available to you. Check the **version history** note a
 
 <!-- Add this at the end of the file -->
 
-### Enable or disable <Feature Name> **(CORE ONLY)**
+### Enable or disable <Feature Name> **(FREE SELF)**
 
 <Feature Name> is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default**.
@@ -93,7 +91,7 @@ Feature.disable(:<feature flag>)
 ````
 
 Adjust the blurb according to the state of the feature you're documenting.
-Replace `<Feature name>`, `**(CORE ONLY)**`, `<feature flag>`, and
+Replace `<Feature name>`, `**(FREE SELF)**`, `<feature flag>`, and
 `<replace with path to>`, and `#anchor-to-section` accordingly.
 
 ### Features that became enabled by default
@@ -122,7 +120,7 @@ use:
 > - [Became enabled by default](link-to-issue) on GitLab 12.1.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -131,7 +129,7 @@ This feature might not be available to you. Check the **version history** note a
 
 <!-- Add this at the end of the file -->
 
-### Enable or disable <Feature Name> **(CORE ONLY)**
+### Enable or disable <Feature Name> **(FREE SELF)**
 
 <Feature Name> is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
@@ -152,7 +150,7 @@ Feature.disable(:<feature flag>)
 ````
 
 Adjust the blurb according to the state of the feature you're documenting.
-Replace `<Feature name>`, `**(CORE ONLY)**`, `<feature flag>`,
+Replace `<Feature name>`, `**(FREE SELF)**`, `<feature flag>`,
 `<replace with path to>`, and `#anchor-to-section` accordingly.
 
 ### Features directly enabled by default
@@ -178,7 +176,7 @@ cannot be enabled for a single project, and is ready for production use:
 > - It's [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), enabled by default.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -187,7 +185,7 @@ This feature might not be available to you. Check the **version history** note a
 
 <!-- Add this at the end of the file -->
 
-### Enable or disable <Feature Name> **(CORE ONLY)**
+### Enable or disable <Feature Name> **(FREE SELF)**
 
 <Feature Name> is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
@@ -208,7 +206,7 @@ Feature.disable(:<feature flag>)
 ````
 
 Adjust the blurb according to the state of the feature you're documenting.
-Replace `<Feature name>`, `**(CORE ONLY)**`, `<feature flag>`,
+Replace `<Feature name>`, `**(FREE SELF)**`, `<feature flag>`,
 `<replace with path to>`, and `#anchor-to-section` accordingly.
 
 ### Features enabled by project
@@ -251,7 +249,7 @@ be enabled by project, and is ready for production use:
 > - It's enabled on GitLab.com.
 > - It can be enabled or disabled for a single project.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -260,7 +258,7 @@ This feature might not be available to you. Check the **version history** note a
 
 <!-- Add this at the end of the file -->
 
-### Enable or disable <Feature Name> **(CORE ONLY)**
+### Enable or disable <Feature Name> **(FREE SELF)**
 
 <Feature Name> is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
@@ -287,7 +285,7 @@ Feature.disable(:<feature flag>, Project.find(<project id>))
 ````
 
 Adjust the blurb according to the state of the feature you're documenting.
-Replace `<Feature name>`, `**(CORE ONLY)**`, `<feature flag>`,
+Replace `<Feature name>`, `**(FREE SELF)**`, `<feature flag>`,
 `<replace with path to>`, and `#anchor-to-section` accordingly.
 
 ### Features with flag removed

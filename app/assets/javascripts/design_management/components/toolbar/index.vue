@@ -3,9 +3,9 @@ import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import permissionsQuery from 'shared_queries/design_management/design_permissions.query.graphql';
 import { __, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
-import DesignNavigation from './design_navigation.vue';
 import DeleteButton from '../delete_button.vue';
 import { DESIGNS_ROUTE_NAME } from '../../router/constants';
+import DesignNavigation from './design_navigation.vue';
 
 export default {
   components: {
@@ -18,6 +18,14 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [timeagoMixin],
+  inject: {
+    projectPath: {
+      default: '',
+    },
+    issueIid: {
+      default: '',
+    },
+  },
   props: {
     id: {
       type: String,
@@ -58,14 +66,6 @@ export default {
       },
     };
   },
-  inject: {
-    projectPath: {
-      default: '',
-    },
-    issueIid: {
-      default: '',
-    },
-  },
   apollo: {
     permissions: {
       query: permissionsQuery,
@@ -75,7 +75,7 @@ export default {
           iid: this.issueIid,
         };
       },
-      update: data => data.project.issue.userPermissions,
+      update: (data) => data.project.issue.userPermissions,
     },
   },
   computed: {

@@ -49,7 +49,7 @@ export default {
     // In this first iteration, the auto-fix settings is toggled for all features at once via a
     // single checkbox. The line below is a temporary workaround to initialize the setting's state
     // until we have distinct checkboxes for each auto-fixable feature.
-    const autoFixEnabled = Object.values(this.autoFixEnabled).some(enabled => enabled);
+    const autoFixEnabled = Object.values(this.autoFixEnabled).some((enabled) => enabled);
     return {
       autoFixEnabledLocal: autoFixEnabled,
       isChecked: autoFixEnabled,
@@ -75,7 +75,7 @@ export default {
           this.autoFixEnabledLocal = enabled;
           this.isChecked = enabled;
         })
-        .catch(e => {
+        .catch((e) => {
           Sentry.captureException(e);
           createFlash(
             __('Something went wrong while toggling auto-fix settings, please try again later.'),

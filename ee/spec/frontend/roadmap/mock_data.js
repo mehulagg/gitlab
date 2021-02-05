@@ -1,3 +1,11 @@
+import {
+  getTimeframeForWeeksView,
+  getTimeframeForMonthsView,
+  getTimeframeForQuartersView,
+} from 'ee/roadmap/utils/roadmap_utils';
+
+import { dateFromString } from 'helpers/datetime_helpers';
+
 export const mockScrollBarSize = 15;
 
 export const mockGroupId = 2;
@@ -93,6 +101,52 @@ export const mockTimeframeWeeksAppend = [
   new Date(2018, 1, 25),
   new Date(2018, 2, 4),
 ];
+
+const OCT_11_2020 = dateFromString('Oct 11 2020');
+export const mockWeekly = {
+  currentDate: OCT_11_2020,
+  /*
+    Each item in timeframe is a Date object.
+
+    timeframe = [ Sep 27 2020, Oct  4 2020, Oct 11 2020, <- current week or currentIndex == 2
+                  Oct 18 2020, Oct 25 2020, Nov  1 2020,
+                  Nov  8 2020 ]
+  */
+  timeframe: getTimeframeForWeeksView(OCT_11_2020),
+};
+
+const DEC_1_2020 = dateFromString('Dec 1 2020');
+export const mockMonthly = {
+  currentDate: DEC_1_2020,
+  /*
+    Each item in timeframe is a Date object.
+
+    timeframe = [ Oct 1 2020, Nov 1 2020, Dec 1 2020, <- current month == index 2
+                  Jan 1 2021, Feb 1 2021, Mar 1 2021,
+                  Apr 1 2021, May 31 2021 ]
+  */
+  timeframe: getTimeframeForMonthsView(DEC_1_2020),
+};
+
+const DEC_25_2020 = dateFromString('Dec 25 2020');
+export const mockQuarterly = {
+  currentDate: DEC_25_2020,
+  /*
+    The format of quarterly timeframes differs from that of the monthly and weekly ones.
+
+    For quarterly, each item in timeframe has the following shape:
+      { quarterSequence: number, range: array<Dates>, year: number }
+
+      Each item in range is a Date object.
+
+      E.g., { 2020 Q2 } = { quarterSequence: 2, range: [ Apr 1 2020, May 1 2020, Jun 30 2020], year 2020 }
+
+    timeframe = [ { 2020 Q2 }, { 2020 Q3 }, { 2020 Q4 }, <- current quarter == index 2
+                  { 2021 Q1 }, { 2021 Q2 }, { 2021 Q3 },
+                  { 2021 Q4 } ]
+  */
+  timeframe: getTimeframeForQuartersView(DEC_25_2020),
+};
 
 export const mockEpic = {
   id: 1,
@@ -395,18 +449,46 @@ export const rawEpics = [
 
 export const mockUnsortedEpics = [
   {
+    title: 'Nov 10 2013 ~ Jun 01 2014; actual start date is Feb 1 2013',
+    originalStartDate: dateFromString('Feb 1 2013'),
+    startDate: dateFromString('Nov 10 2013'),
+    endDate: dateFromString('Jun 1, 2014'),
+  },
+  {
+    title: 'Oct 01 2013 ~ Nov 01 2013; actual due date is Nov 1 2014',
+    startDate: dateFromString('Oct 1 2013'),
+    originalEndDate: dateFromString('Nov 1 2014'),
+    endDate: dateFromString('Nov 1, 2013'),
+  },
+  {
+    title: 'Jan 01 2020 ~ Dec 01 2020; no fixed start date',
+    startDateUndefined: true,
+    startDate: dateFromString('Jan 1 2020'),
+    endDate: dateFromString('Dec 1 2020'),
+  },
+  {
+    title: 'Mar 01 2013 ~ Dec 01 2013; no fixed due date',
+    startDate: dateFromString('Mar 1 2013'),
+    endDateUndefined: true,
+    endDate: dateFromString('Dec 1 2013'),
+  },
+  {
+    title: 'Mar 12 2017 ~ Aug 20 2017',
     startDate: new Date(2017, 2, 12),
     endDate: new Date(2017, 7, 20),
   },
   {
+    title: 'Jun 08 2015 ~ Apr 01 2016',
     startDate: new Date(2015, 5, 8),
     endDate: new Date(2016, 3, 1),
   },
   {
+    title: 'Apr 12 2019 ~ Aug 30 2019',
     startDate: new Date(2019, 4, 12),
     endDate: new Date(2019, 7, 30),
   },
   {
+    title: 'Mar 17 2014 ~ Aug 15 2015',
     startDate: new Date(2014, 3, 17),
     endDate: new Date(2015, 7, 15),
   },

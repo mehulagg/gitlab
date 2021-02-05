@@ -2,8 +2,8 @@ import { s__ } from '~/locale';
 import pollUntilComplete from '~/lib/utils/poll_until_complete';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import * as types from './mutation_types';
 import { getTimeWindowParams } from '../../utils';
+import * as types from './mutation_types';
 
 export const requestStatistics = ({ commit }, timeWindowParams) => {
   commit(types.REQUEST_STATISTICS, timeWindowParams);
@@ -33,7 +33,7 @@ export const fetchStatistics = ({ state, dispatch, rootState }) => {
     },
   })
     .then(({ data }) => dispatch('receiveStatisticsSuccess', data))
-    .catch(error => {
+    .catch((error) => {
       // A NOT_FOUND response from the endpoint means that there is no data for
       // the given parameters. There are various reasons *why* there could be
       // no data, but we can't distinguish between them, yet. So, just render

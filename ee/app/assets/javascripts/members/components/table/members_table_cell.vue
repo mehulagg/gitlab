@@ -19,7 +19,7 @@ export default {
     return createElement(CEMembersTableCell, {
       props: { member: this.member },
       scopedSlots: {
-        default: props => {
+        default: (props) => {
           return this.$scopedSlots.default({
             ...props,
             permissions: {

@@ -1,7 +1,7 @@
-import * as types from './mutation_types';
 import Api from '~/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
+import * as types from './mutation_types';
 
 export const requestAddFreezePeriod = ({ commit }) => {
   commit(types.REQUEST_ADD_FREEZE_PERIOD);
@@ -28,7 +28,7 @@ export const addFreezePeriod = ({ state, dispatch, commit }) => {
       commit(types.RESET_MODAL);
       dispatch('fetchFreezePeriods');
     })
-    .catch(error => {
+    .catch((error) => {
       createFlash(__('Error: Unable to create deploy freeze'));
       dispatch('receiveAddFreezePeriodError', error);
     });

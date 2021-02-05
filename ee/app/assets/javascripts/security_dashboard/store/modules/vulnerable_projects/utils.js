@@ -16,7 +16,7 @@ export const vulnerabilityCount = (project, severityLevel) =>
  * @param project
  * @returns {function(*=): boolean}
  */
-export const hasVulnerabilityWithSeverityLevel = project => severityLevel =>
+export const hasVulnerabilityWithSeverityLevel = (project) => (severityLevel) =>
   vulnerabilityCount(project, severityLevel) > 0;
 
 /**
@@ -45,7 +45,7 @@ export const mostSevereVulnerability = (severityLevelsOrderedBySeverity, project
  * @param severityLevelsInOrder
  * @returns {function(*=): {mostSevereVulnerability: *}}
  */
-export const addMostSevereVulnerabilityInformation = severityLevelsInOrder => project => ({
+export const addMostSevereVulnerabilityInformation = (severityLevelsInOrder) => (project) => ({
   ...project,
   mostSevereVulnerability: mostSevereVulnerability(severityLevelsInOrder, project),
 });

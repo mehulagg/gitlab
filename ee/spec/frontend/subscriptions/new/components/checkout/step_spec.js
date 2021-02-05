@@ -20,7 +20,7 @@ describe('Step', () => {
     nextStepButtonText: 'next',
   };
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(Component, {
       propsData: { ...initialProps, ...propsData },
       localVue,

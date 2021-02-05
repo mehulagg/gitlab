@@ -3,6 +3,7 @@ import { mapActions, mapGetters } from 'vuex';
 
 import 'ee_else_ce/boards/models/issue';
 import 'ee_else_ce/boards/models/list';
+import VueApollo from 'vue-apollo';
 import BoardSidebar from 'ee_else_ce/boards/components/board_sidebar';
 import initNewListDropdown from 'ee_else_ce/boards/components/new_list_dropdown';
 import boardConfigToggle from 'ee_else_ce/boards/config_toggle';
@@ -15,7 +16,7 @@ import {
   getBoardsModalData,
 } from 'ee_else_ce/boards/ee_functions';
 
-import VueApollo from 'vue-apollo';
+import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import BoardContent from '~/boards/components/board_content.vue';
 import BoardExtraActions from '~/boards/components/board_extra_actions.vue';
 import createDefaultClient from '~/lib/graphql';
@@ -40,7 +41,6 @@ import {
   NavigationType,
   convertObjectPropsToCamelCase,
   parseBoolean,
-  urlParamsToObject,
 } from '~/lib/utils/common_utils';
 import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
 
@@ -56,7 +56,7 @@ export default () => {
   const $boardApp = document.getElementById('board-app');
 
   // check for browser back and trigger a hard reload to circumvent browser caching.
-  window.addEventListener('pageshow', event => {
+  window.addEventListener('pageshow', (event) => {
     const isNavTypeBackForward =
       window.performance && window.performance.navigation.type === NavigationType.TYPE_BACK_FORWARD;
 
@@ -69,9 +69,12 @@ export default () => {
     issueBoardsApp.$destroy(true);
   }
 
-  boardsStore.create();
-  boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
+  if (!gon?.features?.graphqlBoardLists) {
+    boardsStore.create();
+    boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
+  }
 
+  // eslint-disable-next-line @gitlab/no-runtime-template-compiler
   issueBoardsApp = new Vue({
     el: $boardApp,
     components: {
@@ -112,33 +115,45 @@ export default () => {
       };
     },
     computed: {
-      ...mapGetters(['isSwimlanesOn', 'shouldUseGraphQL']),
+      ...mapGetters(['shouldUseGraphQL']),
       detailIssueVisible() {
         return Object.keys(this.detailIssue.issue).length;
       },
     },
     created() {
-      const endpoints = {
+      this.setInitialBoardData({
+        boardId: $boardApp.dataset.boardId,
+        fullPath: $boardApp.dataset.fullPath,
+        boardType: this.parent,
+        disabled: this.disabled,
+        boardConfig: {
+          milestoneId: parseInt($boardApp.dataset.boardMilestoneId, 10),
+          milestoneTitle: $boardApp.dataset.boardMilestoneTitle || '',
+          iterationId: parseInt($boardApp.dataset.boardIterationId, 10),
+          iterationTitle: $boardApp.dataset.boardIterationTitle || '',
+          assigneeId: $boardApp.dataset.boardAssigneeId,
+          assigneeUsername: $boardApp.dataset.boardAssigneeUsername,
+          labels: $boardApp.dataset.labels ? JSON.parse($boardApp.dataset.labels) : [],
+          labelIds: $boardApp.dataset.labelIds ? JSON.parse($boardApp.dataset.labelIds) : [],
+          weight: $boardApp.dataset.boardWeight
+            ? parseInt($boardApp.dataset.boardWeight, 10)
+            : null,
+        },
+      });
+      boardsStore.setEndpoints({
         boardsEndpoint: this.boardsEndpoint,
         recentBoardsEndpoint: this.recentBoardsEndpoint,
         listsEndpoint: this.listsEndpoint,
         bulkUpdatePath: this.bulkUpdatePath,
         boardId: $boardApp.dataset.boardId,
         fullPath: $boardApp.dataset.fullPath,
-      };
-      this.setInitialBoardData({
-        ...endpoints,
-        boardType: this.parent,
-        disabled: this.disabled,
       });
-      boardsStore.setEndpoints(endpoints);
       boardsStore.rootPath = this.boardsEndpoint;
 
       eventHub.$on('updateTokens', this.updateTokens);
       eventHub.$on('newDetailIssue', this.updateDetailIssue);
       eventHub.$on('clearDetailIssue', this.clearDetailIssue);
       sidebarEventHub.$on('toggleSubscription', this.toggleSubscription);
-      eventHub.$on('performSearch', this.performSearch);
       eventHub.$on('initialBoardLoad', this.initialBoardLoad);
     },
     beforeDestroy() {
@@ -146,16 +161,10 @@ export default () => {
       eventHub.$off('newDetailIssue', this.updateDetailIssue);
       eventHub.$off('clearDetailIssue', this.clearDetailIssue);
       sidebarEventHub.$off('toggleSubscription', this.toggleSubscription);
-      eventHub.$off('performSearch', this.performSearch);
       eventHub.$off('initialBoardLoad', this.initialBoardLoad);
     },
     mounted() {
-      this.filterManager = new FilteredSearchBoards(
-        boardsStore.filter,
-        store,
-        true,
-        boardsStore.cantEdit,
-      );
+      this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
       this.filterManager.setup();
 
       this.performSearch();
@@ -167,20 +176,13 @@ export default () => {
       }
     },
     methods: {
-      ...mapActions([
-        'setInitialBoardData',
-        'setFilters',
-        'fetchEpicsSwimlanes',
-        'resetIssues',
-        'resetEpics',
-        'fetchLists',
-      ]),
+      ...mapActions(['setInitialBoardData', 'performSearch']),
       initialBoardLoad() {
         boardsStore
           .all()
-          .then(res => res.data)
-          .then(lists => {
-            lists.forEach(list => boardsStore.addList(list));
+          .then((res) => res.data)
+          .then((lists) => {
+            lists.forEach((list) => boardsStore.addList(list));
             this.loading = false;
           })
           .catch(() => {
@@ -190,17 +192,6 @@ export default () => {
       updateTokens() {
         this.filterManager.updateTokens();
       },
-      performSearch() {
-        this.setFilters(convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)));
-        if (this.isSwimlanesOn) {
-          this.resetEpics();
-          this.resetIssues();
-          this.fetchEpicsSwimlanes({});
-        } else if (gon.features.graphqlBoardLists) {
-          this.fetchLists();
-          this.resetIssues();
-        }
-      },
       updateDetailIssue(newIssue, multiSelect = false) {
         const { sidebarInfoEndpoint } = newIssue;
         if (sidebarInfoEndpoint && newIssue.subscribed === undefined) {
@@ -209,8 +200,8 @@ export default () => {
           setEpicFetchingState(newIssue, true);
           boardsStore
             .getIssueInfo(sidebarInfoEndpoint)
-            .then(res => res.data)
-            .then(data => {
+            .then((res) => res.data)
+            .then((data) => {
               const {
                 subscribed,
                 totalTimeSpent,
@@ -286,7 +277,7 @@ export default () => {
     },
   });
 
-  // eslint-disable-next-line no-new
+  // eslint-disable-next-line no-new, @gitlab/no-runtime-template-compiler
   new Vue({
     el: document.getElementById('js-add-list'),
     data: {
@@ -297,6 +288,21 @@ export default () => {
       initNewListDropdown();
     },
   });
+
+  const createColumnTriggerEl = document.querySelector('.js-create-column-trigger');
+  if (createColumnTriggerEl) {
+    // eslint-disable-next-line no-new
+    new Vue({
+      el: createColumnTriggerEl,
+      components: {
+        BoardAddNewColumnTrigger,
+      },
+      store,
+      render(createElement) {
+        return createElement('board-add-new-column-trigger');
+      },
+    });
+  }
 
   boardConfigToggle(boardsStore);
 
@@ -320,7 +326,7 @@ export default () => {
           if (!this.store) {
             return true;
           }
-          return !this.store.lists.filter(list => !list.preset).length;
+          return !this.store.lists.filter((list) => !list.preset).length;
         },
       },
       methods: {
@@ -350,7 +356,7 @@ export default () => {
   }
 
   mountMultipleBoardsSwitcher({
-    boardsEndpoint: $boardApp.dataset.boardsEndpoint,
-    recentBoardsEndpoint: $boardApp.dataset.recentBoardsEndpoint,
+    fullPath: $boardApp.dataset.fullPath,
+    rootPath: $boardApp.dataset.boardsEndpoint,
   });
 };

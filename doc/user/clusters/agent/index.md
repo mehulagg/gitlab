@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Kubernetes Agent **(PREMIUM ONLY)**
+# GitLab Kubernetes Agent **(PREMIUM SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223061) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
 > - It's disabled on GitLab.com. Rolling this feature out to GitLab.com is [planned](https://gitlab.com/groups/gitlab-org/-/epics/3834).
@@ -20,9 +20,10 @@ tasks in a secure and cloud-native way. It enables:
   (network address translation).
 - Pull-based GitOps deployments by leveraging the
   [GitOps Engine](https://github.com/argoproj/gitops-engine).
-- Real-time access to API endpoints within a cluster.
+- Real-time access to API endpoints in a cluster.
 
-Many more features are planned. Please [review our roadmap](https://gitlab.com/groups/gitlab-org/-/epics/3329).
+Many more features are planned. Please review [our roadmap](https://gitlab.com/groups/gitlab-org/-/epics/3329)
+and [our development documentation](../../../development/agent/index.md).
 
 ## GitLab Agent GitOps workflow
 
@@ -169,7 +170,7 @@ gitops:
 GitLab [versions 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) also
 supports manifest projects containing
 multiple directories (or subdirectories) of YAML files. For more information see our
-documentation on the [Kubernetes Agent configuration respository](repository.md).
+documentation on the [Kubernetes Agent configuration repository](repository.md).
 
 ### Create an Agent record in GitLab
 
@@ -189,7 +190,7 @@ the Agent in subsequent steps. You can create an Agent record either:
 
    For full details, read [Starting a Rails console session](../../../administration/operations/rails_console.md#starting-a-rails-console-session).
 
-- Through GraphQL: **(PREMIUM ONLY)**
+- Through GraphQL: **(PREMIUM SELF)**
 
   ```graphql
   mutation createAgent {
@@ -266,7 +267,7 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
     [Support TLS for gRPC communication issue](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/issues/7)
     for progress updates.
   - When deploying KAS through the [GitLab chart](https://docs.gitlab.com/charts/), it's possible to customize the `kas-address` for `wss` and `ws` schemes to whatever you need.
-    Check the [chart's KAS Ingress docs](https://docs.gitlab.com/charts/charts/gitlab/kas/#ingress)
+    Check the [chart's KAS Ingress documentation](https://docs.gitlab.com/charts/charts/gitlab/kas/#ingress)
     to learn more about it.
   - In the near future, Omnibus GitLab intends to provision `gitlab-kas` under a sub-domain by default, instead of the `/-/kubernetes-agent` path. Please follow [this issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5784) for details.
 - If you defined your own secret name, replace `gitlab-agent-token` with your
@@ -436,54 +437,25 @@ spec:
 
 The following example projects can help you get started with the Kubernetes Agent.
 
-### Simple NGINX deployment
-
-This basic GitOps example deploys NGINX:
-
 - [Configuration repository](https://gitlab.com/gitlab-org/configure/examples/kubernetes-agent)
-- [Manifest repository](https://gitlab.com/gitlab-org/configure/examples/gitops-project)
+- This basic GitOps example deploys NGINX: [Manifest repository](https://gitlab.com/gitlab-org/configure/examples/gitops-project)
 
 ### Deploying GitLab Runner with the Agent
 
-These instructions assume that the Agent is already set up as described in the
-[Get started with GitOps](#get-started-with-gitops-and-the-gitlab-agent):
+You can use the Kubernetes Agent to
+[deploy GitLab Runner in a Kubernetes cluster](http://docs.gitlab.com/runner/install/kubernetes-agent.html).
 
-1. Check the possible
-   [Runner chart YAML values](https://gitlab.com/gitlab-org/charts/gitlab-runner/blob/master/values.yaml)
-   on the Runner chart documentation, and create a `runner-chart-values.yaml` file
-   with the configuration that fits your needs, such as:
+## Management interfaces
 
-    ```yaml
-    ## The GitLab Server URL (with protocol) that want to register the runner against
-    ## ref: https://docs.gitlab.com/runner/commands/README.html#gitlab-runner-register
-    ##
-    gitlabUrl: https://gitlab.my.domain.com/
+Users with at least the [Developer](../../permissions.md) can access the user interface
+for the GitLab Kubernetes agent at **Operations > Kubernetes** and selecting the
+**GitLab Agent managed clusters** tab. This page lists all registered agents for
+the current project, and the configuration directory for each agent:
 
-    ## The Registration Token for adding new Runners to the GitLab Server. This must
-    ## be retrieved from your GitLab Instance.
-    ## ref: https://docs.gitlab.com/ce/ci/runners/README.html
-    ##
-    runnerRegistrationToken: "XXXXXXYYYYYYZZZZZZ"
+![GitLab Kubernetes Agent list UI](../img/kubernetes-agent-ui-list_v13_8.png)
 
-    ## For RBAC support:
-    rbac:
-      create: true
-
-    ## Run all containers with the privileged flag enabled
-    ## This will allow the docker:dind image to run if you need to run Docker
-    ## commands. Please read the docs before turning this on:
-    ## ref: https://docs.gitlab.com/runner/executors/kubernetes.html#using-dockerdind
-    runners:
-      privileged: true
-    ```
-
-1. Create a single manifest file to install the Runner chart with your cluster agent:
-
-   ```shell
-   helm template --namespace gitlab gitlab-runner -f runner-chart-values.yaml gitlab/gitlab-runner > manifest.yaml
-   ```
-
-1. Push your `manifest.yaml` to your manifest repository.
+Additional management interfaces are planned for the GitLab Kubernetes Agent.
+[Provide more feedback in the related epic](https://gitlab.com/groups/gitlab-org/-/epics/4739).
 
 ## Troubleshooting
 

@@ -717,6 +717,22 @@ RSpec.describe Ci::Build do
     end
   end
 
+  describe '#artifacts_public?' do
+    subject { build.artifacts_public? }
+
+    context 'artifacts with defaults' do
+      let(:build) { create(:ci_build, :artifacts) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'non public artifacts' do
+      let(:build) { create(:ci_build, :artifacts, :non_public_artifacts) }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
   describe '#artifacts_expired?' do
     subject { build.artifacts_expired? }
 
@@ -1149,26 +1165,12 @@ RSpec.describe Ci::Build do
     end
 
     context 'when transits to skipped' do
-      context 'when cd_skipped_deployment_status is disabled' do
-        before do
-          stub_feature_flags(cd_skipped_deployment_status: false)
-          build.skip!
-        end
-
-        it 'transits deployment status to canceled' do
-          expect(deployment).to be_canceled
-        end
+      before do
+        build.skip!
       end
 
-      context 'when cd_skipped_deployment_status is enabled' do
-        before do
-          stub_feature_flags(cd_skipped_deployment_status: project)
-          build.skip!
-        end
-
-        it 'transits deployment status to skipped' do
-          expect(deployment).to be_skipped
-        end
+      it 'transits deployment status to skipped' do
+        expect(deployment).to be_skipped
       end
     end
 
@@ -1179,60 +1181,6 @@ RSpec.describe Ci::Build do
 
       it 'transits deployment status to canceled' do
         expect(deployment).to be_canceled
-      end
-    end
-  end
-
-  describe 'state transition with resource group' do
-    let(:resource_group) { create(:ci_resource_group, project: project) }
-
-    context 'when build status is created' do
-      let(:build) { create(:ci_build, :created, project: project, resource_group: resource_group) }
-
-      it 'is waiting for resource when build is enqueued' do
-        expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).to receive(:perform_async).with(resource_group.id)
-
-        expect { build.enqueue! }.to change { build.status }.from('created').to('waiting_for_resource')
-
-        expect(build.waiting_for_resource_at).not_to be_nil
-      end
-
-      context 'when build is waiting for resource' do
-        before do
-          build.update_column(:status, 'waiting_for_resource')
-        end
-
-        it 'is enqueued when build requests resource' do
-          expect { build.enqueue_waiting_for_resource! }.to change { build.status }.from('waiting_for_resource').to('pending')
-        end
-
-        it 'releases a resource when build finished' do
-          expect(build.resource_group).to receive(:release_resource_from).with(build).and_call_original
-          expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).to receive(:perform_async).with(build.resource_group_id)
-
-          build.enqueue_waiting_for_resource!
-          build.success!
-        end
-
-        context 'when build has prerequisites' do
-          before do
-            allow(build).to receive(:any_unmet_prerequisites?) { true }
-          end
-
-          it 'is preparing when build is enqueued' do
-            expect { build.enqueue_waiting_for_resource! }.to change { build.status }.from('waiting_for_resource').to('preparing')
-          end
-        end
-
-        context 'when there are no available resources' do
-          before do
-            resource_group.assign_resource_to(create(:ci_build))
-          end
-
-          it 'stays as waiting for resource when build requests resource' do
-            expect { build.enqueue_waiting_for_resource }.not_to change { build.status }
-          end
-        end
       end
     end
   end
@@ -2456,6 +2404,7 @@ RSpec.describe Ci::Build do
           { key: 'CI_PROJECT_VISIBILITY', value: 'private', public: true, masked: false },
           { key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: project.repository_languages.map(&:name).join(',').downcase, public: true, masked: false },
           { key: 'CI_DEFAULT_BRANCH', value: project.default_branch, public: true, masked: false },
+          { key: 'CI_PROJECT_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
           { key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host, public: true, masked: false },
           { key: 'CI_PAGES_URL', value: project.pages_url, public: true, masked: false },
           { key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}", public: true, masked: false },
@@ -2986,7 +2935,7 @@ RSpec.describe Ci::Build do
       let(:ci_config_path) { { key: 'CI_CONFIG_PATH', value: 'custom', public: true, masked: false } }
 
       before do
-        expect_any_instance_of(Project).to receive(:ci_config_path) { 'custom' }
+        project.update!(ci_config_path: 'custom')
       end
 
       it { is_expected.to include(ci_config_path) }
@@ -3602,7 +3551,7 @@ RSpec.describe Ci::Build do
 
     context 'when validates for dependencies is enabled' do
       before do
-        stub_feature_flags(ci_disable_validates_dependencies: false)
+        stub_feature_flags(ci_validate_build_dependencies_override: false)
       end
 
       let!(:pre_stage_job) { create(:ci_build, :success, pipeline: pipeline, name: 'test', stage_idx: 0) }
@@ -3630,7 +3579,7 @@ RSpec.describe Ci::Build do
       let(:options) { { dependencies: ['test'] } }
 
       before do
-        stub_feature_flags(ci_disable_validates_dependencies: true)
+        stub_feature_flags(ci_validate_build_dependencies_override: true)
       end
 
       it_behaves_like 'validation is not active'
@@ -4343,7 +4292,7 @@ RSpec.describe Ci::Build do
   end
 
   describe '#supported_runner?' do
-    let_it_be(:build) { create(:ci_build) }
+    let_it_be_with_refind(:build) { create(:ci_build) }
 
     subject { build.supported_runner?(runner_features) }
 
@@ -4406,6 +4355,41 @@ RSpec.describe Ci::Build do
         let(:runner_features) { {} }
 
         it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when `return_exit_code` feature is required by build' do
+      let(:options) { { allow_failure_criteria: { exit_codes: [1] } } }
+
+      before do
+        build.update!(options: options)
+      end
+
+      context 'when runner provides given feature' do
+        let(:runner_features) { { return_exit_code: true } }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when runner does not provide given feature' do
+        let(:runner_features) { {} }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when the runner does not provide all of the required features' do
+        let(:options) do
+          {
+            allow_failure_criteria: { exit_codes: [1] },
+            artifacts: { reports: { junit: "junit.xml" } }
+          }
+        end
+
+        let(:runner_features) { { return_exit_code: true } }
+
+        it 'requires `upload_multiple_artifacts` too' do
+          is_expected.to be_falsey
+        end
       end
     end
   end
@@ -4737,22 +4721,6 @@ RSpec.describe Ci::Build do
   describe '#debug_mode?' do
     subject { build.debug_mode? }
 
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(restrict_access_to_build_debug_mode: false)
-      end
-
-      it { is_expected.to eq false }
-
-      context 'when in variables' do
-        before do
-          create(:ci_instance_variable, key: 'CI_DEBUG_TRACE', value: 'true')
-        end
-
-        it { is_expected.to eq false }
-      end
-    end
-
     context 'when CI_DEBUG_TRACE=true is in variables' do
       context 'when in instance variables' do
         before do
@@ -4805,6 +4773,153 @@ RSpec.describe Ci::Build do
 
     context 'when CI_DEBUG_TRACE is not in variables' do
       it { is_expected.to eq false }
+    end
+  end
+
+  describe '#drop_with_exit_code!' do
+    let(:exit_code) { 1 }
+    let(:options) { {} }
+
+    before do
+      build.options.merge!(options)
+      build.save!
+    end
+
+    subject(:drop_with_exit_code) do
+      build.drop_with_exit_code!(:unknown_failure, exit_code)
+    end
+
+    shared_examples 'drops the build without changing allow_failure' do
+      it 'does not change allow_failure' do
+        expect { drop_with_exit_code }
+          .not_to change { build.reload.allow_failure }
+      end
+
+      it 'drops the build' do
+        expect { drop_with_exit_code }
+          .to change { build.reload.failed? }
+      end
+    end
+
+    context 'when exit_codes are not defined' do
+      it_behaves_like 'drops the build without changing allow_failure'
+    end
+
+    context 'when allow_failure_criteria is nil' do
+      let(:options) { { allow_failure_criteria: nil } }
+
+      it_behaves_like 'drops the build without changing allow_failure'
+    end
+
+    context 'when exit_codes is nil' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: nil
+          }
+        }
+      end
+
+      it_behaves_like 'drops the build without changing allow_failure'
+    end
+
+    context 'when exit_codes do not match' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: [2, 3, 4]
+          }
+        }
+      end
+
+      it_behaves_like 'drops the build without changing allow_failure'
+    end
+
+    context 'with matching exit codes' do
+      let(:options) do
+        { allow_failure_criteria: { exit_codes: [1, 2, 3] } }
+      end
+
+      it 'changes allow_failure' do
+        expect { drop_with_exit_code }
+          .to change { build.reload.allow_failure }
+      end
+
+      it 'drops the build' do
+        expect { drop_with_exit_code }
+          .to change { build.reload.failed? }
+      end
+
+      it 'is executed inside a transaction' do
+        expect(build).to receive(:drop!)
+          .with(:unknown_failure)
+          .and_raise(ActiveRecord::Rollback)
+
+        expect(build).to receive(:conditionally_allow_failure!)
+          .with(1)
+          .and_call_original
+
+        expect { drop_with_exit_code }
+          .not_to change { build.reload.allow_failure }
+      end
+
+      context 'when exit_code is nil' do
+        let(:exit_code) {}
+
+        it_behaves_like 'drops the build without changing allow_failure'
+      end
+    end
+  end
+
+  describe '#exit_codes_defined?' do
+    let(:options) { {} }
+
+    before do
+      build.options.merge!(options)
+    end
+
+    subject(:exit_codes_defined) do
+      build.exit_codes_defined?
+    end
+
+    context 'without allow_failure_criteria' do
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when exit_codes is nil' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: nil
+          }
+        }
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when exit_codes is an empty array' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: []
+          }
+        }
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when exit_codes are defined' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: [5, 6]
+          }
+        }
+      end
+
+      it { is_expected.to be_truthy }
     end
   end
 end

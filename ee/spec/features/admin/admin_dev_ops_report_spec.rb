@@ -63,6 +63,30 @@ RSpec.describe 'DevOps Report page', :js do
       end
     end
 
+    it 'does not add the tab param when the DevOps Score tab is selected' do
+      visit admin_dev_ops_report_path
+
+      click_link 'DevOps Score'
+
+      expect(page).to have_current_path(admin_dev_ops_report_path)
+    end
+
+    it 'adds the ?tab=devops-adoption param when the Adoption tab is selected' do
+      visit admin_dev_ops_report_path
+
+      click_link 'Adoption'
+
+      expect(page).to have_current_path(admin_dev_ops_report_path(tab: 'devops-adoption'))
+    end
+
+    it 'shows the devops adoption tab when the tab param is set' do
+      visit admin_dev_ops_report_path(tab: 'devops-adoption')
+
+      within tabs_selector do
+        expect(page).to have_selector active_tab_selector, text: 'Adoption'
+      end
+    end
+
     context 'the devops score tab' do
       it 'has dismissable intro callout' do
         visit admin_dev_ops_report_path

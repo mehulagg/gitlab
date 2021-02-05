@@ -15,14 +15,15 @@ For data objects such as LFS, Uploads, Artifacts, etc., an [Object Storage servi
 is recommended over NFS where possible, due to better performance.
 
 WARNING:
-From GitLab 13.0, using NFS for Git repositories is deprecated. In GitLab 14.0,
-support for NFS for Git repositories is scheduled to be removed. Upgrade to
-[Gitaly Cluster](gitaly/praefect.md) as soon as possible.
+From GitLab 13.0, using NFS for Git repositories is deprecated.
+From GitLab 14.0, technical support for NFS for Git repositories
+will no longer be provided. Upgrade to [Gitaly Cluster](gitaly/praefect.md)
+as soon as possible.
 
-Filesystem performance can impact overall GitLab performance, especially for
+File system performance can impact overall GitLab performance, especially for
 actions that read or write to Git repositories. For steps you can use to test
-filesystem performance, see
-[Filesystem Performance Benchmarking](operations/filesystem_benchmarking.md).
+file system performance, see
+[File system Performance Benchmarking](operations/filesystem_benchmarking.md).
 
 ## Known kernel version incompatibilities
 
@@ -370,7 +371,7 @@ GitLab strongly recommends against using AWS Elastic File System (EFS).
 Our support team will not be able to assist on performance issues related to
 file system access.
 
-Customers and users have reported that AWS EFS does not perform well for GitLab's
+Customers and users have reported that AWS EFS does not perform well for the GitLab
 use-case. Workloads where many small files are written in a serialized manner, like `git`,
 are not well-suited for EFS. EBS with an NFS server on top will perform much better.
 
@@ -383,7 +384,7 @@ For more details on another person's experience with EFS, see this [Commit Brook
 ### Avoid using CephFS and GlusterFS
 
 GitLab strongly recommends against using CephFS and GlusterFS.
-These distributed file systems are not well-suited for GitLab's input/output access patterns because Git uses many small files and access times and file locking times to propagate will make Git activity very slow.
+These distributed file systems are not well-suited for the GitLab input/output access patterns because Git uses many small files and access times and file locking times to propagate will make Git activity very slow.
 
 ### Avoid using PostgreSQL with NFS
 
@@ -407,7 +408,7 @@ For supported database architecture, see our documentation about
 ### Finding the requests that are being made to NFS
 
 In case of NFS-related problems, it can be helpful to trace
-the filesystem requests that are being made by using `perf`:
+the file system requests that are being made by using `perf`:
 
 ```shell
 sudo perf trace -e 'nfs4:*' -p $(pgrep -fd ',' puma && pgrep -fd ',' unicorn)

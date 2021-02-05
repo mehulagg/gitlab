@@ -7,7 +7,7 @@ import state from './state';
 
 Vue.use(Vuex);
 
-export default initialState =>
+export default (initialState) =>
   new Vuex.Store({
     actions,
     mutations,

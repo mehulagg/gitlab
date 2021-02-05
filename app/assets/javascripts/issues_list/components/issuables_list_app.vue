@@ -16,8 +16,8 @@ import {
 } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import initManualOrdering from '~/manual_ordering';
-import Issuable from './issuable.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import { setUrlParams } from '~/lib/utils/url_utility';
 import {
   sortOrderMap,
   availableSortOptionsJira,
@@ -26,9 +26,9 @@ import {
   PAGE_SIZE_MANUAL,
   LOADING_LIST_ITEMS_LENGTH,
 } from '../constants';
-import { setUrlParams } from '~/lib/utils/url_utility';
 import issueableEventHub from '../eventhub';
 import { emptyStateHelper } from '../service_desk_helper';
+import Issuable from './issuable.vue';
 
 export default {
   LOADING_LIST_ITEMS_LENGTH,
@@ -208,7 +208,7 @@ export default {
   },
   mounted() {
     if (this.canBulkEdit) {
-      this.unsubscribeToggleBulkEdit = issueableEventHub.$on('issuables:toggleBulkEdit', val => {
+      this.unsubscribeToggleBulkEdit = issueableEventHub.$on('issuables:toggleBulkEdit', (val) => {
         this.isBulkEditing = val;
       });
     }
@@ -223,7 +223,7 @@ export default {
       return Boolean(this.selection[issuableId]);
     },
     setSelection(ids) {
-      ids.forEach(id => {
+      ids.forEach((id) => {
         this.select(id, true);
       });
     },
@@ -254,7 +254,7 @@ export default {
             per_page: this.itemsPerPage,
           },
         })
-        .then(response => {
+        .then((response) => {
           this.loading = false;
           this.issuables = response.data;
           this.totalItems = Number(response.headers['x-total']);
@@ -335,7 +335,7 @@ export default {
     handleFilter(filters) {
       let search = null;
 
-      filters.forEach(filter => {
+      filters.forEach((filter) => {
         if (typeof filter === 'string') {
           search = filter;
         }

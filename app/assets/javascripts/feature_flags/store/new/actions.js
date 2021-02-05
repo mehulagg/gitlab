@@ -1,8 +1,8 @@
-import * as types from './mutation_types';
 import axios from '~/lib/utils/axios_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { NEW_VERSION_FLAG } from '../../constants';
 import { mapFromScopesViewModel, mapStrategiesToRails } from '../helpers';
+import * as types from './mutation_types';
 
 /**
  * Handles the creation of a new feature flag.
@@ -27,7 +27,7 @@ export const createFeatureFlag = ({ state, dispatch }, params) => {
       dispatch('receiveCreateFeatureFlagSuccess');
       visitUrl(state.path);
     })
-    .catch(error => dispatch('receiveCreateFeatureFlagError', error.response.data));
+    .catch((error) => dispatch('receiveCreateFeatureFlagError', error.response.data));
 };
 
 export const requestCreateFeatureFlag = ({ commit }) => commit(types.REQUEST_CREATE_FEATURE_FLAG);

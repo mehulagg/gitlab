@@ -50,7 +50,7 @@ describe('Filter Body component', () => {
   });
 
   describe('search box', () => {
-    it.each([true, false])('shows/hides search box when the showSearchBox prop is %s', show => {
+    it.each([true, false])('shows/hides search box when the showSearchBox prop is %s', (show) => {
       createComponent({ showSearchBox: show });
 
       expect(searchBox().exists()).toBe(show);

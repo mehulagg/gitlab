@@ -24,7 +24,7 @@ describe('EE - DastSiteProfileList', () => {
   const defaultProps = {
     profiles: [],
     tableLabel: 'Site profiles',
-    fields: ['profileName', 'targetUrl', 'validationStatus'],
+    fields: [{ key: 'profileName' }, { key: 'targetUrl' }, { key: 'validationStatus' }],
     profilesPerPage: 10,
     errorMessage: '',
     errorDetails: [],
@@ -33,7 +33,7 @@ describe('EE - DastSiteProfileList', () => {
     isLoading: false,
   };
 
-  const createMockApolloProvider = handlers => {
+  const createMockApolloProvider = (handlers) => {
     localVue.use(VueApollo);
     requestHandlers = handlers;
     return createApolloProvider([[dastSiteValidationsQuery, requestHandlers.dastSiteValidations]]);
@@ -67,7 +67,7 @@ describe('EE - DastSiteProfileList', () => {
     return tableBody;
   };
   const getAllTableRows = () => within(getTableBody()).getAllByRole('row');
-  const getTableRowForProfile = profile => getAllTableRows()[siteProfiles.indexOf(profile)];
+  const getTableRowForProfile = (profile) => getAllTableRows()[siteProfiles.indexOf(profile)];
 
   const findProfileList = () => wrapper.find(ProfilesList);
 
@@ -136,7 +136,7 @@ describe('EE - DastSiteProfileList', () => {
       ${'in-progress'} | ${DAST_SITE_VALIDATION_STATUS.INPROGRESS} | ${'Validating...'}     | ${false}
       ${'passed'}      | ${DAST_SITE_VALIDATION_STATUS.PASSED}     | ${'Validated'}         | ${false}
       ${'failed'}      | ${DAST_SITE_VALIDATION_STATUS.FAILED}     | ${'Validation failed'} | ${true}
-    `('profile with validation $status', ({ statusEnum, label, hasValidateButton }) => {
+    `('profile with $status validation', ({ statusEnum, label, hasValidateButton }) => {
       const profile = siteProfiles.find(({ validationStatus }) => validationStatus === statusEnum);
 
       it(`should show correct label`, () => {
@@ -144,17 +144,13 @@ describe('EE - DastSiteProfileList', () => {
         expect(validationStatusCell.innerText).toContain(label);
       });
 
-      it(`should ${hasValidateButton ? '' : 'not '}render validate button`, () => {
+      it(`should ${hasValidateButton ? 'not ' : ''} disable validate button`, () => {
         const actionsCell = getTableRowForProfile(profile).cells[3];
         const validateButton = within(actionsCell).queryByRole('button', {
-          name: /validate/i,
+          name: /validate|Retry validation/i,
         });
 
-        if (hasValidateButton) {
-          expect(validateButton).not.toBeNull();
-        } else {
-          expect(validateButton).toBeNull();
-        }
+        expect(validateButton.hasAttribute('disabled')).toBe(!hasValidateButton);
       });
     });
 
@@ -193,7 +189,7 @@ describe('EE - DastSiteProfileList', () => {
       });
     });
 
-    it.each(siteProfiles)('profile %# should not have validate button and status', profile => {
+    it.each(siteProfiles)('profile %# should not have validate button and status', (profile) => {
       const [, , validationStatusCell, actionsCell] = getTableRowForProfile(profile).cells;
 
       expect(within(actionsCell).queryByRole('button', { name: /validate/i })).toBe(null);

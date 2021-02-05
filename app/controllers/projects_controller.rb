@@ -14,7 +14,7 @@ class ProjectsController < Projects::ApplicationController
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show]
 
-  before_action :whitelist_query_limiting, only: [:create]
+  before_action :whitelist_query_limiting, only: [:show, :create]
   before_action :authenticate_user!, except: [:index, :show, :activity, :refs, :resolve, :unfoldered_environment_names]
   before_action :redirect_git_extension, only: [:show]
   before_action :project, except: [:index, :new, :create, :resolve]
@@ -30,6 +30,10 @@ class ProjectsController < Projects::ApplicationController
 
   # Project Export Rate Limit
   before_action :export_rate_limit, only: [:export, :download_export, :generate_new_export]
+
+  before_action do
+    push_frontend_feature_flag(:vue_notification_dropdown, @project, default_enabled: :yaml)
+  end
 
   before_action only: [:edit] do
     push_frontend_feature_flag(:approval_suggestions, @project, default_enabled: true)
@@ -94,7 +98,7 @@ class ProjectsController < Projects::ApplicationController
           redirect_to(edit_project_path(@project, anchor: 'js-general-project-settings'))
         end
       else
-        flash.now[:alert] = result[:message]
+        flash[:alert] = result[:message]
         @project.reset
 
         format.html { render_edit }
@@ -197,13 +201,13 @@ class ProjectsController < Projects::ApplicationController
   end
 
   def housekeeping
-    ::Projects::HousekeepingService.new(@project, :gc).execute
+    ::Repositories::HousekeepingService.new(@project, :gc).execute
 
     redirect_to(
       project_path(@project),
       notice: _("Housekeeping successfully started")
     )
-  rescue ::Projects::HousekeepingService::LeaseTaken => ex
+  rescue ::Repositories::HousekeepingService::LeaseTaken => ex
     redirect_to(
       edit_project_path(@project, anchor: 'js-project-advanced-settings'),
       alert: ex.to_s
@@ -387,6 +391,7 @@ class ProjectsController < Projects::ApplicationController
       wiki_access_level
       pages_access_level
       metrics_dashboard_access_level
+      analytics_access_level
       operations_access_level
     ]
   end
@@ -502,7 +507,7 @@ class ProjectsController < Projects::ApplicationController
   end
 
   def whitelist_query_limiting
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42440')
+    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/20826')
   end
 
   def present_project

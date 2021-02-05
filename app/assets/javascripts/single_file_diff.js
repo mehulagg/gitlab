@@ -1,13 +1,13 @@
 /* eslint-disable consistent-return */
 
 import $ from 'jquery';
+import { spriteIcon } from '~/lib/utils/common_utils';
 import { __ } from './locale';
 import axios from './lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from './flash';
 import FilesCommentButton from './files_comment_button';
 import initImageDiffHelper from './image_diff/helpers/init_image_diff';
 import syntaxHighlight from './syntax_highlight';
-import { spriteIcon } from '~/lib/utils/common_utils';
 
 const WRAPPER = '<div class="diff-content"></div>';
 const LOADING_HTML = '<span class="spinner"></span>';
@@ -29,22 +29,17 @@ export default class SingleFileDiff {
     this.isOpen = !this.diffForPath;
     if (this.diffForPath) {
       this.collapsedContent = this.content;
-      this.loadingContent = $(WRAPPER)
-        .addClass('loading')
-        .html(LOADING_HTML)
-        .hide();
+      this.loadingContent = $(WRAPPER).addClass('loading').html(LOADING_HTML).hide();
       this.content = null;
       this.collapsedContent.after(this.loadingContent);
       this.$chevronRightIcon.removeClass('gl-display-none');
     } else {
-      this.collapsedContent = $(WRAPPER)
-        .html(COLLAPSED_HTML)
-        .hide();
+      this.collapsedContent = $(WRAPPER).html(COLLAPSED_HTML).hide();
       this.content.after(this.collapsedContent);
       this.$chevronDownIcon.removeClass('gl-display-none');
     }
 
-    $('.js-file-title, .click-to-expand', this.file).on('click', e => {
+    $('.js-file-title, .click-to-expand', this.file).on('click', (e) => {
       this.toggleDiff($(e.target));
     });
   }

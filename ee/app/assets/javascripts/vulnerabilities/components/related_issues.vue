@@ -6,8 +6,8 @@ import RelatedIssuesBlock from '~/related_issues/components/related_issues_block
 import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
 import { sprintf, __, s__ } from '~/locale';
 import { joinPaths, redirectTo } from '~/lib/utils/url_utility';
-import { RELATED_ISSUES_ERRORS } from '../constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { RELATED_ISSUES_ERRORS } from '../constants';
 import { getFormattedIssue, getAddRelatedIssueRequestParams } from '../helpers';
 
 export default {
@@ -15,6 +15,26 @@ export default {
   components: {
     RelatedIssuesBlock,
     GlButton,
+  },
+  inject: {
+    vulnerabilityId: {
+      default: 0,
+    },
+    projectFingerprint: {
+      default: '',
+    },
+    newIssueUrl: {
+      default: '',
+    },
+    reportType: {
+      default: '',
+    },
+    issueTrackingHelpPath: {
+      default: '',
+    },
+    permissionsHelpPath: {
+      default: '',
+    },
   },
   props: {
     endpoint: {
@@ -54,30 +74,10 @@ export default {
       return this.projectPath.replace(/^\//, ''); // Remove the leading slash, i.e. '/root/test' -> 'root/test'.
     },
     isIssueAlreadyCreated() {
-      return Boolean(this.state.relatedIssues.find(i => i.lockIssueRemoval));
+      return Boolean(this.state.relatedIssues.find((i) => i.lockIssueRemoval));
     },
     canCreateIssue() {
       return !this.isIssueAlreadyCreated && !this.isFetching && Boolean(this.newIssueUrl);
-    },
-  },
-  inject: {
-    vulnerabilityId: {
-      default: 0,
-    },
-    projectFingerprint: {
-      default: '',
-    },
-    newIssueUrl: {
-      default: '',
-    },
-    reportType: {
-      default: '',
-    },
-    issueTrackingHelpPath: {
-      default: '',
-    },
-    permissionsHelpPath: {
-      default: '',
     },
   },
   created() {
@@ -102,7 +102,7 @@ export default {
       const errors = [];
 
       // The endpoint can only accept one issue, so we need to do a separate call for each pending reference.
-      const requests = this.state.pendingReferences.map(reference => {
+      const requests = this.state.pendingReferences.map((reference) => {
         return axios
           .post(
             this.endpoint,
@@ -132,7 +132,7 @@ export default {
         this.isFormVisible = hasErrors;
 
         if (hasErrors) {
-          const messages = errors.map(error => sprintf(RELATED_ISSUES_ERRORS.LINK_ERROR, error));
+          const messages = errors.map((error) => sprintf(RELATED_ISSUES_ERRORS.LINK_ERROR, error));
           createFlash(messages.join(' '));
         }
       });
@@ -157,7 +157,7 @@ export default {
         .then(({ data }) => {
           const issues = data.map(getFormattedIssue);
           this.store.setRelatedIssues(
-            issues.map(i => {
+            issues.map((i) => {
               const lockIssueRemoval = i.vulnerability_link_type === 'created';
 
               return {
@@ -185,7 +185,7 @@ export default {
       this.store.removePendingRelatedIssue(indexToRemove);
     },
     processAllReferences(value = '') {
-      const rawReferences = value.split(/\s+/).filter(reference => reference.trim().length > 0);
+      const rawReferences = value.split(/\s+/).filter((reference) => reference.trim().length > 0);
       this.addPendingReferences({ untouchedRawReferences: rawReferences });
     },
   },

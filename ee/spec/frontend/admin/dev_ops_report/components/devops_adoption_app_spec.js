@@ -1,10 +1,10 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlButton, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import { getByText } from '@testing-library/dom';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import getGroupsQuery from 'ee/admin/dev_ops_report/graphql/queries/get_groups.query.graphql';
 import devopsAdoptionSegments from 'ee/admin/dev_ops_report/graphql/queries/devops_adoption_segments.query.graphql';
@@ -406,7 +406,7 @@ describe('DevopsAdoptionApp', () => {
               const tooltip = getBinding(segmentButtonWrapper.element, 'gl-tooltip');
 
               expect(tooltip).toBeDefined();
-              expect(tooltip.value).toBe('Maximum 30 segments allowed');
+              expect(tooltip.value).toBe('Maximum 30 groups allowed');
             });
           });
         });

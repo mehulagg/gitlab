@@ -29,11 +29,11 @@ export const fetchPipelineJobs = ({ commit, state }) => {
   }
 
   return requestPromise
-    .then(response => {
+    .then((response) => {
       const { data } = response;
       commit(types.RECEIVE_PIPELINE_JOBS_SUCCESS, data);
     })
-    .catch(error => {
+    .catch((error) => {
       Sentry.captureException(error);
       commit(types.RECEIVE_PIPELINE_JOBS_ERROR);
     });

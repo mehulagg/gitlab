@@ -1,4 +1,10 @@
-/* eslint-disable global-require, import/no-unresolved */
+/* eslint-disable global-require */
+// We use "require" rather than `fs` so that this works in a browser environment.
+
+/* eslint "import/no-unresolved": 0 */
+// We don't want to require *all* fixtures to be generated (especailly in a local environment).
+// We use `eslint` instead of `eslint-disable`, so that we also don't trigger an `Unused eslint-disable directive` when all fixtures are present.
+
 import { memoize } from 'lodash';
 
 const createFactoryWithDefault = (fn, defaultValue) => () => {
@@ -10,9 +16,9 @@ const createFactoryWithDefault = (fn, defaultValue) => () => {
 };
 
 const factory = {
-  json: fn => createFactoryWithDefault(fn, { error: 'fixture not found' }),
-  text: fn => createFactoryWithDefault(fn, 'Hello world\nHow are you today?\n'),
-  binary: fn => createFactoryWithDefault(fn, ''),
+  json: (fn) => createFactoryWithDefault(fn, { error: 'fixture not found' }),
+  text: (fn) => createFactoryWithDefault(fn, 'Hello world\nHow are you today?\n'),
+  binary: (fn) => createFactoryWithDefault(fn, ''),
 };
 
 export const getProject = factory.json(() => require('test_fixtures/api/projects/get.json'));

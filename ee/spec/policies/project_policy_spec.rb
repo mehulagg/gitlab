@@ -358,6 +358,24 @@ RSpec.describe ProjectPolicy do
           end
         end
 
+        context 'as a group maintainer' do
+          before do
+            group.add_maintainer(current_user)
+          end
+
+          it 'prevents access without a SAML session' do
+            is_expected.not_to allow_action(:read_project)
+          end
+        end
+
+        context 'as an auditor' do
+          let(:current_user) { create(:user, :auditor) }
+
+          it 'allows access without a SAML session' do
+            is_expected.to allow_action(:read_project)
+          end
+        end
+
         context 'with public access' do
           let(:group) { create(:group, :public) }
           let(:project) { create(:project, :public, group: saml_provider.group) }
@@ -497,6 +515,92 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'access_security_and_compliance' do
+    context 'when the "Security & Compliance" is enabled' do
+      before do
+        project.project_feature.update!(security_and_compliance_access_level: Featurable::PRIVATE)
+      end
+
+      %w[owner maintainer developer].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_allowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with admin' do
+        let(:current_user) { admin }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          it { is_expected.to be_allowed(:access_security_and_compliance) }
+        end
+
+        context 'when admin mode disabled' do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      %w[reporter guest].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with non member' do
+        let(:current_user) { non_member }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+
+      context 'with anonymous' do
+        let(:current_user) { anonymous }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+    end
+
+    context 'when the "Security & Compliance" is not enabled' do
+      before do
+        project.project_feature.update!(security_and_compliance_access_level: Featurable::DISABLED)
+      end
+
+      %w[owner maintainer developer reporter guest].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with admin' do
+        let(:current_user) { admin }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+
+        context 'when admin mode disabled' do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with non member' do
+        let(:current_user) { non_member }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+
+      context 'with anonymous' do
+        let(:current_user) { anonymous }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+    end
+  end
+
   shared_context 'when security dashboard feature is not available' do
     before do
       stub_licensed_features(security_dashboard: false)
@@ -539,6 +643,7 @@ RSpec.describe ProjectPolicy do
         create_merge_request_in
         create_vulnerability_feedback
         read_project
+        admin_merge_request
       )
     end
 
@@ -651,6 +756,68 @@ RSpec.describe ProjectPolicy do
       end
 
       it { is_expected.to be_disallowed(:read_threat_monitoring) }
+    end
+  end
+
+  describe 'read_corpus_management' do
+    context 'when corpus_management feature is available' do
+      before do
+        stub_licensed_features(coverage_fuzzing: true)
+      end
+
+      context 'with developer or higher role' do
+        where(role: %w[owner maintainer developer])
+
+        with_them do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_allowed(:read_coverage_fuzzing) }
+        end
+      end
+
+      context 'with admin' do
+        let(:current_user) { admin }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          it { is_expected.to be_allowed(:read_coverage_fuzzing) }
+        end
+
+        context 'when admin mode disabled' do
+          it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+        end
+      end
+
+      context 'with less than developer role' do
+        where(role: %w[reporter guest])
+
+        with_them do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+        end
+      end
+
+      context 'with non member' do
+        let(:current_user) { non_member }
+
+        it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+      end
+
+      context 'with anonymous' do
+        let(:current_user) { anonymous }
+
+        it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+      end
+    end
+
+    context 'when coverage fuzzing feature is not available' do
+      let(:current_user) { admin }
+
+      before do
+        stub_licensed_features(coverage_fuzzing: true)
+      end
+
+      it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
     end
   end
 

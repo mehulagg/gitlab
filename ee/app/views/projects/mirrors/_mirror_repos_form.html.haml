@@ -10,7 +10,7 @@
 .form-group
   = label_tag :mirror_direction, _('Mirror direction'), class: 'label-light'
   .select-wrapper
-    = select_tag :mirror_direction, options_for_select(direction_options), class: 'form-control select-control js-mirror-direction qa-mirror-direction', disabled: (direction_options.count == 1) || has_existing_pull_mirror
+    = select_tag :mirror_direction, options_for_select(direction_options), class: 'form-control gl-form-input select-control js-mirror-direction qa-mirror-direction', disabled: (direction_options.count == 1) || has_existing_pull_mirror
     = sprite_icon('chevron-down', css_class: "gl-icon gl-absolute gl-top-3 gl-right-3 gl-text-gray-200")
 
 .js-form-insertion-point
@@ -38,6 +38,7 @@
     = f.label :mirror_overwrites_diverged_branches, _('Overwrite diverged branches'), class: 'form-check-label'
     .form-text.text-muted
       = _("If disabled, a diverged local branch will not be automatically updated with commits from its remote counterpart, to prevent local data loss. If the default branch (%{default_branch}) has diverged and cannot be updated, mirroring will fail. Other diverged branches are silently ignored.") % { default_branch: @project.default_branch }
+      = link_to _('Learn more.'), help_page_path('user/project/repository/repository_mirroring', anchor: 'overwrite-diverged-branches'), target: '_blank', rel: 'noopener noreferrer'
 
   - if @project.builds_enabled?
     = render 'shared/mirror_trigger_builds_setting', f: f, checked: false

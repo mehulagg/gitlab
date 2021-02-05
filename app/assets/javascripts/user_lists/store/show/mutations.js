@@ -1,6 +1,6 @@
 import { states } from '../../constants/show';
-import * as types from './mutation_types';
 import { parseUserIds } from '../utils';
+import * as types from './mutation_types';
 
 export default {
   [types.REQUEST_USER_LIST](state) {
@@ -20,10 +20,10 @@ export default {
   [types.ADD_USER_IDS](state, ids) {
     state.userIds = [
       ...state.userIds,
-      ...parseUserIds(ids).filter(id => id && !state.userIds.includes(id)),
+      ...parseUserIds(ids).filter((id) => id && !state.userIds.includes(id)),
     ];
   },
   [types.REMOVE_USER_ID](state, id) {
-    state.userIds = state.userIds.filter(uid => uid !== id);
+    state.userIds = state.userIds.filter((uid) => uid !== id);
   },
 };

@@ -1,15 +1,20 @@
 <script>
 import { isEmpty } from 'lodash';
+import { GlSafeHtmlDirective } from '@gitlab/ui';
 import MRWidgetStore from 'ee_else_ce/vue_merge_request_widget/stores/mr_widget_store';
 import MRWidgetService from 'ee_else_ce/vue_merge_request_widget/services/mr_widget_service';
 import MrWidgetApprovals from 'ee_else_ce/vue_merge_request_widget/components/approvals/approvals.vue';
 import stateMaps from 'ee_else_ce/vue_merge_request_widget/stores/state_maps';
-import { GlSafeHtmlDirective } from '@gitlab/ui';
 import { sprintf, s__, __ } from '~/locale';
 import Project from '~/pages/projects/project';
 import SmartInterval from '~/smart_interval';
 import { secondsToMilliseconds } from '~/lib/utils/datetime_utility';
+import notify from '~/lib/utils/notify';
 import { deprecatedCreateFlash as createFlash } from '../flash';
+import GroupedCodequalityReportsApp from '../reports/codequality_report/grouped_codequality_reports_app.vue';
+import GroupedTestReportsApp from '../reports/components/grouped_test_reports_app.vue';
+import { setFaviconOverlay } from '../lib/utils/favicon';
+import GroupedAccessibilityReportsApp from '../reports/accessibility_report/grouped_accessibility_reports_app.vue';
 import mergeRequestQueryVariablesMixin from './mixins/merge_request_query_variables';
 import Loading from './components/loading.vue';
 import WidgetHeader from './components/mr_widget_header.vue';
@@ -38,17 +43,11 @@ import AutoMergeFailed from './components/states/mr_widget_auto_merge_failed.vue
 import CheckingState from './components/states/mr_widget_checking.vue';
 // import ExtensionsContainer from './components/extensions/container';
 import eventHub from './event_hub';
-import notify from '~/lib/utils/notify';
 import SourceBranchRemovalStatus from './components/source_branch_removal_status.vue';
 import TerraformPlan from './components/terraform/mr_widget_terraform_container.vue';
-import GroupedCodequalityReportsApp from '../reports/codequality_report/grouped_codequality_reports_app.vue';
-import GroupedTestReportsApp from '../reports/components/grouped_test_reports_app.vue';
-import { setFaviconOverlay } from '../lib/utils/common_utils';
-import GroupedAccessibilityReportsApp from '../reports/accessibility_report/grouped_accessibility_reports_app.vue';
 import getStateQuery from './queries/get_state.query.graphql';
 
 export default {
-  el: '#js-vue-mr-widget',
   // False positive i18n lint: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/25
   // eslint-disable-next-line @gitlab/require-i18n-strings
   name: 'MRWidget',
@@ -95,7 +94,6 @@ export default {
     state: {
       query: getStateQuery,
       manual: true,
-      pollInterval: 10 * 1000,
       skip() {
         return !this.mr || !window.gon?.features?.mergeRequestWidgetGraphql;
       },
@@ -166,7 +164,8 @@ export default {
       return (
         !this.mr.canRemoveSourceBranch &&
         this.mr.shouldRemoveSourceBranch &&
-        (!this.mr.isNothingToMergeState && !this.mr.isMergedState)
+        !this.mr.isNothingToMergeState &&
+        !this.mr.isMergedState
       );
     },
     shouldRenderCollaborationStatus() {
@@ -181,7 +180,7 @@ export default {
       );
     },
     shouldRenderSecurityReport() {
-      return Boolean(window.gon?.features?.coreSecurityMrWidget && this.mr.pipeline.id);
+      return Boolean(this.mr.pipeline.id);
     },
     mergeError() {
       let { mergeError } = this.mr;
@@ -190,9 +189,13 @@ export default {
         mergeError = mergeError.slice(0, -1);
       }
 
-      return sprintf(s__('mrWidget|Merge failed: %{mergeError}. Please try again.'), {
-        mergeError,
-      });
+      return sprintf(
+        s__('mrWidget|%{mergeError}. Try again.'),
+        {
+          mergeError,
+        },
+        false,
+      );
     },
     shouldShowAccessibilityReport() {
       return this.mr.accessibilityReportPath;
@@ -282,6 +285,10 @@ export default {
       return new MRWidgetService(this.getServiceEndpoints(store));
     },
     checkStatus(cb, isRebased) {
+      if (window.gon?.features?.mergeRequestWidgetGraphql) {
+        this.$apollo.queries.state.refetch();
+      }
+
       return this.service
         .checkStatus()
         .then(({ data }) => {
@@ -306,8 +313,7 @@ export default {
         callback: this.checkStatus,
         startingInterval: this.startingPollInterval,
         maxInterval: this.startingPollInterval + secondsToMilliseconds(4 * 60),
-        hiddenInterval:
-          window.gon?.features?.widgetVisibilityPolling && secondsToMilliseconds(6 * 60),
+        hiddenInterval: secondsToMilliseconds(6 * 60),
         incrementByFactorOf: 2,
       });
     },
@@ -357,11 +363,12 @@ export default {
     fetchActionsContent() {
       this.service
         .fetchMergeActionsContent()
-        .then(res => {
+        .then((res) => {
           if (res.data) {
             const el = document.createElement('div');
             el.innerHTML = res.data;
             document.body.appendChild(el);
+            document.dispatchEvent(new CustomEvent('merged:UpdateActions'));
             Project.initRefSwitcher();
           }
         })
@@ -387,26 +394,26 @@ export default {
       this.pollingInterval.stopTimer();
     },
     bindEventHubListeners() {
-      eventHub.$on('MRWidgetUpdateRequested', cb => {
+      eventHub.$on('MRWidgetUpdateRequested', (cb) => {
         this.checkStatus(cb);
       });
 
-      eventHub.$on('MRWidgetRebaseSuccess', cb => {
+      eventHub.$on('MRWidgetRebaseSuccess', (cb) => {
         this.checkStatus(cb, true);
       });
 
       // `params` should be an Array contains a Boolean, like `[true]`
       // Passing parameter as Boolean didn't work.
-      eventHub.$on('SetBranchRemoveFlag', params => {
+      eventHub.$on('SetBranchRemoveFlag', (params) => {
         [this.mr.isRemovingSourceBranch] = params;
       });
 
-      eventHub.$on('FailedToMerge', mergeError => {
+      eventHub.$on('FailedToMerge', (mergeError) => {
         this.mr.state = 'failedToMerge';
         this.mr.mergeError = mergeError;
       });
 
-      eventHub.$on('UpdateWidgetData', data => {
+      eventHub.$on('UpdateWidgetData', (data) => {
         this.mr.setData(data);
       });
 
@@ -461,6 +468,7 @@ export default {
         :head-path="mr.codeclimate.head_path"
         :head-blob-path="mr.headBlobPath"
         :base-blob-path="mr.baseBlobPath"
+        :codequality-reports-path="mr.codequalityReportsPath"
         :codequality-help-path="mr.codequalityHelpPath"
       />
 

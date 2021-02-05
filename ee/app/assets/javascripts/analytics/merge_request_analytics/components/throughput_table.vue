@@ -155,12 +155,12 @@ export default {
   },
   computed: {
     ...mapState('filters', {
-      selectedSourceBranch: state => state.branches.source.selected,
-      selectedTargetBranch: state => state.branches.target.selected,
-      selectedMilestone: state => state.milestones.selected,
-      selectedAuthor: state => state.authors.selected,
-      selectedAssignee: state => state.assignees.selected,
-      selectedLabelList: state => state.labels.selectedList,
+      selectedSourceBranch: (state) => state.branches.source.selected,
+      selectedTargetBranch: (state) => state.branches.target.selected,
+      selectedMilestone: (state) => state.milestones.selected,
+      selectedAuthor: (state) => state.authors.selected,
+      selectedAssignee: (state) => state.assignees.selected,
+      selectedLabelList: (state) => state.labels.selectedList,
     }),
     options() {
       return filterToQueryObject({

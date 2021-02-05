@@ -1,0 +1,5 @@
+---
+title: Enable Merge Train checkbox based on Merge Pipelines checkbox
+merge_request: 51233
+author:
+type: changed

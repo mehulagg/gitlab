@@ -67,36 +67,12 @@ execution time and the error output.
 
 ### Number of recent failures
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241759) in GitLab 13.7.
-> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-the-number-of-recent-failures). **(CORE ONLY)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Introduced in Merge Requests](https://gitlab.com/gitlab-org/gitlab/-/issues/241759) in GitLab 13.7.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/268249) in GitLab 13.8.
+> - [Introduced in Test Reports](https://gitlab.com/gitlab-org/gitlab/-/issues/235525) in GitLab 13.9.
 
 If a test failed in the project's default branch in the last 14 days, a message like
 `Failed {n} time(s) in {default_branch} in the last 14 days` is displayed for that test.
-
-#### Enable or disable the number of recent failures **(CORE ONLY)**
-
-Displaying the number of failures in the last 14 days is under development and not
-ready for production use. It is deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:test_failure_history)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:test_failure_history)
-```
 
 ## How to set it up
 
@@ -315,6 +291,22 @@ javascript:
         - junit.xml
 ```
 
+### Flutter / Dart example
+
+This example `.gitlab-ci.yml` file uses the [JUnit Report](https://pub.dev/packages/junitreport) package to convert the `flutter test` output into JUnit report XML format:
+
+```yaml
+test:
+  stage: test
+  script:
+    - flutter test --machine | tojunit -o report.xml
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - report.xml
+```
+
 ## Viewing Unit test reports on GitLab
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24792) in GitLab 12.5 behind a feature flag (`junit_pipeline_view`), disabled by default.
@@ -335,7 +327,7 @@ You can also retrieve the reports via the [GitLab API](../api/pipelines.md#get-a
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202114) in GitLab 13.0.
 > - It's deployed behind a feature flag, disabled by default.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enabling-the-junit-screenshots-feature). **(CORE ONLY)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enabling-the-junit-screenshots-feature). **(FREE SELF)**
 
 If JUnit report format XML files contain an `attachment` tag, GitLab parses the attachment.
 
@@ -349,7 +341,7 @@ Upload your screenshots as [artifacts](pipelines/job_artifacts.md#artifactsrepor
 
 When [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/6061) is complete, the attached file will be visible on the pipeline details page.
 
-### Enabling the JUnit screenshots feature **(CORE ONLY)**
+### Enabling the JUnit screenshots feature **(FREE SELF)**
 
 This feature comes with the `:junit_pipeline_screenshots_view` feature flag disabled by default.
 

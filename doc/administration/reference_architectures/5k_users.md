@@ -5,7 +5,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Reference architecture: up to 5,000 users **(PREMIUM ONLY)**
+# Reference architecture: up to 5,000 users **(PREMIUM SELF)**
 
 This page describes GitLab reference architecture for up to 5,000 users. For a
 full list of reference architectures, see
@@ -24,18 +24,18 @@ costly-to-operate environment by using the
 
 | Service                                    | Nodes       | Configuration           | GCP            | AWS         | Azure    |
 |--------------------------------------------|-------------|-------------------------|----------------|-------------|----------|
-| External load balancing node               | 1           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | c5.large    | F2s v2   |
-| Redis                                      | 3           | 2 vCPU, 7.5 GB memory   | n1-standard-2  | m5.large    | D2s v3   |
-| Consul + Sentinel                          | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | c5.large    | F2s v2   |
-| PostgreSQL                                 | 3           | 2 vCPU, 7.5 GB memory   | n1-standard-2  | m5.large    | D2s v3   |
-| PgBouncer                                  | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | c5.large    | F2s v2   |
-| Internal load balancing node               | 1           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | c5.large    | F2s v2   |
-| Gitaly                                     | 2 (minimum) | 8 vCPU, 30 GB memory    | n1-standard-8  | m5.2xlarge  | D8s v3   |
-| Sidekiq                                    | 4           | 2 vCPU, 7.5 GB memory   | n1-standard-2  | m5.large    | D2s v3   |
-| GitLab Rails                               | 3           | 16 vCPU, 14.4 GB memory | n1-highcpu-16  | c5.4xlarge  | F16s v2  |
-| Monitoring node                            | 1           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | c5.large    | F2s v2   |
+| External load balancing node               | 1           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
+| Redis                                      | 3           | 2 vCPU, 7.5 GB memory   | n1-standard-2  | `m5.large`    | D2s v3   |
+| Consul + Sentinel                          | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
+| PostgreSQL                                 | 3           | 2 vCPU, 7.5 GB memory   | n1-standard-2  | `m5.large`    | D2s v3   |
+| PgBouncer                                  | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
+| Internal load balancing node               | 1           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
+| Gitaly                                     | 2 (minimum) | 8 vCPU, 30 GB memory    | n1-standard-8  | `m5.2xlarge`  | D8s v3   |
+| Sidekiq                                    | 4           | 2 vCPU, 7.5 GB memory   | n1-standard-2  | `m5.large`    | D2s v3   |
+| GitLab Rails                               | 3           | 16 vCPU, 14.4 GB memory | n1-highcpu-16  | `c5.4xlarge`  | F16s v2  |
+| Monitoring node                            | 1           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2   | `c5.large`    | F2s v2   |
 | Object storage                             | n/a         | n/a                     | n/a            | n/a         | n/a      |
-| NFS server (optional, not recommended)     | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | c5.xlarge   | F4s v2   |
+| NFS server (optional, not recommended)     | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | `c5.xlarge`   | F4s v2   |
 
 ```mermaid
 stateDiagram-v2
@@ -671,9 +671,9 @@ install the necessary dependencies from step 1, and add the
 GitLab package repository from step 2. When installing GitLab
 in the second step, do not supply the `EXTERNAL_URL` value.
 
-#### PostgreSQL primary node
+#### PostgreSQL nodes
 
-1. SSH in to the PostgreSQL primary node.
+1. SSH in to one of the PostgreSQL nodes.
 1. Generate a password hash for the PostgreSQL username/password pair. This assumes you will use the default
    username of `gitlab` (recommended). The command will request a password
    and confirmation. Use the value that is output by this command in the next
@@ -701,23 +701,33 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    sudo gitlab-ctl pg-password-md5 gitlab-consul
    ```
 
-1. On the primary database node, edit `/etc/gitlab/gitlab.rb` replacing values noted in the `# START user configuration` section:
+1. On every database node, edit `/etc/gitlab/gitlab.rb` replacing values noted in the `# START user configuration` section:
 
    ```ruby
-   # Disable all components except PostgreSQL and Repmgr and Consul
+   # Disable all components except PostgreSQL, Patroni, and Consul
    roles ['postgres_role']
 
    # PostgreSQL configuration
    postgresql['listen_address'] = '0.0.0.0'
-   postgresql['hot_standby'] = 'on'
-   postgresql['wal_level'] = 'replica'
-   postgresql['shared_preload_libraries'] = 'repmgr_funcs'
+
+   # Enable Patroni
+   patroni['enable'] = true
+   # Set `max_wal_senders` to one more than the number of database nodes in the cluster.
+   # This is used to prevent replication from using up all of the
+   # available database connections.
+   patroni['postgresql']['max_wal_senders'] = 4
+   patroni['postgresql']['max_replication_slots'] = 4
+   # Incoming recommended value for max connections is 500. See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5691.
+   patroni['postgresql']['max_connections'] = 500
 
    # Disable automatic database migrations
    gitlab_rails['auto_migrate'] = false
 
    # Configure the Consul agent
+   consul['enable'] = true
    consul['services'] = %w(postgresql)
+   ## Enable service discovery for Prometheus
+   consul['monitoring_service_discovery'] =  true
 
    # START user configuration
    # Please set the real values as explained in Required Information section
@@ -726,25 +736,13 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    postgresql['pgbouncer_user_password'] = '<pgbouncer_password_hash>'
    # Replace POSTGRESQL_PASSWORD_HASH with a generated md5 value
    postgresql['sql_user_password'] = '<postgresql_password_hash>'
-   # Set `max_wal_senders` to one more than the number of database nodes in the cluster.
-   # This is used to prevent replication from using up all of the
-   # available database connections.
-   postgresql['max_wal_senders'] = 4
-   postgresql['max_replication_slots'] = 4
 
    # Replace XXX.XXX.XXX.XXX/YY with Network Address
-   postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32 10.6.0.0/24)
-   repmgr['trust_auth_cidr_addresses'] = %w(127.0.0.1/32 10.6.0.0/24)
-
-   ## Enable service discovery for Prometheus
-   consul['enable'] = true
-   consul['monitoring_service_discovery'] =  true
+   postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/24)
 
    # Set the network addresses that the exporters will listen on for monitoring
    node_exporter['listen_address'] = '0.0.0.0:9100'
    postgres_exporter['listen_address'] = '0.0.0.0:9187'
-   postgres_exporter['dbname'] = 'gitlabhq_production'
-   postgres_exporter['password'] = '<postgresql_password_hash>'
 
    ## The IPs of the Consul server nodes
    ## You can also use FQDNs and intermix them with IPs
@@ -755,95 +753,13 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    # END user configuration
    ```
 
-1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
-1. You can list the current PostgreSQL primary, secondary nodes status via:
+PostgreSQL, with Patroni managing its failover, will default to use `pg_rewind` by default to handle conflicts.
+Like most failover handling methods, this has a small chance of leading to data loss.
+Learn more about the various [Patroni replication methods](../postgresql/replication_and_failover.md#selecting-the-appropriate-patroni-replication-method).
 
-   ```shell
-   sudo /opt/gitlab/bin/gitlab-ctl repmgr cluster show
-   ```
-
-1. Verify the GitLab services are running:
-
-   ```shell
-   sudo gitlab-ctl status
-   ```
-
-   The output should be similar to the following:
-
-   ```plaintext
-   run: consul: (pid 30593) 77133s; run: log: (pid 29912) 77156s
-   run: logrotate: (pid 23449) 3341s; run: log: (pid 29794) 77175s
-   run: node-exporter: (pid 30613) 77133s; run: log: (pid 29824) 77170s
-   run: postgres-exporter: (pid 30620) 77132s; run: log: (pid 29894) 77163s
-   run: postgresql: (pid 30630) 77132s; run: log: (pid 29618) 77181s
-   run: repmgrd: (pid 30639) 77132s; run: log: (pid 29985) 77150s
-   ```
-
-<div align="right">
-  <a type="button" class="btn btn-default" href="#setup-components">
-    Back to setup components <i class="fa fa-angle-double-up" aria-hidden="true"></i>
-  </a>
-</div>
-
-#### PostgreSQL secondary nodes
-
-1. On both the secondary nodes, add the same configuration specified above for the primary node
-   with an additional setting that will inform `gitlab-ctl` that they are standby nodes initially
-   and there's no need to attempt to register them as a primary node:
-
-   ```ruby
-   # Disable all components except PostgreSQL and Repmgr and Consul
-   roles ['postgres_role']
-
-   # PostgreSQL configuration
-   postgresql['listen_address'] = '0.0.0.0'
-   postgresql['hot_standby'] = 'on'
-   postgresql['wal_level'] = 'replica'
-   postgresql['shared_preload_libraries'] = 'repmgr_funcs'
-
-   # Disable automatic database migrations
-   gitlab_rails['auto_migrate'] = false
-
-   # Configure the Consul agent
-   consul['services'] = %w(postgresql)
-
-   # Specify if a node should attempt to be primary on initialization.
-   repmgr['master_on_initialization'] = false
-
-   # START user configuration
-   # Please set the real values as explained in Required Information section
-   #
-   # Replace PGBOUNCER_PASSWORD_HASH with a generated md5 value
-   postgresql['pgbouncer_user_password'] = '<pgbouncer_password_hash>'
-   # Replace POSTGRESQL_PASSWORD_HASH with a generated md5 value
-   postgresql['sql_user_password'] = '<postgresql_password_hash>'
-   # Set `max_wal_senders` to one more than the number of database nodes in the cluster.
-   # This is used to prevent replication from using up all of the
-   # available database connections.
-   postgresql['max_wal_senders'] = 4
-   postgresql['max_replication_slots'] = 4
-
-   # Replace XXX.XXX.XXX.XXX/YY with Network Address
-   postgresql['trust_auth_cidr_addresses'] = %w(127.0.0.1/32 10.6.0.0/24)
-   repmgr['trust_auth_cidr_addresses'] = %w(127.0.0.1/32 10.6.0.0/24)
-
-   ## Enable service discovery for Prometheus
-   consul['enable'] = true
-   consul['monitoring_service_discovery'] =  true
-
-   # Set the network addresses that the exporters will listen on for monitoring
-   node_exporter['listen_address'] = '0.0.0.0:9100'
-   postgres_exporter['listen_address'] = '0.0.0.0:9187'
-   postgres_exporter['dbname'] = 'gitlabhq_production'
-   postgres_exporter['password'] = '<postgresql_password_hash>'
-
-   ## The IPs of the Consul server nodes
-   ## You can also use FQDNs and intermix them with IPs
-   consul['configuration'] = {
-      retry_join: %w(10.6.0.11 10.6.0.12 10.6.0.13),
-   }
-   # END user configuration
-   ```
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
+   the file of the same name on this server. If that file is not on this server,
+   add the file from your Consul server to this server.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
@@ -874,83 +790,24 @@ SSH in to the **primary node**:
 
 1. Exit the database prompt by typing `\q` and Enter.
 
-1. Verify the cluster is initialized with one node:
+1. Check the status of the leader and cluster:
 
    ```shell
-   gitlab-ctl repmgr cluster show
+   gitlab-ctl patroni members
    ```
 
    The output should be similar to the following:
 
    ```plaintext
-   Role      | Name     | Upstream | Connection String
-   ----------+----------|----------|----------------------------------------
-   * master  | HOSTNAME |          | host=HOSTNAME user=gitlab_repmgr dbname=gitlab_repmgr
+   | Cluster       | Member                            |  Host     | Role   | State   | TL  | Lag in MB | Pending restart |
+   |---------------|-----------------------------------|-----------|--------|---------|-----|-----------|-----------------|
+   | postgresql-ha | <PostgreSQL primary hostname>     | 10.6.0.31 | Leader | running | 175 |           | *               |
+   | postgresql-ha | <PostgreSQL secondary 1 hostname> | 10.6.0.32 |        | running | 175 | 0         | *               |
+   | postgresql-ha | <PostgreSQL secondary 2 hostname> | 10.6.0.33 |        | running | 175 | 0         | *               |
    ```
 
-1. Note down the hostname or IP address in the connection string: `host=HOSTNAME`. We will
-   refer to the hostname in the next section as `<primary_node_name>`. If the value
-   is not an IP address, it will need to be a resolvable name (via DNS or
-   `/etc/hosts`)
-
-SSH in to the **secondary node**:
-
-1. Set up the repmgr standby:
-
-   ```shell
-   gitlab-ctl repmgr standby setup <primary_node_name>
-   ```
-
-   Do note that this will remove the existing data on the node. The command
-   has a wait time.
-
-   The output should be similar to the following:
-
-   ```console
-   Doing this will delete the entire contents of /var/opt/gitlab/postgresql/data
-   If this is not what you want, hit Ctrl-C now to exit
-   To skip waiting, rerun with the -w option
-   Sleeping for 30 seconds
-   Stopping the database
-   Removing the data
-   Cloning the data
-   Starting the database
-   Registering the node with the cluster
-   ok: run: repmgrd: (pid 19068) 0s
-   ```
-
-Before moving on, make sure the databases are configured correctly. Run the
-following command on the **primary** node to verify that replication is working
-properly and the secondary nodes appear in the cluster:
-
-```shell
-gitlab-ctl repmgr cluster show
-```
-
-The output should be similar to the following:
-
-```plaintext
-Role      | Name    | Upstream  | Connection String
-----------+---------|-----------|------------------------------------------------
-* master  | MASTER  |           | host=<primary_node_name> user=gitlab_repmgr dbname=gitlab_repmgr
-  standby | STANDBY | MASTER    | host=<secondary_node_name> user=gitlab_repmgr dbname=gitlab_repmgr
-  standby | STANDBY | MASTER    | host=<secondary_node_name> user=gitlab_repmgr dbname=gitlab_repmgr
-```
-
-If the 'Role' column for any node says "FAILED", check the
+If the 'State' column for any node doesn't say "running", check the
 [Troubleshooting section](troubleshooting.md) before proceeding.
-
-Also, check that the `repmgr-check-master` command works successfully on each node:
-
-```shell
-su - gitlab-consul
-gitlab-ctl repmgr-check-master || echo 'This node is a standby repmgr node'
-```
-
-This command relies on exit codes to tell Consul whether a particular node is a master
-or secondary. The most important thing here is that this command does not produce errors.
-If there are errors it's most likely due to incorrect `gitlab-consul` database user permissions.
-Check the [Troubleshooting section](troubleshooting.md) before proceeding.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
@@ -969,7 +826,7 @@ The following IPs will be used as an example:
 
 1. On each PgBouncer node, edit `/etc/gitlab/gitlab.rb`, and replace
    `<consul_password_hash>` and `<pgbouncer_password_hash>` with the
-   password hashes you [set up previously](#postgresql-primary-node):
+   password hashes you [set up previously](#postgresql-nodes):
 
    ```ruby
    # Disable all components except Pgbouncer and Consul agent
@@ -977,15 +834,16 @@ The following IPs will be used as an example:
 
    # Configure PgBouncer
    pgbouncer['admin_users'] = %w(pgbouncer gitlab-consul)
-
    pgbouncer['users'] = {
-   'gitlab-consul': {
-      password: '<consul_password_hash>'
-   },
-   'pgbouncer': {
-      password: '<pgbouncer_password_hash>'
+      'gitlab-consul': {
+         password: '<consul_password_hash>'
+      },
+      'pgbouncer': {
+         password: '<pgbouncer_password_hash>'
+      }
    }
-   }
+   # Incoming recommended value for max db connections is 150. See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5691.
+   pgbouncer['max_db_connections'] = 150
 
    # Configure Consul agent
    consul['watchers'] = %w(postgresql)
@@ -1479,12 +1337,6 @@ You can also run [multiple Sidekiq processes](../operations/extra_sidekiq_proces
 
 This section describes how to configure the GitLab application (Rails) component.
 
-In our architecture, we run each GitLab Rails node using the Puma webserver, and
-have its number of workers set to 90% of available CPUs, with four threads. For
-nodes running Rails with other components, the worker value should be reduced
-accordingly. We've determined that a worker value of 50% achieves a good balance,
-but this is dependent on workload.
-
 On each node perform the following:
 
 1. If you're [using NFS](#configure-nfs-optional):
@@ -1768,7 +1620,7 @@ GitLab has been tested on a number of object storage providers:
 - [Google Cloud Storage](https://cloud.google.com/storage)
 - [Digital Ocean Spaces](https://www.digitalocean.com/products/spaces/)
 - [Oracle Cloud Infrastructure](https://docs.cloud.oracle.com/en-us/iaas/Content/Object/Tasks/s3compatibleapi.htm)
-- [Openstack Swift](https://docs.openstack.org/swift/latest/s3_compat.html)
+- [OpenStack Swift](https://docs.openstack.org/swift/latest/s3_compat.html)
 - [Azure Blob storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction)
 - On-premises hardware and appliances from various storage vendors.
 - MinIO. We have [a guide to deploying this](https://docs.gitlab.com/charts/advanced/external-object-storage/minio.html) within our Helm Chart documentation.
@@ -1788,7 +1640,7 @@ on what features you intend to use:
 
 |Object storage type|Supported by consolidated configuration?|
 |-------------------|----------------------------------------|
-| [Backups](../../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage)|No|
+| [Backups](../../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage) | No |
 | [Job artifacts](../job_artifacts.md#using-object-storage) including archived job logs | Yes |
 | [LFS objects](../lfs/index.md#storing-lfs-objects-in-remote-object-storage) | Yes |
 | [Uploads](../uploads.md#using-object-storage) | Yes |
@@ -1797,7 +1649,7 @@ on what features you intend to use:
 | [Mattermost](https://docs.mattermost.com/administration/config-settings.html#file-storage)| No |
 | [Packages](../packages/index.md#using-object-storage) (optional feature) | Yes |
 | [Dependency Proxy](../packages/dependency_proxy.md#using-object-storage) (optional feature) | Yes |
-| [Pseudonymizer](../pseudonymizer.md#configuration) (optional feature) **(ULTIMATE ONLY)** | No |
+| [Pseudonymizer](../pseudonymizer.md#configuration) (optional feature) **(ULTIMATE SELF)** | No |
 | [Autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
 | [Terraform state files](../terraform_state.md#using-object-storage) | Yes |
 
@@ -1823,7 +1675,7 @@ work.
   </a>
 </div>
 
-## Configure Advanced Search **(STARTER ONLY)**
+## Configure Advanced Search **(PREMIUM SELF)**
 
 You can leverage Elasticsearch and [enable Advanced Search](../../integration/elasticsearch.md)
 for faster, more advanced code search across your entire GitLab instance.
@@ -1846,6 +1698,12 @@ are recommended over NFS wherever possible for improved performance. If you inte
 to use GitLab Pages, this currently [requires NFS](troubleshooting.md#gitlab-pages-requires-nfs).
 
 See how to [configure NFS](../nfs.md).
+
+WARNING:
+From GitLab 13.0, using NFS for Git repositories is deprecated.
+From GitLab 14.0, technical support for NFS for Git repositories
+will no longer be provided. Upgrade to [Gitaly Cluster](../gitaly/praefect.md)
+as soon as possible.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

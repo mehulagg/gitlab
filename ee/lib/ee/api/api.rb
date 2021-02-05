@@ -29,6 +29,7 @@ module EE
         mount ::API::GroupPushRule
         mount ::API::MergeTrains
         mount ::API::GroupHooks
+        mount ::API::GroupMergeRequestApprovalSettings
         mount ::API::Scim
         mount ::API::ManagedLicenses
         mount ::API::ProjectApprovals
@@ -47,6 +48,7 @@ module EE
         mount ::API::ResourceWeightEvents
         mount ::API::ResourceIterationEvents
         mount ::API::Iterations
+        mount ::API::GroupRepositoryStorageMoves
       end
     end
   end

@@ -101,7 +101,7 @@ describe('EE approvals project settings module actions', () => {
           { type: 'receiveRulesSuccess', payload: mapApprovalSettingsResponse(data) },
         ],
         () => {
-          expect(mock.history.get.map(x => x.url)).toEqual([TEST_SETTINGS_PATH]);
+          expect(mock.history.get.map((x) => x.url)).toEqual([TEST_SETTINGS_PATH]);
         },
       );
     });

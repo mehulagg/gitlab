@@ -23,7 +23,7 @@ The first option is to simply [import the Project tarball file via the GitLab UI
 
 It should take up to 15 minutes for the project to fully import. You can head to the project's main page for the current status.
 
-This method ignores all the errors silently (including the ones related to `GITALY_DISABLE_REQUEST_LIMITS`) and is used by GitLab's users. For development and testing, check the other methods below.
+This method ignores all the errors silently (including the ones related to `GITALY_DISABLE_REQUEST_LIMITS`) and is used by GitLab users. For development and testing, check the other methods below.
 
 ### Importing via the `import-project` script
 
@@ -170,7 +170,7 @@ The last option is to import a project using a Rails console:
 
    Gitlab::ImportExport::RepoRestorer.new(path_to_bundle: repo_path,
                                           shared: shared,
-                                          project: project).restore
+                                          importable: project).restore
    ```
 
    We are storing all import failures in the `import_failures` data table.

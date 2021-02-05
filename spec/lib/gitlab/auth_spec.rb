@@ -133,8 +133,7 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
           expect_next_instance_of(Gitlab::Auth::IpRateLimiter) do |rate_limiter|
             expect(rate_limiter).to receive(:reset!)
           end
-          expect(Gitlab::Auth::UniqueIpsLimiter).to(
-            receive(:limit_user!).exactly(3).times.and_call_original)
+          expect(Gitlab::Auth::UniqueIpsLimiter).to receive(:limit_user!).twice.and_call_original
 
           gl_auth.find_for_git_client(user.username, user.password, project: nil, ip: 'ip')
         end
@@ -365,43 +364,39 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
         let_it_be(:project_access_token) { create(:personal_access_token, user: project_bot_user) }
 
         context 'with valid project access token' do
-          before_all do
+          before do
             project.add_maintainer(project_bot_user)
           end
 
-          it 'succeeds' do
+          it 'successfully authenticates the project bot' do
             expect(gl_auth.find_for_git_client(project_bot_user.username, project_access_token.token, project: project, ip: 'ip'))
+              .to eq(Gitlab::Auth::Result.new(project_bot_user, nil, :personal_access_token, described_class.full_authentication_abilities))
+          end
+
+          it 'successfully authenticates the project bot with a nil project' do
+            expect(gl_auth.find_for_git_client(project_bot_user.username, project_access_token.token, project: nil, ip: 'ip'))
               .to eq(Gitlab::Auth::Result.new(project_bot_user, nil, :personal_access_token, described_class.full_authentication_abilities))
           end
         end
 
         context 'with invalid project access token' do
-          it 'fails' do
-            expect(gl_auth.find_for_git_client(project_bot_user.username, project_access_token.token, project: project, ip: 'ip'))
-              .to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
+          context 'when project bot is not a project member' do
+            it 'fails for a non-project member' do
+              expect(gl_auth.find_for_git_client(project_bot_user.username, project_access_token.token, project: project, ip: 'ip'))
+                .to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
+            end
           end
-        end
-      end
-    end
 
-    context 'while using passwords with OTP' do
-      let_it_be(:user) { create(:user, :two_factor) }
+          context 'when project bot user is blocked' do
+            before do
+              project_bot_user.block!
+            end
 
-      context 'with valid OTP code' do
-        let(:password) { "#{user.password}#{user.current_otp}" }
-
-        it 'accepts password with OTP' do
-          expect(gl_auth.find_for_git_client(user.username, password, project: nil, ip: 'ip'))
-            .to(eq(Gitlab::Auth::Result.new(user, nil, :gitlab_or_ldap, described_class.full_authentication_abilities)))
-        end
-      end
-
-      context 'with invalid OTP code' do
-        let(:password) { "#{user.password}abcdef" }
-
-        it 'throws error' do
-          expect { gl_auth.find_for_git_client(user.username, password, project: nil, ip: 'ip') }
-            .to raise_error(Gitlab::Auth::InvalidOTPError)
+            it 'fails for a blocked project bot' do
+              expect(gl_auth.find_for_git_client(project_bot_user.username, project_access_token.token, project: project, ip: 'ip'))
+                .to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
+            end
+          end
         end
       end
     end
@@ -451,7 +446,7 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
     it 'throws an error suggesting user create a PAT when internal auth is disabled' do
       allow_any_instance_of(ApplicationSetting).to receive(:password_authentication_enabled_for_git?) { false }
 
-      expect { gl_auth.find_for_git_client('foo', 'bar', project: nil, ip: 'ip') }.to raise_error(Gitlab::Auth::Missing2FAError)
+      expect { gl_auth.find_for_git_client('foo', 'bar', project: nil, ip: 'ip') }.to raise_error(Gitlab::Auth::MissingPersonalAccessTokenError)
     end
 
     context 'while using deploy tokens' do

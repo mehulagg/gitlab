@@ -1,14 +1,14 @@
 import { mapValues } from 'lodash';
 import Tracking from '~/tracking';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { SET_FILTER, SET_HIDE_DISMISSED } from './mutation_types';
 import { DISMISSAL_STATES } from './constants';
-import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 
 export const setFilter = ({ commit }, filter) => {
   // Convert the filter key to snake case and the selected option IDs to lower case. The API
   // endpoint needs them to be in this format.
-  const convertedFilter = mapValues(convertObjectPropsToSnakeCase(filter), array =>
-    array.map(element => element.toLowerCase()),
+  const convertedFilter = mapValues(convertObjectPropsToSnakeCase(filter), (array) =>
+    array.map((element) => element.toLowerCase()),
   );
 
   commit(SET_FILTER, convertedFilter);

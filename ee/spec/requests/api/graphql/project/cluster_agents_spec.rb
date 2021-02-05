@@ -69,6 +69,8 @@ RSpec.describe 'Project.cluster_agents' do
     end
 
     it 'does not suffer from N+1 performance issues' do
+      post_graphql(query, current_user: current_user)
+
       expect do
         post_graphql(query, current_user: current_user)
       end.to issue_same_number_of_queries_as { post_graphql(query, current_user: current_user, variables: [first.with(1)]) }

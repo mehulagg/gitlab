@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import '../commons/bootstrap';
-import { isInIssuePage } from '../lib/utils/common_utils';
 import { __ } from '~/locale';
 import { add, show, hide } from '~/tooltips';
+import { isInIssuePage } from '../lib/utils/common_utils';
 
 // Quick Submit behavior
 //
@@ -30,7 +30,7 @@ function keyCodeIs(e, keyCode) {
   return e.keyCode === keyCode;
 }
 
-$(document).on('keydown.quick_submit', '.js-quick-submit', e => {
+$(document).on('keydown.quick_submit', '.js-quick-submit', (e) => {
   // Enter
   if (!keyCodeIs(e, 13)) {
     return;

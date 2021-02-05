@@ -29,12 +29,9 @@ describe('RelatedIssuesList', () => {
     });
 
     it('shows weight', () => {
-      expect(
-        wrapper
-          .find(IssueWeight)
-          .find('.board-card-info-text')
-          .text(),
-      ).toBe(issuable1.weight.toString());
+      expect(wrapper.find(IssueWeight).find('.board-card-info-text').text()).toBe(
+        issuable1.weight.toString(),
+      );
     });
   });
 });

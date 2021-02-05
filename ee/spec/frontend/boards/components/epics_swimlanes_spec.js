@@ -6,7 +6,7 @@ import EpicLane from 'ee/boards/components/epic_lane.vue';
 import EpicsSwimlanes from 'ee/boards/components/epics_swimlanes.vue';
 import IssueLaneList from 'ee/boards/components/issues_lane_list.vue';
 import getters from 'ee/boards/stores/getters';
-import BoardListHeader from 'ee_else_ce/boards/components/board_list_header_new.vue';
+import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
 import { mockLists, mockEpics, mockIssuesByListId, issues } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -103,20 +103,14 @@ describe('EpicsSwimlanes', () => {
     });
 
     it('makes non preset lists draggable', () => {
-      expect(
-        wrapper
-          .findAll('[data-testid="board-header-container"]')
-          .at(1)
-          .classes(),
-      ).toContain('is-draggable');
+      expect(wrapper.findAll('[data-testid="board-header-container"]').at(1).classes()).toContain(
+        'is-draggable',
+      );
     });
 
     it('does not make preset lists draggable', () => {
       expect(
-        wrapper
-          .findAll('[data-testid="board-header-container"]')
-          .at(0)
-          .classes(),
+        wrapper.findAll('[data-testid="board-header-container"]').at(0).classes(),
       ).not.toContain('is-draggable');
     });
   });

@@ -260,6 +260,8 @@ When executing command lines, scanners should use the `debug` level to log the c
 For instance, the [bundler-audit](https://gitlab.com/gitlab-org/security-products/analyzers/bundler-audit) scanner
 uses the `debug` level to log the command line `bundle audit check --quiet`,
 and what `bundle audit` writes to the standard output.
+If the command line fails, then it should be logged with the `error` log level;
+this makes it possible to debug the problem without having to change the log level to `debug` and rerun the scanning job.
 
 #### common logutil package
 
@@ -399,7 +401,7 @@ isn't a stable identifier and you shouldn't assume it as such when tracking vuln
 The maximum number of identifiers for a vulnerability is set as 20. If a vulnerability has more than 20 identifiers,
 the system saves only the first 20 of them. Note that vulnerabilities in the [Pipeline
 Security](../../user/application_security/security_dashboard/#pipeline-security)
-tab do not enforce this limit and will show all identifiers present in the report artifact.
+tab do not enforce this limit and all identifiers present in the report artifact are displayed.
 
 ### Location
 

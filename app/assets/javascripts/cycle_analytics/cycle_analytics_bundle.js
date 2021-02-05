@@ -1,9 +1,13 @@
+// This is a true violation of @gitlab/no-runtime-template-compiler, as it
+// relies on app/views/projects/cycle_analytics/show.html.haml for its
+// template.
+/* eslint-disable @gitlab/no-runtime-template-compiler */
 import $ from 'jquery';
 import Vue from 'vue';
 import Cookies from 'js-cookie';
 import { GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
-import { deprecatedCreateFlash as Flash } from '../flash';
 import { __ } from '~/locale';
+import { deprecatedCreateFlash as Flash } from '../flash';
 import Translate from '../vue_shared/translate';
 import banner from './components/banner.vue';
 import stageCodeComponent from './components/stage_code_component.vue';
@@ -78,7 +82,7 @@ export default () => {
         $dropdown
           .find('li a')
           .off('click')
-          .on('click', e => {
+          .on('click', (e) => {
             e.preventDefault();
             const $target = $(e.currentTarget);
             this.startDate = $target.data('value');
@@ -94,7 +98,7 @@ export default () => {
 
         this.service
           .fetchCycleAnalyticsData(fetchOptions)
-          .then(response => {
+          .then((response) => {
             this.store.setCycleAnalyticsData(response);
             this.selectDefaultStage();
             this.initDropdown();
@@ -128,7 +132,7 @@ export default () => {
             startDate: this.startDate,
             projectIds: this.selectedProjectIds,
           })
-          .then(response => {
+          .then((response) => {
             this.isEmptyStage = !response.events.length;
             this.store.setStageEvents(response.events, stage);
             this.isLoadingStage = false;

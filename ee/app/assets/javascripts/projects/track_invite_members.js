@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import Tracking from '~/tracking';
 
-export default function(assigneeDropdown) {
+export default function (assigneeDropdown) {
   const trackEvent = 'show_invite_members';
   const trackLabel = 'edit_assignee';
 

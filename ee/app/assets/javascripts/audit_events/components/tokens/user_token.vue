@@ -1,5 +1,5 @@
 <script>
-import Api from '~/api';
+import { getUsers, getUser } from '~/rest_api';
 import AuditFilterToken from './shared/audit_filter_token.vue';
 
 export default {
@@ -9,10 +9,10 @@ export default {
   inheritAttrs: false,
   tokenMethods: {
     fetchItem(id) {
-      return Api.user(id).then(res => res.data);
+      return getUser(id).then((res) => res.data);
     },
     fetchSuggestions(term) {
-      return Api.users(term).then(res => res.data);
+      return getUsers(term).then((res) => res.data);
     },
     getItemName({ name }) {
       return name;
@@ -23,7 +23,7 @@ export default {
 
 <template>
   <audit-filter-token v-bind="{ ...this.$attrs, ...this.$options.tokenMethods }" v-on="$listeners">
-    <template #suggestion="{item: user}">
+    <template #suggestion="{ item: user }">
       <p class="m-0">{{ user.name }}</p>
       <p class="m-0">@{{ user.username }}</p>
     </template>

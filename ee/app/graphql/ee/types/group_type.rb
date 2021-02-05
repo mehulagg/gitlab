@@ -54,7 +54,7 @@ module EE
         field :vulnerability_scanners,
               ::Types::VulnerabilityScannerType.connection_type,
               null: true,
-              description: 'Vulnerability scanners reported on the project vulnerabilties of the group and its subgroups',
+              description: 'Vulnerability scanners reported on the project vulnerabilities of the group and its subgroups',
               resolver: ::Resolvers::Vulnerabilities::ScannersResolver
 
         field :vulnerability_severities_count, ::Types::VulnerabilitySeveritiesCountType, null: true,

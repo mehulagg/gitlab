@@ -23,7 +23,7 @@ describe('LdapOverrideConfirmationModal', () => {
     actions = {
       updateLdapOverride: jest.fn(
         () =>
-          new Promise(resolve => {
+          new Promise((resolve) => {
             resolveUpdateLdapOverride = resolve;
           }),
       ),
@@ -40,7 +40,7 @@ describe('LdapOverrideConfirmationModal', () => {
     });
   };
 
-  const createComponent = state => {
+  const createComponent = (state) => {
     wrapper = mount(LdapOverrideConfirmationModal, {
       localVue,
       store: createStore(state),

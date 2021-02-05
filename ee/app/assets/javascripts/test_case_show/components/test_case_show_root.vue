@@ -14,8 +14,8 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
 import IssuableEventHub from '~/issuable_show/event_hub';
 
-import TestCaseSidebar from './test_case_sidebar.vue';
 import TestCaseGraphQL from '../mixins/test_case_graphql';
+import TestCaseSidebar from './test_case_sidebar.vue';
 
 const stateEvent = {
   Close: 'CLOSE',
@@ -34,6 +34,7 @@ export default {
     IssuableShow,
     TestCaseSidebar,
   },
+  mixins: [TestCaseGraphQL],
   inject: [
     'projectFullPath',
     'testCaseNewPath',
@@ -42,7 +43,6 @@ export default {
     'descriptionPreviewPath',
     'descriptionHelpPath',
   ],
-  mixins: [TestCaseGraphQL],
   data() {
     return {
       testCase: {},
@@ -76,7 +76,7 @@ export default {
       return todos.length ? todos[0] : null;
     },
     selectedLabels() {
-      return this.testCase.labels.nodes.map(label => ({
+      return this.testCase.labels.nodes.map((label) => ({
         ...label,
         id: getIdFromGraphQLId(label.id),
       }));
@@ -91,7 +91,7 @@ export default {
         },
         errorMessage: s__('TestCases|Something went wrong while updating the test case.'),
       })
-        .then(updatedTestCase => {
+        .then((updatedTestCase) => {
           this.testCase = updatedTestCase;
         })
         .finally(() => {
@@ -110,7 +110,7 @@ export default {
         },
         errorMessage: s__('TestCases|Something went wrong while updating the test case.'),
       })
-        .then(updatedTestCase => {
+        .then((updatedTestCase) => {
           this.testCase = updatedTestCase;
           this.editTestCaseFormVisible = false;
           IssuableEventHub.$emit('update.issuable');

@@ -2,8 +2,8 @@
 /* eslint-disable vue/no-v-html */
 import { groupBy } from 'lodash';
 import { GlIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
-import { glEmojiTag } from '../../emoji';
 import { __, sprintf } from '~/locale';
+import { glEmojiTag } from '../../emoji';
 
 // Internal constant, specific to this component, used when no `currentUserId` is given
 const NO_USER_ID = -1;
@@ -48,7 +48,7 @@ export default {
     groupedAwards() {
       const { thumbsup, thumbsdown, ...rest } = {
         ...this.groupedDefaultAwards,
-        ...groupBy(this.awards, x => x.name),
+        ...groupBy(this.awards, (x) => x.name),
       };
 
       return [
@@ -73,7 +73,7 @@ export default {
         return false;
       }
 
-      return awardList.some(award => award.user.id === this.currentUserId);
+      return awardList.some((award) => award.user.id === this.currentUserId);
     },
     createAwardList(name, list) {
       return {
@@ -95,11 +95,11 @@ export default {
 
       // Filter myself from list if I am awarded.
       if (hasReactionByCurrentUser) {
-        awardList = awardList.filter(award => award.user.id !== this.currentUserId);
+        awardList = awardList.filter((award) => award.user.id !== this.currentUserId);
       }
 
       // Get only 9-10 usernames to show in tooltip text.
-      const namesToShow = awardList.slice(0, TOOLTIP_NAME_COUNT).map(award => award.user.name);
+      const namesToShow = awardList.slice(0, TOOLTIP_NAME_COUNT).map((award) => award.user.name);
 
       // Get the remaining list to use in `and x more` text.
       const remainingAwardList = awardList.slice(TOOLTIP_NAME_COUNT, awardList.length);

@@ -9,7 +9,7 @@ describe('threatMonitoringStatistics module getters', () => {
   });
 
   describe('hasHistory', () => {
-    it.each(['nominal', 'anomalous'])('returns true if there is any %s history data', type => {
+    it.each(['nominal', 'anomalous'])('returns true if there is any %s history data', (type) => {
       state.statistics.history[type] = ['foo'];
       expect(getters.hasHistory(state)).toBe(true);
     });

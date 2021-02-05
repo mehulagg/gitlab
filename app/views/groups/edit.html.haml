@@ -26,6 +26,7 @@
   .settings-content
     = render 'groups/settings/permissions'
 
+= render_if_exists 'groups/merge_request_approval_settings', expanded: expanded, group: @group, user: current_user
 = render_if_exists 'groups/insights', expanded: expanded
 
 %section.settings.no-animate#js-badge-settings{ class: ('expanded' if expanded) }
@@ -35,8 +36,8 @@
     %button.btn.gl-button.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
     %p
-      = s_('GroupSettings|Customize your group badges.')
-      = link_to s_('GroupSettings|Learn more about badges.'), help_page_path('user/project/badges')
+      = s_('GroupSettings|Customize this group\'s badges.')
+      = link_to s_('GroupSettings|What are badges?'), help_page_path('user/project/badges')
   .settings-content
     = render 'shared/badges/badge_settings'
 

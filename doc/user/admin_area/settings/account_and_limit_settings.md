@@ -5,44 +5,69 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference
 ---
 
-# Account and limit settings **(CORE ONLY)**
+# Account and limit settings **(FREE SELF)**
+
+## Default projects limit
+
+You can change the default maximum number of projects that users can create in their personal namespace.
+Navigate to **Admin Area > Settings > General**, then expand **Account and Limit**.
+You can increase or decrease that `Default projects limit` value.
+
+- If you set `Default projects limit` to 0, users are not allowed to create projects
+  in their users personal namespace. However, projects can still be created in a group.
 
 ## Max attachment size
 
 You can change the maximum file size for attachments in comments and replies in GitLab.
-Navigate to **Admin Area (wrench icon) > Settings > General**, then expand **Account and Limit**.
+Navigate to **Admin Area > Settings > General**, then expand **Account and Limit**.
 From here, you can increase or decrease by changing the value in `Maximum attachment size (MB)`.
 
 NOTE:
-If you choose a size larger than what is currently configured for the web server,
-you will likely get errors. See the [troubleshooting section](#troubleshooting) for more
+If you choose a size larger than the configured value for the web server,
+you may receive errors. See the [troubleshooting section](#troubleshooting) for more
 details.
 
 ## Max push size
 
 You can change the maximum push size for your repository.
-Navigate to **Admin Area (wrench icon) > Settings > General**, then expand **Account and Limit**.
+Navigate to **Admin Area > Settings > General**, then expand **Account and Limit**.
 From here, you can increase or decrease by changing the value in `Maximum push size (MB)`.
 
 ## Max import size
 
 You can change the maximum file size for imports in GitLab.
-Navigate to **Admin Area (wrench icon) > Settings > General**, then expand **Account and Limit**.
+Navigate to **Admin Area > Settings > General**, then expand **Account and Limit**.
 From here, you can increase or decrease by changing the value in `Maximum import size (MB)`.
 
 NOTE:
-If you choose a size larger than what is currently configured for the web server,
-you will likely get errors. See the [troubleshooting section](#troubleshooting) for more
+If you choose a size larger than the configured value for the web server,
+you may receive errors. See the [troubleshooting section](#troubleshooting) for more
 details.
 
-## Repository size limit **(STARTER ONLY)**
+## Personal Access Token prefix
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/740) in [GitLab Enterprise Edition 8.12](https://about.gitlab.com/releases/2016/09/22/gitlab-8-12-released/#limit-project-size-ee).
+You can set a global prefix for all generated Personal Access Tokens.
 
-Repositories within your GitLab instance can grow quickly, especially if you are
+A prefix can help you identify PATs visually, as well as with automation tools.
+
+### Setting a prefix
+
+Only a GitLab administrator can set the prefix, which is a global setting applied
+to any PAT generated in the system by any user:
+
+1. Navigate to **Admin Area > Settings > General**.
+1. Expand the **Account and limit** section.
+1. Fill in the **Personal Access Token prefix** field.
+1. Click **Save changes**.
+
+It is also possible to configure the prefix via the [settings API](../../../api/settings.md)
+using the `personal_access_token_prefix` field.
+
+## Repository size limit **(PREMIUM SELF)**
+
+Repositories in your GitLab instance can grow quickly, especially if you are
 using LFS. Their size can grow exponentially, rapidly consuming available storage.
-
-To avoid this from happening, you can set a hard limit for your repositories' size.
+To prevent this from happening, you can set a hard limit for your repositories' size.
 This limit can be set globally, per group, or per project, with per project limits
 taking the highest priority.
 
@@ -61,7 +86,7 @@ For instance, consider the following workflow:
 Only a GitLab administrator can set those limits. Setting the limit to `0` means
 there are no restrictions.
 
-These settings can be found within:
+These settings can be found in:
 
 - Each project's settings:
   1. From the Project's homepage, navigate to **Settings > General**.
@@ -71,15 +96,15 @@ These settings can be found within:
   1. From the Group's homepage, navigate to **Settings > General**.
   1. Fill in the **Repository size limit (MB)** field in the **Naming, visibility** section.
   1. Click **Save changes**.
-- GitLab's global settings:
+- GitLab global settings:
   1. From the Dashboard, navigate to **Admin Area > Settings > General**.
   1. Expand the **Account and limit** section.
   1. Fill in the **Size limit per repository (MB)** field.
   1. Click **Save changes**.
 
-The first push of a new project, including LFS objects, will be checked for size
-and **will** be rejected if the sum of their sizes exceeds the maximum allowed
-repository size.
+The first push of a new project, including LFS objects, is checked for size.
+If the sum of their sizes exceeds the maximum allowed repository size, the push
+is rejected.
 
 NOTE:
 The repository size limit includes repository files and LFS, but does not include artifacts, uploads,
@@ -94,29 +119,29 @@ For GitLab.com repository size limits, see [accounts and limit settings](../../g
 
 ### 413 Request Entity Too Large
 
-If you are attaching a file to a comment or reply in GitLab and receive the `413 Request Entity Too Large`
-error, it is likely caused by having a [max attachment size](#max-attachment-size)
-larger than what the web server is configured to allow.
+When attaching a file to a comment or reply in GitLab displays a `413 Request Entity Too Large`
+error, the [max attachment size](#max-attachment-size)
+is probably larger than the web server's allowed value.
 
-If you wanted to increase the max attachment size to 200m in a GitLab
-[Omnibus](https://docs.gitlab.com/omnibus/) install, for example, you might need to
+To increase the max attachment size to 200 MB in a
+[Omnibus GitLab](https://docs.gitlab.com/omnibus/) install, you may need to
 add the line below to `/etc/gitlab/gitlab.rb` before increasing the max attachment size:
 
 ```ruby
 nginx['client_max_body_size'] = "200m"
 ```
 
-## Limiting lifetime of personal access tokens **(ULTIMATE ONLY)**
+## Limiting lifetime of personal access tokens **(ULTIMATE SELF)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3649) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3649) in GitLab Ultimate 12.6.
 
 Users can optionally specify an expiration date for
 [personal access tokens](../../profile/personal_access_tokens.md).
 This expiration date is not a requirement, and can be set to any arbitrary date.
 
-Since personal access tokens are the only token needed for programmatic access to GitLab,
-organizations with security requirements may want to enforce more protection to require
-regular rotation of these tokens.
+Personal access tokens are the only tokens needed for programmatic access to GitLab.
+However, organizations with security requirements may want to enforce more protection by
+requiring the regular rotation of these tokens.
 
 ### Setting a limit
 
@@ -138,15 +163,27 @@ Once a lifetime for personal access tokens is set, GitLab will:
   allowed lifetime. Three hours is given to allow administrators to change the allowed lifetime,
   or remove it, before revocation takes place.
 
-## Optional enforcement of Personal Access Token expiry **(ULTIMATE ONLY)**
+## Enforcement of SSH key expiration **(ULTIMATE SELF)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214723) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+GitLab administrators can choose to enforce the expiration of SSH keys after their expiration dates.
+If you enable this feature, this disables all _expired_ SSH keys.
+
+To do this:
+
+1. Navigate to **Admin Area > Settings > General**.
+1. Expand the **Account and limit** section.
+1. Select the **Enforce SSH key expiration** checkbox.
+
+## Optional enforcement of Personal Access Token expiry **(ULTIMATE SELF)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214723) in GitLab Ultimate 13.1.
 > - It is deployed behind a feature flag, disabled by default.
 > - It is disabled on GitLab.com.
 > - It is not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-optional-enforcement-of-personal-access-token-expiry-feature). **(CORE ONLY)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-optional-enforcement-of-personal-access-token-expiry-feature). **(FREE SELF)**
 
-GitLab administrators can choose to prevent personal access tokens from expiring automatically. The tokens will be usable after the expiry date, unless they are revoked explicitly.
+GitLab administrators can choose to prevent personal access tokens from expiring
+automatically. The tokens are usable after the expiry date, unless they are revoked explicitly.
 
 To do this:
 
@@ -154,7 +191,7 @@ To do this:
 1. Expand the **Account and limit** section.
 1. Uncheck the **Enforce personal access token expiration** checkbox.
 
-### Enable or disable optional enforcement of Personal Access Token expiry Feature **(CORE ONLY)**
+### Enable or disable optional enforcement of Personal Access Token expiry Feature **(FREE SELF)**
 
 Optional Enforcement of Personal Access Token Expiry is deployed behind a feature flag and is **disabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md) can enable it for your instance from the [rails console](../../../administration/feature_flags.md#start-the-gitlab-rails-console).
@@ -171,7 +208,7 @@ To disable it:
 Feature.disable(:enforce_pat_expiration)
 ```
 
-## Disabling user profile name changes **(PREMIUM ONLY)**
+## Disabling user profile name changes **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24605) in GitLab 12.7.
 
@@ -183,4 +220,6 @@ To do this:
 1. Check the **Prevent users from changing their profile name** checkbox.
 
 NOTE:
-When this ability is disabled, GitLab administrators will still be able to update the name of any user in their instance via the [Admin UI](../index.md#administering-users) or the [API](../../../api/users.md#user-modification)
+When this ability is disabled, GitLab administrators can still use the
+[Admin UI](../index.md#administering-users) or the
+[API](../../../api/users.md#user-modification) to update usernames.

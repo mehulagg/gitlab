@@ -1,87 +1,93 @@
 import Vue from 'vue';
-import $ from 'jquery';
-import App from './components/app.vue';
+import setConfigs from '@gitlab/ui/dist/config';
+import Translate from '~/vue_shared/translate';
+import GlFeatureFlagsPlugin from '~/vue_shared/gl_feature_flags_plugin';
 
-const store = {
-  state: {
-    error: '',
-  },
-  setErrorMessage(errorMessage) {
-    this.state.error = errorMessage;
-  },
+import { addSubscription, removeSubscription, getLocation } from '~/jira_connect/api';
+import JiraConnectApp from './components/app.vue';
+import createStore from './store';
+import { SET_ERROR_MESSAGE } from './store/mutation_types';
+
+const store = createStore();
+
+const reqComplete = () => {
+  AP.navigator.reload();
 };
 
-/**
- * Initialize necessary form handlers for the Jira Connect app
- */
-const initJiraFormHandlers = () => {
-  const reqComplete = () => {
-    AP.navigator.reload();
-  };
+const reqFailed = (res, fallbackErrorMessage) => {
+  const { error = fallbackErrorMessage } = res || {};
 
-  const reqFailed = (res, fallbackErrorMessage) => {
-    const { responseJSON: { error = fallbackErrorMessage } = {} } = res || {};
+  store.commit(SET_ERROR_MESSAGE, error);
+};
 
-    store.setErrorMessage(error);
-    // eslint-disable-next-line no-alert
-    alert(error);
-  };
-
-  AP.getLocation(location => {
-    $('.js-jira-connect-sign-in').each(function updateSignInLink() {
-      const updatedLink = `${$(this).attr('href')}?return_to=${location}`;
-      $(this).attr('href', updatedLink);
-    });
+const updateSignInLinks = async () => {
+  const location = await getLocation();
+  Array.from(document.querySelectorAll('.js-jira-connect-sign-in')).forEach((el) => {
+    const updatedLink = `${el.getAttribute('href')}?return_to=${location}`;
+    el.setAttribute('href', updatedLink);
   });
+};
 
-  $('#add-subscription-form').on('submit', function onAddSubscriptionForm(e) {
-    const actionUrl = $(this).attr('action');
-    e.preventDefault();
+const initRemoveSubscriptionButtonHandlers = () => {
+  Array.from(document.querySelectorAll('.js-jira-connect-remove-subscription')).forEach((el) => {
+    el.addEventListener('click', function onRemoveSubscriptionClick(e) {
+      e.preventDefault();
 
-    AP.context.getToken(token => {
-      // eslint-disable-next-line no-jquery/no-ajax
-      $.post(actionUrl, {
-        jwt: token,
-        namespace_path: $('#namespace-input').val(),
-        format: 'json',
-      })
-        .done(reqComplete)
-        .fail(err => reqFailed(err, 'Failed to add namespace. Please try again.'));
-    });
-  });
-
-  $('.remove-subscription').on('click', function onRemoveSubscriptionClick(e) {
-    const href = $(this).attr('href');
-    e.preventDefault();
-
-    AP.context.getToken(token => {
-      // eslint-disable-next-line no-jquery/no-ajax
-      $.ajax({
-        url: href,
-        method: 'DELETE',
-        data: {
-          jwt: token,
-          format: 'json',
-        },
-      })
-        .done(reqComplete)
-        .fail(err => reqFailed(err, 'Failed to remove namespace. Please try again.'));
+      const removePath = e.target.getAttribute('href');
+      removeSubscription(removePath)
+        .then(reqComplete)
+        .catch((err) =>
+          reqFailed(err.response.data, 'Failed to remove namespace. Please try again.'),
+        );
     });
   });
 };
 
-function initJiraConnect() {
+const initAddSubscriptionFormHandler = () => {
+  const formEl = document.querySelector('#add-subscription-form');
+  if (!formEl) {
+    return;
+  }
+
+  formEl.addEventListener('submit', function onAddSubscriptionForm(e) {
+    e.preventDefault();
+
+    const addPath = e.target.getAttribute('action');
+    const namespace = (e.target.querySelector('#namespace-input') || {}).value;
+
+    addSubscription(addPath, namespace)
+      .then(reqComplete)
+      .catch((err) => reqFailed(err.response.data, 'Failed to add namespace. Please try again.'));
+  });
+};
+
+export async function initJiraConnect() {
+  initAddSubscriptionFormHandler();
+  initRemoveSubscriptionButtonHandlers();
+
+  await updateSignInLinks();
+
   const el = document.querySelector('.js-jira-connect-app');
+  if (!el) {
+    return null;
+  }
 
-  initJiraFormHandlers();
+  setConfigs();
+  Vue.use(Translate);
+  Vue.use(GlFeatureFlagsPlugin);
+
+  const { groupsPath, subscriptionsPath, usersPath } = el.dataset;
 
   return new Vue({
     el,
-    data: {
-      state: store.state,
+    store,
+    provide: {
+      groupsPath,
+      subscriptionsPath,
+      usersPath,
     },
     render(createElement) {
-      return createElement(App, {});
+      return createElement(JiraConnectApp);
     },
   });
 }

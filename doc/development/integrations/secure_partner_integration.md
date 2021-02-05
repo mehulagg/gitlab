@@ -19,7 +19,7 @@ integration as well as linking to more detailed resources for how to do so.
 
 ## Integration Tiers
 
-GitLab's security offerings are designed for GitLab Gold and GitLab Ultimate users, and the
+The security offerings in GitLab are designed for GitLab Ultimate users, and the
 [DevSecOps](https://about.gitlab.com/handbook/use-cases/#4-devsecops-shift-left-security)
 use case. All the features are in those tiers. This includes the APIs and standard reporting
 framework needed to provide a consistent experience for users to easily bring their preferred
@@ -75,7 +75,7 @@ and complete an integration with the Secure stage.
 1. [Create an issue](https://gitlab.com/gitlab-com/alliances/alliances/-/issues/new?issuable_template=new_partner)
    using our new partner issue template to begin the discussion.
 1. Get a test account to begin developing your integration. You can
-   request a [GitLab.com Gold Subscription Sandbox](https://about.gitlab.com/partners/integrate/#gitlabcom-gold-subscription-sandbox-request)
+   request a [GitLab.com Subscription Sandbox](https://about.gitlab.com/partners/integrate/#gitlabcom-subscription-sandbox-request)
    or an [EE Developer License](https://about.gitlab.com/partners/integrate/#requesting-ee-dev-license-for-rd).
 1. Provide a [pipeline job](../../development/pipelines.md)
    template that users could integrate into their own GitLab pipelines.
@@ -99,7 +99,7 @@ and complete an integration with the Secure stage.
       - In the [Security Dashboard](../../user/application_security/security_dashboard/index.md) ([Dashboard data flow](https://gitlab.com/snippets/1910005#project-and-group-dashboards)).
 1. Optional: Provide a way to interact with results as Vulnerabilities:
    - Users can interact with the findings from your artifact within their workflow. They can dismiss the findings or accept them and create a backlog issue.
-   - To automatically create issues without user interaction, use the [issue API](../../api/issues.md). This will be replaced by [Standalone Vulnerabilities](https://gitlab.com/groups/gitlab-org/-/epics/634) in the future.
+   - To automatically create issues without user interaction, use the [issue API](../../api/issues.md).
 1. Optional: Provide auto-remediation steps:
    - If you specified `remediations` in your artifact, it is proposed through our [automatic remediation](../../user/application_security/index.md#automatic-remediation-for-vulnerabilities)
      interface.
@@ -114,7 +114,7 @@ and complete an integration with the Secure stage.
      doing an [Unfiltered blog post](https://about.gitlab.com/handbook/marketing/blog/unfiltered/),
      doing a co-branded webinar, or producing a co-branded white paper.
 
-We have a [video playlist](https://www.youtube.com/playlist?list=PL05JrBw4t0KpMqYxJiOLz-uBIr5w-yP4A)
+We have a <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [video playlist](https://www.youtube.com/playlist?list=PL05JrBw4t0KpMqYxJiOLz-uBIr5w-yP4A)
 that may be helpful as part of this process. This covers various topics related to integrating your
 tool.
 

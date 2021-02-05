@@ -50,7 +50,7 @@ describe('Selection Summary', () => {
   const dismissMessage = () => wrapper.find('[data-testid="dismiss-message"]');
   const dismissButton = () => wrapper.find(GlButton);
 
-  const selectByIndex = index =>
+  const selectByIndex = (index) =>
     store.commit(`vulnerabilities/${SELECT_VULNERABILITY}`, mockDataVulnerabilities[index].id);
 
   it('renders the form', () => {
@@ -90,9 +90,7 @@ describe('Selection Summary', () => {
 
       selectByIndex(0);
 
-      const option = formSelect()
-        .findAll('option')
-        .at(1);
+      const option = formSelect().findAll('option').at(1);
       option.setSelected();
       formSelect().trigger('change');
 
@@ -108,9 +106,7 @@ describe('Selection Summary', () => {
       selectByIndex(0);
       selectByIndex(1);
 
-      const option = formSelect()
-        .findAll('option')
-        .at(1);
+      const option = formSelect().findAll('option').at(1);
       option.setSelected();
       formSelect().trigger('change');
 

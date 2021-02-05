@@ -57,16 +57,18 @@ RSpec.describe GroupsHelper do
 
     it 'shows the licensed features when they are available' do
       stub_licensed_features(contribution_analytics: true,
+                             group_ci_cd_analytics: true,
                              epics: true)
 
-      expect(helper.group_sidebar_links).to include(:contribution_analytics, :epics)
+      expect(helper.group_sidebar_links).to include(:contribution_analytics, :group_ci_cd_analytics, :epics)
     end
 
     it 'hides the licensed features when they are not available' do
       stub_licensed_features(contribution_analytics: false,
+                             group_ci_cd_analytics: false,
                              epics: false)
 
-      expect(helper.group_sidebar_links).not_to include(:contribution_analytics, :epics)
+      expect(helper.group_sidebar_links).not_to include(:contribution_analytics, :group_ci_cd_analytics, :epics)
     end
 
     context 'when contribution analytics is available' do
@@ -81,6 +83,28 @@ RSpec.describe GroupsHelper do
         it 'hides Contribution Analytics' do
           expect(helper.group_sidebar_links).not_to include(:contribution_analytics)
         end
+      end
+    end
+
+    context 'when the group_ci_cd_analytics_page feature flag is disabled' do
+      before do
+        stub_feature_flags(group_ci_cd_analytics_page: false)
+      end
+
+      it 'hides CI / CD Analytics' do
+        expect(helper.group_sidebar_links).not_to include(:group_ci_cd_analytics)
+      end
+    end
+
+    context 'when the user does not have permissions to view the CI / CD Analytics page' do
+      let(:current_user) { create(:user) }
+
+      before do
+        group.add_guest(current_user)
+      end
+
+      it 'hides CI / CD Analytics' do
+        expect(helper.group_sidebar_links).not_to include(:group_ci_cd_analytics)
       end
     end
   end

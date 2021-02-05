@@ -1,7 +1,8 @@
 <script>
+import { TIMELINE_CELL_WIDTH } from 'ee/oncall_schedules/constants';
+import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 import { monthInWords } from '~/lib/utils/datetime_utility';
 import WeeksHeaderSubItem from './weeks_header_sub_item.vue';
-import CommonMixin from '../../mixins/common_mixin';
 
 export default {
   components: {
@@ -34,10 +35,7 @@ export default {
       const timeframeItemDate = this.timeframeItem.getDate();
 
       if (this.timeframeIndex === 0 || (timeframeItemMonth === 0 && timeframeItemDate <= 7)) {
-        return `${this.timeframeItem.getFullYear()} ${monthInWords(
-          this.timeframeItem,
-          true,
-        )} ${timeframeItemDate}`;
+        return `${monthInWords(this.timeframeItem, true)} ${timeframeItemDate}`;
       }
 
       return `${monthInWords(this.timeframeItem, true)} ${timeframeItemDate}`;
@@ -55,13 +53,22 @@ export default {
 
       return '';
     },
+    timelineHeaderStyles() {
+      return {
+        width: `calc((${100}% - ${TIMELINE_CELL_WIDTH}px) / ${2})`,
+      };
+    },
   },
 };
 </script>
 
 <template>
-  <span class="timeline-header-item">
-    <div :class="timelineHeaderClass" class="item-label" data-testid="timeline-header-label">
+  <span class="timeline-header-item" :style="timelineHeaderStyles">
+    <div
+      :class="timelineHeaderClass"
+      class="item-label gl-pl-6 gl-py-4"
+      data-testid="timeline-header-label"
+    >
       {{ timelineHeaderLabel }}
     </div>
     <weeks-header-sub-item :timeframe-item="timeframeItem" />

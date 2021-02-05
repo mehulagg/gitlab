@@ -65,7 +65,7 @@ GET /users?active=true
 GET /users?blocked=true
 ```
 
-GitLab supports bot users such as the [alert bot](../operations/incident_management/alert_integrations.md)
+GitLab supports bot users such as the [alert bot](../operations/incident_management/integrations.md)
 or the [support bot](../user/project/service_desk.md#support-bot-user).
 To exclude these users from the users' list, you can use the parameter `exclude_internal=true`
 ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241144) in GitLab 13.4).
@@ -89,6 +89,7 @@ GET /users
 | `sort`             | string  | no       | Return users sorted in `asc` or `desc` order. Default is `desc`                                                       |
 | `two_factor`       | string  | no       | Filter users by Two-factor authentication. Filter values are `enabled` or `disabled`. By default it returns all users |
 | `without_projects` | boolean | no       | Filter users without projects. Default is `false`                                                                     |
+| `admins`           | boolean | no       | Return only admin users. Default is `false`                                 |
 
 ```json
 [
@@ -185,7 +186,7 @@ Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) 
 ]
 ```
 
-Users on GitLab [Silver or higher](https://about.gitlab.com/pricing/) also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see
 the `group_saml` provider option:
 
 ```json
@@ -263,6 +264,7 @@ Parameters:
   "created_at": "2012-05-23T08:00:58Z",
   "bio": "",
   "bio_html": "",
+  "bot": false,
   "location": null,
   "public_email": "john@example.com",
   "skype": "",
@@ -349,7 +351,7 @@ the `shared_runners_minutes_limit`, and `extra_shared_runners_minutes_limit` par
 }
 ```
 
-Users on GitLab.com [Silver, or higher](https://about.gitlab.com/pricing/) also
+Users on GitLab.com [Premium or higher](https://about.gitlab.com/pricing/) also
 see the `group_saml` option:
 
 ```json
@@ -416,7 +418,7 @@ Parameters:
 | `note`                               | No       | Admin notes for this user                                                                                                                               |
 | `organization`                       | No       | Organization name                                                                                                                                       |
 | `password`                           | No       | Password                                                                                                                                                |
-| `private_profile`                    | No       | User's profile is private - true, false (default), or null (will be converted to false)                                                                 |
+| `private_profile`                    | No       | User's profile is private - true, false (default), or null (is converted to false)                                                                 |
 | `projects_limit`                     | No       | Number of projects user can create                                                                                                                      |
 | `provider`                           | No       | External provider name                                                                                                                                  |
 | `public_email`                       | No       | The public email of the user                                                                                                                            |
@@ -458,7 +460,7 @@ Parameters:
 | `note`                               | No       | Admin notes for this user                                                                                                                               |
 | `organization`                       | No       | Organization name                                                                                                                                       |
 | `password`                           | No       | Password                                                                                                                                                |
-| `private_profile`                    | No       | User's profile is private - true, false (default), or null (will be converted to false)                                                                 |
+| `private_profile`                    | No       | User's profile is private - true, false (default), or null (is converted to false)                                                                 |
 | `projects_limit`                     | No       | Limit projects each user can create                                                                                                                     |
 | `provider`                           | No       | External provider name                                                                                                                                  |
 | `public_email`                       | No       | The public email of the user                                                                                                                            |
@@ -1373,7 +1375,7 @@ Example Responses:
 ```
 
 ```json
-{ "message": "The user you are trying to approve is not pending an approval" }
+{ "message": "The user you are trying to approve is not pending approval" }
 ```
 
 ## Get an impersonation token of a user
@@ -1480,19 +1482,14 @@ Parameters:
 | `user_id`                | integer | yes      | The ID of the user                |
 | `impersonation_token_id` | integer | yes      | The ID of the impersonation token |
 
-## Create a personal access token (admin only)
+## Create a personal access token **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17176) in GitLab 13.6.
-> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-an-administrators-ability-to-use-the-api-to-create-personal-access-tokens). **(CORE)**
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/267553) in GitLab 13.8.
 
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
-
-> Requires admin permissions.
-> Token values are returned once. Make sure you save it - you can't access it again.
-
-It creates a new personal access token.
+Use this API to create a new personal access token. Token values are returned once so,
+make sure you save it as you can't access it again. This API can only be used by
+GitLab administrators.
 
 ```plaintext
 POST /users/:user_id/personal_access_tokens
@@ -1631,23 +1628,4 @@ Example response:
     "access_level": "20"
   },
 ]
-```
-
-## Enable or disable an administrator's ability to use the API to create personal access tokens **(CORE)**
-
-An administrator's ability to create personal access tokens through the API is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:pat_creation_api_for_admin)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:pat_creation_api_for_admin)
 ```

@@ -1,4 +1,4 @@
-.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **tracking_attrs('projects_side_navigation', 'render', 'projects_side_navigation') }
+%aside.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **tracking_attrs('projects_side_navigation', 'render', 'projects_side_navigation'), 'aria-label': _('Project navigation') }
   .nav-sidebar-inner-scroll
     .context-header
       = link_to project_path(@project), title: @project.name do
@@ -212,7 +212,8 @@
 
             = render_if_exists "layouts/nav/test_cases_link", project: @project
 
-      = render_if_exists 'layouts/nav/sidebar/project_security_link' # EE-specific
+      - if project_nav_tab? :security_and_compliance
+        = render_if_exists 'layouts/nav/sidebar/project_security_link' # EE-specific
 
       - if project_nav_tab? :operations
         = nav_link(controller: sidebar_operations_paths) do
@@ -300,8 +301,8 @@
                         = link_to _('Auto DevOps'), help_page_path('topics/autodevops/index.md')
                         %span= _('uses Kubernetes clusters to deploy your code!')
                       %hr
-                      %button.btn.btn-success.btn-sm.dismiss-feature-highlight{ type: 'button' }
-                        %span= _("Got it!")
+                      %button.gl-button.btn.btn-success.btn-sm.dismiss-feature-highlight{ type: 'button' }
+                        %span.gl-mr-2= _("Got it!")
                         = sprite_icon('thumb-up')
 
             - if project_nav_tab? :environments
@@ -324,7 +325,8 @@
 
       = render_if_exists 'layouts/nav/sidebar/project_packages_link'
 
-      = render 'layouts/nav/sidebar/analytics_links', links: project_analytics_navbar_links(@project, current_user)
+      - if project_nav_tab? :analytics
+        = render 'layouts/nav/sidebar/analytics_links', links: project_analytics_navbar_links(@project, current_user)
 
       - if project_nav_tab?(:confluence)
         - confluence_url = project_wikis_confluence_path(@project)
@@ -382,7 +384,7 @@
               %strong.fly-out-top-item-name
                 = _('Members')
 
-      = render_if_exists 'projects/invite_members_side_nav_link', project: @project
+      = content_for :invite_members_sidebar
 
       - if project_nav_tab? :settings
         = nav_link(path: sidebar_settings_paths) do
@@ -436,8 +438,6 @@
                   = link_to project_pages_path(@project), title: _('Pages') do
                     %span
                       = _('Pages')
-
-              = render_if_exists 'projects/sidebar/settings_audit_events'
 
       = render 'shared/sidebar_toggle_button'
 

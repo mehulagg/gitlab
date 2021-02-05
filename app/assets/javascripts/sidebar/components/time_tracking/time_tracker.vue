@@ -1,22 +1,22 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
+import { s__, __ } from '~/locale';
+import eventHub from '../../event_hub';
 import TimeTrackingHelpState from './help_state.vue';
 import TimeTrackingCollapsedState from './collapsed_state.vue';
 import TimeTrackingSpentOnlyPane from './spent_only_pane.vue';
-import TimeTrackingNoTrackingPane from './no_tracking_pane.vue';
-import TimeTrackingEstimateOnlyPane from './estimate_only_pane.vue';
 import TimeTrackingComparisonPane from './comparison_pane.vue';
-
-import eventHub from '../../event_hub';
 
 export default {
   name: 'IssuableTimeTracker',
+  i18n: {
+    noTimeTrackingText: __('No estimate or time spent'),
+    estimatedOnlyText: s__('TimeTracking|Estimated:'),
+  },
   components: {
     GlIcon,
     TimeTrackingCollapsedState,
-    TimeTrackingEstimateOnlyPane,
     TimeTrackingSpentOnlyPane,
-    TimeTrackingNoTrackingPane,
     TimeTrackingComparisonPane,
     TimeTrackingHelpState,
   },
@@ -47,11 +47,11 @@ export default {
     /*
       In issue list, "time-tracking-collapsed-state" is always rendered even if the sidebar isn't collapsed.
       The actual hiding is controlled with css classes:
-        Hide "time-tracking-collapsed-state" 
+        Hide "time-tracking-collapsed-state"
           if .right-sidebar .right-sidebar-collapsed .sidebar-collapsed-icon
         Show "time-tracking-collapsed-state"
           if .right-sidebar .right-sidebar-expanded .sidebar-collapsed-icon
-      
+
       In Swimlanes sidebar, we do not use collapsed state at all.
     */
     showCollapsed: {
@@ -98,10 +98,12 @@ export default {
     update(data) {
       const { timeEstimate, timeSpent, humanTimeEstimate, humanTimeSpent } = data;
 
+      /* eslint-disable vue/no-mutating-props */
       this.timeEstimate = timeEstimate;
       this.timeSpent = timeSpent;
       this.humanTimeEstimate = humanTimeEstimate;
       this.humanTimeSpent = humanTimeSpent;
+      /* eslint-enable vue/no-mutating-props */
     },
   },
 };
@@ -139,15 +141,17 @@ export default {
       </div>
     </div>
     <div class="time-tracking-content hide-collapsed">
-      <time-tracking-estimate-only-pane
-        v-if="showEstimateOnlyState"
-        :time-estimate-human-readable="humanTimeEstimate"
-      />
+      <div v-if="showEstimateOnlyState" data-testid="estimateOnlyPane">
+        <span class="gl-font-weight-bold">{{ $options.i18n.estimatedOnlyText }} </span
+        >{{ humanTimeEstimate }}
+      </div>
       <time-tracking-spent-only-pane
         v-if="showSpentOnlyState"
         :time-spent-human-readable="humanTimeSpent"
       />
-      <time-tracking-no-tracking-pane v-if="showNoTimeTrackingState" />
+      <div v-if="showNoTimeTrackingState" data-testid="noTrackingPane">
+        <span class="gl-text-gray-500">{{ $options.i18n.noTimeTrackingText }}</span>
+      </div>
       <time-tracking-comparison-pane
         v-if="showComparisonState"
         :time-estimate="timeEstimate"

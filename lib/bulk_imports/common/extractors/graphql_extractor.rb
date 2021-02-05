@@ -4,21 +4,22 @@ module BulkImports
   module Common
     module Extractors
       class GraphqlExtractor
-        def initialize(query)
-          @query = query[:query]
+        def initialize(options = {})
+          @query = options[:query]
         end
 
         def extract(context)
           client = graphql_client(context)
 
-          Enumerator.new do |yielder|
-            result = client.execute(
-              client.parse(query.to_s),
-              query.variables(context.entity)
-            )
+          response = client.execute(
+            client.parse(query.to_s),
+            query.variables(context.entity)
+          ).original_hash.deep_dup
 
-            yielder << result.original_hash.deep_dup
-          end
+          BulkImports::Pipeline::ExtractedData.new(
+            data: response.dig(*query.data_path),
+            page_info: response.dig(*query.page_info_path)
+          )
         end
 
         private
@@ -30,10 +31,6 @@ module BulkImports
             url: context.configuration.url,
             token: context.configuration.access_token
           )
-        end
-
-        def parsed_query
-          @parsed_query ||= graphql_client.parse(query.to_s)
         end
       end
     end

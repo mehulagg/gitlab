@@ -6,8 +6,8 @@ import {
   GlSearchBoxByType,
   GlLoadingIcon,
 } from '@gitlab/ui';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import VueApollo from 'vue-apollo';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
@@ -38,7 +38,7 @@ describe('BoardCardAssigneeDropdown', () => {
         return {
           search,
           selected: [],
-          participants,
+          issueParticipants: participants,
         };
       },
       store,
@@ -49,7 +49,7 @@ describe('BoardCardAssigneeDropdown', () => {
       mocks: {
         $apollo: {
           queries: {
-            participants: {
+            searchUsers: {
               loading,
             },
           },
@@ -70,7 +70,6 @@ describe('BoardCardAssigneeDropdown', () => {
         return {
           search,
           selected: [],
-          participants,
         };
       },
       store,
@@ -93,8 +92,8 @@ describe('BoardCardAssigneeDropdown', () => {
     await wrapper.vm.$nextTick();
   };
 
-  const findByText = text => {
-    return wrapper.findAll(GlDropdownItem).wrappers.find(node => node.text().indexOf(text) === 0);
+  const findByText = (text) => {
+    return wrapper.findAll(GlDropdownItem).wrappers.find((node) => node.text().indexOf(text) === 0);
   };
 
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
@@ -102,7 +101,7 @@ describe('BoardCardAssigneeDropdown', () => {
   beforeEach(() => {
     store.state.activeId = '1';
     store.state.issues = {
-      '1': {
+      1: {
         iid,
         assignees: [{ username: activeIssueName, name: activeIssueName, id: activeIssueName }],
       },
@@ -145,12 +144,7 @@ describe('BoardCardAssigneeDropdown', () => {
     it('renders gl-avatar-labeled in gl-avatar-link', () => {
       const item = findByText('hello');
 
-      expect(
-        item
-          .find(GlAvatarLink)
-          .find(GlAvatarLabeled)
-          .exists(),
-      ).toBe(true);
+      expect(item.find(GlAvatarLink).find(GlAvatarLabeled).exists()).toBe(true);
     });
   });
 
@@ -261,17 +255,15 @@ describe('BoardCardAssigneeDropdown', () => {
     },
   );
 
-  describe('when participants is loading', () => {
-    beforeEach(() => {
-      createComponent('', true);
-    });
-
+  describe('when searching users is loading', () => {
     it('finds a loading icon in the dropdown', () => {
+      createComponent('test', true);
+
       expect(findLoadingIcon().exists()).toBe(true);
     });
   });
 
-  describe('when participants is loading is false', () => {
+  describe('when participants loading is false', () => {
     beforeEach(() => {
       createComponent();
     });

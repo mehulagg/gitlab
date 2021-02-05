@@ -3,12 +3,12 @@ import $ from 'jquery';
 import { escape, debounce } from 'lodash';
 import Api from 'ee/api';
 import { __ } from '~/locale';
-import { TYPE_USER, TYPE_GROUP } from '../constants';
 import { renderAvatar } from '~/helpers/avatar_helper';
 import { loadCSSFile } from '~/lib/utils/css_utils';
+import { TYPE_USER, TYPE_GROUP } from '../constants';
 
 function addType(type) {
-  return items => items.map(obj => Object.assign(obj, { type }));
+  return (items) => items.map((obj) => Object.assign(obj, { type }));
 }
 
 function formatSelection(group) {
@@ -116,7 +116,7 @@ export default {
                 }, 250),
                 id: ({ type, id }) => `${type}${id}`,
               })
-              .on('change', e => this.onChange(e));
+              .on('change', (e) => this.onChange(e));
           })
           .catch(() => {});
       })
@@ -132,7 +132,7 @@ export default {
 
       return Promise.all([groupsAsync, usersAsync])
         .then(([groups, users]) => groups.concat(users))
-        .then(results => ({ results }));
+        .then((results) => ({ results }));
     },
     fetchGroups(term) {
       // Don't includeAll when search is empty. Otherwise, the user could get a lot of garbage choices.

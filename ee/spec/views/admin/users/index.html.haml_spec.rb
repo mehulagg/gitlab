@@ -16,14 +16,14 @@ RSpec.describe 'admin/users/index' do
   end
 
   it 'includes "Send email to users" link' do
-    expect(rendered).to have_link 'Send email to users', href: admin_email_path
+    expect(rendered).to have_link href: admin_email_path
   end
 
   context 'when Gitlab::CurrentSettings.should_check_namespace_plan is true' do
     let(:should_check_namespace_plan) { true }
 
     it 'includes "Send email to users" link' do
-      expect(rendered).to have_link 'Send email to users', href: admin_email_path
+      expect(rendered).to have_link href: admin_email_path
     end
   end
 end

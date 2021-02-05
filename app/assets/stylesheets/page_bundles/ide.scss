@@ -179,6 +179,10 @@ $ide-commit-header-height: 48px;
     overflow: auto;
     padding: $gl-padding;
     background-color: var(--ide-empty-state-background, transparent);
+
+    .md {
+      max-width: $limited-layout-width;
+    }
   }
 
   .file-container {
@@ -600,6 +604,17 @@ $ide-commit-header-height: 48px;
       right: auto;
       left: -1px;
     }
+  }
+
+  .ide-commit-badge {
+    background-color: var(--ide-highlight-accent, $almost-black) !important;
+    color: var(--ide-highlight-background, $white) !important;
+    position: absolute;
+    left: 38px;
+    top: $gl-padding-8;
+    font-size: $gl-font-size-12;
+    padding: 2px $gl-padding-4;
+    font-weight: $gl-font-weight-bold !important;
   }
 }
 

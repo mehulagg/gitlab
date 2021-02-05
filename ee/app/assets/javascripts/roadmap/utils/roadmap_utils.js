@@ -6,8 +6,6 @@ import {
   EXTEND_AS,
   TIMELINE_CELL_MIN_WIDTH,
   DAYS_IN_WEEK,
-  PAST_DATE,
-  FUTURE_DATE,
 } from '../constants';
 
 const monthsForQuarters = {
@@ -406,49 +404,39 @@ export const getEpicsTimeframeRange = ({ presetType = '', timeframe = [] }) => {
   };
 };
 
-/**
- * This function takes two epics and return sortable dates depending on the '
- * type of sorting order -- startDate or endDate.
- */
-export function assignDates(a, b, { dateUndefined, outOfRange, originalDate, date, proxyDate }) {
-  let aDate;
-  let bDate;
-
-  if (a[dateUndefined]) {
-    // Set proxy date to be either far in the past or
-    // far in the future to ensure sort order is
-    // correct.
-    aDate = proxyDate;
-  } else {
-    aDate = a[outOfRange] ? a[originalDate] : a[date];
-  }
-
-  if (b[dateUndefined]) {
-    bDate = proxyDate;
-  } else {
-    bDate = b[outOfRange] ? b[originalDate] : b[date];
-  }
-
-  return [aDate, bDate];
-}
-
 export const sortEpics = (epics, sortedBy) => {
   const sortByStartDate = sortedBy.indexOf('start_date') > -1;
   const sortOrderAsc = sortedBy.indexOf('asc') > -1;
 
   epics.sort((a, b) => {
-    const [aDate, bDate] = assignDates(a, b, {
-      dateUndefined: sortByStartDate ? 'startDateUndefined' : 'endDateUndefined',
-      outOfRange: sortByStartDate ? 'startDateOutOfRange' : 'endDateOutOfRange',
-      originalDate: sortByStartDate ? 'originalStartDate' : 'originalEndDate',
-      date: sortByStartDate ? 'startDate' : 'endDate',
-      proxyDate: sortByStartDate ? PAST_DATE : FUTURE_DATE,
-    });
+    let aDate;
+    let bDate;
+
+    if (sortByStartDate) {
+      // Always use the original start date.
+      // if originalStartDate exists, it means startDate was changed to a proxy date
+      // (refer to roadmap_item_utils.js)
+      const startDateForA = a.originalStartDate ? a.originalStartDate : a.startDate;
+      const startDateForB = b.originalStartDate ? b.originalStartDate : b.startDate;
+
+      // When epic has no fixed start date, use Number.NEGATIVE_INFINITY for comparison.
+      // In other words, epics without fixed start date should, in theory, have the earliest start date.
+      // (the actual min possible value for Date object is much smaller; ECMA-262 20.4.1.1)
+      aDate = a.startDateUndefined ? Number.NEGATIVE_INFINITY : startDateForA.getTime();
+      bDate = b.startDateUndefined ? Number.NEGATIVE_INFINITY : startDateForB.getTime();
+    } else {
+      const endDateForA = a.originalEndDate ? a.originalEndDate : a.endDate;
+      const endDateForB = b.originalEndDate ? b.originalEndDate : b.endDate;
+
+      // Similarly, use Infinity when epic has no fixed due date.
+      aDate = a.endDateUndefined ? Infinity : endDateForA.getTime();
+      bDate = b.endDateUndefined ? Infinity : endDateForB.getTime();
+    }
 
     // Sort in ascending or descending order
-    if (aDate.getTime() < bDate.getTime()) {
+    if (aDate < bDate) {
       return sortOrderAsc ? -1 : 1;
-    } else if (aDate.getTime() > bDate.getTime()) {
+    } else if (aDate > bDate) {
       return sortOrderAsc ? 1 : -1;
     }
     return 0;

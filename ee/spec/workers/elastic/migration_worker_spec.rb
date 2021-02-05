@@ -27,9 +27,9 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
       end
 
       it 'creates an index if it does not exist' do
-        Gitlab::Elastic::Helper.default.delete_index(index_name: es_helper.migrations_index_name)
+        Gitlab::Elastic::Helper.default.delete_migrations_index
 
-        expect { subject.perform }.to change { Gitlab::Elastic::Helper.default.index_exists?(index_name: es_helper.migrations_index_name) }.from(false).to(true)
+        expect { subject.perform }.to change { Gitlab::Elastic::Helper.default.migrations_index_exists? }.from(false).to(true)
       end
 
       context 'no unexecuted migrations' do
@@ -41,6 +41,37 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
           expect(subject).not_to receive(:execute_migration)
 
           expect(subject.perform).to be_falsey
+        end
+      end
+
+      context 'migration is halted' do
+        using RSpec::Parameterized::TableSyntax
+
+        where(:pause_indexing, :halted_indexing_unpaused, :unpause) do
+          false | false | false
+          false | true  | false
+          true  | false | true
+          true  | true  | false
+        end
+
+        with_them do
+          before do
+            allow(Gitlab::CurrentSettings).to receive(:elasticsearch_pause_indexing?).and_return(true)
+            allow(migration).to receive(:pause_indexing?).and_return(true)
+            migration.save_state!(halted: true, pause_indexing: pause_indexing, halted_indexing_unpaused: halted_indexing_unpaused)
+          end
+
+          it 'unpauses indexing' do
+            if unpause
+              expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: false)
+            else
+              expect(Gitlab::CurrentSettings).not_to receive(:update!)
+            end
+
+            expect(migration).not_to receive(:migrate)
+
+            subject.perform
+          end
         end
       end
 
@@ -89,6 +120,29 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
             end
 
             subject.perform
+          end
+        end
+
+        context 'indexing pause' do
+          before do
+            allow(migration).to receive(:pause_indexing?).and_return(true)
+          end
+
+          let(:batched) { true }
+
+          where(:persisted, :completed, :expected) do
+            false | false | false
+            true  | false | false
+            true  | true  | true
+          end
+
+          with_them do
+            it 'pauses and unpauses indexing' do
+              expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: true)
+              expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: false) if expected
+
+              subject.perform
+            end
           end
         end
       end

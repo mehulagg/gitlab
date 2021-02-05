@@ -7,8 +7,8 @@ import mutations from 'ee/security_dashboard/store/modules/filters/mutations';
 import createState from 'ee/security_dashboard/store/modules/filters/state';
 import { DISMISSAL_STATES } from 'ee/security_dashboard/store/modules/filters/constants';
 
-const criticalOption = severityFilter.options.find(x => x.id === 'CRITICAL');
-const highOption = severityFilter.options.find(x => x.id === 'HIGH');
+const criticalOption = severityFilter.options.find((x) => x.id === 'CRITICAL');
+const highOption = severityFilter.options.find((x) => x.id === 'HIGH');
 
 const existingFilters = {
   filter1: ['some', 'value'],
@@ -44,7 +44,7 @@ describe('filters module mutations', () => {
   });
 
   describe('SET_HIDE_DISMISSED', () => {
-    it.each(Object.values(DISMISSAL_STATES))(`sets scope filter to "%s"`, value => {
+    it.each(Object.values(DISMISSAL_STATES))(`sets scope filter to "%s"`, (value) => {
       mutations[SET_HIDE_DISMISSED](state, value);
       expect(state.filters.scope).toBe(value);
     });

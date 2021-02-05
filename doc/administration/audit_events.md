@@ -4,7 +4,7 @@ group: Compliance
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Audit Events **(STARTER)**
+# Audit Events **(PREMIUM)**
 
 GitLab offers a way to view the changes made within the GitLab server for owners and administrators on a [paid plan](https://about.gitlab.com/pricing/).
 
@@ -42,12 +42,12 @@ There are two kinds of events logged:
 
 Impersonation is where an administrator uses credentials to perform an action as a different user.
 
-### Group events **(STARTER)**
+### Group events **(PREMIUM)**
 
-NOTE:
-You need Owner [permissions](../user/permissions.md) to view the group Audit Events page.
+A user with a Owner role (or above) can retrieve group audit events of all users.
+A user with a Developer or Maintainer role is limited to group audit events based on their individual actions.
 
-To view a group's audit events, navigate to **Group > Settings > Audit Events**.
+To view a group's audit events, navigate to **Group > Security & Compliance > Audit Events**.
 From there, you can see the following actions:
 
 - Group name or path changed.
@@ -72,12 +72,12 @@ From there, you can see the following actions:
 
 Group events can also be accessed via the [Group Audit Events API](../api/audit_events.md#group-audit-events)
 
-### Project events **(STARTER)**
+### Project events **(PREMIUM)**
 
-NOTE:
-You need Maintainer [permissions](../user/permissions.md) or higher to view the project Audit Events page.
+A user with a Maintainer role (or above) can retrieve project audit events of all users.
+A user with a Developer role is limited to project audit events based on their individual actions.
 
-To view a project's audit events, navigate to **Project > Settings > Audit Events**.
+To view a project's audit events, navigate to **Project > Security & Compliance > Audit Events**.
 From there, you can see the following actions:
 
 - Added or removed deploy keys
@@ -99,11 +99,15 @@ From there, you can see the following actions:
 - Number of required approvals was updated ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7531) in GitLab 12.9)
 - Added or removed users and groups from project approval groups ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213603) in GitLab 13.2)
 - Project CI/CD variable added, removed, or protected status changed ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30857) in GitLab 13.4)
-- User was approved via Admin Area ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276250) in GitLab 13.6)
+- Project access token was successfully created or revoked ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230007) in GitLab 13.9)
+- Failed attempt to create or revoke a project access token ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230007) in GitLab 13.9)
+- When default branch changes for a project ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/52339) in GitLab 13.9)
 
 Project events can also be accessed via the [Project Audit Events API](../api/audit_events.md#project-audit-events).
 
-### Instance events **(PREMIUM ONLY)**
+Project event queries are limited to a maximum of 30 days.
+
+### Instance events **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2336) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.3.
 
@@ -127,6 +131,9 @@ recorded:
 - Changed username ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7797) in GitLab 12.8)
 - User was deleted ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/251) in GitLab 12.8)
 - User was added ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/251) in GitLab 12.8)
+- User requests access to an instance ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/298783) in GitLab 13.9)
+- User was approved via Admin Area ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276250) in GitLab 13.6)
+- User was rejected via Admin Area ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/298783) in GitLab 13.9)
 - User was blocked via Admin Area ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/251) in GitLab 12.8)
 - User was blocked via API ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25872) in GitLab 12.9)
 - Failed second-factor authentication attempt ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16826) in GitLab 13.5)
@@ -187,7 +194,7 @@ The search filters you can see depends on which audit level you are at.
 
 ![audit events](img/audit_log_v13_6.png)
 
-## Export to CSV **(PREMIUM ONLY)**
+## Export to CSV **(PREMIUM SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1449) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/285441) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.

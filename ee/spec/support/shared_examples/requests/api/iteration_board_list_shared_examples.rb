@@ -2,7 +2,7 @@
 
 RSpec.shared_examples 'iteration board list' do
   before do
-    stub_licensed_features(iterations: true)
+    stub_licensed_features(board_iteration_lists: true)
   end
 
   context 'when iteration_id is sent' do
@@ -24,7 +24,7 @@ RSpec.shared_examples 'iteration board list' do
     end
 
     it 'returns 400 if not licensed' do
-      stub_licensed_features(iterations: false)
+      stub_licensed_features(board_iteration_lists: false)
 
       post api(url, user), params: { iteration_id: iteration.id }
 

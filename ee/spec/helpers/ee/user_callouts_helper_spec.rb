@@ -3,6 +3,7 @@
 require "spec_helper"
 
 RSpec.describe EE::UserCalloutsHelper do
+  include Devise::Test::ControllerHelpers
   using RSpec::Parameterized::TableSyntax
 
   describe '.render_enable_hashed_storage_warning' do
@@ -128,47 +129,6 @@ RSpec.describe EE::UserCalloutsHelper do
 
         it { is_expected.to be_falsy }
       end
-    end
-  end
-
-  describe '.show_canary_deployment_callout?' do
-    let(:project) { build(:project) }
-
-    subject { helper.show_canary_deployment_callout?(project) }
-
-    before do
-      allow(helper).to receive(:show_promotions?).and_return(true)
-    end
-
-    context 'when user needs to upgrade to canary deployments' do
-      before do
-        allow(project).to receive(:feature_available?).with(:deploy_board).and_return(false)
-      end
-
-      context 'when user has dismissed' do
-        before do
-          allow(helper).to receive(:user_dismissed?).and_return(true)
-        end
-
-        it { is_expected.to be_falsey }
-      end
-
-      context 'when user has not dismissed' do
-        before do
-          allow(helper).to receive(:user_dismissed?).and_return(false)
-        end
-
-        it { is_expected.to be_truthy }
-      end
-    end
-
-    context 'when user already has access to canary deployments' do
-      before do
-        allow(project).to receive(:feature_available?).with(:deploy_board).and_return(true)
-        allow(helper).to receive(:user_dismissed?).and_return(false)
-      end
-
-      it { is_expected.to be_falsey }
     end
   end
 
@@ -418,6 +378,73 @@ RSpec.describe EE::UserCalloutsHelper do
 
         it { is_expected.to eq(result) }
       end
+    end
+  end
+
+  describe '#show_eoa_bronze_plan_banner?' do
+    let_it_be(:user) { create(:user) }
+
+    shared_examples 'shows and hides the banner depending on circumstances' do
+      where(:show_billing_eoa_banner, :actual_plan_name, :dismissed_callout, :travel_to_date, :result) do
+        true  | ::Plan::BRONZE | false | eoa_bronze_plan_end_date - 1.day | true
+        true  | ::Plan::BRONZE | false | eoa_bronze_plan_end_date         | false
+        true  | ::Plan::BRONZE | false | eoa_bronze_plan_end_date + 1.day | false
+        true  | ::Plan::BRONZE | true  | eoa_bronze_plan_end_date - 1.day | false
+        true  | ::Plan::SILVER | false | eoa_bronze_plan_end_date - 1.day | false
+        true  | ::Plan::GOLD   | false | eoa_bronze_plan_end_date - 1.day | false
+        false | ::Plan::BRONZE | false | eoa_bronze_plan_end_date - 1.day | false
+      end
+
+      with_them do
+        before do
+          stub_feature_flags(show_billing_eoa_banner: show_billing_eoa_banner)
+          allow(namespace).to receive(:actual_plan_name).and_return(actual_plan_name)
+          allow(user).to receive(:dismissed_callout?).and_return(dismissed_callout)
+        end
+
+        it do
+          travel_to(travel_to_date) do
+            expect(helper.show_eoa_bronze_plan_banner?(namespace)).to eq(result)
+          end
+        end
+      end
+    end
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    context 'with group namespace' do
+      let(:group) { create(:group) }
+      let(:current_user) { user }
+
+      before do
+        group.add_owner(current_user.id)
+        allow(group).to receive(:actual_plan_name).and_return(::Plan::BRONZE)
+        allow(helper).to receive(:current_user).and_return(current_user)
+      end
+
+      it_behaves_like 'shows and hides the banner depending on circumstances' do
+        let(:namespace) { group }
+      end
+    end
+
+    context 'with personal namespace' do
+      let(:current_user) { user }
+
+      before do
+        allow(current_user.namespace).to receive(:actual_plan_name).and_return(::Plan::BRONZE)
+      end
+
+      it_behaves_like 'shows and hides the banner depending on circumstances' do
+        let(:namespace) { current_user.namespace }
+      end
+    end
+  end
+
+  describe '#eoa_bronze_plan_end_date' do
+    it 'returns a date type value' do
+      expect(helper.send(:eoa_bronze_plan_end_date).is_a?(Date)).to eq(true)
     end
   end
 end

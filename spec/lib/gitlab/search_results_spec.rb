@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::SearchResults do
   include ProjectForksHelper
   include SearchHelpers
+  using RSpec::Parameterized::TableSyntax
 
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, name: 'foo') }
@@ -41,8 +42,6 @@ RSpec.describe Gitlab::SearchResults do
     end
 
     describe '#formatted_count' do
-      using RSpec::Parameterized::TableSyntax
-
       where(:scope, :count_method, :expected) do
         'projects'       | :limited_projects_count       | max_limited_count
         'issues'         | :limited_issues_count         | max_limited_count
@@ -61,8 +60,6 @@ RSpec.describe Gitlab::SearchResults do
     end
 
     describe '#highlight_map' do
-      using RSpec::Parameterized::TableSyntax
-
       where(:scope, :expected) do
         'projects'       | {}
         'issues'         | {}
@@ -80,8 +77,6 @@ RSpec.describe Gitlab::SearchResults do
     end
 
     describe '#formatted_limited_count' do
-      using RSpec::Parameterized::TableSyntax
-
       where(:count, :expected) do
         23   | '23'
         99   | '99'
@@ -342,17 +337,36 @@ RSpec.describe Gitlab::SearchResults do
       expect(results.limited_issues_count).to eq 4
     end
 
-    it 'lists all issues for admin' do
-      results = described_class.new(admin, query, limit_projects)
-      issues = results.objects('issues')
+    context 'with admin user' do
+      context 'when admin mode enabled', :enable_admin_mode do
+        it 'lists all issues' do
+          results = described_class.new(admin, query, limit_projects)
+          issues = results.objects('issues')
 
-      expect(issues).to include issue
-      expect(issues).to include security_issue_1
-      expect(issues).to include security_issue_2
-      expect(issues).to include security_issue_3
-      expect(issues).to include security_issue_4
-      expect(issues).not_to include security_issue_5
-      expect(results.limited_issues_count).to eq 5
+          expect(issues).to include issue
+          expect(issues).to include security_issue_1
+          expect(issues).to include security_issue_2
+          expect(issues).to include security_issue_3
+          expect(issues).to include security_issue_4
+          expect(issues).not_to include security_issue_5
+          expect(results.limited_issues_count).to eq 5
+        end
+      end
+
+      context 'when admin mode disabled' do
+        it 'does not list confidential issues' do
+          results = described_class.new(admin, query, limit_projects)
+          issues = results.objects('issues')
+
+          expect(issues).to include issue
+          expect(issues).not_to include security_issue_1
+          expect(issues).not_to include security_issue_2
+          expect(issues).not_to include security_issue_3
+          expect(issues).not_to include security_issue_4
+          expect(issues).not_to include security_issue_5
+          expect(results.limited_issues_count).to eq 1
+        end
+      end
     end
   end
 

@@ -87,8 +87,7 @@ module EE
       def replicables_for_current_secondary(primary_key_in)
         node = ::Gitlab::Geo.current_node
 
-        not_expired
-          .primary_key_in(primary_key_in)
+        primary_key_in(primary_key_in)
           .merge(selective_sync_scope(node))
           .merge(object_storage_scope(node))
       end
@@ -120,7 +119,7 @@ module EE
 
         report = ::Gitlab::Ci::Reports::Security::Report.new(file_type, job.pipeline, nil).tap do |report|
           each_blob do |blob|
-            ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, report)
+            ::Gitlab::Ci::Parsers.fabricate!(file_type, blob, report).parse!
           end
         end
 

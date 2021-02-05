@@ -22,6 +22,10 @@ module Vulnerabilities
 
     scope :by_checksum, -> (checksum) { where(checksum: checksum) }
 
+    def diff
+      @diff ||= file.read
+    end
+
     def retrieve_upload(_identifier, paths)
       Upload.find_by(model: self, path: paths)
     end

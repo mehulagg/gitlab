@@ -15,6 +15,7 @@ import {
 } from '../mock_data';
 
 let state = null;
+const { stages } = customizableStagesAndEvents;
 
 describe('Value Stream Analytics mutations', () => {
   beforeEach(() => {
@@ -61,16 +62,16 @@ describe('Value Stream Analytics mutations', () => {
   });
 
   it.each`
-    mutation                                     | payload                                  | expectedState
-    ${types.SET_FEATURE_FLAGS}                   | ${{ hasDurationChart: true }}            | ${{ featureFlags: { hasDurationChart: true } }}
-    ${types.SET_SELECTED_PROJECTS}               | ${selectedProjects}                      | ${{ selectedProjects }}
-    ${types.SET_DATE_RANGE}                      | ${{ startDate, endDate }}                | ${{ startDate, endDate }}
-    ${types.SET_SELECTED_STAGE}                  | ${{ id: 'first-stage' }}                 | ${{ selectedStage: { id: 'first-stage' } }}
-    ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR}   | ${{ errors: { name: ['is required'] } }} | ${{ createValueStreamErrors: { name: ['is required'] }, isCreatingValueStream: false }}
-    ${types.RECEIVE_DELETE_VALUE_STREAM_ERROR}   | ${'Some error occurred'}                 | ${{ deleteValueStreamError: 'Some error occurred' }}
-    ${types.RECEIVE_VALUE_STREAMS_SUCCESS}       | ${valueStreams}                          | ${{ valueStreams, isLoadingValueStreams: false }}
-    ${types.SET_SELECTED_VALUE_STREAM}           | ${valueStreams[1].id}                    | ${{ selectedValueStream: {} }}
-    ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}                       | ${{ selectedValueStream: valueStreams[1] }}
+    mutation                                     | payload                                                    | expectedState
+    ${types.SET_FEATURE_FLAGS}                   | ${{ hasDurationChart: true }}                              | ${{ featureFlags: { hasDurationChart: true } }}
+    ${types.SET_SELECTED_PROJECTS}               | ${selectedProjects}                                        | ${{ selectedProjects }}
+    ${types.SET_DATE_RANGE}                      | ${{ startDate, endDate }}                                  | ${{ startDate, endDate }}
+    ${types.SET_SELECTED_STAGE}                  | ${{ id: 'first-stage' }}                                   | ${{ selectedStage: { id: 'first-stage' } }}
+    ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR}   | ${{ data: { stages }, errors: { name: ['is required'] } }} | ${{ createValueStreamErrors: { name: ['is required'] }, isCreatingValueStream: false }}
+    ${types.RECEIVE_DELETE_VALUE_STREAM_ERROR}   | ${'Some error occurred'}                                   | ${{ deleteValueStreamError: 'Some error occurred' }}
+    ${types.RECEIVE_VALUE_STREAMS_SUCCESS}       | ${valueStreams}                                            | ${{ valueStreams, isLoadingValueStreams: false }}
+    ${types.SET_SELECTED_VALUE_STREAM}           | ${valueStreams[1].id}                                      | ${{ selectedValueStream: {} }}
+    ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}                                         | ${{ selectedValueStream: valueStreams[1] }}
   `(
     '$mutation with payload $payload will update state with $expectedState',
     ({ mutation, payload, expectedState }) => {
@@ -126,11 +127,11 @@ describe('Value Stream Analytics mutations', () => {
   describe(`${types.RECEIVE_GROUP_STAGES_SUCCESS}`, () => {
     describe('with data', () => {
       beforeEach(() => {
-        mutations[types.RECEIVE_GROUP_STAGES_SUCCESS](state, customizableStagesAndEvents.stages);
+        mutations[types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages);
       });
 
       it('will convert the stats object to stages', () => {
-        [issueStage, planStage, codeStage, stagingStage, reviewStage].forEach(stage => {
+        [issueStage, planStage, codeStage, stagingStage, reviewStage].forEach((stage) => {
           expect(state.stages).toContainEqual(stage);
         });
       });
@@ -160,8 +161,8 @@ describe('Value Stream Analytics mutations', () => {
       ]);
 
       expect(stateWithData.medians).toEqual({
-        '1': { value: 20, error: null },
-        '2': { value: 10, error: null },
+        1: { value: 20, error: null },
+        2: { value: 10, error: null },
       });
     });
   });
@@ -180,14 +181,11 @@ describe('Value Stream Analytics mutations', () => {
       ${'selectedProjects'} | ${initialData.selectedProjects}
       ${'startDate'}        | ${initialData.createdAfter}
       ${'endDate'}          | ${initialData.createdBefore}
-    `(
-      '$mutation with payload $payload will update state with $expectedState',
-      ({ stateKey, expectedState }) => {
-        state = {};
-        mutations[types.INITIALIZE_CYCLE_ANALYTICS](state, initialData);
+    `('$stateKey will be set to $expectedState', ({ stateKey, expectedState }) => {
+      state = {};
+      mutations[types.INITIALIZE_CYCLE_ANALYTICS](state, initialData);
 
-        expect(state[stateKey]).toEqual(expectedState);
-      },
-    );
+      expect(state[stateKey]).toEqual(expectedState);
+    });
   });
 });

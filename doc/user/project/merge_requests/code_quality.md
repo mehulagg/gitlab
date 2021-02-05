@@ -5,9 +5,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, howto
 ---
 
-# Code Quality
+# Code Quality **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in GitLab 9.3.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in 13.2.
 
 Ensuring your project's code stays simple, readable and easy to contribute to can be problematic. With the help of [GitLab CI/CD](../../../ci/README.md), you can analyze your
@@ -28,7 +28,7 @@ Code Quality:
 
 ## Code Quality Widget
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in GitLab 9.3.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in 13.2.
 
 Going a step further, GitLab can show the Code Quality report right
@@ -72,10 +72,10 @@ It requires GitLab 11.11 or later, and GitLab Runner 11.5 or later. If you are u
 GitLab 11.4 or earlier, you can view the deprecated job definitions in the
 [documentation archive](https://docs.gitlab.com/12.10/ee/user/project/merge_requests/code_quality.html#previous-job-definitions).
 
-First, you need GitLab Runner configured:
+- Using shared runners, the job should be configured For the [Docker-in-Docker workflow](../../../ci/docker/using_docker_build.md#use-the-docker-executor-with-the-docker-image-docker-in-docker).
+- Using private runners, there is an [alternative configuration](#set-up-a-private-runner-for-code-quality-without-docker-in-docker) recommended for running CodeQuality analysis more efficiently.
 
-- For the [Docker-in-Docker workflow](../../../ci/docker/using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor).
-- With enough disk space to handle generated Code Quality files. For example on the [GitLab project](https://gitlab.com/gitlab-org/gitlab) the files are approximately 7 GB.
+In either configuration, the runner must have enough disk space to handle generated Code Quality files. For example on the [GitLab project](https://gitlab.com/gitlab-org/gitlab) the files are approximately 7 GB.
 
 Once you set up GitLab Runner, include the Code Quality template in your CI configuration:
 
@@ -139,6 +139,99 @@ On self-managed instances, if a malicious actor compromises the Code Quality job
 definition they could execute privileged Docker commands on the runner
 host. Having proper access control policies mitigates this attack vector by
 allowing access only to trusted actors.
+
+### Set up a private runner for code quality without Docker-in-Docker
+
+It's possible to configure your own runners and avoid Docker-in-Docker. You can use a
+configuration that may greatly speed up job execution without requiring your runners
+to operate in privileged mode.
+
+This alternative configuration uses socket binding to share the Runner's Docker daemon
+with the job environment. Be aware that this configuration [has significant considerations](../../../ci/docker/using_docker_build.md#use-docker-socket-binding)
+to be consider, but may be preferable depending on your use case.
+
+1. Register a new runner:
+
+   ```shell
+   $ gitlab-runner register --executor "docker" \
+     --docker-image="docker:stable" \
+     --url "https://gitlab.com/" \
+     --description "cq-sans-dind" \
+     --tag-list "cq-sans-dind" \
+     --locked="false" \
+     --access-level="not_protected" \
+     --docker-volumes "/cache"\
+     --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
+     --registration-token="<project_token>" \
+     --non-interactive
+   ```
+
+1. **Optional, but recommended:** Set the builds directory to `/tmp/builds`,
+  so job artifacts are periodically purged from the runner host. If you skip
+  this step, you must clean up the default builds directory (`/builds`) yourself.
+  You can do this by adding the following two flags to `gitlab-runner register`
+  in the previous step.
+
+   ```shell
+   --builds-dir /tmp/builds
+   --docker-volumes /tmp/builds:/tmp/builds
+   ```
+
+   The resulting configuration:
+
+   ```toml
+   [[runners]]
+     name = "cq-sans-dind"
+     url = "https://gitlab.com/"
+     token = "<project_token>"
+     executor = "docker"
+     builds_dir = "/tmp/builds"
+     [runners.docker]
+       tls_verify = false
+       image = "docker:stable"
+       privileged = false
+       disable_entrypoint_overwrite = false
+       oom_kill_disable = false
+       disable_cache = false
+       volumes = ["/cache", "/var/run/docker.sock:/var/run/docker.sock", "/tmp/builds:/tmp/builds"]
+       shm_size = 0
+     [runners.cache]
+       [runners.cache.s3]
+       [runners.cache.gcs]
+   ```
+
+1. Apply two overrides to the `code_quality` job created by the template:
+
+   ```yaml
+   include:
+     - template: Code-Quality.gitlab-ci.yml
+
+   code_quality:
+     services:            # Shut off Docker-in-Docker
+     tags:
+       - cq-sans-dind     # Set this job to only run on our new specialized runner
+   ```
+
+The end result is that:
+
+- Privileged mode is not used.
+- Docker-in-Docker is not used.
+- Docker images, including all CodeClimate images, are cached, and not re-fetched for subsequent jobs.
+
+With this configuration, the run time for a second pipeline is much shorter. For example
+this [small change](https://gitlab.com/drew/test-code-quality-template/-/merge_requests/4/diffs?commit_id=1e705607aef7236c1b20bb6f637965f3f3e53a46)
+to an [open merge request](https://gitlab.com/drew/test-code-quality-template/-/merge_requests/4/pipelines)
+running Code Quality analysis ran significantly faster the second time:
+
+![Code Quality sequential runs without DinD](img/code_quality_host_bound_sequential.png)
+
+This configuration is not possible on `gitlab.com` shared runners. Shared runners
+are configured with `privileged=true`, and they do not expose `docker.sock` into
+the job container. As a result, socket binding cannot be used to make `docker` available
+in the context of the job script.
+
+[Docker-in-Docker](../../../ci/docker/using_docker_build.md#use-the-docker-executor-with-the-docker-image-docker-in-docker)
+was chosen as an operational decision by the runner team, instead of exposing `docker.sock`.
 
 ### Disabling the code quality job
 
@@ -265,7 +358,7 @@ After the Code Quality job completes:
   [downloadable artifact](../../../ci/pipelines/job_artifacts.md#downloading-artifacts)
   for the `code_quality` job.
 - The full list of code quality violations generated by a pipeline is shown in the
-  Code Quality tab of the Pipeline Details page. **(STARTER)**
+  Code Quality tab of the Pipeline Details page. **(PREMIUM)**
 
 ### Generating an HTML report
 
@@ -318,7 +411,7 @@ plugins:
     enabled: true
 ```
 
-This adds SonarJava to the `plugins:` section of the [default `.codeclimate.yml`](https://gitlab.com/gitlab-org/ci-cd/codequality/-/blob/master/codeclimate_defaults/.codeclimate.yml)
+This adds SonarJava to the `plugins:` section of the [default `.codeclimate.yml`](https://gitlab.com/gitlab-org/ci-cd/codequality/-/blob/master/codeclimate_defaults/.codeclimate.yml.template)
 included in your project.
 
 Changes to the `plugins:` section do not affect the `exclude_patterns` section of the
@@ -335,7 +428,7 @@ Here's [an example project](https://gitlab.com/jheimbuck_gl/jh_java_example_proj
 A common issue is that the terms `Code Quality` (GitLab specific) and `Code Climate`
 (Engine used by GitLab) are very similar. You must add a **`.codeclimate.yml`** file
 to change the default configuration, **not** a `.codequality.yml` file. If you use
-the wrong filename, the [default `.codeclimate.yml`](https://gitlab.com/gitlab-org/ci-cd/codequality/-/blob/master/codeclimate_defaults/.codeclimate.yml)
+the wrong filename, the [default `.codeclimate.yml`](https://gitlab.com/gitlab-org/ci-cd/codequality/-/blob/master/codeclimate_defaults/.codeclimate.yml.template)
 is still used.
 
 ### No Code Quality report is displayed in a Merge Request
@@ -351,15 +444,15 @@ This can be due to multiple reasons:
 - The [`artifacts:expire_in`](../../../ci/yaml/README.md#artifactsexpire_in) CI/CD
   setting can cause the Code Quality artifact(s) to expire faster than desired.
 - If you use the [`REPORT_STDOUT` environment variable](https://gitlab.com/gitlab-org/ci-cd/codequality#environment-variables), no report file is generated and nothing displays in the merge request.
-- Large `codeclimate.json` files (esp. >10 MB) are [known to prevent the report from being displayed](https://gitlab.com/gitlab-org/gitlab/-/issues/2737).
+- Large `gl-code-quality-report.json` files (esp. >10 MB) are [known to prevent the report from being displayed](https://gitlab.com/gitlab-org/gitlab/-/issues/2737).
   As a work-around, try removing [properties](https://github.com/codeclimate/platform/blob/master/spec/analyzers/SPEC.md#data-types)
   that are [ignored by GitLab](#implementing-a-custom-tool). You can:
   - Configure the Code Quality tool to not output those types.
   - Use `sed`, `awk` or similar commands in the `.gitlab-ci.yml` script to
-    edit the `codeclimate.json` before the job completes.
+    edit the `gl-code-quality-report.json` before the job completes.
 
 ### Only a single Code Quality report is displayed, but more are defined
 
 GitLab only uses the Code Quality artifact from the latest created job (with the largest job ID).
 If multiple jobs in a pipeline generate a code quality artifact, those of earlier jobs are ignored.
-To avoid confusion, configure only one job to generate a `codeclimate.json`.
+To avoid confusion, configure only one job to generate a `gl-code-quality-report.json`.

@@ -99,6 +99,10 @@
     line-height: $list-text-height;
     color: $gl-text-color-secondary;
 
+    @include media-breakpoint-down(xs) {
+      padding-top: $gl-padding-6;
+    }
+
     span {
       margin-right: 15px;
     }
@@ -146,7 +150,11 @@
 }
 
 @mixin green-status-color {
-  @include status-color($green-100, $green-500, $green-700);
+  @include status-color(
+    var(--green-100, $green-100),
+    var(--green-500, $green-500),
+    var(--green-700, $green-700)
+  );
 }
 
 @mixin fade($gradient-direction, $gradient-color) {
@@ -254,9 +262,9 @@
 @mixin build-trace-bar($height) {
   height: $height;
   min-height: $height;
-  background: $gray-light;
-  border: 1px solid $border-color;
-  color: $gl-text-color;
+  background: var(--gray-50, $gray-50);
+  border: 1px solid var(--border-color, $border-color);
+  color: var(--gl-text-color, $gl-text-color);
   padding: $grid-size;
 }
 
@@ -343,13 +351,6 @@
     &:nth-child(3) {
       animation-delay: 0.66s;
     }
-  }
-}
-
-@mixin borderless-status-icon($color) {
-  svg {
-    border: 1px solid $color;
-    border-radius: 50%;
   }
 }
 

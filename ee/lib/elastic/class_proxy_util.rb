@@ -6,15 +6,24 @@ module Elastic
   module ClassProxyUtil
     extend ActiveSupport::Concern
 
-    def initialize(target)
+    attr_reader :use_separate_indices
+
+    def initialize(target, use_separate_indices: false)
       super(target)
 
-      config = version_namespace.const_get('Config', false)
+      const_name = if use_separate_indices
+                     "#{target.name}Config"
+                   else
+                     'Config'
+                   end
+
+      config = version_namespace.const_get(const_name, false)
 
       @index_name = config.index_name
       @document_type = config.document_type
       @settings = config.settings
       @mapping = config.mapping
+      @use_separate_indices = use_separate_indices
     end
 
     ### Multi-version utils

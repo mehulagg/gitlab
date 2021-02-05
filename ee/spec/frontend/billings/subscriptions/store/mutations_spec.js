@@ -39,7 +39,7 @@ describe('EE billings subscription module mutations', () => {
   });
 
   describe(types.RECEIVE_SUBSCRIPTION_SUCCESS, () => {
-    const getColumnValues = columns =>
+    const getColumnValues = (columns) =>
       columns.reduce(
         (acc, { id, value }) => ({
           ...acc,
@@ -47,14 +47,14 @@ describe('EE billings subscription module mutations', () => {
         }),
         {},
       );
-    const getStateTableValues = key =>
+    const getStateTableValues = (key) =>
       state.tables[key].rows.map(({ columns }) => getColumnValues(columns));
 
     describe.each`
-      desc                        | subscription                  | tableKey
-      ${'with Gold subscription'} | ${mockDataSubscription.gold}  | ${TABLE_TYPE_DEFAULT}
-      ${'with Free plan'}         | ${mockDataSubscription.free}  | ${TABLE_TYPE_FREE}
-      ${'with Gold trial'}        | ${mockDataSubscription.trial} | ${TABLE_TYPE_TRIAL}
+      desc                            | subscription                  | tableKey
+      ${'with Ultimate subscription'} | ${mockDataSubscription.gold}  | ${TABLE_TYPE_DEFAULT}
+      ${'with Free plan'}             | ${mockDataSubscription.free}  | ${TABLE_TYPE_FREE}
+      ${'with Ultimate trial'}        | ${mockDataSubscription.trial} | ${TABLE_TYPE_TRIAL}
     `('$desc', ({ subscription, tableKey }) => {
       beforeEach(() => {
         state.isLoadingSubscription = true;

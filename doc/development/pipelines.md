@@ -1,12 +1,12 @@
 ---
 stage: none
-group: unassigned
+group: Engineering Productivity
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Pipelines for the GitLab project
 
-Pipelines for <https://gitlab.com/gitlab-org/gitlab> and <https://gitlab.com/gitlab-org/gitlab-foss> (as well as the
+Pipelines for [`gitlab-org/gitlab`](https://gitlab.com/gitlab-org/gitlab) and [`gitlab-org/gitlab-foss`](https://gitlab.com/gitlab-org/gitlab-foss) (as well as the
 `dev` instance's mirrors) are configured in the usual
 [`.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml)
 which itself includes files under
@@ -37,14 +37,14 @@ Pipeline creation is also affected by the following CI variables:
 No pipeline is created in any other cases (for example, when pushing a branch with no
 MR for it).
 
-The source of truth for these workflow rules is defined in <https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml>.
+The source of truth for these workflow rules is defined in [`.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
 
 ### Pipelines for Merge Requests
 
 In general, pipelines for an MR fall into one or more of the following types,
 depending on the changes made in the MR:
 
-- [Docs-only MR pipeline](#docs-only-mr-pipeline): This is typically created for an MR that only changes documentation.
+- [Documentation only MR pipeline](#documentation-only-mr-pipeline): This is typically created for an MR that only changes documentation.
 - [Code-only MR pipeline](#code-only-mr-pipeline): This is typically created for an MR that only changes code, either backend or frontend.
 - [Frontend-only MR pipeline](#frontend-only-mr-pipeline): This is typically created for an MR that only changes frontend code.
 - [QA-only MR pipeline](#qa-only-mr-pipeline): This is typically created for an MR that only changes end to end tests related code.
@@ -53,46 +53,50 @@ We use the [`rules:`](../ci/yaml/README.md#rules) and [`needs:`](../ci/yaml/READ
 to determine the jobs that need to be run in a pipeline. Note that an MR that includes multiple types of changes would
 have a pipelines that include jobs from multiple types (e.g. a combination of docs-only and code-only pipelines).
 
-#### Docs-only MR pipeline
+#### Documentation only MR pipeline
 
-Reference pipeline: <https://gitlab.com/gitlab-org/gitlab/pipelines/135236627>
+[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/-/pipelines/250546928):
 
 ```mermaid
 graph LR
   subgraph "No needed jobs";
-    1-1["danger-review (3.5 minutes)"];
+    1-1["danger-review (2.3 minutes)"];
     click 1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8100542&udv=0"
-    1-50["docs lint (9 minutes)"];
-    click 1-50 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356757&udv=0"
-  end
+    1-2["docs-lint markdown (1.5 minutes)"];
+    click 1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=10224335&udv=0"
+    1-3["docs-lint links (6 minutes)"];
+    click 1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356757&udv=0"
+    1-4["ui-docs-links lint (2.5 minutes)"];
+    click 1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=10823717&udv=1020379"
+   end
 ```
 
 #### Code-only MR pipeline
 
-Reference pipeline: <https://gitlab.com/gitlab-org/gitlab/pipelines/136295694>
+[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/pipelines/136295694)
 
 ```mermaid
 graph RL;
   classDef criticalPath fill:#f66;
 
   subgraph "No needed jobs";
-    1-1["danger-review (3.5 minutes)"];
+    1-1["danger-review (2.3 minutes)"];
     click 1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8100542&udv=0"
-    1-2["build-qa-image (2.4 minutes)"];
+    1-2["build-qa-image (1.6 minutes)"];
     click 1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914325&udv=0"
-    1-3["compile-test-assets (8.5 minutes)"];
+    1-3["compile-test-assets (7 minutes)"];
     click 1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914317&udv=0"
-    1-4["compile-test-assets as-if-foss (8.35 minutes)"];
+    1-4["compile-test-assets as-if-foss (7 minutes)"];
     click 1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356616&udv=0"
     1-5["compile-production-assets (19 minutes)"];
     click 1-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914312&udv=0"
-    1-6["setup-test-env (7.4 minutes)"];
+    1-6["setup-test-env (9 minutes)"];
     click 1-6 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914315&udv=0"
     1-7["review-stop-failed-deployment"];
     1-8["dependency_scanning"];
     1-9["qa:internal, qa:internal-as-if-foss"];
     1-11["qa:selectors, qa:selectors-as-if-foss"];
-    1-14["retrieve-tests-metadata (1.9 minutes)"];
+    1-14["retrieve-tests-metadata (1 minutes)"];
     click 1-14 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356697&udv=0"
     1-15["code_quality"];
     1-16["brakeman-sast"];
@@ -100,37 +104,37 @@ graph RL;
     1-18["kubesec-sast"];
     1-19["nodejs-scan-sast"];
     1-20["secrets-sast"];
-    1-21["static-analysis (17 minutes)"];
+    1-21["static-analysis (30 minutes)"];
     click 1-21 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914471&udv=0"
 
     class 1-3 criticalPath;
     class 1-6 criticalPath;
   end
 
-  2_1-1["graphql-reference-verify (5 minutes)"];
+  2_1-1["graphql-verify (4 minutes)"];
   click 2_1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356715&udv=0"
   2_1-2["memory-static (4.75 minutes)"];
   click 2_1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356721&udv=0"
-  2_1-3["run-dev-fixtures (5 minutes)"];
+  2_1-3["run-dev-fixtures (6 minutes)"];
   click 2_1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356729&udv=0"
-  2_1-4["run-dev-fixtures-ee (5 minutes)"];
+  2_1-4["run-dev-fixtures-ee (6.75 minutes)"];
   click 2_1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356731&udv=0"
   subgraph "Needs `setup-test-env`";
     2_1-1 & 2_1-2 & 2_1-3 & 2_1-4 --> 1-6;
   end
 
-  2_2-2["frontend-fixtures (16.5 minutes)"];
+  2_2-2["rspec frontend_fixture/rspec-ee frontend_fixture (12 minutes)"];
   class 2_2-2 criticalPath;
   click 2_2-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=7910143&udv=0"
-  2_2-4["memory-on-boot (7.19 minutes)"];
+  2_2-4["memory-on-boot (6 minutes)"];
   click 2_2-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356727&udv=0"
-  2_2-5["webpack-dev-server (6.1 minutes)"];
+  2_2-5["webpack-dev-server (4.5 minutes)"];
   click 2_2-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8404303&udv=0"
   subgraph "Needs `setup-test-env` & `compile-test-assets`";
     2_2-2 & 2_2-4 & 2_2-5 --> 1-6 & 1-3;
   end
 
-  2_3-1["build-assets-image (2.5 minutes)"];
+  2_3-1["build-assets-image (1.6 minutes)"];
   subgraph "Needs `compile-production-assets`";
     2_3-1 --> 1-5
   end
@@ -153,17 +157,17 @@ graph RL;
   click 3_1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914204&udv=0"
   3_1-2["karma (4 minutes)"];
   click 3_1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914200&udv=0"
-  subgraph "Needs `frontend-fixtures`";
+  subgraph "Needs `rspec frontend_fixture/rspec-ee frontend_fixture`";
     3_1-1 & 3_1-2 --> 2_2-2;
   end
 
-  3_2-1["rspec:coverage (7.5 minutes)"];
+  3_2-1["rspec:coverage (4.6 minutes)"];
   subgraph "Depends on `rspec` jobs";
     3_2-1 -.->|"(don't use needs because of limitations)"| 2_5-1;
     click 3_2-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=7248745&udv=0"
   end
 
-  4_1-1["coverage-frontend (3.6 minutes)"];
+  4_1-1["coverage-frontend (2.75 minutes)"];
   subgraph "Needs `jest`";
     4_1-1 --> 3_1-1;
     class 4_1-1 criticalPath;
@@ -173,30 +177,30 @@ graph RL;
 
 #### Frontend-only MR pipeline
 
-Reference pipeline: <https://gitlab.com/gitlab-org/gitlab/pipelines/134661039>
+[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/pipelines/134661039):
 
 ```mermaid
 graph RL;
   classDef criticalPath fill:#f66;
 
   subgraph "No needed jobs";
-    1-1["danger-review (3.5 minutes)"];
+    1-1["danger-review (2.3 minutes)"];
     click 1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8100542&udv=0"
-    1-2["build-qa-image (2.4 minutes)"];
+    1-2["build-qa-image (1.6 minutes)"];
     click 1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914325&udv=0"
-    1-3["compile-test-assets (8.5 minutes)"];
+    1-3["compile-test-assets (7 minutes)"];
     click 1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914317&udv=0"
-    1-4["compile-test-assets as-if-foss (8.35 minutes)"];
+    1-4["compile-test-assets as-if-foss (7 minutes)"];
     click 1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356616&udv=0"
     1-5["compile-production-assets (19 minutes)"];
     click 1-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914312&udv=0"
-    1-6["setup-test-env (7.4 minutes)"];
+    1-6["setup-test-env (9 minutes)"];
     click 1-6 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914315&udv=0"
     1-7["review-stop-failed-deployment"];
     1-8["dependency_scanning"];
     1-9["qa:internal, qa:internal-as-if-foss"];
     1-11["qa:selectors, qa:selectors-as-if-foss"];
-    1-14["retrieve-tests-metadata (1.9 minutes)"];
+    1-14["retrieve-tests-metadata (1 minutes)"];
     click 1-14 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356697&udv=0"
     1-15["code_quality"];
     1-16["brakeman-sast"];
@@ -204,7 +208,7 @@ graph RL;
     1-18["kubesec-sast"];
     1-19["nodejs-scan-sast"];
     1-20["secrets-sast"];
-    1-21["static-analysis (17 minutes)"];
+    1-21["static-analysis (30 minutes)"];
     click 1-21 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914471&udv=0"
 
     class 1-3 criticalPath;
@@ -212,30 +216,30 @@ graph RL;
     class 1-6 criticalPath;
   end
 
-  2_1-1["graphql-reference-verify (5 minutes)"];
+  2_1-1["graphql-verify (4 minutes)"];
   click 2_1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356715&udv=0"
   2_1-2["memory-static (4.75 minutes)"];
   click 2_1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356721&udv=0"
-  2_1-3["run-dev-fixtures (5 minutes)"];
+  2_1-3["run-dev-fixtures (6 minutes)"];
   click 2_1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356729&udv=0"
-  2_1-4["run-dev-fixtures-ee (5 minutes)"];
+  2_1-4["run-dev-fixtures-ee (6.75 minutes)"];
   click 2_1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356731&udv=0"
   subgraph "Needs `setup-test-env`";
     2_1-1 & 2_1-2 & 2_1-3 & 2_1-4 --> 1-6;
   end
 
-  2_2-2["frontend-fixtures (16.5 minutes)"];
+  2_2-2["rspec frontend_fixture/rspec-ee frontend_fixture (12 minutes)"];
   class 2_2-2 criticalPath;
   click 2_2-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=7910143&udv=0"
-  2_2-4["memory-on-boot (7.19 minutes)"];
+  2_2-4["memory-on-boot (6 minutes)"];
   click 2_2-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356727&udv=0"
-  2_2-5["webpack-dev-server (6.1 minutes)"];
+  2_2-5["webpack-dev-server (4.5 minutes)"];
   click 2_2-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8404303&udv=0"
   subgraph "Needs `setup-test-env` & `compile-test-assets`";
     2_2-2 & 2_2-4 & 2_2-5 --> 1-6 & 1-3;
   end
 
-  2_3-1["build-assets-image (2.5 minutes)"];
+  2_3-1["build-assets-image (1.6 minutes)"];
   class 2_3-1 criticalPath;
   subgraph "Needs `compile-production-assets`";
     2_3-1 --> 1-5
@@ -266,17 +270,17 @@ graph RL;
   click 3_1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914204&udv=0"
   3_1-2["karma (4 minutes)"];
   click 3_1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914200&udv=0"
-  subgraph "Needs `frontend-fixtures`";
+  subgraph "Needs `rspec frontend_fixture/rspec-ee frontend_fixture`";
     3_1-1 & 3_1-2 --> 2_2-2;
   end
 
-  3_2-1["rspec:coverage (7.5 minutes)"];
+  3_2-1["rspec:coverage (4.6 minutes)"];
   subgraph "Depends on `rspec` jobs";
     3_2-1 -.->|"(don't use needs because of limitations)"| 2_5-1;
     click 3_2-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=7248745&udv=0"
   end
 
-  4_1-1["coverage-frontend (3.6 minutes)"];
+  4_1-1["coverage-frontend (2.75 minutes)"];
   subgraph "Needs `jest`";
     4_1-1 --> 3_1-1;
     class 4_1-1 criticalPath;
@@ -304,30 +308,30 @@ graph RL;
 
 #### QA-only MR pipeline
 
-Reference pipeline: <https://gitlab.com/gitlab-org/gitlab/pipelines/134645109>
+[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/pipelines/134645109):
 
 ```mermaid
 graph RL;
   classDef criticalPath fill:#f66;
 
   subgraph "No needed jobs";
-    1-1["danger-review (3.5 minutes)"];
+    1-1["danger-review (2.3 minutes)"];
     click 1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8100542&udv=0"
-    1-2["build-qa-image (2.4 minutes)"];
+    1-2["build-qa-image (1.6 minutes)"];
     click 1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914325&udv=0"
-    1-3["compile-test-assets (8.5 minutes)"];
+    1-3["compile-test-assets (7 minutes)"];
     click 1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914317&udv=0"
-    1-4["compile-test-assets as-if-foss (8.35 minutes)"];
+    1-4["compile-test-assets as-if-foss (7 minutes)"];
     click 1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356616&udv=0"
     1-5["compile-production-assets (19 minutes)"];
     click 1-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914312&udv=0"
-    1-6["setup-test-env (7.4 minutes)"];
+    1-6["setup-test-env (9 minutes)"];
     click 1-6 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914315&udv=0"
     1-7["review-stop-failed-deployment"];
     1-8["dependency_scanning"];
     1-9["qa:internal, qa:internal-as-if-foss"];
     1-11["qa:selectors, qa:selectors-as-if-foss"];
-    1-14["retrieve-tests-metadata (1.9 minutes)"];
+    1-14["retrieve-tests-metadata (1 minutes)"];
     click 1-14 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356697&udv=0"
     1-15["code_quality"];
     1-16["brakeman-sast"];
@@ -335,25 +339,25 @@ graph RL;
     1-18["kubesec-sast"];
     1-19["nodejs-scan-sast"];
     1-20["secrets-sast"];
-    1-21["static-analysis (17 minutes)"];
+    1-21["static-analysis (30 minutes)"];
     click 1-21 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914471&udv=0"
 
     class 1-5 criticalPath;
   end
 
-  2_1-1["graphql-reference-verify (5 minutes)"];
+  2_1-1["graphql-verify (4 minutes)"];
   click 2_1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356715&udv=0"
   subgraph "Needs `setup-test-env`";
     2_1-1 --> 1-6;
   end
 
-  2_3-1["build-assets-image (2.5 minutes)"];
+  2_3-1["build-assets-image (1.6 minutes)"];
   subgraph "Needs `compile-production-assets`";
     2_3-1 --> 1-5
     class 2_3-1 criticalPath;
   end
 
-  2_4-1["package-and-qa (108 minutes)"];
+  2_4-1["package-and-qa (105 minutes)"];
   subgraph "Needs `build-qa-image` & `build-assets-image`";
     2_4-1 --> 1-2 & 2_3-1;
     class 2_4-1 criticalPath;
@@ -422,24 +426,29 @@ We are using a custom mapping between source file to test files, maintained in t
 
 ### PostgreSQL versions testing
 
+Even though [Omnibus defaults to PG12 for new installs and upgrades](https://docs.gitlab.com/omnibus/package-information/postgresql_versions.md),
+our test suite is currently running against PG11, since GitLab.com still runs on PG11.
+
+We do run our test suite against PG12 on nightly scheduled pipelines as well as upon specific
+database library changes in MRs and `master` pipelines (with the `rspec db-library-code pg12` job).
+
 #### Current versions testing
 
 | Where? | PostgreSQL version |
-| ------ | ------ |
-| MRs | 11 |
-| `master` (non-scheduled pipelines) | 11 |
-| 2-hourly scheduled pipelines | 11 |
+| ------ | ------------------ |
+| MRs    | 11, 12 for DB library changes |
+| `master` (non-scheduled pipelines) | 11, 12 for DB library changes |
+| 2-hourly scheduled pipelines | 11, 12 for DB library changes |
 | `nightly` scheduled pipelines | 11, 12 |
 
 #### Long-term plan
 
 We follow the [PostgreSQL versions shipped with Omnibus GitLab](https://docs.gitlab.com/omnibus/package-information/postgresql_versions.html):
 
-| PostgreSQL version | 13.0 (May 2020) | 13.1 (June 2020) | 13.2 (July 2020) | 13.3 (August 2020) | 13.4, 13.5   | [13.7 (December 2020)](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5722) | 14.0 (May 2021?) |
-| ------ | --------------- | ---------------- | ---------------- | ------------------ | ------------ | -------------------- | ---------------- |
-| PG11   | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | MRs/`master`/`2-hour`/`nightly` | `nightly` | - |
-| PG12   | - | - | `nightly` | `2-hour`/`nightly` | `2-hour`/`nightly` | MRs/`2-hour`/`nightly` | `2-hour`/`nightly`     |
-| PG13   | - | - | -         | -                  | -                  | -                      | MRs/`2-hour`/`nightly` |
+| PostgreSQL version | 13.7 (December 2020) | 13.8 (January 2021) | 13.9 (February 2021) | 13.10 (March 2021) | 13.11 (April 2021) | 14.0 (May 2021?) |
+| -------------------| -------------------- | ------------------- | -------------------- | ------------------ | ------------------ | ---------------- |
+| PG11               | MRs/`2-hour`/`nightly` | MRs/`2-hour`/`nightly` | MRs/`2-hour`/`nightly` | MRs/`2-hour`/`nightly` | MRs/`2-hour`/`nightly` | MRs/`2-hour`/`nightly` |
+| PG12               | `nightly`            | `nightly`           | `nightly`           | `nightly`           | `nightly`           | `nightly`       |
 
 ### Test jobs
 
@@ -457,7 +466,7 @@ Consult the [Review Apps](testing_guide/review_apps.md) dedicated page for more 
 
 ### As-if-FOSS jobs
 
-The `* as-if-foss` jobs allows to run GitLab's test suite "as-if-FOSS", meaning as if the jobs would run in the context
+The `* as-if-foss` jobs allows the GitLab test suite "as-if-FOSS", meaning as if the jobs would run in the context
 of the `gitlab-org/gitlab-foss` project. These jobs are only created in the following cases:
 
 - `gitlab-org/security/gitlab` merge requests.
@@ -488,6 +497,7 @@ request, be sure to start the `dont-interrupt-me` job before pushing.
 1. We currently have several different caches defined in
    [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/global.gitlab-ci.yml),
    with fixed keys:
+   - `.setup-test-env-cache`.
    - `.rails-cache`.
    - `.static-analysis-cache`.
    - `.coverage-cache`
@@ -495,6 +505,7 @@ request, be sure to start the `dont-interrupt-me` job before pushing.
    - `.yarn-cache`.
    - `.assets-compile-cache` (the key includes `${NODE_ENV}` so it's actually two different caches).
 1. Only 6 specific jobs, running in 2-hourly scheduled pipelines, are pushing (i.e. updating) to the caches:
+   - `update-setup-test-env-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-rails-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-static-analysis-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-coverage-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
@@ -503,6 +514,10 @@ request, be sure to start the `dont-interrupt-me` job before pushing.
    - `update-assets-compile-test-cache`, defined in [`.gitlab/ci/frontend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/frontend.gitlab-ci.yml).
    - `update-yarn-cache`, defined in [`.gitlab/ci/frontend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/frontend.gitlab-ci.yml).
 1. These jobs run in merge requests whose title include `UPDATE CACHE`.
+
+### Artifacts strategy
+
+We limit the artifacts that are saved and retrieved by jobs to the minimum in order to reduce the upload/download time and costs, as well as the artifacts storage.
 
 ### Pre-clone step
 
@@ -575,8 +590,8 @@ runner, or [you can incur network egress charges](https://cloud.google.com/stora
 
 The current stages are:
 
-- `sync`: This stage is used to synchronize changes from <https://gitlab.com/gitlab-org/gitlab> to
-  <https://gitlab.com/gitlab-org/gitlab-foss>.
+- `sync`: This stage is used to synchronize changes from [`gitlab-org/gitlab`](https://gitlab.com/gitlab-org/gitlab) to
+  [`gitlab-org/gitlab-foss`](https://gitlab.com/gitlab-org/gitlab-foss).
 - `prepare`: This stage includes jobs that prepare artifacts that are needed by
   jobs in subsequent stages.
 - `build-images`: This stage includes jobs that prepare Docker images
@@ -605,7 +620,9 @@ that is deployed in stage `review`.
 
 The default image is defined in [`.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
 
+<!-- vale gitlab.Spelling = NO -->
 It includes Ruby, Go, Git, Git LFS, Chrome, Node, Yarn, PostgreSQL, and Graphics Magick.
+<!-- vale gitlab.Spelling = YES -->
 
 The images used in our pipelines are configured in the
 [`gitlab-org/gitlab-build-images`](https://gitlab.com/gitlab-org/gitlab-build-images)
@@ -619,7 +636,7 @@ The current version of the build images can be found in the
 
 In addition to the [predefined variables](../ci/variables/predefined_variables.md),
 each pipeline includes default variables defined in
-<https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml>.
+[`.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
 
 ### Common job definitions
 
@@ -631,6 +648,7 @@ that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-key
 |------------------|-------------|
 | `.default-retry` | Allows a job to [retry](../ci/yaml/README.md#retry) upon `unknown_failure`, `api_failure`, `runner_system_failure`, `job_execution_timeout`, or `stuck_or_timeout_failure`. |
 | `.default-before_script` | Allows a job to use a default `before_script` definition suitable for Ruby/Rails tasks that may need a database running (e.g. tests). |
+| `.setup-test-env-cache` | Allows a job to use a default `cache` definition suitable for setting up test environment for subsequent Ruby/Rails tasks. |
 | `.rails-cache` | Allows a job to use a default `cache` definition suitable for Ruby/Rails tasks. |
 | `.static-analysis-cache` | Allows a job to use a default `cache` definition suitable for static analysis tasks. |
 | `.coverage-cache` | Allows a job to use a default `cache` definition suitable for coverage tasks. |
@@ -650,7 +668,7 @@ that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-key
 We're using the [`rules` keyword](../ci/yaml/README.md#rules) extensively.
 
 All `rules` definitions are defined in
-<https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rules.gitlab-ci.yml>,
+[`rules.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rules.gitlab-ci.yml),
 then included in individual jobs via [`extends`](../ci/yaml/README.md#extends).
 
 The `rules` definitions are composed of `if:` conditions and `changes:` patterns,
@@ -661,16 +679,17 @@ and included in `rules` definitions via [YAML anchors](../ci/yaml/README.md#anch
 #### `if:` conditions
 
 <!-- vale gitlab.Substitutions = NO -->
+
 | `if:` conditions | Description | Notes |
 |------------------|-------------|-------|
-| `if-not-canonical-namespace`                                 | Matches if the project isn't in the canonical (`gitlab-org/`) or security (`gitlab-org/security`) namespace. | Use to create a job for forks (by using `when: on_success\|manual`), or **not** create a job for forks (by using `when: never`). |
+| `if-not-canonical-namespace`                                 | Matches if the project isn't in the canonical (`gitlab-org/`) or security (`gitlab-org/security`) namespace. | Use to create a job for forks (by using `when: on_success|manual`), or **not** create a job for forks (by using `when: never`). |
 | `if-not-ee`                                                  | Matches if the project isn't EE (i.e. project name isn't `gitlab` or `gitlab-ee`). | Use to create a job only in the FOSS project (by using `when: on_success|manual`), or **not** create a job if the project is EE (by using `when: never`). |
 | `if-not-foss`                                                | Matches if the project isn't FOSS (i.e. project name isn't `gitlab-foss`, `gitlab-ce`, or `gitlabhq`). | Use to create a job only in the EE project (by using `when: on_success|manual`), or **not** create a job if the project is FOSS (by using `when: never`). |
 | `if-default-refs`                                            | Matches if the pipeline is for `master`, `/^[\d-]+-stable(-ee)?$/` (stable branches), `/^\d+-\d+-auto-deploy-\d+$/` (auto-deploy branches), `/^security\//` (security branches), merge requests, and tags. | Note that jobs aren't created for branches with this default configuration. |
 | `if-master-refs`                                             | Matches if the current branch is `master`. | |
 | `if-master-push`                                             | Matches if the current branch is `master` and pipeline source is `push`. | |
 | `if-master-schedule-2-hourly`                                | Matches if the current branch is `master` and pipeline runs on a 2-hourly schedule. | |
-| `if-master-schedule-2-nightly`                               | Matches if the current branch is `master` and pipeline runs on a nightly schedule. | |
+| `if-master-schedule-nightly`                                 | Matches if the current branch is `master` and pipeline runs on a nightly schedule. | |
 | `if-auto-deploy-branches`                                    | Matches if the current branch is an auto-deploy one. | |
 | `if-master-or-tag`                                           | Matches if the pipeline is for the `master` branch or for a tag. | |
 | `if-merge-request`                                           | Matches if the pipeline is for a merge request. | |
@@ -691,6 +710,7 @@ and included in `rules` definitions via [YAML anchors](../ci/yaml/README.md#anch
 | `if-rspec-fail-fast-disabled`                                | Limits jobs to pipelines with `$RSPEC_FAIL_FAST_ENABLED` variable not set to `"true"`. | |
 | `if-rspec-fail-fast-skipped`                                 | Matches if the pipeline is for a merge request and the MR title includes "SKIP RSPEC FAIL-FAST". | |
 | `if-security-pipeline-merge-result`                          | Matches if the pipeline is for a security merge request triggered by `@gitlab-release-tools-bot`. | |
+
 <!-- vale gitlab.Substitutions = YES -->
 
 #### `changes:` patterns

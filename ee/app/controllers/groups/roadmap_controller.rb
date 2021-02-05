@@ -9,7 +9,7 @@ module Groups
     before_action :persist_roadmap_layout, only: [:show]
     before_action do
       push_frontend_feature_flag(:roadmap_buffered_rendering, @group)
-      push_frontend_feature_flag(:async_filtering, @group)
+      push_frontend_feature_flag(:async_filtering, @group, default_enabled: true)
     end
 
     feature_category :roadmaps
@@ -19,7 +19,6 @@ module Groups
       # Used to persist the order and show the correct sorting dropdown on UI.
       @sort = set_sort_order
       @epics_state = epics_state_in_user_preference || 'all'
-      @epics_count = EpicsFinder.new(current_user, group_id: @group.id).execute.count
     end
 
     private

@@ -56,11 +56,7 @@ describe('GeoNodeReplicationStatusComponent', () => {
       });
 
       it(`sets background of StatusPill to ${replicationStatusCssClass} when enabled is ${enabled}`, () => {
-        expect(
-          findStatusPill()
-            .classes()
-            .join(' '),
-        ).toContain(replicationStatusCssClass);
+        expect(findStatusPill().classes().join(' ')).toContain(replicationStatusCssClass);
       });
 
       it('renders StatusPill correctly', () => {

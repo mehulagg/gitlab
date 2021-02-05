@@ -2,7 +2,7 @@
   extends:
     - .default-retry
     - .docs:rules:review-docs
-  image: ruby:2.7-alpine
+  image: ${GITLAB_DEPENDENCY_PROXY}ruby:2.7-alpine
   stage: review
   needs: []
   variables:
@@ -43,7 +43,7 @@ docs-lint markdown:
     - .default-retry
     - .docs:rules:docs-lint
   # When updating the image version here, update it in /scripts/lint-doc.sh too.
-  image: "registry.gitlab.com/gitlab-org/gitlab-docs/lint-markdown:alpine-3.12-vale-2.6.1-markdownlint-0.24.0"
+  image: "registry.gitlab.com/gitlab-org/gitlab-docs/lint-markdown:alpine-3.12-vale-2.8.0-markdownlint-0.26.0"
   stage: test
   needs: []
   script:
@@ -66,6 +66,7 @@ docs-lint links:
     - bundle exec nanoc
     # Check the internal links
     - bundle exec nanoc check internal_links
+    - bundle exec nanoc check internal_anchors
     # Delete the redirect files, rebuild, and check internal links again, to see if we are linking to redirects.
     # Don't delete the documentation/index.md, which is a false positive for the simple grep.
     - grep -rl "redirect_to:" /tmp/gitlab-docs/content/ee/ | grep -v "development/documentation/index.md" | xargs rm -f
@@ -74,7 +75,7 @@ docs-lint links:
     - echo -e "\e[1;96mMake sure all links point to the correct page."
     - bundle exec nanoc check internal_links
     # Check the internal anchor links
-    - bundle exec nanoc check internal_anchors
+
 
 ui-docs-links lint:
   extends:
@@ -84,16 +85,3 @@ ui-docs-links lint:
   needs: []
   script:
     - bundle exec haml-lint -i DocumentationLinks
-
-graphql-reference-verify:
-  extends:
-    - .default-retry
-    - .rails-cache
-    - .default-before_script
-    - .docs:rules:graphql-reference-verify
-    - .use-pg11
-  stage: test
-  needs: ["setup-test-env"]
-  script:
-    - bundle exec rake gitlab:graphql:check_docs
-    - bundle exec rake gitlab:graphql:check_schema

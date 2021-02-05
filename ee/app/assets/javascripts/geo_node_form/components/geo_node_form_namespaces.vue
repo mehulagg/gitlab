@@ -32,7 +32,7 @@ export default {
   methods: {
     ...mapActions(['fetchSyncNamespaces']),
     toggleNamespace(namespace) {
-      const index = this.selectedNamespaces.findIndex(id => id === namespace.id);
+      const index = this.selectedNamespaces.findIndex((id) => id === namespace.id);
       if (index > -1) {
         this.$emit('removeSyncOption', { key: SELECTIVE_SYNC_NAMESPACES, index });
       } else {

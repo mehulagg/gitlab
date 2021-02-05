@@ -15,28 +15,27 @@ import {
   slugifyWithUnderscore,
 } from '~/lib/utils/text_utility';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
+import markdownField from '~/vue_shared/components/markdown/field.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import * as constants from '../constants';
 import eventHub from '../event_hub';
-import NoteableWarning from '~/vue_shared/components/notes/noteable_warning.vue';
-import markdownField from '~/vue_shared/components/markdown/field.vue';
-import userAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import issuableStateMixin from '../mixins/issuable_state';
 import noteSignedOutWidget from './note_signed_out_widget.vue';
 import discussionLockedWidget from './discussion_locked_widget.vue';
-import issuableStateMixin from '../mixins/issuable_state';
+import CommentFieldLayout from './comment_field_layout.vue';
 
 export default {
   name: 'CommentForm',
   components: {
-    NoteableWarning,
     noteSignedOutWidget,
     discussionLockedWidget,
     markdownField,
-    userAvatarLink,
     GlButton,
     TimelineEntryItem,
     GlIcon,
+    CommentFieldLayout,
   },
-  mixins: [issuableStateMixin],
+  mixins: [glFeatureFlagsMixin(), issuableStateMixin],
   props: {
     noteableType: {
       type: String,
@@ -143,6 +142,9 @@ export default {
     },
     trackingLabel() {
       return slugifyWithUnderscore(`${this.commentButtonTitle} button`);
+    },
+    hasCloseAndCommentButton() {
+      return !this.glFeatures.removeCommentCloseReopen;
     },
   },
   watch: {
@@ -286,6 +288,9 @@ export default {
         Autosize.update(this.$refs.textarea);
       });
     },
+    hasEmailParticipants() {
+      return this.getNoteableData.issue_email_participants?.length;
+    },
   },
 };
 </script>
@@ -297,57 +302,43 @@ export default {
     <ul v-else-if="canCreateNote" class="notes notes-form timeline">
       <timeline-entry-item class="note-form">
         <div class="flash-container error-alert timeline-content"></div>
-        <div class="timeline-icon d-none d-md-block">
-          <user-avatar-link
-            v-if="author"
-            :link-href="author.path"
-            :img-src="author.avatar_url"
-            :img-alt="author.name"
-            :img-size="40"
-          />
-        </div>
         <div class="timeline-content timeline-content-form">
           <form ref="commentForm" class="new-note common-note-form gfm-form js-main-target-form">
-            <div class="error-alert"></div>
-
-            <noteable-warning
-              v-if="hasWarning(getNoteableData)"
-              :is-locked="isLocked(getNoteableData)"
-              :is-confidential="isConfidential(getNoteableData)"
+            <comment-field-layout
+              :with-alert-container="true"
+              :noteable-data="getNoteableData"
               :noteable-type="noteableType"
-              :locked-noteable-docs-path="lockedIssueDocsPath"
-              :confidential-noteable-docs-path="confidentialIssueDocsPath"
-            />
-
-            <markdown-field
-              ref="markdownField"
-              :is-submitting="isSubmitting"
-              :markdown-preview-path="markdownPreviewPath"
-              :markdown-docs-path="markdownDocsPath"
-              :quick-actions-docs-path="quickActionsDocsPath"
-              :add-spacing-classes="false"
-              :textarea-value="note"
             >
-              <textarea
-                id="note-body"
-                ref="textarea"
-                slot="textarea"
-                v-model="note"
-                dir="auto"
-                :disabled="isSubmitting"
-                name="note[note]"
-                class="note-textarea js-vue-comment-form js-note-text js-gfm-input js-autosize markdown-area"
-                data-qa-selector="comment_field"
-                data-testid="comment-field"
-                data-supports-quick-actions="true"
-                :aria-label="__('Description')"
-                :placeholder="__('Write a comment or drag your files here…')"
-                @keydown.up="editCurrentUserLastNote()"
-                @keydown.meta.enter="handleSave()"
-                @keydown.ctrl.enter="handleSave()"
-              ></textarea>
-            </markdown-field>
-
+              <markdown-field
+                ref="markdownField"
+                :is-submitting="isSubmitting"
+                :markdown-preview-path="markdownPreviewPath"
+                :markdown-docs-path="markdownDocsPath"
+                :quick-actions-docs-path="quickActionsDocsPath"
+                :add-spacing-classes="false"
+                :textarea-value="note"
+              >
+                <template #textarea>
+                  <textarea
+                    id="note-body"
+                    ref="textarea"
+                    v-model="note"
+                    dir="auto"
+                    :disabled="isSubmitting"
+                    name="note[note]"
+                    class="note-textarea js-vue-comment-form js-note-text js-gfm-input js-autosize markdown-area"
+                    data-qa-selector="comment_field"
+                    data-testid="comment-field"
+                    :data-supports-quick-actions="!glFeatures.tributeAutocomplete"
+                    :aria-label="__('Description')"
+                    :placeholder="__('Write a comment or drag your files here…')"
+                    @keydown.up="editCurrentUserLastNote()"
+                    @keydown.meta.enter="handleSave()"
+                    @keydown.ctrl.enter="handleSave()"
+                  ></textarea>
+                </template>
+              </markdown-field>
+            </comment-field-layout>
             <div class="note-form-actions">
               <div
                 class="btn-group gl-mr-3 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
@@ -385,7 +376,7 @@ export default {
                       class="btn btn-transparent"
                       @click.prevent="setNoteType('comment')"
                     >
-                      <gl-icon name="check" class="icon" />
+                      <gl-icon name="check" class="icon gl-flex-shrink-0" />
                       <div class="description">
                         <strong>{{ __('Comment') }}</strong>
                         <p>
@@ -401,10 +392,12 @@ export default {
                   <li class="divider droplab-item-ignore"></li>
                   <li :class="{ 'droplab-item-selected': noteType === 'discussion' }">
                     <button
+                      type="button"
+                      class="btn btn-transparent"
                       data-qa-selector="discussion_menu_item"
                       @click.prevent="setNoteType('discussion')"
                     >
-                      <gl-icon name="check" class="icon" />
+                      <gl-icon name="check" class="icon gl-flex-shrink-0" />
                       <div class="description">
                         <strong>{{ __('Start thread') }}</strong>
                         <p>{{ startDiscussionDescription }}</p>
@@ -415,7 +408,7 @@ export default {
               </div>
 
               <gl-button
-                v-if="canToggleIssueState"
+                v-if="hasCloseAndCommentButton && canToggleIssueState"
                 :loading="isToggleStateButtonLoading"
                 category="secondary"
                 :variant="buttonVariant"

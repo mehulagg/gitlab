@@ -45,6 +45,10 @@ module Gitlab
         code_owners_file&.sections
       end
 
+      def optional_section?(section)
+        code_owners_file&.optional_section?(section)
+      end
+
       private
 
       def load_bare_entries_for_paths

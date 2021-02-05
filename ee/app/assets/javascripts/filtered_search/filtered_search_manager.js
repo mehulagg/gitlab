@@ -6,7 +6,7 @@ export default class extends FilteredSearchManager {
     const { tokens, ...rest } = super.getSearchTokens();
 
     const hasEqualsToEpicIdToken = tokens.some(
-      token =>
+      (token) =>
         token?.key === epicTokenKey.key &&
         token?.operator === '=' &&
         !Number.isNaN(Number(token?.value)),

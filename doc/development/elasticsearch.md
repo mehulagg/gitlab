@@ -4,7 +4,7 @@ group: Global Search
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Elasticsearch knowledge **(STARTER ONLY)**
+# Elasticsearch knowledge **(PREMIUM SELF)**
 
 This area is to maintain a compendium of useful information when working with Elasticsearch.
 
@@ -13,9 +13,9 @@ the [Elasticsearch integration documentation](../integration/elasticsearch.md#en
 
 ## Deep Dive
 
-In June 2019, Mario de la Ossa hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`) on GitLab's [Elasticsearch integration](../integration/elasticsearch.md) to share his domain specific knowledge with anyone who may work in this part of the codebase in the future. You can find the [recording on YouTube](https://www.youtube.com/watch?v=vrvl-tN2EaA), and the slides on [Google Slides](https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit) and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf). Everything covered in this deep dive was accurate as of GitLab 12.0, and while specific details may have changed since then, it should still serve as a good introduction.
+In June 2019, Mario de la Ossa hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`) on the GitLab [Elasticsearch integration](../integration/elasticsearch.md) to share his domain specific knowledge with anyone who may work in this part of the codebase in the future. You can find the <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [recording on YouTube](https://www.youtube.com/watch?v=vrvl-tN2EaA), and the slides on [Google Slides](https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit) and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf). Everything covered in this deep dive was accurate as of GitLab 12.0, and while specific details may have changed since then, it should still serve as a good introduction.
 
-In August 2020, a second Deep Dive was hosted, focusing on [GitLab's specific architecture for multi-indices support](#zero-downtime-reindexing-with-multiple-indices). The [recording on YouTube](https://www.youtube.com/watch?v=0WdPR9oB2fg) and the [slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive/) are available. Everything covered in this deep dive was accurate as of GitLab 13.3.
+In August 2020, a second Deep Dive was hosted, focusing on [GitLab-specific architecture for multi-indices support](#zero-downtime-reindexing-with-multiple-indices). The <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [recording on YouTube](https://www.youtube.com/watch?v=0WdPR9oB2fg) and the [slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive/) are available. Everything covered in this deep dive was accurate as of GitLab 13.3.
 
 ## Supported Versions
 
@@ -173,7 +173,7 @@ This is not applicable yet as multiple indices functionality is not fully implem
 
 Folders like `ee/lib/elastic/v12p1` contain snapshots of search logic from different versions. To keep a continuous Git history, the latest version lives under `ee/lib/elastic/latest`, but its classes are aliased under an actual version (e.g. `ee/lib/elastic/v12p3`). When referencing these classes, never use the `Latest` namespace directly, but use the actual version (e.g. `V12p3`).
 
-The version name basically follows GitLab's release version. If setting is changed in 12.3, we will create a new namespace called `V12p3` (p stands for "point"). Raise an issue if there is a need to name a version differently.
+The version name basically follows the GitLab release version. If setting is changed in 12.3, we will create a new namespace called `V12p3` (p stands for "point"). Raise an issue if there is a need to name a version differently.
 
 If the current version is `v12p1`, and we need to create a new version for `v12p3`, the steps are as follows:
 
@@ -210,11 +210,14 @@ class MigrationName < Elastic::Migration
 end
 ```
 
-Applied migrations are stored in `gitlab-#{RAILS_ENV}-migrations` index. All unexecuted migrations
+Applied migrations are stored in `gitlab-#{RAILS_ENV}-migrations` index. All migrations not executed
 are applied by the [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
 cron worker sequentially.
 
 Any update to the Elastic index mappings should be replicated in [`Elastic::Latest::Config`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/elastic/latest/config.rb).
+
+Migrations can be built with a retry limit and have the ability to be [failed and marked as halted](https://gitlab.com/gitlab-org/gitlab/-/blob/66e899b6637372a4faf61cfd2f254cbdd2fb9f6d/ee/lib/elastic/migration.rb#L40).
+Any data or index cleanup needed to support migration retries should be handled within the migration.
 
 ### Migration options supported by the [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
 
@@ -334,6 +337,51 @@ cluster.routing.allocation.disk.watermark.low: 15gb
 cluster.routing.allocation.disk.watermark.high: 10gb
 ```
 
-Restart Elasticsearch, and the `read_only_allow_delete` will clear on it's own.
+Restart Elasticsearch, and the `read_only_allow_delete` will clear on its own.
 
 _from "Disk-based Shard Allocation | Elasticsearch Reference" [5.6](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/disk-allocator.html#disk-allocator) and [6.x](https://www.elastic.co/guide/en/elasticsearch/reference/6.7/disk-allocator.html)_
+
+### Disaster recovery/data loss/backups
+
+The use of Elasticsearch in GitLab is only ever as a secondary data store.
+This means that all of the data stored in Elasticsearch can always be derived
+again from other data sources, specifically PostgreSQL and Gitaly. Therefore if
+the Elasticsearch data store is ever corrupted for whatever reason you can
+simply reindex everything from scratch.
+
+If your Elasticsearch index is incredibly large it may be too time consuming or
+cause too much downtime to reindex from scratch. There aren't any built in
+mechanisms for automatically finding discrepancies and resyncing an
+Elasticsearch index if it gets out of sync but one tool that may be useful is
+looking at the logs for all the updates that occurred in a time range you
+believe may have been missed. This information is very low level and only
+useful for operators that are familiar with the GitLab codebase. It is
+documented here in case it is useful for others. The relevant logs that could
+theoretically be used to figure out what needs to be replayed are:
+
+1. All non-repository updates that were synced can be found in
+   [`elasticsearch.log`](../administration/logs.md#elasticsearchlog) by
+   searching for
+   [`track_items`](https://gitlab.com/gitlab-org/gitlab/-/blob/1e60ea99bd8110a97d8fc481e2f41cab14e63d31/ee/app/services/elastic/process_bookkeeping_service.rb#L25)
+   and these can be replayed by sending these items again through
+   `::Elastic::ProcessBookkeepingService.track!`
+1. All repository updates that occurred can be found in
+   [`elasticsearch.log`](../administration/logs.md#elasticsearchlog) by
+   searching for
+   [`indexing_commit_range`](https://gitlab.com/gitlab-org/gitlab/-/blob/6f9d75dd3898536b9ec2fb206e0bd677ab59bd6d/ee/lib/gitlab/elastic/indexer.rb#L41).
+   Replaying these requires resetting the
+   [`IndexStatus#last_commit/last_wiki_commit`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/index_status.rb)
+   to the oldest `from_sha` in the logs and then triggering another index of
+   the project using
+   [`ElasticCommitIndexerWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/elastic_commit_indexer_worker.rb)
+1. All project deletes that occurred can be found in
+   [`sidekiq.log`](../administration/logs.md#sidekiqlog) by searching for
+   [`ElasticDeleteProjectWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/elastic_delete_project_worker.rb).
+   These updates can be replayed by triggering another
+   `ElasticDeleteProjectWorker`.
+
+With the above methods and taking regular [Elasticsearch
+snapshots](https://www.elastic.co/guide/en/elasticsearch/reference/current/snapshot-restore.html)
+we should be able to recover from different kinds of data loss issues in a
+relatively short period of time compared to indexing everything from
+scratch.

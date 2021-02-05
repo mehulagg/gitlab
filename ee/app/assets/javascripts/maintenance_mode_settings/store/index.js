@@ -12,4 +12,4 @@ export const getStoreConfig = ({ maintenanceEnabled, bannerMessage }) => ({
   state: createState({ maintenanceEnabled, bannerMessage }),
 });
 
-export const createStore = config => new Vuex.Store(getStoreConfig(config));
+export const createStore = (config) => new Vuex.Store(getStoreConfig(config));

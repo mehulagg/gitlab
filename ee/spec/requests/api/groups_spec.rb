@@ -243,7 +243,7 @@ RSpec.describe API::Groups do
         let(:user) { admin }
 
         where(:feature_enabled, :setting_enabled, :default_branch_protection) do
-          false | false | Gitlab::Access::PROTECTION_NONE
+          true  | true  | Gitlab::Access::PROTECTION_NONE
           false | true  | Gitlab::Access::PROTECTION_NONE
           true  | false | Gitlab::Access::PROTECTION_NONE
           false | false | Gitlab::Access::PROTECTION_NONE
@@ -266,7 +266,7 @@ RSpec.describe API::Groups do
 
       context 'authenticated a normal user' do
         where(:feature_enabled, :setting_enabled, :default_branch_protection) do
-          false | false | Gitlab::Access::PROTECTION_NONE
+          true  | true  | Gitlab::Access::PROTECTION_NONE
           false | true  | Gitlab::Access::PROTECTION_NONE
           true  | false | Gitlab::Access::PROTECTION_FULL
           false | false | Gitlab::Access::PROTECTION_NONE

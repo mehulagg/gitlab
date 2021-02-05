@@ -2,16 +2,11 @@
 import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
 import produce from 'immer';
 import { __ } from '~/locale';
-import securityScannersQuery from '../graphql/project_security_scanners.graphql';
-import vulnerabilitiesQuery from '../graphql/project_vulnerabilities.query.graphql';
-import vulnerabilitiesQueryAutoFix from '../graphql/project_vulnerabilities_autofix.query.graphql';
+import securityScannersQuery from '../graphql/queries/project_security_scanners.query.graphql';
+import vulnerabilitiesQuery from '../graphql/queries/project_vulnerabilities.query.graphql';
 import { preparePageInfo } from '../helpers';
 import { VULNERABILITIES_PER_PAGE } from '../store/constants';
 import VulnerabilityList from './vulnerability_list.vue';
-
-const query = gon?.features?.secureVulnerabilityAutofixIndicator
-  ? vulnerabilitiesQueryAutoFix
-  : vulnerabilitiesQuery;
 
 export default {
   name: 'ProjectVulnerabilitiesApp',
@@ -41,7 +36,7 @@ export default {
   },
   apollo: {
     vulnerabilities: {
-      query,
+      query: vulnerabilitiesQuery,
       variables() {
         return {
           fullPath: this.projectFullPath,
@@ -70,7 +65,8 @@ export default {
       },
       update({ project = {} }) {
         const { available = [], enabled = [], pipelineRun = [] } = project?.securityScanners || {};
-        const translateScannerName = scannerName => this.$options.i18n[scannerName] || scannerName;
+        const translateScannerName = (scannerName) =>
+          this.$options.i18n[scannerName] || scannerName;
 
         return {
           available: available.map(translateScannerName),
@@ -97,7 +93,7 @@ export default {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            const results = produce(fetchMoreResult, draftData => {
+            const results = produce(fetchMoreResult, (draftData) => {
               // eslint-disable-next-line no-param-reassign
               draftData.project.vulnerabilities.nodes = [
                 ...previousResult.project.vulnerabilities.nodes,

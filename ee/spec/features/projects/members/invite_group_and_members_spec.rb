@@ -8,6 +8,11 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
 
   let(:maintainer) { create(:user) }
 
+  before do
+    stub_feature_flags(invite_members_group_modal: false)
+    stub_feature_flags(vue_project_members_list: false)
+  end
+
   describe 'Share group lock' do
     shared_examples 'the project cannot be shared with groups' do
       it 'user is only able to share with members' do
@@ -75,7 +80,9 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
           page.find('body').click
           find('.btn-success').click
 
-          page.within('.project-members-groups') do
+          click_link 'Groups'
+
+          page.within('[data-testid="project-member-groups"]') do
             expect(page).to have_content(group_to_share_with.name)
           end
         end

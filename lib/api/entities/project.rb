@@ -67,6 +67,8 @@ module API
       expose(:builds_access_level) { |project, options| project.project_feature.string_access_level(:builds) }
       expose(:snippets_access_level) { |project, options| project.project_feature.string_access_level(:snippets) }
       expose(:pages_access_level) { |project, options| project.project_feature.string_access_level(:pages) }
+      expose(:operations_access_level) { |project, options| project.project_feature.string_access_level(:operations) }
+      expose(:analytics_access_level) { |project, options| project.project_feature.string_access_level(:analytics) }
 
       expose :emails_disabled
       expose :shared_runners_enabled
@@ -98,6 +100,7 @@ module API
       end
       expose :only_allow_merge_if_pipeline_succeeds
       expose :allow_merge_on_skipped_pipeline
+      expose :restrict_user_defined_variables
       expose :request_access_enabled
       expose :only_allow_merge_if_all_discussions_are_resolved
       expose :remove_source_branch_after_merge

@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import Translate from '~/vue_shared/translate';
-import eventHub from './event_hub';
 import { createStore } from '~/frequent_items/store';
+import eventHub from './event_hub';
 
 Vue.use(Translate);
 
@@ -18,7 +18,7 @@ const frequentItemDropdowns = [
 ];
 
 export default function initFrequentItemDropdowns() {
-  frequentItemDropdowns.forEach(dropdown => {
+  frequentItemDropdowns.forEach((dropdown) => {
     const { namespace, key } = dropdown;
     const el = document.getElementById(`js-${namespace}-dropdown`);
     const navEl = document.getElementById(`nav-${namespace}-dropdown`);

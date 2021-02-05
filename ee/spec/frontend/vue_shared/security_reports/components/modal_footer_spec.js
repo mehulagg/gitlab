@@ -7,7 +7,7 @@ import createState from 'ee/vue_shared/security_reports/store/state';
 describe('Security Reports modal footer', () => {
   let wrapper;
 
-  const mountComponent = propsData => {
+  const mountComponent = (propsData) => {
     wrapper = mount(component, {
       propsData: {
         isCreatingIssue: false,

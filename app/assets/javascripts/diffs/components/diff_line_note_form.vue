@@ -6,7 +6,6 @@ import { s__ } from '~/locale';
 import noteForm from '../../notes/components/note_form.vue';
 import MultilineCommentForm from '../../notes/components/multiline_comment_form.vue';
 import autosave from '../../notes/mixins/autosave';
-import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import { DIFF_NOTE_TYPE, INLINE_DIFF_LINES_KEY, PARALLEL_DIFF_VIEW_TYPE } from '../constants';
 import {
   commentLineOptions,
@@ -16,7 +15,6 @@ import {
 export default {
   components: {
     noteForm,
-    userAvatarLink,
     MultilineCommentForm,
   },
   mixins: [autosave, diffLineNoteFormMixin, glFeatureFlagsMixin()],
@@ -56,10 +54,11 @@ export default {
   },
   computed: {
     ...mapState({
-      noteableData: state => state.notes.noteableData,
-      diffViewType: state => state.diffs.diffViewType,
+      diffViewType: ({ diffs }) => diffs.diffViewType,
+      showSuggestPopover: ({ diffs }) => diffs.showSuggestPopover,
+      noteableData: ({ notes }) => notes.noteableData,
+      selectedCommentPosition: ({ notes }) => notes.selectedCommentPosition,
     }),
-    ...mapState('diffs', ['showSuggestPopover']),
     ...mapGetters('diffs', ['getDiffFileByHash', 'diffLines']),
     ...mapGetters([
       'isLoggedIn',
@@ -126,6 +125,10 @@ export default {
 
       this.initAutoSave(this.noteableData, keys);
     }
+
+    if (this.selectedCommentPosition) {
+      this.commentLineStart = this.selectedCommentPosition.start;
+    }
   },
   methods: {
     ...mapActions('diffs', [
@@ -169,14 +172,6 @@ export default {
         :comment-line-options="commentLineOptions"
       />
     </div>
-    <user-avatar-link
-      v-if="author"
-      :link-href="author.path"
-      :img-src="author.avatar_url"
-      :img-alt="author.name"
-      :img-size="40"
-      class="d-none d-sm-block"
-    />
     <note-form
       ref="noteForm"
       :is-editing="true"

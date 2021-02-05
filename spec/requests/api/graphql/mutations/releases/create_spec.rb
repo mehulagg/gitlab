@@ -116,11 +116,9 @@ RSpec.describe 'Creation of a new release' do
     context 'when all available mutation arguments are provided' do
       it_behaves_like 'no errors'
 
-      # rubocop: disable CodeReuse/ActiveRecord
       it 'returns the new release data' do
         create_release
 
-        release = mutation_response[:release]
         expected_direct_asset_url = Gitlab::Routing.url_helpers.project_release_url(project, Release.find_by(tag: tag_name)) << "/downloads#{asset_link[:directAssetPath]}"
 
         expected_attributes = {
@@ -139,21 +137,17 @@ RSpec.describe 'Creation of a new release' do
                 directAssetUrl: expected_direct_asset_url
               }]
             }
+          },
+          milestones: {
+            nodes: [
+              { title: '12.3' },
+              { title: '12.4' }
+            ]
           }
-        }
+        }.with_indifferent_access
 
-        expect(release).to include(expected_attributes)
-
-        # Right now the milestones are returned in a non-deterministic order.
-        # This `milestones` test should be moved up into the expect(release)
-        # above (and `.to include` updated to `.to eq`) once
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/259012 is addressed.
-        expect(release['milestones']['nodes']).to match_array([
-          { 'title' => '12.4' },
-          { 'title' => '12.3' }
-        ])
+        expect(mutation_response[:release]).to eq(expected_attributes)
       end
-      # rubocop: enable CodeReuse/ActiveRecord
     end
 
     context 'when only the required mutation arguments are provided' do
@@ -315,10 +309,7 @@ RSpec.describe 'Creation of a new release' do
         let(:asset_link_2) { { name: 'My link', url: 'https://example.com/2' } }
         let(:assets) { { links: [asset_link_1, asset_link_2] } }
 
-        # Right now the raw Postgres error message is sent to the user as the validation message.
-        # We should catch this validation error and return a nicer message:
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/277087
-        it_behaves_like 'errors-as-data with message', 'PG::UniqueViolation'
+        it_behaves_like 'errors-as-data with message', %r{Validation failed: Links have duplicate values \(My link\)}
       end
 
       context 'when two release assets share the same URL' do
@@ -326,8 +317,7 @@ RSpec.describe 'Creation of a new release' do
         let(:asset_link_2) { { name: 'My second link', url: 'https://example.com' } }
         let(:assets) { { links: [asset_link_1, asset_link_2] } }
 
-        # Same note as above about the ugly error message
-        it_behaves_like 'errors-as-data with message', 'PG::UniqueViolation'
+        it_behaves_like 'errors-as-data with message', %r{Validation failed: Links have duplicate values \(https://example.com\)}
       end
 
       context 'when the provided tag name is HEAD' do

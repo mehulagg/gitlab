@@ -1,15 +1,15 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 import produce from 'immer';
-import getProjects from 'ee/security_dashboard/graphql/get_projects.query.graphql';
-import projectsQuery from 'ee/security_dashboard/graphql/get_instance_security_dashboard_projects.query.graphql';
-import addProjectToSecurityDashboard from 'ee/security_dashboard/graphql/add_project_to_security_dashboard.mutation.graphql';
-import deleteProjectFromSecurityDashboard from 'ee/security_dashboard/graphql/delete_project_from_security_dashboard.mutation.graphql';
+import getProjects from 'ee/security_dashboard/graphql/queries/get_projects.query.graphql';
+import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_security_dashboard_projects.query.graphql';
+import addProjectToSecurityDashboard from 'ee/security_dashboard/graphql/mutations/add_project_to_security_dashboard.mutation.graphql';
+import deleteProjectFromSecurityDashboard from 'ee/security_dashboard/graphql/mutations/delete_project_from_security_dashboard.mutation.graphql';
 import { createInvalidProjectMessage } from 'ee/security_dashboard/utils/first_class_project_manager_utils';
-import ProjectList from './project_list.vue';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
 import { __, s__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import ProjectList from './project_list.vue';
 
 export default {
   MINIMUM_QUERY_LENGTH: 3,
@@ -60,7 +60,7 @@ export default {
       const isProjectSelected = this.selectedProjects.some(({ id }) => id === project.id);
 
       if (isProjectSelected) {
-        this.selectedProjects = this.selectedProjects.filter(p => p.id !== project.id);
+        this.selectedProjects = this.selectedProjects.filter((p) => p.id !== project.id);
       } else {
         this.selectedProjects.push(project);
       }
@@ -68,7 +68,7 @@ export default {
     addProjects() {
       this.$emit('handleProjectManipulation', true);
 
-      const addProjectsPromises = this.selectedProjects.map(project => {
+      const addProjectsPromises = this.selectedProjects.map((project) => {
         return this.$apollo
           .mutate({
             mutation: addProjectToSecurityDashboard,
@@ -81,7 +81,7 @@ export default {
               const sourceData = store.readQuery({ query: projectsQuery });
               const newProject = results.addProjectToSecurityDashboard.project;
 
-              const data = produce(sourceData, draftData => {
+              const data = produce(sourceData, (draftData) => {
                 // eslint-disable-next-line no-param-reassign
                 draftData.instanceSecurityDashboard.projects.nodes = [
                   ...draftData.instanceSecurityDashboard.projects.nodes,
@@ -112,8 +112,8 @@ export default {
       });
 
       return Promise.all(addProjectsPromises)
-        .then(response => {
-          const invalidProjects = response.filter(value => value.error);
+        .then((response) => {
+          const invalidProjects = response.filter((value) => value.error);
           this.$emit('handleProjectManipulation', false);
 
           if (invalidProjects.length) {
@@ -156,10 +156,10 @@ export default {
           update(store) {
             const sourceData = store.readQuery({ query: projectsQuery });
 
-            const data = produce(sourceData, draftData => {
+            const data = produce(sourceData, (draftData) => {
               // eslint-disable-next-line no-param-reassign
               draftData.instanceSecurityDashboard.projects.nodes = draftData.instanceSecurityDashboard.projects.nodes.filter(
-                curr => curr.id !== id,
+                (curr) => curr.id !== id,
               );
             });
 
@@ -188,7 +188,7 @@ export default {
       }
 
       return this.searchProjects(this.searchQuery, this.pageInfo)
-        .then(payload => {
+        .then((payload) => {
           const {
             data: {
               projects: { nodes, pageInfo },

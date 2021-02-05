@@ -88,7 +88,7 @@ RSpec.describe List do
       it { is_expected.to validate_presence_of(:iteration) }
 
       it 'is invalid when feature is not available' do
-        stub_licensed_features(iterations: false)
+        stub_licensed_features(board_iteration_lists: false)
 
         expect(subject).to be_invalid
         expect(subject.errors[:list_type])

@@ -63,7 +63,7 @@ export default {
           }
           return data.updateIssue?.issue;
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash({
             message: errorMessage,
             captureError: true,
@@ -81,7 +81,7 @@ export default {
         .then(() => {
           this.$apollo.queries.testCase.refetch();
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash({
             message: s__('TestCases|Something went wrong while adding test case to Todo.'),
             captureError: true,
@@ -110,7 +110,7 @@ export default {
           }
           this.$apollo.queries.testCase.refetch();
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash({
             message: s__('TestCases|Something went wrong while marking test case todo as done.'),
             captureError: true,
@@ -143,7 +143,7 @@ export default {
           }
           visitUrl(data.issueMove?.issue.webUrl);
         })
-        .catch(error => {
+        .catch((error) => {
           this.testCaseMoveInProgress = false;
           createFlash({
             message: s__('TestCases|Something went wrong while moving test case.'),

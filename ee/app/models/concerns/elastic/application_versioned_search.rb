@@ -6,9 +6,15 @@ module Elastic
     FORWARDABLE_INSTANCE_METHODS = [:es_id, :es_parent].freeze
     FORWARDABLE_CLASS_METHODS = [:elastic_search, :es_import, :es_type, :index_name, :document_type, :mapping, :mappings, :settings, :import].freeze
 
+    # rubocop:disable Gitlab/ModuleWithInstanceVariables
     def __elasticsearch__(&block)
-      @__elasticsearch__ ||= ::Elastic::MultiVersionInstanceProxy.new(self)
+      if self.class.use_separate_indices?
+        @__elasticsearch_separate__ ||= ::Elastic::MultiVersionInstanceProxy.new(self, use_separate_indices: true)
+      else
+        @__elasticsearch__ ||= ::Elastic::MultiVersionInstanceProxy.new(self)
+      end
     end
+    # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
     # Should be overridden in the models where some records should be skipped
     def searchable?
@@ -77,7 +83,15 @@ module Elastic
 
     class_methods do
       def __elasticsearch__
-        @__elasticsearch__ ||= ::Elastic::MultiVersionClassProxy.new(self)
+        if use_separate_indices?
+          @__elasticsearch_separate__ ||= ::Elastic::MultiVersionClassProxy.new(self, use_separate_indices: true)
+        else
+          @__elasticsearch__ ||= ::Elastic::MultiVersionClassProxy.new(self)
+        end
+      end
+
+      def use_separate_indices?
+        Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.include?(self) && Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
       end
 
       # Mark a dependant association as needing to be updated when a specific

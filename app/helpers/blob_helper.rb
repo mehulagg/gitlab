@@ -64,7 +64,7 @@ module BlobHelper
   def edit_blob_button(project = @project, ref = @ref, path = @path, options = {})
     return unless blob = readable_blob(options, path, project, ref)
 
-    common_classes = "btn btn-primary js-edit-blob gl-mr-3 #{options[:extra_class]}"
+    common_classes = "btn gl-button btn-confirm js-edit-blob gl-mr-3 #{options[:extra_class]}"
     data = { track_event: 'click_edit', track_label: 'Edit' }
 
     if Feature.enabled?(:web_ide_primary_edit, project.group)
@@ -84,7 +84,7 @@ module BlobHelper
   def ide_edit_button(project = @project, ref = @ref, path = @path, blob:)
     return unless blob
 
-    common_classes = 'btn btn-primary ide-edit-button gl-mr-3'
+    common_classes = 'btn gl-button btn-confirm ide-edit-button gl-mr-3'
     data = { track_event: 'click_edit_ide', track_label: 'Web IDE' }
 
     unless Feature.enabled?(:web_ide_primary_edit, project.group)
@@ -105,12 +105,13 @@ module BlobHelper
     return unless current_user
     return unless blob
 
-    common_classes = "btn btn-#{btn_class}"
+    common_classes = "btn gl-button btn-default btn-#{btn_class}"
+    base_button = button_tag(label, class: "#{common_classes} disabled", disabled: true)
 
     if !on_top_of_branch?(project, ref)
-      button_tag label, class: "#{common_classes} disabled has-tooltip", title: "You can only #{action} files when you are on a branch", data: { container: 'body' }
+      modify_file_button_tooltip(base_button, _("You can only %{action} files when you are on a branch") % { action: action })
     elsif blob.stored_externally?
-      button_tag label, class: "#{common_classes} disabled has-tooltip", title: "It is not possible to #{action} files that are stored in LFS using the web interface", data: { container: 'body' }
+      modify_file_button_tooltip(base_button, _("It is not possible to %{action} files that are stored in LFS using the web interface") % { action: action })
     elsif can_modify_blob?(blob, project, ref)
       button_tag label, class: "#{common_classes}", 'data-target' => "#modal-#{modal_type}-blob", 'data-toggle' => 'modal'
     elsif can?(current_user, :fork_project, project) && can?(current_user, :create_merge_request_in, project)
@@ -217,6 +218,10 @@ module BlobHelper
     @gitlab_ci_ymls ||= template_dropdown_names(TemplateFinder.build(:gitlab_ci_ymls, project).execute)
   end
 
+  def gitlab_ci_syntax_ymls(project)
+    @gitlab_ci_syntax_ymls ||= template_dropdown_names(TemplateFinder.build(:gitlab_ci_syntax_ymls, project).execute)
+  end
+
   def metrics_dashboard_ymls(project)
     @metrics_dashboard_ymls ||= template_dropdown_names(TemplateFinder.build(:metrics_dashboard_ymls, project).execute)
   end
@@ -242,7 +247,7 @@ module BlobHelper
   def copy_blob_source_button(blob)
     return unless blob.rendered_as_text?(ignore_errors: false)
 
-    clipboard_button(target: ".blob-content[data-blob-id='#{blob.id}'] > pre", class: "btn btn-sm js-copy-blob-source-btn", title: _("Copy file contents"))
+    clipboard_button(target: ".blob-content[data-blob-id='#{blob.id}'] > pre", class: "btn gl-button btn-default btn-sm js-copy-blob-source-btn", title: _("Copy file contents"))
   end
 
   def open_raw_blob_button(blob)
@@ -252,7 +257,7 @@ module BlobHelper
     title = _('Open raw')
     link_to sprite_icon('doc-code'),
       external_storage_url_or_path(blob_raw_path),
-      class: 'btn btn-sm has-tooltip',
+      class: 'btn gl-button btn-default btn-sm has-tooltip',
       target: '_blank',
       rel: 'noopener noreferrer',
       aria: { label: title },
@@ -267,7 +272,7 @@ module BlobHelper
     link_to sprite_icon('download'),
       external_storage_url_or_path(blob_raw_path(inline: false)),
       download: @path,
-      class: 'btn btn-sm has-tooltip',
+      class: 'btn gl-button btn-default btn-sm has-tooltip',
       target: '_blank',
       rel: 'noopener noreferrer',
       aria: { label: title },
@@ -360,7 +365,11 @@ module BlobHelper
   end
 
   def edit_disabled_button_tag(button_text, common_classes)
-    button_tag(button_text, class: "#{common_classes} disabled has-tooltip", title: _('You can only edit files when you are on a branch'), data: { container: 'body' })
+    button = button_tag(button_text, class: "#{common_classes} disabled", disabled: true)
+
+    # Disabled buttons with tooltips should have the tooltip attached
+    # to a wrapper element https://bootstrap-vue.org/docs/components/tooltip#disabled-elements
+    content_tag(:span, button, class: 'has-tooltip', title: _('You can only edit files when you are on a branch'), data: { container: 'body' })
   end
 
   def edit_link_tag(link_text, edit_path, common_classes, data)
@@ -396,5 +405,13 @@ module BlobHelper
   def editing_ci_config?
     @path.to_s.end_with?(Ci::Pipeline::CONFIG_EXTENSION) ||
       @path.to_s == @project.ci_config_path_or_default
+  end
+
+  private
+
+  def modify_file_button_tooltip(button, tooltip_message)
+    # Disabled buttons with tooltips should have the tooltip attached
+    # to a wrapper element https://bootstrap-vue.org/docs/components/tooltip#disabled-elements
+    content_tag(:span, button, class: 'btn-group has-tooltip', title: tooltip_message, data: { container: 'body' })
   end
 end

@@ -5,6 +5,7 @@ module Gitlab
     class CronManager
       COMMON_JOBS = %w[
         geo_metrics_update_worker
+        geo_verification_cron_worker
         repository_check_worker
       ].freeze
 

@@ -4,10 +4,10 @@ import { cloneDeep } from 'lodash';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
-import AnalyzerConfiguration from './analyzer_configuration.vue';
-import DynamicFields from './dynamic_fields.vue';
-import ExpandableSection from './expandable_section.vue';
 import configureSastMutation from '../graphql/configure_sast.mutation.graphql';
+import DynamicFields from '../../components/dynamic_fields.vue';
+import ExpandableSection from '../../components/expandable_section.vue';
+import AnalyzerConfiguration from './analyzer_configuration.vue';
 import {
   toSastCiConfigurationEntityInput,
   toSastCiConfigurationAnalyzerEntityInput,
@@ -87,7 +87,7 @@ export default {
 
           redirectTo(successPath);
         })
-        .catch(error => {
+        .catch((error) => {
           this.isSubmitting = false;
           this.hasSubmissionError = true;
           Sentry.captureException(error);
@@ -101,7 +101,7 @@ export default {
       };
     },
     onAnalyzerChange(name, updatedAnalyzer) {
-      const index = this.analyzersConfiguration.findIndex(analyzer => analyzer.name === name);
+      const index = this.analyzersConfiguration.findIndex((analyzer) => analyzer.name === name);
       if (index === -1) {
         return;
       }

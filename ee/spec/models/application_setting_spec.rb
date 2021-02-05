@@ -442,6 +442,15 @@ RSpec.describe ApplicationSetting do
     end
   end
 
+  describe '#invalidate_elasticsearch_indexes_cache_for_project!' do
+    it 'deletes the ElasticsearchEnabledCache for a single project' do
+      project_id = 1
+      expect(::Gitlab::Elastic::ElasticsearchEnabledCache).to receive(:delete_record).with(:project, project_id)
+
+      setting.invalidate_elasticsearch_indexes_cache_for_project!(project_id)
+    end
+  end
+
   describe '#search_using_elasticsearch?' do
     # Constructs a truth table to run the specs against
     where(indexing: [true, false], searching: [true, false], limiting: [true, false], advanced_global_search_for_limited_indexing: [true, false])

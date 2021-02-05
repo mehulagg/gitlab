@@ -121,7 +121,7 @@ export default {
               :checked="subjectFilter"
               :options="subjectFilterOptions"
               @input="
-                value =>
+                (value) =>
                   $emit('updateFilter', { filter: $options.TASKS_BY_TYPE_FILTERS.SUBJECT, value })
               "
             />

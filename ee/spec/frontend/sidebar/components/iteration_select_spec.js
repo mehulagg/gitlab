@@ -144,7 +144,7 @@ describe('IterationSelect', () => {
             expect(
               wrapper
                 .findAll(GlDropdownItem)
-                .filter(w => w.text() === title)
+                .filter((w) => w.text() === title)
                 .at(0)
                 .text(),
             ).toBe(title);
@@ -154,7 +154,7 @@ describe('IterationSelect', () => {
             expect(
               wrapper
                 .findAll(GlDropdownItem)
-                .filter(w => w.props('isChecked') === true)
+                .filter((w) => w.props('isChecked') === true)
                 .at(0)
                 .text(),
             ).toBe(title);
@@ -187,7 +187,7 @@ describe('IterationSelect', () => {
 
               wrapper
                 .findAll(GlDropdownItem)
-                .filter(w => w.text() === 'title')
+                .filter((w) => w.text() === 'title')
                 .at(0)
                 .vm.$emit('click');
 
@@ -200,14 +200,17 @@ describe('IterationSelect', () => {
               beforeEach(() => {
                 createComponent({
                   data: {
-                    iterations: [{ id: 'id', title: 'title' }, { id: '123', title: '123' }],
+                    iterations: [
+                      { id: 'id', title: 'title' },
+                      { id: '123', title: '123' },
+                    ],
                     currentIteration: '123',
                   },
                 });
 
                 wrapper
                   .findAll(GlDropdownItem)
-                  .filter(w => w.text() === 'title')
+                  .filter((w) => w.text() === 'title')
                   .at(0)
                   .vm.$emit('click');
               });
@@ -226,10 +229,13 @@ describe('IterationSelect', () => {
             });
 
             describe('when error', () => {
-              const bootstrapComponent = mutationResp => {
+              const bootstrapComponent = (mutationResp) => {
                 createComponent({
                   data: {
-                    iterations: [{ id: '123', title: '123' }, { id: 'id', title: 'title' }],
+                    iterations: [
+                      { id: '123', title: '123' },
+                      { id: 'id', title: 'title' },
+                    ],
                     currentIteration: '123',
                   },
                   mutationPromise: mutationResp,
@@ -246,7 +252,7 @@ describe('IterationSelect', () => {
 
                   wrapper
                     .findAll(GlDropdownItem)
-                    .filter(w => w.text() === 'title')
+                    .filter((w) => w.text() === 'title')
                     .at(0)
                     .vm.$emit('click');
                 });

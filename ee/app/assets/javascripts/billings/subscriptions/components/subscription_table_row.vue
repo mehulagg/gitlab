@@ -1,6 +1,6 @@
 <script>
 import { GlIcon, GlButton } from '@gitlab/ui';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 import Popover from '~/vue_shared/components/help_popover.vue';
 
@@ -11,6 +11,7 @@ export default {
     GlIcon,
     Popover,
   },
+  inject: ['billableSeatsHref', 'isGroup'],
   props: {
     header: {
       type: Object,
@@ -20,15 +21,18 @@ export default {
       type: Array,
       required: true,
     },
-    isFreePlan: {
+    last: {
       type: Boolean,
       required: false,
       default: false,
     },
   },
-  inject: ['billableSeatsHref', 'isGroup'],
   computed: {
     ...mapState(['hasBillableGroupMembers']),
+    ...mapGetters(['isFreePlan']),
+    rowClasses() {
+      return !this.last ? 'gl-border-b-gray-100 gl-border-b-1 gl-border-b-solid' : null;
+    },
   },
   created() {
     if (this.isGroup) {
@@ -66,7 +70,10 @@ export default {
 </script>
 
 <template>
-  <div class="grid-row d-flex flex-grow-1 flex-column flex-sm-column flex-md-column flex-lg-row">
+  <div
+    :class="rowClasses"
+    class="gl-display-flex gl-flex-grow-1 gl-flex-direction-column gl-lg-flex-direction-row"
+  >
     <div class="grid-cell header-cell" data-testid="header-cell">
       <span class="icon-wrapper">
         <gl-icon v-if="header.icon" class="gl-mr-3" :name="header.icon" />

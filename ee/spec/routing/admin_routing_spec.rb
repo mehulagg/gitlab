@@ -105,5 +105,10 @@ RSpec.describe 'EE-specific admin routing' do
       expect(get('/admin/application_settings/templates')).to route_to('admin/application_settings#templates')
       expect(patch('/admin/application_settings/templates')).to route_to('admin/application_settings#templates')
     end
+
+    it 'redirects /advanced_search to to #advanced_search' do
+      expect(get('/admin/application_settings/advanced_search')).to route_to('admin/application_settings#advanced_search')
+      expect(patch('/admin/application_settings/advanced_search')).to route_to('admin/application_settings#advanced_search')
+    end
   end
 end

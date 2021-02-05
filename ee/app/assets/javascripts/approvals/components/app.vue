@@ -23,9 +23,9 @@ export default {
   computed: {
     ...mapState({
       settings: 'settings',
-      isLoading: state => state.approvals.isLoading,
-      hasLoaded: state => state.approvals.hasLoaded,
-      targetBranch: state => state.approvals.targetBranch,
+      isLoading: (state) => state.approvals.isLoading,
+      hasLoaded: (state) => state.approvals.hasLoaded,
+      targetBranch: (state) => state.approvals.targetBranch,
     }),
     createModalId() {
       return `${this.settings.prefix}-approvals-create-modal`;

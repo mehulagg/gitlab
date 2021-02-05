@@ -9,18 +9,14 @@ import {
   GlSkeletonLoader,
   GlSearchBoxByClick,
 } from '@gitlab/ui';
+import { get } from 'lodash';
+import getContainerRepositoriesQuery from 'shared_queries/container_registry/get_container_repositories.query.graphql';
 import Tracking from '~/tracking';
 import createFlash from '~/flash';
-
-import ProjectEmptyState from '../components/list_page/project_empty_state.vue';
-import GroupEmptyState from '../components/list_page/group_empty_state.vue';
 import RegistryHeader from '../components/list_page/registry_header.vue';
-import ImageList from '../components/list_page/image_list.vue';
-import CliCommands from '../components/list_page/cli_commands.vue';
+import DeleteImage from '../components/delete_image.vue';
 
-import getProjectContainerRepositoriesQuery from '../graphql/queries/get_project_container_repositories.query.graphql';
-import getGroupContainerRepositoriesQuery from '../graphql/queries/get_group_container_repositories.query.graphql';
-import deleteContainerRepositoryMutation from '../graphql/mutations/delete_container_repository.mutation.graphql';
+import getContainerRepositoriesDetails from '../graphql/queries/get_container_repositories_details.query.graphql';
 
 import {
   DELETE_IMAGE_SUCCESS_MESSAGE,
@@ -38,12 +34,25 @@ import {
 } from '../constants/index';
 
 export default {
-  name: 'RegistryListApp',
+  name: 'RegistryListPage',
   components: {
     GlEmptyState,
-    ProjectEmptyState,
-    GroupEmptyState,
-    ImageList,
+    ProjectEmptyState: () =>
+      import(
+        /* webpackChunkName: 'container_registry_components' */ '../components/list_page/project_empty_state.vue'
+      ),
+    GroupEmptyState: () =>
+      import(
+        /* webpackChunkName: 'container_registry_components' */ '../components/list_page/group_empty_state.vue'
+      ),
+    ImageList: () =>
+      import(
+        /* webpackChunkName: 'container_registry_components' */ '../components/list_page/image_list.vue'
+      ),
+    CliCommands: () =>
+      import(
+        /* webpackChunkName: 'container_registry_components' */ '../components/list_page/cli_commands.vue'
+      ),
     GlModal,
     GlSprintf,
     GlLink,
@@ -51,13 +60,13 @@ export default {
     GlSkeletonLoader,
     GlSearchBoxByClick,
     RegistryHeader,
-    CliCommands,
+    DeleteImage,
   },
-  inject: ['config'],
   directives: {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [Tracking.mixin()],
+  inject: ['config'],
   loader: {
     repeat: 10,
     width: 1000,
@@ -74,10 +83,8 @@ export default {
     EMPTY_RESULT_MESSAGE,
   },
   apollo: {
-    images: {
-      query() {
-        return this.graphQlQuery;
-      },
+    baseImages: {
+      query: getContainerRepositoriesQuery,
       variables() {
         return this.queryVariables;
       },
@@ -92,10 +99,26 @@ export default {
         createFlash({ message: FETCH_IMAGES_LIST_ERROR_MESSAGE });
       },
     },
+    additionalDetails: {
+      skip() {
+        return !this.fetchAdditionalDetails;
+      },
+      query: getContainerRepositoriesDetails,
+      variables() {
+        return this.queryVariables;
+      },
+      update(data) {
+        return data[this.graphqlResource]?.containerRepositories.nodes;
+      },
+      error() {
+        createFlash({ message: FETCH_IMAGES_LIST_ERROR_MESSAGE });
+      },
+    },
   },
   data() {
     return {
-      images: [],
+      baseImages: [],
+      additionalDetails: [],
       pageInfo: {},
       containerRepositoriesCount: 0,
       itemToDelete: {},
@@ -103,21 +126,24 @@ export default {
       searchValue: null,
       name: null,
       mutationLoading: false,
+      fetchAdditionalDetails: false,
     };
   },
   computed: {
+    images() {
+      return this.baseImages.map((image, index) => ({
+        ...image,
+        ...get(this.additionalDetails, index, {}),
+      }));
+    },
     graphqlResource() {
       return this.config.isGroupPage ? 'group' : 'project';
-    },
-    graphQlQuery() {
-      return this.config.isGroupPage
-        ? getGroupContainerRepositoriesQuery
-        : getProjectContainerRepositoriesQuery;
     },
     queryVariables() {
       return {
         name: this.name,
         fullPath: this.config.isGroupPage ? this.config.groupPath : this.config.projectPath,
+        isGroupPage: this.config.isGroupPage,
         first: GRAPHQL_PAGE_SIZE,
       };
     },
@@ -127,7 +153,7 @@ export default {
       };
     },
     isLoading() {
-      return this.$apollo.queries.images.loading || this.mutationLoading;
+      return this.$apollo.queries.baseImages.loading || this.mutationLoading;
     },
     showCommands() {
       return Boolean(!this.isLoading && !this.config?.isGroupPage && this.images?.length);
@@ -141,66 +167,69 @@ export default {
         : DELETE_IMAGE_ERROR_MESSAGE;
     },
   },
+  mounted() {
+    // If the two graphql calls - which are not batched - resolve togheter we will have a race
+    //  condition when apollo sets the cache, with this we give the 'base' call an headstart
+    setTimeout(() => {
+      this.fetchAdditionalDetails = true;
+    }, 200);
+  },
   methods: {
     deleteImage(item) {
       this.track('click_button');
       this.itemToDelete = item;
       this.$refs.deleteModal.show();
     },
-    handleDeleteImage() {
-      this.track('confirm_delete');
-      this.mutationLoading = true;
-      return this.$apollo
-        .mutate({
-          mutation: deleteContainerRepositoryMutation,
-          variables: {
-            id: this.itemToDelete.id,
-          },
-        })
-        .then(({ data }) => {
-          if (data?.destroyContainerRepository?.errors[0]) {
-            this.deleteAlertType = 'danger';
-          } else {
-            this.deleteAlertType = 'success';
-          }
-        })
-        .catch(() => {
-          this.deleteAlertType = 'danger';
-        })
-        .finally(() => {
-          this.mutationLoading = false;
-        });
-    },
     dismissDeleteAlert() {
       this.deleteAlertType = null;
       this.itemToDelete = {};
     },
-    fetchNextPage() {
+    updateQuery(_, { fetchMoreResult }) {
+      return fetchMoreResult;
+    },
+    async fetchNextPage() {
       if (this.pageInfo?.hasNextPage) {
-        this.$apollo.queries.images.fetchMore({
-          variables: {
-            after: this.pageInfo?.endCursor,
-            first: GRAPHQL_PAGE_SIZE,
-          },
-          updateQuery(previousResult, { fetchMoreResult }) {
-            return fetchMoreResult;
-          },
+        const variables = {
+          after: this.pageInfo?.endCursor,
+          first: GRAPHQL_PAGE_SIZE,
+        };
+
+        this.$apollo.queries.baseImages.fetchMore({
+          variables,
+          updateQuery: this.updateQuery,
+        });
+
+        await this.$nextTick();
+
+        this.$apollo.queries.additionalDetails.fetchMore({
+          variables,
+          updateQuery: this.updateQuery,
         });
       }
     },
-    fetchPreviousPage() {
+    async fetchPreviousPage() {
       if (this.pageInfo?.hasPreviousPage) {
-        this.$apollo.queries.images.fetchMore({
-          variables: {
-            first: null,
-            before: this.pageInfo?.startCursor,
-            last: GRAPHQL_PAGE_SIZE,
-          },
-          updateQuery(previousResult, { fetchMoreResult }) {
-            return fetchMoreResult;
-          },
+        const variables = {
+          first: null,
+          before: this.pageInfo?.startCursor,
+          last: GRAPHQL_PAGE_SIZE,
+        };
+        this.$apollo.queries.baseImages.fetchMore({
+          variables,
+          updateQuery: this.updateQuery,
+        });
+
+        await this.$nextTick();
+
+        this.$apollo.queries.additionalDetails.fetchMore({
+          variables,
+          updateQuery: this.updateQuery,
         });
       }
+    },
+    startDelete() {
+      this.track('confirm_delete');
+      this.mutationLoading = true;
     },
   },
 };
@@ -230,7 +259,7 @@ export default {
       <template #description>
         <p>
           <gl-sprintf :message="$options.i18n.CONNECTION_ERROR_MESSAGE">
-            <template #docLink="{content}">
+            <template #docLink="{ content }">
               <gl-link :href="`${config.helpPagePath}#docker-connection-error`" target="_blank">
                 {{ content }}
               </gl-link>
@@ -242,6 +271,7 @@ export default {
 
     <template v-else>
       <registry-header
+        :metadata-loading="isLoading"
         :images-count="containerRepositoriesCount"
         :expiration-policy="config.expirationPolicy"
         :help-page-path="config.helpPagePath"
@@ -285,6 +315,7 @@ export default {
           <image-list
             v-if="images.length"
             :images="images"
+            :metadata-loading="$apollo.queries.additionalDetails.loading"
             :page-info="pageInfo"
             @delete="deleteImage"
             @prev-page="fetchPreviousPage"
@@ -308,23 +339,32 @@ export default {
         </template>
       </template>
 
-      <gl-modal
-        ref="deleteModal"
-        modal-id="delete-image-modal"
-        ok-variant="danger"
-        @ok="handleDeleteImage"
-        @cancel="track('cancel_delete')"
+      <delete-image
+        :id="itemToDelete.id"
+        @start="startDelete"
+        @error="deleteAlertType = 'danger'"
+        @success="deleteAlertType = 'success'"
+        @end="mutationLoading = false"
       >
-        <template #modal-title>{{ $options.i18n.REMOVE_REPOSITORY_LABEL }}</template>
-        <p>
-          <gl-sprintf :message="$options.i18n.REMOVE_REPOSITORY_MODAL_TEXT">
-            <template #title>
-              <b>{{ itemToDelete.path }}</b>
-            </template>
-          </gl-sprintf>
-        </p>
-        <template #modal-ok>{{ __('Remove') }}</template>
-      </gl-modal>
+        <template #default="{ doDelete }">
+          <gl-modal
+            ref="deleteModal"
+            modal-id="delete-image-modal"
+            :action-primary="{ text: __('Remove'), attributes: { variant: 'danger' } }"
+            @primary="doDelete"
+            @cancel="track('cancel_delete')"
+          >
+            <template #modal-title>{{ $options.i18n.REMOVE_REPOSITORY_LABEL }}</template>
+            <p>
+              <gl-sprintf :message="$options.i18n.REMOVE_REPOSITORY_MODAL_TEXT">
+                <template #title>
+                  <b>{{ itemToDelete.path }}</b>
+                </template>
+              </gl-sprintf>
+            </p>
+          </gl-modal>
+        </template>
+      </delete-image>
     </template>
   </div>
 </template>

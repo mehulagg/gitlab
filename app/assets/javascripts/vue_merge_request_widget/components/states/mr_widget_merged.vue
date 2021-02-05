@@ -4,6 +4,8 @@ import { GlLoadingIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { s__, __ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
+import modalEventHub from '~/projects/commit/event_hub';
+import { OPEN_REVERT_MODAL } from '~/projects/commit/constants';
 import MrWidgetAuthorTime from '../mr_widget_author_time.vue';
 import statusIcon from '../mr_widget_status_icon.vue';
 import eventHub from '../../event_hub';
@@ -77,14 +79,17 @@ export default {
       return s__('mrWidget|Cherry-pick');
     },
   },
+  mounted() {
+    document.dispatchEvent(new CustomEvent('merged:UpdateActions'));
+  },
   methods: {
     removeSourceBranch() {
       this.isMakingRequest = true;
 
       this.service
         .removeSourceBranch()
-        .then(res => res.data)
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => {
           // False positive i18n lint: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/26
           // eslint-disable-next-line @gitlab/require-i18n-strings
           if (data.message === 'Branch was deleted') {
@@ -97,6 +102,9 @@ export default {
           this.isMakingRequest = false;
           Flash(__('Something went wrong. Please try again.'));
         });
+    },
+    openRevertModal() {
+      modalEventHub.$emit(OPEN_REVERT_MODAL);
     },
   },
 };
@@ -119,9 +127,7 @@ export default {
           size="small"
           category="secondary"
           variant="warning"
-          href="#modal-revert-commit"
-          data-toggle="modal"
-          data-container="body"
+          @click="openRevertModal"
         >
           {{ revertLabel }}
         </gl-button>

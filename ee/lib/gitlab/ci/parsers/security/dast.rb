@@ -5,20 +5,20 @@ module Gitlab
     module Parsers
       module Security
         class Dast < Common
-          def parse!(json_data, report)
-            report_data = super
+          def parse!
+            super
 
             report.scanned_resources = create_scanned_resources(report_data.dig('scan', 'scanned_resources'))
           end
 
           private
 
-          def parse_report(json_data)
-            report = super
-
-            return Formatters::Dast.new(report).format if Formatters::Dast.satisfies?(report)
-
-            report
+          def report_data
+            @report_data ||= begin
+              super.then do |data|
+                Formatters::Dast.satisfies?(data) ? Formatters::Dast.new(data).format : data
+              end
+            end
           end
 
           def create_scanned_resources(scanned_resources)

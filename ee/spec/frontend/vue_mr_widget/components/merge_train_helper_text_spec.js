@@ -16,7 +16,7 @@ describe('MergeTrainHelperText', () => {
   const findDocumentationLink = () => wrapper.find('[data-testid="documentation-link"]');
   const findPipelineLink = () => wrapper.find('[data-testid="pipeline-link"]');
 
-  const createWrapper = propsData => {
+  const createWrapper = (propsData) => {
     wrapper = shallowMount(MergeTrainHelperText, {
       propsData: {
         ...defaultProps,

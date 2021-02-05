@@ -191,7 +191,7 @@ RSpec.describe 'Epics through GroupQuery' do
       before do
         stub_licensed_features(epics: true)
 
-        post_graphql(query)
+        post_graphql(query, current_user: user)
       end
 
       it_behaves_like 'a working graphql query'

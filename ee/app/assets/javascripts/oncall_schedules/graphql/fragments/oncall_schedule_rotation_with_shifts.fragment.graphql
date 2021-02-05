@@ -1,0 +1,14 @@
+#import "../fragments/oncall_schedule_rotation.fragment.graphql"
+
+fragment OnCallRotationWithShifts on IncidentManagementOncallRotation {
+  ...OnCallRotation
+  shifts(startTime: $startsAt, endTime: $endsAt) {
+    nodes {
+      participant {
+        ...OnCallParticipant
+      }
+      endsAt
+      startsAt
+    }
+  }
+}

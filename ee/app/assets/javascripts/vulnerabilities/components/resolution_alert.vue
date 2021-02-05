@@ -41,7 +41,7 @@ export default {
       }
     },
     isAlreadyDismissed() {
-      return this.alreadyDismissedVulnerabilities().some(id => id === this.vulnerabilityId);
+      return this.alreadyDismissedVulnerabilities().some((id) => id === this.vulnerabilityId);
     },
     dismiss() {
       const dismissed = this.alreadyDismissedVulnerabilities().concat(this.vulnerabilityId);

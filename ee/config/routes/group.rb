@@ -11,10 +11,11 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       patch :override, on: :member
     end
 
-    get '/analytics', to: redirect('groups/%{group_id}/-/contribution_analytics')
+    get '/analytics', to: redirect('groups/%{group_id}/-/analytics/value_stream_analytics')
     resource :contribution_analytics, only: [:show]
 
     namespace :analytics do
+      resource :ci_cd_analytics, only: :show, path: 'ci_cd'
       resource :productivity_analytics, only: :show
       resources :coverage_reports, only: :index
       resource :merge_request_analytics, only: :show
@@ -28,7 +29,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
             get :records
           end
         end
-        resources :value_streams, only: [:index, :create, :destroy] do
+        resources :value_streams, only: [:index, :create, :update, :destroy] do
           resources :stages, only: [:index, :create, :update, :destroy] do
             member do
               get :duration_chart
@@ -136,6 +137,8 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         get :recent
       end
     end
+
+    resources :epic_boards, only: [:index]
 
     namespace :security do
       resource :dashboard, only: [:show], controller: :dashboard

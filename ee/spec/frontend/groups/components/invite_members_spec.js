@@ -5,7 +5,7 @@ import Component from 'ee/groups/components/invite_members.vue';
 describe('User invites', () => {
   let wrapper;
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(Component, {
       propsData,
     });
@@ -29,11 +29,7 @@ describe('User invites', () => {
     });
 
     it('does not set a value', () => {
-      expect(
-        inputs()
-          .at(0)
-          .attributes('value'),
-      ).toBe(undefined);
+      expect(inputs().at(0).attributes('value')).toBe(undefined);
     });
   });
 
@@ -48,12 +44,8 @@ describe('User invites', () => {
       expect(inputs().length).toBe(3);
     });
 
-    it.each([0, 1, 2])('restores the value of the passed emails', index => {
-      expect(
-        inputs()
-          .at(index)
-          .attributes('value'),
-      ).toBe(emails[index]);
+    it.each([0, 1, 2])('restores the value of the passed emails', (index) => {
+      expect(inputs().at(index).attributes('value')).toBe(emails[index]);
     });
   });
 
@@ -61,7 +53,7 @@ describe('User invites', () => {
     beforeEach(() => {
       wrapper = mount(Component, {
         propsData: { emails: [], docsPath: 'https://some.doc.path' },
-        attachToDocument: true,
+        attachTo: document.body,
       });
 
       clickButton();
@@ -71,12 +63,8 @@ describe('User invites', () => {
       expect(inputs().length).toBe(2);
     });
 
-    it.each([0, 1])('does not set a value', index => {
-      expect(
-        inputs()
-          .at(index)
-          .attributes('value'),
-      ).toBe(undefined);
+    it.each([0, 1])('does not set a value', (index) => {
+      expect(inputs().at(index).attributes('value')).toBe(undefined);
     });
 
     it('sets the focus to the new input field', () => {

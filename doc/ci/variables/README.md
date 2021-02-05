@@ -70,7 +70,8 @@ When you need a specific custom environment variable, you can
 or directly [in the `.gitlab-ci.yml` file](#create-a-custom-variable-in-gitlab-ciyml).
 
 The variables are used by the runner any time the pipeline runs.
-You can also [override variable values manually for a specific pipeline](../jobs/index.md#specifying-variables-when-running-manual-jobs).
+You can also [override variable values manually for a specific pipeline](../jobs/index.md#specifying-variables-when-running-manual-jobs),
+or have them [prefilled in manual pipelines](../pipelines/index.md#prefill-variables-in-manual-pipelines).
 
 There are two types of variables: **Variable** and **File**. You cannot set types in
 the `.gitlab-ci.yml` file, but you can set them in the UI and API.
@@ -208,9 +209,10 @@ The value of the variable must:
 - Be in a single line.
 - Be at least 8 characters long.
 - Not be a predefined or custom environment variable.
-- Consist only of characters from the Base64 alphabet (RFC4648).
-  [In GitLab 12.2](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/63043)
-  and newer, `@` and `:` are also valid values.
+- Consist only of:
+  - Characters from the Base64 alphabet (RFC4648).
+  - The `@` and `:` characters ([In GitLab 12.2](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/63043) and later).
+  - The `.` character ([In GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/29022) and later).
 
 You can't mask variables that don't meet these requirements.
 
@@ -406,6 +408,10 @@ script:
   - 'eval $LS_CMD'  # will execute 'ls -al $TMP_DIR'
 ```
 
+Use the [`value` and `description`](../yaml/README.md#prefill-variables-in-manual-pipelines)
+keywords to define [variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
+when [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually):
+
 ## Group-level environment variables
 
 > Introduced in GitLab 9.4.
@@ -594,7 +600,35 @@ WARNING:
 Variables with multi-line values are not supported due to
 limitations with the Auto DevOps scripting environment.
 
-### Override a variable by manually running a pipeline
+### When you can override variables
+
+You can override the value of a variable when:
+
+1. [Manually running](#override-a-variable-by-manually-running-a-pipeline) pipelines in the UI.
+1. Manually creating pipelines [via API](../../api/pipelines.md#create-a-new-pipeline).
+1. Manually playing a job via the UI.
+1. Using [push options](../../user/project/push_options.md#push-options-for-gitlab-cicd).
+1. Manually triggering pipelines with [the API](../triggers/README.md#making-use-of-trigger-variables).
+1. Passing variables to a [downstream pipeline](../multi_project_pipelines.md#passing-variables-to-a-downstream-pipeline).
+
+These pipeline variables declared in these events take [priority over other variables](#priority-of-environment-variables).
+
+#### Restrict who can override variables
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/295234) in GitLab 13.8.
+
+To allow only users with Maintainer role to set these variables, you can use
+[the API](../../api/projects.md#edit-project) to enable the project setting `restrict_user_defined_variables`.
+When a user without Maintainer role tries to run a pipeline with overridden
+variables, an `Insufficient permissions to set pipeline variables` error occurs.
+
+The setting is `disabled` by default.
+
+If you [store your CI configurations in a different repository](../../ci/pipelines/settings.md#custom-cicd-configuration-path),
+use this setting for strict control over all aspects of the environment
+the pipeline runs in.
+
+#### Override a variable by manually running a pipeline
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/44059) in GitLab 10.8.
 
@@ -749,7 +783,7 @@ so `&&` is evaluated before `||`.
 > - It's deployed behind a feature flag, enabled by default.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-parenthesis-support-for-variables). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-parenthesis-support-for-variables). **(FREE SELF)**
 
 It is possible to use parentheses to group conditions. Parentheses have the highest
 precedence of all operators. Expressions enclosed in parentheses are evaluated first,
@@ -765,7 +799,7 @@ Examples:
 - `($VARIABLE1 =~ /^content.*/ || $VARIABLE2 =~ /thing$/) && $VARIABLE3`
 - `$CI_COMMIT_BRANCH == "my-branch" || (($VARIABLE1 == "thing" || $VARIABLE2 == "thing") && $VARIABLE3)`
 
-##### Enable or disable parenthesis support for variables **(CORE ONLY)**
+##### Enable or disable parenthesis support for variables **(FREE SELF)**
 
 The feature is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
@@ -785,7 +819,9 @@ Feature.enable(:ci_if_parenthesis_enabled)
 
 ### Storing regular expressions in variables
 
-It is possible to store a regular expression in a variable, to be used for pattern matching:
+It is possible to store a regular expression in a variable, to be used for pattern matching.
+The following example tests whether `$RELEASE` contains either the
+string `staging0` or the string `staging1`:
 
 ```yaml
 variables:
@@ -847,13 +883,7 @@ before making them visible again.
 ### Restricted access to debug logging
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213159) in GitLab 13.7.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-restricted-access-to-debug-logging). **(CORE ONLY)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/292661) in GitLab 13.8.
 
 With restricted access to debug logging, only users with
 [developer or higher permissions](../../user/permissions.md#project-members-permissions)
@@ -866,25 +896,6 @@ WARNING:
 If you add `CI_DEBUG_TRACE` as a local variable to your runners, debug logs are visible
 to all users with access to job logs. The permission levels are not checked by Runner,
 so you should make use of the variable in GitLab only.
-
-#### Enable or disable Restricted access to debug logging **(CORE ONLY)**
-
-Restricted Access to Debug logging is under development but ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:restrict_access_to_build_debug_mode)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:restrict_access_to_build_debug_mode)
-```
 
 ### Enable Debug logging
 
@@ -1071,7 +1082,7 @@ if [[ -d "/builds/gitlab-examples/ci-debug-trace/.git" ]]; then
 
 ## Video walkthrough of a working example
 
-The [Managing the Complex Configuration Data Management Monster Using GitLab](https://www.youtube.com/watch?v=v4ZOJ96hAck) video is a walkthrough of the [Complex Config Data Monorepo](https://gitlab.com/guided-explorations/config-data-top-scope/config-data-subscope/config-data-monorepo) working example project. It explains how multiple levels of group CI/CD variables can be combined with environment-scoped project variables for complex configuration of application builds or deployments.
+The [Managing the Complex Configuration Data Management Monster Using GitLab](https://www.youtube.com/watch?v=v4ZOJ96hAck) video is a walkthrough of the [Complex Configuration Data Monorepo](https://gitlab.com/guided-explorations/config-data-top-scope/config-data-subscope/config-data-monorepo) working example project. It explains how multiple levels of group CI/CD variables can be combined with environment-scoped project variables for complex configuration of application builds or deployments.
 
 The example can be copied to your own group or instance for testing. More details
 on what other GitLab CI patterns are demonstrated are available at the project page.

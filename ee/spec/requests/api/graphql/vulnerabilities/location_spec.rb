@@ -32,6 +32,7 @@ RSpec.describe 'Query.vulnerabilities.location' do
               name
             }
           }
+          blobPath
         }
         ... on VulnerabilityLocationDast {
           hostname
@@ -45,6 +46,7 @@ RSpec.describe 'Query.vulnerabilities.location' do
           startLine
           vulnerableClass
           vulnerableMethod
+          blobPath
         }
         ... on VulnerabilityLocationSecretDetection {
           endLine
@@ -52,6 +54,7 @@ RSpec.describe 'Query.vulnerabilities.location' do
           startLine
           vulnerableClass
           vulnerableMethod
+          blobPath
         }
       }
     QUERY
@@ -112,6 +115,8 @@ RSpec.describe 'Query.vulnerabilities.location' do
       create(:vulnerability, project: project, report_type: :dependency_scanning)
     end
 
+    let_it_be(:pipeline) { create(:ci_pipeline, :success, project: project) }
+
     let_it_be(:metadata) do
       {
         location: {
@@ -130,7 +135,8 @@ RSpec.describe 'Query.vulnerabilities.location' do
       create(
         :vulnerabilities_finding,
         vulnerability: vulnerability,
-        raw_metadata: metadata.to_json
+        raw_metadata: metadata.to_json,
+        pipelines: [pipeline]
       )
     end
 
@@ -149,6 +155,8 @@ RSpec.describe 'Query.vulnerabilities.location' do
       create(:vulnerability, project: project, report_type: :sast)
     end
 
+    let_it_be(:pipeline) { create(:ci_pipeline, :success, project: project) }
+
     let_it_be(:metadata) do
       {
         location: {
@@ -156,7 +164,8 @@ RSpec.describe 'Query.vulnerabilities.location' do
           method: 'vulnerable_method',
           file: 'vulnerable_file',
           start_line: '420',
-          end_line: '666'
+          end_line: '666',
+          blob_path: 'blob/vulnerable_file'
         }
       }
     end
@@ -165,7 +174,8 @@ RSpec.describe 'Query.vulnerabilities.location' do
       create(
         :vulnerabilities_finding,
         vulnerability: vulnerability,
-        raw_metadata: metadata.to_json
+        raw_metadata: metadata.to_json,
+        pipelines: [pipeline]
       )
     end
 
@@ -186,6 +196,8 @@ RSpec.describe 'Query.vulnerabilities.location' do
       create(:vulnerability, project: project, report_type: :secret_detection)
     end
 
+    let_it_be(:pipeline) { create(:ci_pipeline, :success, project: project) }
+
     let_it_be(:metadata) do
       {
         location: {
@@ -202,7 +214,8 @@ RSpec.describe 'Query.vulnerabilities.location' do
       create(
         :vulnerabilities_finding,
         vulnerability: vulnerability,
-        raw_metadata: metadata.to_json
+        raw_metadata: metadata.to_json,
+        pipelines: [pipeline]
       )
     end
 

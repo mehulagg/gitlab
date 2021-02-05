@@ -5,10 +5,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# External authorization control **(CORE ONLY)**
+# External authorization control **(FREE SELF)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4216) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.6.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/27056) to [GitLab Core](https://about.gitlab.com/pricing/) in 11.10.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/27056) to GitLab Free in 11.10.
 
 In highly controlled environments, it may be necessary for access policy to be
 controlled by an external service that permits access based on project
@@ -40,7 +39,7 @@ the [Omnibus GitLab documentation](https://docs.gitlab.com/omnibus/settings/logs
 
 ## Configuration
 
-The external authorization service can be enabled by an admin on the GitLab's
+The external authorization service can be enabled by an administrator on the GitLab
 **Admin Area > Settings > General** page:
 
 ![Enable external authorization service](img/external_authorization_service_settings.png)

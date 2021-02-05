@@ -6,8 +6,8 @@ import {
   TABLE_TYPE_TRIAL,
   HEADER_TOTAL_ENTRIES,
 } from 'ee/billings/constants';
-import * as types from './mutation_types';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import * as types from './mutation_types';
 
 export default {
   [types.SET_NAMESPACE_ID](state, payload) {
@@ -32,8 +32,8 @@ export default {
       tableKey = TABLE_TYPE_TRIAL;
     }
 
-    state.tables[tableKey].rows.forEach(row => {
-      row.columns.forEach(col => {
+    state.tables[tableKey].rows.forEach((row) => {
+      row.columns.forEach((col) => {
         if (Object.prototype.hasOwnProperty.call(usage, col.id)) {
           Vue.set(col, 'value', usage[col.id]);
         } else if (Object.prototype.hasOwnProperty.call(billing, col.id)) {

@@ -41,121 +41,89 @@ RSpec.describe Security::StoreScanService do
       known_keys.add(finding_key)
     end
 
-    context 'when the `store_security_findings` feature is not enabled' do
-      before do
-        stub_feature_flags(store_security_findings: false)
+    it 'calls the `Security::StoreFindingsMetadataService` to store findings' do
+      store_scan
+
+      expect(Security::StoreFindingsMetadataService).to have_received(:execute)
+    end
+
+    context 'when the security scan already exists for the artifact' do
+      let_it_be(:security_scan) { create(:security_scan, build: artifact.job, scan_type: :sast) }
+      let_it_be(:unique_security_finding) do
+        create(:security_finding,
+               scan: security_scan,
+               position: 0)
       end
 
-      it 'does not call the `Security::StoreFindingsMetadataService`' do
-        store_scan
-
-        expect(Security::StoreFindingsMetadataService).not_to have_received(:execute)
+      let_it_be(:duplicated_security_finding) do
+        create(:security_finding,
+               scan: security_scan,
+               position: 5)
       end
 
-      context 'when the security scan already exists for the artifact' do
-        let_it_be(:security_scan) { create(:security_scan, build: artifact.job, scan_type: :sast) }
+      it 'does not create a new security scan' do
+        expect { store_scan }.not_to change { artifact.job.security_scans.count }
+      end
 
-        it 'does not create a new security scan' do
-          expect { store_scan }.not_to change { artifact.job.security_scans.count }
+      context 'when the `deduplicate` param is set as false' do
+        it 'does not change the deduplicated flag of duplicated finding' do
+          expect { store_scan }.not_to change { duplicated_security_finding.reload.deduplicated }.from(false)
+        end
+
+        it 'does not change the deduplicated flag of unique finding' do
+          expect { store_scan }.not_to change { unique_security_finding.reload.deduplicated }.from(false)
         end
       end
 
-      context 'when the security scan does not exist for the artifact' do
-        it 'creates a new security scan' do
-          expect { store_scan }.to change { artifact.job.security_scans.sast.count }.by(1)
+      context 'when the `deduplicate` param is set as true' do
+        let(:deduplicate) { true }
+
+        it 'does not change the deduplicated flag of duplicated finding false' do
+          expect { store_scan }.not_to change { duplicated_security_finding.reload.deduplicated }.from(false)
+        end
+
+        it 'sets the deduplicated flag of unique finding as true' do
+          expect { store_scan }.to change { unique_security_finding.reload.deduplicated }.to(true)
         end
       end
     end
 
-    context 'when the `store_security_findings` feature is enabled' do
+    context 'when the security scan does not exist for the artifact' do
+      let(:unique_finding_attribute) do
+        -> { Security::Finding.by_position(0).first&.deduplicated }
+      end
+
+      let(:duplicated_finding_attribute) do
+        -> { Security::Finding.by_position(5).first&.deduplicated }
+      end
+
       before do
-        stub_feature_flags(store_security_findings: artifact.project)
+        allow(Security::StoreFindingsMetadataService).to receive(:execute).and_call_original
       end
 
-      it 'calls the `Security::StoreFindingsMetadataService` to store findings' do
-        store_scan
-
-        expect(Security::StoreFindingsMetadataService).to have_received(:execute)
+      it 'creates a new security scan' do
+        expect { store_scan }.to change { artifact.job.security_scans.sast.count }.by(1)
       end
 
-      context 'when the security scan already exists for the artifact' do
-        let_it_be(:security_scan) { create(:security_scan, build: artifact.job, scan_type: :sast) }
-        let_it_be(:unique_security_finding) do
-          create(:security_finding,
-                 scan: security_scan,
-                 position: 0)
+      context 'when the `deduplicate` param is set as false' do
+        it 'sets the deduplicated flag of duplicated finding as false' do
+          expect { store_scan }.to change { duplicated_finding_attribute.call }.to(false)
         end
 
-        let_it_be(:duplicated_security_finding) do
-          create(:security_finding,
-                 scan: security_scan,
-                 position: 5)
-        end
-
-        it 'does not create a new security scan' do
-          expect { store_scan }.not_to change { artifact.job.security_scans.count }
-        end
-
-        context 'when the `deduplicate` param is set as false' do
-          it 'does not change the deduplicated flag of duplicated finding' do
-            expect { store_scan }.not_to change { duplicated_security_finding.reload.deduplicated }.from(false)
-          end
-
-          it 'does not change the deduplicated flag of unique finding' do
-            expect { store_scan }.not_to change { unique_security_finding.reload.deduplicated }.from(false)
-          end
-        end
-
-        context 'when the `deduplicate` param is set as true' do
-          let(:deduplicate) { true }
-
-          it 'does not change the deduplicated flag of duplicated finding false' do
-            expect { store_scan }.not_to change { duplicated_security_finding.reload.deduplicated }.from(false)
-          end
-
-          it 'sets the deduplicated flag of unique finding as true' do
-            expect { store_scan }.to change { unique_security_finding.reload.deduplicated }.to(true)
-          end
+        it 'sets the deduplicated flag of unique finding as true' do
+          expect { store_scan }.to change { unique_finding_attribute.call }.to(true)
         end
       end
 
-      context 'when the security scan does not exist for the artifact' do
-        let(:unique_finding_attribute) do
-          -> { Security::Finding.by_position(0).first&.deduplicated }
+      context 'when the `deduplicate` param is set as true' do
+        let(:deduplicate) { true }
+
+        it 'sets the deduplicated flag of duplicated finding false' do
+          expect { store_scan }.to change { duplicated_finding_attribute.call }.to(false)
         end
 
-        let(:duplicated_finding_attribute) do
-          -> { Security::Finding.by_position(5).first&.deduplicated }
-        end
-
-        before do
-          allow(Security::StoreFindingsMetadataService).to receive(:execute).and_call_original
-        end
-
-        it 'creates a new security scan' do
-          expect { store_scan }.to change { artifact.job.security_scans.sast.count }.by(1)
-        end
-
-        context 'when the `deduplicate` param is set as false' do
-          it 'sets the deduplicated flag of duplicated finding as false' do
-            expect { store_scan }.to change { duplicated_finding_attribute.call }.to(false)
-          end
-
-          it 'sets the deduplicated flag of unique finding as true' do
-            expect { store_scan }.to change { unique_finding_attribute.call }.to(true)
-          end
-        end
-
-        context 'when the `deduplicate` param is set as true' do
-          let(:deduplicate) { true }
-
-          it 'sets the deduplicated flag of duplicated finding false' do
-            expect { store_scan }.to change { duplicated_finding_attribute.call }.to(false)
-          end
-
-          it 'sets the deduplicated flag of unique finding as true' do
-            expect { store_scan }.to change { unique_finding_attribute.call }.to(true)
-          end
+        it 'sets the deduplicated flag of unique finding as true' do
+          expect { store_scan }.to change { unique_finding_attribute.call }.to(true)
         end
       end
     end

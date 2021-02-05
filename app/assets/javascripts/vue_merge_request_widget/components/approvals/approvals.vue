@@ -2,6 +2,7 @@
 import { GlButton } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
+import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import eventHub from '../../event_hub';
 import approvalsMixin from '../../mixins/approvals';
 import MrWidgetContainer from '../mr_widget_container.vue';
@@ -74,7 +75,7 @@ export default {
       return this.mr.approvals || {};
     },
     approvedBy() {
-      return this.approvals.approved_by ? this.approvals.approved_by.map(x => x.user) : [];
+      return this.approvals.approved_by ? this.approvals.approved_by.map((x) => x.user) : [];
     },
     userHasApproved() {
       return Boolean(this.approvals.user_has_approved);
@@ -124,7 +125,7 @@ export default {
   methods: {
     approve() {
       if (this.requirePasswordToApprove) {
-        this.$root.$emit('bv::show::modal', this.modalId);
+        this.$root.$emit(BV_SHOW_MODAL, this.modalId);
         return;
       }
 
@@ -136,7 +137,7 @@ export default {
     approveWithAuth(data) {
       this.updateApproval(
         () => this.service.approveMergeRequestWithAuth(data),
-        error => {
+        (error) => {
           if (error && error.response && error.response.status === 401) {
             this.hasApprovalAuthError = true;
             return;
@@ -155,9 +156,10 @@ export default {
       this.isApproving = true;
       this.clearError();
       return serviceFn()
-        .then(data => {
+        .then((data) => {
           this.mr.setApprovals(data);
           eventHub.$emit('MRWidgetUpdateRequested');
+          eventHub.$emit('ApprovalUpdated');
           this.$emit('updated');
         })
         .catch(errFn)

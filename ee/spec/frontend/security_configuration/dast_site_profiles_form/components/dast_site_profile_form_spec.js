@@ -5,12 +5,13 @@ import merge from 'lodash/merge';
 import { createMockClient } from 'mock-apollo-client';
 import VueApollo from 'vue-apollo';
 import DastSiteProfileForm from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_profile_form.vue';
+import DastSiteAuthSection from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_auth_section.vue';
 import dastSiteProfileCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_update.mutation.graphql';
 import { siteProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
 import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
 import { TEST_HOST } from 'helpers/test_constants';
-import waitForPromises from 'jest/helpers/wait_for_promises';
+import waitForPromises from 'helpers/wait_for_promises';
 import * as urlUtility from '~/lib/utils/url_utility';
 
 const localVue = createLocalVue();
@@ -19,12 +20,16 @@ localVue.use(VueApollo);
 const [siteProfileOne] = siteProfiles;
 const fullPath = 'group/project';
 const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_profiles`;
+const onDemandScansPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans`;
 const profileName = 'My DAST site profile';
 const targetUrl = 'http://example.com';
+const excludedUrls = 'http://example.com/logout';
+const requestHeaders = 'my-new-header=something';
 
 const defaultProps = {
   profilesLibraryPath,
   fullPath,
+  onDemandScansPath,
 };
 
 const defaultRequestHandlers = {
@@ -40,9 +45,12 @@ describe('DastSiteProfileForm', () => {
   const withinComponent = () => within(wrapper.element);
 
   const findForm = () => wrapper.find(GlForm);
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   const findProfileNameInput = () => findByTestId('profile-name-input');
   const findTargetUrlInput = () => findByTestId('target-url-input');
+  const findAuthSection = () => wrapper.find(DastSiteAuthSection);
+  const findExcludedUrlsInput = () => findByTestId('excluded-urls-input');
+  const findRequestHeadersInput = () => findByTestId('request-headers-input');
   const findSubmitButton = () => findByTestId('dast-site-profile-form-submit-button');
   const findCancelButton = () => findByTestId('dast-site-profile-form-cancel-button');
   const findCancelModal = () => wrapper.find(GlModal);
@@ -54,7 +62,7 @@ describe('DastSiteProfileForm', () => {
     field.trigger('blur');
   };
 
-  const mockClientFactory = handlers => {
+  const mockClientFactory = (handlers) => {
     const mockClient = createMockClient();
 
     requestHandlers = {
@@ -75,7 +83,7 @@ describe('DastSiteProfileForm', () => {
     return mockClient;
   };
 
-  const respondWith = handlers => {
+  const respondWith = (handlers) => {
     apolloProvider.defaultClient = mockClientFactory(handlers);
   };
 
@@ -88,6 +96,11 @@ describe('DastSiteProfileForm', () => {
       {},
       {
         propsData: defaultProps,
+        provide: {
+          glFeatures: {
+            securityDastSiteProfilesAdditionalFields: true,
+          },
+        },
       },
       options,
       {
@@ -119,16 +132,31 @@ describe('DastSiteProfileForm', () => {
       createFullComponent();
     });
 
-    it.each(['asd', 'example.com'])('is marked as invalid provided an invalid URL', async value => {
-      await setFieldValue(findTargetUrlInput(), value);
+    it.each(['asd', 'example.com'])(
+      'is marked as invalid provided an invalid URL',
+      async (value) => {
+        await setFieldValue(findTargetUrlInput(), value);
 
-      expect(wrapper.text()).toContain(errorMessage);
-    });
+        expect(wrapper.text()).toContain(errorMessage);
+      },
+    );
 
     it('is marked as valid provided a valid URL', async () => {
       await setFieldValue(findTargetUrlInput(), targetUrl);
 
       expect(wrapper.text()).not.toContain(errorMessage);
+    });
+  });
+
+  describe('additional fields', () => {
+    beforeEach(() => {
+      createFullComponent();
+    });
+
+    it('should render correctly', () => {
+      expect(findAuthSection().exists()).toBe(true);
+      expect(findExcludedUrlsInput().exists()).toBe(true);
+      expect(findRequestHeadersInput().exists()).toBe(true);
     });
   });
 
@@ -159,6 +187,8 @@ describe('DastSiteProfileForm', () => {
       const fillAndSubmitForm = async () => {
         await setFieldValue(findProfileNameInput(), profileName);
         await setFieldValue(findTargetUrlInput(), targetUrl);
+        await setFieldValue(findExcludedUrlsInput(), excludedUrls);
+        await setFieldValue(findRequestHeadersInput(), requestHeaders);
         submitForm();
       };
 
@@ -173,10 +203,14 @@ describe('DastSiteProfileForm', () => {
 
         it('triggers GraphQL mutation', () => {
           expect(requestHandlers[mutationKind]).toHaveBeenCalledWith({
-            profileName,
-            targetUrl,
-            fullPath,
-            ...mutationVars,
+            input: {
+              profileName,
+              targetUrl,
+              excludedUrls,
+              requestHeaders,
+              fullPath,
+              ...mutationVars,
+            },
           });
         });
 
@@ -230,7 +264,7 @@ describe('DastSiteProfileForm', () => {
           const alert = findAlert();
 
           expect(alert.exists()).toBe(true);
-          errors.forEach(error => {
+          errors.forEach((error) => {
             expect(alert.text()).toContain(error);
           });
         });
@@ -262,6 +296,24 @@ describe('DastSiteProfileForm', () => {
           expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
         });
       });
+    });
+  });
+
+  describe('when feature flag is off', () => {
+    beforeEach(() => {
+      createFullComponent({
+        provide: {
+          glFeatures: {
+            securityDastSiteProfilesAdditionalFields: false,
+          },
+        },
+      });
+    });
+
+    it('should not render additional fields', () => {
+      expect(findAuthSection().exists()).toBe(false);
+      expect(findExcludedUrlsInput().exists()).toBe(false);
+      expect(findRequestHeadersInput().exists()).toBe(false);
     });
   });
 });

@@ -95,9 +95,7 @@ export default {
       this.clearSearchResults();
     },
     onOk() {
-      this.addProjectsToDashboard()
-        .then(this.clearSearchResults)
-        .catch(this.clearSearchResults);
+      this.addProjectsToDashboard().then(this.clearSearchResults).catch(this.clearSearchResults);
     },
     searched(query) {
       this.setSearchQuery(query);

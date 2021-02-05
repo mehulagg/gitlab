@@ -118,8 +118,8 @@ class NotificationService
   #  * project team members with notification level higher then Participating
   #  * users with custom level checked with "close issue"
   #
-  def close_issue(issue, current_user, closed_via: nil)
-    close_resource_email(issue, current_user, :closed_issue_email, closed_via: closed_via)
+  def close_issue(issue, current_user, params = {})
+    close_resource_email(issue, current_user, :closed_issue_email, closed_via: params[:closed_via])
   end
 
   # When we reassign an issue we should send an email to:
@@ -262,6 +262,14 @@ class NotificationService
         current_user.id,
         recipient.reason
       ).deliver_later
+    end
+  end
+
+  def review_requested_of_merge_request(merge_request, current_user, reviewer)
+    recipients = NotificationRecipients::BuildService.build_requested_review_recipients(merge_request, current_user, reviewer)
+
+    recipients.each do |recipient|
+      mailer.request_review_merge_request_email(recipient.user.id, merge_request.id, current_user.id, recipient.reason).deliver_later
     end
   end
 
@@ -481,6 +489,12 @@ class NotificationService
     mailer.member_access_granted_email(group_member.real_source_type, group_member.id).deliver_later
   end
 
+  def updated_group_member_expiration(group_member)
+    return true unless group_member.notifiable?(:mention)
+
+    mailer.member_expiration_date_updated_email(group_member.real_source_type, group_member.id).deliver_later
+  end
+
   def project_was_moved(project, old_path_with_namespace)
     recipients = project_moved_recipients(project)
     recipients = notifiable_users(recipients, :custom, custom_action: :moved_project, project: project)
@@ -656,6 +670,10 @@ class NotificationService
     recipients.each do |recipient|
       mailer.merge_when_pipeline_succeeds_email(recipient.user.id, merge_request.id, current_user.id).deliver_later
     end
+  end
+
+  def in_product_marketing(user_id, group_id, track, series)
+    mailer.in_product_marketing_email(user_id, group_id, track, series).deliver_later
   end
 
   protected

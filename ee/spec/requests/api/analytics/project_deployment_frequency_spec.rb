@@ -70,7 +70,7 @@ RSpec.describe API::Analytics::ProjectDeploymentFrequency do
 
     it 'returns `bad_request` with expected message' do
       expect(response.parsed_body).to eq({
-        "message" => "400 (Bad request) \"Date range is greater than 91 days\" not given"
+        "message" => "400 Bad request - Date range is greater than 91 days"
       })
     end
   end
@@ -82,7 +82,7 @@ RSpec.describe API::Analytics::ProjectDeploymentFrequency do
 
     it 'returns `bad_request` with expected message' do
       expect(response.parsed_body).to eq({
-        "message" => "400 (Bad request) \"Parameter `to` is before the `from` date\" not given"
+        "message" => "400 Bad request - Parameter `to` is before the `from` date"
       })
     end
   end

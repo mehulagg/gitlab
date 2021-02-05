@@ -14,7 +14,7 @@ export const fetchUnscannedProjects = ({ dispatch }, endpoint) => {
   return axios
     .get(endpoint)
     .then(({ data }) => data.map(convertObjectPropsToCamelCase))
-    .then(data => {
+    .then((data) => {
       dispatch('receiveUnscannedProjectsSuccess', data);
     })
     .catch(() => {

@@ -6,7 +6,7 @@ import { PRIMARY_IDENTIFIER_TYPE } from 'ee/security_dashboard/store/constants';
  * @returns {String} the primary identifier's name
  */
 const getPrimaryIdentifier = (identifiers = [], property) => {
-  const identifier = identifiers.find(value => value[property] === PRIMARY_IDENTIFIER_TYPE);
+  const identifier = identifiers.find((value) => value[property] === PRIMARY_IDENTIFIER_TYPE);
   return identifier?.name || identifiers[0]?.name || '';
 };
 

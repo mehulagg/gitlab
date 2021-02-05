@@ -73,7 +73,7 @@ export default {
             }, 250),
             id: ({ type, id }) => `${type}${id}`,
           })
-          .on('change', e => this.onChange(e))
+          .on('change', (e) => this.onChange(e))
           .on('select2-open', () => {
             // https://stackoverflow.com/questions/18487056/select2-doesnt-work-when-embedded-in-a-bootstrap-modal
             // Ensure search feature works in modal
@@ -92,7 +92,7 @@ export default {
   methods: {
     fetchBranches(term) {
       const excludeAnyBranch = term && !term.toLowerCase().includes('any');
-      return Api.projectProtectedBranches(this.projectId, term).then(results => ({
+      return Api.projectProtectedBranches(this.projectId, term).then((results) => ({
         results: excludeAnyBranch ? results : [anyBranch, ...results],
       }));
     },

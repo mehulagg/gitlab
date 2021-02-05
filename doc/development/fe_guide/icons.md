@@ -18,8 +18,6 @@ We are using SVG Icons in GitLab with a SVG Sprite.
 This means the icons are only loaded once, and are referenced through an ID.
 The sprite SVG is located under `/assets/icons.svg`.
 
-Our goal is to replace one by one all inline SVG Icons (as those currently bloat the HTML) and also all Font Awesome icons.
-
 ### Usage in HAML/Rails
 
 To use a sprite Icon in HAML or Rails we use a specific helper function:
@@ -28,11 +26,15 @@ To use a sprite Icon in HAML or Rails we use a specific helper function:
 sprite_icon(icon_name, size: nil, css_class: '')
 ```
 
+<!-- vale gitlab.Spelling = NO -->
+
 - **icon_name**: Use the icon_name for the SVG sprite in the list of
   ([GitLab SVGs](https://gitlab-org.gitlab.io/gitlab-svgs)).
 - **size (optional)**: Use one of the following sizes : 16, 24, 32, 48, 72 (this
   is translated into a `s16` class)
 - **css_class (optional)**: If you want to add additional CSS classes.
+
+<!-- vale gitlab.Spelling = YES -->
 
 **Example**
 
@@ -90,11 +92,6 @@ Please use the following function inside JS to render an icon:
 
 ### Usage in HAML/Rails
 
-WARNING:
-Do not use the `spinner` or `icon('spinner spin')` rails helpers to insert
-loading icons. These helpers rely on the Font Awesome icon library which is
-deprecated.
-
 To insert a loading spinner in HAML or Rails use the `loading_icon` helper:
 
 ```haml
@@ -107,7 +104,7 @@ by the examples that follow:
 - `container` (optional): wraps the loading icon in a container, which centers the loading icon using the `text-center` CSS property.
 - `color` (optional): either `orange` (default), `light`, or `dark`.
 - `size` (optional): either `sm` (default), `md`, `lg`, or `xl`.
-- `css_class` (optional): defaults to an empty string, but can be useful for utility classes to fine-tune alignment or spacing.
+- `css_class` (optional): defaults to an empty string, but can be used for utility classes to fine-tune alignment or spacing.
 
 **Example 1:**
 
@@ -171,8 +168,8 @@ export default {
 
 ## SVG Illustrations
 
-Please use from now on for any SVG based illustrations simple `img` tags to show an illustration by simply using either `image_tag` or `image_path` helpers.
-Please use the class `svg-content` around it to ensure nice rendering.
+From now on, use `img` tags to display any SVG based illustrations with either `image_tag` or `image_path` helpers.
+Using the class `svg-content` around it ensures nice rendering.
 
 ### Usage in HAML/Rails
 

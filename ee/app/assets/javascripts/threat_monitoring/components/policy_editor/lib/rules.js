@@ -67,7 +67,7 @@ function ruleFQDNSpec({ direction, fqdn }) {
   if (fqdnList.length === 0) return {};
 
   return {
-    toFQDNs: fqdnList.map(item => ({ matchName: item })),
+    toFQDNs: fqdnList.map((item) => ({ matchName: item })),
   };
 }
 

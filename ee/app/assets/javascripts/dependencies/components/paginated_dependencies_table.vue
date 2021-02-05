@@ -1,8 +1,8 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import Pagination from '~/vue_shared/components/pagination_links.vue';
-import DependenciesTable from './dependencies_table.vue';
 import { DEPENDENCY_LIST_TYPES } from '../store/constants';
+import DependenciesTable from './dependencies_table.vue';
 
 export default {
   name: 'PaginatedDependenciesTable',
@@ -14,7 +14,7 @@ export default {
     namespace: {
       type: String,
       required: true,
-      validator: value =>
+      validator: (value) =>
         Object.values(DEPENDENCY_LIST_TYPES).some(({ namespace }) => value === namespace),
     },
   },

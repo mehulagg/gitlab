@@ -166,15 +166,7 @@ RSpec.describe Ci::JobArtifact do
       :other               | nil    | [:ci_job_artifact]           | [:project]               | false
       :other               | nil    | [:ci_job_artifact]           | [:project, :in_subgroup] | false
       # expired
-      nil                  | nil    | [:ci_job_artifact, :expired] | [:project]               | false
-      # selective sync by shard
-      nil                  | :model | [:ci_job_artifact, :expired] | [:project]               | false
-      nil                  | :other | [:ci_job_artifact, :expired] | [:project]               | false
-      # selective sync by namespace
-      :model_parent        | nil    | [:ci_job_artifact, :expired] | [:project]               | false
-      :model_parent_parent | nil    | [:ci_job_artifact, :expired] | [:project, :in_subgroup] | false
-      :other               | nil    | [:ci_job_artifact, :expired] | [:project]               | false
-      :other               | nil    | [:ci_job_artifact, :expired] | [:project, :in_subgroup] | false
+      nil                  | nil    | [:ci_job_artifact, :expired] | [:project]               | true
     end
 
     with_them do

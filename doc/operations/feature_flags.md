@@ -4,11 +4,10 @@ group: Release
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Feature Flags **(CORE)**
+# Feature Flags **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/7433) in GitLab 11.4.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212318) to [GitLab Starter](https://about.gitlab.com/pricing/) in 13.4.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212318) to [GitLab Core](https://about.gitlab.com/pricing/) in 13.5.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212318) to GitLab Free in 13.5.
 
 With Feature Flags, you can deploy your application's new features to production in smaller batches.
 You can toggle a feature on and off to subsets of users, helping you achieve Continuous Delivery.
@@ -61,14 +60,13 @@ next to any feature flag in the list.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/254379) in GitLab 13.5.
 
 The maximum number of feature flags per project on self-managed GitLab instances
-is 200. On GitLab.com, the maximum number is determined by [GitLab.com tier](https://about.gitlab.com/pricing/):
+is 200. For GitLab SaaS, the maximum number is determined by [tier](https://about.gitlab.com/pricing/):
 
 | Tier     | Number of feature flags per project |
 |----------|-------------------------------------|
 | Free     | 50                                  |
-| Bronze   | 100                                 |
-| Silver   | 150                                 |
-| Gold     | 200                                 |
+| Premium  | 150                                 |
+| Ultimate | 200                                 |
 
 ## Feature flag strategies
 
@@ -226,9 +224,9 @@ To remove users from a user list:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8240) in GitLab 12.2.
 > - [Made read-only](https://gitlab.com/gitlab-org/gitlab/-/issues/220228) in GitLab 13.4.
 
-In GitLab 13.0 and earlier, the **Rollout strategy** setting affects which users will experience
-the feature as enabled. Choose the percentage of users that the feature will be enabled
-for. The rollout strategy will have no effect if the environment spec is disabled.
+In GitLab 13.0 and earlier, the **Rollout strategy** setting affects which users experience
+the feature as enabled. Choose the percentage of users that the feature is enabled
+for. The rollout strategy has no effect if the environment spec is disabled.
 
 It can be set to:
 
@@ -282,7 +280,7 @@ To get the access credentials that your application needs to communicate with Gi
      could be `production` or similar. This value is used for the environment spec evaluation.
 
 Note that the meaning of these fields might change over time. For example, we're not sure if
-**Instance ID** will be single token or multiple tokens, assigned to the **Environment**. Also,
+**Instance ID** is a single token or multiple tokens, assigned to the **Environment**. Also,
 **Application name** could describe the application version instead of the running environment.
 
 ### Choose a client library

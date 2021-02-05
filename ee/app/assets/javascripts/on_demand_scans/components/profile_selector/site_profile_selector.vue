@@ -1,8 +1,8 @@
 <script>
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import ProfileSelector from './profile_selector.vue';
 import { s__ } from '~/locale';
+import ProfileSelector from './profile_selector.vue';
 
 export default {
   name: 'OnDemandScansSiteProfileSelector',
@@ -10,13 +10,6 @@ export default {
     ProfileSelector,
   },
   mixins: [glFeatureFlagsMixin()],
-  props: {
-    profiles: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-  },
   inject: {
     siteProfilesLibraryPath: {
       default: '',
@@ -25,14 +18,21 @@ export default {
       default: '',
     },
   },
+  props: {
+    profiles: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+  },
   computed: {
     formattedProfiles() {
-      return this.profiles.map(profile => {
+      return this.profiles.map((profile) => {
         const isValidated = profile.validationStatus === DAST_SITE_VALIDATION_STATUS.PASSED;
         const suffix = isValidated
           ? s__('DastProfiles|Validated')
           : s__('DastProfiles|Not Validated');
-        const addSuffix = str =>
+        const addSuffix = (str) =>
           this.glFeatures.securityOnDemandScansSiteValidation ? `${str} (${suffix})` : str;
         return {
           ...profile,
@@ -59,7 +59,8 @@ export default {
         'OnDemandScans|No profile yet. In order to create a new scan, you need to have at least one completed site profile.',
       )
     }}</template>
-    <template #new-profile>{{ s__('OnDemandScans|Create a new site profile') }}</template>
+    <template #new-profile>{{ s__('OnDemandScans|Create new site profile') }}</template>
+    <template #manage-profile>{{ s__('OnDemandScans|Manage site profiles') }}</template>
     <template #summary>
       <slot name="summary"></slot>
     </template>

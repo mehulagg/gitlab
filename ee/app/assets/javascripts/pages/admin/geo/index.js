@@ -6,4 +6,4 @@ initVueAlerts();
 initConfirmModal();
 
 const toasts = document.querySelectorAll('.js-toast-message');
-toasts.forEach(toast => showToast(toast.dataset.message));
+toasts.forEach((toast) => showToast(toast.dataset.message));

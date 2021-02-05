@@ -165,6 +165,9 @@ production: &base
     ## Disable jQuery and CSS animations
     # disable_animations: true
 
+    ## Application settings cache expiry in seconds (default: 60)
+    # application_settings_cache_seconds: 60
+
   ## Reply by email
   # Allow users to comment on issues and merge requests by replying to notification emails.
   # For documentation on how to set this up, see http://doc.gitlab.com/ce/administration/reply_by_email.html
@@ -432,10 +435,13 @@ production: &base
       cron: "0 * * * *"
     # Execute scheduled triggers
     pipeline_schedule_worker:
-      cron: "19 * * * *"
+      cron: "3-59/10 * * * *"
     # Remove expired build artifacts
     expire_build_artifacts_worker:
       cron: "*/7 * * * *"
+    # Remove expired pipeline artifacts
+    ci_pipelines_expire_artifacts_worker:
+      cron: "*/23 * * * *"
     # Remove files from object storage
     ci_schedule_delete_objects_worker:
       cron: "*/16 * * * *"
@@ -477,7 +483,7 @@ production: &base
   ee_cron_jobs:
     # Schedule snapshots for all devops adoption segments
     analytics_devops_adoption_create_all_snapshots_worker:
-      cron: 0 0 1 * *
+      cron: 0 4 * * *
 
     # Snapshot active users statistics
     historical_data_worker:
@@ -1207,10 +1213,7 @@ production: &base
   # yourself, and then update the values here.
   # https://docs.gitlab.com/ee/administration/monitoring/prometheus/
   prometheus:
-    # Do not use `enable` and `listen_address` in any new code, as they are deprecated. Use `server_address` instead.
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/227111
-    # enable: true
-    # listen_address: 'localhost:9090'
+    # enabled: true
     # server_address: 'localhost:9090'
 
   ## Consul settings
@@ -1239,6 +1242,7 @@ production: &base
     ## Matomo analytics.
     # matomo_url: '_your_matomo_url'
     # matomo_site_id: '_your_matomo_site_id'
+    # matomo_disable_cookies: false
 
   rack_attack:
     git_basic_auth:
@@ -1386,7 +1390,7 @@ test:
     storages:
       default:
         path: tmp/tests/repositories/
-        gitaly_address: unix:tmp/tests/gitaly/gitaly.socket
+        gitaly_address: unix:tmp/tests/gitaly/praefect.socket
 
   gitaly:
     client_path: tmp/tests/gitaly
@@ -1499,8 +1503,8 @@ test:
         group_base: 'ou=groups,dc=example,dc=com'
         admin_group: ''
   prometheus:
-    enable: true
-    listen_address: 'localhost:9090'
+    enabled: true
+    server_address: 'localhost:9090'
 
 staging:
   <<: *base

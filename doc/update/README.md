@@ -33,7 +33,7 @@ official ways to update GitLab:
 ### Linux packages (Omnibus GitLab)
 
 The [Omnibus update guide](https://docs.gitlab.com/omnibus/update/)
-contains the steps needed to update a package installed by GitLab's official
+contains the steps needed to update a package installed by official GitLab
 repositories.
 
 There are also instructions when you want to
@@ -147,7 +147,7 @@ Find where your version sits in the upgrade path below, and upgrade GitLab
 accordingly, while also consulting the
 [version-specific upgrade instructions](#version-specific-upgrading-instructions):
 
-`8.11.x` -> `8.12.0` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.1.11` - > `13.5.3`
+`8.11.x` -> `8.12.0` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.1.17` -> `12.10.14` -> `13.0.14` -> `13.1.11` - > `13.x (latest)`
 
 The following table, while not exhaustive, shows some examples of the supported
 upgrade paths.
@@ -195,7 +195,7 @@ However, for this to work there are the following requirements:
    9.3.
 - You have to use [post-deployment
    migrations](../development/post_deployment_migrations.md) (included in
-   zero downtime update steps below).
+   [zero downtime update steps below](#steps)).
 - You are using PostgreSQL. Starting from GitLab 12.1, MySQL is not supported.
 - Multi-node GitLab instance. Single-node instances may experience brief interruptions
   [as services restart (Puma in particular)](https://docs.gitlab.com/omnibus/update/README.html#single-node-deployment).

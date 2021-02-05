@@ -10,6 +10,7 @@ class DastSiteValidationsFinder
 
   def execute
     relation = DastSiteValidation.all
+    relation = by_most_recent(relation)
     relation = by_project(relation)
     relation = by_url_base(relation)
     relation = by_state(relation)
@@ -20,6 +21,12 @@ class DastSiteValidationsFinder
   private
 
   attr_reader :params
+
+  def by_most_recent(relation)
+    return relation unless params[:most_recent]
+
+    relation.by_most_recent
+  end
 
   def by_project(relation)
     return relation if params[:project_id].nil?

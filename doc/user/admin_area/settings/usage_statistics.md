@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Usage statistics **(CORE ONLY)**
+# Usage statistics **(FREE SELF)**
 
 GitLab Inc. periodically collects information about your instance in order
 to perform various actions.
@@ -20,7 +20,7 @@ usage statistics to GitLab Inc.
 
 If your GitLab instance is behind a proxy, set the appropriate [proxy configuration variables](https://docs.gitlab.com/omnibus/settings/environment-variables.html).
 
-## Version Check **(CORE ONLY)**
+## Version Check **(FREE SELF)**
 
 If enabled, version check informs you if a new version is available and the
 importance of it through a status. This is shown on the help page (i.e. `/help`)
@@ -59,15 +59,14 @@ sequenceDiagram
     Version Application->>GitLab instance: Response (PNG/SVG)
 ```
 
-## Usage Ping **(CORE ONLY)**
+## Usage Ping **(FREE SELF)**
 
-See [Usage Ping guide](../../../development/product_analytics/usage_ping.md).
+See [Usage Ping guide](../../../development/usage_ping.md).
 
-## Instance-level statistics **(CORE ONLY)**
+## Instance-level analytics availability
 
 After usage ping is enabled, GitLab gathers data from other instances and
-can show [usage statistics](../analytics/index.md)
-of your instance to your admins in **Admin Area > Analytics**.
+enables certain [instance-level analytics features](../analytics/index.md) that are dependent on usage ping.
 
 <!-- ## Troubleshooting
 

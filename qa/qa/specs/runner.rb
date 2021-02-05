@@ -37,8 +37,10 @@ module QA
         if tags.any?
           tags.each { |tag| tags_for_rspec.push(['--tag', tag.to_s]) }
         else
-          tags_for_rspec.push(%w[--tag ~orchestrated]) unless (%w[-t --tag] & options).any?
+          tags_for_rspec.push(%w[--tag ~orchestrated --tag ~transient]) unless (%w[-t --tag] & options).any?
         end
+
+        tags_for_rspec.push(%w[--tag ~geo]) unless QA::Runtime::Env.geo_environment?
 
         tags_for_rspec.push(%w[--tag ~skip_signup_disabled]) if QA::Runtime::Env.signup_disabled?
 

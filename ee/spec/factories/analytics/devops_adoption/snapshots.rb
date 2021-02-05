@@ -5,6 +5,7 @@ FactoryBot.define do
     association :segment, factory: :devops_adoption_segment
 
     recorded_at { Time.zone.now }
+    end_time { 1.month.ago.end_of_month }
     issue_opened { true }
     merge_request_opened { false }
     merge_request_approved { false }

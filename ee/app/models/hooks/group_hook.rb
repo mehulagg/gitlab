@@ -20,7 +20,9 @@ class GroupHook < WebHook
     :pipeline_hooks,
     :wiki_page_hooks,
     :deployment_hooks,
-    :release_hooks
+    :release_hooks,
+    :member_hooks,
+    :subgroup_hooks
   ]
 
   belongs_to :group

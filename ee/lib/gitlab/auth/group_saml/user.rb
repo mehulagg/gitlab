@@ -51,6 +51,7 @@ module Gitlab
         def build_new_user(skip_confirmation: false)
           super.tap do |user|
             user.provisioned_by_group_id = saml_provider.group_id
+            user.skip_confirmation_notification!
 
             # rubocop:disable GitlabSecurity/PublicSend
             AuthHash::ALLOWED_USER_ATTRIBUTES.each do |attribute|

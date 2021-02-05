@@ -86,7 +86,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
 
     describe 'validation_status field' do
       it 'is the validation status' do
-        expect(first_dast_site_profile['validationStatus']).to eq('PENDING_VALIDATION')
+        expect(first_dast_site_profile['validationStatus']).to eq('NONE')
       end
     end
 

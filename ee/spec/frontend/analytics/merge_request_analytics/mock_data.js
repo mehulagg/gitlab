@@ -8,9 +8,9 @@ export const fullPath = 'gitlab-org/gitlab';
 // We should update our tests to use fixtures instead of hardcoded mock data.
 // https://gitlab.com/gitlab-org/gitlab/-/issues/270544
 export const throughputChartData = {
-  May_2020: { count: 2, __typename: 'MergeRequestConnection' },
-  Jun_2020: { count: 4, __typename: 'MergeRequestConnection' },
-  Jul_2020: { count: 3, __typename: 'MergeRequestConnection' },
+  May_2020: { count: 2, totalTimeToMerge: 1234567, __typename: 'MergeRequestConnection' },
+  Jun_2020: { count: 4, totalTimeToMerge: 2345678, __typename: 'MergeRequestConnection' },
+  Jul_2020: { count: 3, totalTimeToMerge: 3456789, __typename: 'MergeRequestConnection' },
   __typename: 'Project',
 };
 
@@ -23,10 +23,20 @@ export const throughputChartNoData = {
 
 export const formattedThroughputChartData = [
   {
-    data: [['May 2020', 2], ['Jun 2020', 4], ['Jul 2020', 3]],
+    data: [
+      ['May 2020', 2],
+      ['Jun 2020', 4],
+      ['Jul 2020', 3],
+    ],
     name: THROUGHPUT_CHART_STRINGS.Y_AXIS_TITLE,
   },
 ];
+
+export const formattedMttmData = {
+  title: 'Mean time to merge',
+  value: '9',
+  unit: 'days',
+};
 
 export const expectedMonthData = [
   {
@@ -63,6 +73,7 @@ export const throughputChartQuery = `query ($fullPath: ID!, $labels: [String!], 
       targetBranches: $targetBranches
     ) {
       count
+      totalTimeToMerge
     }
     Jun_2020: mergeRequests(
       first: 0
@@ -76,6 +87,7 @@ export const throughputChartQuery = `query ($fullPath: ID!, $labels: [String!], 
       targetBranches: $targetBranches
     ) {
       count
+      totalTimeToMerge
     }
     Jul_2020: mergeRequests(
       first: 0
@@ -89,6 +101,7 @@ export const throughputChartQuery = `query ($fullPath: ID!, $labels: [String!], 
       targetBranches: $targetBranches
     ) {
       count
+      totalTimeToMerge
     }
   }
 }
@@ -142,5 +155,18 @@ export const throughputTableData = [
     approvedBy: {
       nodes: [],
     },
+  },
+];
+
+export const stats = [
+  {
+    title: 'Mean time to merge',
+    unit: 'days',
+    value: '10',
+  },
+  {
+    title: 'MRs per engineer',
+    unit: 'MRs per engineer (per month)',
+    value: '23',
   },
 ];

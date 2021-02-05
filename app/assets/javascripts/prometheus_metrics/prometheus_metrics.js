@@ -2,8 +2,8 @@ import $ from 'jquery';
 import { escape } from 'lodash';
 import { s__, n__, sprintf } from '~/locale';
 import axios from '../lib/utils/axios_utils';
-import PANEL_STATE from './constants';
 import { backOff } from '../lib/utils/common_utils';
+import PANEL_STATE from './constants';
 
 export default class PrometheusMetrics {
   constructor(wrapperSelector) {
@@ -26,8 +26,8 @@ export default class PrometheusMetrics {
     this.activeMetricsEndpoint = this.$monitoredMetricsPanel.data('activeMetrics');
     this.helpMetricsPath = this.$monitoredMetricsPanel.data('metrics-help-path');
 
-    this.$panelToggleRight.on('click', e => this.handlePanelToggle(e));
-    this.$panelToggleDown.on('click', e => this.handlePanelToggle(e));
+    this.$panelToggleRight.on('click', (e) => this.handlePanelToggle(e));
+    this.$panelToggleDown.on('click', (e) => this.handlePanelToggle(e));
   }
 
   init() {
@@ -72,7 +72,7 @@ export default class PrometheusMetrics {
     let totalMissingEnvVarMetrics = 0;
     let totalExporters = 0;
 
-    metrics.forEach(metric => {
+    metrics.forEach((metric) => {
       if (metric.active_metrics > 0) {
         totalExporters += 1;
         this.$monitoredMetricsList.append(
@@ -137,7 +137,7 @@ export default class PrometheusMetrics {
         })
         .catch(stop);
     })
-      .then(res => {
+      .then((res) => {
         if (res && res.data && res.data.length) {
           this.populateActiveMetrics(res.data);
         } else {

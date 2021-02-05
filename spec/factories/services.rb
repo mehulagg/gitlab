@@ -27,12 +27,6 @@ FactoryBot.define do
     end
   end
 
-  factory :mock_deployment_service do
-    project
-    type { 'MockDeploymentService' }
-    active { true }
-  end
-
   factory :prometheus_service do
     project
     active { true }
@@ -41,24 +35,6 @@ FactoryBot.define do
         api_url: 'https://prometheus.example.com/',
         manual_configuration: true
       }
-    end
-  end
-
-  factory :alerts_service do
-    active
-    project
-    type { 'AlertsService' }
-
-    trait :active do
-      active { true }
-    end
-
-    trait :inactive do
-      active { false }
-    end
-
-    before(:create) do |service|
-      service.data = build(:alerts_service_data, service: service)
     end
   end
 

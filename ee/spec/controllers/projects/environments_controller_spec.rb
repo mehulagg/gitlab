@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Projects::EnvironmentsController do
-  include KubernetesHelpers
-
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
 
@@ -16,64 +14,6 @@ RSpec.describe Projects::EnvironmentsController do
     project.add_maintainer(user)
 
     sign_in(user)
-  end
-
-  describe 'GET index' do
-    context 'when requesting JSON response for folders' do
-      before do
-        allow_any_instance_of(EE::Environment).to receive(:has_terminals?).and_return(true)
-        allow_any_instance_of(EE::Environment).to receive(:rollout_status).and_return(kube_deployment_rollout_status)
-
-        create(:environment, project: project,
-                             name: 'staging/review-1',
-                             state: :available)
-
-        create(:environment, project: project,
-                             name: 'staging/review-2',
-                             state: :available)
-
-        create(:environment, project: project,
-                             name: 'staging/review-3',
-                             state: :stopped)
-      end
-
-      let(:environments) { json_response['environments'] }
-
-      context 'when requesting available environments scope' do
-        before do
-          stub_licensed_features(deploy_board: true)
-
-          get :index, params: environment_params(format: :json, nested: true, scope: :available)
-        end
-
-        it 'responds with matching schema' do
-          expect(response).to match_response_schema('environments', dir: 'ee')
-        end
-
-        it 'responds with a payload describing available environments' do
-          expect(environments.count).to eq 2
-          expect(environments.first['name']).to eq 'production'
-          expect(environments.first['latest']['rollout_status']).to be_present
-          expect(environments.second['name']).to eq 'staging'
-          expect(environments.second['size']).to eq 2
-          expect(environments.second['latest']['name']).to eq 'staging/review-2'
-          expect(environments.second['latest']['rollout_status']).to be_present
-        end
-      end
-
-      context 'when license does not have the GitLab_DeployBoard add-on' do
-        before do
-          stub_licensed_features(deploy_board: false)
-
-          get :index, params: environment_params(format: :json, nested: true)
-        end
-
-        it 'does not return the rollout_status_path attribute' do
-          expect(environments.first['latest']['rollout_status']).not_to be_present
-          expect(environments.second['latest']['rollout_status']).not_to be_present
-        end
-      end
-    end
   end
 
   describe '#GET terminal' do

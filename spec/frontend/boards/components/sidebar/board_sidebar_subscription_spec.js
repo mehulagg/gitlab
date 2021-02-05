@@ -4,8 +4,8 @@ import { GlToggle, GlLoadingIcon } from '@gitlab/ui';
 import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
 import * as types from '~/boards/stores/mutation_types';
 import { createStore } from '~/boards/stores';
-import { mockActiveIssue } from '../../mock_data';
 import createFlash from '~/flash';
+import { mockActiveIssue } from '../../mock_data';
 
 jest.mock('~/flash.js');
 
@@ -83,7 +83,7 @@ describe('~/boards/components/sidebar/board_sidebar_subscription_spec.vue', () =
   });
 
   describe('Board sidebar subscription component `behavior`', () => {
-    const mockSetActiveIssueSubscribed = subscribedState => {
+    const mockSetActiveIssueSubscribed = (subscribedState) => {
       jest.spyOn(wrapper.vm, 'setActiveIssueSubscribed').mockImplementation(async () => {
         store.commit(types.UPDATE_ISSUE_BY_ID, {
           issueId: mockActiveIssue.id,

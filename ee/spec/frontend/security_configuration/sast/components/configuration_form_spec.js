@@ -3,12 +3,12 @@ import { shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import AnalyzerConfiguration from 'ee/security_configuration/sast/components/analyzer_configuration.vue';
 import ConfigurationForm from 'ee/security_configuration/sast/components/configuration_form.vue';
-import DynamicFields from 'ee/security_configuration/sast/components/dynamic_fields.vue';
-import ExpandableSection from 'ee/security_configuration/sast/components/expandable_section.vue';
+import DynamicFields from 'ee/security_configuration/components/dynamic_fields.vue';
+import ExpandableSection from 'ee/security_configuration/components/expandable_section.vue';
 import configureSastMutation from 'ee/security_configuration/sast/graphql/configure_sast.mutation.graphql';
 import { redirectTo } from '~/lib/utils/url_utility';
 import * as Sentry from '~/sentry/wrapper';
-import { makeEntities, makeSastCiConfiguration } from './helpers';
+import { makeEntities, makeSastCiConfiguration } from '../../helpers';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
@@ -25,7 +25,7 @@ describe('ConfigurationForm component', () => {
 
   let pendingPromiseResolvers;
   const fulfillPendingPromises = () => {
-    pendingPromiseResolvers.forEach(resolve => resolve());
+    pendingPromiseResolvers.forEach((resolve) => resolve());
   };
 
   const createComponent = ({ mutationResult, ...options } = {}) => {
@@ -47,7 +47,7 @@ describe('ConfigurationForm component', () => {
             $apollo: {
               mutate: jest.fn(
                 () =>
-                  new Promise(resolve => {
+                  new Promise((resolve) => {
                     pendingPromiseResolvers.push(() =>
                       resolve({
                         data: { configureSast: mutationResult },

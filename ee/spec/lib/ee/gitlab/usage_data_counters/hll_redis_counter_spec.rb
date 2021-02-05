@@ -52,7 +52,7 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
             expect(kwargs[:key]).to match(/^#{context}\_.*/)
           end
 
-          described_class.track_event_in_context(entity, event_name, context)
+          described_class.track_event_in_context(event_name, values: entity, context: context)
         end
       end
     end
@@ -61,18 +61,18 @@ RSpec.describe Gitlab::UsageDataCounters::HLLRedisCounter, :clean_gitlab_redis_s
       it 'is not incrementing the counter' do
         expect(Gitlab::Redis::HLL).not_to receive(:add)
 
-        described_class.track_event_in_context(entity1, context_event, '')
+        described_class.track_event_in_context(context_event, values: entity1, context: '')
       end
     end
   end
 
   describe '.unique_events' do
     before do
-      described_class.track_event_in_context([entity1, entity3], context_event, default_context, 2.days.ago)
-      described_class.track_event_in_context(entity3, context_event, ultimate_context, 2.days.ago)
-      described_class.track_event_in_context(entity3, context_event, gold_context, 2.days.ago)
-      described_class.track_event_in_context(entity3, context_event, invalid_context, 2.days.ago)
-      described_class.track_event_in_context([entity1, entity2], context_event, '', 2.weeks.ago)
+      described_class.track_event_in_context(context_event, values: [entity1, entity3], context: default_context, time: 2.days.ago)
+      described_class.track_event_in_context(context_event, values: entity3, context: ultimate_context, time: 2.days.ago)
+      described_class.track_event_in_context(context_event, values: entity3, context: gold_context, time: 2.days.ago)
+      described_class.track_event_in_context(context_event, values: entity3, context: invalid_context, time: 2.days.ago)
+      described_class.track_event_in_context(context_event, values: [entity1, entity2], context: '', time: 2.weeks.ago)
     end
 
     context 'with correct arguments' do

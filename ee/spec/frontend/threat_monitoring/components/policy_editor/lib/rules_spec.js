@@ -20,7 +20,7 @@ describe('buildRule', () => {
 
   describe.each([RuleTypeEndpoint, RuleTypeEntity, RuleTypeCIDR, RuleTypeFQDN])(
     'buildRule $ruleType',
-    ruleType => {
+    (ruleType) => {
       it('builds correct instance', () => {
         const rule = buildRule(ruleType);
         expect(rule).toMatchObject({

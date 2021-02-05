@@ -63,7 +63,7 @@ RSpec.describe SearchController do
 
           it 'does not track if there is no license available' do
             stub_licensed_features(elastic_search: false)
-            expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event).with(instance_of(String), target_id)
+            expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event).with(target_id, values: instance_of(String))
 
             get :show, params: request_params, format: :html
           end
