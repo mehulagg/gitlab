@@ -673,6 +673,16 @@ module ProjectsHelper
   def project_permissions_panel_data_json(project)
     project_permissions_panel_data(project).to_json.html_safe
   end
+  
+  def project_compare_selector_data(project, merge_request, params)
+    {
+      project_compare_index_path: project_compare_index_path(project),
+      refs_project_path: refs_project_path(project),
+      params_from: params[:from], params_to: params[:to],
+      project_merge_request_path: merge_request.present? ? project_merge_request_path(project, merge_request) : '',
+      create_mr_path: create_mr_button? ? create_mr_path : ''
+    }
+  end
 
   def project_allowed_visibility_levels(project)
     Gitlab::VisibilityLevel.values.select do |level|

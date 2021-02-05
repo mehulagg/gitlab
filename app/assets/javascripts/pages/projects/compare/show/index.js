@@ -1,6 +1,9 @@
 import Diff from '~/diff';
 import initChangesDropdown from '~/init_changes_dropdown';
 import GpgBadges from '~/gpg_badges';
+import initCompareSelector from '~/projects/compare';
+
+initCompareSelector();
 
 document.addEventListener('DOMContentLoaded', () => {
   new Diff(); // eslint-disable-line no-new
@@ -8,3 +11,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initChangesDropdown(document.querySelector('.navbar-gitlab').offsetHeight - paddingTop);
   GpgBadges.fetch();
 });
+
