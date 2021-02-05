@@ -5,6 +5,12 @@ module Gitlab
     # This class fetches Peek stats stored in redis and logs them in a
     # structured log (so these can be then analyzed in Kibana)
     class Stats
+      def self.gather_stats?
+        return unless Feature.enabled?(:performance_bar_stats)
+
+        Gitlab.com? || Gitlab.staging? || !Rails.env.production?
+      end
+
       def initialize(redis)
         @redis = redis
       end

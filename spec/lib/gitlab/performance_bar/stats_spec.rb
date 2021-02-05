@@ -10,6 +10,36 @@ RSpec.describe Gitlab::PerformanceBar::Stats do
     let(:request_id) { 'foo' }
     let(:stats) { described_class.new(redis) }
 
+    describe '.gather_stats?' do
+      subject(:gather_stats) { described_class.gather_stats? }
+
+      specify { expect(gather_stats).to be_truthy }
+
+      context 'in production env' do
+        before do
+          stub_rails_env('production')
+        end
+
+        specify { expect(gather_stats).to be_falsey }
+
+        context 'on gitlab.com' do
+          before do
+            allow(Gitlab).to receive(:com?).and_return(true)
+          end
+
+          specify { expect(gather_stats).to be_truthy }
+        end
+      end
+
+      context 'when performance_bar_stats is disabled' do
+        before do
+          stub_feature_flags(performance_bar_stats: false)
+        end
+
+        specify { expect(gather_stats).to be_falsey }
+      end
+    end
+
     describe '#process' do
       subject(:process) { stats.process(request_id) }
 

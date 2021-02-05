@@ -1,6 +1,8 @@
 - return unless performance_bar_enabled?
+- stats_url = 'https://log.gprd.gitlab.net/app/dashboards#/view/823ed530-655a-11eb-a318-db81ec4462fa?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-24h%2Cto%3Anow))'
 
 #js-peek{ data: { env: Peek.env,
          request_id: peek_request_id,
+         stats_url: "#{stats_url if Gitlab::PerformanceBar::Stats.gather_stats?}",
          peek_url: "#{peek_routes_path}/results" },
          class: Peek.env }
