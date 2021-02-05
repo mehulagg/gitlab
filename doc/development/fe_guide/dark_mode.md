@@ -5,22 +5,20 @@ group: Development
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
+This page is about developing dark mode for GitLab. For how to enable dark mode, see the [dark mode user docs](https://docs.gitlab.com/ee/user/profile/preferences.html#dark-mode).
+
 # How dark mode works
 
 TLDR: We reverse the color palette and override a few bootstrap variables.
 
-When setting `color`, `background-color` or other color-related rules, use CSS variables 
-(especially if in `page_bundles` bundles).
+Note the following:
 
-For all pages except for the WebIDE, dark mode works like this:
-
-The dark mode palette is defined in `app/assets/stylesheets/themes/_dark.scss`.
-This is loaded _before_ application.scss to generate `application_dark.css`
-`app/views/layouts/_head.html.haml` then loads the correct application and utilities css based on the user's theme preference.
-
-We define two types of variables in `_dark.scss`:
-SCSS variables are used in framework, components, and utitlity classes
-CSS variables are used for any colors within the `app/assets/stylesheets/page_bundles` directory.
+- The dark mode palette is defined in `app/assets/stylesheets/themes/_dark.scss`.
+  This is loaded _before_ application.scss to generate `application_dark.css`
+  - We define two types of variables in `_dark.scss`:
+    - SCSS variables are used in framework, components, and utitlity classes.
+    - CSS variables are used for any colors within the `app/assets/stylesheets/page_bundles` directory.
+- `app/views/layouts/_head.html.haml` then loads application or application_dark based on the user's theme preference.
 
 Because we didn't want to generate separate `_dark.css` variants of every page_bundle file,
 we use CSS variables with SCSS variables as fallbacks. This is because when we generate the `page_bundles`
@@ -43,9 +41,9 @@ to add support for this.
 
 ## Using different values in light and dark mode
 
-Ideally we use the same values for both light and dark mode, for most things this works. There are some cases where we need a different value for some reason. The current preferred approach is still being decided, use your judgement when choosing what to do.
+Ideally we use the same values for both light and dark mode, for most things this works. There are some cases where we need a different value for dark mode.
 
-Option 1: Add override using the `.dark-mode` class added to `body`
+You can add am override using the `.gl-dark` class that dark mode adds to `body`
 
 ```scss
 color: $gray-700;
@@ -54,35 +52,8 @@ color: $gray-700;
 }
 ```
 
-we could probably make this into a function or mixin:
-
-```scss
-color: $gray-700;
-// NB: this does not actually exist yet
-@include dark-mode-override(color, --gray-500);
-```
-
-If there are multiple usages of the overridden color, you can define a local
-CSS variable, scoped to your component. Then you only need a single override and use your value throughtout.
-
-```css
-.my-component {
-  --component-text-color: #333;
-
-  .dark-mode & {
-    --component-text-color: #eee;
-  }
-
-  color: var(--component-text-color);
-}
-
-/* depends on this header being a child of `my-component` */
-.my-component-header {
-  border-bottom: solid 2px var(--component-text-color);
-}
-```
-
-Please avoid using a different value for the SCSS fallback:
+NOTE:
+Avoid using a different value for the SCSS fallback
 
 ```scss
 // avoid where possible
@@ -91,7 +62,7 @@ Please avoid using a different value for the SCSS fallback:
 color: var(--gray-500, $gray-700);
 ```
 
-There are some existing instances of this, but as we plan to add the CSS variables to light mode as well this will no longer work.
+We [plan to add](https://gitlab.com/gitlab-org/gitlab/-/issues/301147) the CSS variables to light mode. When that happens, different values for the SCSS fallback will no longer work.
 
 ## Why don't we use CSS variables everywhere
 
