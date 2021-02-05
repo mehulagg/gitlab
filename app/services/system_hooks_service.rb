@@ -26,6 +26,7 @@ class SystemHooksService
     return builder_driven_event_data(model, event) if builder_driven_event_data_available?(model)
 
     data = {
+      event_name: build_event_name(model, event),
       created_at: model.created_at&.xmlschema,
       updated_at: model.updated_at&.xmlschema
     }
@@ -58,6 +59,10 @@ class SystemHooksService
     end
 
     data
+  end
+
+  def build_event_name(model, event)
+    "#{model.class.name.downcase}_#{event}"
   end
 
   def project_data(model)

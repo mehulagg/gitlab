@@ -16,19 +16,19 @@ module Gitlab
 
         private
 
-        def project_member_data(model)
-          project = model.project || Project.unscoped.find(model.source_id)
+        def project_member_data
+          project = project_member_data.project || Project.unscoped.find(project_member_data.source_id)
 
           {
             project_name:                 project.name,
             project_path:                 project.path,
             project_path_with_namespace:  project.full_path,
             project_id:                   project.id,
-            user_username:                model.user.username,
-            user_name:                    model.user.name,
-            user_email:                   model.user.email,
-            user_id:                      model.user.id,
-            access_level:                 model.human_access,
+            user_username:                project_member_data.user.username,
+            user_name:                    project_member_data.user.name,
+            user_email:                   project_member_data.user.email,
+            user_id:                      project_member_data.user.id,
+            access_level:                 project_member_data.human_access,
             project_visibility:           Project.visibility_levels.key(project.visibility_level_value).downcase
           }
         end
