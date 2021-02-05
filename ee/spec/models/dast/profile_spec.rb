@@ -19,6 +19,8 @@ RSpec.describe Dast::Profile, type: :model do
     it { is_expected.to validate_presence_of(:project_id) }
     it { is_expected.to validate_presence_of(:dast_site_profile_id) }
     it { is_expected.to validate_presence_of(:dast_scanner_profile_id) }
+    it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_presence_of(:description) }
 
     context 'when the project_id and dast_site_profile.project_id do not match' do
       let(:project) { create(:project) }

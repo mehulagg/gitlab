@@ -9,8 +9,8 @@ module Dast
     belongs_to :dast_scanner_profile
 
     validates :description, length: { maximum: 255 }
-    validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }
-    validates :project_id, :dast_site_profile_id, :dast_scanner_profile_id, presence: true
+    validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }, presence: true
+    validates :project_id, :dast_site_profile_id, :dast_scanner_profile_id, :description, presence: true
 
     validate :project_ids_match
 
