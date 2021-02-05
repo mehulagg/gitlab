@@ -31,8 +31,12 @@ module Ci
       def track_usage_of_monthly_minutes(consumption)
         return unless Feature.enabled?(:ci_minutes_monthly_tracking, project, default_enabled: :yaml)
 
+        # TODO: if this transaction is considered too long, consider
+        # splitting it into `.current` + `update_counters` where only
+        # `update_counters` are inside a transaction
         ActiveRecord::Base.transaction do
           ::Ci::Minutes::NamespaceMonthlyUsage.increase_usage(namespace, consumption)
+          ::Ci::Minutes::ProjectMonthlyUsage.increase_usage(project, consumption)
         end
       end
 
