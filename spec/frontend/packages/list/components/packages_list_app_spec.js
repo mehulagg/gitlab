@@ -107,14 +107,6 @@ describe('packages_list_app', () => {
     expect(store.dispatch).toHaveBeenCalledWith('requestDeletePackage', 'foo');
   });
 
-  it('calls requestPackagesList on sort:changed', () => {
-    mountComponent();
-
-    const list = findListComponent();
-    list.vm.$emit('sort:changed');
-    expect(store.dispatch).toHaveBeenCalledWith('requestPackagesList');
-  });
-
   it('does not call requestPackagesList two times on render', () => {
     mountComponent();
 
@@ -142,10 +134,10 @@ describe('packages_list_app', () => {
       expect(findPackageSearch().exists()).toBe(true);
     });
 
-    it.each(['sort:changed', 'filter:changed'])('on %p fetches data from the store', (event) => {
+    it('on update fetches data from the store', () => {
       mountComponent();
 
-      findPackageSearch().vm.$emit(event);
+      findPackageSearch().vm.$emit('update');
 
       expect(store.dispatch).toHaveBeenCalledWith('requestPackagesList');
     });
