@@ -271,7 +271,6 @@ describe('OnDemandScansForm', () => {
               variables: {
                 input: {
                   name: 'My daily scan',
-                  description: '',
                   dastScannerProfileId: passiveScannerProfile.id,
                   dastSiteProfileId: nonValidatedSiteProfile.id,
                   fullPath: projectPath,

@@ -278,7 +278,7 @@ export default {
         input = {
           ...input,
           ...(this.isEdit ? { id: this.dastScan.id } : {}),
-          ...this.formFieldValues,
+          ...serializeFormObject(this.form.fields),
           runAfterCreate,
         };
       }
