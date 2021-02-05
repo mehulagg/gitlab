@@ -15,6 +15,14 @@ RSpec.describe SetUserStatusBasedOnUserCapSettingWorker, type: :worker do
       allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
     end
 
+    shared_examples 'keeps user in blocked_pending_approval state' do
+      it 'keeps the user in blocked_pending_approval state' do
+        subject
+
+        expect(user.reload).to be_blocked_pending_approval
+      end
+    end
+
     context 'when user is not blocked_pending_approval' do
       let(:user) { active_user }
 
@@ -98,12 +106,32 @@ RSpec.describe SetUserStatusBasedOnUserCapSettingWorker, type: :worker do
     end
 
     context 'when current billable user count is equal to user cap' do
+      let_it_be(:active_admin) { create(:user, :admin, state: 'active') }
+      let_it_be(:inactive_admin) { create(:user, :admin, :deactivated) }
+
+      let(:new_user_signups_cap) { 2 }
+
+      include_examples 'keeps user in blocked_pending_approval state'
+
+      it 'sends an email to every active admin' do
+        expect(::Notify).to receive(:user_cap_reached).once
+        expect(::Notify).to receive(:user_cap_reached).with(active_admin.id)
+
+        subject
+      end
+    end
+
+    context 'when current billable user count is greater than user cap' do
+      let_it_be(:another_active_user) { create(:user, state: 'active') }
+
       let(:new_user_signups_cap) { 1 }
 
-      it 'keeps the user in blocked_pending_approval state' do
-        subject
+      include_examples 'keeps user in blocked_pending_approval state'
 
-        expect(user.reload).to be_blocked_pending_approval
+      it 'does not send an email to every active admin' do
+        expect(::Notify).not_to receive(:user_cap_reached)
+
+        subject
       end
     end
   end

@@ -1878,6 +1878,9 @@ msgstr ""
 msgid "Adds an issue to an epic."
 msgstr ""
 
+msgid "Adjust the user cap setting on your instance"
+msgstr ""
+
 msgid "Adjust your filters/search criteria above. If you believe this may be an error, please refer to the %{linkStart}Geo Troubleshooting%{linkEnd} documentation for more information."
 msgstr ""
 
@@ -14551,6 +14554,9 @@ msgstr ""
 msgid "Helps reduce request volume for protected paths"
 msgstr ""
 
+msgid "Here are some helpful links to help you manage your instance:"
+msgstr ""
+
 msgid "Here you will find recent merge request activity"
 msgstr ""
 
@@ -14828,6 +14834,9 @@ msgstr ""
 msgid "If you did not recently sign in, you should immediately change your password: %{password_link}."
 msgstr ""
 
+msgid "If you have any questions about this process please consults our %{doc_link} or %{support_link}."
+msgstr ""
+
 msgid "If you lose your recovery codes you can generate new ones, invalidating all previous codes."
 msgstr ""
 
@@ -15025,6 +15034,9 @@ msgid "ImportProjects|The repository could not be created."
 msgstr ""
 
 msgid "ImportProjects|Update of imported projects with realtime changes failed"
+msgstr ""
+
+msgid "Important information about usage on your GitLab instance"
 msgstr ""
 
 msgid "Imported requirements"
@@ -17706,6 +17718,9 @@ msgid "Makes this issue confidential."
 msgstr ""
 
 msgid "Manage"
+msgstr ""
+
+msgid "Manage (accept/reject) pending member requests"
 msgstr ""
 
 msgid "Manage Web IDE features"
@@ -29697,6 +29712,9 @@ msgstr ""
 msgid "This is a merge train pipeline"
 msgstr ""
 
+msgid "This is a notification to make you aware that your GitLab instance has reached the maximum allowed %{user_doc_link} set by an instance admin."
+msgstr ""
+
 msgid "This is a security log of important events involving your account."
 msgstr ""
 
@@ -31839,6 +31857,9 @@ msgstr ""
 msgid "Users"
 msgstr ""
 
+msgid "Users can still be invited to your instance and/or add themselves if permitted based on your settings. However, they will not have access to your instance, nor count towards your subscribed seat count until you %{approve_link}."
+msgstr ""
+
 msgid "Users in License"
 msgstr ""
 
@@ -32084,6 +32105,9 @@ msgid "View open merge request"
 msgstr ""
 
 msgid "View page @ "
+msgstr ""
+
+msgid "View pending member requests"
 msgstr ""
 
 msgid "View performance dashboard."
@@ -32684,6 +32708,9 @@ msgid "What are you searching for?"
 msgstr ""
 
 msgid "What describes you best?"
+msgstr ""
+
+msgid "What does this mean?"
 msgstr ""
 
 msgid "What is squashing?"
@@ -33899,6 +33926,9 @@ msgstr ""
 msgid "any-approver for the project already exists"
 msgstr ""
 
+msgid "approve them"
+msgstr ""
+
 msgid "approved by: "
 msgstr ""
 
@@ -34228,6 +34258,9 @@ msgstr ""
 msgid "committed"
 msgstr ""
 
+msgid "contact our support team"
+msgstr ""
+
 msgid "container_name can contain only lowercase letters, digits, '-', and '.' and must start and end with an alphanumeric character"
 msgstr ""
 
@@ -34276,6 +34309,9 @@ msgid "detached"
 msgstr ""
 
 msgid "disabled"
+msgstr ""
+
+msgid "docs"
 msgstr ""
 
 msgid "does not exist"
@@ -35318,6 +35354,9 @@ msgid "uploads"
 msgstr ""
 
 msgid "user avatar"
+msgstr ""
+
+msgid "user cap"
 msgstr ""
 
 msgid "user preferences"

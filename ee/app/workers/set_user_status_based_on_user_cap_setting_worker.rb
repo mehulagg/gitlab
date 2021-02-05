@@ -2,6 +2,7 @@
 
 class SetUserStatusBasedOnUserCapSettingWorker
   include ApplicationWorker
+  include ::Gitlab::Utils::StrongMemoize
 
   feature_category :users
 
@@ -12,7 +13,7 @@ class SetUserStatusBasedOnUserCapSettingWorker
 
     return unless user.blocked_pending_approval?
     return if user_cap_max.nil?
-    return if current_billable_users_count >= user_cap_max
+    return if user_cap_reached?
 
     if user.activate
       # Resends confirmation email if the user isn't confirmed yet.
@@ -28,10 +29,28 @@ class SetUserStatusBasedOnUserCapSettingWorker
   private
 
   def user_cap_max
-    ::Gitlab::CurrentSettings.new_user_signups_cap
+    strong_memoize(:user_cap_max) do
+      ::Gitlab::CurrentSettings.new_user_signups_cap
+    end
   end
 
   def current_billable_users_count
-    User.billable.count
+    strong_memoize(:user_cap_max) do
+      User.billable.count
+    end
+  end
+
+  def user_cap_reached?
+    return false if current_billable_users_count < user_cap_max
+
+    send_user_cap_reached_email if current_billable_users_count == user_cap_max
+
+    true
+  end
+
+  def send_user_cap_reached_email
+    User.admins.active.each do |user|
+      ::Notify.user_cap_reached(user.id).deliver_later
+    end
   end
 end
