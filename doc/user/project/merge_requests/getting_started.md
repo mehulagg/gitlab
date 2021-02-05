@@ -216,8 +216,9 @@ Feature.disable(:reviewer_approval_rules, Project.find(<project id>))
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/293933) in GitLab 13.9.
 
 After a reviewer has completed their review through [merge request reviews](../../../user/discussions/index.md#merge-request-reviews),
-the author of the merge request can request a new review from the reviewer. This will create a new
-todo and send an email to the reviewer.
+the author of the merge request can request a new review from the reviewer by clicking
+the re-request a review button next to the reviewer. This will create a new todo and
+send an email to the reviewer.
 
 ![Request a new review](img/request_new_review_v13_9.png)
 
