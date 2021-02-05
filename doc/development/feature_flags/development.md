@@ -17,11 +17,86 @@ request removing the feature flag or the merge request where the default value o
 the feature flag is set to enabled. If the feature contains any database migrations, it
 *should* include a changelog entry for the database changes.
 
-WARNING:
-All newly-introduced feature flags should be [disabled by default](process.md#feature-flags-in-gitlab-development).
-
 NOTE:
 This document is the subject of continued work as part of an epic to [improve internal usage of Feature Flags](https://gitlab.com/groups/gitlab-org/-/epics/3551). Raise any suggestions as new issues and attach them to the epic.
+
+## Development Workflow
+
+When development of a feature is spread across multiple merge
+  requests, you can use the following workflow:
+
+  1. [Create a new feature flag](development.md#create-a-new-feature-flag)
+     which is **off** by default, in the first merge request which uses the flag.
+     Flags [should not be added separately](development.md#risk-of-a-broken-master-main-branch).
+  1. Submit incremental changes via one or more merge requests, ensuring that any
+     new code added can only be reached if the feature flag is **on**.
+     You can keep the feature flag enabled on your local GDK during development.
+  1. When the feature is ready to be tested, enable the feature flag for
+     a specific project and ensure that there are no issues with the implementation.
+  1. When the feature is ready to be announced, create a merge request that adds
+     documentation about the feature, including [documentation for the feature flag itself](../documentation/feature_flags.md),
+     and a changelog entry. In the same merge request either flip the feature flag to
+     be **on by default** or remove it entirely in order to enable the new behavior.
+
+## Guidelines
+
+- By default, the feature flags should be **off**.
+- Feature flags should remain in the codebase for as short period as possible
+  to reduce the need for feature flag accounting.
+- The person operating with feature flags is responsible for clearly communicating
+  the status of a feature behind the feature flag with responsible stakeholders. The
+  issue description should be updated with the feature flag name and whether it is
+  defaulted on or off as soon it is evident that a feature flag is needed.
+- Merge requests that make changes hidden behind a feature flag, or remove an
+  existing feature flag because a feature is deemed stable must have the
+  ~"feature flag" label assigned.
+
+One might be tempted to think that feature flags will delay the release of a
+feature by at least one month (= one release). This is not the case. A feature
+flag does not have to stick around for a specific amount of time
+(e.g. at least one release). Instead they should stick around until the feature
+is deemed stable. Stable means it works on GitLab.com without causing any
+problems, such as outages.
+
+## Including a feature behind feature flag in the final release
+
+In order to build a final release and present the feature for self-managed
+users, the feature flag should be at least defaulted to **on**. If the feature
+is deemed stable and there is confidence that removing the feature flag is safe,
+consider removing the feature flag altogether. It's _strongly_ recommended that
+the feature flag is [enabled **globally** on **production**](controls.md#enabling-a-feature-for-gitlabcom) for **at least one day**
+before making this decision. Unexpected bugs are sometimes discovered during this period.
+
+The process for enabling features that are disabled by default can take 5-6 days
+from when the merge request is first reviewed to when the change is deployed to
+GitLab.com. However, it is recommended to allow 10-14 days for this activity to
+account for unforeseen problems.
+
+Feature flags must be [documented according to their state (enabled/disabled)](../documentation/feature_flags.md),
+and when the state changes, docs **must** be updated accordingly.
+
+NOTE:
+Take into consideration that such action can make the feature available on
+GitLab.com shortly after the change to the feature flag is merged.
+
+Changing the default state or removing the feature flag has to be done before
+the 22nd of the month, _at least_ 3-4 working days before, in order for the change
+to be included in the final self-managed release.
+
+In addition to this, the feature behind feature flag should:
+
+- Run in all GitLab.com environments for a sufficient period of time. This time
+  period depends on the feature behind the feature flag, but as a general rule of
+  thumb 2-4 working days should be sufficient to gather enough feedback.
+- The feature should be exposed to all users within the GitLab.com plan during
+  the above mentioned period of time. Exposing the feature to a smaller percentage
+  or only a group of users might not expose a sufficient amount of information to aid in
+  making a decision on feature stability.
+
+While rare, release managers may decide to reject picking or revert a change in
+a stable branch, even when feature flags are used. This might be necessary if
+the changes are deemed problematic, too invasive, or there simply isn't enough
+time to properly measure how the changes behave on GitLab.com.
 
 ## Risk of a broken master (main) branch
 
