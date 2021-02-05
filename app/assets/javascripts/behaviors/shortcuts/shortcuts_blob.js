@@ -7,6 +7,7 @@ import {
   getShaFromUrl,
 } from '~/lib/utils/url_utility';
 import { updateRefPortionOfTitle } from '~/repository/utils/title';
+import { keysFor, PROJECT_FILES_GO_TO_PERMALINK } from '~/behaviors/shortcuts/keybindings';
 import Shortcuts from './shortcuts';
 
 const defaults = {
@@ -28,7 +29,7 @@ export default class ShortcutsBlob extends Shortcuts {
 
     this.shortcircuitPermalinkButton();
 
-    Mousetrap.bind('y', this.moveToFilePermalink.bind(this));
+    Mousetrap.bind(keysFor(PROJECT_FILES_GO_TO_PERMALINK), this.moveToFilePermalink.bind(this));
   }
 
   moveToFilePermalink() {

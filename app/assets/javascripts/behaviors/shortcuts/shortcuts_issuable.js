@@ -6,17 +6,35 @@ import { isElementVisible } from '~/lib/utils/dom_utils';
 import Sidebar from '../../right_sidebar';
 import { CopyAsGFM } from '../markdown/copy_as_gfm';
 import Shortcuts from './shortcuts';
+import {
+  keysFor,
+  ISSUE_MR_CHANGE_ASSIGNEE,
+  ISSUE_MR_CHANGE_MILESTONE,
+  EPIC_ISSUE_MR_CHANGE_LABEL,
+  EPIC_ISSUE_MR_COMMENT_OR_REPLY,
+  EPIC_ISSUE_MR_EDIT_DESCRIPTION,
+  MR_COPY_SOURCE_BRANCH_NAME,
+} from './keybindings';
 
 export default class ShortcutsIssuable extends Shortcuts {
   constructor() {
     super();
 
-    Mousetrap.bind('a', () => ShortcutsIssuable.openSidebarDropdown('assignee'));
-    Mousetrap.bind('m', () => ShortcutsIssuable.openSidebarDropdown('milestone'));
-    Mousetrap.bind('l', () => ShortcutsIssuable.openSidebarDropdown('labels'));
-    Mousetrap.bind('r', ShortcutsIssuable.replyWithSelectedText);
-    Mousetrap.bind('e', ShortcutsIssuable.editIssue);
-    Mousetrap.bind('b', ShortcutsIssuable.copyBranchName);
+    Mousetrap.bind(keysFor(ISSUE_MR_CHANGE_ASSIGNEE), () =>
+      ShortcutsIssuable.openSidebarDropdown('assignee'),
+    );
+    Mousetrap.bind(keysFor(ISSUE_MR_CHANGE_MILESTONE), () =>
+      ShortcutsIssuable.openSidebarDropdown('milestone'),
+    );
+    Mousetrap.bind(keysFor(EPIC_ISSUE_MR_CHANGE_LABEL), () =>
+      ShortcutsIssuable.openSidebarDropdown('labels'),
+    );
+    Mousetrap.bind(
+      keysFor(EPIC_ISSUE_MR_COMMENT_OR_REPLY),
+      ShortcutsIssuable.replyWithSelectedText,
+    );
+    Mousetrap.bind(keysFor(EPIC_ISSUE_MR_EDIT_DESCRIPTION), ShortcutsIssuable.editIssue);
+    Mousetrap.bind(keysFor(MR_COPY_SOURCE_BRANCH_NAME), ShortcutsIssuable.copyBranchName);
   }
 
   static replyWithSelectedText() {

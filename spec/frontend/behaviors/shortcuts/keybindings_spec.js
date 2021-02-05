@@ -1,8 +1,9 @@
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 
-describe('~/behaviors/shortcuts/keybindings.js', () => {
+describe('~/behaviors/shortcuts/keybindings', () => {
   let keysFor;
   let TOGGLE_PERFORMANCE_BAR;
+  let WEB_IDE_COMMIT;
   let LOCAL_STORAGE_KEY;
 
   beforeAll(() => {
@@ -17,7 +18,7 @@ describe('~/behaviors/shortcuts/keybindings.js', () => {
     }
 
     jest.resetModules();
-    ({ keysFor, TOGGLE_PERFORMANCE_BAR, LOCAL_STORAGE_KEY } = await import(
+    ({ keysFor, TOGGLE_PERFORMANCE_BAR, WEB_IDE_COMMIT, LOCAL_STORAGE_KEY } = await import(
       '~/behaviors/shortcuts/keybindings'
     ));
   };
@@ -39,8 +40,20 @@ describe('~/behaviors/shortcuts/keybindings.js', () => {
       await setupCustomizations(JSON.stringify({ [TOGGLE_PERFORMANCE_BAR]: customization }));
     });
 
-    it('returns the default keybinding for the command', () => {
+    it('returns the customized keybinding for the command', () => {
       expect(keysFor(TOGGLE_PERFORMANCE_BAR)).toEqual(customization);
+    });
+  });
+
+  describe('when a command is marked as non-customizable', () => {
+    const customization = ['mod+shift+c'];
+
+    beforeEach(async () => {
+      await setupCustomizations(JSON.stringify({ [WEB_IDE_COMMIT]: customization }));
+    });
+
+    it('returns the default keybinding for the command', () => {
+      expect(keysFor(WEB_IDE_COMMIT)).toEqual(['mod+enter']);
     });
   });
 

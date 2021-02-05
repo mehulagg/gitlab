@@ -17389,13 +17389,259 @@ msgstr ""
 msgid "KeyboardKey|Ctrl+"
 msgstr ""
 
+msgid "KeyboardShortcuts|Alerts"
+msgstr ""
+
+msgid "KeyboardShortcuts|Bold text"
+msgstr ""
+
+msgid "KeyboardShortcuts|Change assignee"
+msgstr ""
+
+msgid "KeyboardShortcuts|Change label"
+msgstr ""
+
+msgid "KeyboardShortcuts|Change milestone"
+msgstr ""
+
+msgid "KeyboardShortcuts|Close design"
+msgstr ""
+
+msgid "KeyboardShortcuts|Comment/Reply (quoting selected text)"
+msgstr ""
+
+msgid "KeyboardShortcuts|Commit (when editing commit message)"
+msgstr ""
+
+msgid "KeyboardShortcuts|Copy link to chart"
+msgstr ""
+
+msgid "KeyboardShortcuts|Copy source branch name"
+msgstr ""
+
+msgid "KeyboardShortcuts|Copy two-factor authentication codes"
+msgstr ""
+
+msgid "KeyboardShortcuts|Download CSV"
+msgstr ""
+
+msgid "KeyboardShortcuts|Edit description"
+msgstr ""
+
+msgid "KeyboardShortcuts|Edit wiki page"
+msgstr ""
+
+msgid "KeyboardShortcuts|Edit your most recent comment in a thread (from an empty textarea)"
+msgstr ""
+
+msgid "KeyboardShortcuts|Editing"
+msgstr ""
+
+msgid "KeyboardShortcuts|Epics, Issues, and Merge Requests"
+msgstr ""
+
+msgid "KeyboardShortcuts|Expand panel"
+msgstr ""
+
+msgid "KeyboardShortcuts|Focus filter bar"
+msgstr ""
+
 msgid "KeyboardShortcuts|Global Shortcuts"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go back (while searching for files)"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to commits"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to environments"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to file"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to file permalink (while viewing a file)"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to files"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to find file"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to issue boards"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to issues"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to jobs"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to kubernetes"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to merge requests"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to metrics"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to releases"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to repository charts"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to repository graph"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to snippets"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to the activity feed"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to the milestone list"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to the project's activity feed"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to the project's overview page"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to wiki"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to your To-Do list"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to your groups"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to your issues"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to your merge requests"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to your projects"
+msgstr ""
+
+msgid "KeyboardShortcuts|Go to your snippets"
+msgstr ""
+
+msgid "KeyboardShortcuts|Issues"
+msgstr ""
+
+msgid "KeyboardShortcuts|Issues and Merge Requests"
+msgstr ""
+
+msgid "KeyboardShortcuts|Italic text"
+msgstr ""
+
+msgid "KeyboardShortcuts|Link text"
+msgstr ""
+
+msgid "KeyboardShortcuts|Merge Request Commits"
+msgstr ""
+
+msgid "KeyboardShortcuts|Merge Requests"
+msgstr ""
+
+msgid "KeyboardShortcuts|Metrics"
+msgstr ""
+
+msgid "KeyboardShortcuts|Miscellaneous"
+msgstr ""
+
+msgid "KeyboardShortcuts|Move selection down"
+msgstr ""
+
+msgid "KeyboardShortcuts|Move selection up"
+msgstr ""
+
+msgid "KeyboardShortcuts|New issue"
+msgstr ""
+
+msgid "KeyboardShortcuts|Next commit"
+msgstr ""
+
+msgid "KeyboardShortcuts|Next design"
+msgstr ""
+
+msgid "KeyboardShortcuts|Next file in diff"
+msgstr ""
+
+msgid "KeyboardShortcuts|Next unresolved discussion"
+msgstr ""
+
+msgid "KeyboardShortcuts|Open Selection"
+msgstr ""
+
+msgid "KeyboardShortcuts|Previous commit"
+msgstr ""
+
+msgid "KeyboardShortcuts|Previous design"
+msgstr ""
+
+msgid "KeyboardShortcuts|Previous file in diff"
+msgstr ""
+
+msgid "KeyboardShortcuts|Previous unresolved discussion"
+msgstr ""
+
+msgid "KeyboardShortcuts|Project"
+msgstr ""
+
+msgid "KeyboardShortcuts|Project Files"
+msgstr ""
+
+msgid "KeyboardShortcuts|Repository Graph"
+msgstr ""
+
+msgid "KeyboardShortcuts|Scroll down"
+msgstr ""
+
+msgid "KeyboardShortcuts|Scroll left"
+msgstr ""
+
+msgid "KeyboardShortcuts|Scroll right"
+msgstr ""
+
+msgid "KeyboardShortcuts|Scroll to bottom"
+msgstr ""
+
+msgid "KeyboardShortcuts|Scroll to top"
+msgstr ""
+
+msgid "KeyboardShortcuts|Scroll up"
+msgstr ""
+
+msgid "KeyboardShortcuts|Start search"
 msgstr ""
 
 msgid "KeyboardShortcuts|Toggle GitLab Next"
 msgstr ""
 
+msgid "KeyboardShortcuts|Toggle Markdown preview"
+msgstr ""
+
+msgid "KeyboardShortcuts|Toggle keyboard shortcuts help dialog"
+msgstr ""
+
 msgid "KeyboardShortcuts|Toggle the Performance Bar"
+msgstr ""
+
+msgid "KeyboardShortcuts|View logs"
+msgstr ""
+
+msgid "KeyboardShortcuts|Web IDE"
+msgstr ""
+
+msgid "KeyboardShortcuts|Wiki"
 msgstr ""
 
 msgid "Keys"

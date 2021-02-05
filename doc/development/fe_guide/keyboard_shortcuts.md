@@ -91,6 +91,30 @@ export const MAKE_MOCHA = 'foodAndBeverage.makeMocha';
 }
 ```
 
+## Making shortcuts non-customizable
+
+Occasionally, it's important that a keyboard shortcut _not_ be customizable
+(although this should be a rare occurrence).
+
+In this case, a shortcut can be defined with `customizable: false`, which
+disables customization of the keybinding:
+
+```javascript
+export const MAKE_AMERICANO = 'foodAndBeverage.makeAmericano';
+
+{
+  description: s__('KeyboardShortcuts|Make an Americano'),
+  command: MAKE_AMERICANO,
+  defaultKeys: ['mod+shift+a'],
+  customKeys: customizations[MAKE_AMERICANO],
+
+  // this disables customization of this shortcut
+  customizable: false
+}
+```
+
+This shortcut will always be bound to its `defaultKeys`.
+
 ## Make cross-platform shortcuts
 
 It's difficult to make shortcuts that work well in all platforms and browsers.
