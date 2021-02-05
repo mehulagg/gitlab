@@ -12,6 +12,10 @@ export default {
       required: true,
       type: String,
     },
+    selector: {
+      required: true,
+      type: String,
+    },
   },
   data() {
     return {
@@ -34,22 +38,17 @@ export default {
   },
 
   mounted() {
-    document.addEventListener('click', this.handleClick);
-  },
+    document.querySelectorAll(this.selector).forEach((button) => {
+      button.addEventListener('click', (e) => {
+        if(!button.dataset.glModalAction) return;
 
-  beforeDestroy() {
-    document.removeEventListener('click', this.handleClick);
+        e.preventDefault();
+        this.show(button.dataset);
+      });
+    });
   },
 
   methods: {
-    handleClick(e) {
-      const { glModalAction: action } = e.target.dataset;
-      if (!action) return;
-
-      this.show(e.target.dataset);
-      e.preventDefault();
-    },
-
     show(modalData) {
       const { glModalAction: requestedAction } = modalData;
 
