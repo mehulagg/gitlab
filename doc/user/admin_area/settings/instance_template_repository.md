@@ -22,8 +22,7 @@ select the project to serve as the custom template repository.
 
 ![File templates in the Admin Area](img/file_template_admin_area.png)
 
-Once a project has been selected, you can add custom templates to the repository,
-and they will appear in the appropriate places in the
+You can add custom templates to the repository, which will be displayed in the appropriate places in the
 [frontend](../../project/repository/web_editor.md#template-dropdowns) and
 [API](../../../api/settings.md).
 
@@ -61,8 +60,8 @@ extension and not be empty. So, the hierarchy should look like this:
     |-- another_metrics-dashboard.yml
 ```
 
-Once this is established, the list of custom templates will be included when
-creating a new file and the template type is selected. These will appear at the
+Once this is established, the list of custom templates is included when
+creating a new file and the template type is selected. These appear at the
 top of the list.
 
 ![Custom template dropdown menu](img/file_template_user_dropdown.png)
