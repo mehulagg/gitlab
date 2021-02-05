@@ -632,7 +632,7 @@ for redundancy.
 The current version of the build images can be found in the
 ["Used by GitLab section"](https://gitlab.com/gitlab-org/gitlab-build-images/blob/master/.gitlab-ci.yml).
 
-### Dependency proxy
+### Dependency Proxy
 
 Some of the jobs are using images from Docker Hub, where we also use
 `${GITLAB_DEPENDENCY_PROXY}` as a prefix to the image path, so that we pull
@@ -647,8 +647,8 @@ defined as:
 image: ${GITLAB_DEPENDENCY_PROXY}alpine:edge
 ```
 
-Any projects under `gitlab-org` group will pull from Dependency Proxy, while
-forks reside on any other personal namespaces or groups will fallback to
+Projects in the `gitlab-org` group pull from the Dependency Proxy, while
+forks that reside on any other personal namespaces or groups fall back to
 Docker Hub unless `${GITLAB_DEPENDENCY_PROXY}` is also defined there.
 
 ### Default variables
