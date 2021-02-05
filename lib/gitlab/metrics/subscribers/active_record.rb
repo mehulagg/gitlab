@@ -29,9 +29,9 @@ module Gitlab
         def self.db_counter_payload
           return {} unless Gitlab::SafeRequestStore.active?
 
-          DB_COUNTERS.map do |counter|
+          DB_COUNTERS.to_h do |counter|
             [counter, Gitlab::SafeRequestStore[counter].to_i]
-          end.to_h
+          end
         end
 
         private

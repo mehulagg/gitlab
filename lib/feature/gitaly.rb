@@ -19,11 +19,11 @@ class Feature
 
         Feature.persisted_names
           .select { |f| f.start_with?(PREFIX) }
-          .map do |f|
+          .to_h do |f|
           flag = f.delete_prefix(PREFIX)
 
           ["gitaly-feature-#{flag.tr('_', '-')}", enabled?(flag).to_s]
-        end.to_h
+        end
       end
     end
   end

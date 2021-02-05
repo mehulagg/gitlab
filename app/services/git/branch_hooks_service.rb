@@ -210,10 +210,10 @@ module Git
 
     def commit_paths
       strong_memoize(:commit_paths) do
-        limited_commits.map do |commit|
+        limited_commits.to_h do |commit|
           paths = Set.new(commit.raw_deltas.map(&:new_path))
           [commit, paths]
-        end.to_h
+        end
       end
     end
   end

@@ -39,8 +39,7 @@ module Gitlab
 
         def to_hash
           self.to_runner_variables
-            .map { |env| [env.fetch(:key), env.fetch(:value)] }
-            .to_h.with_indifferent_access
+            .to_h { |env| [env.fetch(:key), env.fetch(:value)] }.with_indifferent_access
         end
       end
     end
