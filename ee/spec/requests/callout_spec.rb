@@ -30,7 +30,6 @@ RSpec.describe 'callout alerts' do
     end
 
     before do
-      stub_feature_flags(admin_new_user_signups_cap: enabled)
       stub_application_setting(new_user_signups_cap: 1)
       allow(User).to receive(:billable).and_return(billable_users)
 

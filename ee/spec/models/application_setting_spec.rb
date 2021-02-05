@@ -755,30 +755,20 @@ RSpec.describe ApplicationSetting do
   describe '#should_apply_user_signup_cap?' do
     subject { setting.should_apply_user_signup_cap? }
 
-    context 'when feature admin_new_user_signups_cap is disabled' do
-      before do
-        stub_feature_flags(admin_new_user_signups_cap: false)
-      end
+    before do
+      allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+    end
+
+    context 'when new_user_signups_cap setting is nil' do
+      let(:new_user_signups_cap) { nil }
 
       it { is_expected.to be false }
     end
 
-    context 'when feature admin_new_user_signups_cap is enabled' do
-      before do
-        allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
-      end
+    context 'when new_user_signups_cap setting is set to any number' do
+      let(:new_user_signups_cap) { 10 }
 
-      context 'when new_user_signups_cap setting is nil' do
-        let(:new_user_signups_cap) { nil }
-
-        it { is_expected.to be false }
-      end
-
-      context 'when new_user_signups_cap setting is set to any number' do
-        let(:new_user_signups_cap) { 10 }
-
-        it { is_expected.to be true }
-      end
+      it { is_expected.to be true }
     end
   end
 end

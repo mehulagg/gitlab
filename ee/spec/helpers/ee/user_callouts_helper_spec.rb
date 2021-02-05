@@ -351,15 +351,6 @@ RSpec.describe EE::UserCalloutsHelper do
       it { is_expected.to eq(false) }
     end
 
-    context 'when feature flag is disabled' do
-      before do
-        allow(helper).to receive(:current_user).and_return(admin)
-        stub_feature_flags(admin_new_user_signups_cap: false)
-      end
-
-      it { is_expected.to eq(false) }
-    end
-
     context 'when feature flag is enabled' do
       where(:new_user_signups_cap, :active_user_count, :result) do
         nil | 10 | false
