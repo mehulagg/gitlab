@@ -10,42 +10,24 @@ RSpec.describe Resolvers::ExternalIssueResolver do
   context 'when Jira issues are requested' do
     let_it_be(:vulnerability_external_issue_link) { create(:vulnerabilities_external_issue_link) }
 
-    before do
-      allow_next_instance_of(::Integrations::Jira::IssueSerializer) do |serializer|
-        allow(serializer).to receive(:represent).and_return(serialized_result)
-      end
-    end
-
     let(:jira_issue) do
       double(
         id: vulnerability_external_issue_link.external_issue_key,
         summary: 'Issue Title',
         created: Time.at(1606348800).utc,
         updated: Time.at(1606348800).utc,
-        resolutiondate: Time.at(1606348800).utc,
         status: double(name: 'To Do'),
         key: 'GV-1',
-        labels: [],
-        reporter: double(displayName: 'User', accountId: '10000'),
-        assignee: nil,
         client: double(options: { site: 'http://jira.com/' })
       )
     end
 
-    let(:serialized_result) do
+    let(:expected_result) do
       {
-        'project_id' => vulnerability_external_issue_link.vulnerability.project_id,
         'title' => 'Issue Title',
         'created_at' => '2020-11-26T00:00:00.000Z',
         'updated_at' => '2020-11-26T00:00:00.000Z',
-        'closed_at' => '2020-11-26T00:00:00.000Z',
         'status' => 'To Do',
-        'labels' => [],
-        'author' => {
-          'name' => 'User',
-          'web_url' => 'http://jira.com/people/10000'
-        },
-        'assignees' => [],
         'web_url' => 'http://jira.com/browse/GV-1',
         'references' => {
           'relative' => 'GV-1'
@@ -94,7 +76,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
 
       it 'returns serialized Jira issues' do
         result = batch_sync { resolve_external_issue({}) }
-        expect(result.as_json).to eq(serialized_result)
+        expect(result.as_json).to eq(expected_result)
       end
     end
 
