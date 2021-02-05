@@ -51,6 +51,15 @@ module IncidentManagement
       interval_start.present?
     end
 
+    def interval_times
+      return unless has_shift_intervals?
+
+      {
+        start: interval_start.to_time,
+        end: interval_end.to_time
+      }
+    end
+
     private
 
     def no_interval_for_hourly_shifts

@@ -143,8 +143,8 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
       it_behaves_like 'successfully creates rotation'
 
       context 'with an interval given' do
-        let(:interval_start) { "08:00" }
-        let(:interval_end) { "17:00" }
+        let(:interval_start) { '08:00' }
+        let(:interval_end) { '17:00' }
 
         before do
           params[:interval_start] = interval_start
@@ -170,8 +170,8 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
         end
 
         context 'when end interval is before start interval' do
-          let(:interval_start) { "17:00" }
-          let(:interval_end) { "08:00" }
+          let(:interval_start) { '17:00' }
+          let(:interval_end) { '08:00' }
 
           it_behaves_like 'saved the interval times'
         end

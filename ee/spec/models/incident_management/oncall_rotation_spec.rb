@@ -37,7 +37,7 @@ RSpec.describe IncidentManagement::OncallRotation do
     describe 'interval start/end time' do
       context 'missing values' do
         before do
-          allow(subject).to receive(stubbed_field).and_return(Time.current)
+          allow(subject).to receive(stubbed_field).and_return('08:00')
         end
 
         context 'start time set' do
@@ -57,8 +57,8 @@ RSpec.describe IncidentManagement::OncallRotation do
         subject { build(:incident_management_oncall_rotation, schedule: schedule, name: 'Test rotation', length_unit: :hours) }
 
         it 'raises a validation error if an interval is set' do
-          subject.interval_start = Time.current
-          subject.interval_end = Time.current
+          subject.interval_start = '08:00'
+          subject.interval_end = '17:00'
 
           expect(subject.valid?).to eq(false)
           expect(subject.errors.full_messages).to include(/Restricted shift times are not available for hourly shifts/)

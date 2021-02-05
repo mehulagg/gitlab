@@ -78,8 +78,8 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
         it 'saves the on-call rotation with interval times' do
           rotation = resolve[:oncall_rotation]
 
-          expect(rotation.interval_start.strftime('%H:%M')).to eql('08:00')
-          expect(rotation.interval_end.strftime('%H:%M')).to eql('17:00')
+          expect(rotation.interval_start).to eql('08:00')
+          expect(rotation.interval_end).to eql('17:00')
         end
 
         context 'hours rotation length unit' do

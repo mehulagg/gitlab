@@ -9,8 +9,8 @@ FactoryBot.define do
     length_unit { :days }
 
     trait :with_interval do
-      interval_start { Time.parse('08:00') }
-      interval_end { Time.parse('17:00') }
+      interval_start { '08:00' }
+      interval_end { '17:00' }
     end
 
     trait :with_participant do
