@@ -140,7 +140,11 @@ To disable shared runners for a group:
 1. Optionally, to allow shared runners to be enabled for individual projects or subgroups,
    click **Allow projects and subgroups to override the group setting**.
 
-**Note**: To re-enable the shared runners for a group, toggle on the **Enable shared runners for this group** button. Please notice that subgroups or project owners/maintainers must explicitly reset the shared runners enablement rules as this is not applied recursively on individual descendants.
+NOTE:
+To re-enable the shared runners for a group, turn on the
+**Enable shared runners for this group** toggle.
+Then, an owner or maintainer must explicitly change this setting
+for each project subgroup or project.
 
 ### Group runners
 
