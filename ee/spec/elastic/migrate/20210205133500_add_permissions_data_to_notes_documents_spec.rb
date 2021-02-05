@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require File.expand_path('ee/elastic/migrate/20210128163600_add_permissions_data_to_notes_documents.rb')
+require File.expand_path('ee/elastic/migrate/20210205133500_add_permissions_data_to_notes_documents.rb')
 
 RSpec.describe AddPermissionsDataToNotesDocuments, :elastic, :sidekiq_inline do
   let(:version) { 20210128163600 }
