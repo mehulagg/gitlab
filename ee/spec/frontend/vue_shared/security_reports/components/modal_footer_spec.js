@@ -13,10 +13,13 @@ describe('Security Reports modal footer', () => {
         isCreatingIssue: false,
         isDismissingVulnerability: false,
         isCreatingMergeRequest: false,
+        vulnerability: {},
         ...propsData,
       },
     });
   };
+
+  const findActionButton = () => wrapper.find('.js-action-button');
 
   describe('can only create issue', () => {
     beforeEach(() => {
@@ -33,15 +36,43 @@ describe('Security Reports modal footer', () => {
 
     it('only renders the create issue button', () => {
       expect(wrapper.vm.actionButtons[0].name).toBe('Create issue');
-      expect(wrapper.find('.js-action-button').text()).toBe('Create issue');
+      expect(findActionButton().text()).toBe('Create issue');
     });
 
     it('emits createIssue when create issue button is clicked', () => {
-      wrapper.find('.js-action-button').trigger('click');
+      findActionButton().trigger('click');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted().createNewIssue).toBeTruthy();
       });
+    });
+  });
+
+  describe('can only create jira issue', () => {
+    const url = 'https://gitlab.atlassian.net/create-issue';
+
+    beforeEach(() => {
+      const propsData = {
+        modal: createState().modal,
+        canCreateIssue: true,
+        vulnerability: {
+          create_jira_issue_url: url,
+        },
+      };
+      mountComponent(propsData);
+    });
+
+    it('has target property properly set', () => {
+      expect(findActionButton().props('target')).toBe('_blank');
+      expect(findActionButton().props('action')).toBeUndefined();
+    });
+
+    it('has href attribute properly set', () => {
+      expect(findActionButton().attributes('href')).toBe(url);
+    });
+
+    it('has the correct text', () => {
+      expect(findActionButton().text()).toBe('Create Jira issue');
     });
   });
 
@@ -56,11 +87,11 @@ describe('Security Reports modal footer', () => {
 
     it('only renders the create merge request button', () => {
       expect(wrapper.vm.actionButtons[0].name).toBe('Resolve with merge request');
-      expect(wrapper.find('.js-action-button').text()).toBe('Resolve with merge request');
+      expect(findActionButton().text()).toBe('Resolve with merge request');
     });
 
     it('emits createMergeRequest when create merge request button is clicked', () => {
-      wrapper.find('.js-action-button').trigger('click');
+      findActionButton().trigger('click');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted().createMergeRequest).toBeTruthy();
@@ -79,11 +110,11 @@ describe('Security Reports modal footer', () => {
 
     it('renders the download patch button', () => {
       expect(wrapper.vm.actionButtons[0].name).toBe('Download patch to resolve');
-      expect(wrapper.find('.js-action-button').text()).toBe('Download patch to resolve');
+      expect(findActionButton().text()).toBe('Download patch to resolve');
     });
 
     it('emits downloadPatch when download patch button is clicked', () => {
-      wrapper.find('.js-action-button').trigger('click');
+      findActionButton().trigger('click');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted().downloadPatch).toBeTruthy();

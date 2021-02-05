@@ -34025,6 +34025,9 @@ msgstr ""
 msgid "ciReport|Coverage fuzzing"
 msgstr ""
 
+msgid "ciReport|Create Jira issue"
+msgstr ""
+
 msgid "ciReport|Create a merge request to implement this solution, or download and apply the patch manually."
 msgstr ""
 

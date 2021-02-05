@@ -5,7 +5,6 @@ import SplitButton from 'ee/vue_shared/security_reports/components/split_button.
 import { s__ } from '~/locale';
 
 export default {
-  name: 'ModalFooter',
   components: {
     DismissButton,
     GlButton,
@@ -58,15 +57,26 @@ export default {
       type: Boolean,
       required: true,
     },
+    vulnerability: {
+      type: Object,
+      required: true,
+    },
   },
   computed: {
+    createIssueButtonText() {
+      return this.vulnerability.create_jira_issue_url
+        ? s__('ciReport|Create Jira issue')
+        : s__('ciReport|Create issue');
+    },
+
     actionButtons() {
       const buttons = [];
       const issueButton = {
-        name: s__('ciReport|Create issue'),
+        name: this.createIssueButtonText,
         tagline: s__('ciReport|Investigate this vulnerability by creating an issue'),
         isLoading: this.isCreatingIssue,
-        action: 'createNewIssue',
+        action: this.vulnerability.create_jira_issue_url ? undefined : 'createNewIssue',
+        href: this.vulnerability.create_jira_issue_url,
       };
       const MRButton = {
         name: s__('ciReport|Resolve with merge request'),
@@ -133,6 +143,8 @@ export default {
       category="secondary"
       class="js-action-button"
       data-qa-selector="create_issue_button"
+      :target="actionButtons[0].href ? '_blank' : undefined"
+      :href="actionButtons[0].href"
       @click="$emit(actionButtons[0].action)"
     >
       {{ __(actionButtons[0].name) }}
