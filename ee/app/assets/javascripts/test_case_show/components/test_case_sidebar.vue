@@ -2,7 +2,7 @@
 import { GlTooltipDirective as GlTooltip, GlButton, GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import Mousetrap from 'mousetrap';
 
-import { keysFor, EPIC_ISSUE_MR_CHANGE_LABEL } from '~/behaviors/shortcuts/keybindings';
+import { keysFor, ISSUABLE_CHANGE_LABEL } from '~/behaviors/shortcuts/keybindings';
 import { s__, __ } from '~/locale';
 import ProjectSelect from '~/vue_shared/components/sidebar/issuable_move_dropdown.vue';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
@@ -77,10 +77,10 @@ export default {
   },
   mounted() {
     this.sidebarEl = document.querySelector('aside.right-sidebar');
-    Mousetrap.bind(keysFor(EPIC_ISSUE_MR_CHANGE_LABEL), this.handleLabelsCollapsedButtonClick);
+    Mousetrap.bind(keysFor(ISSUABLE_CHANGE_LABEL), this.handleLabelsCollapsedButtonClick);
   },
   beforeDestroy() {
-    Mousetrap.unbind(keysFor(EPIC_ISSUE_MR_CHANGE_LABEL));
+    Mousetrap.unbind(keysFor(ISSUABLE_CHANGE_LABEL));
   },
   methods: {
     handleTodoButtonClick() {

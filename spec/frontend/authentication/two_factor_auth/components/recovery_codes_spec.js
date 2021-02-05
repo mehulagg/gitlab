@@ -6,8 +6,10 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import RecoveryCodes, {
   i18n,
 } from '~/authentication/two_factor_auth/components/recovery_codes.vue';
-import { RECOVERY_CODE_DOWNLOAD_FILENAME } from '~/authentication/two_factor_auth/constants';
-import { keysFor, MISC_COPY_TWO_FACTOR_CODES } from '~/behaviors/shortcuts/keybindings';
+import {
+  RECOVERY_CODE_DOWNLOAD_FILENAME,
+  COPY_KEYBOARD_SHORTCUT,
+} from '~/authentication/two_factor_auth/constants';
 import Tracking from '~/tracking';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import { codes, codesFormattedString, codesDownloadHref, profileAccountPath } from '../mock_data';
@@ -38,7 +40,7 @@ describe('RecoveryCodes', () => {
   const findPrintButton = () => findButtonByText('Print codes');
   const findProceedButton = () => findButtonByText('Proceed');
   const manuallyCopyRecoveryCodes = () =>
-    wrapper.vm.$options.mousetrap.trigger(keysFor(MISC_COPY_TWO_FACTOR_CODES));
+    wrapper.vm.$options.mousetrap.trigger(COPY_KEYBOARD_SHORTCUT);
 
   beforeEach(() => {
     jest.spyOn(Tracking, 'event');

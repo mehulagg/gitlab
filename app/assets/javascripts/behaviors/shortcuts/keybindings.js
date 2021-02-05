@@ -81,9 +81,9 @@ export const PROJECT_FILES_OPEN_SELECTION = 'projectFiles.openSelection';
 export const PROJECT_FILES_GO_BACK = 'projectFiles.goBack';
 export const PROJECT_FILES_GO_TO_PERMALINK = 'projectFiles.goToFilePermalink';
 
-export const EPIC_ISSUE_MR_COMMENT_OR_REPLY = 'epicsIssuesMRs.commentReply';
-export const EPIC_ISSUE_MR_EDIT_DESCRIPTION = 'epicsIssuesMRs.editDescription';
-export const EPIC_ISSUE_MR_CHANGE_LABEL = 'epicsIssuesMRs.changeLabel';
+export const ISSUABLE_COMMENT_OR_REPLY = 'issuables.commentReply';
+export const ISSUABLE_EDIT_DESCRIPTION = 'issuables.editDescription';
+export const ISSUABLE_CHANGE_LABEL = 'issuables.changeLabel';
 
 export const ISSUE_MR_CHANGE_ASSIGNEE = 'issuesMRs.changeAssignee';
 export const ISSUE_MR_CHANGE_MILESTONE = 'issuesMRs.changeMilestone';
@@ -110,8 +110,6 @@ export const METRICS_VIEW_LOGS = 'metrics.viewLogs';
 export const METRICS_DOWNLOAD_CSV = 'metrics.downloadCSV';
 export const METRICS_COPY_LINK_TO_CHART = 'metrics.copyLinkToChart';
 export const METRICS_SHOW_ALERTS = 'metrics.showAlerts';
-
-export const MISC_COPY_TWO_FACTOR_CODES = 'misc.copyTwoFactorCodes';
 
 /** All keybindings, grouped and ordered with descriptions */
 export const keybindingGroups = [
@@ -397,17 +395,17 @@ export const keybindingGroups = [
     keybindings: [
       {
         description: s__('KeyboardShortcuts|Comment/Reply (quoting selected text)'),
-        command: EPIC_ISSUE_MR_COMMENT_OR_REPLY,
+        command: ISSUABLE_COMMENT_OR_REPLY,
         defaultKeys: ['r'],
       },
       {
         description: s__('KeyboardShortcuts|Edit description'),
-        command: EPIC_ISSUE_MR_EDIT_DESCRIPTION,
+        command: ISSUABLE_EDIT_DESCRIPTION,
         defaultKeys: ['e'],
       },
       {
         description: s__('KeyboardShortcuts|Change label'),
-        command: EPIC_ISSUE_MR_CHANGE_LABEL,
+        command: ISSUABLE_CHANGE_LABEL,
         defaultKeys: ['l'],
       },
     ],
@@ -559,11 +557,6 @@ export const keybindingGroups = [
     groupId: 'misc',
     name: s__('KeyboardShortcuts|Miscellaneous'),
     keybindings: [
-      {
-        description: s__('KeyboardShortcuts|Copy two-factor authentication codes'),
-        command: MISC_COPY_TWO_FACTOR_CODES,
-        defaultKeys: ['mod+c'],
-      },
       {
         description: s__('KeyboardShortcuts|Toggle GitLab Next'),
         command: TOGGLE_CANARY,

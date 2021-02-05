@@ -10,9 +10,9 @@ import {
   keysFor,
   ISSUE_MR_CHANGE_ASSIGNEE,
   ISSUE_MR_CHANGE_MILESTONE,
-  EPIC_ISSUE_MR_CHANGE_LABEL,
-  EPIC_ISSUE_MR_COMMENT_OR_REPLY,
-  EPIC_ISSUE_MR_EDIT_DESCRIPTION,
+  ISSUABLE_CHANGE_LABEL,
+  ISSUABLE_COMMENT_OR_REPLY,
+  ISSUABLE_EDIT_DESCRIPTION,
   MR_COPY_SOURCE_BRANCH_NAME,
 } from './keybindings';
 
@@ -26,14 +26,11 @@ export default class ShortcutsIssuable extends Shortcuts {
     Mousetrap.bind(keysFor(ISSUE_MR_CHANGE_MILESTONE), () =>
       ShortcutsIssuable.openSidebarDropdown('milestone'),
     );
-    Mousetrap.bind(keysFor(EPIC_ISSUE_MR_CHANGE_LABEL), () =>
+    Mousetrap.bind(keysFor(ISSUABLE_CHANGE_LABEL), () =>
       ShortcutsIssuable.openSidebarDropdown('labels'),
     );
-    Mousetrap.bind(
-      keysFor(EPIC_ISSUE_MR_COMMENT_OR_REPLY),
-      ShortcutsIssuable.replyWithSelectedText,
-    );
-    Mousetrap.bind(keysFor(EPIC_ISSUE_MR_EDIT_DESCRIPTION), ShortcutsIssuable.editIssue);
+    Mousetrap.bind(keysFor(ISSUABLE_COMMENT_OR_REPLY), ShortcutsIssuable.replyWithSelectedText);
+    Mousetrap.bind(keysFor(ISSUABLE_EDIT_DESCRIPTION), ShortcutsIssuable.editIssue);
     Mousetrap.bind(keysFor(MR_COPY_SOURCE_BRANCH_NAME), ShortcutsIssuable.copyBranchName);
   }
 

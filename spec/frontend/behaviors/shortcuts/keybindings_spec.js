@@ -1,7 +1,9 @@
+import { flatten } from 'lodash';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 
 describe('~/behaviors/shortcuts/keybindings', () => {
   let keysFor;
+  let keybindingGroups;
   let TOGGLE_PERFORMANCE_BAR;
   let WEB_IDE_COMMIT;
   let LOCAL_STORAGE_KEY;
@@ -18,10 +20,32 @@ describe('~/behaviors/shortcuts/keybindings', () => {
     }
 
     jest.resetModules();
-    ({ keysFor, TOGGLE_PERFORMANCE_BAR, WEB_IDE_COMMIT, LOCAL_STORAGE_KEY } = await import(
-      '~/behaviors/shortcuts/keybindings'
-    ));
+    ({
+      keysFor,
+      keybindingGroups,
+      TOGGLE_PERFORMANCE_BAR,
+      WEB_IDE_COMMIT,
+      LOCAL_STORAGE_KEY,
+    } = await import('~/behaviors/shortcuts/keybindings'));
   };
+
+  describe('keybinding definition errors', () => {
+    beforeEach(async () => {
+      await setupCustomizations();
+    });
+
+    it('has no duplicate group IDs', () => {
+      const allGroupIds = keybindingGroups.map((group) => group.groupId);
+      expect(allGroupIds).toHaveLength(new Set(allGroupIds).size);
+    });
+
+    it('has no duplicate commands', () => {
+      const allCommands = flatten(
+        keybindingGroups.map((group) => group.keybindings.map((kb) => kb.command)),
+      );
+      expect(allCommands).toHaveLength(new Set(allCommands).size);
+    });
+  });
 
   describe('when a command has not been customized', () => {
     beforeEach(async () => {

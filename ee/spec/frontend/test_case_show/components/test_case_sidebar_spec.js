@@ -8,7 +8,7 @@ import { mockCurrentUserTodo, mockLabels } from 'jest/issuable_list/mock_data';
 import ProjectSelect from '~/vue_shared/components/sidebar/issuable_move_dropdown.vue';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
-import { keysFor, EPIC_ISSUE_MR_CHANGE_LABEL } from '~/behaviors/shortcuts/keybindings';
+import { keysFor, ISSUABLE_CHANGE_LABEL } from '~/behaviors/shortcuts/keybindings';
 
 import { mockProvide, mockTestCase } from '../mock_data';
 
@@ -102,7 +102,7 @@ describe('TestCaseSidebar', () => {
   describe('mounted', () => {
     it('binds key-press listener for `l` on Mousetrap', () => {
       expect(mousetrapSpy).toHaveBeenCalledWith(
-        keysFor(EPIC_ISSUE_MR_CHANGE_LABEL),
+        keysFor(ISSUABLE_CHANGE_LABEL),
         wrapper.vm.handleLabelsCollapsedButtonClick,
       );
     });
