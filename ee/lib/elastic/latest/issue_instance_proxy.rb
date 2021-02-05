@@ -14,7 +14,7 @@ module Elastic
 
         data['assignee_id'] = safely_read_attribute_for_elasticsearch(:assignee_ids)
         data['visibility_level'] = target.project.visibility_level
-        data['issues_access_level'] = safely_read_project_feature_for_elasticsearch(:issues_access_level)
+        data['issues_access_level'] = safely_read_project_feature_for_elasticsearch(:issues)
 
         data.merge(generic_attributes)
       end

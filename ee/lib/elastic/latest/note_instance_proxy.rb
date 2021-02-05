@@ -20,13 +20,13 @@ module Elastic
             'author_id' => noteable.author_id,
             'confidential' => noteable.confidential
           }
-          data['issues_access_level'] = safely_read_project_feature_for_elasticsearch(:issues_access_level)
+          data['issues_access_level'] = safely_read_project_feature_for_elasticsearch(:issues)
         elsif noteable.is_a?(Snippet)
-          data['snippets_access_level'] = safely_read_project_feature_for_elasticsearch(:snippets_access_level)
+          data['snippets_access_level'] = safely_read_project_feature_for_elasticsearch(:snippets)
         elsif noteable.is_a?(MergeRequest)
-          data['merge_requests_access_level'] = safely_read_project_feature_for_elasticsearch(:merge_requests_access_level)
+          data['merge_requests_access_level'] = safely_read_project_feature_for_elasticsearch(:merge_requests)
         elsif noteable.is_a?(Commit)
-          data['repository_access_level'] = safely_read_project_feature_for_elasticsearch(:repository_access_level)
+          data['repository_access_level'] = safely_read_project_feature_for_elasticsearch(:repository)
         end
 
         data['visibility_level'] = target.project.visibility_level

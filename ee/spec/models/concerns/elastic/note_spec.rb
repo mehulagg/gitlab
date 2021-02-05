@@ -90,14 +90,11 @@ RSpec.describe Note, :elastic do
 
     it "returns json with all needed elements" do
       assignee = create(:user)
-      project = create(:project, :repository)
+      project = create(:project)
       issue = create(:issue, project: project, assignees: [assignee])
-      issue_note = create(:note, noteable: issue, project: project)
-      commit_note = create(:note_on_commit, project: project, commit_id: project.commit.id)
-      merge_request_note = create(:note_on_merge_request, project: project)
-      snippet_note = create(:note_on_project_snippet, project: project)
+      note = create(:note, noteable: issue, project: project)
 
-      expected_hash = issue_note.attributes.extract!(
+      expected_hash = note.attributes.extract!(
         'id',
         'note',
         'project_id',
@@ -112,19 +109,16 @@ RSpec.describe Note, :elastic do
                   'author_id' => issue.author_id,
                   'confidential' => issue.confidential
                 },
-                'type' => issue_note.es_type,
+                'type' => note.es_type,
                 'join_field' => {
-                  'name' => issue_note.es_type,
-                  'parent' => issue_note.es_parent
+                  'name' => note.es_type,
+                  'parent' => note.es_parent
                 },
                 'visibility_level' => project.visibility_level,
                 'issues_access_level' => project.issues_access_level
               })
 
-      expect(issue_note.__elasticsearch__.as_indexed_json).to eq(expected_hash)
-      expect(commit_note.__elasticsearch__.as_indexed_json).to have_key('repository_access_level')
-      expect(merge_request_note.__elasticsearch__.as_indexed_json).to have_key('merge_requests_access_level')
-      expect(snippet_note.__elasticsearch__.as_indexed_json).to have_key('snippets_access_level')
+      expect(note.__elasticsearch__.as_indexed_json).to eq(expected_hash)
     end
 
     it 'does not raise error for notes with null noteable references' do
@@ -134,19 +128,23 @@ RSpec.describe Note, :elastic do
       expect { note.__elasticsearch__.as_indexed_json }.not_to raise_error
     end
 
-    where(:note_type, :expected_key) do
-      :note_on_issue             | 'issues_access_level'
-      :note_on_project_snippet   | 'snippets_access_level'
-      :note_on_merge_request     | 'merge_requests_access_level'
-      :note_on_commit            | 'repository_access_level'
+    where(:note_type, :permission, :access_level) do
+      :note_on_issue                      | ProjectFeature::ENABLED      | 'issues_access_level'
+      :note_on_project_snippet            | ProjectFeature::DISABLED     | 'snippets_access_level'
+      :note_on_merge_request              | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :note_on_commit                     | ProjectFeature::PRIVATE      | 'repository_access_level'
     end
 
     with_them do
-      it 'contains the correct permissions' do
-        note = create(note_type) # rubocop:disable Rails/SaveBang
+      let_it_be(:project) { create(:project, :repository) }
+
+      it 'contains the correct permissions', :aggregate_failures do
+        project.project_feature.update_attribute(access_level.to_sym, permission)
+        note = create(note_type, project: project) # rubocop:disable Rails/SaveBang
 
         note_json = note.__elasticsearch__.as_indexed_json
-        expect(note_json).to have_key(expected_key)
+        expect(note_json).to have_key(access_level)
+        expect(note_json[access_level]).to eq(permission)
         expect(note_json).to have_key('visibility_level')
       end
     end
