@@ -1,7 +1,7 @@
 <script>
 import { GlSorting, GlSortingItem, GlFilteredSearch } from '@gitlab/ui';
 
-const ASCENDING_ODER = 'asc';
+const ASCENDING_ORDER = 'asc';
 const DESCENDING_ORDER = 'desc';
 
 export default {
