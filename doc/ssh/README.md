@@ -104,8 +104,8 @@ If you do not have an existing SSH key pair, generate a new one.
    Enter file in which to save the key (/home/user/.ssh/id_ed25519):
    ```
 
-1. Unless you are generating a [deploy key](#deploy-keys), accept the suggested
-   file and directory, or specify a name and location.
+1. Accept the suggested filename and directory, unless you are generating a [deploy key](#deploy-keys)
+   or want to save in a specific directory where you store other keys.
 
    You can also dedicate the SSH key pair to a [specific host](#working-with-non-default-ssh-key-pair-paths).
 
