@@ -763,6 +763,10 @@ const Api = {
     return axios.delete(url, { data });
   },
 
+  /**
+   * @deprecated This method will be removed soon. Use the
+   * `getRawFile` method in `~/rest_api` instead.
+   */
   getRawFile(id, path, params = { ref: 'master' }) {
     const url = Api.buildUrl(this.rawFilePath)
       .replace(':id', encodeURIComponent(id))
