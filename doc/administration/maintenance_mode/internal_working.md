@@ -13,7 +13,7 @@ Maintenance mode **only** blocks database write requests at the application leve
 The guards are placed in the following places in the code:
 
 1. [the read-only middleware](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/ee/gitlab/middleware/read_only/controller.rb), where the HTTP requests that cause database writes are blocked, unless explicitly allowed.
-1. [Git push access is denied](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/ee/gitlab/git_access.rb#L13) by returning 401 when `gitlab-shell` POSTs to `/internal/allowed` to check if access is allowed.
+1. [Git push access via ssh is denied](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/ee/gitlab/git_access.rb#L13) by returning 401 when `gitlab-shell` POSTs to `/internal/allowed` to check if access is allowed.
 1. [Container registry authentication service](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/services/ee/auth/container_registry_authentication_service.rb#L12), where updates to the container registry are blocked.
 
 Users with access to the database via the rails console or write access directly to the database can still write to it.
@@ -45,3 +45,11 @@ Unfortunately a complete disabling of database writes would involve categorizing
 Maintenance mode is aimed at offering a viable solution that is a trade-off between continued service and limiting writes to the database so that some important use cases are resolved, even though not all.
 
 ## How does maintenance mode affect services that GitLab relies on?
+
+Maintenance mode will only affect the following related services:
+
+| Service | in maintenance mode|
+|---------|----|
+|GitLab shell| Access requests to the rails application for git pushes  over SSH are denied |
+|Geo nodes|Git pushes that are poxied from secondary to primary will be blocked. Replication and verification will continue. Secondary will be in maintenance mode too once primary is in maintenance mode.|
+| Registry| Push to container registry is blocked, pull is allowed|
