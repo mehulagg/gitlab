@@ -57,8 +57,9 @@ There are three ways to disable maintenance mode:
   ::Gitlab::CurrentSettings.update_attributes!(maintenance_mode: false)
   ```
 
-## Behavior in maintenance mode
+## Behavior of GitLab features in maintenance mode
 
+### Overview
 When maintenance mode is enabled, a banner is displayed at the top of the page.
 The banner can be customized with a specific message.
 
@@ -72,14 +73,32 @@ however, this is only the frontend update, and it doesn't take into account the
 failed status of the POST request. These visual bugs are to be fixed
 [in follow-up iterations](https://gitlab.com/gitlab-org/gitlab/-/issues/295197).
 
-### Application settings
+### Admin functions
 
 In maintenance mode, admins can edit the application settings. This will allow
 them to disable maintenance mode after it's been enabled.
 
-### Logging in/out
+### Auth
 
 All users can log in and out of the GitLab instance.
+
+If there are LDAP syncs scheduled for that time they will fail if user creation is disabled. Similarly, user creations based on SAML will fail.
+
+### Git actions
+
+All read-only Git operations will continue to work in maintenance mode, for example
+`git clone` and `git pull`, but all write operations will fail, both through the CLI
+and Web IDE.
+
+Geo secondaries are read-only instances that allow Git pushes because they are
+proxied to the primary instance. However, in maintenance mode, Git pushes to
+both primary and secondaries will fail.
+
+### Merge requests, issues, epics
+
+All write actions except those mentioned above will fail. So, in maintenance mode, a user cannot update merge requests, issues, etc.
+
+Creating issue comments or new Service Desk issues via email will also fail.
 
 ### CI/CD
 
@@ -96,28 +115,22 @@ Once maintenance mode is disabled, new jobs are picked up again. The jobs that w
 in the running state before enabling maintenance mode, will resume, and their logs
 will start getting updated again.
 
-### Git actions
+#### Auto Deploys
 
-All read-only Git operations will continue to work in maintenance mode, for example
-`git clone` and `git pull`, but all write operations will fail, both through the CLI
-and Web IDE.
+It is recommended to disable auto deploys during maintenance mode, and enable
+them once maintenance mode is disabled.
 
-Geo secondaries are read-only instances that allow Git pushes because they are
-proxied to the primary instance. However, in maintenance mode, Git pushes to
-both primary and secondaries will fail.
+#### Terraform integration
 
-### Merge requests, issues, epics
-
-All write actions except those mentioned above will fail. So, in maintenance mode, a user cannot update merge requests, issues, etc.
+### K8S integration
 
 ### Container Registry
 
 In maintenance mode, `docker push` is blocked, but `docker pull` is available.
 
-### Auto Deploys
+### Package Registries
 
-It is recommended to disable auto deploys during maintenance mode, and enable
-them once maintenance mode is disabled.
+### Dependency Proxy
 
 ### Background jobs
 
@@ -129,9 +142,14 @@ it is recommended that you disable all cron jobs except for those related to Geo
 
 You can monitor queues and disable jobs in **Admin Area > Monitoring > Background Jobs**.
 
+### Feature flags 
 ### Geo secondaries
 
 The maintenance mode setting will be propagated to the secondary as they sync up.
 It is important that you do not disable replication before enabling maintenance mode.
 
 Replication and verification will continue to work in maintenance mode.
+
+### Secure features
+#### Fuzz testing
+#### Network policy management
