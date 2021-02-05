@@ -237,6 +237,41 @@ module Gitlab
             @updates[:reviewer_ids] = []
           end
         end
+
+        types MergeRequest
+        desc do
+          _('Re-request review')
+        end
+        explanation do |users|
+          reviewers = reviewers_to_add(users)
+          _('Re-requests a review from %{reviewer_users_sentence}.') % { reviewer_users_sentence: reviewer_users_sentence(users),
+                                                                        reviewer_text: 'reviewer'.pluralize(reviewers.size) }
+        end
+        execution_message do |users = nil|
+          reviewers = reviewers_to_add(users)
+          if reviewers.blank?
+            _("Failed to re-request a review because no user was found.")
+          else
+            _('Re-requested a review from %{reviewer_users_sentence}') % { reviewer_users_sentence: reviewer_users_sentence(users),
+                                                                          reviewer_text: 'reviewer'.pluralize(reviewers.size) }
+          end
+        end
+        params do
+          quick_action_target.allows_multiple_reviewers? ? '@user1 @user2' : '@user'
+        end
+        parse_params do |reviewer_param|
+          extract_users(reviewer_param)
+        end
+        command :rerequest_review do |users|
+          next if users.empty?
+
+          if quick_action_target.allows_multiple_reviewers?
+            @updates[:re_request_reviewers] ||= quick_action_target.reviewers
+            @updates[:re_request_reviewers] |= users
+          else
+            @updates[:re_request_reviewers] = [users.first]
+          end
+        end
       end
 
       def reviewer_users_sentence(users)

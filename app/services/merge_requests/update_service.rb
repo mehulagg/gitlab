@@ -144,7 +144,21 @@ module MergeRequests
         params.delete(:merge)
       end
 
+      re_request_reviewers = params.delete(:re_request_reviewers)
+
+      if re_request_reviewers
+        re_request_review_from_quick_action(merge_request, re_request_reviewers)
+      end
+
       merge_from_quick_action(merge_request) if params[:merge]
+    end
+
+    def re_request_review_from_quick_action(merge_request, users)
+      service = MergeRequests::RequestReviewService.new(merge_request.project, current_user)
+
+      users.each do |user|
+        service.execute(merge_request, user)
+      end
     end
 
     def rebase_from_quick_action(merge_request)
