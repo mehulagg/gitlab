@@ -8,9 +8,7 @@
 
 ## Related issues
 
-<!-- Mention the issue(s) this MR closes or is related to -->
-
-Closes
+<!-- Mention the issue(s) this MR is related to -->
 
 ## Moving docs to a new location?
 
