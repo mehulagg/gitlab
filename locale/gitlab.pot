@@ -28509,6 +28509,9 @@ msgstr ""
 msgid "Terraform|Locked by %{user} %{timeAgo}"
 msgstr ""
 
+msgid "Terraform|Locking state"
+msgstr ""
+
 msgid "Terraform|Name"
 msgstr ""
 
@@ -28540,6 +28543,9 @@ msgid "Terraform|Unknown User"
 msgstr ""
 
 msgid "Terraform|Unlock"
+msgstr ""
+
+msgid "Terraform|Unlocking state"
 msgstr ""
 
 msgid "Terraform|You are about to remove the State file %{name}. This will permanently delete all the State versions and history. The infrastructure provisioned previously\twill remain intact, only the state file with all its versions are to be removed. This action is non-revertible."
