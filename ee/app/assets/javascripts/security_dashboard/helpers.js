@@ -10,7 +10,7 @@ import { DEFAULT_SCANNER } from './constants';
 const parseOptions = (obj) =>
   Object.entries(obj).map(([id, name]) => ({ id: id.toUpperCase(), name }));
 
-export const mapProjects = (projects) =>
+export const mapProjects = (projects = []) =>
   projects.map((p) => ({ id: p.id.split('/').pop(), name: p.name }));
 
 const stateOptions = parseOptions(VULNERABILITY_STATES);
@@ -65,14 +65,12 @@ export const activityFilter = {
   defaultOptions: [],
 };
 
-export const getProjectFilter = (projects) => {
-  return {
-    name: s__('SecurityReports|Project'),
-    id: 'projectId',
-    options: mapProjects(projects),
-    allOption: BASE_FILTERS.project_id,
-    defaultOptions: [],
-  };
+export const projectFilter = {
+  name: s__('SecurityReports|Project'),
+  id: 'projectId',
+  options: [],
+  allOption: BASE_FILTERS.project_id,
+  defaultOptions: [],
 };
 
 /**

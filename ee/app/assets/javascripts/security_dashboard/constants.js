@@ -8,3 +8,4 @@ export const vulnerabilitiesSeverityCountScopes = {
 };
 
 export const DEFAULT_SCANNER = 'GitLab';
+export const PROJECT_ID_PREFIX = 'gid://gitlab/Project/';

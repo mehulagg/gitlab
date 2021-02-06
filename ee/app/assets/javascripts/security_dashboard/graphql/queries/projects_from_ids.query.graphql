@@ -1,0 +1,8 @@
+query projectsFromIds($ids: [ID!]) {
+  projects(ids: $ids) {
+    nodes {
+      id
+      name
+    }
+  }
+}

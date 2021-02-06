@@ -1,0 +1,13 @@
+query projectsSearch($fullPath: ID!, $search: String, $pageSize: Int = 1, $endCursor: String) {
+  group(fullPath: $fullPath) {
+    projects(search: $search, first: $pageSize, after: $endCursor, includeSubgroups: true, hasVulnerabilities: true) {
+      nodes {
+        id
+        name
+      }
+      pageInfo {
+        endCursor
+      }
+    }
+  }
+}
