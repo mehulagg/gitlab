@@ -270,6 +270,28 @@ By clicking the download icon, a dropdown will open with links to download the f
 - **Artifacts:**
   allows users to download the artifacts of the latest CI build.
 
+## Redirects when changing repository paths
+
+When a repository path changes, it is essential to smoothly transition from the
+old location to the new one. GitLab provides two kinds of redirects: the web UI
+and Git push/pull redirects.
+
+Depending on the situation, different things apply.
+
+When [renaming a user](../profile/index.md#changing-your-username),
+[changing a group path](../group/index.md#changing-a-groups-path) or [renaming a repository](settings/index.md#renaming-a-repository):
+
+- Existing web URLs for the namespace and anything under it (such as projects) will
+  redirect to the new URLs.
+- Starting with GitLab 10.3, existing Git remote URLs for projects under the
+  namespace redirect to the new remote URL. Every time you push/pull to a
+  repository that has changed its location, a warning message to update
+  your remote is displayed instead of rejecting your action.
+  This means that any automation scripts, or Git clients continue to
+  work after a rename, making any transition a lot smoother.
+- The redirects are available as long as the original path is not claimed by
+  another group, user or project.
+
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
