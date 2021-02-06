@@ -139,7 +139,7 @@ gosec-sast:
 mobsf-android-sast:
   extends: .sast-analyzer
   services:
-    - name: opensecurity/mobile-security-framework-mobsf:latest
+    - name: opensecurity/mobile-security-framework-mobsf:v3.2.9
       alias: mobsf
   image:
     name: "$SAST_ANALYZER_IMAGE"
@@ -160,7 +160,7 @@ mobsf-android-sast:
 mobsf-ios-sast:
   extends: .sast-analyzer
   services:
-    - name: opensecurity/mobile-security-framework-mobsf:latest
+    - name: opensecurity/mobile-security-framework-mobsf:v3.2.9
       alias: mobsf
   image:
     name: "$SAST_ANALYZER_IMAGE"
