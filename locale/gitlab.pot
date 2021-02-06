@@ -23775,6 +23775,9 @@ msgstr ""
 msgid "Protip:"
 msgstr ""
 
+msgid "Protip: %{linkStart}Auto DevOps%{linkEnd} uses Kubernetes clusters to deploy your code!"
+msgstr ""
+
 msgid "Protocol"
 msgstr ""
 
