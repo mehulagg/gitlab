@@ -8,6 +8,51 @@ import {
 const CONTENT_1 = 'Lorem ipsum dolar\nSit amit\n\nGoodbye!\n';
 const CONTENT_2 = 'Lorem ipsum dolar sit amit.\n\nGoodbye!\n';
 
+export const createGQLSnippet = () => ({
+  __typename: 'Snippet',
+  id: 7,
+  title: 'Snippet Title',
+  description: 'Lorem ipsum snippet desc',
+  descriptionHtml: '<p>Lorem ipsum snippet desc</p>',
+  createdAt: new Date(Date.now() - 1e6),
+  updatedAt: new Date(Date.now() - 1e3),
+  httpUrlToRepo: 'https://test.host/repo',
+  sshUrlToRepo: 'ssh://test.host/repo',
+  blobs: [],
+  userPermissions: {
+    __typename: 'SnippetPermissions',
+    adminSnippet: true,
+    updateSnippet: true,
+  },
+  project: {
+    __typename: 'Project',
+    fullPath: 'group/project',
+    webUrl: 'https://test.host/group/project',
+  },
+  author: {
+    __typename: 'User',
+    id: 1,
+    avatarUrl: 'https://assets.test.host/avatar.png',
+    name: 'root',
+    username: 'root',
+    webUrl: 'https://test.host/root',
+    status: {
+      __typename: 'UserStatus',
+      emoji: '',
+      message: '',
+    },
+  },
+});
+
+export const createGQLSnippetsQueryResponse = (snippets) => ({
+  data: {
+    snippets: {
+      __typename: 'SnippetConnection',
+      nodes: snippets,
+    },
+  },
+});
+
 export const testEntries = {
   created: {
     id: 'blob_1',
