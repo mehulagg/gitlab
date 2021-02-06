@@ -24,6 +24,14 @@ FactoryBot.define do
     trait :with_diffs do
     end
 
+    trait :draft_merge_request do
+      title { generate(:draft_title) }
+    end
+
+    trait :wip_merge_request do
+      title { generate(:wip_title) }
+    end
+
     trait :jira_title do
       title { generate(:jira_title) }
     end
