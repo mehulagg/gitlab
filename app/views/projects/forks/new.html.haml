@@ -1,5 +1,11 @@
 - page_title _("Fork project")
 
+-# = params
+-# = namespace_id_from(params)
+-# - namespace_id = namespace_id_from(params)
+-# = namespaces_options_with_developer_maintainer_access(selected: namespace_id, display_path: true, extra_group: namespace_id)
+-# = namespaces_options_with_developer_maintainer_access(display_path: true)
+
 .row.gl-mt-3
   .col-lg-3
     %h4.gl-mt-0
@@ -9,10 +15,17 @@
       %br
       = _('Forking a repository allows you to make changes without affecting the original project.')
   .col-lg-9
-    - if @own_namespace.present?
-      .fork-thumbnail-container.js-fork-content
-        %h5.gl-mt-0.gl-mb-0.gl-ml-3.gl-mr-3
-          = _("Select a namespace to fork the project")
-        = render 'fork_button', namespace: @own_namespace
-    #fork-groups-mount-element{ data: { endpoint: new_project_fork_path(@project, format: :json), can_create_project: current_user.can_create_project?.to_s } }
+    -# - if @own_namespace.present?
+    -#   .fork-thumbnail-container.js-fork-content
+    -#     %h5.gl-mt-0.gl-mb-0.gl-ml-3.gl-mr-3
+    -#       = _("Select a namespace to fork the project")
+    -#     = render 'fork_button', namespace: @own_namespace
+    #fork-groups-mount-element{ data: {
+      endpoint: new_project_fork_path(@project, format: :json),
+      can_create_project: current_user.can_create_project?.to_s,
+      new_group_path: new_group_path,
+      project_name: @project.name,
+      project_path: @project.path,
+      project_description: @project.description,
+      project_visibility: @project.visibility } }
 
