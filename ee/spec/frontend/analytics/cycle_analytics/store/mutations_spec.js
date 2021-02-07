@@ -49,6 +49,9 @@ describe('Value Stream Analytics mutations', () => {
     ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${'isCreatingValueStream'}   | ${false}
     ${types.REQUEST_CREATE_VALUE_STREAM}         | ${'createValueStreamErrors'} | ${{}}
     ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${'createValueStreamErrors'} | ${{}}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${'isCreatingValueStream'}   | ${false}
+    ${types.REQUEST_UPDATE_VALUE_STREAM}         | ${'createValueStreamErrors'} | ${{}}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${'createValueStreamErrors'} | ${{}}
     ${types.REQUEST_DELETE_VALUE_STREAM}         | ${'isDeletingValueStream'}   | ${true}
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'isDeletingValueStream'}   | ${false}
     ${types.REQUEST_DELETE_VALUE_STREAM}         | ${'deleteValueStreamError'}  | ${null}
