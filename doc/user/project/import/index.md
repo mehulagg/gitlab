@@ -89,7 +89,7 @@ usually accessed with a namespace and project name. It is also possible to acces
 them via a project alias. This feature is only available on Git over SSH.
 
 A project alias can be only created via API and only by GitLab administrators.
-Follow the [Project Aliases API documentation](../../api/project_aliases.md) for
+Follow the [Project Aliases API documentation](../../../api/project_aliases.md) for
 more details.
 
 After an alias has been created for a project (such as an alias `gitlab` for the

@@ -1,6 +1,6 @@
 # Working in projects
 
-Most work in GitLab is done within a [Project](../user/project/index.md). Files and
+Most work in GitLab is done within a [Project](../../user/project/index.md). Files and
 code are saved in projects, and most features are used within the scope of projects.
 
 ## Create a project in GitLab
@@ -12,13 +12,13 @@ To create a project in GitLab:
 1. On the **New project** page, choose if you want to:
    - Create a [blank project](#blank-projects).
    - Create a project using one of the available [project templates](#project-templates).
-   - [Import a project](../user/project/import/index.md) from a different repository,
+   - [Import a project](../../user/project/import/index.md) from a different repository,
      if enabled on your GitLab instance. Contact your GitLab administrator if this is unavailable.
-   - Run [CI/CD pipelines for external repositories](../ci/ci_cd_for_external_repos/index.md). **(PREMIUM)**
+   - Run [CI/CD pipelines for external repositories](../../ci/ci_cd_for_external_repos/index.md). **(PREMIUM)**
 
 NOTE:
 For a list of words that can't be used as project names see
-[Reserved project and group names](../user/reserved_names.md).
+[Reserved project and group names](../../user/reserved_names.md).
 
 ### Blank projects
 
@@ -40,7 +40,7 @@ To create a new blank project on the **New project** page:
      understand what your project is about. Though it's not required, it's a good
      idea to fill this in.
    - Changing the **Visibility Level** modifies the project's
-     [viewing and access rights](../public_access/public_access.md) for users.
+     [viewing and access rights](../../public_access/public_access.md) for users.
    - Selecting the **Initialize repository with a README** option creates a
      README file so that the Git repository is initialized, has a default branch, and
      can be cloned.
@@ -104,8 +104,8 @@ You can improve the existing built-in templates or contribute new ones in the
 Creating new projects based on custom project templates is a convenient option for
 quickly starting projects.
 
-Custom projects are available at the [instance-level](../user/admin_area/custom_project_templates.md)
-from the **Instance** tab, or at the [group-level](../user/group/custom_project_templates.md)
+Custom projects are available at the [instance-level](../../user/admin_area/custom_project_templates.md)
+from the **Instance** tab, or at the [group-level](../../user/group/custom_project_templates.md)
 from the **Group** tab, under the **Create from template** tab.
 
 To use a custom project template on the **New project** page:
@@ -122,7 +122,7 @@ To use a custom project template on the **New project** page:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/26388) in GitLab 10.5.
 
 When you create a new repository locally, instead of manually creating a new project in GitLab
-and then [cloning the repository](start-using-git.md#clone-a-repository)
+and then [cloning the repository](../../gitlab-basics/start-using-git.md#clone-a-repository)
 locally, you can directly push it to GitLab to create the new project, all without leaving
 your terminal. If you have access rights to the associated namespace, GitLab
 automatically creates a new project under that GitLab namespace with its visibility
