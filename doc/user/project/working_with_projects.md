@@ -3,7 +3,18 @@
 Most work in GitLab is done in a [project](../../user/project/index.md). Files and
 code are saved in projects, and most features are in the scope of projects.
 
-## Create a project in GitLab
+## Explore projects
+
+You can explore other popular projects available on GitLab. To explore projects:
+
+1. Click **Projects** in the navigation bar.
+1. Click **Explore Projects**.
+
+GitLab displays a list of projects, sorted by last updated date. To view
+projects with the most [stars](#star-a-project), click **Most stars**. To view
+projects with the largest number of comments in the past month, click **Trending**.
+
+## Create a project
 
 To create a project in GitLab:
 
@@ -155,17 +166,13 @@ remote:   https://gitlab.example.com/namespace/nonexistent-project
 remote:
 ```
 
-## Delete a project
+## Fork a project
 
-To delete a project, first navigate to the home page for that project.
+A fork is a copy of an original repository that you put in another namespace
+where you can experiment and apply changes that you can later decide whether or
+not to share, without affecting the original project.
 
-1. Navigate to **Settings > General**.
-1. Expand the **Advanced** section.
-1. Scroll down to the **Delete project** section.
-1. Click **Delete project**
-1. Confirm this action by typing in the expected text.
-
-Projects in personal namespaces are deleted immediately on request. For information on delayed deletion of projects in a group, please see [Enabling delayed project removal](../group/index.md#enabling-delayed-project-removal).
+It takes just a few steps to [fork a project in GitLab](repository/forking_workflow.md#creating-a-fork).
 
 ## Star a project
 
@@ -189,16 +196,17 @@ To view your starred projects:
    - Number of open merge requests
    - Number of open issues
 
-## Explore projects
+## Delete a project
 
-You can explore other popular projects available on GitLab. To explore projects:
+To delete a project, first navigate to the home page for that project.
 
-1. Click **Projects** in the navigation bar.
-1. Click **Explore Projects**.
+1. Navigate to **Settings > General**.
+1. Expand the **Advanced** section.
+1. Scroll down to the **Delete project** section.
+1. Click **Delete project**
+1. Confirm this action by typing in the expected text.
 
-GitLab displays a list of projects, sorted by last updated date. To view
-projects with the most [stars](#star-a-project), click **Most stars**. To view
-projects with the largest number of comments in the past month, click **Trending**.
+Projects in personal namespaces are deleted immediately on request. For information on delayed deletion of projects in a group, please see [Enabling delayed project removal](../group/index.md#enabling-delayed-project-removal).
 
 ## Project settings
 
