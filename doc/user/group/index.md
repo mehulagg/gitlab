@@ -288,7 +288,7 @@ In [GitLab Premium or higher](https://about.gitlab.com/pricing/), GitLab adminis
 
 There are two different ways to add a new project to a group:
 
-- Select a group, and then click **New project**. You can then continue [creating your project](../../gitlab-basics/create-project.md).
+- Select a group, and then click **New project**. You can then continue [creating your project](../../user/project/working_with_projects.md#create-a-project).
 
   ![New project](img/create_new_project_from_group_v13_6.png)
 

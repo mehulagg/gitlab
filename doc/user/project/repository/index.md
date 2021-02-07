@@ -14,7 +14,7 @@ A repository is part of a [project](../index.md), which has a lot of other featu
 ## Create a repository
 
 To create a new repository, all you need to do is
-[create a new project](../../../gitlab-basics/create-project.md) or
+[create a new project](../../../user/project/working_with_projects.md#create-a-project) or
 [fork an existing project](forking_workflow.md).
 
 Once you create a new project, you can add new files via UI
