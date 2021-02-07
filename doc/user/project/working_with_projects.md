@@ -1,7 +1,7 @@
-# Working in projects
+# Working with projects
 
-Most work in GitLab is done within a [Project](../../user/project/index.md). Files and
-code are saved in projects, and most features are used within the scope of projects.
+Most work in GitLab is done in a [project](../../user/project/index.md). Files and
+code are saved in projects, and most features are in the scope of projects.
 
 ## Create a project in GitLab
 
