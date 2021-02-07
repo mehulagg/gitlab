@@ -1,5 +1,5 @@
 ---
-redirect_to: '../user/project/working_in_projects.md'
+redirect_to: '../user/project/working_with_projects.md'
 ---
 
 This document was moved to [another location](../user/project/working_with_projects.md).
