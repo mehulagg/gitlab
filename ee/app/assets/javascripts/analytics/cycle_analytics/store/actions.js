@@ -354,6 +354,26 @@ export const createValueStream = ({ commit, dispatch, getters }, data) => {
     });
 };
 
+export const receiveUpdateValueStreamSuccess = ({ commit, dispatch }, valueStream = {}) => {
+  commit(types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS, valueStream);
+  return dispatch('fetchCycleAnalyticsData');
+};
+
+export const updateValueStream = (
+  { commit, dispatch, getters },
+  { id: valueStreamId, ...data },
+) => {
+  const { currentGroupPath } = getters;
+  commit(types.REQUEST_UPDATE_VALUE_STREAM);
+
+  return Api.cycleAnalyticsUpdateValueStream({ groupId: currentGroupPath, valueStreamId, data })
+    .then(({ data: newValueStream }) => dispatch('receiveUpdateValueStreamSuccess', newValueStream))
+    .catch(({ response } = {}) => {
+      const { data: { message, payload: { errors } } = null } = response;
+      commit(types.RECEIVE_UPDATE_VALUE_STREAM_ERROR, { message, errors, data });
+    });
+};
+
 export const deleteValueStream = ({ commit, dispatch, getters }, valueStreamId) => {
   const { currentGroupPath } = getters;
   commit(types.REQUEST_DELETE_VALUE_STREAM);

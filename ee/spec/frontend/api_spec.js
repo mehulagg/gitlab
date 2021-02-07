@@ -374,6 +374,24 @@ describe('Api', () => {
       });
     });
 
+    describe('cycleAnalyticsUpdateValueStream', () => {
+      it('updates the custom value stream data', (done) => {
+        const response = {};
+        const customValueStream = { name: 'cool-value-stream-stage', stages: [] };
+        const expectedUrl = valueStreamBaseUrl({ resource: `value_streams/${valueStreamId}` });
+        mock.onPut(expectedUrl).reply(httpStatus.OK, response);
+
+        Api.cycleAnalyticsUpdateValueStream({ groupId, valueStreamId, data: customValueStream })
+          .then(({ data, config: { data: reqData, url } }) => {
+            expect(data).toEqual(response);
+            expect(JSON.parse(reqData)).toMatchObject(customValueStream);
+            expect(url).toEqual(expectedUrl);
+          })
+          .then(done)
+          .catch(done.fail);
+      });
+    });
+
     describe('cycleAnalyticsDeleteValueStream', () => {
       it('delete the custom value stream', (done) => {
         const response = {};
