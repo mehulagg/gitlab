@@ -40,3 +40,58 @@
     'incident_management_incident_unrelate',
     'incident_management_incident_change_confidential'
   ]
+- name: code_review_group_monthly_active_users
+  operator: OR
+  events: [
+    'i_code_review_mr_diffs',
+    'i_code_review_user_single_file_diffs',
+    'i_code_review_mr_single_file_diffs',
+    'i_code_review_user_create_mr',
+    'i_code_review_user_close_mr',
+    'i_code_review_user_reopen_mr',
+    'i_code_review_user_resolve_thread',
+    'i_code_review_user_unresolve_thread',
+    'i_code_review_edit_mr_title',
+    'i_code_review_edit_mr_desc',
+    'i_code_review_user_merge_mr',
+    'i_code_review_user_create_mr_comment',
+    'i_code_review_user_edit_mr_comment',
+    'i_code_review_user_remove_mr_comment',
+    'i_code_review_user_create_review_note',
+    'i_code_review_user_publish_review',
+    'i_code_review_user_create_multiline_mr_comment',
+    'i_code_review_user_edit_multiline_mr_comment',
+    'i_code_review_user_remove_multiline_mr_comment',
+    'i_code_review_user_add_suggestion',
+    'i_code_review_user_apply_suggestion',
+    'i_code_review_user_assigned',
+    'i_code_review_user_review_requested'
+  ]
+- name: code_review_category_monthly_active_users
+  operator: OR
+  events: [
+    'i_code_review_mr_diffs',
+    'i_code_review_user_single_file_diffs',
+    'i_code_review_mr_single_file_diffs',
+    'i_code_review_user_create_mr',
+    'i_code_review_user_close_mr',
+    'i_code_review_user_reopen_mr',
+    'i_code_review_user_resolve_thread',
+    'i_code_review_user_unresolve_thread',
+    'i_code_review_edit_mr_title',
+    'i_code_review_edit_mr_desc',
+    'i_code_review_user_merge_mr',
+    'i_code_review_user_create_mr_comment',
+    'i_code_review_user_edit_mr_comment',
+    'i_code_review_user_remove_mr_comment',
+    'i_code_review_user_create_review_note',
+    'i_code_review_user_publish_review',
+    'i_code_review_user_create_multiline_mr_comment',
+    'i_code_review_user_edit_multiline_mr_comment',
+    'i_code_review_user_remove_multiline_mr_comment',
+    'i_code_review_user_add_suggestion',
+    'i_code_review_user_apply_suggestion',
+    'i_code_review_user_assigned',
+    'i_code_review_user_review_requested'
+]
+
