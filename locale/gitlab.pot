@@ -7498,6 +7498,9 @@ msgstr ""
 msgid "Configure limit for issues created per minute by web and API requests."
 msgstr ""
 
+msgid "Configure limit for notes created per minute by web and API requests."
+msgstr ""
+
 msgid "Configure limits for Project/Group Import/Export."
 msgstr ""
 
@@ -20132,6 +20135,9 @@ msgid "Note: Consider asking your GitLab administrator to configure %{github_int
 msgstr ""
 
 msgid "NoteForm|Note"
+msgstr ""
+
+msgid "Notes Rate Limits"
 msgstr ""
 
 msgid "Notes|Are you sure you want to cancel creating this comment?"
