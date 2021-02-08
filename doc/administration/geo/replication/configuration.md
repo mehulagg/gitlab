@@ -229,7 +229,7 @@ keys must be manually replicated to the **secondary** node.
    gitlab-rake gitlab:geo:check
    ```
 
-Once added to the administration panel and restarted, the **secondary** node will automatically start
+Once added to the Geo settings panel and restarted, the **secondary** node will automatically start
 replicating missing data from the **primary** node in a process known as **backfill**.
 Meanwhile, the **primary** node will start to notify each **secondary** node of any changes, so
 that the **secondary** node can act on those notifications immediately.
