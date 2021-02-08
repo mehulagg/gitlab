@@ -10,5 +10,5 @@ export default {
 </script>
 
 <template>
-  <span></span>
+  <span>foo</span>
 </template>
