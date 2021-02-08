@@ -1,6 +1,5 @@
 <script>
 import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
-
 import { fetchIssue } from 'ee/integrations/jira/issues_show/api';
 import { issueStates, issueStateLabels } from 'ee/integrations/jira/issues_show/constants';
 import Sidebar from 'ee/integrations/jira/issues_show/components/sidebar.vue';
@@ -25,6 +24,7 @@ export default {
   data() {
     return {
       isLoading: true,
+      errorMessage: undefined,
       issue: {},
     };
   },
@@ -52,17 +52,17 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="gl-mt-5">
     <gl-alert
       variant="info"
       :dismissible="false"
-      :title="s__('JiraService|This issue is updated from Jira')"
-      class="gl-mt-5 gl-mb-2"
+      :title="s__('JiraService|This issue is synchronized with Jira')"
+      class="gl-mb-2"
     >
       <gl-sprintf
         :message="
           s__(
-            `JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}`,
+            `JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}.`,
           )
         "
       >
@@ -71,6 +71,7 @@ export default {
         </template>
       </gl-sprintf>
     </gl-alert>
+
     <issuable-show
       v-if="!isLoading"
       :issuable="issue"

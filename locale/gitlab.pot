@@ -16667,7 +16667,7 @@ msgstr ""
 msgid "JiraService|Jira workflow transition IDs"
 msgstr ""
 
-msgid "JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}"
+msgid "JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}."
 msgstr ""
 
 msgid "JiraService|Open Jira"
@@ -16694,7 +16694,7 @@ msgstr ""
 msgid "JiraService|This feature requires a Premium plan."
 msgstr ""
 
-msgid "JiraService|This issue is updated from Jira"
+msgid "JiraService|This issue is synchronized with Jira"
 msgstr ""
 
 msgid "JiraService|Use a password for server version and an API token for cloud version"
