@@ -185,6 +185,7 @@ class Project < ApplicationRecord
   has_one :hangouts_chat_service
   has_one :unify_circuit_service
   has_one :webex_teams_service
+  has_one :vault_setting, inverse_of: :project, class_name: 'Vault::Setting'
 
   has_one :root_of_fork_network,
           foreign_key: 'root_project_id',

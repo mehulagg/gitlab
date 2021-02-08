@@ -17901,6 +17901,28 @@ CREATE SEQUENCE users_statistics_id_seq
 
 ALTER SEQUENCE users_statistics_id_seq OWNED BY users_statistics.id;
 
+CREATE TABLE vault_settings (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    server_url text NOT NULL,
+    auth_role text,
+    auth_path text,
+    CONSTRAINT check_24b7a1f48f CHECK ((char_length(auth_role) <= 255)),
+    CONSTRAINT check_50863534bb CHECK ((char_length(auth_path) <= 255)),
+    CONSTRAINT check_75eaf4b24f CHECK ((char_length(server_url) <= 2047))
+);
+
+CREATE SEQUENCE vault_settings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vault_settings_id_seq OWNED BY vault_settings.id;
+
 CREATE TABLE vulnerabilities (
     id bigint NOT NULL,
     milestone_id bigint,
@@ -19246,6 +19268,8 @@ ALTER TABLE ONLY users_ops_dashboard_projects ALTER COLUMN id SET DEFAULT nextva
 ALTER TABLE ONLY users_star_projects ALTER COLUMN id SET DEFAULT nextval('users_star_projects_id_seq'::regclass);
 
 ALTER TABLE ONLY users_statistics ALTER COLUMN id SET DEFAULT nextval('users_statistics_id_seq'::regclass);
+
+ALTER TABLE ONLY vault_settings ALTER COLUMN id SET DEFAULT nextval('vault_settings_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerabilities ALTER COLUMN id SET DEFAULT nextval('vulnerabilities_id_seq'::regclass);
 
@@ -20805,6 +20829,9 @@ ALTER TABLE ONLY users_star_projects
 
 ALTER TABLE ONLY users_statistics
     ADD CONSTRAINT users_statistics_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY vault_settings
+    ADD CONSTRAINT vault_settings_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY vulnerabilities
     ADD CONSTRAINT vulnerabilities_pkey PRIMARY KEY (id);
@@ -23393,6 +23420,8 @@ CREATE INDEX index_users_star_projects_on_project_id ON users_star_projects USIN
 
 CREATE UNIQUE INDEX index_users_star_projects_on_user_id_and_project_id ON users_star_projects USING btree (user_id, project_id);
 
+CREATE UNIQUE INDEX index_vault_settings_on_project_id ON vault_settings USING btree (project_id);
+
 CREATE UNIQUE INDEX index_vuln_historical_statistics_on_project_id_and_date ON vulnerability_historical_statistics USING btree (project_id, date);
 
 CREATE INDEX index_vulnerabilities_on_author_id ON vulnerabilities USING btree (author_id);
@@ -24623,6 +24652,9 @@ ALTER TABLE ONLY packages_debian_group_distributions
 
 ALTER TABLE ONLY packages_conan_file_metadata
     ADD CONSTRAINT fk_rails_0afabd9328 FOREIGN KEY (package_file_id) REFERENCES packages_package_files(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY vault_settings
+    ADD CONSTRAINT fk_rails_0aff6a8325 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_build_pending_states
     ADD CONSTRAINT fk_rails_0bbbfeaf9d FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
