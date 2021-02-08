@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlModal, GlModalDirective } from '@gitlab/ui';
+import { GlButton, GlModal, GlSprintf, GlModalDirective } from '@gitlab/ui';
 import { sprintf, __ } from '~/locale';
 
 export default {
