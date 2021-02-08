@@ -137,6 +137,32 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
     end
   end
 
+  context 'when the query is a hash' do
+    it 'displays IPv6 in the label' do
+      subscriber.request(
+        double(:event, payload: {
+          method: 'POST', code: "200", duration: 0.03,
+          scheme: 'https', host: '2606:4700:90:0:f22e:fbec:5bed:a9b9', port: 80, path: '/api/v4/projects',
+          query: { current: true, 'item1' => 'string', 'item2' => [1, 2] }
+        })
+      )
+      expect(
+        subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
+      ).to match_array(
+        [
+          {
+            duration: 30.0,
+            label: "POST https://[2606:4700:90:0:f22e:fbec:5bed:a9b9]:80/api/v4/projects?current=true&item1=string&item2%5B%5D=1&item2%5B%5D=2",
+            code: "Response status: 200",
+            proxy: nil,
+            error: nil,
+            warnings: []
+          }
+        ]
+      )
+    end
+  end
+
   context 'when the host is invalid' do
     it 'displays unknown in the label' do
       subscriber.request(
@@ -163,12 +189,38 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
     end
   end
 
-  context 'when another URI component is invalid' do
+  context 'when another URI component is invalid, raises an URI::Error' do
     it 'displays unknown in the label' do
       subscriber.request(
         double(:event, payload: {
           method: 'POST', code: "200", duration: 0.03,
           scheme: 'https', host: 'invalid', port: 'invalid', path: '/api/v4/projects',
+          query: 'current=true'
+        })
+      )
+      expect(
+        subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
+      ).to match_array(
+        [
+          {
+            duration: 30.0,
+            label: "POST unknown",
+            code: "Response status: 200",
+            proxy: nil,
+            error: nil,
+            warnings: []
+          }
+        ]
+      )
+    end
+  end
+
+  context 'when another URI component is invalid, raises a StandardError exception' do
+    it 'displays unknown in the label' do
+      subscriber.request(
+        double(:event, payload: {
+          method: 'POST', code: "200", duration: 0.03,
+          scheme: 1234, host: 80, port: 'invalid', path: '/api/v4/projects',
           query: 'current=true'
         })
       )
