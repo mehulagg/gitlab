@@ -31,6 +31,8 @@ class GeoNodeStatus < ApplicationRecord
   alias_attribute :last_event_timestamp, :last_event_date_timestamp
   alias_attribute :cursor_last_event_timestamp, :cursor_last_event_date_timestamp
 
+  scope :for_active_secondaries, -> { joins(:geo_node).where('geo_nodes.primary': false, 'geo_nodes.enabled': true) }
+
   def self.status_fields_for(replicable_class)
     {
       "#{replicable_class.replicable_name_plural}_count".to_sym => "Number of #{replicable_class.replicable_title_plural} on the primary",

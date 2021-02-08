@@ -46,6 +46,18 @@ RSpec.describe GeoNodeStatus, :geo do
     end
   end
 
+  describe '#for_active_secondaries' do
+    let!(:primary_status) { create(:geo_node_status, geo_node: primary) }
+    let!(:secondary_status) { create(:geo_node_status, geo_node: secondary) }
+    let!(:disabled_status) { create(:geo_node_status, geo_node: create(:geo_node, enabled: false)) }
+
+    it 'excludes primaries and disabled nodes' do
+      expect(described_class.for_active_secondaries).to include(secondary_status)
+      expect(described_class.for_active_secondaries).not_to include(primary_status)
+      expect(described_class.for_active_secondaries).not_to include(disabled_status)
+    end
+  end
+
   describe '#healthy?' do
     context 'when health is blank' do
       it 'returns true' do

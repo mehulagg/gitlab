@@ -379,14 +379,37 @@ RSpec.describe Gitlab::UsageData do
       expect(described_class.usage_activity_by_stage_enablement({})).to eq({})
     end
 
-    it 'excludes data outside of the date range' do
-      create_list(:geo_node, 2).each do |node|
-        for_defined_days_back do
-          create(:oauth_access_grant, application: node.oauth_application)
+    context 'geo enabled' do
+      before do
+        create_list(:geo_node, 2, primary: false).each do |node|
+          for_defined_days_back do
+            create(:oauth_access_grant, application: node.oauth_application)
+          end
+        end
+
+        create(:geo_node, enabled: false)
+        create(:geo_node, primary: true)
+
+        GeoNode.all.each do |node|
+          create(:geo_node_status, geo_node: node)
         end
       end
 
-      expect(described_class.usage_activity_by_stage_enablement(described_class.last_28_days_time_period)).to eq(geo_secondary_web_oauth_users: 2)
+      subject { described_class.usage_activity_by_stage_enablement(described_class.last_28_days_time_period) }
+
+      it 'excludes data outside of the date range' do
+        expect(subject).to include(geo_secondary_web_oauth_users: 2)
+      end
+
+      context 'node status fields' do
+        it 'only includes active secondary nodes' do
+          expect(subject[:secondary_node_usage].size).to eq(2)
+        end
+
+        it 'includes all resource status fields' do
+          expect(subject[:secondary_node_usage].first.keys).to eq(GeoNodeStatus::RESOURCE_STATUS_FIELDS)
+        end
+      end
     end
   end
 

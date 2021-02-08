@@ -289,7 +289,14 @@ module EE
                               application_id: GeoNode.secondary_nodes.select(:oauth_application_id)
                             ),
                         :resource_owner_id
-                      )
+                      ),
+                      # rubocop: disable UsageData/LargeTable
+                      # These fields are pre-calculated on the secondary for
+                      # transmission and storage on the primary.
+                      secondary_node_usage: GeoNodeStatus.for_active_secondaries.map do |node|
+                        GeoNodeStatus::RESOURCE_STATUS_FIELDS.map{ |field| [ field, node[field] ] }.to_h
+                      end
+                      # rubocop: enable UsageData/LargeTable
                   })
         end
 
