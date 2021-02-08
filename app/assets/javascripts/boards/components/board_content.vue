@@ -8,11 +8,12 @@ import defaultSortableConfig from '~/sortable/sortable_config';
 import { sortableEnd, sortableStart } from '~/boards/mixins/sortable_default_options';
 import BoardColumn from './board_column.vue';
 import BoardColumnDeprecated from './board_column_deprecated.vue';
+import BoardAddNewColumn from './board_add_new_column.vue';
 
 export default {
   components: {
     BoardColumn: gon.features?.graphqlBoardLists ? BoardColumn : BoardColumnDeprecated,
-    BoardAddNewColumn: () => import('./board_add_new_column.vue'),
+    BoardAddNewColumn,
     BoardContentSidebar: () => import('ee_component/boards/components/board_content_sidebar.vue'),
     EpicsSwimlanes: () => import('ee_component/boards/components/epics_swimlanes.vue'),
     GlAlert,

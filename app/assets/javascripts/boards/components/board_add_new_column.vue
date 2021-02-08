@@ -7,14 +7,19 @@ import {
   GlSkeletonLoader,
 } from '@gitlab/ui';
 import { mapActions, mapGetters } from 'vuex';
-import boardsStore from '../stores/boards_store';
 import { __ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import boardsStore from '../stores/boards_store';
 
 export default {
   i18n: {
+    add: __('Add'),
+    cancel: __('Cancel'),
     formDescription: __('A label list displays all issues with the selected label.'),
+    labelsError: __('Unable to load labels'),
+    newLabelList: __('New label list'),
     searchPlaceholder: __('Search labels'),
+    selectLabel: __('Select label'),
   },
   components: {
     GlButton,
@@ -121,7 +126,7 @@ export default {
         })
         .catch((e) => {
           this.labels = [];
-          this.error = __('Unable to load labels');
+          this.error = this.$options.i18n.labelsError;
           throw e;
         })
         .finally(() => {
@@ -143,7 +148,7 @@ export default {
       <h3
         class="gl-font-base gl-px-5 gl-py-5 gl-m-0 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
       >
-        {{ __('New label list') }}
+        {{ $options.i18n.newLabelList }}
       </h3>
 
       <div class="gl-display-flex gl-flex-direction-column gl-h-full gl-overflow-hidden">
@@ -153,7 +158,7 @@ export default {
 
         <!-- TODO: tabs to Use existing label or Create new label -->
 
-        <label class="gl-px-5">{{ __('Select label') }}</label>
+        <label class="gl-px-5">{{ $options.i18n.selectLabel }}</label>
 
         <gl-search-box-by-type
           v-model.trim="searchTerm"
@@ -197,14 +202,14 @@ export default {
         class="gl-display-flex gl-p-3 gl-border-t-1 gl-border-t-solid gl-border-gray-100 gl-bg-gray-10"
       >
         <gl-button class="gl-ml-auto gl-mr-3" @click="setAddColumnFormVisibility(false)">{{
-          __('Cancel')
+          $options.i18n.cancel
         }}</gl-button>
         <gl-button
           :disabled="!selectedLabelId"
           variant="success"
           class="gl-mr-4"
           @click="addList"
-          >{{ __('Add') }}</gl-button
+          >{{ $options.i18n.add }}</gl-button
         >
       </div>
     </div>
