@@ -93,19 +93,15 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
     it 'displays IPv4 in the label' do
       subscriber.request(double(:event, payload: event_1))
 
-      expect(
-        subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
-      ).to match_array(
-        [
-          {
-            duration: 30.0,
-            label: "POST https://1.2.3.4:80/api/v4/projects?current=true",
-            code: "Response status: 200",
-            proxy: nil,
-            error: nil,
-            warnings: []
-          }
-        ]
+      expect(subject.results[:details]).to contain_exactly(
+        a_hash_including(
+          duration: 30.0,
+          label: "POST https://1.2.3.4:80/api/v4/projects?current=true",
+          code: "Response status: 200",
+          proxy: nil,
+          error: nil,
+          warnings: []
+        )
       )
     end
   end
@@ -118,19 +114,15 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
     it 'displays IPv6 in the label' do
       subscriber.request(double(:event, payload: event_1))
 
-      expect(
-        subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
-      ).to match_array(
-        [
-          {
-            duration: 30.0,
-            label: "POST https://[2606:4700:90:0:f22e:fbec:5bed:a9b9]:80/api/v4/projects?current=true",
-            code: "Response status: 200",
-            proxy: nil,
-            error: nil,
-            warnings: []
-          }
-        ]
+      expect(subject.results[:details]).to contain_exactly(
+        a_hash_including(
+          duration: 30.0,
+          label: "POST https://[2606:4700:90:0:f22e:fbec:5bed:a9b9]:80/api/v4/projects?current=true",
+          code: "Response status: 200",
+          proxy: nil,
+          error: nil,
+          warnings: []
+        )
       )
     end
   end
@@ -143,19 +135,15 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
     it 'converts query hash into a query string' do
       subscriber.request(double(:event, payload: event_1))
 
-      expect(
-        subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
-      ).to match_array(
-        [
-          {
-            duration: 30.0,
-            label: "POST https://gitlab.com:80/api/v4/projects?current=true&item1=string&item2%5B%5D=1&item2%5B%5D=2",
-            code: "Response status: 200",
-            proxy: nil,
-            error: nil,
-            warnings: []
-          }
-        ]
+      expect(subject.results[:details]).to contain_exactly(
+        a_hash_including(
+          duration: 30.0,
+          label: "POST https://gitlab.com:80/api/v4/projects?current=true&item1=string&item2%5B%5D=1&item2%5B%5D=2",
+          code: "Response status: 200",
+          proxy: nil,
+          error: nil,
+          warnings: []
+        )
       )
     end
   end
@@ -168,19 +156,15 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
     it 'displays unknown in the label' do
       subscriber.request(double(:event, payload: event_1))
 
-      expect(
-        subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
-      ).to match_array(
-        [
-          {
-            duration: 30.0,
-            label: "POST unknown",
-            code: "Response status: 200",
-            proxy: nil,
-            error: nil,
-            warnings: []
-          }
-        ]
+      expect(subject.results[:details]).to contain_exactly(
+        a_hash_including(
+          duration: 30.0,
+          label: "POST unknown",
+          code: "Response status: 200",
+          proxy: nil,
+          error: nil,
+          warnings: []
+        )
       )
     end
   end
@@ -194,19 +178,15 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
     it 'displays unknown in the label' do
       subscriber.request(double(:event, payload: event_1))
 
-      expect(
-        subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
-      ).to match_array(
-        [
-          {
-            duration: 30.0,
-            label: "POST unknown",
-            code: "Response status: 200",
-            proxy: nil,
-            error: nil,
-            warnings: []
-          }
-        ]
+      expect(subject.results[:details]).to contain_exactly(
+        a_hash_including(
+          duration: 30.0,
+          label: "POST unknown",
+          code: "Response status: 200",
+          proxy: nil,
+          error: nil,
+          warnings: []
+        )
       )
     end
   end
@@ -220,19 +200,15 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
     it 'displays unknown in the label' do
       subscriber.request(double(:event, payload: event_1))
 
-      expect(
-        subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
-      ).to match_array(
-        [
-          {
-            duration: 30.0,
-            label: "POST unknown",
-            code: "Response status: 200",
-            proxy: nil,
-            error: nil,
-            warnings: []
-          }
-        ]
+      expect(subject.results[:details]).to contain_exactly(
+        a_hash_including(
+          duration: 30.0,
+          label: "POST unknown",
+          code: "Response status: 200",
+          proxy: nil,
+          error: nil,
+          warnings: []
+        )
       )
     end
   end
