@@ -133,6 +133,8 @@ To enable notifications on one specific Issue, Merge Request or Epic, you need t
 - **Disable**: If you are receiving notifications for updates to that issue but no
   longer want to receive them, unsubscribe from it.
 
+Configuring this notification on an Epic doesn't make you automatically subscribed to the issue that are linked to the epic.
+
 ### Notification levels
 
 For each project and group you can select one of the following levels:
