@@ -44,7 +44,7 @@ RSpec.describe Gitlab::ImportExport::RepoRestorer do
       it 'restores the repo successfully', :aggregated_failures do
         expect(group.wiki_repository_exists?).to be false
 
-        restorer.restore
+        expect { restorer.restore }.to change { GroupWikiRepository.count }.by(1)
 
         pages = group.wiki.list_pages(load_content: true)
         expect(pages.size).to eq 1
@@ -59,6 +59,7 @@ RSpec.describe Gitlab::ImportExport::RepoRestorer do
       it 'does not creates an empty wiki' do
         expect(restorer.restore).to be true
         expect(group.wiki_repository_exists?).to be false
+        expect(group.group_wiki_repository).to be_nil
       end
     end
   end
