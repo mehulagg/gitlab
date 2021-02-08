@@ -275,6 +275,7 @@ especially in combination with [assignee lists](#assignee-lists).
 
 > - One group issue board per group introduced in GitLab 10.6.
 > - Multiple group issue boards [introduced](https://about.gitlab.com/releases/2017/09/22/gitlab-10-0-released/#group-issue-boards) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.0.
+> - Editing title in the issue sidebar [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285074) in GitLab 13.9.
 
 Accessible at the group navigation level, a group issue board offers the same features as a project-level board.
 It can display issues from all projects in that
