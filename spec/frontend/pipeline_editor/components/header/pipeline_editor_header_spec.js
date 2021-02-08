@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import PipelineEditorHeader from '~/pipeline_editor/components/header/pipeline_editor_header.vue';
+import PipelineStatus from '~/pipeline_editor/components/header/pipeline_status.vue';
 import ValidationSegment from '~/pipeline_editor/components/header/validation_segment.vue';
 
 import { mockLintResponse } from '../../mock_data';
@@ -16,6 +17,7 @@ describe('Pipeline editor header', () => {
     });
   };
 
+  const findPipelineStatus = () => wrapper.findComponent(PipelineStatus);
   const findValidationSegment = () => wrapper.findComponent(ValidationSegment);
 
   afterEach(() => {
@@ -27,6 +29,11 @@ describe('Pipeline editor header', () => {
     beforeEach(() => {
       createComponent();
     });
+
+    it('renders the pipeline status', () => {
+      expect(findPipelineStatus().exists()).toBe(true);
+    });
+
     it('renders the validation segment', () => {
       expect(findValidationSegment().exists()).toBe(true);
     });

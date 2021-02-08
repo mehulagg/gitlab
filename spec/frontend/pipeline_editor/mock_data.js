@@ -137,6 +137,28 @@ export const mergeUnwrappedCiConfig = (mergedConfig) => {
   };
 };
 
+export const mockPipeline = {
+  data: {
+    project: {
+      pipeline: {
+        id: 'gid://gitlab/Ci::Pipeline/118',
+        iid: '28',
+        status: 'SUCCESS',
+        detailedStatus: {
+          detailsPath: '/root/sample-ci-project/-/pipelines/118"',
+          group: 'success',
+          icon: 'status_success',
+          text: 'passed',
+        },
+        pipelineType: {
+          commitPath: '/',
+          shortSha: mockCommitSha,
+        },
+      },
+    },
+  },
+};
+
 export const mockLintResponse = {
   valid: true,
   errors: [],
