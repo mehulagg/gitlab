@@ -817,7 +817,7 @@ exceed 1 and the concurrency limiter has no effect.
 ## Background Repository Optimization
 
 Empty directories and unneeded config settings may accumulate in a repository and
-slow down git operations. Gitaly can schedule a daily background task with a maximum duration
+slow down Git operations. Gitaly can schedule a daily background task with a maximum duration
 to clean up these items and improve performance.
 
 **For Omnibus GitLab**
