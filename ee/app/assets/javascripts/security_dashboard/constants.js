@@ -6,3 +6,5 @@ export const vulnerabilitiesSeverityCountScopes = {
   group: 'group',
   project: 'project',
 };
+
+export const DEFAULT_SCANNER = 'GitLab';

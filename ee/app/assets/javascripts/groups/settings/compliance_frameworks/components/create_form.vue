@@ -2,9 +2,9 @@
 import { visitUrl } from '~/lib/utils/url_utility';
 import * as Sentry from '~/sentry/wrapper';
 import createComplianceFrameworkMutation from '../graphql/queries/create_compliance_framework.mutation.graphql';
+import { initialiseFormData, SAVE_ERROR } from '../constants';
 import SharedForm from './shared_form.vue';
 import FormStatus from './form_status.vue';
-import { initialiseFormData, SAVE_ERROR } from '../constants';
 
 export default {
   components: {

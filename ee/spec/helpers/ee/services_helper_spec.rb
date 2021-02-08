@@ -87,4 +87,17 @@ RSpec.describe EE::ServicesHelper do
       expect(slack_link).to include('redirect_uri=http://some-path/project/1&state=a+token')
     end
   end
+
+  describe '#jira_issues_show_data' do
+    subject { helper.jira_issues_show_data }
+
+    before do
+      allow(helper).to receive(:params).and_return({ id: 'FE-1' })
+      assign(:project, project)
+    end
+
+    it 'includes Jira issues show data' do
+      is_expected.to include(:issues_show_path)
+    end
+  end
 end

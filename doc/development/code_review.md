@@ -111,7 +111,7 @@ with [domain expertise](#domain-experts).
      [GitLab Licensing and Compatibility documentation](licensing.md).
 1. If your merge request includes adding a new UI/UX paradigm (*1*), it must be
    **approved by a [UX lead](https://about.gitlab.com/company/team/)**.
-1. If your merge request includes a new dependency or a filesystem change, it must be
+1. If your merge request includes a new dependency or a file system change, it must be
    **approved by a [Distribution team member](https://about.gitlab.com/company/team/)**. See how to work with the [Distribution team](https://about.gitlab.com/handbook/engineering/development/enablement/distribution/#how-to-work-with-distribution) for more details.
 1. If your merge request includes documentation changes, it must be **approved
    by a [Technical writer](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments)**, based on
@@ -281,6 +281,8 @@ first time.
   of your shiny new branch, read through the entire diff. Does it make sense?
   Did you include something unrelated to the overall purpose of the changes? Did
   you forget to remove any debugging code?
+- Consider providing instructions on how to test the merge request. This can be
+  helpful for reviewers not familiar with the product feature or area of the codebase.
 <!-- vale gitlab.FutureTense = NO -->
 - Be grateful for the reviewer's suggestions. ("Good call. I'll make that
   change.")

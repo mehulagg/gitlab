@@ -65,7 +65,7 @@ GET /users?active=true
 GET /users?blocked=true
 ```
 
-GitLab supports bot users such as the [alert bot](../operations/incident_management/alert_integrations.md)
+GitLab supports bot users such as the [alert bot](../operations/incident_management/integrations.md)
 or the [support bot](../user/project/service_desk.md#support-bot-user).
 To exclude these users from the users' list, you can use the parameter `exclude_internal=true`
 ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241144) in GitLab 13.4).
@@ -217,7 +217,9 @@ For example:
 GET /users?extern_uid=1234567&provider=github
 ```
 
-You can search for users who are external with: `/users?external=true`
+Instance administrators can search for users who are external with: `/users?external=true`
+
+You cannot search for external users if you are not an instance administrator. 
 
 You can search users by creation date time range with:
 

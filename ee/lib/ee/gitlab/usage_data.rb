@@ -451,10 +451,10 @@ module EE
               pipelines_with_secure_jobs[metric_name.to_sym] =
                 if start_id && finish_id
                   estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start_id, finish: finish_id) do |result|
-                    save_aggregated_metrics(aggregated_metrics_params.merge(data: result))
+                    save_aggregated_metrics(**aggregated_metrics_params.merge({ data: result }))
                   end
                 else
-                  save_aggregated_metrics(aggregated_metrics_params.merge(data: ::Gitlab::Database::PostgresHll::Buckets.new))
+                  save_aggregated_metrics(**aggregated_metrics_params.merge({ data: ::Gitlab::Database::PostgresHll::Buckets.new }))
                   0
                 end
             end

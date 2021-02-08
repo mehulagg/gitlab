@@ -22,7 +22,7 @@ RSpec.describe 'Project settings > Issues', :js do
         expect(page).to have_content('Set a default description template to be used for new issues.')
 
         within('.sharing-permissions-form') do
-          find('.project-feature-controls[data-for="project[project_feature_attributes][issues_access_level]"] .project-feature-toggle').click
+          find('.project-feature-controls[data-for="project[project_feature_attributes][issues_access_level]"] .gl-toggle').click
           click_on('Save changes')
         end
 
@@ -41,7 +41,7 @@ RSpec.describe 'Project settings > Issues', :js do
       expect(page).not_to have_content('Set a default description template to be used for new issues.')
 
       within('.sharing-permissions-form') do
-        find('.project-feature-controls[data-for="project[project_feature_attributes][issues_access_level]"] .project-feature-toggle').click
+        find('.project-feature-controls[data-for="project[project_feature_attributes][issues_access_level]"] .gl-toggle').click
         click_on('Save changes')
       end
 

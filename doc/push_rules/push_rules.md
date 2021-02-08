@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, howto
 ---
 
-# Push Rules **(STARTER)**
+# Push Rules **(PREMIUM)**
 
 Gain additional control over what can and can't be pushed to your repository by using
 regular expressions to reject pushes based on commit contents, branch names or file details.
@@ -80,7 +80,7 @@ GitLab administrators can set push rules globally under
 **Admin Area > Push Rules** that all new projects inherit. You can later
 override them in a project's settings. They can be also set on a [group level](../user/group/index.md#group-push-rules).
 
-1. Navigate to your project's **Settings > Repository** and expand **Push Rules**
+1. Navigate to your project's **Settings > Repository** and expand **Push rules**
 1. Set the rule you want
 1. Click **Save Push Rules** for the changes to take effect
 
@@ -89,12 +89,12 @@ The following options are available:
 | Push rule                       | Description |
 |---------------------------------|-------------|
 | Removal of tags with `git push` | Forbid users to remove Git tags with `git push`. Tags can be deleted through the web UI. |
-| Check whether author is a GitLab user | Restrict commits by author (email) to existing GitLab users. |
-| Committer restriction **(PREMIUM)** | GitLab rejects any commit that was not committed by the current authenticated user. |
+| Check whether the commit author is a GitLab user | Restrict commits to existing GitLab users (checked against their emails). |
+| Reject unverified users **(PREMIUM)** | GitLab rejects any commit that was not committed by an authenticated user. |
 | Check whether commit is signed through GPG **(PREMIUM)** | Reject commit when it is not signed through GPG. Read [signing commits with GPG](../user/project/repository/gpg_signed_commits/index.md). |
-| Prevent committing secrets to Git | GitLab rejects any files that are likely to contain secrets. Read [what files are forbidden](#prevent-pushing-secrets-to-the-repository). |
-| Restrict by commit message | Only commit messages that match this regular expression are allowed to be pushed. Leave empty to allow any commit message. Uses multiline mode, which can be disabled using `(?-m)`. |
-| Restrict by commit message (negative match) | Only commit messages that do not match this regular expression are allowed to be pushed. Leave empty to allow any commit message. Uses multiline mode, which can be disabled using `(?-m)`. |
+| Prevent pushing secret files | GitLab rejects any files that are likely to contain secrets. See the [forbidden file names](#prevent-pushing-secrets-to-the-repository). |
+| Require expression in commit messages | Only commit messages that match this regular expression are allowed to be pushed. Leave empty to allow any commit message. Uses multiline mode, which can be disabled using `(?-m)`. |
+| Reject expression in commit messages | Only commit messages that do not match this regular expression are allowed to be pushed. Leave empty to allow any commit message. Uses multiline mode, which can be disabled using `(?-m)`. |
 | Restrict by branch name | Only branch names that match this regular expression are allowed to be pushed. Leave empty to allow any branch name. |
 | Restrict by commit author's email | Only commit author's email that match this regular expression are allowed to be pushed. Leave empty to allow any email. |
 | Prohibited file names | Any committed filenames that match this regular expression and do not already exist in the repository are not allowed to be pushed. Leave empty to allow any filenames. See [common examples](#prohibited-file-names). |
@@ -105,7 +105,8 @@ GitLab uses [RE2 syntax](https://github.com/google/re2/wiki/Syntax) for regular 
 
 ## Prevent pushing secrets to the repository
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/385) in [GitLab Starter](https://about.gitlab.com/pricing/) 8.12.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/385) in GitLab 8.12.
+> - Moved to GitLab Premium in 13.9.
 
 Secrets such as credential files, SSH private keys, and other files containing secrets should never be committed to source control.
 GitLab enables you to turn on a predefined denylist of files which can't be
@@ -180,7 +181,8 @@ id_ecdsa
 
 ## Prohibited file names
 
-> Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 7.10.
+> - Introduced in GitLab 7.10.
+> - Moved to GitLab Premium in 13.9.
 
 Each filename contained in a Git push is compared to the regular expression in this field. Filenames in Git consist of both the file's name and any directory that may precede it. A singular regular expression can contain multiple independent matches used as exclusions. File names can be broadly matched to any location in the repository, or restricted to specific locations. Filenames can also be partial matches used to exclude file types by extension.
 

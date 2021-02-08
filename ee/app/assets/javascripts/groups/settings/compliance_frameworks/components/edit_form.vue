@@ -5,9 +5,9 @@ import { convertToGraphQLId } from '~/graphql_shared/utils';
 
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
 import updateComplianceFrameworkMutation from '../graphql/queries/update_compliance_framework.mutation.graphql';
+import { initialiseFormData, FETCH_ERROR, SAVE_ERROR } from '../constants';
 import SharedForm from './shared_form.vue';
 import FormStatus from './form_status.vue';
-import { initialiseFormData, FETCH_ERROR, SAVE_ERROR } from '../constants';
 
 export default {
   components: {

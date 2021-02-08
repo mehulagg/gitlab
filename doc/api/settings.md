@@ -77,6 +77,7 @@ Example response:
   "asset_proxy_enabled": true,
   "asset_proxy_url": "https://assets.example.com",
   "asset_proxy_whitelist": ["example.com", "*.example.com", "your-instance.com"],
+  "asset_proxy_allowlist": ["example.com", "*.example.com", "your-instance.com"],
   "npm_package_requests_forwarding": true,
   "snippet_size_limit": 52428800,
   "issues_create_limit": 300,
@@ -166,7 +167,7 @@ Example response:
   "local_markdown_version": 0,
   "asset_proxy_enabled": true,
   "asset_proxy_url": "https://assets.example.com",
-  "asset_proxy_whitelist": ["example.com", "*.example.com", "your-instance.com"],
+  "asset_proxy_allowlist": ["example.com", "*.example.com", "your-instance.com"],
   "geo_node_allowed_ips": "0.0.0.0/0, ::/0",
   "allow_local_requests_from_hooks_and_services": true,
   "allow_local_requests_from_web_hooks_and_services": true,
@@ -219,7 +220,8 @@ listed in the descriptions of the relevant settings.
 | `asset_proxy_enabled`                    | boolean          | no                                   | (**If enabled, requires:** `asset_proxy_url`) Enable proxying of assets. GitLab restart is required to apply changes. |
 | `asset_proxy_secret_key`                 | string           | no                                   | Shared secret with the asset proxy server. GitLab restart is required to apply changes. |
 | `asset_proxy_url`                        | string           | no                                   | URL of the asset proxy server. GitLab restart is required to apply changes. |
-| `asset_proxy_whitelist`                  | string or array of strings | no                         | Assets that match these domain(s) are **not** proxied. Wildcards allowed. Your GitLab installation URL is automatically allowlisted. GitLab restart is required to apply changes. |
+| `asset_proxy_whitelist`                  | string or array of strings | no                         | (Deprecated: Use `asset_proxy_allowlist` instead) Assets that match these domain(s) are **not** proxied. Wildcards allowed. Your GitLab installation URL is automatically allowlisted. GitLab restart is required to apply changes. |
+| `asset_proxy_allowlist`                  | string or array of strings | no                         | Assets that match these domain(s) are **not** proxied. Wildcards allowed. Your GitLab installation URL is automatically allowlisted. GitLab restart is required to apply changes. |
 | `authorized_keys_enabled`                | boolean          | no                                   | By default, we write to the `authorized_keys` file to support Git over SSH without additional configuration. GitLab can be optimized to authenticate SSH keys via the database file. Only disable this if you have configured your OpenSSH server to use the AuthorizedKeysCommand. |
 | `auto_devops_domain`                     | string           | no                                   | Specify a domain to use by default for every project's Auto Review Apps and Auto Deploy stages. |
 | `auto_devops_enabled`                    | boolean          | no                                   | Enable Auto DevOps for projects by default. It automatically builds, tests, and deploys applications based on a predefined CI/CD configuration. |
@@ -280,6 +282,7 @@ listed in the descriptions of the relevant settings.
 | `first_day_of_week`                      | integer          | no                                   | Start day of the week for calendar views and date pickers. Valid values are `0` (default) for Sunday, `1` for Monday, and `6` for Saturday. |
 | `geo_node_allowed_ips`                   | string           | yes                                  | **(PREMIUM)** Comma-separated list of IPs and CIDRs of allowed secondary nodes. For example, `1.1.1.1, 2.2.2.0/24`. |
 | `geo_status_timeout`                     | integer          | no                                   | **(PREMIUM)** The amount of seconds after which a request to get a secondary node status times out. |
+| `git_two_factor_session_expiry`          | integer          | no                                   | **(PREMIUM)** Maximum duration (in minutes) of a session for Git operations when 2FA is enabled. |
 | `gitaly_timeout_default`                 | integer          | no                                   | Default Gitaly timeout, in seconds. This timeout is not enforced for Git fetch/push operations or Sidekiq jobs. Set to `0` to disable timeouts. |
 | `gitaly_timeout_fast`                    | integer          | no                                   | Gitaly fast operation timeout, in seconds. Some Gitaly operations are expected to be fast. If they exceed this threshold, there may be a problem with a storage shard and 'failing fast' can help maintain the stability of the GitLab instance. Set to `0` to disable timeouts. |
 | `gitaly_timeout_medium`                  | integer          | no                                   | Medium Gitaly timeout, in seconds. This should be a value between the Fast and the Default timeout. Set to `0` to disable timeouts. |
@@ -300,7 +303,7 @@ listed in the descriptions of the relevant settings.
 | `housekeeping_incremental_repack_period` | integer          | required by: `housekeeping_enabled`  | Number of Git pushes after which an incremental `git repack` is run. |
 | `html_emails_enabled`                    | boolean          | no                                   | Enable HTML emails. |
 | `import_sources`                         | array of strings | no                                   | Sources to allow project import from, possible values: `github`, `bitbucket`, `bitbucket_server`, `gitlab`, `fogbugz`, `git`, `gitlab_project`, `gitea`, `manifest`, and `phabricator`. |
-| `invisible_captcha_enabled`              | boolean          | no                                   | Enable Invisible Captcha spam detection during sign-up. Disabled by default. |
+| `invisible_captcha_enabled`              | boolean          | no                                   | <!-- vale gitlab.Spelling = NO --> Enable Invisible Captcha <!-- vale gitlab.Spelling = YES --> spam detection during sign-up. Disabled by default. |
 | `issues_create_limit`                    | integer          | no                                   | Max number of issue creation requests per minute per user. Disabled by default.|
 | `local_markdown_version`                 | integer          | no                                   | Increase this value when any cached Markdown should be invalidated. |
 | `maintenance_mode_message`               | string           | no                                   | **(PREMIUM)** Message displayed when instance is in maintenance mode |

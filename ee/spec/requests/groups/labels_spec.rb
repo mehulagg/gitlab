@@ -21,20 +21,6 @@ RSpec.describe 'view audit events' do
       expect { send_request }.not_to exceed_all_query_limit(control)
     end
 
-    context 'when preset_root_ancestor_for_labels flag is disabled' do
-      before do
-        stub_feature_flags(preset_root_ancestor_for_labels: false)
-      end
-
-      it 'does additional N+1 DB queries', :request_store do
-        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { send_request }
-
-        create_list(:group, 3, parent: group)
-
-        expect { send_request }.to exceed_all_query_limit(control)
-      end
-    end
-
     def send_request
       get group_labels_path(group, include_descendant_groups: true, format: :json)
     end

@@ -208,6 +208,8 @@ export default {
         projectFingerprint,
       } = this.vulnerability;
 
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios
         .post(this.vulnerability.createMrUrl, {
           vulnerability_feedback: {

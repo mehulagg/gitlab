@@ -1,5 +1,6 @@
 <script>
-import { GlButton, GlSprintf } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__ } from '~/locale';
 import { formatUsageSize } from '../utils';
 import UsageStatisticsCard from './usage_statistics_card.vue';
@@ -7,7 +8,6 @@ import UsageStatisticsCard from './usage_statistics_card.vue';
 export default {
   components: {
     GlButton,
-    GlSprintf,
     UsageStatisticsCard,
   },
   props: {
@@ -32,6 +32,10 @@ export default {
         footerNote: s__(
           'UsageQuota|This is the total amount of storage used across your projects within this namespace.',
         ),
+        link: {
+          text: s__('UsageQuota|Learn more about usage quotas'),
+          url: helpPagePath('user/usage_quotas'),
+        },
       };
     },
     excessUsage() {
@@ -41,6 +45,10 @@ export default {
         footerNote: s__(
           'UsageQuota|This is the total amount of storage used by projects above the free %{actualRepositorySizeLimit} storage limit.',
         ),
+        link: {
+          text: s__('UsageQuota|Learn more about excess storage usage'),
+          url: helpPagePath('user/usage_quotas', { anchor: 'excess-storage-usage' }),
+        },
       };
     },
     purchasedUsage() {
@@ -87,34 +95,22 @@ export default {
 <template>
   <div class="gl-display-flex gl-sm-flex-direction-column">
     <usage-statistics-card
-      data-testid="totalUsage"
+      data-testid="total-usage"
       :usage="totalUsage.usage"
       :link="totalUsage.link"
       :description="totalUsage.description"
       css-class="gl-mr-4"
-    >
-      <template #footer="{}">
-        {{ totalUsage.footerNote }}
-      </template>
-    </usage-statistics-card>
+    />
     <usage-statistics-card
-      data-testid="excessUsage"
+      data-testid="excess-usage"
       :usage="excessUsage.usage"
       :link="excessUsage.link"
       :description="excessUsage.description"
       css-class="gl-mx-4"
-    >
-      <template #footer="{}">
-        <gl-sprintf :message="excessUsage.footerNote">
-          <template #actualRepositorySizeLimit>
-            {{ formattedActualRepoSizeLimit }}
-          </template>
-        </gl-sprintf>
-      </template>
-    </usage-statistics-card>
+    />
     <usage-statistics-card
       v-if="purchasedUsage"
-      data-testid="purchasedUsage"
+      data-testid="purchased-usage"
       :usage="purchasedUsage.usage"
       :usage-total="purchasedUsage.usageTotal"
       :link="purchasedUsage.link"

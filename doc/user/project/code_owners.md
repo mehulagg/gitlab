@@ -5,10 +5,11 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference
 ---
 
-# Code Owners **(STARTER)**
+# Code Owners **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6916) in GitLab 11.3.
 > - Code Owners for Merge Request approvals was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4418) in GitLab Premium 11.9.
+> - Moved to GitLab Premium in 13.9.
 
 ## Introduction
 
@@ -96,7 +97,7 @@ without using [Approval Rules](merge_requests/merge_request_approvals.md#approva
 1. Use [the syntax of Code Owners files](code_owners.md#the-syntax-of-code-owners-files)
    to specify the actual owners and granular permissions.
 
-Using Code Owners in conjunction with [Protected Branches](protected_branches.md#protected-branches-approval-by-code-owners)
+Using Code Owners in conjunction with [protected branches](protected_branches.md#protected-branches-approval-by-code-owners)
 prevents any user who is not specified in the `CODEOWNERS` file from pushing
 changes for the specified files/paths, except those included in the
 **Allowed to push** column. This allows for a more inclusive push strategy, as
@@ -230,6 +231,7 @@ the rules for "Groups" and "Documentation" sections:
 #### Optional Code Owners Sections **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232995) in GitLab Premium 13.8 behind a feature flag, enabled by default.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/53227) in GitLab 13.9.
 
 To make a certain section optional, add a code owners section prepended with the
 caret `^` character. Approvals from owners listed in the section are **not** required. For example:

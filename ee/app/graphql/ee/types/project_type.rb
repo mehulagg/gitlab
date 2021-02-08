@@ -116,6 +116,12 @@ module EE
               description: 'Code coverage summary associated with the project',
               resolver: ::Resolvers::Ci::CodeCoverageSummaryResolver
 
+        field :alert_management_payload_fields,
+              [::Types::AlertManagement::PayloadAlertFieldType],
+              null: true,
+              description: 'Extract alert fields from payload for custom mapping',
+              resolver: ::Resolvers::AlertManagement::PayloadAlertFieldResolver
+
         field :incident_management_oncall_schedules,
               ::Types::IncidentManagement::OncallScheduleType.connection_type,
               null: true,

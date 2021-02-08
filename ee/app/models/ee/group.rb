@@ -468,6 +468,35 @@ module EE
 
     private
 
+    override :post_create_hook
+    def post_create_hook
+      super
+
+      execute_subgroup_hooks(:create)
+    end
+
+    override :post_destroy_hook
+    def post_destroy_hook
+      super
+
+      execute_subgroup_hooks(:destroy)
+    end
+
+    def execute_subgroup_hooks(event)
+      return unless subgroup?
+      return unless parent.group? # TODO: Remove this after fixing https://gitlab.com/gitlab-org/gitlab/-/issues/301013
+      return unless feature_available?(:group_webhooks)
+
+      run_after_commit do
+        data = ::Gitlab::HookData::SubgroupBuilder.new(self).build(event)
+        # Imagine a case where a subgroup has a webhook with `subgroup_events` enabled.
+        # When this subgroup is removed, there is no point in this subgroup's webhook itself being notified
+        # that `self` was removed. Rather, we should only care about notifying its ancestors
+        # and hence we need to trigger the hooks starting only from its `parent` group.
+        parent.execute_hooks(data, :subgroup_hooks)
+      end
+    end
+
     def custom_project_templates_group_allowed
       return if custom_project_templates_group_id.blank?
       return if children.exists?(id: custom_project_templates_group_id)

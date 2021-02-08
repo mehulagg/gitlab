@@ -81,7 +81,7 @@ describe('Board List Header Component', () => {
   const findSettingsButton = () => wrapper.find({ ref: 'settingsBtn' });
 
   describe('Settings Button', () => {
-    const hasSettings = [ListType.assignee, ListType.milestone, ListType.label];
+    const hasSettings = [ListType.assignee, ListType.milestone, ListType.iteration, ListType.label];
     const hasNoSettings = [ListType.backlog, ListType.closed];
 
     it.each(hasSettings)('does render for List Type `%s`', (listType) => {

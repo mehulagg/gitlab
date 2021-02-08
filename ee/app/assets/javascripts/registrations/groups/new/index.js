@@ -2,7 +2,7 @@ import Vue from 'vue';
 import mountInviteMembers from 'ee/groups/invite';
 import mountVisibilityLevelDropdown from '~/groups/visibility_level';
 import 'ee/pages/trials/country_select';
-import { STEPS, ONBOARDING_ISSUES_EXPERIMENT_FLOW_STEPS } from '../../constants';
+import { STEPS, SIGNUP_ONBOARDING_FLOW_STEPS } from '../../constants';
 import ProgressBar from '../../components/progress_bar.vue';
 import RegistrationTrialToggle from '../../components/registration_trial_toggle.vue';
 
@@ -17,7 +17,7 @@ function mountProgressBar() {
     el,
     render(createElement) {
       return createElement(ProgressBar, {
-        props: { steps: ONBOARDING_ISSUES_EXPERIMENT_FLOW_STEPS, currentStep: STEPS.yourGroup },
+        props: { steps: SIGNUP_ONBOARDING_FLOW_STEPS, currentStep: STEPS.yourGroup },
       });
     },
   });

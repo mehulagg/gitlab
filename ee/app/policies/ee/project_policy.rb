@@ -16,7 +16,7 @@ module EE
       condition(:iterations_available) { @subject.feature_available?(:iterations) }
 
       with_scope :subject
-      condition(:requirements_available) { @subject.feature_available?(:requirements) & feature_available?(:requirements) }
+      condition(:requirements_available) { @subject.feature_available?(:requirements) & access_allowed_to?(:requirements) }
 
       condition(:compliance_framework_available) { @subject.feature_available?(:compliance_framework, @user) }
 
@@ -113,7 +113,7 @@ module EE
 
       with_scope :subject
       condition(:security_and_compliance_enabled) do
-        @subject.feature_available?(:security_and_compliance) && feature_available?(:security_and_compliance)
+        @subject.feature_available?(:security_and_compliance) && access_allowed_to?(:security_and_compliance)
       end
 
       with_scope :subject

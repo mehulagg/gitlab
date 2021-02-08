@@ -1,6 +1,6 @@
 <script>
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
-import updateAlertStatusMutation from '~/graphql_shared/mutations/update_alert_status.mutation.graphql';
+import updateAlertStatusMutation from '~/graphql_shared/mutations/alert_status_update.mutation.graphql';
 import { MESSAGES, STATUSES } from './constants';
 
 export default {

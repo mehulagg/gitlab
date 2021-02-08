@@ -34,10 +34,6 @@
 module Gitlab
   module Experimentation
     EXPERIMENTS = {
-      onboarding_issues: {
-        tracking_category: 'Growth::Conversion::Experiment::OnboardingIssues',
-        use_backwards_compatible_subject_index: true
-      },
       ci_notification_dot: {
         tracking_category: 'Growth::Expansion::Experiment::CiNotificationDot',
         use_backwards_compatible_subject_index: true
@@ -90,10 +86,6 @@ module Gitlab
       },
       ci_syntax_templates: {
         tracking_category: 'Growth::Activation::Experiment::CiSyntaxTemplates',
-        rollout_strategy: :user
-      },
-      pipelines_empty_state: {
-        tracking_category: 'Growth::Activation::Experiment::PipelinesEmptyState',
         rollout_strategy: :user
       },
       invite_members_new_dropdown: {

@@ -40,7 +40,7 @@ export default {
     errors: {
       type: Object,
       required: false,
-      default: () => {},
+      default: () => ({}),
     },
     stageEvents: {
       type: Array,
@@ -49,10 +49,10 @@ export default {
   },
   methods: {
     isValid(field) {
-      return !this.errors[field]?.length;
+      return !this.errors[field] || !this.errors[field]?.length;
     },
     renderError(field) {
-      return this.errors[field]?.join('\n');
+      return this.errors[field] ? this.errors[field]?.join('\n') : null;
     },
     eventName(eventIds = []) {
       return eventIdsToName(this.stageEvents, eventIds);
@@ -68,6 +68,7 @@ export default {
         class="gl-flex-grow-1 gl-mb-0"
         :state="isValid('name')"
         :invalid-feedback="renderError('name')"
+        :data-testid="`default-stage-name-${index}`"
       >
         <!-- eslint-disable vue/no-mutating-props -->
         <gl-form-input

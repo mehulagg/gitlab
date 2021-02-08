@@ -90,44 +90,82 @@ RSpec.describe Gitlab::Geo::VerificationState do
     let(:other_failed_ids) { other_failed_records.map { |result| result['id'] } }
 
     before do
-      subject.verification_started!
+      subject.verification_started
       subject.verification_failed_with_message!('foo')
     end
 
-    it 'returns IDs of rows pending verification' do
-      expect(subject.class.verification_failed_batch(batch_size: 3)).to include(subject.id)
-    end
-
-    it 'marks verification as started' do
-      subject.class.verification_failed_batch(batch_size: 3)
-
-      expect(subject.reload.verification_started?).to be_truthy
-      expect(subject.verification_started_at).to be_present
-    end
-
-    it 'limits with batch_size and orders records by verification_retry_at with NULLs first' do
-      expected = other_failed_ids
-
-      # `match_array` instead of `eq` because the UPDATE query does not
-      # guarantee that results are returned in the same order as the subquery
-      # used to SELECT the correct batch.
-      expect(subject.class.verification_failed_batch(batch_size: 2)).to match_array(expected)
-    end
-
-    context 'other verification states' do
-      it 'does not include them' do
-        subject.verification_started!
-
-        expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
-
-        subject.verification_succeeded_with_checksum!('foo', Time.current)
-
-        expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
-
-        subject.verification_pending!
-
-        expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
+    context 'with a failed record with retry due' do
+      before do
+        subject.update!(verification_retry_at: 1.minute.ago)
       end
+
+      it 'returns IDs of rows pending verification' do
+        expect(subject.class.verification_failed_batch(batch_size: 3)).to include(subject.id)
+      end
+
+      it 'marks verification as started' do
+        subject.class.verification_failed_batch(batch_size: 3)
+
+        expect(subject.reload.verification_started?).to be_truthy
+        expect(subject.verification_started_at).to be_present
+      end
+
+      it 'limits with batch_size and orders records by verification_retry_at with NULLs first' do
+        expected = other_failed_ids
+
+        # `match_array` instead of `eq` because the UPDATE query does not
+        # guarantee that results are returned in the same order as the subquery
+        # used to SELECT the correct batch.
+        expect(subject.class.verification_failed_batch(batch_size: 2)).to match_array(expected)
+      end
+
+      context 'other verification states' do
+        it 'does not include them' do
+          subject.verification_started!
+
+          expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
+
+          subject.verification_succeeded_with_checksum!('foo', Time.current)
+
+          expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
+
+          subject.verification_pending!
+
+          expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
+        end
+      end
+    end
+
+    context 'when verification_retry_at is in the future' do
+      it 'does not return the row' do
+        subject.update!(verification_retry_at: 1.minute.from_now)
+
+        expect(subject.class.verification_failed_batch(batch_size: 3)).not_to include(subject.id)
+      end
+    end
+  end
+
+  describe '.needs_verification' do
+    it 'includes verification_pending' do
+      subject.save!
+
+      expect(subject.class.needs_verification).to include(subject)
+    end
+
+    it 'includes verification_failed and retry_due' do
+      subject.verification_started
+      subject.verification_failed_with_message!('foo')
+      subject.update!(verification_retry_at: 1.minute.ago)
+
+      expect(subject.class.needs_verification).to include(subject)
+    end
+
+    it 'excludes verification_failed with future verification_retry_at' do
+      subject.verification_started
+      subject.verification_failed_with_message!('foo')
+      subject.update!(verification_retry_at: 1.minute.from_now)
+
+      expect(subject.class.needs_verification).not_to include(subject)
     end
   end
 
@@ -157,7 +195,7 @@ RSpec.describe Gitlab::Geo::VerificationState do
     end
   end
 
-  describe '#track_checksum_attempt!' do
+  describe '#track_checksum_attempt!', :aggregate_failures do
     context 'when verification was not yet started' do
       it 'starts verification' do
         expect do
@@ -196,12 +234,39 @@ RSpec.describe Gitlab::Geo::VerificationState do
     end
 
     context 'when an error occurs while yielding' do
-      it 'sets verification_failed' do
-        subject.track_checksum_attempt! do
-          raise 'an error'
-        end
+      context 'when the record was failed' do
+        it 'sets verification_failed and increments verification_retry_count' do
+          subject.verification_failed_with_message!('foo')
 
-        expect(subject.reload.verification_failed?).to be_truthy
+          subject.track_checksum_attempt! do
+            raise 'an error'
+          end
+
+          expect(subject.reload.verification_failed?).to be_truthy
+          expect(subject.verification_retry_count).to eq(2)
+        end
+      end
+    end
+
+    context 'when the yielded block returns nil' do
+      context 'when the record was pending' do
+        it 'sets verification_failed and sets verification_retry_count to 1' do
+          subject.track_checksum_attempt! { nil }
+
+          expect(subject.reload.verification_failed?).to be_truthy
+          expect(subject.verification_retry_count).to eq(1)
+        end
+      end
+
+      context 'when the record was failed' do
+        it 'sets verification_failed and increments verification_retry_count' do
+          subject.verification_failed_with_message!('foo')
+
+          subject.track_checksum_attempt! { nil }
+
+          expect(subject.reload.verification_failed?).to be_truthy
+          expect(subject.verification_retry_count).to eq(2)
+        end
       end
     end
   end

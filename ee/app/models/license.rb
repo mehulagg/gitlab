@@ -82,6 +82,7 @@ class License < ApplicationRecord
     file_locks
     geo
     generic_alert_fingerprinting
+    git_two_factor_enforcement
     github_project_service_integration
     group_allowed_email_domains
     group_coverage_reports

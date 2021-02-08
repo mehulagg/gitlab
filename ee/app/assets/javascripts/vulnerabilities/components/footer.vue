@@ -112,6 +112,8 @@ export default {
       return Date.parse(date) / 1000;
     },
     fetchDiscussions() {
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios
         .get(this.vulnerability.discussionsUrl)
         .then(({ data, headers: { date } }) => {
@@ -146,6 +148,8 @@ export default {
         });
     },
     createNotesPoll() {
+      // note: this polling call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       this.poll = new Poll({
         resource: {
           fetchNotes: () =>

@@ -276,37 +276,23 @@ RSpec.describe QuickActions::InterpretService do
     context 'reassign_reviewer command' do
       let(:content) { "/reassign_reviewer @#{current_user.username}" }
 
-      context "if the 'merge_request_reviewers' feature flag is on" do
-        context 'unlicensed' do
-          before do
-            stub_licensed_features(multiple_merge_request_reviewers: false)
-          end
-
-          it 'does not recognize /reassign_reviewer @user' do
-            content = "/reassign_reviewer @#{current_user.username}"
-            _, updates = service.execute(content, merge_request)
-
-            expect(updates).to be_empty
-          end
-        end
-
-        it 'reassigns reviewer if content contains /reassign_reviewer @user' do
-          _, updates = service.execute("/reassign_reviewer @#{current_user.username}", merge_request)
-
-          expect(updates[:reviewer_ids]).to match_array([current_user.id])
-        end
-      end
-
-      context "if the 'merge_request_reviewers' feature flag is off" do
+      context 'unlicensed' do
         before do
-          stub_feature_flags(merge_request_reviewers: false)
+          stub_licensed_features(multiple_merge_request_reviewers: false)
         end
 
         it 'does not recognize /reassign_reviewer @user' do
+          content = "/reassign_reviewer @#{current_user.username}"
           _, updates = service.execute(content, merge_request)
 
           expect(updates).to be_empty
         end
+      end
+
+      it 'reassigns reviewer if content contains /reassign_reviewer @user' do
+        _, updates = service.execute("/reassign_reviewer @#{current_user.username}", merge_request)
+
+        expect(updates[:reviewer_ids]).to match_array([current_user.id])
       end
     end
 

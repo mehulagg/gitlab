@@ -15,7 +15,7 @@ You can read more about [project access tokens](../user/project/settings/project
 Get a list of project access tokens.
 
 ```plaintext
-GET /:id/access_tokens
+GET projects/:id/access_tokens
 ```
 
 | Attribute | Type    | required | Description         |
@@ -50,13 +50,13 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/a
 Create a project access token.
 
 ```plaintext
-POST /:id/access_tokens
+POST projects/:id/access_tokens
 ```
 
 | Attribute | Type    | required | Description         |
 |-----------|---------|----------|---------------------|
 | `name` | String | yes | The name of the project access token  |
-| `scopes` | Array[String] | yes | [List of scopes](../user/project/settings/project_access_tokens.md#limiting-scopes-of-a-project-access-token) |
+| `scopes` | Array\[String] | yes | [List of scopes](../user/project/settings/project_access_tokens.md#limiting-scopes-of-a-project-access-token) |
 | `expires_at` | Date | no | The token expires at midnight UTC on that date |
 
 ```shell
@@ -89,7 +89,7 @@ curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
 Revoke a project access token.
 
 ```plaintext
-DELETE /:id/access_tokens/:token_id
+DELETE projects/:id/access_tokens/:token_id
 ```
 
 | Attribute | Type    | required | Description         |

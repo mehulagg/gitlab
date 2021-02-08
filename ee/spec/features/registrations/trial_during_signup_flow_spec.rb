@@ -8,8 +8,8 @@ RSpec.describe 'User sees new onboarding flow', :js do
 
   before do
     allow(Gitlab).to receive(:com?).and_return(true)
-    stub_experiment(onboarding_issues: true, trial_during_signup: true)
-    stub_experiment_for_subject(onboarding_issues: true, trial_during_signup: true)
+    stub_experiment(trial_during_signup: true)
+    stub_experiment_for_subject(trial_during_signup: true)
     sign_in(user)
     visit users_sign_up_welcome_path
 

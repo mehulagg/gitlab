@@ -41,9 +41,8 @@ export const setDateRange = ({ commit, dispatch }, { skipFetch = false, startDat
 };
 
 export const requestStageData = ({ commit }) => commit(types.REQUEST_STAGE_DATA);
-export const receiveStageDataSuccess = ({ commit }, data) => {
+export const receiveStageDataSuccess = ({ commit }, data) =>
   commit(types.RECEIVE_STAGE_DATA_SUCCESS, data);
-};
 
 export const receiveStageDataError = ({ commit }, error) => {
   const { message = '' } = error;
@@ -351,7 +350,7 @@ export const createValueStream = ({ commit, dispatch, getters }, data) => {
     .then(({ data: newValueStream }) => dispatch('receiveCreateValueStreamSuccess', newValueStream))
     .catch(({ response } = {}) => {
       const { data: { message, payload: { errors } } = null } = response;
-      commit(types.RECEIVE_CREATE_VALUE_STREAM_ERROR, { message, errors });
+      commit(types.RECEIVE_CREATE_VALUE_STREAM_ERROR, { message, errors, data });
     });
 };
 

@@ -5,7 +5,7 @@ module Types
     graphql_name 'DastScannerProfile'
     description 'Represents a DAST scanner profile'
 
-    authorize :create_on_demand_dast_scan
+    authorize :read_on_demand_scans
 
     field :id, ::Types::GlobalIDType[::DastScannerProfile], null: false,
           description: 'ID of the DAST scanner profile'

@@ -22,8 +22,8 @@ UPDATE projects SET has_external_issue_tracker = (
     WHERE project_id = COALESCE(NEW.project_id, OLD.project_id)
       AND active = TRUE
       AND category = 'issue_tracker'
-    )
   )
+)
 WHERE projects.id = COALESCE(NEW.project_id, OLD.project_id);
 RETURN NULL;
 
@@ -9293,7 +9293,6 @@ CREATE TABLE application_settings (
     instance_administration_project_id bigint,
     asset_proxy_enabled boolean DEFAULT false NOT NULL,
     asset_proxy_url character varying,
-    asset_proxy_whitelist text,
     encrypted_asset_proxy_secret_key text,
     encrypted_asset_proxy_secret_key_iv character varying,
     static_objects_external_storage_url character varying(255),
@@ -9412,6 +9411,7 @@ CREATE TABLE application_settings (
     container_registry_cleanup_tags_service_max_list_size integer DEFAULT 200 NOT NULL,
     enforce_ssh_key_expiration boolean DEFAULT false NOT NULL,
     git_two_factor_session_expiry integer DEFAULT 15 NOT NULL,
+    asset_proxy_allowlist text,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
@@ -11775,7 +11775,9 @@ CREATE TABLE dependency_proxy_manifests (
     file_name text NOT NULL,
     file text NOT NULL,
     digest text NOT NULL,
+    content_type text,
     CONSTRAINT check_079b293a7b CHECK ((char_length(file) <= 255)),
+    CONSTRAINT check_167a9a8a91 CHECK ((char_length(content_type) <= 255)),
     CONSTRAINT check_c579e3f586 CHECK ((char_length(file_name) <= 255)),
     CONSTRAINT check_f5d9996bf1 CHECK ((char_length(digest) <= 255))
 );
@@ -13600,6 +13602,14 @@ CREATE TABLE jira_tracker_data (
     deployment_type smallint DEFAULT 0 NOT NULL,
     vulnerabilities_issuetype text,
     vulnerabilities_enabled boolean DEFAULT false NOT NULL,
+    encrypted_proxy_address text,
+    encrypted_proxy_address_iv text,
+    encrypted_proxy_port text,
+    encrypted_proxy_port_iv text,
+    encrypted_proxy_username text,
+    encrypted_proxy_username_iv text,
+    encrypted_proxy_password text,
+    encrypted_proxy_password_iv text,
     CONSTRAINT check_0bf84b76e9 CHECK ((char_length(vulnerabilities_issuetype) <= 255)),
     CONSTRAINT check_214cf6a48b CHECK ((char_length(project_key) <= 255))
 );
@@ -16129,7 +16139,7 @@ CREATE TABLE projects (
     repository_storage character varying DEFAULT 'default'::character varying NOT NULL,
     repository_read_only boolean,
     request_access_enabled boolean DEFAULT true NOT NULL,
-    has_external_wiki boolean DEFAULT false,
+    has_external_wiki boolean,
     ci_config_path character varying,
     lfs_enabled boolean,
     description_html text,
@@ -19662,9 +19672,6 @@ ALTER TABLE ONLY chat_teams
 ALTER TABLE vulnerability_scanners
     ADD CONSTRAINT check_37608c9db5 CHECK ((char_length(vendor) <= 255)) NOT VALID;
 
-ALTER TABLE projects
-    ADD CONSTRAINT check_421d399b70 CHECK ((has_external_wiki IS NOT NULL)) NOT VALID;
-
 ALTER TABLE group_import_states
     ADD CONSTRAINT check_cda75c7c3f CHECK ((user_id IS NOT NULL)) NOT VALID;
 
@@ -21026,8 +21033,6 @@ CREATE INDEX backup_labels_group_id_title_idx ON backup_labels USING btree (grou
 
 CREATE INDEX backup_labels_project_id_idx ON backup_labels USING btree (project_id);
 
-CREATE UNIQUE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
-
 CREATE INDEX backup_labels_template_idx ON backup_labels USING btree (template) WHERE template;
 
 CREATE INDEX backup_labels_title_idx ON backup_labels USING btree (title);
@@ -21050,7 +21055,7 @@ CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_and_note_id_index ON epic_user
 
 CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_index ON epic_user_mentions USING btree (epic_id) WHERE (note_id IS NULL);
 
-CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (id, created_at) WHERE ((expire_at IS NULL) AND (created_at < '2020-06-22 00:00:00+00'::timestamp with time zone));
+CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (id, created_at) WHERE ((expire_at IS NULL) AND (date(timezone('UTC'::text, created_at)) < '2020-06-22'::date));
 
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
 

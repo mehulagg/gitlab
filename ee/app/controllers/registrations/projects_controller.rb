@@ -4,7 +4,7 @@ module Registrations
   class ProjectsController < ApplicationController
     layout 'checkout'
 
-    before_action :check_experiment_enabled
+    before_action :check_signup_onboarding_enabled
     before_action :find_namespace, only: :new
 
     feature_category :navigation
@@ -38,6 +38,10 @@ module Registrations
 
     private
 
+    def check_signup_onboarding_enabled
+      access_denied! unless helpers.signup_onboarding_enabled?
+    end
+
     def create_learn_gitlab_project
       title, filename = if helpers.in_trial_onboarding_flow?
                           [s_('Learn GitLab - Ultimate trial'), 'learn_gitlab_gold_trial.tar.gz']
@@ -56,13 +60,7 @@ module Registrations
         ).execute
       end
 
-      cookies[:onboarding_issues_settings] = { 'groups#show' => true, 'projects#show' => true, 'issues#index' => true }.to_json if learn_gitlab_project.saved? && !helpers.in_trial_onboarding_flow?
-
       learn_gitlab_project
-    end
-
-    def check_experiment_enabled
-      access_denied! unless experiment_enabled?(:onboarding_issues)
     end
 
     def find_namespace

@@ -7,8 +7,8 @@ import * as utils from 'ee/oncall_schedules/components/schedule/utils';
 import * as commonUtils from 'ee/oncall_schedules/utils/common_utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import mockTimezones from './mocks/mockTimezones.json';
 import * as dateTimeUtility from '~/lib/utils/datetime_utility';
+import mockTimezones from './mocks/mockTimezones.json';
 
 describe('On-call schedule', () => {
   let wrapper;
