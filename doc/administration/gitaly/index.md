@@ -814,6 +814,35 @@ Though the name of the Prometheus metric contains `rate_limiting`, it is a concu
 a rate limiter. If a Gitaly client makes 1000 requests in a row very quickly, concurrency does not
 exceed 1 and the concurrency limiter has no effect.
 
+## Background Repository Optimization
+
+Empty directories and unneeded config settings may accumulate in a repository and
+slow down git operations. Gitaly can schedule a daily background task with a maximum duration
+to clean up these items and improve performance.
+
+**For Omnibus GitLab**
+
+1. Edit /etc/gitlab/gitlab.rb and add:
+
+```ruby
+gitaly['daily_maintenance_start_hour'] = 4
+gitaly['daily_maintenance_start_minute'] = 30
+gitaly['daily_maintenance_duration'] = '30m'
+gitaly['daily_maintenance_storages'] = ["default"]
+```
+
+**For installations from source**
+
+1. Edit `/home/git/gitaly/config.toml` and add:
+
+```toml
+[daily_maintenance]
+start_hour = 4
+start_minute = 30
+duration = '30m'
+storages = ["default"]
+```
+
 ## Rotate Gitaly authentication token
 
 Rotating credentials in a production environment often requires downtime, causes outages, or both.
