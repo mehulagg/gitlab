@@ -15,7 +15,7 @@ RSpec.shared_examples 'handle uploads authorize request' do
     end
 
     it 'rejects requests that bypassed gitlab-workhorse' do
-      workhorse_headers.delete(Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER)
+      workhorse_header.delete(Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER)
 
       expect { subject }.to raise_error(JWT::DecodeError)
     end

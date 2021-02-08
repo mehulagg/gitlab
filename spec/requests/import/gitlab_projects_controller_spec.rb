@@ -5,8 +5,7 @@ require 'spec_helper'
 RSpec.describe Import::GitlabProjectsController do
   include WorkhorseHelpers
 
-  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-  let(:workhorse_headers) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
+  include_context 'workhorse headers'
 
   let_it_be(:namespace) { create(:namespace) }
   let_it_be(:user) { namespace.owner }
@@ -16,7 +15,7 @@ RSpec.describe Import::GitlabProjectsController do
   end
 
   describe 'POST create' do
-    subject { upload_archive(file_upload, workhorse_headers, params) }
+    subject { upload_archive(file_upload, workhorse_header, params) }
 
     let(:file) { File.join('spec', 'features', 'projects', 'import_export', 'test_project_export.tar.gz') }
     let(:file_upload) { fixture_file_upload(file) }
@@ -88,7 +87,7 @@ RSpec.describe Import::GitlabProjectsController do
       let(:uploader_class) { ImportExportUploader }
       let(:maximum_size) { Gitlab::CurrentSettings.max_import_size.megabytes }
 
-      subject { post authorize_import_gitlab_project_path, headers: workhorse_headers }
+      subject { post authorize_import_gitlab_project_path, headers: workhorse_header }
     end
   end
 end

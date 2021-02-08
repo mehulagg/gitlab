@@ -5,12 +5,10 @@ require 'spec_helper'
 RSpec.describe Import::GitlabGroupsController do
   include WorkhorseHelpers
 
+  include_context 'workhorse headers'
+
   let_it_be(:user) { create(:user) }
   let(:import_path) { "#{Dir.tmpdir}/gitlab_groups_controller_spec" }
-  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-  let(:workhorse_headers) do
-    { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token }
-  end
 
   before do
     allow_next_instance_of(Gitlab::ImportExport) do |import_export|
@@ -27,7 +25,7 @@ RSpec.describe Import::GitlabGroupsController do
   end
 
   describe 'POST create' do
-    subject(:import_request) { upload_archive(file_upload, workhorse_headers, request_params) }
+    subject(:import_request) { upload_archive(file_upload, workhorse_header, request_params) }
 
     let(:file) { File.join('spec', %w[fixtures group_export.tar.gz]) }
     let(:file_upload) { fixture_file_upload(file) }
@@ -117,7 +115,7 @@ RSpec.describe Import::GitlabGroupsController do
       subject(:import_request) do
         upload_archive(
           file_upload,
-          workhorse_headers,
+          workhorse_header,
           { path: '', name: '' }
         )
       end
@@ -197,7 +195,7 @@ RSpec.describe Import::GitlabGroupsController do
       let(:uploader_class) { ImportExportUploader }
       let(:maximum_size) { Gitlab::CurrentSettings.max_import_size.megabytes }
 
-      subject { post authorize_import_gitlab_group_path, headers: workhorse_headers }
+      subject { post authorize_import_gitlab_group_path, headers: workhorse_header }
     end
   end
 end

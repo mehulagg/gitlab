@@ -5,19 +5,18 @@ require 'spec_helper'
 RSpec.describe API::ProjectImport do
   include WorkhorseHelpers
 
+  include_context 'workhorse headers'
+
   let(:user) { create(:user) }
   let(:file) { File.join('spec', 'features', 'projects', 'import_export', 'test_project_export.tar.gz') }
   let(:namespace) { create(:group) }
-
-  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-  let(:workhorse_headers) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
 
   before do
     namespace.add_owner(user)
   end
 
   describe 'POST /projects/import' do
-    subject { upload_archive(file_upload, workhorse_headers, params) }
+    subject { upload_archive(file_upload, workhorse_header, params) }
 
     let(:file_upload) { fixture_file_upload(file) }
 
@@ -297,7 +296,7 @@ RSpec.describe API::ProjectImport do
   end
 
   describe 'POST /projects/import/authorize' do
-    subject { post api('/projects/import/authorize', user), headers: workhorse_headers }
+    subject { post api('/projects/import/authorize', user), headers: workhorse_header }
 
     it 'authorizes importing project with workhorse header' do
       subject
@@ -308,7 +307,7 @@ RSpec.describe API::ProjectImport do
     end
 
     it 'rejects requests that bypassed gitlab-workhorse' do
-      workhorse_headers.delete(Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER)
+      workhorse_header.delete(Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER)
 
       subject
 

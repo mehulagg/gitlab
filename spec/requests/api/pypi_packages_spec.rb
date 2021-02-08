@@ -74,8 +74,8 @@ RSpec.describe API::PypiPackages do
   end
 
   describe 'POST /api/v4/projects/:id/packages/pypi/authorize' do
-    let_it_be(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-    let_it_be(:workhorse_header) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
+    include_context 'workhorse headers'
+
     let(:url) { "/projects/#{project.id}/packages/pypi/authorize" }
     let(:headers) { {} }
 
@@ -124,8 +124,8 @@ RSpec.describe API::PypiPackages do
   end
 
   describe 'POST /api/v4/projects/:id/packages/pypi' do
-    let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-    let(:workhorse_header) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
+    include_context 'workhorse headers'
+
     let_it_be(:file_name) { 'package.whl' }
     let(:url) { "/projects/#{project.id}/packages/pypi" }
     let(:headers) { {} }

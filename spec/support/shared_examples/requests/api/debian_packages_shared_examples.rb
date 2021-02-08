@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.shared_context 'Debian repository shared context' do |object_type|
+  include_context 'workhorse header'
+
   before do
     stub_feature_flags(debian_packages: true)
   end
@@ -37,10 +39,9 @@ RSpec.shared_context 'Debian repository shared context' do |object_type|
   let(:params) { workhorse_params }
 
   let(:auth_headers) { {} }
-  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
   let(:workhorse_headers) do
     if method == :put
-      { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token }
+      workhorse header
     else
       {}
     end

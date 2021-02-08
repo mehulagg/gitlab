@@ -144,8 +144,8 @@ RSpec.describe API::NugetProjectPackages do
   end
 
   describe 'PUT /api/v4/projects/:id/packages/nuget/authorize' do
-    let_it_be(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-    let_it_be(:workhorse_header) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
+    include_context 'workhorse headers'
+
     let(:url) { "/projects/#{target.id}/packages/nuget/authorize" }
     let(:headers) { {} }
 
@@ -194,8 +194,8 @@ RSpec.describe API::NugetProjectPackages do
   end
 
   describe 'PUT /api/v4/projects/:id/packages/nuget' do
-    let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-    let(:workhorse_header) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
+    include_context 'workhorse headers'
+
     let_it_be(:file_name) { 'package.nupkg' }
     let(:url) { "/projects/#{target.id}/packages/nuget" }
     let(:headers) { {} }

@@ -5,10 +5,10 @@ require 'spec_helper'
 RSpec.describe Projects::RequirementsManagement::RequirementsController do
   include WorkhorseHelpers
 
+  include_context 'workhorse headers'
+
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :public) }
-  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-  let(:workhorse_headers) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
 
   shared_examples 'response with 404 status' do
     it 'returns 404' do
@@ -22,7 +22,7 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
     let(:file) { fixture_file_upload('spec/fixtures/csv_comma.csv') }
     let(:params) { { namespace_id: project.namespace.id, path: 'test' } }
 
-    subject { upload_file(file, workhorse_headers, params) }
+    subject { upload_file(file, workhorse_header, params) }
 
     context 'unauthorized' do
       context 'when user is not signed in' do
@@ -113,7 +113,7 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
   describe 'POST #authorize' do
     subject do
       post import_csv_authorize_project_requirements_management_requirements_path(project),
-        headers: workhorse_headers
+        headers: workhorse_header
     end
 
     before do

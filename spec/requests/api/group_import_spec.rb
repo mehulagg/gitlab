@@ -5,13 +5,13 @@ require 'spec_helper'
 RSpec.describe API::GroupImport do
   include WorkhorseHelpers
 
+  include_context 'workhorse headers'
+
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let(:path) { '/groups/import' }
   let(:file) { File.join('spec', 'fixtures', 'group_export.tar.gz') }
   let(:export_path) { "#{Dir.tmpdir}/group_export_spec" }
-  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-  let(:workhorse_headers) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
 
   before do
     allow_next_instance_of(Gitlab::ImportExport) do |import_export|
@@ -35,7 +35,7 @@ RSpec.describe API::GroupImport do
       }
     end
 
-    subject { upload_archive(file_upload, workhorse_headers, params) }
+    subject { upload_archive(file_upload, workhorse_header, params) }
 
     shared_examples 'when all params are correct' do
       context 'when user is authorized to create new group' do
@@ -152,7 +152,7 @@ RSpec.describe API::GroupImport do
             params[:file] = file_upload
 
             expect do
-              upload_archive(file_upload, workhorse_headers, params)
+              upload_archive(file_upload, workhorse_header, params)
             end.not_to change { Group.count }.from(1)
 
             expect(response).to have_gitlab_http_status(:bad_request)
@@ -172,7 +172,7 @@ RSpec.describe API::GroupImport do
 
       context 'without a file from workhorse' do
         it 'rejects the request' do
-          upload_archive(nil, workhorse_headers, params)
+          upload_archive(nil, workhorse_header, params)
 
           expect(response).to have_gitlab_http_status(:bad_request)
         end
@@ -258,7 +258,7 @@ RSpec.describe API::GroupImport do
   end
 
   describe 'POST /groups/import/authorize' do
-    subject { post api('/groups/import/authorize', user), headers: workhorse_headers }
+    subject { post api('/groups/import/authorize', user), headers: workhorse_header }
 
     it 'authorizes importing group with workhorse header' do
       subject
@@ -268,7 +268,7 @@ RSpec.describe API::GroupImport do
     end
 
     it 'rejects requests that bypassed gitlab-workhorse' do
-      workhorse_headers.delete(Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER)
+      workhorse_header.delete(Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER)
 
       subject
 
