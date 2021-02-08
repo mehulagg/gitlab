@@ -1,7 +1,22 @@
 import $ from 'jquery';
 import { __ } from './locale';
 
-export function expandSection($section) {
+/**
+ * Returns true if the given section is expanded or not
+ *
+ * For legacy consistency, it supports both jQuery and DOM elements
+ *
+ * @param {jQuery | Element} section
+ */
+export function isExpanded(sectionArg) {
+  const section = sectionArg instanceof $ ? sectionArg[0] : sectionArg;
+
+  return section.classList.contains('expanded');
+}
+
+export function expandSection(sectionArg) {
+  const $section = $(sectionArg);
+
   $section.find('.js-settings-toggle:not(.js-settings-toggle-trigger-only)').text(__('Collapse'));
   // eslint-disable-next-line @gitlab/no-global-event-off
   $section.find('.settings-content').off('scroll.expandSection').scrollTop(0);
@@ -13,7 +28,9 @@ export function expandSection($section) {
   }
 }
 
-export function closeSection($section) {
+export function closeSection(sectionArg) {
+  const $section = $(sectionArg);
+
   $section.find('.js-settings-toggle:not(.js-settings-toggle-trigger-only)').text(__('Expand'));
   $section.find('.settings-content').on('scroll.expandSection', () => expandSection($section));
   $section.removeClass('expanded');
