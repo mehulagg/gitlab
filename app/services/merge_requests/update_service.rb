@@ -103,7 +103,7 @@ module MergeRequests
 
         # Track edits to title or description
         #
-        Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+        merge_request_activity_counter
           .public_send("track_#{action}_edit_action".to_sym, user: current_user) # rubocop:disable GitlabSecurity/PublicSend
 
         # Track changes to Draft/WIP status
@@ -116,12 +116,12 @@ module MergeRequests
           if !old_title_wip && new_title_wip
             # Marked as Draft/WIP
             #
-            Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+            merge_request_activity_counter
               .track_marked_as_draft_action(user: current_user)
           elsif old_title_wip && !new_title_wip
             # Unmarked as Draft/WIP
             #
-            Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+            merge_request_activity_counter
               .track_unmarked_as_draft_action(user: current_user)
           end
         end
