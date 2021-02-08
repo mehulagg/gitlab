@@ -319,7 +319,7 @@ their own authors. To change this setting:
 
 Note that users can edit the approval rules in every merge request and override pre-defined settings unless it's set [**not to allow** overrides](#prevent-overriding-default-approvals).
 
-It is possible to prevent authors from approving their own merge requests [at the instance level](../../admin_area/merge_requests_approvals.html). When enabled, this setting will no longer be editable on the project level.
+It is possible to prevent authors from approving their own merge requests [at the instance level](../../admin_area/merge_requests_approvals.md). When enabled, this setting will no longer be editable on the project level.
 
 #### Prevent approval of merge requests by their committers **(PREMIUM)**
 
@@ -332,7 +332,7 @@ enable this feature:
 1. Check the **Prevent MR approvals from users who make commits to the MR.** checkbox.
 1. Click **Save changes**.
 
-It is possible to prevent committers from approving their merge requests [at the instance level](../../admin_area/merge_requests_approvals.html). When enabled, this setting will no longer be editable on the project level.
+It is possible to prevent committers from approving their merge requests [at the instance level](../../admin_area/merge_requests_approvals.md). When enabled, this setting will no longer be editable on the project level.
 
 #### Require authentication when approving a merge request
 
