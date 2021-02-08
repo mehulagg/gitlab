@@ -28,7 +28,7 @@ module Gitlab
         end
 
         def render_name_and_description(object)
-          content = "### #{object[:name]}\n"
+          content = "### #{object[:name].camelcase}\n"
 
           if object[:description].present?
             content += "\n#{object[:description]}.\n"
@@ -47,6 +47,14 @@ module Gitlab
             render_field_type(field[:type][:info]),
             render_description(field)
             ]
+        end
+
+        def render_argument(argument)
+          '| %s | %s | %s |' % [
+            render_name(argument),
+            render_description(argument),
+            render_field_type(argument[:type][:info])
+          ]
         end
 
         def render_enum_value(value)
@@ -96,6 +104,10 @@ module Gitlab
           object_types.each do |type|
             type[:fields] += type[:connections]
           end
+        end
+
+        def queries
+          graphql_operation_types.find { |type| type[:name] == 'Query' }[:fields]
         end
 
         # We ignore the built-in enum types.

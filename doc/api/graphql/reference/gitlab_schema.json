@@ -62153,7 +62153,7 @@
                 },
                 {
                   "name": "content",
-                  "description": "Contents of '.gitlab-ci.yml'.",
+                  "description": "Contents of `.gitlab-ci.yml`.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -62356,7 +62356,7 @@
               "args": [
                 {
                   "name": "fullPath",
-                  "description": "The full path of the project, group or namespace, e.g., \"gitlab-org/gitlab-foss\".",
+                  "description": "The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -62579,7 +62579,7 @@
               "args": [
                 {
                   "name": "fullPath",
-                  "description": "The full path of the project, group or namespace, e.g., \"gitlab-org/gitlab-foss\".",
+                  "description": "The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -62633,7 +62633,7 @@
               "args": [
                 {
                   "name": "fullPath",
-                  "description": "The full path of the project, group or namespace, e.g., \"gitlab-org/gitlab-foss\".",
+                  "description": "The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,

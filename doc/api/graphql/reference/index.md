@@ -26,6 +26,150 @@ in [Removed Items](../removed_items.md).
 
 <!-- vale gitlab.Spelling = NO -->
 
+## Queries
+
+Queries are used to get the resources, filter or query them.
+
+For more information, see [Queries and Mutations](https://graphql.org/learn/queries/) on `graphql.org`.
+
+### CiApplicationSettings
+
+CI related settings that apply to the entire instance..
+
+### CiConfig
+
+Get linted and processed contents of a CI config. Should not be requested more than once per request..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `content` | Contents of `.gitlab-ci.yml`. | String! |
+| `dryRun` | Run pipeline creation simulation, or only do static check. | Boolean |
+| `projectPath` | The project of the CI config. | ID! |
+
+### ContainerRepository
+
+Find a container repository..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The global ID of the container repository. | ContainerRepositoryID! |
+
+### CurrentUser
+
+Get information about current user..
+
+### DesignManagement
+
+Fields related to design management..
+
+### Echo
+
+Text to echo back..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `text` | Text to echo back. | String! |
+
+### GeoNode
+
+Find a Geo node..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `name` | The name of the Geo node. Defaults to the current Geo node name. | String |
+
+### Group
+
+Find a group..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+
+### InstanceSecurityDashboard
+
+Fields related to Instance Security Dashboard..
+
+### Issue
+
+Find an issue..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The global ID of the Issue. | IssueID! |
+
+### Iteration
+
+Find an iteration..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | Find an iteration by its ID. | IterationID! |
+
+### Metadata
+
+Metadata about GitLab..
+
+### Milestone
+
+Find a milestone..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | Find a milestone by its ID. | MilestoneID! |
+
+### Namespace
+
+Find a namespace..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+
+### Package
+
+Find a package..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The global ID of the package. | PackagesPackageID! |
+
+### Project
+
+Find a project..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+
+### RunnerSetup
+
+Get runner setup instructions..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `architecture` | Architecture to generate the instructions for. | String! |
+| `groupId` | Group to register the runner for. | GroupID |
+| `platform` | Platform to generate the instructions for. | String! |
+| `projectId` | Project to register the runner for. | ProjectID |
+
+### User
+
+Find a user..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | ID of the User. | UserID |
+| `username` | Username of the User. | String |
+
+### Vulnerability
+
+Find a vulnerability..
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The Global ID of the Vulnerability. | VulnerabilityID! |
+
 ## Object types
 
 Object types represent the resources that the GitLab GraphQL API can return.
