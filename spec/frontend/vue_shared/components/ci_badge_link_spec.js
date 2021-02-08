@@ -1,10 +1,9 @@
-import Vue from 'vue';
-import mountComponent from 'helpers/vue_mount_component_helper';
-import ciBadge from '~/vue_shared/components/ci_badge_link.vue';
+import { mount } from '@vue/test-utils';
+import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
+import CiIcon from '~/vue_shared/components/ci_icon.vue';
 
 describe('CI Badge Link Component', () => {
-  let CIBadge;
-  let vm;
+  let wrapper;
 
   const statuses = {
     canceled: {
@@ -72,29 +71,32 @@ describe('CI Badge Link Component', () => {
     },
   };
 
-  beforeEach(() => {
-    CIBadge = Vue.extend(ciBadge);
-  });
+  const findIcon = () => wrapper.findComponent(CiIcon);
+
+  const createComponent = (props) => {
+    wrapper = mount(CiBadge, { propsData: { ...props } });
+  };
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
   });
 
   it('should render each status badge', () => {
     Object.keys(statuses).map((status) => {
-      vm = mountComponent(CIBadge, { status: statuses[status] });
+      createComponent({ status: statuses[status] });
 
-      expect(vm.$el.getAttribute('href')).toEqual(statuses[status].details_path);
-      expect(vm.$el.textContent.trim()).toEqual(statuses[status].text);
-      expect(vm.$el.getAttribute('class')).toContain(`ci-status ci-${statuses[status].group}`);
-      expect(vm.$el.querySelector('svg')).toBeDefined();
-      return vm;
+      expect(wrapper.attributes('href')).toEqual(statuses[status].details_path);
+      expect(wrapper.text()).toEqual(statuses[status].text);
+      expect(wrapper.classes()).toContain('ci-status');
+      expect(wrapper.classes()).toContain(`ci-${statuses[status].group}`);
+      expect(findIcon().exists()).toBe(true);
     });
   });
 
   it('should not render label', () => {
-    vm = mountComponent(CIBadge, { status: statuses.canceled, showText: false });
+    createComponent({ status: statuses.canceled, showText: false });
 
-    expect(vm.$el.textContent.trim()).toEqual('');
+    expect(wrapper.text()).toEqual('');
   });
 });
