@@ -27,14 +27,15 @@ describe('TerraformList', () => {
       },
     };
 
-    // Override @client  _showDetails
-    getStatesQuery.getStates.definitions[1].selectionSet.selections[0].directives = [];
-
-    // Override @client errorMessages
-    getStatesQuery.getStates.definitions[1].selectionSet.selections[1].directives = [];
-
-    // Override @client loadingActions
-    getStatesQuery.getStates.definitions[1].selectionSet.selections[2].directives = [];
+    // Override @client  directives
+    getStatesQuery.getStates.definitions[1].selectionSet.selections = getStatesQuery.getStates.definitions[1].selectionSet.selections.map(
+      (selection) => {
+        return {
+          ...selection,
+          directives: [],
+        };
+      },
+    );
 
     const statsQueryResponse = queryResponse || jest.fn().mockResolvedValue(apolloQueryResponse);
     const apolloProvider = createMockApollo([[getStatesQuery, statsQueryResponse]]);
@@ -66,7 +67,8 @@ describe('TerraformList', () => {
           id: 'gid://gitlab/Terraform::State/1',
           name: 'state-1',
           latestVersion: null,
-          loadingActions: false,
+          loadingLock: false,
+          loadingRemove: false,
           lockedAt: null,
           lockedByUser: null,
           updatedAt: null,
@@ -77,7 +79,8 @@ describe('TerraformList', () => {
           id: 'gid://gitlab/Terraform::State/2',
           name: 'state-2',
           latestVersion: null,
-          loadingActions: false,
+          loadingLock: false,
+          loadingRemove: false,
           lockedAt: null,
           lockedByUser: null,
           updatedAt: null,
