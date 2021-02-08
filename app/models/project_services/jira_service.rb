@@ -166,7 +166,7 @@ class JiraService < IssueTrackerService
   def close_issue(entity, external_issue, current_user)
     issue = find_issue(external_issue.iid)
 
-    return if issue.nil? || has_resolution?(issue) || !jira_issue_transition_id.present?
+    return if issue.nil? || has_resolution?(issue)
 
     commit_id = case entity
                 when Commit then entity.id
@@ -261,20 +261,44 @@ class JiraService < IssueTrackerService
   # the issue is transitioned at the order given by the user
   # if any transition fails it will log the error message and stop the transition sequence
   def transition_issue(issue)
-    jira_issue_transition_id.scan(Gitlab::Regex.jira_transition_id_regex).each do |transition_id|
-      issue.transitions.build.save!(transition: { id: transition_id })
-    rescue => error
-      log_error(
-        "Issue transition failed",
-          error: {
-            exception_class: error.class.name,
-            exception_message: error.message,
-            exception_backtrace: Gitlab::BacktraceCleaner.clean_backtrace(error.backtrace)
-          },
-         client_url: client_url
-      )
-      return false
+    return transition_issue_to_done(issue) if jira_issue_transition_id.blank?
+
+    jira_issue_transition_id.scan(Gitlab::Regex.jira_transition_id_regex).all? do |transition_id|
+      transition_issue_to_id(issue, transition_id)
     end
+  end
+
+  def transition_issue_to_id(issue, transition_id)
+    issue.transitions.build.save!(
+      transition: { id: transition_id }
+    )
+
+    true
+  rescue => error
+    log_error(
+      "Issue transition failed",
+        error: {
+          exception_class: error.class.name,
+          exception_message: error.message,
+          exception_backtrace: Gitlab::BacktraceCleaner.clean_backtrace(error.backtrace)
+        },
+        client_url: client_url
+    )
+
+    false
+  end
+
+  def transition_issue_to_done(issue)
+    transitions = issue.transitions.all rescue []
+
+    transition = transitions.find do |transition|
+      status = transition&.to&.statusCategory
+      status && status['key'] == 'done'
+    end
+
+    return false unless transition
+
+    transition_issue_to_id(issue, transition.id)
   end
 
   def log_usage(action, user)
