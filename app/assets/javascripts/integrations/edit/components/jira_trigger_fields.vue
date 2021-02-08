@@ -1,7 +1,15 @@
 <script>
 import { mapGetters } from 'vuex';
-import { GlFormGroup, GlFormCheckbox, GlFormRadio } from '@gitlab/ui';
+import {
+  GlFormGroup,
+  GlFormCheckbox,
+  GlFormRadio,
+  GlFormInput,
+  GlLink,
+  GlSprintf,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
+import eventHub from '../event_hub';
 
 const commentDetailOptions = [
   {
@@ -18,12 +26,32 @@ const commentDetailOptions = [
   },
 ];
 
+const issueTransitionOptions = [
+  {
+    value: 'auto',
+    label: s__('JiraService|Move to Done'),
+    help: s__('Use the next Jira status with a category of "Done"'),
+  },
+  {
+    value: 'custom',
+    label: s__('JiraService|Use custom transitions'),
+    help: s__(
+      'JiraService|Set transition IDs for Jira workflow transitions. %{linkStart}Learn more%{linkEnd}',
+    ),
+    link:
+      'https://docs.gitlab.com/ee/user/project/integrations/jira.html#obtaining-a-transition-id',
+  },
+];
+
 export default {
   name: 'JiraTriggerFields',
   components: {
     GlFormGroup,
     GlFormCheckbox,
     GlFormRadio,
+    GlFormInput,
+    GlLink,
+    GlSprintf,
   },
   props: {
     initialTriggerCommit: {
@@ -43,20 +71,47 @@ export default {
       required: false,
       default: 'standard',
     },
+    initialJiraIssueTransitionId: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   data() {
     return {
+      validated: false,
       triggerCommit: this.initialTriggerCommit,
       triggerMergeRequest: this.initialTriggerMergeRequest,
       enableComments: this.initialEnableComments,
       commentDetail: this.initialCommentDetail,
+      jiraIssueTransitionId: this.initialJiraIssueTransitionId,
+      issueTransitionMode: this.initialJiraIssueTransitionId.length ? 'custom' : 'auto',
       commentDetailOptions,
+      issueTransitionOptions,
     };
   },
   computed: {
     ...mapGetters(['isInheriting']),
-    showEnableComments() {
+    showTriggerSettings() {
       return this.triggerCommit || this.triggerMergeRequest;
+    },
+    validIssueTransitionId() {
+      return (
+        !this.validated ||
+        this.issueTransitionMode !== 'custom' ||
+        this.jiraIssueTransitionId.length > 0
+      );
+    },
+  },
+  created() {
+    eventHub.$on('validateForm', this.validateForm);
+  },
+  beforeDestroy() {
+    eventHub.$off('validateForm', this.validateForm);
+  },
+  methods: {
+    validateForm() {
+      this.validated = true;
     },
   },
 };
@@ -89,7 +144,7 @@ export default {
     </gl-form-group>
 
     <gl-form-group
-      v-show="showEnableComments"
+      v-show="showTriggerSettings"
       :label="s__('Integrations|Comment settings:')"
       label-for="service[comment_on_event_enabled]"
       class="gl-pl-6"
@@ -106,7 +161,7 @@ export default {
     </gl-form-group>
 
     <gl-form-group
-      v-show="showEnableComments && enableComments"
+      v-show="showTriggerSettings && enableComments"
       :label="s__('Integrations|Comment detail:')"
       label-for="service[comment_detail]"
       class="gl-pl-9"
@@ -125,6 +180,60 @@ export default {
           {{ commentDetailOption.help }}
         </template>
       </gl-form-radio>
+    </gl-form-group>
+
+    <gl-form-group
+      v-show="showTriggerSettings"
+      :label="s__('JiraService|Closing Jira issues:')"
+      class="gl-pl-6"
+      data-testid="issue-transition-settings"
+    >
+      <gl-form-radio
+        v-for="issueTransitionOption in issueTransitionOptions"
+        :key="issueTransitionOption.value"
+        v-model="issueTransitionMode"
+        :value="issueTransitionOption.value"
+        :disabled="isInheriting"
+        :data-qa-selector="'service_issue_transition_mode_' + issueTransitionOption.value"
+      >
+        {{ issueTransitionOption.label }}
+
+        <template
+          v-if="issueTransitionMode === 'custom' && issueTransitionOption.value === 'custom'"
+        >
+          <gl-form-input
+            v-model="jiraIssueTransitionId"
+            name="service[jira_issue_transition_id]"
+            type="text"
+            class="gl-mt-3 gl-mb-3"
+            data-qa-selector="service_jira_issue_transition_id_field"
+            :aria-label="s__('JiraService|Jira workflow transition IDs')"
+            :placeholder="s__('JiraService|For example, 12, 24')"
+            :disabled="isInheriting"
+            :required="true"
+            :state="validIssueTransitionId"
+          />
+
+          <span class="invalid-feedback">
+            {{ s__('This field is required.') }}
+          </span>
+        </template>
+
+        <template #help>
+          <gl-sprintf :message="issueTransitionOption.help">
+            <template #link="{ content }">
+              <gl-link :href="issueTransitionOption.link" target="_blank">{{ content }}</gl-link>
+            </template>
+          </gl-sprintf>
+        </template>
+      </gl-form-radio>
+
+      <input
+        v-if="issueTransitionMode === 'auto'"
+        name="service[jira_issue_transition_id]"
+        type="hidden"
+        value=""
+      />
     </gl-form-group>
   </div>
 </template>

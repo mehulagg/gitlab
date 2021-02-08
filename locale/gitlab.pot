@@ -16616,6 +16616,9 @@ msgstr ""
 msgid "JiraService|An error occured while fetching issue list"
 msgstr ""
 
+msgid "JiraService|Closing Jira issues:"
+msgstr ""
+
 msgid "JiraService|Define the type of Jira issue to create from a vulnerability."
 msgstr ""
 
@@ -16670,7 +16673,7 @@ msgstr ""
 msgid "JiraService|Jira project key"
 msgstr ""
 
-msgid "JiraService|Jira workflow transition IDs"
+msgid "JiraService|Move to Done"
 msgstr ""
 
 msgid "JiraService|Open Jira"
@@ -16688,7 +16691,7 @@ msgstr ""
 msgid "JiraService|Select issue type"
 msgstr ""
 
-msgid "JiraService|Set transition IDs for Jira workflow transitions. %{link_start}Learn more%{link_end}"
+msgid "JiraService|Set transition IDs for Jira workflow transitions. %{linkStart}Learn more%{linkEnd}"
 msgstr ""
 
 msgid "JiraService|Sign in to GitLab.com to get started."
@@ -16701,6 +16704,9 @@ msgid "JiraService|Use a password for server version and an API token for cloud 
 msgstr ""
 
 msgid "JiraService|Use a username for server version and an email for cloud version"
+msgstr ""
+
+msgid "JiraService|Use custom transitions"
 msgstr ""
 
 msgid "JiraService|Username or Email"
@@ -31622,6 +31628,9 @@ msgid "Use one line per URI"
 msgstr ""
 
 msgid "Use template"
+msgstr ""
+
+msgid "Use the next Jira status with a category of \"Done\""
 msgstr ""
 
 msgid "Use this token to validate received payloads"

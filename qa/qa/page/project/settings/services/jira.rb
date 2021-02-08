@@ -10,7 +10,12 @@ module QA
               element :service_url_field, ':data-qa-selector="`${fieldId}_field`"' # rubocop:disable QA/ElementWithPattern
               element :service_username_field, ':data-qa-selector="`${fieldId}_field`"' # rubocop:disable QA/ElementWithPattern
               element :service_password_field, ':data-qa-selector="`${fieldId}_field`"' # rubocop:disable QA/ElementWithPattern
-              element :service_jira_issue_transition_id_field, ':data-qa-selector="`${fieldId}_field`"' # rubocop:disable QA/ElementWithPattern
+            end
+
+            view 'app/assets/javascripts/integrations/edit/components/jira_trigger_fields.vue' do
+              element :service_issue_transition_mode_auto
+              element :service_issue_transition_mode_custom
+              element :service_jira_issue_transition_id_field
             end
 
             view 'app/assets/javascripts/integrations/edit/components/integration_form.vue' do

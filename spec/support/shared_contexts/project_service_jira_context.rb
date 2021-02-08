@@ -10,6 +10,5 @@ RSpec.shared_context 'project service Jira context' do
     fill_in 'service_url', with: url
     fill_in 'service_username', with: 'username'
     fill_in 'service_password', with: 'password'
-    fill_in 'service_jira_issue_transition_id', with: '25'
   end
 end

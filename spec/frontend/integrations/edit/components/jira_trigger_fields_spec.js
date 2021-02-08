@@ -95,7 +95,7 @@ describe('JiraTriggerFields', () => {
       });
     });
 
-    it('disables checkboxes and radios if inheriting', () => {
+    it('disables input fields if inheriting', () => {
       createComponent(
         {
           initialTriggerCommit: true,
@@ -104,12 +104,8 @@ describe('JiraTriggerFields', () => {
         true,
       );
 
-      wrapper.findAll('[type=checkbox]').wrappers.forEach((checkbox) => {
-        expect(checkbox.attributes('disabled')).toBe('disabled');
-      });
-
-      wrapper.findAll('[type=radio]').wrappers.forEach((radio) => {
-        expect(radio.attributes('disabled')).toBe('disabled');
+      wrapper.findAll('[type=text], [type=checkbox], [type=radio]').wrappers.forEach((input) => {
+        expect(input.attributes('disabled')).toBe('disabled');
       });
     });
   });
