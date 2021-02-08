@@ -120,7 +120,7 @@ RSpec.describe Notes::CreateService do
           end
 
           it 'tracks merge request usage data' do
-            expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter).to receive(:track_create_comment_action).with(user: user)
+            expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter).to receive(:track_create_comment_action).with(note: kind_of(Note))
 
             described_class.new(project_with_repo, user, new_opts).execute
           end
@@ -457,6 +457,26 @@ RSpec.describe Notes::CreateService do
           existing_note.reload
         end.to change { existing_note.type }.from(nil).to('DiscussionNote')
             .and change { existing_note.updated_at }
+      end
+
+      context 'failure in when_saved' do
+        let(:service) { described_class.new(project, user, reply_opts) }
+
+        it 'converts existing note to DiscussionNote' do
+          expect do
+            existing_note
+
+            allow(service).to receive(:when_saved).and_raise(ActiveRecord::StatementInvalid)
+
+            travel_to(Time.current + 1.minute) do
+              service.execute
+            rescue ActiveRecord::StatementInvalid
+            end
+
+            existing_note.reload
+          end.to change { existing_note.type }.from(nil).to('DiscussionNote')
+            .and change { existing_note.updated_at }
+        end
       end
 
       it 'returns a DiscussionNote with its parent discussion refreshed correctly' do

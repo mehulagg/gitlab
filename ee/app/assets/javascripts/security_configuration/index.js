@@ -4,6 +4,11 @@ import SecurityConfigurationApp from './components/app.vue';
 
 export default function init() {
   const el = document.getElementById('js-security-configuration');
+
+  if (!el) {
+    return null;
+  }
+
   const {
     autoDevopsHelpPagePath,
     autoDevopsPath,

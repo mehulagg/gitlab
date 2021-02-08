@@ -12,12 +12,14 @@ module Gitlab
       rack_attack::Request.include(Gitlab::RackAttack::Request)
 
       # This is Rack::Attack::DEFAULT_THROTTLED_RESPONSE, modified to allow a custom response
-      Rack::Attack.throttled_response = lambda do |env|
+      rack_attack.throttled_response = lambda do |env|
         throttled_headers = Gitlab::RackAttack.throttled_response_headers(
           env['rack.attack.matched'], env['rack.attack.match_data']
         )
         [429, { 'Content-Type' => 'text/plain' }.merge(throttled_headers), [Gitlab::Throttle.rate_limiting_response_text]]
       end
+
+      rack_attack.cache.store = Gitlab::RackAttack::InstrumentedCacheStore.new
 
       # Configure the throttles
       configure_throttles(rack_attack)
@@ -49,9 +51,9 @@ module Gitlab
     # reset. This is a standardized HTTP header:
     # https://tools.ietf.org/html/rfc7231#page-69
     #
-    # - RateLimit-Reset: Similar to Retry-After.
+    # - RateLimit-Reset: the point of time that the request quota is reset, in Unix time
     #
-    # - RateLimit-ResetTime: the point of time that the quest quota is reset.
+    # - RateLimit-ResetTime: the point of time that the request quota is reset, in HTTP date format
     def self.throttled_response_headers(matched, match_data)
       # Match data example:
       # {:discriminator=>"127.0.0.1", :count=>12, :period=>60 seconds, :limit=>1, :epoch_time=>1609833930}
@@ -62,14 +64,14 @@ module Gitlab
       observed = match_data[:count]
       now = match_data[:epoch_time]
       retry_after = period - (now % period)
-      reset_time = now + (period - now % period)
+      reset_time = Time.at(now + retry_after) # rubocop:disable Rails/TimeZone
       {
         'RateLimit-Name' => matched.to_s,
         'RateLimit-Limit' => rounded_limit.to_s,
         'RateLimit-Observed' => observed.to_s,
         'RateLimit-Remaining' => (limit > observed ? limit - observed : 0).to_s,
-        'RateLimit-Reset' => retry_after.to_s,
-        'RateLimit-ResetTime' => Time.at(reset_time).httpdate,
+        'RateLimit-Reset' => reset_time.to_i.to_s,
+        'RateLimit-ResetTime' => reset_time.httpdate,
         'Retry-After' => retry_after.to_s
       }
     end

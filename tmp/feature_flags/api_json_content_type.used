@@ -1,4 +1,0 @@
-This is added to silence warning for `api_json_content_type` being not used.
-It is hard to properly test this feature flag as part of specs.
-
-Ref.: `lib/api/api.rb`

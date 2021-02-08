@@ -49,7 +49,7 @@ module EE
 
     override :project_feature_attributes
     def project_feature_attributes
-      super + [:requirements_access_level]
+      super + [:requirements_access_level, :security_and_compliance_access_level]
     end
 
     override :project_params_attributes
@@ -72,6 +72,11 @@ module EE
     end
 
     private
+
+    override :project_setting_attributes
+    def project_setting_attributes
+      super + [:prevent_merge_without_jira_issue]
+    end
 
     def project_params_ee
       attrs = %i[

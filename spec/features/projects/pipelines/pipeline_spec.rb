@@ -15,6 +15,7 @@ RSpec.describe 'Pipeline', :js do
     sign_in(user)
     project.add_role(user, role)
     stub_feature_flags(graphql_pipeline_details: false)
+    stub_feature_flags(graphql_pipeline_details_users: false)
   end
 
   shared_context 'pipeline builds' do
@@ -625,20 +626,6 @@ RSpec.describe 'Pipeline', :js do
         end
       end
     end
-
-    context 'when FF dag_pipeline_tab is disabled' do
-      before do
-        stub_feature_flags(dag_pipeline_tab: false)
-        visit_pipeline
-      end
-
-      it 'does not show DAG link' do
-        expect(page).to have_link('Pipeline')
-        expect(page).to have_link('Jobs')
-        expect(page).not_to have_link('DAG')
-        expect(page).to have_link('Failed Jobs')
-      end
-    end
   end
 
   context 'when user does not have access to read jobs' do
@@ -855,6 +842,28 @@ RSpec.describe 'Pipeline', :js do
               within '.stage-column:nth-child(2)' do
                 expect(page).to have_content('deploy')
                 expect(page).to have_css('.ci-status-icon-pending')
+              end
+            end
+          end
+        end
+
+        context 'when deploy job is a bridge to trigger a downstream pipeline' do
+          let!(:deploy_job) do
+            create(:ci_bridge, :created, stage: 'deploy', name: 'deploy',
+              stage_idx: 2, pipeline: pipeline, project: project, resource_group: resource_group)
+          end
+
+          it 'shows deploy job as waiting for resource' do
+            subject
+
+            within('.pipeline-header-container') do
+              expect(page).to have_content('waiting')
+            end
+
+            within('.pipeline-graph') do
+              within '.stage-column:nth-child(2)' do
+                expect(page).to have_content('deploy')
+                expect(page).to have_css('.ci-status-icon-waiting-for-resource')
               end
             end
           end

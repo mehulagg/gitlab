@@ -47,3 +47,5 @@ export const FIELDS = [
 export const PAGE_SIZE = 20;
 
 export const DEFAULT_FILTERS = { statuses: ['TRIGGERED', 'ACKNOWLEDGED'] };
+
+export const DOMAIN = 'threat_monitoring';

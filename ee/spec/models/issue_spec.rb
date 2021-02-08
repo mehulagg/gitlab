@@ -280,22 +280,70 @@ RSpec.describe Issue do
     end
 
     describe 'confidential' do
-      subject { build(:issue, :confidential) }
+      let_it_be(:epic) { create(:epic, :confidential) }
 
-      it 'is valid when changing to non-confidential and is associated with non-confidential epic' do
-        subject.epic = build(:epic)
+      context 'when assigning an epic to a new issue' do
+        let(:issue) { build(:issue, confidential: confidential) }
 
-        subject.confidential = false
+        context 'when an issue is not confidential' do
+          let(:confidential) { false }
 
-        expect(subject).to be_valid
+          it 'is not valid' do
+            issue.epic = epic
+
+            expect(issue).not_to be_valid
+            expect(issue.errors.messages[:issue]).to include(/this issue cannot be assigned to a confidential epic since it is public/)
+          end
+        end
+
+        context 'when an issue is confidential' do
+          let(:confidential) { true }
+
+          it 'is valid' do
+            issue.epic = epic
+
+            expect(issue).to be_valid
+          end
+        end
       end
 
-      it 'is not valid when changing to non-confidential and is associated with confidential epic' do
-        subject.epic = build(:epic, :confidential)
+      context 'when updating an existing issue' do
+        let(:confidential) { true }
+        let(:issue) { create(:issue, confidential: confidential) }
 
-        subject.confidential = false
+        context 'when an issue is assigned to the confidential epic' do
+          before do
+            issue.update!(epic: epic)
+          end
 
-        expect(subject).not_to be_valid
+          context 'when changing issue to public' do
+            it 'is not valid' do
+              issue.confidential = false
+
+              expect(issue).not_to be_valid
+              expect(issue.errors.messages[:issue]).to include(/this issue cannot be made public since it belongs to a confidential epic/)
+            end
+          end
+        end
+
+        context 'when assigining a confidential issue' do
+          it 'is valid' do
+            issue.epic = epic
+
+            expect(issue).to be_valid
+          end
+        end
+
+        context 'when assigining a public issue' do
+          let(:confidential) { false }
+
+          it 'is not valid' do
+            issue.epic = epic
+
+            expect(issue).not_to be_valid
+            expect(issue.errors.messages[:issue]).to include(/this issue cannot be assigned to a confidential epic since it is public/)
+          end
+        end
       end
     end
   end
@@ -696,9 +744,8 @@ RSpec.describe Issue do
     where(:id, :issue_link_source_id, :issue_link_type_value, :expected) do
       1 | 1   | 0 | 'relates_to'
       1 | 1   | 1 | 'blocks'
-      1 | 2   | 3 | 'relates_to'
+      1 | 2   | 2 | 'relates_to'
       1 | 2   | 1 | 'is_blocked_by'
-      1 | 2   | 2 | 'blocks'
     end
 
     with_them do
@@ -729,8 +776,8 @@ RSpec.describe Issue do
     before_all do
       create(:issue_link, source: blocking_issue, target: issue, link_type: IssueLink::TYPE_BLOCKS)
       create(:issue_link, source: other_project_blocking_issue, target: issue, link_type: IssueLink::TYPE_BLOCKS)
-      create(:issue_link, source: issue, target: blocked_by_issue, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
-      create(:issue_link, source: issue, target: confidential_blocked_by_issue, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
+      create(:issue_link, source: blocked_by_issue, target: issue, link_type: IssueLink::TYPE_BLOCKS)
+      create(:issue_link, source: confidential_blocked_by_issue, target: issue, link_type: IssueLink::TYPE_BLOCKS)
       create(:issue_link, source: issue, target: related_issue, link_type: IssueLink::TYPE_RELATES_TO)
       create(:issue_link, source: closed_blocking_issue, target: issue, link_type: IssueLink::TYPE_BLOCKS)
     end
@@ -813,7 +860,7 @@ RSpec.describe Issue do
         blocked_issue_2 = create(:issue, project: project)
         blocked_issue_3 = create(:issue, project: project)
         create(:issue_link, source: issue, target: blocked_issue_1, link_type: IssueLink::TYPE_BLOCKS)
-        create(:issue_link, source: blocked_issue_2, target: issue, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
+        create(:issue_link, source: issue, target: blocked_issue_2, link_type: IssueLink::TYPE_BLOCKS)
         create(:issue_link, source: issue, target: blocked_issue_3, link_type: IssueLink::TYPE_BLOCKS)
         # Set to 0 for proper testing, this is being set by IssueLink callbacks.
         issue.update(blocking_issues_count: 0)

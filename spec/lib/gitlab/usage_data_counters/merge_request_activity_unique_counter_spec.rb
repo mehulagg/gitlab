@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter, :clean_gitlab_redis_shared_state do
   let(:merge_request) { build(:merge_request, id: 1) }
   let(:user) { build(:user, id: 1) }
+  let(:note) { build(:note, author: user) }
 
   shared_examples_for 'a tracked merge request unique event' do
     specify do
@@ -72,27 +73,111 @@ RSpec.describe Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter, :cl
     end
   end
 
+  describe '.track_approve_mr_action' do
+    subject { described_class.track_approve_mr_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_APPROVE_ACTION }
+    end
+  end
+
+  describe '.track_unapprove_mr_action' do
+    subject { described_class.track_unapprove_mr_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_UNAPPROVE_ACTION }
+    end
+  end
+
+  describe '.track_resolve_thread_action' do
+    subject { described_class.track_resolve_thread_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_RESOLVE_THREAD_ACTION }
+    end
+  end
+
+  describe '.track_unresolve_thread_action' do
+    subject { described_class.track_unresolve_thread_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_UNRESOLVE_THREAD_ACTION }
+    end
+  end
+
+  describe '.track_title_edit_action' do
+    subject { described_class.track_title_edit_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_EDIT_MR_TITLE_ACTION }
+    end
+  end
+
+  describe '.track_description_edit_action' do
+    subject { described_class.track_description_edit_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_EDIT_MR_DESC_ACTION }
+    end
+  end
+
   describe '.track_create_comment_action' do
-    subject { described_class.track_create_comment_action(user: user) }
+    subject { described_class.track_create_comment_action(note: note) }
 
     it_behaves_like 'a tracked merge request unique event' do
       let(:action) { described_class::MR_CREATE_COMMENT_ACTION }
     end
+
+    context 'when the note is multiline diff note' do
+      let(:note) { build(:diff_note_on_merge_request, author: user) }
+
+      before do
+        allow(note).to receive(:multiline?).and_return(true)
+      end
+
+      it_behaves_like 'a tracked merge request unique event' do
+        let(:action) { described_class::MR_CREATE_MULTILINE_COMMENT_ACTION }
+      end
+    end
   end
 
   describe '.track_edit_comment_action' do
-    subject { described_class.track_edit_comment_action(user: user) }
+    subject { described_class.track_edit_comment_action(note: note) }
 
     it_behaves_like 'a tracked merge request unique event' do
       let(:action) { described_class::MR_EDIT_COMMENT_ACTION }
     end
+
+    context 'when the note is multiline diff note' do
+      let(:note) { build(:diff_note_on_merge_request, author: user) }
+
+      before do
+        allow(note).to receive(:multiline?).and_return(true)
+      end
+
+      it_behaves_like 'a tracked merge request unique event' do
+        let(:action) { described_class::MR_EDIT_MULTILINE_COMMENT_ACTION }
+      end
+    end
   end
 
   describe '.track_remove_comment_action' do
-    subject { described_class.track_remove_comment_action(user: user) }
+    subject { described_class.track_remove_comment_action(note: note) }
 
     it_behaves_like 'a tracked merge request unique event' do
       let(:action) { described_class::MR_REMOVE_COMMENT_ACTION }
+    end
+
+    context 'when the note is multiline diff note' do
+      let(:note) { build(:diff_note_on_merge_request, author: user) }
+
+      before do
+        allow(note).to receive(:multiline?).and_return(true)
+      end
+
+      it_behaves_like 'a tracked merge request unique event' do
+        let(:action) { described_class::MR_REMOVE_MULTILINE_COMMENT_ACTION }
+      end
     end
   end
 
@@ -109,6 +194,38 @@ RSpec.describe Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter, :cl
 
     it_behaves_like 'a tracked merge request unique event' do
       let(:action) { described_class::MR_PUBLISH_REVIEW_ACTION }
+    end
+  end
+
+  describe '.track_add_suggestion_action' do
+    subject { described_class.track_add_suggestion_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_ADD_SUGGESTION_ACTION }
+    end
+  end
+
+  describe '.track_apply_suggestion_action' do
+    subject { described_class.track_apply_suggestion_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_APPLY_SUGGESTION_ACTION }
+    end
+  end
+
+  describe '.track_users_assigned_to_mr' do
+    subject { described_class.track_users_assigned_to_mr(users: [user]) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_ASSIGNED_USERS_ACTION }
+    end
+  end
+
+  describe '.track_users_review_requested' do
+    subject { described_class.track_users_review_requested(users: [user]) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_REVIEW_REQUESTED_USERS_ACTION }
     end
   end
 end

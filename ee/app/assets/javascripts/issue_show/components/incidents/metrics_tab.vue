@@ -89,17 +89,16 @@ export default {
       :action-cancel="{ text: $options.i18n.modalCancel }"
       :title="$options.i18n.modalTitle"
       :visible="modalVisible"
-      @canceled="clearInputs"
+      @hidden="clearInputs"
       @primary.prevent="onUpload"
     >
       <p>{{ $options.i18n.modalDescription }}</p>
-      <gl-form-group :label="__('URL')" label-for="upload-url-input">
+      <gl-form-group
+        :label="__('URL')"
+        label-for="upload-url-input"
+        :description="s__('Incidents|Must start with http or https')"
+      >
         <gl-form-input id="upload-url-input" v-model="modalUrl" />
-        <template name="description">
-          <p class="gl-text-gray-500 gl-mt-3 gl-mb-0">
-            {{ s__('Incidents|Must start with http or https') }}
-          </p>
-        </template>
       </gl-form-group>
     </gl-modal>
     <metrics-image v-for="metric in metricImages" :key="metric.id" v-bind="metric" />

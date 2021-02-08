@@ -29,7 +29,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
             get :records
           end
         end
-        resources :value_streams, only: [:index, :create, :destroy] do
+        resources :value_streams, only: [:index, :create, :update, :destroy] do
           resources :stages, only: [:index, :create, :update, :destroy] do
             member do
               get :duration_chart
@@ -137,6 +137,8 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         get :recent
       end
     end
+
+    resources :epic_boards, only: [:index]
 
     namespace :security do
       resource :dashboard, only: [:show], controller: :dashboard

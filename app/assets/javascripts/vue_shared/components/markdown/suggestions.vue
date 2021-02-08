@@ -2,8 +2,8 @@
 import Vue from 'vue';
 import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import { __ } from '~/locale';
-import SuggestionDiff from './suggestion_diff.vue';
 import { deprecatedCreateFlash as Flash } from '~/flash';
+import SuggestionDiff from './suggestion_diff.vue';
 
 export default {
   directives: {
@@ -38,6 +38,10 @@ export default {
       type: String,
       required: true,
     },
+    defaultCommitMessage: {
+      type: String,
+      required: true,
+    },
     suggestionsCount: {
       type: Number,
       required: false,
@@ -59,6 +63,11 @@ export default {
   },
   mounted() {
     this.renderSuggestions();
+  },
+  beforeDestroy() {
+    if (this.suggestionsWatch) {
+      this.suggestionsWatch();
+    }
   },
   methods: {
     renderSuggestions() {
@@ -82,16 +91,37 @@ export default {
       this.isRendered = true;
     },
     generateDiff(suggestionIndex) {
-      const { suggestions, disabled, batchSuggestionsInfo, helpPagePath, suggestionsCount } = this;
+      const {
+        suggestions,
+        disabled,
+        batchSuggestionsInfo,
+        helpPagePath,
+        defaultCommitMessage,
+        suggestionsCount,
+      } = this;
       const suggestion =
         suggestions && suggestions[suggestionIndex] ? suggestions[suggestionIndex] : {};
       const SuggestionDiffComponent = Vue.extend(SuggestionDiff);
       const suggestionDiff = new SuggestionDiffComponent({
-        propsData: { disabled, suggestion, batchSuggestionsInfo, helpPagePath, suggestionsCount },
+        propsData: {
+          disabled,
+          suggestion,
+          batchSuggestionsInfo,
+          helpPagePath,
+          defaultCommitMessage,
+          suggestionsCount,
+        },
       });
 
-      suggestionDiff.$on('apply', ({ suggestionId, callback }) => {
-        this.$emit('apply', { suggestionId, callback, flashContainer: this.$el });
+      // We're using `$watch` as `suggestionsCount` updates do not
+      // propagate to this component for some unknown reason while
+      // using a traditional prop watcher.
+      this.suggestionsWatch = this.$watch('suggestionsCount', () => {
+        suggestionDiff.suggestionsCount = this.suggestionsCount;
+      });
+
+      suggestionDiff.$on('apply', ({ suggestionId, callback, message }) => {
+        this.$emit('apply', { suggestionId, callback, flashContainer: this.$el, message });
       });
 
       suggestionDiff.$on('applyBatch', () => {

@@ -114,13 +114,6 @@ describe('DevopsAdoptionTable', () => {
             expect(icon.exists()).toBe(true);
             expect(icon.props('name')).toBe('hourglass');
           });
-
-          it('contains a tooltip', () => {
-            const tooltip = getBinding(icon.element, 'gl-tooltip');
-
-            expect(tooltip).toBeDefined();
-            expect(tooltip.value).toBe('Segment data pending until the start of next month');
-          });
         });
       });
     });

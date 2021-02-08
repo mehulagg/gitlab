@@ -1,7 +1,4 @@
 - promotion_feature = 'promote_weight_sidebar_dismissed'
-- trial_cta = Feature.enabled?(:promotion_issue_weight_trial_cta, current_user)
-- session_dismissal = Feature.enabled?(:promotion_issue_weight_session_dismiss, current_user)
-- tracking_options = { track_label: trial_cta.to_s, track_property: session_dismissal.to_s }
 
 - if show_promotions? && show_callout?(promotion_feature)
   .block.js-weight-sidebar-callout.promotion-issue-sidebar{ data: { uid: promotion_feature } }
@@ -13,7 +10,7 @@
       = s_('Promotions|Weight')
     .hide-collapsed.js-toggle-container.promotion-issue-weight-sidebar-message
       = s_('Promotions|This feature is locked.')
-      %a.btn-link.js-toggle-button.js-weight-sidebar-callout{ href: '#', data: { track_event: 'click_callout' }.merge(tracking_options) }
+      %a.btn-link.js-toggle-button.js-weight-sidebar-callout{ href: '#' }
         = s_('Promotions|Learn more')
         = sprite_icon('chevron-up', css_class: 'js-sidebar-collapse hidden')
         = sprite_icon('chevron-down', css_class: 'js-sidebar-expand')
@@ -33,8 +30,5 @@
             - else
               = s_('Promotions|Improve issues management with Issue weight and GitLab Enterprise Edition.')
           %div
-            = render 'shared/promotions/promotion_link_project', short_form: true, target_blank: !trial_cta, trial_cta: trial_cta
-            - if session_dismissal
-              = link_to s_("Promotions|Not now, thanks!"), '#', class: ['btn', 'js-close', 'js-close-callout', 'gl-mt-3', 'js-close-session', 'tr-issue-weights-not-now-cta'], data: { track_event: 'click_notnow' }.merge(tracking_options)
-            - else
-              = link_to s_("Promotions|Don't show me this again"), '#', class: ['btn', 'js-close', 'js-close-callout', 'gl-mt-3', 'tr-issue-weights-dont-show-me-again'], data: { track_event: 'click_dontshow' }.merge(tracking_options)
+            = render 'shared/promotions/promotion_link_project', short_form: true, target_blank: false
+            = link_to s_("Promotions|Not now, thanks!"), '#', class: ['gl-button', 'btn', 'js-close', 'js-close-callout', 'gl-mt-3', 'js-close-session', 'tr-issue-weights-not-now-cta']

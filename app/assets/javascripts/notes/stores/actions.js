@@ -2,22 +2,23 @@ import Vue from 'vue';
 import $ from 'jquery';
 import Visibility from 'visibilityjs';
 import axios from '~/lib/utils/axios_utils';
-import TaskList from '../../task_list';
-import { deprecatedCreateFlash as Flash } from '../../flash';
-import Poll from '../../lib/utils/poll';
-import * as types from './mutation_types';
-import * as utils from './utils';
-import * as constants from '../constants';
-import loadAwardsHandler from '../../awards_handler';
-import sidebarTimeTrackingEventHub from '../../sidebar/event_hub';
-import { isInViewport, scrollToElement, isInMRPage } from '../../lib/utils/common_utils';
-import { mergeUrlParams } from '../../lib/utils/url_utility';
-import mrWidgetEventHub from '../../vue_merge_request_widget/event_hub';
 import updateIssueConfidentialMutation from '~/sidebar/components/confidential/mutations/update_issue_confidential.mutation.graphql';
 import updateMergeRequestLockMutation from '~/sidebar/components/lock/mutations/update_merge_request_lock.mutation.graphql';
 import updateIssueLockMutation from '~/sidebar/components/lock/mutations/update_issue_lock.mutation.graphql';
 import { __, sprintf } from '~/locale';
 import Api from '~/api';
+import TaskList from '../../task_list';
+import { deprecatedCreateFlash as Flash } from '../../flash';
+import Poll from '../../lib/utils/poll';
+import * as constants from '../constants';
+import loadAwardsHandler from '../../awards_handler';
+import sidebarTimeTrackingEventHub from '../../sidebar/event_hub';
+import { isInViewport, scrollToElement, isInMRPage } from '../../lib/utils/common_utils';
+import { mergeUrlParams } from '../../lib/utils/url_utility';
+import eventHub from '../event_hub';
+import mrWidgetEventHub from '../../vue_merge_request_widget/event_hub';
+import * as utils from './utils';
+import * as types from './mutation_types';
 
 let eTagPoll;
 
@@ -420,14 +421,25 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     .catch(processErrors);
 };
 
-const pollSuccessCallBack = (resp, commit, state, getters, dispatch) => {
+export const setFetchingState = ({ commit }, fetchingState) =>
+  commit(types.SET_NOTES_FETCHING_STATE, fetchingState);
+
+const pollSuccessCallBack = async (resp, commit, state, getters, dispatch) => {
   if (state.isResolvingDiscussion) {
     return null;
   }
 
+  if (window.gon?.features?.paginatedNotes && !resp.more && state.isFetching) {
+    eventHub.$emit('fetchedNotesData');
+    dispatch('setFetchingState', false);
+    dispatch('setNotesFetchedState', true);
+    dispatch('setLoadingState', false);
+  }
+
   if (resp.notes?.length) {
-    dispatch('updateOrCreateNotes', resp.notes);
+    await dispatch('updateOrCreateNotes', resp.notes);
     dispatch('startTaskList');
+    dispatch('updateResolvableDiscussionsCounts');
   }
 
   commit(types.SET_LAST_FETCHED_AT, resp.last_fetched_at);
@@ -559,7 +571,7 @@ export const updateResolvableDiscussionsCounts = ({ commit }) =>
 
 export const submitSuggestion = (
   { commit, dispatch },
-  { discussionId, suggestionId, flashContainer },
+  { discussionId, suggestionId, flashContainer, message },
 ) => {
   const dispatchResolveDiscussion = () =>
     dispatch('resolveDiscussion', { discussionId }).catch(() => {});
@@ -567,7 +579,7 @@ export const submitSuggestion = (
   commit(types.SET_RESOLVING_DISCUSSION, true);
   dispatch('stopPolling');
 
-  return Api.applySuggestion(suggestionId)
+  return Api.applySuggestion(suggestionId, message)
     .then(dispatchResolveDiscussion)
     .catch((err) => {
       const defaultMessage = __(
@@ -727,9 +739,13 @@ export const updateConfidentialityOnIssuable = (
     })
     .then(({ data }) => {
       const {
-        issueSetConfidential: { issue },
+        issueSetConfidential: { issue, errors },
       } = data;
 
-      setConfidentiality({ commit }, issue.confidential);
+      if (errors?.length) {
+        Flash(errors[0], 'alert');
+      } else {
+        setConfidentiality({ commit }, issue.confidential);
+      }
     });
 };

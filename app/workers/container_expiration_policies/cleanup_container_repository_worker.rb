@@ -25,6 +25,7 @@ module ContainerExpirationPolicies
       return unless container_repository
 
       log_extra_metadata_on_done(:container_repository_id, container_repository.id)
+      log_extra_metadata_on_done(:project_id, project.id)
 
       unless allowed_to_run?(container_repository)
         container_repository.cleanup_unscheduled!
@@ -78,7 +79,7 @@ module ContainerExpirationPolicies
     end
 
     def project
-      container_repository&.project
+      container_repository.project
     end
 
     def container_repository
@@ -109,6 +110,13 @@ module ContainerExpirationPolicies
 
         log_extra_metadata_on_done(field, value)
       end
+
+      before_truncate_size = result.payload[:cleanup_tags_service_before_truncate_size]
+      after_truncate_size = result.payload[:cleanup_tags_service_after_truncate_size]
+      truncated = before_truncate_size &&
+                    after_truncate_size &&
+                    before_truncate_size != after_truncate_size
+      log_extra_metadata_on_done(:cleanup_tags_service_truncated, !!truncated)
     end
   end
 end

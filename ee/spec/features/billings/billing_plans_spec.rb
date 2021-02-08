@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Billing plan pages', :feature do
   include StubRequests
+  include SubscriptionPortalHelpers
 
   let(:user) { create(:user) }
   let(:namespace) { user.namespace }
@@ -22,6 +23,7 @@ RSpec.describe 'Billing plan pages', :feature do
     stub_experiment_for_subject(contact_sales_btn_in_app: true)
     stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}&namespace_id=#{namespace.id}")
       .to_return(status: 200, body: plans_data.to_json)
+    stub_eoa_eligibility_request(namespace.id)
     stub_application_setting(check_namespace_plan: true)
     allow(Gitlab).to receive(:com?) { true }
     gitlab_sign_in(user)
@@ -159,8 +161,7 @@ RSpec.describe 'Billing plan pages', :feature do
             expect(action).not_to have_link('Upgrade')
             expect(action).not_to have_css('.disabled')
           when 'current_plan'
-            expect(action).to have_link('Upgrade')
-            expect(action).to have_css('.disabled')
+            expect(action).not_to have_link('Upgrade')
           when 'upgrade'
             expect(action).to have_link('Upgrade')
             expect(action).not_to have_css('.disabled')
@@ -254,7 +255,6 @@ RSpec.describe 'Billing plan pages', :feature do
             expect(action).not_to have_link('Upgrade')
             expect(action).not_to have_css('.disabled')
           when 'current_plan'
-            expect(action).to have_link('Upgrade')
             expect(action).not_to have_css('.disabled')
           when 'upgrade'
             expect(action).to have_link('Upgrade')
@@ -312,7 +312,7 @@ RSpec.describe 'Billing plan pages', :feature do
 
         it 'displays plan header' do
           page.within('.billing-plan-header') do
-            expect(page).to have_content("#{namespace.name} is currently using the Gold plan")
+            expect(page).to have_content("#{namespace.name} is currently using the Gold Plan")
 
             expect(page).to have_css('.billing-plan-logo .identicon')
           end
@@ -340,7 +340,7 @@ RSpec.describe 'Billing plan pages', :feature do
 
         it 'displays plan header' do
           page.within('.billing-plan-header') do
-            expect(page).to have_content("#{namespace.name} is currently using the Bronze plan")
+            expect(page).to have_content("#{namespace.name} is currently using the Bronze Plan")
 
             expect(page).to have_css('.billing-plan-logo .identicon')
           end
@@ -392,7 +392,7 @@ RSpec.describe 'Billing plan pages', :feature do
 
         it 'displays plan header' do
           page.within('.billing-plan-header') do
-            expect(page).to have_content("#{namespace.name} is currently using the Gold plan")
+            expect(page).to have_content("#{namespace.name} is currently using the Gold Plan")
 
             expect(page).to have_css('.billing-plan-logo .identicon')
           end
@@ -433,7 +433,7 @@ RSpec.describe 'Billing plan pages', :feature do
 
     it 'displays plan header' do
       page.within('.billing-plan-header') do
-        expect(page).to have_content("#{subgroup2.full_name} is currently using the Bronze plan")
+        expect(page).to have_content("#{subgroup2.full_name} is currently using the Bronze Plan")
         expect(page).to have_css('.billing-plan-logo .identicon')
         expect(page.find('.btn-success')).to have_content('Manage plan')
       end

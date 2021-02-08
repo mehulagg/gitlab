@@ -16,7 +16,7 @@ module EE
       condition(:iterations_available) { @subject.feature_available?(:iterations) }
 
       with_scope :subject
-      condition(:requirements_available) { @subject.feature_available?(:requirements) & feature_available?(:requirements) }
+      condition(:requirements_available) { @subject.feature_available?(:requirements) & access_allowed_to?(:requirements) }
 
       condition(:compliance_framework_available) { @subject.feature_available?(:compliance_framework, @user) }
 
@@ -112,8 +112,18 @@ module EE
       end
 
       with_scope :subject
+      condition(:security_and_compliance_enabled) do
+        @subject.feature_available?(:security_and_compliance) && access_allowed_to?(:security_and_compliance)
+      end
+
+      with_scope :subject
       condition(:security_dashboard_enabled) do
         @subject.feature_available?(:security_dashboard)
+      end
+
+      with_scope :subject
+      condition(:coverage_fuzzing_enabled) do
+        @subject.feature_available?(:coverage_fuzzing)
       end
 
       with_scope :subject
@@ -209,9 +219,17 @@ module EE
 
       rule { can?(:read_project) & iterations_available }.enable :read_iteration
 
+      rule { security_and_compliance_enabled & can?(:developer_access) }.policy do
+        enable :access_security_and_compliance
+      end
+
       rule { security_dashboard_enabled & can?(:developer_access) }.policy do
         enable :read_vulnerability
         enable :read_vulnerability_scanner
+      end
+
+      rule { coverage_fuzzing_enabled & can?(:developer_access) }.policy do
+        enable :read_coverage_fuzzing
       end
 
       rule { on_demand_scans_enabled & can?(:developer_access) }.policy do
@@ -234,6 +252,7 @@ module EE
         enable :push_code
         enable :create_merge_request_from
         enable :create_vulnerability_feedback
+        enable :admin_merge_request
       end
 
       rule { issues_disabled & merge_requests_disabled }.policy do

@@ -23,10 +23,12 @@ RSpec.describe Integrations::Jira::IssueEntity do
       assignee: double('displayName' => 'assignee'),
       project: double(key: 'GL'),
       key: 'GL-5',
-      client: double(options: { site: 'http://jira.com/' }),
+      client: jira_client,
       status: double(name: 'To Do')
     )
   end
+
+  let(:jira_client) { double(options: { site: 'http://jira.com/' }) }
 
   subject { described_class.new(jira_issue, project: project).as_json }
 
@@ -62,6 +64,15 @@ RSpec.describe Integrations::Jira::IssueEntity do
 
     it 'returns the Jira Server profile URL' do
       expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter@reporter.com')
+    end
+
+    context 'and context_path' do
+      let(:jira_client) { double(options: { site: 'http://jira.com/', context_path: '/jira-sub-path' }) }
+
+      it 'returns URLs including context path' do
+        expect(subject[:author]).to include(web_url: 'http://jira.com/jira-sub-path/secure/ViewProfile.jspa?name=reporter@reporter.com')
+        expect(subject[:web_url]).to eq('http://jira.com/jira-sub-path/browse/GL-5')
+      end
     end
   end
 

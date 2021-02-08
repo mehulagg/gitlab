@@ -6,7 +6,7 @@ import DashboardNotConfigured from 'ee/security_dashboard/components/empty_state
 import ProjectSecurityCharts from 'ee/security_dashboard/components/project_security_charts.vue';
 import SecurityChartsLayout from 'ee/security_dashboard/components/security_charts_layout.vue';
 import projectsHistoryQuery from 'ee/security_dashboard/graphql/queries/project_vulnerabilities_by_day_and_count.query.graphql';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import {
   mockProjectSecurityChartsWithData,
   mockProjectSecurityChartsWithoutData,

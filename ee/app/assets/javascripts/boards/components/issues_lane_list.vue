@@ -5,8 +5,7 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import defaultSortableConfig from '~/sortable/sortable_config';
 import BoardCardLayout from '~/boards/components/board_card_layout.vue';
 import eventHub from '~/boards/eventhub';
-import BoardNewIssue from '~/boards/components/board_new_issue_new.vue';
-import { ISSUABLE } from '~/boards/constants';
+import BoardNewIssue from '~/boards/components/board_new_issue.vue';
 
 export default {
   components: {
@@ -90,7 +89,7 @@ export default {
     eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
   },
   methods: {
-    ...mapActions(['setActiveId', 'moveIssue', 'moveIssueEpic', 'fetchIssuesForList']),
+    ...mapActions(['moveIssue', 'moveIssueEpic', 'fetchIssuesForList']),
     toggleForm() {
       this.showIssueForm = !this.showIssueForm;
       if (this.showIssueForm && this.isUnassignedIssuesLane) {
@@ -99,9 +98,6 @@ export default {
     },
     isActiveIssue(issue) {
       return this.activeId === issue.id;
-    },
-    showIssue(issue) {
-      this.setActiveId({ id: issue.id, sidebarType: ISSUABLE });
     },
     handleDragOnStart() {
       document.body.classList.add('is-dragging');
@@ -180,7 +176,6 @@ export default {
           :issue="issue"
           :disabled="disabled || !canAdminEpic"
           :is-active="isActiveIssue(issue)"
-          @show="showIssue(issue)"
         />
         <gl-loading-icon v-if="isLoadingMore && isUnassignedIssuesLane" size="sm" class="gl-py-3" />
       </component>

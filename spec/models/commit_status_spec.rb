@@ -519,6 +519,9 @@ RSpec.describe CommitStatus do
     subject { commit_status.group_name }
 
     where(:name, :group_name) do
+      'rspec1'                                              | 'rspec1'
+      'rspec1 0 1'                                          | 'rspec1'
+      'rspec1 0/2'                                          | 'rspec1'
       'rspec:windows'                                       | 'rspec:windows'
       'rspec:windows 0'                                     | 'rspec:windows 0'
       'rspec:windows 0 test'                                | 'rspec:windows 0 test'
@@ -722,22 +725,6 @@ RSpec.describe CommitStatus do
     let(:commit_status) { create(:commit_status) }
 
     it { is_expected.to eq(true) }
-
-    context 'when build requires a resource' do
-      before do
-        allow(commit_status).to receive(:requires_resource?) { true }
-      end
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when build has a prerequisite' do
-      before do
-        allow(commit_status).to receive(:any_unmet_prerequisites?) { true }
-      end
-
-      it { is_expected.to eq(false) }
-    end
   end
 
   describe '#enqueue' do
@@ -745,7 +732,6 @@ RSpec.describe CommitStatus do
 
     before do
       allow(Time).to receive(:now).and_return(current_time)
-      expect(commit_status.any_unmet_prerequisites?).to eq false
     end
 
     shared_examples 'commit status enqueued' do

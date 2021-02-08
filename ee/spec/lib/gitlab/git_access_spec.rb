@@ -758,7 +758,7 @@ RSpec.describe Gitlab::GitAccess do
 
     context 'when maintenance mode is enabled' do
       before do
-        stub_application_setting(maintenance_mode: true)
+        stub_maintenance_mode_setting(true)
       end
 
       it 'blocks git push' do
@@ -770,11 +770,27 @@ RSpec.describe Gitlab::GitAccess do
 
     context 'when maintenance mode is disabled' do
       before do
-        stub_application_setting(maintenance_mode: false)
+        stub_maintenance_mode_setting(false)
       end
 
       it 'allows git push' do
         expect { push_access_check }.not_to raise_error
+      end
+    end
+  end
+
+  describe '#check_valid_actor!' do
+    context 'key expiration is enforced' do
+      let(:actor) { build(:personal_key, expires_at: 2.days.ago) }
+
+      before do
+        stub_licensed_features(enforce_ssh_key_expiration: true)
+        stub_ee_application_setting(enforce_ssh_key_expiration: true)
+      end
+
+      it 'does not allow expired keys', :aggregate_failures do
+        expect { push_changes }.to raise_forbidden('Your SSH key has expired and the instance administrator has enforced expiration.')
+        expect { pull_changes }.to raise_forbidden('Your SSH key has expired and the instance administrator has enforced expiration.')
       end
     end
   end

@@ -72,6 +72,7 @@ export default {
         :class="{ 'is-invalid': Boolean(formErrors.name) }"
         class="gl-display-flex gl-align-items-center"
       >
+        <!-- eslint-disable vue/no-mutating-props -->
         <gl-form-input
           id="node-name-field"
           v-model="nodeData.name"
@@ -81,6 +82,7 @@ export default {
           type="text"
           @update="checkName"
         />
+        <!-- eslint-enable vue/no-mutating-props -->
         <span class="gl-text-gray-500 m-n5 gl-z-index-2">{{ 255 - nodeData.name.length }}</span>
       </div>
     </gl-form-group>
@@ -109,6 +111,7 @@ export default {
           :class="{ 'is-invalid': Boolean(formErrors.url) }"
           class="gl-display-flex gl-align-items-center"
         >
+          <!-- eslint-disable vue/no-mutating-props -->
           <gl-form-input
             id="node-url-field"
             v-model="nodeData.url"
@@ -118,6 +121,7 @@ export default {
             type="text"
             @update="checkUrl"
           />
+          <!-- eslint-enable vue/no-mutating-props -->
           <span class="gl-text-gray-500 m-n5 gl-z-index-2">{{ 255 - nodeData.url.length }}</span>
         </div>
       </gl-form-group>
@@ -149,12 +153,14 @@ export default {
           </gl-sprintf>
         </template>
         <div class="gl-display-flex gl-align-items-center">
+          <!-- eslint-disable vue/no-mutating-props -->
           <gl-form-input
             id="node-internal-url-field"
             v-model="nodeData.internalUrl"
             class="gl-pr-8!"
             type="text"
           />
+          <!-- eslint-enable vue/no-mutating-props -->
           <span class="gl-text-gray-500 m-n5 gl-z-index-2">{{
             255 - nodeData.internalUrl.length
           }}</span>

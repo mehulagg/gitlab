@@ -10,6 +10,7 @@ module EE
       end
 
       expose :supports_weight?, as: :supports_weight
+      expose :supports_iterations?, as: :supports_iterations
     end
   end
 end

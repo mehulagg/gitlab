@@ -3,8 +3,8 @@ import { find } from 'lodash';
 import AccessDropdown from '~/projects/settings/access_dropdown';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 import { __ } from '~/locale';
+import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 
 export default class ProtectedEnvironmentEdit {
   constructor(options) {

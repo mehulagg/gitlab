@@ -169,7 +169,7 @@ Example response:
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -183,7 +183,7 @@ the `weight` parameter:
 ]
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -347,7 +347,7 @@ Example response:
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -361,7 +361,7 @@ the `weight` parameter:
 ]
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -530,7 +530,7 @@ Example response:
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -544,7 +544,7 @@ the `weight` parameter:
 ]
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -684,7 +684,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -696,7 +696,7 @@ the `weight` parameter:
 }
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `epic` property:
 
 ```javascript
@@ -833,7 +833,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -845,7 +845,7 @@ the `weight` parameter:
 }
 ```
 
-Users on GitLab [Premium](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium](https://about.gitlab.com/pricing/) can also see
 the `epic` property:
 
 ```javascript
@@ -864,7 +864,7 @@ the `epic` property:
 }
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see the `health_status`
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see the `health_status`
 property:
 
 ```json
@@ -980,7 +980,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -992,7 +992,7 @@ the `weight` parameter:
 }
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -1133,7 +1133,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -1145,7 +1145,7 @@ the `weight` parameter:
 }
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -1298,7 +1298,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -1310,7 +1310,7 @@ the `weight` parameter:
 }
 ```
 
-Users on GitLab [Ultimate](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Ultimate](https://about.gitlab.com/pricing/) can also see
 the `health_status` parameter:
 
 ```json
@@ -1421,7 +1421,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -2211,3 +2211,26 @@ Example response:
     }
 ]
 ```
+
+## Delete metric image
+
+Available only for Incident issues.
+
+```plaintext
+DELETE /projects/:id/issues/:issue_iid/metric_images/:image_id
+```
+
+| Attribute   | Type    | Required | Description                          |
+|-------------|---------|----------|--------------------------------------|
+| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user  |
+| `issue_iid` | integer | yes      | The internal ID of a project's issue |
+| `image_id` | integer | yes      | The ID of the image |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/5/issues/93/metric_images/1"
+```
+
+Can return the following status codes:
+
+- `204 No Content`, if the image was deleted successfully.
+- `400 Bad Request`, if the image could not be deleted.

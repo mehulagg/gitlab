@@ -1,0 +1,6 @@
+- return unless License.feature_available?(:git_two_factor_enforcement)
+- return unless Feature.enabled?(:two_factor_for_cli)
+
+.form-group
+  = form.label :git_two_factor_session_expiry, s_('AdminSettings|Session duration for Git operations when 2FA is enabled (minutes)')
+  = form.number_field :git_two_factor_session_expiry, class: 'form-control', title: s_('AdminSettings|Maximum duration of a session for Git operations when 2FA is enabled.'), data: { toggle: 'tooltip', container: 'body' }

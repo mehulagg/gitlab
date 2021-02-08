@@ -87,8 +87,7 @@ module EE
       def replicables_for_current_secondary(primary_key_in)
         node = ::Gitlab::Geo.current_node
 
-        not_expired
-          .primary_key_in(primary_key_in)
+        primary_key_in(primary_key_in)
           .merge(selective_sync_scope(node))
           .merge(object_storage_scope(node))
       end

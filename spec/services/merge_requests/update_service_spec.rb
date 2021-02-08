@@ -87,6 +87,19 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
         expect(@merge_request.discussion_locked).to be_truthy
       end
 
+      context 'usage counters' do
+        let(:merge_request2) { create(:merge_request) }
+
+        it 'update as expected' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_title_edit_action).once.with(user: user)
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_description_edit_action).once.with(user: user)
+
+          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request2)
+        end
+      end
+
       context 'updating milestone' do
         RSpec.shared_examples 'updates milestone' do
           it 'sets milestone' do
@@ -142,29 +155,19 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       context 'with reviewers' do
         let(:opts) { { reviewer_ids: [user2.id] } }
 
-        context 'when merge_request_reviewers feature is disabled' do
-          before(:context) do
-            stub_feature_flags(merge_request_reviewers: false)
-          end
+        it 'creates system note about merge_request review request' do
+          note = find_note('requested review from')
 
-          it 'does not create a system note about merge_request review request' do
-            note = find_note('review requested from')
-
-            expect(note).to be_nil
-          end
+          expect(note).not_to be_nil
+          expect(note.note).to include "requested review from #{user2.to_reference}"
         end
 
-        context 'when merge_request_reviewers feature is enabled' do
-          before(:context) do
-            stub_feature_flags(merge_request_reviewers: true)
-          end
+        it 'updates the tracking' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_users_review_requested)
+            .with(users: [user])
 
-          it 'creates system note about merge_request review request' do
-            note = find_note('requested review from')
-
-            expect(note).not_to be_nil
-            expect(note.note).to include "requested review from #{user2.to_reference}"
-          end
+          update_merge_request(reviewer_ids: [user.id])
         end
       end
 
@@ -792,6 +795,14 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
         update_merge_request(assignee_ids: [user.id])
 
         expect(merge_request.assignee_ids).to eq([user.id])
+      end
+
+      it 'updates the tracking when user ids are valid' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .to receive(:track_users_assigned_to_mr)
+          .with(users: [user])
+
+        update_merge_request(assignee_ids: [user.id])
       end
 
       it 'does not update assignee_id when user cannot read issue' do

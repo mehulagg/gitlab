@@ -35,9 +35,9 @@ module Elastic
       [elastic_helper.target_name] + elastic_helper.standalone_indices_proxies.map(&:index_name)
     end
 
-    def default_index_options
+    def default_index_options(index_name)
       {
-        refresh_interval: nil, # Change it back to the default
+        refresh_interval: elastic_helper.get_settings(index_name: index_name).dig('refresh_interval'), # Use existing setting or nil for default
         number_of_replicas: Gitlab::CurrentSettings.elasticsearch_replicas,
         translog: { durability: 'request' }
       }
@@ -142,7 +142,7 @@ module Elastic
 
     def apply_default_index_options
       current_task.subtasks.each do |subtask|
-        elastic_helper.update_settings(index_name: subtask.index_name_to, settings: default_index_options)
+        elastic_helper.update_settings(index_name: subtask.index_name_to, settings: default_index_options(subtask.index_name_from))
       end
     end
 

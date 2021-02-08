@@ -29,6 +29,15 @@ FactoryBot.define do
       transient do
         without_package_files { false }
         file_metadatum_trait { :keep }
+        published_in { :create }
+      end
+
+      after :build do |package, evaluator|
+        if evaluator.published_in == :create
+          create(:debian_publication, package: package)
+        elsif !evaluator.published_in.nil?
+          create(:debian_publication, package: package, distribution: evaluator.published_in)
+        end
       end
 
       after :create do |package, evaluator|
@@ -50,6 +59,7 @@ FactoryBot.define do
         transient do
           without_package_files { false }
           file_metadatum_trait { :unknown }
+          published_in { nil }
         end
       end
     end
@@ -174,6 +184,24 @@ FactoryBot.define do
 
     target_sha { '123' }
     composer_json { { name: 'foo' } }
+  end
+
+  factory :composer_cache_file, class: 'Packages::Composer::CacheFile' do
+    group
+
+    file_sha256 { '1' * 64 }
+
+    transient do
+      file_fixture { 'spec/fixtures/packages/composer/package.json' }
+    end
+
+    after(:build) do |cache_file, evaluator|
+      cache_file.file = fixture_file_upload(evaluator.file_fixture)
+    end
+
+    trait(:object_storage) do
+      file_store { Packages::Composer::CacheUploader::Store::REMOTE }
+    end
   end
 
   factory :maven_metadatum, class: 'Packages::Maven::Metadatum' do

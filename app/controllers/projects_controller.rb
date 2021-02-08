@@ -14,7 +14,7 @@ class ProjectsController < Projects::ApplicationController
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show]
 
-  before_action :whitelist_query_limiting, only: [:create]
+  before_action :whitelist_query_limiting, only: [:show, :create]
   before_action :authenticate_user!, except: [:index, :show, :activity, :refs, :resolve, :unfoldered_environment_names]
   before_action :redirect_git_extension, only: [:show]
   before_action :project, except: [:index, :new, :create, :resolve]
@@ -30,6 +30,10 @@ class ProjectsController < Projects::ApplicationController
 
   # Project Export Rate Limit
   before_action :export_rate_limit, only: [:export, :download_export, :generate_new_export]
+
+  before_action do
+    push_frontend_feature_flag(:vue_notification_dropdown, @project, default_enabled: :yaml)
+  end
 
   before_action only: [:edit] do
     push_frontend_feature_flag(:approval_suggestions, @project, default_enabled: true)
@@ -71,6 +75,7 @@ class ProjectsController < Projects::ApplicationController
     @project = ::Projects::CreateService.new(current_user, project_params(attributes: project_params_create_attributes)).execute
 
     if @project.saved?
+      experiment(:new_project_readme, actor: current_user).track(:created, property: active_new_project_tab)
       redirect_to(
         project_path(@project, custom_import_params),
         notice: _("Project '%{project_name}' was successfully created.") % { project_name: @project.name }
@@ -197,13 +202,13 @@ class ProjectsController < Projects::ApplicationController
   end
 
   def housekeeping
-    ::Projects::HousekeepingService.new(@project, :gc).execute
+    ::Repositories::HousekeepingService.new(@project, :gc).execute
 
     redirect_to(
       project_path(@project),
       notice: _("Housekeeping successfully started")
     )
-  rescue ::Projects::HousekeepingService::LeaseTaken => ex
+  rescue ::Repositories::HousekeepingService::LeaseTaken => ex
     redirect_to(
       edit_project_path(@project, anchor: 'js-project-advanced-settings'),
       alert: ex.to_s
@@ -392,6 +397,14 @@ class ProjectsController < Projects::ApplicationController
     ]
   end
 
+  def project_setting_attributes
+    %i[
+      show_default_award_emojis
+      squash_option
+      allow_editing_commit_messages
+    ]
+  end
+
   def project_params_attributes
     [
       :allow_merge_on_skipped_pipeline,
@@ -429,11 +442,7 @@ class ProjectsController < Projects::ApplicationController
       :suggestion_commit_message,
       :packages_enabled,
       :service_desk_enabled,
-      project_setting_attributes: %i[
-        show_default_award_emojis
-        squash_option
-        allow_editing_commit_messages
-      ]
+      project_setting_attributes: project_setting_attributes
     ] + [project_feature_attributes: project_feature_attributes]
   end
 
@@ -503,7 +512,7 @@ class ProjectsController < Projects::ApplicationController
   end
 
   def whitelist_query_limiting
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42440')
+    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/20826')
   end
 
   def present_project

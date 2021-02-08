@@ -32,8 +32,8 @@ export default () => {
   } = el.dataset;
   const initialData = JSON.parse(el.dataset.initial);
 
-  Vue.component('tree-root', TreeRoot);
-  Vue.component('tree-item', TreeItem);
+  Vue.component('TreeRoot', TreeRoot);
+  Vue.component('TreeItem', TreeItem);
 
   return new Vue({
     el,

@@ -1,216 +1,182 @@
-import Vue from 'vue';
-
-import epicsListEmptyComponent from 'ee/roadmap/components/epics_list_empty.vue';
-
+import { shallowMount } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import EpicsListEmpty from 'ee/roadmap/components/epics_list_empty.vue';
+import { mockTimeframeInitialDate, mockSvgPath } from 'ee_jest/roadmap/mock_data';
 import { PRESET_TYPES } from 'ee/roadmap/constants';
+import { TEST_HOST } from 'helpers/test_constants';
 import {
   getTimeframeForQuartersView,
   getTimeframeForWeeksView,
   getTimeframeForMonthsView,
 } from 'ee/roadmap/utils/roadmap_utils';
 
-import {
-  mockTimeframeInitialDate,
-  mockSvgPath,
-  mockNewEpicEndpoint,
-} from 'ee_jest/roadmap/mock_data';
-import mountComponent from 'helpers/vue_mount_component_helper';
+const TEST_EPICS_PATH = '/epics';
+const TEST_NEW_EPIC_PATH = '/epics/new';
 
 const mockTimeframeQuarters = getTimeframeForQuartersView(mockTimeframeInitialDate);
 const mockTimeframeMonths = getTimeframeForMonthsView(mockTimeframeInitialDate);
 const mockTimeframeWeeks = getTimeframeForWeeksView(mockTimeframeInitialDate);
 
-const createComponent = ({
-  hasFiltersApplied = false,
-  presetType = PRESET_TYPES.MONTHS,
-  timeframeStart = mockTimeframeMonths[0],
-  timeframeEnd = mockTimeframeMonths[mockTimeframeMonths.length - 1],
-}) => {
-  const Component = Vue.extend(epicsListEmptyComponent);
+describe('ee/roadmap/components/epics_list_empty.vue', () => {
+  let wrapper;
 
-  return mountComponent(Component, {
-    presetType,
-    timeframeStart,
-    timeframeEnd,
-    emptyStateIllustrationPath: mockSvgPath,
-    newEpicEndpoint: mockNewEpicEndpoint,
-    hasFiltersApplied,
-  });
-};
-
-describe('EpicsListEmptyComponent', () => {
-  let vm;
-
-  beforeEach(() => {
-    vm = createComponent({});
-  });
+  const createWrapper = ({
+    isChildEpics = false,
+    hasFiltersApplied = false,
+    presetType = PRESET_TYPES.MONTHS,
+    timeframeStart = mockTimeframeMonths[0],
+    timeframeEnd = mockTimeframeMonths[mockTimeframeMonths.length - 1],
+  } = {}) => {
+    wrapper = extendedWrapper(
+      shallowMount(EpicsListEmpty, {
+        propsData: {
+          presetType,
+          timeframeStart,
+          timeframeEnd,
+          emptyStateIllustrationPath: mockSvgPath,
+          hasFiltersApplied,
+          isChildEpics,
+        },
+        provide: {
+          newEpicPath: TEST_NEW_EPIC_PATH,
+          listEpicsPath: TEST_EPICS_PATH,
+          epicsDocsPath: TEST_HOST,
+        },
+      }),
+    );
+  };
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
   });
 
-  describe('computed', () => {
-    describe('message', () => {
-      it('returns default empty state message', () => {
-        expect(vm.message).toBe('The roadmap shows the progress of your epics along a timeline');
-      });
+  const findTitle = () => wrapper.findByTestId('title');
+  const findSubTitle = () => wrapper.findByTestId('sub-title');
+  const findNewEpicButton = () => wrapper.findByTestId('new-epic-button');
+  const findListEpicsButton = () => wrapper.findByTestId('list-epics-button');
+  const findIllustration = () => wrapper.findByTestId('illustration');
 
-      it('returns empty state message when `hasFiltersApplied` prop is true', (done) => {
-        vm.hasFiltersApplied = true;
-        Vue.nextTick()
-          .then(() => {
-            expect(vm.message).toBe('Sorry, no epics matched your search');
-          })
-          .then(done)
-          .catch(done.fail);
-      });
-    });
+  it('renders default message', () => {
+    createWrapper({});
 
-    describe('subMessage', () => {
-      describe('with presetType `QUARTERS`', () => {
-        beforeEach(() => {
-          vm.presetType = PRESET_TYPES.QUARTERS;
-          [vm.timeframeStart] = mockTimeframeQuarters;
-          vm.timeframeEnd = mockTimeframeQuarters[mockTimeframeQuarters.length - 1];
-        });
-
-        it('returns default empty state sub-message when `hasFiltersApplied` props is false', (done) => {
-          Vue.nextTick()
-            .then(() => {
-              expect(vm.subMessage).toBe(
-                'To view the roadmap, add a start or due date to one of your epics in this group or its subgroups; from Jul 1, 2017 to Mar 31, 2019.',
-              );
-            })
-            .then(done)
-            .catch(done.fail);
-        });
-
-        it('returns empty state sub-message when `hasFiltersApplied` prop is true', (done) => {
-          vm.hasFiltersApplied = true;
-          Vue.nextTick()
-            .then(() => {
-              expect(vm.subMessage).toBe(
-                'To widen your search, change or remove filters; from Jul 1, 2017 to Mar 31, 2019.',
-              );
-            })
-            .then(done)
-            .catch(done.fail);
-        });
-      });
-
-      describe('with presetType `MONTHS`', () => {
-        beforeEach(() => {
-          vm.presetType = PRESET_TYPES.MONTHS;
-        });
-
-        it('returns default empty state sub-message when `hasFiltersApplied` props is false', (done) => {
-          Vue.nextTick()
-            .then(() => {
-              expect(vm.subMessage).toBe(
-                'To view the roadmap, add a start or due date to one of your epics in this group or its subgroups; from Nov 1, 2017 to Jun 30, 2018.',
-              );
-            })
-            .then(done)
-            .catch(done.fail);
-        });
-
-        it('returns empty state sub-message when `hasFiltersApplied` prop is true', (done) => {
-          vm.hasFiltersApplied = true;
-          Vue.nextTick()
-            .then(() => {
-              expect(vm.subMessage).toBe(
-                'To widen your search, change or remove filters; from Nov 1, 2017 to Jun 30, 2018.',
-              );
-            })
-            .then(done)
-            .catch(done.fail);
-        });
-      });
-
-      describe('with presetType `WEEKS`', () => {
-        beforeEach(() => {
-          const timeframeEnd = mockTimeframeWeeks[mockTimeframeWeeks.length - 1];
-          timeframeEnd.setDate(timeframeEnd.getDate() + 6);
-
-          vm.presetType = PRESET_TYPES.WEEKS;
-          [vm.timeframeStart] = mockTimeframeWeeks;
-          vm.timeframeEnd = timeframeEnd;
-        });
-
-        it('returns default empty state sub-message when `hasFiltersApplied` props is false', (done) => {
-          Vue.nextTick()
-            .then(() => {
-              expect(vm.subMessage).toBe(
-                'To view the roadmap, add a start or due date to one of your epics in this group or its subgroups; from Dec 17, 2017 to Feb 9, 2018.',
-              );
-            })
-            .then(done)
-            .catch(done.fail);
-        });
-
-        it('returns empty state sub-message when `hasFiltersApplied` prop is true', (done) => {
-          vm.hasFiltersApplied = true;
-          Vue.nextTick()
-            .then(() => {
-              expect(vm.subMessage).toBe(
-                'To widen your search, change or remove filters; from Dec 17, 2017 to Feb 15, 2018.',
-              );
-            })
-            .then(done)
-            .catch(done.fail);
-        });
-      });
-
-      describe('with child epics context', () => {
-        it('returns empty state sub-message when `isChildEpics` is set to `true`', (done) => {
-          vm.isChildEpics = true;
-          Vue.nextTick()
-            .then(() => {
-              expect(vm.subMessage).toBe(
-                'To view the roadmap, add a start or due date to one of the <a href="https://docs.gitlab.com/ee/user/group/epics/#multi-level-child-epics" target="_blank" rel="noopener noreferrer nofollow">child epics</a>.',
-              );
-            })
-            .then(done)
-            .catch(done.fail);
-        });
-      });
-    });
-
-    describe('timeframeRange', () => {
-      it('returns correct timeframe startDate and endDate in words', () => {
-        expect(vm.timeframeRange.startDate).toBe('Nov 1, 2017');
-        expect(vm.timeframeRange.endDate).toBe('Jun 30, 2018');
-      });
-    });
+    expect(findTitle().text()).toBe(wrapper.vm.message);
   });
 
-  describe('template', () => {
-    it('renders empty state illustration in image element with provided `emptyStateIllustrationPath`', () => {
-      expect(vm.$el.querySelector('.svg-content img').getAttribute('src')).toBe(
-        vm.emptyStateIllustrationPath,
+  it('renders empty state message when `hasFiltersApplied` prop is true', () => {
+    createWrapper({ hasFiltersApplied: true });
+
+    expect(findTitle().text()).toBe('Sorry, no epics matched your search');
+  });
+
+  describe('with presetType `QUARTERS`', () => {
+    it('renders default empty state sub-title when `hasFiltersApplied` props is false', () => {
+      createWrapper({
+        presetType: PRESET_TYPES.QUARTERS,
+        timeframeStart: mockTimeframeQuarters[0],
+        timeframeEnd: mockTimeframeQuarters[mockTimeframeQuarters.length - 1],
+      });
+
+      expect(findSubTitle().text()).toBe(
+        'To view the roadmap, add a start or due date to one of your epics in this group or its subgroups; from Jul 1, 2017 to Mar 31, 2019.',
       );
     });
 
-    it('renders mount point for new epic button to boot via Epic app', () => {
-      expect(vm.$el.querySelector('#epic-create-root')).not.toBeNull();
+    it('renders empty state sub-title when `hasFiltersApplied` prop is true', () => {
+      createWrapper({
+        presetType: PRESET_TYPES.QUARTERS,
+        timeframeStart: mockTimeframeQuarters[0],
+        timeframeEnd: mockTimeframeQuarters[mockTimeframeQuarters.length - 1],
+        hasFiltersApplied: true,
+      });
+
+      expect(findSubTitle().text()).toBe(
+        'To widen your search, change or remove filters; from Jul 1, 2017 to Mar 31, 2019.',
+      );
+    });
+  });
+
+  describe('with presetType `MONTHS`', () => {
+    it('renders default empty state sub-title when `hasFiltersApplied` props is false', () => {
+      createWrapper({
+        presetType: PRESET_TYPES.MONTHS,
+      });
+
+      expect(findSubTitle().text()).toBe(
+        'To view the roadmap, add a start or due date to one of your epics in this group or its subgroups; from Nov 1, 2017 to Jun 30, 2018.',
+      );
     });
 
-    it('does not render new epic button element when `hasFiltersApplied` prop is true', (done) => {
-      vm.hasFiltersApplied = true;
-      Vue.nextTick()
-        .then(() => {
-          expect(vm.$el.querySelector('.epic-create-dropdown')).toBeNull();
-        })
-        .then(done)
-        .catch(done.fail);
+    it('renders empty state sub-title when `hasFiltersApplied` prop is true', () => {
+      createWrapper({
+        presetType: PRESET_TYPES.MONTHS,
+        hasFiltersApplied: true,
+      });
+
+      expect(findSubTitle().text()).toBe(
+        'To widen your search, change or remove filters; from Nov 1, 2017 to Jun 30, 2018.',
+      );
+    });
+  });
+
+  describe('with presetType `WEEKS`', () => {
+    let timeframeEnd;
+
+    beforeEach(() => {
+      timeframeEnd = mockTimeframeWeeks[mockTimeframeWeeks.length - 1];
+      timeframeEnd.setDate(timeframeEnd.getDate() + 6);
     });
 
-    it('renders view epics list link element', () => {
-      const viewEpicsListEl = vm.$el.querySelector('a.btn');
+    it('renders default empty state sub-title when `hasFiltersApplied` props is false', () => {
+      createWrapper({
+        presetType: PRESET_TYPES.WEEKS,
+        timeframeStart: mockTimeframeWeeks[0],
+        timeframeEnd,
+      });
 
-      expect(viewEpicsListEl).not.toBeNull();
-      expect(viewEpicsListEl.getAttribute('href')).toBe(mockNewEpicEndpoint);
-      expect(viewEpicsListEl.querySelector('span').innerText.trim()).toBe('View epics list');
+      expect(findSubTitle().text()).toBe(
+        'To view the roadmap, add a start or due date to one of your epics in this group or its subgroups; from Dec 17, 2017 to Feb 9, 2018.',
+      );
     });
+
+    it('renders empty state sub-title when `hasFiltersApplied` prop is true', () => {
+      createWrapper({
+        presetType: PRESET_TYPES.WEEKS,
+        timeframeStart: mockTimeframeWeeks[0],
+        timeframeEnd,
+        hasFiltersApplied: true,
+      });
+
+      expect(findSubTitle().text()).toBe(
+        'To widen your search, change or remove filters; from Dec 17, 2017 to Feb 15, 2018.',
+      );
+    });
+  });
+
+  it('renders empty state sub-title when `isChildEpics` is set to `true`', () => {
+    createWrapper({ isChildEpics: true });
+
+    expect(findSubTitle().text()).toBe(
+      'To view the roadmap, add a start or due date to one of the child epics.',
+    );
+  });
+
+  it('renders empty state illustration in image element with provided `emptyStateIllustrationPath`', () => {
+    createWrapper({});
+
+    expect(findIllustration().attributes('src')).toBe(mockSvgPath);
+  });
+
+  it('renders buttons for create and list epics', () => {
+    createWrapper({});
+
+    expect(findNewEpicButton().attributes('href')).toBe(TEST_NEW_EPIC_PATH);
+    expect(findListEpicsButton().attributes('href')).toBe(TEST_EPICS_PATH);
+  });
+
+  it('does not render new epic button element when `hasFiltersApplied` prop is true', () => {
+    createWrapper({ hasFiltersApplied: true });
+
+    expect(findNewEpicButton().exists()).toBe(false);
   });
 });

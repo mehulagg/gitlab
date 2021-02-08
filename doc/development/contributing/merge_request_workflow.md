@@ -150,7 +150,7 @@ Commit messages should follow the guidelines below, for reasons explained by Chr
 #### Why these standards matter
 
 1. Consistent commit messages that follow these guidelines make the history more readable.
-1. Concise standard commit messages helps to identify breaking changes for a deployment or ~"master:broken" quicker when
+1. Concise standard commit messages helps to identify [breaking changes](index.md#breaking-changes) for a deployment or ~"master:broken" quicker when
    reviewing commits between two points in time.
 
 #### Commit message template
@@ -212,7 +212,7 @@ the contribution acceptance criteria below:
 1. Changes do not degrade performance:
    - Avoid repeated polling of endpoints that require a significant amount of overhead.
    - Check for N+1 queries via the SQL log or [`QueryRecorder`](../merge_request_performance_guidelines.md).
-   - Avoid repeated access of the filesystem.
+   - Avoid repeated access of the file system.
    - Use [polling with ETag caching](../polling.md) if needed to support real-time features.
 1. If the merge request adds any new libraries (gems, JavaScript libraries, etc.),
    they should conform to our [Licensing guidelines](../licensing.md). See those

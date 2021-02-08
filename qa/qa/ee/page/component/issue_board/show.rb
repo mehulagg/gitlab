@@ -15,7 +15,7 @@ module QA
                   element :board_scope_modal
                 end
 
-                view 'ee/app/assets/javascripts/boards/config_toggle.js' do
+                view 'ee/app/assets/javascripts/boards/components/config_toggle.vue' do
                   element :boards_config_button
                 end
               end

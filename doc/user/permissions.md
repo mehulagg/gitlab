@@ -95,7 +95,7 @@ The following table depicts the various user permission levels in a project.
 | View metrics dashboard annotations                |         | ✓          | ✓           | ✓        | ✓      |
 | Archive/reopen requirements **(ULTIMATE)**        |         | ✓          | ✓           | ✓        | ✓      |
 | Create/edit requirements **(ULTIMATE)**           |         | ✓          | ✓           | ✓        | ✓      |
-| Import requirements **(ULTIMATE)**                |         | ✓          | ✓           | ✓        | ✓      |
+| Import/export requirements **(ULTIMATE)**         |         | ✓          | ✓           | ✓        | ✓      |
 | Create new [test case](../ci/test_cases/index.md) |         | ✓          | ✓           | ✓        | ✓      |
 | Archive [test case](../ci/test_cases/index.md)    |         | ✓          | ✓           | ✓        | ✓      |
 | Move [test case](../ci/test_cases/index.md)       |         | ✓          | ✓           | ✓        | ✓      |
@@ -142,13 +142,13 @@ The following table depicts the various user permission levels in a project.
 | Create/edit/delete metrics dashboard annotations  |         |            | ✓           | ✓        | ✓      |
 | Run CI/CD pipeline against a protected branch     |         |            | ✓ (*5*)     | ✓        | ✓      |
 | Delete [packages](packages/index.md)              |         |            |             | ✓        | ✓      |
-| Request a CVE ID **(FREE ONLY)**                  |         |            |             | ✓        | ✓      |
+| Request a CVE ID **(FREE SAAS)**                  |         |            |             | ✓        | ✓      |
 | Use environment terminals                         |         |            |             | ✓        | ✓      |
-| Run Web IDE's Interactive Web Terminals **(ULTIMATE ONLY)** |     |      |             | ✓        | ✓      |
+| Run Web IDE's Interactive Web Terminals **(ULTIMATE SELF)** |     |      |             | ✓        | ✓      |
 | Add new team members                              |         |            |             | ✓        | ✓      |
 | Enable/disable branch protection                  |         |            |             | ✓        | ✓      |
 | Push to protected branches                        |         |            |             | ✓        | ✓      |
-| Turn on/off protected branch push for devs        |         |            |             | ✓        | ✓      |
+| Turn on/off protected branch push for developers  |         |            |             | ✓        | ✓      |
 | Enable/disable tag protections                    |         |            |             | ✓        | ✓      |
 | Edit project settings                             |         |            |             | ✓        | ✓      |
 | Edit project badges                               |         |            |             | ✓        | ✓      |
@@ -172,7 +172,7 @@ The following table depicts the various user permission levels in a project.
 | Delete wiki pages                                 |         |            |             | ✓        | ✓      |
 | View project Audit Events                         |         |            |  ✓ (*12*)   | ✓        | ✓      |
 | Manage [push rules](../push_rules/push_rules.md)  |         |            |             | ✓        | ✓      |
-| Manage [project access tokens](project/settings/project_access_tokens.md) **(CORE ONLY)** |         |            |             | ✓        | ✓      |
+| Manage [project access tokens](project/settings/project_access_tokens.md) **(FREE SELF)** |         |            |             | ✓        | ✓      |
 | Switch visibility level                           |         |            |             |          | ✓      |
 | Transfer project to another namespace             |         |            |             |          | ✓      |
 | Rename project                                    |         |            |             |          | ✓      |
@@ -189,7 +189,7 @@ The following table depicts the various user permission levels in a project.
 1. Guest users are able to perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
 1. Guest users can only view the confidential issues they created themselves.
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
-1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [Protected Branches](project/protected_branches.md).
+1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [protected branches](project/protected_branches.md).
 1. If the [branch is protected](project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings), this depends on the access Developers and Maintainers are given.
 1. Guest users can access GitLab [**Releases**](project/releases/index.md) for downloading assets but are not allowed to download the source code nor see repository information like tags and commits.
 1. Actions are limited only to records owned (referenced) by user.
@@ -282,7 +282,7 @@ group.
 | Manage group members                                   |       |          |           |            | ✓     |
 | Delete group                                           |       |          |           |            | ✓     |
 | Delete group epic **(PREMIUM)**                       |       |          |           |            | ✓     |
-| Edit SAML SSO Billing **(SILVER ONLY)**                | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
+| Edit SAML SSO Billing **(PREMIUM SAAS)**                | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
 | View group Audit Events                                |       |          | ✓ (7)     | ✓ (7)      | ✓     |
 | Disable notification emails                            |       |          |           |            | ✓     |
 | View Contribution analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
@@ -290,8 +290,8 @@ group.
 | View Issue analytics **(PREMIUM)**                     | ✓     | ✓        | ✓         | ✓          | ✓     |
 | View Productivity analytics **(PREMIUM)**              |       | ✓        | ✓         | ✓          | ✓     |
 | View Value Stream analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View Billing **(FREE ONLY)**                           |       |          |           |            | ✓ (4) |
-| View Usage Quotas **(FREE ONLY)**                      |       |          |           |            | ✓ (4) |
+| View Billing **(FREE SAAS)**                           |       |          |           |            | ✓ (4) |
+| View Usage Quotas **(FREE SAAS)**                      |       |          |           |            | ✓ (4) |
 | Filter members by 2FA status                           |       |          |           |            | ✓     |
 
 1. Groups can be set to [allow either Owners or Owners and
@@ -314,7 +314,7 @@ nested groups if you have membership in one of its parents.
 To learn more, read through the documentation on
 [subgroups memberships](group/subgroups/index.md#membership).
 
-## External users **(CORE ONLY)**
+## External users **(FREE SELF)**
 
 In cases where it is desired that a user has access only to some internal or
 private projects, there is the option of creating **External Users**. This
@@ -351,6 +351,9 @@ An administrator can flag a user as external by either of the following methods:
 - Or by navigating to the **Admin Area > Overview > Users** to create a new user
   or edit an existing one. There, you can find the option to flag the user as
   external.
+
+Additionally users can be set as external users using [SAML groups](../integration/saml.md#external-groups)
+and [LDAP groups](../administration/auth/ldap/index.md#external-groups).
 
 ### Setting new users to external
 
@@ -396,7 +399,7 @@ Beware though that even if a user is external, if they already have Reporter or
 higher permissions in any project or group, they are **not** counted as a
 free guest user.
 
-## Auditor users **(PREMIUM ONLY)**
+## Auditor users **(PREMIUM SELF)**
 
 >[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/998) in [GitLab Premium](https://about.gitlab.com/pricing/) 8.17.
 
@@ -421,7 +424,8 @@ details such as projects or subgroups. They do not have access to the group's pa
 ### Minimal access users take license seats
 
 Users with even a "minimal access" role are counted against your number of license seats. This
-requirement does not apply for [GitLab Gold/Ultimate](https://about.gitlab.com/pricing/) subscriptions.
+requirement does not apply for [GitLab Ultimate](https://about.gitlab.com/pricing/)
+subscriptions.
 
 ## Project features
 

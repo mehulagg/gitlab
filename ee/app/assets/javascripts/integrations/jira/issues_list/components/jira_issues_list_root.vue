@@ -9,14 +9,13 @@ import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 
-import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
-
 import {
   IssuableStates,
   IssuableListTabs,
   AvailableSortOptions,
   DEFAULT_PAGE_SIZE,
 } from '~/issuable_list/constants';
+import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
 
 export default {
   name: 'JiraIssuesList',

@@ -8,7 +8,7 @@
 - add_page_startup_api_call "#{issuable_sidebar[:issuable_json_path]}?serializer=sidebar_extras"
 - reviewers = local_assigns.fetch(:reviewers, nil)
 
-%aside.right-sidebar.js-right-sidebar.js-issuable-sidebar{ data: { signed: { in: signed_in }, issuable_type: issuable_type }, class: sidebar_gutter_collapsed_class, 'aria-live' => 'polite' }
+%aside.right-sidebar.js-right-sidebar.js-issuable-sidebar{ data: { signed: { in: signed_in }, issuable_type: issuable_type }, class: sidebar_gutter_collapsed_class, 'aria-live' => 'polite', 'aria-label': issuable_type }
   .issuable-sidebar
     .block.issuable-sidebar-header
       - if signed_in
@@ -26,7 +26,7 @@
       .block.assignee.qa-assignee-block
         = render "shared/issuable/sidebar_assignees", issuable_sidebar: issuable_sidebar, assignees: assignees, signed_in: signed_in
 
-      - if Feature.enabled?(:merge_request_reviewers, @project, default_enabled: true) && reviewers
+      - if reviewers
         .block.reviewer.qa-reviewer-block
           = render "shared/issuable/sidebar_reviewers", issuable_sidebar: issuable_sidebar, reviewers: reviewers, signed_in: signed_in
 
@@ -58,7 +58,7 @@
           .selectbox.hide-collapsed
             = f.hidden_field 'milestone_id', value: milestone[:id], id: nil
             = dropdown_tag('Milestone', options: { title: _('Assign milestone'), toggle_class: 'js-milestone-select js-extra-options', filter: true, dropdown_class: 'dropdown-menu-selectable', placeholder: _('Search milestones'), data: { show_no: true, field_name: "#{issuable_type}[milestone_id]", project_id: issuable_sidebar[:project_id], issuable_id: issuable_sidebar[:id], ability_name: issuable_type, issue_update: issuable_sidebar[:issuable_json_path], use_id: true, default_no: true, selected: milestone[:title], null_default: true, display: 'static' }})
-          - if @project.group.present?
+          - if @project.group.present? && issuable_sidebar[:supports_iterations]
             = render_if_exists 'shared/issuable/iteration_select', can_edit: can_edit_issuable, group_path: @project.group.full_path, project_path: issuable_sidebar[:project_full_path], issue_iid: issuable_sidebar[:iid], issuable_type: issuable_type
 
       - if issuable_sidebar[:supports_time_tracking]
@@ -66,7 +66,7 @@
           // Fallback while content is loading
           .title.hide-collapsed
             = _('Time tracking')
-            = loading_icon
+            = loading_icon(css_class: 'gl-vertical-align-text-bottom')
       - if issuable_sidebar.has_key?(:due_date)
         .block.due_date
           .sidebar-collapsed-icon.has-tooltip{ data: { placement: 'left', container: 'body', html: 'true', boundary: 'viewport' }, title: sidebar_due_date_tooltip_label(issuable_sidebar[:due_date]) }

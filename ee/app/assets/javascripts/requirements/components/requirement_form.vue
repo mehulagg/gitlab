@@ -14,10 +14,9 @@ import ZenMode from '~/zen_mode';
 import { TAB_KEY_CODE } from '~/lib/utils/keycodes';
 import IssuableBody from '~/issuable_show/components/issuable_body.vue';
 
-import RequirementStatusBadge from './requirement_status_badge.vue';
-
 import RequirementMeta from '../mixins/requirement_meta';
 import { MAX_TITLE_LENGTH, TestReportStatus } from '../constants';
+import RequirementStatusBadge from './requirement_status_badge.vue';
 
 export default {
   maxTitleLength: MAX_TITLE_LENGTH,
@@ -246,58 +245,56 @@ export default {
         />
       </div>
     </template>
-    <template>
-      <issuable-body
-        :issuable="requirementObject"
-        :enable-edit="canEditRequirement"
-        :enable-autocomplete="false"
-        :enable-autosave="false"
-        :edit-form-visible="enableRequirementEdit || isCreate"
-        :show-field-title="true"
-        :description-preview-path="descriptionPreviewPath"
-        :description-help-path="descriptionHelpPath"
-        status-badge-class="status-box-open"
-        status-icon="issue-open-m"
-        @edit-issuable="$emit($options.events.enableEdit, $event)"
-        @keydown-title.escape.exact.stop="handleFormInputKeyDown"
-        @keydown-description.escape.exact.stop="handleFormInputKeyDown"
-        @keydown-title.meta.enter="handleSave(arguments[1])"
-        @keydown-title.ctrl.enter="handleSave(arguments[1])"
-        @keydown-description.meta.enter="handleSave(arguments[1])"
-        @keydown-description.ctrl.enter="handleSave(arguments[1])"
-      >
-        <template #edit-form-actions="issuableMeta">
-          <gl-form-checkbox v-if="!isCreate" v-model="satisfied" class="gl-mt-6">{{
-            __('Satisfied')
-          }}</gl-form-checkbox>
-          <div class="gl-display-flex requirement-form-actions gl-mt-6">
-            <gl-button
-              :disabled="
-                requirementRequestActive ||
-                issuableMeta.issuableTitle.length > $options.maxTitleLength ||
-                !issuableMeta.issuableTitle.length
-              "
-              :loading="requirementRequestActive"
-              data-testid="requirement-save"
-              variant="success"
-              category="primary"
-              class="gl-mr-auto js-requirement-save"
-              @click="handleSave(issuableMeta)"
-            >
-              {{ saveButtonLabel }}
-            </gl-button>
-            <gl-button
-              data-testid="requirement-cancel"
-              variant="default"
-              category="primary"
-              class="js-requirement-cancel"
-              @click="handleCancel"
-            >
-              {{ __('Cancel') }}
-            </gl-button>
-          </div>
-        </template>
-      </issuable-body>
-    </template>
+    <issuable-body
+      :issuable="requirementObject"
+      :enable-edit="canEditRequirement"
+      :enable-autocomplete="false"
+      :enable-autosave="false"
+      :edit-form-visible="enableRequirementEdit || isCreate"
+      :show-field-title="true"
+      :description-preview-path="descriptionPreviewPath"
+      :description-help-path="descriptionHelpPath"
+      status-badge-class="status-box-open"
+      status-icon="issue-open-m"
+      @edit-issuable="$emit($options.events.enableEdit, $event)"
+      @keydown-title.escape.exact.stop="handleFormInputKeyDown"
+      @keydown-description.escape.exact.stop="handleFormInputKeyDown"
+      @keydown-title.meta.enter="handleSave(arguments[1])"
+      @keydown-title.ctrl.enter="handleSave(arguments[1])"
+      @keydown-description.meta.enter="handleSave(arguments[1])"
+      @keydown-description.ctrl.enter="handleSave(arguments[1])"
+    >
+      <template #edit-form-actions="issuableMeta">
+        <gl-form-checkbox v-if="!isCreate" v-model="satisfied" class="gl-mt-6">{{
+          __('Satisfied')
+        }}</gl-form-checkbox>
+        <div class="gl-display-flex requirement-form-actions gl-mt-6">
+          <gl-button
+            :disabled="
+              requirementRequestActive ||
+              issuableMeta.issuableTitle.length > $options.maxTitleLength ||
+              !issuableMeta.issuableTitle.length
+            "
+            :loading="requirementRequestActive"
+            data-testid="requirement-save"
+            variant="success"
+            category="primary"
+            class="gl-mr-auto js-requirement-save"
+            @click="handleSave(issuableMeta)"
+          >
+            {{ saveButtonLabel }}
+          </gl-button>
+          <gl-button
+            data-testid="requirement-cancel"
+            variant="default"
+            category="primary"
+            class="js-requirement-cancel"
+            @click="handleCancel"
+          >
+            {{ __('Cancel') }}
+          </gl-button>
+        </div>
+      </template>
+    </issuable-body>
   </gl-drawer>
 </template>

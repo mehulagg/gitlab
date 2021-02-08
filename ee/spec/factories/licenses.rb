@@ -35,7 +35,8 @@ FactoryBot.define do
           'GitLab_FileLocks' => 1,
           'GitLab_Auditor_User' => 1
         },
-        plan: plan
+        plan: plan,
+        subscription_id: '0000'
       }
     end
   end

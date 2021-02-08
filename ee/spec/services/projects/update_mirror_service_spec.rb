@@ -33,8 +33,7 @@ RSpec.describe Projects::UpdateMirrorService do
     it 'runs project housekeeping' do
       stub_fetch_mirror(project)
 
-      expect_next_instance_of(Projects::HousekeepingService) do |svc|
-        expect(svc.project).to eq(project)
+      expect_next_instance_of(Repositories::HousekeepingService) do |svc|
         expect(svc).to receive(:increment!)
         expect(svc).to receive(:needed?).and_return(true)
         expect(svc).to receive(:execute)

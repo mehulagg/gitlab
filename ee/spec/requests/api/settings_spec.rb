@@ -169,6 +169,17 @@ RSpec.describe API::Settings, 'EE Settings' do
     it_behaves_like 'settings for licensed features'
   end
 
+  context 'git_two_factor_session_expiry setting' do
+    before do
+      stub_feature_flags(two_factor_for_cli: true)
+    end
+
+    let(:settings) { { git_two_factor_session_expiry: 10 } }
+    let(:feature) { :git_two_factor_enforcement }
+
+    it_behaves_like 'settings for licensed features'
+  end
+
   context 'default project deletion protection' do
     let(:settings) { { default_project_deletion_protection: true } }
     let(:feature) { :default_project_deletion_protection }

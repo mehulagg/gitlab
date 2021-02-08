@@ -50,5 +50,11 @@ module EE
     def escaped_form_authenticity_token
       CGI.escape(form_authenticity_token)
     end
+
+    def jira_issues_show_data
+      {
+        issues_show_path: project_integrations_jira_issue_path(@project, params[:id], format: :json)
+      }
+    end
   end
 end

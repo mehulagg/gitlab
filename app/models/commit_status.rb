@@ -209,7 +209,7 @@ class CommitStatus < ApplicationRecord
 
   def group_name
     # 'rspec:linux: 1/10' => 'rspec:linux'
-    common_name = name.to_s.gsub(%r{\d+[\s:\/\\]+\d+\s*}, '')
+    common_name = name.to_s.gsub(%r{\b\d+[\s:\/\\]+\d+\s*}, '')
 
     # 'rspec:linux: [aws, max memory]' => 'rspec:linux', 'rspec:linux: [aws]' => 'rspec:linux'
     common_name.gsub!(%r{: \[.*\]\s*\z}, '')
@@ -255,15 +255,7 @@ class CommitStatus < ApplicationRecord
   end
 
   def all_met_to_become_pending?
-    !any_unmet_prerequisites? && !requires_resource?
-  end
-
-  def any_unmet_prerequisites?
-    false
-  end
-
-  def requires_resource?
-    false
+    true
   end
 
   def auto_canceled?

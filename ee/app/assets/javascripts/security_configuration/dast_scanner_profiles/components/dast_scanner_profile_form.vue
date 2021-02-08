@@ -13,14 +13,14 @@ import {
   GlFormRadioGroup,
 } from '@gitlab/ui';
 import { initFormField } from 'ee/security_configuration/utils';
+import { returnToPreviousPageFactory } from 'ee/security_configuration/dast_profiles/redirect';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
-import { redirectTo } from '~/lib/utils/url_utility';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import dastScannerProfileCreateMutation from '../graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from '../graphql/dast_scanner_profile_update.mutation.graphql';
-import tooltipIcon from './tooltip_icon.vue';
 import { SCAN_TYPE, SCAN_TYPE_OPTIONS } from '../constants';
+import tooltipIcon from './tooltip_icon.vue';
 
 const SPIDER_TIMEOUT_MIN = 0;
 const SPIDER_TIMEOUT_MAX = 2880;
@@ -48,6 +48,10 @@ export default {
       required: true,
     },
     profilesLibraryPath: {
+      type: String,
+      required: true,
+    },
+    onDemandScansPath: {
       type: String,
       required: true,
     },
@@ -81,6 +85,11 @@ export default {
       initialFormValues: serializeFormObject(form),
       loading: false,
       showAlert: false,
+      returnToPreviousPage: returnToPreviousPageFactory({
+        onDemandScansPath: this.onDemandScansPath,
+        profilesLibraryPath: this.profilesLibraryPath,
+        urlParamKey: 'scanner_profile_id',
+      }),
     };
   },
   spiderTimeoutRange: {
@@ -189,6 +198,7 @@ export default {
           ({
             data: {
               [this.isEdit ? 'dastScannerProfileUpdate' : 'dastScannerProfileCreate']: {
+                id,
                 errors = [],
               },
             },
@@ -197,7 +207,7 @@ export default {
               this.showErrors(errors);
               this.loading = false;
             } else {
-              redirectTo(this.profilesLibraryPath);
+              this.returnToPreviousPage(id);
             }
           },
         )
@@ -215,7 +225,7 @@ export default {
       }
     },
     discard() {
-      redirectTo(this.profilesLibraryPath);
+      this.returnToPreviousPage();
     },
     showErrors(errors = []) {
       this.errors = errors;

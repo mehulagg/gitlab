@@ -1,6 +1,5 @@
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import CanaryDeploymentBoard from '~/environments/components/canary_deployment_callout.vue';
 import DeployBoard from '~/environments/components/deploy_board.vue';
 import EnvironmentsComponent from '~/environments/components/environments_app.vue';
 import axios from '~/lib/utils/axios_utils';
@@ -11,7 +10,6 @@ describe('Environment', () => {
   let wrapper;
 
   const mockData = {
-    canaryDeploymentFeatureId: 'canary_deployment',
     canCreateEnvironment: true,
     canReadEnvironment: true,
     endpoint: 'environments.json',
@@ -19,12 +17,8 @@ describe('Environment', () => {
     helpPagePath: 'help',
     lockPromotionSvgPath: '/assets/illustrations/lock-promotion.svg',
     newEnvironmentPath: 'environments/new',
-    showCanaryDeploymentCallout: true,
     userCalloutsPath: '/callouts',
   };
-
-  const canaryPromoKeyValue = () =>
-    wrapper.find(CanaryDeploymentBoard).attributes('data-js-canary-promo-key');
 
   const createWrapper = () => {
     wrapper = mount(EnvironmentsComponent, { propsData: mockData });
@@ -86,23 +80,6 @@ describe('Environment', () => {
         expect(wrapper.find('.deploy-board-icon [data-testid="chevron-down-icon"]').exists()).toBe(
           true,
         );
-      });
-    });
-
-    describe('canary callout with one environment', () => {
-      it('should render banner underneath first environment', () => {
-        expect(canaryPromoKeyValue()).toBe('0');
-      });
-    });
-
-    describe('canary callout with multiple environments', () => {
-      beforeEach(() => {
-        mockRequest([environment, environment, environment]);
-        return createWrapper();
-      });
-
-      it('should render banner underneath second environment', () => {
-        expect(canaryPromoKeyValue()).toBe('1');
       });
     });
   });

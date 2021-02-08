@@ -34,7 +34,7 @@ class Project < ApplicationRecord
   include FromUnion
   include IgnorableColumns
   include Integration
-  include CanHousekeepRepository
+  include Repositories::CanHousekeepRepository
   include EachBatch
   extend Gitlab::Cache::RequestCache
   extend Gitlab::Utils::Override
@@ -75,7 +75,7 @@ class Project < ApplicationRecord
   default_value_for :resolve_outdated_diff_discussions, false
   default_value_for :container_registry_enabled, gitlab_config_features.container_registry
   default_value_for(:repository_storage) do
-    pick_repository_storage
+    Repository.pick_storage_shard
   end
 
   default_value_for(:shared_runners_enabled) { Gitlab::CurrentSettings.shared_runners_enabled }
@@ -117,7 +117,7 @@ class Project < ApplicationRecord
 
   use_fast_destroy :build_trace_chunks
 
-  after_destroy -> { run_after_commit { remove_pages } }
+  after_destroy -> { run_after_commit { legacy_remove_pages } }
   after_destroy :remove_exports
 
   after_validation :check_pending_delete
@@ -147,7 +147,6 @@ class Project < ApplicationRecord
   has_many :boards
 
   # Project services
-  has_one :alerts_service
   has_one :campfire_service
   has_one :datadog_service
   has_one :discord_service
@@ -219,6 +218,7 @@ class Project < ApplicationRecord
 
   # Merge Requests for target project should be removed with it
   has_many :merge_requests, foreign_key: 'target_project_id', inverse_of: :target_project
+  has_many :merge_request_metrics, foreign_key: 'target_project', class_name: 'MergeRequest::Metrics', inverse_of: :target_project
   has_many :source_of_merge_requests, foreign_key: 'source_project_id', class_name: 'MergeRequest'
   has_many :issues
   has_many :labels, class_name: 'ProjectLabel'
@@ -457,7 +457,7 @@ class Project < ApplicationRecord
   validates :repository_storage,
     presence: true,
     inclusion: { in: ->(_object) { Gitlab.config.repositories.storages.keys } }
-  validates :variables, variable_duplicates: { scope: :environment_scope }
+  validates :variables, nested_attributes_duplicates: { scope: :environment_scope }
   validates :bfg_object_map, file_size: { maximum: :max_attachment_size }
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
@@ -1315,21 +1315,11 @@ class Project < ApplicationRecord
   end
 
   def external_issue_tracker
-    if has_external_issue_tracker.nil?
-      cache_has_external_issue_tracker
-    end
+    cache_has_external_issue_tracker if has_external_issue_tracker.nil?
 
-    if has_external_issue_tracker?
-      strong_memoize(:external_issue_tracker) do
-        services.external_issue_trackers.first
-      end
-    else
-      nil
-    end
-  end
+    return unless has_external_issue_tracker?
 
-  def cache_has_external_issue_tracker
-    update_column(:has_external_issue_tracker, services.external_issue_trackers.any?) if Gitlab::Database.read_write?
+    @external_issue_tracker ||= services.external_issue_trackers.first
   end
 
   def external_references_supported?
@@ -1357,9 +1347,9 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
-    return ['datadog'] unless Feature.enabled?(:datadog_ci_integration, self)
+    return %w(datadog alerts) unless Feature.enabled?(:datadog_ci_integration, self)
 
-    []
+    %w(alerts)
   end
 
   def find_or_initialize_service(name)
@@ -1798,15 +1788,15 @@ class Project < ApplicationRecord
                .delete_all
   end
 
-  # TODO: what to do here when not using Legacy Storage? Do we still need to rename and delay removal?
+  # TODO: remove this method https://gitlab.com/gitlab-org/gitlab/-/issues/320775
   # rubocop: disable CodeReuse/ServiceClass
-  def remove_pages
+  def legacy_remove_pages
+    return unless Feature.enabled?(:pages_update_legacy_storage, default_enabled: true)
+
     # Projects with a missing namespace cannot have their pages removed
     return unless namespace
 
     mark_pages_as_not_deployed unless destroyed?
-
-    DestroyPagesDeploymentsWorker.perform_async(id)
 
     # 1. We rename pages to temporary directory
     # 2. We wait 5 minutes, due to NFS caching
@@ -2533,6 +2523,11 @@ class Project < ApplicationRecord
     tracing_setting&.external_url
   end
 
+  override :git_garbage_collect_worker_klass
+  def git_garbage_collect_worker_klass
+    Projects::GitGarbageCollectWorker
+  end
+
   private
 
   def find_service(services, name)
@@ -2690,6 +2685,10 @@ class Project < ApplicationRecord
 
   def cache_has_external_wiki
     update_column(:has_external_wiki, services.external_wikis.any?) if Gitlab::Database.read_write?
+  end
+
+  def cache_has_external_issue_tracker
+    update_column(:has_external_issue_tracker, services.external_issue_trackers.any?) if Gitlab::Database.read_write?
   end
 end
 

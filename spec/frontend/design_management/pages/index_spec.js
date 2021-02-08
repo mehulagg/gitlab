@@ -4,7 +4,7 @@ import VueApollo, { ApolloMutation } from 'vue-apollo';
 import VueDraggable from 'vuedraggable';
 import VueRouter from 'vue-router';
 import { GlEmptyState } from '@gitlab/ui';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import getDesignListQuery from 'shared_queries/design_management/get_design_list.query.graphql';
 import permissionsQuery from 'shared_queries/design_management/design_permissions.query.graphql';
@@ -22,6 +22,11 @@ import {
 import createFlash from '~/flash';
 import createRouter from '~/design_management/router';
 import * as utils from '~/design_management/utils/design_management_utils';
+import moveDesignMutation from '~/design_management/graphql/mutations/move_design.mutation.graphql';
+import {
+  DESIGN_TRACKING_PAGE_NAME,
+  DESIGN_SNOWPLOW_EVENT_TYPES,
+} from '~/design_management/utils/tracking';
 import {
   designListQueryResponse,
   designUploadMutationCreatedResponse,
@@ -31,11 +36,6 @@ import {
   reorderedDesigns,
   moveDesignMutationResponseWithErrors,
 } from '../mock_data/apollo_mock';
-import moveDesignMutation from '~/design_management/graphql/mutations/move_design.mutation.graphql';
-import {
-  DESIGN_TRACKING_PAGE_NAME,
-  DESIGN_SNOWPLOW_EVENT_TYPES,
-} from '~/design_management/utils/tracking';
 
 jest.mock('~/flash.js');
 const mockPageEl = {

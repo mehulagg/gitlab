@@ -5,4 +5,5 @@
 .js-iteration{ data: { full_path: @project.full_path,
   can_edit: can?(current_user, :admin_iteration, @project).to_s,
   iteration_id: params[:id],
+  labels_fetch_path: project_labels_path(@project, format: :json, include_ancestor_groups: true),
   preview_markdown_path: preview_markdown_path(@project) } }

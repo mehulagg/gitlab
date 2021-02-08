@@ -13,7 +13,6 @@ export const resolvers = {
       const params = {
         per_page: Api.DEFAULT_PER_PAGE,
         search,
-        top_level_only: true,
       };
       if (nextPage) {
         params.page = nextPage;

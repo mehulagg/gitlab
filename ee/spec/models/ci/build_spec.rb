@@ -98,7 +98,7 @@ RSpec.describe Ci::Build do
 
     %w(success drop cancel).each do |event|
       it "for event #{event}", :sidekiq_might_not_need_inline do
-        expect(UpdateBuildMinutesService)
+        expect(Ci::Minutes::UpdateBuildMinutesService)
           .to receive(:new).and_call_original
 
         job.public_send(event)
@@ -467,12 +467,6 @@ RSpec.describe Ci::Build do
       let(:merge_request) { create(:merge_request, :with_merge_request_pipeline) }
 
       it { is_expected.to be true }
-    end
-
-    context 'with pipeline for merge train' do
-      let(:merge_request) { create(:merge_request, :on_train, :with_merge_train_pipeline) }
-
-      it { is_expected.to be false }
     end
   end
 

@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# GitLab Rails Console Cheat Sheet **(CORE ONLY)**
+# GitLab Rails Console Cheat Sheet **(FREE SELF)**
 
 This is the GitLab Support Team's collection of information regarding the GitLab Rails
 console, for use while troubleshooting. It is listed here for transparency,
@@ -743,7 +743,7 @@ m.project.try(:ci_service)
 ```ruby
 project = Project.find_by_full_path 'group/project'
 content = project.repository.gitlab_ci_yml_for(project.repository.root_ref_sha)
-Gitlab::Ci::YamlProcessor.validation_message(content,  user: User.first)
+Gitlab::Ci::Lint.new(project: project,  current_user: User.first).validate(content)
 ```
 
 ### Disable AutoDevOps on Existing Projects

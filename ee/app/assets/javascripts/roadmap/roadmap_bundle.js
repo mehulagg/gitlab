@@ -3,15 +3,14 @@ import { mapActions } from 'vuex';
 
 import Translate from '~/vue_shared/translate';
 
-import EpicItem from './components/epic_item.vue';
-import EpicItemContainer from './components/epic_item_container.vue';
-
 import {
   parseBoolean,
   urlParamsToObject,
   convertObjectPropsToCamelCase,
 } from '~/lib/utils/common_utils';
 import { visitUrl, mergeUrlParams } from '~/lib/utils/url_utility';
+import EpicItem from './components/epic_item.vue';
+import EpicItemContainer from './components/epic_item_container.vue';
 
 import { PRESET_TYPES, EPIC_DETAILS_CELL_WIDTH } from './constants';
 
@@ -41,14 +40,26 @@ export default () => {
     });
   }
 
-  Vue.component('epic-item', EpicItem);
-  Vue.component('epic-item-container', EpicItemContainer);
+  Vue.component('EpicItem', EpicItem);
+  Vue.component('EpicItemContainer', EpicItemContainer);
 
   return new Vue({
     el,
     store: createStore(),
     components: {
       roadmapApp,
+    },
+    provide() {
+      const { dataset } = this.$options.el;
+
+      return {
+        newEpicPath: dataset.newEpicPath,
+        listEpicsPath: dataset.listEpicsPath,
+        epicsDocsPath: dataset.epicsDocsPath,
+        groupFullPath: dataset.fullPath,
+        groupLabelsPath: dataset.groupLabelsEndpoint,
+        groupMilestonesPath: dataset.groupMilestonesEndpoint,
+      };
     },
     data() {
       const supportedPresetTypes = Object.keys(PRESET_TYPES);
@@ -79,13 +90,10 @@ export default () => {
         allowSubEpics: parseBoolean(dataset.allowSubEpics),
         defaultInnerHeight: Number(dataset.innerHeight),
         isChildEpics: parseBoolean(dataset.childEpics),
-        currentGroupId: parseInt(dataset.groupId, 0),
+        currentGroupId: parseInt(dataset.groupId, 10),
         basePath: dataset.epicsPath,
         fullPath: dataset.fullPath,
         epicIid: dataset.iid,
-        newEpicEndpoint: dataset.newEpicEndpoint,
-        groupLabelsEndpoint: dataset.groupLabelsEndpoint,
-        groupMilestonesEndpoint: dataset.groupMilestonesEndpoint,
         epicsState: dataset.epicsState,
         sortedBy: dataset.sortedBy,
         filterParams,
@@ -104,8 +112,6 @@ export default () => {
         timeframe: this.timeframe,
         basePath: this.basePath,
         filterParams: this.filterParams,
-        groupLabelsEndpoint: this.groupLabelsEndpoint,
-        groupMilestonesEndpoint: this.groupMilestonesEndpoint,
         defaultInnerHeight: this.defaultInnerHeight,
         isChildEpics: this.isChildEpics,
         hasFiltersApplied: this.hasFiltersApplied,
@@ -119,7 +125,6 @@ export default () => {
       return createElement('roadmap-app', {
         props: {
           presetType: this.presetType,
-          newEpicEndpoint: this.newEpicEndpoint,
           emptyStateIllustrationPath: this.emptyStateIllustrationPath,
         },
       });

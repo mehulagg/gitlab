@@ -1,6 +1,6 @@
 <script>
-import ItemButton from './button.vue';
 import { isTextFile } from '~/ide/utils';
+import ItemButton from './button.vue';
 
 export default {
   components: {
@@ -81,6 +81,7 @@ export default {
       type="file"
       class="hidden"
       multiple
+      data-qa-selector="file_upload_field"
       @change="openFile"
     />
   </div>

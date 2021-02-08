@@ -4,8 +4,8 @@ import { mapActions, mapState, mapGetters } from 'vuex';
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { s__ } from '~/locale';
-import SubscriptionTableRow from './subscription_table_row.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import SubscriptionTableRow from './subscription_table_row.vue';
 
 const createButtonProps = (text, href, testId) => ({ text, href, testId });
 
@@ -36,12 +36,15 @@ export default {
     addSeatsHref: {
       default: '',
     },
+    planName: {
+      default: '',
+    },
   },
   computed: {
     ...mapState(['isLoadingSubscription', 'hasErrorSubscription', 'plan', 'tables', 'endpoint']),
     ...mapGetters(['isFreePlan']),
     subscriptionHeader() {
-      const planName = this.isFreePlan ? s__('SubscriptionTable|Free') : escape(this.plan.name);
+      const planName = this.isFreePlan ? s__('SubscriptionTable|Free') : escape(this.planName);
       const suffix = !this.isFreePlan && this.plan.trial ? s__('SubscriptionTable|Trial') : '';
 
       return `${this.namespaceName}: ${planName} ${suffix}`;
@@ -50,7 +53,7 @@ export default {
       return this.glFeatures.saasAddSeatsButton && !this.isFreePlan;
     },
     canRenew() {
-      return this.glFeatures.saasManualRenewButton && !this.isFreePlan;
+      return !this.isFreePlan;
     },
     canUpgrade() {
       return this.isFreePlan || this.plan.upgradable;

@@ -7,7 +7,7 @@ RSpec.describe GroupPolicy do
 
   let(:epic_rules) do
     %i(read_epic create_epic admin_epic destroy_epic read_confidential_epic
-       destroy_epic_link read_epic_board read_epic_list)
+       destroy_epic_link read_epic_board read_epic_list admin_epic_board)
   end
 
   context 'when epics feature is disabled' do
@@ -1390,6 +1390,37 @@ RSpec.describe GroupPolicy do
 
         before do
           stub_licensed_features(group_merge_request_approval_settings: licensed)
+        end
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+      end
+    end
+
+    describe ':start_trial' do
+      using RSpec::Parameterized::TableSyntax
+
+      let(:policy) { :start_trial }
+
+      where(:role, :eligible_for_trial, :allowed) do
+        :guest      | true  | false
+        :guest      | false | false
+        :reporter   | true  | false
+        :reporter   | false | false
+        :developer  | true  | false
+        :developer  | false | false
+        :maintainer | true  | true
+        :maintainer | false | false
+        :owner      | true  | true
+        :owner      | false | false
+        :admin      | true  | true
+        :admin      | false | false
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        before do
+          allow(group).to receive(:eligible_for_trial?).and_return(eligible_for_trial)
         end
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }

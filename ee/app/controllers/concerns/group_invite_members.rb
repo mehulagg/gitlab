@@ -11,7 +11,7 @@ module GroupInviteMembers
 
     result = Members::CreateService.new(current_user, invite_params).execute(group)
 
-    track_event('invite_members', { label: 'new_group_form' }) if result[:status] == :success
+    track_event('invite_members', label: 'new_group_form') if result[:status] == :success
   end
 
   def emails_param

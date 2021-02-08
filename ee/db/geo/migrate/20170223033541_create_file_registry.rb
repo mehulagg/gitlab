@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateFileRegistry < ActiveRecord::Migration[4.2]
   # rubocop:disable Migration/PreventStrings
   def change

@@ -816,6 +816,15 @@ RSpec.describe License do
     end
   end
 
+  describe '#subscription_id' do
+    it 'has correct subscription_id' do
+      gl_license = build(:gitlab_license, restrictions: { subscription_id: "1111" })
+      license = build(:license, data: gl_license.export)
+
+      expect(license.subscription_id).to eq("1111")
+    end
+  end
+
   describe '#daily_billable_users_count' do
     before_all do
       create(:group_member)

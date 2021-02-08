@@ -11,13 +11,17 @@ RSpec.describe EE::Issuable do
         allow(InternalId).to receive(:generate_next).and_return(nil)
       end
 
-      it { is_expected.to validate_presence_of(:iid) }
       it { is_expected.to validate_presence_of(:author) }
       it { is_expected.to validate_presence_of(:title) }
       it { is_expected.to validate_length_of(:title).is_at_most(::Issuable::TITLE_LENGTH_MAX) }
       it { is_expected.to validate_length_of(:description).is_at_most(::Issuable::DESCRIPTION_LENGTH_MAX).on(:create) }
 
-      it_behaves_like 'validates description length with custom validation'
+      it_behaves_like 'validates description length with custom validation' do
+        before do
+          allow(InternalId).to receive(:generate_next).and_call_original
+        end
+      end
+
       it_behaves_like 'truncates the description to its allowed maximum length on import'
     end
   end
@@ -77,6 +81,31 @@ RSpec.describe EE::Issuable do
       subject { issuable.weight_available? }
 
       it { is_expected.to eq(weight_available) }
+    end
+  end
+
+  describe '#supports_iterations?' do
+    let(:group) { build_stubbed(:group) }
+    let(:project_with_group) { build_stubbed(:project, group: group) }
+    let(:project_without_group) { build_stubbed(:project) }
+
+    where(:issuable_type, :project, :supports_iterations) do
+      [
+        [:issue, :project_with_group, true],
+        [:issue, :project_without_group, true],
+        [:incident, :project_with_group, false],
+        [:incident, :project_without_group, false],
+        [:merge_request, :project_with_group, false],
+        [:merge_request, :project_without_group, false]
+      ]
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type, project: send(project)) }
+
+      subject { issuable.supports_iterations? }
+
+      it { is_expected.to eq(supports_iterations) }
     end
   end
 end

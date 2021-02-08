@@ -192,4 +192,44 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       end
     end
   end
+
+  context 'elasticsearch migrations' do
+    let(:application_setting) { build(:application_setting) }
+
+    it 'does not show the retry migration card' do
+      render
+
+      expect(rendered).not_to include('There is a halted Elasticsearch migration')
+      expect(rendered).not_to include('Retry migration')
+    end
+
+    context 'when there is a halted migration' do
+      let(:migration) { Elastic::DataMigrationService.migrations.last }
+
+      before do
+        allow(Elastic::DataMigrationService).to receive(:halted_migrations?).and_return(true)
+        allow(Elastic::DataMigrationService).to receive(:halted_migration).and_return(migration)
+      end
+
+      it 'shows the retry migration card' do
+        render
+
+        expect(rendered).to include('There is a halted Elasticsearch migration')
+        expect(rendered).to include('Retry migration')
+      end
+    end
+
+    context 'when elasticsearch is unreachable' do
+      before do
+        allow(Gitlab::Elastic::Helper.default).to receive(:ping?).and_return(false)
+      end
+
+      it 'does not show the retry migration card' do
+        render
+
+        expect(rendered).not_to include('There is a halted Elasticsearch migration')
+        expect(rendered).not_to include('Retry migration')
+      end
+    end
+  end
 end

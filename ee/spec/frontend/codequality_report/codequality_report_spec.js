@@ -12,7 +12,7 @@ describe('Codequality report app', () => {
   let wrapper;
   let store;
 
-  const createComponent = (state = {}, issues = []) => {
+  const createComponent = (state = {}, issues = [], glFeatures = {}) => {
     store = new Vuex.Store({
       state: {
         pageInfo: {},
@@ -27,6 +27,9 @@ describe('Codequality report app', () => {
     wrapper = mount(CodequalityReportApp, {
       localVue,
       store,
+      provide: {
+        glFeatures,
+      },
     });
   };
 

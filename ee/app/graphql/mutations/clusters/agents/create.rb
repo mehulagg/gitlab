@@ -4,7 +4,7 @@ module Mutations
   module Clusters
     module Agents
       class Create < BaseMutation
-        include ResolvesProject
+        include FindsProject
 
         authorize :create_cluster
 
@@ -24,19 +24,13 @@ module Mutations
               description: 'Cluster agent created after mutation.'
 
         def resolve(project_path:, name:)
-          project = authorized_find!(full_path: project_path)
+          project = authorized_find!(project_path)
           result = ::Clusters::Agents::CreateService.new(project, current_user).execute(name: name)
 
           {
             cluster_agent: result[:cluster_agent],
             errors: Array.wrap(result[:message])
           }
-        end
-
-        private
-
-        def find_object(full_path:)
-          resolve_project(full_path: full_path)
         end
       end
     end

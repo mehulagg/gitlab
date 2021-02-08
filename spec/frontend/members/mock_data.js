@@ -4,10 +4,11 @@ export const member = {
   canRemove: false,
   canOverride: false,
   isOverridden: false,
+  isDirectMember: false,
   accessLevel: { integerValue: 50, stringValue: 'Owner' },
   source: {
     id: 178,
-    name: 'Foo Bar',
+    fullName: 'Foo Bar',
     webUrl: 'https://gitlab.com/groups/foo-bar',
   },
   user: {
@@ -69,3 +70,8 @@ export const accessRequest = {
 };
 
 export const members = [member];
+
+export const membersJsonString = JSON.stringify(members);
+
+export const directMember = { ...member, isDirectMember: true };
+export const inheritedMember = { ...member, isDirectMember: false };

@@ -21,8 +21,8 @@ export const groupNodes = [
 ];
 
 export const groupNodeLabelValues = [
-  { label: 'Foo', value: '1' },
-  { label: 'Bar', value: '2' },
+  { text: 'Foo', value: '1' },
+  { text: 'Bar', value: '2' },
 ];
 
 export const groupIds = ['1', '2'];
@@ -85,7 +85,7 @@ export const devopsAdoptionSegmentsDataEmpty = {
 export const devopsAdoptionTableHeaders = [
   {
     index: 0,
-    label: 'Segment',
+    label: 'Group',
     tooltip: null,
   },
   {
@@ -132,9 +132,9 @@ export const devopsAdoptionTableHeaders = [
 
 export const segmentName = 'Foooo';
 
-export const genericErrorMessage = 'An error occured while saving the segment. Please try again.';
+export const genericErrorMessage = 'An error occured while saving the group. Please try again.';
 
 export const dataErrorMessage = 'Name already taken.';
 
 export const genericDeleteErrorMessage =
-  'An error occured while deleting the segment. Please try again.';
+  'An error occured while deleting the group. Please try again.';

@@ -22,6 +22,7 @@ module EE
           expose :group_owners_can_manage_default_branch_protection, if: ->(_instance, _opts) { ::License.feature_available?(:default_branch_protection_restriction_in_groups) }
           expose :maintenance_mode, if: ->(_instance, _opts) { ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode) }
           expose :maintenance_mode_message, if: ->(_instance, _opts) { ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode) }
+          expose :git_two_factor_session_expiry, if: ->(_instance, _opts) { License.feature_available?(:git_two_factor_enforcement) && ::Feature.enabled?(:two_factor_for_cli) }
         end
       end
     end

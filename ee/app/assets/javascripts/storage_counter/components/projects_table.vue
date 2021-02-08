@@ -1,10 +1,10 @@
 <script>
 import { GlSearchBoxByType } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { SEARCH_DEBOUNCE_MS } from '~/ref/constants';
 import Project from './project.vue';
 import ProjectWithExcessStorage from './project_with_excess_storage.vue';
 import ProjectsSkeletonLoader from './projects_skeleton_loader.vue';
-import { SEARCH_DEBOUNCE_MS } from '~/ref/constants';
 
 export default {
   components: {

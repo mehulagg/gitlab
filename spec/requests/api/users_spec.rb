@@ -368,6 +368,16 @@ RSpec.describe API::Users do
           expect(json_response.map { |u| u['id'] }).not_to include(internal_user.id)
         end
       end
+
+      context 'admins param' do
+        it 'returns all users' do
+          get api("/users?admins=true", user)
+
+          expect(response).to match_response_schema('public_api/v4/user/basics')
+          expect(json_response.size).to eq(2)
+          expect(json_response.map { |u| u['id'] }).to include(user.id, admin.id)
+        end
+      end
     end
 
     context "when admin" do
@@ -485,6 +495,16 @@ RSpec.describe API::Users do
         get api('/users', admin), params: { order_by: 'magic', sort: 'asc' }
 
         expect(response).to have_gitlab_http_status(:bad_request)
+      end
+    end
+
+    context 'admins param' do
+      it 'returns only admins' do
+        get api("/users?admins=true", admin)
+
+        expect(response).to match_response_schema('public_api/v4/user/basics')
+        expect(json_response.size).to eq(1)
+        expect(json_response.first['id']).to eq(admin.id)
       end
     end
   end
@@ -2545,7 +2565,7 @@ RSpec.describe API::Users do
           it 'does not approve a deactivated user' do
             expect { approve }.not_to change { deactivated_user.reload.state }
             expect(response).to have_gitlab_http_status(:conflict)
-            expect(json_response['message']).to eq('The user you are trying to approve is not pending an approval')
+            expect(json_response['message']).to eq('The user you are trying to approve is not pending approval')
           end
         end
 
@@ -2565,7 +2585,7 @@ RSpec.describe API::Users do
           it 'returns 201' do
             expect { approve }.not_to change { user.reload.state }
             expect(response).to have_gitlab_http_status(:conflict)
-            expect(json_response['message']).to eq('The user you are trying to approve is not pending an approval')
+            expect(json_response['message']).to eq('The user you are trying to approve is not pending approval')
           end
         end
 
@@ -2575,7 +2595,7 @@ RSpec.describe API::Users do
           it 'returns 403' do
             expect { approve }.not_to change { blocked_user.reload.state }
             expect(response).to have_gitlab_http_status(:conflict)
-            expect(json_response['message']).to eq('The user you are trying to approve is not pending an approval')
+            expect(json_response['message']).to eq('The user you are trying to approve is not pending approval')
           end
         end
 
@@ -2585,7 +2605,7 @@ RSpec.describe API::Users do
           it 'returns 403' do
             expect { approve }.not_to change { ldap_blocked_user.reload.state }
             expect(response).to have_gitlab_http_status(:conflict)
-            expect(json_response['message']).to eq('The user you are trying to approve is not pending an approval')
+            expect(json_response['message']).to eq('The user you are trying to approve is not pending approval')
           end
         end
 

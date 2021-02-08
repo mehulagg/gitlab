@@ -273,4 +273,32 @@ RSpec.describe 'Edit group settings' do
       end
     end
   end
+
+  describe 'merge request approval settings', :js do
+    context 'when feature flag is enabled and group is licensed' do
+      before do
+        stub_feature_flags(group_merge_request_approval_settings_feature_flag: true)
+        stub_licensed_features(group_merge_request_approval_settings: true)
+      end
+
+      it 'is visible' do
+        visit edit_group_path(group)
+
+        expect(page).to have_content('Merge request approvals')
+      end
+    end
+
+    context 'when feature flag is disabled and group is not licensed' do
+      before do
+        stub_feature_flags(group_merge_request_approval_settings_feature_flag: false)
+        stub_licensed_features(group_merge_request_approval_settings: false)
+      end
+
+      it 'is not visible' do
+        visit edit_group_path(group)
+
+        expect(page).not_to have_content('Merge request approvals')
+      end
+    end
+  end
 end

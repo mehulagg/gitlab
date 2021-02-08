@@ -4,10 +4,10 @@ group: Static Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# SAST Analyzers **(CORE)**
+# SAST Analyzers **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3775) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.3.
-> - [Moved](https://gitlab.com/groups/gitlab-org/-/epics/2098) to GitLab Core in 13.3.
+> - [Moved](https://gitlab.com/groups/gitlab-org/-/epics/2098) to GitLab Free in 13.3.
 
 SAST relies on underlying third party tools that are wrapped into what we call
 "Analyzers". An analyzer is a
@@ -68,6 +68,10 @@ the official analyzers.
 
 ### Selecting specific analyzers
 
+WARNING:
+`SAST_DEFAULT_ANALYZERS` is [deprecated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/50872) in GitLab 13.8,
+and is scheduled for [removal in GitLab 14.0](https://gitlab.com/gitlab-org/gitlab/-/issues/290777).
+
 You can select the official analyzers you want to run. Here's how to enable
 `bandit` and `flawfinder` while disabling all the other default ones.
 In `.gitlab-ci.yml` define:
@@ -83,9 +87,9 @@ variables:
 `bandit` runs first. When merging the reports, SAST
 removes the duplicates and keeps the `bandit` entries.
 
-### Disabling default analyzers
+### Disabling all default analyzers
 
-Setting `SAST_DEFAULT_ANALYZERS` to an empty string disables all the official
+Setting `SAST_DISABLED` to `true` disables all the official
 default analyzers. In `.gitlab-ci.yml` define:
 
 ```yaml
@@ -93,10 +97,37 @@ include:
   - template: Security/SAST.gitlab-ci.yml
 
 variables:
-  SAST_DEFAULT_ANALYZERS: ""
+  SAST_DISABLED: true
 ```
 
 That's needed when one totally relies on [custom analyzers](#custom-analyzers).
+
+### Disabling specific default analyzers
+
+Set `SAST_EXCLUDED_ANALYZERS` to a comma-delimited string that includes the official
+default analyzers that you want to avoid running. In `.gitlab-ci.yml` define the
+following to prevent the `eslint` analyzer from running:
+
+```yaml
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
+variables:
+  SAST_EXCLUDED_ANALYZERS: "eslint"
+```
+
+## Post Analyzers **(ULTIMATE)**
+
+While analyzers are thin wrappers for executing scanners, post analyzers work to
+enrich the data generated within our reports.
+
+GitLab SAST post analyzers never modify report contents directly but work by
+augmenting results with additional properties (such as CWEs), location tracking fields,
+and a means of identifying false positives or insignificant findings.
+
+The implementation of post analyzers is determined by feature availability tiers, where
+simple data enrichment may occur within our free tier and most advanced processing is split
+into separate binaries or pipeline jobs.
 
 ## Custom Analyzers
 
@@ -124,26 +155,26 @@ The [Security Scanner Integration](../../../development/integrations/secure.md) 
 
 | Property / Tool                         | Apex                 | Bandit               | Brakeman             | ESLint security      | SpotBugs             | Flawfinder           | Gosec                | Kubesec Scanner      | MobSF                | NodeJsScan           | PHP CS Security Audit   | Security code Scan (.NET)   | Sobelow            |
 | --------------------------------------- | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :---------------------: | :-------------------------: | :----------------: |
-| Severity                                | ✓                    | ✓                    | ✓                    | 𐄂                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                       | 𐄂                           | 𐄂                  |
+| Severity                                | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                       | ✗                           | ✗                  |
 | Title                                   | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                       | ✓                           | ✓                  |
-| Description                             | ✓                    | 𐄂                    | 𐄂                    | ✓                    | ✓                    | 𐄂                    | 𐄂                    | ✓                    | ✓                    | ✓                    | 𐄂                       | 𐄂                           | ✓                  |
+| Description                             | ✓                    | ✗                    | ✗                    | ✓                    | ✓                    | ✗                    | ✗                    | ✓                    | ✓                    | ✓                    | ✗                       | ✗                           | ✓                  |
 | File                                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                       | ✓                           | ✓                  |
-| Start line                              | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | 𐄂                    | ✓                    | ✓                    | ✓                       | ✓                           | ✓                  |
-| End line                                | ✓                    | ✓                    | 𐄂                    | ✓                    | ✓                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                       | 𐄂                           | 𐄂                  |
-| Start column                            | ✓                    | 𐄂                    | 𐄂                    | ✓                    | ✓                    | ✓                    | ✓                    | 𐄂                    | 𐄂                    | 𐄂                    | ✓                       | ✓                           | 𐄂                  |
-| End column                              | ✓                    | 𐄂                    | 𐄂                    | ✓                    | ✓                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                       | 𐄂                           | 𐄂                  |
-| External ID (for example, CVE)                  | 𐄂                    | 𐄂                    | ⚠                    | 𐄂                    | ⚠                    | ✓                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                       | 𐄂                           | 𐄂                  |
-| URLs                                    | ✓                    | 𐄂                    | ✓                    | 𐄂                    | ⚠                    | 𐄂                    | ⚠                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                       | 𐄂                           | 𐄂                  |
-| Internal doc/explanation                | ✓                    | ⚠                    | ✓                    | 𐄂                    | ✓                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                       | 𐄂                           | ✓                  |
-| Solution                                | ✓                    | 𐄂                    | 𐄂                    | 𐄂                    | ⚠                    | ✓                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                       | 𐄂                           | 𐄂                  |
-| Affected item (for example, class or package)   | ✓                    | 𐄂                    | ✓                    | 𐄂                    | ✓                    | ✓                    | 𐄂                    | ✓                    | 𐄂                    | 𐄂                    | 𐄂                       | 𐄂                           | 𐄂                  |
-| Confidence                              | 𐄂                    | ✓                    | ✓                    | 𐄂                    | ✓                    | x                    | ✓                    | ✓                    | 𐄂                    | 𐄂                    | 𐄂                       | 𐄂                           | ✓                  |
-| Source code extract                     | 𐄂                    | ✓                    | ✓                    | ✓                    | 𐄂                    | ✓                    | ✓                    | 𐄂                    | 𐄂                    | 𐄂                    | 𐄂                       | 𐄂                           | 𐄂                  |
-| Internal ID                             | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | 𐄂                    | 𐄂                    | 𐄂                    | ✓                       | ✓                           | ✓                  |
+| Start line                              | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✗                    | ✓                    | ✓                    | ✓                       | ✓                           | ✓                  |
+| End line                                | ✓                    | ✓                    | ✗                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
+| Start column                            | ✓                    | ✗                    | ✗                    | ✓                    | ✓                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                    | ✓                       | ✓                           | ✗                  |
+| End column                              | ✓                    | ✗                    | ✗                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
+| External ID (for example, CVE)                  | ✗                    | ✗                    | ⚠                    | ✗                    | ⚠                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
+| URLs                                    | ✓                    | ✗                    | ✓                    | ✗                    | ⚠                    | ✗                    | ⚠                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
+| Internal doc/explanation                | ✓                    | ⚠                    | ✓                    | ✗                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✓                  |
+| Solution                                | ✓                    | ✗                    | ✗                    | ✗                    | ⚠                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
+| Affected item (for example, class or package)   | ✓                    | ✗                    | ✓                    | ✗                    | ✓                    | ✓                    | ✗                    | ✓                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
+| Confidence                              | ✗                    | ✓                    | ✓                    | ✗                    | ✓                    | x                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                       | ✗                           | ✓                  |
+| Source code extract                     | ✗                    | ✓                    | ✓                    | ✓                    | ✗                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
+| Internal ID                             | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                    | ✓                       | ✓                           | ✓                  |
 
 - ✓ => we have that data
 - ⚠ => we have that data but it's partially reliable, or we need to extract it from unstructured content
-- 𐄂 => we don't have that data or it would need to develop specific or inefficient/unreliable logic to obtain it.
+- ✗ => we don't have that data or it would need to develop specific or inefficient/unreliable logic to obtain it.
 
 The values provided by these tools are heterogeneous so they are sometimes
 normalized into common values (for example, `severity`, `confidence`, and so on).

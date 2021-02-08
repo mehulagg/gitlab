@@ -59,6 +59,7 @@ export default () => {
         canCreateRequirement,
         requirementsWebUrl,
         requirementsImportCsvPath: importCsvPath,
+        currentUserEmail,
       } = el.dataset;
       const stateFilterBy = filterBy ? FilterState[filterBy] : FilterState.opened;
 
@@ -84,6 +85,7 @@ export default () => {
         canCreateRequirement,
         requirementsWebUrl,
         importCsvPath,
+        currentUserEmail,
       };
     },
     render(createElement) {
@@ -102,6 +104,7 @@ export default () => {
           canCreateRequirement: parseBoolean(this.canCreateRequirement),
           requirementsWebUrl: this.requirementsWebUrl,
           importCsvPath: this.importCsvPath,
+          currentUserEmail: this.currentUserEmail,
         },
       });
     },

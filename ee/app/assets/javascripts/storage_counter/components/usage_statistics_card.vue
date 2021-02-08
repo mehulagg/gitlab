@@ -62,7 +62,7 @@ export default {
     </p>
     <p
       class="gl-mb-0 gl-text-gray-900 gl-font-sm gl-white-space-normal"
-      data-testid="statisticsCardFooter"
+      data-testid="statistics-card-footer"
     >
       <slot v-bind="{ link }" name="footer">
         <gl-link target="_blank" :href="link.url">

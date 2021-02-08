@@ -1,12 +1,12 @@
 <script>
+import { mapActions, mapGetters, mapState } from 'vuex';
+import { ISSUABLE } from '~/boards/constants';
 import IssueCardInner from './issue_card_inner.vue';
-import IssueCardInnerDeprecated from './issue_card_inner_deprecated.vue';
-import boardsStore from '../stores/boards_store';
 
 export default {
   name: 'BoardCardLayout',
   components: {
-    IssueCardInner: gon.features?.graphqlBoardLists ? IssueCardInner : IssueCardInnerDeprecated,
+    IssueCardInner,
   },
   props: {
     list: {
@@ -38,15 +38,17 @@ export default {
   data() {
     return {
       showDetail: false,
-      multiSelect: boardsStore.multiSelect,
     };
   },
   computed: {
+    ...mapState(['selectedBoardItems']),
+    ...mapGetters(['isSwimlanesOn']),
     multiSelectVisible() {
-      return this.multiSelect.list.findIndex((issue) => issue.id === this.issue.id) > -1;
+      return this.selectedBoardItems.findIndex((boardItem) => boardItem.id === this.issue.id) > -1;
     },
   },
   methods: {
+    ...mapActions(['setActiveId', 'toggleBoardItemMultiSelection']),
     mouseDown() {
       this.showDetail = true;
     },
@@ -59,9 +61,14 @@ export default {
 
       const isMultiSelect = e.ctrlKey || e.metaKey;
 
+      if (!isMultiSelect) {
+        this.setActiveId({ id: this.issue.id, sidebarType: ISSUABLE });
+      } else {
+        this.toggleBoardItemMultiSelection(this.issue);
+      }
+
       if (this.showDetail || isMultiSelect) {
         this.showDetail = false;
-        this.$emit('show', { event: e, isMultiSelect });
       }
     },
   },

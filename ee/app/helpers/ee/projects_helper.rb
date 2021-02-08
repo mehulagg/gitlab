@@ -27,8 +27,6 @@ module EE
     def get_project_nav_tabs(project, current_user)
       nav_tabs = super
 
-      nav_tabs += get_project_security_nav_tabs(project, current_user)
-
       if can?(current_user, :read_code_review_analytics, project)
         nav_tabs << :code_review
       end
@@ -59,14 +57,16 @@ module EE
     override :project_permissions_settings
     def project_permissions_settings(project)
       super.merge(
-        requirementsAccessLevel: project.requirements_access_level
+        requirementsAccessLevel: project.requirements_access_level,
+        securityAndComplianceAccessLevel: project.security_and_compliance_access_level
       )
     end
 
     override :project_permissions_panel_data
     def project_permissions_panel_data(project)
       super.merge(
-        requirementsAvailable: project.feature_available?(:requirements)
+        requirementsAvailable: project.feature_available?(:requirements),
+        securityAndComplianceAvailable: project.feature_available?(:security_and_compliance)
       )
     end
 
@@ -117,13 +117,13 @@ module EE
     end
 
     def permanent_delete_message(project)
-      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}immediately%{strongClose}, including its repositories and all content: issues, merge requests, etc.')
+      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}immediately%{strongClose}, including its repositories and all related resources, including issues, merge requests, etc.')
       html_escape(message) % remove_message_data(project)
     end
 
     def marked_for_removal_message(project)
       date = permanent_deletion_date(Time.now.utc)
-      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}on %{date}%{strongClose}, including its repositories and all content: issues, merge requests, etc.')
+      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}on %{date}%{strongClose}, including its repositories and all related resources, including issues, merge requests, etc.')
       html_escape(message) % remove_message_data(project).merge(date: date)
     end
 
@@ -158,10 +158,11 @@ module EE
       @project.feature_available?(:merge_trains)
     end
 
+    override :sidebar_security_paths
     def sidebar_security_paths
-      %w[
-        projects/security/configuration#show
+      super + %w[
         projects/security/sast_configuration#show
+        projects/security/api_fuzzing_configuration#show
         projects/security/vulnerabilities#show
         projects/security/vulnerability_report#index
         projects/security/dashboard#index
@@ -196,10 +197,11 @@ module EE
       ]
     end
 
+    override :sidebar_security_configuration_paths
     def sidebar_security_configuration_paths
-      %w[
-        projects/security/configuration#show
+      super + %w[
         projects/security/sast_configuration#show
+        projects/security/api_fuzzing_configuration#show
         projects/security/dast_profiles#show
         projects/security/dast_site_profiles#new
         projects/security/dast_site_profiles#edit
@@ -251,7 +253,8 @@ module EE
           no_pipeline_run_scanners_help_path: new_project_pipeline_path(project),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
           auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
-          auto_fix_mrs_path: project_merge_requests_path(@project, label_name: 'GitLab-auto-fix')
+          auto_fix_mrs_path: project_merge_requests_path(@project, label_name: 'GitLab-auto-fix'),
+          scanners: VulnerabilityScanners::ListService.new(project).execute.to_json
         }.merge!(security_dashboard_pipeline_data(project))
       end
     end
@@ -319,12 +322,20 @@ module EE
 
     private
 
+    override :can_read_security_configuration?
+    def can_read_security_configuration?(project, current_user)
+      super || (project.feature_available?(:security_dashboard) &&
+        can?(current_user, :read_project_security_dashboard, project))
+    end
+
+    override :get_project_security_nav_tabs
     def get_project_security_nav_tabs(project, current_user)
-      nav_tabs = []
+      return [] unless can?(current_user, :access_security_and_compliance, project)
+
+      nav_tabs = super.union([:security_and_compliance])
 
       if can?(current_user, :read_project_security_dashboard, project)
         nav_tabs << :security
-        nav_tabs << :security_configuration
       end
 
       if can?(current_user, :read_on_demand_scans, @project)

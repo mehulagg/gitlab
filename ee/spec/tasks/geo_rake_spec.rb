@@ -364,7 +364,7 @@ RSpec.describe 'geo rake tasks', :geo do
             /Repositories Checked: /,
             /Last event ID seen from primary: /,
             /Last status report was: /
-          ] + Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural} Checked:/ } +
+          ] + Gitlab::Geo.verification_enabled_replicator_classes.map { |k| /#{k.replicable_title_plural} Verified:/ } +
               Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural}:/ }
 
           checks.each do |text|

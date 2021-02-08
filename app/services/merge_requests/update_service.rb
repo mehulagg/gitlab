@@ -87,8 +87,23 @@ module MergeRequests
       MergeRequests::CloseService
     end
 
+    def before_update(issuable, skip_spam_check: false)
+      return unless issuable.changed?
+
+      @issuable_changes = issuable.changes
+    end
+
     def after_update(issuable)
       issuable.cache_merge_request_closes_issues!(current_user)
+
+      return unless @issuable_changes
+
+      %w(title description).each do |action|
+        next unless @issuable_changes.key?(action)
+
+        Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+          .public_send("track_#{action}_edit_action".to_sym, user: current_user) # rubocop:disable GitlabSecurity/PublicSend
+      end
     end
 
     private
@@ -109,6 +124,9 @@ module MergeRequests
       create_assignee_note(merge_request, old_assignees)
       notification_service.async.reassigned_merge_request(merge_request, current_user, old_assignees)
       todo_service.reassigned_assignable(merge_request, current_user, old_assignees)
+
+      new_assignees = merge_request.assignees - old_assignees
+      merge_request_activity_counter.track_users_assigned_to_mr(users: new_assignees)
     end
 
     def handle_reviewers_change(merge_request, old_reviewers)
@@ -117,6 +135,9 @@ module MergeRequests
       notification_service.async.changed_reviewer_of_merge_request(merge_request, current_user, old_reviewers)
       todo_service.reassigned_reviewable(merge_request, current_user, old_reviewers)
       invalidate_cache_counts(merge_request, users: affected_reviewers.compact)
+
+      new_reviewers = merge_request.reviewers - old_reviewers
+      merge_request_activity_counter.track_users_review_requested(users: new_reviewers)
     end
 
     def create_branch_change_note(issuable, branch_type, old_branch, new_branch)

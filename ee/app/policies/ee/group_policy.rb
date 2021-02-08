@@ -117,6 +117,8 @@ module EE
 
       condition(:over_storage_limit, scope: :subject) { @subject.over_storage_limit? }
 
+      condition(:eligible_for_trial, scope: :subject) { @subject.eligible_for_trial? }
+
       rule { public_group | logged_in_viewable }.policy do
         enable :read_wiki
         enable :download_wiki_code
@@ -195,6 +197,7 @@ module EE
         enable :update_epic
         enable :read_confidential_epic
         enable :destroy_epic_link
+        enable :admin_epic_board
       end
 
       rule { reporter & subepics_available }.policy do
@@ -309,6 +312,8 @@ module EE
       rule { can?(:maintainer_access) & push_rules_available }.enable :change_push_rules
 
       rule { admin & is_gitlab_com }.enable :update_subscription_limit
+
+      rule { maintainer & eligible_for_trial }.enable :start_trial
 
       rule { over_storage_limit }.policy do
         prevent :create_projects

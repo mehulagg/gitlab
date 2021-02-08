@@ -1,17 +1,16 @@
 <script>
 import { delay } from 'lodash';
 
-import EpicItemDetails from './epic_item_details.vue';
-import EpicItemTimeline from './epic_item_timeline.vue';
-
 import CommonMixin from '../mixins/common_mixin';
 import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
 import MonthsPresetMixin from '../mixins/months_preset_mixin';
 import WeeksPresetMixin from '../mixins/weeks_preset_mixin';
 
+import { EPIC_HIGHLIGHT_REMOVE_AFTER } from '../constants';
 import CurrentDayIndicator from './current_day_indicator.vue';
 
-import { EPIC_HIGHLIGHT_REMOVE_AFTER } from '../constants';
+import EpicItemTimeline from './epic_item_timeline.vue';
+import EpicItemDetails from './epic_item_details.vue';
 
 export default {
   components: {
@@ -115,6 +114,7 @@ export default {
       if (this.epic.newEpic) {
         this.$nextTick(() => {
           delay(() => {
+            // eslint-disable-next-line vue/no-mutating-props
             this.epic.newEpic = false;
           }, EPIC_HIGHLIGHT_REMOVE_AFTER);
         });
@@ -142,7 +142,7 @@ export default {
         class="epic-timeline-cell"
         data-qa-selector="epic_timeline_cell"
       >
-        <!-- 
+        <!--
           CurrentDayIndicator internally checks if a given timeframeItem is for today.
           However, we are doing a duplicate check (index === todaysIndex) here -
           so that the the indicator is rendered once.

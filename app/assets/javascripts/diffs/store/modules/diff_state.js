@@ -45,5 +45,7 @@ export default () => ({
   fileFinderVisible: false,
   dismissEndpoint: '',
   showSuggestPopover: true,
+  defaultSuggestionCommitMessage: '',
   mrReviews: {},
+  latestDiff: true,
 });

@@ -2,6 +2,7 @@
 import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import Clipboard from 'clipboard';
 import { uniqueId } from 'lodash';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 
 export default {
   components: {
@@ -55,6 +56,11 @@ export default {
       required: false,
       default: null,
     },
+    category: {
+      type: String,
+      required: false,
+      default: 'primary',
+    },
   },
   computed: {
     modalDomId() {
@@ -71,7 +77,7 @@ export default {
       });
       this.clipboard
         .on('success', (e) => {
-          this.$root.$emit('bv::hide::tooltip', this.id);
+          this.$root.$emit(BV_HIDE_TOOLTIP, this.id);
           this.$emit('success', e);
           // Clear the selection and blur the trigger so it loses its border
           e.clearSelection();
@@ -95,6 +101,7 @@ export default {
     :data-clipboard-target="target"
     :data-clipboard-text="text"
     :title="title"
+    :category="category"
     icon="copy-to-clipboard"
   />
 </template>

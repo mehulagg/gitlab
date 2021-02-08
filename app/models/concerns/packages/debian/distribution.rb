@@ -18,6 +18,10 @@ module Packages
         belongs_to container_type
         belongs_to :creator, class_name: 'User'
 
+        has_many :components,
+          class_name: "Packages::Debian::#{container_type.capitalize}Component",
+          foreign_key: :distribution_id,
+          inverse_of: :distribution
         has_many :architectures,
           class_name: "Packages::Debian::#{container_type.capitalize}Architecture",
           foreign_key: :distribution_id,
@@ -70,6 +74,7 @@ module Packages
         scope :with_container, ->(subject) { where(container_type => subject) }
         scope :with_codename, ->(codename) { where(codename: codename) }
         scope :with_suite, ->(suite) { where(suite: suite) }
+        scope :with_codename_or_suite, ->(codename_or_suite) { with_codename(codename_or_suite).or(with_suite(codename_or_suite)) }
 
         attr_encrypted :signing_keys,
                        mode: :per_attribute_iv,

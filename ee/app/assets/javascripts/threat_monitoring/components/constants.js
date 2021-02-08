@@ -5,6 +5,11 @@ export const TOTAL_REQUESTS = s__('ThreatMonitoring|Total Requests');
 export const ANOMALOUS_REQUESTS = s__('ThreatMonitoring|Anomalous Requests');
 export const TIME = s__('ThreatMonitoring|Time');
 export const REQUESTS = s__('ThreatMonitoring|Requests');
+export const NO_ENVIRONMENT_TITLE = s__('ThreatMonitoring|No environments detected');
+export const EMPTY_STATE_DESCRIPTION = s__(
+  `ThreatMonitoring|To view this data, ensure you have configured an environment
+    for this project and that at least one threat monitoring feature is enabled. %{linkStart}More information%{linkEnd}`,
+);
 
 export const COLORS = {
   nominal: gray700,

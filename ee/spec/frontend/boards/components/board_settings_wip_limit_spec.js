@@ -186,7 +186,7 @@ describe('BoardSettingsWipLimit', () => {
 
     afterEach(() => {
       flash.mockReset();
-      boardsStore.removeList(listId, 'label');
+      boardsStore.removeList(listId);
     });
 
     describe.each`

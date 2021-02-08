@@ -3,7 +3,7 @@ import LinkedGraphWrapper from '../graph_shared/linked_graph_wrapper.vue';
 import LinksLayer from '../graph_shared/links_layer.vue';
 import LinkedPipelinesColumn from './linked_pipelines_column.vue';
 import StageColumnComponent from './stage_column_component.vue';
-import { DOWNSTREAM, MAIN, UPSTREAM } from './constants';
+import { DOWNSTREAM, MAIN, UPSTREAM, ONE_COL_WIDTH } from './constants';
 import { reportToSentry } from './utils';
 
 export default {
@@ -39,6 +39,7 @@ export default {
   data() {
     return {
       hoveredJobName: '',
+      highlightedJobs: [],
       measurements: {
         width: 0,
         height: 0,
@@ -85,11 +86,11 @@ export default {
     reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
   mounted() {
-    this.measurements = this.getMeasurements();
+    this.getMeasurements();
   },
   methods: {
     getMeasurements() {
-      return {
+      this.measurements = {
         width: this.$refs[this.containerId].scrollWidth,
         height: this.$refs[this.containerId].scrollHeight,
       };
@@ -100,11 +101,21 @@ export default {
     setJob(jobName) {
       this.hoveredJobName = jobName;
     },
+    slidePipelineContainer() {
+      this.$refs.mainPipelineContainer.scrollBy({
+        left: ONE_COL_WIDTH,
+        top: 0,
+        behavior: 'smooth',
+      });
+    },
     togglePipelineExpanded(jobName, expanded) {
       this.pipelineExpanded = {
         expanded,
         jobName: expanded ? jobName : '',
       };
+    },
+    updateHighlightedJobs(jobs) {
+      this.highlightedJobs = jobs;
     },
   },
 };
@@ -112,57 +123,63 @@ export default {
 <template>
   <div class="js-pipeline-graph">
     <div
-      :id="containerId"
-      :ref="containerId"
-      class="gl-pipeline-min-h gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
-      :class="{ 'gl-py-5': !isLinkedPipeline }"
+      ref="mainPipelineContainer"
+      class="gl-display-flex gl-position-relative gl-bg-gray-10 gl-white-space-nowrap"
+      :class="{ 'gl-pipeline-min-h gl-py-5 gl-overflow-auto': !isLinkedPipeline }"
     >
-      <links-layer
-        :pipeline-data="graph"
-        :pipeline-id="pipeline.id"
-        :container-id="containerId"
-        :container-measurements="measurements"
-        :highlighted-job="hoveredJobName"
-        default-link-color="gl-stroke-transparent"
-        @error="onError"
-      >
-        <linked-graph-wrapper>
-          <template #upstream>
-            <linked-pipelines-column
-              v-if="showUpstreamPipelines"
-              :linked-pipelines="upstreamPipelines"
-              :column-title="__('Upstream')"
-              :type="$options.pipelineTypeConstants.UPSTREAM"
-              @error="onError"
-            />
-          </template>
-          <template #main>
-            <stage-column-component
-              v-for="stage in graph"
-              :key="stage.name"
-              :title="stage.name"
-              :groups="stage.groups"
-              :action="stage.status.action"
-              :job-hovered="hoveredJobName"
-              :pipeline-expanded="pipelineExpanded"
+      <linked-graph-wrapper>
+        <template #upstream>
+          <linked-pipelines-column
+            v-if="showUpstreamPipelines"
+            :linked-pipelines="upstreamPipelines"
+            :column-title="__('Upstream')"
+            :type="$options.pipelineTypeConstants.UPSTREAM"
+            @error="onError"
+          />
+        </template>
+        <template #main>
+          <div :id="containerId" :ref="containerId">
+            <links-layer
+              :pipeline-data="graph"
               :pipeline-id="pipeline.id"
-              @refreshPipelineGraph="$emit('refreshPipelineGraph')"
-              @jobHover="setJob"
-            />
-          </template>
-          <template #downstream>
-            <linked-pipelines-column
-              v-if="showDownstreamPipelines"
-              :linked-pipelines="downstreamPipelines"
-              :column-title="__('Downstream')"
-              :type="$options.pipelineTypeConstants.DOWNSTREAM"
-              @downstreamHovered="setJob"
-              @pipelineExpandToggle="togglePipelineExpanded"
+              :container-id="containerId"
+              :container-measurements="measurements"
+              :highlighted-job="hoveredJobName"
+              default-link-color="gl-stroke-transparent"
               @error="onError"
-            />
-          </template>
-        </linked-graph-wrapper>
-      </links-layer>
+              @highlightedJobsChange="updateHighlightedJobs"
+            >
+              <stage-column-component
+                v-for="stage in graph"
+                :key="stage.name"
+                :title="stage.name"
+                :groups="stage.groups"
+                :action="stage.status.action"
+                :highlighted-jobs="highlightedJobs"
+                :job-hovered="hoveredJobName"
+                :pipeline-expanded="pipelineExpanded"
+                :pipeline-id="pipeline.id"
+                @refreshPipelineGraph="$emit('refreshPipelineGraph')"
+                @jobHover="setJob"
+                @updateMeasurements="getMeasurements"
+              />
+            </links-layer>
+          </div>
+        </template>
+        <template #downstream>
+          <linked-pipelines-column
+            v-if="showDownstreamPipelines"
+            class="gl-mr-6"
+            :linked-pipelines="downstreamPipelines"
+            :column-title="__('Downstream')"
+            :type="$options.pipelineTypeConstants.DOWNSTREAM"
+            @downstreamHovered="setJob"
+            @pipelineExpandToggle="togglePipelineExpanded"
+            @scrollContainer="slidePipelineContainer"
+            @error="onError"
+          />
+        </template>
+      </linked-graph-wrapper>
     </div>
   </div>
 </template>

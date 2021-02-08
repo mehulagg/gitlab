@@ -89,7 +89,9 @@ export default {
           id: undefined,
         };
       }
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.assignee_id = assignee.id;
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.assignee = assignee;
     },
   },
@@ -105,7 +107,7 @@ export default {
       </button>
     </div>
     <div class="value">
-      <div v-if="hasValue" class="media">
+      <div v-if="hasValue" class="media gl-display-flex gl-align-items-center">
         <div class="align-center">
           <user-avatar-image :img-src="selected.avatar_url" :size="32" />
         </div>

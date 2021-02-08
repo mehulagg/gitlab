@@ -5,10 +5,10 @@ require 'spec_helper'
 RSpec.describe 'Welcome screen', :js do
   let_it_be(:user) { create(:user) }
 
+  let(:signup_onboarding_enabled) { true }
   let(:in_invitation_flow) { false }
   let(:in_subscription_flow) { false }
   let(:in_trial_flow) { false }
-  let(:part_of_onboarding_issues_experiment) { false }
 
   describe 'on GitLab.com' do
     before do
@@ -17,14 +17,15 @@ RSpec.describe 'Welcome screen', :js do
       allow_any_instance_of(EE::WelcomeHelper).to receive(:in_invitation_flow?).and_return(in_invitation_flow)
       allow_any_instance_of(EE::WelcomeHelper).to receive(:in_subscription_flow?).and_return(in_subscription_flow)
       allow_any_instance_of(EE::WelcomeHelper).to receive(:in_trial_flow?).and_return(in_trial_flow)
-      stub_experiment_for_subject(onboarding_issues: part_of_onboarding_issues_experiment)
+      stub_feature_flags(signup_onboarding: signup_onboarding_enabled)
 
       visit users_sign_up_welcome_path
     end
 
-    it 'shows the welcome page without a progress bar' do
+    it 'shows the welcome page with a progress bar' do
       expect(page).to have_content('Welcome to GitLab')
-      expect(page).not_to have_content('Your profile')
+      expect(page).to have_content('Your profile Your GitLab group Your first project')
+      expect(page).to have_content('Continue')
     end
 
     context 'when in the subscription flow' do
@@ -35,27 +36,28 @@ RSpec.describe 'Welcome screen', :js do
       end
     end
 
-    context 'when part of the onboarding issues experiment' do
-      let(:part_of_onboarding_issues_experiment) { true }
+    context 'when in the invitation flow' do
+      let(:in_invitation_flow) { true }
 
-      it 'shows the progress bar with the correct steps' do
-        expect(page).to have_content('Your profile Your GitLab group Your first project')
+      it 'does not show the progress bar' do
+        expect(page).not_to have_content('Your profile')
       end
+    end
 
-      context 'when in the invitation flow' do
-        let(:in_invitation_flow) { true }
+    context 'when in the trial flow' do
+      let(:in_trial_flow) { true }
 
-        it 'does not show the progress bar' do
-          expect(page).not_to have_content('Your profile')
-        end
+      it 'does not show the progress bar' do
+        expect(page).not_to have_content('Your profile')
       end
+    end
 
-      context 'when in the trial flow' do
-        let(:in_trial_flow) { true }
+    context 'when onboarding_signup is disabled' do
+      let(:signup_onboarding_enabled) { false }
 
-        it 'does not show the progress bar' do
-          expect(page).not_to have_content('Your profile')
-        end
+      it 'does not show the progress bar' do
+        expect(page).not_to have_content('Your profile')
+        expect(page).to have_content('Get started!')
       end
     end
   end

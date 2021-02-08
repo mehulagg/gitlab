@@ -1,7 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import WeeksHeaderSubItemComponent from 'ee/oncall_schedules/components/schedule/components/preset_weeks/weeks_header_sub_item.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
+import updateShiftTimeUnitWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_shift_time_unit_width.mutation.graphql';
 import { useFakeDate } from 'helpers/fake_date';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('WeeksHeaderSubItemComponent', () => {
   let wrapper;
@@ -11,11 +14,21 @@ describe('WeeksHeaderSubItemComponent', () => {
   const mockTimeframeWeeks = getTimeframeForWeeksView(mockTimeframeInitialDate);
 
   function mountComponent({ timeframeItem = mockTimeframeWeeks[0] }) {
-    wrapper = shallowMount(WeeksHeaderSubItemComponent, {
-      propsData: {
-        timeframeItem,
-      },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(WeeksHeaderSubItemComponent, {
+        propsData: {
+          timeframeItem,
+        },
+        directives: {
+          GlResizeObserver: createMockDirective(),
+        },
+        mocks: {
+          $apollo: {
+            mutate: jest.fn(),
+          },
+        },
+      }),
+    );
   }
 
   beforeEach(() => {
@@ -25,11 +38,11 @@ describe('WeeksHeaderSubItemComponent', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 
   const findSublabelValues = () => wrapper.findAll('[data-testid="sublabel-value"]');
+  const findWeeksHeaderSubItemComponent = () => wrapper.findByTestId('week-item-sublabel');
 
   describe('computed', () => {
     describe('headerSubItems', () => {
@@ -70,6 +83,25 @@ describe('WeeksHeaderSubItemComponent', () => {
       expect(findSublabelValues().at(2).classes()).toEqual(
         expect.arrayContaining(['label-dark', 'label-bold']),
       );
+    });
+
+    it('should store the rendered cell width in Apollo cache via `updateShiftTimeUnitWidthMutation` when mounted', async () => {
+      wrapper.vm.$apollo.mutate.mockResolvedValueOnce({});
+      await wrapper.vm.$nextTick();
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+        mutation: updateShiftTimeUnitWidthMutation,
+        variables: {
+          shiftTimeUnitWidth: wrapper.vm.$refs.weeklyDayCell[0].offsetWidth,
+        },
+      });
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(1);
+    });
+
+    it('should re-calculate cell width inside Apollo cache on page resize', () => {
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(1);
+      const { value } = getBinding(findWeeksHeaderSubItemComponent().element, 'gl-resize-observer');
+      value();
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(2);
     });
   });
 });

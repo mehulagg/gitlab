@@ -1,8 +1,0 @@
----
-name: incident_metric_upload_ui
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46731
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/293934
-milestone: '13.8'
-type: development
-group: group::monitor
-default_enabled: false

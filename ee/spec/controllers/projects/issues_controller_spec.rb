@@ -69,10 +69,18 @@ RSpec.describe Projects::IssuesController do
           let(:vulnerability) { create(:vulnerability, project: project, findings: [finding]) }
           let(:vulnerability_field) { "<input type=\"hidden\" name=\"vulnerability_id\" id=\"vulnerability_id\" value=\"#{vulnerability.id}\" />" }
 
+          subject { get :new, params: { namespace_id: project.namespace, project_id: project, vulnerability_id: vulnerability.id } }
+
           it 'sets the vulnerability_id' do
-            get :new, params: { namespace_id: project.namespace, project_id: project, vulnerability_id: vulnerability.id }
+            subject
 
             expect(response.body).to include(vulnerability_field)
+          end
+
+          it 'sets the confidential flag to true by default' do
+            subject
+
+            expect(assigns(:issue).confidential).to eq(true)
           end
         end
       end
@@ -104,6 +112,21 @@ RSpec.describe Projects::IssuesController do
             expect(project.issues.last.vulnerability_links.first.vulnerability).to eq(vulnerability)
           end
 
+          it 'creates vulnerability feedback' do
+            send_request
+
+            expect(project.issues.last).to eq(Vulnerabilities::Feedback.last.issue)
+          end
+
+          it 'overwrites the default fields' do
+            send_request
+
+            issue = project.issues.last
+            expect(issue.title).to eq('Title')
+            expect(issue.description).to eq('Description')
+            expect(issue.confidential).to be false
+          end
+
           context 'when vulnerability already has a linked issue' do
             render_views
 
@@ -123,7 +146,7 @@ RSpec.describe Projects::IssuesController do
             post :create, params: {
               namespace_id: project.namespace.to_param,
               project_id: project,
-              issue: { title: 'Title', description: 'Description' },
+              issue: { title: 'Title', description: 'Description', confidential: 'false' },
               vulnerability_id: vulnerability.id
             }
           end

@@ -9,6 +9,12 @@ import { STAGE_ACTIONS } from 'ee/analytics/cycle_analytics/constants';
 import customStagesStore from 'ee/analytics/cycle_analytics/store/modules/custom_stages';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import {
+  endpoints,
+  groupLabels,
+  customStageEvents as events,
+  customStageFormErrors,
+} from '../mock_data';
+import {
   emptyState,
   formInitialData,
   minimumFields,
@@ -17,12 +23,6 @@ import {
   ISSUE_CREATED,
   ISSUE_CLOSED,
 } from './create_value_stream_form/mock_data';
-import {
-  endpoints,
-  groupLabels,
-  customStageEvents as events,
-  customStageFormErrors,
-} from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -82,7 +82,7 @@ describe('CustomStageForm', () => {
 
   const setFields = async (fields = minimumFields) => {
     Object.entries(fields).forEach(([field, value]) => {
-      wrapper.find(CustomStageFields).vm.$emit('update', field, value);
+      wrapper.find(CustomStageFields).vm.$emit('input', { field, value });
     });
     await wrapper.vm.$nextTick();
   };
@@ -133,7 +133,7 @@ describe('CustomStageForm', () => {
       it('clears the error when the field changes', async () => {
         await setNameField('not an issue');
 
-        expect(findFieldErrors('name')).not.toContain('Stage name already exists');
+        expect(findFieldErrors('name')).toBeUndefined();
       });
     });
   });

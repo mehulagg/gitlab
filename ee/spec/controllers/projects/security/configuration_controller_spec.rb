@@ -7,70 +7,112 @@ RSpec.describe Projects::Security::ConfigurationController do
   let(:project) { create(:project, :repository, namespace: group) }
 
   describe 'GET #show' do
+    using RSpec::Parameterized::TableSyntax
+
     subject(:request) { get :show, params: { namespace_id: project.namespace, project_id: project } }
 
-    it_behaves_like SecurityDashboardsPermissions do
-      let(:vulnerable) { project }
-      let(:security_dashboard_action) { request }
+    let(:user) { create(:user) }
+
+    render_views
+
+    where(:user_role, :security_dashboard_enabled, :ce_flag_enabled, :status, :selector) do
+      :guest     | false | false | :not_found | nil
+      :guest     | false | true  | :forbidden | nil
+      :guest     | true  | false | :not_found | nil
+      :guest     | true  | true  | :forbidden | nil
+      :developer | false | false | :not_found | nil
+      :developer | false | true  | :ok        | '#js-security-configuration-static'
+      :developer | true  | false | :ok        | '#js-security-configuration'
+      :developer | true  | true  | :ok        | '#js-security-configuration'
     end
 
-    context 'with user' do
-      let(:user) { create(:user) }
-
-      render_views
-
+    with_them do
       before do
-        stub_licensed_features(security_dashboard: true)
-
-        group.add_developer(user)
+        stub_licensed_features(security_dashboard: security_dashboard_enabled)
+        stub_feature_flags(secure_security_and_compliance_configuration_page_on_ce: ce_flag_enabled)
+        group.send("add_#{user_role}", user)
         sign_in(user)
       end
 
-      it 'responds in json format when requested' do
-        get :show, params: { namespace_id: project.namespace, project_id: project, format: :json }
-
-        types = %w(sast dast dast_profiles dependency_scanning container_scanning secret_detection coverage_fuzzing license_scanning api_fuzzing)
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['features'].map { |f| f['type'] }).to match_array(types)
-        expect(json_response['auto_fix_enabled']).to include({ 'dependency_scanning' => true, 'container_scanning' => true })
-      end
-
-      it "renders data on the project's security configuration" do
+      it 'responds with the correct status' do
         request
 
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to render_template(:show)
-        expect(response.body).to have_css(
-          'div#js-security-configuration'\
-            "[data-auto-devops-help-page-path=\"#{help_page_path('topics/autodevops/index')}\"]"\
-            "[data-help-page-path=\"#{help_page_path('user/application_security/index')}\"]"\
-            "[data-latest-pipeline-path=\"#{help_page_path('ci/pipelines')}\"]"
-        )
+        expect(response).to have_gitlab_http_status(status)
+
+        unless selector.nil?
+          expect(response).to render_template(:show)
+          expect(response.body).to have_css(selector)
+        end
+      end
+    end
+
+    context 'with developer and security dashboard feature enabled' do
+      let(:flag) { :secure_security_and_compliance_configuration_page_on_ce }
+
+      # The tests in this context should be unaffected by this feature flag,
+      # and should behave identically whether this is enabled or disabled.
+      where(:flag_enabled) do
+        [
+          [true],
+          [false]
+        ]
       end
 
-      context 'when the latest pipeline used Auto DevOps' do
-        let!(:pipeline) do
-          create(
-            :ci_pipeline,
-            :auto_devops_source,
-            project: project,
-            ref: project.default_branch,
-            sha: project.commit.sha
-          )
+      with_them do
+        before do
+          stub_feature_flags(flag => flag_enabled)
+          stub_licensed_features(security_dashboard: true)
+
+          group.add_developer(user)
+          sign_in(user)
         end
 
-        it 'reports that Auto DevOps is enabled' do
+        it 'responds in json format when requested' do
+          get :show, params: { namespace_id: project.namespace, project_id: project, format: :json }
+
+          types = %w(sast dast dast_profiles dependency_scanning container_scanning secret_detection coverage_fuzzing license_scanning api_fuzzing)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['features'].map { |f| f['type'] }).to match_array(types)
+          expect(json_response['auto_fix_enabled']).to include({ 'dependency_scanning' => true, 'container_scanning' => true })
+        end
+
+        it "renders data on the project's security configuration" do
           request
 
           expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to render_template(:show)
           expect(response.body).to have_css(
             'div#js-security-configuration'\
-              '[data-auto-devops-enabled]'\
               "[data-auto-devops-help-page-path=\"#{help_page_path('topics/autodevops/index')}\"]"\
               "[data-help-page-path=\"#{help_page_path('user/application_security/index')}\"]"\
-              "[data-latest-pipeline-path=\"#{project_pipeline_path(project, pipeline)}\"]"
+              "[data-latest-pipeline-path=\"#{help_page_path('ci/pipelines')}\"]"
           )
+        end
+
+        context 'when the latest pipeline used Auto DevOps' do
+          let!(:pipeline) do
+            create(
+              :ci_pipeline,
+              :auto_devops_source,
+              project: project,
+              ref: project.default_branch,
+              sha: project.commit.sha
+            )
+          end
+
+          it 'reports that Auto DevOps is enabled' do
+            request
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(response.body).to have_css(
+              'div#js-security-configuration'\
+                '[data-auto-devops-enabled]'\
+                "[data-auto-devops-help-page-path=\"#{help_page_path('topics/autodevops/index')}\"]"\
+                "[data-help-page-path=\"#{help_page_path('user/application_security/index')}\"]"\
+                "[data-latest-pipeline-path=\"#{project_pipeline_path(project, pipeline)}\"]"
+            )
+          end
         end
       end
     end

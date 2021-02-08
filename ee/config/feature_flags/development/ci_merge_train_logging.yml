@@ -1,8 +1,0 @@
----
-name: ci_merge_train_logging
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40105
-rollout_issue_url: 
-milestone: '13.4'
-type: development
-group: group::continuous integration
-default_enabled: false

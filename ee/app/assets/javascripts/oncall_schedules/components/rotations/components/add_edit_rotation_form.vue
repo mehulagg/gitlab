@@ -224,7 +224,7 @@ export default {
         </div>
       </gl-form-group>
     </div>
-    <div class="gl-w-fit-content">
+    <div class="gl-display-inline-block">
       <gl-toggle
         v-model="endDateEnabled"
         :label="$options.i18n.fields.endsOn.enableToggle"
@@ -235,7 +235,7 @@ export default {
       <gl-card
         v-if="endDateEnabled"
         data-testid="rotation-ends-on"
-        class="gl-border-gray-400 gl-bg-gray-10 gl-w-fit-content"
+        class="gl-border-gray-400 gl-bg-gray-10"
       >
         <gl-form-group
           :label="$options.i18n.fields.endsOn.title"

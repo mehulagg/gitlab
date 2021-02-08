@@ -10,15 +10,20 @@ module EE
           extractor ::BulkImports::Common::Extractors::GraphqlExtractor,
             query: EE::BulkImports::Groups::Graphql::GetEpicsQuery
 
-          transformer ::BulkImports::Common::Transformers::HashKeyDigger, key_path: %w[data group epics]
-          transformer ::BulkImports::Common::Transformers::UnderscorifyKeysTransformer
           transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
+          transformer EE::BulkImports::Groups::Transformers::EpicAttributesTransformer
 
           loader EE::BulkImports::Groups::Loaders::EpicsLoader
 
-          after_run do |context|
-            if context.entity.has_next_page?(:epics)
-              self.new.run(context)
+          def after_run(context, extracted_data)
+            context.entity.update_tracker_for(
+              relation: :epics,
+              has_next_page: extracted_data.has_next_page?,
+              next_page: extracted_data.next_page
+            )
+
+            if extracted_data.has_next_page?
+              run(context)
             end
           end
         end

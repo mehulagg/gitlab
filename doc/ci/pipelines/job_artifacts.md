@@ -155,9 +155,10 @@ as artifacts.
 
 The collected Code Quality report uploads to GitLab as an artifact and is summarized in merge requests.
 
-#### `artifacts:reports:sast` **(ULTIMATE)**
+#### `artifacts:reports:sast`
 
 > - Introduced in GitLab 11.5.
+> - Made [available in all tiers](https://gitlab.com/groups/gitlab-org/-/epics/2098) in GitLab 13.3.
 > - Requires GitLab Runner 11.5 and above.
 
 The `sast` report collects [SAST vulnerabilities](../../user/application_security/sast/index.md)
@@ -167,9 +168,11 @@ The collected SAST report uploads to GitLab as an artifact and is summarized
 in merge requests and the pipeline view. It's also used to provide data for security
 dashboards.
 
-#### `artifacts:reports:secret_detection` **(ULTIMATE)**
+#### `artifacts:reports:secret_detection`
 
 > - Introduced in GitLab 13.1.
+> - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/222788) in GitLab
+    13.3.
 > - Requires GitLab Runner 11.5 and above.
 
 The `secret-detection` report collects [detected secrets](../../user/application_security/secret_detection/index.md)
@@ -480,6 +483,9 @@ a project, you can disable this behavior to save space:
 
 1. Navigate to **Settings > CI/CD > Artifacts**.
 1. Uncheck **Keep artifacts from most recent successful jobs**.
+
+When you disable the feature, the latest artifacts do not immediately expire.
+A new pipeline must run before the latest artifacts can expire and be deleted.
 
 ## Troubleshooting
 

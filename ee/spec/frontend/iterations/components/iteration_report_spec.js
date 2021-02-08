@@ -10,6 +10,7 @@ describe('Iterations report', () => {
   const defaultProps = {
     fullPath: 'gitlab-org',
     iterationIid: '3',
+    labelsFetchPath: '/gitlab-org/gitlab-test/-/labels.json?include_ancestor_groups=true',
   };
 
   const findTopbar = () => wrapper.find({ ref: 'topbar' });
@@ -111,6 +112,7 @@ describe('Iterations report', () => {
         expect(iterationReportTabs.props()).toEqual({
           fullPath: defaultProps.fullPath,
           iterationId: iteration.id,
+          labelsFetchPath: defaultProps.labelsFetchPath,
           namespaceType: Namespace.Group,
         });
       });

@@ -9,10 +9,10 @@ import {
   GlBadge,
   GlLoadingIcon,
 } from '@gitlab/ui';
-import SkeletonLoader from './skeleton_loader.vue';
-import Feature from './feature.vue';
 import Tracking from '~/tracking';
 import { getDrawerBodyHeight } from '../utils/get_drawer_body_height';
+import SkeletonLoader from './skeleton_loader.vue';
+import Feature from './feature.vue';
 
 const trackingMixin = Tracking.mixin();
 
@@ -95,7 +95,7 @@ export default {
       @close="closeDrawer"
     >
       <template #header>
-        <h4 class="page-title gl-my-2">{{ __("What's new at GitLab") }}</h4>
+        <h4 class="page-title gl-my-2">{{ __("What's new") }}</h4>
       </template>
       <template v-if="features.length">
         <gl-infinite-scroll

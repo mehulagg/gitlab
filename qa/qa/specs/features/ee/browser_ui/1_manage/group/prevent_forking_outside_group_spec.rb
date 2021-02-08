@@ -21,7 +21,7 @@ module QA
           set_prevent_forking_outside_group('disabled')
         end
 
-        it 'allows forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1070' do
+        it 'allows forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1681' do
           visit_project_and_search_group_for_fork
 
           expect(page).to have_text(group_for_fork.path)
@@ -34,7 +34,7 @@ module QA
           set_prevent_forking_outside_group('enabled')
         end
 
-        it 'does not allow forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1107' do
+        it 'does not allow forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1682' do
           visit_project_and_search_group_for_fork
 
           expect(page).not_to have_text(group_for_fork.path)

@@ -1,7 +1,7 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import { GlModal, GlAlert } from '@gitlab/ui';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import AddEditScheduleModal, {
   i18n,
@@ -61,9 +61,6 @@ describe('AddScheduleModal', () => {
   }
 
   async function updateSchedule(localWrapper) {
-    await jest.runOnlyPendingTimers();
-    await localWrapper.vm.$nextTick();
-
     localWrapper.find(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
   }
 

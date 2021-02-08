@@ -1,7 +1,8 @@
-- return unless show_trial_status_widget?(group)
+- root_group = group.root_ancestor
+- return unless show_trial_status_widget?(root_group)
 
 = nav_link do
-  #js-trial-status-widget{ data: { href: group_billings_path(group),
+  #js-trial-status-widget{ data: { href: group_billings_path(root_group),
     nav_icon_image_path: image_path('illustrations/golden_tanuki.svg'),
-    title: trial_days_remaining_in_words(group),
-    percentage_complete: trial_percentage_complete(group) } }
+    title: trial_days_remaining_in_words(root_group),
+    percentage_complete: root_group.trial_percentage_complete } }

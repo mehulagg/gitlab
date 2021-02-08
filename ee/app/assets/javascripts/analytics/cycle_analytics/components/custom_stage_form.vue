@@ -1,4 +1,5 @@
 <script>
+import Vue from 'vue';
 import { mapGetters, mapState } from 'vuex';
 import { isEqual } from 'lodash';
 import {
@@ -10,11 +11,11 @@ import {
   GlButton,
 } from '@gitlab/ui';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
+import { STAGE_ACTIONS } from '../constants';
+import { getAllowedEndEvents, getLabelEventsIdentifiers, isLabelEvent } from '../utils';
 import CustomStageFormFields from './create_value_stream_form/custom_stage_fields.vue';
 import { validateStage, initializeFormData } from './create_value_stream_form/utils';
 import { defaultFields, ERRORS, I18N } from './create_value_stream_form/constants';
-import { STAGE_ACTIONS } from '../constants';
-import { getAllowedEndEvents, getLabelEventsIdentifiers, isLabelEvent } from '../utils';
 
 export default {
   components: {
@@ -155,7 +156,7 @@ export default {
     handleRecoverStage(id) {
       this.$emit(STAGE_ACTIONS.UPDATE, { id, hidden: false });
     },
-    handleUpdateFields(field, value) {
+    handleUpdateFields({ field, value }) {
       this.fields = { ...this.fields, [field]: value };
 
       const newErrors = validateStage({ ...this.fields, custom: true });
@@ -163,7 +164,7 @@ export default {
         this.fields.startEventIdentifier && this.eventMismatchError
           ? [ERRORS.INVALID_EVENT_PAIRS]
           : newErrors.endEventIdentifier;
-      this.errors = { ...this.errors, ...newErrors };
+      Vue.set(this, 'errors', newErrors);
     },
   },
   I18N,
@@ -196,11 +197,13 @@ export default {
       </gl-dropdown>
     </div>
     <custom-stage-form-fields
-      :fields="fields"
-      :label-events="labelEvents"
+      :index="0"
+      :total-stages="1"
+      :stage="fields"
       :errors="errors"
-      :events="events"
-      @update="handleUpdateFields"
+      :stage-events="events"
+      @input="handleUpdateFields"
+      @select-label="({ field, value }) => handleUpdateFields({ field, value })"
     />
     <div>
       <gl-button

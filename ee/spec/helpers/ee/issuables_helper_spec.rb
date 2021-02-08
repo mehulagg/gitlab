@@ -84,7 +84,6 @@ RSpec.describe IssuablesHelper do
       context 'when incident metric upload is available' do
         before do
           stub_licensed_features(incident_metric_upload: true)
-          stub_feature_flags(incident_metric_upload_ui: issue.project)
         end
 
         let_it_be(:issue) { create(:issue, author: user, description: 'issue text', issue_type: :incident) }

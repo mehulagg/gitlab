@@ -6,7 +6,7 @@ import EpicLane from 'ee/boards/components/epic_lane.vue';
 import EpicsSwimlanes from 'ee/boards/components/epics_swimlanes.vue';
 import IssueLaneList from 'ee/boards/components/issues_lane_list.vue';
 import getters from 'ee/boards/stores/getters';
-import BoardListHeader from 'ee_else_ce/boards/components/board_list_header_new.vue';
+import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
 import { mockLists, mockEpics, mockIssuesByListId, issues } from '../mock_data';
 
 const localVue = createLocalVue();

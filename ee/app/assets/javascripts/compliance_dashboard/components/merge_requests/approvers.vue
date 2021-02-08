@@ -61,7 +61,7 @@ export default {
       :collapsed="true"
       :max-visible="$options.PRESENTABLE_APPROVERS_LIMIT"
       :avatar-size="24"
-      class="gl-display-inline-flex gl-display-lg-none! gl-ml-3"
+      class="gl-display-inline-flex gl-lg-display-none! gl-ml-3"
       badge-tooltip-prop="name"
     >
       <template #avatar="{ avatar }">
@@ -89,7 +89,7 @@ export default {
       :href="approver.web_url"
       :data-user-id="approver.id"
       :data-name="approver.name"
-      class="gl-display-none gl-display-lg-inline-flex! gl-align-items-center gl-justify-content-end gl-ml-3 gl-text-gray-900 author-link js-user-link"
+      class="gl-display-none gl-lg-display-inline-flex! gl-align-items-center gl-justify-content-end gl-ml-3 gl-text-gray-900 author-link js-user-link"
     >
       <gl-avatar
         :src="approver.avatar_url"
@@ -103,7 +103,7 @@ export default {
     <span
       v-if="isApproversOverLimit"
       v-gl-tooltip.top="approversOverLimitString"
-      class="gl-display-none gl-display-lg-inline-block! avatar-counter gl-ml-3 gl-px-2 gl-flex-shrink-0 gl-flex-grow-0"
+      class="gl-display-none gl-lg-display-inline-block! avatar-counter gl-ml-3 gl-px-2 gl-flex-shrink-0 gl-flex-grow-0"
       >+ {{ amountOfApproversOverLimit }}</span
     >
   </div>

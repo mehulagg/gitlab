@@ -45,6 +45,7 @@ const fetchGroupEpics = (
     variables = {
       ...variables,
       ...filterParams,
+      first: gon.roadmap_epics_limit + 1,
     };
   }
 

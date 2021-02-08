@@ -1,12 +1,12 @@
 import { shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import IncidentSla from 'ee/issue_show/components/incidents/incident_sla.vue';
-import { formatTime } from '~/lib/utils/datetime_utility';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import ServiceLevelAgreement from 'ee_component/vue_shared/components/incidents/service_level_agreement.vue';
 
 jest.mock('~/lib/utils/datetime_utility');
 
 const defaultProvide = { fullPath: 'test', iid: 1, slaFeatureAvailable: true };
+const mockSlaDueAt = '2020-01-01T00:00:00.000Z';
 
 describe('Incident SLA', () => {
   let wrapper;
@@ -17,7 +17,7 @@ describe('Incident SLA', () => {
       merge(
         {
           data() {
-            return { slaDueAt: '2020-01-01T00:00:00.000Z' };
+            return { slaDueAt: mockSlaDueAt, hasData: true };
           },
           provide: { ...defaultProvide },
         },
@@ -26,10 +26,6 @@ describe('Incident SLA', () => {
     );
   };
 
-  beforeEach(() => {
-    formatTime.mockImplementation(() => '12:34:56');
-  });
-
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
@@ -37,28 +33,16 @@ describe('Incident SLA', () => {
     }
   });
 
-  const findTimer = () => wrapper.find(TimeAgoTooltip);
+  const findSLA = () => wrapper.find(ServiceLevelAgreement);
 
-  it('does not render an SLA when no sla is present', () => {
+  it('renders a blank component when there is no data', () => {
     mountComponent({
       data() {
-        return { slaDueAt: null };
+        return { hasData: false };
       },
     });
 
-    expect(findTimer().exists()).toBe(false);
-  });
-
-  it('renders an incident SLA when sla is present', () => {
-    mountComponent();
-
-    expect(findTimer().text()).toBe('12:34');
-  });
-
-  it('renders a component when feature is available', () => {
-    mountComponent();
-
-    expect(wrapper.exists()).toBe(true);
+    expect(wrapper.isVisible()).toBe(false);
   });
 
   it('renders a blank component when feature is not available', () => {
@@ -69,6 +53,13 @@ describe('Incident SLA', () => {
       },
     });
 
-    expect(wrapper.html()).toBe('');
+    expect(wrapper.isVisible()).toBe(false);
+  });
+
+  it('renders an incident SLA when sla is present and feature is available', () => {
+    mountComponent();
+
+    expect(wrapper.isVisible()).toBe(true);
+    expect(findSLA().attributes('sladueat')).toBe(mockSlaDueAt);
   });
 });

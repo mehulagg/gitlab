@@ -149,12 +149,12 @@ Users are notified of the following events:
 | Password changed by administrator | User           | Security email, always sent when an administrator changes the password of another user |
 | Two-factor authentication disabled | User          | Security email, always sent. |
 | New user created             | User                | Sent on user creation, except for OmniAuth (LDAP)|
+| New SAML/SCIM user provisioned. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276018) in GitLab 13.8  | User            | Sent when a user is provisioned through SAML/SCIM |
 | User added to project        | User                | Sent when user is added to project |
 | Project access level changed | User                | Sent when user project access level is changed |
 | User added to group          | User                | Sent when user is added to group |
 | Group access level changed   | User                | Sent when user group access level is changed |
-| Personal Access Tokens expiring soon | User          | Security email, always sent. |
-<!-- Do not delete or lint this instance of future tense -->
+| Personal Access Tokens expiring soon <!-- Do not delete or lint this instance of future tense --> | User          | Security email, always sent. |
 | Personal Access Tokens have expired | User         | Security email, always sent. |
 | Project moved                | Project members (1) | (1) not disabled             |
 | New release                  | Project members     | Custom notification          |
@@ -173,7 +173,7 @@ In most of the below cases, the notification is sent to:
 - Custom: Users with notification level "custom" who turned on notifications for any of the events present in the table below
 
 NOTE:
-To minimize the number of notifications that do not require any action, from [GitLab 12.9 onwards](https://gitlab.com/gitlab-org/gitlab/-/issues/616), eligible approvers are no longer notified for all the activities in their projects. To receive them they have to change their user notification settings to **Watch** instead.
+To minimize the number of notifications that do not require any action, in [GitLab versions 12.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/616), eligible approvers are no longer notified for all the activities in their projects. To receive them they have to change their user notification settings to **Watch** instead.
 
 | Event                  | Sent to |
 |------------------------|---------|

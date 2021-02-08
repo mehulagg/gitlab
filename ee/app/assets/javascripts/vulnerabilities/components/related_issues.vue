@@ -6,8 +6,8 @@ import RelatedIssuesBlock from '~/related_issues/components/related_issues_block
 import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
 import { sprintf, __, s__ } from '~/locale';
 import { joinPaths, redirectTo } from '~/lib/utils/url_utility';
-import { RELATED_ISSUES_ERRORS } from '../constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { RELATED_ISSUES_ERRORS } from '../constants';
 import { getFormattedIssue, getAddRelatedIssueRequestParams } from '../helpers';
 
 export default {
@@ -103,6 +103,8 @@ export default {
 
       // The endpoint can only accept one issue, so we need to do a separate call for each pending reference.
       const requests = this.state.pendingReferences.map((reference) => {
+        // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+        // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
         return axios
           .post(
             this.endpoint,
@@ -140,6 +142,8 @@ export default {
     removeRelatedIssue(idToRemove) {
       const issue = this.state.relatedIssues.find(({ id }) => id === idToRemove);
 
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios
         .delete(joinPaths(this.endpoint, issue.vulnerabilityLinkId.toString()))
         .then(() => {
@@ -152,6 +156,8 @@ export default {
     fetchRelatedIssues() {
       this.isFetching = true;
 
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios
         .get(this.endpoint)
         .then(({ data }) => {

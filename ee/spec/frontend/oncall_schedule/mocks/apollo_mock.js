@@ -1,4 +1,7 @@
+import invalidUrl from '~/lib/utils/invalid_url';
 import mockRotations from './mock_rotation.json';
+
+export const scheduleIid = '37';
 
 export const participants = [
   {
@@ -16,6 +19,7 @@ export const participants = [
     avatarUrl: '',
   },
 ];
+
 export const errorMsg = 'Something went wrong';
 
 export const getOncallSchedulesQueryResponse = {
@@ -26,11 +30,12 @@ export const getOncallSchedulesQueryResponse = {
           {
             __typename: 'IncidentManagementOncallSchedule',
             iid: '37',
-            name: 'Test schedule',
+            name: 'Test schedule from query',
             description: 'Description 1 lives here',
             timezone: {
               identifier: 'Pacific/Honolulu',
             },
+            rotations: { nodes: mockRotations },
           },
         ],
       },
@@ -48,6 +53,9 @@ export const destroyScheduleResponse = {
         name: 'Test schedule',
         description: 'Description 1 lives here',
         timezone: 'Pacific/Honolulu',
+        rotations: {
+          nodes: [],
+        },
       },
     },
   },
@@ -63,6 +71,9 @@ export const destroyScheduleResponseWithErrors = {
         name: 'Test schedule',
         description: 'Description 1 lives here',
         timezone: 'Pacific/Honolulu',
+        rotations: {
+          nodes: [],
+        },
       },
     },
   },
@@ -78,6 +89,9 @@ export const updateScheduleResponse = {
         name: 'Test schedule 2',
         description: 'Description 2 lives here',
         timezone: 'Pacific/Honolulu',
+        rotations: {
+          nodes: [],
+        },
       },
     },
   },
@@ -93,6 +107,9 @@ export const updateScheduleResponseWithErrors = {
         name: 'Test schedule 2',
         description: 'Description 2 lives here',
         timezone: 'Pacific/Honolulu',
+        rotations: {
+          nodes: [],
+        },
       },
     },
   },
@@ -103,6 +120,9 @@ export const preExistingSchedule = {
   iid: '1',
   name: 'Monitor rotations',
   timezone: 'Pacific/Honolulu',
+  rotations: {
+    nodes: [],
+  },
 };
 
 export const newlyCreatedSchedule = {
@@ -110,6 +130,9 @@ export const newlyCreatedSchedule = {
   iid: '2',
   name: 'S-Monitor rotations',
   timezone: 'Kyiv/EST',
+  rotations: {
+    nodes: [],
+  },
 };
 
 export const createRotationResponse = {
@@ -125,7 +148,12 @@ export const createRotationResponse = {
         participants: {
           nodes: [
             {
-              user: { id: 'gid://gitlab/User/50', username: 'project_1_bot3', __typename: 'User' },
+              user: {
+                id: 'gid://gitlab/User/50',
+                username: 'project_1_bot3',
+                avatarUrl: invalidUrl,
+                avatar__typename: 'User',
+              },
               colorWeight: '500',
               colorPalette: 'blue',
               __typename: 'OncallParticipantType',
@@ -153,7 +181,12 @@ export const createRotationResponseWithErrors = {
         participants: {
           nodes: [
             {
-              user: { id: 'gid://gitlab/User/50', username: 'project_1_bot3', __typename: 'User' },
+              user: {
+                id: 'gid://gitlab/User/50',
+                username: 'project_1_bot3',
+                avatarUrl: invalidUrl,
+                __typename: 'User',
+              },
               colorWeight: '500',
               colorPalette: 'blue',
               __typename: 'OncallParticipantType',

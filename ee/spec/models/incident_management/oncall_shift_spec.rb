@@ -91,6 +91,21 @@ RSpec.describe IncidentManagement::OncallShift do
         # tue_to_wed - Ends as timeframe starts
         # sat_to_sun - Starts as timeframe ends
       end
+
+      context 'for invalid timeframe' do
+        subject { described_class.for_timeframe(saturday, friday) }
+
+        it { is_expected.to eq described_class.none }
+      end
+    end
+
+    describe '.order_starts_at_desc' do
+      subject { described_class.order_starts_at_desc }
+
+      let_it_be(:shift1) { create_shift(Time.current, Time.current + 1.hour, participant) }
+      let_it_be(:shift2) { create_shift(Time.current + 2.hours, Time.current + 3.hours, participant) }
+
+      it { is_expected.to eq [shift2, shift1]}
     end
   end
 

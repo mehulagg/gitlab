@@ -11,26 +11,25 @@ import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-
-import RequirementsTabs from './requirements_tabs.vue';
-import RequirementsLoading from './requirements_loading.vue';
-import RequirementsEmptyState from './requirements_empty_state.vue';
-import RequirementItem from './requirement_item.vue';
-import RequirementForm from './requirement_form.vue';
-import ImportRequirementsModal from './import_requirements_modal.vue';
 
 import projectRequirements from '../queries/projectRequirements.query.graphql';
 import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
 import createRequirement from '../queries/createRequirement.mutation.graphql';
 import updateRequirement from '../queries/updateRequirement.mutation.graphql';
-
+import exportRequirement from '../queries/exportRequirements.mutation.graphql';
 import {
   FilterState,
   AvailableSortOptions,
   TestReportStatus,
   DEFAULT_PAGE_SIZE,
 } from '../constants';
+import RequirementsTabs from './requirements_tabs.vue';
+import RequirementsLoading from './requirements_loading.vue';
+import RequirementsEmptyState from './requirements_empty_state.vue';
+import RequirementItem from './requirement_item.vue';
+import RequirementForm from './requirement_form.vue';
+import ImportRequirementsModal from './import_requirements_modal.vue';
+import ExportRequirementsModal from './export_requirements_modal.vue';
 
 export default {
   DEFAULT_PAGE_SIZE,
@@ -45,8 +44,9 @@ export default {
     RequirementCreateForm: RequirementForm,
     RequirementEditForm: RequirementForm,
     ImportRequirementsModal,
+    ExportRequirementsModal,
   },
-  mixins: [glFeatureFlagsMixin(), Tracking.mixin()],
+  mixins: [Tracking.mixin()],
   props: {
     projectPath: {
       type: String,
@@ -105,6 +105,10 @@ export default {
       required: true,
     },
     importCsvPath: {
+      type: String,
+      required: true,
+    },
+    currentUserEmail: {
       type: String,
       required: true,
     },
@@ -404,6 +408,27 @@ export default {
           createFlash({ message });
         });
     },
+    exportCsv() {
+      return this.$apollo
+        .mutate({
+          mutation: exportRequirement,
+          variables: {
+            projectPath: this.projectPath,
+            state: this.filterBy,
+            authorUsername: this.authorUsernames,
+            search: this.textSearch,
+            sortBy: this.sortBy,
+          },
+        })
+        .catch((e) => {
+          createFlash({
+            message: __('Something went wrong while exporting requirements'),
+            captureError: true,
+            error: e,
+          });
+          throw e;
+        });
+    },
     handleTabClick({ filterBy }) {
       this.filterBy = filterBy;
       this.prevPageCursor = '';
@@ -607,11 +632,11 @@ export default {
       :filter-by="filterBy"
       :requirements-count="requirementsCount"
       :show-create-form="showRequirementCreateDrawer"
-      :show-upload-csv="glFeatures.importRequirementsCsv"
       :can-create-requirement="canCreateRequirement"
       @click-tab="handleTabClick"
       @click-new-requirement="handleNewRequirementClick"
       @click-import-requirements="handleImportRequirementsClick"
+      @click-export-requirements="$refs.exportModal.show()"
     />
     <filtered-search-bar
       :namespace="projectPath"
@@ -647,7 +672,6 @@ export default {
       :empty-state-path="emptyStatePath"
       :requirements-count="requirementsCount"
       :can-create-requirement="canCreateRequirement"
-      :show-upload-csv="glFeatures.importRequirementsCsv"
       @click-new-requirement="handleNewRequirementClick"
       @click-import-requirements="handleImportRequirementsClick"
     />
@@ -683,11 +707,12 @@ export default {
       class="gl-pagination gl-mt-3"
       @input="handlePageChange"
     />
-    <import-requirements-modal
-      v-if="glFeatures.importRequirementsCsv"
-      ref="modal"
-      :project-path="projectPath"
-      @import="importCsv"
+    <import-requirements-modal ref="modal" :project-path="projectPath" @import="importCsv" />
+    <export-requirements-modal
+      ref="exportModal"
+      :requirement-count="totalRequirementsForCurrentTab"
+      :email="currentUserEmail"
+      @export="exportCsv"
     />
   </div>
 </template>

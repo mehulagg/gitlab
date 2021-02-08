@@ -12,6 +12,7 @@ export const DAYS_IN_WEEK = 7;
 export const HOURS_IN_DAY = 24;
 
 export const PRESET_TYPES = {
+  DAYS: 'DAYS',
   WEEKS: 'WEEKS',
 };
 
@@ -24,3 +25,10 @@ export const PRESET_DEFAULTS = {
 export const addRotationModalId = 'addRotationModal';
 export const editRotationModalId = 'editRotationModal';
 export const deleteRotationModalId = 'deleteRotationModal';
+
+/**
+ * Used as a JavaScript week is represented as 0 - 6
+ */
+export const DAYS_IN_DATE_WEEK = 6;
+export const ASSIGNEE_SPACER = 2;
+export const TIMELINE_CELL_WIDTH = 180;

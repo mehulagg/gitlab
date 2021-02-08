@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :geo do
   namespace :replication do
     task pause: :gitlab_environment do

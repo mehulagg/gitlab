@@ -12,6 +12,7 @@ class License < ApplicationRecord
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
 
   EES_FEATURES = %i[
+    security_and_compliance
     audit_events
     blocked_issues
     board_iteration_lists
@@ -20,6 +21,7 @@ class License < ApplicationRecord
     contribution_analytics
     description_diffs
     elastic_search
+    full_codequality_report
     group_activity_analytics
     group_bulk_edit
     group_webhooks
@@ -81,6 +83,7 @@ class License < ApplicationRecord
     file_locks
     geo
     generic_alert_fingerprinting
+    git_two_factor_enforcement
     github_project_service_integration
     group_allowed_email_domains
     group_coverage_reports
@@ -142,6 +145,7 @@ class License < ApplicationRecord
     dependency_scanning
     devops_adoption
     enforce_pat_expiration
+    enforce_ssh_key_expiration
     enterprise_templates
     environment_alerts
     group_ci_cd_analytics
@@ -150,6 +154,7 @@ class License < ApplicationRecord
     insights
     issuable_health_status
     jira_vulnerabilities_integration
+    jira_issue_association_enforcement
     license_scanning
     personal_access_token_expiration_policy
     project_activity_analytics
@@ -386,6 +391,11 @@ class License < ApplicationRecord
   # keep `add_ons`.
   def add_ons
     restricted_attr(:add_ons, {})
+  end
+
+  # License zuora_subscription_id
+  def subscription_id
+    restricted_attr(:subscription_id)
   end
 
   def features_from_add_ons

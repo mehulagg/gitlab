@@ -3,8 +3,8 @@ import Vuex from 'vuex';
 import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon, GlPagination } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
-import { TEST_HOST } from 'spec/test_constants';
 import Mousetrap from 'mousetrap';
+import { TEST_HOST } from 'spec/test_constants';
 import App from '~/diffs/components/app.vue';
 import NoChanges from '~/diffs/components/no_changes.vue';
 import DiffFile from '~/diffs/components/diff_file.vue';
@@ -13,14 +13,14 @@ import HiddenFilesWarning from '~/diffs/components/hidden_files_warning.vue';
 import CollapsedFilesWarning from '~/diffs/components/collapsed_files_warning.vue';
 import CommitWidget from '~/diffs/components/commit_widget.vue';
 import TreeList from '~/diffs/components/tree_list.vue';
-import createDiffsStore from '../create_diffs_store';
 import axios from '~/lib/utils/axios_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
-import diffsMockData from '../mock_data/merge_request_diffs';
 
 import { EVT_VIEW_FILE_BY_FILE } from '~/diffs/constants';
 
 import eventHub from '~/diffs/event_hub';
+import diffsMockData from '../mock_data/merge_request_diffs';
+import createDiffsStore from '../create_diffs_store';
 
 const mergeRequestDiff = { version_index: 1 };
 const TEST_ENDPOINT = `${TEST_HOST}/diff/endpoint`;
@@ -282,14 +282,10 @@ describe('diffs/components/app', () => {
     let moveSpy;
     let jumpSpy;
 
-    function setup(componentProps, featureFlags) {
-      createComponent(
-        componentProps,
-        ({ state }) => {
-          state.diffs.commit = { id: 'SHA123' };
-        },
-        { glFeatures: featureFlags },
-      );
+    function setup(componentProps) {
+      createComponent(componentProps, ({ state }) => {
+        state.diffs.commit = { id: 'SHA123' };
+      });
 
       moveSpy = jest.spyOn(wrapper.vm, 'moveToNeighboringCommit').mockImplementation(() => {});
       jumpSpy = jest.spyOn(wrapper.vm, 'jumpToFile').mockImplementation(() => {});
@@ -298,17 +294,17 @@ describe('diffs/components/app', () => {
 
     describe('visible app', () => {
       it.each`
-        key    | name                         | spy  | args                           | featureFlags
-        ${'['} | ${'jumpToFile'}              | ${0} | ${[-1]}                        | ${{}}
-        ${'k'} | ${'jumpToFile'}              | ${0} | ${[-1]}                        | ${{}}
-        ${']'} | ${'jumpToFile'}              | ${0} | ${[+1]}                        | ${{}}
-        ${'j'} | ${'jumpToFile'}              | ${0} | ${[+1]}                        | ${{}}
-        ${'x'} | ${'moveToNeighboringCommit'} | ${1} | ${[{ direction: 'previous' }]} | ${{}}
-        ${'c'} | ${'moveToNeighboringCommit'} | ${1} | ${[{ direction: 'next' }]}     | ${{}}
+        key    | name                         | spy  | args
+        ${'['} | ${'jumpToFile'}              | ${0} | ${[-1]}
+        ${'k'} | ${'jumpToFile'}              | ${0} | ${[-1]}
+        ${']'} | ${'jumpToFile'}              | ${0} | ${[+1]}
+        ${'j'} | ${'jumpToFile'}              | ${0} | ${[+1]}
+        ${'x'} | ${'moveToNeighboringCommit'} | ${1} | ${[{ direction: 'previous' }]}
+        ${'c'} | ${'moveToNeighboringCommit'} | ${1} | ${[{ direction: 'next' }]}
       `(
         'calls `$name()` with correct parameters whenever the "$key" key is pressed',
-        async ({ key, spy, args, featureFlags }) => {
-          setup({ shouldShow: true }, featureFlags);
+        async ({ key, spy, args }) => {
+          setup({ shouldShow: true });
 
           await nextTick();
           expect(spies[spy]).not.toHaveBeenCalled();

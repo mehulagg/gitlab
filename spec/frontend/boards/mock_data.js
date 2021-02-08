@@ -137,7 +137,7 @@ export const rawIssue = {
       {
         id: 1,
         title: 'test',
-        color: 'red',
+        color: '#F0AD4E',
         description: 'testing',
       },
     ],
@@ -165,7 +165,7 @@ export const mockIssue = {
     {
       id: 1,
       title: 'test',
-      color: 'red',
+      color: '#F0AD4E',
       description: 'testing',
     },
   ],
@@ -285,7 +285,7 @@ export const setMockEndpoints = (opts = {}) => {
 export const mockList = {
   id: 'gid://gitlab/List/1',
   title: 'Backlog',
-  position: null,
+  position: -Infinity,
   listType: 'backlog',
   collapsed: false,
   label: null,

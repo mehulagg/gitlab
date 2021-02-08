@@ -14,7 +14,7 @@ RSpec.describe Groups::TransferService, '#execute' do
     new_group&.add_owner(user)
   end
 
-  describe 'elasticsearch indexing', :elastic, :aggregate_failures do
+  describe 'elasticsearch indexing', :aggregate_failures do
     before do
       stub_ee_application_setting(elasticsearch_indexing: true)
     end
@@ -24,16 +24,15 @@ RSpec.describe Groups::TransferService, '#execute' do
         stub_ee_application_setting(elasticsearch_limit_indexing: true)
       end
 
-      let(:project) { create(:project, :repository, :public, namespace: group) }
-
       context 'when moving from a non-indexed namespace to an indexed namespace' do
         before do
           create(:elasticsearch_indexed_namespace, namespace: new_group)
         end
 
-        it 'invalidates the cache and indexes the project and associated issues' do
-          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+        it 'invalidates the cache and indexes the project and all associated data' do
+          expect(project).not_to receive(:maintain_elasticsearch_update)
+          expect(project).not_to receive(:maintain_elasticsearch_destroy)
+          expect(::Elastic::ProcessInitialBookkeepingService).to receive(:backfill_projects!).with(project)
           expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_cache_for_project!).with(project.id).and_call_original
 
           transfer_service.execute(new_group)
@@ -46,9 +45,10 @@ RSpec.describe Groups::TransferService, '#execute' do
           create(:elasticsearch_indexed_namespace, namespace: new_group)
         end
 
-        it 'invalidates the cache and indexes the project and associated issues' do
-          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+        it 'invalidates the cache and indexes the project and associated issues only' do
+          expect(project).not_to receive(:maintain_elasticsearch_update)
+          expect(project).not_to receive(:maintain_elasticsearch_destroy)
+          expect(::Elastic::ProcessInitialBookkeepingService).to receive(:backfill_projects!).with(project)
           expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_cache_for_project!).with(project.id).and_call_original
 
           transfer_service.execute(new_group)
@@ -60,11 +60,12 @@ RSpec.describe Groups::TransferService, '#execute' do
       context 'when visibility changes' do
         let(:new_group) { create(:group, :private) }
 
-        it 'reindexes projects and associated issues' do
+        it 'does not invalidate the cache and reindexes projects and associated issues' do
           project1 = create(:project, :repository, :public, namespace: group)
           project2 = create(:project, :repository, :public, namespace: group)
           project3 = create(:project, :repository, :private, namespace: group)
 
+          expect(::Gitlab::CurrentSettings).not_to receive(:invalidate_elasticsearch_indexes_cache_for_project!)
           expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project1)
           expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project1.id, ['issues'])
           expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project2)

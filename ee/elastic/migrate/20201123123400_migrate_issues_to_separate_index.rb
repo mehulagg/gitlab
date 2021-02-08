@@ -27,8 +27,10 @@ class MigrateIssuesToSeparateIndex < Elastic::Migration
   def migrate
     # On initial batch we only create index
     if migration_state[:slice].blank?
+      cleanup # support retries
+
       log "Create standalone issues index under #{issues_index_name}"
-      helper.create_standalone_indices unless helper.index_exists?(index_name: issues_index_name)
+      helper.create_standalone_indices(target_classes: [Issue])
 
       options = {
         slice: 0,
@@ -87,6 +89,10 @@ class MigrateIssuesToSeparateIndex < Elastic::Migration
   end
 
   private
+
+  def cleanup
+    helper.delete_index(index_name: issues_index_name) if helper.index_exists?(index_name: issues_index_name)
+  end
 
   def reindex(slice:, max_slices:)
     body = query(slice: slice, max_slices: max_slices)

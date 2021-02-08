@@ -38,6 +38,14 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       expect(response).to render_template(:index)
     end
 
+    it 'tracks usage' do
+      expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+        .to receive(:track_event)
+        .with('i_ecosystem_jira_service_list_issues', values: user.id)
+
+      get :index, params: { namespace_id: project.namespace, project_id: project }
+    end
+
     context 'when project has moved' do
       let(:new_project) { create(:project) }
 
@@ -169,6 +177,45 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
             let(:expected_params) { { 'state' => 'opened', 'sort' => 'created_date' } }
           end
         end
+      end
+    end
+  end
+
+  describe 'GET #show' do
+    context 'when `jira_issues_show_integration` feature is disabled' do
+      before do
+        stub_feature_flags(jira_issues_show_integration: false)
+      end
+
+      it 'returns 404 status' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when `jira_issues_show_integration` feature is enabled' do
+      before do
+        stub_feature_flags(jira_issues_show_integration: true)
+      end
+
+      it 'renders `show` template' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to render_template(:show)
+      end
+
+      it 'returns JSON response' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1, format: :json }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to include(
+          'title_html',
+          'description_html',
+          'author',
+          'labels'
+        )
       end
     end
   end

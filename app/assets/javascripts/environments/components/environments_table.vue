@@ -8,14 +8,12 @@ import { s__ } from '~/locale';
 import EnvironmentItem from './environment_item.vue';
 import DeployBoard from './deploy_board.vue';
 import CanaryUpdateModal from './canary_update_modal.vue';
-import CanaryDeploymentCallout from './canary_deployment_callout.vue';
 
 export default {
   components: {
     EnvironmentItem,
     GlLoadingIcon,
     DeployBoard,
-    CanaryDeploymentCallout,
     EnvironmentAlert: () => import('ee_component/environments/components/environment_alert.vue'),
     CanaryUpdateModal,
   },
@@ -25,40 +23,10 @@ export default {
       required: true,
       default: () => [],
     },
-    deployBoardsHelpPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
     canReadEnvironment: {
       type: Boolean,
       required: false,
       default: false,
-    },
-    canaryDeploymentFeatureId: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    helpCanaryDeploymentsPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    lockPromotionSvgPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    showCanaryDeploymentCallout: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    userCalloutsPath: {
-      type: String,
-      required: false,
-      default: '',
     },
   },
   data() {
@@ -122,9 +90,6 @@ export default {
     },
     shouldRenderFolderContent(env) {
       return env.isFolder && env.isOpen && env.children && env.children.length > 0;
-    },
-    shouldShowCanaryCallout(env) {
-      return env.showCanaryCallout && this.showCanaryDeploymentCallout;
     },
     shouldRenderAlert(env) {
       return env?.has_opened_alert;
@@ -204,7 +169,6 @@ export default {
         <div class="deploy-board-container">
           <deploy-board
             :deploy-board-data="model.deployBoardData"
-            :deploy-boards-help-path="deployBoardsHelpPath"
             :is-loading="model.isLoadingDeployBoard"
             :is-empty="model.isEmptyDeployBoard"
             :logs-path="model.logs_path"
@@ -242,17 +206,6 @@ export default {
             </div>
           </div>
         </template>
-      </template>
-
-      <template v-if="shouldShowCanaryCallout(model)">
-        <canary-deployment-callout
-          :key="`canary-promo-${i}`"
-          :canary-deployment-feature-id="canaryDeploymentFeatureId"
-          :user-callouts-path="userCalloutsPath"
-          :lock-promotion-svg-path="lockPromotionSvgPath"
-          :help-canary-deployments-path="helpCanaryDeploymentsPath"
-          :data-js-canary-promo-key="i"
-        />
       </template>
     </template>
   </div>

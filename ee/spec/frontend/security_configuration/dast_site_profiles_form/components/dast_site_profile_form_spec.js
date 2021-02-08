@@ -11,7 +11,7 @@ import dastSiteProfileUpdateMutation from 'ee/security_configuration/dast_site_p
 import { siteProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
 import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
 import { TEST_HOST } from 'helpers/test_constants';
-import waitForPromises from 'jest/helpers/wait_for_promises';
+import waitForPromises from 'helpers/wait_for_promises';
 import * as urlUtility from '~/lib/utils/url_utility';
 
 const localVue = createLocalVue();
@@ -20,6 +20,7 @@ localVue.use(VueApollo);
 const [siteProfileOne] = siteProfiles;
 const fullPath = 'group/project';
 const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_profiles`;
+const onDemandScansPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans`;
 const profileName = 'My DAST site profile';
 const targetUrl = 'http://example.com';
 const excludedUrls = 'http://example.com/logout';
@@ -28,6 +29,7 @@ const requestHeaders = 'my-new-header=something';
 const defaultProps = {
   profilesLibraryPath,
   fullPath,
+  onDemandScansPath,
 };
 
 const defaultRequestHandlers = {

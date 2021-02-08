@@ -277,29 +277,27 @@ export default {
           </div>
         </div>
       </template>
-      <template>
-        <div v-if="hasSelectedPolicy">
-          <policy-drawer v-if="shouldShowCiliumDrawer" v-model="selectedPolicy.manifest" />
+      <div v-if="hasSelectedPolicy">
+        <policy-drawer v-if="shouldShowCiliumDrawer" v-model="selectedPolicy.manifest" />
 
-          <div v-else>
-            <h5>{{ s__('NetworkPolicies|Policy definition') }}</h5>
-            <p>
-              {{ s__("NetworkPolicies|Define this policy's location, conditions and actions.") }}
-            </p>
-            <div class="gl-p-3 gl-bg-gray-50">
-              <network-policy-editor
-                ref="policyEditor"
-                v-model="selectedPolicy.manifest"
-                class="network-policy-editor"
-              />
-            </div>
+        <div v-else>
+          <h5>{{ s__('NetworkPolicies|Policy definition') }}</h5>
+          <p>
+            {{ s__("NetworkPolicies|Define this policy's location, conditions and actions.") }}
+          </p>
+          <div class="gl-p-3 gl-bg-gray-50">
+            <network-policy-editor
+              ref="policyEditor"
+              v-model="selectedPolicy.manifest"
+              class="network-policy-editor"
+            />
           </div>
-
-          <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Enforcement status') }}</h5>
-          <p>{{ s__('NetworkPolicies|Choose whether to enforce this policy.') }}</p>
-          <gl-toggle v-model="selectedPolicy.isEnabled" data-testid="policyToggle" />
         </div>
-      </template>
+
+        <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Enforcement status') }}</h5>
+        <p>{{ s__('NetworkPolicies|Choose whether to enforce this policy.') }}</p>
+        <gl-toggle v-model="selectedPolicy.isEnabled" data-testid="policyToggle" />
+      </div>
     </gl-drawer>
   </div>
 </template>

@@ -1,5 +1,0 @@
----
-title: Remove `store_security_findings` feature flag
-merge_request: 48357
-author:
-type: changed

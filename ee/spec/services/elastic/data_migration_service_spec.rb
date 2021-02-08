@@ -119,4 +119,73 @@ RSpec.describe Elastic::DataMigrationService, :elastic do
       expect(subject.migration_has_finished?(migration_name)).to eq(finished)
     end
   end
+
+  describe '.migration_halted?' do
+    let(:migration) { subject.migrations.last }
+
+    before do
+      allow(Rails).to receive(:cache).and_return(ActiveSupport::Cache::MemoryStore.new)
+      allow(subject).to receive(:migration_halted_uncached?).with(migration).and_return(true, false)
+    end
+
+    it 'calls the uncached method only once' do
+      expect(subject).to receive(:migration_halted_uncached?).once
+
+      expect(subject.migration_halted?(migration)).to eq(true)
+      expect(subject.migration_halted?(migration)).to eq(true)
+    end
+  end
+
+  describe '.migration_halted_uncached?' do
+    let(:migration) { subject.migrations.last }
+    let(:halted_response) { { '_source': { 'state': { halted: true } } }.with_indifferent_access }
+    let(:not_halted_response) { { '_source': { 'state': { halted: false } } }.with_indifferent_access }
+
+    it 'returns true if migration has been halted' do
+      allow(migration).to receive(:load_from_index).and_return(not_halted_response)
+      expect(subject.migration_halted_uncached?(migration)).to eq(false)
+
+      allow(migration).to receive(:load_from_index).and_return(halted_response)
+      expect(subject.migration_halted_uncached?(migration)).to eq(true)
+    end
+  end
+
+  describe '.drop_migration_halted_cache!' do
+    let(:migration) { subject.migrations.last }
+
+    before do
+      allow(Rails).to receive(:cache).and_return(ActiveSupport::Cache::MemoryStore.new)
+      allow(subject).to receive(:migration_halted_uncached?).with(migration).and_return(true, false)
+    end
+
+    it 'drops cache' do
+      expect(subject).to receive(:migration_halted_uncached?).twice
+
+      expect(subject.migration_halted?(migration)).to eq(true)
+
+      subject.drop_migration_halted_cache!(migration)
+
+      expect(subject.migration_halted?(migration)).to eq(false)
+    end
+  end
+
+  describe '.halted_migration' do
+    let(:migration) { subject.migrations.last }
+    let(:halted_response) { { '_source': { 'state': { halted: true } } }.with_indifferent_access }
+
+    before do
+      allow(Rails).to receive(:cache).and_return(ActiveSupport::Cache::MemoryStore.new)
+      allow(Elastic::MigrationRecord).to receive(:new).and_call_original
+      allow(Elastic::MigrationRecord).to receive(:new).with(version: migration.version, name: migration.name, filename: migration.filename).and_return(migration)
+    end
+
+    it 'returns a migration when it is halted' do
+      expect(subject.halted_migration).to be_nil
+
+      allow(migration).to receive(:load_from_index).and_return(halted_response)
+      subject.drop_migration_halted_cache!(migration)
+
+      expect(subject.halted_migration).to eq(migration)
+    end
+  end
 end

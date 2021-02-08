@@ -28,7 +28,7 @@ RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
 
     subject
 
-    expect(Analytics::DevopsAdoption::CreateSnapshotWorker).to have_received(:perform_async).with(Analytics::DevopsAdoption::Segment.last.id, nil)
+    expect(Analytics::DevopsAdoption::CreateSnapshotWorker).to have_received(:perform_async).with(Analytics::DevopsAdoption::Segment.last.id)
   end
 
   context 'when user is not an admin' do

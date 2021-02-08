@@ -4,7 +4,11 @@ import testAction from 'helpers/vuex_action_helper';
 import createStore from 'ee/issue_show/components/incidents/store';
 import * as actions from 'ee/issue_show/components/incidents/store/actions';
 import * as types from 'ee/issue_show/components/incidents/store/mutation_types';
-import { getMetricImages, uploadMetricImage } from 'ee/issue_show/components/incidents/service';
+import {
+  getMetricImages,
+  uploadMetricImage,
+  deleteMetricImage,
+} from 'ee/issue_show/components/incidents/service';
 import createFlash from '~/flash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { fileList, initialData } from '../mock_data';
@@ -13,6 +17,7 @@ jest.mock('~/flash');
 jest.mock('ee/issue_show/components/incidents/service', () => ({
   getMetricImages: jest.fn(),
   uploadMetricImage: jest.fn(),
+  deleteMetricImage: jest.fn(),
 }));
 
 const defaultState = {
@@ -97,6 +102,21 @@ describe('Metrics tab store actions', () => {
         [],
       );
       expect(createFlash).toHaveBeenCalled();
+    });
+  });
+
+  describe('deleting a metric image', () => {
+    const payload = fileList[0].id;
+
+    it('should call success action when deleting an image', () => {
+      deleteMetricImage.mockImplementation(() => Promise.resolve());
+
+      testAction(actions.deleteImage, payload, state, [
+        {
+          type: types.RECEIVE_METRIC_DELETE_SUCCESS,
+          payload,
+        },
+      ]);
     });
   });
 

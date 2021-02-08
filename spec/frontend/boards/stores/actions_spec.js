@@ -1,4 +1,18 @@
 import testAction from 'helpers/vuex_action_helper';
+import actions, { gqlClient } from '~/boards/stores/actions';
+import * as types from '~/boards/stores/mutation_types';
+import { inactiveId } from '~/boards/constants';
+import issueMoveListMutation from '~/boards/graphql/issue_move_list.mutation.graphql';
+import destroyBoardListMutation from '~/boards/graphql/board_list_destroy.mutation.graphql';
+import issueCreateMutation from '~/boards/graphql/issue_create.mutation.graphql';
+import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
+import {
+  fullBoardId,
+  formatListIssues,
+  formatBoardLists,
+  formatIssueInput,
+} from '~/boards/boards_util';
+import createFlash from '~/flash';
 import {
   mockLists,
   mockListsById,
@@ -11,14 +25,6 @@ import {
   mockActiveIssue,
   mockGroupProjects,
 } from '../mock_data';
-import actions, { gqlClient } from '~/boards/stores/actions';
-import * as types from '~/boards/stores/mutation_types';
-import { inactiveId } from '~/boards/constants';
-import issueMoveListMutation from '~/boards/graphql/issue_move_list.mutation.graphql';
-import destroyBoardListMutation from '~/boards/graphql/board_list_destroy.mutation.graphql';
-import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
-import { fullBoardId, formatListIssues, formatBoardLists } from '~/boards/boards_util';
-import createFlash from '~/flash';
 
 jest.mock('~/flash');
 
@@ -65,7 +71,7 @@ describe('setFilters', () => {
       actions.setFilters,
       filters,
       state,
-      [{ type: types.SET_FILTERS, payload: filters }],
+      [{ type: types.SET_FILTERS, payload: { ...filters, not: {} } }],
       [],
       done,
     );
@@ -245,6 +251,27 @@ describe('createList', () => {
       [],
       done,
     );
+  });
+});
+
+describe('fetchLabels', () => {
+  it('should commit mutation RECEIVE_LABELS_SUCCESS on success', async () => {
+    const queryResponse = {
+      data: {
+        group: {
+          labels: {
+            nodes: labels,
+          },
+        },
+      },
+    };
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    await testAction({
+      action: actions.fetchLabels,
+      state: { boardType: 'group' },
+      expectedMutations: [{ type: types.RECEIVE_LABELS_SUCCESS, payload: labels }],
+    });
   });
 });
 
@@ -728,6 +755,27 @@ describe('createNewIssue', () => {
   const state = {
     boardType: 'group',
     fullPath: 'gitlab-org/gitlab',
+    boardConfig: {
+      labelIds: [],
+      assigneeId: null,
+      milestoneId: -1,
+    },
+  };
+
+  const stateWithBoardConfig = {
+    boardConfig: {
+      labels: [
+        {
+          id: 5,
+          title: 'Test',
+          color: '#ff0000',
+          description: 'testing;',
+          textColor: 'white',
+        },
+      ],
+      assigneeId: 2,
+      milestoneId: 3,
+    },
   };
 
   it('should return issue from API on success', async () => {
@@ -744,11 +792,59 @@ describe('createNewIssue', () => {
     expect(result).toEqual(mockIssue);
   });
 
+  it('should add board scope to the issue being created', async () => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        createIssue: {
+          issue: mockIssue,
+          errors: [],
+        },
+      },
+    });
+
+    await actions.createNewIssue({ state: stateWithBoardConfig }, mockIssue);
+    expect(gqlClient.mutate).toHaveBeenCalledWith({
+      mutation: issueCreateMutation,
+      variables: {
+        input: formatIssueInput(mockIssue, stateWithBoardConfig.boardConfig),
+      },
+    });
+  });
+
+  it('should add board scope by merging attributes to the issue being created', async () => {
+    const issue = {
+      ...mockIssue,
+      assigneeIds: ['gid://gitlab/User/1'],
+      labelIds: ['gid://gitlab/GroupLabel/4'],
+    };
+
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        createIssue: {
+          issue,
+          errors: [],
+        },
+      },
+    });
+
+    const payload = formatIssueInput(issue, stateWithBoardConfig.boardConfig);
+
+    await actions.createNewIssue({ state: stateWithBoardConfig }, issue);
+    expect(gqlClient.mutate).toHaveBeenCalledWith({
+      mutation: issueCreateMutation,
+      variables: {
+        input: formatIssueInput(issue, stateWithBoardConfig.boardConfig),
+      },
+    });
+    expect(payload.labelIds).toEqual(['gid://gitlab/GroupLabel/4', 'gid://gitlab/GroupLabel/5']);
+    expect(payload.assigneeIds).toEqual(['gid://gitlab/User/1', 'gid://gitlab/User/2']);
+  });
+
   it('should commit CREATE_ISSUE_FAILURE mutation when API returns an error', (done) => {
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
       data: {
         createIssue: {
-          issue: {},
+          issue: mockIssue,
           errors: [{ foo: 'bar' }],
         },
       },
@@ -1122,6 +1218,40 @@ describe('setSelectedProject', () => {
       ],
       [],
       done,
+    );
+  });
+});
+
+describe('toggleBoardItemMultiSelection', () => {
+  const boardItem = mockIssue;
+
+  it('should commit mutation ADD_BOARD_ITEM_TO_SELECTION if item is not on selection state', () => {
+    testAction(
+      actions.toggleBoardItemMultiSelection,
+      boardItem,
+      { selectedBoardItems: [] },
+      [
+        {
+          type: types.ADD_BOARD_ITEM_TO_SELECTION,
+          payload: boardItem,
+        },
+      ],
+      [],
+    );
+  });
+
+  it('should commit mutation REMOVE_BOARD_ITEM_FROM_SELECTION if item is on selection state', () => {
+    testAction(
+      actions.toggleBoardItemMultiSelection,
+      boardItem,
+      { selectedBoardItems: [mockIssue] },
+      [
+        {
+          type: types.REMOVE_BOARD_ITEM_FROM_SELECTION,
+          payload: boardItem,
+        },
+      ],
+      [],
     );
   });
 });

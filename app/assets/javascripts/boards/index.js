@@ -3,6 +3,7 @@ import { mapActions, mapGetters } from 'vuex';
 
 import 'ee_else_ce/boards/models/issue';
 import 'ee_else_ce/boards/models/list';
+import VueApollo from 'vue-apollo';
 import BoardSidebar from 'ee_else_ce/boards/components/board_sidebar';
 import initNewListDropdown from 'ee_else_ce/boards/components/new_list_dropdown';
 import boardConfigToggle from 'ee_else_ce/boards/config_toggle';
@@ -15,7 +16,7 @@ import {
   getBoardsModalData,
 } from 'ee_else_ce/boards/ee_functions';
 
-import VueApollo from 'vue-apollo';
+import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import BoardContent from '~/boards/components/board_content.vue';
 import BoardExtraActions from '~/boards/components/board_extra_actions.vue';
 import createDefaultClient from '~/lib/graphql';
@@ -68,9 +69,12 @@ export default () => {
     issueBoardsApp.$destroy(true);
   }
 
-  boardsStore.create();
-  boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
+  if (!gon?.features?.graphqlBoardLists) {
+    boardsStore.create();
+    boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
+  }
 
+  // eslint-disable-next-line @gitlab/no-runtime-template-compiler
   issueBoardsApp = new Vue({
     el: $boardApp,
     components: {
@@ -127,8 +131,10 @@ export default () => {
           milestoneTitle: $boardApp.dataset.boardMilestoneTitle || '',
           iterationId: parseInt($boardApp.dataset.boardIterationId, 10),
           iterationTitle: $boardApp.dataset.boardIterationTitle || '',
+          assigneeId: $boardApp.dataset.boardAssigneeId,
           assigneeUsername: $boardApp.dataset.boardAssigneeUsername,
-          labels: $boardApp.dataset.labels ? JSON.parse($boardApp.dataset.labels || []) : [],
+          labels: $boardApp.dataset.labels ? JSON.parse($boardApp.dataset.labels) : [],
+          labelIds: $boardApp.dataset.labelIds ? JSON.parse($boardApp.dataset.labelIds) : [],
           weight: $boardApp.dataset.boardWeight
             ? parseInt($boardApp.dataset.boardWeight, 10)
             : null,
@@ -271,7 +277,7 @@ export default () => {
     },
   });
 
-  // eslint-disable-next-line no-new
+  // eslint-disable-next-line no-new, @gitlab/no-runtime-template-compiler
   new Vue({
     el: document.getElementById('js-add-list'),
     data: {
@@ -282,6 +288,21 @@ export default () => {
       initNewListDropdown();
     },
   });
+
+  const createColumnTriggerEl = document.querySelector('.js-create-column-trigger');
+  if (createColumnTriggerEl) {
+    // eslint-disable-next-line no-new
+    new Vue({
+      el: createColumnTriggerEl,
+      components: {
+        BoardAddNewColumnTrigger,
+      },
+      store,
+      render(createElement) {
+        return createElement('board-add-new-column-trigger');
+      },
+    });
+  }
 
   boardConfigToggle(boardsStore);
 

@@ -14,13 +14,13 @@ RSpec.describe IncidentManagement::OncallParticipant do
     rotation.project.add_developer(user)
   end
 
-  describe '.associations' do
+  describe 'associations' do
     it { is_expected.to belong_to(:rotation) }
     it { is_expected.to belong_to(:user) }
     it { is_expected.to have_many(:shifts) }
   end
 
-  describe '.validations' do
+  describe 'validations' do
     it { is_expected.to validate_presence_of(:rotation) }
     it { is_expected.to validate_presence_of(:user) }
     it { is_expected.to validate_presence_of(:color_weight) }
@@ -35,6 +35,18 @@ RSpec.describe IncidentManagement::OncallParticipant do
         expect(subject).to be_invalid
         expect(subject.errors.full_messages.to_sentence).to eq('User has already been taken')
       end
+    end
+  end
+
+  describe 'scopes' do
+    describe '.ordered_asc' do
+      let_it_be(:participant1) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
+      let_it_be(:participant2) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
+      let_it_be(:participant3) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
+
+      subject { described_class.ordered_asc }
+
+      it { is_expected.to eq([participant1, participant2, participant3]) }
     end
   end
 

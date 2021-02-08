@@ -13,6 +13,9 @@ type: reference
 You can set up [GitLab CI/CD](README.md) across multiple projects, so that a pipeline
 in one project can trigger a pipeline in another project.
 
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For an overview see the [Multi-project pipelines demo](https://www.youtube.com/watch?v=g_PIwBM1J84).
+
 GitLab CI/CD is a powerful continuous integration tool that works not only per project,
 but also across projects with multi-project pipelines.
 
@@ -258,7 +261,7 @@ test:
 ### Mirroring status from triggered pipeline
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11238) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.3.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/199224) to GitLab Core in 12.8.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/199224) to GitLab Free in 12.8.
 
 You can mirror the pipeline status from the triggered pipeline to the source
 bridge job by using `strategy: depend`. For example:

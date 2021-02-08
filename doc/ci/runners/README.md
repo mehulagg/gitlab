@@ -37,10 +37,10 @@ multiple projects.
 
 If you are using a self-managed instance of GitLab:
 
-- Your administrator can install and register shared runners by [following the documentation](https://docs.gitlab.com/runner/install/index.html).
-  <!-- going to your project's-->
-  <!-- **Settings > CI / CD**, expanding the **Runners** section, and clicking **Show runner installation instructions**.-->
-  <!-- These instructions are also available [in the documentation](https://docs.gitlab.com/runner/install/index.html).-->
+- Your administrator can install and register shared runners by
+  going to your project's **Settings > CI / CD**, expanding the **Runners** section,
+  and clicking **Show runner installation instructions**.
+  These instructions are also available [in the documentation](https://docs.gitlab.com/runner/install/index.html).
 - The administrator can also configure a maximum number of shared runner [pipeline minutes for
   each group](../../user/admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota).
 
@@ -136,9 +136,15 @@ Shared runners are automatically disabled for a project:
 To disable shared runners for a group:
 
 1. Go to the group's **Settings > CI/CD** and expand the **Runners** section.
-1. In the **Shared runners** area, click **Enable shared runners for this group**.
+1. In the **Shared runners** area, turn off the **Enable shared runners for this group** toggle.
 1. Optionally, to allow shared runners to be enabled for individual projects or subgroups,
    click **Allow projects and subgroups to override the group setting**.
+
+NOTE:
+To re-enable the shared runners for a group, turn on the
+**Enable shared runners for this group** toggle.
+Then, an owner or maintainer must explicitly change this setting
+for each project subgroup or project.
 
 ### Group runners
 
@@ -268,6 +274,15 @@ This feature can be used to prevent your shared runner from being overwhelmed
 by a project that has jobs with a long timeout (for example, one week).
 
 When not configured, runners do not override the project timeout.
+
+On GitLab.com, you cannot override the job timeout for shared runners and must use the [project defined timeout](../pipelines/settings.md#timeout).
+
+To set the maximum job timeout:
+
+1. In a project, go to **Settings > CI/CD > Runners**.
+1. Select your specific runner to edit the settings. 
+1. Enter a value under **Maximum job timeout**.
+1. Select **Save changes**.
 
 How this feature works:
 

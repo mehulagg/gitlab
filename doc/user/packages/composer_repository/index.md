@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Composer packages in the Package Registry
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15886) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
 Publish [Composer](https://getcomposer.org/) packages in your project's Package Registry.
 Then, install the packages whenever you need to use them as a dependency.
@@ -272,6 +272,6 @@ Output indicates that the package has been successfully installed.
 
 WARNING:
 Never commit the `auth.json` file to your repository. To install packages from a CI/CD job,
-consider using the [`composer config`](https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md#authentication) tool with your personal access token
+consider using the [`composer config`](https://getcomposer.org/doc/articles/handling-private-packages.md#satis) tool with your personal access token
 stored in a [GitLab CI/CD environment variable](../../../ci/variables/README.md) or in
 [HashiCorp Vault](../../../ci/secrets/index.md).

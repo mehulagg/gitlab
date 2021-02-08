@@ -37,7 +37,7 @@
             }
         ],
         "free": true,
-        "name": "Free",
+        "name": "Free Plan",
         "price_per_month": 0.0,
         "price_per_year": 0.0,
         "purchase_link": {
@@ -84,7 +84,7 @@
             }
         ],
         "free": false,
-        "name": "Bronze",
+        "name": "Bronze Plan",
         "price_per_month": 4.0,
         "price_per_year": 48.0,
         "purchase_link": {
@@ -120,7 +120,7 @@
             }
         ],
         "free": false,
-        "name": "Silver",
+        "name": "Silver Plan",
         "price_per_month": 19.0,
         "price_per_year": 228.0,
         "purchase_link": {
@@ -159,7 +159,7 @@
             }
         ],
         "free": false,
-        "name": "Gold",
+        "name": "Gold Plan",
         "price_per_month": 99.0,
         "price_per_year": 1188.0,
         "purchase_link": {
