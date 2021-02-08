@@ -4,6 +4,7 @@ module Ci
   class DailyBuildGroupReportResult < ApplicationRecord
     extend Gitlab::Ci::Model
 
+    MAX_ITEMS = 1000
     REPORT_WINDOW = 90.days
     PARAM_TYPES = %w[coverage].freeze
 
@@ -20,6 +21,7 @@ module Ci
     scope :with_default_branch, -> { where(default_branch: true) }
     scope :by_date, -> (start_date) { where(date: report_window(start_date)..Date.current) }
     scope :by_dates, -> (start_date, end_date) { where(date: start_date..end_date) }
+    scope :order_by_date_desc, -> { order(date: :desc) }
 
     store_accessor :data, :coverage
 

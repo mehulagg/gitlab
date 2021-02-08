@@ -8,8 +8,12 @@
 #   current_user
 #   params:
 #     project: integer
+#     group: integer
+#     coverage: boolean
 #     ref_path: string
 #     start_date: date
+#     end_date: date
+#     limit: integer
 
 module Ci
   module Testing
@@ -50,7 +54,8 @@ module Ci
         collection = by_coverage(collection)
         collection = by_ref_path(collection)
         collection = by_dates(collection)
-        collection = by_limit(collection)
+        collection = order_by_date_desc(collection)
+        collection = limit_by(collection)
         collection
       end
 
@@ -66,7 +71,11 @@ module Ci
         @params[:start_date].present? && @params[:end_date].present? ? items.by_dates(@params[:start_date], @params[:end_date]) : items
       end
 
-      def by_limit(items)
+      def order_by_date_desc(items)
+        items.order_by_date_desc
+      end
+
+      def limit_by(items)
         @params[:limit].present? ? items.limit(@params[:limit]) : items # rubocop: disable CodeReuse/ActiveRecord
       end
     end
