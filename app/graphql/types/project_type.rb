@@ -321,7 +321,14 @@ module Types
           description: 'Terraform states associated with the project.',
           resolver: Resolvers::Terraform::StatesResolver
 
+    field :analytics,
+          Types::ProjectAnalyticsType,
+          null: true,
+          method: :itself,
+          description: 'Analytics related to the project'
+
     field :pipeline_analytics, Types::Ci::AnalyticsType, null: true,
+          deprecated: { reason: 'Moved to `project.analytics.pipeline`', milestone: '13.9' },
           description: 'Pipeline analytics.',
           resolver: Resolvers::ProjectPipelineStatisticsResolver
 
