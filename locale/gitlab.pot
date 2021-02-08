@@ -32610,49 +32610,10 @@ msgstr ""
 msgid "Webhooks|Tag push events"
 msgstr ""
 
-msgid "Webhooks|This URL is triggered when a deployment starts, finishes, fails, or is canceled"
-msgstr ""
-
-msgid "Webhooks|This URL is triggered when a feature flag is turned on or off"
-msgstr ""
-
-msgid "Webhooks|This URL is triggered when a release is created/updated"
-msgstr ""
-
-msgid "Webhooks|This URL will be triggered by a push to the repository"
-msgstr ""
-
-msgid "Webhooks|This URL will be triggered when a confidential issue is created/updated/merged"
-msgstr ""
-
 msgid "Webhooks|This URL will be triggered when a group member is created/updated/removed"
 msgstr ""
 
-msgid "Webhooks|This URL will be triggered when a merge request is created/updated/merged"
-msgstr ""
-
-msgid "Webhooks|This URL will be triggered when a new tag is pushed to the repository"
-msgstr ""
-
 msgid "Webhooks|This URL will be triggered when a subgroup is created/removed"
-msgstr ""
-
-msgid "Webhooks|This URL will be triggered when a wiki page is created/updated"
-msgstr ""
-
-msgid "Webhooks|This URL will be triggered when an issue is created/updated/merged"
-msgstr ""
-
-msgid "Webhooks|This URL will be triggered when someone adds a comment"
-msgstr ""
-
-msgid "Webhooks|This URL will be triggered when someone adds a comment on a confidential issue"
-msgstr ""
-
-msgid "Webhooks|This URL will be triggered when the job status changes"
-msgstr ""
-
-msgid "Webhooks|This URL will be triggered when the pipeline status changes"
 msgstr ""
 
 msgid "Webhooks|Trigger"
@@ -32661,7 +32622,49 @@ msgstr ""
 msgid "Webhooks|URL"
 msgstr ""
 
-msgid "Webhooks|Use this token to validate received payloads. It will be sent with the request in the X-Gitlab-Token HTTP header."
+msgid "Webhooks|URL is triggered by a push to the repository"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when a confidential issue is created/updated/merged"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when a deployment starts, finishes, fails, or is canceled"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when a feature flag is turned on or off"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when a merge request is created/updated/merged"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when a new tag is pushed to the repository"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when a release is created/updated"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when a wiki page is created/updated"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when an issue is created/updated/merged"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when someone adds a comment"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when someone adds a comment on a confidential issue"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when the job status changes"
+msgstr ""
+
+msgid "Webhooks|URL is triggered when the pipeline status changes"
+msgstr ""
+
+msgid "Webhooks|URL must be percent-encoded if neccessary."
+msgstr ""
+
+msgid "Webhooks|Use this token to validate received payloads. It is sent with the request in the X-Gitlab-Token HTTP header."
 msgstr ""
 
 msgid "Webhooks|Wiki Page events"
