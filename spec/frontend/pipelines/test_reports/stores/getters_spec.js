@@ -8,6 +8,7 @@ describe('Getters TestReports Store', () => {
   const testReports = getJSONFixture('pipelines/test_report.json');
 
   const defaultState = {
+    blobPath: '/test/blob/path',
     testReports,
     selectedSuiteIndex: 0,
     pageInfo: {
@@ -17,6 +18,7 @@ describe('Getters TestReports Store', () => {
   };
 
   const emptyState = {
+    blobPath: '',
     testReports: {},
     selectedSuite: null,
     pageInfo: {
@@ -74,6 +76,7 @@ describe('Getters TestReports Store', () => {
       const expected = testReports.test_suites[0].test_cases
         .map((x) => ({
           ...x,
+          filePath: `${state.blobPath}/${x.file.replace(/^\.?\//, '')}`,
           formattedTime: formattedTime(x.execution_time),
           icon: iconForTestStatus(x.status),
         }))
