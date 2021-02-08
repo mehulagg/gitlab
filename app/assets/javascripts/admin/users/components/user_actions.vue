@@ -6,9 +6,9 @@ import {
   GlDropdownSectionHeader,
   GlDropdownDivider,
 } from '@gitlab/ui';
-import { s__, __ } from '~/locale';
 import { convertArrayToCamelCase } from '~/lib/utils/common_utils';
 import { generateUserPaths } from '../utils';
+import { I18N_USER_ACTIONS } from '../constants';
 
 export default {
   components: {
@@ -59,20 +59,7 @@ export default {
       return action === 'ldapBlocked';
     },
   },
-  i18n: {
-    edit: __('Edit'),
-    settings: __('Settings'),
-    unlock: __('Unlock'),
-    block: s__('AdminUsers|Block'),
-    unblock: s__('AdminUsers|Unblock'),
-    approve: s__('AdminUsers|Approve'),
-    reject: s__('AdminUsers|Reject'),
-    deactivate: s__('AdminUsers|Deactivate'),
-    activate: s__('AdminUsers|Activate'),
-    ldapBlocked: s__('AdminUsers|Cannot unblock LDAP blocked users'),
-    delete: s__('AdminUsers|Delete user'),
-    deleteWithContributions: s__('AdminUsers|Delete user and contributions'),
-  },
+  i18n: I18N_USER_ACTIONS,
 };
 </script>
 
