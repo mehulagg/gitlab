@@ -135,6 +135,7 @@ module EE
 
       before_save :set_fixed_start_date, if: :start_date_is_fixed?
       before_save :set_fixed_due_date, if: :due_date_is_fixed?
+      after_create_commit :usage_ping_record_epic_creation
 
       def epic_tree_root?
         parent_id.nil?
@@ -160,6 +161,10 @@ module EE
         self.end_date = due_date_fixed
         self.due_date_sourcing_milestone = nil
         self.due_date_sourcing_epic = nil
+      end
+
+      def usage_ping_record_epic_creation
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_created_action(author: author)
       end
     end
 
