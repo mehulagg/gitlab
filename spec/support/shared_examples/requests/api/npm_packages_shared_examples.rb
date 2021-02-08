@@ -139,8 +139,6 @@ RSpec.shared_examples 'handling get metadata requests' do |scope: :project|
   with_them do
     include_context 'set package name from package name type'
 
-    let(:anonymous) { user_role == :anonymous }
-
     let(:headers) do
       case auth
       when :oauth
@@ -159,7 +157,7 @@ RSpec.shared_examples 'handling get metadata requests' do |scope: :project|
     subject { get(url, headers: anonymous ? {} : headers) }
 
     before do
-      project.send("add_#{user_role}", user) if user_role && !anonymous
+      project.send("add_#{user_role}", user) if user_role
       project.update!(visibility: Gitlab::VisibilityLevel.const_get(visibility, false))
       package.update!(name: package_name) unless package_name == 'non-existing-package'
       stub_application_setting(npm_package_requests_forwarding: request_forward)
