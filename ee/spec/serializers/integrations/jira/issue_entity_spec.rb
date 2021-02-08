@@ -33,6 +33,14 @@ RSpec.describe Integrations::Jira::IssueEntity do
 
   subject { described_class.new(jira_issue, project: project).as_json }
 
+  context 'feature flag "jira_issues_show_integration" is disabled' do
+    it 'returns web_url with remote Jira url' do
+      stub_feature_flags(jira_issues_show_integration: false)
+
+      expect(subject[:web_url]).to eq('http://jira.com/browse/GL-5')
+    end
+  end
+
   it 'returns the Jira issues attributes' do
     expect(subject).to include(
       project_id: project.id,
