@@ -134,6 +134,34 @@ RSpec.describe Projects::Ci::DailyBuildGroupReportResultsController do
         end
       end
 
+      context 'when coverage_data_new_finder flag is enabled' do
+        before do
+          stub_feature_flags(coverage_data_new_finder: true)
+        end
+
+        it 'calls new daily coverage finder' do
+          expect_any_instance_of(::Ci::Testing::DailyBuildGroupReportResultsFinder) do |finder|
+            expect(finder).to receive(:execute)
+          end
+
+          expect(json_response).to eq([
+            {
+              'group_name' => 'rspec',
+              'data' => [
+                { 'date' => '2020-03-09', 'coverage' => 79.0 },
+                { 'date' => '2020-03-08', 'coverage' => 77.0 }
+              ]
+            },
+            {
+              'group_name' => 'karma',
+              'data' => [
+                { 'date' => '2019-12-10', 'coverage' => 81.0 }
+              ]
+            }
+          ])
+        end
+      end
+
       it_behaves_like 'validating param_type'
       it_behaves_like 'ensuring policy'
     end
