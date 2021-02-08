@@ -180,7 +180,7 @@ Once a lifetime for personal access tokens is set, GitLab will:
   allowed lifetime. Three hours is given to allow administrators to change the allowed lifetime,
   or remove it, before revocation takes place.
 
-## Enforcement of SSH key expiration **(ULTIMATE SELF)**
+## Optional enforcement of SSH key expiration **(ULTIMATE SELF)**
 
 GitLab administrators can choose to enforce the expiration of SSH keys after their expiration dates.
 If you enable this feature, this disables all _expired_ SSH keys.
@@ -191,16 +191,16 @@ To do this:
 1. Expand the **Account and limit** section.
 1. Select the **Enforce SSH key expiration** checkbox.
 
-## Optional enforcement of Personal Access Token expiry **(ULTIMATE SELF)**
+## Optional enforcement of Personal Access Token expiration **(ULTIMATE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214723) in GitLab Ultimate 13.1.
 > - It is deployed behind a feature flag, disabled by default.
 > - It is disabled on GitLab.com.
 > - It is not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-optional-enforcement-of-personal-access-token-expiry-feature). **(FREE SELF)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-optional-enforcement-of-personal-access-token-expiration-feature). **(FREE SELF)**
 
 GitLab administrators can choose to prevent personal access tokens from expiring
-automatically. The tokens are usable after the expiry date, unless they are revoked explicitly.
+automatically. The tokens are usable after the expiration date, unless they are revoked explicitly.
 
 To do this:
 
@@ -208,9 +208,9 @@ To do this:
 1. Expand the **Account and limit** section.
 1. Uncheck the **Enforce personal access token expiration** checkbox.
 
-### Enable or disable optional enforcement of Personal Access Token expiry Feature **(FREE SELF)**
+### Enable or disable optional enforcement of Personal Access Token expiration Feature **(FREE SELF)**
 
-Optional Enforcement of Personal Access Token Expiry is deployed behind a feature flag and is **disabled by default**.
+Optional Enforcement of Personal Access Token Expiration is deployed behind a feature flag and is **disabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md) can enable it for your instance from the [rails console](../../../administration/feature_flags.md#start-the-gitlab-rails-console).
 
 To enable it:
