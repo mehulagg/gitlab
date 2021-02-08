@@ -4,31 +4,41 @@ import {
   GlFormGroup,
   GlFormRadio,
   GlFormRadioGroup,
+  GlLabel,
   GlSearchBoxByType,
   GlSkeletonLoader,
+  GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
 import { mapActions, mapGetters } from 'vuex';
 import { __ } from '~/locale';
+import { isScopedLabel } from '~/lib/utils/common_utils';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import boardsStore from '../stores/boards_store';
 
 export default {
+  inject: ['scopedLabelsAvailable'],
   i18n: {
     add: __('Add'),
     cancel: __('Cancel'),
     formDescription: __('A label list displays all issues with the selected label.'),
     labelsError: __('Unable to load labels'),
     newLabelList: __('New label list'),
+    noLabelSelected: __('No label selected'),
     searchPlaceholder: __('Search labels'),
     selectLabel: __('Select label'),
+    selected: __('Selected'),
   },
   components: {
     GlButton,
     GlFormGroup,
     GlFormRadio,
     GlFormRadioGroup,
+    GlLabel,
     GlSearchBoxByType,
     GlSkeletonLoader,
+  },
+  directives: {
+    GlTooltip,
   },
   data() {
     return {
@@ -40,6 +50,9 @@ export default {
   },
   computed: {
     ...mapGetters(['getListByLabelId', 'shouldUseGraphQL']),
+    selectedLabel() {
+      return this.labels.find(({ id }) => id === this.selectedLabelId);
+    },
   },
   created() {
     this.filterLabels();
@@ -71,7 +84,7 @@ export default {
         return;
       }
 
-      const label = this.labels.find(({ id }) => id === this.selectedLabelId);
+      const label = this.selectedLabel();
 
       if (!label) {
         return;
@@ -135,6 +148,10 @@ export default {
           this.loading = false;
         });
     },
+
+    showScopedLabels(label) {
+      return this.scopedLabelsAvailable && isScopedLabel(label);
+    },
   },
 };
 </script>
@@ -149,6 +166,7 @@ export default {
     >
       <h3
         class="gl-font-base gl-px-5 gl-py-5 gl-m-0 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
+        data-testid="board-add-column-form-title"
       >
         {{ $options.i18n.newLabelList }}
       </h3>
@@ -158,8 +176,22 @@ export default {
 
         <p class="gl-m-5">{{ $options.i18n.formDescription }}</p>
 
+        <div class="gl-px-5 gl-pb-4">
+          <label class="gl-mb-2">{{ $options.i18n.selected }}</label>
+          <div>
+            <gl-label
+              v-if="selectedLabel"
+              v-gl-tooltip
+              :title="selectedLabel.title"
+              :description="selectedLabel.description"
+              :background-color="selectedLabel.color"
+              :scoped="showScopedLabels(selectedLabel)"
+            />
+            <div v-else class="gl-text-gray-500">{{ $options.i18n.noLabelSelected }}</div>
+          </div>
+        </div>
+
         <gl-form-group
-          id="group-id"
           class="gl-mx-5"
           :label="$options.i18n.selectLabel"
           label-for="board-available-labels"
@@ -181,11 +213,7 @@ export default {
           </gl-skeleton-loader>
         </div>
 
-        <gl-form-radio-group
-          v-else
-          v-model="selectedLabelId"
-          class="gl-overflow-y-auto gl-px-5"
-        >
+        <gl-form-radio-group v-else v-model="selectedLabelId" class="gl-overflow-y-auto gl-px-5">
           <label
             v-for="label in labels"
             :key="label.id"
