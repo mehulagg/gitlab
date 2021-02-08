@@ -169,7 +169,7 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
     end
   end
 
-  context 'when another URI component is invalid, raises an URI::Error' do
+  context 'when URI creation raises an URI::Error' do
     before do
       # This raises an URI::Error exception
       event_1[:port] = 'invalid'
@@ -191,7 +191,7 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
     end
   end
 
-  context 'when another URI component is invalid, raises a StandardError exception' do
+  context 'when URI creation raises a StandardError exception' do
     before do
       # This raises a TypeError exception
       event_1[:scheme] = 1234
