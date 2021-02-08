@@ -11,6 +11,10 @@ module IssuableLinks
     end
 
     def execute
+      unless current_user.can?(:admin_feature_flags_issue_links, issuable.project)
+        return error('Unauthorized request', 401)
+      end
+
       # If ALL referenced issues are already assigned to the given epic it renders a conflict status,
       # otherwise create issue links for the issues which
       # are still not assigned and return success message.

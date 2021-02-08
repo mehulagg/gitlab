@@ -63,6 +63,7 @@ module Notes
       todo_service.new_note(note, current_user)
       clear_noteable_diffs_cache(note)
       Suggestions::CreateService.new(note).execute
+      ::FeatureFlagIssues::CreateService.create_link_from_note(note, current_user)
       increment_usage_counter(note)
       track_event(note, current_user)
 

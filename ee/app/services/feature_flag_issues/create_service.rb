@@ -14,5 +14,19 @@ module FeatureFlagIssues
       attrs = { feature_flag_id: issuable.id, issue: referenced_issue }
       ::FeatureFlagIssue.create(attrs)
     end
+
+    def self.create_link_from_note(note, current_user)
+      return unless note.for_issue?
+
+      feature_flag = note.all_references(current_user).feature_flags.first
+
+      return unless feature_flag
+
+      issue = note.noteable
+
+      params = { issuable_references: [issue.to_reference], link_type: 'relates_to' }
+
+      new(feature_flag, current_user, params).execute
+    end
   end
 end
