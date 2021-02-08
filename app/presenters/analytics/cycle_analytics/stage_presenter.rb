@@ -15,6 +15,14 @@ module Analytics
         ''
       end
 
+      def start_event_identifier
+        extract_default_stage_attribute(:start_event_identifier) || ''
+      end
+
+      def end_event_identifier
+        extract_default_stage_attribute(:end_event_identifier) || ''
+      end
+
       private
 
       def extract_default_stage_attribute(attribute)
