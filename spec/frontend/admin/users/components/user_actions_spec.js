@@ -2,14 +2,26 @@ import { shallowMount } from '@vue/test-utils';
 import { GlDropdownDivider } from '@gitlab/ui';
 import AdminUserActions from '~/admin/users/components/user_actions.vue';
 import { generateUserPaths } from '~/admin/users/utils';
+import {
+  ACTION_COMPONENTS,
+  DELETE_ACTION_COMPONENTS,
+  I18N_USER_ACTIONS,
+} from '~/admin/users/constants';
+import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 
 import { users, paths } from '../mock_data';
 
 const BLOCK = 'block';
+const UNBLOCK = 'unblock';
 const EDIT = 'edit';
 const LDAP = 'ldapBlocked';
 const DELETE = 'delete';
 const DELETE_WITH_CONTRIBUTIONS = 'deleteWithContributions';
+const UNLOCK = 'unlock';
+const ACTIVATE = 'activate';
+const DEACTIVATE = 'deactivate';
+const REJECT = 'reject';
+const APPROVE = 'approve';
 
 describe('AdminUserActions component', () => {
   let wrapper;
@@ -72,10 +84,37 @@ describe('AdminUserActions component', () => {
         expect(findActionsDropdown().exists()).toBe(true);
       });
 
-      it.each(actions)('renders a dropdown item for %s', (action) => {
-        const dropdownAction = wrapper.find(`[data-testid="${action}"]`);
-        expect(dropdownAction.exists()).toBe(true);
-        expect(dropdownAction.attributes('href')).toBe(userPaths[action]);
+      describe('when there are actions that do not require confirmation', () => {
+        const linkActions = [REJECT, APPROVE];
+
+        beforeEach(() => {
+          initComponent({ actions: linkActions });
+        });
+
+        it.each(linkActions)('renders a dropdown item with a link for "%s"', (action) => {
+          const component = wrapper.find(`[data-testid="${action}"]`);
+
+          expect(component.exists()).toBe(true);
+          expect(component.attributes('href')).toBe(userPaths[action]);
+          expect(component.text()).toBe(I18N_USER_ACTIONS[action]);
+        });
+      });
+
+      describe('when there are actions that require confirmation', () => {
+        const confirmationActions = [ACTIVATE, BLOCK, DEACTIVATE, UNLOCK, UNBLOCK];
+
+        beforeEach(() => {
+          initComponent({ actions: confirmationActions });
+        });
+
+        it.each(confirmationActions)('renders an action component item for "%s"', (action) => {
+          const component = wrapper.find(ACTION_COMPONENTS[capitalizeFirstCharacter(action)]);
+
+          expect(component.exists()).toBe(true);
+          expect(component.props('username')).toBe(user.name);
+          expect(component.props('path')).toEqual(userPaths[action]);
+          expect(component.text()).toBe(I18N_USER_ACTIONS[action]);
+        });
       });
 
       describe('when there is a LDAP action', () => {
@@ -87,6 +126,7 @@ describe('AdminUserActions component', () => {
           const dropdownAction = wrapper.find(`[data-testid="${LDAP}"]`);
           expect(dropdownAction.exists()).toBe(true);
           expect(dropdownAction.attributes('href')).toBe(undefined);
+          expect(dropdownAction.text()).toBe(I18N_USER_ACTIONS[LDAP]);
         });
       });
 
@@ -106,10 +146,15 @@ describe('AdminUserActions component', () => {
           expect(length).toBe(deleteActions.length);
         });
 
-        it.each(deleteActions)('renders a delete dropdown item for %s', (action) => {
-          const deleteAction = wrapper.find(`[data-testid="delete-${action}"]`);
-          expect(deleteAction.exists()).toBe(true);
-          expect(deleteAction.attributes('href')).toBe(userPaths[action]);
+        it.each(deleteActions)('renders a delete action component item for "%s"', (action) => {
+          const component = wrapper.find(
+            DELETE_ACTION_COMPONENTS[capitalizeFirstCharacter(action)],
+          );
+
+          expect(component.exists()).toBe(true);
+          expect(component.props('username')).toBe(user.name);
+          expect(component.props('paths')).toEqual(userPaths);
+          expect(component.text()).toBe(I18N_USER_ACTIONS[action]);
         });
       });
 
