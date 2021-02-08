@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../settings'
 require_relative '../object_store_settings'
 require_relative '../smime_signature_settings'
@@ -416,7 +418,7 @@ Settings.cron_jobs['stuck_ci_jobs_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['stuck_ci_jobs_worker']['cron'] ||= '0 * * * *'
 Settings.cron_jobs['stuck_ci_jobs_worker']['job_class'] = 'StuckCiJobsWorker'
 Settings.cron_jobs['pipeline_schedule_worker'] ||= Settingslogic.new({})
-Settings.cron_jobs['pipeline_schedule_worker']['cron'] ||= '19 * * * *'
+Settings.cron_jobs['pipeline_schedule_worker']['cron'] ||= '3-59/10 * * * *'
 Settings.cron_jobs['pipeline_schedule_worker']['job_class'] = 'PipelineScheduleWorker'
 Settings.cron_jobs['expire_build_artifacts_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['expire_build_artifacts_worker']['cron'] ||= '*/7 * * * *'

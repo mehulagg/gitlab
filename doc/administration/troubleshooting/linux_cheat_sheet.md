@@ -266,7 +266,7 @@ Rough numbers for calls to `open` and `openat` (used to access files) on various
 Slow storage can cause the dreaded `DeadlineExceeded` error in Gitaly.
 
 Also [see this entry](../operations/filesystem_benchmarking.md)
-in the handbook for quick tests customers can perform to check their filesystem performance.
+in the handbook for quick tests customers can perform to check their file system performance.
 
 Keep in mind that timing information from `strace` is often somewhat inaccurate, so
 small differences should not be considered significant.
@@ -304,6 +304,24 @@ whois <ip_address> | grep -i "orgname\|netname"
 
 # Curl headers with redirect
 curl --head --location "https://example.com"
+
+# Test if a host is reachable on the network. `ping6` works on IPv6 networks.
+ping example.com
+
+# Show the route taken to a host. `traceroute6` works on IPv6 networks.
+traceroute example.com
+mtr example.com
+
+# List details of network interfaces
+ip address
+
+# Check local DNS settings
+cat /etc/hosts
+cat /etc/resolv.conf
+systemd-resolve --status
+
+# Capture traffic to/from a host
+sudo tcpdump host www.example.com
 ```
 
 ## Package Management

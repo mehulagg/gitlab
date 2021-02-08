@@ -64,14 +64,7 @@ module VulnerabilitiesHelper
 
   def vulnerability_finding_data(vulnerability)
     data = Vulnerabilities::FindingSerializer.new(current_user: current_user).represent(vulnerability.finding, only: FINDING_FIELDS)
-
-    if data[:location]['file']
-      branch = vulnerability.finding.pipelines&.last&.sha || vulnerability.project.default_branch
-      path = project_blob_path(vulnerability.project, tree_join(branch, data[:location]['file']))
-
-      data[:location]['blob_path'] = path
-    end
-
+    data[:location].merge!('blob_path' => vulnerability.blob_path).compact!
     data
   end
 end

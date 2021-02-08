@@ -21,6 +21,7 @@ module EE
                     has_next_page: hasNextPage
                   }
                   nodes {
+                    iid
                     title
                     description
                     state
@@ -33,6 +34,19 @@ module EE
                     due_date_is_fixed: dueDateIsFixed
                     relative_position: relativePosition
                     confidential
+                    parent {
+                      iid
+                    }
+                    children {
+                      nodes {
+                        iid
+                      }
+                    }
+                    labels {
+                      nodes {
+                        title
+                      }
+                    }
                   }
                 }
               }

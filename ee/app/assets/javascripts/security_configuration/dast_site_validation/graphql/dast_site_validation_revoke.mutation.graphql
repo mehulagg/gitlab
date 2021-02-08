@@ -1,0 +1,7 @@
+mutation dastSiteValidationRevoke($fullPath: ID!, $normalizedTargetUrl: String!) {
+  dastSiteValidationRevoke(
+    input: { fullPath: $fullPath, normalizedTargetUrl: $normalizedTargetUrl }
+  ) {
+    errors
+  }
+}

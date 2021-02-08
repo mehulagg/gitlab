@@ -7,25 +7,20 @@ description: 'Writing styles, markup, formatting, and other standards for GitLab
 
 # Documentation Style Guide
 
-This document defines the standards for GitLab documentation.
+This document defines the standards for GitLab documentation, including grammar, formatting, word use, and more.
 
-For broader information about the documentation, see the [Documentation guidelines](../index.md).
+For style questions, mention `@tw-style` in an issue or merge request. If you have access to the GitLab Slack workspace,
+use the `#docs-processes` channel.
 
-For guidelines specific to text in the GitLab interface, see the Pajamas [Content](https://design.gitlab.com/content/error-messages/) section.
+In addition to this page, the following resources can help you craft and contribute to documentation:
 
-For information on how to validate styles locally or by using GitLab CI/CD, see [Testing](../testing.md).
-
-You can view a list of [recent updates to this guide](https://gitlab.com/dashboard/merge_requests?scope=all&utf8=%E2%9C%93&state=merged&label_name[]=tw-style&not[label_name][]=docs%3A%3Afix).
-
-If you can't find what you need:
-
-- View the GitLab Handbook for [writing style guidelines](https://about.gitlab.com/handbook/communication/#writing-style-guidelines) that apply to all GitLab content.
-- Refer to:
-
-  - [Microsoft Style Guide](https://docs.microsoft.com/en-us/style-guide/welcome/).
-  - [Google Developer Documentation Style Guide](https://developers.google.com/style).
-
-If you have questions about style, mention `@tw-style` in an issue or merge request, or, if you have access to the GitLab Slack workspace, use `#docs-process`.
+- [Doc contribution guidelines](../index.md)
+- [Doc style and consistency testing](../testing.md)
+- [UI text guidelines](https://design.gitlab.com/content/error-messages/)
+- [GitLab Handbook style guidelines](https://about.gitlab.com/handbook/communication/#writing-style-guidelines)
+- [Microsoft Style Guide](https://docs.microsoft.com/en-us/style-guide/welcome/)
+- [Google Developer Documentation Style Guide](https://developers.google.com/style)
+- [Recent updates to this guide](https://gitlab.com/dashboard/merge_requests?scope=all&utf8=%E2%9C%93&state=merged&label_name[]=tw-style&not[label_name][]=docs%3A%3Afix)
 
 ## Documentation is the single source of truth (SSOT)
 
@@ -1002,7 +997,8 @@ To link to internal documentation:
 - Use relative links to Markdown files in the same repository.
 - Do not use absolute URLs or URLs from `docs.gitlab.com`.
 - Use `../` to navigate to higher-level directories.
-- Don't prepend `./` to links to files or directories.
+- Don't prepend `./` to links to files or directories. To link to a file in the
+  same directory or one of its sub-directories, use the syntax `path/to/file.md`.
 - Don't link relative to root. For example, `/ee/user/gitlab_com/index.md`.
 
   Don't:
@@ -1027,6 +1023,7 @@ To link to internal documentation:
   - `../../merge_requests/index.md`
   - `../../issues/tags.md`
   - `../../issues/tags.md#stages`
+  - `issues/tags.md`
 
 NOTE:
 Using the Markdown extension is necessary for the [`/help`](../index.md#gitlab-help)

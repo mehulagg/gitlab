@@ -56,6 +56,28 @@ RSpec.describe Project do
 
     it { is_expected.to have_many(:incident_management_oncall_schedules).class_name('IncidentManagement::OncallSchedule') }
 
+    describe '#jira_issue_association_required_to_merge_enabled?' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:licensed, :feature_flag, :result) do
+        true  | true  | true
+        true  | false | false
+        false | false | false
+        false | true  | false
+      end
+
+      before do
+        stub_licensed_features(jira_issue_association_enforcement: licensed)
+        stub_feature_flags(jira_issue_association_on_merge_request: feature_flag)
+      end
+
+      with_them do
+        it 'returns the correct value' do
+          expect(project.jira_issue_association_required_to_merge_enabled?).to eq(result)
+        end
+      end
+    end
+
     describe 'approval_rules association' do
       let_it_be(:rule, reload: true) { create(:approval_project_rule) }
       let(:project) { rule.project }

@@ -5,7 +5,7 @@ module QA
     describe 'Default issue templates' do
       let(:default_template_project) do
         Resource::Project.fabricate_via_api! do |project|
-          project.name = "default-issue-template-project-#{SecureRandom.hex(8)}"
+          project.name = "default-issue-template-project"
         end
       end
 

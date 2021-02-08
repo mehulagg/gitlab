@@ -140,7 +140,7 @@ Set up your project's merge request settings:
 
 - Set up the merge request method (merge commit, [fast-forward merge](../merge_requests/fast_forward_merge.md)).
 - Add merge request [description templates](../description_templates.md#description-templates).
-- Enable [merge request approvals](../merge_requests/merge_request_approvals.md). **(STARTER)**
+- Enable [merge request approvals](../merge_requests/merge_request_approvals.md).
 - Enable [merge only if pipeline succeeds](../merge_requests/merge_when_pipeline_succeeds.md).
 - Enable [merge only when all threads are resolved](../../discussions/index.md#only-allow-merge-requests-to-be-merged-if-all-threads-are-resolved).
 - Enable [`delete source branch after merge` option by default](../merge_requests/getting_started.md#deleting-the-source-branch)
@@ -266,7 +266,7 @@ This action:
 
 - Deletes a project including all associated resources (issues, merge requests etc).
 - From [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) on [Premium](https://about.gitlab.com/pricing/) or higher tiers,
-group administrators can [configure](../../group/index.md#enabling-delayed-project-removal) projects within a group
+group owners can [configure](../../group/index.md#enabling-delayed-project-removal) projects within a group
 to be deleted after a delayed period.
 When enabled, actual deletion happens after number of days
 specified in [instance settings](../../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).

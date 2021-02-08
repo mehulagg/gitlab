@@ -22,8 +22,8 @@ UPDATE projects SET has_external_issue_tracker = (
     WHERE project_id = COALESCE(NEW.project_id, OLD.project_id)
       AND active = TRUE
       AND category = 'issue_tracker'
-    )
   )
+)
 WHERE projects.id = COALESCE(NEW.project_id, OLD.project_id);
 RETURN NULL;
 
@@ -9293,7 +9293,6 @@ CREATE TABLE application_settings (
     instance_administration_project_id bigint,
     asset_proxy_enabled boolean DEFAULT false NOT NULL,
     asset_proxy_url character varying,
-    asset_proxy_whitelist text,
     encrypted_asset_proxy_secret_key text,
     encrypted_asset_proxy_secret_key_iv character varying,
     static_objects_external_storage_url character varying(255),
@@ -9412,6 +9411,7 @@ CREATE TABLE application_settings (
     container_registry_cleanup_tags_service_max_list_size integer DEFAULT 200 NOT NULL,
     enforce_ssh_key_expiration boolean DEFAULT false NOT NULL,
     git_two_factor_session_expiry integer DEFAULT 15 NOT NULL,
+    asset_proxy_allowlist text,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
@@ -11775,7 +11775,9 @@ CREATE TABLE dependency_proxy_manifests (
     file_name text NOT NULL,
     file text NOT NULL,
     digest text NOT NULL,
+    content_type text,
     CONSTRAINT check_079b293a7b CHECK ((char_length(file) <= 255)),
+    CONSTRAINT check_167a9a8a91 CHECK ((char_length(content_type) <= 255)),
     CONSTRAINT check_c579e3f586 CHECK ((char_length(file_name) <= 255)),
     CONSTRAINT check_f5d9996bf1 CHECK ((char_length(digest) <= 255))
 );
@@ -13600,6 +13602,14 @@ CREATE TABLE jira_tracker_data (
     deployment_type smallint DEFAULT 0 NOT NULL,
     vulnerabilities_issuetype text,
     vulnerabilities_enabled boolean DEFAULT false NOT NULL,
+    encrypted_proxy_address text,
+    encrypted_proxy_address_iv text,
+    encrypted_proxy_port text,
+    encrypted_proxy_port_iv text,
+    encrypted_proxy_username text,
+    encrypted_proxy_username_iv text,
+    encrypted_proxy_password text,
+    encrypted_proxy_password_iv text,
     CONSTRAINT check_0bf84b76e9 CHECK ((char_length(vulnerabilities_issuetype) <= 255)),
     CONSTRAINT check_214cf6a48b CHECK ((char_length(project_key) <= 255))
 );
@@ -15020,6 +15030,21 @@ CREATE SEQUENCE packages_debian_project_distributions_id_seq
 
 ALTER SEQUENCE packages_debian_project_distributions_id_seq OWNED BY packages_debian_project_distributions.id;
 
+CREATE TABLE packages_debian_publications (
+    id bigint NOT NULL,
+    package_id bigint NOT NULL,
+    distribution_id bigint NOT NULL
+);
+
+CREATE SEQUENCE packages_debian_publications_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE packages_debian_publications_id_seq OWNED BY packages_debian_publications.id;
+
 CREATE TABLE packages_dependencies (
     id bigint NOT NULL,
     name character varying(255) NOT NULL,
@@ -16039,6 +16064,7 @@ CREATE TABLE project_settings (
     has_confluence boolean DEFAULT false NOT NULL,
     has_vulnerabilities boolean DEFAULT false NOT NULL,
     allow_editing_commit_messages boolean DEFAULT false NOT NULL,
+    prevent_merge_without_jira_issue boolean DEFAULT false NOT NULL,
     CONSTRAINT check_bde223416c CHECK ((show_default_award_emojis IS NOT NULL))
 );
 
@@ -19005,6 +19031,8 @@ ALTER TABLE ONLY packages_debian_project_components ALTER COLUMN id SET DEFAULT 
 
 ALTER TABLE ONLY packages_debian_project_distributions ALTER COLUMN id SET DEFAULT nextval('packages_debian_project_distributions_id_seq'::regclass);
 
+ALTER TABLE ONLY packages_debian_publications ALTER COLUMN id SET DEFAULT nextval('packages_debian_publications_id_seq'::regclass);
+
 ALTER TABLE ONLY packages_dependencies ALTER COLUMN id SET DEFAULT nextval('packages_dependencies_id_seq'::regclass);
 
 ALTER TABLE ONLY packages_dependency_links ALTER COLUMN id SET DEFAULT nextval('packages_dependency_links_id_seq'::regclass);
@@ -20388,6 +20416,9 @@ ALTER TABLE ONLY packages_debian_project_components
 ALTER TABLE ONLY packages_debian_project_distributions
     ADD CONSTRAINT packages_debian_project_distributions_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY packages_debian_publications
+    ADD CONSTRAINT packages_debian_publications_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY packages_dependencies
     ADD CONSTRAINT packages_dependencies_pkey PRIMARY KEY (id);
 
@@ -21023,8 +21054,6 @@ CREATE INDEX backup_labels_group_id_title_idx ON backup_labels USING btree (grou
 
 CREATE INDEX backup_labels_project_id_idx ON backup_labels USING btree (project_id);
 
-CREATE UNIQUE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
-
 CREATE INDEX backup_labels_template_idx ON backup_labels USING btree (template) WHERE template;
 
 CREATE INDEX backup_labels_title_idx ON backup_labels USING btree (title);
@@ -21047,7 +21076,7 @@ CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_and_note_id_index ON epic_user
 
 CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_index ON epic_user_mentions USING btree (epic_id) WHERE (note_id IS NULL);
 
-CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (id, created_at) WHERE ((expire_at IS NULL) AND (created_at < '2020-06-22 00:00:00+00'::timestamp with time zone));
+CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (id, created_at) WHERE ((expire_at IS NULL) AND (date(timezone('UTC'::text, created_at)) < '2020-06-22'::date));
 
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
 
@@ -22127,8 +22156,6 @@ CREATE INDEX index_incident_management_oncall_schedules_on_project_id ON inciden
 
 CREATE INDEX index_incident_management_oncall_shifts_on_participant_id ON incident_management_oncall_shifts USING btree (participant_id);
 
-CREATE INDEX index_incident_management_oncall_shifts_on_rotation_id ON incident_management_oncall_shifts USING btree (rotation_id);
-
 CREATE UNIQUE INDEX index_index_statuses_on_project_id ON index_statuses USING btree (project_id);
 
 CREATE INDEX index_insights_on_namespace_id ON insights USING btree (namespace_id);
@@ -22575,6 +22602,8 @@ CREATE INDEX index_onboarding_progresses_for_verify_track ON onboarding_progress
 
 CREATE UNIQUE INDEX index_onboarding_progresses_on_namespace_id ON onboarding_progresses USING btree (namespace_id);
 
+CREATE INDEX index_oncall_shifts_on_rotation_id_and_starts_at_and_ends_at ON incident_management_oncall_shifts USING btree (rotation_id, starts_at, ends_at);
+
 CREATE INDEX index_open_project_tracker_data_on_service_id ON open_project_tracker_data USING btree (service_id);
 
 CREATE INDEX index_operations_feature_flags_issues_on_issue_id ON operations_feature_flags_issues USING btree (issue_id);
@@ -22614,6 +22643,10 @@ CREATE INDEX index_packages_debian_group_distributions_on_group_id ON packages_d
 CREATE INDEX index_packages_debian_project_distributions_on_creator_id ON packages_debian_project_distributions USING btree (creator_id);
 
 CREATE INDEX index_packages_debian_project_distributions_on_project_id ON packages_debian_project_distributions USING btree (project_id);
+
+CREATE INDEX index_packages_debian_publications_on_distribution_id ON packages_debian_publications USING btree (distribution_id);
+
+CREATE UNIQUE INDEX index_packages_debian_publications_on_package_id ON packages_debian_publications USING btree (package_id);
 
 CREATE UNIQUE INDEX index_packages_dependencies_on_name_and_version_pattern ON packages_dependencies USING btree (name, version_pattern);
 
@@ -25024,6 +25057,9 @@ ALTER TABLE ONLY aws_roles
 ALTER TABLE ONLY security_scans
     ADD CONSTRAINT fk_rails_4ef1e6b4c6 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY packages_debian_publications
+    ADD CONSTRAINT fk_rails_4fc8ebd03e FOREIGN KEY (distribution_id) REFERENCES packages_debian_project_distributions(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY merge_request_diff_files
     ADD CONSTRAINT fk_rails_501aa0a391 FOREIGN KEY (merge_request_diff_id) REFERENCES merge_request_diffs(id) ON DELETE CASCADE;
 
@@ -25266,6 +25302,9 @@ ALTER TABLE ONLY x509_certificates
 
 ALTER TABLE ONLY pages_domain_acme_orders
     ADD CONSTRAINT fk_rails_76581b1c16 FOREIGN KEY (pages_domain_id) REFERENCES pages_domains(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY packages_debian_publications
+    ADD CONSTRAINT fk_rails_7668c1d606 FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY boards_epic_user_preferences
     ADD CONSTRAINT fk_rails_76c4e9732d FOREIGN KEY (epic_id) REFERENCES epics(id) ON DELETE CASCADE;

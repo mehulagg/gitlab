@@ -27,8 +27,6 @@ module EE
     def get_project_nav_tabs(project, current_user)
       nav_tabs = super
 
-      nav_tabs += get_project_security_nav_tabs(project, current_user)
-
       if can?(current_user, :read_code_review_analytics, project)
         nav_tabs << :code_review
       end
@@ -160,9 +158,9 @@ module EE
       @project.feature_available?(:merge_trains)
     end
 
+    override :sidebar_security_paths
     def sidebar_security_paths
-      %w[
-        projects/security/configuration#show
+      super + %w[
         projects/security/sast_configuration#show
         projects/security/api_fuzzing_configuration#show
         projects/security/vulnerabilities#show
@@ -199,9 +197,9 @@ module EE
       ]
     end
 
+    override :sidebar_security_configuration_paths
     def sidebar_security_configuration_paths
-      %w[
-        projects/security/configuration#show
+      super + %w[
         projects/security/sast_configuration#show
         projects/security/api_fuzzing_configuration#show
         projects/security/dast_profiles#show
@@ -324,14 +322,20 @@ module EE
 
     private
 
+    override :can_read_security_configuration?
+    def can_read_security_configuration?(project, current_user)
+      super || (project.feature_available?(:security_dashboard) &&
+        can?(current_user, :read_project_security_dashboard, project))
+    end
+
+    override :get_project_security_nav_tabs
     def get_project_security_nav_tabs(project, current_user)
       return [] unless can?(current_user, :access_security_and_compliance, project)
 
-      nav_tabs = [:security_and_compliance]
+      nav_tabs = super.union([:security_and_compliance])
 
       if can?(current_user, :read_project_security_dashboard, project)
         nav_tabs << :security
-        nav_tabs << :security_configuration
       end
 
       if can?(current_user, :read_on_demand_scans, @project)

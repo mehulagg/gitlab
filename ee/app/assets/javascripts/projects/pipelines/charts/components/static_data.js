@@ -1,14 +1,21 @@
 import dateFormat from 'dateformat';
-import { s__, sprintf } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
 import { helpPagePath } from '~/helpers/help_page_helper';
-import { nDaysBefore, nMonthsBefore } from '~/lib/utils/datetime_utility';
+import { nDaysBefore, nMonthsBefore, getStartOfDay, dayAfter } from '~/lib/utils/datetime_utility';
 import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 
-// Compute all relative dates based on the _beginning_ of today
-const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
-const lastWeek = nDaysBefore(startOfToday, 7);
-const lastMonth = nMonthsBefore(startOfToday, 1);
-const last90Days = nDaysBefore(startOfToday, 90);
+// Compute all relative dates based on the _beginning_ of today.
+// We use this date as the end date for the charts. This causes
+// the current date to be the last day included in the graph.
+const startOfToday = getStartOfDay(new Date(), { utc: true });
+
+// We use this date as the "to" parameter for the API. This allows
+// us to get deployment information about the current day.
+const startOfTomorrow = dayAfter(startOfToday, { utc: true });
+
+const lastWeek = nDaysBefore(startOfTomorrow, 7, { utc: true });
+const lastMonth = nMonthsBefore(startOfTomorrow, 1, { utc: true });
+const last90Days = nDaysBefore(startOfTomorrow, 90, { utc: true });
 const apiDateFormatString = 'isoDateTime';
 const titleDateFormatString = 'mmm d';
 const sharedRequestParams = {
@@ -23,53 +30,47 @@ const sharedRequestParams = {
 export const allChartDefinitions = [
   {
     id: LAST_WEEK,
-    title: sprintf(
-      s__(
-        'DeploymentFrequencyCharts|Deployments to production for last week (%{startDate} - %{endDate})',
-      ),
-      {
-        startDate: dateFormat(lastWeek, titleDateFormatString),
-        endDate: dateFormat(startOfToday, titleDateFormatString),
-      },
-    ),
+    title: __('Last week'),
+    range: sprintf(s__('DeploymentFrequencyCharts|%{startDate} - %{endDate}'), {
+      startDate: dateFormat(lastWeek, titleDateFormatString, true),
+      endDate: dateFormat(startOfToday, titleDateFormatString, true),
+    }),
     startDate: lastWeek,
+    endDate: startOfTomorrow,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(lastWeek, apiDateFormatString),
+      from: dateFormat(lastWeek, apiDateFormatString, true),
+      to: dateFormat(startOfTomorrow, apiDateFormatString, true),
     },
   },
   {
     id: LAST_MONTH,
-    title: sprintf(
-      s__(
-        'DeploymentFrequencyCharts|Deployments to production for last month (%{startDate} - %{endDate})',
-      ),
-      {
-        startDate: dateFormat(lastMonth, titleDateFormatString),
-        endDate: dateFormat(startOfToday, titleDateFormatString),
-      },
-    ),
+    title: __('Last month'),
+    range: sprintf(s__('DeploymentFrequencyCharts|%{startDate} - %{endDate}'), {
+      startDate: dateFormat(lastMonth, titleDateFormatString, true),
+      endDate: dateFormat(startOfToday, titleDateFormatString, true),
+    }),
     startDate: lastMonth,
+    endDate: startOfTomorrow,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(lastMonth, apiDateFormatString),
+      from: dateFormat(lastMonth, apiDateFormatString, true),
+      to: dateFormat(startOfTomorrow, apiDateFormatString, true),
     },
   },
   {
     id: LAST_90_DAYS,
-    title: sprintf(
-      s__(
-        'DeploymentFrequencyCharts|Deployments to production for the last 90 days (%{startDate} - %{endDate})',
-      ),
-      {
-        startDate: dateFormat(last90Days, titleDateFormatString),
-        endDate: dateFormat(startOfToday, titleDateFormatString),
-      },
-    ),
+    title: __('Last 90 days'),
+    range: sprintf(s__('%{startDate} - %{endDate}'), {
+      startDate: dateFormat(last90Days, titleDateFormatString, true),
+      endDate: dateFormat(startOfToday, titleDateFormatString, true),
+    }),
     startDate: last90Days,
+    endDate: startOfTomorrow,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(last90Days, apiDateFormatString),
+      from: dateFormat(last90Days, apiDateFormatString, true),
+      to: dateFormat(startOfTomorrow, apiDateFormatString, true),
     },
   },
 ];

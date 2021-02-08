@@ -22,12 +22,15 @@ module Projects
 
     def edit
       not_found unless Feature.enabled?(:dast_saved_scans, @project, default_enabled: :yaml)
-      @dast_scan = {
-        id: 1,
-        name: "My saved DAST scan",
-        description: "My scan's description",
-        scannerProfileId: "gid://gitlab/DastScannerProfile/5",
-        siteProfileId: "gid://gitlab/DastSiteProfile/15"
+
+      dast_profile = Dast::ProfilesFinder.new(project_id: @project.id, id: params[:id]).execute.first! # rubocop: disable CodeReuse/ActiveRecord
+
+      @dast_profile = {
+        id: dast_profile.to_global_id.to_s,
+        name: dast_profile.name,
+        description: dast_profile.description,
+        site_profile_id: DastSiteProfile.new(id: dast_profile.dast_site_profile_id).to_global_id.to_s,
+        scanner_profile_id: DastScannerProfile.new(id: dast_profile.dast_scanner_profile_id).to_global_id.to_s
       }
     end
   end

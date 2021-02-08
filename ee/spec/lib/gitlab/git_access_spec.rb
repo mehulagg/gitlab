@@ -785,7 +785,6 @@ RSpec.describe Gitlab::GitAccess do
 
       before do
         stub_licensed_features(enforce_ssh_key_expiration: true)
-        stub_feature_flags(ff_enforce_ssh_key_expiration: true)
         stub_ee_application_setting(enforce_ssh_key_expiration: true)
       end
 

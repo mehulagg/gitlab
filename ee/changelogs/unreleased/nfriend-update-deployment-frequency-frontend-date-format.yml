@@ -1,0 +1,5 @@
+---
+title: Update Deployment Frequency graphs to always use UTC dates
+merge_request: 52919
+author:
+type: changed

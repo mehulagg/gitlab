@@ -194,7 +194,20 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       it 'renders `show` template' do
         get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
 
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template(:show)
+      end
+
+      it 'returns JSON response' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1, format: :json }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to include(
+          'title_html',
+          'description_html',
+          'author',
+          'labels'
+        )
       end
     end
   end

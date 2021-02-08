@@ -44,7 +44,13 @@ RSpec.describe 'Project Analytics (JavaScript fixtures)' do
       clean_frontend_fixtures('api/project_analytics/')
     end
 
-    let(:shared_params) { { environment: environment.name, interval: 'daily' } }
+    let(:shared_params) do
+      {
+        environment: environment.name,
+        interval: 'daily',
+        to: Date.tomorrow.beginning_of_day
+      }
+    end
 
     def make_request(additional_query_params:)
       params = shared_params.merge(additional_query_params)

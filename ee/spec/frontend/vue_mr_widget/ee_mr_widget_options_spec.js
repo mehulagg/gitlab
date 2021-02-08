@@ -3,6 +3,7 @@ import MockAdapter from 'axios-mock-adapter';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import MrWidgetOptions from 'ee/vue_merge_request_widget/mr_widget_options.vue';
+import PerformanceIssueBody from 'ee/vue_merge_request_widget/components/performance_issue_body.vue';
 import {
   sastDiffSuccessMock,
   dastDiffSuccessMock,
@@ -370,6 +371,13 @@ describe('ee merge request widget options', () => {
           });
         });
 
+        it('should render performance issue body component', (done) => {
+          setImmediate(() => {
+            expect(wrapper.find(PerformanceIssueBody).exists()).toBe(true);
+            done();
+          });
+        });
+
         describe('text connector', () => {
           it('should only render information about fixed issues', (done) => {
             setImmediate(() => {
@@ -525,6 +533,10 @@ describe('ee merge request widget options', () => {
           expect(trimText(wrapper.find('.js-load-performance-widget .js-code-text').text())).toBe(
             'Load performance test metrics: 1 degraded, 1 same, 2 improved',
           );
+        });
+
+        it('should render performance issue body component', () => {
+          expect(wrapper.find(PerformanceIssueBody).exists()).toBe(true);
         });
 
         describe('text connector', () => {

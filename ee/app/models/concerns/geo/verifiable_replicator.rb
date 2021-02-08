@@ -118,8 +118,9 @@ module Geo
       end
     end
 
+    # Schedules a verification job after a model record is created/updated
     def after_verifiable_update
-      verify_async if needs_checksum?
+      verify_async if should_primary_verify?
     end
 
     def verify_async
@@ -137,7 +138,7 @@ module Geo
     # state.
     def verify
       verification_state_tracker.track_checksum_attempt! do
-        model_record.calculate_checksum
+        calculate_checksum
       end
     end
 
@@ -146,14 +147,7 @@ module Geo
     # @param [String] checksum
     # @return [Boolean] whether checksum matches
     def matches_checksum?(checksum)
-      model_record.verification_checksum == checksum
-    end
-
-    def needs_checksum?
-      return false unless self.class.verification_enabled?
-      return true unless model_record.respond_to?(:needs_checksum?)
-
-      model_record.needs_checksum?
+      primary_checksum == checksum
     end
 
     # Checksum value from the main database
@@ -169,6 +163,26 @@ module Geo
 
     def verification_state_tracker
       Gitlab::Geo.secondary? ? registry : model_record
+    end
+
+    # @abstract
+    # @return [String] a checksum representing the data
+    def calculate_checksum
+      raise NotImplementedError, "#{self.class} does not implement #{__method__}"
+    end
+
+    private
+
+    def should_primary_verify?
+      self.class.verification_enabled? &&
+       primary_checksum.nil? && # Some models may populate this as part of creating the record
+       checksummable?
+    end
+
+    # @abstract
+    # @return [Boolean] whether the replicable is capable of checksumming itself
+    def checksummable?
+      raise NotImplementedError, "#{self.class} does not implement #{__method__}"
     end
   end
 end

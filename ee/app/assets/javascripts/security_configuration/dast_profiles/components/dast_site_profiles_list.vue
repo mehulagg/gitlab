@@ -4,8 +4,11 @@ import {
   DAST_SITE_VALIDATION_STATUS,
   DAST_SITE_VALIDATION_STATUS_PROPS,
   DAST_SITE_VALIDATION_POLLING_INTERVAL,
+  DAST_SITE_VALIDATION_MODAL_ID,
+  DAST_SITE_VALIDATION_REVOKE_MODAL_ID,
 } from 'ee/security_configuration/dast_site_validation/constants';
 import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
+import DastSiteValidationRevokeModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_revoke_modal.vue';
 import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validations.query.graphql';
 import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -13,7 +16,7 @@ import { fetchPolicies } from '~/lib/graphql';
 import { updateSiteProfilesStatuses } from '../graphql/cache_utils';
 import ProfilesList from './dast_profiles_list.vue';
 
-const { NONE, PENDING, INPROGRESS, FAILED } = DAST_SITE_VALIDATION_STATUS;
+const { NONE, PENDING, INPROGRESS, FAILED, PASSED } = DAST_SITE_VALIDATION_STATUS;
 
 export default {
   components: {
@@ -21,6 +24,7 @@ export default {
     GlIcon,
     GlLink,
     DastSiteValidationModal,
+    DastSiteValidationRevokeModal,
     ProfilesList,
   },
   apollo: {
@@ -47,14 +51,8 @@ export default {
           },
         },
       }) {
-        const store = this.$apollo.getClient();
         nodes.forEach(({ normalizedTargetUrl, status }) => {
-          updateSiteProfilesStatuses({
-            fullPath: this.fullPath,
-            normalizedTargetUrl,
-            status,
-            store,
-          });
+          this.updateSiteProfilesStatuses(normalizedTargetUrl, status);
         });
       },
     },
@@ -76,9 +74,13 @@ export default {
   data() {
     return {
       validatingProfile: null,
+      revokeValidationProfile: null,
     };
   },
   statuses: DAST_SITE_VALIDATION_STATUS_PROPS,
+  DAST_SITE_VALIDATION_MODAL_ID,
+  DAST_SITE_VALIDATION_REVOKE_MODAL_ID,
+  VALIDATION_STATUS: DAST_SITE_VALIDATION_STATUS,
   computed: {
     urlsPendingValidation() {
       return this.profiles.reduce((acc, { validationStatus, normalizedTargetUrl }) => {
@@ -90,10 +92,18 @@ export default {
     },
   },
   methods: {
+    updateSiteProfilesStatuses(normalizedTargetUrl, status) {
+      updateSiteProfilesStatuses({
+        fullPath: this.fullPath,
+        normalizedTargetUrl,
+        status,
+        store: this.$apollo.getClient(),
+      });
+    },
     isPendingValidation(status) {
       return [PENDING, INPROGRESS].includes(status);
     },
-    shouldShowValidateBtn(status) {
+    canValidateProfile(status) {
       return [NONE, FAILED].includes(status);
     },
     validateBtnLabel(status) {
@@ -104,22 +114,35 @@ export default {
     shouldShowValidationStatus(status) {
       return this.glFeatures.securityOnDemandScansSiteValidation && status !== NONE;
     },
-    showValidationModal() {
-      this.$refs['dast-site-validation-modal'].show();
+    hasValidationPassed(status) {
+      return status === PASSED;
+    },
+    showModal(modalId) {
+      this.$refs[modalId].show();
     },
     setValidatingProfile(profile) {
       this.validatingProfile = profile;
       this.$nextTick(() => {
-        this.showValidationModal();
+        this.showModal(DAST_SITE_VALIDATION_MODAL_ID);
       });
     },
-    startValidatingProfile({ normalizedTargetUrl }) {
-      updateSiteProfilesStatuses({
-        fullPath: this.fullPath,
-        normalizedTargetUrl,
-        status: PENDING,
-        store: this.$apollo.getClient(),
+    setRevokeValidationProfile(profile) {
+      this.revokeValidationProfile = profile;
+      this.$nextTick(() => {
+        this.showModal(DAST_SITE_VALIDATION_REVOKE_MODAL_ID);
       });
+    },
+    similarProfilesCount(profile) {
+      // Ideally checking the normalized URL should be sufficient,
+      // but checking the validation status is necessary to avoid anomalies
+      // until https://gitlab.com/gitlab-org/gitlab/-/issues/300740 is resolved
+      return (
+        this.profiles.filter(
+          ({ normalizedTargetUrl, validationStatus }) =>
+            normalizedTargetUrl === profile.normalizedTargetUrl &&
+            validationStatus === profile.validationStatus,
+        ).length - 1
+      );
     },
   },
 };
@@ -146,22 +169,56 @@ export default {
 
     <template #actions="{ profile }">
       <gl-button
-        v-if="glFeatures.securityOnDemandScansSiteValidation"
-        :disabled="!shouldShowValidateBtn(profile.validationStatus)"
+        v-if="
+          glFeatures.securityOnDemandScansSiteValidation &&
+          !hasValidationPassed(profile.validationStatus)
+        "
+        :disabled="!canValidateProfile(profile.validationStatus)"
         variant="info"
         category="tertiary"
         size="small"
         @click="setValidatingProfile(profile)"
         >{{ validateBtnLabel(profile.validationStatus) }}</gl-button
       >
+      <gl-button
+        v-else-if="
+          glFeatures.securityOnDemandScansSiteValidation &&
+          hasValidationPassed(profile.validationStatus)
+        "
+        variant="info"
+        category="tertiary"
+        size="small"
+        @click="setRevokeValidationProfile(profile)"
+        >{{ s__('DastSiteValidation|Revoke validation') }}</gl-button
+      >
     </template>
 
     <dast-site-validation-modal
       v-if="validatingProfile"
-      ref="dast-site-validation-modal"
+      :ref="$options.DAST_SITE_VALIDATION_MODAL_ID"
       :full-path="fullPath"
       :target-url="validatingProfile.targetUrl"
-      @primary="startValidatingProfile(validatingProfile)"
+      @primary="
+        updateSiteProfilesStatuses(
+          validatingProfile.normalizedTargetUrl,
+          $options.VALIDATION_STATUS.PENDING,
+        )
+      "
+    />
+
+    <dast-site-validation-revoke-modal
+      v-if="revokeValidationProfile"
+      :ref="$options.DAST_SITE_VALIDATION_REVOKE_MODAL_ID"
+      :full-path="fullPath"
+      :target-url="revokeValidationProfile.targetUrl"
+      :normalized-target-url="revokeValidationProfile.normalizedTargetUrl"
+      :profile-count="similarProfilesCount(revokeValidationProfile)"
+      @revoke="
+        updateSiteProfilesStatuses(
+          revokeValidationProfile.normalizedTargetUrl,
+          $options.VALIDATION_STATUS.NONE,
+        )
+      "
     />
   </profiles-list>
 </template>

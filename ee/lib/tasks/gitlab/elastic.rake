@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :elastic do
     desc "GitLab | Elasticsearch | Index everything at once"

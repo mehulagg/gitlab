@@ -20,14 +20,14 @@ import {
   nDaysBefore,
   nDaysAfter,
 } from '~/lib/utils/datetime_utility';
+import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
+import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
 import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
-import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
-import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 
 export const i18n = {
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{timezone}'),

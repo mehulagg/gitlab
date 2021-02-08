@@ -8,6 +8,7 @@ class Groups::EpicsController < Groups::ApplicationController
   include RendersNotes
   include EpicsActions
   include DescriptionDiffActions
+  include CommentAndCloseFlag
 
   before_action :check_epics_available!
   before_action :epic, except: [:index, :create, :new, :bulk_update]

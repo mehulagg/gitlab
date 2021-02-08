@@ -21,6 +21,7 @@ class License < ApplicationRecord
     contribution_analytics
     description_diffs
     elastic_search
+    full_codequality_report
     group_activity_analytics
     group_bulk_edit
     group_webhooks
@@ -82,6 +83,7 @@ class License < ApplicationRecord
     file_locks
     geo
     generic_alert_fingerprinting
+    git_two_factor_enforcement
     github_project_service_integration
     group_allowed_email_domains
     group_coverage_reports
@@ -152,6 +154,7 @@ class License < ApplicationRecord
     insights
     issuable_health_status
     jira_vulnerabilities_integration
+    jira_issue_association_enforcement
     license_scanning
     personal_access_token_expiration_policy
     project_activity_analytics

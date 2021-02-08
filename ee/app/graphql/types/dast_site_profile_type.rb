@@ -5,7 +5,7 @@ module Types
     graphql_name 'DastSiteProfile'
     description 'Represents a DAST Site Profile'
 
-    authorize :create_on_demand_dast_scan
+    authorize :read_on_demand_scans
 
     expose_permissions Types::PermissionTypes::DastSiteProfile
 

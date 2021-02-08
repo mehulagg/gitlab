@@ -28,7 +28,7 @@ export default {
       return s__('ApprovalRule|Approval rules');
     },
     isCollapseFeatureEnabled() {
-      return this.glFeatures.mergeRequestReviewers && this.glFeatures.mrCollapsedApprovalRules;
+      return this.glFeatures.mrCollapsedApprovalRules;
     },
     hasOptionalRules() {
       return this.rules.every((r) => r.approvalsRequired === 0);

@@ -2,6 +2,12 @@
 
 module RequirementsManagement
   class ExportCsvService < ::Issuable::ExportCsv::BaseService
+    def initialize(issuables_relation, project, fields = [])
+      super(issuables_relation, project)
+
+      @fields = fields
+    end
+
     def email(user)
       Notify.requirements_csv_email(user, project, csv_data, csv_builder.status).deliver_now
     end
@@ -13,16 +19,7 @@ module RequirementsManagement
     end
 
     def header_to_value_hash
-      {
-        'Requirement ID' => 'iid',
-        'Title' => 'title',
-        'Description' => 'description',
-        'Author' => -> (requirement) { requirement.author&.name },
-        'Author Username' => -> (requirement) { requirement.author&.username },
-        'Created At (UTC)' => -> (requirement) { requirement.created_at.utc },
-        'State' => -> (requirement) { requirement.last_test_report_state == 'passed' ? 'Satisfied' : '' },
-        'State Updated At (UTC)' => -> (requirement) { requirement.latest_report&.created_at&.utc }
-      }
+      RequirementsManagement::MapExportFieldsService.new(@fields).execute
     end
   end
 end

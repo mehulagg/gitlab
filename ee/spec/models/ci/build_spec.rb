@@ -98,7 +98,7 @@ RSpec.describe Ci::Build do
 
     %w(success drop cancel).each do |event|
       it "for event #{event}", :sidekiq_might_not_need_inline do
-        expect(UpdateBuildMinutesService)
+        expect(Ci::Minutes::UpdateBuildMinutesService)
           .to receive(:new).and_call_original
 
         job.public_send(event)

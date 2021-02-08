@@ -11,6 +11,7 @@ import {
 } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import { pikadayToString } from '~/lib/utils/datetime_utility';
+import { mergeUrlParams } from '~/lib/utils/url_utility';
 import SelectProjectsDropdown from './select_projects_dropdown.vue';
 
 export default {
@@ -53,17 +54,19 @@ export default {
       today.setDate(today.getDate() - this.selectedDateRange.value);
       const startDate = pikadayToString(today);
 
-      const queryParams = new URLSearchParams({
+      const queryParams = {
         start_date: startDate,
         end_date: endDate,
-      });
+      };
 
       // not including a project_ids param is the same as selecting all the projects
-      if (!this.allProjectsSelected) {
-        this.selectedProjectIds.forEach((id) => queryParams.append('project_ids[]', id));
+      if (!this.allProjectsSelected && this.selectedProjectIds.length) {
+        queryParams.project_ids = this.selectedProjectIds;
       }
 
-      return `${this.groupAnalyticsCoverageReportsPath}&${queryParams.toString()}`;
+      return mergeUrlParams(queryParams, this.groupAnalyticsCoverageReportsPath, {
+        spreadArrays: true,
+      });
     },
     downloadCSVModalButton() {
       return {

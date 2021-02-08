@@ -56,7 +56,7 @@ request's page at the top-right side:
 - [Assign](#assignee) the merge request to a colleague for review. With [multiple assignees](#multiple-assignees), you can assign it to more than one person at a time.
 - Set a [milestone](../milestones/index.md) to track time-sensitive changes.
 - Add [labels](../labels.md) to help contextualize and filter your merge requests over time.
-- Require [approval](merge_request_approvals.md) from your team. **(STARTER)**
+- Require [approval](merge_request_approvals.md) from your team. **(PREMIUM)**
 - [Close issues automatically](#merge-requests-to-close-issues) when they are merged.
 - Enable the [delete source branch when merge request is accepted](#deleting-the-source-branch) option to keep your repository clean.
 - Enable the [squash commits when merge request is accepted](squash_and_merge.md) option to combine all the commits into one before merging, thus keep a clean commit history in your repository.
@@ -87,9 +87,10 @@ Open the drop down box to search for the user you wish to assign,
 and the merge request will be added to their
 [assigned merge request list](../../search/index.md#issues-and-merge-requests).
 
-#### Multiple assignees **(STARTER)**
+#### Multiple assignees **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2004) in [GitLab Starter 11.11](https://about.gitlab.com/pricing/).
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2004) in GitLab 11.11.
+> - Moved to GitLab Premium in 13.9
 
 Multiple people often review merge requests at the same time.
 GitLab allows you to have multiple assignees for merge requests
@@ -114,16 +115,9 @@ It is also possible to manage multiple assignees:
 ### Reviewer
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216054) in GitLab 13.5.
-> - It was [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49787) on GitLab 13.7.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - It can be enabled or disabled for a single project.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-merge-request-reviewers). **(FREE SELF)**
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/245190) in GitLab 13.9.
 
 WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
-
 Requesting a code review is an important part of contributing code. However, deciding who should review
 your code and asking for a review are no easy tasks. Using the "assignee" field for both authors and
 reviewers makes it hard for others to determine who's doing what on a merge request.
@@ -136,43 +130,10 @@ This makes it easy to determine the relevant roles for the users involved in the
 
 To request it, open the **Reviewers** drop-down box to search for the user you wish to get a review from.
 
-#### Enable or disable Merge Request Reviewers **(FREE SELF)**
-
-Merge Request Reviewers is under development but ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-# For the instance
-Feature.enable(:merge_request_reviewers)
-# For a single project
-Feature.enable(:merge_request_reviewers, Project.find(<project id>))
-```
-
-To disable it:
-
-```ruby
-# For the instance
-Feature.disable(:merge_request_reviewers)
-# For a single project
-Feature.disable(:merge_request_reviewers, Project.find(<project id>))
-```
-
-#### Approval Rule information for Reviewers **(STARTER)**
+#### Approval Rule information for Reviewers **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233736) in GitLab 13.8.
-> - It was [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51183) in GitLab 13.8.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - It can be enabled or disabled for a single project.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-approval-rule-information-for-reviewers). **(STARTER ONLY)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/293742) in GitLab 13.9.
 
 When editing the **Reviewers** field in a new or existing merge request, GitLab
 displays the name of the matching [approval rule](merge_request_approvals.md#approval-rules)
@@ -185,31 +146,6 @@ This example shows reviewers and approval rules when creating a new merge reques
 This example shows reviewers and approval rules in a merge request sidebar:
 
 ![Reviewer approval rules in sidebar](img/reviewer_approval_rules_sidebar_v13_8.png)
-
-##### Enable or disable Approval Rule information for Reviewers **(STARTER ONLY)**
-
-Merge Request Reviewers is under development and ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-# For the instance
-Feature.enable(:reviewer_approval_rules)
-# For a single project
-Feature.enable(:reviewer_approval_rules, Project.find(<project id>))
-```
-
-To disable it:
-
-```ruby
-# For the instance
-Feature.disable(:reviewer_approval_rules)
-# For a single project
-Feature.disable(:reviewer_approval_rules, Project.find(<project id>))
-```
 
 ### Merge requests to close issues
 

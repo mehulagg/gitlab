@@ -216,7 +216,7 @@ control over how the Pages daemon runs and serves content in your environment.
 
 | Setting | Description |
 | ------- | ----------- |
-| `pages_external_url` | The URL where GitLab Pages is accessible, including protocol (HTTP / HTTPS). If `https://` is used, you must also set `gitlab_pages['ssl_certificate']` and `gitlab_pages['ssl_certificate_key']`.
+| `pages_external_url` | The URL where GitLab Pages is accessible, including protocol (HTTP / HTTPS). If `https://` is used, additional configuration is required. See [Wildcard domains with TLS support](#wildcard-domains-with-tls-support) and [Custom domains with TLS support](#custom-domains-with-tls-support) for details.
 | `gitlab_pages[]` | |
 | `access_control` |  Whether to enable [access control](index.md#access-control).
 | `api_secret_key`  | Full path to file with secret key used to authenticate with the GitLab API. Auto-generated when left unset.
@@ -730,6 +730,13 @@ or report an issue.
 
 ### Object storage settings
 
+WARNING:
+With the following settings, Pages uses both NFS and Object Storage locations when deploying the
+site. **Do not remove the existing NFS mount used by Pages** when applying these settings. For more
+information, see the epics
+[3901](https://gitlab.com/groups/gitlab-org/-/epics/3901#how-to-test-object-storage-integration-in-beta)
+and [3910](https://gitlab.com/groups/gitlab-org/-/epics/3910).
+
 The following settings are:
 
 - Nested under `pages:` and then `object_store:` on source installations.
@@ -838,7 +845,7 @@ open /etc/ssl/ca-bundle.pem: permission denied
 ```
 
 The use of a `chroot` jail makes this error misleading, as it is not
-referring to `/etc/ssl` on the root filesystem.
+referring to `/etc/ssl` on the root file system.
 
 The fix is to correct the source file permissions and restart Pages:
 
@@ -964,3 +971,21 @@ If the wildcard DNS [prerequisite](#prerequisites) can't be met, you can still u
 1. [Move](../../user/project/settings/index.md#transferring-an-existing-project-into-another-namespace)
    all projects you need to use Pages with into a single group namespace, for example `pages`.
 1. Configure a [DNS entry](#dns-configuration) without the `*.`-wildcard, for example `pages.example.io`.
+
+### Pages daemon fails with permission denied errors
+
+If `/tmp` is mounted with `noexec`, the Pages daemon fails to start with an error like:
+
+```plaintext
+{"error":"fork/exec /gitlab-pages: permission denied","level":"fatal","msg":"could not create pages daemon","time":"2021-02-02T21:54:34Z"}
+```
+
+In this case, change `TMPDIR` to a location that is not mounted with `noexec`. Add the following to
+`/etc/gitlab/gitlab.rb`:
+
+```ruby
+gitlab_pages['env'] = {'TMPDIR' => '<new_tmp_path>'}
+```
+
+Once added, reconfigure with `sudo gitlab-ctl reconfigure` and restart GitLab with
+`sudo gitlab-ctl restart`.

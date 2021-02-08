@@ -93,6 +93,17 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(-1).for(:new_user_signups_cap) }
     it { is_expected.not_to allow_value(2.5).for(:new_user_signups_cap) }
 
+    it { is_expected.to allow_value(1).for(:git_two_factor_session_expiry) }
+    it { is_expected.to allow_value(10).for(:git_two_factor_session_expiry) }
+    it { is_expected.to allow_value(10079).for(:git_two_factor_session_expiry) }
+    it { is_expected.to allow_value(10080).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(nil).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value("value").for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(2.5).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(-5).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(0).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(10081).for(:git_two_factor_session_expiry) }
+
     describe 'when additional email text is enabled' do
       before do
         stub_licensed_features(email_additional_text: true)

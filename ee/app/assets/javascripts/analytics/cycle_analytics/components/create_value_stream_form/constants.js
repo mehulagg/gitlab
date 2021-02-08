@@ -71,13 +71,7 @@ export const defaultFields = {
   endEventLabelId: null,
 };
 
-const defaultStageCommonFields = { custom: false, hidden: false };
-
-export const defaultCustomStageFields = {
-  ...defaultFields,
-  ...defaultStageCommonFields,
-  custom: true,
-};
+export const defaultCustomStageFields = { ...defaultFields, custom: true };
 
 /**
  * These stage configs are copied from the https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/cycle_analytics
@@ -120,11 +114,12 @@ const BASE_DEFAULT_STAGE_CONFIG = [
 
 export const DEFAULT_STAGE_CONFIG = BASE_DEFAULT_STAGE_CONFIG.map(({ id, ...rest }) => ({
   ...rest,
-  ...defaultStageCommonFields,
+  custom: false,
   name: capitalizeFirstCharacter(id),
 }));
 
 export const PRESET_OPTIONS_DEFAULT = 'default';
+export const PRESET_OPTIONS_BLANK = 'blank';
 export const PRESET_OPTIONS = [
   {
     text: I18N.TEMPLATE_DEFAULT,
@@ -132,6 +127,6 @@ export const PRESET_OPTIONS = [
   },
   {
     text: I18N.TEMPLATE_BLANK,
-    value: 'blank',
+    value: PRESET_OPTIONS_BLANK,
   },
 ];

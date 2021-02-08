@@ -2,7 +2,7 @@ import { GlSprintf, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { useFakeDate } from 'helpers/fake_date';
-import CiCdAnalyticsAreaChart from '~/projects/pipelines/charts/components/ci_cd_analytics_area_chart.vue';
+import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
 import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
 import * as Sentry from '~/sentry/wrapper';
@@ -58,6 +58,7 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
           environment: 'production',
           interval: 'daily',
           per_page: 100,
+          to: '2015-07-04T00:00:00+0000',
           from,
         },
       })
@@ -77,9 +78,18 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
     beforeEach(async () => {
       mock = new MockAdapter(axios);
 
-      setUpMockDeploymentFrequencies({ from: '2015-06-26T00:00:00+0000', data: lastWeekData });
-      setUpMockDeploymentFrequencies({ from: '2015-06-03T00:00:00+0000', data: lastMonthData });
-      setUpMockDeploymentFrequencies({ from: '2015-04-04T00:00:00+0000', data: last90DaysData });
+      setUpMockDeploymentFrequencies({
+        from: '2015-06-27T00:00:00+0000',
+        data: lastWeekData,
+      });
+      setUpMockDeploymentFrequencies({
+        from: '2015-06-04T00:00:00+0000',
+        data: lastMonthData,
+      });
+      setUpMockDeploymentFrequencies({
+        from: '2015-04-05T00:00:00+0000',
+        data: last90DaysData,
+      });
 
       createComponent();
 
@@ -91,9 +101,8 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
     });
 
     it('converts the data from the API into data usable by the chart component', () => {
-      wrapper.findAll(CiCdAnalyticsAreaChart).wrappers.forEach((chartWrapper) => {
-        expect(chartWrapper.props().chartData[0].data).toMatchSnapshot();
-      });
+      const chartWrapper = wrapper.find(CiCdAnalyticsCharts);
+      expect(chartWrapper.props().charts).toMatchSnapshot();
     });
 
     it('does not show a flash message', () => {

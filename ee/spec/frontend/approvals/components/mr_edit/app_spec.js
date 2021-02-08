@@ -16,13 +16,12 @@ describe('EE Approvals MREditApp', () => {
   let store;
   let axiosMock;
 
-  const factory = (mergeRequestReviewers = false, mrCollapsedApprovalRules = false) => {
+  const factory = (mrCollapsedApprovalRules = false) => {
     wrapper = mount(MREditApp, {
       localVue,
       store: new Vuex.Store(store),
       provide: {
         glFeatures: {
-          mergeRequestReviewers,
           mrCollapsedApprovalRules,
         },
       },

@@ -31,3 +31,22 @@ if (complianceFrameworksList) {
     }
   })();
 }
+
+const mergeRequestApprovalSetting = document.querySelector('#js-merge-request-approval-settings');
+
+if (mergeRequestApprovalSetting) {
+  (async () => {
+    try {
+      const { mountGroupApprovalSettings } = await import(
+        /* webpackChunkName: 'mountGroupApprovalSettings' */ 'ee/approvals/mount_group_settings'
+      );
+      mountGroupApprovalSettings(mergeRequestApprovalSetting);
+    } catch (error) {
+      createFlash({
+        message: __('An error occurred while loading a section of this page.'),
+        captureError: true,
+        error: `Error mounting group approval settings component: #{error.message}`,
+      });
+    }
+  })();
+}

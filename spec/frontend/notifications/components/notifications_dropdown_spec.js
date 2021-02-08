@@ -1,12 +1,13 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { shallowMount } from '@vue/test-utils';
-import { GlButtonGroup, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { GlButtonGroup, GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import waitForPromises from 'helpers/wait_for_promises';
 import httpStatus from '~/lib/utils/http_status';
 import NotificationsDropdown from '~/notifications/components/notifications_dropdown.vue';
 import NotificationsDropdownItem from '~/notifications/components/notifications_dropdown_item.vue';
+import CustomNotificationsModal from '~/notifications/components/custom_notifications_modal.vue';
 
 const mockDropdownItems = ['global', 'watch', 'participating', 'mention', 'disabled'];
 const mockToastShow = jest.fn();
@@ -14,19 +15,30 @@ const mockToastShow = jest.fn();
 describe('NotificationsDropdown', () => {
   let wrapper;
   let mockAxios;
+  let glModalDirective;
 
   function createComponent(injectedProperties = {}) {
+    glModalDirective = jest.fn();
+
     return shallowMount(NotificationsDropdown, {
       stubs: {
         GlButtonGroup,
         GlDropdown,
         GlDropdownItem,
         NotificationsDropdownItem,
+        CustomNotificationsModal,
       },
       directives: {
         GlTooltip: createMockDirective(),
+        glModal: {
+          bind(_, { value }) {
+            glModalDirective(value);
+          },
+        },
       },
       provide: {
+        dropdownItems: mockDropdownItems,
+        initialNotificationLevel: 'global',
         ...injectedProperties,
       },
       mocks: {
@@ -38,6 +50,7 @@ describe('NotificationsDropdown', () => {
   }
 
   const findButtonGroup = () => wrapper.find(GlButtonGroup);
+  const findButton = () => wrapper.find(GlButton);
   const findDropdown = () => wrapper.find(GlDropdown);
   const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   const findAllNotificationsDropdownItems = () => wrapper.findAll(NotificationsDropdownItem);
@@ -66,7 +79,6 @@ describe('NotificationsDropdown', () => {
     describe('when notification level is "custom"', () => {
       beforeEach(() => {
         wrapper = createComponent({
-          dropdownItems: mockDropdownItems,
           initialNotificationLevel: 'custom',
         });
       });
@@ -74,18 +86,64 @@ describe('NotificationsDropdown', () => {
       it('renders a button group', () => {
         expect(findButtonGroup().exists()).toBe(true);
       });
+
+      it('shows the button text when showLabel is true', () => {
+        wrapper = createComponent({
+          initialNotificationLevel: 'custom',
+          showLabel: true,
+        });
+
+        expect(findButton().text()).toBe('Custom');
+      });
+
+      it("doesn't show the button text when showLabel is false", () => {
+        wrapper = createComponent({
+          initialNotificationLevel: 'custom',
+          showLabel: false,
+        });
+
+        expect(findButton().text()).toBe('');
+      });
+
+      it('opens the modal when the user clicks the button', async () => {
+        jest.spyOn(axios, 'put');
+        mockAxios.onPut('/api/v4/notification_settings').reply(httpStatus.OK, {});
+
+        wrapper = createComponent({
+          initialNotificationLevel: 'custom',
+        });
+
+        findButton().vm.$emit('click');
+
+        expect(glModalDirective).toHaveBeenCalled();
+      });
     });
 
     describe('when notification level is not "custom"', () => {
       beforeEach(() => {
         wrapper = createComponent({
-          dropdownItems: mockDropdownItems,
           initialNotificationLevel: 'global',
         });
       });
 
       it('does not render a button group', () => {
         expect(findButtonGroup().exists()).toBe(false);
+      });
+
+      it('shows the button text when showLabel is true', () => {
+        wrapper = createComponent({
+          showLabel: true,
+        });
+
+        expect(findDropdown().props('text')).toBe('Global');
+      });
+
+      it("doesn't show the button text when showLabel is false", () => {
+        wrapper = createComponent({
+          showLabel: false,
+        });
+
+        expect(findDropdown().props('text')).toBe(null);
       });
     });
 
@@ -101,7 +159,6 @@ describe('NotificationsDropdown', () => {
         ${'custom'}        | ${'Custom'}
       `(`renders "${tooltipTitlePrefix} - $title" for "$level" level`, ({ level, title }) => {
         wrapper = createComponent({
-          dropdownItems: mockDropdownItems,
           initialNotificationLevel: level,
         });
 
@@ -115,7 +172,6 @@ describe('NotificationsDropdown', () => {
     describe('button icon', () => {
       beforeEach(() => {
         wrapper = createComponent({
-          dropdownItems: mockDropdownItems,
           initialNotificationLevel: 'disabled',
         });
       });
@@ -125,10 +181,7 @@ describe('NotificationsDropdown', () => {
       });
 
       it('renders the "notifications" icon when notification level is not "disabled"', () => {
-        wrapper = createComponent({
-          dropdownItems: mockDropdownItems,
-          initialNotificationLevel: 'global',
-        });
+        wrapper = createComponent();
 
         expect(findDropdown().props('icon')).toBe('notifications');
       });
@@ -144,10 +197,7 @@ describe('NotificationsDropdown', () => {
         ${4}          | ${'disabled'}      | ${'Disabled'}    | ${'You will not get any notifications via email'}
         ${5}          | ${'custom'}        | ${'Custom'}      | ${'You will only receive notifications for the events you choose'}
       `('displays "$title" and "$description"', ({ dropdownIndex, title, description }) => {
-        wrapper = createComponent({
-          dropdownItems: mockDropdownItems,
-          initialNotificationLevel: 'global',
-        });
+        wrapper = createComponent();
 
         expect(findAllNotificationsDropdownItems().at(dropdownIndex).props('title')).toBe(title);
         expect(findAllNotificationsDropdownItems().at(dropdownIndex).props('description')).toBe(
@@ -171,8 +221,6 @@ describe('NotificationsDropdown', () => {
       'calls the $endpointType endpoint when $condition',
       async ({ projectId, groupId, endpointUrl }) => {
         wrapper = createComponent({
-          dropdownItems: mockDropdownItems,
-          initialNotificationLevel: 'global',
           projectId,
           groupId,
         });
@@ -187,10 +235,7 @@ describe('NotificationsDropdown', () => {
 
     it('updates the selectedNotificationLevel and marks the item with a checkmark', async () => {
       mockAxios.onPut('/api/v4/notification_settings').reply(httpStatus.OK, {});
-      wrapper = createComponent({
-        dropdownItems: mockDropdownItems,
-        initialNotificationLevel: 'global',
-      });
+      wrapper = createComponent();
 
       const dropdownItem = findDropdownItemAt(1);
 
@@ -202,10 +247,7 @@ describe('NotificationsDropdown', () => {
 
     it("won't update the selectedNotificationLevel and shows a toast message when the request fails and ", async () => {
       mockAxios.onPut('/api/v4/notification_settings').reply(httpStatus.NOT_FOUND, {});
-      wrapper = createComponent({
-        dropdownItems: mockDropdownItems,
-        initialNotificationLevel: 'global',
-      });
+      wrapper = createComponent();
 
       await clickDropdownItemAt(1);
 
@@ -216,6 +258,17 @@ describe('NotificationsDropdown', () => {
         'An error occured while updating the notification settings. Please try again.',
         { type: 'error' },
       );
+    });
+
+    it('opens the modal when the user clicks on the "Custom" dropdown item', async () => {
+      mockAxios.onPut('/api/v4/notification_settings').reply(httpStatus.OK, {});
+      wrapper = createComponent();
+
+      const mockModalShow = jest.spyOn(wrapper.vm.$refs.customNotificationsModal, 'open');
+
+      await clickDropdownItemAt(5);
+
+      expect(mockModalShow).toHaveBeenCalled();
     });
   });
 });

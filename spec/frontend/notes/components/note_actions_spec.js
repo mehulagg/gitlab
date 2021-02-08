@@ -5,6 +5,7 @@ import { TEST_HOST } from 'spec/test_constants';
 import createStore from '~/notes/stores';
 import noteActions from '~/notes/components/note_actions.vue';
 import axios from '~/lib/utils/axios_utils';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { userDataMock } from '../mock_data';
 
 describe('noteActions', () => {
@@ -135,7 +136,7 @@ describe('noteActions', () => {
           .then(() => {
             const emitted = Object.keys(rootWrapper.emitted());
 
-            expect(emitted).toEqual(['bv::hide::tooltip']);
+            expect(emitted).toEqual([BV_HIDE_TOOLTIP]);
             done();
           })
           .catch(done.fail);

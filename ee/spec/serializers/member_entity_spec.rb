@@ -20,13 +20,13 @@ RSpec.describe MemberEntity do
     end
 
     it 'correctly exposes `group_sso`' do
-      allow(member.user).to receive(:group_sso?).with(group).and_return(true)
+      allow(member).to receive(:group_sso?).and_return(true)
 
       expect(entity_hash[:group_sso]).to be(true)
     end
 
     it 'correctly exposes `group_managed_account`' do
-      allow(member.user).to receive(:group_managed_account?).and_return(true)
+      allow(member).to receive(:group_managed_account?).and_return(true)
 
       expect(entity_hash[:group_managed_account]).to be(true)
     end

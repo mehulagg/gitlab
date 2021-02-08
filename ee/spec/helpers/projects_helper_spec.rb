@@ -302,7 +302,8 @@ RSpec.describe ProjectsHelper do
 
     describe 'Security & Compliance tabs' do
       where(:ability, :nav_tabs) do
-        :read_project_security_dashboard          | [:security, :security_configuration]
+        :read_project_security_dashboard          | [:security]
+        :read_security_configuration              | [:security_configuration]
         :read_on_demand_scans                     | [:on_demand_scans]
         :read_dependencies                        | [:dependencies]
         :read_licenses                            | [:licenses]

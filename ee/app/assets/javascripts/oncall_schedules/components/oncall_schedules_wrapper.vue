@@ -3,9 +3,9 @@ import { GlAlert, GlButton, GlEmptyState, GlLoadingIcon, GlModalDirective } from
 import * as Sentry from '~/sentry/wrapper';
 import { s__ } from '~/locale';
 import { fetchPolicies } from '~/lib/graphql';
+import getOncallSchedulesWithRotations from '../graphql/queries/get_oncall_schedules.query.graphql';
 import AddScheduleModal from './add_edit_schedule_modal.vue';
 import OncallSchedule from './oncall_schedule.vue';
-import getOncallSchedulesWithRotations from '../graphql/queries/get_oncall_schedules.query.graphql';
 
 export const addScheduleModalId = 'addScheduleModal';
 

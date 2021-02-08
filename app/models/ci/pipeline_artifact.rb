@@ -15,7 +15,12 @@ module Ci
 
     DEFAULT_FILE_NAMES = {
       code_coverage: 'code_coverage.json',
-      code_quality: 'code_quality.json'
+      code_quality_mr_diff: 'code_quality_mr_diff.json'
+    }.freeze
+
+    REPORT_TYPES = {
+      code_coverage: :raw,
+      code_quality_mr_diff: :raw
     }.freeze
 
     belongs_to :project, class_name: "Project", inverse_of: :pipeline_artifacts
@@ -32,11 +37,13 @@ module Ci
 
     enum file_type: {
       code_coverage: 1,
-      code_quality: 2
+      code_quality_mr_diff: 2
     }
 
     class << self
-      def has_report?(file_type)
+      def report_exists?(file_type)
+        return false unless REPORT_TYPES.key?(file_type)
+
         where(file_type: file_type).exists?
       end
 

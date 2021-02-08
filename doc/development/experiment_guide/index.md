@@ -44,7 +44,7 @@ addressed.
 > - It is not yet intended for use in GitLab self-managed instances.
 
 [GitLab Experiment](https://gitlab.com/gitlab-org/gitlab-experiment/) is a gem included
-in GitLab that can be used for running experiments. 
+in GitLab that can be used for running experiments.
 
 ## How to create an A/B test using `experimentation.rb`
 
@@ -325,7 +325,7 @@ Note that the use of this method requires that we have first [recorded the user 
 
 ### Enable the experiment
 
-After all merge requests have been merged, use [`chatops`](../../ci/chatops/README.md) in the
+After all merge requests have been merged, use [`chatops`](../../ci/chatops/index.md) in the
 [appropriate channel](../feature_flags/controls.md#communicate-the-change) to start the experiment for 10% of the users.
 The feature flag should have the name of the experiment with the `_experiment_percentage` suffix appended.
 For visibility, please also share any commands run against production in the `#s_growth` channel:
@@ -368,7 +368,7 @@ Use a comma to list more than one experiment to be forced:
 document.cookie = "force_experiment=<EXPERIMENT_KEY>,<ANOTHER_EXPERIMENT_KEY>; path=/";
 ```
 
-Clear the experiments by unsetting the `force_experiment` cookie:
+To clear the experiments, unset the `force_experiment` cookie:
 
 ```javascript
 document.cookie = "force_experiment=; path=/";

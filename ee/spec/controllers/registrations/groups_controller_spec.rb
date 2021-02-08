@@ -26,6 +26,8 @@ RSpec.describe Registrations::GroupsController do
   end
 
   describe 'GET #new' do
+    let(:signup_onboarding_enabled) { true }
+
     subject { get :new }
 
     context 'with an unauthenticated user' do
@@ -36,7 +38,7 @@ RSpec.describe Registrations::GroupsController do
     context 'with an authenticated user' do
       before do
         sign_in(user)
-        stub_experiment_for_subject(onboarding_issues: true)
+        allow(controller.helpers).to receive(:signup_onboarding_enabled?).and_return(signup_onboarding_enabled)
       end
 
       it { is_expected.to have_gitlab_http_status(:ok) }
@@ -61,10 +63,8 @@ RSpec.describe Registrations::GroupsController do
         it { is_expected.to have_gitlab_http_status(:not_found) }
       end
 
-      context 'with the experiment not enabled for user' do
-        before do
-          stub_experiment_for_subject(onboarding_issues: false)
-        end
+      context 'signup onboarding not enabled' do
+        let(:signup_onboarding_enabled) { false }
 
         it { is_expected.to have_gitlab_http_status(:not_found) }
       end
@@ -78,6 +78,7 @@ RSpec.describe Registrations::GroupsController do
     let_it_be(:trial_form_params) { { trial: 'false' } }
     let_it_be(:trial_onboarding_issues_enabled) { false }
     let_it_be(:trial_onboarding_flow_params) { {} }
+    let(:signup_onboarding_enabled) { true }
     let(:group_params) { { name: 'Group name', path: 'group-path', visibility_level: Gitlab::VisibilityLevel::PRIVATE, emails: ['', ''] } }
     let(:params) do
       { group: group_params }.merge(glm_params).merge(trial_form_params).merge(trial_onboarding_flow_params)
@@ -93,7 +94,8 @@ RSpec.describe Registrations::GroupsController do
     context 'with an authenticated user' do
       before do
         sign_in(user)
-        stub_experiment_for_subject(onboarding_issues: true, trial_onboarding_issues: trial_onboarding_issues_enabled)
+        stub_experiment_for_subject(trial_onboarding_issues: trial_onboarding_issues_enabled)
+        allow(controller.helpers).to receive(:signup_onboarding_enabled?).and_return(signup_onboarding_enabled)
       end
 
       it 'creates a group' do
@@ -162,7 +164,6 @@ RSpec.describe Registrations::GroupsController do
         end
 
         before do
-          allow(controller).to receive(:experiment_enabled?).with(:onboarding_issues).and_call_original
           allow(controller).to receive(:experiment_enabled?).with(:trial_during_signup).and_return(true)
         end
 
@@ -258,6 +259,12 @@ RSpec.describe Registrations::GroupsController do
         it { is_expected.to have_gitlab_http_status(:ok) }
         it { is_expected.to render_template(:new) }
 
+        context 'signup onboarding not enabled' do
+          let(:signup_onboarding_enabled) { false }
+
+          it { is_expected.to have_gitlab_http_status(:not_found) }
+        end
+
         context 'when the trial onboarding is active' do
           let_it_be(:group) { create(:group) }
           let_it_be(:trial_onboarding_flow_params) { { trial_onboarding_flow: true } }
@@ -266,14 +273,6 @@ RSpec.describe Registrations::GroupsController do
           it { is_expected.not_to receive(:apply_trial) }
           it { is_expected.to render_template(:new) }
         end
-      end
-
-      context 'with the experiment not enabled for user' do
-        before do
-          stub_experiment_for_subject(onboarding_issues: false)
-        end
-
-        it { is_expected.to have_gitlab_http_status(:not_found) }
       end
     end
   end

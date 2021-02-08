@@ -1,5 +1,13 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.8.3 (2021-02-05)
+
+### Fixed (2 changes)
+
+- Fix Geo replication and verification status for replicables with no data to sync. !52253
+- Handle network unreachable for ES settings check. !52586
+
+
 ## 13.8.2 (2021-02-01)
 
 ### Security (2 changes)

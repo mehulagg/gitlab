@@ -1,0 +1,9 @@
+- parent = local_assigns.fetch(:parent)
+- return unless parent&.feature_available?(:issuable_health_status)
+
+.block
+  .title
+    = _('Health status')
+  .filter-item.health-status.health-status-filter
+    #js-bulk-update-health-status-root
+  %input{ id: 'issue_health_status_value', type: 'hidden', name: 'update[health_status]' }
