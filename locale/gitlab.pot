@@ -16608,6 +16608,9 @@ msgstr ""
 msgid "JiraService|Events for %{noteable_model_name} are disabled."
 msgstr ""
 
+msgid "JiraService|Failed to load Jira issue. Please view issue in jira, or try again."
+msgstr ""
+
 msgid "JiraService|Fetch issue types for this Jira project"
 msgstr ""
 
@@ -16650,7 +16653,7 @@ msgstr ""
 msgid "JiraService|Jira workflow transition IDs"
 msgstr ""
 
-msgid "JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}"
+msgid "JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}."
 msgstr ""
 
 msgid "JiraService|Open Jira"
@@ -16677,7 +16680,7 @@ msgstr ""
 msgid "JiraService|This feature requires a Premium plan."
 msgstr ""
 
-msgid "JiraService|This issue is updated from Jira"
+msgid "JiraService|This issue is synchronized with Jira"
 msgstr ""
 
 msgid "JiraService|Use a password for server version and an API token for cloud version"
