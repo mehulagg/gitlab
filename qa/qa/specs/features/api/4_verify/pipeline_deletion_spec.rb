@@ -61,12 +61,10 @@ module QA
           delete(pipeline_data_request.url)
 
           deleted_pipeline = nil
-          Support::Waiter.wait_until(sleep_interval: 3) do
+          Support::Retrier.retry_until(max_duration: 15, sleep_interval: 3) do
             deleted_pipeline = pipeline
-            !pipeline.empty?
+            !deleted_pipeline.empty? && deleted_pipeline&.key?('message')
           end
-
-          raise "Pipeline response does not have a 'message' key: #{deleted_pipeline}" unless deleted_pipeline&.key?('message')
 
           expect(deleted_pipeline['message'].downcase).to have_content('404 not found')
         end
