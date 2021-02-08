@@ -634,3 +634,9 @@
   redis_slot: pipeline_authoring
   aggregation: weekly
   feature_flag: usage_data_unique_users_committing_ciconfigfile
+# Epic events
+- name: g_product_planning_epic_created
+  category: epic_edit
+  redis_slot: product_planning
+  aggregation: daily
+  feature_flag: track_epic_activity_actions
