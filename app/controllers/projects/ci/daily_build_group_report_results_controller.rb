@@ -60,7 +60,7 @@ class Projects::Ci::DailyBuildGroupReportResultsController < Projects::Applicati
     }
 
     if params[:ref_path].present?
-      params[:ref_path] = ref_path
+      params[:ref_path] = params[:ref_path]
     end
 
     params
