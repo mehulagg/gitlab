@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+---
+
 # Working with projects
 
 Most work in GitLab is done in a [project](../../user/project/index.md). Files and
