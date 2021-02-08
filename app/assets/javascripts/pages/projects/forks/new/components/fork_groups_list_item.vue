@@ -31,10 +31,6 @@ export default {
       type: Object,
       required: true,
     },
-    hasReachedProjectLimit: {
-      type: Boolean,
-      required: true,
-    },
   },
   data() {
     return { namespaces: null, isForking: false };
@@ -60,12 +56,10 @@ export default {
       return GROUP_VISIBILITY_TYPE[this.group.visibility];
     },
     isSelectButtonDisabled() {
-      return this.hasReachedProjectLimit || !this.group.can_create_project;
+      return !this.group.can_create_project;
     },
     selectButtonDisabledTooltip() {
-      return this.hasReachedProjectLimit
-        ? this.$options.i18n.hasReachedProjectLimitMessage
-        : this.$options.i18n.insufficientPermissionsMessage;
+      return this.$options.i18n.insufficientPermissionsMessage;
     },
   },
 
@@ -77,7 +71,6 @@ export default {
   },
 
   i18n: {
-    hasReachedProjectLimitMessage: __('You have reached your project limit'),
     insufficientPermissionsMessage: __(
       'You must have permission to create a project in a namespace before forking.',
     ),
