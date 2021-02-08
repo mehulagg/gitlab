@@ -1,0 +1,5 @@
+query restPackages($projectPath: ID!) {
+  restPackages(projectPath: $projectPath) @client {
+    data
+  }
+}

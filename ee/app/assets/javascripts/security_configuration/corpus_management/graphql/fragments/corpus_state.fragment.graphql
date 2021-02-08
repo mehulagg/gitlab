@@ -1,0 +1,7 @@
+fragment CorpusState on Package {
+  restPackages @client
+  
+  id
+  name
+  createdAt
+}
