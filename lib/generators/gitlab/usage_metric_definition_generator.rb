@@ -68,7 +68,7 @@ module Gitlab
     end
 
     def file_name
-      key_path.split('.').last
+      "#{Time.now.utc.strftime("%Y%m%d%H%M%S")}_#{key_path.split('.').last}"
     end
 
     def directory
