@@ -1,6 +1,5 @@
 <script>
-import { GlSprintf, GlLink } from '@gitlab/ui';
-import createFlash from '~/flash';
+import { GlSprintf, GlLink, GlAlert } from '@gitlab/ui';
 import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
 import MavenSettings from '~/packages_and_registries/settings/group/components/maven_settings.vue';
 
@@ -26,6 +25,7 @@ export default {
     PACKAGES_DOCS_PATH,
   },
   components: {
+    GlAlert,
     GlSprintf,
     GlLink,
     SettingsBlock,
@@ -49,6 +49,7 @@ export default {
     return {
       packageSettings: {},
       errors: {},
+      alertConfig: null,
     };
   },
   computed: {
@@ -57,6 +58,9 @@ export default {
     },
   },
   methods: {
+    dismissAlert() {
+      this.alertConfig = null;
+    },
     updateSettings(payload) {
       this.errors = {};
       return this.$apollo
@@ -76,9 +80,9 @@ export default {
         })
         .then(({ data }) => {
           if (data.updateNamespacePackageSettings?.errors?.length > 0) {
-            createFlash({ message: ERROR_UPDATING_SETTINGS, type: 'warning' });
+            this.alertConfig = { message: ERROR_UPDATING_SETTINGS, variant: 'warning' };
           } else {
-            createFlash({ message: SUCCESS_UPDATING_SETTINGS, type: 'success' });
+            this.alertConfig = { message: SUCCESS_UPDATING_SETTINGS, variant: 'success' };
           }
         })
         .catch((e) => {
@@ -93,7 +97,7 @@ export default {
               this.errors = { ...this.errors, [key]: message };
             });
           }
-          createFlash({ message: ERROR_UPDATING_SETTINGS, type: 'warning' });
+          this.alertConfig = { message: ERROR_UPDATING_SETTINGS, variant: 'warning' };
         });
     },
   },
@@ -102,6 +106,15 @@ export default {
 
 <template>
   <div>
+    <gl-alert
+      v-if="alertConfig"
+      :variant="alertConfig.variant"
+      class="gl-mt-4"
+      @dismiss="dismissAlert"
+    >
+      {{ alertConfig.message }}
+    </gl-alert>
+
     <settings-block :default-expanded="defaultExpanded">
       <template #title> {{ $options.i18n.PACKAGE_SETTINGS_HEADER }}</template>
       <template #description>
@@ -122,6 +135,7 @@ export default {
           :maven-duplicate-exception-regex-error="errors.mavenDuplicateExceptionRegex"
           :loading="isLoading"
           @update="updateSettings"
+          @focus="dismissAlert"
         />
       </template>
     </settings-block>
