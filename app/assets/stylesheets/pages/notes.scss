@@ -586,6 +586,41 @@ $system-note-svg-size: 16px;
 .note-header {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+
+  > .note-header-info,
+  > .note-actions {
+    flex-grow: 1;
+    flex-shrink: 1;
+  }
+}
+
+.note {
+  @include notes-media('max', map-get($grid-breakpoints, sm) - 1) {
+    .note-header {
+      .note-actions {
+        flex-wrap: wrap;
+        margin-bottom: $gl-padding-12;
+
+        > :first-child {
+          margin-left: 0;
+        }
+      }
+    }
+
+    .note-header-author-name {
+      display: block;
+    }
+
+    .user-avatar-link {
+      display: block;
+    }
+
+    .timeline-icon,
+    .timeline-icon .avatar {
+      float: none;
+    }
+  }
 }
 
 .note-header-info {
@@ -667,7 +702,8 @@ $system-note-svg-size: 16px;
 
 .note-actions {
   align-self: flex-start;
-  flex-shrink: 0;
+  justify-content: flex-end;
+  flex-shrink: 1;
   display: inline-flex;
   align-items: center;
   margin-left: 10px;
