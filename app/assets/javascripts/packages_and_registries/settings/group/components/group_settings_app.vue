@@ -49,7 +49,7 @@ export default {
     return {
       packageSettings: {},
       errors: {},
-      alertConfig: null,
+      alertMessage: null,
     };
   },
   computed: {
@@ -59,7 +59,7 @@ export default {
   },
   methods: {
     dismissAlert() {
-      this.alertConfig = null;
+      this.alertMessage = null;
     },
     updateSettings(payload) {
       this.errors = {};
@@ -80,9 +80,10 @@ export default {
         })
         .then(({ data }) => {
           if (data.updateNamespacePackageSettings?.errors?.length > 0) {
-            this.alertConfig = { message: ERROR_UPDATING_SETTINGS, variant: 'warning' };
+            this.alertMessage = ERROR_UPDATING_SETTINGS;
           } else {
-            this.alertConfig = { message: SUCCESS_UPDATING_SETTINGS, variant: 'success' };
+            this.dismissAlert();
+            this.$toast.show(SUCCESS_UPDATING_SETTINGS, { type: 'success' });
           }
         })
         .catch((e) => {
@@ -97,7 +98,7 @@ export default {
               this.errors = { ...this.errors, [key]: message };
             });
           }
-          this.alertConfig = { message: ERROR_UPDATING_SETTINGS, variant: 'warning' };
+          this.alertMessage = ERROR_UPDATING_SETTINGS;
         });
     },
   },
@@ -106,13 +107,8 @@ export default {
 
 <template>
   <div>
-    <gl-alert
-      v-if="alertConfig"
-      :variant="alertConfig.variant"
-      class="gl-mt-4"
-      @dismiss="dismissAlert"
-    >
-      {{ alertConfig.message }}
+    <gl-alert v-if="alertMessage" variant="warning" class="gl-mt-4" @dismiss="dismissAlert">
+      {{ alertMessage }}
     </gl-alert>
 
     <settings-block :default-expanded="defaultExpanded">
@@ -135,7 +131,6 @@ export default {
           :maven-duplicate-exception-regex-error="errors.mavenDuplicateExceptionRegex"
           :loading="isLoading"
           @update="updateSettings"
-          @focus="dismissAlert"
         />
       </template>
     </settings-block>
