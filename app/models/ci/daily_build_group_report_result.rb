@@ -13,10 +13,13 @@ module Ci
     validates :data, json_schema: { filename: "daily_build_group_report_result_data" }
 
     scope :with_included_projects, -> { includes(:project) }
+    scope :by_ref_path, -> (ref_path) { where(ref_path: ref_path) }
     scope :by_projects, -> (ids) { where(project_id: ids) }
     scope :with_coverage, -> { where("(data->'coverage') IS NOT NULL") }
     scope :with_default_branch, -> { where(default_branch: true) }
     scope :by_date, -> (start_date) { where(date: report_window(start_date)..Date.current) }
+    scope :by_dates, -> (start_date, end_date) { where(date: start_date..end_date) }
+    scope :order_by_date_desc, -> { order(date: :desc) }
 
     store_accessor :data, :coverage
 
