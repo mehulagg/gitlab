@@ -66,7 +66,6 @@ export default {
       default: null,
     },
   },
-  pipelinesTable: PIPELINES_TABLE,
   data() {
     return {
       isRetrying: false,
@@ -270,6 +269,9 @@ export default {
       this.isRetrying = true;
       eventHub.$emit('retryPipeline', this.pipeline.retry_path);
     },
+    handlePipelineActionRequestComplete() {
+      eventHub.$emit('refreshPipelinesTable');
+    },
   },
 };
 </script>
@@ -321,9 +323,9 @@ export default {
             data-testid="widget-mini-pipeline-graph"
           >
             <pipeline-stage
-              :type="$options.pipelinesTable"
               :stage="stage"
               :update-dropdown="updateGraphDropdown"
+              @pipelineActionRequestComplete="handlePipelineActionRequestComplete"
             />
           </div>
         </template>
