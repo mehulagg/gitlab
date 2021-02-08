@@ -635,6 +635,16 @@ type AlertManagementHttpIntegration implements AlertManagementIntegration {
   name: String
 
   """
+  The custom mapping of GitLab alert attributes to fields from the payload_example.
+  """
+  payloadAttributeMappings: [AlertManagementPayloadAlertFieldInput!]
+
+  """
+  The example of an alert payload.
+  """
+  payloadExample: JsonString
+
+  """
   Token used to authenticate alert notification requests.
   """
   token: String

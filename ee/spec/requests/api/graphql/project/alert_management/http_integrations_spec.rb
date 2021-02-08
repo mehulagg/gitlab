@@ -1,10 +1,13 @@
 # frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec.describe 'getting Alert Management Integrations' do
   include ::Gitlab::Routing.url_helpers
   include GraphqlHelpers
 
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:current_user) { create(:user) }
   let_it_be(:payload_example) do
     {
       alert: {
@@ -21,13 +24,7 @@ RSpec.describe 'getting Alert Management Integrations' do
     }
   end
 
-  let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:current_user) { create(:user) }
-  let_it_be(:prometheus_service) { create(:prometheus_service, project: project) }
-  let_it_be(:project_alerting_setting) { create(:project_alerting_setting, project: project) }
-  let_it_be(:inactive_http_integration) { create(:alert_management_http_integration, :inactive, project: project) }
-  let_it_be(:other_project_http_integration) { create(:alert_management_http_integration) }
-  let_it_be(:active_http_integration) do
+  let_it_be(:http_integration) do
     create(
       :alert_management_http_integration,
       project: project,
@@ -39,7 +36,7 @@ RSpec.describe 'getting Alert Management Integrations' do
   let(:fields) do
     <<~QUERY
       nodes {
-        #{all_graphql_fields_for('AlertManagementIntegration')}
+        #{all_graphql_fields_for('AlertManagementHttpIntegration')}
       }
     QUERY
   end
@@ -48,7 +45,7 @@ RSpec.describe 'getting Alert Management Integrations' do
     graphql_query_for(
       'project',
       { 'fullPath' => project.full_path },
-      query_graphql_field('alertManagementIntegrations', {}, fields)
+      query_graphql_field('alertManagementHttpIntegrations', {}, fields)
     )
   end
 
@@ -58,7 +55,7 @@ RSpec.describe 'getting Alert Management Integrations' do
   end
 
   context 'with integrations' do
-    let(:integrations) { graphql_data.dig('project', 'alertManagementIntegrations', 'nodes') }
+    let(:integrations) { graphql_data.dig('project', 'alertManagementHttpIntegrations', 'nodes') }
 
     context 'without project permissions' do
       let(:user) { create(:user) }
@@ -80,9 +77,9 @@ RSpec.describe 'getting Alert Management Integrations' do
 
       it_behaves_like 'a working graphql query'
 
-      specify { expect(integrations.size).to eq(3) }
+      specify { expect(integrations.size).to eq(1) }
 
-      it 'returns the correct properties of the integrations' do
+      it 'returns the correct properties of the integration' do
         expect(integrations).to include(
           {
             'id' => GitlabSchema.id_from_object(active_http_integration).to_s,
@@ -94,24 +91,6 @@ RSpec.describe 'getting Alert Management Integrations' do
             'apiUrl' => nil,
             'payloadExample' => 'hallo',
             'payloadAttributeMappings' => 503
-          },
-          {
-            'id' => GitlabSchema.id_from_object(inactive_http_integration).to_s,
-            'type' => 'HTTP',
-            'name' => inactive_http_integration.name,
-            'active' => inactive_http_integration.active,
-            'token' => inactive_http_integration.token,
-            'url' => inactive_http_integration.url,
-            'apiUrl' => nil
-          },
-          {
-            'id' => GitlabSchema.id_from_object(prometheus_service).to_s,
-            'type' => 'PROMETHEUS',
-            'name' => 'Prometheus',
-            'active' => prometheus_service.manual_configuration?,
-            'token' => project_alerting_setting.token,
-            'url' => "http://localhost/#{project.full_path}/prometheus/alerts/notify.json",
-            'apiUrl' => prometheus_service.api_url
           }
         )
       end
