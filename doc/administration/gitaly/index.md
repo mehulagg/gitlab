@@ -822,7 +822,7 @@ to clean up these items and improve performance.
 
 **For Omnibus GitLab**
 
-1. Edit /etc/gitlab/gitlab.rb and add:
+1. Edit `/etc/gitlab/gitlab.rb` and add:
 
 ```ruby
 gitaly['daily_maintenance_start_hour'] = 4
