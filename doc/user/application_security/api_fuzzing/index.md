@@ -25,7 +25,7 @@ you can run fuzz tests as part your CI/CD workflow.
   - GraphQL
   - Form bodies, JSON, or XML
 - One of the following assets to provide APIs to test:
-  - OpenAPI v2 API definition
+  - OpenAPI v2 or v3 API definition
   - HTTP Archive (HAR) of API requests to test
   - Postman Collection v2.0 or v2.1
 
@@ -54,7 +54,7 @@ changes, other pipelines, or other scanners) during a scan could cause inaccurat
 
 There are three ways to perform scans. See the configuration section for the one you wish to use:
 
-- [OpenAPI v2 specification](#openapi-specification)
+- [OpenAPI v2 or v3 specification](#openapi-specification)
 - [HTTP Archive (HAR)](#http-archive-har)
 - [Postman Collection v2.0 or v2.1](#postman-collection)
 
@@ -70,6 +70,12 @@ The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Spe
 API description format for REST APIs. This section shows you how to configure API fuzzing by using
 an OpenAPI specification to provide information about the target API to test. OpenAPI specifications
 are provided as a file system resource or URL.
+
+NOTE:
+Please notice that API fuzzing process will use OpenAPI document to generate request body. When a request body is required, then the body generation is limited to the following body types:
+* application/x-www-form-urlencoded
+* multipart/form-data
+* application/json
 
 Follow these steps to configure API fuzzing in GitLab with an OpenAPI specification:
 
@@ -315,6 +321,18 @@ information about the target API to test:
      FUZZAPI_POSTMAN_COLLECTION: postman-collection_serviceA.json
      FUZZAPI_TARGET_URL: http://test-deployment/
    ```
+1. (Optional) Postman variables
+
+    You can provide values for the variables defined in your postman document into the document itself. Also, you could also specify the values for the variables externally (e.g. outside the postman file).  The external values are provided when using the environmental variable [`FUZZAPI_POSTMAN_COLLECTION_VARIABLES`](#Available-variables). 
+
+    When provided, the environmental variable [`FUZZAPI_POSTMAN_COLLECTION_VARIABLES`](#Available-variables) contains a file path to a JSON document. The JSON is an object where its properties are key-value pairs where keys (are variable names) and values (are the variable values) for instance:
+
+    ```json
+    { 
+      "var_name1" : "value_1", 
+      "var_name2" : "value_2" 
+    }
+    ```
 
 This is a minimal configuration for API Fuzzing. From here you can:
 
@@ -497,6 +515,7 @@ increases as the numbers go up. To use a configuration file, add it to your repo
 |[`FUZZAPI_OPENAPI`](#openapi-specification) | OpenAPI specification file or URL. |
 |[`FUZZAPI_HAR`](#http-archive-har) | HTTP Archive (HAR) file. |
 |[`FUZZAPI_POSTMAN_COLLECTION`](#postman-collection) | Postman Collection file. |
+|`FUZZAPI_POSTMAN_COLLECTION_VARIABLES` | Path to a JSON file to extract postman variable values. |
 |[`FUZZAPI_OVERRIDES_FILE`](#overrides)     | Path to a JSON file containing overrides. |
 |[`FUZZAPI_OVERRIDES_ENV`](#overrides)      | JSON string containing headers to override. |
 |[`FUZZAPI_OVERRIDES_CMD`](#overrides)      | Overrides command. |
@@ -525,7 +544,7 @@ made. You can use this to inject semantic version headers, authentication, and s
 Overrides uses a JSON document to define the headers and cookies:
 
 ```json
-{
+  {
   "headers": {
     "header1": "value",
     "header2": "value"
@@ -533,6 +552,22 @@ Overrides uses a JSON document to define the headers and cookies:
   "cookies": {
     "cookie1": "value",
     "cookie2": "value"
+  },
+  "query":      { 
+    "query-string1": "value",
+    "query-string2": "value"
+  },
+  "body-form":  { 
+    "form-param1": "value",
+    "form-param1": "value",
+  },
+  "body-json":  { 
+    "json-path1": "value",
+    "json-path2": "value",
+  },
+  "body-xml" :  { 
+    "xpath1":    "value",
+    "xpath2":    "value",
   }
 }
 ```
@@ -559,6 +594,44 @@ Example usage for setting both a header and cookie:
   }
 }
 ```
+
+Example usage for setting a `body-form` override:
+
+```json
+{
+  "body-form":  { 
+    "username": "john.doe"
+  }
+}
+```
+
+NOTE:
+The override engine uses `body-form` when the request body has only form-data content.
+
+Example usage for setting a `body-json` override:
+
+```json
+{
+  "body-json":  { 
+    "$.phoneNumber.type": "mobile"
+  }
+}
+```
+
+NOTE:
+Please notice that each JSON property name in the object `body-json` is set to a [JSON Path](https://goessner.net/articles/JsonPath/) expression. The expression identifies the node to be overridden with the `value`. The override engine uses `body-json` when the request body has only [JSON](https://www.json.org/json-en.html) content.
+
+Example usage for setting a `body-xml` override:
+
+```json
+{
+  "body-xml" :  { 
+    "/DataSet/Owner/@authorization": "WU6cG"
+  }
+}
+```
+NOTE:
+Please notice that each JSON property name in the object `body-xml` is set to a [XPath v2](https://www.w3.org/TR/xpath20/) expression. The expression identifies the node to be overridden with the `value`. The override engine uses `body-xml` when the request body has only [XML](https://www.w3.org/XML/) content.
 
 You can provide this JSON document as a file or environment variable. You may also provide a command
 to generate the JSON document. The command can run at intervals to support values that expire.
