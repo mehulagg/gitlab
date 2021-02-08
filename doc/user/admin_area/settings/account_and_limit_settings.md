@@ -131,6 +131,10 @@ add the line below to `/etc/gitlab/gitlab.rb` before increasing the max attachme
 nginx['client_max_body_size'] = "200m"
 ```
 
+This error can also occur when uploading artifacts to coordinator at the end of a CI job.
+In that case, the [maximum artifacts size](continuous_integration.md#maximum-artifacts-size)
+needs to be increased as well.
+
 ## Customize session duration for Git Operations when 2FA is enabled **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/296669) in GitLab 13.9.
