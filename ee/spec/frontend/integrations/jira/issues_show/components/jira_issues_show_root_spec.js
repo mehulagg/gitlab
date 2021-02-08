@@ -45,6 +45,21 @@ describe('JiraIssuesShow', () => {
     }
   });
 
+  describe('when error occurs during mount', () => {
+    it('renders generic error message', async () => {
+      mockAxios.onGet(mockJiraIssuesShowPath).replyOnce(500);
+      createComponent();
+
+      await waitForPromises();
+      await wrapper.vm.$nextTick();
+
+      const alert = findAlert();
+
+      expect(alert.exists()).toBe(true);
+      expect(alert.text()).toContain('Failed to load Jira issue');
+    });
+  });
+
   it('renders IssuableShow', async () => {
     mockAxios.onGet(mockJiraIssuesShowPath).replyOnce(200, mockJiraIssue);
     createComponent();

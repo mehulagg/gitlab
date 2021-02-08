@@ -1,5 +1,6 @@
 <script>
 import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
+import { s__ } from '~/locale';
 import { fetchIssue } from 'ee/integrations/jira/issues_show/api';
 import { issueStates, issueStateLabels } from 'ee/integrations/jira/issues_show/constants';
 import Sidebar from 'ee/integrations/jira/issues_show/components/sidebar.vue';
@@ -42,48 +43,65 @@ export default {
       return this.isIssueOpen ? 'issue-open-m' : 'mobile-issue-close';
     },
   },
-  async mounted() {
-    this.issue = convertObjectPropsToCamelCase(await fetchIssue(this.issuesShowPath), {
-      deep: true,
-    });
-    this.isLoading = false;
+  mounted() {
+    this.loadIssue();
+  },
+  methods: {
+    loadIssue() {
+      fetchIssue(this.issuesShowPath)
+        .then((issue) => {
+          this.issue = convertObjectPropsToCamelCase(issue, { deep: true });
+        })
+        .catch(() => {
+          this.errorMessage = s__('JiraService|Failed to load Jira issue. Please view issue in jira, or try again.');
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
+    },
   },
 };
 </script>
 
 <template>
   <div class="gl-mt-5">
-    <gl-alert
-      variant="info"
-      :dismissible="false"
-      :title="s__('JiraService|This issue is synchronized with Jira')"
-      class="gl-mb-2"
+    <gl-alert v-if="errorMessage" variant="danger" :dismissable="false" class="gl-mb-2">
+      {{ errorMessage }}</gl-alert
     >
-      <gl-sprintf
-        :message="
-          s__(
-            `JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}.`,
-          )
-        "
+
+    <template v-else-if="!isLoading">
+      <gl-alert
+        variant="info"
+        :dismissible="false"
+        :title="s__('JiraService|This issue is synchronized with Jira')"
+        class="gl-mb-2"
       >
-        <template #link="{ content }">
-          <gl-link :href="issue.webUrl" target="_blank">{{ content }}</gl-link>
+        <gl-sprintf
+          :message="
+            s__(
+              `JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}.`,
+            )
+          "
+        >
+          <template #link="{ content }">
+            <gl-link :href="issue.webUrl" target="_blank">{{ content }}</gl-link>
+          </template>
+        </gl-sprintf>
+      </gl-alert>
+
+      <issuable-show
+        v-if="!isLoading"
+        :issuable="issue"
+        :enable-edit="false"
+        :status-badge-class="statusBadgeClass"
+        :status-icon="statusIcon"
+      >
+        <template #status-badge>{{ statusBadgeText }}</template>
+
+        <template #right-sidebar-items="{ sidebarExpanded }">
+          <sidebar :sidebar-expanded="sidebarExpanded" :selected-labels="issue.labels" />
         </template>
-      </gl-sprintf>
-    </gl-alert>
-
-    <issuable-show
-      v-if="!isLoading"
-      :issuable="issue"
-      :enable-edit="false"
-      :status-badge-class="statusBadgeClass"
-      :status-icon="statusIcon"
-    >
-      <template #status-badge>{{ statusBadgeText }}</template>
-
-      <template #right-sidebar-items="{ sidebarExpanded }">
-        <sidebar :sidebar-expanded="sidebarExpanded" :selected-labels="issue.labels" />
-      </template>
-    </issuable-show>
+      </issuable-show>
+    </template>
   </div>
 </template>
