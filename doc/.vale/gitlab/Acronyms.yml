@@ -107,6 +107,7 @@ exceptions:
   - PNG
   - POST
   - PUT
+  - RAID
   - RAM
   - RDP
   - REST
