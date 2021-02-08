@@ -2,7 +2,7 @@ import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
-//import resolvers from './graphql/resolvers';
+import resolvers from './graphql/resolvers';
 import CorpusManagement from './components/corpus_management.vue';
 
 Vue.use(VueApollo);
@@ -14,7 +14,7 @@ export default () => {
     return undefined;
   }
 
-  const defaultClient = createDefaultClient({}, {
+  const defaultClient = createDefaultClient(resolvers, {
     cacheConfig: {
       dataIdFromObject: (object) => {
           return object.id || defaultDataIdFromObject(object)

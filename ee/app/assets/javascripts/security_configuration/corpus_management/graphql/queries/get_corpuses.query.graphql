@@ -13,4 +13,7 @@ query getCorpuses($projectPath: ID!, $first: Int, $last: Int, $before: String, $
       }
     }
   }
+  restPackages(projectPath: $projectPath) @client {
+    data
+  }
 }

@@ -1,5 +1,4 @@
-import Package from './fragments/state.fragment.graphql';
-import axios from '~/lib/utils/axios_utils';
+import Api from 'ee/api';
 
 export default {
   Package: {
@@ -9,7 +8,12 @@ export default {
   },
   Query: {
     restPackages(_, {projectPath}) {
+      debugger;
       return {
+        data: Api.fetchPackages(projectPath).then(({data}) => {
+          debugger;
+          return data;
+        }),
         __typename: 'RestPackages',
       };
     }
