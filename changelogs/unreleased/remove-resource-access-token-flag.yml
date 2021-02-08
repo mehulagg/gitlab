@@ -1,0 +1,5 @@
+---
+title: Remove resource access token feature flag
+merge_request: 53663
+author:
+type: changed
