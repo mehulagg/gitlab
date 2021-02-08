@@ -24,6 +24,10 @@ module Gitlab
           http_get("api/payment_methods/#{id}", admin_headers)
         end
 
+        def filter_eligible_namespaces(user, namespaces)
+          http_post('api/v1/gitlab/namespaces/filter_purchase_eligible', admin_headers, { customer_uid: user.id, namespaces: namespaces })
+        end
+
         def activate(activation_code)
           uuid = Gitlab::CurrentSettings.uuid
 
