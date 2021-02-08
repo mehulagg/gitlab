@@ -79,6 +79,8 @@ Plans are underway for supporting the following languages, dependency managers, 
 | ------------------- | --------- | --------------- | ---------- | ----- |
 | [Poetry](https://python-poetry.org/) | Python | `poetry.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) | [GitLab#7006](https://gitlab.com/gitlab-org/gitlab/-/issues/7006) |
 
+Note: Support for sbt 1.3 and above was added in GitLab 13.9.
+
 ## Contribute your scanner
 
 The [Security Scanner Integration](../../../development/integrations/secure.md) documentation explains how to integrate other security scanners into GitLab.
