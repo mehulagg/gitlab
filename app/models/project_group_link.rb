@@ -14,6 +14,7 @@ class ProjectGroupLink < ApplicationRecord
   validate :different_group
 
   scope :non_guests, -> { where('group_access > ?', Gitlab::Access::GUEST) }
+  scope :with_developer_access, -> { where('group_access >= ?', Gitlab::Access::DEVELOPER) }
 
   alias_method :shared_with_group, :group
 

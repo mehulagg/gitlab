@@ -33,18 +33,31 @@ RSpec.describe ProjectGroupLink do
   end
 
   describe 'scopes' do
+    let!(:project_group_link_reporter) { create :project_group_link, :reporter }
+    let!(:project_group_link_maintainer) { create :project_group_link, :maintainer }
+    let!(:project_group_link_developer) { create :project_group_link }
+    let!(:project_group_link_guest) { create :project_group_link, :guest }
+
     describe '.non_guests' do
-      let!(:project_group_link_reporter) { create :project_group_link, :reporter }
-      let!(:project_group_link_maintainer) { create :project_group_link, :maintainer }
-      let!(:project_group_link_developer) { create :project_group_link }
-      let!(:project_group_link_guest) { create :project_group_link, :guest }
+      subject { described_class.non_guests }
 
       it 'returns all records which are greater than Guests access' do
-        expect(described_class.non_guests).to match_array([
-                                                           project_group_link_reporter,
-                                                           project_group_link_developer,
-                                                           project_group_link_maintainer
-                                                          ])
+        is_expected.to match_array([
+                                     project_group_link_reporter,
+                                     project_group_link_developer,
+                                     project_group_link_maintainer
+                                   ])
+      end
+    end
+
+    describe '.with_developer_access' do
+      subject { described_class.with_developer_access }
+
+      it 'returns all records which are greater or equal than Developer access' do
+        is_expected.to match_array([
+                                     project_group_link_developer,
+                                     project_group_link_maintainer
+                                   ])
       end
     end
   end
