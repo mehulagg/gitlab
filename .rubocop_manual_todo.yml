@@ -1452,6 +1452,7 @@ Gitlab/NamespacedClass:
     - 'app/finders/personal_access_tokens_finder.rb'
     - 'app/finders/personal_projects_finder.rb'
     - 'app/finders/projects_finder.rb'
+    - 'app/finders/project_groups_finder.rb'
     - 'app/finders/prometheus_metrics_finder.rb'
     - 'app/finders/protected_branches_finder.rb'
     - 'app/finders/releases_finder.rb'

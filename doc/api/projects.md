@@ -1033,6 +1033,77 @@ GET /projects/:id/users
 ]
 ```
 
+## List a project's groups
+
+Get a list of ancestor groups for this project.
+
+```plaintext
+GET /projects/:id/groups
+```
+
+| Attribute    | Type           | Required               | Description |
+|--------------|----------------|------------------------|-------------|
+| `id`         | integer/string | **{check-circle}** Yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding). |
+| `search`     | string         | **{dotted-circle}** No | Search for specific groups. |
+| `skip_groups`            | array of integers | **{dotted-circle}** no       | Skip the group IDs passed |
+| `with_shared`                 | boolean        | **{dotted-circle}** no       | Include projects shared to this group. Default is `false` |
+| `shared_min_access_level`       | integer           | **{dotted-circle}** no       | Limit to shared groups with at least this [access level](members.md#valid-access-levels) |
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Foobar Group",
+    "path": "foo-bar",
+    "description": "An interesting group",
+    "visibility": "public",
+    "share_with_group_lock": false,
+    "require_two_factor_authentication": false,
+    "two_factor_grace_period": 48,
+    "project_creation_level": "developer",
+    "auto_devops_enabled": null,
+    "subgroup_creation_level": "owner",
+    "emails_disabled": null,
+    "mentions_disabled": null,
+    "lfs_enabled": true,
+    "default_branch_protection": 2,
+    "avatar_url": "http://localhost:3000/uploads/group/avatar/1/foo.jpg",
+    "web_url": "http://localhost:3000/groups/foo-bar",
+    "request_access_enabled": false,
+    "full_name": "Foobar Group",
+    "full_path": "foo-bar",
+    "file_template_project_id": 1,
+    "parent_id": null,
+    "created_at": "2020-01-15T12:36:29.590Z"
+  },
+  {
+    "id": 2,
+    "name": "Shared Group",
+    "path": "foo/shared",
+    "description": "A group shared with project",
+    "visibility": "public",
+    "share_with_group_lock": false,
+    "require_two_factor_authentication": false,
+    "two_factor_grace_period": 48,
+    "project_creation_level": "developer",
+    "auto_devops_enabled": null,
+    "subgroup_creation_level": "owner",
+    "emails_disabled": null,
+    "mentions_disabled": null,
+    "lfs_enabled": true,
+    "default_branch_protection": 2,
+    "avatar_url": "http://gitlab.example.com/uploads/group/avatar/1/bar.jpg",
+    "web_url": "http://gitlab.example.com/groups/foo/bar",
+    "request_access_enabled": false,
+    "full_name": "Shared Group",
+    "full_path": "foo/shared",
+    "file_template_project_id": 1,
+    "parent_id": 123,
+    "created_at": "2020-01-15T12:36:29.590Z"
+  }
+]
+```
+
 ## Get project events
 
 Refer to the [Events API documentation](events.md#list-a-projects-visible-events).
