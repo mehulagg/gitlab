@@ -23,8 +23,8 @@ export default () => ({
     pageInfo: {},
   },
   selectedProject: {},
-  addColumnFormVisible: false,
   error: undefined,
+  addColumnFormVisible: false,
   // TODO: remove after ce/ee split of board_content.vue
   isShowingEpicsSwimlanes: false,
 });

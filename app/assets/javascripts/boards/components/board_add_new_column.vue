@@ -1,6 +1,7 @@
 <script>
 import {
   GlButton,
+  GlFormGroup,
   GlFormRadio,
   GlFormRadioGroup,
   GlSearchBoxByType,
@@ -23,6 +24,7 @@ export default {
   },
   components: {
     GlButton,
+    GlFormGroup,
     GlFormRadio,
     GlFormRadioGroup,
     GlSearchBoxByType,
@@ -156,17 +158,20 @@ export default {
 
         <p class="gl-m-5">{{ $options.i18n.formDescription }}</p>
 
-        <!-- TODO: tabs to Use existing label or Create new label -->
-
-        <label class="gl-px-5">{{ $options.i18n.selectLabel }}</label>
-
-        <gl-search-box-by-type
-          v-model.trim="searchTerm"
-          debounce="250"
-          :placeholder="$options.i18n.searchPlaceholder"
-          class="gl-mx-5 gl-mb-4"
-          @input="filterLabels"
-        />
+        <gl-form-group
+          id="group-id"
+          class="gl-mx-5"
+          :label="$options.i18n.selectLabel"
+          label-for="board-available-labels"
+        >
+          <gl-search-box-by-type
+            id="board-available-labels"
+            v-model.trim="searchTerm"
+            debounce="250"
+            :placeholder="$options.i18n.searchPlaceholder"
+            @input="filterLabels"
+          />
+        </gl-form-group>
 
         <div v-if="loading" class="gl-m-5">
           <gl-skeleton-loader :width="500" :height="172">
@@ -179,7 +184,7 @@ export default {
         <gl-form-radio-group
           v-else
           v-model="selectedLabelId"
-          class="gl-overflow-y-auto gl-p-5 gl-pt-4"
+          class="gl-overflow-y-auto gl-px-5"
         >
           <label
             v-for="label in labels"

@@ -65,9 +65,8 @@ export default {
   methods: {
     ...mapActions(['moveList']),
     afterFormEnters() {
-      // todo: apparently no safari support for using scrollTo with options obj
-      this.$refs.list.$el.scrollTo({ left: this.$refs.list.$el.scrollWidth, behavior: 'smooth' });
-      // todo: set focus to form field
+      const el = this.canDragColumns ? this.$refs.list.$el : this.$refs.list;
+      el.scrollTo({ left: el.scrollWidth, behavior: 'smooth' });
     },
     handleDragOnStart() {
       sortableStart();
@@ -108,8 +107,8 @@ export default {
     >
       <transition-group name="slide">
         <board-column
-          v-for="list in boardListsToUse"
-          :key="list.id"
+          v-for="(list, index) in boardListsToUse"
+          :key="index"
           ref="board"
           :can-admin-list="canAdminList"
           :list="list"
@@ -122,14 +121,13 @@ export default {
       </transition>
     </component>
 
-    <div v-else class="gl-display-flex">
-      <epics-swimlanes
-        ref="swimlanes"
-        :lists="boardListsToUse"
-        :can-admin-list="canAdminList"
-        :disabled="disabled"
-      />
-    </div>
+    <epics-swimlanes
+      v-else
+      ref="swimlanes"
+      :lists="boardListsToUse"
+      :can-admin-list="canAdminList"
+      :disabled="disabled"
+    />
 
     <board-content-sidebar v-if="isSwimlanesOn || glFeatures.graphqlBoardLists" />
   </div>

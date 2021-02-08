@@ -68,7 +68,7 @@ export default {
   >
     <div
       class="board-inner gl-display-flex gl-flex-direction-column gl-relative gl-h-full gl-rounded-base"
-      :class="{ 'board-column-highlighted': list.highlighted }"
+      :class="{ 'gl-shadow-blue-200-x0-y0-b4-s2 gl-bg-blue-50': list.highlighted }"
     >
       <board-list-header :can-admin-list="canAdminList" :list="list" :disabled="disabled" />
       <board-list
