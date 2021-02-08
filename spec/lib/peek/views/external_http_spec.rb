@@ -12,29 +12,29 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
   end
 
   let(:event_1) do
-    double(:event, payload: {
+    {
       method: 'POST', code: "200", duration: 0.03,
       scheme: 'https', host: 'gitlab.com', port: 80, path: '/api/v4/projects',
       query: 'current=true'
-    })
+    }
   end
 
   let(:event_2) do
-    double(:event, payload: {
+    {
       method: 'POST', duration: 1.3,
       scheme: 'http', host: 'gitlab.com', port: 80, path: '/api/v4/projects/2/issues',
       query: 'current=true',
       exception_object: Net::ReadTimeout.new
-    })
+    }
   end
 
   let(:event_3) do
-    double(:event, payload: {
+    {
       method: 'GET', code: "301", duration: 0.005,
       scheme: 'http', host: 'gitlab.com', port: 80, path: '/api/v4/projects/2',
       query: 'current=true',
       proxy_host: 'proxy.gitlab.com', proxy_port: 8080
-    })
+    }
   end
 
   it 'returns no results' do
@@ -44,9 +44,9 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
   end
 
   it 'returns aggregated results' do
-    subscriber.request(event_1)
-    subscriber.request(event_2)
-    subscriber.request(event_3)
+    subscriber.request(double(:event, payload: event_1))
+    subscriber.request(double(:event, payload: event_2))
+    subscriber.request(double(:event, payload: event_3))
 
     results = subject.results
     expect(results[:calls]).to eq(3)
@@ -86,14 +86,13 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
   end
 
   context 'when the host is in IPv4 format' do
+    before do
+      event_1[:host] = '1.2.3.4'
+    end
+
     it 'displays IPv4 in the label' do
-      subscriber.request(
-        double(:event, payload: {
-          method: 'POST', code: "200", duration: 0.03,
-          scheme: 'https', host: '1.2.3.4', port: 80, path: '/api/v4/projects',
-          query: 'current=true'
-        })
-      )
+      subscriber.request(double(:event, payload: event_1))
+
       expect(
         subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
       ).to match_array(
@@ -112,14 +111,13 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
   end
 
   context 'when the host is in IPv6 foramat' do
+    before do
+      event_1[:host] = '2606:4700:90:0:f22e:fbec:5bed:a9b9'
+    end
+
     it 'displays IPv6 in the label' do
-      subscriber.request(
-        double(:event, payload: {
-          method: 'POST', code: "200", duration: 0.03,
-          scheme: 'https', host: '2606:4700:90:0:f22e:fbec:5bed:a9b9', port: 80, path: '/api/v4/projects',
-          query: 'current=true'
-        })
-      )
+      subscriber.request(double(:event, payload: event_1))
+
       expect(
         subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
       ).to match_array(
@@ -138,21 +136,20 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
   end
 
   context 'when the query is a hash' do
-    it 'displays IPv6 in the label' do
-      subscriber.request(
-        double(:event, payload: {
-          method: 'POST', code: "200", duration: 0.03,
-          scheme: 'https', host: '2606:4700:90:0:f22e:fbec:5bed:a9b9', port: 80, path: '/api/v4/projects',
-          query: { current: true, 'item1' => 'string', 'item2' => [1, 2] }
-        })
-      )
+    before do
+      event_1[:query] = { current: true, 'item1' => 'string', 'item2' => [1, 2] }
+    end
+
+    it 'converts query hash into a query string' do
+      subscriber.request(double(:event, payload: event_1))
+
       expect(
         subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
       ).to match_array(
         [
           {
             duration: 30.0,
-            label: "POST https://[2606:4700:90:0:f22e:fbec:5bed:a9b9]:80/api/v4/projects?current=true&item1=string&item2%5B%5D=1&item2%5B%5D=2",
+            label: "POST https://gitlab.com:80/api/v4/projects?current=true&item1=string&item2%5B%5D=1&item2%5B%5D=2",
             code: "Response status: 200",
             proxy: nil,
             error: nil,
@@ -164,14 +161,13 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
   end
 
   context 'when the host is invalid' do
+    before do
+      event_1[:host] = '!@#%!@#%!@#%'
+    end
+
     it 'displays unknown in the label' do
-      subscriber.request(
-        double(:event, payload: {
-          method: 'POST', code: "200", duration: 0.03,
-          scheme: 'https', host: '!@#%!@#%!@#%', port: 80, path: '/api/v4/projects',
-          query: 'current=true'
-        })
-      )
+      subscriber.request(double(:event, payload: event_1))
+
       expect(
         subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
       ).to match_array(
@@ -190,14 +186,14 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
   end
 
   context 'when another URI component is invalid, raises an URI::Error' do
+    before do
+      # This raises an URI::Error exception
+      event_1[:port] = 'invalid'
+    end
+
     it 'displays unknown in the label' do
-      subscriber.request(
-        double(:event, payload: {
-          method: 'POST', code: "200", duration: 0.03,
-          scheme: 'https', host: 'invalid', port: 'invalid', path: '/api/v4/projects',
-          query: 'current=true'
-        })
-      )
+      subscriber.request(double(:event, payload: event_1))
+
       expect(
         subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
       ).to match_array(
@@ -216,14 +212,14 @@ RSpec.describe Peek::Views::ExternalHttp, :request_store do
   end
 
   context 'when another URI component is invalid, raises a StandardError exception' do
+    before do
+      # This raises a TypeError exception
+      event_1[:scheme] = 1234
+    end
+
     it 'displays unknown in the label' do
-      subscriber.request(
-        double(:event, payload: {
-          method: 'POST', code: "200", duration: 0.03,
-          scheme: 1234, host: 80, port: 'invalid', path: '/api/v4/projects',
-          query: 'current=true'
-        })
-      )
+      subscriber.request(double(:event, payload: event_1))
+
       expect(
         subject.results[:details].map { |data| data.slice(:duration, :label, :code, :proxy, :error, :warnings) }
       ).to match_array(
