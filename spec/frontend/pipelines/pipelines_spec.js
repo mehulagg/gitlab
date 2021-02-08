@@ -66,7 +66,8 @@ describe('Pipelines', () => {
   const findRunPipelineButton = () => findByTestId('run-pipeline-button');
   const findCiLintButton = () => findByTestId('ci-lint-button');
   const findCleanCacheButton = () => findByTestId('clear-cache-button');
-  const findStagesDropdown = () => findByTestId('mini-pipeline-graph-dropdown-toggle');
+  const findStagesDropdownToggle = () =>
+    wrapper.find('[data-testid="mini-pipeline-graph-dropdown"] .dropdown-toggle');
 
   const findEmptyState = () => wrapper.find(EmptyState);
   const findBlankState = () => wrapper.find(BlankState);
@@ -461,66 +462,67 @@ describe('Pipelines', () => {
     });
 
     describe('updates results when a staged is clicked', () => {
+      let stopMock;
+      let restartMock;
+      let cancelMock;
+
       beforeEach(() => {
         const copyPipeline = { ...pipelineWithStages };
         copyPipeline.id += 1;
-        mock
-          .onGet('twitter/flight/pipelines.json')
-          .reply(
-            200,
-            {
-              pipelines: [pipelineWithStages],
-              count: {
-                all: 1,
-                finished: 1,
-                pending: 0,
-                running: 0,
-              },
+        mock.onGet('twitter/flight/pipelines.json').reply(
+          200,
+          {
+            pipelines: [pipelineWithStages],
+            count: {
+              all: 1,
+              finished: 1,
+              pending: 0,
+              running: 0,
             },
-            {
-              'POLL-INTERVAL': 100,
-            },
-          )
-          .onGet(pipelineWithStages.details.stages[0].dropdown_path)
-          .reply(200, stageReply);
+          },
+          {
+            'POLL-INTERVAL': 100,
+          },
+        );
+        mock.onGet(pipelineWithStages.details.stages[0].dropdown_path).reply(200, stageReply);
 
         createComponent();
+
+        stopMock = jest.spyOn(wrapper.vm.poll, 'stop');
+        restartMock = jest.spyOn(wrapper.vm.poll, 'restart');
+        cancelMock = jest.spyOn(wrapper.vm.service.cancelationSource, 'cancel');
       });
 
       describe('when a request is being made', () => {
-        it('stops polling, cancels the request, & restarts polling', () => {
-          const stopMock = jest.spyOn(wrapper.vm.poll, 'stop');
-          const restartMock = jest.spyOn(wrapper.vm.poll, 'restart');
-          const cancelMock = jest.spyOn(wrapper.vm.service.cancelationSource, 'cancel');
+        it('stops polling, cancels the request, & restarts polling', async () => {
           mock.onGet('twitter/flight/pipelines.json').reply(200, pipelines);
 
-          return waitForPromises()
-            .then(() => {
-              wrapper.vm.isMakingRequest = true;
-              findStagesDropdown().trigger('click');
-            })
-            .then(() => {
-              expect(cancelMock).toHaveBeenCalled();
-              expect(stopMock).toHaveBeenCalled();
-              expect(restartMock).toHaveBeenCalled();
-            });
+          await waitForPromises();
+
+          wrapper.vm.isMakingRequest = true;
+          findStagesDropdownToggle().trigger('click');
+
+          await waitForPromises();
+
+          expect(cancelMock).toHaveBeenCalled();
+          expect(stopMock).toHaveBeenCalled();
+          expect(restartMock).toHaveBeenCalled();
         });
       });
 
       describe('when no request is being made', () => {
-        it('stops polling & restarts polling', () => {
-          const stopMock = jest.spyOn(wrapper.vm.poll, 'stop');
-          const restartMock = jest.spyOn(wrapper.vm.poll, 'restart');
+        it('stops polling & restarts polling', async () => {
           mock.onGet('twitter/flight/pipelines.json').reply(200, pipelines);
 
-          return waitForPromises()
-            .then(() => {
-              findStagesDropdown().trigger('click');
-              expect(stopMock).toHaveBeenCalled();
-            })
-            .then(() => {
-              expect(restartMock).toHaveBeenCalled();
-            });
+          await waitForPromises();
+
+          findStagesDropdownToggle().trigger('click');
+
+          await waitForPromises();
+
+          expect(cancelMock).not.toHaveBeenCalled();
+          expect(stopMock).toHaveBeenCalled();
+          expect(restartMock).toHaveBeenCalled();
         });
       });
     });

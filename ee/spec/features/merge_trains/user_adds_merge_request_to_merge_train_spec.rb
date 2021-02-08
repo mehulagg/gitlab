@@ -18,7 +18,6 @@ RSpec.describe 'User adds a merge request to a merge train', :js do
 
   before do
     stub_feature_flags(disable_merge_trains: false)
-    stub_feature_flags(ci_mini_pipeline_gl_dropdown: false)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
     project.add_maintainer(user)
     project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
@@ -70,11 +69,11 @@ RSpec.describe 'User adds a merge request to a merge train', :js do
       end
 
       it 'displays pipeline control' do
-        expect(page).to have_selector('[data-testid="mini-pipeline-graph-dropdown-toggle"]')
+        expect(page).to have_selector('[data-testid="mini-pipeline-graph-dropdown"]')
       end
 
       it 'does not allow retry for merge train pipeline' do
-        find('[data-testid="mini-pipeline-graph-dropdown-toggle"]').click
+        find('[data-testid="mini-pipeline-graph-dropdown"] .dropdown-toggle').click
         page.within '.ci-job-component' do
           expect(page).to have_selector('.ci-status-icon')
           expect(page).not_to have_selector('.retry')
