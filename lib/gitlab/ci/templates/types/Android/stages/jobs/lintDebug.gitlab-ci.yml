@@ -1,0 +1,11 @@
+template:
+  description: 'This template is for Auto Deploy in Auto DevOps'
+  type: job
+
+# Basic android and gradle stuff
+# Check linting
+lintDebug:
+  interruptible: true
+  stage: build
+  script:
+    - ./gradlew -Pci --console=plain :app:lintDebug -PbuildDir=lint

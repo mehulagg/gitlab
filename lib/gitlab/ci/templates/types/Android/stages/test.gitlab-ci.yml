@@ -1,0 +1,6 @@
+template:
+  description: 'This template is for Auto Deploy in Auto DevOps'
+  type: stage
+
+includes:
+  - template: ./jobs/debugTests.gitlab-ci.yml

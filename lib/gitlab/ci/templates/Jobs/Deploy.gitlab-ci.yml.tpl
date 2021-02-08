@@ -1,11 +1,5 @@
 template:
-  description: 'This template is for Auto Deploy in Auto DevOps'
-  ## Type
-  # 'pipeline' type ... It can define global keywords, such as `workflow`, `stages`.
-  #                     It must contain one of the 'stage' type template.
-  # 'stage' type ...    It can define multiple jobs.
-  # 'job' type ...      It contains a single job definition.
-  type: stage # one of 'pipeline', 'stage' or 'job'.
+  description: 'This template is for ...'
   version: 2.0.0
   arguments:
     - key: CI_REF_TEMPLATE_JOBS_DEPLOY_VERSION_MAJOR
@@ -14,19 +8,19 @@ template:
       type: Boolean
     - key: CI_COMMIT_BRANCH
       type: String
-    - key: REVIEW_DISABLED
-      type: String
-    - key: CI_COMMIT_TAG
-      type: String
-    - key: CI_COMMIT_BRANCH
-      type: String
 
 .auto-deploy:
-  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v1.0.7"
+{{ if '$CI_REF_TEMPLATE_JOBS_DEPLOY_VERSION_MAJOR == 2' }}
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v1.0.0"
+{{ else }}
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v2.0.0"
+{{ end }}
   dependencies: []
 
 review:
-  extends: .auto-deploy
+  extends:
+    - anchor: .auto-deploy
+      if: $CI_KUBERNETES_ACTIVE
   stage: review
   script:
     - auto-deploy check_kube_domain

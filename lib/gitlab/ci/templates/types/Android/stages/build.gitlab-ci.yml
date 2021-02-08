@@ -1,0 +1,7 @@
+template:
+  description: 'This template is for Auto Deploy in Auto DevOps'
+  type: stage
+
+includes:
+  - template: ./jobs/lintDebug.gitlab-ci.yml
+  - template: ./jobs/assembleDebug.gitlab-ci.yml

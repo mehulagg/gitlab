@@ -1,0 +1,10 @@
+template:
+  description: 'This template is for Auto Deploy in Auto DevOps'
+  type: job
+
+# Run all tests, if any fails, interrupt the pipeline(fail it)
+debugTests:
+  interruptible: true
+  stage: test
+  script:
+    - ./gradlew -Pci --console=plain :app:testDebug

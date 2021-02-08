@@ -1,0 +1,14 @@
+template:
+  description: 'This template is for Auto Deploy in Auto DevOps'
+  type: job
+  environment: ../../environments/openjdk.gitlab-ci.yml
+
+# Make Project
+assembleDebug:
+  interruptible: true
+  stage: build
+  script:
+    - ./gradlew assembleDebug
+  artifacts:
+    paths:
+      - app/build/outputs/

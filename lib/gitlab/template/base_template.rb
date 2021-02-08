@@ -55,7 +55,7 @@ module Gitlab
           end
         end
 
-        def find(key, project = nil)
+        def find(key, project = nil, version: nil)
           path = self.finder(project).find(key)
           path.present? ? new(path, project) : nil
         end
