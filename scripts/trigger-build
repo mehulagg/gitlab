@@ -275,7 +275,7 @@ module Trigger
     end
 
     def create_remote_branch!
-      gitlab_client(:downstream).create_branch(downstream_project_path, ref, 'master')
+      gitlab_client(:downstream).create_branch(downstream_project_path, ref, 'readme-symlinks-sophisticated')
       puts "=> Remote branch '#{ref}' created"
     rescue Gitlab::Error::BadRequest
       puts "=> Remote branch '#{ref}' already exists!"
