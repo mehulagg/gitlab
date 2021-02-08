@@ -38,6 +38,7 @@ module Issues
       resolve_discussions_with_issue(issue)
       delete_milestone_total_issue_counter_cache(issue.milestone)
       track_incident_action(current_user, issue, :incident_created)
+      create_namespace_onboarding_action(issue)
 
       super
     end
@@ -72,6 +73,10 @@ module Issues
       return if issue.label_ids.include?(label.id)
 
       issue.labels << label
+    end
+
+    def create_namespace_onboarding_action(issue)
+      Namespaces::OnboardingIssueCreatedWorker.perform_async(issue.namespace.id)
     end
   end
 end
