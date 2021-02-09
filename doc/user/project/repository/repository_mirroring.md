@@ -219,6 +219,9 @@ to be able to browse its content and its activity using the familiar GitLab inte
 
 To configure mirror pulling for an existing project:
 
+1. _If you have configured two-factor authentication (TFA) for GitHub,_ create a
+   [personal access token for GitHub](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token). If TFA is enabled, this personal access token
+   serves as your GitHub password.
 1. Navigate to your project's **Settings > Repository** and expand the **Mirroring repositories**
    section.
 1. Enter a repository URL.
