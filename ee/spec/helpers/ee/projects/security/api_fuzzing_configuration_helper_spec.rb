@@ -18,9 +18,9 @@ RSpec.describe Projects::Security::ApiFuzzingConfigurationHelper do
   end
 
   describe '#api_fuzzing_configuration_data' do
-    context 'user with set_pipeline_variables permissions' do
+    context 'user with admin_pipeline permissions' do
       before do
-        allow(helper).to receive(:can?).with(user, :set_pipeline_variables, project).and_return(true)
+        allow(helper).to receive(:can?).with(user, :admin_pipeline, project).and_return(true)
       end
 
       it {
@@ -35,9 +35,9 @@ RSpec.describe Projects::Security::ApiFuzzingConfigurationHelper do
       }
     end
 
-    context 'user without set_pipeline_variables permissions' do
+    context 'user without admin_pipeline permissions' do
       before do
-        allow(helper).to receive(:can?).with(user, :set_pipeline_variables, project).and_return(false)
+        allow(helper).to receive(:can?).with(user, :admin_pipeline, project).and_return(false)
       end
 
       it {
