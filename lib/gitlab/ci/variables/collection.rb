@@ -43,9 +43,19 @@ module Gitlab
             .to_h.with_indifferent_access
         end
 
+        def ==(other)
+          return false unless other.class == self.class
+
+          @variables == other.variables
+        end
+
         def sorted_collection(project)
           Sorted.new(self, project)
         end
+
+        protected
+
+        attr_reader :variables
       end
     end
   end
