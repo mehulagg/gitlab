@@ -43,6 +43,7 @@ import {
   parseBoolean,
 } from '~/lib/utils/common_utils';
 import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
+import initFilteredSearch from 'ee/boards/filtered_search';
 
 Vue.use(VueApollo);
 
@@ -70,6 +71,7 @@ export default () => {
   }
 
   if (!gon?.features?.graphqlBoardLists) {
+    initFilteredSearch();
     boardsStore.create();
     boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
   }
@@ -115,7 +117,7 @@ export default () => {
       };
     },
     computed: {
-      ...mapGetters(['shouldUseGraphQL']),
+      ...mapGetters(['shouldUseGraphQL', 'isSwimlanesOn']),
       detailIssueVisible() {
         return Object.keys(this.detailIssue.issue).length;
       },
@@ -164,10 +166,13 @@ export default () => {
       eventHub.$off('initialBoardLoad', this.initialBoardLoad);
     },
     mounted() {
+      // if (!this.isSwimlanesOn) {
+      //   console.log('here');
       this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
       this.filterManager.setup();
 
       this.performSearch();
+      // }
 
       boardsStore.disabled = this.disabled;
 

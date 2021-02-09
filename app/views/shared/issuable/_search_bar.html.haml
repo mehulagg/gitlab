@@ -30,9 +30,7 @@
                 .js-filtered-search-history-dropdown{ data: { full_path: search_history_storage_prefix } }
             .filtered-search-box-input-container.droplab-dropdown
               .scroll-container
-                %ul.tokens-container.list-unstyled
-                  %li.input-token
-                    %input.form-control.filtered-search{ search_filter_input_options(type, placeholder) }
+                #js-board-filtered-search{ data: search_filter_input_options(type, placeholder) }
               #js-dropdown-hint.filtered-search-input-dropdown-menu.dropdown-menu.hint-dropdown
                 %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
                   %li.filter-dropdown-item{ data: {hint: "#{'{{hint}}'}", tag: "#{'{{tag}}'}", action: "#{'{{hint === \'search\' ? \'submit\' : \'\' }}'}" } }
