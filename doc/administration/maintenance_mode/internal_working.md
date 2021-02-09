@@ -24,18 +24,18 @@ However, as of [GitLab 13.9](https://gitlab.com/groups/gitlab-org/-/epics/2149),
 
 |HTTP verb | allowlisted routes |  Notes |
 |:----:|:--------------------------------------:|:----:|
-| POST | /admin/application_settings/general | only for administrators|
-| PUT | /api/v4/application/settings | only for administrators |
-| POST | /users/sign_in | to allow users to log in |
-| POST | /users/sign_out| to allow users to log out |
-| POST | /oauth/token | to allow users to log in to a secondary for the first time |
-| POST | /api/graphql | |
-| POST | /admin/session, /admin/session/destroy | |
+| POST | `/admin/application_settings/general` | only for administrators|
+| PUT  | `/api/v4/application/settings` | only for administrators |
+| POST | `/users/sign_in` | to allow users to log in |
+| POST | `/users/sign_out`| to allow users to log out |
+| POST | `/oauth/token` | to allow users to log in to a secondary for the first time |
+| POST | `/api/graphql` | |
+| POST | `/admin/session`, `/admin/session/destroy` | |
 | POST | ending with `/compare`| Git revision routes |
-| POST | .git/git-upload-pack | for Git pull/clone|
-| POST | /api/<v3, v4>/internal | internal api routes |
-| POST | /admin/sidekiq | |
-| POST |  /admin/geo | |
+| POST | `.git/git-upload-pack` | for Git pull/clone|
+| POST | `/api/<v3, v4>/internal` | internal API routes |
+| POST | `/admin/sidekiq` | |
+| POST |  `/admin/geo` | |
 | POST | paths including `/api/<v3, v4>/geo_replication`| |
 
 ## Why are some database writes allowed and some are not?
@@ -56,12 +56,4 @@ Unfortunately a complete disabling of database writes would involve categorizing
 
 Maintenance mode is aimed at offering a viable solution that is a trade-off between continued service and limiting writes to the database so that some important use cases are resolved, even though not all.
 
-## How does maintenance mode affect services that GitLab relies on?
-
-Maintenance mode will only affect the following related services:
-
-| Service | in maintenance mode|
-|---------|----|
-|GitLab Shell| Access requests to the rails application for Git pushes over SSH are denied |
-|Geo nodes|Git pushes that are proxied from secondary to primary will be blocked. Replication and verification will continue. Secondary will be in maintenance mode too once primary is in maintenance mode.|
-| Registry| Push to container registry is blocked, pull is allowed|
+Example use case:

@@ -161,3 +161,13 @@ Replication and verification will continue to work in maintenance mode.
 #### Fuzz testing
 
 #### Network policy management
+
+## How does maintenance mode affect services that GitLab relies on?
+
+Maintenance mode will only affect the following related services:
+
+| Service | in maintenance mode|
+|---------|----|
+|GitLab Shell| Access requests to the rails application for Git pushes over SSH are denied |
+|Geo nodes|Git pushes that are proxied from secondary to primary will be blocked. Replication and verification will continue. Secondary will be in maintenance mode too once primary is in maintenance mode.|
+| Registry| Push to container registry is blocked, pull is allowed|
