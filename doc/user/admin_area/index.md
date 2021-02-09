@@ -150,7 +150,7 @@ you must provide the complete email address.
 > - It's [deployed behind a feature flag](../../administration/feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(FREE SELF)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-user-permission-export-free-self). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -166,7 +166,7 @@ The following data is included in the export:
 - Path
 - Access level
 
-### Enable or disable User Permission Export
+### Enable or disable User Permission Export **(FREE SELF)**
 
 User Permission Export is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default**.
