@@ -1,0 +1,5 @@
+---
+title: Remove adjacency checks
+merge_request: 53771
+author:
+type: fixed
