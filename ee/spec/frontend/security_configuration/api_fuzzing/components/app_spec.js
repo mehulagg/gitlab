@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 
 import App from 'ee/security_configuration/api_fuzzing/components/app.vue';
 import ConfigurationForm from 'ee/security_configuration/api_fuzzing/components/configuration_form.vue';
@@ -55,6 +55,8 @@ describe('EE - ApiFuzzingConfigurationApp', () => {
   it('includes a link to API fuzzing documentation ', () => {
     createWrapper();
 
-    expect(wrapper.html()).toContain('/api_fuzzing/documentation/path');
+    const link = wrapper.find(GlLink);
+    expect(link.exists()).toBe(true);
+    expect(link.attributes('href')).toBe('/api_fuzzing/documentation/path');
   });
 });
