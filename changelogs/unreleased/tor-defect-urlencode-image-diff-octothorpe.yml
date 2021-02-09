@@ -1,0 +1,5 @@
+---
+title: Fix unencoded image URLs causing image diff viewer to not display images
+merge_request: 53638
+author:
+type: fixed

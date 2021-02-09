@@ -43,6 +43,19 @@ export default {
     hasDimensions() {
       return this.width && this.height;
     },
+    safePath() {
+      const safetyMappings = {
+        '#': '%23',
+        ' ': '%20',
+      };
+      let saferPath = this.path;
+
+      Object.keys(safetyMappings).forEach((character) => {
+        saferPath = saferPath.replace(new RegExp(character, 'gm'), safetyMappings[character]);
+      });
+
+      return saferPath;
+    },
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeThrottled, false);
@@ -84,7 +97,7 @@ export default {
 <template>
   <div data-testid="image-viewer" data-qa-selector="image_viewer_container">
     <div :class="innerCssClasses" class="position-relative">
-      <img ref="contentImg" :src="path" @load="onImgLoad" />
+      <img ref="contentImg" :src="safePath" @load="onImgLoad" />
       <slot
         name="image-overlay"
         :rendered-width="renderedWidth"

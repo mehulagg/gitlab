@@ -33,4 +33,21 @@ describe('Image Viewer', () => {
       },
     );
   });
+
+  describe('file path', () => {
+    it.each`
+      character | input                    | output
+      ${' '}    | ${'/url/hello 1.jpg'}    | ${'/url/hello%201.jpg'}
+      ${'#'}    | ${'/url/hello%20#1.jpg'} | ${'/url/hello%20%231.jpg'}
+    `(
+      'properly escapes `$character` characters while retaining the integrity of the URL',
+      ({ input, output }) => {
+        wrapper = mount(ImageViewer, {
+          propsData: { path: input },
+        });
+
+        expect(wrapper.vm.$refs.contentImg.getAttribute('src')).toBe(output);
+      },
+    );
+  });
 });
