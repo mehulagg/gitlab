@@ -42,6 +42,11 @@ module Gitlab
             .map { |env| [env.fetch(:key), env.fetch(:value)] }
             .to_h.with_indifferent_access
         end
+
+        # Returns a sorted Collection object, and sets errors property in case of an error
+        def sorted_collection(project)
+          Sorted.new(self, project).sort
+        end
       end
     end
   end
