@@ -8,7 +8,7 @@ export const I18N = {
   FORM_CREATED: s__("CreateValueStreamForm|'%{name}' Value Stream created"),
   RECOVER_HIDDEN_STAGE: s__('CreateValueStreamForm|Recover hidden stage'),
   RESTORE_HIDDEN_STAGE: s__('CreateValueStreamForm|Restore stage'),
-  RESTORE_STAGES: s__('CreateValueStreamForm|Restore defaults'),
+  RESTORE_DEFAULTS: s__('CreateValueStreamForm|Restore defaults'),
   RECOVER_STAGE_TITLE: s__('CreateValueStreamForm|Default stages'),
   RECOVER_STAGES_VISIBLE: s__('CreateValueStreamForm|All default stages are currently visible'),
   SELECT_START_EVENT: s__('CreateValueStreamForm|Select start event'),

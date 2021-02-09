@@ -48,7 +48,7 @@ describe('createComplianceFrameworksFormApp', () => {
     });
 
     it('parses and passes props', () => {
-      expect(findFormApp(CreateForm).props()).toMatchObject({
+      expect(findFormApp(CreateForm).props()).toStrictEqual({
         groupEditPath,
         groupPath,
       });
@@ -61,7 +61,8 @@ describe('createComplianceFrameworksFormApp', () => {
     });
 
     it('parses and passes props', () => {
-      expect(findFormApp(EditForm).props()).toMatchObject({
+      expect(findFormApp(EditForm).props()).toStrictEqual({
+        graphqlFieldName,
         groupEditPath,
         groupPath,
         id: testId,

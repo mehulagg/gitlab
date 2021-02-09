@@ -20,7 +20,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
         status: double(name: 'To Do'),
         key: 'GV-1',
         labels: [],
-        reporter: double(displayName: 'User', accountId: '10000'),
+        reporter: double(displayName: 'User', accountId: '10000', avatarUrls: { '48x48' => 'http://reporter.avatar' }),
         assignee: nil,
         client: double(options: { site: 'http://jira.com/' })
       )
@@ -37,7 +37,8 @@ RSpec.describe Resolvers::ExternalIssueResolver do
         'labels' => [],
         'author' => {
           'name' => 'User',
-          'web_url' => 'http://jira.com/people/10000'
+          'web_url' => 'http://jira.com/people/10000',
+          'avatar_url' => 'http://reporter.avatar'
         },
         'assignees' => [],
         'web_url' => 'http://jira.com/browse/GV-1',

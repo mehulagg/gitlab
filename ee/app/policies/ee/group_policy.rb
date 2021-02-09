@@ -198,6 +198,7 @@ module EE
         enable :read_confidential_epic
         enable :destroy_epic_link
         enable :admin_epic_board
+        enable :admin_epic_list
       end
 
       rule { reporter & subepics_available }.policy do
@@ -214,6 +215,7 @@ module EE
         prevent :admin_epic
         prevent :update_epic
         prevent :destroy_epic
+        prevent :admin_epic_list
       end
 
       rule { auditor }.policy do

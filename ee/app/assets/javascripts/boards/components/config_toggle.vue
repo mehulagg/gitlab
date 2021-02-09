@@ -1,6 +1,8 @@
 <script>
 import { GlButton, GlModalDirective, GlTooltipDirective } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
+import eventHub from '~/boards/eventhub';
+import { formType } from '~/boards/constants';
 
 export default {
   components: {
@@ -38,8 +40,9 @@ export default {
     },
   },
   methods: {
-    showPage(page) {
-      return this.boardsStore.showPage(page);
+    showPage() {
+      eventHub.$emit('showBoardModal', formType.edit);
+      return this.boardsStore.showPage(formType.edit);
     },
   },
 };
@@ -53,10 +56,9 @@ export default {
       :title="tooltipTitle"
       :class="{ 'dot-highlight': hasScope }"
       data-qa-selector="boards_config_button"
-      @click.prevent="showPage('edit')"
+      @click.prevent="showPage"
     >
       {{ buttonText }}
     </gl-button>
   </div>
 </template>
-};

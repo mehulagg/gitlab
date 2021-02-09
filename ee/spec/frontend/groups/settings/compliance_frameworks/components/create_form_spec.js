@@ -21,13 +21,14 @@ jest.mock('~/lib/utils/url_utility');
 
 describe('CreateForm', () => {
   let wrapper;
-  const sentryError = new Error('Network error');
-  const sentrySaveError = new Error('Invalid values given');
+
   const propsData = {
     groupPath: 'group-1',
     groupEditPath: 'group-1/edit',
-    scopedLabelsHelpPath: 'help/scoped-labels',
   };
+
+  const sentryError = new Error('Network error');
+  const sentrySaveError = new Error('Invalid values given');
 
   const create = jest.fn().mockResolvedValue(validCreateResponse);
   const createWithNetworkErrors = jest.fn().mockRejectedValue(sentryError);

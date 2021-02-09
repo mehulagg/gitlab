@@ -129,7 +129,21 @@ export default {
   [types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS](state, valueStream) {
     state.isCreatingValueStream = false;
     state.createValueStreamErrors = {};
-    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream);
+    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream, { deep: true });
+  },
+  [types.REQUEST_UPDATE_VALUE_STREAM](state) {
+    state.isEditingValueStream = true;
+    state.createValueStreamErrors = {};
+  },
+  [types.RECEIVE_UPDATE_VALUE_STREAM_ERROR](state, { data: { stages = [] }, errors = {} }) {
+    const { stages: stageErrors = {}, ...rest } = errors;
+    state.createValueStreamErrors = { ...rest, stages: prepareStageErrors(stages, stageErrors) };
+    state.isEditingValueStream = false;
+  },
+  [types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS](state, valueStream) {
+    state.isEditingValueStream = false;
+    state.createValueStreamErrors = {};
+    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream, { deep: true });
   },
   [types.REQUEST_DELETE_VALUE_STREAM](state) {
     state.isDeletingValueStream = true;
@@ -145,7 +159,7 @@ export default {
     state.selectedValueStream = null;
   },
   [types.SET_SELECTED_VALUE_STREAM](state, valueStream) {
-    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream);
+    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream, { deep: true });
   },
   [types.REQUEST_VALUE_STREAMS](state) {
     state.isLoadingValueStreams = true;

@@ -22,6 +22,33 @@ module EE
                 super
               end
             end
+
+            override :two_factor_otp_check
+            def two_factor_otp_check
+              return { success: false, message: 'Feature is not available' } unless ::License.feature_available?(:git_two_factor_enforcement)
+              return { success: false, message: 'Feature flag is disabled' } unless ::Feature.enabled?(:two_factor_for_cli)
+
+              actor.update_last_used_at!
+              user = actor.user
+
+              error_message = validate_actor_key(actor, params[:key_id])
+
+              return { success: false, message: error_message } if error_message
+
+              return { success: false, message: 'Deploy keys cannot be used for Two Factor' } if actor.key.is_a?(DeployKey)
+
+              return { success: false, message: 'Two-factor authentication is not enabled for this user' } unless user.two_factor_enabled?
+
+              otp_validation_result = ::Users::ValidateOtpService.new(user).execute(params.fetch(:otp_attempt))
+
+              if otp_validation_result[:status] == :success
+                ::Gitlab::Auth::Otp::SessionEnforcer.new(actor.key).update_session
+
+                { success: true }
+              else
+                { success: false, message: 'Invalid OTP' }
+              end
+            end
           end
         end
       end

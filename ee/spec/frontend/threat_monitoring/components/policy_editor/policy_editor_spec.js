@@ -38,6 +38,7 @@ describe('PolicyEditorApp component', () => {
     wrapper = shallowMount(PolicyEditorApp, {
       propsData: {
         threatMonitoringPath: '/threat-monitoring',
+        projectId: '21',
         ...propsData,
       },
       provide: {
@@ -124,6 +125,8 @@ kind: CiliumNetworkPolicy
 description: test description
 metadata:
   name: test-policy
+  labels:
+    app.gitlab.com/proj: '21'
 spec:
   endpointSelector:
     matchLabels:
@@ -147,6 +150,7 @@ spec:
             matchLabels: 'foo:bar',
           },
         ],
+        labels: { 'app.gitlab.com/proj': '21' },
       });
     });
   });
