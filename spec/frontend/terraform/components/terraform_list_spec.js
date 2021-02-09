@@ -28,14 +28,14 @@ describe('TerraformList', () => {
     };
 
     // Override @client  directives
-    getStatesQuery.getStates.definitions[1].selectionSet.selections = getStatesQuery.getStates.definitions[1].selectionSet.selections.map(
-      (selection) => {
-        return {
-          ...selection,
-          directives: [],
-        };
-      },
-    );
+    const { selectionSet } = getStatesQuery.getStates.definitions[1];
+    selectionSet.selections = selectionSet.selections.map((selection) => {
+      return {
+        ...selection,
+        directives: [],
+      };
+    });
+    getStatesQuery.getStates.definitions[1].selectionSet = selectionSet;
 
     const statsQueryResponse = queryResponse || jest.fn().mockResolvedValue(apolloQueryResponse);
     const apolloProvider = createMockApollo([[getStatesQuery, statsQueryResponse]]);
