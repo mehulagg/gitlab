@@ -79,7 +79,7 @@ failed status of the POST request. These visual bugs are to be fixed
 In maintenance mode, admins can edit the application settings. This will allow
 them to disable maintenance mode after it's been enabled.
 
-### Auth
+### Authentication
 
 All users can log in and out of the GitLab instance.
 
