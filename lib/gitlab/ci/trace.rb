@@ -139,14 +139,16 @@ module Gitlab
 
       def read_stream
         stream = Gitlab::Ci::Trace::Stream.new do
-          if trace_artifact
-            trace_artifact.open
-          elsif job.trace_chunks.any?
-            Gitlab::Ci::Trace::ChunkedIO.new(job)
-          elsif current_path
-            File.open(current_path, "rb")
-          elsif old_trace
-            StringIO.new(old_trace)
+          ::Gitlab::Database::Consistency.with_read_consistency do
+            if trace_artifact
+              trace_artifact.open
+            elsif job.trace_chunks.any?
+              Gitlab::Ci::Trace::ChunkedIO.new(job)
+            elsif current_path
+              File.open(current_path, "rb")
+            elsif old_trace
+              StringIO.new(old_trace)
+            end
           end
         end
 
