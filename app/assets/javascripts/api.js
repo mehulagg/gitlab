@@ -30,6 +30,7 @@ const Api = {
   projectLabelsPath: '/:namespace_path/:project_path/-/labels',
   projectFileSchemaPath: '/:namespace_path/:project_path/-/schema/:ref/:filename',
   projectUsersPath: '/api/:version/projects/:id/users',
+  projectGroupsPath: '/api/:version/projects/:id/groups.json',
   projectInvitationsPath: '/api/:version/projects/:id/invitations',
   projectMembersPath: '/api/:version/projects/:id/members',
   projectMergeRequestsPath: '/api/:version/projects/:id/merge_requests',
@@ -238,6 +239,22 @@ const Api = {
         },
       })
       .then(({ data }) => data);
+  },
+
+  projectGroups(id, options, callback = () => {}) {
+    const url = Api.buildUrl(this.projectGroupsPath).replace(':id', encodeURIComponent(id));
+
+    return axios
+      .get(url, {
+        params: {
+          ...options,
+        },
+      })
+      .then(({ data }) => {
+        callback(data);
+
+        return data;
+      });
   },
 
   addProjectMembersByUserId(id, data) {

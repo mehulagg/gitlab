@@ -2,7 +2,6 @@
 import $ from 'jquery';
 import { escape, debounce } from 'lodash';
 import Api from 'ee/api';
-import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 import { renderAvatar } from '~/helpers/avatar_helper';
 import { loadCSSFile } from '~/lib/utils/css_utils';
@@ -133,45 +132,17 @@ export default {
       const usersAsync = this.fetchUsers(term).then(addType(TYPE_USER));
 
       return Promise.all([groupsAsync, usersAsync])
-        .then(([groups, users]) => groups.concat(users))
-        .then((results) => ({ results }));
+        .then(([groups, users]) => console.log('>>>g', groups) || groups.concat(users))
+        .then((results) => console.log('>>>r', results) || { results });
     },
-    // fetchGroups(term) {
-    //   // Don't includeAll when search is empty. Otherwise, the user could get a lot of garbage choices.
-    //   // https://gitlab.com/gitlab-org/gitlab/issues/11566
-    //   const includeAll = term.trim().length > 0;
-
-    //   return Api.groups(term, {
-    //     skip_groups: this.skipGroupIds,
-    //     all_available: includeAll,
-    //   });
-    // },
-    // fetchGroups(term) {
-    //   const hasTerm = term.trim().length > 0;
-
-    //   return Api.projectGroups(this.projectId, {
-    //     with_shared: true,
-    //     shared_min_access_level: 30,
-    //     ...(hasTerm ? { search: term } : {}),
-    //   });
-    // },
     fetchGroups(term) {
-      const projectsGroupPath = '/api/:version/projects/:id/groups.json';
-      const url = Api.buildUrl(projectsGroupPath).replace(
-        ':id',
-        encodeURIComponent(this.projectId),
-      );
-      return axios
-        .get(url, {
-          params: {
-            with_shared: true,
-            shared_min_access_level: 30,
-            search: term,
-          },
-        })
-        .then(({ data }) => {
-          return data;
-        });
+      const hasTerm = term.trim().length > 0;
+
+      return Api.projectGroups(this.projectId, {
+        with_shared: true,
+        shared_min_access_level: 30,
+        ...(hasTerm ? { search: term } : {}),
+      });
     },
     fetchUsers(term) {
       return Api.projectUsers(this.projectId, term, {
