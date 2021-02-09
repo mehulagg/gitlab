@@ -152,7 +152,9 @@ $subscriptions-full-width-lg: 541px;
     }
 
     iframe {
-      background-color: $white;
+      // Use literals here to avoid dark theme from changing the color
+      // stylelint-disable-next-line
+      background-color: #fff;
       margin: -4px;
       width: 100% !important;
     }
