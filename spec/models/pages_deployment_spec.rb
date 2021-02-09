@@ -53,7 +53,8 @@ RSpec.describe PagesDeployment do
   end
 
   def create_migrated_deployment(project)
-    FileUtils.mkdir_p File.join(project.pages_path, "public")
+    public_path = File.join(project.pages_path, "public")
+    FileUtils.mkdir_p(public_path)
     File.open(File.join(project.pages_path, "public/index.html"), "w") do |f|
       f.write("Hello!")
     end
@@ -61,6 +62,8 @@ RSpec.describe PagesDeployment do
     expect(::Pages::MigrateLegacyStorageToDeploymentService.new(project).execute[:status]).to eq(:success)
 
     project.reload.pages_metadatum.pages_deployment
+  ensure
+    FileUtils.rm_rf(public_path)
   end
 
   describe 'default for file_store' do
