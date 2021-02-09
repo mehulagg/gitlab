@@ -9,6 +9,7 @@ allowlist
 allowlisted
 allowlisting
 allowlists
+Anchore
 anonymized
 Ansible
 Anthos
@@ -146,6 +147,7 @@ dequarantine
 dequarantined
 dequarantining
 DevOps
+Dhall
 disambiguates
 discoverability
 dismissable
@@ -306,6 +308,7 @@ lookbehinds
 lookups
 loopback
 Lucene
+Magick
 Maildir
 Mailgun
 Mailroom
@@ -417,6 +420,7 @@ Prettifier
 Pritaly
 Priyanka
 profiler
+Prolog
 Prometheus
 protobuf
 protobufs

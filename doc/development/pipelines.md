@@ -620,9 +620,7 @@ that is deployed in stage `review`.
 
 The default image is defined in [`.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
 
-<!-- vale gitlab.Spelling = NO -->
 It includes Ruby, Go, Git, Git LFS, Chrome, Node, Yarn, PostgreSQL, and Graphics Magick.
-<!-- vale gitlab.Spelling = YES -->
 
 The images used in our pipelines are configured in the
 [`gitlab-org/gitlab-build-images`](https://gitlab.com/gitlab-org/gitlab-build-images)
@@ -697,8 +695,6 @@ and included in `rules` definitions via [YAML anchors](../ci/yaml/README.md#anch
 
 #### `if:` conditions
 
-<!-- vale gitlab.Substitutions = NO -->
-
 | `if:` conditions | Description | Notes |
 |------------------|-------------|-------|
 | `if-not-canonical-namespace`                                 | Matches if the project isn't in the canonical (`gitlab-org/`) or security (`gitlab-org/security`) namespace. | Use to create a job for forks (by using `when: on_success|manual`), or **not** create a job for forks (by using `when: never`). |
@@ -712,9 +708,9 @@ and included in `rules` definitions via [YAML anchors](../ci/yaml/README.md#anch
 | `if-auto-deploy-branches`                                    | Matches if the current branch is an auto-deploy one. | |
 | `if-master-or-tag`                                           | Matches if the pipeline is for the `master` branch or for a tag. | |
 | `if-merge-request`                                           | Matches if the pipeline is for a merge request. | |
-| `if-merge-request-title-as-if-foss`                          | Matches if the pipeline is for a merge request and the MR title includes "RUN AS-IF-FOSS". | |
-| `if-merge-request-title-update-caches`                       | Matches if the pipeline is for a merge request and the MR title includes "UPDATE CACHE". | |
-| `if-merge-request-title-run-all-rspec`                       | Matches if the pipeline is for a merge request and the MR title includes "RUN ALL RSPEC". | |
+| `if-merge-request-title-as-if-foss`                          | Matches if the pipeline is for a merge request and the MR title includes `RUN AS-IF-FOSS`. | |
+| `if-merge-request-title-update-caches`                       | Matches if the pipeline is for a merge request and the MR title includes `UPDATE CACHE`. | |
+| `if-merge-request-title-run-all-rspec`                       | Matches if the pipeline is for a merge request and the MR title includes `RUN ALL RSPEC`. | |
 | `if-security-merge-request`                                  | Matches if the pipeline is for a security merge request. | |
 | `if-security-schedule`                                       | Matches if the pipeline is for a security scheduled pipeline. | |
 | `if-nightly-master-schedule`                                 | Matches if the pipeline is for a `master` scheduled pipeline with `$NIGHTLY` set. | |
@@ -727,10 +723,8 @@ and included in `rules` definitions via [YAML anchors](../ci/yaml/README.md#anch
 | `if-dot-com-ee-schedule`                                     | Limits jobs to scheduled pipelines for the `gitlab-org/gitlab` project on GitLab.com. | |
 | `if-cache-credentials-schedule`                              | Limits jobs to scheduled pipelines with the `$CI_REPO_CACHE_CREDENTIALS` variable set. | |
 | `if-rspec-fail-fast-disabled`                                | Limits jobs to pipelines with `$RSPEC_FAIL_FAST_ENABLED` variable not set to `"true"`. | |
-| `if-rspec-fail-fast-skipped`                                 | Matches if the pipeline is for a merge request and the MR title includes "SKIP RSPEC FAIL-FAST". | |
+| `if-rspec-fail-fast-skipped`                                 | Matches if the pipeline is for a merge request and the MR title includes `SKIP RSPEC FAIL-FAST`. | |
 | `if-security-pipeline-merge-result`                          | Matches if the pipeline is for a security merge request triggered by `@gitlab-release-tools-bot`. | |
-
-<!-- vale gitlab.Substitutions = YES -->
 
 #### `changes:` patterns
 
