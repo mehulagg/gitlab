@@ -83,16 +83,166 @@ RSpec.describe JiraService do
     end
   end
 
-  describe '#issue_types' do
-    subject(:issue_types) { jira_service.issue_types }
+  describe '#project_issuetype_scheme_ids' do
+    let(:jira_service) { described_class.new(options) }
+    subject(:issue_types) { jira_service.project_issuetype_scheme_ids }
 
-    let(:client) { double(Issuetype: issue_type_jira_resource) }
-    let(:issue_type_jira_resource) { double(all: jira_issue_types) }
-    let(:jira_issue_types) { [double(subtask: true), double(subtask: false, id: '10001', name: 'Bug', description: 'Jira Bug')] }
+    let(:issue_type_scheme_response) do
+      {
+        values: [
+          {
+            issueTypeScheme: {
+              id: '10126',
+              name: 'GV: Software Development Issue Type Scheme',
+              defaultIssueTypeId: '10005'
+            },
+            projectIds: [
+              '10000'
+            ]
+          }
+        ]
+      }
+    end
 
     before do
-      allow(jira_service.project).to receive(:jira_vulnerabilities_integration_enabled?).and_return(true)
-      allow(jira_service).to receive(:client).and_return(client)
+      WebMock.stub_request(:get, /api\/2\/project\/GL/).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: { 'id' => '10000' }.to_json, headers: { 'Content-Type' => 'application/json' })
+      WebMock.stub_request(:get, /api\/2\/issuetypescheme\/project\?projectId\=10000/).to_return(body: issue_type_scheme_response.to_json, headers: { 'Content-Type' => 'application/json' })
+    end
+
+    it 'returns ids of issuetype schemes' do
+      expect(issue_types).to eq(['10126'])
+    end
+  end
+
+  describe '#project_issuetype_ids' do
+    let(:jira_service) { described_class.new(options) }
+    subject(:issue_types) { jira_service.project_issuetype_ids }
+
+    let(:issue_type_scheme_response) do
+      {
+        values: [
+          {
+            issueTypeScheme: {
+              id: '10126',
+              name: 'GV: Software Development Issue Type Scheme',
+              defaultIssueTypeId: '10005'
+            },
+            projectIds: [
+              '10000'
+            ]
+          }
+        ]
+      }
+    end
+
+    let(:issue_type_mapping_response) do
+      {
+        values: [
+          {
+            issueTypeSchemeId: '10126',
+            issueTypeId: '10001'
+          },
+          {
+            issueTypeSchemeId: '10126',
+            issueTypeId: '10002'
+          },
+          {
+            issueTypeSchemeId: '10126',
+            issueTypeId: '10003'
+          },
+          {
+            issueTypeSchemeId: '10126',
+            issueTypeId: '10005'
+          },
+          {
+            issueTypeSchemeId: '10126',
+            issueTypeId: '10000'
+          }
+        ]
+      }
+    end
+
+    before do
+      WebMock.stub_request(:get, /api\/2\/project\/GL/).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: { 'id' => '10000' }.to_json, headers: { 'Content-Type' => 'application/json' })
+      WebMock.stub_request(:get, /api\/2\/issuetypescheme\/project\?projectId\=10000/).to_return(body: issue_type_scheme_response.to_json, headers: { 'Content-Type' => 'application/json' })
+      WebMock.stub_request(:get, /api\/2\/issuetypescheme\/mapping\?issueTypeSchemeId\=10126/).to_return(body: issue_type_mapping_response.to_json, headers: { 'Content-Type' => 'application/json' })
+    end
+
+    it 'returns ids of issuetype for given project' do
+      expect(issue_types).to eq(%w[10001 10002 10003 10005 10000])
+    end
+  end
+
+  describe '#issue_types' do
+    let(:jira_service) { described_class.new(options) }
+    subject(:issue_types) { jira_service.issue_types }
+
+    let(:issue_type_scheme_response) do
+      {
+        values: [
+          {
+            issueTypeScheme: {
+              id: '10126',
+              name: 'GV: Software Development Issue Type Scheme',
+              defaultIssueTypeId: '10001'
+            },
+            projectIds: [
+              '10000'
+            ]
+          }
+        ]
+      }
+    end
+
+    let(:issue_type_mapping_response) do
+      {
+        values: [
+          {
+            issueTypeSchemeId: '10126',
+            issueTypeId: '10003'
+          },
+          {
+            issueTypeSchemeId: '10126',
+            issueTypeId: '10001'
+          }
+        ]
+      }
+    end
+
+    let(:issue_types_response) do
+      [
+        {
+          id: '10004',
+          description: 'A new feature of the product, which has yet to be developed.',
+          name: 'New Feature',
+          untranslatedName: 'New Feature',
+          subtask: false,
+          avatarId: 10311
+        },
+        {
+          id: '10001',
+          description: 'Jira Bug',
+          name: 'Bug',
+          untranslatedName: 'Bug',
+          subtask: false,
+          avatarId: 10303
+        },
+        {
+          id: '10003',
+          description: 'A small piece of work thats part of a larger task.',
+          name: 'Sub-task',
+          untranslatedName: 'Sub-task',
+          subtask: true,
+          avatarId: 10316
+        }
+      ]
+    end
+
+    before do
+      WebMock.stub_request(:get, /api\/2\/project\/GL\z/).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: { 'id' => '10000' }.to_json, headers: { 'Content-Type' => 'application/json' })
+      WebMock.stub_request(:get, /api\/2\/issuetype\z/).to_return(body: issue_types_response.to_json, headers: { 'Content-Type' => 'application/json' })
+      WebMock.stub_request(:get, /api\/2\/issuetypescheme\/project\?projectId\=10000\z/).to_return(body: issue_type_scheme_response.to_json, headers: { 'Content-Type' => 'application/json' })
+      WebMock.stub_request(:get, /api\/2\/issuetypescheme\/mapping\?issueTypeSchemeId\=10126\z/).to_return(body: issue_type_mapping_response.to_json, headers: { 'Content-Type' => 'application/json' })
     end
 
     it 'loads all issue types without subtask issue types' do

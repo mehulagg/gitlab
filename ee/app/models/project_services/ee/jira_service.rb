@@ -30,10 +30,28 @@ module EE
       active? && project_key.present? && vulnerabilities_issuetype.present? && jira_vulnerabilities_integration_enabled?
     end
 
+    def project_issuetype_scheme_ids
+      client
+        .get(client.options[:rest_base_path] + '/issuetypescheme/project?projectId=' + jira_project_id.to_s)
+        .fetch('values', [])
+        .map { |schemes| schemes.dig('issueTypeScheme', 'id') }
+    end
+
+    def project_issuetype_ids
+      query = project_issuetype_scheme_ids.map { |scheme_id| "issueTypeSchemeId=#{scheme_id}" }.join('&')
+      client
+        .get(client.options[:rest_base_path] + '/issuetypescheme/mapping?' + query)
+        .fetch('values', [])
+        .map { |schemes| schemes['issueTypeId'] }
+    end
+
     def issue_types
+      return [] if jira_project.blank?
+
       client
         .Issuetype
         .all
+        .select { |issue_type| issue_type.id.in?(project_issuetype_ids) }
         .reject { |issue_type| issue_type.subtask }
         .map { |issue_type| { id: issue_type.id, name: issue_type.name, description: issue_type.description } }
     end
@@ -71,8 +89,12 @@ module EE
     end
 
     def jira_project_id
-      strong_memoize(:jira_project_id) do
-        client_url.present? ? jira_request { client.Project.find(project_key).id } : nil
+      jira_project.id
+    end
+
+    def jira_project
+      strong_memoize(:jira_project) do
+        client_url.present? ? jira_request { client.Project.find(project_key) } : nil
       end
     end
   end
