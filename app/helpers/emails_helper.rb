@@ -255,6 +255,13 @@ module EmailsHelper
     end
   end
 
+  def access_token_about_to_expire_list(user)
+    limit_date = PersonalAccessToken::DAYS_TO_EXPIRE.days.from_now.to_date
+    tokens = user.personal_access_tokens.without_impersonation.expiring_and_not_notified(limit_date)
+
+    tokens.pluck(:name) # rubocop: disable CodeReuse/ActiveRecord
+  end
+
   def contact_your_administrator_text
     _('Please contact your administrator with any questions.')
   end
