@@ -40713,6 +40713,24 @@
               "deprecationReason": null
             },
             {
+              "name": "divergedFromTargetBranch",
+              "description": "Indicates if the source branch is behind the target branch.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "downvotes",
               "description": "Number of downvotes for the merge request.",
               "args": [

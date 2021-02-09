@@ -14891,6 +14891,11 @@ type MergeRequest implements CurrentUserTodos & Noteable {
   ): DiscussionConnection!
 
   """
+  Indicates if the source branch is behind the target branch.
+  """
+  divergedFromTargetBranch: Boolean!
+
+  """
   Number of downvotes for the merge request.
   """
   downvotes: Int!
