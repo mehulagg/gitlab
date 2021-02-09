@@ -121,4 +121,38 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
       expect(collection.to_hash).not_to include(TEST1: 'test-1')
     end
   end
+
+  describe '#sorted_collection' do
+    context 'when FF :variable_inside_variable is enabled' do
+      before do
+        stub_feature_flags(variable_inside_variable: [project])
+      end
+
+      let!(:project) { create(:project) }
+
+      let(:collection) do
+        described_class.new
+          .append(key: 'A', value: 'test-$B')
+          .append(key: 'B', value: 'test-$C')
+          .append(key: 'C', value: 'test')
+      end
+
+      subject { collection.sorted_collection(project) }
+
+      it { is_expected.to be_a(Gitlab::Ci::Variables::Collection::Sorted) }
+
+      context 'sorted_collection#sort returns expected variables' do
+        let(:sort) { subject.sort.to_runner_variables}
+
+        it 'returns sorted Collection' do
+          expect(sort).to eq(
+            [
+              { key: 'C', value: 'test', masked: false, protected: false, public: true },
+              { key: 'B', value: 'test-$C', masked: false, protected: false, public: true },
+              { key: 'A', value: 'test-$B', masked: false, protected: false, public: true }
+            ])
+        end
+      end
+    end
+  end
 end

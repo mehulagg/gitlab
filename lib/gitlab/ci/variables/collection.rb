@@ -42,6 +42,10 @@ module Gitlab
             .map { |env| [env.fetch(:key), env.fetch(:value)] }
             .to_h.with_indifferent_access
         end
+
+        def sorted_collection(project)
+          Sorted.new(self, project)
+        end
       end
     end
   end
