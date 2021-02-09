@@ -54,10 +54,10 @@ module EE
             GRAPHQL
           end
 
-          def variables(entity)
+          def variables(context)
             {
-              full_path: entity.source_full_path,
-              cursor: entity.next_page_for(:epics)
+              full_path: context.entity.source_full_path,
+              cursor: context.entity.next_page_for(:epics)
             }
           end
 
