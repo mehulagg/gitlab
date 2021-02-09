@@ -56,6 +56,8 @@ a community contribution is acceptable.
 
 Here is a message you can use to explain to community contributors as to why we reject simple updates:
 
+<!-- vale gitlab.RelativeLinks = NO -->
+
 ```markdown
 Hello CONTRIBUTOR!
 
@@ -69,6 +71,8 @@ You might find that we do not currently update DEPENDENCY automatically, but we 
 
 Thank you for understanding, I will close this Merge Request.  
 ```
+
+<!-- vale gitlab.RelativeLinks = YES -->
 
 ### Blocked dependencies
 
