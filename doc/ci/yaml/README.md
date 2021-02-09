@@ -4592,6 +4592,65 @@ Use this feature to ignore jobs, or use the
 [special YAML features](#special-yaml-features) and transform the hidden jobs
 into templates.
 
+### Custom YAML tags
+
+#### !reference
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/266173) in GitLab 13.9.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-custom-tags). **(FREE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+This custom YAML tag allows to merge specific keys from multiple file into a single pipeline configuration.
+
+```yaml
+# Content of setup.yml
+.setup:
+  script:
+    - echo creating environment1
+    - echo creating environment2
+
+# Content of teardown.yml
+.teardown:
+  script:
+    - echo deleting environment1
+    - echo deleting environment2
+
+# .gitlab-ci.yml
+include:
+  - local: setup.yml
+  - local: teardown.yml
+
+test:
+  script:
+    - !reference [.setup, script]
+    - echo running my own command
+    - !reference [.teardown, script]
+```
+
+##### Enable or disable custom tags **(FREE SELF)**
+
+The `!reference` tag is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_custom_yaml_tags)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_custom_yaml_tags)
+```
+
 ## Skip Pipeline
 
 To push a commit without triggering a pipeline, add `[ci skip]` or `[skip ci]`, using any
