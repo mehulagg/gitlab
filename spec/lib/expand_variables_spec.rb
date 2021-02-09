@@ -246,10 +246,6 @@ RSpec.describe ExpandVariables do
           "complex expansions": {
             value: 'key${variable}${variable2}',
             result: true
-          },
-          "complex expansions for Windows": {
-            value: 'key%variable%%variable2%',
-            result: true
           }
         }
       end

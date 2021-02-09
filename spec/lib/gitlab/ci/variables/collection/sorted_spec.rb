@@ -33,12 +33,6 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sorted do
                 { key: 'variable2', value: 'key${variable}' }
               ]
             },
-            "complex expansions with missing variable for Windows": {
-              variables: [
-                { key: 'variable', value: 'value' },
-                { key: 'variable3', value: 'key%variable%%variable2%' }
-              ]
-            },
             "out-of-order variable reference": {
               variables: [
                 { key: 'variable2', value: 'key${variable}' },

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ExpandVariables
-  VARIABLES_REGEXP = /\$([a-zA-Z_][a-zA-Z0-9_]*)|\${\g<1>}|%\g<1>%/.freeze
+  VARIABLES_REGEXP = /\$([a-zA-Z_][a-zA-Z0-9_]*)|\${\g<1>}/.freeze
 
   class << self
     def expand(value, variables)
@@ -19,7 +19,7 @@ module ExpandVariables
     def possible_var_reference?(value)
       return unless value
 
-      %w[$ %].any? { |symbol| value.include?(symbol) }
+      value.include?('$')
     end
 
     private
