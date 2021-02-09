@@ -3,6 +3,7 @@ import { GlButton, GlLink } from '@gitlab/ui';
 import CiIconBadge from '~/vue_shared/components/ci_badge_link.vue';
 import HeaderCi from '~/vue_shared/components/header_ci_component.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('Header CI Component', () => {
   let wrapper;
@@ -32,17 +33,19 @@ describe('Header CI Component', () => {
   const findTimeAgo = () => wrapper.findComponent(TimeagoTooltip);
   const findUserLink = () => wrapper.findComponent(GlLink);
   const findSidebarToggleBtn = () => wrapper.findComponent(GlButton);
-  const findActionButtons = () => wrapper.find('[data-testid="ci-header-action-buttons"]');
-  const findHeaderItemText = () => wrapper.find('[data-testid="ci-header-item-text"]');
+  const findActionButtons = () => wrapper.findByTestId('ci-header-action-buttons');
+  const findHeaderItemText = () => wrapper.findByTestId('ci-header-item-text');
 
   const createComponent = (props, slots) => {
-    wrapper = shallowMount(HeaderCi, {
-      propsData: {
-        ...defaultProps,
-        ...props,
-      },
-      ...slots,
-    });
+    wrapper = extendedWrapper(
+      shallowMount(HeaderCi, {
+        propsData: {
+          ...defaultProps,
+          ...props,
+        },
+        ...slots,
+      }),
+    );
   };
 
   afterEach(() => {
