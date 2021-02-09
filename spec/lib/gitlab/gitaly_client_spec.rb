@@ -267,11 +267,6 @@ RSpec.describe Gitlab::GitalyClient do
   end
 
   describe '.request_kwargs' do
-    context 'when catfile-cache feature is enabled' do
-      before do
-        stub_feature_flags('gitaly_catfile-cache': true)
-      end
-
       it 'sets the gitaly-session-id in the metadata' do
         results = described_class.request_kwargs('default', timeout: 1)
         expect(results[:metadata]).to include('gitaly-session-id')
