@@ -232,7 +232,7 @@ container_scanning:
         -----END CERTIFICATE-----
 ```
 
-The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/index.md#create-a-custom-variable-in-the-ui), either as a `file`, which will require the path to the certificate, or as a variable, which will require the text representation of the certificate.
+The `ADDITIONAL_CA_CERT_BUNDLE` value can also be configured as a [custom variable in the UI](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui), either as a `file`, which will require the path to the certificate, or as a variable, which will require the text representation of the certificate.
 
 ### Vulnerability allowlisting
 
