@@ -13,7 +13,9 @@ class SetUserStatusBasedOnUserCapSettingWorker
 
     return unless user.blocked_pending_approval?
     return if user_cap_max.nil?
-    return if user_cap_reached?
+
+    send_user_cap_reached_email if user_cap_reached?
+    return if user_cap_reached? || user_cap_exceeded?
 
     if user.activate
       # Resends confirmation email if the user isn't confirmed yet.
@@ -41,11 +43,11 @@ class SetUserStatusBasedOnUserCapSettingWorker
   end
 
   def user_cap_reached?
-    return false if current_billable_users_count < user_cap_max
+    current_billable_users_count == user_cap_max
+  end
 
-    send_user_cap_reached_email if current_billable_users_count == user_cap_max
-
-    true
+  def user_cap_exceeded?
+    current_billable_users_count > user_cap_max
   end
 
   def send_user_cap_reached_email
