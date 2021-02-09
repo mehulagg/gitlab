@@ -100,7 +100,7 @@ If you do not have an existing SSH key pair, generate a new one.
 1. Accept the suggested filename and directory, unless you are generating a [deploy key](../user/project/deploy_keys/index.md)
    or want to save in a specific directory where you store other keys.
 
-   You can also dedicate the SSH key pair to a [specific host](configure-ssh-to-point-to-a-different-private-key-location).
+   You can also dedicate the SSH key pair to a [specific host](#configure-ssh-to-point-to-a-different-private-key-location).
 
 1. Specify a [passphrase](https://www.ssh.com/ssh/passphrase/):
 
