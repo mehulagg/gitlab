@@ -19,6 +19,7 @@ class Note < ApplicationRecord
   include Gitlab::SQL::Pattern
   include ThrottledTouch
   include FromUnion
+  include Spammable
 
   cache_markdown_field :note, pipeline: :note, issuable_state_filter_enabled: true
 
@@ -45,6 +46,8 @@ class Note < ApplicationRecord
 
   # Attribute used to store the attributes that have been changed by quick actions.
   attr_accessor :commands_changes
+
+  attr_spammable :note, spam_description: true
 
   default_value_for :system, false
 
@@ -273,6 +276,15 @@ class Note < ApplicationRecord
 
   def for_issuable?
     for_issue? || for_merge_request?
+  end
+
+  def check_for_spam?
+    for_issuable? && publicly_visible? && (note_changed? || issue.confidential_changed?)
+  end
+
+  # Returns `true` if this Issue is visible to everybody.
+  def publicly_visible?
+    project.public? && !issue.confidential? && !::Gitlab::ExternalAuthorization.enabled?
   end
 
   def skip_project_check?

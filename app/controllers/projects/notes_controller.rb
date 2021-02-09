@@ -5,6 +5,7 @@ class Projects::NotesController < Projects::ApplicationController
   include NotesActions
   include NotesHelper
   include ToggleAwardEmoji
+  include SpammableActions
 
   before_action :whitelist_query_limiting, only: [:create, :update]
   before_action :authorize_read_note!
