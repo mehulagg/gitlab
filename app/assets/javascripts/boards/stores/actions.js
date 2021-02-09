@@ -110,8 +110,29 @@ export default {
       .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
   },
 
-  createList: ({ state, commit, dispatch }, { backlog, labelId, milestoneId, assigneeId }) => {
+  highlightList: ({ state }, listId) => {
+    state.highlightedLists.push(listId);
+
+    setTimeout(() => {
+      const index = state.highlightedLists.indexOf(listId);
+      if (index > -1) {
+        state.highlightedLists.splice(index, 1);
+      }
+    }, 4000);
+  },
+
+  createList: (
+    { state, commit, dispatch, getters },
+    { backlog, labelId, milestoneId, assigneeId },
+  ) => {
     const { boardId } = state;
+
+    const existingList = getters.getListByLabelId(labelId);
+
+    if (existingList) {
+      dispatch('highlightList', existingList.id);
+      return;
+    }
 
     gqlClient
       .mutate({
@@ -127,10 +148,15 @@ export default {
       .then(({ data }) => {
         if (data?.boardListCreate?.errors.length) {
           commit(types.CREATE_LIST_FAILURE);
+          throw new Error(data.boardListCreate.errors[0]);
         } else {
           const list = data.boardListCreate?.list;
           dispatch('addList', list);
+          return list;
         }
+      })
+      .then((list) => {
+        dispatch('highlightList', list.id);
       })
       .catch(() => commit(types.CREATE_LIST_FAILURE));
   },

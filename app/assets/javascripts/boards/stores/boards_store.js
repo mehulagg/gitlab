@@ -107,6 +107,10 @@ const boardsStore = {
       .save()
       .then(() => {
         // Remove any new issues from the backlog
+        list.highlighted = true;
+        setTimeout(() => {
+          list.highlighted = false;
+        }, 4000);
         // as they will be visible in the new list
         list.issues.forEach(backlogList.removeIssue.bind(backlogList));
         this.state.lists = sortBy(this.state.lists, 'position');
@@ -117,6 +121,7 @@ const boardsStore = {
   },
 
   updateNewListDropdown(listId) {
+    // eslint-disable-next-line no-unused-expressions
     document
       .querySelector(`.js-board-list-${getIdFromGraphQLId(listId)}`)
       ?.classList.remove('is-active');
