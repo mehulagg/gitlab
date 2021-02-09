@@ -140,6 +140,13 @@ module QA
         end
       end
 
+      def reload!
+        Resource::MergeRequest.fabricate_via_api! do |resource|
+          resource.project = project
+          resource.id = api_resource[:iid]
+        end
+      end
+
       private
 
       def transform_api_resource(api_resource)
