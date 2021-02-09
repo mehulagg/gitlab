@@ -151,9 +151,9 @@ This allows the administrator to "see what the user sees," and take actions on b
 Impersonation can be conducted via:
 
 1. Admin Area > Overview > Users > [Select a user] > Impersonate (see screenshot below)
-1. API using [impersonation tokens](../../api/README.html#impersonation-tokens)
+1. API using [impersonation tokens](../../api/README.md#impersonation-tokens)
 
-All impersonation activity is [captured with audit events](../../administration/audit_events.html#impersonation-data).
+All impersonation activity is [captured with audit events](../../administration/audit_events.md#impersonation-data).
 
 ![user impersonation button](img/user_impersonation_button_example.png)
 
