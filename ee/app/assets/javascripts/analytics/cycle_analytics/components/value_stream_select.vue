@@ -11,10 +11,11 @@ import {
 import { mapState, mapActions } from 'vuex';
 import { sprintf, __ } from '~/locale';
 import ValueStreamForm from './value_stream_form.vue';
-import { BASE_DEFAULT_STAGE_CONFIG } from './create_value_stream_form/constants';
 
-const findStageById = (_id = '') =>
-  BASE_DEFAULT_STAGE_CONFIG.find(({ id }) => id.toLowerCase().trim() === _id);
+const findStageById = (defaultStageConfig, _id = '') => {
+  console.log('findStageById', defaultStageConfig, _id);
+  return defaultStageConfig.find(({ name }) => name.toLowerCase().trim() === _id);
+};
 
 const prepareCustomStage = ({ startEventLabel = {}, endEventLabel = {}, ...rest }) => ({
   ...rest,
@@ -24,10 +25,9 @@ const prepareCustomStage = ({ startEventLabel = {}, endEventLabel = {}, ...rest 
 });
 
 // default stages currently dont have any label based events
-const prepareDefaultStage = ({ name, ...rest }) => {
-  const { startEventIdentifier = null, endEventIdentifier = null } = findStageById(
-    name.toLowerCase().trim(),
-  );
+const prepareDefaultStage = (defaultStageConfig, { name, ...rest }) => {
+  const stage = findStageById(defaultStageConfig, name.toLowerCase().trim()) || {};
+  const { startEventIdentifier = null, endEventIdentifier = null } = stage;
   return {
     ...rest,
     name,
@@ -150,13 +150,16 @@ export default {
           // TODO: AFAICT default stages won't specify the start / end event identifiers
           // TODO: i dont think this will hold true if you edit a default stage, it might then become custom?
           // TODO: perhaps updating the stage only preserves one of the events that are used for the stage, not both...
+          // TODO: might need to re-think how we track default stages once they have been updated - maybe some additional UI to highlight it was a default?
+          // once the default stage is updated it becomes `custom` should we still allow selection of `issue_start_event`?
+
           ({ startEventIdentifier = null, endEventIdentifier = null, custom = false, ...rest }) => {
-            const fn =
+            const stageData =
               custom && startEventIdentifier && endEventIdentifier
-                ? prepareCustomStage
-                : prepareDefaultStage;
+                ? prepareCustomStage(rest)
+                : prepareDefaultStage(this.defaultStageConfig, rest);
             return {
-              ...fn(rest),
+              ...stageData,
               startEventIdentifier,
               endEventIdentifier,
               custom,
