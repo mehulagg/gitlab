@@ -21,6 +21,8 @@
         - if @can_bulk_update
           .check-all-holder.d-none.d-sm-block.hidden
             = check_box_tag "check-all-issues", nil, false, class: "check-all-issues left"
+        - if Feature.enabled?(:boards_filtered_search, @group)
+          #js-board-filtered-search
         .issues-other-filters.filtered-search-wrapper.d-flex.flex-column.flex-md-row
           .filtered-search-box
             - if type != :boards_modal && type != :boards
