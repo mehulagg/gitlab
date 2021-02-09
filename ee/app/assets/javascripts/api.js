@@ -296,7 +296,6 @@ export default {
   },
 
   fetchPackages(projectId, params = {}) {
-    debugger;
     const url = Api.buildUrl(this.projectPackagesPath).replace(
       ':id',
       encodeURIComponent(projectId),

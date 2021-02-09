@@ -33,10 +33,31 @@ export default {
         before: null,
       }
     }
+  },
+  computed: {
+    graphQlData() {
+      const packages = this.states?.project.packages.nodes;
+      debugger;
+      return packages;
+    },
+     restData() {
+       const packages = this.states?.restPackages.data;
+       debugger;
+      return packages;
+    },
+    mockedData() {
+      const packages = this.states?.mockedPackages.data;
+      debugger;
+      return packages;
+    },       
   }
 };
 </script>
 
 <template>
-  <span>foo</span>
+  <div>
+    <div>GraphQL: {{graphQlData}}</div>
+    <div>REST: {{restData}}</div>
+    <div>Mocked: {{mockedData}}</div>
+  </div>
 </template>

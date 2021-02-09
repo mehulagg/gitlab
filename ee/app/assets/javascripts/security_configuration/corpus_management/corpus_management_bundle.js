@@ -30,8 +30,6 @@ export default () => {
     projectFullPath,
   };
 
-  debugger;
-
   return new Vue({
     el,
     apolloProvider: new VueApollo({ defaultClient }),
