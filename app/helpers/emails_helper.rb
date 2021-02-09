@@ -256,8 +256,8 @@ module EmailsHelper
   end
 
   def access_token_about_to_expire_list(user)
-    limit_date = PersonalAccessToken::DAYS_TO_EXPIRE.days.from_now.to_date
-    tokens = user.personal_access_tokens.without_impersonation.expiring_and_not_notified(limit_date)
+    date = PersonalAccessToken::DAYS_TO_EXPIRE.days.from_now.to_date
+    tokens = user.personal_access_tokens.without_impersonation.expiring_and_not_notified(date)
 
     tokens.pluck(:name) # rubocop: disable CodeReuse/ActiveRecord
   end
