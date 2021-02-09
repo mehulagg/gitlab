@@ -82,7 +82,7 @@ export default {
         :data-testid="`action_${action.key}`"
         @click="handleItemClick(action)"
       >
-        <strong>{{ action.text }}</strong>
+        <span class="gl-font-weight-bold">{{ action.text }}</span>
       </gl-dropdown-item>
       <gl-dropdown-divider v-if="index != actions.length - 1" :key="action.key + '_divider'" />
     </template>
