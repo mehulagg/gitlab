@@ -1,7 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
 import AssigneeAvatar from '~/sidebar/components/assignees/assignee_avatar.vue';
-import AssigneeAvatarLink from '~/sidebar/components/assignees/assignee_avatar_link.vue';
+import AssigneeAvatarLink, {
+  generateAssigneeTooltip,
+} from '~/sidebar/components/assignees/assignee_avatar_link.vue';
 import userDataMock from '../../user_data_mock';
 
 const TOOLTIP_PLACEMENT = 'bottom';
@@ -76,6 +78,27 @@ describe('AssigneeAvatarLink component', () => {
 
       it('sets tooltip', () => {
         expect(findTooltipText()).toBe(expected);
+      });
+    },
+  );
+
+  describe.each`
+    tooltipHasName | availability | cannotMerge | expected
+    ${true}        | ${'Busy'}    | ${true}     | ${'Root (Busy) (cannot merge)'}
+    ${true}        | ${'Busy'}    | ${false}    | ${'Root (Busy)'}
+    ${true}        | ${''}        | ${true}     | ${'Root (cannot merge)'}
+    ${true}        | ${''}        | ${false}    | ${'Root'}
+    ${false}       | ${'Busy'}    | ${true}     | ${'Cannot merge'}
+    ${false}       | ${'Busy'}    | ${false}    | ${''}
+    ${false}       | ${''}        | ${true}     | ${'Cannot merge'}
+    ${false}       | ${''}        | ${false}    | ${''}
+  `(
+    "with $tooltipHasName and availability='$availability' and cannotMerge=$cannotMerge",
+    ({ tooltipHasName, availability, cannotMerge, expected }) => {
+      it('generates the tooltip text', () => {
+        expect(
+          generateAssigneeTooltip({ name: USER_NAME, availability, cannotMerge, tooltipHasName }),
+        ).toBe(expected);
       });
     },
   );
