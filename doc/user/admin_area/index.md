@@ -144,6 +144,47 @@ To search for users, enter your criteria in the search field. The user search is
 insensitive, and applies partial matching to name and username. To search for an email address,
 you must provide the complete email address.
 
+#### User Permission Export **(PREMIUM SELF)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1772) in GitLab 13.8.
+> - It's [deployed behind a feature flag](../../administration/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(FREE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can export user permissions for all users in the GitLab instance from the Admin Area's Users page.
+The export lists direct membership the users have in groups and projects.
+
+The following data is included in the export:
+
+- Username
+- Email
+- Type
+- Path
+- Access level
+
+### Enable or disable User Permission Export
+
+User Permission Export is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:export_user_permissions_feature_flag)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:export_user_permissions_feature_flag)
+```
+
 #### Users statistics
 
 The **Users statistics** page provides an overview of user accounts by role. These statistics are
