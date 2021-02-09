@@ -533,11 +533,17 @@ module Ci
       options&.dig(:environment, :on_stop)
     end
 
+    def variables
+      strong_memoize(:variables) do
+        variable_collection.to_runner_variables
+      end
+    end
+
     ##
     # All variables, including persisted environment variables.
     #
-    def variables
-      strong_memoize(:variables) do
+    def variable_collection
+      strong_memoize(:variable_collection) do
         Gitlab::Ci::Variables::Collection.new
           .concat(persisted_variables)
           .concat(dependency_proxy_variables)
