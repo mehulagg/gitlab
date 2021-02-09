@@ -186,8 +186,7 @@ To add a redirect:
    `gitlab-runner`, `omnibus-gitlab` or `charts`), depending on the location of
    the file that's being moved, renamed, or removed.
 1. To move or rename the documentation file, create a new file with the new
-   name or location, but don't delete the existing documentation file. To
-   remove the existing file and set up a redirect, go to the next step.
+   name or location, but don't delete the existing documentation file.
 1. In the to-be-redirected documentation file, add the redirect code for
    `/help`. Use the following template exactly, and only change the links and
    date. Use relative paths and `.md` for a redirect to another docs page. Use
