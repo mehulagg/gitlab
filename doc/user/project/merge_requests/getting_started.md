@@ -194,6 +194,33 @@ is set for deletion, the merge request widget displays the
 
 ![Delete source branch status](img/remove_source_branch_status.png)
 
+### Automatically retargeting merge requests
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/320902) in GitLab 13.9.
+> - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-automatically-retargeting-merge-requests). **(FREE SELF)**
+
+It is common to have a number of merge requests in a chain,
+when one depends on another. For example:
+
+- Merge Request A: merge `feature-A` into `master`
+- Merge Request B: merge `feature-B` into `feature-A`
+
+We can distinguish two workflows:
+
+- the MR A is merged into `master` first, and then MR B is retargeted onto `master`
+- the MR B is merged into `feature-A` branch, and then MR A is merged into `master`
+
+Upon merge of `MR A` does automatically retarget the `MR B` onto `master`.
+This relieves user from having to perform this operation manually.
+
+This feature works only in following cases:
+
+- The MR A needs to be in a main project (forks not supported), as we GitLab is cannot change target project of MR B
+- Only 4 MR's of type B are retargeted automatically this way
+
 ## Recommendations and best practices for Merge Requests
 
 - When working locally in your branch, add multiple commits and only push when
@@ -229,4 +256,23 @@ To disable it:
 Feature.disable(:reviewer_approval_rules)
 # For a single project
 Feature.disable(:reviewer_approval_rules, Project.find(<project id>))
+```
+
+### Enable or disable Automatically retargeting merge requests **(FREE SELF)**
+
+Automatically retargeting merge requests is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:retarget_merge_requests)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:retarget_merge_requests)
 ```

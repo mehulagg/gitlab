@@ -9,6 +9,8 @@ module MergeRequests
   class PostMergeService < MergeRequests::BaseService
     include RemovesRefs
 
+    MAX_RETARGET_MERGE_REQUESTS = 4
+
     def execute(merge_request)
       merge_request.mark_as_merged
       close_issues(merge_request)
@@ -18,6 +20,7 @@ module MergeRequests
       merge_request_activity_counter.track_merge_mr_action(user: current_user)
       notification_service.merge_mr(merge_request, current_user)
       execute_hooks(merge_request, 'merge')
+      retarget_chain_merge_requests(merge_request)
       invalidate_cache_counts(merge_request, users: merge_request.assignees | merge_request.reviewers)
       merge_request.update_project_counter_caches
       delete_non_latest_diffs(merge_request)
@@ -27,6 +30,31 @@ module MergeRequests
     end
 
     private
+
+    def retarget_chain_merge_requests(merge_request)
+      return unless Feature.enabled?(:retarget_merge_requests, merge_request.target_project)
+
+      # we can only retarget MRs that are targetting the same project
+      return unless merge_request.target_project == merge_request.source_project
+
+      # find another merge requests that
+      # - as a target have a current source project and branch
+      other_merge_requests = merge_request.source_project
+        .merge_requests
+        .opened
+        .by_target_branch(merge_request.source_branch)
+        .preload_source_project
+        .limit(MAX_RETARGET_MERGE_REQUESTS)
+
+      other_merge_requests.find_each do |other_merge_request|
+        # Update only MRs on projects that we have access to
+        next unless can?(current_user, :update_merge_request, other_merge_request.source_project)
+
+        ::MergeRequests::UpdateService
+          .new(other_merge_request.source_project, current_user, target_branch: merge_request.target_branch)
+          .execute(other_merge_request)
+      end
+    end
 
     def close_issues(merge_request)
       return unless merge_request.target_branch == project.default_branch
