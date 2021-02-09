@@ -598,17 +598,6 @@ with the Fog library that GitLab uses. Symptoms include an error in `production.
 411 Length Required
 ```
 
-### GitLab Pages requires NFS
-
-If you're working to add more GitLab servers for [scaling or fault tolerance](reference_architectures/index.md)
-and one of your requirements is [GitLab Pages](../user/project/pages/index.md) this currently requires
-NFS. There is [work in progress](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/196)
-to remove this dependency. In the future, GitLab Pages may use
-[object storage](https://gitlab.com/gitlab-org/gitlab/-/issues/208135).
-
-The dependency on disk storage also prevents Pages being deployed using the
-[GitLab Helm chart](https://gitlab.com/gitlab-org/charts/gitlab/-/issues/37).
-
 ### Incremental logging is required for CI to use object storage
 
 If you configure GitLab to use object storage for CI logs and artifacts,
