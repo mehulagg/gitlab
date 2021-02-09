@@ -12,6 +12,10 @@ module EE
         def pipelines
           super << EE::BulkImports::Groups::Pipelines::EpicsPipeline
         end
+
+        def importers
+          super << EE::BulkImports::Importers::Groups::EpicRelationsImporter
+        end
       end
     end
   end
