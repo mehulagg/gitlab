@@ -70,8 +70,8 @@ module Gitlab
 
           def each_variable_reference(value)
             walk_references(value) do |vars_hash, ref_var_name|
-              variable = vars_hash.dig(ref_var_name)
-              yield variable if variable
+              ref_var = vars_hash[ref_var_name]
+              yield ref_var if ref_var && !ref_var[:protected]
             end
           end
         end

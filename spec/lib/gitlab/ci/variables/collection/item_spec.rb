@@ -8,7 +8,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
   let(:expected_value) { variable_value }
 
   let(:variable) do
-    { key: variable_key, value: variable_value, public: true, masked: false }
+    { key: variable_key, value: variable_value, public: true, masked: false, protected: false }
   end
 
   describe '.new' do
@@ -136,7 +136,7 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
           .to_runner_variable
 
         expect(runner_variable)
-          .to eq(key: 'VAR', value: 'value', public: true, file: true, masked: false)
+          .to eq(key: 'VAR', value: 'value', public: true, file: true, masked: false, protected: false)
       end
     end
   end
