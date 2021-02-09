@@ -16,11 +16,12 @@ module Banzai
     # The reference type is used to determine what nodes to pass to the
     # `referenced_by` method.
     #
-    # Parser classes should either implement the instance method
-    # `references_relation` or overwrite `referenced_by`. The
+    # Parser classes should either override the class method
+    # `references_relation` or instance method `referenced_by`. The
     # `references_relation` method is supposed to return an
     # ActiveRecord::Relation used as a base relation for retrieving the objects
-    # referenced in a set of HTML nodes.
+    # referenced in a set of HTML nodes. By default, the relation model is
+    # derived from `reference_type` class accessor.
     #
     # Each class can implement two additional methods:
     #
@@ -34,8 +35,18 @@ module Banzai
     # `nodes_visible_to_user` method so it can ensure users can only see issues
     # they have access to.
     class BaseParser
+      include ::Gitlab::Utils::Override
+
       class << self
         attr_accessor :reference_type, :reference_options
+
+        def object_reference_pattern
+          references_relation.try(:reference_pattern)
+        end
+
+        def references_relation
+          reference_type.to_s.classify.constantize
+        end
       end
 
       # Returns the attribute name containing the value for every object to be
@@ -80,17 +91,10 @@ module Banzai
         ids = unique_attribute_values(nodes, self.class.data_attribute)
 
         if ids.empty?
-          references_relation.none
+          self.class.references_relation.none
         else
-          references_relation.where(id: ids)
+          self.class.references_relation.where(id: ids)
         end
-      end
-
-      # Returns the ActiveRecord::Relation to use for querying references in the
-      # DB.
-      def references_relation
-        raise NotImplementedError,
-          "#{self.class} does not implement #{__method__}"
       end
 
       # Returns a Hash containing attribute values per project ID.

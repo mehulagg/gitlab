@@ -6,10 +6,6 @@ module Banzai
     class IterationParser < BaseParser
       self.reference_type = :iteration
 
-      def references_relation
-        Iteration
-      end
-
       private
 
       def can_read_reference?(_user, _ref_project, _node)

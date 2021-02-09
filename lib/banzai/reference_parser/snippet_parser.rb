@@ -5,13 +5,9 @@ module Banzai
     class SnippetParser < BaseParser
       self.reference_type = :snippet
 
-      def references_relation
-        Snippet
-      end
-
       # Returns all the nodes that are visible to the given user.
       def nodes_visible_to_user(user, nodes)
-        snippets = lazy { grouped_objects_for_nodes(nodes, references_relation, self.class.data_attribute) }
+        snippets = lazy { grouped_objects_for_nodes(nodes, self.class.references_relation, self.class.data_attribute) }
 
         nodes.select do |node|
           if node.has_attribute?(self.class.data_attribute)

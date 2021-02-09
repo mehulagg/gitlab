@@ -11,7 +11,8 @@ module Banzai
         @data_attribute ||= PROJECT_ATTR
       end
 
-      def references_relation
+      override :references_relation
+      def self.references_relation
         Project
       end
     end

@@ -5,7 +5,8 @@ module Banzai
     class AlertParser < BaseParser
       self.reference_type = :alert
 
-      def references_relation
+      override :references_relation
+      def self.references_relation
         AlertManagement::Alert
       end
 

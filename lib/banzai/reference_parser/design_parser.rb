@@ -5,7 +5,8 @@ module Banzai
     class DesignParser < BaseParser
       self.reference_type = :design
 
-      def references_relation
+      override :references_relation
+      def self.references_relation
         DesignManagement::Design
       end
 

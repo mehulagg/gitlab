@@ -11,7 +11,8 @@ module Banzai
         @data_attribute ||= GROUP_ATTR
       end
 
-      def references_relation
+      override :references_relation
+      def self.references_relation
         Group
       end
 

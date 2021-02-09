@@ -5,7 +5,8 @@ module Banzai
     class FeatureFlagParser < BaseParser
       self.reference_type = :feature_flag
 
-      def references_relation
+      override :references_relation
+      def self.references_relation
         Operations::FeatureFlag
       end
 

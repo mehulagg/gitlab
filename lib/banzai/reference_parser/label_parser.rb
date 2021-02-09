@@ -5,10 +5,6 @@ module Banzai
     class LabelParser < BaseParser
       self.reference_type = :label
 
-      def references_relation
-        Label
-      end
-
       private
 
       def can_read_reference?(user, ref_project, node)

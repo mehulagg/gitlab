@@ -7,10 +7,6 @@ module Banzai
 
       self.reference_type = :project
 
-      def references_relation
-        Project
-      end
-
       private
 
       # Returns an Array of Project ids that can be read by the given user.
