@@ -18,6 +18,31 @@ The storage location of these files defaults to:
 
 These locations can be configured using the options described below.
 
+## Disabling Terraform state
+
+To disable terraform state site-wide, follow the steps below.
+
+**In Omnibus installations:**
+
+1. Edit `/etc/gitlab/gitlab.rb` and add the following line:
+
+   ```ruby
+   gitlab_rails['terraform_state_enabled'] = false
+   ```
+
+1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
+**In installations from source:**
+
+1. Edit `/home/git/gitlab/config/gitlab.yml` and add or amend the following lines:
+
+   ```yaml
+   terraform_state:
+     enabled: false
+   ```
+
+1. Save the file and [restart GitLab](restart_gitlab.md#installations-from-source) for the changes to take effect.
+
 ## Using local storage
 
 The default configuration uses local storage. To change the location where
