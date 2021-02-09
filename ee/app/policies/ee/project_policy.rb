@@ -416,9 +416,7 @@ module EE
     def resource_access_token_available?
       return true unless ::Gitlab.com?
 
-      group = project.namespace
-
-      group.feature_available_non_trial?(:resource_access_token)
+      project.namespace.feature_available_non_trial?(:resource_access_token)
     end
   end
 end
