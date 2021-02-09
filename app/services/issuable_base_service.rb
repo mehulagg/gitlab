@@ -261,6 +261,9 @@ class IssuableBaseService < BaseService
       end
     end
 
+    Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+      .track_task_item_status_changed(user: current_user)
+
     issuable
   end
 
