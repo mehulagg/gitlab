@@ -82,10 +82,10 @@ $subscriptions-full-width-lg: 541px;
 
     &.payment-method {
       // Use literals here to avoid dark theme from changing the color
-      // scss-lint:disable ColorVariable
+      // stylelint-disable-next-line
       background-color: #fff;
+      // stylelint-disable-next-line
       color: #303030;
-      // scss-lint:enable ColorVariable
     }
   }
 
@@ -152,10 +152,7 @@ $subscriptions-full-width-lg: 541px;
     }
 
     iframe {
-      // Use literal to avoid dark theme from changing the color
-      // scss-lint:disable ColorVariable
-      background-color: #fff;
-      // scss-lint:enable ColorVariable
+      background-color: $white;
       margin: -4px;
       width: 100% !important;
     }
@@ -182,6 +179,7 @@ $subscriptions-full-width-lg: 541px;
       font-weight: $gl-font-weight-normal;
     }
 
+    // stylelint-disable-next-line
     .field_with_errors {
       @include gl-flex-grow-1;
       display: inline;
