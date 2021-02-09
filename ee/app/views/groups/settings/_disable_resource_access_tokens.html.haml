@@ -1,0 +1,6 @@
+.form-group.gl-mb-3
+  .form-check
+    = f.check_box :delayed_project_removal, checked: !::Feature.enabled?(:resource_access_token_feature, group, default_enabled: true), class: 'form-check-input'
+    = f.label :delayed_project_removal, class: 'form-check-label' do
+      %span.gl-display-block= s_('GroupSettings|Disable resource access tokens')
+      %span.gl-text-gray-400= s_('GroupSettings|%{resource_access_tokens} will not be allowed in this group, its subgroups, or its projects.').html_safe % { resource_access_tokens: link_to('Resource access tokens', help_page_path('user/project/settings/project_access_tokens.md')) }
