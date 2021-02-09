@@ -21,7 +21,7 @@ module QA
 
       let(:auth_token) do
         QA::Flow::Login.while_signed_in(address: :geo_primary) do
-          Resource::PersonalAccessToken.fabricate!.access_token
+          Resource::PersonalAccessToken.fabricate!.token
         end
       end
 

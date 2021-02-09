@@ -4,14 +4,39 @@ require 'date'
 
 module QA
   module Resource
-    ##
-    # Create a personal access token that can be used by the api
-    #
     class PersonalAccessToken < Base
-      attr_accessor :name
+      attr_accessor :name, :user
 
-      attribute :access_token do
+      attribute :name
+      attribute :scopes
+      attribute :user_id
+      attribute :token do
         Page::Profile::PersonalAccessTokens.perform(&:created_access_token)
+      end
+
+      def fabricate_via_api!
+        super
+      end
+
+      def api_post_path
+        "/users/#{user.api_resource[:id]}/personal_access_tokens"
+      end
+
+      def api_get_path
+        '/personal_access_tokens'
+      end
+
+      def api_post_body
+        {
+          name: name,
+          scopes: ["api"]
+        }
+      end
+
+      def resource_web_url(resource)
+        super
+      rescue ResourceURLMissingError
+        # this particular resource does not expose a web_url property
       end
 
       def fabricate!

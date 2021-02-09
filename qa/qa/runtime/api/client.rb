@@ -69,7 +69,7 @@ module QA
 
           Flow::Login.sign_in_unless_signed_in(as: @user)
 
-          token = Resource::PersonalAccessToken.fabricate!.access_token
+          token = Resource::PersonalAccessToken.fabricate!.token
 
           # If this is a new session, that tests that follow could fail if they
           # try to sign in without starting a new session.
