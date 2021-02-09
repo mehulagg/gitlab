@@ -71,6 +71,8 @@ module Ci
     #
     # Since Gitlab 12.9, we started persisting the expanded environment name to
     # avoid repeated variables expansion in `action: stop` builds as well.
+    #
+    # This is a just a test
     def persisted_environment
       return unless has_environment?
 

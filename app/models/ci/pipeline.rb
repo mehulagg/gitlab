@@ -35,6 +35,8 @@ module Ci
     # is used for storing the processed CI YAML contents for linting purposes.
     # There is an open issue to address this:
     # https://gitlab.com/gitlab-org/gitlab/-/issues/259010
+    #
+    # This is just a test
     attr_accessor :merged_yaml
 
     belongs_to :project, inverse_of: :all_pipelines
