@@ -17766,7 +17766,7 @@ msgstr ""
 msgid "Manage"
 msgstr ""
 
-msgid "Manage (accept/reject) pending member requests"
+msgid "Manage (accept/reject) pending user sign ups"
 msgstr ""
 
 msgid "Manage Web IDE features"
@@ -29767,9 +29767,6 @@ msgstr ""
 msgid "This is a merge train pipeline"
 msgstr ""
 
-msgid "This is a notification to make you aware that your GitLab instance has reached the maximum allowed %{user_doc_link} set by an instance admin."
-msgstr ""
-
 msgid "This is a security log of important events involving your account."
 msgstr ""
 
@@ -31915,7 +31912,7 @@ msgstr ""
 msgid "Users"
 msgstr ""
 
-msgid "Users can still be invited to your instance and/or add themselves if permitted based on your settings. However, they will not have access to your instance, nor count towards your subscribed seat count until you %{approve_link}."
+msgid "Users can still be invited to your instance and/or add themselves if permitted based on your settings. They will not have access to your instance, nor count towards your subscribed seat count until you %{approve_link}."
 msgstr ""
 
 msgid "Users in License"
@@ -32763,6 +32760,9 @@ msgid "Welcome to the guided GitLab tour"
 msgstr ""
 
 msgid "What are you searching for?"
+msgstr ""
+
+msgid "What can I do?"
 msgstr ""
 
 msgid "What describes you best?"
@@ -33686,6 +33686,9 @@ msgid "Your GitLab account request has been approved!"
 msgstr ""
 
 msgid "Your GitLab group"
+msgstr ""
+
+msgid "Your GitLab instance has reached the maximum allowed %{user_doc_link} set by an instance admin."
 msgstr ""
 
 msgid "Your Groups"

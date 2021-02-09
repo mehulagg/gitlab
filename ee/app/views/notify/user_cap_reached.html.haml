@@ -3,7 +3,7 @@
 
 %p
   %b= _('What does this mean?')
-  = _('Users can still be invited to your instance and/or add themselves if permitted based on your settings. They will not have access to your instance, nor count towards your subscribed seat count until you %{approve_link}.').html_safe % { approve_link: link_to(_('approve them'), @url_to_approve) }
+  = _('Users can still be invited to your instance and/or add themselves if permitted based on your settings. They will not have access to your instance, nor count towards your subscribed seat count until you %{approve_link}.').html_safe % { approve_link: link_to(_('approve them'), @url_to_manage_pending_users) }
 
 %p
   %b= _('What can I do?')
