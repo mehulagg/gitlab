@@ -689,7 +689,7 @@ Pages server.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217912) in GitLab 13.3.
 
 GitLab Pages can use different sources to get domain configuration.
-The default value is `nil`. However, GitLab Pages defaults to `auto`.
+The default value for Omnibus installations is `nil`.
 
    ```ruby
    gitlab_pages['domain_config_source'] = nil
@@ -700,10 +700,33 @@ preferred source is `gitlab`, which uses [API-based configuration](#gitlab-api-b
 
 For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/how-gitlab-pages-uses-the-gitlab-api-to-serve-content/).
 
+### Deprecated domain_config_source
+
+WARNING:
+Starting from [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913) the flag
+`gitlab_pages['domain_config_source']` is deprecated and it will be removed from GitLab 14.0 onwards.
+
+The special `domain_config_source` flag was introduced in 13.3 to allow users to use
+[API-based configuration](#gitlab-api-based-configuration) and opt-in manually into this new flow.
+In 13.7, the [`auto` value was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218358)
+to enable a smoother transition into API-based configuration.
+
+Starting from 14.0, GitLab Pages will only support API-based configuration and
+[disk source configuration will be removed](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/382).
+Therefore the `domain_config_source` will also be removed.
+
+GitLab Pages will fail to start if it cannot connect to the GitLab API.
+For other common issues, see the [troubleshooting section](#failed-to-connect-to-the-internal-gitlab-api)
+or report an issue.
+
 ### GitLab API-based configuration
 
 GitLab Pages can use an API-based configuration. This replaces disk source configuration, which
 was used prior to GitLab 13.0. Follow these steps to enable it:
+
+NOTE:
+Starting from GitLab 14.0 API-Based configuration will be the only supported method by GitLab Pages.
+Pages will automatically try to connect to the API and it will fail to start if it cannot do it.
 
 1. Add the following to your `/etc/gitlab/gitlab.rb` file:
 
@@ -936,6 +959,10 @@ error="failed to connect to internal Pages API: Get \"https://gitlab.example.com
 ```
 
 ### Pages cannot communicate with an instance of the GitLab API
+
+WARNING:
+The configuration flag `domain_config_source` is now [deprecated](#deprecated-domain_config_source)
+and will be removed in 14.0.
 
 If you use the default value for `domain_config_source=auto` and run multiple instances of GitLab
 Pages, you may see intermittent 502 error responses while serving Pages content. You may also see
