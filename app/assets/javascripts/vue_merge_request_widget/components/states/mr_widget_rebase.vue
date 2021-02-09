@@ -183,7 +183,7 @@ export default {
           </gl-button>
           <span
             v-if="!rebasingError"
-            class="gl-font-weight-bold gl-ml-0!"
+            class="gl-font-weight-bold"
             data-testid="rebase-message"
             >{{
               __(
@@ -191,7 +191,7 @@ export default {
               )
             }}</span
           >
-          <span v-else class="gl-font-weight-bold danger gl-ml-0!" data-testid="rebase-message">{{
+          <span v-else class="gl-font-weight-bold danger" data-testid="rebase-message">{{
             rebasingError
           }}</span>
         </div>
