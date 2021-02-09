@@ -26,6 +26,43 @@ RSpec.describe PagesDeployment do
     end
   end
 
+  describe '.migrated_from_legacy_storage' do
+    it 'only returns migrated deployments' do
+      project = create(:project)
+      migrated_deployment = create_migrated_deployment(project)
+      # create one other deployment
+      create(:pages_deployment, project: project)
+
+      expect(described_class.migrated_from_legacy_storage).to eq([migrated_deployment])
+    end
+  end
+
+  describe '#migrated?' do
+    it 'returns false for normal deployment' do
+      deployment = create(:pages_deployment)
+
+      expect(deployment.migrated?).to eq(false)
+    end
+
+    it 'returns true for migrated deployment' do
+      project = create(:project)
+      deployment = create_migrated_deployment(project)
+
+      expect(deployment.migrated?).to eq(true)
+    end
+  end
+
+  def create_migrated_deployment(project)
+    FileUtils.mkdir_p File.join(project.pages_path, "public")
+    File.open(File.join(project.pages_path, "public/index.html"), "w") do |f|
+      f.write("Hello!")
+    end
+
+    expect(::Pages::MigrateLegacyStorageToDeploymentService.new(project).execute[:status]).to eq(:success)
+
+    project.reload.pages_metadatum.pages_deployment
+  end
+
   describe 'default for file_store' do
     let(:project) { create(:project) }
     let(:deployment) do
