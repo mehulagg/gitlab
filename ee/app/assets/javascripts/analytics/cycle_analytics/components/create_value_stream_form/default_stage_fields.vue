@@ -1,20 +1,17 @@
 <script>
 import { GlFormGroup, GlFormInput, GlFormText } from '@gitlab/ui';
 import StageFieldActions from './stage_field_actions.vue';
-import { I18N } from './constants';
+import { I18N, ADDITIONAL_STAGE_EVENTS } from './constants';
 
 const findStageEvent = (stageEvents = [], eid = null) => {
   if (!eid) return '';
   return stageEvents.find(({ identifier }) => identifier === eid);
 };
 
-const eventIdsToName = (stageEvents = [], eventIds = []) =>
-  eventIds
-    .map((eid) => {
-      const stage = findStageEvent(stageEvents, eid);
-      return stage?.name || '';
-    })
-    .join(', ');
+const eventIdToName = (stageEvents = [], eid) => {
+  const event = findStageEvent(stageEvents, eid);
+  return event?.name || '';
+};
 
 export default {
   name: 'DefaultStageFields',
@@ -54,8 +51,8 @@ export default {
     renderError(field) {
       return this.errors[field] ? this.errors[field]?.join('\n') : null;
     },
-    eventName(eventIds = []) {
-      return eventIdsToName(this.stageEvents, eventIds);
+    eventName(eventId) {
+      return eventIdToName([].concat(this.stageEvents, ADDITIONAL_STAGE_EVENTS), eventId);
     },
   },
   I18N,

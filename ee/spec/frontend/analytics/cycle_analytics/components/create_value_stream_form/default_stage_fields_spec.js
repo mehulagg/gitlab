@@ -14,8 +14,8 @@ const ISSUE_CREATED = { id: 'issue_created', name: 'Issue created' };
 const ISSUE_CLOSED = { id: 'issue_closed', name: 'Issue closed' };
 const defaultStage = {
   name: 'Cool new stage',
-  startEventIdentifier: [ISSUE_CREATED.id],
-  endEventIdentifier: [ISSUE_CLOSED.id],
+  startEventIdentifier: ISSUE_CREATED.id,
+  endEventIdentifier: ISSUE_CLOSED.id,
   endEventLabel: 'some_label',
 };
 

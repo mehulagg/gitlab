@@ -6,7 +6,6 @@ import { sprintf } from '~/locale';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { swapArrayItems } from '~/lib/utils/array_utility';
 import {
-  DEFAULT_STAGE_CONFIG,
   STAGE_SORT_DIRECTION,
   I18N,
   defaultCustomStageFields,
@@ -17,12 +16,12 @@ import { validateValueStreamName, validateStage } from './create_value_stream_fo
 import DefaultStageFields from './create_value_stream_form/default_stage_fields.vue';
 import CustomStageFields from './create_value_stream_form/custom_stage_fields.vue';
 
-const initializeStageErrors = (selectedPreset = PRESET_OPTIONS_DEFAULT) =>
-  selectedPreset === PRESET_OPTIONS_DEFAULT ? DEFAULT_STAGE_CONFIG.map(() => ({})) : [{}];
+const initializeStageErrors = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DEFAULT) =>
+  selectedPreset === PRESET_OPTIONS_DEFAULT ? defaultStageConfig.map(() => ({})) : [{}];
 
-const initializeStages = (selectedPreset = PRESET_OPTIONS_DEFAULT) =>
+const initializeStages = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DEFAULT) =>
   selectedPreset === PRESET_OPTIONS_DEFAULT
-    ? DEFAULT_STAGE_CONFIG
+    ? defaultStageConfig
     : [{ ...defaultCustomStageFields }];
 
 const formatStageDataForSubmission = (stages) => {
@@ -68,14 +67,24 @@ export default {
       required: false,
       default: false,
     },
+    defaultStageConfig: {
+      type: Array,
+      required: true,
+    },
   },
   data() {
-    const { hasExtendedFormFields, initialData, initialFormErrors, initialPreset } = this;
+    const {
+      defaultStageConfig = [],
+      hasExtendedFormFields,
+      initialData,
+      initialFormErrors,
+      initialPreset,
+    } = this;
     const { name: nameError = [], stages: stageErrors = [{}] } = initialFormErrors;
     const additionalFields = hasExtendedFormFields
       ? {
-          stages: initializeStages(initialPreset),
-          stageErrors: stageErrors || initializeStageErrors(initialPreset),
+          stages: initializeStages(defaultStageConfig, initialPreset),
+          stageErrors: stageErrors || initializeStageErrors(defaultStageConfig, initialPreset),
           ...initialData,
         }
       : { stages: [], nameError };
@@ -91,9 +100,7 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      isCreating: 'isCreatingValueStream',
-    }),
+    ...mapState({ isCreating: 'isCreatingValueStream' }),
     ...mapState('customStages', ['formEvents']),
     isValueStreamNameValid() {
       return !this.nameError?.length;
@@ -151,8 +158,8 @@ export default {
           });
           this.name = '';
           this.nameError = [];
-          this.stages = initializeStages(this.selectedPreset);
-          this.stageErrors = initializeStageErrors(this.selectedPreset);
+          this.stages = initializeStages(this.defaultStageConfig, this.selectedPreset);
+          this.stageErrors = initializeStageErrors(this.defaultStageConfig, this.selectedPreset);
         }
       });
     },
@@ -222,7 +229,7 @@ export default {
     },
     handleResetDefaults() {
       this.name = '';
-      DEFAULT_STAGE_CONFIG.forEach((stage, index) => {
+      this.defaultStageConfig.forEach((stage, index) => {
         Vue.set(this.stages, index, { ...stage, hidden: false });
       });
     },
@@ -236,7 +243,11 @@ export default {
       } else {
         this.handleResetBlank();
       }
-      Vue.set(this, 'stageErrors', initializeStageErrors(this.selectedPreset));
+      Vue.set(
+        this,
+        'stageErrors',
+        initializeStageErrors(this.defaultStageConfig, this.selectedPreset),
+      );
     },
   },
   I18N,

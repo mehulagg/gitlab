@@ -6,7 +6,7 @@ import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_v
 import CustomStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/custom_stage_fields.vue';
 import { PRESET_OPTIONS_BLANK } from 'ee/analytics/cycle_analytics/components/create_value_stream_form/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import { customStageEvents as formEvents } from '../mock_data';
+import { customStageEvents as formEvents, defaultStageConfig } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -28,11 +28,10 @@ describe('ValueStreamForm', () => {
     ],
   };
 
-  const fakeStore = ({ initialState = {} }) =>
+  const fakeStore = () =>
     new Vuex.Store({
       state: {
         isCreatingValueStream: false,
-        ...initialState,
       },
       actions: {
         createValueStream: createValueStreamMock,
@@ -47,17 +46,18 @@ describe('ValueStreamForm', () => {
       },
     });
 
-  const createComponent = ({ props = {}, data = {}, initialState = {}, stubs = {} } = {}) =>
+  const createComponent = ({ props = {}, data = {}, stubs = {} } = {}) =>
     extendedWrapper(
       shallowMount(ValueStreamForm, {
         localVue,
-        store: fakeStore({ initialState }),
+        store: fakeStore(),
         data() {
           return {
             ...data,
           };
         },
         propsData: {
+          defaultStageConfig,
           ...props,
         },
         mocks: {
@@ -132,11 +132,11 @@ describe('ValueStreamForm', () => {
       });
 
       it('adds a blank custom stage when clicked', () => {
-        expect(wrapper.vm.stages.length).toBe(6);
+        expect(wrapper.vm.stages.length).toBe(defaultStageConfig.length);
 
         clickAddStage();
 
-        expect(wrapper.vm.stages.length).toBe(7);
+        expect(wrapper.vm.stages.length).toBe(defaultStageConfig.length + 1);
       });
 
       it('validates existing fields when clicked', () => {

@@ -3,7 +3,7 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
 import { findDropdownItemText } from '../helpers';
-import { valueStreams } from '../mock_data';
+import { valueStreams, defaultStageConfig } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -28,6 +28,7 @@ describe('ValueStreamSelect', () => {
         deleteValueStreamError: null,
         valueStreams: [],
         selectedValueStream: {},
+        defaultStageConfig,
         ...initialState,
       },
       actions: {

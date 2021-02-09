@@ -8454,6 +8454,9 @@ msgstr ""
 msgid "CreateValueStreamForm|All default stages are currently visible"
 msgstr ""
 
+msgid "CreateValueStreamForm|Code stage start"
+msgstr ""
+
 msgid "CreateValueStreamForm|Create from default template"
 msgstr ""
 
@@ -8481,6 +8484,9 @@ msgstr ""
 msgid "CreateValueStreamForm|Enter value stream name"
 msgstr ""
 
+msgid "CreateValueStreamForm|Issue stage end"
+msgstr ""
+
 msgid "CreateValueStreamForm|Maximum length %{maxLength} characters"
 msgstr ""
 
@@ -8488,6 +8494,9 @@ msgid "CreateValueStreamForm|Name is required"
 msgstr ""
 
 msgid "CreateValueStreamForm|New stage"
+msgstr ""
+
+msgid "CreateValueStreamForm|Plan stage start"
 msgstr ""
 
 msgid "CreateValueStreamForm|Please select a start event first"
