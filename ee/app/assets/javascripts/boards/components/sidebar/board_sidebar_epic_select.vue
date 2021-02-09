@@ -64,9 +64,9 @@ export default {
   },
   methods: {
     ...mapActions(['setActiveIssueEpic', 'fetchEpicForActiveIssue']),
-    openEpicsDropdown() {
+    toggleEpicsDropdown() {
       if (!this.loading) {
-        this.$refs.epicSelect.handleEditClick();
+        this.$refs.epicSelect.toggleFormDropdown();
       }
     },
     async setEpic(selectedEpic) {
@@ -89,7 +89,8 @@ export default {
     ref="sidebarItem"
     :title="$options.i18n.epic"
     :loading="epicFetchInProgress"
-    @open="openEpicsDropdown"
+    @open="toggleEpicsDropdown"
+    @close="toggleEpicsDropdown"
   >
     <template v-if="epicData.title" #collapsed>
       <a class="gl-text-gray-900! gl-font-weight-bold" href="#">

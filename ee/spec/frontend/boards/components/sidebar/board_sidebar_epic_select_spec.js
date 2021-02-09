@@ -59,7 +59,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
         BoardEditableItem,
         EpicsSelect: stubComponent(EpicsSelect, {
           methods: {
-            handleEditClick: epicsSelectHandleEditClick,
+            toggleFormDropdown: epicsSelectHandleEditClick,
           },
         }),
       },
