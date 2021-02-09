@@ -12,10 +12,8 @@ full list of reference architectures, see
 [Available reference architectures](index.md#available-reference-architectures).
 
 > - **Supported users (approximate):** 10,000
-> - **High Availability:** Yes*
+> - **High Availability:** Yes ([Praefect](#configure-praefect-postgresql) needs a third-party PostgreSQL solution for HA)
 > - **Test requests per second (RPS) rates:** API: 200 RPS, Web: 20 RPS, Git (Pull): 20 RPS, Git (Push): 4 RPS
->
-> _\* At this time Praefect requires a third party PostgreSQL database solution to achieve full High Availability. We hope to offer a built in solution for this in the future. Refer to the following issues for more information: [`omnibus-gitlab#5919`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5919) & [`gitaly#3398`](https://gitlab.com/gitlab-org/gitaly/-/issues/3398)_
 
 | Service                                    | Nodes       | Configuration           | GCP             | AWS         | Azure    |
 |--------------------------------------------|-------------|-------------------------|-----------------|-------------|----------|
@@ -56,7 +54,7 @@ card "Gitaly Cluster" as gitaly_cluster {
   collections "**Praefect** x3" as praefect #FF8C00
   collections "**Gitaly** x3" as gitaly #FF8C00
   card "**Praefect PostgreSQL***\n//Non fault-tolerant//" as praefect_postgres #FF8C00
-  
+
   praefect -[#FF8C00]-> gitaly
   praefect -[#FF8C00]> praefect_postgres
 }
@@ -65,7 +63,7 @@ card "Database" as database {
   collections "**PGBouncer** x3" as pgbouncer #4EA7FF
   card "**PostgreSQL** (Primary)" as postgres_primary #4EA7FF
   collections "**PostgreSQL** (Secondary) x2" as postgres_secondary #4EA7FF
-  
+
   pgbouncer -[#4EA7FF]-> postgres_primary
   postgres_primary .[#4EA7FF]> postgres_secondary
 }
@@ -75,7 +73,7 @@ card "redis" as redis {
   collections "**Redis Cache** x3" as redis_cache #FF6347
   collections "**Redis Persistent Sentinel** x3" as redis_persistent_sentinel #FF6347
   collections "**Redis Cache Sentinel** x3"as redis_cache_sentinel #FF6347
-  
+
   redis_persistent <.[#FF6347]- redis_persistent_sentinel
   redis_cache <.[#FF6347]- redis_cache_sentinel
 }
@@ -1347,42 +1345,39 @@ To configure the Sentinel Queues server:
 ## Configure Gitaly Cluster
 
 [Gitaly Cluster](../gitaly/praefect.md) is a GitLab provided and recommended fault tolerant solution for storing Git repositories.
-In this configuration every Git repository is stored on every Gitaly node in the cluster, with one being designated the primary, and failover occurs automatically if the primary node goes down. 
+In this configuration, every Git repository is stored on every Gitaly node in the cluster, with one being designated the primary, and failover occurs automatically if the primary node goes down.
 
-The recommended Cluster setup includes the following components:
+The recommended cluster setup includes the following components:
 
-- 3 Gitaly nodes - Replicated storage of Git repositories
-- 3 Praefect nodes - Router and transaction manager for Gitaly Cluster
-- 1 Praefect PostgreSQL node - Database server for Praefect
-  - A third party solution is currently required for Praefect database connections to be made HA
+- 3 Gitaly nodes: Replicated storage of Git repositories.
+- 3 Praefect nodes: Router and transaction manager for Gitaly Cluster.
+- 1 Praefect PostgreSQL node: Database server for Praefect. A third-party solution
+  is required for Praefect database connections to be made highly available.
+- 1 load balancer: A load balancer is required for Praefect. In this guide we use the internal load balancer node for this.
 
-A load balancer is also required for Praefect. In this guide we use the Internal Load Balancer node for this.
-
-This section will detail how to configure the recommended standard setup in order. For more advanced setups please refer to the [Gitaly Cluster documentation](../gitaly/praefect.md).
+This section will detail how to configure the recommended standard setup in order.
+For more advanced setups refer to the [standalone Gitaly Cluster documentation](../gitaly/praefect.md).
 
 ### Configure Praefect PostgreSQL
 
-Praefect, the routing and transaction manager for Gitaly Cluster, requires a database to store data on Gitaly Cluster status.
+Praefect, the routing and transaction manager for Gitaly Cluster, requires its own database server to store data on Gitaly Cluster status.
 
-**As noted earlier in this guide [Praefect currently requires a third party PostgreSQL database solution to achieve full High Availability](../gitaly/praefect.md#postgresql)**.
-In addition to this it should be noted that Praefect also currently requires its own separate database server.
+If you want to have a highly available setup, Praefect requires a third-party PostgreSQL database.
+A built-in solution is being [worked on](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5919).
 
-We hope to offer a built in solutions for these restrictions in the future but in the meantime a non HA PostgreSQL server
-can be set up via Omnibus GitLab, which this section will detail.
-
-#### Standalone non HA PostgreSQL using Omnibus GitLab
+#### Praefect non-HA PostgreSQL standalone using Omnibus GitLab
 
 The following IPs will be used as an example:
 
 - `10.6.0.141`: PostgreSQL
 
 First, make sure to [install](https://about.gitlab.com/install/)
-the Linux GitLab package the node. Following the steps,
+the Linux GitLab package in the Praefect PostgreSQL node. Following the steps,
 install the necessary dependencies from step 1, and add the
 GitLab package repository from step 2. When installing GitLab
 in the second step, do not supply the `EXTERNAL_URL` value.
 
-1. SSH in to the PostgreSQL node.
+1. SSH in to the Praefect PostgreSQL node.
 1. Create a strong password to be used for the Praefect PostgreSQL user. Take note of this password as `<praefect_postgresql_password>`.
 1. Generate the password hash for the Praefect PostgreSQL username/password pair. This assumes you will use the default
    username of `praefect` (recommended). The command will request the password `<praefect_postgresql_password>`
@@ -1435,11 +1430,7 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
-
-1. Connect to the PostgreSQL server with the `praefect` user you created earlier. The database template1 is used because it is created by default on all PostgreSQL servers.
-
-Advanced [configuration options](https://docs.gitlab.com/omnibus/settings/database.html)
-are supported and can be added if needed.
+1. Follow the [post configuration](#praefect-postgresql-post-configuration).
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
@@ -1447,28 +1438,30 @@ are supported and can be added if needed.
   </a>
 </div>
 
-#### Configure your own Praefect PostgreSQL server
+#### Praefect HA PostgreSQL third-party solution
 
-As noted elsewhere in this guide, currently a third party PostgreSQL solution for Praefect's database is recommended if aiming for full High Availability.
+[As noted](#configure-praefect-postgresql), a third-party PostgreSQL solution for
+Praefect's database is recommended if aiming for full High Availability.
 
-There are many third party solutions for PostgreSQL HA. Note that the solution selected must have the following to work with Praefect:
+There are many third-party solutions for PostgreSQL HA. The solution selected must have the following to work with Praefect:
 
-- For HA the solution must have a static IP for all connections that doesn't change on failover
-- [`LISTEN`](https://www.postgresql.org/docs/12/sql-listen.html) SQL functionality must be supported
+- A static IP for all connections that doesn't change on failover.
+- [`LISTEN`](https://www.postgresql.org/docs/12/sql-listen.html) SQL functionality must be supported.
 
 Examples of the above could include [Google's Cloud SQL](https://cloud.google.com/sql/docs/postgres/high-availability#normal) or [Amazon RDS](https://aws.amazon.com/rds/).
 
+Once the database is set up, follow the [post configuration](#praefect-postgresql-post-configuration).
+
 #### Praefect PostgreSQL post-configuration
 
-After the Praefect PostgreSQL server has been set up you'll then need to configure the User and Database for Praefect to use.
+After the Praefect PostgreSQL server has been set up, you'll then need to configure the user and database for Praefect to use.
 
-We recommend the user be named `praefect` and the database `praefect_production` and these can be configured as standard in PostgreSQL.
-The password for the user is the same as the one you configured earlier - `<praefect_postgresql_password>`.
+We recommend the user be named `praefect` and the database `praefect_production`, and these can be configured as standard in PostgreSQL.
+The password for the user is the same as the one you configured earlier as `<praefect_postgresql_password>`.
 
-An example of how this would work with a Omnibus GitLab PostgreSQL set up is below.
+This is how this would work with a Omnibus GitLab PostgreSQL setup:
 
 1. SSH in to the Praefect PostgreSQL node.
-
 1. Connect to the PostgreSQL server with administrative access.
    The `gitlab-psql` user should be used here for this as it's added by default in Omnibus.
    The database `template1` is used because it is created by default on all PostgreSQL servers.
@@ -1506,20 +1499,18 @@ An example of how this would work with a Omnibus GitLab PostgreSQL set up is bel
 Praefect is the router and transaction manager for Gitaly Cluster and all connections to Gitaly go through
 it. This section details how to configure it.
 
-It should note that Praefect requires several secret tokens to secure communications across the Cluster:
+Praefect requires several secret tokens to secure communications across the Cluster:
 
-- `praefect_external_token`: Repositories hosted on your Praefect cluster can only be accessed by Gitaly clients that carry this token.
-- `praefect_internal_token`: This token is used for replication traffic inside your Praefect cluster. This is distinct from `praefect_external_token` because Gitaly clients must not be able to access internal nodes of the Praefect cluster directly; that could lead to data loss.
-
-It's also worth noting that the `praefect_postgresql_password` defined in the previous section is
-also required as part of this setup.
+- `<praefect_external_token>`: Used for repositories hosted on your Gitaly cluster and can only be accessed by Gitaly clients that carry this token.
+- `<praefect_internal_token>`: Used for replication traffic inside your Gitaly cluster. This is distinct from `praefect_external_token` because Gitaly clients must not be able to access internal nodes of the Praefect cluster directly; that could lead to data loss.
+- `<praefect_postgresql_password>`: The Praefect PostgreSQL password defined in the previous section is also required as part of this setup.
 
 Gitaly Cluster nodes are configured in Praefect via a `virtual storage`. Each storage contains
-the details of each Gitaly node that makes up the cluster. Each Storage is also given a name
-and this name is used in several areas of config. In this guide the name of the storage will be
-`default`. Note that this guide is geared towards new installs, if upgrading an existing environment
-to use Gitaly Cluster you may need to use a different name.
-Please refer to the [docs](../gitaly/praefect.md#praefect) for more info.
+the details of each Gitaly node that makes up the cluster. Each storage is also given a name
+and this name is used in several areas of the config. In this guide, the name of the storage will be
+`default`. Also, this guide is geared towards new installs, if upgrading an existing environment
+to use Gitaly Cluster, you may need to use a different name.
+Refer to the [Praefect documentation](../gitaly/praefect.md#praefect) for more info.
 
 To configure the Praefect nodes, on each one:
 
@@ -1528,7 +1519,7 @@ To configure the Praefect nodes, on each one:
    package of your choice. Be sure to follow _only_ installation steps 1 and 2
    on the page.
 1. Edit the `/etc/gitlab/gitlab.rb` file to configure Praefect:
-   
+
    ```ruby
    # Avoid running unnecessary services on the Gitaly server
    postgresql['enable'] = false
@@ -1598,7 +1589,7 @@ To configure the Praefect nodes, on each one:
    # Set the network addresses that the exporters will listen on for monitoring
    node_exporter['listen_address'] = '0.0.0.0:9100'
    praefect['prometheus_listen_addr'] = '0.0.0.0:9652'
-   
+
    ## The IPs of the Consul server nodes
    ## You can also use FQDNs and intermix them with IPs
    consul['configuration'] = {
@@ -1623,7 +1614,7 @@ no more than 5 TB of data on each node. Depending on your
 repository storage requirements, you may require additional Gitaly Clusters.
 
 Due to Gitaly having notable input and output requirements, we strongly
-recommend that all Gitaly Cluster nodes use solid-state drives (SSDs). These SSDs
+recommend that all Gitaly nodes use solid-state drives (SSDs). These SSDs
 should have a throughput of at least 8,000
 input/output operations per second (IOPS) for read operations and 2,000 IOPS for
 write operations. These IOPS values are initial recommendations, and may be
@@ -1687,7 +1678,7 @@ On each node:
    ```
 
 1. Append the following to `/etc/gitlab/gitlab.rb` for each respective server:
-   - On Gitaly Cluster node 1:
+   - On Gitaly node 1:
 
      ```ruby
      git_data_dirs({
@@ -1697,7 +1688,7 @@ On each node:
      })
      ```
 
-   - On Gitaly Cluster node 2:
+   - On Gitaly node 2:
 
      ```ruby
      git_data_dirs({
@@ -1707,7 +1698,7 @@ On each node:
      })
      ```
 
-   - On Gitaly Cluster node 3:
+   - On Gitaly node 3:
 
      ```ruby
      git_data_dirs({
@@ -1756,8 +1747,6 @@ Note the following:
   Refer to the load balancers documentation on how to configure this.
 
 To configure Praefect with TLS:
-
-**For Omnibus GitLab**
 
 1. Create certificates for Praefect servers.
 
