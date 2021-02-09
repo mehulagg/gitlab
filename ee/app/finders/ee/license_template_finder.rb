@@ -25,6 +25,13 @@ module EE
       end
     end
 
+    override :template_names
+    def template_names
+      return super unless custom_templates?
+
+      custom_templates.all_template_names.merge(super)
+    end
+
     private
 
     def custom_templates?

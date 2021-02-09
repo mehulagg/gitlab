@@ -73,7 +73,7 @@ module QA
         end
       end
 
-      it 'displays security reports in the project security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/566' do
+      it 'displays security reports in the project security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1683' do
         Page::Project::Menu.perform(&:click_project)
         Page::Project::Menu.perform(&:click_on_vulnerability_report)
 

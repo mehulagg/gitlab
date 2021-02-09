@@ -7,6 +7,11 @@ module Projects
         include RecordUserLastActivity
         include SortingHelper
         include SortingPreference
+        include RedisTracking
+
+        track_redis_hll_event :index,
+          name: 'i_ecosystem_jira_service_list_issues',
+          feature: :usage_data_track_ecosystem_jira_service
 
         before_action :check_feature_enabled!
         before_action :check_issues_show_enabled!, only: :show
@@ -42,6 +47,10 @@ module Projects
         end
 
         private
+
+        def visitor_id
+          current_user&.id
+        end
 
         def issues_json
           jira_issues = Kaminari.paginate_array(

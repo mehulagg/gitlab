@@ -6,10 +6,10 @@ RSpec.describe BlobHelper do
   include TreeHelper
 
   describe '#licenses_for_select' do
-    let(:group) { create(:group) }
-    let(:project) { create(:project, namespace: group) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, :repository, namespace: group) }
+    let_it_be(:group_category) { "Group #{group.full_name}" }
 
-    let(:group_category) { "Group #{group.full_name}" }
     let(:categories) { result.keys }
     let(:by_group) { result[group_category] }
     let(:by_instance) { result['Instance'] }
@@ -32,7 +32,7 @@ RSpec.describe BlobHelper do
         .and_return([OpenStruct.new(key: 'name', name: 'Name')])
 
       expect(categories).to contain_exactly(:Popular, :Other, group_category)
-      expect(by_group).to contain_exactly({ id: 'name', name: 'Name' })
+      expect(by_group).to contain_exactly({ id: 'name', name: 'Name', key: 'name', project_id: nil })
       expect(by_popular).to be_present
       expect(by_other).to be_present
     end
@@ -46,7 +46,7 @@ RSpec.describe BlobHelper do
         .and_return([OpenStruct.new(key: 'name', name: 'Name')])
 
       expect(categories).to contain_exactly(:Popular, :Other, 'Instance')
-      expect(by_instance).to contain_exactly({ id: 'name', name: 'Name' })
+      expect(by_instance).to contain_exactly({ id: 'name', name: 'Name', key: 'name', project_id: nil })
       expect(by_popular).to be_present
       expect(by_other).to be_present
     end

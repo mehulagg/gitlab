@@ -13,7 +13,7 @@ module Mutations
               description: 'The created profile.'
 
         field :pipeline_url, GraphQL::STRING_TYPE,
-              null: false,
+              null: true,
               description: 'The URL of the pipeline that was created. Requires `runAfterCreate` to be set to `true`.'
 
         argument :full_path, GraphQL::ID_TYPE,

@@ -33,5 +33,14 @@ module EE
         custom_templates.all + super
       end
     end
+
+    override :template_names
+    def template_names
+      return super if custom_templates.nil? || !custom_templates.enabled?
+
+      # on custom templates we do want to fetch all template names as this will iterate through inherited templates
+      # from ancestor group levels
+      custom_templates.all_template_names.merge(super)
+    end
   end
 end

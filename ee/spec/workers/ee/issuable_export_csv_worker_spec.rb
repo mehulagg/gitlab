@@ -10,7 +10,7 @@ RSpec.describe IssuableExportCsvWorker do
   subject { described_class.new.perform(issuable_type, user.id, project.id, params) }
 
   context 'when issuable type is :requirement' do
-    let(:issuable_type) { :requirement }
+    let(:issuable_type) { 'requirement' }
 
     it 'emails a CSV' do
       expect { subject }.to change(ActionMailer::Base.deliveries, :size).by(1)

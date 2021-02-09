@@ -73,6 +73,11 @@ module EE
 
     private
 
+    override :project_setting_attributes
+    def project_setting_attributes
+      super + [:prevent_merge_without_jira_issue]
+    end
+
     def project_params_ee
       attrs = %i[
         approvals_before_merge

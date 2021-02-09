@@ -38,6 +38,14 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       expect(response).to render_template(:index)
     end
 
+    it 'tracks usage' do
+      expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+        .to receive(:track_event)
+        .with('i_ecosystem_jira_service_list_issues', values: user.id)
+
+      get :index, params: { namespace_id: project.namespace, project_id: project }
+    end
+
     context 'when project has moved' do
       let(:new_project) { create(:project) }
 

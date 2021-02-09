@@ -126,6 +126,11 @@ export const assignIssueToEpic = ({ state, dispatch }, epic) => {
         epic,
       });
     })
+    .catch((error) => {
+      // Handle specific format "#ID cannot be added: reason"
+      const message = error.response.data.message.split(':')[1].trim();
+      dispatch('receiveIssueUpdateFailure', message);
+    })
     .catch(() => {
       // Shows flash error for Epic change failure
       dispatch(

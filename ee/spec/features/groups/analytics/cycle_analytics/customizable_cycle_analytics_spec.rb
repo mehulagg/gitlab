@@ -3,6 +3,7 @@ require 'spec_helper'
 
 RSpec.describe 'Customizable Group Value Stream Analytics', :js do
   include DragTo
+  include CycleAnalyticsHelpers
 
   let_it_be(:group) { create(:group, name: 'CA-test-group') }
   let_it_be(:sub_group) { create(:group, name: 'CA-sub-group', parent: group) }
@@ -51,12 +52,6 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
     Analytics::CycleAnalytics::Stages::CreateService.new(parent: parent_group, params: params, current_user: user).execute
   end
 
-  def select_group(target_group = group)
-    visit group_analytics_cycle_analytics_path(target_group)
-
-    expect(page).to have_selector '.js-stage-table' # wait_for_stages_to_load
-  end
-
   def toggle_more_options(stage)
     stage.hover
 
@@ -66,21 +61,6 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
   def select_dropdown_option(name, value = start_event_identifier)
     toggle_dropdown name
     page.find("[data-testid='#{name}'] .dropdown-menu").all('.dropdown-item').find { |item| item.value == value.to_s }.click
-  end
-
-  def select_dropdown_option_by_value(name, value, elem = '.dropdown-item')
-    toggle_dropdown name
-    page.find("[data-testid='#{name}'] .dropdown-menu").find("#{elem}[value='#{value}']").click
-  end
-
-  def toggle_dropdown(field)
-    page.within("[data-testid='#{field}']") do
-      find('.dropdown-toggle').click
-
-      wait_for_requests
-
-      expect(find('.dropdown-menu')).to have_selector('.dropdown-item')
-    end
   end
 
   def select_dropdown_label(field, index = 1)
@@ -105,7 +85,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
 
   context 'Manual ordering' do
     before do
-      select_group
+      select_group(group)
     end
 
     let(:default_stage_order) { %w[Issue Plan Code Test Review Staging].freeze }
@@ -139,7 +119,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
           page.driver.browser.manage.window.resize_to(1650, 1150)
 
           create_custom_stage
-          select_group
+          select_group(group)
         end
 
         it 'allows a stage to be dragged' do
@@ -153,7 +133,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
         it 'persists the order when a group is selected' do
           drag_from_index_to_index(start_index, end_index)
 
-          select_group
+          select_group(group)
 
           confirm_stage_order(updated_order)
         end
@@ -175,7 +155,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
 
   context 'Add a stage button' do
     before do
-      select_group
+      select_group(group)
     end
 
     it 'displays the custom stage form when clicked' do
@@ -332,7 +312,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
   context 'with a group' do
     context 'selected' do
       before do
-        select_group
+        select_group(group)
       end
 
       it_behaves_like 'can create custom stages' do
@@ -345,7 +325,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
     context 'with a custom stage created', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/273045' do
       before do
         create_custom_stage
-        select_group
+        select_group(group)
 
         expect(page).to have_text custom_stage_name
       end
@@ -391,7 +371,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
       end
 
       before do
-        select_group
+        select_group(group)
 
         toggle_more_options(first_default_stage)
       end
@@ -443,7 +423,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
     context 'custom stages' do
       before do
         create_custom_stage
-        select_group
+        select_group(group)
 
         expect(page).to have_text custom_stage_name
 
@@ -487,7 +467,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
     end
 
     before do
-      select_group
+      select_group(group)
     end
 
     it 'has all the default stages' do

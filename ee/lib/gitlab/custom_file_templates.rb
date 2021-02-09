@@ -15,6 +15,19 @@ module Gitlab
       instance_enabled? || namespace_enabled?
     end
 
+    def all_template_names
+      template_names = {}
+      namespace_template_projects_hash.flat_map do |namespace, project|
+        template_names[category_for(namespace)] = template_names_for(project).values.flatten
+      end
+
+      if instance_enabled?
+        template_names[_('Instance')] = template_names_for(instance_template_project).values.flatten
+      end
+
+      template_names
+    end
+
     def all
       by_namespace = namespace_template_projects_hash.flat_map do |namespace, project|
         templates_for(project, category_for(namespace))
@@ -22,7 +35,7 @@ module Gitlab
 
       by_instance =
         if instance_enabled?
-          templates_for(instance_template_project, 'Instance')
+          templates_for(instance_template_project, _('Instance'))
         else
           []
         end
@@ -36,7 +49,7 @@ module Gitlab
         return found if found
       end
 
-      template_for(instance_template_project, name, 'Instance')
+      template_for(instance_template_project, name, _('Instance'))
     end
 
     private
@@ -74,6 +87,12 @@ module Gitlab
           .map { |namespace| [namespace, namespace.checked_file_template_project] }
           .to_h
       end
+    end
+
+    def template_names_for(project)
+      return [] unless project
+
+      finder.template_names(project)
     end
 
     def templates_for(project, category)

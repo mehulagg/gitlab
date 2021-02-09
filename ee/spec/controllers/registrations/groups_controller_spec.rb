@@ -236,6 +236,11 @@ RSpec.describe Registrations::GroupsController do
           expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields, namespace_id: group.id)
           expect(controller).to receive(:record_experiment_user).with(:trimmed_skip_trial_copy, namespace_id: group.id)
           expect(controller).to receive(:record_experiment_user).with(:trial_registration_with_social_signin, namespace_id: group.id)
+          expect(controller).to receive(:record_experiment_user).with(:trial_onboarding_issues, namespace_id: group.id)
+          expect(controller).to receive(:record_experiment_conversion_event).with(:remove_known_trial_form_fields)
+          expect(controller).to receive(:record_experiment_conversion_event).with(:trimmed_skip_trial_copy)
+          expect(controller).to receive(:record_experiment_conversion_event).with(:trial_registration_with_social_signin)
+          expect(controller).to receive(:record_experiment_conversion_event).with(:trial_onboarding_issues)
 
           is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: group.id, trial: false, trial_onboarding_flow: true))
         end

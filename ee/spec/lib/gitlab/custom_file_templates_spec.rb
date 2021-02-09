@@ -184,4 +184,68 @@ RSpec.describe Gitlab::CustomFileTemplates do
       end
     end
   end
+
+  describe '#all_template_names' do
+    where(:template_finder, :type) do
+      Gitlab::Template::CustomDockerfileTemplate  | :dockerfile
+      Gitlab::Template::CustomGitignoreTemplate   | :gitignore
+      Gitlab::Template::CustomGitlabCiYmlTemplate | :gitlab_ci_yml
+      Gitlab::Template::CustomLicenseTemplate     | :license
+    end
+
+    with_them do
+      let(:result) { templates.all_template_names }
+      let(:template_file_names) { result.values.flatten.map { |el| el[:name] } }
+      let(:template_categories) { result.keys }
+
+      before do
+        stub_ee_application_setting(file_template_project: instance_template_project)
+        group.update_columns(file_template_project_id: group_template_project.id)
+      end
+
+      context 'unlicensed' do
+        let(:target_project) { project }
+
+        it { expect(result).to be_empty }
+      end
+
+      context 'licensed' do
+        before do
+          stub_licensed_features(custom_file_templates: true, custom_file_templates_for_namespace: true)
+        end
+
+        context 'in a toplevel group' do
+          let(:target_project) { project }
+
+          it 'has the group names and instance as category' do
+            expect(template_categories).to eq(["Group #{group.full_name}", "Instance"])
+          end
+
+          it 'orders results from most specific to least specific' do
+            expect(template_file_names).to eq(["group_#{type}", "instance_#{type}"])
+          end
+        end
+
+        context 'in a subgroup' do
+          let_it_be(:subgroup) { create(:group, parent: group) }
+          let_it_be(:subproject) { create(:project, namespace: subgroup) }
+          let_it_be(:subgroup_template_project) { create(:project, :custom_repo, namespace: subgroup, files: template_files('subgroup')) }
+
+          let(:target_project) { subproject }
+
+          before do
+            subgroup.update_columns(file_template_project_id: subgroup_template_project.id)
+          end
+
+          it 'has the group names and instance as category' do
+            expect(template_categories).to eq(["Group #{subgroup.full_name}", "Group #{group.full_name}", "Instance"])
+          end
+
+          it 'orders results from most specific to least specific' do
+            expect(template_file_names).to eq(["subgroup_#{type}", "group_#{type}", "instance_#{type}"])
+          end
+        end
+      end
+    end
+  end
 end
