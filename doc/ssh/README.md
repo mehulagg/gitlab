@@ -183,7 +183,7 @@ Now you can copy the SSH key you created to your GitLab account.
 
 1. Navigate to `https://gitlab.com` or your local GitLab instance URL and sign in.
 1. Select your avatar in the upper right corner, and click **Settings**
-1. Click **SSH Keys**.
+1. Click **SSH Keys** in the left sidebar.
 1. Paste the public key that you copied into the **Key** text box.
 1. Make sure your key includes a descriptive name in the **Title** text box, such as _Work Laptop_ or
    _Home Workstation_.
