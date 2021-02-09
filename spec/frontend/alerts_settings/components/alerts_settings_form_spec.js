@@ -359,7 +359,7 @@ describe('AlertsSettingsForm', () => {
         );
       });
 
-      it('displays aa error message under payload field on unsuccessful parse', async () => {
+      it('displays an error message under payload field on unsuccessful parse', async () => {
         const errorMessage = 'Error parsing paylod';
         jest.spyOn(wrapper.vm.$apollo, 'query').mockRejectedValue({ message: errorMessage });
         wrapper.setData({
