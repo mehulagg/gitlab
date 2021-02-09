@@ -12,27 +12,17 @@ RSpec.describe 'Query.vulnerabilities.externalIssueLinks' do
   let_it_be(:vulnerability) { create(:vulnerability, project: project) }
   let_it_be(:vulnerability_external_issue_link) { create(:vulnerabilities_external_issue_link, external_issue_key: '10001', vulnerability: vulnerability) }
 
-  let_it_be(:fields) do
+  let(:fields) do
     <<~QUERY
       externalIssueLinks {
         nodes {
-          id
-          linkType
-          externalIssue {
-            externalTracker
-            relativeReference
-            status
-            title
-            webUrl
-            createdAt
-            updatedAt
-          }
+          #{all_graphql_fields_for('VulnerabilityExternalIssueLink')}
         }
       }
     QUERY
   end
 
-  let_it_be(:query) { graphql_query_for('vulnerabilities', {}, query_graphql_field('nodes', {}, fields)) }
+  let(:query) { graphql_query_for('vulnerabilities', {}, query_graphql_field('nodes', {}, fields)) }
 
   before do
     project.add_developer(user)
