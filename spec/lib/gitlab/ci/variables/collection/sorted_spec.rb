@@ -139,6 +139,14 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sorted do
                 { key: 'variable3', value: 'key$variable$variable2', protected: true }
               ],
               validation_result: nil
+            },
+            "variable containing escaped variable reference": {
+              variables: [
+                { key: 'variable_a', value: 'value' },
+                { key: 'variable_b', value: '$$variable_a' },
+                { key: 'variable_c', value: '$variable_b' }
+              ],
+              validation_result: nil
             }
           }
         end
