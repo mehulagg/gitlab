@@ -110,8 +110,18 @@ export default {
       .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
   },
 
-  createList: ({ state, commit, dispatch }, { backlog, labelId, milestoneId, assigneeId }) => {
+  createList: (
+    { state, commit, dispatch, getters },
+    { backlog, labelId, milestoneId, assigneeId },
+  ) => {
     const { boardId } = state;
+
+    const existingList = getters.getListByLabelId(labelId);
+
+    if (existingList) {
+      dispatch('highlightList', existingList.id);
+      return;
+    }
 
     gqlClient
       .mutate({
@@ -537,10 +547,10 @@ export default {
   },
 
   highlightList: ({ state }, listId) => {
-    state.boardLists[listId].highlight = true;
+    state.boardLists[listId].highlighted = true;
 
     setTimeout(() => {
-      state.boardLists[listId].highlight = false;
+      state.boardLists[listId].highlighted = false;
     }, 4000);
   },
 

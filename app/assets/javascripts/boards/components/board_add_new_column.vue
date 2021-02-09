@@ -84,7 +84,7 @@ export default {
         return;
       }
 
-      const label = this.selectedLabel();
+      const label = this.selectedLabel;
 
       if (!label) {
         return;
@@ -98,15 +98,8 @@ export default {
       }
 
       if (this.shouldUseGraphQL) {
-        this.createList({ labelId: this.selectedLabelId })
-          .then((list) => {
-            this.setAddColumnFormVisibility(false);
-            this.highlight(list.id);
-          })
-          .catch((e) => {
-            // todo: create list failed, reopen form and show error
-            throw e;
-          });
+        this.createList({ labelId: this.selectedLabelId });
+        this.setAddColumnFormVisibility(false);
       } else {
         boardsStore.new({
           title: label.title,
@@ -192,7 +185,7 @@ export default {
         </div>
 
         <gl-form-group
-          class="gl-mx-5"
+          class="gl-mx-5 gl-mb-3"
           :label="$options.i18n.selectLabel"
           label-for="board-available-labels"
         >
@@ -213,7 +206,11 @@ export default {
           </gl-skeleton-loader>
         </div>
 
-        <gl-form-radio-group v-else v-model="selectedLabelId" class="gl-overflow-y-auto gl-px-5">
+        <gl-form-radio-group
+          v-else
+          v-model="selectedLabelId"
+          class="gl-overflow-y-auto gl-px-5 gl-pt-3"
+        >
           <label
             v-for="label in labels"
             :key="label.id"

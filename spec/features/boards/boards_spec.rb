@@ -13,14 +13,12 @@ RSpec.describe 'Issue Boards', :js do
   let_it_be(:user2)   { create(:user) }
 
   before do
-    stub_feature_flags(board_new_list: false)
-
     project.add_maintainer(user)
     project.add_maintainer(user2)
 
     set_cookie('sidebar_collapsed', 'true')
 
-    stub_feature_flags(board_new_list: false)
+    stub_feature_flags(board_new_list: true)
 
     sign_in(user)
   end
@@ -322,10 +320,11 @@ RSpec.describe 'Issue Boards', :js do
 
       context 'new list' do
         it 'shows all labels in new list dropdown' do
-          click_button 'Add list'
+          click_button 'Create list'
+
           wait_for_requests
 
-          page.within('.dropdown-menu-issues-board-new') do
+          page.within('.board-add-new-list') do
             expect(page).to have_content(planning.title)
             expect(page).to have_content(development.title)
             expect(page).to have_content(testing.title)
@@ -333,7 +332,7 @@ RSpec.describe 'Issue Boards', :js do
         end
 
         it 'creates new list for label' do
-          click_button 'Add list'
+          click_button 'Create list'
           wait_for_requests
 
           page.within('.dropdown-menu-issues-board-new') do
