@@ -27,6 +27,7 @@ class StoreSecurityReportsWorker # rubocop:disable Scalability/IdempotentWorker
 
   def revoke_secret_detection_token?(pipeline)
     pipeline.present? &&
+      pipeline.project.public? &&
       ::Gitlab::CurrentSettings.secret_detection_token_revocation_enabled? &&
       secret_detection_vulnerability_found?(pipeline)
   end

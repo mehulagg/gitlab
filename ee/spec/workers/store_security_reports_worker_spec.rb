@@ -18,15 +18,23 @@ RSpec.describe StoreSecurityReportsWorker do
   describe '#revoke_secret_detection_token?' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:pipeline, :token_revocation_enabled, :secret_detection_vulnerability_found, :expected_result) do
-      Object.new  | true  | true  | true
-      Object.new  | true  | false | false
-      Object.new  | false | true  | false
-      Object.new  | false | false | false
-      nil         | true  | true  | false
-      nil         | true  | false | false
-      nil         | false | true  | false
-      nil         | false | false | false
+    where(:pipeline, :is_project_public, :token_revocation_enabled, :secret_detection_vulnerability_found, :expected_result) do
+      build(:ci_pipeline) | true  | true  | true  | true
+      build(:ci_pipeline) | true  | true  | false | false
+      build(:ci_pipeline) | true  | false | true  | false
+      build(:ci_pipeline) | true  | false | false | false
+      build(:ci_pipeline) | false | true  | true  | false
+      build(:ci_pipeline) | false | true  | false | false
+      build(:ci_pipeline) | false | false | true  | false
+      build(:ci_pipeline) | false | false | false | false
+      nil                 | true  | true  | true  | false
+      nil                 | true  | true  | false | false
+      nil                 | true  | false | true  | false
+      nil                 | true  | false | false | false
+      nil                 | false | true  | true  | false
+      nil                 | false | true  | false | false
+      nil                 | false | false | true  | false
+      nil                 | false | false | false | false
     end
 
     with_them do
@@ -36,6 +44,8 @@ RSpec.describe StoreSecurityReportsWorker do
         allow_next_instance_of(described_class) do |store_scans_worker|
           allow(store_scans_worker).to receive(:secret_detection_vulnerability_found?) { secret_detection_vulnerability_found }
         end
+
+        allow_any_instance_of(Project).to receive(:public?).and_return(is_project_public)
       end
 
       specify { expect(described_class.new.send(:revoke_secret_detection_token?, pipeline)).to eql(expected_result) }
