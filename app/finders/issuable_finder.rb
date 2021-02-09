@@ -87,7 +87,7 @@ class IssuableFinder
     end
 
     def valid_params
-      @valid_params ||= scalar_params + [array_params.merge(not: {})]
+      @valid_params ||= scalar_params + [array_params.merge(not: {}, or: {})]
     end
   end
 
@@ -107,6 +107,9 @@ class IssuableFinder
   def execute
     items = init_collection
     items = filter_items(items)
+
+    # Handle OR filters
+    items = filter_union_items(items) if should_filter_union_args?
 
     # Let's see if we have to negate anything
     items = filter_negated_items(items) if should_filter_negated_args?
@@ -141,11 +144,24 @@ class IssuableFinder
     by_my_reaction_emoji(items)
   end
 
+  def should_filter_union_args?
+    or_params.present? && Feature.enabled?(:or_issuable_queries, params.group || params.project)
+  end
+
   def should_filter_negated_args?
     return false unless Feature.enabled?(:not_issuable_queries, params.group || params.project, default_enabled: true)
 
     # API endpoints send in `nil` values so we test if there are any non-nil
     not_params.present? && not_params.values.any?
+  end
+
+  def filter_union_items(items)
+    items = by_author_union(items)
+    items = by_assignee_union(items)
+    items = by_label_union(items)
+    items = by_milestone_union(items)
+    items = by_release_union(items)
+    by_my_reaction_emoji_union(items)
   end
 
   # Negates all params found in `negatable_params`
@@ -235,6 +251,10 @@ class IssuableFinder
   private
 
   attr_reader :parent
+
+  def or_params
+    params[:or]
+  end
 
   def not_params
     strong_memoize(:not_params) do
@@ -387,6 +407,14 @@ class IssuableFinder
   # rubocop: enable CodeReuse/ActiveRecord
 
   # rubocop: disable CodeReuse/ActiveRecord
+  def by_author_union(items)
+    return items if or_params[:author_username].blank?
+
+    items.where(author_id: User.where(username: or_params[:author_username]))
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
+
+  # rubocop: disable CodeReuse/ActiveRecord
   def by_negated_author(items)
     if not_params.author
       items.where.not(author_id: not_params.author.id)
@@ -411,6 +439,14 @@ class IssuableFinder
       items
     end
   end
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  def by_assignee_union(items)
+    return items if or_params[:assignee_username].blank?
+
+    items.assigned_to(User.where(username: or_params[:assignee_username]))
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   def by_negated_assignee(items)
     # We want CE users to be able to say "Issues not assigned to either PersonA nor PersonB"
@@ -442,6 +478,12 @@ class IssuableFinder
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
+  def by_milestone_union(items)
+    return items if or_params[:milestone_title].blank?
+
+    items.with_milestone(or_params[:milestone_title])
+  end
+
   # rubocop: disable CodeReuse/ActiveRecord
   def by_negated_milestone(items)
     return items unless not_params.milestones?
@@ -469,6 +511,13 @@ class IssuableFinder
     end
   end
 
+  def by_release_union(items)
+    return items if or_params[:release_tag].blank?
+    return items if params.group? # don't allow release filtering at group level
+
+    items.with_release(or_params[:release_tag], params[:project_id])
+  end
+
   def by_negated_release(items)
     return items unless not_params.releases?
 
@@ -487,6 +536,12 @@ class IssuableFinder
     end
   end
 
+  def by_label_union(items)
+    return items if or_params[:label_name].blank?
+
+    items.with_labels_union(or_params[:label_name])
+  end
+
   def by_negated_label(items)
     return items unless not_params.labels?
 
@@ -503,6 +558,12 @@ class IssuableFinder
     else
       items.awarded(current_user, params[:my_reaction_emoji])
     end
+  end
+
+  def by_my_reaction_emoji_union(items)
+    return items if or_params[:my_reaction_emoji].blank?
+
+    items.awarded(current_user, params[:my_reaction_emoji])
   end
 
   def by_negated_my_reaction_emoji(items)

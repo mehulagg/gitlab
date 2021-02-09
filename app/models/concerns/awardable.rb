@@ -13,7 +13,7 @@ module Awardable
   end
 
   class_methods do
-    def awarded(user, name = nil)
+    def awarded(user, names = [])
       award_emoji_table = Arel::Table.new('award_emoji')
       inner_query = award_emoji_table
                 .project('true')
@@ -21,12 +21,12 @@ module Awardable
                 .where(award_emoji_table[:awardable_type].eq(self.name))
                 .where(award_emoji_table[:awardable_id].eq(self.arel_table[:id]))
 
-      inner_query = inner_query.where(award_emoji_table[:name].eq(name)) if name.present?
+      inner_query = inner_query.where(award_emoji_table[:name].in(names)) if names.present?
 
       where(inner_query.exists)
     end
 
-    def not_awarded(user, name = nil)
+    def not_awarded(user, names = [])
       award_emoji_table = Arel::Table.new('award_emoji')
       inner_query = award_emoji_table
                 .project('true')
@@ -34,7 +34,7 @@ module Awardable
                 .where(award_emoji_table[:awardable_type].eq(self.name))
                 .where(award_emoji_table[:awardable_id].eq(self.arel_table[:id]))
 
-      inner_query = inner_query.where(award_emoji_table[:name].eq(name)) if name.present?
+      inner_query = inner_query.where(award_emoji_table[:name].in(names)) if names.present?
 
       where(inner_query.exists.not)
     end
