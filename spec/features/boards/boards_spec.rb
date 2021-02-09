@@ -20,7 +20,7 @@ RSpec.describe 'Issue Boards', :js do
 
     set_cookie('sidebar_collapsed', 'true')
 
-    sign_in(user)
+    gitlab_sign_in(user)
   end
 
   context 'no lists' do
