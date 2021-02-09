@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_12_08_031224) do
+ActiveRecord::Schema.define(version: 2021_02_08_175408) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -184,6 +184,12 @@ ActiveRecord::Schema.define(version: 2020_12_08_031224) do
     t.index ["resync_wiki"], name: "index_project_registry_on_resync_wiki"
     t.index ["wiki_retry_at"], name: "index_project_registry_on_wiki_retry_at"
     t.index ["wiki_verification_checksum_sha"], name: "idx_project_registry_on_wiki_checksum_sha_partial", where: "(wiki_verification_checksum_sha IS NULL)"
+  end
+
+  create_table "secondary_usage_data", force: :cascade do |t|
+    t.datetime_with_timezone "created_at", null: false
+    t.datetime_with_timezone "updated_at", null: false
+    t.jsonb "data", default: {}, null: false
   end
 
   create_table "snippet_repository_registry", force: :cascade do |t|
