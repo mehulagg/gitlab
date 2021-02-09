@@ -48,7 +48,7 @@ RSpec.describe 'Query.vulnerabilities.externalIssueLinks' do
             'nodes' => [
               {
                 'externalIssue' => nil,
-                'id' => 'gid://gitlab/Vulnerabilities::ExternalIssueLink/1',
+                'id' => "gid://gitlab/Vulnerabilities::ExternalIssueLink/#{vulnerability_external_issue_link.id}",
                 'linkType' => 'CREATED'
               }
             ]
@@ -87,7 +87,7 @@ RSpec.describe 'Query.vulnerabilities.externalIssueLinks' do
                   'updatedAt' => '2020-12-16T09:42:03Z',
                   'webUrl' => 'https://jira.example.com/browse/GV-100'
                 },
-                'id' => 'gid://gitlab/Vulnerabilities::ExternalIssueLink/1',
+                'id' => "gid://gitlab/Vulnerabilities::ExternalIssueLink/#{vulnerability_external_issue_link.id}",
                 'linkType' => 'CREATED'
               }
             ]
