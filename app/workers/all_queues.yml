@@ -1445,6 +1445,22 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: bulk_imports_pipeline
+  :feature_category: :importers
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: bulk_imports_stage
+  :feature_category: :importers
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: chat_notification
   :feature_category: :chatops
   :has_external_dependencies: true

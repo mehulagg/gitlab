@@ -9,8 +9,16 @@ module EE
         private
 
         override :pipelines
-        def pipelines
-          super << EE::BulkImports::Groups::Pipelines::EpicsPipeline
+        def stages
+          [
+            ::BulkImports::Groups::Pipelines::GroupPipeline,
+            [
+              ::BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline,
+              ::BulkImports::Groups::Pipelines::LabelsPipeline
+            ],
+            EE::BulkImports::Groups::Pipelines::EpicsPipeline,
+            ::BulkImports::Importers::GroupImporter::EntityFinisher
+          ]
         end
       end
     end

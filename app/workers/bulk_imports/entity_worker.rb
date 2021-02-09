@@ -18,7 +18,6 @@ module BulkImports
 
         BulkImports::Importers::GroupImporter.new(entity).execute
       end
-
     rescue => e
       extra = {
         bulk_import_id: entity&.bulk_import&.id,

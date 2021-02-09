@@ -46,7 +46,7 @@ module BulkImports
       rescue => e
         log_import_failure(e, step, context)
 
-        mark_as_failed(context) if abort_on_failure?
+        context.entity.fail_op!  if abort_on_failure?
 
         nil
       end
@@ -55,12 +55,6 @@ module BulkImports
         run_pipeline_step(:extractor, extractor.class.name, context) do
           extractor.extract(context)
         end
-      end
-
-      def mark_as_failed(context)
-        warn(context, message: 'Pipeline failed', pipeline_class: pipeline)
-
-        context.entity.fail_op!
       end
 
       def marked_as_failed?(context)
@@ -87,6 +81,15 @@ module BulkImports
           exception_message: exception.message.truncate(255),
           correlation_id_value: Labkit::Correlation::CorrelationId.current_or_new_id
         }
+
+        warn(
+          context,
+          message: 'Pipeline failed',
+          pipeline_class: pipeline,
+          pipeline_step: step,
+          exception_class: exception.class.to_s,
+          exception_message: exception.message.truncate(255),
+        )
 
         BulkImports::Failure.create(attributes)
       end
