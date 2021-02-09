@@ -703,8 +703,8 @@ For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/h
 ### Deprecated domain_config_source
 
 WARNING:
-Starting from [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913) the flag
-`gitlab_pages['domain_config_source']` is deprecated and it will be removed from GitLab 14.0 onwards.
+The flag `gitlab_pages['domain_config_source']` is deprecated for use in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913),
+and is planned for removal in GitLab 14.0.
 
 The special `domain_config_source` flag was introduced in 13.3 to allow users to use
 [API-based configuration](#gitlab-api-based-configuration) and opt-in manually into this new flow.
