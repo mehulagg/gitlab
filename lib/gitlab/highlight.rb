@@ -11,6 +11,10 @@ module Gitlab
         .highlight(blob_content, continue: false, plain: plain)
     end
 
+    def self.too_large?(size)
+      size > MAXIMUM_TEXT_HIGHLIGHT_SIZE
+    end
+
     attr_reader :blob_name
 
     def initialize(blob_name, blob_content, language: nil)
@@ -21,7 +25,7 @@ module Gitlab
     end
 
     def highlight(text, continue: true, plain: false)
-      plain ||= text.length > MAXIMUM_TEXT_HIGHLIGHT_SIZE
+      plain ||= self.class.too_large?(text.length)
 
       highlighted_text = highlight_text(text, continue: continue, plain: plain)
       highlighted_text = link_dependencies(text, highlighted_text) if blob_name

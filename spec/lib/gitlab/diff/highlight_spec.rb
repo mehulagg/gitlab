@@ -124,5 +124,34 @@ RSpec.describe Gitlab::Diff::Highlight do
         it_behaves_like 'without inline diffs'
       end
     end
+
+    context 'when blob is too large' do
+      let(:subject) { described_class.new(diff_file, repository: project.repository).highlight }
+
+      before do
+        allow(Gitlab::Highlight).to receive(:too_large?).and_return(true)
+      end
+
+      it 'blobs are not highlighted' do
+        expect(subject[2].rich_text).to eq('   def popen(cmd, path=nil)')
+
+        code = %q{+      raise <span class="idiff left right">RuntimeError, </span>&quot;System commands must be given as an array of strings&quot;}
+        expect(subject[5].rich_text).to eq(code)
+        expect(subject[5].rich_text).to be_html_safe
+      end
+
+      it_behaves_like 'without inline diffs'
+
+      context 'when limited_diff_highlighting is disabled' do
+        before do
+          stub_feature_flags(limited_diff_highlighting: false)
+        end
+
+        it 'blobs are highlighted as plain text' do
+          code = %Q{ <span id="LC7" class="line" lang="">  def popen(cmd, path=nil)</span>\n}
+          expect(subject[2].rich_text).to eq(code)
+        end
+      end
+    end
   end
 end
