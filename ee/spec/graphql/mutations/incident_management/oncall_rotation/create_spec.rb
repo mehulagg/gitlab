@@ -42,6 +42,28 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
             errors: be_empty
           )
         end
+
+        context 'with endsAt arg' do
+          let(:ends_at) { "2020-02-10 09:00".in_time_zone(schedule.timezone) }
+
+          before do
+            args.merge!(ends_at: ends_at)
+          end
+
+          it 'returns the on-call rotation with no errors' do
+            expect(resolve[:oncall_rotation].ends_at).to eq(ends_at)
+            expect(resolve[:errors]).to be_empty
+          end
+
+          context 'when endsAt is nil' do
+            let(:ends_at) { nil }
+
+            it 'returns the on-call rotation with no errors' do
+              expect(resolve[:oncall_rotation].ends_at).to be_nil
+              expect(resolve[:errors]).to be_empty
+            end
+          end
+        end
       end
 
       context 'when OncallRotations::CreateService responds with an error' do

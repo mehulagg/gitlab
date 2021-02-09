@@ -25,6 +25,10 @@ module Mutations
                  required: true,
                  description: 'The start date and time of the on-call rotation, in the timezone of the on-call schedule.'
 
+        argument :ends_at, Types::IncidentManagement::OncallRotationDateInputType,
+                 required: false,
+                 description: 'The end date and time of the on-call rotation, in the timezone of the on-call schedule.'
+
         argument :rotation_length, Types::IncidentManagement::OncallRotationLengthInputType,
                  required: true,
                  description: 'The rotation length of the on-call rotation.'
@@ -65,18 +69,20 @@ module Mutations
         def create_service_params(schedule, participants, args)
           rotation_length = args[:rotation_length][:length]
           rotation_length_unit = args[:rotation_length][:unit]
-          starts_at = parse_start_time(schedule, args)
+          starts_at = parse_datetime(schedule, args[:starts_at])
+          ends_at = parse_datetime(schedule, args[:ends_at]) if args[:ends_at]
 
           args.slice(:name).merge(
             length: rotation_length,
             length_unit: rotation_length_unit,
             starts_at: starts_at,
+            ends_at: ends_at,
             participants: find_participants(participants)
           )
         end
 
-        def parse_start_time(schedule, args)
-          args[:starts_at].asctime.in_time_zone(schedule.timezone)
+        def parse_datetime(schedule, timestamp)
+          timestamp.asctime.in_time_zone(schedule.timezone)
         end
 
         def find_participants(user_array)

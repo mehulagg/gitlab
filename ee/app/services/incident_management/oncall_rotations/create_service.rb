@@ -13,6 +13,7 @@ module IncidentManagement
       # @param params - length [Integer] The length of the rotation.
       # @param params - length_unit [String] The unit of the rotation length. (One of 'hours', days', 'weeks')
       # @param params - starts_at [DateTime] The datetime the rotation starts on.
+      # @param params - ends_at [DateTime] The datetime the rotation ends on.
       # @param params - participants [Array<hash>] An array of hashes defining participants of the on-call rotations.
       # @option opts  - participant [User] The user who is part of the rotation
       # @option opts  - color_palette [String] The color palette to assign to the on-call user, for example: "blue".

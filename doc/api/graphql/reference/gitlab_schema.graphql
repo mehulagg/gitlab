@@ -16904,6 +16904,11 @@ input OncallRotationCreateInput {
   clientMutationId: String
 
   """
+  The end date and time of the on-call rotation, in the timezone of the on-call schedule.
+  """
+  endsAt: OncallRotationDateInputType
+
+  """
   The name of the on-call rotation.
   """
   name: String!

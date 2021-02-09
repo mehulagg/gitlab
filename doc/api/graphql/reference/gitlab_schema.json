@@ -49986,6 +49986,16 @@
               "defaultValue": null
             },
             {
+              "name": "endsAt",
+              "description": "The end date and time of the on-call rotation, in the timezone of the on-call schedule.",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "OncallRotationDateInputType",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "rotationLength",
               "description": "The rotation length of the on-call rotation.",
               "type": {

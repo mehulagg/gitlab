@@ -14,7 +14,7 @@ module IncidentManagement
     # @return [IncidentManagement::OncallShift]
     def for_timeframe(starts_at:, ends_at:)
       starts_at = [apply_timezone(starts_at), rotation_starts_at].max
-      ends_at = apply_timezone(ends_at)
+      ends_at = [apply_timezone(ends_at), rotation_ends_at].compact.min
 
       return [] unless starts_at < ends_at
       return [] unless rotation.participants.any?
@@ -43,7 +43,7 @@ module IncidentManagement
     def for_timestamp(timestamp)
       timestamp = apply_timezone(timestamp)
 
-      return if timestamp < rotation_starts_at
+      return if timestamp < rotation_starts_at || (rotation_ends_at && rotation_ends_at <= timestamp)
       return unless rotation.participants.any?
 
       elapsed_shift_count = elapsed_whole_shifts(timestamp)
@@ -108,11 +108,14 @@ module IncidentManagement
     # be persisted.
     # @return [IncidentManagement::OncallShift]
     def shift_for(elapsed_shift_count, shift_starts_at)
+      ends_at = shift_starts_at + shift_duration
+      ends_at = [rotation_ends_at, ends_at].min if rotation_ends_at
+
       IncidentManagement::OncallShift.new(
         rotation: rotation,
         participant: participants[participant_rank(elapsed_shift_count)],
         starts_at: shift_starts_at,
-        ends_at: shift_starts_at + shift_duration
+        ends_at: ends_at
       )
     end
 
@@ -131,8 +134,12 @@ module IncidentManagement
       @rotation_starts_at ||= apply_timezone(rotation.starts_at)
     end
 
+    def rotation_ends_at
+      @rotation_ends_at ||= apply_timezone(rotation.ends_at)
+    end
+
     def apply_timezone(timestamp)
-      timestamp.in_time_zone(rotation.schedule.timezone)
+      timestamp&.in_time_zone(rotation.schedule.timezone)
     end
   end
 end

@@ -33,6 +33,23 @@ RSpec.describe IncidentManagement::OncallRotation do
         expect(subject.errors.full_messages.to_sentence).to eq('Name has already been taken')
       end
     end
+
+    context 'with ends_at' do
+      let(:ends_at) { 5.days.from_now }
+
+      subject { build(:incident_management_oncall_rotation, schedule: schedule, ends_at: ends_at) }
+
+      it { is_expected.to be_valid }
+
+      context 'with ends_at before starts_at' do
+        let(:ends_at) { 5.days.ago }
+
+        it 'has validation errors' do
+          expect(subject).to be_invalid
+          expect(subject.errors.full_messages.to_sentence).to eq('Ends at must be after start')
+        end
+      end
+    end
   end
 
   describe 'scopes' do
@@ -40,9 +57,11 @@ RSpec.describe IncidentManagement::OncallRotation do
       subject { described_class.started }
 
       let_it_be(:rotation_1) { create(:incident_management_oncall_rotation, schedule: schedule) }
-      let_it_be(:rotation_2) { create(:incident_management_oncall_rotation, schedule: schedule, starts_at: 1.week.from_now) }
+      let_it_be(:rotation_2) { create(:incident_management_oncall_rotation, schedule: schedule, ends_at: nil) }
+      let_it_be(:rotation_3) { create(:incident_management_oncall_rotation, schedule: schedule, starts_at: 1.week.from_now) }
+      let_it_be(:rotation_4) { create(:incident_management_oncall_rotation, schedule: schedule, starts_at: 1.week.ago, ends_at: 6.days.ago) }
 
-      it { is_expected.to contain_exactly(rotation_1) }
+      it { is_expected.to contain_exactly(rotation_1, rotation_2) }
     end
   end
 
