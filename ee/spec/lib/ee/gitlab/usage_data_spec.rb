@@ -395,9 +395,10 @@ RSpec.describe Gitlab::UsageData do
         end
       end
 
-      subject { described_class.usage_activity_by_stage_enablement(described_class.last_28_days_time_period) }
+      subject do
+        described_class.usage_activity_by_stage_enablement(described_class.last_28_days_time_period)
+      end
 
-      it 'excludes data outside of the date range' do
         expect(subject).to include(geo_secondary_web_oauth_users: 2)
       end
 
