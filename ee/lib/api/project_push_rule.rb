@@ -8,6 +8,22 @@ module API
     before { check_project_feature_available!(:push_rules) }
     before { authorize_change_param(user_project, :commit_committer_check, :reject_unsigned_commits) }
 
+    helpers do
+      def create_or_update_push_rule
+        service_response = PushRules::UpdateService.new(
+          container: user_project,
+          current_user: current_user,
+          params: declared_params(include_missing: false)
+        ).execute
+
+        if service_response.success?
+          present(service_response.payload, with: EE::API::Entities::ProjectPushRule, user: current_user)
+        else
+          render_validation_error!(service_response.payload)
+        end
+      end
+    end
+
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end
@@ -48,12 +64,7 @@ module API
         use :push_rule_params
       end
       post ":id/push_rule" do
-        if user_project.push_rule
-          error!("Project push rule exists", 422)
-        else
-          push_rule = user_project.create_push_rule(declared_params(include_missing: false))
-          present push_rule, with: EE::API::Entities::ProjectPushRule, user: current_user
-        end
+        create_or_update_push_rule
       end
 
       desc 'Update an existing project push rule' do
@@ -63,14 +74,7 @@ module API
         use :push_rule_params
       end
       put ":id/push_rule" do
-        push_rule = user_project.push_rule
-        not_found!('Push Rule') unless push_rule
-
-        if push_rule.update(declared_params(include_missing: false))
-          present push_rule, with: EE::API::Entities::ProjectPushRule, user: current_user
-        else
-          render_validation_error!(push_rule)
-        end
+        create_or_update_push_rule
       end
 
       desc 'Deletes project push rule'

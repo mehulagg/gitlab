@@ -14,13 +14,16 @@ class Projects::PushRulesController < Projects::ApplicationController
   feature_category :source_code_management
 
   def update
-    @push_rule = project.push_rule
-    @push_rule.update(push_rule_params)
+    service_response = PushRules::UpdateService.new(
+      container: user_project,
+      current_user: current_user,
+      params: declared_params(include_missing: false)
+    ).execute
 
-    if @push_rule.valid?
+    if service_response.success?
       flash[:notice] = _('Push Rules updated successfully.')
     else
-      flash[:alert] = @push_rule.errors.full_messages.join(', ').html_safe
+      flash[:alert] = service_response.payload.errors.full_messages.join(', ').html_safe
     end
 
     redirect_to_repository_settings(@project, anchor: 'js-push-rules')
