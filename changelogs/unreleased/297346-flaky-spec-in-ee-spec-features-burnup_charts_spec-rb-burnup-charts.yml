@@ -1,5 +1,5 @@
 ---
-title: Add chart-shaped loaders to milestone and iteration paegs
+title: Fix charts sometimes being hidden on milestone page
 merge_request: 52552
 author:
-type: changed
+type: fixed
