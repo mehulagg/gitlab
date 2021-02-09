@@ -19,7 +19,7 @@ Tools like `eslint`, `jest`, and various plugins and tools used in development a
 This distinction is used by omnibus to determine which dependencies it requires when building GitLab.
 
 Exceptions are made for some tools that we require in the
-`gitlab:assets:compile` CI job such as `webpack-bundle-analyzer` to analyze our
+`compile-production-assets` CI job such as `webpack-bundle-analyzer` to analyze our
 production assets post-compile. 
 
 ## Updating dependencies
@@ -47,9 +47,9 @@ Updating dependencies automatically has several benefits, have a look at this [e
 ### Community contributions updating dependencies
 
 It is okay to reject Community Contributions that solely bump dependencies.
-Simple dependency updates are better done automatically by the reasons provided above.
-If a community contribution needs to be rebased or goes stale, the effort on our side and the contributors
-side is much likely not worth the benefits we gain.
+Simple dependency updates are better done automatically for the reasons provided above.
+If a community contribution needs to be rebased, runs into conflicts, or goes stale, the effort required
+to instruct the contributor to correct it often outweighs the benefits.
 
 If a dependency update is accompanied with significant migration efforts, due to major version updates,
 a community contribution is acceptable.
