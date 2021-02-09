@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 ## Where is maintenance mode enforced?
 
-Maintenance mode **only** blocks HTTP and SSH requests at the application level in three key places within the rails application:
+Maintenance mode **only** blocks writes from HTTP and SSH requests at the application level in three key places within the rails application:
 
 1. [the read-only middleware](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/ee/gitlab/middleware/read_only/controller.rb), where HTTP requests that cause database writes are blocked, unless explicitly allowed.
 1. [Git push access via SSH is denied](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/ee/gitlab/git_access.rb#L13) by returning 401 when `gitlab-shell` POSTs to `/internal/allowed` to check if access is allowed.
@@ -18,9 +18,25 @@ The database itself is not in read-only mode and can be written to from sources 
 
 ## Which HTTP requests are still allowed?
 
-In maintenance mode most HTTP requests that write to the database will be blocked. 
+In maintenance mode most HTTP (POST, PUT, PATCH, DELETE) requests that write to the database will be blocked. 
 
-However a few POST/PUT requests are allowed, e.g. `POST /users/sign_in` and `POST /users/sign_out`
+However, as of [GitLab 13.9](https://gitlab.com/groups/gitlab-org/-/epics/2149), the following requests are allowed:
+
+|HTTP verb | allowlisted routes |  Notes |
+|:----:|:--------------------------------------:|:----:|
+| POST | /admin/application_settings/general | only for administrators|
+| PUT | /api/v4/application/settings | only for administrators |
+| POST | /users/sign_in | to allow users to log in |
+| POST | /users/sign_out| to allow users to log out |
+| POST | /oauth/token | to allow users to log in to a secondary for the first time |
+| POST | /api/graphql | |
+| POST | /admin/session, /admin/session/destroy | |
+| POST | ending with `/compare`| Git revision routes |
+| POST | .git/git-upload-pack | for Git pull/clone|
+| POST | /api/<v3, v4>/internal | internal api routes |
+| POST | /admin/sidekiq | |
+| POST |  /admin/geo | |
+| POST | paths including `/api/<v3, v4>/geo_replication`| |
 
 ## Why are some database writes allowed and some are not?
 
