@@ -706,17 +706,17 @@ WARNING:
 The flag `gitlab_pages['domain_config_source']` is deprecated for use in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913),
 and is planned for removal in GitLab 14.0.
 
-The special `domain_config_source` flag was introduced in 13.3 to allow users to use
-[API-based configuration](#gitlab-api-based-configuration) and opt-in manually into this new flow.
-In 13.7, the [`auto` value was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218358)
-to enable a smoother transition into API-based configuration.
+GitLab 13.0 introduced the special flag `domain_config_source` to support manual opt-in to
+[API-based configuration](#gitlab-api-based-configuration).
+GitLab 13.7 introduced the [`auto` value](https://gitlab.com/gitlab-org/gitlab/-/issues/218358)
+to support a smoother transition to API-based configuration.
 
-Starting from 14.0, GitLab Pages will only support API-based configuration and
-[disk source configuration will be removed](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/382).
-Therefore the `domain_config_source` will also be removed.
+Starting with GitLab 14.0, GitLab Pages only supports API-based configuration, and
+[disk source configuration is removed](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/382).
+Therefore, GitLab 14.0 also removes `domain_config_source`.
 
-GitLab Pages will fail to start if it cannot connect to the GitLab API.
-For other common issues, see the [troubleshooting section](#failed-to-connect-to-the-internal-gitlab-api)
+GitLab Pages fails to start if it can't connect to the GitLab API. For other common issues, see the
+[troubleshooting section](#failed-to-connect-to-the-internal-gitlab-api)
 or report an issue.
 
 ### GitLab API-based configuration
