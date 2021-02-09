@@ -4605,7 +4605,7 @@ into templates.
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
-This custom YAML tag allows to merge specific keys from multiple file into a single pipeline configuration.
+This custom YAML tag allows to merge specific keys from multiple files into a single pipeline configuration.
 
 ```yaml
 # Content of setup.yml
