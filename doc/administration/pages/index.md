@@ -961,8 +961,9 @@ error="failed to connect to internal Pages API: Get \"https://gitlab.example.com
 ### Pages cannot communicate with an instance of the GitLab API
 
 WARNING:
-The configuration flag `domain_config_source` is now [deprecated](#deprecated-domain_config_source)
-and will be removed in 14.0.
+The flag `gitlab_pages['domain_config_source']` is [deprecated](#deprecated-domain_config_source)
+for use in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913),
+and is planned for removal in GitLab 14.0.
 
 If you use the default value for `domain_config_source=auto` and run multiple instances of GitLab
 Pages, you may see intermittent 502 error responses while serving Pages content. You may also see
