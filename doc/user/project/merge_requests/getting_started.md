@@ -132,7 +132,7 @@ To request it, open the **Reviewers** drop-down box to search for the user you w
 
 #### Approval Rule information for Reviewers **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233736) in GitLab 13.8. For this version only, GitLab administrators can opt to [enable it](#enable-or-disable-approval-rule-information).
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233736) in GitLab 13.8.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/293742) in GitLab 13.9.
 
 When editing the **Reviewers** field in a new or existing merge request, GitLab
