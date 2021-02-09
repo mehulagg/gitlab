@@ -85,7 +85,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
       Ci::JobArtifact::DEFAULT_FILE_NAMES.each do |file_type, filename|
         context file_type.to_s do
           let(:report) { { "#{file_type}": [filename] } }
-          let(:build) { create(:ci_build, options: { artifacts: { reports: report } } ) }
+          let(:build) { create(:ci_build, options: { artifacts: { reports: report } }) }
 
           let(:report_expectation) do
             {
@@ -106,7 +106,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
     context "when option has both archive and reports specification" do
       let(:report) { { junit: ['junit.xml'] } }
-      let(:build) { create(:ci_build, options: { script: 'echo', artifacts: { **archive, reports: report } } ) }
+      let(:build) { create(:ci_build, options: { script: 'echo', artifacts: { **archive, reports: report } }) }
 
       let(:report_expectation) do
         {
@@ -268,6 +268,48 @@ RSpec.describe Ci::BuildRunnerPresenter do
         is_expected
           .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                               "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
+      end
+    end
+  end
+
+  describe '#variables subset' do
+    subject { presenter.variables.select { |v| %w[A B C].include?(v[:key]) } }
+
+    let(:build) { create(:ci_build) }
+
+    context 'with references in pipeline variables' do
+      before do
+        create(:ci_pipeline_variable, key: 'A', value: 'refA-$B', pipeline: build.pipeline)
+        create(:ci_pipeline_variable, key: 'B', value: 'refB-$C', pipeline: build.pipeline)
+        create(:ci_pipeline_variable, key: 'C', value: 'value', pipeline: build.pipeline)
+      end
+
+      context 'when FF :variable_inside_variable is disabled' do
+        before do
+          stub_feature_flags(variable_inside_variable: false)
+        end
+
+        it 'returns non-expanded variables' do
+          is_expected.to eq [
+                              { key: 'A', value: 'refA-$B', public: false, masked: false },
+                              { key: 'B', value: 'refB-$C', public: false, masked: false },
+                              { key: 'C', value: 'value', public: false, masked: false }
+                            ]
+        end
+      end
+
+      context 'when FF :variable_inside_variable is enabled' do
+        before do
+          stub_feature_flags(variable_inside_variable: [build.project])
+        end
+
+        it 'returns expanded and sorted variables' do
+          is_expected.to eq [
+                              { key: 'C', value: 'value', public: false, masked: false },
+                              { key: 'B', value: 'refB-$C', public: false, masked: false },
+                              { key: 'A', value: 'refA-$B', public: false, masked: false }
+                            ]
+        end
       end
     end
   end

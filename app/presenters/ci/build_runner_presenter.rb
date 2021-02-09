@@ -32,6 +32,12 @@ module Ci
       end.to_i
     end
 
+    def variables
+      sorter = variable_collection.sorted_collection(project)
+
+      sorter.sort.to_runner_variables
+    end
+
     def refspecs
       specs = []
       specs << refspec_for_persistent_ref if persistent_ref_exist?

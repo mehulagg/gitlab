@@ -1,0 +1,5 @@
+---
+title: Send fully-resolved variable values to the runner
+merge_request: 48627
+author:
+type: added
