@@ -2,12 +2,14 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
-  let(:cursor) { 'cursor' }
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
-  let(:bulk_import) { create(:bulk_import, user: user) }
-  let(:entity) do
+RSpec.describe EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline do
+  let_it_be(:cursor) { 'cursor' }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:epic) { create(:epic, group: group) }
+  let_it_be(:tracker) { "epic_#{epic.iid}_award_emoji" }
+  let_it_be(:bulk_import) { create(:bulk_import, user: user) }
+  let_it_be(:entity) do
     create(
       :bulk_import_entity,
       group: group,
@@ -18,7 +20,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
     )
   end
 
-  let(:context) { BulkImports::Pipeline::Context.new(entity) }
+  let_it_be(:context) { BulkImports::Pipeline::Context.new(entity) }
 
   before do
     stub_licensed_features(epics: true)
@@ -27,18 +29,26 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
 
   subject { described_class.new(context) }
 
+  describe '#initialize' do
+    it 'update context with next epic iid' do
+      subject
+
+      expect(context.extra[:epic_iid]).to eq(epic.iid)
+    end
+  end
+
   describe '#run' do
-    it 'imports group epics into destination group' do
-      first_page = extractor_data(has_next_page: true, cursor: cursor)
-      last_page = extractor_data(has_next_page: false)
+    it 'imports epic award emoji' do
+      data = extractor_data(has_next_page: false, cursor: cursor)
 
       allow_next_instance_of(BulkImports::Common::Extractors::GraphqlExtractor) do |extractor|
         allow(extractor)
           .to receive(:extract)
-          .and_return(first_page, last_page)
+          .and_return(data)
       end
 
-      expect { subject.run }.to change(::Epic, :count).by(2)
+      expect { subject.run }.to change(::AwardEmoji, :count).by(1)
+      expect(epic.award_emoji.first.name).to eq('thumbsup')
     end
   end
 
@@ -51,10 +61,10 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
 
         subject.after_run(data)
 
-        tracker = entity.trackers.find_by(relation: :epics)
+        page_tracker = entity.trackers.find_by(relation: tracker)
 
-        expect(tracker.has_next_page).to eq(true)
-        expect(tracker.next_page).to eq(cursor)
+        expect(page_tracker.has_next_page).to eq(true)
+        expect(page_tracker.next_page).to eq(cursor)
       end
     end
 
@@ -66,10 +76,21 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
 
         subject.after_run(data)
 
-        tracker = entity.trackers.find_by(relation: :epics)
+        page_tracker = entity.trackers.find_by(relation: tracker)
 
-        expect(tracker.has_next_page).to eq(false)
-        expect(tracker.next_page).to be_nil
+        expect(page_tracker.has_next_page).to eq(false)
+        expect(page_tracker.next_page).to be_nil
+      end
+
+      it 'updates context with next epic iid' do
+        epic2 = create(:epic, group: group)
+        data = extractor_data(has_next_page: false)
+
+        expect(subject).to receive(:run)
+
+        subject.after_run(data)
+
+        expect(context.extra[:epic_iid]).to eq(epic2.iid)
       end
     end
   end
@@ -83,7 +104,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
         .to eq(
           klass: BulkImports::Common::Extractors::GraphqlExtractor,
           options: {
-            query: EE::BulkImports::Groups::Graphql::GetEpicsQuery
+            query: EE::BulkImports::Groups::Graphql::GetEpicAwardEmojiQuery
           }
         )
     end
@@ -92,26 +113,17 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
       expect(described_class.transformers)
         .to contain_exactly(
           { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil },
-          { klass: EE::BulkImports::Groups::Transformers::EpicAttributesTransformer, options: nil }
+          { klass: BulkImports::Common::Transformers::AwardEmojiTransformer, options: nil }
         )
     end
 
     it 'has loaders' do
-      expect(described_class.get_loader).to eq(klass: EE::BulkImports::Groups::Loaders::EpicsLoader, options: nil)
+      expect(described_class.get_loader).to eq(klass: EE::BulkImports::Groups::Loaders::EpicAwardEmojiLoader, options: nil)
     end
   end
 
   def extractor_data(has_next_page:, cursor: nil)
-    data = [
-      {
-        'title' => 'epic1',
-        'state' => 'closed',
-        'confidential' => true,
-        'labels' => {
-          'nodes' => []
-        }
-      }
-    ]
+    data = [{ 'name' => 'thumbsup' }]
 
     page_info = {
       'end_cursor' => cursor,

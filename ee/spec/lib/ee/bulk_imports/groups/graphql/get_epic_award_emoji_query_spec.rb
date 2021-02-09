@@ -2,24 +2,21 @@
 
 require 'spec_helper'
 
-RSpec.describe BulkImports::Groups::Graphql::GetMembersQuery do
+RSpec.describe EE::BulkImports::Groups::Graphql::GetEpicAwardEmojiQuery do
   it 'has a valid query' do
-    entity = create(:bulk_import_entity)
-    context = BulkImports::Pipeline::Context.new(entity)
+    context = BulkImports::Pipeline::Context.new(create(:bulk_import_entity), epic_iid: 1)
 
-    query = GraphQL::Query.new(
-      GitlabSchema,
+    result = GitlabSchema.execute(
       described_class.to_s,
       variables: described_class.variables(context)
-    )
-    result = GitlabSchema.static_validator.validate(query)
+    ).to_h
 
-    expect(result[:errors]).to be_empty
+    expect(result['errors']).to be_blank
   end
 
   describe '#data_path' do
     it 'returns data path' do
-      expected = %w[data group group_members nodes]
+      expected = %w[data group epic award_emoji nodes]
 
       expect(described_class.data_path).to eq(expected)
     end
@@ -27,7 +24,7 @@ RSpec.describe BulkImports::Groups::Graphql::GetMembersQuery do
 
   describe '#page_info_path' do
     it 'returns pagination information path' do
-      expected = %w[data group group_members page_info]
+      expected = %w[data group epic award_emoji page_info]
 
       expect(described_class.page_info_path).to eq(expected)
     end
