@@ -9,6 +9,7 @@ import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_is
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
 import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
+import BoardSidebarIterationSelect from 'ee_component/boards/components/sidebar/board_sidebar_iteration_select.vue';
 import { ISSUABLE } from '~/boards/constants';
 import { createStore } from '~/boards/stores';
 
@@ -85,6 +86,10 @@ describe('ee/BoardContentSidebar', () => {
 
   it('renders BoardSidebarMilestoneSelect', () => {
     expect(wrapper.find(BoardSidebarMilestoneSelect).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarIterationSelect', () => {
+    expect(wrapper.find(BoardSidebarIterationSelect).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {
