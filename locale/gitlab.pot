@@ -20619,7 +20619,7 @@ msgstr ""
 msgid "One or more of your personal access tokens has expired."
 msgstr ""
 
-msgid "One or more of your personal access tokens will expire in %{days_to_expire} days or less."
+msgid "One or more of your personal access tokens will expire in %{days_to_expire} days or less:"
 msgstr ""
 
 msgid "Only 'Reporter' roles and above on tiers Premium and above can see Value Stream Analytics."
