@@ -22,6 +22,7 @@ module RequirementsManagement
       items = by_iid(items)
       items = by_author(items)
       items = by_search(items)
+      items = by_last_test_report_state(items)
 
       sort(items)
     end
@@ -56,6 +57,14 @@ module RequirementsManagement
       return items.none unless authors.present? # author not found
 
       items.with_author(authors)
+    end
+
+    def by_last_test_report_state(items)
+      last_test_report_state = params[:last_test_report_state]
+
+      return items unless last_test_report_state
+
+      items.with_last_test_report_state(last_test_report_state)
     end
 
     def get_authors(username_param)

@@ -37,6 +37,21 @@ module RequirementsManagement
     scope :with_author, -> (user) { where(author: user) }
     scope :counts_by_state, -> { group(:state).count }
 
+    # Used to filter requirements by latest test report attributes
+    scope :include_last_test_report, -> do
+      joins(
+        "INNER JOIN (
+           SELECT DISTINCT ON (requirement_id) *
+           FROM requirements_management_test_reports
+           ORDER BY requirement_id, created_at DESC
+        ) AS test_reports ON test_reports.requirement_id = requirements.id"
+      )
+    end
+
+    scope :with_last_test_report_state, -> (state) do
+      include_last_test_report.where( test_reports: { state: state } )
+    end
+
     class << self
       # Searches for records with a matching title.
       #
