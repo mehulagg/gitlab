@@ -58,7 +58,7 @@ Here is a message you can use to explain to community contributors as to why we 
 
 <!-- vale gitlab.RelativeLinks = NO -->
 
-```markdown
+```
 Hello CONTRIBUTOR!
 
 Thank you very much for this contribution. It seems like you are doing a "simple" dependency update.
