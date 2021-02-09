@@ -147,6 +147,10 @@ module Gitlab
           @puma_options = options
         end
 
+        def in_single_puma?
+          Gitlab::Runtime.puma? && !in_clustered_puma?
+        end
+
         private
 
         def call(name, hooks)

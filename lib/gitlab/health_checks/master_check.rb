@@ -46,6 +46,10 @@ module Gitlab
         end
 
         def check
+          # For Puma Single mode, MasterCheck is not relevant, and it shouldn't break Health probes.
+          # See https://gitlab.com/gitlab-org/gitlab/-/issues/300661
+          return true if Gitlab::Cluster::LifecycleEvents.in_single_puma?
+
           # the lack of pipe is a legitimate failure of check
           return false unless @pipe_read
 
