@@ -1,5 +1,6 @@
 export default () => ({
   featureFlags: {},
+  defaultStageConfig: [],
 
   startDate: null,
   endDate: null,
