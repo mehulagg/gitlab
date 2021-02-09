@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 
 import App from 'ee/security_configuration/api_fuzzing/components/app.vue';
 import ConfigurationForm from 'ee/security_configuration/api_fuzzing/components/configuration_form.vue';
@@ -50,6 +50,16 @@ describe('EE - ApiFuzzingConfigurationApp', () => {
 
     expect(findConfigurationForm().exists()).toBe(true);
     expect(findLoadingSpinner().exists()).toBe(false);
+  });
+
+  it("shows a notice about the tool's purpose", () => {
+    createWrapper();
+
+    const alert = wrapper.find(GlAlert);
+    expect(alert.exists()).toBe(true);
+    expect(alert.text()).toBe(
+      'Use this tool to generate API fuzzing configuration YAML to copy into your .gitlab-ci.yml file. This tool does not reflect or update your .gitlab-ci.yml file automatically.',
+    );
   });
 
   it('includes a link to API fuzzing documentation ', () => {
