@@ -59,7 +59,9 @@ module BoardsHelper
   end
 
   def board_base_url
-    if board.group_board?
+    if board.to_type == "EpicBoard"
+      group_epic_boards_url(@group)
+    elsif board.group_board?
       group_boards_url(@group)
     else
       project_boards_path(@project)

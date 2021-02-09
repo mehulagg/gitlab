@@ -83,6 +83,7 @@ export default () => {
         fullPath: $boardApp.dataset.fullPath,
         boardType: this.parent,
         disabled: this.disabled,
+        isEpicBoard: true,
         boardConfig: {
           milestoneId: parseInt($boardApp.dataset.boardMilestoneId, 10),
           milestoneTitle: $boardApp.dataset.boardMilestoneTitle || '',
@@ -111,5 +112,6 @@ export default () => {
   mountMultipleBoardsSwitcher({
     fullPath: $boardApp.dataset.fullPath,
     rootPath: $boardApp.dataset.boardsEndpoint,
+    isEpicBoard: true,
   });
 };
