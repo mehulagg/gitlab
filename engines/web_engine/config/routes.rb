@@ -35,7 +35,9 @@ Rails.application.routes.draw do
     match '*all', via: [:get, :post], to: proc { [404, {}, ['']] }
   end
 
-  draw :oauth
+  Gitlab.ee do
+    draw :oauth
+  end
 
   use_doorkeeper_openid_connect
 
