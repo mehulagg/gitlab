@@ -4,6 +4,7 @@ mutation exportRequirements(
   $authorUsername: [String!] = []
   $search: String = ""
   $sortBy: Sort = CREATED_DESC
+  $selectedFields: [String!] = []
 ) {
   exportRequirements(
     input: {
@@ -12,6 +13,7 @@ mutation exportRequirements(
       authorUsername: $authorUsername
       state: $state
       sort: $sortBy
+      selectedFields: $selectedFields
     }
   ) {
     errors

@@ -408,7 +408,7 @@ export default {
           createFlash({ message });
         });
     },
-    exportCsv() {
+    exportCsv(selectedFields) {
       return this.$apollo
         .mutate({
           mutation: exportRequirement,
@@ -418,6 +418,7 @@ export default {
             authorUsername: this.authorUsernames,
             search: this.textSearch,
             sortBy: this.sortBy,
+            selectedFields,
           },
         })
         .catch((e) => {
