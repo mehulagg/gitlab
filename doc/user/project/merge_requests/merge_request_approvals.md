@@ -330,6 +330,10 @@ enable this feature:
 1. Check the **Prevent MR approvals from users who make commits to the MR.** checkbox.
 1. Click **Save changes**.
 
+Note that this only prevents **committers** from approving the MR. Code **authors** are still able to approve the MR.
+
+The differences between authors and committers is explained in the [official git documentation](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History)
+
 #### Require authentication when approving a merge request
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5981) in GitLab 12.0.
