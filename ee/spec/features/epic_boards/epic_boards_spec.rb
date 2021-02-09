@@ -158,6 +158,33 @@ RSpec.describe 'epic boards', :js do
     end
   end
 
+  context 'filtered search' do
+    before do
+      stub_licensed_features(epics: true)
+      stub_feature_flags(boards_filtered_search: true)
+
+      group.add_guest(user)
+      sign_in(user)
+      visit_epic_boards_page
+    end
+
+    it 'can select an Author and Label' do
+      page.find('[data-testid="epic-filtered-search"]').click
+
+      page.within('[data-testid="epic-filtered-search"]') do
+        click_link 'Author'
+        wait_for_requests
+        click_link user.name
+
+        click_link 'Label'
+        wait_for_requests
+        click_link label.title
+
+        expect(page).to have_text("Author = #{user.name} Label = ~#{label.title}")
+      end
+    end
+  end
+
   def visit_epic_boards_page
     visit group_epic_boards_path(group)
     wait_for_requests
