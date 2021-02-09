@@ -73,13 +73,4 @@ functions:
 - `darken`
 - `color-yiq` (color contrast)
 
-Not all SCSS variables, even if they compile, are valid. For example, the following SCSS variable
-does not work:
-
-```scss
-color: rgba(var(--black), 0.5);
-```
-
-It compiles. It even appears as a valid style in your browser's developer tools. However, since
-our CSS variables are defined in hex format, such as `--black: #222`, that style
-computes to `rgba(#222, 0.5)`, which is _not_ valid CSS!
+If those are needed then SCSS variables should be used.
