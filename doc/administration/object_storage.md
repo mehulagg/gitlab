@@ -562,8 +562,7 @@ supported by consolidated configuration form, refer to the following guides:
 If you're working to [scale out](reference_architectures/index.md) your GitLab implementation,
 or add fault tolerance and redundancy, you may be
 looking at removing dependencies on block or network file systems.
-See the following additional guides and
-[note that Pages requires disk storage](#gitlab-pages-requires-nfs):
+See the following additional guides:
 
 1. Make sure the [`git` user home directory](https://docs.gitlab.com/omnibus/settings/configuration.html#moving-the-home-directory-for-a-user) is on local disk.
 1. Configure [database lookup of SSH keys](operations/fast_ssh_key_lookup.md)
