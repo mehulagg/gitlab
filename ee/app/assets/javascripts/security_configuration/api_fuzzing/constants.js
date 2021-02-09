@@ -18,3 +18,5 @@ export const SCAN_MODES = {
     ),
   },
 };
+
+export const CONFIGURATION_SNIPPET_MODAL_ID = 'CONFIGURATION_SNIPPET_MODAL_ID';

@@ -11,6 +11,7 @@ export const initApiFuzzingConfiguration = () => {
   }
 
   const {
+    securityConfigurationPath,
     fullPath,
     apiFuzzingDocumentationPath,
     apiFuzzingAuthenticationDocumentationPath,
@@ -23,6 +24,7 @@ export const initApiFuzzingConfiguration = () => {
     el,
     apolloProvider,
     provide: {
+      securityConfigurationPath,
       fullPath,
       apiFuzzingDocumentationPath,
       apiFuzzingAuthenticationDocumentationPath,

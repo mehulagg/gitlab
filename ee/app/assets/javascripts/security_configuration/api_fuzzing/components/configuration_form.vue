@@ -10,13 +10,17 @@ import {
   GlLink,
   GlSprintf,
 } from '@gitlab/ui';
+import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
-import { SCAN_MODES } from '../constants';
+import { SCAN_MODES, CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
+import configureApiFuzzingMutation from '../graphql/configure_api_fuzzing.mutation.graphql';
 import DropdownInput from '../../components/dropdown_input.vue';
 import DynamicFields from '../../components/dynamic_fields.vue';
 import FormInput from '../../components/form_input.vue';
+import ConfigurationSnippetModal from './configuration_snippet_modal.vue';
 
 export default {
+  CONFIGURATION_SNIPPET_MODAL_ID,
   components: {
     GlAccordion,
     GlAccordionItem,
@@ -27,11 +31,15 @@ export default {
     GlFormCheckbox,
     GlLink,
     GlSprintf,
+    ConfigurationSnippetModal,
     DropdownInput,
     DynamicFields,
     FormInput,
   },
   inject: {
+    securityConfigurationPath: {
+      from: 'securityConfigurationPath',
+    },
     apiFuzzingAuthenticationDocumentationPath: {
       from: 'apiFuzzingAuthenticationDocumentationPath',
     },
@@ -53,6 +61,8 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
+      showError: false,
       targetUrl: {
         field: 'targetUrl',
         label: s__('APIFuzzing|Target URL'),
@@ -111,6 +121,8 @@ export default {
           }),
         ),
       },
+      ciYamlEditUrl: '',
+      configurationYaml: '',
     };
   },
   computed: {
@@ -142,9 +154,50 @@ export default {
         ({ name }) => name === this.scanProfile.value,
       )?.yaml;
     },
+    someFieldEmpty() {
+      const fields = [this.targetUrl, this.scanMode, this.apiSpecificationFile, this.scanProfile];
+      if (this.authenticationEnabled) {
+        fields.push(...this.authenticationSettings);
+      }
+      return fields.some(({ value }) => !value);
+    },
   },
   methods: {
-    onSubmit() {},
+    async onSubmit() {
+      this.isLoading = true;
+      this.showError = false;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      try {
+        const {
+          data: {
+            configureApiFuzzing: { gitlabCiYamlEditUrl, configurationYaml },
+            errors = [],
+          },
+        } = await this.$apollo.mutate({
+          mutation: configureApiFuzzingMutation,
+          variables: {
+            input: {
+              foo: 'bar',
+            },
+          },
+        });
+        if (errors.length) {
+          this.showError = true;
+        } else {
+          this.ciYamlEditUrl = gitlabCiYamlEditUrl;
+          this.configurationYaml = configurationYaml;
+          this.$refs[CONFIGURATION_SNIPPET_MODAL_ID].show();
+        }
+      } catch (e) {
+        this.showError = true;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    dismissError(e) {
+      this.showError = false;
+      Sentry.captureException(e);
+    },
   },
   SCAN_MODES,
 };
@@ -152,6 +205,10 @@ export default {
 
 <template>
   <form @submit.prevent="onSubmit">
+    <gl-alert v-if="showError" variant="danger" class="gl-mb-5" @dismiss="dismissError">
+      {{ s__('APIFuzzing|The configuration could not be saved, please try again later.') }}
+    </gl-alert>
+
     <form-input v-model="targetUrl.value" v-bind="targetUrl" class="gl-mb-7" />
 
     <dropdown-input v-model="scanMode.value" v-bind="scanMode" />
@@ -223,9 +280,22 @@ export default {
 
     <hr />
 
-    <gl-button type="submit" variant="confirm">{{
-      s__('APIFuzzing|Generate code snippet')
+    <gl-button
+      :disabled="someFieldEmpty"
+      :loading="isLoading"
+      type="submit"
+      variant="confirm"
+      class="js-no-auto-disable"
+      >{{ s__('APIFuzzing|Generate code snippet') }}</gl-button
+    >
+    <gl-button :disabled="isLoading" :href="securityConfigurationPath">{{
+      __('Cancel')
     }}</gl-button>
-    <gl-button>{{ __('Cancel') }}</gl-button>
+
+    <configuration-snippet-modal
+      :ref="$options.CONFIGURATION_SNIPPET_MODAL_ID"
+      :ci-yaml-edit-url="ciYamlEditUrl"
+      :yaml="configurationYaml"
+    />
   </form>
 </template>

@@ -3,6 +3,7 @@
 module Projects::Security::ApiFuzzingConfigurationHelper
   def api_fuzzing_configuration_data(project)
     {
+      security_configuration_path: project_security_configuration_path(project),
       full_path: project.full_path,
       api_fuzzing_documentation_path: help_page_path('user/application_security/api_fuzzing/index'),
       api_fuzzing_authentication_documentation_path: help_page_path('user/application_security/api_fuzzing/index', anchor: 'authentication'),

@@ -4,4 +4,17 @@ import createDefaultClient from '~/lib/graphql';
 
 Vue.use(VueApollo);
 
-export const apolloProvider = new VueApollo({ defaultClient: createDefaultClient() });
+const resolvers = {
+  Mutation: {
+    configureApiFuzzing: () => {
+      return {
+        configurationYaml: 'yaml',
+        status: 'OK',
+        gitlabCiYamlEditUrl: '/edit/yaml',
+        __typename: 'ApiFuzzingConfiguration',
+      };
+    },
+  },
+};
+
+export const apolloProvider = new VueApollo({ defaultClient: createDefaultClient(resolvers) });

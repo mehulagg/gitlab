@@ -1408,6 +1408,15 @@ msgstr ""
 msgid "APIFuzzing|Choose a profile"
 msgstr ""
 
+msgid "APIFuzzing|Code snippet for the API Fuzzing configuration"
+msgstr ""
+
+msgid "APIFuzzing|Copy code and open .gitlab-ci.yml file"
+msgstr ""
+
+msgid "APIFuzzing|Copy code only"
+msgstr ""
+
 msgid "APIFuzzing|Customize common API fuzzing settings to suit your requirements. For details of more advanced configuration options, see the %{docsLinkStart}GitLab API Fuzzing documentation%{docsLinkEnd}."
 msgstr ""
 
@@ -1454,6 +1463,9 @@ msgid "APIFuzzing|Show code snippet for the profile"
 msgstr ""
 
 msgid "APIFuzzing|Target URL"
+msgstr ""
+
+msgid "APIFuzzing|The configuration could not be saved, please try again later."
 msgstr ""
 
 msgid "APIFuzzing|There are two ways to perform scans."
