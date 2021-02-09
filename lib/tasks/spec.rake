@@ -3,6 +3,8 @@
 return if Rails.env.production?
 
 namespace :spec do
+  require_relative '../../tooling/quality/test_level'
+
   desc 'GitLab | RSpec | Run unit tests'
   RSpec::Core::RakeTask.new(:unit, :rspec_opts) do |t, args|
     require_dependency 'quality/test_level'

@@ -72,6 +72,8 @@ Dir[Rails.root.join("spec/support/shared_contexts/*.rb")].sort.each { |f| requir
 Dir[Rails.root.join("spec/support/shared_examples/*.rb")].sort.each { |f| require f }
 Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
 
+require File.expand_path('../tooling/quality/test_level', __dir__)
+
 quality_level = Quality::TestLevel.new
 
 RSpec.configure do |config|
