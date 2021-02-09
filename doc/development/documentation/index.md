@@ -177,9 +177,8 @@ There are two types of redirects:
 - Redirects in a [`_redirects`](../../user/project/pages/redirects.md) file,
   for users who view the docs on <https://docs.gitlab.com>.
 
-When adding a redirect, you'll use only the redirect codes method. The
-Technical Writing team manages the process to regularly update the `_redirects`
-file.
+The Technical Writing team manages the process to regularly update the
+`_redirects` file.
 
 To add a redirect:
 
