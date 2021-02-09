@@ -5,6 +5,17 @@ export const MOCK_QUERY = {
   group_id: 'test_1',
 };
 
+export const MOCK_WIKI_QUERY = {
+  search: 'test',
+  group_id: 'group_1',
+  project_id: 'project_1',
+  scope: 'wiki_blobs',
+  search_code: false,
+  snippets: false,
+  sort: 'created_asc',
+  repository_ref: null,
+};
+
 export const MOCK_GROUP = {
   name: 'test group',
   full_name: 'full name test group',

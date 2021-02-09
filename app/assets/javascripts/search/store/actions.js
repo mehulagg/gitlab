@@ -1,3 +1,4 @@
+import { pick } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
 import Api from '~/api';
 import createFlash from '~/flash';
@@ -6,6 +7,17 @@ import { visitUrl, setUrlParams } from '~/lib/utils/url_utility';
 import * as types from './mutation_types';
 
 /* private */
+const searchGenericParams = [
+  'search',
+  'scope',
+  'project_id',
+  'group_id',
+  'repository_ref',
+  'snippets',
+  'sort',
+  'force_search_results',
+];
+
 const getCount = ({ params, state, activeCount }) => {
   const globalSearchCountsPath = '/search/count';
   const url = Api.buildUrl(globalSearchCountsPath);
@@ -83,6 +95,8 @@ export const applyQuery = ({ state }) => {
 };
 
 export const resetQuery = ({ state }, snippets = false) => {
+  // the only params that should be let through on query resets
+  const genericQuery = pick(state.query, searchGenericParams);
   let defaultQuery = {
     page: null,
     state: null,
@@ -92,12 +106,12 @@ export const resetQuery = ({ state }, snippets = false) => {
 
   if (snippets) {
     defaultQuery = {
+      ...defaultQuery,
       snippets: true,
       group_id: null,
       project_id: null,
-      ...defaultQuery,
     };
   }
 
-  visitUrl(setUrlParams({ ...state.query, ...defaultQuery }));
+  visitUrl(setUrlParams({ ...genericQuery, ...defaultQuery }));
 };

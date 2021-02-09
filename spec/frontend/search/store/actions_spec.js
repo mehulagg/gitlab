@@ -9,6 +9,7 @@ import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
 import {
   MOCK_QUERY,
+  MOCK_WIKI_QUERY,
   MOCK_GROUPS,
   MOCK_PROJECT,
   MOCK_PROJECTS,
@@ -132,17 +133,22 @@ describe('Global Search Store Actions', () => {
     });
   });
 
-  it('calls setUrlParams with snippets, group_id, and project_id when snippets param is true', () => {
-    return testAction(actions.resetQuery, true, state, [], [], () => {
+  it('filters out non-generic params', () => {
+    state = createState({ query: MOCK_WIKI_QUERY });
+
+    return testAction(actions.resetQuery, null, state, [], [], () => {
       expect(urlUtils.setUrlParams).toHaveBeenCalledWith({
-        ...state.query,
+        search: state.query.search,
+        scope: state.query.scope,
+        project_id: state.query.project_id,
+        group_id: state.query.group_id,
+        repository_ref: state.query.repository_ref,
+        sort: state.query.sort,
         page: null,
         state: null,
         confidential: null,
         nav_source: null,
-        group_id: null,
-        project_id: null,
-        snippets: true,
+        snippets: false,
       });
     });
   });
