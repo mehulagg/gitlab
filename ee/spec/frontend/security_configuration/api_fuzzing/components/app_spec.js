@@ -3,6 +3,7 @@ import VueApollo from 'vue-apollo';
 import { shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import { GlAlert, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { stripTypenames } from 'helpers/graphql_helpers';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import apiFuzzingCiConfigurationQuery from 'ee/security_configuration/api_fuzzing/graphql/api_fuzzing_ci_configuration.query.graphql';
 import App from 'ee/security_configuration/api_fuzzing/components/app.vue';
@@ -64,9 +65,21 @@ describe('EE - ApiFuzzingConfigurationApp', () => {
       createWrapper();
     });
 
+    it('sets the configuration properly', () => {
+      expect(wrapper.vm.apiFuzzingCiConfiguration).toEqual(
+        stripTypenames(apiFuzzingConfigurationQueryResponse.data.project.apiFuzzingCiConfiguration),
+      );
+    });
+
     it('shows the form once the configuration has loaded', () => {
       expect(findConfigurationForm().exists()).toBe(true);
       expect(findLoadingSpinner().exists()).toBe(false);
+    });
+
+    it('passes the configuration to the form', () => {
+      expect(findConfigurationForm().props('apiFuzzingCiConfiguration')).toEqual(
+        stripTypenames(apiFuzzingConfigurationQueryResponse.data.project.apiFuzzingCiConfiguration),
+      );
     });
 
     it("shows a notice about the tool's purpose", () => {
