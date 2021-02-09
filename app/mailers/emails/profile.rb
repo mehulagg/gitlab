@@ -58,7 +58,7 @@ module Emails
       @days_to_expire = PersonalAccessToken::DAYS_TO_EXPIRE
 
       Gitlab::I18n.with_locale(@user.preferred_language) do
-        mail(to: @user.notification_email, subject: subject(_("Your Personal Access Tokens will expire in %{days_to_expire} days or less") % { days_to_expire: @days_to_expire }))
+        mail(to: @user.notification_email, subject: subject(_("Your personal access tokens will expire in %{days_to_expire} days or less") % { days_to_expire: @days_to_expire }))
       end
     end
 

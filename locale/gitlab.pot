@@ -33679,9 +33679,6 @@ msgstr ""
 msgid "Your Personal Access Token was revoked"
 msgstr ""
 
-msgid "Your Personal Access Tokens will expire in %{days_to_expire} days or less"
-msgstr ""
-
 msgid "Your Primary Email will be used for avatar detection."
 msgstr ""
 
@@ -33851,6 +33848,9 @@ msgid "Your password reset token has expired."
 msgstr ""
 
 msgid "Your personal access token has expired"
+msgstr ""
+
+msgid "Your personal access tokens will expire in %{days_to_expire} days or less"
 msgstr ""
 
 msgid "Your profile"

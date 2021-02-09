@@ -138,7 +138,7 @@ RSpec.describe Emails::Profile do
     end
 
     it 'has the correct subject' do
-      is_expected.to have_subject /^Your Personal Access Tokens will expire in 7 days or less$/i
+      is_expected.to have_subject /^Your personal access tokens will expire in 7 days or less$/i
     end
 
     it 'mentions the access tokens will expire' do
