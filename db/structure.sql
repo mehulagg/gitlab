@@ -12317,6 +12317,39 @@ CREATE SEQUENCE experiments_id_seq
 
 ALTER SEQUENCE experiments_id_seq OWNED BY experiments.id;
 
+CREATE TABLE external_approval_rules (
+    id bigint NOT NULL,
+    project_id bigint,
+    external_url text NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT check_b634ca168d CHECK ((char_length(external_url) <= 255))
+);
+
+CREATE SEQUENCE external_approval_rules_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE external_approval_rules_id_seq OWNED BY external_approval_rules.id;
+
+CREATE TABLE external_approval_rules_protected_branches (
+    id bigint NOT NULL,
+    external_approval_rule_id bigint,
+    protected_branch_id bigint
+);
+
+CREATE SEQUENCE external_approval_rules_protected_branches_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE external_approval_rules_protected_branches_id_seq OWNED BY external_approval_rules_protected_branches.id;
+
 CREATE TABLE external_pull_requests (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -18795,6 +18828,10 @@ ALTER TABLE ONLY experiment_users ALTER COLUMN id SET DEFAULT nextval('experimen
 
 ALTER TABLE ONLY experiments ALTER COLUMN id SET DEFAULT nextval('experiments_id_seq'::regclass);
 
+ALTER TABLE ONLY external_approval_rules ALTER COLUMN id SET DEFAULT nextval('external_approval_rules_id_seq'::regclass);
+
+ALTER TABLE ONLY external_approval_rules_protected_branches ALTER COLUMN id SET DEFAULT nextval('external_approval_rules_protected_branches_id_seq'::regclass);
+
 ALTER TABLE ONLY external_pull_requests ALTER COLUMN id SET DEFAULT nextval('external_pull_requests_id_seq'::regclass);
 
 ALTER TABLE ONLY feature_gates ALTER COLUMN id SET DEFAULT nextval('feature_gates_id_seq'::regclass);
@@ -20002,6 +20039,12 @@ ALTER TABLE ONLY experiment_users
 ALTER TABLE ONLY experiments
     ADD CONSTRAINT experiments_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY external_approval_rules
+    ADD CONSTRAINT external_approval_rules_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY external_approval_rules_protected_branches
+    ADD CONSTRAINT external_approval_rules_protected_branches_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY external_pull_requests
     ADD CONSTRAINT external_pull_requests_pkey PRIMARY KEY (id);
 
@@ -21078,6 +21121,10 @@ CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_index ON epic_user_mentions US
 
 CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (id, created_at) WHERE ((expire_at IS NULL) AND (date(timezone('UTC'::text, created_at)) < '2020-06-22'::date));
 
+CREATE INDEX external_approval_rules_protected_branches_ear_idx ON external_approval_rules_protected_branches USING btree (external_approval_rule_id);
+
+CREATE INDEX external_approval_rules_protected_branches_pb_idx ON external_approval_rules_protected_branches USING btree (protected_branch_id);
+
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
 
 CREATE INDEX idx_audit_events_on_entity_id_desc_author_id_created_at ON audit_events_archived USING btree (entity_id, entity_type, id DESC, author_id, created_at);
@@ -21957,6 +22004,8 @@ CREATE INDEX index_experiment_users_on_user_id ON experiment_users USING btree (
 CREATE UNIQUE INDEX index_experiments_on_name ON experiments USING btree (name);
 
 CREATE INDEX index_expired_and_not_notified_personal_access_tokens ON personal_access_tokens USING btree (id, expires_at) WHERE ((impersonation = false) AND (revoked = false) AND (expire_notification_delivered = false));
+
+CREATE INDEX index_external_approval_rules_on_project_id ON external_approval_rules USING btree (project_id);
 
 CREATE UNIQUE INDEX index_external_pull_requests_on_project_and_branches ON external_pull_requests USING btree (project_id, source_branch, target_branch);
 
@@ -25738,8 +25787,14 @@ ALTER TABLE ONLY resource_milestone_events
 ALTER TABLE ONLY gpg_signatures
     ADD CONSTRAINT fk_rails_c97176f5f7 FOREIGN KEY (gpg_key_id) REFERENCES gpg_keys(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY external_approval_rules_protected_branches
+    ADD CONSTRAINT fk_rails_c9a037a926 FOREIGN KEY (external_approval_rule_id) REFERENCES external_approval_rules(id);
+
 ALTER TABLE ONLY board_group_recent_visits
     ADD CONSTRAINT fk_rails_ca04c38720 FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY external_approval_rules_protected_branches
+    ADD CONSTRAINT fk_rails_ca2ffb55e6 FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id);
 
 ALTER TABLE ONLY boards_epic_board_positions
     ADD CONSTRAINT fk_rails_cb4563dd6e FOREIGN KEY (epic_board_id) REFERENCES boards_epic_boards(id) ON DELETE CASCADE;
@@ -25995,6 +26050,9 @@ ALTER TABLE ONLY ci_job_variables
 
 ALTER TABLE ONLY packages_nuget_metadata
     ADD CONSTRAINT fk_rails_fc0c19f5b4 FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY external_approval_rules
+    ADD CONSTRAINT fk_rails_fd4f9ac573 FOREIGN KEY (project_id) REFERENCES projects(id);
 
 ALTER TABLE ONLY experiment_users
     ADD CONSTRAINT fk_rails_fd805f771a FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
