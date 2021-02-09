@@ -58,7 +58,12 @@ module Gitlab
 
     config.generators.templates.push("#{config.root}/generator_templates")
 
+    config.paths['draw_routes'] = %w(config/routes/)
+
+
     if Gitlab.ee?
+      config.paths['draw_routes'] << 'ee/config/routes/'
+
       ee_paths = config.eager_load_paths.each_with_object([]) do |path, memo|
         ee_path = config.root.join('ee', Pathname.new(path).relative_path_from(config.root))
         memo << ee_path.to_s
