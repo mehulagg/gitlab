@@ -20,6 +20,11 @@ module EE
       end
     end
 
+    # override
+    def check_for_spam?
+      for_issuable? && noteable.author.bot? && (note_changed? || noteable.confidential_changed?) || super
+    end
+
     # Original method in Elastic::ApplicationSearch
     def searchable?
       !system && super

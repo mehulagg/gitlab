@@ -17,6 +17,7 @@ import {
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import markdownField from '~/vue_shared/components/markdown/field.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import recaptchaModalImplementor from '~/vue_shared/mixins/recaptcha_modal_implementor';
 import * as constants from '../constants';
 import eventHub from '../event_hub';
 import issuableStateMixin from '../mixins/issuable_state';
@@ -35,7 +36,7 @@ export default {
     GlIcon,
     CommentFieldLayout,
   },
-  mixins: [glFeatureFlagsMixin(), issuableStateMixin],
+  mixins: [glFeatureFlagsMixin(), issuableStateMixin, recaptchaModalImplementor],
   props: {
     noteableType: {
       type: String,
@@ -48,6 +49,7 @@ export default {
       noteType: constants.COMMENT,
       isSubmitting: false,
       isSubmitButtonDisabled: true,
+      noteDataToRestoreOnCaptchaClose: null,
     };
   },
   computed: {
@@ -206,6 +208,9 @@ export default {
         this.isSubmitting = true;
 
         this.saveNote(noteData)
+          .then((data) => {
+            return this.checkForSpam(data);
+          })
           .then(() => {
             this.restartPolling();
             this.discard();
@@ -214,14 +219,20 @@ export default {
               this.toggleIssueState();
             }
           })
-          .catch(() => {
-            this.discard(false);
-            const msg = __(
-              'Your comment could not be submitted! Please check your network connection and try again.',
-            );
-            Flash(msg, 'alert', this.$el);
-            this.note = noteData.data.note.note; // Restore textarea content.
-            this.removePlaceholderNotes();
+          .catch((response) => {
+            if (response.name === 'SpamError') {
+              // TODO: Is there a better way to pass the noteData through to closeRecaptchaModal?
+              this.noteDataToRestoreOnCaptchaClose = noteData;
+              this.openRecaptcha();
+            } else {
+              this.discard(false);
+              const msg = __(
+                'Your comment could not be submitted! Please check your network connection and try again.',
+              );
+              Flash(msg, 'alert', this.$el);
+              this.note = noteData.data.note.note; // Restore textarea content.
+              this.removePlaceholderNotes();
+            }
           })
           .finally(() => {
             this.isSubmitting = false;
@@ -229,6 +240,14 @@ export default {
       } else {
         this.toggleIssueState();
       }
+    },
+    closeRecaptchaModal() {
+      this.discard(false);
+      this.note = this.noteDataToRestoreOnCaptchaClose.data.note.note; // Restore textarea content.
+      this.removePlaceholderNotes();
+      this.isSubmitting = false;
+
+      this.closeRecaptcha();
     },
     toggleIssueState() {
       if (this.isIssue) {
@@ -416,12 +435,18 @@ export default {
                 :disabled="isSubmitting"
                 data-testid="close-reopen-button"
                 @click="handleSave(true)"
-                >{{ issueActionButtonTitle }}</gl-button
-              >
+                >{{ issueActionButtonTitle }}
+              </gl-button>
             </div>
           </form>
         </div>
       </timeline-entry-item>
+      <recaptcha-modal
+        v-show="showRecaptcha"
+        ref="recaptchaModal"
+        :html="recaptchaHTML"
+        @close="closeRecaptchaModal"
+      />
     </ul>
   </div>
 </template>

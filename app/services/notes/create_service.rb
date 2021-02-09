@@ -5,7 +5,17 @@ module Notes
     include IncidentManagement::UsageData
 
     def execute
+      @request = params.delete(:request)
+      @spam_params = Spam::SpamActionService.filter_spam_params!(params)
+
       note = Notes::BuildService.new(project, current_user, params.except(:merge_request_diff_head_sha)).execute
+
+      Spam::SpamActionService.new(
+        spammable: note,
+        request: request,
+        user: current_user,
+        action: :create
+      ).execute(spam_params: spam_params)
 
       # n+1: https://gitlab.com/gitlab-org/gitlab-foss/issues/37440
       note_valid = Gitlab::GitalyClient.allow_n_plus_1_calls do
@@ -41,6 +51,8 @@ module Notes
     end
 
     private
+
+    attr_reader :request, :spam_params
 
     def execute_quick_actions(note)
       return yield(false) unless quick_actions_service.supported?(note)

@@ -40,33 +40,39 @@ module NotesActions
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def create
-    @note = Notes::CreateService.new(note_project, current_user, create_note_params).execute
+    create_params = create_note_params.merge(spammable_params)
+
+    @note = Notes::CreateService.new(note_project, current_user, create_params).execute
 
     respond_to do |format|
       format.json do
-        json = {
-          commands_changes: @note.commands_changes&.slice(:emoji_award, :time_estimate, :spend_time)
-        }
+        recaptcha_check_with_fallback(false) do
+          json = {
+            commands_changes: @note.commands_changes&.slice(:emoji_award, :time_estimate, :spend_time)
+          }
 
-        if @note.persisted? && return_discussion?
-          json[:valid] = true
+          if @note.persisted? && return_discussion?
+            json[:valid] = true
 
-          discussion = @note.discussion
-          prepare_notes_for_rendering(discussion.notes)
-          json[:discussion] = discussion_serializer.represent(discussion, context: self)
-        else
-          prepare_notes_for_rendering([@note])
+            discussion = @note.discussion
+            prepare_notes_for_rendering(discussion.notes)
+            json[:discussion] = discussion_serializer.represent(discussion, context: self)
+          else
+            prepare_notes_for_rendering([@note])
 
-          json.merge!(note_json(@note))
-        end
+            json.merge!(note_json(@note))
+          end
 
-        if @note.errors.present? && @note.errors.keys != [:commands_only]
-          render json: json, status: :unprocessable_entity
-        else
-          render json: json
+          if @note.errors.present? && @note.errors.keys != [:commands_only]
+            render json: json, status: :unprocessable_entity
+          else
+            render json: json
+          end
         end
       end
-      format.html { redirect_back_or_default }
+      format.html do
+        recaptcha_check_with_fallback { redirect_back_or_default }
+      end
     end
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables

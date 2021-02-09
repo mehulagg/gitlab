@@ -343,12 +343,16 @@ export default {
     assigneesUpdate(assignees) {
       this.updateAssignees(assignees);
     },
+    showingRecaptcha() {
+      return !this.note.id;
+    },
   },
 };
 </script>
 
 <template>
   <timeline-entry-item
+    v-if="!showingRecaptcha"
     :id="noteAnchorId"
     :class="classNameBindings"
     :data-award-url="note.toggle_award_path"

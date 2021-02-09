@@ -25,6 +25,8 @@ module SpammableActions
 
       respond_to do |format|
         format.html do
+          # TODO: This will probably fail if called from notes controller, but that may not be possible
+          #   if it never uses format.html?
           render :verify
         end
 

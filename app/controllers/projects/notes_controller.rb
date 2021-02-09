@@ -5,6 +5,7 @@ class Projects::NotesController < Projects::ApplicationController
   include NotesActions
   include NotesHelper
   include ToggleAwardEmoji
+  include SpammableActions
 
   before_action :whitelist_query_limiting, only: [:create, :update]
   before_action :authorize_read_note!
@@ -56,16 +57,24 @@ class Projects::NotesController < Projects::ApplicationController
     end
   end
 
+  protected
+
+  def note
+    @note ||= @project.notes.find(params[:id])
+  end
+
+  alias_method :spammable, :note
+
+  def spammable_path
+    project_issue_path(@project, @noteable)
+  end
+
   private
 
   def render_json_with_notes_serializer
     prepare_notes_for_rendering([note])
 
     render json: note_serializer.represent(note, render_truncated_diff_lines: true)
-  end
-
-  def note
-    @note ||= @project.notes.find(params[:id])
   end
 
   alias_method :awardable, :note
