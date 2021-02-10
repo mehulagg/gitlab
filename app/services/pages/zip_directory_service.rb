@@ -10,8 +10,9 @@ module Pages
 
     PUBLIC_DIR = 'public'
 
-    def initialize(input_dir)
+    def initialize(input_dir, ignore_invalid_entries: false)
       @input_dir = input_dir
+      @ignore_invalid_entries = ignore_invalid_entries
     end
 
     def execute
@@ -53,6 +54,8 @@ module Pages
       end
     rescue InvalidEntryError => e
       Gitlab::ErrorTracking.track_exception(e, input_dir: @input_dir, disk_file_path: disk_file_path)
+
+      raise e unless @ignore_invalid_entries
     end
 
     def recursively_zip_directory(zipfile, disk_file_path, zipfile_path)

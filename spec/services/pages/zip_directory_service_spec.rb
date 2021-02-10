@@ -10,8 +10,14 @@ RSpec.describe Pages::ZipDirectoryService do
     end
   end
 
+  let(:ignore_invalid_entries) { false }
+
+  let(:service) do
+    described_class.new(@work_dir, ignore_invalid_entries: ignore_invalid_entries)
+  end
+
   let(:result) do
-    described_class.new(@work_dir).execute
+    service.execute
   end
 
   let(:status) { result[:status] }
@@ -134,31 +140,73 @@ RSpec.describe Pages::ZipDirectoryService do
       end
     end
 
-    it 'ignores the symlink pointing outside of public directory' do
-      create_file("target.html", "hello")
-      create_link("public/link.html", "../target.html")
+    context 'when symlink points outside of public directory' do
+      before do
+        create_file("target.html", "hello")
+        create_link("public/link.html", "../target.html")
+      end
 
-      with_zip_file do |zip_file|
-        expect { zip_file.get_entry("public/link.html") }.to raise_error(Errno::ENOENT)
+      it 'raises error' do
+        expect do
+          result
+        end.to raise_error(described_class::InvalidEntryError)
+      end
+
+      context 'when errors are ignored' do
+        let(:ignore_invalid_entries) { true }
+
+        it 'ignores the symlink' do
+          with_zip_file do |zip_file|
+            expect { zip_file.get_entry("public/link.html") }.to raise_error(Errno::ENOENT)
+          end
+        end
       end
     end
 
-    it 'ignores the symlink if target is absent' do
-      create_link("public/link.html", "./target.html")
+    context 'when target of the symlink is absent' do
+      before do
+        create_link("public/link.html", "./target.html")
+      end
 
-      with_zip_file do |zip_file|
-        expect { zip_file.get_entry("public/link.html") }.to raise_error(Errno::ENOENT)
+      it 'raises error' do
+        expect do
+          result
+        end.to raise_error(described_class::InvalidEntryError)
+      end
+
+      context 'when errors are ignored' do
+        let(:ignore_invalid_entries) { true }
+
+        it 'ignores symlink' do
+          with_zip_file do |zip_file|
+            expect { zip_file.get_entry("public/link.html") }.to raise_error(Errno::ENOENT)
+          end
+        end
       end
     end
 
-    it 'ignores symlink if is absolute and points to outside of directory' do
-      target = File.join(@work_dir, "target")
-      FileUtils.touch(target)
+    context 'when symlink is absolute and points to outside of directory' do
+      before do
+        target = File.join(@work_dir, "target")
+        FileUtils.touch(target)
 
-      create_link("public/link.html", target)
+        create_link("public/link.html", target)
+      end
 
-      with_zip_file do |zip_file|
-        expect { zip_file.get_entry("public/link.html") }.to raise_error(Errno::ENOENT)
+      it 'raises error' do
+        expect do
+          result
+        end.to raise_error(described_class::InvalidEntryError)
+      end
+
+      context 'when errors are ignored' do
+        let(:ignore_invalid_entries) { true }
+
+        it 'ignores symlink' do
+          with_zip_file do |zip_file|
+            expect { zip_file.get_entry("public/link.html") }.to raise_error(Errno::ENOENT)
+          end
+        end
       end
     end
 
