@@ -169,6 +169,10 @@ module EE
       }
     end
 
+    def has_security_reports?
+      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.security_reports)
+    end
+
     def has_dependency_scanning_reports?
       !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.dependency_list_reports)
     end
