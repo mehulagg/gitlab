@@ -54,9 +54,9 @@ module Pages
         raise InvalidEntryError, "#{disk_file_path} has invalid ftype: #{ftype}, input_dir: #{@input_dir}"
       end
     rescue InvalidEntryError => e
-      Gitlab::ErrorTracking.track_exception(e, input_dir: @input_dir, disk_file_path: disk_file_path)
-
       raise e unless @ignore_invalid_entries
+
+      Gitlab::ErrorTracking.track_exception(e, input_dir: @input_dir, disk_file_path: disk_file_path)
     end
 
     def recursively_zip_directory(zipfile, disk_file_path, zipfile_path)
