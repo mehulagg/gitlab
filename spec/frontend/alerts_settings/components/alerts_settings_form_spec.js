@@ -343,12 +343,7 @@ describe('AlertsSettingsForm', () => {
     });
 
     describe('Parsing payload', () => {
-      it('displays a toast message on successful parse', async () => {
-        jest.spyOn(wrapper.vm.$apollo, 'query').mockResolvedValue({
-          data: {
-            project: { alertManagementPayloadFields: [] },
-          },
-        });
+      beforeEach(() => {
         wrapper.setData({
           selectedIntegration: typeSet.http,
           currentIntegration: {
@@ -358,8 +353,14 @@ describe('AlertsSettingsForm', () => {
           },
           resetSamplePayloadConfirmed: true,
         });
-        await wrapper.vm.$nextTick();
+      });
 
+      it('displays a toast message on successful parse', async () => {
+        jest.spyOn(wrapper.vm.$apollo, 'query').mockResolvedValue({
+          data: {
+            project: { alertManagementPayloadFields: [] },
+          },
+        });
         findActionBtn().vm.$emit('click');
 
         await waitForPromises();
@@ -372,16 +373,6 @@ describe('AlertsSettingsForm', () => {
       it('displays an error message under payload field on unsuccessful parse', async () => {
         const errorMessage = 'Error parsing paylod';
         jest.spyOn(wrapper.vm.$apollo, 'query').mockRejectedValue({ message: errorMessage });
-        wrapper.setData({
-          selectedIntegration: typeSet.http,
-          currentIntegration: {
-            samplePayload: validSamplePayload,
-            type: typeSet.http,
-            active: true,
-          },
-          resetSamplePayloadConfirmed: true,
-        });
-        await wrapper.vm.$nextTick();
         findActionBtn().vm.$emit('click');
 
         await waitForPromises();
