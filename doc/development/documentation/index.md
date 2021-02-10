@@ -178,7 +178,8 @@ There are two types of redirects:
   for users who view the docs on [`docs.gitlab.com`](https://docs.gitlab.com).
 
 The Technical Writing team manages the [process](https://gitlab.com/gitlab-org/technical-writing/-/blob/master/.gitlab/issue_templates/tw-monthly-tasks.md)
-to regularly update the [`redirects.yaml`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/content/_data/redirects.yaml) file.
+to regularly update the [`redirects.yaml`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/content/_data/redirects.yaml)
+file.
 
 To add a redirect:
 
@@ -208,8 +209,8 @@ To add a redirect:
    are removed after three months. Redirect files linking to external sites are
    removed after one year.
 
-1. If the documentation page being moved has any Disqus comments on it, follow the
-   steps described in [Redirections for pages with Disqus comments](#redirections-for-pages-with-disqus-comments).
+1. If the documentation page being moved has any Disqus comments, follow the steps
+   described in [Redirections for pages with Disqus comments](#redirections-for-pages-with-disqus-comments).
 1. If a documentation page you're removing includes images that aren't used
    with any other documentation pages, be sure to use your merge request to delete
    those images from the repository.
