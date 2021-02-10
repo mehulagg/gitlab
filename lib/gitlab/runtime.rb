@@ -98,6 +98,12 @@ module Gitlab
 
         threads
       end
+
+      def max_puma_workers
+        return unless puma?
+
+        Puma.cli_config.options[:workers].to_i
+      end
     end
   end
 end

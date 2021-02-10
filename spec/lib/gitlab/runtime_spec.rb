@@ -47,7 +47,7 @@ RSpec.describe Gitlab::Runtime do
 
     before do
       stub_const('::Puma', puma_type)
-      allow(puma_type).to receive_message_chain(:cli_config, :options).and_return(max_threads: 2)
+      allow(puma_type).to receive_message_chain(:cli_config, :options).and_return(max_threads: 2, workers: 4)
       stub_env('ACTION_CABLE_IN_APP', 'false')
     end
 
@@ -69,6 +69,12 @@ RSpec.describe Gitlab::Runtime do
       end
 
       it_behaves_like "valid runtime", :puma, 11
+    end
+
+    describe '.max_puma_workers' do
+      it 'it returns the value of `:workers` from `cli_config`' do
+        expect(subject.max_puma_workers).to eq(4)
+      end
     end
   end
 
