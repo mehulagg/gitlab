@@ -237,7 +237,9 @@ module QA
         end
 
         def merged?
-          has_element?(:merged_status_content, text: 'The changes were merged into', wait: 60)
+          retry_until(max_attempts: 3, reload: true) do
+            has_element?(:merged_status_content, text: 'The changes were merged into', wait: 20)
+          end
         end
 
         # Check if the MR is able to be merged
