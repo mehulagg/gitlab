@@ -197,7 +197,7 @@ The following list includes descriptions of each server and its assigned IP:
 - `10.6.0.93`: Gitaly 3
 - `10.6.0.131`: Praefect 1
 - `10.6.0.132`: Praefect 2
-- `10.6.0.134`: Praefect 3
+- `10.6.0.133`: Praefect 3
 - `10.6.0.141`: Praefect PostgreSQL 1 (non HA)
 - `10.6.0.101`: Sidekiq 1
 - `10.6.0.102`: Sidekiq 2
@@ -1369,7 +1369,7 @@ A built-in solution is being [worked on](https://gitlab.com/gitlab-org/omnibus-g
 
 The following IPs will be used as an example:
 
-- `10.6.0.141`: PostgreSQL
+- `10.6.0.141`: Praefect PostgreSQL
 
 First, make sure to [install](https://about.gitlab.com/install/)
 the Linux GitLab package in the Praefect PostgreSQL node. Following the steps,
@@ -1512,6 +1512,12 @@ and this name is used in several areas of the config. In this guide, the name of
 to use Gitaly Cluster, you may need to use a different name.
 Refer to the [Praefect documentation](../gitaly/praefect.md#praefect) for more info.
 
+The following IPs will be used as an example:
+
+- `10.6.0.131`: Praefect 1
+- `10.6.0.132`: Praefect 2
+- `10.6.0.133`: Praefect 3
+
 To configure the Praefect nodes, on each one:
 
 1. SSH in to the Praefect server.
@@ -1556,10 +1562,10 @@ To configure the Praefect nodes, on each one:
    praefect['auth_token'] = '<praefect_external_token>'
 
    # Praefect Database Settings
-   praefect['database_host'] = '10.142.0.141'
+   praefect['database_host'] = '10.6.0.141'
    praefect['database_port'] = 5432
    # `no_proxy` settings must always be a direct connection for caching
-   praefect['database_host_no_proxy'] = '10.142.0.141'
+   praefect['database_host_no_proxy'] = '10.6.0.141'
    praefect['database_port_no_proxy'] = 5432
    praefect['database_dbname'] = 'praefect_production'
    praefect['database_user'] = 'praefect'
@@ -1571,16 +1577,16 @@ To configure the Praefect nodes, on each one:
    praefect['virtual_storages'] = {
      'default' => {
        'gitaly-1' => {
-         'address' => 'tcp://10.142.0.91:8075',
+         'address' => 'tcp://10.6.0.91:8075',
          'token'   => '<praefect_internal_token>',
          'primary' => true
        },
        'gitaly-2' => {
-         'address' => 'tcp://10.142.0.92:8075',
+         'address' => 'tcp://10.6.0.92:8075',
          'token'   => '<praefect_internal_token>'
        },
        'gitaly-3' => {
-         'address' => 'tcp://10.142.0.93:8075',
+         'address' => 'tcp://10.6.0.93:8075',
          'token'   => '<praefect_internal_token>'
        },
      }
@@ -1631,6 +1637,12 @@ For configuring Gitaly you should note the following:
 
 - `git_data_dirs` should be configured to reflect the storage path for the specific Gitaly node
 - `auth_token` should be the same as `praefect_internal_token`
+
+The following IPs will be used as an example:
+
+- `10.6.0.91`: Gitaly 1
+- `10.6.0.92`: Gitaly 2
+- `10.6.0.93`: Gitaly 3
 
 On each node:
 
