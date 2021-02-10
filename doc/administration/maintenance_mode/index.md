@@ -4,9 +4,16 @@ group: Geo
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab in maintenance mode **(PREMIUM SELF)**
+# Maintenance mode **(PREMIUM SELF)**
 
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2149) in GitLab Premium 13.9.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2149) in GitLab 13.9.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-maintenance-mode). **(PREMIUM SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
 
 In maintenance mode, most write operations are disabled at the application level.
 This means that GitLab is effectively in a read-only mode for all non-administrative
@@ -135,3 +142,24 @@ The maintenance mode setting will be propagated to the secondary as they sync up
 It is important that you do not disable replication before enabling maintenance mode.
 
 Replication and verification will continue to work in maintenance mode.
+
+<!-- Add this at the end of the file -->
+
+### Enable or disable maintenance mode feature **(PREMIUM SELF)**
+
+Maintenance mode is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:maintenance_mode)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:maintenance_mode)
+```
