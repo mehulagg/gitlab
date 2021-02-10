@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::BackgroundMigration::BackfillProjectUpdatedAtAfterRepositoryStorageMove, :migration, schema: 20210210093901 do
   let(:projects) { table(:projects) }
-  let(:project_repository_storage_move) { table(:project_repository_storage_moves) }
+  let(:project_repository_storage_moves) { table(:project_repository_storage_moves) }
   let(:namespace) { table(:namespaces).create!(name: 'user', path: 'user') }
 
   subject { described_class.new }
@@ -19,9 +19,9 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillProjectUpdatedAtAfterReposit
         original_project_4_updated_at = 10.days.ago
         project_4 = projects.create!(id: 4, namespace_id: namespace.id, updated_at: original_project_4_updated_at)
 
-        repository_storage_move_1 = project_repository_storage_move.create!(project_id: project_1.id, updated_at: 2.hours.ago, source_storage_name: 'default', destination_storage_name: 'default')
-        repository_storage_move_2 = project_repository_storage_move.create!(project_id: project_2.id, updated_at: Time.current, source_storage_name: 'default', destination_storage_name: 'default')
-        project_repository_storage_move.create!(project_id: project_3.id, updated_at: Time.current, source_storage_name: 'default', destination_storage_name: 'default')
+        repository_storage_move_1 = project_repository_storage_moves.create!(project_id: project_1.id, updated_at: 2.hours.ago, source_storage_name: 'default', destination_storage_name: 'default')
+        repository_storage_move_2 = project_repository_storage_moves.create!(project_id: project_2.id, updated_at: Time.current, source_storage_name: 'default', destination_storage_name: 'default')
+        project_repository_storage_moves.create!(project_id: project_3.id, updated_at: Time.current, source_storage_name: 'default', destination_storage_name: 'default')
 
         subject.perform([1, 2, 3, 4])
 
