@@ -1826,6 +1826,10 @@ class MergeRequest < ApplicationRecord
     }
   end
 
+  def security_reports_up_to_date?
+    project.latest_pipeline_with_security_reports(only_successful: true) != project.ci_pipelines.latest_successful_for_ref(target_branch)
+  end
+
   private
 
   def missing_report_error(report_type)

@@ -180,6 +180,10 @@ module Types
     field :merge_user, Types::UserType, null: true,
           description: 'User who merged this merge request.'
 
+    field :security_reports_up_to_date_on_target_branch, GraphQL::BOOLEAN_TYPE, null: false,
+          method: :security_reports_up_to_date?,
+          description: 'Indicates if the target branch security reports are out of date.'
+
     def approved_by
       object.approved_by_users
     end

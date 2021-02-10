@@ -15157,6 +15157,11 @@ type MergeRequest implements CurrentUserTodos & Noteable {
   securityAutoFix: Boolean
 
   """
+  Indicates if the target branch security reports are out of date.
+  """
+  securityReportsUpToDateOnTargetBranch: Boolean!
+
+  """
   Indicates if the merge request will be rebased.
   """
   shouldBeRebased: Boolean!

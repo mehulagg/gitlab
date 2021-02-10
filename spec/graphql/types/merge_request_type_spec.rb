@@ -31,6 +31,7 @@ RSpec.describe GitlabSchema.types['MergeRequest'] do
       default_merge_commit_message_with_description squash_on_merge available_auto_merge_strategies
       has_ci mergeable commits_without_merge_commits squash security_auto_fix default_squash_commit_message
       auto_merge_strategy merge_user
+      security_reports_up_to_date_on_target_branch
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields).at_least
@@ -75,6 +76,35 @@ RSpec.describe GitlabSchema.types['MergeRequest'] do
       it 'pulls out data from metrics object' do
         expect(response).to match('additions' => 5, 'deletions' => 8)
       end
+    end
+  end
+
+  describe '#security_reports_up_to_date_on_target_branch' do
+    subject(:execute_query) { GitlabSchema.execute(query, context: { current_user: current_user }).as_json }
+
+    let!(:merge_request) { create(:merge_request, target_project: project, source_project: project) }
+    let(:project) { create(:project, :public) }
+    let(:current_user) { create :admin }
+    let(:query) do
+      %(
+        {
+          project(fullPath: "#{project.full_path}") {
+            mergeRequests {
+              nodes {
+                securityReportsUpToDateOnTargetBranch
+              }
+            }
+          }
+        }
+      )
+    end
+
+    it 'delegates the security_reports_up_to_date? call to the merge request entity' do
+      expect_next_found_instance_of(MergeRequest) do |instance|
+        expect(instance).to receive(:security_reports_up_to_date?)
+      end
+
+      execute_query
     end
   end
 end
