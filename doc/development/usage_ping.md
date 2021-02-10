@@ -324,6 +324,8 @@ The highest encountered error rate is 4.9%.
 When correctly used, the `estimate_batch_distinct_count` method enables efficient counting over
 columns that contain non-unique values, which can not be assured by other counters.
 
+#### estimate_batch_distinct_count method
+
 Method: [`estimate_batch_distinct_count(relation, column = nil, batch_size: nil, start: nil, finish: nil)`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/utils/usage_data.rb#L63)
 
 The method includes the following arguments:
@@ -919,7 +921,11 @@ To add data for aggregated metrics into Usage Ping payload you should add corres
 - operator: operator that defines how aggregated metric data is counted. Available operators are:
   - `OR`: removes duplicates and counts all entries that triggered any of listed events
   - `AND`: removes duplicates and counts all elements that were observed triggering all of following events
-- events: list of events names (from [`known_events/`](#known-events-are-added-automatically-in-usage-data-payload)) to aggregate into metric. All events in this list must have the same `redis_slot` and `aggregation` attributes.
+- source: datasource used to collect all events data included in aggregated metric. Valid datasources are:
+  - [databse](#database-sourced-aggregated-metrics)
+  - [redis](#redis-sourced-aggregated-metrics)
+- events: list of events names to aggregate into metric. All events in this list must relay on the same datasource, 
+additional datasource requirements are described at [databse](#database-sourced-aggregated-metrics) and [redis](#redis-sourced-aggregated-metrics) sections
 - feature_flag: name of [development feature flag](feature_flags/development.md#development-type) that is checked before
 metrics aggregation is performed. Corresponding feature flag should have `default_enabled` attribute set to `false`.
 `feature_flag` attribute is **OPTIONAL**  and can be omitted, when `feature_flag` is missing no feature flag is checked.
@@ -927,12 +933,14 @@ metrics aggregation is performed. Corresponding feature flag should have `defaul
 Example aggregated metric entries:
 
 ```yaml
-- name: product_analytics_test_metrics_union
+- name: product_analytics_test_metrics_union_redis_sourced
   operator: OR
   events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
-- name: product_analytics_test_metrics_intersection_with_feautre_flag
+  source: redis
+- name: product_analytics_test_metrics_intersection_with_feautre_flag_database_sourced
   operator: AND
-  events: ['i_search_total', 'i_search_advanced', 'i_search_paid']
+  source: database
+  events: ['dependency_scanning_pipeline_all_time', 'container_scanning_pipeline_all_time']
   feature_flag: example_aggregated_metric
 ```
 
@@ -957,6 +965,64 @@ Aggregated metrics are added under `aggregated_metrics` key in both `counts_week
 }
 ```
 
+### Redis sourced aggregated metrics
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45979) in GitLab 13.6.
+
+In order to declare aggregate of events collected with [Redis HLL Counters](#redis-hll-counters) 
+following requirements has to be fulfilled:
+1. All events listed at `events` attribute have to come from [`known_events/*.yml`](#known-events-are-added-automatically-in-usage-data-payload) files
+1. All events listed at `events` attribute must have the same `redis_slot` attribute
+1. All events listed at `events` attribute must have the same `aggregation` attribute
+
+### Database sourced aggregated metrics
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52784) in GitLab 13.9.
+> 
+ 
+In order to declare aggregate of  metrics based on events collected from database one should follow steps listed below:
+
+#### Persist metrics for aggregation
+
+Only metrics calculated with [Estimated Batch Counters](#estimated-batch-counters) can be persisted for database sourced aggregated metric.
+In order to persis metric, one should inject ruby block into [estimate_batch_distinct_count](#estimate_batch_distinct_count-method) method.
+This block should invoke [`Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll.save_aggregated_metrics`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage/metrics/aggregates/sources/postgres_hll.rb#L21) method which stores `estimate_batch_distinct_count` results for future use in aggregated metrics
+
+`Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll.save_aggregated_metrics` method accepts the following arguments:
+
+- `metric_name`: The name of metric that is going to be used for aggregations, this name should be the same as the key under which metric is added into Usage Ping 
+- `recorded_at_timestamp`: The timestamp representing moment when given Usage Ping payload was collected. Convenience method `recorded_at` was added, which should always be used to fill `recorded_at_timestamp` argument, eg: `recorded_at_timestamp: recorded_at`
+- `time_period`: The time period used to build `relation` argument passed into `estimate_batch_distinct_count` if no time period was used (metric was collected with all available historical data) `nil` value should be set as time period eg: `time_period: nil`
+- `data`:  HyperLogLog buckets structure representing uniq entries within `relation`. `estimate_batch_distinct_count` method always passes correct argument into the block, therefore `data` argument should always has value equal to block argument, eg: `data: result` 
+
+Example metrics persistence:
+
+```ruby
+class UsageData
+  def count_secure_pipelines(time_period)
+    ...
+    relation = ::Security::Scan.latest_successful_by_build.by_scan_types(scan_type).where(security_scans: time_period)
+
+    pipelines_with_secure_jobs['dependency_scanning_pipeline'] = estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start_id, finish: finish_id) do |result|
+      ::Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll
+        .save_aggregated_metrics(metric_name: 'dependency_scanning_pipeline', recorded_at_timestamp: recorded_at, time_period: time_period, data: result)
+    end
+  end
+end
+```
+
+#### Add new aggregated metric definition
+
+After all metrics are persisted, one can proceed and add aggregated metric definition at  [`aggregated_metrics/`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/aggregated_metrics/). While doing so for metrics names listed at `events:` attribute, one should use the same names as was passed as `metric_name` argument while persisting metrics in previous step.
+
+Example definition:
+
+```yaml
+- name: product_analytics_test_metrics_intersection_database_sourced
+  operator: AND
+  source: database
+  events: ['dependency_scanning_pipeline', 'container_scanning_pipeline']
+```
 ## Example Usage Ping payload
 
 The following is example content of the Usage Ping payload.
