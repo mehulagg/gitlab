@@ -24060,6 +24060,9 @@ msgstr ""
 msgid "Receive notifications about your own activity"
 msgstr ""
 
+msgid "Receive product marketing emails"
+msgstr ""
+
 msgid "Recent"
 msgstr ""
 
