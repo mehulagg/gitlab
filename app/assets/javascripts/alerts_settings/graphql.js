@@ -34,7 +34,7 @@ const resolvers = {
 
           if (type === typeSet.http && gon?.features?.multipleHttpIntegrationsCustomMapping) {
             // eslint-disable-next-line no-param-reassign
-            draftData.currentIntegration.samplePaylaod = mockedCustomMapping.samplePayload.body;
+            draftData.currentIntegration.samplePayload = mockedCustomMapping.samplePayload.body;
           }
         }
       });

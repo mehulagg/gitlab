@@ -212,7 +212,7 @@ export default {
       );
     },
     hasSamplePayload() {
-      return Boolean(this.currentIntegration?.samplePaylaod);
+      return Boolean(this.currentIntegration?.samplePayload);
     },
     canEditPayload() {
       return this.hasSamplePayload && !this.resetSamplePayloadConfirmed;
@@ -247,7 +247,7 @@ export default {
       this.selectedIntegration = val.type;
       this.active = val.active;
       if (val.type === typeSet.http && this.showMappingBuilder) {
-        this.integrationTestPayload.json = val.samplePaylaod;
+        this.integrationTestPayload.json = val.samplePayload;
       }
       return this.integrationTypeSelect();
     },

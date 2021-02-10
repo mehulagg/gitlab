@@ -6,7 +6,7 @@ mutation updateCurrentIntegration(
   $type: String
   $url: String
   $apiUrl: String
-  $samplePaylaod: String
+  $samplePayload: String
 ) {
   updateCurrentIntegration(
     id: $id
@@ -16,6 +16,6 @@ mutation updateCurrentIntegration(
     type: $type
     url: $url
     apiUrl: $apiUrl
-    samplePaylaod: $samplePaylaod
+    samplePayload: $samplePayload
   ) @client
 }
