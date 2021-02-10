@@ -2,10 +2,11 @@
 
 module Pages
   class MigrateFromLegacyStorageService
-    def initialize(logger, migration_threads, batch_size)
+    def initialize(logger, migration_threads:, batch_size:, ignore_invalid_entries:)
       @logger = logger
       @migration_threads = migration_threads
       @batch_size = batch_size
+      @ignore_invalid_entries = ignore_invalid_entries
 
       @migrated = 0
       @errored = 0
@@ -59,7 +60,7 @@ module Pages
     def migrate_project(project)
       result = nil
       time = Benchmark.realtime do
-        result = ::Pages::MigrateLegacyStorageToDeploymentService.new(project).execute
+        result = ::Pages::MigrateLegacyStorageToDeploymentService.new(project, ignore_invalid_entries: @ignore_invalid_entries).execute
       end
 
       if result[:status] == :success
