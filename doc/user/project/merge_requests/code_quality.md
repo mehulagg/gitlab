@@ -457,10 +457,11 @@ GitLab only uses the Code Quality artifact from the latest created job (with the
 If multiple jobs in a pipeline generate a code quality artifact, those of earlier jobs are ignored.
 To avoid confusion, configure only one job to generate a `gl-code-quality-report.json`.
 
-### Unknown Ruby version 2.7 found in `.ruby-version`. (RuboCop::ValidationError)
+### Rubocop errors
 
-When using Code Quality jobs on a **Ruby** project, the following error can
-appear when using either a very recent, or very old version of Ruby:
+When using Code Quality jobs on a **Ruby** project, you can encounter problems running Rubocop.
+For example, the following error can appear when using either a very recent or very old version
+of Ruby:
 
 ```plaintext
 /usr/local/bundle/gems/rubocop-0.52.1/lib/rubocop/config.rb:510:in `check_target_ruby':
