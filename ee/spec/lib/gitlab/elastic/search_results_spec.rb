@@ -300,23 +300,24 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
     end
 
     context 'ordering' do
-      let!(:project) { create(:project, :public) }
+      let_it_be(:project) { create(:project, :public) }
 
       let!(:old_result) { create(:issue, project: project, title: 'sorted old', created_at: 1.month.ago) }
       let!(:new_result) { create(:issue, project: project, title: 'sorted recent', created_at: 1.day.ago) }
       let!(:very_old_result) { create(:issue, project: project, title: 'sorted very old', created_at: 1.year.ago) }
-      let(:results_created) { described_class.new(user, 'sorted', [project.id], sort: sort) }
 
       let!(:old_updated) { create(:issue, project: project, title: 'updated old', updated_at: 1.month.ago) }
       let!(:new_updated) { create(:issue, project: project, title: 'updated recent', updated_at: 1.day.ago) }
       let!(:very_old_updated) { create(:issue, project: project, title: 'updated very old', updated_at: 1.year.ago) }
-      let(:results_updated) { described_class.new(user, 'updated', [project.id], sort: sort) }
 
       before do
         ensure_elasticsearch_index!
       end
 
-      include_examples 'search results sorted'
+      include_examples 'search results sorted' do
+        let(:results_created) { described_class.new(user, 'sorted', [project.id], sort: sort) }
+        let(:results_updated) { described_class.new(user, 'updated', [project.id], sort: sort) }
+      end
     end
   end
 
@@ -691,7 +692,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
     end
 
     context 'ordering' do
-      let!(:project) { create(:project, :public) }
+      let_it_be(:project) { create(:project, :public) }
 
       let!(:old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'old-1', title: 'sorted old', created_at: 1.month.ago) }
       let!(:new_result) { create(:merge_request, :opened, source_project: project, source_branch: 'new-1', title: 'sorted recent', created_at: 1.day.ago) }

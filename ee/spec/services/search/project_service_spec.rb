@@ -184,7 +184,7 @@ RSpec.describe Search::ProjectService do
     let(:scope) { 'issues' }
 
     context 'sorting', :elastic do
-      let!(:project) { create(:project, :public) }
+      let_it_be(:project) { create(:project, :public) }
 
       let!(:old_result) { create(:issue, project: project, title: 'sorted old', created_at: 1.month.ago) }
       let!(:new_result) { create(:issue, project: project, title: 'sorted recent', created_at: 1.day.ago) }
@@ -209,7 +209,7 @@ RSpec.describe Search::ProjectService do
     let(:scope) { 'merge_requests' }
 
     context 'sorting', :elastic do
-      let!(:project) { create(:project, :public) }
+      let(:project) { create(:project, :public) }
 
       let!(:old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'old-1', title: 'sorted old', created_at: 1.month.ago) }
       let!(:new_result) { create(:merge_request, :opened, source_project: project, source_branch: 'new-1', title: 'sorted recent', created_at: 1.day.ago) }

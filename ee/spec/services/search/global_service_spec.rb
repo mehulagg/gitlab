@@ -145,7 +145,7 @@ RSpec.describe Search::GlobalService do
       end
 
       context 'ordering' do
-        let!(:project) { create(:project, :public) }
+        let_it_be(:project) { create(:project, :public) }
 
         let!(:old_result) { create(:issue, project: project, title: 'sorted old', created_at: 1.month.ago) }
         let!(:new_result) { create(:issue, project: project, title: 'sorted recent', created_at: 1.day.ago) }
