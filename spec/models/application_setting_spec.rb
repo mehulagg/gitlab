@@ -954,11 +954,4 @@ RSpec.describe ApplicationSetting do
       expect(subject.class.repository_storages_weighted_attributes).to eq([:repository_storages_weighted_default])
     end
   end
-
-  it 'does not allow to set weight for non existing storage' do
-    setting.repository_storages_weighted = { invalid_storage: 100 }
-
-    expect(setting).not_to be_valid
-    expect(setting.errors.messages[:repository_storages_weighted]).to match_array(["can't include: invalid_storage"])
-  end
 end

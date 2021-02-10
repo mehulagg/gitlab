@@ -284,7 +284,7 @@ module ApplicationSettingImplementation
   end
 
   def repository_storages_weighted
-    read_attribute(:repository_storages_weighted)
+    read_attribute(:repository_storages_weighted).slice(*Gitlab.config.repositories.storages.keys)
   end
 
   def commit_email_hostname
