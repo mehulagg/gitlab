@@ -44,13 +44,14 @@ module Pages
         raise InvalidEntryError, "#{disk_file_path} is invalid, input_dir: #{@input_dir}"
       end
 
-      case File.lstat(disk_file_path).ftype
+      ftype = File.lstat(disk_file_path).ftype
+      case ftype
       when 'directory'
         recursively_zip_directory(zipfile, disk_file_path, zipfile_path)
       when 'file', 'link'
         zipfile.add(zipfile_path, disk_file_path)
       else
-        raise InvalidEntryError, "#{disk_file_path} has invalid ftype, input_dir: #{@input_dir}"
+        raise InvalidEntryError, "#{disk_file_path} has invalid ftype: #{ftype}, input_dir: #{@input_dir}"
       end
     rescue InvalidEntryError => e
       Gitlab::ErrorTracking.track_exception(e, input_dir: @input_dir, disk_file_path: disk_file_path)
