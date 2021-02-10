@@ -64,6 +64,16 @@ RSpec.describe IncidentManagement::OncallRotation do
           expect(subject.errors.full_messages).to include(/Restricted shift times are not available for hourly shifts/)
         end
       end
+
+      context 'end time after start time' do
+        it 'raises a validation error if an interval is set' do
+          subject.interval_start = '17:00'
+          subject.interval_end = '08:00'
+
+          expect(subject.valid?).to eq(false)
+          expect(subject.errors.full_messages).to include('Interval end must be later than interval start')
+        end
+      end
     end
   end
 
@@ -90,6 +100,42 @@ RSpec.describe IncidentManagement::OncallRotation do
         let(:rotation) { build(:incident_management_oncall_rotation, schedule: schedule, length_unit: unit) }
 
         it { is_expected.to be_a(ActiveSupport::Duration) }
+      end
+    end
+  end
+
+  describe '#shifts_per_cycle' do
+    let(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule, length: 5, length_unit: length_unit, interval_start: interval_start, interval_end: interval_end) }
+    let(:length_unit) { :weeks }
+    let(:interval_start) { nil }
+    let(:interval_end) { nil }
+
+    subject { rotation.shifts_per_cycle }
+
+    context 'when no shift intervals set up' do
+      it { is_expected.to eq(1) }
+    end
+
+    context 'when hours' do
+      let(:length_unit) { :hours }
+
+      it { is_expected.to eq(1) }
+    end
+
+    context 'with shift intervals' do
+      let(:interval_start) { '08:00' }
+      let(:interval_end) { '17:00' }
+
+      context 'weeks length unit' do
+        let(:length_unit) { :weeks }
+
+        it { is_expected.to eq(35) }
+      end
+
+      context 'days length unit' do
+        let(:length_unit) { :days }
+
+        it { is_expected.to eq(5) }
       end
     end
   end

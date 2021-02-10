@@ -35292,6 +35292,9 @@ msgstr ""
 msgid "must be greater than start date"
 msgstr ""
 
+msgid "must be later than interval start"
+msgstr ""
+
 msgid "must contain only valid frameworks"
 msgstr ""
 

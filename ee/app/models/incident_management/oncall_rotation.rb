@@ -2,6 +2,8 @@
 
 module IncidentManagement
   class OncallRotation < ApplicationRecord
+    include Gitlab::Utils::StrongMemoize
+
     self.table_name = 'incident_management_oncall_rotations'
 
     enum length_unit: {
@@ -25,6 +27,7 @@ module IncidentManagement
 
     validates :interval_start, presence: true, if: :interval_end
     validates :interval_end, presence: true, if: :interval_start
+    validate :interval_end_after_interval_start, if: :interval_start
     validate :no_interval_for_hourly_shifts, if: :hours?
 
     scope :started, -> { where('starts_at < ?', Time.current) }
@@ -42,25 +45,52 @@ module IncidentManagement
       joins(shifts: { participant: :user }).pluck(:id, 'users.id')
     end
 
+    # The duration of a shift cycle, which is the time until the next participant is on-call.
+    # If a shift interval is setup then many shifts will be within a shift_cycle_duration.
     def shift_cycle_duration
       # As length_unit is an enum, input is guaranteed to be appropriate
       length.public_send(length_unit) # rubocop:disable GitlabSecurity/PublicSend
     end
 
+    def shifts_per_cycle
+      return 1 unless has_shift_intervals?
+
+      weeks? ? (7 * length) : length
+    end
+
     def has_shift_intervals?
+      return false if hours?
+
       interval_start.present?
     end
 
     def interval_times
       return unless has_shift_intervals?
 
-      {
-        start: interval_start.to_time,
-        end: interval_end.to_time
-      }
+      strong_memoize(:interval_times) do
+        {
+          start: interval_start.to_time,
+          end: interval_end.to_time
+        }
+      end
+    end
+
+    def unrestricted_interval(date)
+      [
+        date.change(hour: interval_times[:start].hour, min: interval_times[:start].min),
+        date.change(hour: interval_times[:end].hour, min: interval_times[:end].min)
+      ]
     end
 
     private
+
+    def interval_end_after_interval_start
+      return unless interval_start && interval_end
+
+      unless interval_end.to_time > interval_start.to_time
+        errors.add(:interval_end, _('must be later than interval start'))
+      end
+    end
 
     def no_interval_for_hourly_shifts
       if interval_start || interval_end

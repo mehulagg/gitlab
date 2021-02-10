@@ -28,8 +28,7 @@ module IncidentManagement
 
       while shift_cycle_starts_at < ends_at
         new_shifts = Array(shift_cycle_for(elapsed_shift_cycle_count, shift_cycle_starts_at))
-        new_shifts.reject! { |shift| shift.ends_at < starts_at } if shift_cycle_starts_at < starts_at
-        new_shifts.reject! { |shift| shift.starts_at > ends_at } if (shift_cycle_starts_at + shift_cycle_duration) > ends_at
+        new_shifts = remove_out_of_bounds_shifts(new_shifts, shift_cycle_starts_at, starts_at, ends_at)
 
         shifts.concat(new_shifts)
 
@@ -50,12 +49,12 @@ module IncidentManagement
       return if timestamp < rotation_starts_at
       return unless rotation.participants.any?
 
-      elapsed_shift_count = elapsed_whole_shift_cycles(timestamp)
-      shift_cycle_starts_at = shift_cycle_start_time(elapsed_shift_count)
+      elapsed_shift_cycle_count = elapsed_whole_shift_cycles(timestamp)
+      shift_cycle_starts_at = shift_cycle_start_time(elapsed_shift_cycle_count)
 
-      participant = participants[participant_rank(elapsed_shift_count)]
+      new_shifts = Array(shift_cycle_for(elapsed_shift_cycle_count, shift_cycle_starts_at))
 
-      shift_for(participant, shift_cycle_starts_at, shift_cycle_starts_at + shift_cycle_duration)
+      new_shifts.detect { |shift| timestamp.between?(shift.starts_at, shift.ends_at) }
     end
 
     private
@@ -113,10 +112,10 @@ module IncidentManagement
     def shift_cycle_for(elapsed_shift_cycle_count, shift_cycle_starts_at)
       participant = participants[participant_rank(elapsed_shift_cycle_count)]
 
-      if !rotation.hours? && rotation.has_shift_intervals?
+      if rotation.has_shift_intervals?
         # the number of shifts we expect to be included in the
         # shift_cycle. 1.week is the same as 7.days.
-        expected_shift_count = rotation.weeks? ? (7 * rotation.length) : rotation.length
+        expected_shift_count = rotation.shifts_per_cycle
         (0..expected_shift_count - 1).map do |shift_count|
           # we know the start/end time of the intervals,
           # so the date is dependent on the cycle start time
@@ -127,8 +126,8 @@ module IncidentManagement
           #     expected_shift_count = 14          -> pretend it's a 2-week rotation
           #     shift_count = 2                    -> we're calculating the shift for the 3rd day
           # starts_at = Monday 00:00:00 + 8.hours + 2.days => Thursday 08:00:00
-          starts_at = shift_cycle_starts_at.beginning_of_day + rotation.interval_times[:start].seconds_since_midnight + shift_count.days
-          ends_at = shift_cycle_starts_at.beginning_of_day + rotation.interval_times[:end].seconds_since_midnight + shift_count.days
+
+          starts_at, ends_at = rotation.unrestricted_interval(shift_cycle_starts_at + shift_count.days)
 
           shift_for(participant, starts_at, ends_at)
         end
@@ -136,6 +135,14 @@ module IncidentManagement
         # This is the normal shift start/end times
         shift_for(participant, shift_cycle_starts_at, shift_cycle_starts_at + shift_cycle_duration)
       end
+    end
+
+    # Removes shifts which are out of bounds from the given starts_at and ends_at timestamps.
+    def remove_out_of_bounds_shifts(shifts, shift_cycle_starts_at, starts_at, ends_at)
+      shifts.reject! { |shift| shift.ends_at < starts_at } if shift_cycle_starts_at < starts_at
+      shifts.reject! { |shift| shift.starts_at > ends_at } if (shift_cycle_starts_at + shift_cycle_duration) > ends_at
+
+      shifts
     end
 
     # Returns an UNSAVED shift, as this shift won't necessarily

@@ -173,7 +173,7 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
           let(:interval_start) { '17:00' }
           let(:interval_end) { '08:00' }
 
-          it_behaves_like 'saved the interval times'
+          it_behaves_like 'error response', "Interval end must be later than interval start"
         end
       end
     end

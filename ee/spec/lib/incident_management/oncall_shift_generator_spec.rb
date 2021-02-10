@@ -78,7 +78,7 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
       include_context 'with three participants'
 
       it_behaves_like 'unsaved shifts',
-        'One shifts of 5 days long for each participant',
+        'One shift of 5 days long for each participant',
         [[:participant1, '2020-12-08 00:00:00 UTC', '2020-12-13 00:00:00 UTC'],
          [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC'],
          [:participant3, '2020-12-18 00:00:00 UTC', '2020-12-23 00:00:00 UTC']]
@@ -88,13 +88,6 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
           rotation.update!(
             interval_start: "08:00",
             interval_end: "17:00"
-          )
-        end
-
-        after do
-          rotation.update!(
-            interval_start: nil,
-            interval_end: nil
           )
         end
 
@@ -114,6 +107,36 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
            [:participant2, '2020-12-15 08:00:00 UTC', '2020-12-15 17:00:00 UTC'],
            [:participant2, '2020-12-16 08:00:00 UTC', '2020-12-16 17:00:00 UTC'],
            [:participant2, '2020-12-17 08:00:00 UTC', '2020-12-17 17:00:00 UTC']]
+
+        context 'with week length unit' do
+          before do
+            rotation.update!(
+              length_unit: :weeks,
+              length: 1
+            )
+          end
+
+          it 'splits the shifts daily by each interval' do
+            expect(shifts.count).to eq (ends_at.to_date - starts_at.to_date).to_i
+          end
+
+          it_behaves_like 'unsaved shifts',
+            '7 shifts for each participant split by each day',
+            [[:participant1, '2020-12-08 08:00:00 UTC', '2020-12-08 17:00:00 UTC'],
+             [:participant1, '2020-12-09 08:00:00 UTC', '2020-12-09 17:00:00 UTC'],
+             [:participant1, '2020-12-10 08:00:00 UTC', '2020-12-10 17:00:00 UTC'],
+             [:participant1, '2020-12-11 08:00:00 UTC', '2020-12-11 17:00:00 UTC'],
+             [:participant1, '2020-12-12 08:00:00 UTC', '2020-12-12 17:00:00 UTC'],
+             [:participant1, '2020-12-13 08:00:00 UTC', '2020-12-13 17:00:00 UTC'],
+             [:participant1, '2020-12-14 08:00:00 UTC', '2020-12-14 17:00:00 UTC'],
+             [:participant2, '2020-12-15 08:00:00 UTC', '2020-12-15 17:00:00 UTC'],
+             [:participant2, '2020-12-16 08:00:00 UTC', '2020-12-16 17:00:00 UTC'],
+             [:participant2, '2020-12-17 08:00:00 UTC', '2020-12-17 17:00:00 UTC'],
+             [:participant2, '2020-12-18 08:00:00 UTC', '2020-12-18 17:00:00 UTC'],
+             [:participant2, '2020-12-19 08:00:00 UTC', '2020-12-19 17:00:00 UTC'],
+             [:participant2, '2020-12-20 08:00:00 UTC', '2020-12-20 17:00:00 UTC'],
+             [:participant2, '2020-12-21 08:00:00 UTC', '2020-12-21 17:00:00 UTC']]
+        end
       end
 
       context 'when end time is earlier than start time' do
@@ -736,6 +759,35 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
         it_behaves_like 'unsaved shift',
           'the shift during which the timestamp occurs',
           [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC']
+      end
+
+      context 'with shift interval times set' do
+        before do
+          rotation.update!(
+            interval_start: "08:00",
+            interval_end: "17:00"
+          )
+        end
+
+        context 'when timestamp is the start of rotation, but before interval' do
+          let(:timestamp) { rotation_start_time }
+
+          it { is_expected.to be_nil }
+        end
+
+        context 'when timestamp is the same time as interval start' do
+          let(:timestamp) { rotation_start_time.change(hour: 8) }
+
+          it_behaves_like 'unsaved shift',
+            'the first shift of the shift cycle (split by the interval)',
+            [:participant1, '2020-12-08 08:00:00 UTC', '2020-12-08 17:00:00 UTC']
+        end
+
+        context 'when timestamp is the after the inerval ends' do
+          let(:timestamp) { rotation_start_time.change(hour: 17, min: 1) }
+
+          it { is_expected.to be_nil }
+        end
       end
     end
   end
