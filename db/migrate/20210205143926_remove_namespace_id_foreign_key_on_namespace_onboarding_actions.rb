@@ -13,7 +13,7 @@ class RemoveNamespaceIdForeignKeyOnNamespaceOnboardingActions < ActiveRecord::Mi
 
   def down
     with_lock_retries do
-      add_foreign_key :namespace_onboarding_actions, :namespaces
+      add_foreign_key :namespace_onboarding_actions, :namespaces, on_delete: :cascade
     end
   end
 end
