@@ -2024,8 +2024,10 @@ This example creates four paths of execution:
   - For GitLab.com, the limit is 50. For more information, see our
     [infrastructure issue](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/7541).
   - For self-managed instances, the limit is: 50. This limit [can be changed](#changing-the-needs-job-limit).
-- If `needs:` refers to a job that is marked as `parallel:`.
-  the current job depends on all parallel jobs being created.
+- If a job `needs:` a job using the [`parallel`](#parallel) keyword,
+  it depends on all jobs created in parallel, not just one job. It also downloads
+  artifacts from all the parallel jobs by default. If the artifacts have the same
+  name, they overwrite each other and only the last one downloaded is saved.
 - `needs:` is similar to `dependencies:` in that it must use jobs from prior stages,
   meaning it's impossible to create circular dependencies. Depending on jobs in the
   current stage is not possible either, but support [is planned](https://gitlab.com/gitlab-org/gitlab/-/issues/30632).
@@ -2033,13 +2035,6 @@ This example creates four paths of execution:
   that have the keyword `needs:` or are referred to by one.
 
 ##### Changing the `needs:` job limit **(FREE SELF)**
-
-WARNING:
-It is not currently possible to `needs:` a single job when using `parallel:`.
-Instead, all the jobs will match, and their `artifacts:` will clobber eachother.  
-Make sure that your artifacts have unique paths if your intention is to
-keep all of them, for instance by using the variables from the
-`parallel:matrix:`.
 
 The maximum number of jobs that can be defined in `needs:` defaults to 50.
 
