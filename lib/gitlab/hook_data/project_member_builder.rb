@@ -5,34 +5,34 @@ module Gitlab
     class ProjectMemberBuilder < BaseBuilder
       alias_method :project_member, :object
 
-        def build(event)
+      def build(event)
         [
           timestamps_data,
           project_member_data,
           event_data(event)
         ].reduce(:merge)
-        end
+      end
 
+      private
 
-        private
+      def project_member_data
+        project = project_member.project || Project.unscoped.find(project_member.source_id)
 
-        def project_member_data
-          project = project_member.project || Project.unscoped.find(project_member.source_id)
+        {
+          project_name:                 project.name,
+          project_path:                 project.path,
+          project_path_with_namespace:  project.full_path,
+          project_id:                   project.id,
+          user_username:                project_member.user.username,
+          user_name:                    project_member.user.name,
+          user_email:                   project_member.user.email,
+          user_id:                      project_member.user.id,
+          access_level:                 project_member.human_access,
+          project_visibility:           Project.visibility_levels.key(project.visibility_level_value).downcase
+        }
+      end
 
-          {
-            project_name:                 project.name,
-            project_path:                 project.path,
-            project_path_with_namespace:  project.full_path,
-            project_id:                   project.id,
-            user_username:                project_member.user.username,
-            user_name:                    project_member.user.name,
-            user_email:                   project_member.user.email,
-            user_id:                      project_member.user.id,
-            access_level:                 project_member.human_access,
-            project_visibility:           Project.visibility_levels.key(project.visibility_level_value).downcase
-          }
-        end
-        def event_data(event)
+      def event_data(event)
         event_name =  case event
                       when :create
                         'user_add_to_team'
@@ -42,7 +42,7 @@ module Gitlab
                         'user_update_for_team'
                       end
         { event_name: event_name }
-        end
+      end
     end
   end
 end
