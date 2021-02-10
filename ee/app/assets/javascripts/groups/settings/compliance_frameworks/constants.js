@@ -7,3 +7,5 @@ export const FETCH_ERROR = s__(
 export const SAVE_ERROR = s__(
   'ComplianceFrameworks|Unable to save this compliance framework. Please try again',
 );
+
+export const PIPELINE_CONFIGURATION_PATH_FORMAT = /^([^@]*\.yml)@([^/]*)\/(.*)$/;
