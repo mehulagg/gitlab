@@ -99,6 +99,11 @@ RSpec.describe Groups::Epics::NotesController do
         expect(parsed_response[:errors]).to be_nil
       end
     end
+
+    it_behaves_like 'request exceeding rate limit' do
+      let(:params) { request_params }
+      let(:full_path) { "groups/#{group.full_path}/-/epics/#{epic.id}" }
+    end
   end
 
   describe 'PUT update' do

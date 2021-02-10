@@ -133,6 +133,11 @@ RSpec.describe Projects::Security::Vulnerabilities::NotesController do
         end
       end
     end
+
+    it_behaves_like 'request exceeding rate limit' do
+      let(:params) { request_params.merge(extra_params) }
+      let(:full_path) { project.full_path }
+    end
   end
 
   describe 'PUT update' do

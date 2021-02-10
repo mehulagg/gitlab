@@ -141,6 +141,11 @@ RSpec.describe Snippets::NotesController do
       it 'creates the note' do
         expect { post :create, params: request_params }.to change { Note.count }.by(1)
       end
+
+      it_behaves_like 'request exceeding rate limit' do
+        let(:params) { request_params }
+        let(:full_path) { "-/snippets/#{public_snippet.id}" }
+      end
     end
 
     context 'when a snippet is internal' do
@@ -163,6 +168,11 @@ RSpec.describe Snippets::NotesController do
 
       it 'creates the note' do
         expect { post :create, params: request_params }.to change { Note.count }.by(1)
+      end
+
+      it_behaves_like 'request exceeding rate limit' do
+        let(:request) { post :create, params: request_params }
+        let(:full_path) { "-/snippets/#{internal_snippet.id}" }
       end
     end
 
@@ -228,6 +238,11 @@ RSpec.describe Snippets::NotesController do
         it 'creates the note' do
           expect { post :create, params: request_params }.to change { Note.count }.by(1)
         end
+      end
+
+      it_behaves_like 'request exceeding rate limit' do
+        let(:request) { post :create, params: request_params }
+        let(:full_path) { "-/snippets/#{private_snippet.id}" }
       end
     end
   end

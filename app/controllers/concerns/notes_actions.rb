@@ -15,6 +15,7 @@ module NotesActions
     before_action :require_noteable!, only: [:index, :create]
     before_action :authorize_admin_note!, only: [:update, :destroy]
     before_action :note_project, only: [:create]
+    before_action :check_create_rate_limit, only: [:create]
   end
 
   def index
@@ -336,5 +337,18 @@ module NotesActions
     return false if params['html']
 
     noteable.discussions_rendered_on_frontend?
+  end
+
+  def check_create_rate_limit
+    key = :notes_create
+
+    return unless rate_limiter.throttled?(key, scope: [current_user])
+
+    rate_limiter.log_request(request, "#{key}_request_limit".to_sym, current_user)
+    render plain: _('This endpoint has been requested too many times. Try again later.'), status: :too_many_requests
+  end
+
+  def rate_limiter
+    ::Gitlab::ApplicationRateLimiter
   end
 end
