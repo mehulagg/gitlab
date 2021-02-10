@@ -121,6 +121,11 @@ export default {
       required: false,
       default: '',
     },
+    newDirPath: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   uploadBlobModalId: UPLOAD_BLOB_MODAL_ID,
   data() {

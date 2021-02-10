@@ -92,6 +92,7 @@ export default function setupVueRepositoryList() {
             forkNewDirectoryPath,
             forkUploadBlobPath,
             uploadPath,
+            newDirPath,
           },
         });
       },
