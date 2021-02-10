@@ -2,9 +2,7 @@
 
 <%= _('One or more of your personal access tokens will expire in %{days_to_expire} days or less:') % { days_to_expire: @days_to_expire } %>
 
-<% tokens = access_token_about_to_expire_list(@user) %>
-
-<% tokens.each do |token| %>
+<% @token_names.each do |token| %>
   <%= "- %{token}\n" % { token: token } %>
 <% end %>
 
