@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_01_25_222907) do
+ActiveRecord::Schema.define(version: 2021_02_08_221816) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -82,7 +82,7 @@ ActiveRecord::Schema.define(version: 2021_01_25_222907) do
     t.datetime_with_timezone "retry_at"
     t.bigint "bytes"
     t.integer "lfs_object_id"
-    t.integer "retry_count", limit: 2, default: 0
+    t.integer "retry_count", default: 0
     t.boolean "missing_on_primary", default: false, null: false
     t.boolean "success", default: false, null: false
     t.binary "sha256"

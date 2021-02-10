@@ -3,7 +3,6 @@
 FactoryBot.define do
   factory :geo_lfs_object_registry, class: 'Geo::LfsObjectRegistry' do
     sequence(:lfs_object_id)
-    created_at { Time.now }
     success { true }
 
     trait :failed do
