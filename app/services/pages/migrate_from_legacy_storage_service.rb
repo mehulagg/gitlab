@@ -72,7 +72,7 @@ module Pages
       end
     rescue => e
       @counters_lock.synchronize { @errored += 1 }
-      @logger.error("#{e.message} project_id: #{project&.id}")
+      @logger.error("project_id: #{project&.id} #{project&.pages_path} failed to be migrated: #{e.message}")
       Gitlab::ErrorTracking.track_exception(e, project_id: project&.id)
     end
   end
