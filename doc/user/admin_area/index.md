@@ -148,10 +148,10 @@ you must provide the complete email address.
 
 An administrator can "impersonate" any other user, including other administrator users.
 This allows the administrator to "see what the user sees," and take actions on behalf of the user.
-Impersonation can be conducted via:
+You can impersonate a user in the following ways:
 
-1. **Admin Area > Overview > Users > [Select a user] > Impersonate** (see screenshot below)
-1. API using [impersonation tokens](../../api/README.md#impersonation-tokens)
+- Through the UI, by selecting **Admin Area > Overview > Users > [Select a user] > Impersonate**.
+- With the API, using [impersonation tokens](../../api/README.md#impersonation-tokens).
 
 All impersonation activities are [captured with audit events](../../administration/audit_events.md#impersonation-data).
 
