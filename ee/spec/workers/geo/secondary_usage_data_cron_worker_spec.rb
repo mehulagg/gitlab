@@ -7,6 +7,7 @@ RSpec.describe Geo::SecondaryUsageDataCronWorker, :clean_gitlab_redis_shared_sta
 
   before do
     allow(subject).to receive(:sleep)
+    allow(Geo::SecondaryUsageData).to receive(:update_metrics!)
     stub_secondary_node
   end
 
