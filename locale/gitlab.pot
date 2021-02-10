@@ -2624,12 +2624,6 @@ msgstr ""
 msgid "AlertMappingBuilder|Title is a required field for alerts in GitLab. Should the payload field you specified not be available, specifiy which field we should use instead. "
 msgstr ""
 
-msgid "AlertService|Review your external service's documentation to learn where to provide this information to your external service, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
-msgstr ""
-
-msgid "AlertService|You must provide this URL and authorization key to authorize an external service to send alerts to GitLab. You can provide this URL and key to multiple services. After configuring an external service, alerts from your service will display on the GitLab %{linkStart}Alerts%{linkEnd} page."
-msgstr ""
-
 msgid "AlertSettings|1. Select integration type"
 msgstr ""
 
@@ -24943,9 +24937,6 @@ msgstr ""
 msgid "Reset to project defaults"
 msgstr ""
 
-msgid "Resetting the authorization key for this project will require updating the authorization key in every alert source it is enabled in."
-msgstr ""
-
 msgid "Resetting the authorization key will invalidate the previous key. Existing alert configurations will need to be updated with the new key."
 msgstr ""
 
@@ -31292,9 +31283,6 @@ msgid "Update approvers"
 msgstr ""
 
 msgid "Update failed"
-msgstr ""
-
-msgid "Update failed. Please try again."
 msgstr ""
 
 msgid "Update it"
