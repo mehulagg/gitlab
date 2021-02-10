@@ -8,11 +8,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2149) in GitLab Premium 13.9.
 
-In maintenance mode, most write operations are disabled at the application level.
-This means that GitLab is effectively in a read-only mode for all non-administrative
-users (administrators are still able to edit application settings). Regular users
-are able to log in to GitLab, view the interface and perform other read-only
-operations, such as `git clone` or `git pull`.
+Maintenance mode allows administrators to reduce GitLab's internal state changes to a minimum while maintenance tasks are performed.
+
+The main goal is to block all external actions that change GitLab's internal state (including the PG DB, but especially files, Git repos, container repos, etc). 
+
+Then in-progress actions will finish (relatively quickly since no new actions are coming in), and internal state changes will be minimal.
+
+In that state, various maintenance tasks are easier, and/or service can be stopped completely or further degraded for a much shorter period of time than might otherwise be needed e.g. stopping cron jobs and draining queues should be fairly quick.
+
+Ideally, we allow all external actions that do not change internal state. That is roughly accomplished by allowing all, and only, HTTP GET requests, but many special cases are needed in practice. [Handling the special cases](internal_working.md) is most of the work behind maintenance mode.
 
 ## Enable maintenance mode
 
