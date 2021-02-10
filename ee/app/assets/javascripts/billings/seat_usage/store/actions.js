@@ -1,4 +1,4 @@
-import Api from '~/api';
+import Api from 'ee/api';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import * as types from './mutation_types';
