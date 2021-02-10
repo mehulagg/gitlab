@@ -14,6 +14,11 @@ module Mutations
                  required: true,
                  description: 'Global ID of the cluster agent that will be associated with the new token.'
 
+        argument :name,
+                 GraphQL::STRING_TYPE,
+                 required: false,
+                 description: 'Name of the token.'
+
         field :secret,
               GraphQL::STRING_TYPE,
               null: true,
@@ -24,12 +29,15 @@ module Mutations
               null: true,
               description: 'Token created after mutation.'
 
-        def resolve(cluster_agent_id:)
+        def resolve(cluster_agent_id:, name: nil)
           cluster_agent = authorized_find!(id: cluster_agent_id)
 
           result = ::Clusters::AgentTokens::CreateService
-            .new(container: cluster_agent.project, current_user: current_user)
-            .execute(cluster_agent)
+            .new(
+              container: cluster_agent.project,
+              current_user: current_user,
+              params: { agent: cluster_agent, name: name }
+            ).execute
 
           payload = result.payload
 

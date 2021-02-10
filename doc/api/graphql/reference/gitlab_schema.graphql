@@ -3474,6 +3474,11 @@ input ClusterAgentTokenCreateInput {
   Global ID of the cluster agent that will be associated with the new token.
   """
   clusterAgentId: ClustersAgentID!
+
+  """
+  Name of the token.
+  """
+  name: String
 }
 
 """

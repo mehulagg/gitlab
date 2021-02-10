@@ -9447,6 +9447,16 @@
               "defaultValue": null
             },
             {
+              "name": "name",
+              "description": "Name of the token.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "clientMutationId",
               "description": "A unique identifier for the client performing the mutation.",
               "type": {

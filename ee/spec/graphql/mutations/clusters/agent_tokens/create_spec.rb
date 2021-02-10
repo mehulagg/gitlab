@@ -37,6 +37,10 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
     end
 
     context 'with premium plan and user permissions' do
+      let(:token_name) { 'New Token' }
+
+      subject { mutation.resolve(cluster_agent_id: cluster_agent.to_global_id, name: token_name) }
+
       before do
         stub_licensed_features(cluster_agents: true)
         cluster_agent.project.add_maintainer(user)
@@ -46,6 +50,7 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
         expect { subject }.to change { ::Clusters::AgentToken.count }.by(1)
         expect(subject[:secret]).not_to be_nil
         expect(subject[:errors]).to eq([])
+        expect(subject[:token].name).to eq(token_name)
       end
 
       context 'invalid params' do
