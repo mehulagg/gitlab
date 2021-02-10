@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
 import {
   isInIssuePage,
   isInDesignPage,
@@ -10,6 +9,7 @@ import {
 } from '~/lib/utils/common_utils';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
+import { apolloProvider } from '~/sidebar/graphql';
 import Translate from '../vue_shared/translate';
 import SidebarTimeTracking from './components/time_tracking/sidebar_time_tracking.vue';
 import SidebarAssignees from './components/assignees/sidebar_assignees.vue';
@@ -32,9 +32,6 @@ function getSidebarOptions(sidebarOptEl = document.querySelector('.js-sidebar-op
 
 function mountAssigneesComponent(mediator) {
   const el = document.getElementById('js-vue-sidebar-assignees');
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
 
   if (!el) return;
 
@@ -63,9 +60,6 @@ function mountAssigneesComponent(mediator) {
 
 function mountReviewersComponent(mediator) {
   const el = document.getElementById('js-vue-sidebar-reviewers');
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
 
   if (!el) return;
 
@@ -96,10 +90,6 @@ export function mountSidebarLabels() {
   if (!el) {
     return false;
   }
-
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
 
   return new Vue({
     el,
@@ -256,9 +246,6 @@ function mountSeverityComponent() {
   if (!severityContainerEl) {
     return false;
   }
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
 
   const { fullPath, iid, severity } = getSidebarOptions();
 
