@@ -68,6 +68,7 @@ This has certain benefits as outlined in our <a href="https://docs.gitlab.com/ee
 You might find that we do not currently update DEPENDENCY automatically, but we are planning to do so in [the near future](https://gitlab.com/gitlab-org/frontend/rfcs/-/issues/21).
 
 Thank you for understanding, I will close this Merge Request.
+/close
 ```
 
 ### Blocked dependencies
