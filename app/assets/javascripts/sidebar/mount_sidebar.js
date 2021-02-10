@@ -10,6 +10,7 @@ import {
   parseBoolean,
 } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
+import { apolloProvider } from '~/sidebar/graphql';
 import Translate from '../vue_shared/translate';
 import SidebarAssignees from './components/assignees/sidebar_assignees.vue';
 import ConfidentialIssueSidebar from './components/confidential/confidential_issue_sidebar.vue';
@@ -54,9 +55,6 @@ function getSidebarAssigneeAvailabilityData() {
 
 function mountAssigneesComponent(mediator) {
   const el = document.getElementById('js-vue-sidebar-assignees');
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
 
   if (!el) return;
 
@@ -87,9 +85,6 @@ function mountAssigneesComponent(mediator) {
 
 function mountReviewersComponent(mediator) {
   const el = document.getElementById('js-vue-sidebar-reviewers');
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
 
   if (!el) return;
 
@@ -120,10 +115,6 @@ export function mountSidebarLabels() {
   if (!el) {
     return false;
   }
-
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
 
   return new Vue({
     el,
@@ -280,9 +271,6 @@ function mountSeverityComponent() {
   if (!severityContainerEl) {
     return false;
   }
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
 
   const { fullPath, iid, severity } = getSidebarOptions();
 
