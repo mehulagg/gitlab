@@ -132,32 +132,17 @@ Find the latest DAST versions on the [Releases](https://gitlab.com/gitlab-org/se
 ### Deployment options
 
 Depending on the complexity of the target application, there are a few options as to how to deploy and configure
-the DAST template.
+the DAST template. A set of example applications with their configurations have been made available in our 
+[demos](https://gitlab.com/gitlab-org/security-products/demos/dast/) project.
 
-#### Review App
+#### Review Apps
 
 Review Apps are the most involved method of deploying your DAST target application. 
 The [Configuration](#configuration) section references an example using Kubernetes. 
 
-A more simplified example of a Review App deployment is in our [Review Apps NGINX](https://gitlab.com/gitlab-examples/review-apps-nginx) template.
-
-To enable DAST for the above Review App the following YAML would need to be included in the
-`gitlab-ci.yml` file.
-
-```yaml
-stages:
-  - build
-  - review
-  - staging
-  - production
-
-include:
-  - template: DAST.gitlab-ci.yml
-
-variables:
-  DAST_FULL_SCAN_ENABLED: "true"
-  DAST_WEBSITE: http://$CI_BUILD_REF_SLUG.$APPS_DOMAIN
-```
+An example of a Review App deployment using GKE is in our [Review Apps - GKE](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke)
+along with detailed instructions in the [README.md](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke/-/blob/master/README.md) 
+on how to fully configure Review Apps for DAST.
 
 #### Docker Services
 
@@ -170,34 +155,32 @@ By overriding the `dast` job, it is possible to link services necessary for the 
 ```yaml
 stages:
   - build
-  - analyze
+  - dast
 
-variables:
-  DAST_IMAGE: registry.gitlab.com/gitlab-org/security-products/analyzers/dast:1
-  DOCKER_DRIVER: overlay2
-  DAST_WEBSITE: http://example/
+include: 
+  - template: DAST.gitlab-ci.yml
 
-deploy-image:
+# Deploys the container to the GitLab container registry
+deploy:
+  services:
+  - name: docker:dind
+    alias: dind
+  image: docker:19.03.5
   stage: build
-  extends: .use-docker-in-docker
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - export IMAGE=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
-    - docker build -f Dockerfile -t $IMAGE .
-    - docker push $IMAGE
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
 
-dast:
-  stage: analyze
-  image: $DAST_IMAGE
-  services:
-    - name: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
-      alias: example
-  script:
-    - /analyze -t $DAST_WEBSITE
-  artifacts:
-    name: "gl-dast-report.json"
-    paths: [gl-dast-report.json]
-    expire_in: 1 week
+services: # use services to link your app container to the dast job
+  - name: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    alias: yourapp
+
+variables:
+  DAST_FULL_SCAN_ENABLED: "true" # do a full scan
+  DAST_ZAP_USE_AJAX_SPIDER: "true" # use the ajax spider
 ```
 
 Most applications utilize multiple services such as databases or caching services that the
@@ -205,22 +188,14 @@ target application depends on. By default, services defined in the services fiel
 with one another. To enable this, the [feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags) `FF_NETWORK_PER_BUILD` must be enabled.
 
 ```yaml
-dast:
-  stage: analyze
-  image: $DAST_IMAGE
-  services:
-    - name: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
-      alias: example
-    - name: mongo:3.6.20-xenial
-      alias: docdb
-  script:
-    - /analyze -t $DAST_WEBSITE
-  variables:
-    FF_NETWORK_PER_BUILD: 1
-  artifacts:
-    name: "gl-dast-report.json"
-    paths: [gl-dast-report.json]
-    expire_in: 1 week
+variables:
+  FF_NETWORK_PER_BUILD: "true" # enable network per build so all services can communicate on the same network
+
+services: # use services to link the nodegoat container to the dast job
+  - name: mongo:latest
+    alias: mongo
+  - name: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    alias: vulnapp
 ```
 
 ### When DAST scans run
