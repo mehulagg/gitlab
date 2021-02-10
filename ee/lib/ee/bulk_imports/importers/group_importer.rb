@@ -10,11 +10,10 @@ module EE
 
         override :pipelines
         def pipelines
-          super << EE::BulkImports::Groups::Pipelines::EpicsPipeline
-        end
-
-        def importers
-          super << EE::BulkImports::Importers::Groups::EpicRelationsImporter
+          super + [
+            EE::BulkImports::Groups::Pipelines::EpicsPipeline,
+            EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline
+          ]
         end
       end
     end

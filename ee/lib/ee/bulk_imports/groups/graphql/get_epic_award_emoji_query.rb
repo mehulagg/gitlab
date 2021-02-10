@@ -32,7 +32,7 @@ module EE
 
           def variables(context)
             iid = context.extra[:epic_iid]
-            tracker = "epic_#{iid}_award_emoji".to_sym
+            tracker = :"epic_#{iid}_award_emoji"
 
             {
               full_path: context.entity.source_full_path,

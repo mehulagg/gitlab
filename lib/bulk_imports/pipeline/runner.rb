@@ -7,7 +7,11 @@ module BulkImports
 
       MarkedAsFailedError = Class.new(StandardError)
 
-      def run(context)
+      def initialize(context)
+        @context = context
+      end
+
+      def run
         raise MarkedAsFailedError if marked_as_failed?(context)
 
         info(context, message: 'Pipeline started')
@@ -34,6 +38,8 @@ module BulkImports
       end
 
       private # rubocop:disable Lint/UselessAccessModifier
+
+      attr_reader :context
 
       def run_pipeline_step(step, class_name, context)
         raise MarkedAsFailedError if marked_as_failed?(context)
