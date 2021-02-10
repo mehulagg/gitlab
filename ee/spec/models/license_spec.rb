@@ -353,6 +353,36 @@ RSpec.describe License do
         end
       end
     end
+
+    describe '#reset_previous', :request_store do
+      let!(:previous_license) do
+        create(
+          :license,
+          data: create(:gitlab_license, starts_at: Date.new(1969, 1, 1), expires_at: Date.new(1969, 12, 31)).export)
+      end
+
+      before do
+        described_class.previous
+
+        expect(Gitlab::SafeRequestStore.read(:previous_license)).to be_present
+      end
+
+      context 'when a license is created' do
+        it 'deletes the previous_license value in Gitlab::SafeRequestStore' do
+          create(:license)
+
+          expect(Gitlab::SafeRequestStore.read(:previous_license)).to be_nil
+        end
+      end
+
+      context 'when a license is destroyed' do
+        it 'deletes the previous_license value in Gitlab::SafeRequestStore' do
+          previous_license.destroy
+
+          expect(Gitlab::SafeRequestStore.read(:previous_license)).to be_nil
+        end
+      end
+    end
   end
 
   describe "Class methods" do
@@ -436,6 +466,19 @@ RSpec.describe License do
         it 'returns nil' do
           allow(described_class).to receive(:last_hundred).and_return([license])
           allow(license).to receive(:valid?).and_return(false)
+
+          expect(described_class.current).to be_nil
+        end
+      end
+
+      context 'when the license is expired' do
+        it 'returns nil' do
+          expired_license = create(
+            :license,
+            data: create(:gitlab_license, starts_at: Date.current - 1.month, expires_at: Date.yesterday).export
+          )
+
+          allow(described_class).to receive(:last_hundred).and_return([expired_license])
 
           expect(described_class.current).to be_nil
         end
@@ -555,6 +598,55 @@ RSpec.describe License do
           future_dated_license = create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export)
 
           expect(described_class.future_dated).to eq(future_dated_license)
+        end
+      end
+    end
+
+    describe '.previous' do
+      before do
+        described_class.reset_previous
+      end
+
+      context 'when there is no license' do
+        it 'returns nil' do
+          allow(described_class).to receive(:last_hundred).and_return([])
+
+          expect(described_class.previous).to be_nil
+        end
+      end
+
+      context 'when the license is invalid' do
+        it 'returns nil' do
+          license = build(
+            :license,
+            data: build(:gitlab_license, starts_at: Date.new(1969, 1, 1), expires_at: Date.new(1969, 12, 31)).export
+          )
+
+          allow(described_class).to receive(:last_hundred).and_return([license])
+          allow(license).to receive(:valid?).and_return(false)
+
+          expect(described_class.previous).to be_nil
+        end
+      end
+
+      context 'when the license is valid' do
+        it 'returns the the previous license' do
+          previous_license = create(
+            :license,
+            data: create(:gitlab_license, starts_at: Date.new(1969, 1, 1), expires_at: Date.new(1969, 12, 31)).export
+          )
+
+          expect(described_class.previous).to eq(previous_license)
+        end
+      end
+
+      context 'when only a current and a future dated license exist' do
+        before do
+          create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export)
+        end
+
+        it 'returns nil' do
+          expect(described_class.previous).to be_nil
         end
       end
     end

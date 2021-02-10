@@ -241,6 +241,7 @@ class License < ApplicationRecord
   after_create :reset_current
   after_destroy :reset_current
   after_commit :reset_future_dated, on: [:create, :destroy]
+  after_commit :reset_previous, on: [:create, :destroy]
 
   scope :recent, -> { reorder(id: :desc) }
   scope :last_hundred, -> { recent.limit(100) }
@@ -303,6 +304,14 @@ class License < ApplicationRecord
       future_dated.present?
     end
 
+    def previous
+      Gitlab::SafeRequestStore.fetch(:previous_license) { load_previous }
+    end
+
+    def reset_previous
+      Gitlab::SafeRequestStore.delete(:previous_license)
+    end
+
     def global_feature?(feature)
       GLOBAL_FEATURES.include?(feature)
     end
@@ -333,6 +342,10 @@ class License < ApplicationRecord
 
     def load_future_dated
       self.last_hundred.find { |license| license.valid? && license.future_dated? }
+    end
+
+    def load_previous
+      self.last_hundred.find { |license| license.valid? && !license.future_dated? && license != License.current }
     end
   end
 
@@ -488,12 +501,12 @@ class License < ApplicationRecord
     overage(maximum_user_count)
   end
 
-  def historical_max(from = nil, to = nil)
+  def historical_max(from: nil, to: nil)
     HistoricalData.max_historical_user_count(license: self, from: from, to: to)
   end
 
   def maximum_user_count
-    [historical_max(starts_at), daily_billable_users_count].max
+    [historical_max(from: starts_at), daily_billable_users_count].max
   end
 
   def update_trial_setting
@@ -561,6 +574,10 @@ class License < ApplicationRecord
     self.class.reset_future_dated
   end
 
+  def reset_previous
+    self.class.reset_previous
+  end
+
   def reset_license
     @license = nil
   end
@@ -573,10 +590,7 @@ class License < ApplicationRecord
 
   def prior_historical_max
     @prior_historical_max ||= begin
-      from = (starts_at - 1.year).beginning_of_day
-      to   = starts_at.end_of_day
-
-      historical_max(from, to)
+      historical_max(from: previous_started_at, to: previous_expired_at)
     end
   end
 
@@ -603,9 +617,9 @@ class License < ApplicationRecord
 
   def check_trueup
     trueup_qty          = restrictions[:trueup_quantity]
-    trueup_from         = Date.parse(restrictions[:trueup_from]).beginning_of_day rescue (starts_at - 1.year).beginning_of_day
-    trueup_to           = Date.parse(restrictions[:trueup_to]).end_of_day rescue starts_at.end_of_day
-    max_historical      = historical_max(trueup_from, trueup_to)
+    trueup_from         = Date.parse(restrictions[:trueup_from]).beginning_of_day rescue previous_started_at
+    trueup_to           = Date.parse(restrictions[:trueup_to]).end_of_day rescue previous_expired_at
+    max_historical      = historical_max(from: trueup_from, to: trueup_to)
     expected_trueup_qty = if previous_user_count
                             max_historical - previous_user_count
                           else
@@ -642,5 +656,17 @@ class License < ApplicationRecord
     return unless self.license? && self.expired?
 
     self.errors.add(:base, _('This license has already expired.'))
+  end
+
+  def previous_started_at
+    strong_memoize(:previous_started_at) do
+      (License.previous&.starts_at || starts_at - 1.year).beginning_of_day
+    end
+  end
+
+  def previous_expired_at
+    strong_memoize(:previous_expired_at) do
+      (License.previous&.expires_at || expires_at - 1.year).end_of_day
+    end
   end
 end
