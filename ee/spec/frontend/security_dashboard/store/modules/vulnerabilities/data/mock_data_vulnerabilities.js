@@ -170,7 +170,7 @@ export default [
       issue_iid: null,
       pipeline: {
         id: 2,
-        path: '/namespace5/project5/pipelines/2',
+        path: '/namespace5/project5/-/pipelines/2',
       },
       category: 'sast',
       feedback_type: 'dismissal',
@@ -249,7 +249,7 @@ export default [
       issue_iid: 1,
       pipeline: {
         id: 3,
-        path: '/namespace6/project6/pipelines/3',
+        path: '/namespace6/project6/-/pipelines/3',
       },
       issue_url: 'http://localhost/namespace1/project1/issues/1',
       category: 'sast',
@@ -327,7 +327,7 @@ export default [
       issue_iid: null,
       pipeline: {
         id: 2,
-        path: '/namespace5/project5/pipelines/2',
+        path: '/namespace5/project5/-/pipelines/2',
       },
       category: 'sast',
       feedback_type: 'dismissal',
@@ -352,7 +352,7 @@ export default [
       issue_iid: 1,
       pipeline: {
         id: 3,
-        path: '/namespace6/project6/pipelines/3',
+        path: '/namespace6/project6/-/pipelines/3',
       },
       issue_url: 'http://localhost/namespace1/project1/issues/1',
       category: 'sast',
@@ -484,7 +484,7 @@ export default [
       issue_iid: null,
       pipeline: {
         id: 3,
-        path: '/namespace6/project6/pipelines/3',
+        path: '/namespace6/project6/-/pipelines/3',
       },
       issue_url: null,
       category: 'sast',

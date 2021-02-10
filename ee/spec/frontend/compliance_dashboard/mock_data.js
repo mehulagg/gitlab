@@ -17,7 +17,7 @@ export const mergedAt = () => {
 };
 
 export const createPipelineStatus = (status) => ({
-  details_path: '/h5bp/html5-boilerplate/pipelines/58',
+  details_path: '/h5bp/html5-boilerplate/-/pipelines/58',
   favicon: '',
   group: status,
   has_details: true,
