@@ -14,6 +14,9 @@ import { typeSet } from '~/alerts_settings/constants';
 import alertFields from '../mocks/alertFields.json';
 import { defaultAlertSettingsConfig } from './util';
 
+const validSamplePayload = JSON.stringify(alertFields);
+const emptySamplePayload = '';
+
 describe('AlertsSettingsForm', () => {
   let wrapper;
   const mockToastShow = jest.fn();
@@ -278,16 +281,13 @@ describe('AlertsSettingsForm', () => {
   });
 
   describe('Test payload section for HTTP integration', () => {
-    const validPayload = '{"title": "hello"}';
-    const emptyPayload = '';
-
     beforeEach(() => {
       createComponent({
         multipleHttpIntegrationsCustomMapping: true,
         data: {
           currentIntegration: {
             type: typeSet.http,
-            samplePayload: validPayload,
+            samplePayload: validSamplePayload,
           },
         },
         props: { alertFields },
@@ -310,7 +310,7 @@ describe('AlertsSettingsForm', () => {
           currentIntegration: {
             active,
             type: typeSet.http,
-            samplePayload: validPayload,
+            samplePayload: validSamplePayload,
           },
           resetSamplePayloadConfirmed,
         });
@@ -321,11 +321,11 @@ describe('AlertsSettingsForm', () => {
 
     describe('action buttons for sample payload', () => {
       describe.each`
-        resetSamplePayloadConfirmed | samplePayload   | caption
-        ${false}                    | ${validPayload} | ${'Edit payload'}
-        ${true}                     | ${emptyPayload} | ${'Submit payload'}
-        ${true}                     | ${validPayload} | ${'Submit payload'}
-        ${false}                    | ${emptyPayload} | ${'Submit payload'}
+        resetSamplePayloadConfirmed | samplePayload         | caption
+        ${false}                    | ${validSamplePayload} | ${'Edit payload'}
+        ${true}                     | ${emptySamplePayload} | ${'Submit payload'}
+        ${true}                     | ${validSamplePayload} | ${'Submit payload'}
+        ${false}                    | ${emptySamplePayload} | ${'Submit payload'}
       `('', ({ resetSamplePayloadConfirmed, samplePayload, caption }) => {
         const samplePayloadMsg = samplePayload ? 'was provided' : 'was not provided';
         const payloadResetMsg = resetSamplePayloadConfirmed ? 'was confirmed' : 'was not confirmed';
@@ -351,8 +351,15 @@ describe('AlertsSettingsForm', () => {
         });
         wrapper.setData({
           selectedIntegration: typeSet.http,
+          currentIntegration: {
+            samplePayload: validSamplePayload,
+            type: typeSet.http,
+            active: true,
+          },
+          resetSamplePayloadConfirmed: true,
         });
         await wrapper.vm.$nextTick();
+
         findActionBtn().vm.$emit('click');
 
         await waitForPromises();
@@ -367,6 +374,12 @@ describe('AlertsSettingsForm', () => {
         jest.spyOn(wrapper.vm.$apollo, 'query').mockRejectedValue({ message: errorMessage });
         wrapper.setData({
           selectedIntegration: typeSet.http,
+          currentIntegration: {
+            samplePayload: validSamplePayload,
+            type: typeSet.http,
+            active: true,
+          },
+          resetSamplePayloadConfirmed: true,
         });
         await wrapper.vm.$nextTick();
         findActionBtn().vm.$emit('click');
