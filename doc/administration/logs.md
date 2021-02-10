@@ -413,11 +413,10 @@ For example:
 
 ## Sidekiq Logs
 
-For Omnibus installations, some Sidekiq logs reside in `/var/log/gitlab/sidekiq/current` and as follows.
+NOTE:
+In Omnibus GitLab `12.10` or earlier, the Sidekiq log lives in `/var/log/gitlab/gitlab-rails/sidekiq.log`.
 
-### `sidekiq.log`
-
-This file lives in `/var/log/gitlab/gitlab-rails/sidekiq.log` for
+This file lives in `/var/log/gitlab/sidekiq/current` for
 Omnibus GitLab packages or in `/home/git/gitlab/log/sidekiq.log` for
 installations from source.
 
