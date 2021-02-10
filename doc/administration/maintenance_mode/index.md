@@ -172,7 +172,6 @@ Features that depend on creating or approving Merge Requests, will not work.
 
 SAST and Secret Detection cannot be initiated because depend on passing CI jobs to create artifacts.
 
-
 ## How does maintenance mode affect services that GitLab relies on?
 
 Maintenance mode will only affect the following related services:
