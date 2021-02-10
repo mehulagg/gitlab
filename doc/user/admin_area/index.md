@@ -150,12 +150,12 @@ An administrator can "impersonate" any other user, including other administrator
 This allows the administrator to "see what the user sees," and take actions on behalf of the user.
 Impersonation can be conducted via:
 
-1. Admin Area > Overview > Users > [Select a user] > Impersonate (see screenshot below)
+1. **Admin Area > Overview > Users > [Select a user] > Impersonate** (see screenshot below)
 1. API using [impersonation tokens](../../api/README.md#impersonation-tokens)
 
-All impersonation activity is [captured with audit events](../../administration/audit_events.md#impersonation-data).
+All impersonation activities are [captured with audit events](../../administration/audit_events.md#impersonation-data).
 
-![user impersonation button](img/user_impersonation_button_example.png)
+![user impersonation button](img/impersonate_user_button_v13_8.png)
 
 #### Users statistics
 
