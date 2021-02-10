@@ -4651,7 +4651,7 @@ test-vars-1:
   script:
     - printenv
 
-test vars 2:
+test-vars-2:
   variables:
     MY_VAR: !reference [.vars, variables, IMPORTANT_VAR]
   script:
