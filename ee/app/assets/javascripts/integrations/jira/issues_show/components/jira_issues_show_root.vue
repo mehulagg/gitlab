@@ -4,7 +4,7 @@ import { issueStates, issueStateLabels } from 'ee/integrations/jira/issues_show/
 import Sidebar from 'ee/integrations/jira/issues_show/components/sidebar.vue';
 import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
 
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { transformJiraIssue } from '../../utils';
 
 export default {
   name: 'JiraIssuesShow',
@@ -35,7 +35,7 @@ export default {
     },
   },
   async mounted() {
-    this.issue = convertObjectPropsToCamelCase(await fetchIssue(this.issuesShowPath), {
+    this.issue = transformJiraIssue(await fetchIssue(this.issuesShowPath), {
       deep: true,
     });
     this.isLoading = false;

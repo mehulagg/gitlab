@@ -1,11 +1,9 @@
 <script>
 import { GlButton, GlIcon, GlLink, GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import jiraLogo from '@gitlab/svgs/dist/illustrations/logos/jira.svg';
-
 import { __ } from '~/locale';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 
@@ -15,6 +13,7 @@ import {
   AvailableSortOptions,
   DEFAULT_PAGE_SIZE,
 } from '~/issuable_list/constants';
+import { transformJiraIssue } from '../../utils';
 import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
 
 export default {
@@ -109,20 +108,7 @@ export default {
           const { headers, data } = res;
           this.currentPage = parseInt(headers['x-page'], 10);
           this.totalIssues = parseInt(headers['x-total'], 10);
-          this.issues = data.map((rawIssue, index) => {
-            const issue = convertObjectPropsToCamelCase(rawIssue, { deep: true });
-
-            return {
-              ...issue,
-              // JIRA issues don't have ID so we extract
-              // an ID equivalent from references.relative
-              id: parseInt(rawIssue.references.relative.split('-').pop(), 10),
-              author: {
-                ...issue.author,
-                id: index,
-              },
-            };
-          });
+          this.issues = data.map((rawJiraIssue) => transformJiraIssue(rawJiraIssue));
           this.issuesCount[this.currentState] = this.issues.length;
         })
         .catch((error) => {
