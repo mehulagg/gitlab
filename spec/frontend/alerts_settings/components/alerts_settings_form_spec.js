@@ -278,8 +278,8 @@ describe('AlertsSettingsForm', () => {
   });
 
   describe('Test payload section for HTTP integration', () => {
-    const validJSON = '{"title": "hello"}';
-    const emptyJSON = '';
+    const validPayload = '{"title": "hello"}';
+    const emptyPayload = '';
 
     beforeEach(() => {
       createComponent({
@@ -287,7 +287,7 @@ describe('AlertsSettingsForm', () => {
         data: {
           currentIntegration: {
             type: typeSet.http,
-            samplePayload: validJSON,
+            samplePayload: validPayload,
           },
         },
         props: { alertFields },
@@ -310,7 +310,7 @@ describe('AlertsSettingsForm', () => {
           currentIntegration: {
             active,
             type: typeSet.http,
-            samplePayload: validJSON,
+            samplePayload: validPayload,
           },
           resetSamplePayloadConfirmed,
         });
@@ -321,11 +321,11 @@ describe('AlertsSettingsForm', () => {
 
     describe('action buttons for sample payload', () => {
       describe.each`
-        resetSamplePayloadConfirmed | samplePayload | caption
-        ${false}                    | ${validJSON}  | ${'Edit payload'}
-        ${true}                     | ${emptyJSON}  | ${'Submit payload'}
-        ${true}                     | ${validJSON}  | ${'Submit payload'}
-        ${false}                    | ${emptyJSON}  | ${'Submit payload'}
+        resetSamplePayloadConfirmed | samplePayload   | caption
+        ${false}                    | ${validPayload} | ${'Edit payload'}
+        ${true}                     | ${emptyPayload} | ${'Submit payload'}
+        ${true}                     | ${validPayload} | ${'Submit payload'}
+        ${false}                    | ${emptyPayload} | ${'Submit payload'}
       `('', ({ resetSamplePayloadConfirmed, samplePayload, caption }) => {
         const samplePayloadMsg = samplePayload ? 'was provided' : 'was not provided';
         const payloadResetMsg = resetSamplePayloadConfirmed ? 'was confirmed' : 'was not confirmed';
