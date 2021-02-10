@@ -324,6 +324,10 @@ module Gitlab
         if resource_updated_during_checksum?(calculation_started_at)
           # just let backfill pick it up
           self.verification_pending!
+        else
+          # It should probably be placed in state machine's transition block but in this case
+          # we drop the effect of sequential updates, so we relieve some extra load here.
+          self.handle_after_checksum_changed
         end
       end
 
