@@ -233,7 +233,7 @@ Table description links:
 - [Source](../install/installation.md)
 - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit)
 
-| Component                                             | Description                                                          | Omnibus GitLab | GitLab Environment Toolkit (Omnibus) | GitLab chart | Minikube Minimal | GitLab.com | Source | GDK |  CE/EE  |
+| Component                                             | Description                                                          | Omnibus GitLab | GitLab Environment Toolkit (GET) - Omnibus | GitLab chart | Minikube Minimal | GitLab.com | Source | GDK |  CE/EE  |
 |-------------------------------------------------------|----------------------------------------------------------------------|:--------------:|:--------------:|:------------:|:----------------:|:----------:|:------:|:---:|:-------:|
 | [Certificate Management](#certificate-management)     | TLS Settings, Let's Encrypt                                          |       ✅       |       ✅        |      ✅       |        ⚙         |     ✅      |   ⚙    |  ⚙  | CE & EE |
 | [Consul](#consul)                                     | Database node discovery, failover                                    |       ⚙       |       ✅         |      ❌       |        ❌         |     ✅      |   ❌    |  ❌  | EE Only |
