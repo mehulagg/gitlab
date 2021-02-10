@@ -11,7 +11,7 @@ RSpec.describe PersonalAccessTokens::ExpiringWorker, type: :worker do
 
       it 'uses notification service to send the email' do
         expect_next_instance_of(NotificationService) do |notification_service|
-          expect(notification_service).to receive(:access_token_about_to_expire).with(pat.user)
+          expect(notification_service).to receive(:access_token_about_to_expire).with(pat.user, [pat.name])
         end
 
         worker.perform
@@ -27,7 +27,7 @@ RSpec.describe PersonalAccessTokens::ExpiringWorker, type: :worker do
 
       it "doesn't use notification service to send the email" do
         expect_next_instance_of(NotificationService) do |notification_service|
-          expect(notification_service).not_to receive(:access_token_about_to_expire).with(pat.user)
+          expect(notification_service).not_to receive(:access_token_about_to_expire).with(pat.user, [pat.name])
         end
 
         worker.perform
@@ -43,7 +43,7 @@ RSpec.describe PersonalAccessTokens::ExpiringWorker, type: :worker do
 
       it "doesn't use notification service to send the email" do
         expect_next_instance_of(NotificationService) do |notification_service|
-          expect(notification_service).not_to receive(:access_token_about_to_expire).with(pat.user)
+          expect(notification_service).not_to receive(:access_token_about_to_expire).with(pat.user, [pat.name])
         end
 
         worker.perform
