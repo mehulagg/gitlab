@@ -724,7 +724,66 @@ The `secrets.yml` file stores encryption keys for sessions and secure variables.
 Backup `secrets.yml` someplace safe, but don't store it in the same place as your database backups.
 Otherwise, your secrets are exposed if one of your backups is compromised.
 
-### Install Init Script
+### Install the Service
+
+Classically GitLab supports SysV init scripts, that are widely supported and portable. In recent years systemd has become the de facto standard for service supervision. It is recommended to use native systemd services to benefit from automatic restarts and the possibility for better sandboxing and resource control.
+
+#### Install systemd units
+
+Skip this step if you plan on using the init script described below.
+
+Copy the services and run `systemctl daemon-reload` so that systemd picks them up:
+
+```shell
+sudo cp lib/support/systemd/* /etc/systemd/system
+sudo systemctl daemon-reload
+```
+
+The units provided by GitLab make very little assumptions about where you are running Redis and PostgreSQL. Also, if you installed GitLab in another directory or as a user other than the default, you need to change these values in the units as well.
+
+For example, if you're running Redis and PostgreSQL on the same machine as GitLab, you should:
+
+1. Run:
+
+   ```shell
+   systemctl edit gitlab-puma.service
+   ```
+
+   to edit the Puma service.
+
+1. In the editor that opens, add the following and save the file:
+
+   ```plaintext
+   [Unit]
+   Requires=redis-server.service postgresql.service
+   After=redis-server.service postgresql.service
+   ```
+
+1. Edit the Sidekiq service:
+
+   ```shell
+   systemctl edit gitlab-sidekiq.service
+   ```
+
+1. Add the following and save the file:
+
+   ```plaintext
+   [Unit]
+   Requires=redis-server.service postgresql.service
+   After=redis-server.service postgresql.service
+   ```
+
+`systemctl edit` will install drop-in configuration files at `/etc/systemd/system/<name of the unit>.d/override.conf`, so that your local configuration is not overwritten when updating the unit files later. You can also add the above snippets manually in `.conf` files under `/etc/systemd/system/<name of the unit>.d/` if you need to split your drop-in configuration files thematically.
+
+Make GitLab start on boot:
+
+```shell
+sudo systemctl enable gitlab-gitaly.service gitlab-mailroom.service gitlab-puma.service gitlab-sidekiq.service gitlab-workhorse.service gitlab.target
+```
+
+#### Install SysV init script
+
+Skip this step if you plan on using the systemd units described above.
 
 Download the init script (is `/etc/init.d/gitlab`):
 
@@ -744,6 +803,9 @@ Make GitLab start on boot:
 
 ```shell
 sudo update-rc.d gitlab defaults 21
+# or if running this on a machine running systemd
+sudo systemctl daemon-reload
+sudo systemctl enable gitlab.service
 ```
 
 ### Set up Logrotate
@@ -782,9 +844,11 @@ sudo -u git -H bundle exec rake gitlab:assets:compile RAILS_ENV=production NODE_
 ### Start Your GitLab Instance
 
 ```shell
+# For systems running systemd
+sudo systemctl start gitlab.target
+
+# For systems running SysV init
 sudo service gitlab start
-# or
-sudo /etc/init.d/gitlab restart
 ```
 
 ## 9. NGINX
@@ -855,7 +919,11 @@ nginx: configuration file /etc/nginx/nginx.conf test failed
 ### Restart
 
 ```shell
-sudo service nginx restart
+# For systems running systemd
+sudo systemctl restart nginx.service
+
+# For systems running SysV init
+sudo service restart nginx
 ```
 
 ## Post-install
