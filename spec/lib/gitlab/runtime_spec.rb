@@ -72,7 +72,7 @@ RSpec.describe Gitlab::Runtime do
     end
 
     describe '.max_puma_workers' do
-      it 'it returns the value of `:workers` from `cli_config`' do
+      it 'returns the value of `:workers` from `cli_config`' do
         expect(subject.max_puma_workers).to eq(4)
       end
     end
