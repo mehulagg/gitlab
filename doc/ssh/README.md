@@ -100,7 +100,7 @@ If you do not have an existing SSH key pair, generate a new one.
 1. Accept the suggested filename and directory, unless you are generating a [deploy key](../user/project/deploy_keys/index.md)
    or want to save in a specific directory where you store other keys.
 
-   You can also dedicate the SSH key pair to a [specific host](#configure-ssh-to-point-to-a-different-private-key-location).
+   You can also dedicate the SSH key pair to a [specific host](#configure-ssh-to-point-to-a-different-directory).
 
 1. Specify a [passphrase](https://www.ssh.com/ssh/passphrase/):
 
@@ -115,12 +115,12 @@ A public and private key are generated.
 [Add the public SSH key to your GitLab account](#add-an-ssh-key-to-your-gitlab-account) and keep
 the private key secure.
 
-### Configure SSH to point to a different private key location
+### Configure SSH to point to a different directory
 
-If you did not save your SSH key pair in the default location,
-configure your SSH client to point to your private key's location.
+If you did not save your SSH key pair in the default directory,
+configure your SSH client to point to the directory where the private key is stored.
 
-1. From a terminal, run this command:
+1. Open a terminal and run this command:
 
    ```shell
    eval $(ssh-agent -s)
@@ -141,6 +141,8 @@ configure your SSH client to point to your private key's location.
      IdentityFile ~/.ssh/example_com_rsa
    ```
 
+   For more information on these settings, see the `man` page for `ssh_config`.
+
 Public SSH keys must be unique to GitLab because they bind to your account.
 Your SSH key is the only identifier you have when you push code with SSH.
 It must uniquely map to a single user.
@@ -149,7 +151,7 @@ It must uniquely map to a single user.
 
 You can update the passphrase for your SSH key.
 
-1. Open a terminal and type this command:
+1. Open a terminal and run this command:
 
    ```shell
    ssh-keygen -p -f /path/to/ssh_key
@@ -163,7 +165,7 @@ If your version of OpenSSH is between 6.5 and 7.8,
 you can save your private RSA SSH keys in a more secure
 OpenSSH format.
 
-1. Open a terminal and type this command:
+1. Open a terminal and run this command:
 
    ```shell
    ssh-keygen -o -f ~/.ssh/id_rsa
@@ -209,7 +211,7 @@ To use SSH with GitLab, copy your public key to your GitLab account.
 1. From the left sidebar, select **SSH Keys**.
 1. In the **Key** box, paste the contents of your public key.
    If you manually copied the key, make sure you copy the entire key,
-   which starts with `ssh-ed25519` or `ssh-rsa`.
+   which starts with `ssh-ed25519` or `ssh-rsa`, and may end with a comment.
 1. In the **Title** text box, type a description, like _Work Laptop_ or
    _Home Workstation_.
 1. Optional. In the **Expires at** box, select an expiration date. (Introduced in [GitLab 12.9](https://gitlab.com/gitlab-org/gitlab/-/issues/36243).)
@@ -222,7 +224,9 @@ To use SSH with GitLab, copy your public key to your GitLab account.
 
 Verify that your SSH key was added correctly.
 
-1. From a terminal, run this command, replacing `gitlab.com` with your GitLab instance URL:
+1. For GitLab.com, to ensure you're connecting to the correct server, confirm the
+   [SSH host keys fingerprints](../user/gitlab_com/index.md#ssh-host-keys-fingerprints).
+1. Open a terminal and run this command, replacing `gitlab.com` with your GitLab instance URL:
 
    ```shell
    ssh -T git@gitlab.com
@@ -248,9 +252,6 @@ in verbose mode:
 ```shell
 ssh -Tvvv git@gitlab.com
 ```
-
-For GitLab.com, to ensure you're connecting to the correct server, confirm the
-[SSH host keys fingerprints](../user/gitlab_com/index.md#ssh-host-keys-fingerprints).
 
 ## Use different keys for different repositories
 
@@ -373,6 +374,6 @@ This indicates that something is wrong with your SSH setup.
 
 - Ensure that you generated your SSH key pair correctly and added the public SSH
   key to your GitLab profile.
-- Try manually registering your private SSH key by using `ssh-agent`.
+- Try to manually register your private SSH key by using `ssh-agent`.
 - Try to debug the connection by running `ssh -Tv git@example.com`.
   Replace `example.com` with your GitLab URL.
