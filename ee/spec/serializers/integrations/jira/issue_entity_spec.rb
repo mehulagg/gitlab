@@ -76,6 +76,7 @@ RSpec.describe Integrations::Jira::IssueEntity do
       it 'returns URLs including context path' do
         expect(subject[:author]).to include(web_url: 'http://jira.com/jira-sub-path/secure/ViewProfile.jspa?name=reporter@reporter.com')
         expect(subject[:web_url]).to eq('http://jira.com/jira-sub-path/browse/GL-5')
+        expect(subject[:gitlab_web_url]).to eq(Gitlab::Routing.url_helpers.project_integrations_jira_issue_path(project, 'GL-5'))
       end
     end
   end
@@ -109,4 +110,14 @@ RSpec.describe Integrations::Jira::IssueEntity do
       expect(subject).to include(labels: [])
     end
   end
+
+  context 'feature flag "jira_issues_show_integration" is disabled' do
+    before do
+      stub_feature_flags(jira_issues_show_integration: false)
+    end
+
+    it 'sets `gitlab_web_url` to nil' do
+      expect(subject[:gitlab_web_url]).to eq(nil)
+    end
+  end 
 end
