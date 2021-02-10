@@ -40,7 +40,7 @@ to protect trigger tokens.
 
 ### CI job token
 
-You can use the `CI_JOB_TOKEN` [variable](../variables/README.md#predefined-environment-variables) (used to authenticate
+You can use the `CI_JOB_TOKEN` [variable](../variables/README.md#predefined-cicd-variables) (used to authenticate
 with the [GitLab Container Registry](../../user/packages/container_registry/index.md)) in the following cases.
 
 #### When used with multi-project pipelines

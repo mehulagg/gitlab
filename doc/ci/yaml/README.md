@@ -1214,7 +1214,7 @@ expression string per rule, rather than an array of them. Any set of expressions
 evaluated can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
 by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-environment-variable-expressions).
 
-Unlike variables in [`script`](../variables/README.md#syntax-of-environment-variables-in-job-scripts)
+Unlike variables in [`script`](../variables/README.md#syntax-of-cicd-variables-in-job-scripts)
 sections, variables in rules expressions are always formatted as `$VARIABLE`.
 
 `if:` clauses are evaluated based on the values of [predefined environment variables](../variables/predefined_variables.md)
@@ -3575,7 +3575,7 @@ test:
 ```
 
 Every parallel job has a `CI_NODE_INDEX` and `CI_NODE_TOTAL`
-[environment variable](../variables/README.md#predefined-environment-variables) set.
+[environment variable](../variables/README.md#predefined-cicd-variables) set.
 
 Different languages and test suites have different methods to enable parallelization.
 For example, use [Semaphore Test Boosters](https://github.com/renderedtext/test-boosters)
@@ -3614,7 +3614,7 @@ There can be from 2 to 50 jobs.
 Jobs can only run in parallel if there are multiple runners, or a single runner is
 [configured to run multiple jobs concurrently](#use-your-own-runners).
 
-Every job gets the same `CI_NODE_TOTAL` [environment variable](../variables/README.md#predefined-environment-variables) value, and a unique `CI_NODE_INDEX` value.
+Every job gets the same `CI_NODE_TOTAL` [environment variable](../variables/README.md#predefined-cicd-variables) value, and a unique `CI_NODE_INDEX` value.
 
 ```yaml
 deploystacks:

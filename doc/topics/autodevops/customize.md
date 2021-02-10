@@ -376,7 +376,7 @@ The following table lists variables related to the database.
 | `POSTGRES_ENABLED`                      | Whether PostgreSQL is enabled. Defaults to `true`. Set to `false` to disable the automatic deployment of PostgreSQL. |
 | `POSTGRES_USER`                         | The PostgreSQL user. Defaults to `user`. Set it to use a custom username. |
 | `POSTGRES_PASSWORD`                     | The PostgreSQL password. Defaults to `testing-password`. Set it to use a custom password. |
-| `POSTGRES_DB`                           | The PostgreSQL database name. Defaults to the value of [`$CI_ENVIRONMENT_SLUG`](../../ci/variables/README.md#predefined-environment-variables). Set it to use a custom database name. |
+| `POSTGRES_DB`                           | The PostgreSQL database name. Defaults to the value of [`$CI_ENVIRONMENT_SLUG`](../../ci/variables/README.md#predefined-cicd-variables). Set it to use a custom database name. |
 | `POSTGRES_VERSION`                      | Tag for the [`postgres` Docker image](https://hub.docker.com/_/postgres) to use. Defaults to `9.6.16` for tests and deployments as of GitLab 13.0 (previously `9.6.2`). If `AUTO_DEVOPS_POSTGRES_CHANNEL` is set to `1`, deployments uses the default version `9.6.2`. |
 
 ### Disable jobs
