@@ -317,12 +317,15 @@ describe('AlertsSettingsForm', () => {
     });
 
     describe('action buttons for sample payload', () => {
+      const validJSON = '{"title": "hello"}';
+      const emptyJSON = '';
+
       describe.each`
         resetSamplePayloadConfirmed | samplePayload | caption
-        ${false}                    | ${true}       | ${'Edit payload'}
-        ${true}                     | ${false}      | ${'Submit payload'}
-        ${true}                     | ${true}       | ${'Submit payload'}
-        ${false}                    | ${false}      | ${'Submit payload'}
+        ${false}                    | ${validJSON}  | ${'Edit payload'}
+        ${true}                     | ${emptyJSON}  | ${'Submit payload'}
+        ${true}                     | ${validJSON}  | ${'Submit payload'}
+        ${false}                    | ${emptyJSON}  | ${'Submit payload'}
       `('', ({ resetSamplePayloadConfirmed, samplePayload, caption }) => {
         const samplePayloadMsg = samplePayload ? 'was provided' : 'was not provided';
         const payloadResetMsg = resetSamplePayloadConfirmed ? 'was confirmed' : 'was not confirmed';
@@ -333,7 +336,9 @@ describe('AlertsSettingsForm', () => {
             currentIntegration: { samplePayload, type: typeSet.http, active: true },
             resetSamplePayloadConfirmed,
           });
+
           await wrapper.vm.$nextTick();
+
           expect(findActionBtn().text()).toBe(caption);
         });
       });
