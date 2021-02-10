@@ -150,7 +150,7 @@ If your application utilizes Docker containers you have another option for deplo
 After your Docker build job completes and your image is added to your container registry, you can utilize the image as a 
 [service](../../../ci/docker/using_docker_images.md#what-is-a-service). 
 
-By overriding the `dast` job, it is possible to link services necessary for the DAST analyzer to run against.
+By using service definitions in your `gitlab-ci.yml`, it is possible to scan services with the DAST analyzer.
 
 ```yaml
 stages:
