@@ -8,6 +8,8 @@ RSpec.describe 'Project.cluster_agents' do
   let_it_be(:project) { create(:project, :public) }
   let_it_be(:current_user) { create(:user, maintainer_projects: [project]) }
   let_it_be(:agents) { create_list(:cluster_agent, 5, project: project) }
+  let_it_be(:token_1) { create(:cluster_agent_token, agent: agents.first) }
+  let_it_be(:token_2) { create(:cluster_agent_token, agent: agents.second) }
 
   let(:first) { var('Int') }
   let(:cluster_agents_fields) { nil }
@@ -52,20 +54,15 @@ RSpec.describe 'Project.cluster_agents' do
   context 'selecting tokens' do
     let(:cluster_agents_fields) { [:id, query_nodes(:tokens, of: 'ClusterAgentToken')] }
 
-    before do
-      create(:cluster_agent_token, agent: agents.first)
-      create(:cluster_agent_token, agent: agents.second)
-    end
-
     it 'can select tokens' do
       post_graphql(query, current_user: current_user)
 
       tokens = graphql_data_at(:project, :cluster_agents, :nodes, :tokens, :nodes)
 
-      expect(tokens).to contain_exactly(
-        a_hash_including('id' => be_present),
-        a_hash_including('id' => be_present)
-      )
+      expect(tokens).to match_array([
+        a_hash_including('id' => global_id_of(token_1), 'name' => token_1.name),
+        a_hash_including('id' => global_id_of(token_2), 'name' => token_2.name)
+      ])
     end
 
     it 'does not suffer from N+1 performance issues' do

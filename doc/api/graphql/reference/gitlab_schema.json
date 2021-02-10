@@ -9275,7 +9275,7 @@
           "fields": [
             {
               "name": "clusterAgent",
-              "description": "Cluster agent this token is associated with",
+              "description": "Cluster agent this token is associated with.",
               "args": [
 
               ],
@@ -9289,7 +9289,7 @@
             },
             {
               "name": "createdAt",
-              "description": "Timestamp the token was created",
+              "description": "Timestamp the token was created.",
               "args": [
 
               ],
@@ -9303,7 +9303,7 @@
             },
             {
               "name": "id",
-              "description": "Global ID of the token",
+              "description": "Global ID of the token.",
               "args": [
 
               ],
@@ -9315,6 +9315,20 @@
                   "name": "ClustersAgentTokenID",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name given to the token.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null

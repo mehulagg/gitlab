@@ -3416,19 +3416,24 @@ type ClusterAgentEdge {
 
 type ClusterAgentToken {
   """
-  Cluster agent this token is associated with
+  Cluster agent this token is associated with.
   """
   clusterAgent: ClusterAgent
 
   """
-  Timestamp the token was created
+  Timestamp the token was created.
   """
   createdAt: Time
 
   """
-  Global ID of the token
+  Global ID of the token.
   """
   id: ClustersAgentTokenID!
+
+  """
+  Name given to the token.
+  """
+  name: String
 }
 
 """
