@@ -13,7 +13,7 @@ module Emails
       @url_to_docs = 'https://docs.gitlab.com/'
       @url_to_support = 'https://about.gitlab.com/support/'
 
-      mail to: email, subject: _('Important information about usage on your GitLab instance')
+      mail to: email, subject: s_('AdminUsers|Important information about usage on your GitLab instance')
     end
   end
 end
