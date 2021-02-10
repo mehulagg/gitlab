@@ -2,7 +2,7 @@
 // relies on app/views/admin/application_settings/_gitpod.html.haml for its
 // template.
 /* eslint-disable @gitlab/no-runtime-template-compiler */
-import Vue from 'vue';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import IntegrationHelpText from '~/vue_shared/components/integrations_help_text.vue';
 import initUserInternalRegexPlaceholder from '../account_and_limits';
 
