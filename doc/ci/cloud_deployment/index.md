@@ -141,7 +141,7 @@ After you have these prerequisites ready, follow these steps:
    ```
 
    You can create your `CI_AWS_ECS_TASK_DEFINITION_FILE` variable as a
-   [file-typed environment variable](../variables/README.md#custom-environment-variables-of-type-file) instead of a
+   [file-typed environment variable](../variables/README.md#custom-cicd-variables-of-type-file) instead of a
    regular environment variable. If you choose to do so, set the variable value to be the full contents of
    the JSON task definition. You can then remove the JSON file from your project.
 
@@ -252,7 +252,7 @@ pass three JSON input objects, based on existing templates:
        CI_AWS_EC2_DEPLOYMENT_FILE: 'aws/create_deployment.json'
      ```
 
-   - Alternatively, you can provide these JSON objects as [file-typed environment variables](../variables/README.md#custom-environment-variables-of-type-file).
+   - Alternatively, you can provide these JSON objects as [file-typed environment variables](../variables/README.md#custom-cicd-variables-of-type-file).
    In your project, go to **Settings > CI / CD > Variables** and add
    the three variables listed above as file-typed environment variables.
    For each variable, set the value to its corresponding JSON object.

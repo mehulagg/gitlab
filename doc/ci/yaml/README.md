@@ -1212,13 +1212,13 @@ or excluded from a pipeline. In plain English, `if` rules can be interpreted as 
 `rules:if` differs slightly from `only:variables` by accepting only a single
 expression string per rule, rather than an array of them. Any set of expressions to be
 evaluated can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
-by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-environment-variable-expressions).
+by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-cicd-variable-expressions).
 
 Unlike variables in [`script`](../variables/README.md#syntax-of-cicd-variables-in-job-scripts)
 sections, variables in rules expressions are always formatted as `$VARIABLE`.
 
 `if:` clauses are evaluated based on the values of [predefined environment variables](../variables/predefined_variables.md)
-or [custom environment variables](../variables/README.md#custom-environment-variables).
+or [custom environment variables](../variables/README.md#custom-cicd-variables).
 
 For example:
 
@@ -1303,7 +1303,7 @@ Other commonly used variables for `if` clauses:
   branch (usually `master`). Use when you want to have the same configuration in multiple
   projects with different default branches.
 - `if: '$CI_COMMIT_BRANCH =~ /regex-expression/'`: If the commit branch matches a regular expression.
-- `if: '$CUSTOM_VARIABLE !~ /regex-expression/'`: If the [custom variable](../variables/README.md#custom-environment-variables)
+- `if: '$CUSTOM_VARIABLE !~ /regex-expression/'`: If the [custom variable](../variables/README.md#custom-cicd-variables)
   `CUSTOM_VARIABLE` does **not** match a regular expression.
 - `if: '$CUSTOM_VARIABLE == "value1"'`: If the custom variable `CUSTOM_VARIABLE` is
   exactly `value1`.
@@ -4288,7 +4288,7 @@ They can be set globally and per-job.
 
 There are two types of variables.
 
-- [Custom variables](../variables/README.md#custom-environment-variables):
+- [Custom variables](../variables/README.md#custom-cicd-variables):
   You can define their values in the `.gitlab-ci.yml` file, in the GitLab UI,
   or by using the API. You can also input variables in the GitLab UI when
   [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually).
@@ -4324,7 +4324,7 @@ meaning it applies to all jobs. If you define a variable in a job, it's availabl
 to that job only.
 
 If a variable of the same name is defined globally and for a specific job, the
-[job-specific variable overrides the global variable](../variables/README.md#priority-of-environment-variables).
+[job-specific variable overrides the global variable](../variables/README.md#priority-of-cicd-variables).
 
 All YAML-defined variables are also set to any linked
 [Docker service containers](../docker/using_docker_images.md#what-is-a-service).
