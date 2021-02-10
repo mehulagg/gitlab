@@ -132,12 +132,12 @@ configure your SSH client to point to your private key's location.
    ```conf
    # GitLab.com
    Host gitlab.com
-     Preferredauthentications publickey
+     PreferredAuthentications publickey
      IdentityFile ~/.ssh/gitlab_com_rsa
 
    # Private GitLab instance
    Host gitlab.company.com
-     Preferredauthentications publickey
+     PreferredAuthentications publickey
      IdentityFile ~/.ssh/example_com_rsa
    ```
 
@@ -262,18 +262,19 @@ Open a terminal and run this command:
 git config core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/private-key-filename-for-this-repository -F /dev/null"
 ```
 
-This command does not use the SSH Agent and requires Git 2.10 or later.
+This command does not use the SSH Agent and requires Git 2.10 or later. For more information
+on `ssh` command options, see the `man` pages for both `ssh` and `ssh_config`.
 
 ## Use different accounts on a single GitLab instance
 
 You can use multiple accounts to connect to a single instance of GitLab.
 You can do this by using the command in the [previous topic](#use-different-keys-for-different-repositories).
-However, even if you set `IdentitiesOnly` to `yes`, you cannot log in if an `IdentityFile` exists
+However, even if you set `IdentitiesOnly` to `yes`, you cannot sign in if an `IdentityFile` exists
 outside of a `Host` block.
 
 Instead, you can assign aliases to hosts in the `~.ssh/config` file.
 
-- For the `Host`, use strings like `user_1.gitlab.com` and
+- For the `Host`, use an alias like `user_1.gitlab.com` and
   `user_2.gitlab.com`. Advanced configurations
   are more difficult to maintain, and these strings are easier to
   understand when you use tools like `git remote`. 
@@ -367,7 +368,7 @@ are **explicitly not supported** and may stop working at any time.
 
 ## Troubleshooting SSH connections
 
-When you use `git clone`, you may be prompted for a password, like `git@gitlab.com's password:`.
+When you run `git clone`, you may be prompted for a password, like `git@gitlab.com's password:`.
 This indicates that something is wrong with your SSH setup.
 
 - Ensure that you generated your SSH key pair correctly and added the public SSH
