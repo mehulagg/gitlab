@@ -175,7 +175,7 @@ There are two types of redirects:
   view the docs in `/help` on self-managed instances. For example,
   [`/help` on GitLab.com](https://gitlab.com/help).
 - Redirects in a [`_redirects`](../../user/project/pages/redirects.md) file,
-  for users who view the docs on <https://docs.gitlab.com>.
+  for users who view the docs on [`docs.gitlab.com`](https://docs.gitlab.com).
 
 The Technical Writing team manages the process to regularly update the
 `_redirects` file.
@@ -187,10 +187,10 @@ To add a redirect:
    the file that's being moved, renamed, or removed.
 1. To move or rename the documentation file, create a new file with the new
    name or location, but don't delete the existing documentation file.
-1. In the to-be-redirected documentation file, add the redirect code for
+1. In the old documentation file, add the redirect code for
    `/help`. Use the following template exactly, and only change the links and
    date. Use relative paths and `.md` for a redirect to another docs page. Use
-   the full URL to redirect to a different project or site:
+   the full URL (with `https://`) to redirect to a different project or site:
 
    ```markdown
    ---
@@ -213,8 +213,8 @@ To add a redirect:
    with any other documentation pages, be sure to use your MR to delete those
    images from the repository.
 1. Assign the MR to a technical writer for review and merge.
-1. Search for links to the old file. You must find and update all links to the
-   to-be-redirected documentation file:
+1. Search for links to the old file. You must find and update all links that point to the
+   old documentation file:
 
    - In <https://gitlab.com/gitlab-com/www-gitlab-com>, search for full URLs:
      `grep -r "docs.gitlab.com/ee/path/to/file.html" .`
