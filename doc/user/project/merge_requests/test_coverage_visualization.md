@@ -52,7 +52,8 @@ Hovering over the coverage bar will provide further information, such as the num
 of times the line was checked by tests.
 
 NOTE:
-There is currently a limit of 100 `<source>` nodes for Cobertura format XML files. If your Cobertura report exceeds 100 nodes, there maybe mismatches or no matches in the Merge Request diff view.
+A limit of 100 `<source>` nodes for Cobertura format XML files applies. If your Cobertura report exceeds
+100 nodes, there can be mismatches or no matches in the Merge Request diff view.
 
 ### Automatic class path correction
 
