@@ -10,7 +10,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-maintenance-mode). **(PREMIUM SELF)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-maintenance-mode-feature). **(PREMIUM SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
