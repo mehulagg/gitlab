@@ -1353,7 +1353,8 @@ The recommended cluster setup includes the following components:
 - 3 Praefect nodes: Router and transaction manager for Gitaly Cluster.
 - 1 Praefect PostgreSQL node: Database server for Praefect. A third-party solution
   is required for Praefect database connections to be made highly available.
-- 1 load balancer: A load balancer is required for Praefect. In this guide we use the internal load balancer node for this.
+- 1 load balancer: A load balancer is required for Praefect. The
+  [internal load balancer](#configure-the-internal-load-balancer) will be used.
 
 This section will detail how to configure the recommended standard setup in order.
 For more advanced setups refer to the [standalone Gitaly Cluster documentation](../gitaly/praefect.md).
