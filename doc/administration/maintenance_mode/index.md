@@ -91,6 +91,7 @@ In maintenance mode:
   it will **not** time out.
 - Pipelines cannot be started, retried or canceled in maintenance mode.
   No new jobs can be created either.
+
 Once maintenance mode is disabled, new jobs are picked up again. The jobs that were
 in the running state before enabling maintenance mode, will resume, and their logs
 will start getting updated again.
