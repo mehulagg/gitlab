@@ -73,7 +73,11 @@ module Ci
     end
 
     def variables
-      param_variables + [payload_variable]
+      if ::Feature.enabled?(:ci_trigger_payload_into_pipeline, project, default_enabled: :yaml)
+        param_variables + [payload_variable]
+      else
+        param_variables
+      end
     end
 
     def param_variables
@@ -83,7 +87,6 @@ module Ci
     end
 
     def payload_variable
-      # TODO: add FF
       { key: PAYLOAD_VARIABLE_KEY,
         value: params.except(*PAYLOAD_VARIABLE_HIDDEN_PARAMS).to_json,
         variable_type: :file }
