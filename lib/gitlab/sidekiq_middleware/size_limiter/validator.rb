@@ -3,6 +3,8 @@
 module Gitlab
   module SidekiqMiddleware
     module SizeLimiter
+      # A custom exception for size limiter. It contains worker class and its
+      # size to easier track later
       class ExceedLimitError < StandardError
         attr_reader :worker_class, :size, :size_limit
 
@@ -23,6 +25,16 @@ module Gitlab
         end
       end
 
+      # Validate a Sidekiq job payload limit based on current configuration.
+      # This validator pulls the configuration from the environment variables:
+      #
+      # - GITLAB_SIDEKIQ_SIZE_LIMITER_MODE: the current mode of the size
+      # limiter. This must be either `track` or `raise`.
+      #
+      # - GITLAB_SIDEKIQ_SIZE_LIMITER_LIMIT_BYTES: the size limit in bytes.
+      #
+      # If the size of job payload after serialization exceeds the limit, an
+      # error is tracked raised adhering to the mode.
       class Validator
         def self.validate!(worker_class, job)
           new(worker_class, job).validate!
@@ -69,6 +81,9 @@ module Gitlab
         private
 
         def get_job_size(job)
+          # This maynot be the optimal solution, but can be acceptable solution
+          # for now. Internally, Sidekiq calls Sidekiq.dump_json everywhere.
+          # There is no clean way to intefere to prevent double serialization.
           ::Sidekiq.dump_json(job).bytesize
         end
 
