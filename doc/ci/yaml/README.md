@@ -4592,47 +4592,73 @@ Use this feature to ignore jobs, or use the
 [special YAML features](#special-yaml-features) and transform the hidden jobs
 into templates.
 
-### Custom YAML tags
-
-#### !reference
+### `!reference` tags
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/266173) in GitLab 13.9.
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-custom-tags). **(FREE SELF)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-reference-tags). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
-This custom YAML tag allows to merge specific keys from multiple files into a single pipeline configuration.
+Use the `!reference` custom YAML tag to select keyword configuration from other job
+sections and reuse it in the current section. Unlike [YAML anchors](#anchors), you can
+use `!reference` tags to reuse configuration from [included](#include) configuration
+files as well.
+
+In this example, a `script` and an `after_script` from two different locations are
+reused in the `test` job:
+
+- `setup.yml`:
+
+  ```yaml
+  .setup:
+    script:
+      - echo creating environment
+  ```
+
+- `.gitlab-ci.yml`:
+
+  ```yaml
+  include:
+    - local: setup.yml
+
+  .teardown:
+    after_script:
+      - echo deleting environment
+
+  test:
+    script:
+      - !reference [.setup, script]
+      - echo running my own command
+    after_script:
+      - !reference [.teardown, after_script]
+  ```
+
+In this example, `test-vars-1` reuses the all the variables in `.vars`, while `test-vars-2`
+selects a specific variable and reuses it as a new `MY_VAR` variable.
 
 ```yaml
-# Content of setup.yml
-.setup:
-  script:
-    - echo creating environment1
-    - echo creating environment2
+.vars:
+  variables:
+    URL: "http://my-url.internal"
+    IMPORTANT_VAR: "the details"
 
-# Content of teardown.yml
-.teardown:
+test-vars-1:
+  variables: !reference [.vars, variables]
   script:
-    - echo deleting environment1
-    - echo deleting environment2
+    - printenv
 
-# .gitlab-ci.yml
-include:
-  - local: setup.yml
-  - local: teardown.yml
-
-test:
+test vars 2:
+  variables:
+    MY_VAR: !reference [.vars, variables, IMPORTANT_VAR]
   script:
-    - !reference [.setup, script]
-    - echo running my own command
-    - !reference [.teardown, script]
+    - printenv
 ```
 
-##### Enable or disable custom tags **(FREE SELF)**
+#### Enable or disable `!reference` tags **(FREE SELF)**
 
 The `!reference` tag is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default**.
