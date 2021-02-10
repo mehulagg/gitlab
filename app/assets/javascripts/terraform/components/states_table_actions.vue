@@ -115,7 +115,7 @@ export default {
         this.hideModal();
 
         this.updateStateCache({
-          _showDetails: true,
+          _showDetails: false,
           errorMessages: [],
           loadingLock: false,
           loadingRemove: true,
