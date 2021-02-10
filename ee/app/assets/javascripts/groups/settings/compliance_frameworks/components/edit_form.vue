@@ -33,6 +33,11 @@ export default {
       required: false,
       default: null,
     },
+    pipelineConfigurationFullPathEnabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -85,11 +90,12 @@ export default {
         return initialiseFormData();
       }
 
-      const { name, description, color } = complianceFrameworks[0];
+      const { name, description, pipelineConfigurationFullPath, color } = complianceFrameworks[0];
 
       return {
         name,
         description,
+        pipelineConfigurationFullPath,
         color,
       };
     },
@@ -106,7 +112,7 @@ export default {
       this.saveErrorMessage = '';
 
       try {
-        const { name, description, color } = this.formData;
+        const { name, description, pipelineConfigurationFullPath, color } = this.formData;
         const { data } = await this.$apollo.mutate({
           mutation: updateComplianceFrameworkMutation,
           variables: {
@@ -115,6 +121,7 @@ export default {
               params: {
                 name,
                 description,
+                pipelineConfigurationFullPath,
                 color,
               },
             },
@@ -143,8 +150,10 @@ export default {
     <shared-form
       v-if="showForm"
       :group-edit-path="groupEditPath"
+      :pipeline-configuration-full-path-enabled="pipelineConfigurationFullPathEnabled"
       :name.sync="formData.name"
       :description.sync="formData.description"
+      :pipeline-configuration-full-path.sync="formData.pipelineConfigurationFullPath"
       :color.sync="formData.color"
       @submit="onSubmit"
     />

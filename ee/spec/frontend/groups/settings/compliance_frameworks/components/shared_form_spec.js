@@ -1,21 +1,25 @@
 import { GlForm, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlFormGroup } from 'jest/registry/shared/stubs';
+
+import waitForPromises from 'helpers/wait_for_promises';
 
 import SharedForm from 'ee/groups/settings/compliance_frameworks/components/shared_form.vue';
 import ColorPicker from '~/vue_shared/components/color_picker/color_picker.vue';
+import PipelineConfigurationField from 'ee/groups/settings/compliance_frameworks/components/fields/pipeline_configuration.vue';
+import { GlFormGroup, GlFormInput } from '../stubs';
 
 import { frameworkFoundResponse, suggestedLabelColors } from '../mock_data';
 
 describe('SharedForm', () => {
   let wrapper;
-  const defaultPropsData = { groupEditPath: 'group-1' };
+  const defaultPropsData = { groupEditPath: 'group-1', pipelineConfigurationFullPathEnabled: true };
 
   const findForm = () => wrapper.findComponent(GlForm);
   const findNameGroup = () => wrapper.find('[data-testid="name-input-group"]');
   const findNameInput = () => wrapper.find('[data-testid="name-input"]');
   const findDescriptionGroup = () => wrapper.find('[data-testid="description-input-group"]');
   const findDescriptionInput = () => wrapper.find('[data-testid="description-input"]');
+  const findPipelineConfigurationField = () => wrapper.findComponent(PipelineConfigurationField);
   const findColorPicker = () => wrapper.findComponent(ColorPicker);
   const findSubmitBtn = () => wrapper.find('[data-testid="submit-btn"]');
   const findCancelBtn = () => wrapper.find('[data-testid="cancel-btn"]');
@@ -28,15 +32,7 @@ describe('SharedForm', () => {
       },
       stubs: {
         GlFormGroup,
-        GlFormInput: {
-          name: 'gl-form-input-stub',
-          props: ['state'],
-          template: `
-            <div>
-              <slot></slot>
-            </div>
-          `,
-        },
+        GlFormInput,
         GlSprintf,
       },
     });
@@ -58,6 +54,7 @@ describe('SharedForm', () => {
 
       expect(findNameInput()).toExist();
       expect(findDescriptionInput()).toExist();
+      expect(findPipelineConfigurationField()).toExist();
       expect(findColorPicker()).toExist();
       expect(findSubmitBtn()).toExist();
       expect(findCancelBtn()).toExist();
@@ -68,6 +65,19 @@ describe('SharedForm', () => {
 
       expect(findNameGroup().text()).toContain('Use :: to create a scoped set (eg. SOX::AWS)');
     });
+
+    it.each`
+      enabled
+      ${true}
+      ${false}
+    `(
+      'renders the pipeline configuration input correctly when enabled is $enabled',
+      ({ enabled }) => {
+        wrapper = createComponent({ pipelineConfigurationFullPathEnabled: enabled });
+
+        expect(findPipelineConfigurationField().exists()).toBe(enabled);
+      },
+    );
   });
 
   describe('Validation', () => {
@@ -110,17 +120,21 @@ describe('SharedForm', () => {
     });
 
     it.each`
-      name     | description | color     | disabled
-      ${null}  | ${null}     | ${null}   | ${'true'}
-      ${''}    | ${null}     | ${null}   | ${'true'}
-      ${null}  | ${''}       | ${null}   | ${'true'}
-      ${null}  | ${null}     | ${''}     | ${'true'}
-      ${'Foo'} | ${null}     | ${''}     | ${'true'}
-      ${'Foo'} | ${'Bar'}    | ${'#000'} | ${undefined}
+      name     | description | color     | isValidPipelineConfiguration | disabled
+      ${null}  | ${null}     | ${null}   | ${true}                      | ${'true'}
+      ${'Foo'} | ${null}     | ${null}   | ${true}                      | ${'true'}
+      ${null}  | ${'Bar'}    | ${null}   | ${true}                      | ${'true'}
+      ${null}  | ${null}     | ${'#000'} | ${true}                      | ${'true'}
+      ${null}  | ${null}     | ${null}   | ${false}                     | ${'true'}
+      ${'Foo'} | ${''}       | ${''}     | ${false}                     | ${'true'}
+      ${'Foo'} | ${'Bar'}    | ${'#000'} | ${true}                      | ${undefined}
     `(
-      'should set the submit buttons disabled attribute to $disabled',
-      ({ name, description, color, disabled }) => {
+      'should set the submit buttons disabled attribute to $disabled when name: $name, description: $description, color: $color, pipelineConfigurationFullPath: $pipelineConfigurationFullPath',
+      async ({ name, description, color, isValidPipelineConfiguration, disabled }) => {
         wrapper = createComponent({ name, description, color });
+
+        await findPipelineConfigurationField().vm.$emit('state', isValidPipelineConfiguration);
+        await waitForPromises();
 
         expect(findSubmitBtn().attributes('disabled')).toBe(disabled);
       },
@@ -129,30 +143,33 @@ describe('SharedForm', () => {
 
   describe('Updating data', () => {
     it('updates the initial form data when the props are updated', async () => {
-      const { name, description, color } = frameworkFoundResponse;
+      const { name, description, pipelineConfigurationFullPath, color } = frameworkFoundResponse;
       wrapper = createComponent();
 
-      expect(findNameInput().attributes('value')).toBe(undefined);
-      expect(findDescriptionInput().attributes('value')).toBe(undefined);
-      expect(findColorPicker().attributes('value')).toBe(undefined);
+      expect(findNameInput().props('value')).toBe(null);
+      expect(findDescriptionInput().props('value')).toBe(null);
+      expect(findPipelineConfigurationField().props('pipelineConfigurationFullPath')).toBe(null);
+      expect(findColorPicker().props('value')).toBe(null);
 
-      await wrapper.setProps({ name, description, color });
+      await wrapper.setProps({ name, description, pipelineConfigurationFullPath, color });
 
-      expect(findNameInput().attributes('value')).toBe(name);
-      expect(findDescriptionInput().attributes('value')).toBe(description);
-      expect(findColorPicker().attributes('value')).toBe(color);
+      expect(findNameInput().props('value')).toBe(name);
+      expect(findDescriptionInput().props('value')).toBe(description);
+      expect(findPipelineConfigurationField().props('pipelineConfigurationFullPath')).toBe(
+        pipelineConfigurationFullPath,
+      );
+      expect(findColorPicker().props('value')).toBe(color);
     });
   });
 
   describe('On form submission', () => {
     it('emits a submit event', async () => {
-      const { name, description, color } = frameworkFoundResponse;
-      wrapper = createComponent({ name, description, color });
+      const { name, description, pipelineConfigurationFullPath, color } = frameworkFoundResponse;
+      wrapper = createComponent({ name, description, pipelineConfigurationFullPath, color });
 
       await findForm().vm.$emit('submit', { preventDefault: () => {} });
 
       expect(wrapper.emitted('submit')).toHaveLength(1);
-      expect(wrapper.emitted('submit')[0]).toEqual([{ name, description, color }]);
     });
   });
 });

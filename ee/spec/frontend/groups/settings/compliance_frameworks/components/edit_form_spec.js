@@ -33,6 +33,7 @@ describe('EditForm', () => {
     groupEditPath: 'group-1/edit',
     groupPath: 'group-1',
     id: '1',
+    pipelineConfigurationFullPathEnabled: true,
   };
 
   const sentryError = new Error('Network error');
@@ -64,11 +65,12 @@ describe('EditForm', () => {
     });
   }
 
-  async function submitForm(name, description, color) {
+  async function submitForm(name, description, pipelineConfiguration, color) {
     await waitForPromises();
 
     findForm().vm.$emit('update:name', name);
     findForm().vm.$emit('update:description', description);
+    findForm().vm.$emit('update:pipelineConfigurationFullPath', pipelineConfiguration);
     findForm().vm.$emit('update:color', color);
     findForm().vm.$emit('submit');
 
@@ -97,10 +99,12 @@ describe('EditForm', () => {
 
       expect(fetchOne).toHaveBeenCalledTimes(1);
       expect(findForm().props()).toStrictEqual({
-        name: frameworkFoundResponse.name,
-        description: frameworkFoundResponse.description,
         color: frameworkFoundResponse.color,
+        description: frameworkFoundResponse.description,
         groupEditPath: propsData.groupEditPath,
+        name: frameworkFoundResponse.name,
+        pipelineConfigurationFullPath: frameworkFoundResponse.pipelineConfigurationFullPath,
+        pipelineConfigurationFullPathEnabled: true,
       });
       expect(findForm().exists()).toBe(true);
     });
@@ -134,6 +138,7 @@ describe('EditForm', () => {
   describe('onSubmit', () => {
     const name = 'Test';
     const description = 'Test description';
+    const pipelineConfigurationFullPath = 'file.yml@group/project';
     const color = '#000000';
     const updateProps = {
       input: {
@@ -141,6 +146,7 @@ describe('EditForm', () => {
         params: {
           name,
           description,
+          pipelineConfigurationFullPath,
           color,
         },
       },
@@ -153,7 +159,7 @@ describe('EditForm', () => {
         [updateComplianceFrameworkMutation, updateWithNetworkErrors],
       ]);
 
-      await submitForm(name, description, color);
+      await submitForm(name, description, pipelineConfigurationFullPath, color);
 
       expect(updateWithNetworkErrors).toHaveBeenCalledWith(updateProps);
       expect(findFormStatus().props('loading')).toBe(false);
@@ -169,7 +175,7 @@ describe('EditForm', () => {
         [updateComplianceFrameworkMutation, updateWithErrors],
       ]);
 
-      await submitForm(name, description, color);
+      await submitForm(name, description, pipelineConfigurationFullPath, color);
 
       expect(updateWithErrors).toHaveBeenCalledWith(updateProps);
       expect(findFormStatus().props('loading')).toBe(false);
@@ -184,7 +190,7 @@ describe('EditForm', () => {
         [updateComplianceFrameworkMutation, update],
       ]);
 
-      await submitForm(name, description, color);
+      await submitForm(name, description, pipelineConfigurationFullPath, color);
 
       expect(update).toHaveBeenCalledWith(updateProps);
       expect(findFormStatus().props('loading')).toBe(false);

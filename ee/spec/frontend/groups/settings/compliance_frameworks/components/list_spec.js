@@ -9,6 +9,7 @@ import getComplianceFrameworkQuery from 'ee/groups/settings/compliance_framework
 import List from 'ee/groups/settings/compliance_frameworks/components/list.vue';
 import ListItem from 'ee/groups/settings/compliance_frameworks/components/list_item.vue';
 import EmptyState from 'ee/groups/settings/compliance_frameworks/components/list_empty_state.vue';
+import { PIPELINE_CONFIGURATION_PATH_FORMAT } from 'ee/groups/settings/compliance_frameworks/constants';
 
 import * as Sentry from '~/sentry/wrapper';
 import { validFetchResponse, emptyFetchResponse } from '../mock_data';
@@ -161,6 +162,9 @@ describe('List', () => {
               parsedId: expect.any(Number),
               name: expect.any(String),
               description: expect.any(String),
+              pipelineConfigurationFullPath: expect.stringMatching(
+                PIPELINE_CONFIGURATION_PATH_FORMAT,
+              ),
               color: expect.stringMatching(/^#([0-9A-F]{3}){1,2}$/i),
             },
           }),

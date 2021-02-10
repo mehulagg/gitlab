@@ -5,6 +5,7 @@ import { helpPagePath } from '~/helpers/help_page_helper';
 import { validateHexColor } from '~/lib/utils/color_utils';
 import { __, s__ } from '~/locale';
 import ColorPicker from '~/vue_shared/components/color_picker/color_picker.vue';
+import PipelineConfigurationField from './fields/pipeline_configuration.vue';
 
 export default {
   components: {
@@ -15,6 +16,7 @@ export default {
     GlFormInput,
     GlLink,
     GlSprintf,
+    PipelineConfigurationField,
   },
   props: {
     color: {
@@ -36,6 +38,21 @@ export default {
       required: false,
       default: null,
     },
+    pipelineConfigurationFullPathEnabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    pipelineConfigurationFullPath: {
+      type: String,
+      required: false,
+      default: null,
+    },
+  },
+  data() {
+    return {
+      isValidPipelineConfiguration: null,
+    };
   },
   computed: {
     isValidColor() {
@@ -56,7 +73,12 @@ export default {
       return Boolean(this.description);
     },
     disableSubmitBtn() {
-      return !this.isValidName || !this.isValidDescription || !this.isValidColor;
+      return (
+        !this.isValidName ||
+        !this.isValidDescription ||
+        !this.isValidColor ||
+        !this.isValidPipelineConfiguration
+      );
     },
     scopedLabelsHelpPath() {
       return helpPagePath('user/project/labels.md', { anchor: 'scoped-labels' });
@@ -64,9 +86,7 @@ export default {
   },
   methods: {
     onSubmit() {
-      const { name, description, color } = this;
-
-      this.$emit('submit', { name, description, color });
+      this.$emit('submit');
     },
   },
   i18n: {
@@ -77,6 +97,9 @@ export default {
     titleInputInvalid: __('A title is required'),
     descriptionInputLabel: __('Description'),
     descriptionInputInvalid: __('A description is required'),
+    pipelineConfigurationInputLabel: s__(
+      'ComplianceFrameworks|Compliance pipeline configuration location (optional)',
+    ),
     colorInputLabel: __('Background color'),
     submitBtnText: __('Save changes'),
     cancelBtnText: __('Cancel'),
@@ -124,6 +147,13 @@ export default {
         @input="$emit('update:description', $event)"
       />
     </gl-form-group>
+
+    <pipeline-configuration-field
+      v-if="pipelineConfigurationFullPathEnabled"
+      :pipeline-configuration-full-path="pipelineConfigurationFullPath"
+      @update:pipelineConfigurationFullPath="$emit('update:pipelineConfigurationFullPath', $event)"
+      @state="isValidPipelineConfiguration = $event"
+    />
 
     <color-picker
       :value="color"

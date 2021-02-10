@@ -11,6 +11,7 @@ query getComplianceFramework(
         name
         description
         color
+        pipelineConfigurationFullPath
       }
     }
   }
