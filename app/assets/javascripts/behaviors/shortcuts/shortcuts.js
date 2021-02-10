@@ -8,7 +8,6 @@ import findAndFollowLink from '~/lib/utils/navigation_utility';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
 import { disableShortcuts, shouldDisableShortcuts } from './shortcuts_toggle';
-import ShortcutsToggle from './shortcuts_toggle.vue';
 import { keysFor, TOGGLE_PERFORMANCE_BAR, TOGGLE_CANARY } from './keybindings';
 
 const defaultStopCallback = Mousetrap.prototype.stopCallback;
@@ -56,7 +55,8 @@ function getToolbarBtnToShortcutsMap($textarea) {
 export default class Shortcuts {
   constructor() {
     this.onToggleHelp = this.onToggleHelp.bind(this);
-    this.enabledHelp = [];
+    this.helpModalElement = null;
+    this.helpModalVueInstance = null;
 
     Mousetrap.bind('?', this.onToggleHelp);
     Mousetrap.bind('s', Shortcuts.focusSearch);
@@ -98,11 +98,33 @@ export default class Shortcuts {
   }
 
   onToggleHelp(e) {
-    if (e.preventDefault) {
+    if (e && e.preventDefault) {
       e.preventDefault();
     }
 
-    Shortcuts.toggleHelp(this.enabledHelp);
+    if (this.helpModalElement) {
+      this.helpModalVueInstance.$destroy();
+      this.helpModalElement.remove();
+      this.helpModalElement = null;
+      this.helpModalVueInstance = null;
+    } else {
+      this.helpModalElement = document.createElement('div');
+      document.body.append(this.helpModalElement);
+
+      this.helpModalVueInstance = new Vue({
+        el: this.helpModalElement,
+        components: {
+          ShortcutsHelp: () => import('./shortcuts_help.vue'),
+        },
+        render: (createElement) => {
+          return createElement('shortcuts-help', {
+            on: {
+              hidden: this.onToggleHelp,
+            },
+          });
+        },
+      });
+    }
   }
 
   static onTogglePerfBar(e) {
@@ -133,29 +155,6 @@ export default class Shortcuts {
       $('.js-md-preview-button', $form).focus();
     }
     $(document).triggerHandler('markdown-preview:toggle', [e]);
-  }
-
-  static toggleHelp() {
-    const modal = document.querySelector('#modal-shortcuts');
-
-    if (modal) {
-      modal.remove();
-      return null;
-    }
-
-    const el = document.createElement('div');
-
-    document.body.append(el);
-
-    return new Vue({
-      el,
-      components: {
-        ShortcutsHelp: () => import('./shortcuts_help.vue'),
-      },
-      render(createElement) {
-        return createElement('shortcuts-help');
-      },
-    });
   }
 
   focusFilter(e) {
