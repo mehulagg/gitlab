@@ -52,7 +52,7 @@ module EE
               attrs = attrs.except(:git_two_factor_session_expiry)
             end
 
-            unless ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode)
+            unless ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode, default_enabled: :yaml)
               attrs = attrs.except(:maintenance_mode, :maintenance_mode_message)
             end
 
