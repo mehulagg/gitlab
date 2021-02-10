@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
+import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import produce from 'immer';
 import { __ } from '~/locale';
 import securityScannersQuery from '../graphql/queries/project_security_scanners.query.graphql';
@@ -87,20 +87,29 @@ export default {
       return `${this.sortBy}_${this.sortDirection}`;
     },
   },
+  watch: {
+    filters() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
+    },
+    sort() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
+    },
+  },
   methods: {
     fetchNextPage() {
       if (this.pageInfo.hasNextPage) {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            const results = produce(fetchMoreResult, (draftData) => {
+            return produce(fetchMoreResult, (draftData) => {
               // eslint-disable-next-line no-param-reassign
               draftData.project.vulnerabilities.nodes = [
                 ...previousResult.project.vulnerabilities.nodes,
                 ...draftData.project.vulnerabilities.nodes,
               ];
             });
-            return results;
           },
         });
       }
