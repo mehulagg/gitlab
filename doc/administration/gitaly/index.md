@@ -822,7 +822,7 @@ to clean up these items and improve performance.
 
 WARNING:
 This is an experimental feature and may place significant load on the host while running.
-Make sure to schedule this during off-peak hours and keep the duration short.
+Make sure to schedule this during off-peak hours and keep the duration short (e.g. 30-60 minutes).
 
 **For Omnibus GitLab**
 
