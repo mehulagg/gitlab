@@ -340,3 +340,11 @@ bundle exec rake gitlab:graphql:schema:dump
 ```
 
 This uses GraphQL Ruby's built-in Rake tasks to generate files in both [IDL](https://www.prisma.io/blog/graphql-sdl-schema-definition-language-6755bcb9ce51) and JSON formats.
+
+### Update documentation and schema together
+
+To generate GraphQL documentation and schema at the same time, run:
+
+```shell
+bundle exec rake gitlab:graphql:update_all
+```

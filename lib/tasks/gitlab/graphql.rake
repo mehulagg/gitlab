@@ -142,6 +142,14 @@ namespace :gitlab do
         abort
       end
     end
+
+    desc 'GitLab | GraphQL | Update GraphQL docs and schema'
+    task update_all: [:environment, :enable_feature_flags] do
+      Rake::Task["gitlab:graphql:compile_docs"].invoke
+      Rake::Task["gitlab:graphql:schema:dump"].invoke
+
+      puts "GitLab GraphQL has been updated."
+    end
   end
 end
 
