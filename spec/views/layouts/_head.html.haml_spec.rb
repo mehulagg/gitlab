@@ -127,18 +127,6 @@ RSpec.describe 'layouts/_head' do
           expect(rendered).not_to include('_paq.push(["disableCookies"])')
         end
       end
-
-      context 'when absent' do
-        before do
-          stub_config(extra: { matomo_url: matomo_host, matomo_site_id: 12345 })
-        end
-
-        it 'does not disable cookies' do
-          render
-
-          expect(rendered).not_to include('_paq.push(["disableCookies"])')
-        end
-      end
     end
   end
 
