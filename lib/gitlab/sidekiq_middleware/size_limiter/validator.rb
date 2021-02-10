@@ -23,6 +23,8 @@ module Gitlab
           RAISE_MODE = 'raise'
         ].freeze
 
+        attr_reader :mode, :size_limit
+
         def initialize(
           worker_class, job,
           mode: ENV['GITLAB_SIDEKIQ_SIZE_LIMITER_MODE'],
@@ -34,7 +36,7 @@ module Gitlab
           @mode = (mode || TRACK_MODE).to_s.strip
           raise "Invalid Sidekiq size limiter mode: #{@mode}" unless MODES.include?(@mode)
 
-          @size_limit = (size_limit || 0).to_f
+          @size_limit = (size_limit || 0).to_i
           raise "Invalid Sidekiq size limiter limit: #{@size_limit}" if @size_limit < 0
         end
 
