@@ -3,9 +3,9 @@
 // template.
 /* eslint-disable @gitlab/no-runtime-template-compiler */
 import $ from 'jquery';
-import Vue from 'vue';
 import Cookies from 'js-cookie';
 import { GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import { __ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '../flash';
 import Translate from '../vue_shared/translate';
