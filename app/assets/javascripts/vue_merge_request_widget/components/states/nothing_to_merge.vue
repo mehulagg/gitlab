@@ -32,21 +32,14 @@ export default {
         <p class="highlight">
           {{
             s__(
-              'mrWidgetNothingToMerge|Merge requests are a place to propose changes you have made to a project and discuss those changes with others.',
+              'mrWidgetNothingToMerge|This merge request contains no changes.',
             )
           }}
         </p>
         <p>
           {{
             s__(
-              'mrWidgetNothingToMerge|Interested parties can even contribute by pushing commits if they want to.',
-            )
-          }}
-        </p>
-        <p>
-          {{
-            s__(
-              "mrWidgetNothingToMerge|Currently there are no changes in this merge request's source branch. Please push new commits or use a different branch.",
+              'mrWidgetNothingToMerge|Use merge requests to propose changes to your project and discuss those changes with your team. To make changes to files, push a new commit or update the merge request to use a different branch.',
             )
           }}
         </p>
