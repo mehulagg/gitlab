@@ -1,7 +1,7 @@
 <script>
 import { GlButton, GlLoadingIcon, GlModal, GlLink } from '@gitlab/ui';
 import PipelinesService from '~/pipelines/services/pipelines_service';
-import PipelineStore from '~/pipelines/stores/pipelines_store';
+import PipelinesStore from '~/pipelines/stores/pipelines_store';
 import pipelinesMixin from '~/pipelines/mixins/pipelines';
 import eventHub from '~/pipelines/event_hub';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
@@ -67,7 +67,7 @@ export default {
   },
 
   data() {
-    const store = new PipelineStore();
+    const store = new PipelinesStore();
 
     return {
       store,

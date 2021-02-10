@@ -9,7 +9,6 @@ import {
 } from '~/lib/utils/common_utils';
 import Translate from '~/vue_shared/translate';
 import Pipelines from './components/pipelines_list/pipelines.vue';
-import PipelinesStore from './stores/pipelines_store';
 
 Vue.use(Translate);
 Vue.use(GlToast);
@@ -39,11 +38,6 @@ export const initPipelinesIndex = (selector = '#pipelines-list-vue') => {
 
   return new Vue({
     el,
-    data() {
-      return {
-        store: new PipelinesStore(),
-      };
-    },
     created() {
       if (doesHashExistInUrl('delete_success')) {
         this.$toast.show(__('The pipeline has been deleted'));
@@ -53,7 +47,6 @@ export const initPipelinesIndex = (selector = '#pipelines-list-vue') => {
     render(createElement) {
       return createElement(Pipelines, {
         props: {
-          store: this.store,
           endpoint,
           pipelineScheduleUrl,
           helpPagePath,
