@@ -31,10 +31,14 @@ export default {
       type: Array,
       required: true,
     },
-    collectPerfMetric: {
-      type: Boolean,
+    totalGroups: {
+      type: Number,
+      required: true,
+    },
+    metricsConfig: {
+      type: Object,
       required: false,
-      default: false,
+      default: () => ({}),
     },
     defaultLinkColor: {
       type: String,
@@ -105,12 +109,13 @@ export default {
   },
   methods: {
     beginPerfMeasure(){
-      if (this.collectPerfMetric) {
+      if (this.metricsConfig.collectMetrics) {
         performanceMarkAndMeasure({ mark: PIPELINE_LINKS_MARK_CALCULATE_START })
       }
     },
     finishPerfMeasureAndSend(){
-      if (this.collectPerfMetric) {
+      if (this.metricsConfig.collectMetrics) {
+        console.log('in if');
         performanceMarkAndMeasure({
           mark: PIPELINE_LINKS_MARK_CALCULATE_END,
           measures: [
@@ -122,6 +127,22 @@ export default {
           ],
         })
       }
+
+      console.log(window.performance.getEntriesByName(PIPELINE_LINKS_MEASURE_CALCULATION));
+
+      const duration = window.performance.getEntriesByName(PIPELINE_LINKS_MEASURE_CALCULATION)[0]?.duration;
+      const data = {
+        histograms: [
+          { name: 'pipeline_graph_link_calculation_duration_seconds', value: duration },
+          { name: 'pipeline_graph_links_total', value: this.links.length },
+          { name: 'pipeline_graph_link_per_job_ratio', value: this.links.length / this.totalGroups }
+        ]
+      };
+
+      console.log('data', data);
+      // get numbers
+      // structure data
+      // send data
     },
     isLinkHighlighted(linkRef) {
       return this.highlightedLinks.includes(linkRef);
@@ -133,7 +154,8 @@ export default {
         const parsedData = parseData(arrayOfJobs);
         this.links = generateLinksData(parsedData, this.containerId, `-${this.pipelineId}`);
         this.finishPerfMeasureAndSend();
-      } catch {
+      } catch (err) {
+        console.log(err);
         this.$emit('error', DRAW_FAILURE);
       }
     },
