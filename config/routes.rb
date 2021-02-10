@@ -258,9 +258,9 @@ Rails.application.routes.draw do
 
   get '/projects/:id' => 'projects#resolve'
 
-  draw :api
   draw :git_http
   draw :sidekiq
+  draw :help
   draw :google_api
   draw :import
   draw :uploads
