@@ -79,7 +79,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::SizeLimiter::Validator do
         end
       end
 
-      context 'when job size is less than size limit' do
+      context 'when job size is bigger than size limit' do
         let(:size_limit) { 50 }
 
         it 'tracks job' do
@@ -93,9 +93,27 @@ RSpec.describe Gitlab::SidekiqMiddleware::SizeLimiter::Validator do
         it 'does not raise an exception' do
           expect { validate.call(TestSizeLimiterWorker, { a: 'a' * 300 }) }.not_to raise_error
         end
+
+        context 'when the worker has big_payload attribute' do
+          before do
+            worker_class.big_payload!
+          end
+
+          it 'does not track jobs' do
+            expect(Gitlab::ErrorTracking).not_to receive(:track_exception)
+
+            validate.call(TestSizeLimiterWorker, { a: 'a' * 300 })
+            validate.call('TestSizeLimiterWorker', { a: 'a' * 300 })
+          end
+
+          it 'does not raise an exception' do
+            expect { validate.call(TestSizeLimiterWorker, { a: 'a' * 300 }) }.not_to raise_error
+            expect { validate.call('TestSizeLimiterWorker', { a: 'a' * 300 }) }.not_to raise_error
+          end
+        end
       end
 
-      context 'when job size is bigger than size limit' do
+      context 'when job size is less than size limit' do
         let(:size_limit) { 50 }
 
         it 'does not track job' do
@@ -110,7 +128,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::SizeLimiter::Validator do
       end
     end
 
-    context 'in track mode' do
+    context 'in raise mode' do
       let(:mode) { 'raise' }
 
       context 'when size limit is 0' do
@@ -121,10 +139,10 @@ RSpec.describe Gitlab::SidekiqMiddleware::SizeLimiter::Validator do
         end
       end
 
-      context 'when job size is less than size limit' do
+      context 'when job size is bigger than size limit' do
         let(:size_limit) { 50 }
 
-        it 'does raises an exception' do
+        it 'raises an exception' do
           expect do
             validate.call(TestSizeLimiterWorker, { a: 'a' * 300 })
           end.to raise_error(
@@ -132,9 +150,20 @@ RSpec.describe Gitlab::SidekiqMiddleware::SizeLimiter::Validator do
             /TestSizeLimiterWorker job exceeds payload size limit/i
           )
         end
+
+        context 'when the worker has big_payload attribute' do
+          before do
+            worker_class.big_payload!
+          end
+
+          it 'does not raise an exception' do
+            expect { validate.call(TestSizeLimiterWorker, { a: 'a' * 300 }) }.not_to raise_error
+            expect { validate.call('TestSizeLimiterWorker', { a: 'a' * 300 }) }.not_to raise_error
+          end
+        end
       end
 
-      context 'when job size is bigger than size limit' do
+      context 'when job size is less than size limit' do
         let(:size_limit) { 50 }
 
         it 'does not raise an exception' do

@@ -44,6 +44,8 @@ module Gitlab
           # Size limit equal to 0 mean no limit at all
           return if @size_limit == 0
 
+          return if allow_big_payload?(@worker_class)
+
           size = get_job_size(@job)
           return if size <= @size_limit
 
@@ -65,6 +67,15 @@ module Gitlab
           # for now. Internally, Sidekiq calls Sidekiq.dump_json everywhere.
           # There is no clean way to intefere to prevent double serialization.
           ::Sidekiq.dump_json(job).bytesize
+        end
+
+        def allow_big_payload?(worker_class)
+          worker_class = worker_class.to_s.safe_constantize
+
+          return false unless worker_class
+          return false unless worker_class.respond_to?(:big_payload?)
+
+          worker_class.big_payload?
         end
 
         def track_mode?
