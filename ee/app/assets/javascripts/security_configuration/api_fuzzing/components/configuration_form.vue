@@ -13,7 +13,7 @@ import {
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
 import { SCAN_MODES, CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
-import configureApiFuzzingMutation from '../graphql/configure_api_fuzzing.mutation.graphql';
+import createApiFuzzingMutation from '../graphql/create_api_fuzzing.mutation.graphql';
 import DropdownInput from '../../components/dropdown_input.vue';
 import DynamicFields from '../../components/dynamic_fields.vue';
 import FormInput from '../../components/form_input.vue';
@@ -170,11 +170,14 @@ export default {
       try {
         const {
           data: {
-            configureApiFuzzing: { gitlabCiYamlEditUrl, configurationYaml },
-            errors = [],
+            createApiFuzzingCiConfiguration: {
+              gitlabCiYamlEditUrl,
+              configurationYaml,
+              errors = [],
+            },
           },
         } = await this.$apollo.mutate({
-          mutation: configureApiFuzzingMutation,
+          mutation: createApiFuzzingMutation,
           variables: {
             input: {
               foo: 'bar',

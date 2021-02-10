@@ -1,7 +1,0 @@
-mutation($input: ApiFuzzingCiConfigurationInput!) {
-  configureApiFuzzing(input: $input) @client {
-    status
-    configurationYaml
-    gitlabCiYamlEditUrl
-  }
-}

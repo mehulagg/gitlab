@@ -6,11 +6,11 @@ Vue.use(VueApollo);
 
 const resolvers = {
   Mutation: {
-    configureApiFuzzing: () => {
+    createApiFuzzingCiConfiguration: () => {
       return {
         configurationYaml: 'yaml',
-        status: 'OK',
         gitlabCiYamlEditUrl: '/edit/yaml',
+        errors: [],
         __typename: 'ApiFuzzingConfiguration',
       };
     },
