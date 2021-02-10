@@ -56,8 +56,6 @@ a community contribution is acceptable.
 
 Here is a message you can use to explain to community contributors as to why we reject simple updates:
 
-<!-- vale gitlab.RelativeLinks = NO -->
-
 ```markdown
 Hello CONTRIBUTOR!
 
@@ -65,14 +63,12 @@ Thank you very much for this contribution. It seems like you are doing a "simple
 
 If a dependency update is as simple as increasing the version number, we'd like a Bot to do this to save you and ourselves some time.
 
-This has certain benefits as outlined in our [Frontend development guidelines](https://docs.gitlab.com/ee/development/fe_guide/dependencies.html#updating-dependencies).
+This has certain benefits as outlined in our <a href="https://docs.gitlab.com/ee/development/fe_guide/dependencies.html#updating-dependencies">Frontend development guidelines</a>.
 
 You might find that we do not currently update DEPENDENCY automatically, but we are planning to do so in [the near future](https://gitlab.com/gitlab-org/frontend/rfcs/-/issues/21).
 
-Thank you for understanding, I will close this Merge Request.  
+Thank you for understanding, I will close this Merge Request.
 ```
-
-<!-- vale gitlab.RelativeLinks = YES -->
 
 ### Blocked dependencies
 
