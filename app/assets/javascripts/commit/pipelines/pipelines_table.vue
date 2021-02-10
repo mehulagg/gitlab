@@ -2,11 +2,10 @@
 import { GlButton, GlLoadingIcon, GlModal, GlLink } from '@gitlab/ui';
 import PipelinesService from '~/pipelines/services/pipelines_service';
 import PipelineStore from '~/pipelines/stores/pipelines_store';
-import pipelinesMixin from '~/pipelines/mixins/pipelines';
+import PipelinesMixin from '~/pipelines/mixins/pipelines_mixin';
 import eventHub from '~/pipelines/event_hub';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 import { getParameterByName } from '~/lib/utils/common_utils';
-import PipelinesPaginationApiMixin from '~/pipelines/mixins/pipelines_pagination_api_mixin';
 
 export default {
   components: {
@@ -16,7 +15,7 @@ export default {
     GlModal,
     GlLink,
   },
-  mixins: [pipelinesMixin, PipelinesPaginationApiMixin],
+  mixins: [PipelinesMixin],
   props: {
     endpoint: {
       type: String,
