@@ -48,8 +48,6 @@ module Gitlab
             .merge(system_usage_data_license)
             .merge(system_usage_data_settings)
             .merge(system_usage_data)
-            .merge(system_usage_data_monthly)
-            .merge(system_usage_data_weekly)
             .merge(features_usage_data)
             .merge(components_usage_data)
             .merge(object_store_usage_data)
@@ -60,6 +58,8 @@ module Gitlab
             .merge(compliance_unique_visits_data)
             .merge(search_unique_visits_data)
             .merge(redis_hll_counters)
+            .merge(system_usage_data_monthly)
+            .merge(system_usage_data_weekly)
         end
       end
 

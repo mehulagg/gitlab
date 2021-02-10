@@ -48,3 +48,7 @@
     'incident_management_incident_unrelate',
     'incident_management_incident_change_confidential'
   ]
+- name: product_analytics_test_metrics_intersection_database_sourced
+  source: database
+  events: ['dependency_scanning_pipeline', 'container_scanning_pipeline']
+  operator: AND
