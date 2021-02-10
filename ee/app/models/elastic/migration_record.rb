@@ -27,7 +27,7 @@ module Elastic
       client.index index: index_name, type: '_doc', id: version, body: { completed: completed, state: load_state.merge(state) }
     end
 
-    def persisted?
+    def started?
       load_from_index.present?
     end
 

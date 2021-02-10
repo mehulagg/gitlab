@@ -51,7 +51,7 @@ module Elastic
     private
 
     def execute_migration(migration)
-      if migration.persisted? && !migration.batched?
+      if migration.started? && !migration.batched?
         logger.info "MigrationWorker: migration[#{migration.name}] did not execute migrate method since it was already executed. Waiting for migration to complete"
       else
         pause_indexing!(migration)
