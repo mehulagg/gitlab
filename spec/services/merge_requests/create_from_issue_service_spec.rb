@@ -62,6 +62,14 @@ RSpec.describe MergeRequests::CreateFromIssueService do
         service.execute
       end
 
+      it 'tracks the service call' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .to receive(:track_mr_create_from_issue)
+          .with(user: user)
+
+        service.execute
+      end
+
       it 'creates a merge request', :sidekiq_might_not_need_inline do
         expect { service.execute }.to change(target_project.merge_requests, :count).by(1)
       end

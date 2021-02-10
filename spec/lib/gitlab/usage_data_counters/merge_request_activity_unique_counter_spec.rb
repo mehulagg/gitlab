@@ -228,4 +228,12 @@ RSpec.describe Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter, :cl
       let(:action) { described_class::MR_REVIEW_REQUESTED_USERS_ACTION }
     end
   end
+
+  describe '.track_mr_create_from_issue' do
+    subject { described_class.track_mr_create_from_issue(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_CREATE_FROM_ISSUE_ACTION }
+    end
+  end
 end
