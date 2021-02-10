@@ -18,9 +18,6 @@ describe('AlertsSettingsForm', () => {
   let wrapper;
   const mockToastShow = jest.fn();
 
-  const validSamplePayload = JSON.stringify(alertFields);
-  const emptySamplePayload = '';
-
   const createComponent = ({
     data = {},
     props = {},
@@ -281,6 +278,9 @@ describe('AlertsSettingsForm', () => {
   });
 
   describe('Test payload section for HTTP integration', () => {
+    const validSamplePayload = JSON.stringify(alertFields);
+    const emptySamplePayload = '';
+
     beforeEach(() => {
       createComponent({
         multipleHttpIntegrationsCustomMapping: true,
@@ -346,11 +346,6 @@ describe('AlertsSettingsForm', () => {
       beforeEach(() => {
         wrapper.setData({
           selectedIntegration: typeSet.http,
-          currentIntegration: {
-            samplePayload: validSamplePayload,
-            type: typeSet.http,
-            active: true,
-          },
           resetSamplePayloadConfirmed: true,
         });
       });
