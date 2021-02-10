@@ -27,7 +27,7 @@ module Gitlab
           # ignore highlighting for "match" lines
           next diff_line if diff_line.meta?
 
-          rich_line = highlight_line(diff_line) || ERB::Util.html_escape(diff_line.text)
+          rich_line = highlight_line(diff_line, i) || ERB::Util.html_escape(diff_line.text)
 
           if line_inline_diffs = inline_diffs[i]
             begin
@@ -48,8 +48,9 @@ module Gitlab
 
       private
 
-      def highlight_line(diff_line)
+      def highlight_line(diff_line, index)
         return unless diff_file && diff_file.diff_refs
+        return blobless_diff_highlight(diff_line, index) if Feature.enabled?(:blobless_diff_highlighting, project, default_enabled: :yaml)
 
         rich_line =
           if diff_line.unchanged? || diff_line.added?
@@ -83,6 +84,12 @@ module Gitlab
 
         blob.load_all_data!
         blob.present.highlight.lines
+      end
+
+      def blobless_diff_highlight(diff_line, index)
+        @highlighted_lines ||= Gitlab::Diff::HighlightedLines.new(diff_file)
+
+        @highlighted_lines.for(diff_line, index)
       end
     end
   end
