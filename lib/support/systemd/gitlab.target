@@ -1,0 +1,5 @@
+[Unit]
+Description=GitLab
+
+[Install]
+WantedBy=multi-user.target
