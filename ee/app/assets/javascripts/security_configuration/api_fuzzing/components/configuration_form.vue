@@ -12,6 +12,7 @@ import {
 } from '@gitlab/ui';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
+import { isEmptyValue } from '~/lib/utils/forms';
 import { SCAN_MODES, CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
 import createApiFuzzingMutation from '../graphql/create_api_fuzzing.mutation.graphql';
 import DropdownInput from '../../components/dropdown_input.vue';
@@ -159,7 +160,7 @@ export default {
       if (this.authenticationEnabled) {
         fields.push(...this.authenticationSettings);
       }
-      return fields.some(({ value }) => !value);
+      return fields.some(({ value }) => isEmptyValue(value));
     },
   },
   methods: {
