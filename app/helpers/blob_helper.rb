@@ -127,7 +127,7 @@ module BlobHelper
       blob: blob,
       label:      _("Replace"),
       action:     "replace",
-      btn_class:  "default",
+      btn_class:  "md",
       modal_type: "upload"
     )
   end
@@ -140,7 +140,7 @@ module BlobHelper
       blob: blob,
       label:      _("Delete"),
       action:     "delete",
-      btn_class:  "default",
+      btn_class:  "md",
       modal_type: "remove"
     )
   end
@@ -229,13 +229,13 @@ module BlobHelper
   end
 
   def copy_file_path_button(file_path)
-    clipboard_button(text: file_path, gfm: "`#{file_path}`", class: 'btn-clipboard btn-transparent', title: _('Copy file path'))
+    clipboard_button(text: file_path, gfm: "`#{file_path}`", class: 'gl-button btn btn-default-tertiary btn-icon btn-sm', title: _('Copy file path'))
   end
 
   def copy_blob_source_button(blob)
     return unless blob.rendered_as_text?(ignore_errors: false)
 
-    clipboard_button(target: ".blob-content[data-blob-id='#{blob.id}'] > pre", class: "btn gl-button btn-default btn-sm js-copy-blob-source-btn", title: _("Copy file contents"))
+    clipboard_button(target: ".blob-content[data-blob-id='#{blob.id}'] > pre", class: "btn gl-button btn-default btn-icon js-copy-blob-source-btn", title: _("Copy file contents"))
   end
 
   def open_raw_blob_button(blob)
@@ -245,7 +245,7 @@ module BlobHelper
     title = _('Open raw')
     link_to sprite_icon('doc-code'),
       external_storage_url_or_path(blob_raw_path),
-      class: 'btn gl-button btn-default btn-sm has-tooltip',
+      class: 'btn gl-button btn-default btn-icon has-tooltip',
       target: '_blank',
       rel: 'noopener noreferrer',
       aria: { label: title },
@@ -260,7 +260,7 @@ module BlobHelper
     link_to sprite_icon('download'),
       external_storage_url_or_path(blob_raw_path(inline: false)),
       download: @path,
-      class: 'btn gl-button btn-default btn-sm has-tooltip',
+      class: 'btn gl-button btn-default btn-icon has-tooltip',
       target: '_blank',
       rel: 'noopener noreferrer',
       aria: { label: title },
