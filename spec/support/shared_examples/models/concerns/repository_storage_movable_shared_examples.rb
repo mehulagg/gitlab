@@ -99,6 +99,10 @@ RSpec.shared_examples 'handles repository moves' do
 
           expect(container).not_to be_repository_read_only
         end
+
+        it 'updates the updated_at column of the container' do
+          expect { storage_move.finish_replication! }.to change { container.updated_at }
+        end
       end
 
       context 'and transits to failed' do
