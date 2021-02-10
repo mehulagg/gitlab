@@ -47,7 +47,7 @@ namespace :gitlab do
     end
 
     def ignore_invalid_entries
-      ActiveRecord::Type::Boolean.new.cast(
+      Gitlab::Utils.to_boolean(
         ENV.fetch('PAGES_MIGRATION_IGNORE_INVALID_ENTRIES', 'false')
       )
     end
