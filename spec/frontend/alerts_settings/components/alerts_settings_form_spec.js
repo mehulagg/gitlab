@@ -278,13 +278,16 @@ describe('AlertsSettingsForm', () => {
   });
 
   describe('Test payload section for HTTP integration', () => {
+    const validJSON = '{"title": "hello"}';
+    const emptyJSON = '';
+
     beforeEach(() => {
       createComponent({
         multipleHttpIntegrationsCustomMapping: true,
         data: {
           currentIntegration: {
             type: typeSet.http,
-            samplePayload: true,
+            samplePayload: validJSON,
           },
         },
         props: { alertFields },
@@ -307,7 +310,7 @@ describe('AlertsSettingsForm', () => {
           currentIntegration: {
             active,
             type: typeSet.http,
-            samplePayload: true,
+            samplePayload: validJSON,
           },
           resetSamplePayloadConfirmed,
         });
@@ -317,9 +320,6 @@ describe('AlertsSettingsForm', () => {
     });
 
     describe('action buttons for sample payload', () => {
-      const validJSON = '{"title": "hello"}';
-      const emptyJSON = '';
-
       describe.each`
         resetSamplePayloadConfirmed | samplePayload | caption
         ${false}                    | ${validJSON}  | ${'Edit payload'}
@@ -336,9 +336,7 @@ describe('AlertsSettingsForm', () => {
             currentIntegration: { samplePayload, type: typeSet.http, active: true },
             resetSamplePayloadConfirmed,
           });
-
           await wrapper.vm.$nextTick();
-
           expect(findActionBtn().text()).toBe(caption);
         });
       });
