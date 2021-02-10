@@ -147,70 +147,87 @@ export const getMergeRequestVersions = (
     }
   });
 
-export const openMergeRequest = (
-  { dispatch, state, getters },
-  { projectId, targetProjectId, mergeRequestId } = {},
-) =>
-  dispatch('getMergeRequestData', {
-    projectId,
-    targetProjectId,
-    mergeRequestId,
-  })
-    .then((mr) => {
-      dispatch('setCurrentBranchId', mr.source_branch);
+export const openMergeRequestChanges = ({ dispatch, getters, state }, changes) => {
+  // If there are no changes, do nothing.
+  if (!changes.length) {
+    return;
+  }
 
-      return dispatch('getBranchData', {
-        projectId,
-        branchId: mr.source_branch,
-      }).then(() => {
-        const branch = getters.findBranch(projectId, mr.source_branch);
+  dispatch('updateActivityBarView', leftSidebarViews.review.name);
 
-        return dispatch('getFiles', {
-          projectId,
-          branchId: mr.source_branch,
-          ref: branch.commit.id,
-        });
+  const [firstPath] = await Promise.all(changes
+    .map((change) => ({
+      entry: state.entries[change.new_path],
+      change,
+    }))
+    // Filter out non-entry changes (i.e. deletes), so we can reliably use ind === 0
+    .filter((x) => x.entry)
+    // Map each entry to a Promise<String> so we can use Promise.all
+    .map(async ({ change, entry }, ind) => {
+      dispatch('setFileMrChange', {
+        file: entry,
+        mrChange: change,
       });
-    })
-    .then(() =>
-      dispatch('getMergeRequestVersions', {
-        projectId,
-        targetProjectId,
-        mergeRequestId,
-      }),
-    )
-    .then(() =>
-      dispatch('getMergeRequestChanges', {
-        projectId,
-        targetProjectId,
-        mergeRequestId,
-      }),
-    )
-    .then((mrChanges) => {
-      if (mrChanges.changes.length) {
-        dispatch('updateActivityBarView', leftSidebarViews.review.name);
+
+      if (ind < 10) {
+        try {
+          await dispatch('getFileData', {
+            path: change.new_path,
+            makeFileActive: ind === 0,
+          });
+        } catch (e) {
+          // If one of the file fetches fails, we dont want to blow up the rest of them.
+          console.error('[gitlab] An unexpected error occurred fetching MR file data', e);
+        }
       }
 
-      mrChanges.changes.forEach((change, ind) => {
-        const changeTreeEntry = state.entries[change.new_path];
+      return change.new_path;
+    }));
 
-        if (changeTreeEntry) {
-          dispatch('setFileMrChange', {
-            file: changeTreeEntry,
-            mrChange: change,
-          });
+  await dispatch('router/push', getters.getUrlForPath(firstPath));
+};
 
-          if (ind < 10) {
-            dispatch('getFileData', {
-              path: change.new_path,
-              makeFileActive: ind === 0,
-              openFile: true,
-            });
-          }
-        }
-      });
-    })
-    .catch((e) => {
-      flash(__('Error while loading the merge request. Please try again.'));
-      throw e;
+export const openMergeRequest = async (
+  { dispatch, state, getters },
+  { projectId, targetProjectId, mergeRequestId } = {},
+) => {
+  try {
+    const mr = await dispatch('getMergeRequestData', {
+      projectId,
+      targetProjectId,
+      mergeRequestId,
     });
+
+    dispatch('setCurrentBranchId', mr.source_branch);
+
+    await dispatch('getBranchData', {
+      projectId,
+      branchId: mr.source_branch,
+    });
+
+    const branch = getters.findBranch(projectId, mr.source_branch);
+
+    await dispatch('getFiles', {
+      projectId,
+      branchId: mr.source_branch,
+      ref: branch.commit.id,
+    });
+
+    await dispatch('getMergeRequestVersions', {
+      projectId,
+      targetProjectId,
+      mergeRequestId,
+    });
+
+    const { changes } = await dispatch('getMergeRequestChanges', {
+      projectId,
+      targetProjectId,
+      mergeRequestId,
+    });
+
+    await dispatch('openMergeRequestChanges', changes);
+  } catch (e) {
+    flash(__('Error while loading the merge request. Please try again.'));
+    throw e;
+  }
+};
