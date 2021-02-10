@@ -74,3 +74,5 @@ module Ci
     end
   end
 end
+
+Ci::Testing::DailyBuildGroupReportResultsFinder.prepend_if_ee('::EE::Ci::Testing::DailyBuildGroupReportResultsFinder')

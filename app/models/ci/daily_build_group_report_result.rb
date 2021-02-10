@@ -16,6 +16,7 @@ module Ci
     scope :with_included_projects, -> { includes(:project) }
     scope :by_ref_path, -> (ref_path) { where(ref_path: ref_path) }
     scope :by_projects, -> (ids) { where(project_id: ids) }
+    scope :by_group, -> (id) { where(group_id: id) }
     scope :with_coverage, -> { where("(data->'coverage') IS NOT NULL") }
     scope :with_default_branch, -> { where(default_branch: true) }
     scope :by_date, -> (start_date) { where(date: report_window(start_date)..Date.current) }
