@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign, babel/camelcase, no-nested-ternary, no-continue */
 
 import $ from 'jquery';
-import Vue from 'vue';
 import Cookies from 'js-cookie';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import { s__ } from '~/locale';
 
 ((global) => {

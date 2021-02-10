@@ -3,7 +3,7 @@
 // template.
 /* eslint-disable @gitlab/no-runtime-template-compiler */
 import $ from 'jquery';
-import Vue from 'vue';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '../flash';

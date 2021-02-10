@@ -3,8 +3,8 @@
 // for its template.
 /* eslint-disable no-param-reassign, @gitlab/no-runtime-template-compiler */
 
-import Vue from 'vue';
 import { debounce } from 'lodash';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
