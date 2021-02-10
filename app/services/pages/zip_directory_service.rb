@@ -41,7 +41,7 @@ module Pages
 
       unless valid_path?(disk_file_path)
         # archive with invalid entry will just have this entry missing
-        raise InvalidEntryError
+        raise InvalidEntryError, "#{disk_file_path} is invalid, input_dir: #{@input_dir}"
       end
 
       case File.lstat(disk_file_path).ftype
@@ -50,7 +50,7 @@ module Pages
       when 'file', 'link'
         zipfile.add(zipfile_path, disk_file_path)
       else
-        raise InvalidEntryError
+        raise InvalidEntryError, "#{disk_file_path} has invalid ftype, input_dir: #{@input_dir}"
       end
     rescue InvalidEntryError => e
       Gitlab::ErrorTracking.track_exception(e, input_dir: @input_dir, disk_file_path: disk_file_path)
