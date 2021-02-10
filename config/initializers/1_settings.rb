@@ -214,6 +214,7 @@ Settings.gitlab['no_todos_messages'] ||= YAML.load_file(Rails.root.join('config'
 Settings.gitlab['impersonation_enabled'] ||= true if Settings.gitlab['impersonation_enabled'].nil?
 Settings.gitlab['usage_ping_enabled'] = true if Settings.gitlab['usage_ping_enabled'].nil?
 Settings.gitlab['max_request_duration_seconds'] ||= 57
+Settings.gitlab['notes_rate_limit_users_allowlist'] ||= ENV['NOTES_RATE_LIMIT_USERS_ALLOWLIST'] || []
 
 Gitlab.ee do
   Settings.gitlab['mirror_max_delay'] ||= 300

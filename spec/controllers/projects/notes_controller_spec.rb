@@ -730,11 +730,11 @@ RSpec.describe Projects::NotesController do
 
     context 'when the endpoint receives requests above the limit' do
       before do
-        stub_application_setting(notes_create_limit: 5)
+        stub_application_setting(notes_create_limit: 3)
       end
 
       it 'prevents from creating more notes', :request_store do
-        5.times { create! }
+        3.times { create! }
 
         expect { create! }
           .to change { Gitlab::GitalyClient.get_request_count }.by(0)
@@ -761,6 +761,14 @@ RSpec.describe Projects::NotesController do
         sign_in(user)
 
         6.times { create! }
+      end
+
+      it 'allows user in allow-list to create notes' do
+        stub_config_setting(notes_rate_limit_users_allowlist: "#{user.username}")
+        3.times { create! }
+
+        create!
+        expect(response).to have_gitlab_http_status(:found)
       end
     end
   end

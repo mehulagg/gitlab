@@ -8,6 +8,7 @@ module Gitlab
       end
 
       def rejection_message
+        binding.pry
         case rejection_type
         when :internal
           "This action cannot be performed by internal users"

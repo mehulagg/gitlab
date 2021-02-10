@@ -58,7 +58,8 @@ module Mutations
 
         def verify_rate_limit!(current_user)
           rate_limiter, key = ::Gitlab::ApplicationRateLimiter, :notes_create
-          return unless rate_limiter.throttled?(key, scope: [current_user])
+          allowlist = Gitlab.config.gitlab.notes_rate_limit_users_allowlist.split(', ')
+          return unless rate_limiter.throttled?(key, scope: [current_user], users_allowlist: allowlist)
 
           raise Gitlab::Graphql::Errors::ResourceNotAvailable,
             'This endpoint has been requested too many times. Try again later.'

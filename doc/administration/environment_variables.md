@@ -33,6 +33,7 @@ You can use the following environment variables to override certain values:
 | `GITLAB_UNICORN_MEMORY_MIN`                | integer | The minimum memory threshold (in bytes) for the [unicorn-worker-killer](operations/unicorn.md#unicorn-worker-killer).      |
 | `RAILS_ENV`                                | string  | The Rails environment; can be one of `production`, `development`, `staging`, or `test`.                 |
 | `UNSTRUCTURED_RAILS_LOG`                   | string  | Enables the unstructured log in addition to JSON logs (defaults to `true`).                             |
+| `NOTES_RATE_LIMIT_USERS_ALLOWLIST`         | string  | Sets the list of usernames to be excluded from the notes creation rate limit.                           |
 
 ## Complete database variables
 
