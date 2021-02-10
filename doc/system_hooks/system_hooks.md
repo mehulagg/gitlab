@@ -48,6 +48,10 @@ NOTE:
 We follow the same structure and deprecations as [Webhooks](../user/project/integrations/webhooks.md)
 for Push and Tag events, but we never display commits.
 
+## Creating a system hook
+
+System hooks can be created under the **Admin Area > System Hooks** page.
+
 ## Hooks request example
 
 **Request header**:
