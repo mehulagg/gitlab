@@ -313,7 +313,7 @@ Dynamic environments are a fundamental part of [Review apps](../review_apps/inde
 The `name` and `url` keywords for dynamic environments can use most available CI/CD variables,
 including:
 
-- [Predefined environment variables](../variables/README.md#predefined-cicd-variables)
+- [Predefined CI/CD variables](../variables/README.md#predefined-cicd-variables)
 - [Project and group variables](../variables/README.md#gitlab-cicd-environment-variables)
 - [`.gitlab-ci.yml` variables](../yaml/README.md#variables)
 
