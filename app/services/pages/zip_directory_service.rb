@@ -75,6 +75,8 @@ module Pages
     # to pack any directory on disk
     # it isn't possible because SafeZip doesn't extract such archives
     def valid_path?(disk_file_path)
+      return false unless disk_file_path
+
       realpath = File.realpath(disk_file_path)
 
       realpath == public_dir || realpath.start_with?(public_dir + "/")

@@ -20,6 +20,8 @@ RSpec.describe Pages::ZipDirectoryService do
   let(:entries_count) { result[:entries_count] }
 
   it 'returns error if project pages dir does not exist' do
+    expect(Gitlab::ErrorTracking).not_to receive(:track_exception)
+
     expect(
       described_class.new("/tmp/not/existing/dir").execute
     ).to eq(status: :error, message: "Can not find valid public dir in /tmp/not/existing/dir")
