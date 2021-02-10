@@ -27,18 +27,20 @@ describe('TerraformList', () => {
       },
     };
 
-    // Override @client  directives
-    const { selectionSet } = getStatesQuery.getStates.definitions[1];
-    selectionSet.selections = selectionSet.selections.map((selection) => {
-      return {
-        ...selection,
-        directives: [],
-      };
-    });
-    getStatesQuery.getStates.definitions[1].selectionSet = selectionSet;
+    const mockResolvers = {
+      TerraformState: {
+        _showDetails: jest.fn().mockResolvedValue(false),
+        errorMessages: jest.fn().mockResolvedValue([]),
+        loadingLock: jest.fn().mockResolvedValue(false),
+        loadingRemove: jest.fn().mockResolvedValue(false),
+      },
+      Mutation: {
+        addDataToTerraformState: jest.fn().mockResolvedValue({}),
+      },
+    };
 
     const statsQueryResponse = queryResponse || jest.fn().mockResolvedValue(apolloQueryResponse);
-    const apolloProvider = createMockApollo([[getStatesQuery, statsQueryResponse]]);
+    const apolloProvider = createMockApollo([[getStatesQuery, statsQueryResponse]], mockResolvers);
 
     wrapper = shallowMount(TerraformList, {
       localVue,
