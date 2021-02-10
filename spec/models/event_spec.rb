@@ -744,13 +744,17 @@ RSpec.describe Event do
 
     describe '#wiki_page and #wiki_page?' do
       context 'for a wiki page event' do
-        let(:wiki_page) do
-          create(:wiki_page, project: project)
-        end
+        let(:wiki_page) { create(:wiki_page, project: project) }
 
         subject(:event) { create(:wiki_page_event, project: project, wiki_page: wiki_page) }
 
         it { is_expected.to have_attributes(wiki_page?: be_truthy, wiki_page: wiki_page) }
+
+        context 'title is empty' do
+          let(:wiki_page) { create(:wiki_page, project: project, title: '') }
+
+          it { is_expected.to have_attributes(wiki_page: to_nil, wiki_page?: be_falsy) }
+        end
       end
 
       context 'for any other event' do

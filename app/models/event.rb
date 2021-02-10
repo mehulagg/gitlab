@@ -232,7 +232,7 @@ class Event < ApplicationRecord
 
   def wiki_page
     strong_memoize(:wiki_page) do
-      next unless wiki_page?
+      next unless wiki_page? && !target_title.empty?
 
       ProjectWiki.new(project, author).find_page(target.canonical_slug)
     end
