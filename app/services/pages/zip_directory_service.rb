@@ -73,10 +73,8 @@ module Pages
       end
     end
 
-    # that should never happen, but we want to be safer
-    # in theory without this we would allow to use symlinks
-    # to pack any directory on disk
-    # it isn't possible because SafeZip doesn't extract such archives
+    # SafeZip was introduced only recently,
+    # so we have invalid entries on disk
     def valid_path?(disk_file_path)
       return false unless disk_file_path
 
