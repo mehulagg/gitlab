@@ -2289,7 +2289,7 @@ msgstr ""
 msgid "AdminUsers|Here are some helpful links to help you manage your instance:"
 msgstr ""
 
-msgid "AdminUsers|If you have any questions about this process please consults our %{doc_link} or %{support_link}."
+msgid "AdminUsers|If you have any questions about this process please consult our %{doc_link} or %{support_link}."
 msgstr ""
 
 msgid "AdminUsers|Important information about usage on your GitLab instance"
