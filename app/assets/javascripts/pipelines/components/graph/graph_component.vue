@@ -145,6 +145,7 @@ export default {
               :container-id="containerId"
               :container-measurements="measurements"
               :highlighted-job="hoveredJobName"
+              :collect-perf-metric="true"
               default-link-color="gl-stroke-transparent"
               @error="onError"
               @highlightedJobsChange="updateHighlightedJobs"

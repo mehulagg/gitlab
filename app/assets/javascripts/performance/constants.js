@@ -54,3 +54,14 @@ export const MR_DIFFS_MARK_DIFF_FILES_END = 'mr-diffs-mark-diff-files-end';
 // Measures
 export const MR_DIFFS_MEASURE_FILE_TREE_DONE = 'mr-diffs-measure-file-tree-done';
 export const MR_DIFFS_MEASURE_DIFF_FILES_DONE = 'mr-diffs-measure-diff-files-done';
+
+//
+// PIPELINE namespace
+//
+
+// Marks
+export const PIPELINE_LINKS_MARK_CALCULATE_START = 'pipeline-links-mark-calculate-start';
+export const PIPELINE_LINKS_MARK_CALCULATE_END = 'pipeline-links-mark-calculate-end';
+
+// Measures
+export const PIPELINE_LINKS_MEASURE_CALCULATION = 'pipeline-links-calculate-done';

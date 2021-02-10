@@ -1,5 +1,11 @@
 <script>
 import { isEmpty } from 'lodash';
+import { performanceMarkAndMeasure } from '~/performance/utils';
+import {
+  PIPELINE_LINKS_MARK_CALCULATE_START,
+  PIPELINE_LINKS_MARK_CALCULATE_END,
+  PIPELINE_LINKS_MEASURE_CALCULATION,
+} from '~/performance/constants.js'
 import { DRAW_FAILURE } from '../../constants';
 import { createJobsHash, generateJobNeedsDict } from '../../utils';
 import { parseData } from '../parsing_utils';
@@ -24,6 +30,11 @@ export default {
     pipelineData: {
       type: Array,
       required: true,
+    },
+    collectPerfMetric: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     defaultLinkColor: {
       type: String,
@@ -93,14 +104,35 @@ export default {
     }
   },
   methods: {
+    beginPerfMeasure(){
+      if (this.collectPerfMetric) {
+        performanceMarkAndMeasure({ mark: PIPELINE_LINKS_MARK_CALCULATE_START })
+      }
+    },
+    finishPerfMeasureAndSend(){
+      if (this.collectPerfMetric) {
+        performanceMarkAndMeasure({
+          mark: PIPELINE_LINKS_MARK_CALCULATE_END,
+          measures: [
+            {
+              name: PIPELINE_LINKS_MEASURE_CALCULATION,
+              start: PIPELINE_LINKS_MARK_CALCULATE_START,
+              end: PIPELINE_LINKS_MARK_CALCULATE_END,
+            },
+          ],
+        })
+      }
+    },
     isLinkHighlighted(linkRef) {
       return this.highlightedLinks.includes(linkRef);
     },
     prepareLinkData() {
       try {
+        this.beginPerfMeasure();
         const arrayOfJobs = this.pipelineData.flatMap(({ groups }) => groups);
         const parsedData = parseData(arrayOfJobs);
         this.links = generateLinksData(parsedData, this.containerId, `-${this.pipelineId}`);
+        this.finishPerfMeasureAndSend();
       } catch {
         this.$emit('error', DRAW_FAILURE);
       }
