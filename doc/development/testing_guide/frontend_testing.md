@@ -548,7 +548,11 @@ In order to ensure that a clean wrapper object and DOM are being used in each te
   });
 ```
 
+<!-- vale gitlab.Spelling = NO -->
+
 See also the [Vue Test Utils documentation on `destroy`](https://vue-test-utils.vuejs.org/api/wrapper/#destroy).
+
+<!-- vale gitlab.Spelling = YES -->
 
 ### Jest best practices
 
@@ -646,20 +650,46 @@ The latter is useful when you have `setInterval` in the code. **Remember:** our 
 
 Non-determinism is the breeding ground for flaky and brittle specs. Such specs end up breaking the CI pipeline, interrupting the work flow of other contributors.
 
-1. Make sure your test subject's collaborators (e.g., axios, apollo, lodash helpers) and test environment (e.g., Date) behave consistently across systems and over time.
+1. Make sure your test subject's collaborators (e.g., Axios, apollo, Lodash helpers) and test environment (e.g., Date) behave consistently across systems and over time.
 1. Make sure tests are focused and not doing "extra work" (e.g., needlessly creating the test subject more than once in an individual test)
 
 ### Faking `Date` for determinism
 
-Consider using `useFakeDate` to ensure a consistent value is returned with every `new Date()` or `Date.now()`.
+`Date` is faked by default in our Jest environment. This means every call to `Date()` or `Date.now()` returns a fixed deterministic value.
+
+If you really need to change the default fake date, you can call `useFakeDate` within any `describe` block, and
+the date will be replaced for that specs within that `describe` context only:
 
 ```javascript
 import { useFakeDate } from 'helpers/fake_date';
 
 describe('cool/component', () => {
-  useFakeDate();
+  // Default fake `Date`
+  const TODAY = new Date();
 
-  // ...
+  // NOTE: `useFakeDate` cannot be called during test execution (i.e. inside `it`, `beforeEach`, `beforeAll`, etc.).
+  describe("on Ada Lovelace's Birthday", () => {
+    useFakeDate(1815, 11, 10)
+
+    it('Date is no longer default', () => {
+      expect(new Date()).not.toEqual(TODAY);
+    });
+  });
+
+  it('Date is still default in this scope', () => {
+    expect(new Date()).toEqual(TODAY)
+  });
+})
+```
+
+Similarly, if you really need to use the real `Date` class, then you can import and call `useRealDate` within any `describe` block:
+
+```javascript
+import { useRealDate } from 'helpers/fake_date';
+
+// NOTE: `useRealDate` cannot be called during test execution (i.e. inside `it`, `beforeEach`, `beforeAll`, etc.). 
+describe('with real date', () => {
+  useRealDate();
 });
 ```
 
@@ -807,7 +837,7 @@ yarn karma -f 'spec/javascripts/ide/**/file_spec.js'
 ## Frontend test fixtures
 
 Frontend fixtures are files containing responses from backend controllers. These responses can be either HTML
-generated from haml templates or JSON payloads. Frontend tests that rely on these responses are
+generated from HAML templates or JSON payloads. Frontend tests that rely on these responses are
 often using fixtures to validate correct integration with the backend code.
 
 ### Generate fixtures
@@ -1042,7 +1072,7 @@ import _Thing from '~/feature/path/to/thing.vue';
 NOTE:
 Do not disregard test timeouts. This could be a sign that there's
 actually a production problem. Use this opportunity to analyze the production webpack bundles and
-chunks and confirm that there is not a production issue with the async imports.
+chunks and confirm that there is not a production issue with the asynchronous imports.
 
 ## Overview of Frontend Testing Levels
 
@@ -1092,8 +1122,12 @@ Check an example in [`spec/frontend/ide/stores/actions_spec.js`](https://gitlab.
 
 ### Wait until Axios requests finish
 
+<!-- vale gitlab.Spelling = NO -->
+
 The Axios Utils mock module located in `spec/frontend/mocks/ce/lib/utils/axios_utils.js` contains two helper methods for Jest tests that spawn HTTP requests.
 These are very useful if you don't have a handle to the request's Promise, for example when a Vue component does a request as part of its life cycle.
+
+<!-- vale gitlab.Spelling = YES -->
 
 - `waitFor(url, callback)`: Runs `callback` after a request to `url` finishes (either successfully or unsuccessfully).
 - `waitForAll(callback)`: Runs `callback` once all pending requests have finished. If no requests are pending, runs `callback` on the next tick.

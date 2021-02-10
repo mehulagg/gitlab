@@ -16,30 +16,18 @@ RSpec.describe Resolvers::ExternalIssueResolver do
         summary: 'Issue Title',
         created: Time.at(1606348800).utc,
         updated: Time.at(1606348800).utc,
-        resolutiondate: Time.at(1606348800).utc,
         status: double(name: 'To Do'),
         key: 'GV-1',
-        labels: [],
-        reporter: double(displayName: 'User', accountId: '10000'),
-        assignee: nil,
         client: double(options: { site: 'http://jira.com/' })
       )
     end
 
     let(:expected_result) do
       {
-        'project_id' => vulnerability_external_issue_link.vulnerability.project_id,
         'title' => 'Issue Title',
         'created_at' => '2020-11-26T00:00:00.000Z',
         'updated_at' => '2020-11-26T00:00:00.000Z',
-        'closed_at' => '2020-11-26T00:00:00.000Z',
         'status' => 'To Do',
-        'labels' => [],
-        'author' => {
-          'name' => 'User',
-          'web_url' => 'http://jira.com/people/10000'
-        },
-        'assignees' => [],
         'web_url' => 'http://jira.com/browse/GV-1',
         'references' => {
           'relative' => 'GV-1'

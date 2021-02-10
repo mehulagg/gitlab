@@ -126,6 +126,14 @@ module CommitsHelper
     %w(btn gpg-status-box) + Array(additional_classes)
   end
 
+  def conditionally_paginate_diff_files(diffs, paginate:, per: Projects::CommitController::COMMIT_DIFFS_PER_PAGE)
+    if paginate && Feature.enabled?(:paginate_commit_view, @project, type: :development)
+      Kaminari.paginate_array(diffs.diff_files.to_a).page(params[:page]).per(per)
+    else
+      diffs.diff_files
+    end
+  end
+
   protected
 
   # Private: Returns a link to a person. If the person has a matching user and
@@ -166,7 +174,7 @@ module CommitsHelper
     path = project_blob_path(project, tree_join(commit_sha, diff_new_path))
     title = replaced ? _('View replaced file @ ') : _('View file @ ')
 
-    link_to(path, class: 'btn') do
+    link_to(path, class: 'btn gl-button btn-default') do
       raw(title) + content_tag(:span, truncate_sha(commit_sha), class: 'commit-sha')
     end
   end

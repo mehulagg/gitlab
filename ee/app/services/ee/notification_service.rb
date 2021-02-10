@@ -66,6 +66,12 @@ module EE
       mailer.provisioned_member_access_granted_email(group_member.id).deliver_later
     end
 
+    def notify_oncall_users_of_alert(users, alert)
+      users.each do |user|
+        mailer.prometheus_alert_fired_email(alert.project, user, alert).deliver_later
+      end
+    end
+
     private
 
     def add_mr_approvers_email(merge_request, approvers, current_user)

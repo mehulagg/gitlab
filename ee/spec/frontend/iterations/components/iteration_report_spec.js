@@ -1,15 +1,24 @@
 import { GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 import IterationForm from 'ee/iterations/components/iteration_form.vue';
 import IterationReport from 'ee/iterations/components/iteration_report.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import query from 'ee/iterations/queries/iteration.query.graphql';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import waitForPromises from 'helpers/wait_for_promises';
+import { mockIterationNode, mockGroupIterations, mockProjectIterations } from '../mock_data';
+
+const localVue = createLocalVue();
 
 describe('Iterations report', () => {
   let wrapper;
+  let mockApollo;
+
   const defaultProps = {
     fullPath: 'gitlab-org',
-    iterationIid: '3',
     labelsFetchPath: '/gitlab-org/gitlab-test/-/labels.json?include_ancestor_groups=true',
   };
 
@@ -21,6 +30,78 @@ describe('Iterations report', () => {
     findActionsDropdown().vm.$emit('click');
     wrapper.find(GlDropdownItem).vm.$emit('click');
   };
+
+  const mountComponentWithApollo = ({
+    props = defaultProps,
+    iterationQueryHandler = jest.fn(),
+  } = {}) => {
+    localVue.use(VueApollo);
+    mockApollo = createMockApollo([[query, iterationQueryHandler]]);
+
+    wrapper = shallowMount(IterationReport, {
+      localVue,
+      apolloProvider: mockApollo,
+      propsData: props,
+      stubs: {
+        GlLoadingIcon,
+        GlTab,
+        GlTabs,
+      },
+    });
+  };
+
+  describe('with mock apollo', () => {
+    describe.each([
+      [
+        'group',
+        {
+          fullPath: 'group-name',
+          iterationId: String(getIdFromGraphQLId(mockIterationNode.id)),
+        },
+        mockGroupIterations,
+        {
+          fullPath: 'group-name',
+          id: mockIterationNode.id,
+          isGroup: true,
+        },
+      ],
+      [
+        'project',
+        {
+          fullPath: 'group-name/project-name',
+          iterationId: String(getIdFromGraphQLId(mockIterationNode.id)),
+          namespaceType: Namespace.Project,
+        },
+        mockProjectIterations,
+        {
+          fullPath: 'group-name/project-name',
+          id: mockIterationNode.id,
+          isGroup: false,
+        },
+      ],
+    ])('when viewing an iteration in a %s', (_, props, mockIteration, expectedParams) => {
+      it('calls a query with correct parameters', () => {
+        const iterationQueryHandler = jest.fn();
+        mountComponentWithApollo({
+          props,
+          iterationQueryHandler,
+        });
+
+        expect(iterationQueryHandler).toHaveBeenNthCalledWith(1, expectedParams);
+      });
+
+      it('renders an iteration title', async () => {
+        mountComponentWithApollo({
+          props,
+          iterationQueryHandler: jest.fn().mockResolvedValue(mockIteration),
+        });
+
+        await waitForPromises();
+
+        expect(findTitle().text()).toContain(mockIterationNode.title);
+      });
+    });
+  });
 
   const mountComponent = ({ props = defaultProps, loading = false } = {}) => {
     wrapper = shallowMount(IterationReport, {

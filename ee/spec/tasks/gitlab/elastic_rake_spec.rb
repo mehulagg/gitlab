@@ -21,17 +21,13 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
     end
 
     context 'when SKIP_ALIAS environment variable is set' do
-      let(:secondary_index_name) { "gitlab-test-#{Time.now.strftime("%Y%m%d-%H%M")}"}
-
       before do
         stub_env('SKIP_ALIAS', '1')
       end
 
       after do
-        es_helper.delete_index(index_name: secondary_index_name)
+        es_helper.client.indices.delete(index: "#{es_helper.target_name}*")
       end
-
-      subject { run_rake_task('gitlab:elastic:create_empty_index', secondary_index_name) }
 
       it 'does not alias the new index' do
         expect { subject }.not_to change { es_helper.alias_exists?(name: es_helper.target_name) }
@@ -42,10 +38,6 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
         es_helper.delete_index(index_name: migration_index_name)
 
         expect { subject }.not_to change { es_helper.index_exists?(index_name: migration_index_name) }
-      end
-
-      it 'creates an index at the specified name' do
-        expect { subject }.to change { es_helper.index_exists?(index_name: secondary_index_name) }.from(false).to(true)
       end
 
       Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.each do |class_name|

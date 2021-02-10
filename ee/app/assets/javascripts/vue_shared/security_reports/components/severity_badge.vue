@@ -22,7 +22,7 @@ export default {
       return Object.keys(SEVERITY_CLASS_NAME_MAP).includes(this.severityKey);
     },
     severityKey() {
-      return this.severity.toLowerCase();
+      return this.severity?.toLowerCase();
     },
     className() {
       return SEVERITY_CLASS_NAME_MAP[this.severityKey];

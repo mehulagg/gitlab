@@ -328,6 +328,7 @@ module ApplicationSettingsHelper
       :email_restrictions_enabled,
       :email_restrictions,
       :issues_create_limit,
+      :notes_create_limit,
       :raw_blob_request_limit,
       :project_import_limit,
       :project_export_limit,
@@ -339,7 +340,8 @@ module ApplicationSettingsHelper
       :container_registry_delete_tags_service_timeout,
       :rate_limiting_response_text,
       :container_registry_expiration_policies_worker_capacity,
-      :container_registry_cleanup_tags_service_max_list_size
+      :container_registry_cleanup_tags_service_max_list_size,
+      :keep_latest_artifact
     ]
   end
 

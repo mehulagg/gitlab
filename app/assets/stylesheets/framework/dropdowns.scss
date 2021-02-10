@@ -525,7 +525,7 @@
 
       &.is-active {
         /* stylelint-disable-next-line function-url-quotes */
-        background: url(asset_path('checkmark.png')) no-repeat 14px 8px;
+        background: url(asset_path('checkmark.png')) no-repeat 14px center;
       }
     }
   }
@@ -1091,19 +1091,5 @@ header.header-content .dropdown-menu.frequent-items-dropdown-menu {
 .gl-new-dropdown {
   .gl-dropdown-menu-wide {
     width: $gl-dropdown-width-wide;
-  }
-}
-
-.gl-dropdown-item-deprecated-adapter {
-  .dropdown-item {
-    align-items: flex-start;
-
-    .gl-new-dropdown-item-text-primary {
-      @include gl-font-weight-bold;
-    }
-
-    .gl-new-dropdown-item-text-secondary {
-      color: inherit;
-    }
   }
 }

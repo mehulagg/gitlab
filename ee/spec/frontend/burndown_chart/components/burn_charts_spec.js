@@ -10,7 +10,7 @@ import TimeboxSummaryCards from 'ee/burndown_chart/components/timebox_summary_ca
 import { useFakeDate } from 'helpers/fake_date';
 import { day1, day2, day3, day4 } from '../mock_data';
 
-function fakeDate({ date }) {
+function useFakeDateFromDay({ date }) {
   const [year, month, day] = date.split('-');
 
   useFakeDate(year, month - 1, day);
@@ -201,12 +201,12 @@ describe('burndown_chart', () => {
 
   // some separate tests for the update function since it has a bunch of logic
   describe('padSparseBurnupData function', () => {
+    useFakeDateFromDay(day4);
+
     beforeEach(() => {
       createComponent({
         props: { startDate: day1.date, dueDate: day4.date },
       });
-
-      fakeDate(day4);
     });
 
     it('pads data from startDate if no startDate values', () => {
@@ -236,15 +236,18 @@ describe('burndown_chart', () => {
       });
     });
 
-    it('if dueDate is in the future, pad data up to current date using last existing value', () => {
-      fakeDate(day3);
+    describe('when dueDate is in the future', () => {
+      // day3 is before the day4 we set to dueDate in the beforeEach
+      useFakeDateFromDay(day3);
 
-      const result = wrapper.vm.padSparseBurnupData([day1, day2]);
+      it('pad data up to current date using last existing value', () => {
+        const result = wrapper.vm.padSparseBurnupData([day1, day2]);
 
-      expect(result.length).toBe(3);
-      expect(result[2]).toEqual({
-        ...day2,
-        date: day3.date,
+        expect(result.length).toBe(3);
+        expect(result[2]).toEqual({
+          ...day2,
+          date: day3.date,
+        });
       });
     });
 

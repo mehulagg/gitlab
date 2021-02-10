@@ -1,6 +1,7 @@
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
+import * as urlUtility from '~/lib/utils/url_utility';
 
 const buttons = [
   {
@@ -62,6 +63,20 @@ describe('Split Button', () => {
 
     expect(wrapper.emitted('button1Action')).toBeDefined();
     expect(wrapper.emitted('button1Action')).toHaveLength(1);
+  });
+
+  it('visits url if href property is specified', () => {
+    const spy = jest.spyOn(urlUtility, 'visitUrl').mockReturnValue({});
+    const href = 'https://gitlab.com';
+
+    createComponent({
+      buttons: [{ ...buttons.slice(0), action: undefined, href }],
+    });
+
+    findDropdown().vm.$emit('click');
+
+    expect(wrapper.emitted('button1Action')).toBeUndefined();
+    expect(spy).toHaveBeenCalledWith(href, true);
   });
 
   it('renders a correct amount of dropdown items', () => {

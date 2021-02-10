@@ -559,6 +559,25 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#default_pipeline_lock' do
+    let(:project) { build_stubbed(:project) }
+
+    subject { project.default_pipeline_lock }
+
+    where(:keep_latest_artifact_enabled, :result_pipeline_locked) do
+      false        | :unlocked
+      true         | :artifacts_locked
+    end
+
+    before do
+      allow(project).to receive(:keep_latest_artifacts_available?).and_return(keep_latest_artifact_enabled)
+    end
+
+    with_them do
+      it { expect(subject).to eq(result_pipeline_locked) }
+    end
+  end
+
   describe '#autoclose_referenced_issues' do
     context 'when DB entry is nil' do
       let(:project) { build(:project, autoclose_referenced_issues: nil) }
@@ -6376,20 +6395,7 @@ RSpec.describe Project, factory_default: :keep do
   describe 'with Debian Distributions' do
     subject { create(:project) }
 
-    let!(:distributions) { create_list(:debian_project_distribution, 2, :with_file, container: subject) }
-
-    it 'removes distribution files on removal' do
-      distribution_file_paths = distributions.map do |distribution|
-        distribution.file.path
-      end
-
-      expect { subject.destroy }
-        .to change {
-          distribution_file_paths.select do |path|
-            File.exist? path
-          end.length
-        }.from(distribution_file_paths.length).to(0)
-    end
+    it_behaves_like 'model with Debian distributions'
   end
 
   describe '#environments_for_scope' do

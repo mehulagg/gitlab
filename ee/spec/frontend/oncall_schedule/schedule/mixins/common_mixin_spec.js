@@ -7,9 +7,13 @@ import * as dateTimeUtility from '~/lib/utils/datetime_utility';
 describe('Schedule Common Mixins', () => {
   // January 3rd, 2018
   useFakeDate(2018, 0, 3);
-  const today = new Date();
 
+  let today;
   let wrapper;
+
+  beforeEach(() => {
+    today = new Date();
+  });
 
   const component = {
     template: `<span></span>`,

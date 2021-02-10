@@ -266,6 +266,15 @@ RSpec.describe SearchHelper do
       }
     }
 
+    mock_updated_sort = {
+      title: _('Last updated'),
+      sortable: true,
+      sortParam: {
+        asc: 'updated_asc',
+        desc: 'updated_desc'
+      }
+    }
+
     before do
       allow(self).to receive(:current_user).and_return(user)
     end
@@ -276,13 +285,76 @@ RSpec.describe SearchHelper do
       end
 
       it 'returns the correct data' do
-        expect(search_sort_options).to eq([mock_relevant_sort, mock_created_sort])
+        expect(search_sort_options).to eq([mock_relevant_sort, mock_created_sort, mock_updated_sort])
       end
     end
 
     context 'with basic search enabled' do
       it 'returns the correct data' do
-        expect(search_sort_options).to eq([mock_created_sort])
+        expect(search_sort_options).to eq([mock_created_sort, mock_updated_sort])
+      end
+    end
+  end
+
+  describe '#search_nav_tabs' do
+    let(:current_user) { nil }
+
+    subject { search_nav_tabs }
+
+    context 'when @show_snippets is present' do
+      before do
+        @show_snippets = 1
+      end
+
+      it { is_expected.to eq([:snippet_titles]) }
+    end
+
+    context 'when @project is present' do
+      before do
+        @project = 1
+        allow(self).to receive(:project_search_tabs?).with(anything).and_return(true)
+      end
+
+      it { is_expected.to eq([:blobs, :issues, :merge_requests, :milestones, :notes, :wiki_blobs, :commits, :users]) }
+    end
+
+    context 'when @show_snippets and @project are not present' do
+      context 'when user has access to read users' do
+        before do
+          allow(self).to receive(:can?).with(current_user, :read_users_list).and_return(true)
+        end
+
+        context 'when elasticsearch is enabled' do
+          before do
+            allow(self.search_service).to receive(:use_elasticsearch?).and_return(true)
+          end
+
+          it { is_expected.to eq([:projects, :issues, :merge_requests, :milestones, :notes, :blobs, :commits, :wiki_blobs, :users]) }
+
+          context 'when show_epics? is true' do
+            before do
+              allow(self.search_service).to receive(:show_epics?).and_return(true)
+            end
+
+            it { is_expected.to eq([:projects, :issues, :merge_requests, :milestones, :epics, :notes, :blobs, :commits, :wiki_blobs, :users]) }
+          end
+        end
+
+        context 'when elasticsearch is disabled' do
+          before do
+            allow(self.search_service).to receive(:use_elasticsearch?).and_return(false)
+          end
+
+          it { is_expected.to eq([:projects, :issues, :merge_requests, :milestones, :users]) }
+
+          context 'when show_epics? is true' do
+            before do
+              allow(self.search_service).to receive(:show_epics?).and_return(true)
+            end
+
+            it { is_expected.to eq([:projects, :issues, :merge_requests, :milestones, :epics, :users]) }
+          end
+        end
       end
     end
   end

@@ -5,13 +5,13 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 comments: false
 ---
 
-# Get started with GitLab
+# Get started with GitLab **(FREE)**
 
 ## Organize
 
 Create projects and groups.
 
-- [Create a new project](../gitlab-basics/create-project.md)
+- [Create a new project](../user/project/working_with_projects.md#create-a-project)
 - [Create a new group](../user/group/index.md#create-a-new-group)
 
 ## Prioritize

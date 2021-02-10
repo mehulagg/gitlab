@@ -207,19 +207,41 @@ To add a redirect:
    1. Assign the MR to a technical writer for review and merge.
 1. If the redirect is to one of the 4 internal docs projects (not an external URL),
    create an MR in [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs):
-   1. Update [`_redirects`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/content/_redirects)
+   1. Update [`content/_data/redirects.yaml`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/content/_data/redirects.yaml)
       with one redirect entry for each renamed or moved file. This code works for
-      <https://docs.gitlab.com> links only:
+      <https://docs.gitlab.com> links only. Keep them alphabetically sorted:
 
-      ```plaintext
-      /ee/path/to/old_file.html /ee/path/to/new_file 302 # To be removed after YYYY-MM-DD
+      ```yaml
+      - from: /ee/path/to/old_file.html
+        to: /ee/path/to/new_file.html
+        remove_date: YYYY-MM-DD
       ```
 
-      The path must start with the internal project directory `/ee` for `gitlab`,
-      `/gitlab-runner`, `/omnibus-gitlab` or `charts`, and must end with `.html`.
+      The path must start with the internal project directory `/ee`,
+      `/runner`, `/omnibus` or `/charts`, and end with either `.html` or `/`
+      for a clean URL.
 
-      `_redirects` entries can be removed after one year.
+      If the `from:` redirect is an `index.html` file, add a duplicate entry for
+      the `/` URL (without `index.html). For example:
 
+      ```yaml
+      - from: /ee/user/project/operations/index.html
+        to: /ee/operations/index.html
+        remove_date: 2021-11-01
+      - from: /ee/user/project/operations/
+        to: /ee/operations/index.html
+        remove_date: 2021-11-01
+      ```
+
+      The `remove_date` should be one year after the redirect is submitted.
+
+   1. Run the Rake task in the `gitlab-docs` project to populate the `_redirects` file:
+
+      ```shell
+      bundle exec rake redirects
+      ```
+
+   1. Add both `content/_redirects` and `content/_data/redirects.yaml` to your MR.
 1. Search for links to the old file. You must find and update all links to the old file:
 
    - In <https://gitlab.com/gitlab-com/www-gitlab-com>, search for full URLs:
@@ -306,68 +328,51 @@ with GitLab 11.4. Meaning, it's available only with `/help` from GitLab
 
 ### Linking to `/help`
 
-When you're building a new feature, you may need to link the documentation
-from GitLab, the application. This is normally done in files inside the
-`app/views/` directory with the help of the `help_page_path` helper method.
+When you're building a new feature, you may need to link to the documentation
+from the GitLab application. This is normally done in files inside the
+`app/views/` directory, with the help of the `help_page_path` helper method.
 
-In its simplest form, the HAML code to generate a link to the `/help` page is:
+The `help_page_path` contains the path to the document you want to link to,
+with the following conventions:
 
-```haml
-= link_to 'Help page', help_page_path('user/permissions')
-```
+- It's relative to the `doc/` directory in the GitLab repository.
+- It omits the `.md` extension.
+- It doesn't end with a slash (`/`).
 
-The `help_page_path` contains the path to the document you want to link to with
-the following conventions:
+The help text follows the [Pajamas guidelines](https://design.gitlab.com/usability/helping-users/#formatting-help-content).
 
-- it is relative to the `doc/` directory in the GitLab repository
-- the `.md` extension must be omitted
-- it must not end with a slash (`/`)
+Use the following special cases depending on the context, ensuring all links
+are inside `_()` so they can be translated:
 
-Below are some special cases where should be used depending on the context.
-You can combine one or more of the following:
+- Linking to a doc page. In its most basic form, the HAML code to generate a
+  link to the `/help` page is:
 
-1. **Linking to an anchor link.** Use `anchor` as part of the `help_page_path`
-   method:
+  ```haml
+  = link_to _('Learn more.'), help_page_path('user/permissions'), target: '_blank', rel: 'noopener noreferrer'
+  ```
 
-   ```haml
-   = link_to 'Help page', help_page_path('user/permissions', anchor: 'anchor-link')
-   ```
+- Linking to an anchor link. Use `anchor` as part of the `help_page_path`
+  method:
 
-1. **Opening links in a new tab.** This should be the default behavior:
+  ```haml
+  = link_to _('Learn more.'), help_page_path('user/permissions', anchor: 'anchor-link'), target: '_blank', rel: 'noopener noreferrer'
+  ```
 
-   ```haml
-   = link_to 'Help page', help_page_path('user/permissions'), target: '_blank'
-   ```
+- Using links inline of some text. First, define the link, and then use it. In
+  this example, `link_start` is the name of the variable that contains the
+  link:
 
-1. **Using a question icon.** Usually used in settings where a long
-   description cannot be used, like near checkboxes. You can basically use
-   any GitLab SVG icon, but prefer the `question-o`:
+  ```haml
+  - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/permissions') }
+  %p= _("This is a text describing the option/feature in a sentence. %{link_start}Learn more.%{link_end}").html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
+  ```
 
-   ```haml
-   = link_to sprite_icon('question-o'), help_page_path('user/permissions')
-   ```
+- Using a button link. Useful in places where text would be out of context with
+  the rest of the page layout:
 
-1. **Using a button link.** Useful in places where text would be out of context
-   with the rest of the page layout:
-
-   ```haml
-   = link_to 'Help page', help_page_path('user/permissions'),  class: 'btn btn-info'
-   ```
-
-1. **Using links inline of some text.**
-
-   ```haml
-   Description to #{link_to 'Help page', help_page_path('user/permissions')}.
-   ```
-
-1. **Adding a period at the end of the sentence.** Useful when you don't want
-   the period to be part of the link:
-
-   ```haml
-   = succeed '.' do
-     Learn more in the
-     = link_to 'Help page', help_page_path('user/permissions')
-   ```
+  ```haml
+  = link_to _('Learn more.'), help_page_path('user/permissions'),  class: 'btn btn-info', target: '_blank', rel: 'noopener noreferrer'
+  ```
 
 #### Linking to `/help` in JavaScript
 

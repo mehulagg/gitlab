@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, how-to
 ---
 
-# Sourcegraph integration
+# Sourcegraph integration **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/16556) in GitLab 12.5.
 > - Note that this integration is in BETA and deployed [behind a feature flag](#enable-the-sourcegraph-feature-flag) disabled by default. Self-managed instances can opt to enable it.
@@ -87,9 +87,12 @@ You can skip this step if you already have your GitLab repositories searchable i
 
 If a GitLab administrator has enabled Sourcegraph, you can enable this feature in your user preferences.
 
-1. In GitLab, click your avatar in the top-right corner, then click **Settings**. On the left-hand nav, click **Preferences**.
-1. Under **Integrations**, find the **Sourcegraph** section.
-1. Check **Enable Sourcegraph**.
+In GitLab:
+
+1. In the top-right corner, select your avatar.
+1. Select **Preferences**.
+1. In the **Integrations** section, select the checkbox under **Sourcegraph**.
+1. Select **Save changes**.
 
 ![Sourcegraph user preferences](img/sourcegraph_user_preferences_v12_5.png)
 

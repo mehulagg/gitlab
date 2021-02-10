@@ -142,4 +142,24 @@ spec:
 `);
     });
   });
+
+  describe('when labels are not empty', () => {
+    beforeEach(() => {
+      policy.labels = { 'app.gitlab.com/proj': '21' };
+    });
+
+    it('returns yaml representation', () => {
+      expect(toYaml(policy)).toEqual(`apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: test-policy
+  labels:
+    app.gitlab.com/proj: '21'
+spec:
+  endpointSelector:
+    matchLabels:
+      network-policy.gitlab.com/disabled_by: gitlab
+`);
+    });
+  });
 });

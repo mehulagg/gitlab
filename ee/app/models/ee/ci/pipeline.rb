@@ -99,16 +99,6 @@ module EE
         batch_lookup_report_artifact_for_file_type(:license_scanning).present?
       end
 
-      def security_reports(report_types: [])
-        reports_scope = report_types.empty? ? ::Ci::JobArtifact.security_reports : ::Ci::JobArtifact.security_reports(file_types: report_types)
-
-        ::Gitlab::Ci::Reports::Security::Reports.new(self).tap do |security_reports|
-          latest_report_builds(reports_scope).each do |build|
-            build.collect_security_reports!(security_reports)
-          end
-        end
-      end
-
       def license_scanning_report
         ::Gitlab::Ci::Reports::LicenseScanning::Report.new.tap do |license_management_report|
           latest_report_builds(::Ci::JobArtifact.license_scanning_reports).each do |build|
