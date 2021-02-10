@@ -191,11 +191,11 @@ with one another. To enable this, the [feature flag](https://docs.gitlab.com/run
 variables:
   FF_NETWORK_PER_BUILD: "true" # enable network per build so all services can communicate on the same network
 
-services: # use services to link the nodegoat container to the dast job
+services: # use services to link the container to the dast job
   - name: mongo:latest
     alias: mongo
   - name: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-    alias: vulnapp
+    alias: yourapp
 ```
 
 ### When DAST scans run
