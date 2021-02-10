@@ -820,6 +820,10 @@ Empty directories and unneeded config settings may accumulate in a repository an
 slow down Git operations. Gitaly can schedule a daily background task with a maximum duration
 to clean up these items and improve performance.
 
+WARNING:
+This is an experimental feature and may place significant load on the host while running.
+Make sure to schedule this during off-peak hours and keep the duration short.
+
 **For Omnibus GitLab**
 
 1. Edit `/etc/gitlab/gitlab.rb` and add:
