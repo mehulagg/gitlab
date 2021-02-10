@@ -84,15 +84,13 @@ All users can log in and out of the GitLab instance.
 
 In maintenance mode:
 
-- No new jobs are started. Already running jobs stay in 'running'
-  status but their logs are no longer updated.
-- Pipelines fail, including scheduled pipelines that are already running when maintenance
+- No new jobs or pipelines, scheduled or otherwise, will start in maintenance mode.
+- Those jobs that were already running, will continue to show status as 'running' in the Web UI, even if they finish running on GitLab Runner.
   mode is turned on. You can restart them after maintenance mode is turned off.
 - If the job has been in 'running' state for longer than the project's time limit,
   it will **not** time out.
 - Pipelines cannot be started, retried or canceled in maintenance mode.
   No new jobs can be created either.
-- No new scheduled pipelines can start.
 Once maintenance mode is disabled, new jobs are picked up again. The jobs that were
 in the running state before enabling maintenance mode, will resume, and their logs
 will start getting updated again.
