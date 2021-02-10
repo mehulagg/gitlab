@@ -34,31 +34,31 @@ RSpec.describe IncidentManagement::OncallRotation do
       end
     end
 
-    describe 'interval start/end time' do
+    describe 'active period start/end time' do
       context 'missing values' do
         before do
           allow(subject).to receive(stubbed_field).and_return('08:00')
         end
 
         context 'start time set' do
-          let(:stubbed_field) { :interval_start }
+          let(:stubbed_field) { :active_period_start }
 
-          it { is_expected.to validate_presence_of(:interval_end) }
+          it { is_expected.to validate_presence_of(:active_period_end) }
         end
 
         context 'end time set' do
-          let(:stubbed_field) { :interval_end }
+          let(:stubbed_field) { :active_period_end }
 
-          it { is_expected.to validate_presence_of(:interval_start) }
+          it { is_expected.to validate_presence_of(:active_period_start) }
         end
       end
 
       context 'hourly shifts' do
         subject { build(:incident_management_oncall_rotation, schedule: schedule, name: 'Test rotation', length_unit: :hours) }
 
-        it 'raises a validation error if an interval is set' do
-          subject.interval_start = '08:00'
-          subject.interval_end = '17:00'
+        it 'raises a validation error if an active period is set' do
+          subject.active_period_start = '08:00'
+          subject.active_period_end = '17:00'
 
           expect(subject.valid?).to eq(false)
           expect(subject.errors.full_messages).to include(/Restricted shift times are not available for hourly shifts/)
@@ -66,12 +66,12 @@ RSpec.describe IncidentManagement::OncallRotation do
       end
 
       context 'end time after start time' do
-        it 'raises a validation error if an interval is set' do
-          subject.interval_start = '17:00'
-          subject.interval_end = '08:00'
+        it 'raises a validation error if an active period is set' do
+          subject.active_period_start = '17:00'
+          subject.active_period_end = '08:00'
 
           expect(subject.valid?).to eq(false)
-          expect(subject.errors.full_messages).to include('Interval end must be later than interval start')
+          expect(subject.errors.full_messages).to include('Active period end must be later than active period start')
         end
       end
     end
@@ -105,14 +105,14 @@ RSpec.describe IncidentManagement::OncallRotation do
   end
 
   describe '#shifts_per_cycle' do
-    let(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule, length: 5, length_unit: length_unit, interval_start: interval_start, interval_end: interval_end) }
+    let(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule, length: 5, length_unit: length_unit, active_period_start: active_period_start, active_period_end: active_period_end) }
     let(:length_unit) { :weeks }
-    let(:interval_start) { nil }
-    let(:interval_end) { nil }
+    let(:active_period_start) { nil }
+    let(:active_period_end) { nil }
 
     subject { rotation.shifts_per_cycle }
 
-    context 'when no shift intervals set up' do
+    context 'when no shift active period set up' do
       it { is_expected.to eq(1) }
     end
 
@@ -122,9 +122,9 @@ RSpec.describe IncidentManagement::OncallRotation do
       it { is_expected.to eq(1) }
     end
 
-    context 'with shift intervals' do
-      let(:interval_start) { '08:00' }
-      let(:interval_end) { '17:00' }
+    context 'with shift active periods' do
+      let(:active_period_start) { '08:00' }
+      let(:active_period_end) { '17:00' }
 
       context 'weeks length unit' do
         let(:length_unit) { :weeks }

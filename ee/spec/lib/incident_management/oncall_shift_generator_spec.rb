@@ -83,15 +83,15 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
          [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC'],
          [:participant3, '2020-12-18 00:00:00 UTC', '2020-12-23 00:00:00 UTC']]
 
-      context 'with shift interval times set' do
+      context 'with shift active period times set' do
         before do
           rotation.update!(
-            interval_start: "08:00",
-            interval_end: "17:00"
+            active_period_start: "08:00",
+            active_period_end: "17:00"
           )
         end
 
-        it 'splits the shifts daily by each interval' do
+        it 'splits the shifts daily by each active period' do
           expect(shifts.count).to eq (ends_at.to_date - starts_at.to_date).to_i
         end
 
@@ -116,7 +116,7 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
             )
           end
 
-          it 'splits the shifts daily by each interval' do
+          it 'splits the shifts daily by each active period' do
             expect(shifts.count).to eq (ends_at.to_date - starts_at.to_date).to_i
           end
 
@@ -761,29 +761,29 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
           [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC']
       end
 
-      context 'with shift interval times set' do
+      context 'with shift active period times set' do
         before do
           rotation.update!(
-            interval_start: "08:00",
-            interval_end: "17:00"
+            active_period_start: "08:00",
+            active_period_end: "17:00"
           )
         end
 
-        context 'when timestamp is the start of rotation, but before interval' do
+        context 'when timestamp is the start of rotation, but before active period' do
           let(:timestamp) { rotation_start_time }
 
           it { is_expected.to be_nil }
         end
 
-        context 'when timestamp is the same time as interval start' do
+        context 'when timestamp is the same time as active period start' do
           let(:timestamp) { rotation_start_time.change(hour: 8) }
 
           it_behaves_like 'unsaved shift',
-            'the first shift of the shift cycle (split by the interval)',
+            'the first shift of the shift cycle (split by the active period)',
             [:participant1, '2020-12-08 08:00:00 UTC', '2020-12-08 17:00:00 UTC']
         end
 
-        context 'when timestamp is the after the inerval ends' do
+        context 'when timestamp is the after the active period ends' do
           let(:timestamp) { rotation_start_time.change(hour: 17, min: 1) }
 
           it { is_expected.to be_nil }

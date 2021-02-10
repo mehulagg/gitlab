@@ -15,6 +15,8 @@ RSpec.describe GitlabSchema.types['IncidentManagementOncallRotation'] do
       length
       length_unit
       participants
+      active_period_start
+      active_period_end
       shifts
     ]
 

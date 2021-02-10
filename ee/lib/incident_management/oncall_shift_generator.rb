@@ -112,22 +112,22 @@ module IncidentManagement
     def shift_cycle_for(elapsed_shift_cycle_count, shift_cycle_starts_at)
       participant = participants[participant_rank(elapsed_shift_cycle_count)]
 
-      if rotation.has_shift_intervals?
+      if rotation.has_shift_active_period?
         # the number of shifts we expect to be included in the
         # shift_cycle. 1.week is the same as 7.days.
         expected_shift_count = rotation.shifts_per_cycle
         (0..expected_shift_count - 1).map do |shift_count|
-          # we know the start/end time of the intervals,
+          # we know the start/end time of the active period,
           # so the date is dependent on the cycle start time
           # and how many days have elapsed in the cycle.
           # EX) shift_cycle_starts_at = Monday @ 8am
-          #     interval_starts_at = 8am
-          #     interval_ends_at = 5pm
+          #     active_period_start = 8am
+          #     active_period_end = 5pm
           #     expected_shift_count = 14          -> pretend it's a 2-week rotation
           #     shift_count = 2                    -> we're calculating the shift for the 3rd day
           # starts_at = Monday 00:00:00 + 8.hours + 2.days => Thursday 08:00:00
 
-          starts_at, ends_at = rotation.unrestricted_interval(shift_cycle_starts_at + shift_count.days)
+          starts_at, ends_at = rotation.active_period(shift_cycle_starts_at + shift_count.days)
 
           shift_for(participant, starts_at, ends_at)
         end

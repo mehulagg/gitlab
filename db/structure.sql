@@ -13174,11 +13174,9 @@ CREATE TABLE incident_management_oncall_rotations (
     length_unit smallint NOT NULL,
     starts_at timestamp with time zone NOT NULL,
     name text NOT NULL,
-    interval_start text,
-    interval_end text,
-    CONSTRAINT check_3d3ac820ae CHECK ((char_length(interval_end) <= 5)),
-    CONSTRAINT check_5209fb5d02 CHECK ((char_length(name) <= 200)),
-    CONSTRAINT check_ddf508a656 CHECK ((char_length(interval_start) <= 5))
+    active_period_start text,
+    active_period_end text,
+    CONSTRAINT check_5209fb5d02 CHECK ((char_length(name) <= 200))
 );
 
 CREATE SEQUENCE incident_management_oncall_rotations_id_seq

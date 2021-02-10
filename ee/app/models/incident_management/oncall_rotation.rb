@@ -25,10 +25,10 @@ module IncidentManagement
     validates :length, presence: true, numericality: true
     validates :length_unit, presence: true
 
-    validates :interval_start, presence: true, if: :interval_end
-    validates :interval_end, presence: true, if: :interval_start
-    validate :interval_end_after_interval_start, if: :interval_start
-    validate :no_interval_for_hourly_shifts, if: :hours?
+    validates :active_period_start, presence: true, if: :active_period_end
+    validates :active_period_end, presence: true, if: :active_period_start
+    validate :active_period_end_after_start, if: :active_period_start
+    validate :no_active_period_for_hourly_shifts, if: :hours?
 
     scope :started, -> { where('starts_at < ?', Time.current) }
     scope :except_ids, -> (ids) { where.not(id: ids) }
@@ -46,54 +46,54 @@ module IncidentManagement
     end
 
     # The duration of a shift cycle, which is the time until the next participant is on-call.
-    # If a shift interval is setup then many shifts will be within a shift_cycle_duration.
+    # If a shift active period is setup then many shifts will be within a shift_cycle_duration.
     def shift_cycle_duration
       # As length_unit is an enum, input is guaranteed to be appropriate
       length.public_send(length_unit) # rubocop:disable GitlabSecurity/PublicSend
     end
 
     def shifts_per_cycle
-      return 1 unless has_shift_intervals?
+      return 1 unless has_shift_active_period?
 
       weeks? ? (7 * length) : length
     end
 
-    def has_shift_intervals?
+    def has_shift_active_period?
       return false if hours?
 
-      interval_start.present?
+      active_period_start.present?
     end
 
-    def interval_times
-      return unless has_shift_intervals?
+    def active_period_times
+      return unless has_shift_active_period?
 
-      strong_memoize(:interval_times) do
+      strong_memoize(:active_period_times) do
         {
-          start: interval_start.to_time,
-          end: interval_end.to_time
+          start: active_period_start.to_time,
+          end: active_period_end.to_time
         }
       end
     end
 
-    def unrestricted_interval(date)
+    def active_period(date)
       [
-        date.change(hour: interval_times[:start].hour, min: interval_times[:start].min),
-        date.change(hour: interval_times[:end].hour, min: interval_times[:end].min)
+        date.change(hour: active_period_times[:start].hour, min: active_period_times[:start].min),
+        date.change(hour: active_period_times[:end].hour, min: active_period_times[:end].min)
       ]
     end
 
     private
 
-    def interval_end_after_interval_start
-      return unless interval_start && interval_end
+    def active_period_end_after_start
+      return unless active_period_start && active_period_end
 
-      unless interval_end.to_time > interval_start.to_time
-        errors.add(:interval_end, _('must be later than interval start'))
+      unless active_period_end.to_time > active_period_start.to_time
+        errors.add(:active_period_end, _('must be later than active period start'))
       end
     end
 
-    def no_interval_for_hourly_shifts
-      if interval_start || interval_end
+    def no_active_period_for_hourly_shifts
+      if active_period_start || active_period_end
         errors.add(:length_unit, _('Restricted shift times are not available for hourly shifts'))
       end
     end

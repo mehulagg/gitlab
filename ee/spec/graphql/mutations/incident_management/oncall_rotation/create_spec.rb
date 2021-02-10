@@ -60,9 +60,9 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
         end
       end
 
-      context 'with interval times given' do
+      context 'with active period times given' do
         before do
-          args[:interval] = {
+          args[:active_period] = {
             from: '08:00',
             to: '17:00'
           }
@@ -75,11 +75,11 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
           )
         end
 
-        it 'saves the on-call rotation with interval times' do
+        it 'saves the on-call rotation with active period times' do
           rotation = resolve[:oncall_rotation]
 
-          expect(rotation.interval_start).to eql('08:00')
-          expect(rotation.interval_end).to eql('17:00')
+          expect(rotation.active_period_start).to eql('08:00')
+          expect(rotation.active_period_end).to eql('17:00')
         end
 
         context 'hours rotation length unit' do

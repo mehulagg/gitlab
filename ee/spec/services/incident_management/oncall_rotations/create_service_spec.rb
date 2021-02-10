@@ -142,38 +142,38 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
 
       it_behaves_like 'successfully creates rotation'
 
-      context 'with an interval given' do
-        let(:interval_start) { '08:00' }
-        let(:interval_end) { '17:00' }
+      context 'with an active period given' do
+        let(:active_period_start) { '08:00' }
+        let(:active_period_end) { '17:00' }
 
         before do
-          params[:interval_start] = interval_start
-          params[:interval_end] = interval_end
+          params[:active_period_start] = active_period_start
+          params[:active_period_end] = active_period_end
         end
 
-        shared_examples 'saved the interval times' do
-          it 'saves the interval times' do
+        shared_examples 'saved the active period times' do
+          it 'saves the active period times' do
             oncall_rotation = execute.payload[:oncall_rotation]
 
-            expect(oncall_rotation.interval_start).to eq(interval_start)
-            expect(oncall_rotation.interval_end).to eq(interval_end)
+            expect(oncall_rotation.active_period_start).to eq(active_period_start)
+            expect(oncall_rotation.active_period_end).to eq(active_period_end)
           end
         end
 
         it_behaves_like 'successfully creates rotation'
-        it_behaves_like 'saved the interval times'
+        it_behaves_like 'saved the active period times'
 
         context 'when only one interval is set' do
-          let(:interval_end) { nil }
+          let(:active_period_end) { nil }
 
-          it_behaves_like 'error response', "Interval end can't be blank"
+          it_behaves_like 'error response', "Active period end can't be blank"
         end
 
-        context 'when end interval is before start interval' do
-          let(:interval_start) { '17:00' }
-          let(:interval_end) { '08:00' }
+        context 'when end active time is before start active time' do
+          let(:active_period_start) { '17:00' }
+          let(:active_period_end) { '08:00' }
 
-          it_behaves_like 'error response', "Interval end must be later than interval start"
+          it_behaves_like 'error response', "Active period end must be later than active period start"
         end
       end
     end
