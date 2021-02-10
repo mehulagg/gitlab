@@ -849,15 +849,20 @@ problem.
 
 There is a [more structured, lower-level troubleshooting document](../administration/troubleshooting/elasticsearch.md) for when you experience other issues, including poor performance.
 
-### Known issues
+## Known issues
 
-[Elasticsearch `code_analyzer` doesn't account for all code cases](https://gitlab.com/groups/gitlab-org/-/epics/3621).
+### Elasticsearch `code_analyzer` doesn't account for all code cases
 
 The `code_analyzer` pattern and filter configuration is being evaluated for improvement. We have fixed [most edge cases](https://gitlab.com/groups/gitlab-org/-/epics/3621#note_363429094) that were not returning expected search results due to our pattern and filter configuration.
 
 Improvements to the `code_analyzer` pattern and filters are being discussed in [epic 3621](https://gitlab.com/groups/gitlab-org/-/epics/3621).
 
-### Reverting to Basic Search
+### Some binary files may not be searchable by name
+
+We made a change in GitLab 13.9 release where [binary file name is being indexed](https://gitlab.com/gitlab-org/gitlab/-/issues/301083). However, without indexing all projects data from scratch, only binary files that are added or updated after the GitLab 13.9 release are searchable.
+
+
+## Reverting to Basic Search
 
 Sometimes there may be issues with your Elasticsearch index data and as such
 GitLab will allow you to revert to "basic search" when there are no search
@@ -866,7 +871,7 @@ search" will behave as though you don't have Advanced Search enabled at all for
 your instance and search using other data sources (such as PostgreSQL data and Git
 data).
 
-### Data recovery: Elasticsearch is a secondary data store only
+## Data recovery: Elasticsearch is a secondary data store only
 
 The use of Elasticsearch in GitLab is only ever as a secondary data store.
 This means that all of the data stored in Elasticsearch can always be derived
