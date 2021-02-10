@@ -23,6 +23,7 @@ export default {
   <gl-modal
     modal-id="keyboard-shortcut-modal"
     size="lg"
+    data-testid="modal-shortcuts"
     :visible="true"
     :hide-footer="true"
     @hidden="$emit('hidden')"
