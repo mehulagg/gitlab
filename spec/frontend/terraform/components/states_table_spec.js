@@ -1,6 +1,7 @@
 import { GlIcon, GlTooltip } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { useFakeDate } from 'helpers/fake_date';
+import waitForPromises from 'helpers/wait_for_promises';
 import StateActions from '~/terraform/components/states_table_actions.vue';
 import StatesTable from '~/terraform/components/states_table.vue';
 
@@ -97,7 +98,7 @@ describe('StatesTable', () => {
 
   const createComponent = (propsData = defaultProps) => {
     wrapper = mount(StatesTable, { propsData });
-    return wrapper.vm.$nextTick();
+    return waitForPromises();
   };
 
   const findActions = () => wrapper.findAll(StateActions);
