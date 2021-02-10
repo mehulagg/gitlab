@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import store from '~/boards/stores';
 import ToggleEpicsSwimlanes from './components/toggle_epics_swimlanes.vue';
 

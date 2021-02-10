@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import ConfigToggle from './components/config_toggle.vue';
 
 export default (boardsStore) => {

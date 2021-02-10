@@ -1,9 +1,9 @@
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 
 import 'ee_else_ce/boards/models/issue';
 import 'ee_else_ce/boards/models/list';
 import VueApollo from 'vue-apollo';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import BoardSidebar from 'ee_else_ce/boards/components/board_sidebar';
 import initNewListDropdown from 'ee_else_ce/boards/components/new_list_dropdown';
 import boardConfigToggle from 'ee_else_ce/boards/config_toggle';

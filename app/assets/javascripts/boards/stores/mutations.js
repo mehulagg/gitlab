@@ -1,5 +1,5 @@
-import Vue from 'vue';
 import { pull, union } from 'lodash';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import { s__ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { formatIssue, moveIssueListHelper } from '../boards_util';

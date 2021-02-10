@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import ToggleFocus from './components/toggle_focus.vue';
 
 export default () => {

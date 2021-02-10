@@ -1,6 +1,6 @@
-import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { mapGetters } from 'vuex';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import store from '~/boards/stores';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import createDefaultClient from '~/lib/graphql';

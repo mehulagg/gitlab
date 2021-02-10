@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import boardsStore from '~/boards/stores/boards_store';
 import vuexStore from '~/boards/stores';
 import { fullMilestoneId, fullUserId } from '../../boards_util';

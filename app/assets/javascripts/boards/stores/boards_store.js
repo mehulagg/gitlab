@@ -2,7 +2,7 @@
 /* global List */
 /* global ListIssue */
 import { sortBy } from 'lodash';
-import Vue from 'vue';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import BoardsStoreEE from 'ee_else_ce/boards/stores/boards_store_ee';
 import {
   urlParamsToObject,

@@ -4,8 +4,8 @@
 /* eslint-disable no-new, @gitlab/no-runtime-template-compiler */
 
 import $ from 'jquery';
-import Vue from 'vue';
 import { GlLabel } from '@gitlab/ui';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { sprintf, __ } from '~/locale';
 import Sidebar from '~/right_sidebar';

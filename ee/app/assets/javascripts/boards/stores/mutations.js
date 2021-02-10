@@ -1,5 +1,5 @@
-import Vue from 'vue';
 import { union, unionBy } from 'lodash';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
 import { moveIssueListHelper } from '~/boards/boards_util';
 import { s__ } from '~/locale';

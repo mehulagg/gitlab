@@ -1,5 +1,5 @@
-import Vue from 'vue';
 import Vuex from 'vuex';
+import Vue from '~/lib/vue_with_runtime_compiler';
 import state from 'ee_else_ce/boards/stores/state';
 import getters from 'ee_else_ce/boards/stores/getters';
 import actions from 'ee_else_ce/boards/stores/actions';
