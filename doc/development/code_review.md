@@ -283,6 +283,8 @@ first time.
   you forget to remove any debugging code?
 - Consider providing instructions on how to test the merge request. This can be
   helpful for reviewers not familiar with the product feature or area of the codebase.
+- If you know your change depends on another being merged first, note it in the 
+  description and set a [MR Dependency].
 <!-- vale gitlab.FutureTense = NO -->
 - Be grateful for the reviewer's suggestions. ("Good call. I'll make that
   change.")
@@ -362,6 +364,7 @@ Before taking the decision to merge:
   Unless a strong case can be made for the violation, these should be resolved
   before merging. A comment must to be posted if the MR is merged with any failed job.
 - If the MR contains both Quality and non-Quality-related changes, the MR should be merged by the relevant maintainer for user-facing changes (backend, frontend, or database) after the Quality related changes are approved by a Software Engineer in Test.
+- Ensure there are no open dependencies by checking related issues for blocking issues. If blocked by one or more open MRs, set an [MR dependency](https://docs.gitlab.com/ee/user/project/merge_requests/merge_request_dependencies.html) and defer the merge. 
 
 If a merge request is fundamentally ready, but needs only trivial fixes (such as
 typos), consider demonstrating a [bias for
