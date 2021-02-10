@@ -14,12 +14,12 @@ import { typeSet } from '~/alerts_settings/constants';
 import alertFields from '../mocks/alertFields.json';
 import { defaultAlertSettingsConfig } from './util';
 
-const validSamplePayload = JSON.stringify(alertFields);
-const emptySamplePayload = '';
-
 describe('AlertsSettingsForm', () => {
   let wrapper;
   const mockToastShow = jest.fn();
+
+  const validSamplePayload = JSON.stringify(alertFields);
+  const emptySamplePayload = '';
 
   const createComponent = ({
     data = {},
