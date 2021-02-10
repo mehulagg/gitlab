@@ -1,5 +1,0 @@
----
-title: Convert External HTTP's hash query to query string
-merge_request: 53575
-author:
-type: fixed
