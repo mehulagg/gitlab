@@ -162,8 +162,8 @@ Nanoc layout), which is displayed at the top of the page if defined:
 ## Move or rename a page
 
 Moving or renaming a document is the same as changing its location. Be sure to
-assign a technical writer to any MR that renames or moves a page. Technical
-Writers can help with any questions and can review your change.
+assign a technical writer to any merge request that renames or moves a page.
+Technical Writers can help with any questions and can review your change.
 
 When moving or renaming a page, you must redirect browsers to the new page.
 This ensures users find the new page, and have the opportunity to update their
@@ -177,20 +177,21 @@ There are two types of redirects:
 - Redirects in a [`_redirects`](../../user/project/pages/redirects.md) file,
   for users who view the docs on [`docs.gitlab.com`](https://docs.gitlab.com).
 
-The Technical Writing team manages the process to regularly update the
-`_redirects` file.
+The Technical Writing team manages the [process](https://gitlab.com/gitlab-org/technical-writing/-/blob/master/.gitlab/issue_templates/tw-monthly-tasks.md)
+to regularly update the `_redirects` file.
 
 To add a redirect:
 
 1. Create a merge request in one of the internal docs projects (`gitlab`,
-   `gitlab-runner`, `omnibus-gitlab` or `charts`), depending on the location of
+   `gitlab-runner`, `omnibus-gitlab`, or `charts`), depending on the location of
    the file that's being moved, renamed, or removed.
 1. To move or rename the documentation file, create a new file with the new
    name or location, but don't delete the existing documentation file.
-1. In the old documentation file, add the redirect code for
-   `/help`. Use the following template exactly, and only change the links and
-   date. Use relative paths and `.md` for a redirect to another docs page. Use
-   the full URL (with `https://`) to redirect to a different project or site:
+1. In the original documentation file, add the redirect code for
+   `/help`. Use the following template exactly, and change only the links and
+   date. Use relative paths and `.md` for a redirect to another documentation
+   page. Use the full URL (with `https://`) to redirect to a different project or
+   site:
 
    ```markdown
    ---
@@ -203,25 +204,25 @@ To add a redirect:
    <!-- Before deletion, see: https://docs.gitlab.com/ee/development/documentation/#move-or-rename-a-page -->
    ```
 
-   Redirect files linking to docs in any of the 4 internal docs projects can be
-   removed after 3 months. Redirect files linking to external sites can be
-   removed after 1 year.
+   Redirect files linking to docs in any of the internal documentations projects
+   are removed after three months. Redirect files linking to external sites are
+   removed after one year.
 
-1. If the document being moved has any Disqus comments on it, follow the steps
-   described in [Redirections for pages with Disqus comments](#redirections-for-pages-with-disqus-comments).
+1. If the documentation page being moved has any Disqus comments on it, follow the
+   steps described in [Redirections for pages with Disqus comments](#redirections-for-pages-with-disqus-comments).
 1. If a documentation page you're removing includes images that aren't used
-   with any other documentation pages, be sure to use your MR to delete those
-   images from the repository.
-1. Assign the MR to a technical writer for review and merge.
-1. Search for links to the old file. You must find and update all links that point to the
-   old documentation file:
+   with any other documentation pages, be sure to use your merge request to delete
+   those images from the repository.
+1. Assign the merge request to a technical writer for review and merge.
+1. Search for links to the original documentation file. You must find and update all
+   links that point to the original documentation file:
 
    - In <https://gitlab.com/gitlab-com/www-gitlab-com>, search for full URLs:
      `grep -r "docs.gitlab.com/ee/path/to/file.html" .`
    - In <https://gitlab.com/gitlab-org/gitlab-docs/-/tree/master/content/_data>,
      search the navigation bar configuration files for the path with `.html`:
      `grep -r "path/to/file.html" .`
-   - In any of the 4 internal projects. This includes searching for links in the docs
+   - In any of the four internal projects. This includes searching for links in the docs
      and codebase. Search for all variations, including full URL and just the path.
      In macOS for example, go to the root directory of the `gitlab` project and run:
 
@@ -232,8 +233,8 @@ To add a redirect:
      grep -r "path/to/file" .
      ```
 
-     You may need to try variations of relative links as well, such as `../path/to/file`
-     or even `../file` to find every case.
+     You may need to try variations of relative links, such as `../path/to/file` or
+     `../file` to find every case.
 
 ### Redirections for pages with Disqus comments
 
