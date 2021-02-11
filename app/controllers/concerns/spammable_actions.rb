@@ -17,17 +17,19 @@ module SpammableActions
 
   private
 
-  def recaptcha_check_with_fallback(should_redirect = true, &fallback)
+  def recaptcha_check_with_fallback(should_redirect = true)
+    respond_to do |format|
+      format.html do
+        raise "DOES ANYTHING USE format.html?"
+      end
+    end
+
     if should_redirect && spammable.valid?
       redirect_to spammable_path
     elsif spammable.render_recaptcha?
       Gitlab::Recaptcha.load_configurations!
 
       respond_to do |format|
-        format.html do
-          render :verify
-        end
-
         format.json do
           locals = { spammable: spammable, script: false, has_submit: false }
           recaptcha_html = render_to_string(partial: 'shared/recaptcha_form', formats: :html, locals: locals)

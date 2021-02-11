@@ -142,7 +142,7 @@ class Projects::IssuesController < Projects::ApplicationController
 
     respond_to do |format|
       format.html do
-        recaptcha_check_with_fallback { render :new }
+        raise "DOES ANYTHING USE format.html?"
       end
       format.js do
         @link = @issue.attachment.url.to_js
