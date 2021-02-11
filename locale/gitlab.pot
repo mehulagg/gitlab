@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-msgid " %{project_name}#%{issuable_iid} &middot; opened %{issuable_created} by %{author}"
+msgid " %{project_name}#%{issuable_iid} &middot; opened %{issuable_created} by %{author} &middot; updated %{issuable_updated}"
 msgstr ""
 
 msgid " %{start} to %{end}"
