@@ -71,11 +71,13 @@ If you have project maintainer access you have the option to set up Service Desk
    contacts to continue working.
 
    WARNING:
-   This email address can be used by anyone to create an issue on this project, regardless
+   - This email address can be used by anyone to create an issue on this project, regardless
    of their access level to your GitLab instance. We recommend **putting this behind an alias on your email system** so it can be
    changed if needed. We also recommend **[enabling Akismet](../../integration/akismet.md)** on your GitLab
    instance to add spam checking to this service. Unblocked email spam would result in many spam
    issues being created.
+   - The unique internal email address will be visible as an information note to all project members in your GitLab instance. 
+   However, when using an email alias externally, an end user (issue creator) will not be able to see the internal email address displayed in the information note.
 
    If you have [templates](description_templates.md) in your repository, you can optionally select
    one from the selector menu to append it to all Service Desk issues.
