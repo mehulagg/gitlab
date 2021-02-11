@@ -54,8 +54,10 @@ module Gitlab
 
         threshold_value = threshold || threshold(key)
 
-        threshold_value > 0 &&
-          increment(key, scope, interval) > threshold_value
+        threshold_reached = threshold_value > 0 &&
+                              increment(key, scope, interval) > threshold_value
+
+        threshold_reached || external_limiter.throttled?(key)
       end
 
       # Increments the given cache key and increments the value by 1 with the
@@ -141,6 +143,31 @@ module Gitlab
       def application_settings
         Gitlab::CurrentSettings.current_application_settings
       end
+
+      def external_limiter
+        ExternalLimiter.new
+      end
+    end
+  end
+
+  class ExternalLimiter
+    def initialize
+      @url = 'http://localhost:4567/throttle'
+    end
+
+    def throttled?(throttle)
+      response = Gitlab::HTTP.post(
+        @url,
+        body: { throttle: throttle, context: Labkit::Context.current.to_h }.to_json,
+        timeout: { open_timeout: 0.1, read_timeout: 0.1, write_timeout: 0.1 },
+        allow_local_requests: true
+      )
+
+      response&.code == 406
+    rescue *Gitlab::HTTP::HTTP_ERRORS => e
+      # Logging and whatnot, but we want the request to continue, but now
+      # I want to see what's going on
+      raise e
     end
   end
 end
