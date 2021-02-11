@@ -35,4 +35,12 @@ RSpec.describe API::Entities::User do
       expect(subject[:bot]).to eq(true)
     end
   end
+
+  context 'with project bot user' do
+    let(:user) { create(:user, :project_bot) }
+
+    it 'does not expose project bot user name' do
+      expect(subject).not_to include(:name)
+    end
+  end
 end
