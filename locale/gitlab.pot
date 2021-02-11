@@ -2253,6 +2253,9 @@ msgstr ""
 msgid "AdminUsers|(Deactivated)"
 msgstr ""
 
+msgid "AdminUsers|(Group Managed Account)"
+msgstr ""
+
 msgid "AdminUsers|(Internal)"
 msgstr ""
 
