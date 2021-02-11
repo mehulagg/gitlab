@@ -148,15 +148,11 @@ export default {
       .then(({ data }) => {
         if (data?.boardListCreate?.errors.length) {
           commit(types.CREATE_LIST_FAILURE);
-          throw new Error(data.boardListCreate.errors[0]);
         } else {
           const list = data.boardListCreate?.list;
           dispatch('addList', list);
-          return list;
+          dispatch('highlightList', list.id);
         }
-      })
-      .then((list) => {
-        dispatch('highlightList', list.id);
       })
       .catch(() => commit(types.CREATE_LIST_FAILURE));
   },
