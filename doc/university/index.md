@@ -39,7 +39,7 @@ The GitLab University curriculum is composed of GitLab videos, screencasts, pres
 
 1. [An Overview of GitLab.com - Video](https://www.youtube.com/watch?v=WaiL5DGEMR4)
 1. [Why Use Git and GitLab - Slides](https://docs.google.com/a/gitlab.com/presentation/d/1RcZhFmn5VPvoFu6UMxhMOy7lAsToeBZRjLRn0LIdaNc/edit?usp=drive_web)
-1. [GitLab Basics - Article](../gitlab-basics/README.md)
+1. [GitLab Basics - Article](../gitlab-basics/index.md)
 1. [Git and GitLab Basics - Video](https://www.youtube.com/watch?v=03wb9FvO4Ak&index=5&list=PLFGfElNsQthbQu_IWlNOxul0TbS_2JH-e)
 1. [Git and GitLab Basics - Online Course](https://courses.platzi.com/classes/57-git-gitlab/2475-part-233-2/)
 1. [Comparison of GitLab Versions](https://about.gitlab.com/features/#compare)
