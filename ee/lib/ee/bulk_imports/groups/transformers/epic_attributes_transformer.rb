@@ -14,6 +14,7 @@ module EE
               .then { |data| add_parent(context, data) }
               .then { |data| add_children(context, data) }
               .then { |data| add_labels(context, data) }
+              .then { |data| add_events(context, data) }
           end
 
           private
@@ -45,6 +46,10 @@ module EE
             end
 
             data
+          end
+
+          def add_events(context, data)
+            data['events'] = data.dig('')
           end
         end
       end

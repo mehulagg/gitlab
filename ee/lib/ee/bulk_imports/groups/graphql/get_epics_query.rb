@@ -47,6 +47,12 @@ module EE
                         title
                       }
                     }
+                    events {
+                      nodes {
+                        action
+
+                      }
+                    }
                   }
                 }
               }
