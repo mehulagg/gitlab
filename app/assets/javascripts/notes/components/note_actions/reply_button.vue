@@ -2,6 +2,9 @@
 import { GlTooltipDirective, GlButton } from '@gitlab/ui';
 
 export default {
+  i18n: {
+    buttonText: __('Reply to comment'),
+  },
   name: 'ReplyButton',
   components: {
     GlButton,
@@ -21,8 +24,8 @@ export default {
     category="tertiary"
     size="small"
     icon="comment"
-    :title="__('Reply to comment')"
-    :aria-label="__('Reply to comment')"
+    :title="$options.i18n.buttonText"
+    :aria-label="$options.i18n.buttonText"
     @click="$emit('startReplying')"
   />
 </template>
