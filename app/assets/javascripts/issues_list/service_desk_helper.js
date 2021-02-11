@@ -16,22 +16,22 @@ export function generateMessages(emptyStateMeta) {
   } = emptyStateMeta;
 
   const serviceDeskSupportedTitle = __(
-    'Use Service Desk to connect with your users (e.g. to offer customer support) through email right inside GitLab',
+    'Use Service Desk to connect with your users and offer customer support through email right inside GitLab',
   );
 
   const serviceDeskSupportedMessage = __(
-    'Those emails automatically become issues (with the comments becoming the email conversation) listed here.',
+    'Issues created from Service Desk emails will appear here. Each comment becomes part of the email conversation.',
   );
 
   const commonDescription = `
   <span>${serviceDeskSupportedMessage}</span>
-  <a href="${serviceDeskHelpPage}">${__('Read more')}</a>`;
+  <a href="${serviceDeskHelpPage}">${__('Learn more.')}</a>`;
 
   return {
     serviceDeskEnabledAndCanEditProjectSettings: {
       title: serviceDeskSupportedTitle,
       svgPath,
-      description: `<p>${__('Have your users email')}
+      description: `<p>${__('Your users can send emails to')}
       <code>${serviceDeskAddress}</code>
       </p>
       ${commonDescription}`,
@@ -46,7 +46,7 @@ export function generateMessages(emptyStateMeta) {
       svgPath,
       description: commonDescription,
       primaryLink: editProjectPage,
-      primaryText: __('Turn on Service Desk'),
+      primaryText: __('Enable Service Desk'),
     },
     serviceDeskDisabledAndCannotEditProjectSettings: {
       title: serviceDeskSupportedTitle,
@@ -57,7 +57,7 @@ export function generateMessages(emptyStateMeta) {
       title: __('Service Desk is not supported'),
       svgPath,
       description: __(
-        'In order to enable Service Desk for your instance, you must first set up incoming email.',
+        'To enable Service Desk for your instance, you must first set up incoming email.',
       ),
       primaryLink: incomingEmailHelpPage,
       primaryText: __('More information'),
