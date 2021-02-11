@@ -4,10 +4,15 @@ module BulkImports
   module Pipeline
     extend ActiveSupport::Concern
     include Gitlab::ClassAttributes
+    include Runner
+
+    attr_reader :context
+
+    def initialize(context)
+      @context = context
+    end
 
     included do
-      include Runner
-
       private
 
       def extractor
