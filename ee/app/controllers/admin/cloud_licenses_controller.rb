@@ -8,11 +8,11 @@ class Admin::CloudLicensesController < Admin::ApplicationController
   before_action :require_cloud_license_enabled
 
   def show
-    if application_setting.cloud_license_auth_token.present?
+    # if application_setting.cloud_license_auth_token.present?
       render
-    else
-      render :missing
-    end
+    # else
+    #   render :missing
+    # end
   end
 
   private
