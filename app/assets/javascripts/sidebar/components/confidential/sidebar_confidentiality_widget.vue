@@ -3,7 +3,6 @@ import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 import SidebarConfidentialityForm from '~/sidebar/components/confidential/sidebar_confidentiality_form.vue';
 import { __, sprintf } from '~/locale';
-import Sidebar_confidentiality_form from './sidebar_confidentiality_form.vue';
 
 export default {
   tracking: {
@@ -38,11 +37,21 @@ export default {
       });
     },
   },
+  methods: {
+    closeForm() {
+      this.$refs.editable.collapse();
+    },
+  },
 };
 </script>
 
 <template>
-  <sidebar-editable-item :title="__('Confidentiality')" :tracking="$options.tracking" class="block">
+  <sidebar-editable-item
+    ref="editable"
+    :title="__('Confidentiality')"
+    :tracking="$options.tracking"
+    class="block"
+  >
     <template #collapsed>
       <div v-if="!confidential" data-testid="not-confidential">
         <gl-icon :size="16" name="eye" class="sidebar-item-icon inline" />
@@ -62,7 +71,11 @@ export default {
         <gl-icon :size="16" name="eye-slash" class="sidebar-item-icon inline is-active" />
         {{ confidentialText }}
       </div>
-      <sidebar-confidentiality-form :confidential="confidential" :issuable-type="issuableType" />
+      <sidebar-confidentiality-form
+        :confidential="confidential"
+        :issuable-type="issuableType"
+        @closeForm="closeForm"
+      />
     </template>
   </sidebar-editable-item>
 </template>
