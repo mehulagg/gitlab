@@ -5,6 +5,7 @@ module Clusters
     self.table_name = 'cluster_agents'
 
     belongs_to :project, class_name: '::Project' # Otherwise, it will load ::Clusters::Project
+    belongs_to :created_by_user, class_name: 'User', optional: true
 
     has_many :agent_tokens, class_name: 'Clusters::AgentToken'
 
