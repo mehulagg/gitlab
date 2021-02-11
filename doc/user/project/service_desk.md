@@ -54,38 +54,41 @@ Here's how Service Desk works for you:
 
 ## Configuring Service Desk
 
-NOTE:
-Service Desk is enabled on GitLab.com.
-You can skip step 1 below; you only need to enable it per project.
+Users with Maintainer and higher access in a project can configure Service Desk.
 
-If you have project maintainer access you have the option to set up Service Desk. Follow these steps:
+Service Desk issues are [confidential](issues/confidential_issues.md), so they are
+only visible to project members. In GitLab 11.7 we updated the generated email
+address format. The older format is still supported, so existing aliases or
+contacts still work.
 
-1. [Set up incoming email](../../administration/incoming_email.md#set-it-up) for the GitLab instance.
+If you have [templates](description_templates.md) in your repository, you can optionally select
+one from the selector menu to append it to all Service Desk issues.
+
+To enable Service Desk in your project:
+
+1. (GitLab self-managed only) [Set up incoming email](../../administration/incoming_email.md#set-it-up) for the GitLab instance.
    We recommend using [email sub-addressing](../../administration/incoming_email.md#email-sub-addressing),
-   but in GitLab 11.7 and later you can also use [catch-all mailboxes](../../administration/incoming_email.md#catch-all-mailbox).
-1. Navigate to your project's **Settings > General** and locate the **Service Desk** section.
+   but you can also use [catch-all mailboxes](../../administration/incoming_email.md#catch-all-mailbox).
+1. In a project, go to your project's **Settings > General** and locate the **Service Desk** section.
 1. Enable the **Activate Service Desk** toggle. This reveals a unique email address to email issues
-   to the project. These issues are [confidential](issues/confidential_issues.md), so they are
-   only visible to project members. Note that in GitLab 11.7, we updated the generated email
-   address's format. The older format is still supported, however, allowing existing aliases or
-   contacts to continue working.
+   to the project.
 
-   WARNING:
-   - This email address can be used by anyone to create an issue on this project, regardless
-   of their access level to your GitLab instance. We recommend **putting this behind an alias on your email system** so it can be
-   changed if needed. We also recommend **[enabling Akismet](../../integration/akismet.md)** on your GitLab
-   instance to add spam checking to this service. Unblocked email spam would result in many spam
-   issues being created.
-   - The unique internal email address will be visible as an information note to all project members in your GitLab instance. 
-   However, when using an email alias externally, an end user (issue creator) will not be able to see the internal email address displayed in the information note.
+Service Desk is now enabled for this project! To access it in a project, in the left sidebar, select 
+**Issues > Service Desk**.
 
-   If you have [templates](description_templates.md) in your repository, you can optionally select
-   one from the selector menu to append it to all Service Desk issues.
+WARNING:
+Anyone in your project can use the Service Desk email address to create an issue in this project, **regardless
+of their access level** to your GitLab instance.
 
-Service Desk is now enabled for this project! You should be able to access it from your project's
-**Issues** menu.
+To improve your project's security, we recommed the following:
 
-![Service Desk Navigation Item](img/service_desk_nav_item.png)
+- Put the Service Desk email address behind an alias on your email system so you can change it later.
+- [Enable Akismet](../../integration/akismet.md) on your GitLab instance to add spam checking to this service.
+  Unblocked email spam can result in many spam issues created.
+
+The unique internal email address is visible to all project members in your GitLab instance. 
+However, when using an email alias externally, an end user (issue creator) cannot see the internal
+email address displayed in the information note.
 
 ### Using customized email templates
 
