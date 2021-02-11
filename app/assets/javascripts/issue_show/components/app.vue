@@ -5,7 +5,6 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Poll from '~/lib/utils/poll';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { __, s__, sprintf } from '~/locale';
-import recaptchaModalImplementor from '~/vue_shared/mixins/recaptcha_modal_implementor';
 import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
 import eventHub from '../event_hub';
 import Service from '../services/index';
@@ -25,7 +24,6 @@ export default {
     formComponent,
     PinnedLinks,
   },
-  mixins: [recaptchaModalImplementor],
   props: {
     endpoint: {
       required: true,
@@ -350,7 +348,6 @@ export default {
       return this.service
         .updateIssuable(this.store.formState)
         .then((res) => res.data)
-        .then((data) => this.checkForSpam(data))
         .then((data) => {
           if (!window.location.pathname.includes(data.web_url)) {
             visitUrl(data.web_url);
@@ -361,28 +358,18 @@ export default {
           eventHub.$emit('close.form');
         })
         .catch((error = {}) => {
-          const { name, response = {} } = error;
+          const { message, response = {} } = error;
 
-          if (name === 'SpamError') {
-            this.openRecaptcha();
+          let errMsg = this.defaultErrorMessage;
+
+          if (response.data && response.data.errors) {
+            errMsg += `. ${response.data.errors.join(' ')}`;
           } else {
-            let errMsg = this.defaultErrorMessage;
-
-            if (response.data && response.data.errors) {
-              errMsg += `. ${response.data.errors.join(' ')}`;
-            }
-
-            createFlash(errMsg);
+            errMsg += message;
           }
+
+          createFlash(errMsg);
         });
-    },
-
-    closeRecaptchaModal() {
-      this.store.setFormState({
-        updateLoading: false,
-      });
-
-      this.closeRecaptcha();
     },
 
     deleteIssuable(payload) {
@@ -429,13 +416,6 @@ export default {
         :can-attach-file="canAttachFile"
         :enable-autocomplete="enableAutocomplete"
         :issuable-type="issuableType"
-      />
-
-      <recaptcha-modal
-        v-show="showRecaptcha"
-        ref="recaptchaModal"
-        :html="recaptchaHTML"
-        @close="closeRecaptchaModal"
       />
     </div>
     <div v-else>
