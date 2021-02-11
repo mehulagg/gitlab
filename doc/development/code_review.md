@@ -284,7 +284,7 @@ first time.
 - Consider providing instructions on how to test the merge request. This can be
   helpful for reviewers not familiar with the product feature or area of the codebase.
 - If you know your change depends on another being merged first, note it in the 
-  description and set a [MR Dependency].
+  description and set an [merge request dependency](../user/project/merge_requests/merge_request_dependencies.md).
 <!-- vale gitlab.FutureTense = NO -->
 - Be grateful for the reviewer's suggestions. ("Good call. I'll make that
   change.")
