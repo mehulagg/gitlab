@@ -22,6 +22,13 @@ class UserCalloutsController < ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def ensure_callout
+    user_callout = UserCallout.feature_names[feature_name]
+
+    unless user_callout
+      Gitlab::ErrorTracking.track_and_raise_for_dev_exception("Missing user callout feature name", feature_name: feature_name)
+      return
+    end
+
     current_user.callouts.find_or_create_by(feature_name: UserCallout.feature_names[feature_name])
   end
   # rubocop: enable CodeReuse/ActiveRecord

@@ -71,6 +71,12 @@ module UserCalloutsHelper
   private
 
   def user_dismissed?(feature_name, ignore_dismissal_earlier_than = nil)
+    puts 'feature_name'
+    puts feature_name
+    puts 'ignore_dismissal_earlier_than'
+    puts ignore_dismissal_earlier_than
+    puts 'current_user'
+    puts current_user
     return false unless current_user
 
     current_user.dismissed_callout?(feature_name: feature_name, ignore_dismissal_earlier_than: ignore_dismissal_earlier_than)

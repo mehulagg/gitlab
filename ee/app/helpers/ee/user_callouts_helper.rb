@@ -14,6 +14,7 @@ module EE
     PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
     THREAT_MONITORING_INFO         = 'threat_monitoring_info'
     EOA_BRONZE_PLAN_BANNER         = 'eoa_bronze_plan_banner'
+    EOA_BRONZE_PLAN_END_DATE       = '2022-01-26'
 
     def render_enable_hashed_storage_warning
       return unless show_enable_hashed_storage_warning?
@@ -94,6 +95,16 @@ module EE
     end
 
     def show_eoa_bronze_plan_banner?(namespace)
+      puts '::Feature.enabled?(:show_billing_eoa_banner)'
+      puts ::Feature.enabled?(:show_billing_eoa_banner)
+      puts 'Date.current < eoa_bronze_plan_end_date'
+      puts Date.current < eoa_bronze_plan_end_date
+      puts 'namespace.bronze_plan?'
+      puts namespace.bronze_plan?
+      puts 'user_dismissed?(EOA_BRONZE_PLAN_BANNER)'
+      puts user_dismissed?(EOA_BRONZE_PLAN_BANNER)
+      puts '(namespace.group? && namespace.has_owner?(current_user.id)) || !namespace.group?'
+      puts (namespace.group? && namespace.has_owner?(current_user.id)) || !namespace.group?
       return false unless ::Feature.enabled?(:show_billing_eoa_banner)
       return false unless Date.current < eoa_bronze_plan_end_date
       return false unless namespace.bronze_plan?
@@ -105,7 +116,7 @@ module EE
     private
 
     def eoa_bronze_plan_end_date
-      Date.parse('2022-01-26')
+      Date.parse(EOA_BRONZE_PLAN_END_DATE)
     end
 
     def hashed_storage_enabled?

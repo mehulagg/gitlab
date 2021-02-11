@@ -1802,6 +1802,8 @@ class User < ApplicationRecord
   end
 
   def dismissed_callout?(feature_name:, ignore_dismissal_earlier_than: nil)
+    puts 'self.callouts.with_feature_name(feature_name)'
+    puts self.callouts.with_feature_name(feature_name).inspect
     callouts = self.callouts.with_feature_name(feature_name)
     callouts = callouts.with_dismissed_after(ignore_dismissal_earlier_than) if ignore_dismissal_earlier_than
 
