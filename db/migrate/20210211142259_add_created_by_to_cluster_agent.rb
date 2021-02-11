@@ -10,7 +10,7 @@ class AddCreatedByToClusterAgent < ActiveRecord::Migration[6.0]
 
   def up
     unless column_exists?(:cluster_agents, :created_by_user_id)
-      add_column :cluster_agents, :created_by_user_id, :integer
+      add_column :cluster_agents, :created_by_user_id, :bigint
     end
 
     add_concurrent_index :cluster_agents, :created_by_user_id, name: INDEX_NAME

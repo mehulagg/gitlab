@@ -11024,7 +11024,7 @@ CREATE TABLE cluster_agents (
     updated_at timestamp with time zone NOT NULL,
     project_id bigint NOT NULL,
     name text NOT NULL,
-    created_by_user_id integer,
+    created_by_user_id bigint,
     CONSTRAINT check_3498369510 CHECK ((char_length(name) <= 255))
 );
 
