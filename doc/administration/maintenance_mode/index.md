@@ -86,7 +86,6 @@ In maintenance mode:
 
 - No new jobs or pipelines, scheduled or otherwise, will start in maintenance mode.
 - Those jobs that were already running, will continue to show status as 'running' in the Web UI, even if they finish running on GitLab Runner.
-  mode is turned on. 
 **Note** It is recommended that you restart already running pipelines after maintenance mode is turned off.
 - If the job has been in 'running' state for longer than the project's time limit,
   it will **not** time out.
