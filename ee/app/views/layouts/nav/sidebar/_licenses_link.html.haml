@@ -1,11 +1,23 @@
-= nav_link(controller: :licenses) do
-  = link_to admin_license_path, class: "qa-link-license-menu" do
+:ruby
+  settings = Gitlab::CurrentSettings.current_application_settings
+  if settings.cloud_license_enabled?
+    controller = :cloud_licenses
+    item_name = _('Cloud License')
+    path = admin_cloud_license_path
+  else
+    controller = :licenses
+    item_name = _('License')
+    path = admin_license_path
+  end
+
+= nav_link(controller: controller) do
+  = link_to path, class: "qa-link-license-menu" do
     .nav-icon-container
       = sprite_icon('license')
     %span.nav-item-name
-      = _('License')
+      = item_name
   %ul.sidebar-sub-level-items.is-fly-out-only
-    = nav_link(controller: :licenses, html_options: { class: "fly-out-top-item" } ) do
-      = link_to admin_license_path do
+    = nav_link(controller: controller, html_options: { class: "fly-out-top-item" } ) do
+      = link_to path do
         %strong.fly-out-top-item-name
-          = _('License')
+          = item_name

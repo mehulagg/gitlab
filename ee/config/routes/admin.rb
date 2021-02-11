@@ -32,6 +32,8 @@ namespace :admin do
     resource :usage_export, controller: 'licenses/usage_exports', only: [:show]
   end
 
+  resource :cloud_license, only: [:show]
+
   # using `only: []` to keep duplicate routes from being created
   resource :application_settings, only: [] do
     get :seat_link_payload
