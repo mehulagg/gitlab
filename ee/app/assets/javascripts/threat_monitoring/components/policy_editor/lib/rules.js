@@ -23,7 +23,6 @@ function commonSpec(rule) {
 */
 function ruleEndpointSpec({ direction, matchLabels }) {
   const matchSelector = labelSelector(matchLabels);
-  if (Object.keys(matchSelector).length === 0) return {};
 
   return {
     [direction === RuleDirectionInbound ? 'fromEndpoints' : 'toEndpoints']: [
