@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Service Desk **(FREE)**
 
-> - Moved to GitLab Free in 13.2.
+> Moved to GitLab Free in 13.2.
 
 Service Desk is a module that allows your team to connect
 with any external party through email, without any external tools.
@@ -237,7 +237,8 @@ The configuration options are the same as for configuring
 
 ## Using Service Desk
 
-There are a few ways Service Desk can be used.
+You can use Service Desk to [create an issue](#as-an-end-user-issue-creator) or [respond to one](#as-a-responder-to-the-issue).
+In these issues, you can also see our friendly neighborhood [Support Bot](#support-bot-user).
 
 ### As an end user (issue creator)
 
