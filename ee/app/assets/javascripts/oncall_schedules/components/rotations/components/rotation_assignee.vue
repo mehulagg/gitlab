@@ -7,7 +7,7 @@ import { __, sprintf } from '~/locale';
 export const SHIFT_WIDTHS = {
   md: 150,
   sm: 75,
-  xs: 25,
+  xs: 40,
 };
 
 export default {

@@ -88,40 +88,17 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
               class="gl-token-content"
             >
               <div
-                class="gl-avatar-labeled"
-                shape="circle"
-                size="16"
-                title="nora.schaden"
+                class="gl-avatar-labeled-label gl-display-flex"
               >
                 <div
-                  class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
-                  title="nora.schaden"
+                  class="gl-mr-2 gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
                 >
                   
   
 
                 </div>
                  
-                <div
-                  class="gl-avatar-labeled-labels gl-text-left!"
-                >
-                  <div
-                    class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
-                  >
-                    <span
-                      class="gl-avatar-labeled-label"
-                    >
-                      nora.schaden
-                    </span>
-                     
-                  </div>
-                   
-                  <span
-                    class="gl-avatar-labeled-sublabel"
-                  >
-                    
-                  </span>
-                </div>
+                <!---->
               </div>
                
               <!---->
@@ -159,40 +136,17 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
               class="gl-token-content"
             >
               <div
-                class="gl-avatar-labeled"
-                shape="circle"
-                size="16"
-                title="racheal.loving"
+                class="gl-avatar-labeled-label gl-display-flex"
               >
                 <div
-                  class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
-                  title="racheal.loving"
+                  class="gl-mr-2 gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
                 >
                   
   
 
                 </div>
                  
-                <div
-                  class="gl-avatar-labeled-labels gl-text-left!"
-                >
-                  <div
-                    class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
-                  >
-                    <span
-                      class="gl-avatar-labeled-label"
-                    >
-                      racheal.loving
-                    </span>
-                     
-                  </div>
-                   
-                  <span
-                    class="gl-avatar-labeled-sublabel"
-                  >
-                    
-                  </span>
-                </div>
+                <!---->
               </div>
                
               <!---->
