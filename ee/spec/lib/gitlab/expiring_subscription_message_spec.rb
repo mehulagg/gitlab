@@ -22,7 +22,7 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
     let(:grace_period_effective_from) { expired_date - 35.days }
     let(:today) { Time.utc(2020, 3, 7, 10) }
     let(:expired_date) { Time.utc(2020, 3, 9, 10).to_date }
-    let(:plan_name) { ::Plan::GOLD }
+    let(:plan_name) { ::Plan::ULTIMATE }
 
     before do
       allow_any_instance_of(Gitlab::ExpiringSubscriptionMessage).to receive(:grace_period_effective_from).and_return(grace_period_effective_from)
@@ -122,7 +122,7 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
               end
 
               context 'when it is not currently blocking changes' do
-                let(:plan_name) { ::Plan::GOLD }
+                let(:plan_name) { ::Plan::ULTIMATE }
 
                 before do
                   allow(subscribable).to receive(:block_changes?).and_return(false)
