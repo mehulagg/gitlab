@@ -431,11 +431,11 @@ RSpec.describe MergeRequests::BuildService do
           end
 
           it 'sets the correct title' do
-            expect(merge_request.title).to eq(title)
+            expect(merge_request.title).to eq('Closes #1234 Second commit')
           end
 
           it 'sets the closing description' do
-            expect(merge_request.description).to eq(closing_message)
+            expect(merge_request.description).to eq("Create the app#{closing_message ? "\n\n" + closing_message : ''}")
           end
         end
       end
