@@ -35,11 +35,12 @@ module Gitlab
             end
           end
 
-          # sort sorts an array of variables, ignoring unknown variable references.
-          # If a circular variable reference is found, the original array is returned
+          # sort sorts a sorted collection of variables, ignoring unknown variable references.
+          # If a circular variable reference is found, a new collection with the original array and an error is returned
           def sort
             return @coll if Feature.disabled?(:variable_inside_variable, @project)
-            return @coll if errors
+
+            return Gitlab::Ci::Variables::Collection.new(@coll, errors) if errors
 
             Gitlab::Ci::Variables::Collection.new(tsort)
           end
