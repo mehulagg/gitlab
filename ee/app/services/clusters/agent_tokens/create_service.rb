@@ -7,7 +7,7 @@ module Clusters
         return error_feature_not_available unless container.feature_available?(:cluster_agents)
         return error_no_permissions unless current_user.can?(:create_cluster, container)
 
-        token = ::Clusters::AgentToken.new(agent: cluster_agent)
+        token = ::Clusters::AgentToken.new(agent: cluster_agent, created_by_user: current_user)
 
         if token.save
           ServiceResponse.success(payload: { secret: token.token, token: token })

@@ -3426,6 +3426,11 @@ type ClusterAgentToken {
   createdAt: Time
 
   """
+  The user who created the token.
+  """
+  createdByUser: User
+
+  """
   Global ID of the token.
   """
   id: ClustersAgentTokenID!
