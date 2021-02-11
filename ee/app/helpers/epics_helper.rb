@@ -79,14 +79,12 @@ module EpicsHelper
       "#{link.source_id}-->#{link.target_id}"
     end
 
-    <<~MARKDOWN.chomp
-    ```mermaid
-    graph LR
-
-    #{node_declarations.join("\n")}
-
-    #{node_relationships.join("\n")}
-    ```
-    MARKDOWN
+    [
+      "```mermaid\n",
+      "graph LR\n",
+      *node_declarations,
+      *node_relationships,
+      "\n```"
+    ].join("\n")
   end
 end

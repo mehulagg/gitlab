@@ -146,6 +146,7 @@ RSpec.describe 'Epic show', :js do
           page.within('.js-epic-tabs-content #issue-flowchart') do
             expect(page).to have_content(blocking_issue.title)
             expect(page).to have_content(blocked_issue.title)
+            expect(page).not_to have_content('graph LR')
           end
         end
       end

@@ -38,11 +38,11 @@ export default class EpicTabs {
 
   bindEvents() {
     const $roadmapTab = $('#roadmap-tab', this.epicTabs);
-    const $issueHierarchyTab = $('#issue-hierarchy-tab', this.epicTabs);
+    const $issueFlowchartTab = $('#issue-flowchart-tab', this.epicTabs);
 
     $roadmapTab.on('show.bs.tab', this.onRoadmapShow.bind(this));
     $roadmapTab.on('hide.bs.tab', this.onRoadmapHide.bind(this));
-    $issueHierarchyTab.on('shown.bs.tab', this.onIssueHierarchyShow.bind(this));
+    $issueFlowchartTab.on('shown.bs.tab', this.onIssueFlowchartShow.bind(this));
   }
 
   onRoadmapShow() {
