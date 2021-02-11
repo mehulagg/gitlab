@@ -1,34 +1,41 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlToken, GlAvatarLabeled, GlPopover } from '@gitlab/ui';
-import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
+import { GlToken, GlAvatar, GlPopover } from '@gitlab/ui';
+import RotationAssignee, {
+  SHIFT_WIDTHS,
+} from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import { truncate } from '~/lib/utils/text_utility';
 import mockRotations from '../../mocks/mock_rotation.json';
 
 describe('RotationAssignee', () => {
   let wrapper;
 
   const mockRandomNumber = 0.391352525;
+  const shiftWidth = 100;
 
   const assignee = mockRotations[0].shifts.nodes[0];
   const findToken = () => wrapper.findComponent(GlToken);
-  const findAvatar = () => wrapper.findComponent(GlAvatarLabeled);
+  const findAvatar = () => wrapper.findComponent(GlAvatar);
   const findPopOver = () => wrapper.findComponent(GlPopover);
   const findStartsAt = () => wrapper.findByTestId('rotation-assignee-starts-at');
   const findEndsAt = () => wrapper.findByTestId('rotation-assignee-ends-at');
+  const findName = () => wrapper.findByTestId('rotation-assignee-name');
 
   const formattedDate = (date) => {
     return formatDate(date, 'mmmm d, yyyy, h:MMtt Z');
   };
 
-  function createComponent() {
+  function createComponent({ props = {} } = {}) {
     wrapper = extendedWrapper(
       shallowMount(RotationAssignee, {
         propsData: {
-          assignee: assignee.participant,
+          assignee: { avatarUrl: '/url', ...assignee.participant },
           rotationAssigneeStartsAt: assignee.startsAt,
           rotationAssigneeEndsAt: assignee.endsAt,
-          rotationAssigneeStyle: { left: '0px', width: '100px' },
+          rotationAssigneeStyle: { left: '0px', width: `${shiftWidth}px` },
+          shiftWidth,
+          ...props,
         },
       }),
     );
@@ -44,8 +51,19 @@ describe('RotationAssignee', () => {
   });
 
   describe('rotation assignee token', () => {
-    it('should render an assignee name', () => {
-      expect(findAvatar().attributes('label')).toBe(assignee.participant.user.username);
+    it('should render an assignee name and avatar', () => {
+      expect(findAvatar().props('src')).toBe(wrapper.vm.assignee.avatarUrl);
+      expect(findName().text()).toBe(assignee.participant.user.username);
+    });
+
+    it('truncate the rotation name on small screens', () => {
+      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.sm } });
+      expect(findName().text()).toBe(truncate(assignee.participant.user.username, 3));
+    });
+
+    it('hide the rotation name on mobile screens', () => {
+      createComponent({ props: { shiftWidth: SHIFT_WIDTHS.xs } });
+      expect(findName().exists()).toBe(false);
     });
 
     it('should render an assignee color based on the chevron skipping color pallette', () => {

@@ -1,7 +1,8 @@
 <script>
 import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { HOURS_IN_DAY, HOURS_IN_DATE_DAY, ASSIGNEE_SPACER } from 'ee/oncall_schedules/constants';
-import { getOverlapDateInPeriods, nDaysAfter } from '~/lib/utils/datetime_utility';
+import { getOverlapDateInPeriods } from '~/lib/utils/datetime_utility';
+import { shiftShouldRender, currentTimeframeEndsAt } from './shift_utils';
 
 export default {
   components: {
@@ -35,30 +36,27 @@ export default {
   },
   computed: {
     currentTimeframeEndsAt() {
-      return nDaysAfter(this.timeframeItem, 1);
+      return currentTimeframeEndsAt(this.timeframeItem, this.presetType);
     },
     hoursUntilEndOfTimeFrame() {
       return HOURS_IN_DAY - new Date(this.shiftRangeOverlap.overlapStartDate).getHours();
     },
     rotationAssigneeStyle() {
-      const startHour = this.shiftStartsAt.getHours();
-      const isFirstCell = startHour === 0;
-      const shouldStartAtBeginningOfCell = isFirstCell || this.shiftStartHourOutOfRange;
-      const width =
+      const shouldStartAtBeginningOfCell =
+        this.shiftStartsAt.getHours() === 0 || this.shiftStartHourOutOfRange;
+      const baseWidth =
         this.shiftEndsAt.getTime() >= this.currentTimeframeEndsAt.getTime()
           ? HOURS_IN_DAY
           : this.shiftRangeOverlap.hoursOverlap;
 
       const left = shouldStartAtBeginningOfCell
-        ? '0px'
-        : `${
-            (HOURS_IN_DATE_DAY - this.hoursUntilEndOfTimeFrame) * this.shiftTimeUnitWidth +
-            ASSIGNEE_SPACER
-          }px`;
+        ? 0
+        : (HOURS_IN_DATE_DAY - this.hoursUntilEndOfTimeFrame) * this.shiftTimeUnitWidth -
+          ASSIGNEE_SPACER;
 
       return {
-        left,
-        width: `${this.shiftTimeUnitWidth * width - ASSIGNEE_SPACER}px`,
+        left: `${left}px`,
+        width: `${this.shiftTimeUnitWidth * baseWidth - ASSIGNEE_SPACER}px`,
       };
     },
     shiftStartsAt() {
@@ -80,8 +78,8 @@ export default {
     shiftStartHourOutOfRange() {
       return this.shiftStartsAt.getTime() < this.timeframeItem.getTime();
     },
-    shiftShouldRender() {
-      return Boolean(this.shiftRangeOverlap.hoursOverlap);
+    shouldRender() {
+      return shiftShouldRender(this.shiftRangeOverlap);
     },
   },
 };
@@ -89,7 +87,7 @@ export default {
 
 <template>
   <rotation-assignee
-    v-if="shiftShouldRender"
+    v-if="shouldRender"
     :assignee="shift.participant"
     :rotation-assignee-style="rotationAssigneeStyle"
     :rotation-assignee-starts-at="shift.startsAt"

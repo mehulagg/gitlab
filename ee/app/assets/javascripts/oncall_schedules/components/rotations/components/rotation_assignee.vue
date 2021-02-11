@@ -1,11 +1,18 @@
 <script>
-import { GlToken, GlAvatarLabeled, GlPopover } from '@gitlab/ui';
+import { GlToken, GlAvatar, GlPopover } from '@gitlab/ui';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import { truncate } from '~/lib/utils/text_utility';
 import { __, sprintf } from '~/locale';
+
+export const SHIFT_WIDTHS = {
+  md: 150,
+  sm: 75,
+  xs: 25,
+};
 
 export default {
   components: {
-    GlAvatarLabeled,
+    GlAvatar,
     GlPopover,
     GlToken,
   },
@@ -26,6 +33,11 @@ export default {
       type: Object,
       required: true,
     },
+    shiftWidth: {
+      type: Number,
+      required: false,
+      default: SHIFT_WIDTHS.md,
+    },
   },
   computed: {
     chevronClass() {
@@ -44,6 +56,16 @@ export default {
         endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, h:MMtt Z'),
       });
     },
+    rotationMobileView() {
+      return this.shiftWidth <= SHIFT_WIDTHS.xs;
+    },
+    assigneeName() {
+      if (this.shiftWidth <= SHIFT_WIDTHS.sm) {
+        return truncate(this.assignee.user.username, 3);
+      }
+
+      return this.assignee.user.username;
+    },
   },
 };
 </script>
@@ -59,13 +81,12 @@ export default {
       :class="chevronClass"
       :view-only="true"
     >
-      <gl-avatar-labeled
-        shape="circle"
-        :size="16"
-        :src="assignee.avatarUrl"
-        :label="assignee.user.username"
-        :title="assignee.user.username"
-      />
+      <div class="gl-avatar-labeled-label gl-display-flex">
+        <gl-avatar :src="assignee.avatarUrl" :size="16" class="gl-mr-2" />
+        <span v-if="!rotationMobileView" data-testid="rotation-assignee-name">{{
+          assigneeName
+        }}</span>
+      </div>
     </gl-token>
     <gl-popover
       :target="rotationRandomID"

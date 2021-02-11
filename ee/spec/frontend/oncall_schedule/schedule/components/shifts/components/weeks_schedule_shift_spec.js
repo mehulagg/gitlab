@@ -59,13 +59,13 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/w
       createComponent({ data: { shiftTimeUnitWidth: CELL_WIDTH } });
       expect(findRotationAssignee().props('rotationAssigneeStyle')).toEqual({
         left: '0px',
-        width: '198px',
+        width: '148px',
       });
     });
 
     it('calculates the correct rotation assignee styles when the shift does not start at the beginning of the time-frame cell', () => {
       /**
-       * Where left should be 52px i.e. ((DAYS_IN_WEEK - (timeframeEndsAt - overlapStartDate)) * CELL_WIDTH) + ASSIGNEE_SPACER(((7 - (20 - 14)) * 50)) + 2
+       * Where left should be 48px i.e. ((DAYS_IN_WEEK - (timeframeEndsAt - overlapStartDate)) * CELL_WIDTH) - ASSIGNEE_SPACER(((7 - (20 - 14)) * 50)) - 2
        * and width should be overlapping days * (CELL_WIDTH + offset)(1 * (50 + 50))
        * where offset is either CELL_WIDTH * 0 or CELL_WIDTH * 1 depending on the index of the timeframe
        */
@@ -75,7 +75,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/w
       });
       expect(findRotationAssignee().props('rotationAssigneeStyle')).toEqual({
         left: '52px',
-        width: '98px',
+        width: '48px',
       });
     });
   });

@@ -40,9 +40,8 @@ export const editRotationModalId = 'editRotationModal';
 export const deleteRotationModalId = 'deleteRotationModal';
 
 /**
- * Used as a JavaScript week is represented as 0 - 6, and a day as 0 - 23
+ * Used as a JavaScript day is represented as 0 - 23
  */
-export const DAYS_IN_DATE_WEEK = 6;
 export const HOURS_IN_DATE_DAY = 23;
 
 export const ASSIGNEE_SPACER = 2;
