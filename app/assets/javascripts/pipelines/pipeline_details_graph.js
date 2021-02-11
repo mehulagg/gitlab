@@ -11,7 +11,7 @@ const apolloProvider = new VueApollo({
   defaultClient: createDefaultClient(
     {},
     {
-      batchMax: 2,
+      batchMax: 1,
     },
   ),
 });

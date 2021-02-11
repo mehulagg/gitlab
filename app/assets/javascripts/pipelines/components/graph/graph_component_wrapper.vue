@@ -34,6 +34,15 @@ export default {
   },
   apollo: {
     pipeline: {
+      context: {
+        fetchOptions: {
+          method: 'GET',
+        },
+        headers: {
+          'X-GITLAB-GRAPHQL-FEATURE-CORRELATION': 'verify/ci/pipeline-graph',
+          'X-GITLAB-GRAPHQL-RESOURCE-ETAG': 'pipelines/id/123',
+        },
+      },
       query: getPipelineDetails,
       pollInterval: 10000,
       variables() {
