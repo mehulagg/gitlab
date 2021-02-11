@@ -1,12 +1,14 @@
 <script>
 import {
-  GlTable,
   GlAvatarLabeled,
   GlAvatarLink,
-  GlPagination,
-  GlTooltipDirective,
-  GlSearchBoxByType,
   GlBadge,
+  GlButton,
+  GlPagination,
+  GlSearchBoxByType,
+  GlTable,
+  GlTooltipDirective,
+  GlModalDirective,
 } from '@gitlab/ui';
 import { parseInt, debounce } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
@@ -17,26 +19,31 @@ import {
   SEARCH_DEBOUNCE_MS,
   REMOVE_MEMBER_MODAL_ID,
 } from 'ee/billings/seat_usage/constants';
+import RemoveMemberModal from './remove_member_modal.vue';
 
 export default {
   directives: {
+    GlModal: GlModalDirective,
     GlTooltip: GlTooltipDirective,
   },
   components: {
-    GlTable,
     GlAvatarLabeled,
     GlAvatarLink,
+    GlBadge,
+    GlButton,
     GlPagination,
     GlSearchBoxByType,
-    GlBadge,
+    GlTable,
+    RemoveMemberModal,
   },
   data() {
     return {
       searchQuery: '',
+      memberToRemove: null,
     };
   },
   computed: {
-    ...mapState(['isLoading', 'page', 'perPage', 'total', 'namespaceName']),
+    ...mapState(['isLoading', 'page', 'perPage', 'total', 'namespaceName', 'namespaceId']),
     ...mapGetters(['tableItems']),
     currentPage: {
       get() {
@@ -92,12 +99,17 @@ export default {
         this.resetMembers();
       }
     },
+    setMemberToRemove(member) {
+      this.memberToRemove = member;
+    },
+  },
+  i18n: {
+    emailNotVisibleTooltipText: s__(
+      'Billing|An email address is only visible for users with public emails.',
+    ),
   },
   removeMemberModalId: REMOVE_MEMBER_MODAL_ID,
   avatarSize: AVATAR_SIZE,
-  emailNotVisibleTooltipText: s__(
-    'Billing|An email address is only visible for users with public emails.',
-  ),
   fields: FIELDS,
 };
 </script>
@@ -154,11 +166,20 @@ export default {
           <span
             v-else
             v-gl-tooltip
-            :title="$options.emailNotVisibleTooltipText"
+            :title="$options.i18n.emailNotVisibleTooltipText"
             class="gl-font-style-italic"
             >{{ s__('Billing|Private') }}</span
           >
         </div>
+      </template>
+
+      <template #cell(actions)="data">
+        <gl-button
+          v-gl-modal="$options.removeMemberModalId"
+          variant="danger"
+          icon="remove"
+          @click="setMemberToRemove(data.item.user)"
+        />
       </template>
     </gl-table>
 
@@ -169,6 +190,14 @@ export default {
       :total-items="totalFormatted"
       align="center"
       class="gl-mt-5"
+    />
+
+    <remove-member-modal
+      v-if="memberToRemove"
+      :member="memberToRemove"
+      :namespace="namespaceName"
+      :namespace-id="namespaceId"
+      :modal-id="$options.removeMemberModalId"
     />
   </section>
 </template>
