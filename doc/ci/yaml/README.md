@@ -4658,6 +4658,9 @@ test-vars-2:
     - printenv
 ```
 
+You can't reuse a section that already includes a `!reference` tag. Only one level
+of nesting is supported.
+
 #### Enable or disable `!reference` tags **(FREE SELF)**
 
 The `!reference` tag is under development and not ready for production use. It is
