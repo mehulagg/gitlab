@@ -41,7 +41,7 @@ The following visualizations and data are available, representing all merge requ
 
 ### Mean time to merge
 
-The Mean time to merge (MTTM) metrics shows the average time it takes from initiating a MR to being merged.
+The mean time to merge (MTTM) metric shows the average time it takes from submitting a merge request to merging.
 
 ![Mean time to merge](img/mr_mean_time_to_merge_metric_v13_9.png "Merge Request Analytics - MTTM metric showing the average time it takes from initiating a MR to being merged")
 
