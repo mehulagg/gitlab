@@ -1027,9 +1027,6 @@ msgstr ""
 msgid "+ %{numberOfHiddenAssignees} more"
 msgstr ""
 
-msgid "+ %{numberOfHiddenReviewers} more"
-msgstr ""
-
 msgid "+%d more"
 msgid_plural "+%d more"
 msgstr[0] ""
