@@ -8,7 +8,7 @@ module Clusters
         return error_not_premium_plan unless project.feature_available?(:cluster_agents)
         return error_no_permissions unless cluster_agent_permissions?
 
-        agent = ::Clusters::Agent.new(name: name, project: project)
+        agent = ::Clusters::Agent.new(name: name, project: project, created_by_user: current_user)
 
         if agent.save
           success.merge(cluster_agent: agent)

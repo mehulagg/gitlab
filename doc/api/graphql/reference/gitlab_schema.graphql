@@ -3299,6 +3299,11 @@ type ClusterAgent {
   createdAt: Time
 
   """
+  The user who created the agent.
+  """
+  createdByUser: User
+
+  """
   ID of the cluster agent.
   """
   id: ID!

@@ -14,6 +14,11 @@ module Types
             null: true,
             description: 'Timestamp the cluster agent was created.'
 
+      field :created_by_user,
+            Types::UserType,
+            null: true,
+            description: 'The user who created the agent.'
+
       field :id, GraphQL::ID_TYPE,
             null: false,
             description: 'ID of the cluster agent.'
