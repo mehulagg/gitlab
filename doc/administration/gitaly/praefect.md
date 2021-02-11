@@ -480,17 +480,19 @@ application server, or a Gitaly node.
    # server ('praefect') and in git_data_dirs on Gitaly nodes ('gitaly-1')
    praefect['virtual_storages'] = {
      'default' => {
-       'gitaly-1' => {
-         'address' => 'tcp://GITALY_HOST_1:8075',
-         'token'   => 'PRAEFECT_INTERNAL_TOKEN',
-       },
-       'gitaly-2' => {
-         'address' => 'tcp://GITALY_HOST_2:8075',
-         'token'   => 'PRAEFECT_INTERNAL_TOKEN'
-       },
-       'gitaly-3' => {
-         'address' => 'tcp://GITALY_HOST_3:8075',
-         'token'   => 'PRAEFECT_INTERNAL_TOKEN'
+       'nodes' => {
+         'gitaly-1' => {
+           'address' => 'tcp://GITALY_HOST_1:8075',
+           'token'   => 'PRAEFECT_INTERNAL_TOKEN',
+         },
+         'gitaly-2' => {
+           'address' => 'tcp://GITALY_HOST_2:8075',
+           'token'   => 'PRAEFECT_INTERNAL_TOKEN'
+         },
+         'gitaly-3' => {
+           'address' => 'tcp://GITALY_HOST_3:8075',
+           'token'   => 'PRAEFECT_INTERNAL_TOKEN'
+         }
        }
      }
    }
@@ -686,7 +688,7 @@ because we rely on Praefect to route operations correctly.
 Particular attention should be shown to:
 
 - The `gitaly['auth_token']` configured in this section must match the `token`
-  value under `praefect['virtual_storages']` on the Praefect node. This was set
+  value under `praefect['virtual_storages']['nodes']` on the Praefect node. This was set
   in the [previous section](#praefect). This document uses the placeholder
   `PRAEFECT_INTERNAL_TOKEN` throughout.
 - The storage names in `git_data_dirs` configured in this section must match the
@@ -1140,11 +1142,7 @@ You can configure:
   praefect['virtual_storages'] = {
     'default' => {
       'default_replication_factor' => 1,
-      # nodes...
-      'gitaly-1' => {
-        'address' => 'tcp://GITALY_HOST_1:8075',
-        'token'   => 'PRAEFECT_INTERNAL_TOKEN',
-      },
+      # ...
     }
   }
   ```
