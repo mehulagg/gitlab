@@ -18,6 +18,7 @@ RSpec.describe Gitlab::InstrumentationHelper do
 
         expect(payload[:elasticsearch_calls]).to be > 0
         expect(payload[:elasticsearch_duration_s]).to be > 0
+        expect(payload[:elasticsearch_timed_out_count]).to be_kind_of(Integer)
       end
     end
   end
