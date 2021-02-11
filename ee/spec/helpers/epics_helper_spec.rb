@@ -107,4 +107,91 @@ RSpec.describe EpicsHelper, type: :helper do
       end
     end
   end
+
+  describe 'Issue Flowchart' do
+    let_it_be_with_reload(:epic) { create(:epic) }
+    let_it_be(:project) { create(:project, group: epic.group) }
+
+    subject { helper.linked_issue_flowchart(epic) }
+
+    before do
+      project.add_reporter(epic.author)
+      allow(helper).to receive(:current_user).and_return(epic.author)
+    end
+
+    context 'without blocking issues' do
+      it { is_expected.to be_nil }
+    end
+
+    context 'with blocking issues' do
+      let_it_be_with_reload(:blocking_issue) { create(:issue, project: project) }
+      let_it_be(:blocked_issue) { create(:issue, project: project) }
+      let_it_be(:unblocked_issue) { create(:issue, project: project) }
+      let_it_be(:non_permissioned_issue) { create(:issue) }
+
+      # Flowchart excludes any issues or links which are not in the epic
+      let_it_be(:other_epic) { create(:epic, group: epic.group) }
+      let_it_be(:other_epic_issue) { create(:issue, project: project) }
+      let_it_be(:other_epic_blocking_issue) { create(:issue, project: project) }
+      let_it_be(:other_epic_blocked_issue) { create(:issue, project: project) }
+
+      # source blocks target
+      let_it_be(:issue_link) { create(:issue_link, source: blocking_issue, target: blocked_issue) }
+      let_it_be(:other_epic_blocking_issue_link) { create(:issue_link, source: other_epic_blocking_issue, target: blocked_issue) }
+      let_it_be(:other_epic_blocked_link) { create(:issue_link, source: blocking_issue, target: other_epic_blocked_issue) }
+
+      before do
+        [blocking_issue, blocked_issue, unblocked_issue, non_permissioned_issue].each do |issue|
+          create(:epic_issue, issue: issue, epic: epic)
+        end
+
+        [other_epic_issue, other_epic_blocked_issue, other_epic_blocking_issue].each do |issue|
+          create(:epic_issue, issue: issue, epic: other_epic)
+        end
+      end
+
+      it 'represents the dependencies within the epic in a mermaid flowchart' do
+        expect(subject).to eq(
+          <<~MARKDOWN.chomp
+          ```mermaid
+          graph LR
+
+          3("3: #{unblocked_issue.title}")
+          click 3 href "http://test.host/group6/project1/-/issues/3" "#{unblocked_issue.title}"
+          2("2: #{blocked_issue.title}")
+          click 2 href "http://test.host/group6/project1/-/issues/2" "#{blocked_issue.title}"
+          1("1: #{blocking_issue.title}")
+          click 1 href "http://test.host/group6/project1/-/issues/1" "#{blocking_issue.title}"
+
+          1-->2
+          ```
+          MARKDOWN
+        )
+      end
+
+      context 'with double-quotes in an issue title' do
+        before do
+          blocking_issue.update!(title: 'My "Odd" title')
+        end
+
+        it { is_expected.to include('My #quot;Odd#quot; title') }
+      end
+
+      context 'with special characters in an issue title' do
+        before do
+          blocking_issue.update!(title: 'My <p>Odd</p> title')
+        end
+
+        it { is_expected.to include("\"#{blocking_issue.id}: My <p>Odd</p> title\"") }
+      end
+
+      context 'with very long issue titles' do
+        before do
+          blocking_issue.update!(title: 'This is a very long title which I expect to be cutoff because mermaid does not do well with long strings in nodes')
+        end
+
+        it { is_expected.to include('This is a very long title which I exp...') }
+      end
+    end
+  end
 end

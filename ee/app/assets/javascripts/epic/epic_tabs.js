@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import initRelatedItemsTree from 'ee/related_items_tree/related_items_tree_bundle';
+import renderMermaid from '~/behaviors/markdown/render_mermaid';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
 export default class EpicTabs {
@@ -37,9 +38,11 @@ export default class EpicTabs {
 
   bindEvents() {
     const $roadmapTab = $('#roadmap-tab', this.epicTabs);
+    const $issueHierarchyTab = $('#issue-hierarchy-tab', this.epicTabs);
 
     $roadmapTab.on('show.bs.tab', this.onRoadmapShow.bind(this));
     $roadmapTab.on('hide.bs.tab', this.onRoadmapHide.bind(this));
+    $issueHierarchyTab.on('shown.bs.tab', this.onIssueHierarchyShow.bind(this));
   }
 
   onRoadmapShow() {
@@ -52,5 +55,9 @@ export default class EpicTabs {
 
   onRoadmapHide() {
     this.wrapper.classList.add('container-limited');
+  }
+
+  onIssueHierarchyShow() {
+    renderMermaid($('.js-render-mermaid', this.wrapper));
   }
 }

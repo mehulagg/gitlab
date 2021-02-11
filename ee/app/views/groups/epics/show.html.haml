@@ -5,6 +5,7 @@
 - epic_reference = @epic.to_reference
 - sub_epics_feature_available = @group.feature_available?(:subepics)
 - issuable_health_status_feature_available = @group.feature_available?(:issuable_health_status)
+- linked_issue_flowchart = linked_issue_flowchart(@epic)
 
 - allow_sub_epics = sub_epics_feature_available ? 'true' : 'false'
 - allow_issuable_health_status = issuable_health_status_feature_available ? 'true' : 'false'
@@ -40,6 +41,10 @@
           %li.roadmap-tab
             %a#roadmap-tab{ href: '#roadmap', data: { toggle: 'tab' } }
               = _('Roadmap')
+        - if linked_issue_flowchart
+          %li.issue-flowchart-tab
+            %a#issue-flowchart-tab{ href: '#issue-flowchart', data: { toggle: 'tab' } }
+              = _('Issue Flowchart')
 
   .tab-content.epic-tabs-content.js-epic-tabs-content
     #tree.tab-pane.show.active
@@ -74,6 +79,11 @@
               sorted_by: roadmap_sort_order,
               inner_height: '600',
               child_epics: 'true' } }
+    - if linked_issue_flowchart
+      #issue-flowchart.tab-pane
+        .row
+          %section.col-md-12
+            = markdown(linked_issue_flowchart)
   %hr.epic-discussion-separator.mt-1.mb-0
   .d-flex.justify-content-between.content-block.content-block-small.emoji-list-container.js-noteable-awards
     = render 'award_emoji/awards_block', awardable: @epic, inline: true

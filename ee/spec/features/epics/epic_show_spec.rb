@@ -115,6 +115,41 @@ RSpec.describe 'Epic show', :js do
         end
       end
     end
+
+    describe 'Issue Flowchart tab' do
+      context 'without blocking issues within the epic' do
+        it 'does not show the Issue Flowchart tab' do
+          expect(page).not_to have_selector('#issue-flowchart-tab')
+        end
+      end
+
+      context 'with blocking issues' do
+        let_it_be(:blocking_issue) { create(:issue, project: public_project) }
+        let_it_be(:blocked_issue) { create(:issue, project: public_project) }
+        let_it_be(:blocking_epic_issue) { create(:epic_issue, issue: blocking_issue, epic: epic) }
+        let_it_be(:blocked_epic_issue) { create(:epic_issue, issue: blocked_issue, epic: epic) }
+        let_it_be(:issue_link) { create(:issue_link, source: blocking_issue, target: blocked_issue) }
+
+        before do
+          find('.js-epic-tabs-container #issue-flowchart-tab').click
+          wait_for_requests
+          wait_for_requests
+        end
+
+        it 'adds a Issue Flowchart tab' do
+          page.within('.js-epic-tabs-container') do
+            expect(find('.epic-tabs #issue-flowchart-tab')).to have_content('Issue Flowchart')
+          end
+        end
+
+        it 'shows the relationship between the two issues' do
+          page.within('.js-epic-tabs-content #issue-flowchart') do
+            expect(page).to have_content(blocking_issue.title)
+            expect(page).to have_content(blocked_issue.title)
+          end
+        end
+      end
+    end
   end
 
   describe 'Epic metadata' do

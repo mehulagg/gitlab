@@ -57,4 +57,36 @@ module EpicsHelper
       s_("GroupRoadmap|No start date – %{dateWord}") % { dateWord: epic.end_date.strftime(long_format) }
     end
   end
+
+  def linked_issue_flowchart(epic)
+    issues = IssuesFinder.new(current_user, epic_id: epic.id, state: :opened).execute.with_project_association
+    issue_ids = issues.map(&:id)
+    issue_links = IssueLink.for_issue_ids(issue_ids)
+
+    return unless issue_links.exists?
+
+    node_declarations = issues.flat_map do |issue|
+      quote_free_title = issue.title.gsub('"', "#quot;")
+      preview = quote_free_title.truncate(40)
+      url = project_issue_url(issue.project, issue)
+      node = "#{issue.id}(\"#{issue.iid}: #{preview}\")"
+      on_click = "click #{issue.id} href \"#{url}\" \"#{quote_free_title}\""
+
+      [node, on_click]
+    end
+
+    node_relationships = issue_links.map do |link|
+      "#{link.source_id}-->#{link.target_id}"
+    end
+
+    <<~MARKDOWN.chomp
+    ```mermaid
+    graph LR
+
+    #{node_declarations.join("\n")}
+
+    #{node_relationships.join("\n")}
+    ```
+    MARKDOWN
+  end
 end
