@@ -21,6 +21,7 @@ tasks in a secure and cloud-native way. It enables:
 - Pull-based GitOps deployments by leveraging the
   [GitOps Engine](https://github.com/argoproj/gitops-engine).
 - Real-time access to API endpoints in a cluster.
+- Alert generation based on [Container network policy](https://docs.gitlab.com/ee/user/application_security/threat_monitoring/#container-network-policy).
 
 Many more features are planned. Please review [our roadmap](https://gitlab.com/groups/gitlab-org/-/epics/3329)
 and [our development documentation](../../../development/agent/index.md).
@@ -65,17 +66,6 @@ and manifest repositories. Our backlog contains issues for adding support for
 
 For more details, please refer to our [full architecture documentation](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/architecture.md#high-level-architecture) in the Agent project.
 
-## Get started with GitOps and the GitLab Agent
-
-The setup process involves a few steps to enable GitOps deployments:
-
-1. [Install the Agent server](#install-the-kubernetes-agent-server).
-1. [Define a configuration repository](#define-a-configuration-repository).
-1. [Create an Agent record in GitLab](#create-an-agent-record-in-gitlab).
-1. [Generate and copy a Secret token used to connect to the Agent](#create-the-kubernetes-secret).
-1. [Install the Agent into the cluster](#install-the-agent-into-the-cluster).
-1. [Create a `manifest.yaml`](#create-a-manifestyaml).
-
 ### Upgrades and version compatibility
 
 As the GitLab Kubernetes Agent is a new product, we are constantly adding new features
@@ -91,6 +81,153 @@ Upgrade your agent installations together with GitLab upgrades. To decide which 
 
 The available `agentk` and `kas` versions can be found in
 [the container registry](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/container_registry/).
+
+
+## Get started with GitOps and the GitLab Agent
+
+The setup process involves a few steps to enable GitOps deployments:
+
+1. [Install the Agent server](#install-the-kubernetes-agent-server).
+1. [Define a configuration repository](#define-a-configuration-repository).
+1. [Create an Agent record in GitLab](#create-an-agent-record-in-gitlab).
+1. [Generate and copy a Secret token used to connect to the Agent](#create-the-kubernetes-secret).
+1. [Install the Agent into the cluster](#install-the-agent-into-the-cluster).
+1. [Create a `manifest.yaml`](#create-a-manifestyaml).
+
+
+
+### Define a configuration repository
+
+Next, you need a GitLab repository to contain your Agent configuration. The minimal
+repository layout looks like this:
+
+```plaintext
+.gitlab/agents/<agent-name>/config.yaml
+```
+
+Your `config.yaml` file can specify multiple manifest projects in the
+section `manifest_projects`:
+
+```yaml
+gitops:
+  manifest_projects:
+  - id: "path-to/your-manifest-project-number1"
+  ...
+```
+
+GitLab [versions 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) also
+supports manifest projects containing
+multiple directories (or subdirectories) of YAML files. For more information see our
+documentation on the [Kubernetes Agent configuration repository](repository.md).
+
+
+
+
+### Create a `manifest.yaml`
+
+In a previous step, you configured a `config.yaml` to point to the GitLab projects
+the Agent should synchronize. In each of those projects, you must create a `manifest.yaml`
+file for the Agent to monitor. You can auto-generate this `manifest.yaml` with a
+templating engine or other means.
+
+The agent is authorized to download manifests for the configuration
+project, and public projects. Support for other private projects is
+planned in the issue [Agent authorization for private manifest
+projects](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
+
+Each time you commit and push a change to this file, the Agent logs the change:
+
+```plaintext
+2020-09-15_14:09:04.87946 gitlab-k8s-agent      : time="2020-09-15T10:09:04-04:00" level=info msg="Config: new commit" agent_id=1 commit_id=e6a3651f1faa2e928fe6120e254c122451be4eea
+```
+
+#### Example `manifest.yaml` file
+
+This file creates an NGINX deployment.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: gitlab-agent  # Can be any namespace managed by you that the agent has access to.
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+```
+
+## Example projects
+
+The following example projects can help you get started with the Kubernetes Agent.
+
+- [Configuration repository](https://gitlab.com/gitlab-org/configure/examples/kubernetes-agent)
+- This basic GitOps example deploys NGINX: [Manifest repository](https://gitlab.com/gitlab-org/configure/examples/gitops-project)
+
+
+## Kubernetes Network Security Alerts
+
+The Gitlab Agent also provides an integration with Cilium. The integration provides a simple way to easily generate network policy related alerts and to surface those alerts in GitLab.
+
+There are several components that work in concert for the Agent to accomplish the generation of those alerts:
+
+- A properly-configured Kubernetes cluster.
+- A proper Cilium integration either through:
+  - [Gitlab Managed Apps](https://docs.gitlab.com/ee/user/clusters/applications.html#install-cilium-using-gitlab-cicd)
+  - Existing Cilium integration. Making sure that [hubble-relay](https://docs.cilium.io/en/v1.8/concepts/overview/#hubble) is enabled.
+- One or more network policies either through:
+  - [Container Network Policy editor](https://docs.gitlab.com/ee/user/application_security/threat_monitoring/#container-network-policy-editor)
+  - [AutoDevOps](https://docs.gitlab.com/ee/user/application_security/threat_monitoring/#container-network-policy-management)
+  - Existing network policies. Making sure that the equivalent labels and annotations are properly set.
+- A configuration repository that contains a `config.yaml` file, which tells the
+  Agent which repositories to synchronize with.
+
+
+This repository might be the same GitLab project or a separate project.
+
+
+## Get started with Network Security Alerts and the GitLab Agent
+
+The setup process involves a few steps to enable GitOps deployments:
+
+1. [Install the Agent server](#install-the-kubernetes-agent-server).
+1. [Define a configuration repository with cilium settings](#define-a-configuration-repository-with-cilium-settings).
+1. [Create an Agent record in GitLab](#create-an-agent-record-in-gitlab).
+1. [Generate and copy a Secret token used to connect to the Agent](#create-the-kubernetes-secret).
+1. [Install the Agent into the cluster](#install-the-agent-into-the-cluster).
+
+
+### Define a configuration repository with cilium settings
+
+Next, you need a GitLab repository to contain your Agent configuration. The minimal
+repository layout looks like this:
+
+```plaintext
+.gitlab/agents/<agent-name>/config.yaml
+```
+
+Your `config.yaml` file need to specify the `host` and `port` of your hubble relay service. If your Cilium integration was performed through [Gitlab Managed Apps](https://docs.gitlab.com/ee/user/clusters/applications.html#install-cilium-using-gitlab-cicd), you can use `hubble-relay.gitlab-managed-apps.svc.cluster.local:80`:
+
+```yaml
+cilium:
+  hubble_relay_address: "<hubble-relay-host>:<hubble-relay-port>"
+  ...
+```
+
+
+
+## GitLab Agent shared steps
 
 ### Install the Kubernetes Agent Server
 
@@ -148,29 +285,6 @@ gitlab:
 
 For details, read [Using the GitLab-KAS chart](https://docs.gitlab.com/charts/charts/gitlab/kas/).
 
-### Define a configuration repository
-
-Next, you need a GitLab repository to contain your Agent configuration. The minimal
-repository layout looks like this:
-
-```plaintext
-.gitlab/agents/<agent-name>/config.yaml
-```
-
-Your `config.yaml` file can specify multiple manifest projects in the
-section `manifest_projects`:
-
-```yaml
-gitops:
-  manifest_projects:
-  - id: "path-to/your-manifest-project-number1"
-  ...
-```
-
-GitLab [versions 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/259669) also
-supports manifest projects containing
-multiple directories (or subdirectories) of YAML files. For more information see our
-documentation on the [Kubernetes Agent configuration repository](repository.md).
 
 ### Create an Agent record in GitLab
 
@@ -388,57 +502,6 @@ subjects:
   namespace: gitlab-agent
 ```
 
-### Create a `manifest.yaml`
-
-In a previous step, you configured a `config.yaml` to point to the GitLab projects
-the Agent should synchronize. In each of those projects, you must create a `manifest.yaml`
-file for the Agent to monitor. You can auto-generate this `manifest.yaml` with a
-templating engine or other means.
-
-The agent is authorized to download manifests for the configuration
-project, and public projects. Support for other private projects is
-planned in the issue [Agent authorization for private manifest
-projects](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
-
-Each time you commit and push a change to this file, the Agent logs the change:
-
-```plaintext
-2020-09-15_14:09:04.87946 gitlab-k8s-agent      : time="2020-09-15T10:09:04-04:00" level=info msg="Config: new commit" agent_id=1 commit_id=e6a3651f1faa2e928fe6120e254c122451be4eea
-```
-
-#### Example `manifest.yaml` file
-
-This file creates an NGINX deployment.
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-  namespace: gitlab-agent  # Can be any namespace managed by you that the agent has access to.
-spec:
-  selector:
-    matchLabels:
-      app: nginx
-  replicas: 2
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.14.2
-        ports:
-        - containerPort: 80
-```
-
-## Example projects
-
-The following example projects can help you get started with the Kubernetes Agent.
-
-- [Configuration repository](https://gitlab.com/gitlab-org/configure/examples/kubernetes-agent)
-- This basic GitOps example deploys NGINX: [Manifest repository](https://gitlab.com/gitlab-org/configure/examples/gitops-project)
 
 ### Deploying GitLab Runner with the Agent
 
