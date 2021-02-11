@@ -364,7 +364,7 @@ Before taking the decision to merge:
   Unless a strong case can be made for the violation, these should be resolved
   before merging. A comment must to be posted if the MR is merged with any failed job.
 - If the MR contains both Quality and non-Quality-related changes, the MR should be merged by the relevant maintainer for user-facing changes (backend, frontend, or database) after the Quality related changes are approved by a Software Engineer in Test.
-- Ensure there are no open dependencies by checking related issues for blocking issues. If blocked by one or more open MRs, set an [MR dependency](../user/project/merge_requests/merge_request_dependencies.md) and defer the merge. 
+- Ensure there are no open dependencies by checking related issues for blocking issues. If blocked by one or more open MRs, set an [MR dependency](../user/project/merge_requests/merge_request_dependencies.md) and delay the merge. 
 
 If a merge request is fundamentally ready, but needs only trivial fixes (such as
 typos), consider demonstrating a [bias for
