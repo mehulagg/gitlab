@@ -1,7 +1,9 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
+import SidebarConfidentialityForm from '~/sidebar/components/confidential/sidebar_confidentiality_form.vue';
 import { __, sprintf } from '~/locale';
+import Sidebar_confidentiality_form from './sidebar_confidentiality_form.vue';
 
 export default {
   tracking: {
@@ -15,6 +17,7 @@ export default {
   components: {
     SidebarEditableItem,
     GlIcon,
+    SidebarConfidentialityForm,
   },
   props: {
     issuableType: {
@@ -59,6 +62,7 @@ export default {
         <gl-icon :size="16" name="eye-slash" class="sidebar-item-icon inline is-active" />
         {{ confidentialText }}
       </div>
+      <sidebar-confidentiality-form :confidential="confidential" :issuable-type="issuableType" />
     </template>
   </sidebar-editable-item>
 </template>
