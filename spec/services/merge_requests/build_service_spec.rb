@@ -333,15 +333,11 @@ RSpec.describe MergeRequests::BuildService do
 
       it_behaves_like 'allows the merge request to be created'
 
-      context 'no multi-line commit messages in the diff' do
-        let(:commits) { Commit.decorate([commit_1, commit_3], project) }
-
-        it 'uses the title of the branch as the merge request title' do
-          expect(merge_request.title).to eq('Feature branch')
-        end
-        it 'does not add a description' do
-          expect(merge_request.description).to be_nil
-        end
+      it 'uses the title of the branch as the merge request title' do
+        expect(merge_request.title).to eq('Feature branch')
+      end
+      it 'does not add a description' do
+        expect(merge_request.description).to be_nil
       end
 
       context 'merge request already has a description set' do
@@ -399,14 +395,6 @@ RSpec.describe MergeRequests::BuildService do
 
       it 'adds the remaining lines of the first multi-line commit message as the description' do
         expect(merge_request.description).to eq('Create the app')
-      end
-
-      context 'merge request already has a description set' do
-        let(:description) { 'Merge request description' }
-
-        it 'keeps the description from the initial params' do
-          expect(merge_request.description).to eq(description)
-        end
       end
 
       context 'when the source branch matches an issue' do
