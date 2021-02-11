@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.describe ExternalApprovalRule, type: :model do
-  subject { described_class.new }
+RSpec.describe ApprovalRules::ExternalApprovalRule, type: :model do
+  subject { build(:external_approval_rule) }
 
   describe 'Associations' do
     it { is_expected.to belong_to(:project) }
@@ -12,5 +12,7 @@ RSpec.describe ExternalApprovalRule, type: :model do
 
   describe 'Validations' do
     it { is_expected.to validate_presence_of(:external_url) }
+    it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
+    it { is_expected.to validate_uniqueness_of(:external_url).scoped_to(:project_id) }
   end
 end
