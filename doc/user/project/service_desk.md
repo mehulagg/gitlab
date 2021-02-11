@@ -69,7 +69,7 @@ To enable Service Desk in your project:
 1. (GitLab self-managed only) [Set up incoming email](../../administration/incoming_email.md#set-it-up) for the GitLab instance.
    We recommend using [email sub-addressing](../../administration/incoming_email.md#email-sub-addressing),
    but you can also use [catch-all mailboxes](../../administration/incoming_email.md#catch-all-mailbox).
-1. In a project, go to your project's **Settings > General** and locate the **Service Desk** section.
+1. In a project, in the left sidebar, go to **Settings > General** and expand the **Service Desk** section.
 1. Enable the **Activate Service Desk** toggle. This reveals a unique email address to email issues
    to the project.
 
