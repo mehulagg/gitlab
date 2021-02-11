@@ -75,9 +75,8 @@ export default {
       <span data-testid="title">{{ title }}</span>
       <gl-loading-icon v-if="loading" inline class="gl-ml-2" />
       <gl-button
-        v-if="canUpdate"
         variant="link"
-        class="gl-text-gray-900! gl-ml-auto js-sidebar-dropdown-toggle"
+        class="gl-text-gray-900! js-sidebar-dropdown-toggle"
         data-testid="edit-button"
         @keyup.esc="toggle"
         @click="toggle"

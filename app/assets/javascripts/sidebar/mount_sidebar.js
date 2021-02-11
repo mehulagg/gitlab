@@ -10,6 +10,7 @@ import {
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 import { apolloProvider } from '~/sidebar/graphql';
+import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import Translate from '../vue_shared/translate';
 import SidebarTimeTracking from './components/time_tracking/sidebar_time_tracking.vue';
 import SidebarAssignees from './components/assignees/sidebar_assignees.vue';
@@ -105,7 +106,7 @@ export function mountSidebarLabels() {
   });
 }
 
-function mountConfidentialComponent(mediator) {
+function mountConfidentialComponentDeprecated(mediator) {
   const el = document.getElementById('js-confidential-entry-point');
 
   const { fullPath, iid } = getSidebarOptions();
@@ -138,6 +139,32 @@ function mountConfidentialComponent(mediator) {
     .catch(() => {
       createFlash({ message: __('Failed to load sidebar confidential toggle') });
     });
+}
+
+function mountConfidentialComponent() {
+  const el = document.getElementById('js-confidential-entry-point');
+  const { fullPath, iid } = getSidebarOptions();
+  const dataNode = document.getElementById('js-confidential-issue-data');
+  const initialData = JSON.parse(dataNode.innerHTML);
+
+  if (!el) {
+    return;
+  }
+
+  // eslint-disable-next-line no-new
+  new Vue({
+    el,
+
+    components: {
+      SidebarConfidentialityWidget,
+    },
+    provide: {
+      iid: String(iid),
+      fullPath,
+      canUpdate: initialData.is_editable,
+    },
+    render: (createElement) => createElement('sidebar-confidentiality-widget'),
+  });
 }
 
 function mountLockComponent() {
