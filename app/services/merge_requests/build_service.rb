@@ -237,7 +237,6 @@ module MergeRequests
       if commits&.count == 1
         commit = commits.first
       else
-        # @@@(maxcoplan) Testing failures comes from here
         commit = first_multiline_commit
         return unless commit
       end
