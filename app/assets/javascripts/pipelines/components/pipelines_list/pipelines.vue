@@ -339,6 +339,7 @@ export default {
 
       <div v-else-if="stateToRender === $options.stateMap.tableList">
         <pipelines-table-component
+          data-testid="pipelines-table"
           :pipelines="state.pipelines"
           :pipeline-schedule-url="pipelineScheduleUrl"
           :update-graph-dropdown="updateGraphDropdown"

@@ -30,6 +30,8 @@ export default class PipelinesStore {
       paginationInfo = pagination;
     }
 
+    // console.log(paginationInfo);
+
     this.state.pageInfo = paginationInfo;
   }
 

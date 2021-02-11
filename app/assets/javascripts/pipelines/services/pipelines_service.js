@@ -27,6 +27,8 @@ export default class PipelinesService {
 
     this.cancelationSource = CancelToken.source();
 
+    // console.log('axios.get', queryParams);
+
     return axios.get(this.endpoint, {
       params: queryParams,
       cancelToken: this.cancelationSource.token,

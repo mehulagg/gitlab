@@ -1,7 +1,8 @@
 import { nextTick } from 'vue';
+import { chunk } from 'lodash';
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { GlFilteredSearch, GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlPagination, GlFilteredSearch, GlButton, GlLoadingIcon } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
@@ -26,7 +27,7 @@ describe('Pipelines', () => {
 
   preloadFixtures(jsonFixtureName);
 
-  let pipelines;
+  let pipelinesResponse;
   let wrapper;
   let mock;
 
@@ -68,6 +69,8 @@ describe('Pipelines', () => {
   const findCleanCacheButton = () => findByTestId('clear-cache-button');
   const findStagesDropdown = () => findByTestId('mini-pipeline-graph-dropdown-toggle');
 
+  const findPipelinesTable = () => wrapper.find(PipelinesTableComponent);
+  const findPipelineUrlLinks = () => wrapper.findAll('[data-testid="pipeline-url-link"]');
   const findEmptyState = () => wrapper.find(EmptyState);
   const findBlankState = () => wrapper.find(BlankState);
 
@@ -90,22 +93,25 @@ describe('Pipelines', () => {
 
   beforeEach(() => {
     window.location = { search: '' };
-    mock = new MockAdapter(axios);
-    pipelines = getJSONFixture(jsonFixtureName);
 
+    mock = new MockAdapter(axios);
+    pipelinesResponse = getJSONFixture(jsonFixtureName);
+
+    jest.spyOn(window.history, 'pushState').mockImplementation(() => {});
     jest.spyOn(Api, 'projectUsers').mockResolvedValue(users);
     jest.spyOn(Api, 'branches').mockResolvedValue({ data: branches });
   });
 
   afterEach(() => {
+    window.history.pushState.mockReset();
     wrapper.destroy();
-    mock.restore();
+    mock.reset();
   });
 
   describe('With permission', () => {
     describe('With pipelines in main tab', () => {
       beforeEach(() => {
-        mock.onGet('twitter/flight/pipelines.json').reply(200, pipelines);
+        mock.onGet('twitter/flight/pipelines.json').reply(200, pipelinesResponse);
         createComponent();
         return waitForPromises();
       });
@@ -128,7 +134,7 @@ describe('Pipelines', () => {
 
       it('renders pipelines table', () => {
         expect(wrapper.findAll('.gl-responsive-table-row')).toHaveLength(
-          pipelines.pipelines.length + 1,
+          pipelinesResponse.pipelines.length + 1,
         );
       });
     });
@@ -170,12 +176,12 @@ describe('Pipelines', () => {
         expect(findBlankState().text()).toBe('There are currently no pipelines.');
       });
 
-      it('renders tab empty state finished scope', () => {
-        wrapper.vm.scope = 'finished';
+      it('renders tab empty state finished scope', async () => {
+        findNavigationTabs().vm.$emit('onChangeTab', 'finished');
 
-        return nextTick().then(() => {
-          expect(findBlankState().text()).toBe('There are currently no finished pipelines.');
-        });
+        await waitForPromises();
+
+        expect(findBlankState().text()).toBe('There are currently no finished pipelines.');
       });
     });
 
@@ -237,7 +243,7 @@ describe('Pipelines', () => {
   describe('Without permission', () => {
     describe('With pipelines in main tab', () => {
       beforeEach(() => {
-        mock.onGet('twitter/flight/pipelines.json').reply(200, pipelines);
+        mock.onGet('twitter/flight/pipelines.json').reply(200, pipelinesResponse);
 
         createComponent({ hasGitlabCi: false, canCreatePipeline: false, ...noPermissions });
 
@@ -256,7 +262,7 @@ describe('Pipelines', () => {
 
       it('renders pipelines table', () => {
         expect(wrapper.findAll('.gl-responsive-table-row')).toHaveLength(
-          pipelines.pipelines.length + 1,
+          pipelinesResponse.pipelines.length + 1,
         );
       });
     });
@@ -356,7 +362,7 @@ describe('Pipelines', () => {
   describe('successful request', () => {
     describe('with pipelines', () => {
       beforeEach(() => {
-        mock.onGet('twitter/flight/pipelines.json').reply(200, pipelines);
+        mock.onGet('twitter/flight/pipelines.json').reply(200, pipelinesResponse);
 
         createComponent();
         return waitForPromises();
@@ -364,7 +370,7 @@ describe('Pipelines', () => {
 
       it('should render table', () => {
         expect(wrapper.findAll('.gl-responsive-table-row')).toHaveLength(
-          pipelines.pipelines.length + 1,
+          pipelinesResponse.pipelines.length + 1,
         );
       });
 
@@ -397,113 +403,154 @@ describe('Pipelines', () => {
           });
         });
       });
+    });
+  });
 
-      describe('with pagination', () => {
-        it('should make an API request when using pagination', () => {
-          createComponent({ hasGitlabCi: true, canCreatePipeline: true, ...paths });
-          jest.spyOn(wrapper.vm.service, 'getPipelines');
+  describe('When there are multiple pages of pipelines available', () => {
+    const mockPageSize = 2;
+    const mockPageHeader = ({ page = 1 } = {}) => {
+      return {
+        'X-PER-PAGE': `${mockPageSize}`,
+        'X-PREV-PAGE': `${page - 1}`,
+        'X-PAGE': `${page}`,
+        'X-NEXT-PAGE': `${page + 1}`,
+      };
+    };
+    const goToTab = (tab) => {
+      findNavigationTabs().vm.$emit('onChangeTab', tab);
+    };
+    const goToPage = (page) => {
+      findTablePagination().find(GlPagination).vm.$emit('input', page);
+    };
 
-          return waitForPromises()
-            .then(() => {
-              // Mock pagination
-              wrapper.vm.store.state.pageInfo = {
-                page: 1,
-                total: 10,
-                perPage: 2,
-                nextPage: 2,
-                totalPages: 5,
-              };
+    beforeEach(async () => {
+      const pages = chunk(pipelinesResponse.pipelines, mockPageSize);
 
-              return nextTick();
-            })
-            .then(() => {
-              wrapper.find('.next-page-item').trigger('click');
-              expect(wrapper.vm.service.getPipelines).toHaveBeenCalledWith({
-                scope: 'all',
-                page: '2',
-              });
-            });
-        });
+      mock.onGet(paths.endpoint, { params: { scope: 'all', page: '1' } }).reply(
+        200,
+        {
+          pipelines: pages[0],
+          count: pipelinesResponse.count,
+        },
+        mockPageHeader({ page: 1 }),
+      );
+      mock.onGet(paths.endpoint, { params: { scope: 'all', page: '2' } }).reply(
+        200,
+        {
+          pipelines: pages[1],
+          count: pipelinesResponse.count,
+        },
+        mockPageHeader({ page: 2 }),
+      );
+
+      createComponent();
+
+      await waitForPromises();
+    });
+
+    it('shows the first page of pipelines', () => {
+      expect(findPipelineUrlLinks().length).toBe(2);
+      expect(findPipelineUrlLinks().at(0).text()).toBe('#3');
+      expect(findPipelineUrlLinks().at(1).text()).toBe('#2');
+
+      expect(window.history.pushState).not.toHaveBeenCalled();
+    });
+
+    describe('when user goes to next page', () => {
+      beforeEach(async () => {
+        goToPage(2);
+        await waitForPromises();
+      });
+
+      it('should update page and keep scope the same scope', async () => {
+        expect(findPipelineUrlLinks().length).toBe(1);
+        expect(findPipelineUrlLinks().at(0).text()).toBe('#1');
+      });
+
+      it('should update browser bar', () => {
+        expect(window.history.pushState).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          `${window.location.pathname}?page=2&scope=all`,
+        );
+      });
+    });
+
+    describe('when user changes tabs', () => {
+      beforeEach(async () => {
+        mock.onGet(paths.endpoint, { params: { scope: 'running', page: '1' } }).reply(
+          200,
+          {
+            pipelines: [pipelinesResponse.pipelines[0]],
+            count: pipelinesResponse.count,
+          },
+          mockPageHeader({ page: 1 }),
+        );
+
+        goToTab('running');
+
+        await waitForPromises();
+      });
+
+      it('should filter pipelines', async () => {
+        expect(findPipelineUrlLinks().length).toBe(1);
+        expect(findPipelineUrlLinks().at(0).text()).toBe('#3');
+      });
+
+      it('should update browser bar', () => {
+        expect(window.history.pushState).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          `${window.location.pathname}?scope=running&page=1`,
+        );
       });
     });
   });
 
   describe('User Interaction', () => {
-    let updateContentMock;
-
-    beforeEach(() => {
-      jest.spyOn(window.history, 'pushState').mockImplementation(() => null);
-    });
-
-    beforeEach(() => {
-      mock.onGet(paths.endpoint).reply(200, pipelines);
-      createComponent();
-
-      updateContentMock = jest.spyOn(wrapper.vm, 'updateContent');
-
-      return waitForPromises();
-    });
-
-    describe('when user changes tabs', () => {
-      it('should set page to 1', () => {
-        findNavigationTabs().vm.$emit('onChangeTab', 'running');
-
-        expect(updateContentMock).toHaveBeenCalledWith({ scope: 'running', page: '1' });
-      });
-    });
-
-    describe('when user changes page', () => {
-      it('should update page and keep scope', () => {
-        findTablePagination().vm.change(4);
-
-        expect(updateContentMock).toHaveBeenCalledWith({ scope: wrapper.vm.scope, page: '4' });
-      });
-    });
-
     describe('updates results when a staged is clicked', () => {
       beforeEach(() => {
         const copyPipeline = { ...pipelineWithStages };
         copyPipeline.id += 1;
-        mock
-          .onGet('twitter/flight/pipelines.json')
-          .reply(
-            200,
-            {
-              pipelines: [pipelineWithStages],
-              count: {
-                all: 1,
-                finished: 1,
-                pending: 0,
-                running: 0,
-              },
+
+        mock.onGet(paths.endpoint, { scope: 'all', page: '1' }).reply(
+          200,
+          {
+            pipelines: [pipelineWithStages],
+            count: {
+              all: 1,
+              finished: 1,
+              pending: 0,
+              running: 0,
             },
-            {
-              'POLL-INTERVAL': 100,
-            },
-          )
-          .onGet(pipelineWithStages.details.stages[0].dropdown_path)
-          .reply(200, stageReply);
+          },
+          {
+            'POLL-INTERVAL': 100,
+          },
+        );
+        mock.onGet(pipelineWithStages.details.stages[0].dropdown_path).reply(200, stageReply);
 
         createComponent();
       });
 
       describe('when a request is being made', () => {
-        it('stops polling, cancels the request, & restarts polling', () => {
+        it('stops polling, cancels the request, & restarts polling', async () => {
           const stopMock = jest.spyOn(wrapper.vm.poll, 'stop');
           const restartMock = jest.spyOn(wrapper.vm.poll, 'restart');
           const cancelMock = jest.spyOn(wrapper.vm.service.cancelationSource, 'cancel');
-          mock.onGet('twitter/flight/pipelines.json').reply(200, pipelines);
+          mock.onGet('twitter/flight/pipelines.json').reply(200, pipelinesResponse);
 
-          return waitForPromises()
-            .then(() => {
-              wrapper.vm.isMakingRequest = true;
-              findStagesDropdown().trigger('click');
-            })
-            .then(() => {
-              expect(cancelMock).toHaveBeenCalled();
-              expect(stopMock).toHaveBeenCalled();
-              expect(restartMock).toHaveBeenCalled();
-            });
+          await waitForPromises();
+
+          wrapper.vm.isMakingRequest = true;
+
+          findStagesDropdown().trigger('click');
+
+          await waitForPromises();
+
+          expect(cancelMock).toHaveBeenCalled();
+          expect(stopMock).toHaveBeenCalled();
+          expect(restartMock).toHaveBeenCalled();
         });
       });
 
@@ -511,7 +558,7 @@ describe('Pipelines', () => {
         it('stops polling & restarts polling', () => {
           const stopMock = jest.spyOn(wrapper.vm.poll, 'stop');
           const restartMock = jest.spyOn(wrapper.vm.poll, 'restart');
-          mock.onGet('twitter/flight/pipelines.json').reply(200, pipelines);
+          mock.onGet('twitter/flight/pipelines.json').reply(200, pipelinesResponse);
 
           return waitForPromises()
             .then(() => {
@@ -550,7 +597,7 @@ describe('Pipelines', () => {
       it('shows table list when app has pipelines', () => {
         wrapper.vm.isLoading = false;
         wrapper.vm.hasError = false;
-        wrapper.vm.state.pipelines = pipelines.pipelines;
+        wrapper.vm.state.pipelines = pipelinesResponse.pipelines;
 
         return nextTick().then(() => {
           expect(wrapper.find(PipelinesTableComponent).exists()).toBe(true);
@@ -599,7 +646,7 @@ describe('Pipelines', () => {
 
       it('returns true when state is tableList & has already made the first request', () => {
         wrapper.vm.isLoading = false;
-        wrapper.vm.state.pipelines = pipelines.pipelines;
+        wrapper.vm.state.pipelines = pipelinesResponse.pipelines;
         wrapper.vm.hasMadeRequest = true;
 
         return nextTick().then(() => {
@@ -670,7 +717,7 @@ describe('Pipelines', () => {
     let updateContentMock;
 
     beforeEach(() => {
-      mock.onGet(paths.endpoint).reply(200, pipelines);
+      mock.onGet(paths.endpoint).reply(200, pipelinesResponse);
       createComponent();
 
       updateContentMock = jest.spyOn(wrapper.vm, 'updateContent');

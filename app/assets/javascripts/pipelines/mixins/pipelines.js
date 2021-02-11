@@ -86,13 +86,17 @@ export default {
      */
     updateContent(parameters) {
       this.updateInternalState(parameters);
+      // console.log('1 updateContent...', parameters, this.requestData.page, this.requestData.scope);
 
       // fetch new data
       return this.service
         .getPipelines(this.requestData)
         .then((response) => {
+          // console.log('2 handling result...', response);
+
           this.isLoading = false;
           this.successCallback(response);
+          // console.log('3 successCallback', response);
 
           this.poll.enable({ data: this.requestData, response });
         })
