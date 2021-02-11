@@ -6,6 +6,7 @@ import {
   GlCollapseToggleDirective,
   GlSprintf,
   GlModalDirective,
+  GlLink,
 } from '@gitlab/ui';
 import Modal from 'ee/vue_shared/security_reports/components/dast_modal.vue';
 import { __ } from '~/locale';
@@ -21,6 +22,7 @@ export default {
     GlCollapse,
     GlSprintf,
     Modal,
+    GlLink,
   },
   directives: {
     collapseToggle: GlCollapseToggleDirective,
@@ -131,6 +133,16 @@ export default {
               :scanned-resources-count="scanSummary.scannedResourcesCount"
               :download-link="downloadLink(scanSummary)"
             />
+          </template>
+          <template v-else-if="scanSummary.scannedResourcesCsvPath">
+            <gl-link
+              download
+              :href="downloadLink(scanSummary)"
+              class="gl-ml-4"
+              data-testid="download-link"
+            >
+              {{ s__('SecurityReports|Download scanned resources') }}
+            </gl-link>
           </template>
         </div>
       </div>
