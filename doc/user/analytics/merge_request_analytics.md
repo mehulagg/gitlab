@@ -39,6 +39,12 @@ Merge Request Analytics could be used when:
 
 The following visualizations and data are available, representing all merge requests that were merged in the given date range.
 
+### Mean time to merge
+
+The Mean time to merge (MTTM) metrics tells shows the average time it takes from initiating an MR to being merged.
+
+![Mean time to merge](img/mr_mean_time_to_merge_metric_v13_9.png "Merge Request Analytics - MTTM metric showing the average time it takes from initiating an MR to being merged")
+
 ### Throughput chart
 
 The throughput chart shows the number of merge requests merged per month.
