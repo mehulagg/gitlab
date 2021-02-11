@@ -4,6 +4,7 @@ exports[`Subscription Seats renders table content renders the correct data 1`] =
 Array [
   Object {
     "email": "administrator@email.com",
+    "removeButtonExists": true,
     "tooltip": undefined,
     "user": Object {
       "avatarLabeled": Object {
@@ -19,6 +20,7 @@ Array [
   },
   Object {
     "email": "agustin_walker@email.com",
+    "removeButtonExists": true,
     "tooltip": undefined,
     "user": Object {
       "avatarLabeled": Object {
@@ -34,6 +36,7 @@ Array [
   },
   Object {
     "email": "Private",
+    "removeButtonExists": true,
     "tooltip": "An email address is only visible for users with public emails.",
     "user": Object {
       "avatarLabeled": Object {
