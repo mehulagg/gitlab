@@ -1,7 +1,7 @@
 ---
 name: security_orchestration_policies
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/issues/300918
-rollout_issue_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/321258
 milestone: '13.9'
 type: development
 group: group::container security
