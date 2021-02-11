@@ -1,0 +1,230 @@
+# frozen_string_literal: true
+
+require 'spec_helper'
+
+RSpec.describe API::Users do
+  let(:user)  { create(:user) }
+  let(:admin) { create(:admin) }
+
+  context 'updating name' do
+    shared_examples_for 'admin can update the name of a user' do
+      it 'updates the user with new name' do
+        put api("/users/#{user.id}", admin), params: { name: 'New Name' }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['name']).to eq('New Name')
+      end
+    end
+
+    context "when authenticated and ldap is enabled" do
+      it "returns non-ldap user" do
+        ldap_user = create :omniauth_user, provider: "ldapserver1"
+
+        get api("/users", user), params: { skip_ldap: "true" }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_an Array
+        expect(json_response).not_to be_empty
+        expect(json_response.map { |u| u['username'] })
+          .not_to include(ldap_user.username)
+      end
+    end
+
+    context 'when `disable_name_update_for_users` feature is available' do
+      before do
+        stub_licensed_features(disable_name_update_for_users: true)
+      end
+
+      context 'when the ability to update their name is disabled for users' do
+        before do
+          stub_application_setting(updating_name_disabled_for_users: true)
+        end
+
+        it_behaves_like 'admin can update the name of a user'
+      end
+
+      context 'when the ability to update their name is not disabled for users' do
+        before do
+          stub_application_setting(updating_name_disabled_for_users: false)
+        end
+
+        it_behaves_like 'admin can update the name of a user'
+      end
+    end
+
+    context 'when `disable_name_update_for_users` feature is not available' do
+      before do
+        stub_licensed_features(disable_name_update_for_users: false)
+      end
+
+      it_behaves_like 'admin can update the name of a user'
+    end
+  end
+
+  context 'extended audit events' do
+    before do
+      stub_licensed_features(extended_audit_events: true)
+    end
+
+    describe "PUT /users/:id" do
+      it "creates audit event when updating user with new password" do
+        put api("/users/#{user.id}", admin), params: { password: '12345678' }
+
+        expect(AuditEvent.count).to eq(1)
+      end
+    end
+
+    describe 'POST /users/:id/block' do
+      it 'creates audit event when blocking user' do
+        expect do
+          post api("/users/#{user.id}/block", admin)
+        end.to change { AuditEvent.count }.by(1)
+      end
+    end
+
+    describe 'POST /user/keys' do
+      it 'creates audit event when user adds a new SSH key' do
+        key = attributes_for(:key)
+
+        expect do
+          post api('/user/keys', user), params: key
+        end.to change { AuditEvent.count }.by(1)
+      end
+    end
+
+    describe 'POST /users/:id/keys' do
+      it 'creates audit event when admin adds a new key for a user' do
+        key = attributes_for(:key)
+
+        expect do
+          post api("/users/#{user.id}/keys", admin), params: key
+        end.to change { AuditEvent.count }.by(1)
+      end
+    end
+  end
+
+  context 'shared_runners_minutes_limit' do
+    describe "PUT /users/:id" do
+      context 'when user is an admin' do
+        it "updates shared_runners_minutes_limit" do
+          expect do
+            put api("/users/#{user.id}", admin), params: { shared_runners_minutes_limit: 133 }
+          end.to change { user.reload.shared_runners_minutes_limit }
+                   .from(nil).to(133)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['shared_runners_minutes_limit']).to eq(133)
+        end
+      end
+
+      context 'when user is not an admin' do
+        it "cannot update their own shared_runners_minutes_limit" do
+          expect do
+            put api("/users/#{user.id}", user), params: { shared_runners_minutes_limit: 133 }
+          end.not_to change { user.reload.shared_runners_minutes_limit }
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+    end
+  end
+
+  context 'with group SAML' do
+    let(:saml_provider) { create(:saml_provider) }
+
+    it 'creates user with new identity' do
+      post api("/users", admin), params: attributes_for(:user, provider: 'group_saml', extern_uid: '67890', group_id_for_saml: saml_provider.group.id)
+
+      expect(response).to have_gitlab_http_status(:created)
+      expect(json_response['identities'].first['extern_uid']).to eq('67890')
+      expect(json_response['identities'].first['provider']).to eq('group_saml')
+      expect(json_response['identities'].first['saml_provider_id']).to eq(saml_provider.id)
+    end
+
+    it 'creates user with new identity without sending reset password email' do
+      post api("/users", admin), params: attributes_for(:user, reset_password: false, provider: 'group_saml', extern_uid: '67890', group_id_for_saml: saml_provider.group.id)
+
+      expect(response).to have_gitlab_http_status(:created)
+
+      new_user = User.find(json_response['id'])
+      expect(new_user.recently_sent_password_reset?).to eq(false)
+    end
+
+    it 'updates user with new identity' do
+      put api("/users/#{user.id}", admin), params: { provider: 'group_saml', extern_uid: '67890', group_id_for_saml: saml_provider.group.id }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['identities'].first['extern_uid']).to eq('67890')
+      expect(json_response['identities'].first['provider']).to eq('group_saml')
+      expect(json_response['identities'].first['saml_provider_id']).to eq(saml_provider.id)
+    end
+
+    it 'fails to update user with nonexistent identity' do
+      put api("/users/#{user.id}", admin), params: { provider: 'group_saml', extern_uid: '67890', group_id_for_saml: 15 }
+      expect(response).to have_gitlab_http_status(:bad_request)
+      expect(json_response['message']).to eq({ "identities.saml_provider_id" => ["can't be blank"] })
+    end
+
+    it 'fails to update user with nonexistent provider' do
+      put api("/users/#{user.id}", admin), params: { provider: nil, extern_uid: '67890', group_id_for_saml: saml_provider.group.id }
+      expect(response).to have_gitlab_http_status(:bad_request)
+      expect(json_response['message']).to eq({ "identities.provider" => ["can't be blank"] })
+    end
+  end
+
+  describe 'GET /user/:id' do
+    context 'when authenticated' do
+      context 'as an admin' do
+        context 'and user has a plan' do
+          let!(:subscription) { create(:gitlab_subscription, :gold, namespace: user.namespace) }
+
+          context 'and user is not a trial user' do
+            it 'contains plan and trial' do
+              get api("/users/#{user.id}", admin)
+
+              expect(json_response).to include('plan' => 'gold', 'trial' => false)
+            end
+          end
+
+          context 'and user is a trial user' do
+            before do
+              subscription.update!(trial: true)
+            end
+
+            it 'contains plan and trial' do
+              get api("/users/#{user.id}", admin)
+
+              expect(json_response).to include('plan' => 'gold', 'trial' => true)
+            end
+          end
+        end
+
+        context 'and user has no plan' do
+          it 'returns `nil` for both plan and trial' do
+            get api("/users/#{user.id}", admin)
+
+            expect(json_response).to include('plan' => nil, 'trial' => nil)
+          end
+        end
+      end
+
+      context 'as a user' do
+        it 'does not contain plan and trial info' do
+          get api("/users/#{user.id}", user)
+
+          expect(json_response).not_to have_key('plan')
+          expect(json_response).not_to have_key('trial')
+        end
+      end
+    end
+
+    context 'when not authenticated' do
+      it 'does not contain plan and trial info' do
+        get api("/users/#{user.id}")
+
+        expect(json_response).not_to have_key('plan')
+        expect(json_response).not_to have_key('trial')
+      end
+    end
+  end
+end
