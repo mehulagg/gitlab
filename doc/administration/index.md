@@ -32,7 +32,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 
 ### Installing GitLab
 
-- [Install](../install/README.md): Requirements, directory structures, and installation methods.
+- [Install](../install/index.md): Requirements, directory structures, and installation methods.
   - [Database load balancing](database_load_balancing.md): Distribute database queries among multiple database servers.
   - [Omnibus support for log forwarding](https://docs.gitlab.com/omnibus/settings/logs.html#udp-log-shipping-gitlab-enterprise-edition-only).
 - [Reference architectures](reference_architectures/index.md): Add additional resources to support more users.
