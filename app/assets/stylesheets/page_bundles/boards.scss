@@ -136,6 +136,11 @@
   font-size: $issue-boards-font-size;
   background: var(--gray-10, $gray-10);
   border: 1px solid var(--gray-100, $gray-100);
+  transition: box-shadow 0.6s;
+}
+
+.board-column-highlighted {
+  box-shadow: 0 0 6px 3px $blue-200;
 }
 
 .board-header {

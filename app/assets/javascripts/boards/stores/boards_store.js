@@ -103,14 +103,15 @@ const boardsStore = {
     const list = this.addList(listObj);
     const backlogList = this.findList('type', 'backlog');
 
+    list.highlighted = true;
+    setTimeout(() => {
+      list.highlighted = false;
+    }, 2000);
+
     list
       .save()
       .then(() => {
         // Remove any new issues from the backlog
-        list.highlighted = true;
-        setTimeout(() => {
-          list.highlighted = false;
-        }, 4000);
         // as they will be visible in the new list
         list.issues.forEach(backlogList.removeIssue.bind(backlogList));
         this.state.lists = sortBy(this.state.lists, 'position');

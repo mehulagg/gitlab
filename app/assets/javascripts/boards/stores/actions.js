@@ -118,7 +118,7 @@ export default {
       if (index > -1) {
         state.highlightedLists.splice(index, 1);
       }
-    }, 4000);
+    }, 2000);
   },
 
   createList: (
