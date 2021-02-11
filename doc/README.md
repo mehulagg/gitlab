@@ -122,5 +122,5 @@ Learn how to contribute to GitLab with the following resources:
 | Topic                                                       | Description |
 |:------------------------------------------------------------|:------------|
 | [Development](development/README.md)                        | How to contribute to GitLab development. |
-| [Legal](legal/README.md)                                    | Contributor license agreements. |
+| [Legal](legal/index.md)                                    | Contributor license agreements. |
 | [Writing documentation](development/documentation/index.md) | How to contribute to GitLab Docs. |
