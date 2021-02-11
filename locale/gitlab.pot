@@ -29578,6 +29578,9 @@ msgstr ""
 msgid "There was an error trying to validate your query"
 msgstr ""
 
+msgid "There was an error updating merge request approval settings."
+msgstr ""
+
 msgid "There was an error updating the Geo Settings"
 msgstr ""
 

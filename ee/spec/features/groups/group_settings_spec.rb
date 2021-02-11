@@ -281,10 +281,23 @@ RSpec.describe 'Edit group settings' do
         stub_licensed_features(group_merge_request_approval_settings: true)
       end
 
-      it 'is visible' do
+      it 'allows to save settings' do
         visit edit_group_path(group)
 
         expect(page).to have_content('Merge request approvals')
+
+        within('[data-testid="merge-request-approval-settings"]') do
+          click_button 'Expand'
+          find('[data-testid="prevent-author-approval"]').set(false)
+          click_button 'Save changes'
+        end
+
+        visit edit_group_path(group)
+
+        within('[data-testid="merge-request-approval-settings"]') do
+          click_button 'Expand'
+          expect(find("[data-testid='prevent-author-approval']")).not_to be_checked
+        end
       end
     end
 
