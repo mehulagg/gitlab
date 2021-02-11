@@ -20,7 +20,6 @@ import TimeTracker from '~/sidebar/components/time_tracking/time_tracker.vue';
 import MilestoneSelect from '~/milestone_select';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import boardsStore from '../stores/boards_store';
-import RemoveBtn from './sidebar/remove_issue.vue';
 
 export default Vue.extend({
   components: {
@@ -29,7 +28,6 @@ export default Vue.extend({
     GlLabel,
     SidebarEpicsSelect: () =>
       import('ee_component/sidebar/components/sidebar_item_epics_select.vue'),
-    RemoveBtn,
     Subscriptions,
     TimeTracker,
   },

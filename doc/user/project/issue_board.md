@@ -476,6 +476,8 @@ Feature.disable(:add_issues_button)
 
 ### Remove an issue from a list
 
+> - [Removed](https://gitlab.com/gitlab-org/gitlab/-/issues/229507) in GitLab 13.9
+
 Removing an issue from a list can be done by clicking the issue card and then
 clicking the **Remove from board** button in the sidebar. The
 respective label is removed.

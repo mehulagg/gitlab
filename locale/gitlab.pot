@@ -24442,9 +24442,6 @@ msgstr ""
 msgid "Remove from batch"
 msgstr ""
 
-msgid "Remove from board"
-msgstr ""
-
 msgid "Remove from epic"
 msgstr ""
 
