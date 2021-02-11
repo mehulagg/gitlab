@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sidekiq/web'
 require 'sidekiq/cron/web'
 require 'product_analytics/collector_app'
@@ -11,12 +13,6 @@ Rails.application.routes.draw do
   concern :awardable do
     post :toggle_award_emoji, on: :member
   end
-
-  favicon_redirect = redirect do |_params, _request|
-    ActionController::Base.helpers.asset_url(Gitlab::Favicon.main)
-  end
-  get 'favicon.png', to: favicon_redirect
-  get 'favicon.ico', to: favicon_redirect
 
   draw :sherlock
   draw :development
@@ -39,7 +35,9 @@ Rails.application.routes.draw do
     match '*all', via: [:get, :post], to: proc { [404, {}, ['']] }
   end
 
-  draw :oauth
+  Gitlab.ee do
+    draw :oauth
+  end
 
   use_doorkeeper_openid_connect
 
@@ -127,10 +125,10 @@ Rails.application.routes.draw do
     get 'ide' => 'ide#index'
     get 'ide/*vueroute' => 'ide#index', format: false
 
-    draw :operations
     draw :jira_connect
 
     Gitlab.ee do
+      draw :operations
       draw :security
       draw :smartcard
       draw :username
@@ -261,7 +259,6 @@ Rails.application.routes.draw do
   get '/projects/:id' => 'projects#resolve'
 
   draw :git_http
-  draw :api
   draw :sidekiq
   draw :help
   draw :google_api

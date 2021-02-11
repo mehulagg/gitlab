@@ -6,3 +6,8 @@ test_web_engine = Gitlab::Utils.to_boolean(ENV['TEST_WEB_ENGINE'], default: fals
 if Gitlab::Runtime.web_server? || Gitlab::Runtime.console? || test_web_engine
   require 'web_engine'
 end
+
+ActiveSupport::Notifications.subscribe "load_config_initializer.railties" do |name, started, finished, unique_id, data|
+  # puts data.inspect # {:this=>:data}
+  # puts name
+end

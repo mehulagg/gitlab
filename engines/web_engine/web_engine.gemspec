@@ -37,4 +37,9 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'graphql-docs', '~> 1.6.0'
   spec.add_dependency 'rails', '~> 6.0.3', '>= 6.0.3.3'
+
+  # API
+  # Locked at Grape v1.4.0 until https://github.com/ruby-grape/grape/pull/2088 is merged
+  # Remove config/initializers/grape_patch.rb
+  spec.add_dependency 'grape', '= 1.4.0'
 end

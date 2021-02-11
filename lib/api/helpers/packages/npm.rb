@@ -7,8 +7,10 @@ module API
         include Gitlab::Utils::StrongMemoize
         include ::API::Helpers::PackagesHelpers
 
+        NO_SLASH_URL_PART_REGEX = %r{[^/]+}.freeze
+
         NPM_ENDPOINT_REQUIREMENTS = {
-          package_name: API::NO_SLASH_URL_PART_REGEX
+          package_name: NO_SLASH_URL_PART_REGEX
         }.freeze
 
         def endpoint_scope

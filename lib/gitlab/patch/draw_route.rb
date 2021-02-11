@@ -8,17 +8,25 @@ module Gitlab
       RoutesNotFound = Class.new(StandardError)
 
       def draw(routes_name)
-        drawn_any = draw_ee(routes_name) | draw_ce(routes_name)
+        drawn_any = draw_all_routes(routes_name)
 
         drawn_any || raise(RoutesNotFound.new("Cannot find #{routes_name}"))
       end
 
-      def draw_ce(routes_name)
-        draw_route(route_path("config/routes/#{routes_name}.rb"))
+      private
+
+      def paths
+        Rails.application.config.paths['draw_routes']
       end
 
-      def draw_ee(_)
-        true
+      def draw_route_for_path(path, routes_name)
+        draw_route(route_path("#{path}/#{routes_name}.rb"))
+      end
+
+      def draw_all_routes(routes_name)
+        paths.inject(false) do |result, path|
+          result | draw_route_for_path(path, routes_name)
+        end
       end
 
       def route_path(routes_name)
@@ -37,4 +45,3 @@ module Gitlab
   end
 end
 
-Gitlab::Patch::DrawRoute.prepend_if_ee('EE::Gitlab::Patch::DrawRoute')

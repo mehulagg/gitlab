@@ -2,7 +2,7 @@
 
 module API
   module Entities
-    class CommitWithLink < Commit
+    class CommitWithLink < ::API::Entities::Commit
       include MarkupHelper
       include RequestAwareEntity
 
