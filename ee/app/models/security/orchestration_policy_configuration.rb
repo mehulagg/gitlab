@@ -10,12 +10,13 @@ module Security
       'api_fuzzing'         => 'API-Fuzzing',
       'container_scanning'  => 'Container-Scanning',
       'coverage_fuzzing'    => 'Coverage-Fuzzing',
-      'dast'                => 'DAST',
       'dependency_scanning' => 'Dependency-Scanning',
       'license_scanning'    => 'License-Scanning',
       'sast'                => 'SAST',
       'secret_detection'    => 'Secret-Detection'
     }.freeze
+
+    ON_DEMAND_SCANS = %w[dast].freeze
 
     belongs_to :project, inverse_of: :security_orchestration_policy_configuration
     belongs_to :security_policy_management_project, class_name: 'Project', foreign_key: 'security_policy_management_project_id'
@@ -50,6 +51,13 @@ module Security
         .uniq
         .then { |scans| SCAN_TEMPLATES.values_at(*scans) }
         .compact
+    end
+
+    def on_demand_scan_actions(branch)
+      active_policies
+        .select { |policy| applicable_for_branch?(policy, branch) }
+        .flat_map { |policy| policy[:actions] }
+        .select { |action| action[:scan].in?(ON_DEMAND_SCANS) }
     end
 
     private

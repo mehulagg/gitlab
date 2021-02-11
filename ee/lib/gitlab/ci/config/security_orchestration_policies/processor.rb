@@ -19,6 +19,7 @@ module Gitlab
 
             @config
               .deep_merge(merged_security_orchestration_policy_templates)
+              .deep_merge(on_demand_scans_template)
           end
 
           def merged_security_orchestration_policy_templates
@@ -26,6 +27,12 @@ module Gitlab
               .scan_templates(@ref)
               .reduce({}) { |config, template_name| config.deep_merge(required_template_hash(template_name)) }
               .then { |config| Config::Extendable.new(config).to_hash }
+          end
+
+          def on_demand_scans_template
+            ::Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConfigurationService
+              .new(project)
+              .execute(security_orchestration_policy_configuration.on_demand_scan_actions(@ref))
           end
 
           private
