@@ -39,7 +39,7 @@ describe('burndown_chart', () => {
     burndownEventsPath: '/api/v4/projects/1234/milestones/1/burndown_events',
   };
 
-  const createComponent = ({ props = {}, data = {} } = {}) => {
+  const createComponent = ({ props = {}, data = {}, loading = false } = {}) => {
     wrapper = shallowMount(BurnCharts, {
       propsData: {
         ...defaultProps,
@@ -49,7 +49,7 @@ describe('burndown_chart', () => {
         $apollo: {
           queries: {
             report: {
-              loading: false,
+              loading,
             },
           },
         },
@@ -67,6 +67,20 @@ describe('burndown_chart', () => {
   afterEach(() => {
     mock.restore();
     wrapper.destroy();
+  });
+
+  it('passes loading=true through to charts', () => {
+    createComponent({ loading: true });
+
+    expect(findBurndownChart().props('loading')).toBe(true);
+    expect(findBurnupChart().props('loading')).toBe(true);
+  });
+
+  it('passes loading=false through to charts', () => {
+    createComponent({ loading: false });
+
+    expect(findBurndownChart().props('loading')).toBe(false);
+    expect(findBurnupChart().props('loading')).toBe(false);
   });
 
   it('includes Issues and Issue weight buttons', () => {

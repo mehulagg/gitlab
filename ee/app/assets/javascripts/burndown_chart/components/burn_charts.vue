@@ -369,7 +369,7 @@ export default {
         :open-issues-count="issuesCount"
         :open-issues-weight="issuesWeight"
         :issues-selected="issuesSelected"
-        :is-loading="loading"
+        :loading="loading"
         class="col-md-6"
       />
       <burnup-chart
@@ -377,7 +377,7 @@ export default {
         :due-date="dueDate"
         :burnup-data="burnupData"
         :issues-selected="issuesSelected"
-        :is-loading="loading"
+        :loading="loading"
         class="col-md-6"
       />
     </div>

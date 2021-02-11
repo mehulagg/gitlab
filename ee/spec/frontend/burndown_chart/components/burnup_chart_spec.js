@@ -26,6 +26,18 @@ describe('Burnup chart', () => {
     });
   };
 
+  it('hides chart while loading', () => {
+    createComponent({ loading: true });
+
+    expect(findChart().exists()).toBe(false);
+  });
+
+  it('shows chart when not loading', () => {
+    createComponent({ loading: false });
+
+    expect(findChart().exists()).toBe(true);
+  });
+
   it('renders the lineChart correctly', () => {
     const burnupData = [day1, day2, day3];
 
