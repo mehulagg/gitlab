@@ -4,14 +4,15 @@ query($fullPath: ID!, $pipelineIid: ID!) {
       securityReportSummary {
         dast {
           vulnerabilitiesCount
-          scannedResourcesCount
           scannedResourcesCsvPath
-          scannedResources {
-            nodes {
-              requestMethod
-              url
-            }
-          }
+          # The additional fields will be added in #id
+          # scannedResourcesCount
+          # scannedResources {
+          #   nodes {
+          #     requestMethod
+          #     url
+          #   }
+          # }
         }
         sast {
           vulnerabilitiesCount
