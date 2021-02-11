@@ -27,7 +27,6 @@ module Gitlab
           :full_query,
           :generator_url,
           :gitlab_alert,
-          :gitlab_fingerprint,
           :gitlab_prometheus_alert_id,
           :gitlab_y_label,
           :has_required_attributes?,
@@ -38,7 +37,6 @@ module Gitlab
           :resolved?,
           :runbook,
           :service,
-          :severity,
           :starts_at,
           :status,
           :title
@@ -48,6 +46,18 @@ module Gitlab
         EXPECTED_PAYLOAD_ATTRIBUTES.each do |key|
           define_method(key) {}
         end
+
+        SEVERITY_MAPPING = {
+          'critical' => :critical,
+          'high' => :high,
+          'medium' => :medium,
+          'low' => :low,
+          'info' => :info
+        }.freeze
+
+        # Handle an unmapped severity value the same way we treat missing values
+        # so we can fallback to alert's default severity `critical`.
+        UNMAPPED_SEVERITY = nil
 
         # Defines a method which allows access to a given
         # value within an alert payload
@@ -131,9 +141,21 @@ module Gitlab
           true
         end
 
+        def severity
+          severity_mapping.fetch(severity_raw.to_s.downcase, UNMAPPED_SEVERITY)
+        end
+
         private
 
-        def plain_gitlab_fingerprint; end
+        def plain_gitlab_fingerprint
+        end
+
+        def severity_raw
+        end
+
+        def severity_mapping
+          SEVERITY_MAPPING
+        end
 
         def truncate_hosts(hosts)
           return hosts if hosts.join.length <= ::AlertManagement::Alert::HOSTS_MAX_LENGTH
