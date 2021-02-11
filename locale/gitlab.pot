@@ -11004,6 +11004,9 @@ msgstr ""
 msgid "Enable Seat Link"
 msgstr ""
 
+msgid "Enable Service Desk"
+msgstr ""
+
 msgid "Enable Spam Check via external API endpoint"
 msgstr ""
 
@@ -14630,9 +14633,6 @@ msgstr ""
 msgid "Hashed storage can't be disabled anymore for new projects"
 msgstr ""
 
-msgid "Have your users email"
-msgstr ""
-
 msgid "Header logo was successfully removed."
 msgstr ""
 
@@ -15196,9 +15196,6 @@ msgid "In %{time_to_now}"
 msgstr ""
 
 msgid "In case of pull mirroring, your user will be the author of all events in the activity feed that are the result of an update, like new branches being created or new commits being pushed to existing branches."
-msgstr ""
-
-msgid "In order to enable Service Desk for your instance, you must first set up incoming email."
 msgstr ""
 
 msgid "In progress"
@@ -16572,6 +16569,9 @@ msgid "Issues can be bugs, tasks or ideas to be discussed. Also, issues are sear
 msgstr ""
 
 msgid "Issues closed"
+msgstr ""
+
+msgid "Issues created from Service Desk emails will appear here. Each comment becomes part of the email conversation."
 msgstr ""
 
 msgid "Issues with comments, merge requests with diffs and comments, labels, milestones, snippets, and other project entities"
@@ -30193,9 +30193,6 @@ msgstr ""
 msgid "This will remove the fork relationship between this project and other projects in the fork network."
 msgstr ""
 
-msgid "Those emails automatically become issues (with the comments becoming the email conversation) listed here."
-msgstr ""
-
 msgid "Thread to reply to cannot be found"
 msgstr ""
 
@@ -30587,6 +30584,9 @@ msgstr ""
 msgid "To access this domain create a new DNS record"
 msgstr ""
 
+msgid "To activate Service Desk on this instance, you must first set up incoming email."
+msgstr ""
+
 msgid "To add an SSH key you need to %{generate_link_start}generate one%{link_end} or use an %{existing_link_start}existing key%{link_end}."
 msgstr ""
 
@@ -30609,6 +30609,9 @@ msgid "To connect an SVN repository, check out %{svn_link}."
 msgstr ""
 
 msgid "To define internal users, first enable new users set to external"
+msgstr ""
+
+msgid "To enable Service Desk for your instance, you must first set up incoming email."
 msgstr ""
 
 msgid "To ensure no loss of personal content, this account should only be used for matters related to %{group_name}."
@@ -31094,9 +31097,6 @@ msgid "Turn On"
 msgstr ""
 
 msgid "Turn on %{strongStart}usage ping%{strongEnd} to activate analysis of user activity, known as %{docLinkStart}Cohorts%{docLinkEnd}."
-msgstr ""
-
-msgid "Turn on Service Desk"
 msgstr ""
 
 msgid "Turn on usage ping"
@@ -31750,7 +31750,7 @@ msgstr ""
 msgid "Use .gitlab-ci.yml"
 msgstr ""
 
-msgid "Use Service Desk to connect with your users (e.g. to offer customer support) through email right inside GitLab"
+msgid "Use Service Desk to connect with your users and offer customer support through email right inside GitLab"
 msgstr ""
 
 msgid "Use an one time password authenticator on your mobile device or computer to enable two-factor authentication (2FA)."
@@ -33637,9 +33637,6 @@ msgstr ""
 msgid "You must select a stack for configuring your cloud provider. Learn more about"
 msgstr ""
 
-msgid "You must set up incoming email before it becomes active."
-msgstr ""
-
 msgid "You must upload a file with the same file name when dropping onto an existing design."
 msgstr ""
 
@@ -34046,6 +34043,9 @@ msgid "Your subscription will expire in %{remaining_days}."
 msgstr ""
 
 msgid "Your username is %{username}."
+msgstr ""
+
+msgid "Your users can send emails to"
 msgstr ""
 
 msgid "Zoom meeting added"
