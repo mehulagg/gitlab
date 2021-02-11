@@ -305,6 +305,9 @@ For example, to unlink the `MyOrg` account:
 
 ![Unlink Group SAML](img/unlink_group_saml.png)
 
+NOTE:
+There must always be at least one owner in the SAML group. If your account is the only owner in the SAML group, you will not be able to unlink the account. Add another user in the group as an owner first before trying again.
+
 ## Group Sync
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
