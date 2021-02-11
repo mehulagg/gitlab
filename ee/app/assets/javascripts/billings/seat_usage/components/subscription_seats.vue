@@ -11,9 +11,12 @@ import {
 import { parseInt, debounce } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { s__ } from '~/locale';
-
-const AVATAR_SIZE = 32;
-const SEARCH_DEBOUNCE_MS = 250;
+import {
+  FIELDS,
+  AVATAR_SIZE,
+  SEARCH_DEBOUNCE_MS,
+  REMOVE_MEMBER_MODAL_ID,
+} from 'ee/billings/seat_usage/constants';
 
 export default {
   directives: {
@@ -29,7 +32,6 @@ export default {
   },
   data() {
     return {
-      fields: ['user', 'email'],
       searchQuery: '',
     };
   },
@@ -91,10 +93,12 @@ export default {
       }
     },
   },
+  removeMemberModalId: REMOVE_MEMBER_MODAL_ID,
   avatarSize: AVATAR_SIZE,
   emailNotVisibleTooltipText: s__(
     'Billing|An email address is only visible for users with public emails.',
   ),
+  fields: FIELDS,
 };
 </script>
 
@@ -124,7 +128,7 @@ export default {
     <gl-table
       class="seats-table"
       :items="tableItems"
-      :fields="fields"
+      :fields="$options.fields"
       :busy="isLoading"
       :show-empty="true"
       data-testid="table"
