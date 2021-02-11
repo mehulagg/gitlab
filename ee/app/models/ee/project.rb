@@ -200,7 +200,7 @@ module EE
       delegate :closest_gitlab_subscription, to: :namespace
       delegate :jira_vulnerabilities_integration_enabled?, to: :jira_service, allow_nil: true
 
-      delegate :requirements_access_level, :security_and_compliance_access_level, to: :project_feature, allow_nil: true
+      delegate :requirements_access_level, to: :project_feature, allow_nil: true
       delegate :pipeline_configuration_full_path, to: :compliance_management_framework, allow_nil: true
       alias_attribute :compliance_pipeline_configuration_full_path, :pipeline_configuration_full_path
 

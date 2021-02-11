@@ -57,17 +57,20 @@ module EE
     override :project_permissions_settings
     def project_permissions_settings(project)
       super.merge(
-        requirementsAccessLevel: project.requirements_access_level,
-        securityAndComplianceAccessLevel: project.security_and_compliance_access_level
+        requirementsAccessLevel: project.requirements_access_level
       )
     end
 
     override :project_permissions_panel_data
     def project_permissions_panel_data(project)
       super.merge(
-        requirementsAvailable: project.feature_available?(:requirements),
-        securityAndComplianceAvailable: project.feature_available?(:security_and_compliance)
+        requirementsAvailable: project.feature_available?(:requirements)
       )
+    end
+
+    override :show_security_and_compliance_toggle?
+    def show_security_and_compliance_toggle?
+      super || show_audit_events?(project)
     end
 
     override :default_url_to_repo

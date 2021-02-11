@@ -7,8 +7,6 @@ module EE
         extend ::Gitlab::Utils::Override
 
         prepended do
-          include SecurityAndCompliancePermissions
-
           alias_method :vulnerable, :project
 
           before_action :ensure_security_dashboard_feature_enabled!, except: [:show]

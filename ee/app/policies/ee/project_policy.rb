@@ -112,11 +112,6 @@ module EE
       end
 
       with_scope :subject
-      condition(:security_and_compliance_enabled) do
-        @subject.feature_available?(:security_and_compliance) && access_allowed_to?(:security_and_compliance)
-      end
-
-      with_scope :subject
       condition(:security_dashboard_enabled) do
         @subject.feature_available?(:security_dashboard)
       end
@@ -218,10 +213,6 @@ module EE
       end
 
       rule { can?(:read_project) & iterations_available }.enable :read_iteration
-
-      rule { security_and_compliance_enabled & can?(:developer_access) }.policy do
-        enable :access_security_and_compliance
-      end
 
       rule { security_dashboard_enabled & can?(:developer_access) }.policy do
         enable :read_vulnerability
