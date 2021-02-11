@@ -282,7 +282,7 @@ Edition, follow the guides below based on the installation method:
 ### Enterprise to Community Edition
 
 If you need to downgrade your Enterprise Edition installation back to Community
-Edition, you can follow [this guide](../downgrade_ee_to_ce/README.md) to make the process as smooth as
+Edition, you can follow [this guide](../downgrade_ee_to_ce/index.md) to make the process as smooth as
 possible.
 
 ## Version-specific upgrading instructions

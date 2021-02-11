@@ -110,7 +110,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 ### Upgrading or downgrading GitLab
 
 - [Upgrade from GitLab CE to GitLab EE](../update/README.md#upgrading-between-editions): learn how to upgrade GitLab Community Edition to GitLab Enterprise Editions.
-- [Downgrade from GitLab EE to GitLab CE](../downgrade_ee_to_ce/README.md): Learn how to downgrade GitLab Enterprise Editions to Community Edition.
+- [Downgrade from GitLab EE to GitLab CE](../downgrade_ee_to_ce/index.md): Learn how to downgrade GitLab Enterprise Editions to Community Edition.
 
 ### GitLab platform integrations
 
