@@ -93,5 +93,5 @@ git fetch --all
 git checkout 8-x-stable
 ```
 
-Remember to follow the correct [update guides](../update/README.md) to make
+Remember to follow the correct [update guides](../update/index.md) to make
 sure all dependencies are up to date.

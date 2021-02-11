@@ -129,7 +129,7 @@ installation:
   an authentication mechanism for GitLab.
 - [Back up and restore GitLab](../raketasks/backup_restore.md): Learn the different
   ways you can back up or restore GitLab.
-- [Upgrade GitLab](../update/README.md): Every 22nd of the month, a new feature-rich GitLab version
+- [Upgrade GitLab](../update/index.md): Every 22nd of the month, a new feature-rich GitLab version
   is released. Learn how to upgrade to it, or to an interim release that contains a security fix.
 - [Scaling GitLab](../administration/reference_architectures/index.md):
   GitLab supports several different types of clustering.
