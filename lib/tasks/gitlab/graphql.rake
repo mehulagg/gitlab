@@ -129,19 +129,6 @@ namespace :gitlab do
         abort
       end
     end
-
-    desc 'GitLab | GraphQL | Check if GraphQL schemas are up to date'
-    task check_schema: [:environment, :enable_feature_flags] do
-      idl_doc = File.read(Rails.root.join(OUTPUT_DIR, 'gitlab_schema.graphql'))
-      json_doc = File.read(Rails.root.join(OUTPUT_DIR, 'gitlab_schema.json'))
-
-      if idl_doc == GitlabSchema.to_definition && json_doc == GitlabSchema.to_json
-        puts "GraphQL schema is up to date"
-      else
-        format_output('GraphQL schema is outdated! Please update it by running `bundle exec rake gitlab:graphql:schema:dump`.')
-        abort
-      end
-    end
   end
 end
 
