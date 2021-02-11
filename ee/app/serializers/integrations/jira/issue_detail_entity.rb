@@ -10,6 +10,10 @@ module Integrations
       expose :state do |jira_issue|
         jira_issue.resolutiondate ? 'closed' : 'opened'
       end
+
+      expose :due_date do |jira_issue|
+        jira_issue.duedate&.to_datetime&.utc
+      end
     end
   end
 end

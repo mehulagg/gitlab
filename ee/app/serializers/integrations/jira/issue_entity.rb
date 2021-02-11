@@ -38,19 +38,13 @@ module Integrations
       end
 
       expose :author do |jira_issue|
-        {
-          name: jira_issue.reporter.displayName,
-          web_url: author_web_url(jira_issue),
-          avatar_url: jira_issue.reporter.avatarUrls['48x48']
-        }
+        jira_user(jira_issue, :reporter)
       end
 
       expose :assignees do |jira_issue|
         if jira_issue.assignee.present?
           [
-            {
-              name: jira_issue.assignee.displayName
-            }
+            jira_user(jira_issue, :assignee)
           ]
         else
           []
@@ -73,16 +67,26 @@ module Integrations
 
       private
 
-      def author_web_url(jira_issue)
+      # rubocop:disable GitlabSecurity/PublicSend
+      def jira_user(jira_issue, user_type)
+        {
+          name: jira_issue.public_send(user_type).displayName,
+          web_url: jira_web_url(jira_issue, user_type),
+          avatar_url: jira_issue.public_send(user_type).avatarUrls['48x48']
+        }
+      end
+
+      def jira_web_url(jira_issue, user_type)
         # There are differences between Jira Cloud and Jira Server URLs and responses.
         # accountId is only available on Jira Cloud.
         # https://community.atlassian.com/t5/Jira-Questions/How-to-find-account-id-on-jira-on-premise/qaq-p/1168652
-        if jira_issue.reporter.try(:accountId)
-          "#{base_web_url(jira_issue)}/people/#{jira_issue.reporter.accountId}"
+        if jira_issue.public_send(user_type).try(:accountId)
+          "#{base_web_url(jira_issue)}/people/#{jira_issue.public_send(user_type).accountId}"
         else
-          "#{base_web_url(jira_issue)}/secure/ViewProfile.jspa?name=#{jira_issue.reporter.name}"
+          "#{base_web_url(jira_issue)}/secure/ViewProfile.jspa?name=#{jira_issue.public_send(user_type).name}"
         end
       end
+      # rubocop:enable GitlabSecurity/PublicSend
 
       def base_web_url(jira_issue)
         site_url = jira_issue.client.options[:site].delete_suffix('/')
