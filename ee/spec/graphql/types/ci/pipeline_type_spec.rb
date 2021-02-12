@@ -8,6 +8,7 @@ RSpec.describe GitlabSchema.types['Pipeline'] do
   it 'includes the ee specific fields' do
     expected_fields = %w[
         security_report_summary
+        security_report_findings
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)

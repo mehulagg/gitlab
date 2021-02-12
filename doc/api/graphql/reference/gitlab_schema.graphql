@@ -18488,7 +18488,48 @@ type Pipeline {
   retryable: Boolean!
 
   """
-  Vulnerability and scanned resource counts for each security scanner of the pipeline.
+
+  Vulnerability findings reported on the pipeline
+  """
+  securityReportFindings(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    Filter vulnerability findings by report type.
+    """
+    reportType: [String!]
+
+    """
+    Filter vulnerability findings by Scanner.externalId.
+    """
+    scanner: [String!]
+
+    """
+    Filter vulnerability findings by severity.
+    """
+    severity: [String!]
+  ): PipelineSecurityReportFindingConnection
+
+  """
+  Vulnerability and scanned resource counts for each security scanner of the pipeline
   """
   securityReportSummary: SecurityReportSummary
 
@@ -18777,6 +18818,106 @@ type PipelineRetryPayload {
   The pipeline after mutation.
   """
   pipeline: Pipeline
+}
+
+"""
+Represents vulnerability finding of a security report on the pipeline
+"""
+type PipelineSecurityReportFinding {
+  """
+  Type of the security report that found the vulnerability 
+  """
+  confidence: String
+
+  """
+  Description of the vulnerability finding
+  """
+  description: String
+
+  """
+  Identifiers of the vulnerabilit finding.
+  """
+  identifiers: [VulnerabilityIdentifier!]!
+
+  """
+  Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability
+  """
+  location: VulnerabilityLocation
+
+  """
+  Name of the vulnerability finding
+  """
+  name: String
+
+  """
+  The project on which the vulnerability finding was found
+  """
+  project: Project
+
+  """
+  Name of the vulnerability finding
+  """
+  projectFingerprint: String
+
+  """
+  Type of the security report that found the vulnerability finding
+  """
+  reportType: VulnerabilityReportType
+
+  """
+  Scanner metadata for the vulnerability.
+  """
+  scanner: VulnerabilityScanner
+
+  """
+  Severity of the vulnerability finding
+  """
+  severity: VulnerabilitySeverity
+
+  """
+  URL to the vulnerability's details page
+  """
+  solution: String
+
+  """
+  Name of the vulnerability finding
+  """
+  uuid: String
+}
+
+"""
+The connection type for PipelineSecurityReportFinding.
+"""
+type PipelineSecurityReportFindingConnection {
+  """
+  A list of edges.
+  """
+  edges: [PipelineSecurityReportFindingEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [PipelineSecurityReportFinding]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type PipelineSecurityReportFindingEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: PipelineSecurityReportFinding
 }
 
 enum PipelineStatusEnum {
