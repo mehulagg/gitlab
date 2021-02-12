@@ -48,17 +48,15 @@ It's recommended to create two separate migration script files.
      def up
        create_or_update_plan_limit('project_hooks', 'default', 0)
        create_or_update_plan_limit('project_hooks', 'free', 10)
-       create_or_update_plan_limit('project_hooks', 'bronze', 20)
-       create_or_update_plan_limit('project_hooks', 'silver', 30)
-       create_or_update_plan_limit('project_hooks', 'gold', 100)
+       create_or_update_plan_limit('project_hooks', 'premium', 20)
+       create_or_update_plan_limit('project_hooks', 'ultimate', 100)
      end
 
      def down
        create_or_update_plan_limit('project_hooks', 'default', 0)
        create_or_update_plan_limit('project_hooks', 'free', 0)
-       create_or_update_plan_limit('project_hooks', 'bronze', 0)
-       create_or_update_plan_limit('project_hooks', 'silver', 0)
-       create_or_update_plan_limit('project_hooks', 'gold', 0)
+       create_or_update_plan_limit('project_hooks', 'premium', 0)
+       create_or_update_plan_limit('project_hooks', 'ultimate', 0)
      end
    end
    ```
@@ -145,8 +143,7 @@ GitLab.com:
 
 - `default` - Any system-wide feature
 - `free` - Namespaces and projects with a Free subscription
-- `bronze`- Namespaces and projects with a Bronze subscription
-- `silver` - Namespaces and projects with a Silver subscription
-- `gold` - Namespaces and projects with a Gold subscription
+- `premium` - Namespaces and projects with a Premium subscription
+- `ultimate` - Namespaces and projects with an Ultimate subscription
 
 The `test` environment doesn't have any plans.
