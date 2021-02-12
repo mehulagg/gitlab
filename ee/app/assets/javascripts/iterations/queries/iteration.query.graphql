@@ -1,17 +1,16 @@
 #import "./iteration_report.fragment.graphql"
 
-query Iteration(
-  $fullPath: ID!
-  $id: IterationID!
-  $iid: ID
-  $hasId: Boolean = false
-  $hasIid: Boolean = false
-) {
-  iteration(id: $id) @include(if: $hasId) {
-    ...IterationReport
+query Iteration($fullPath: ID!, $id: ID!, $isGroup: Boolean = true) {
+  group(fullPath: $fullPath) @include(if: $isGroup) {
+    iterations(id: $id, first: 1, includeAncestors: true) {
+      nodes {
+        ...IterationReport
+      }
+    }
   }
-  group(fullPath: $fullPath) @include(if: $hasIid) {
-    iterations(iid: $iid, first: 1, includeAncestors: false) {
+
+  project(fullPath: $fullPath) @skip(if: $isGroup) {
+    iterations(id: $id, first: 1, includeAncestors: true) {
       nodes {
         ...IterationReport
       }

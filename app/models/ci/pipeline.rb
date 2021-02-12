@@ -16,6 +16,7 @@ module Ci
     include ShaAttribute
     include FromUnion
     include UpdatedAtFilterable
+    include EachBatch
 
     MAX_OPEN_MERGE_REQUESTS_REFS = 4
 
@@ -1217,6 +1218,16 @@ module Ci
     # EE-only
     def merge_train_pipeline?
       false
+    end
+
+    def security_reports(report_types: [])
+      reports_scope = report_types.empty? ? ::Ci::JobArtifact.security_reports : ::Ci::JobArtifact.security_reports(file_types: report_types)
+
+      ::Gitlab::Ci::Reports::Security::Reports.new(self).tap do |security_reports|
+        latest_report_builds(reports_scope).each do |build|
+          build.collect_security_reports!(security_reports)
+        end
+      end
     end
 
     private

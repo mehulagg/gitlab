@@ -144,7 +144,7 @@ class License < ApplicationRecord
     dast
     dependency_scanning
     devops_adoption
-    enforce_pat_expiration
+    enforce_personal_access_token_expiration
     enforce_ssh_key_expiration
     enterprise_templates
     environment_alerts

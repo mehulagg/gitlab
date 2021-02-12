@@ -101,7 +101,7 @@ function mountIterationSelect() {
       createElement('iteration-select', {
         props: {
           groupPath,
-          canEdit,
+          canEdit: parseBoolean(canEdit),
           projectPath,
           issueIid,
         },

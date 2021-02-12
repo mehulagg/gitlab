@@ -702,12 +702,25 @@ RSpec.describe Namespace do
 
       context 'when namespace has a subscription associated' do
         before do
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+          create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan, start_date: start_date)
         end
 
-        it 'returns the plan from the subscription' do
-          expect(namespace.actual_plan).to eq(gold_plan)
-          expect(namespace.gitlab_subscription).to be_present
+        context 'when this subscription was purchased before EoA rollout (legacy)' do
+          let(:start_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date - 3.days }
+
+          it 'returns the legacy plan from the subscription' do
+            expect(namespace.actual_plan).to eq(gold_plan)
+            expect(namespace.gitlab_subscription).to be_present
+          end
+        end
+
+        context 'when this subscription was purchase after EoA rollout (new plan)' do
+          let(:start_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date + 3.days }
+
+          it 'returns the new plan from the subscription' do
+            expect(namespace.actual_plan).to be_an_instance_of(Subscriptions::NewPlanPresenter)
+            expect(namespace.gitlab_subscription).to be_present
+          end
         end
       end
 

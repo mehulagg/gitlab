@@ -10,8 +10,7 @@ module Projects
         include RedisTracking
 
         track_redis_hll_event :index,
-          name: 'i_ecosystem_jira_service_list_issues',
-          feature: :usage_data_track_ecosystem_jira_service
+          name: 'i_ecosystem_jira_service_list_issues'
 
         before_action :check_feature_enabled!
         before_action :check_issues_show_enabled!, only: :show
@@ -65,27 +64,8 @@ module Projects
         end
 
         def issue_json
-          {
-            title_html: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
-            description_html: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
-            created_at: 2.hours.ago,
-            author: {
-              id: 2,
-              username: 'justin_ho',
-              name: 'Justin Ho',
-              web_url: 'http://127.0.0.1:3000/root',
-              avatar_url: 'http://127.0.0.1:3000/uploads/-/system/user/avatar/1/avatar.png?width=90'
-            },
-            labels: [
-              {
-                title: 'In Progress',
-                description: 'Work that is still in progress',
-                color: '#EBECF0',
-                text_color: '#283856'
-              }
-            ],
-            state: 'opened'
-          }
+          ::Integrations::Jira::IssueDetailSerializer.new
+            .represent(project.jira_service.find_issue(params[:id], rendered_fields: true), project: project)
         end
 
         def finder

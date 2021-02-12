@@ -2,6 +2,8 @@
 
 module Projects
   class OnDemandScansController < Projects::ApplicationController
+    include SecurityAndCompliancePermissions
+
     before_action do
       push_frontend_feature_flag(:security_on_demand_scans_site_validation, @project, default_enabled: :yaml)
       push_frontend_feature_flag(:security_dast_site_profiles_additional_fields, @project, default_enabled: :yaml)

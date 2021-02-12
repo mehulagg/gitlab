@@ -67,7 +67,11 @@ module QA
       after(:all) do
         @user_with_minimal_access.remove_via_api!
         @project.remove_via_api!
-        @group.remove_via_api!
+        begin
+          @group.remove_via_api!
+        rescue Resource::ApiFabricator::ResourceNotDeletedError
+          # It is ok if the group is already marked for deletion by another test
+        end
       end
     end
   end

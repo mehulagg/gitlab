@@ -283,10 +283,7 @@ first time.
   you forget to remove any debugging code?
 - Consider providing instructions on how to test the merge request. This can be
   helpful for reviewers not familiar with the product feature or area of the codebase.
-<!-- vale gitlab.FutureTense = NO -->
-- Be grateful for the reviewer's suggestions. ("Good call. I'll make that
-  change.")
-<!-- vale gitlab.FutureTense = YES -->
+- Be grateful for the reviewer's suggestions. (`Good call. I'll make that change.`)
 - Don't take it personally. The review is of the code, not of you.
 - Explain why the code exists. ("It's like that because of these reasons. Would
   it be more clear if I rename this class/file/method/variable?")
@@ -385,9 +382,12 @@ When ready to merge:
 - Consider using the [Squash and
   merge](../user/project/merge_requests/squash_and_merge.md#squash-and-merge)
   feature when the merge request has a lot of commits.
-  When merging code a maintainer should only use the squash feature if the
-  author has already set this option or if the merge request clearly contains a
-  messy commit history that is intended to be squashed.
+  When merging code, a maintainer should only use the squash feature if the
+  author has already set this option, or if the merge request clearly contains a
+  messy commit history, it will be more efficient to squash commits instead of
+  circling back with the author about that. Otherwise, if the MR only has a few commits, we'll
+  be respecting the author's setting by not squashing them.
+
 - **Start a new merge request pipeline with the `Run Pipeline` button in the merge
   request's "Pipelines" tab, and enable "Merge When Pipeline Succeeds" (MWPS).** Note that:
   - If the **latest [Pipeline for Merged Results](../ci/merge_request_pipelines/pipelines_for_merged_results/#pipelines-for-merged-results)** finished less than 2 hours ago, you

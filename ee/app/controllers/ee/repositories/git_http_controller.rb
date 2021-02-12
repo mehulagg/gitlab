@@ -35,11 +35,17 @@ module EE
       end
 
       def geo_push_user
-        @geo_push_user ||= ::Geo::PushUser.new_from_headers(request.headers)
+        return unless geo_gl_id
+
+        @geo_push_user ||= ::Geo::PushUser.new(geo_gl_id) # rubocop:disable Gitlab/ModuleWithInstanceVariables
       end
 
-      def geo_push_user_headers_provided?
-        ::Geo::PushUser.needed_headers_provided?(request.headers)
+      def geo_gl_id
+        decoded_authorization&.dig(:gl_id)
+      end
+
+      def geo_push_proxy_request?
+        geo_gl_id
       end
 
       def geo_request?
@@ -53,8 +59,8 @@ module EE
       override :access_actor
       def access_actor
         return super unless geo?
-        return :geo unless geo_push_user_headers_provided?
-        return geo_push_user.user if geo_push_user.user
+        return :geo unless geo_push_proxy_request?
+        return geo_push_user.user if geo_push_user&.user
 
         raise ::Gitlab::GitAccess::ForbiddenError, 'Geo push user is invalid.'
       end

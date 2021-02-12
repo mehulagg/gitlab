@@ -60,7 +60,6 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   const {
     fullPath,
     iterationId,
-    iterationIid,
     labelsFetchPath,
     editIterationPath,
     previewMarkdownPath,
@@ -75,7 +74,6 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
         props: {
           fullPath,
           iterationId,
-          iterationIid,
           labelsFetchPath,
           canEdit,
           editIterationPath,

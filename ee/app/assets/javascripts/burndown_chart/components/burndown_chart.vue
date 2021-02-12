@@ -40,6 +40,11 @@ export default {
       required: false,
       default: true,
     },
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -126,7 +131,7 @@ export default {
     <div v-if="showTitle" class="burndown-header d-flex align-items-center">
       <h3>{{ __('Burndown chart') }}</h3>
     </div>
-    <resizable-chart-container class="burndown-chart js-burndown-chart">
+    <resizable-chart-container v-if="!loading" class="burndown-chart js-burndown-chart">
       <gl-line-chart
         slot-scope="{ width }"
         :width="width"

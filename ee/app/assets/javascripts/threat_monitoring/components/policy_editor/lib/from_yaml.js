@@ -113,7 +113,7 @@ function parseRule(item, direction) {
 */
 export default function fromYaml(manifest) {
   const { description, metadata, spec } = safeLoad(manifest, { json: true });
-  const { name, resourceVersion, annotations } = metadata;
+  const { name, resourceVersion, annotations, labels } = metadata;
   const { endpointSelector = {}, ingress = [], egress = [] } = spec;
   const matchLabels = endpointSelector.matchLabels || {};
 
@@ -135,6 +135,7 @@ export default function fromYaml(manifest) {
     resourceVersion,
     description,
     annotations,
+    labels,
     isEnabled: !Object.keys(matchLabels).includes(DisabledByLabel),
     endpointMatchMode: endpointLabels.length > 0 ? EndpointMatchModeLabel : EndpointMatchModeAny,
     endpointLabels: endpointLabels.join(' '),

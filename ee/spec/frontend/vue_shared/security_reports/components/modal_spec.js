@@ -108,6 +108,8 @@ describe('Security Reports modal', () => {
       });
 
       describe('with merge request created', () => {
+        const findActionButton = () => wrapper.find('[data-testid=create-issue-button]');
+
         it('renders the issue button as a single button', (done) => {
           const propsData = {
             modal: createState().modal,
@@ -122,11 +124,9 @@ describe('Security Reports modal', () => {
           Vue.nextTick()
             .then(() => {
               expect(wrapper.find('.js-split-button').exists()).toBe(false);
-              expect(wrapper.find('.js-action-button').exists()).toBe(true);
-              expect(wrapper.find('.js-action-button').text()).not.toContain(
-                'Resolve with merge request',
-              );
-              expect(wrapper.find('.js-action-button').text()).toContain('Create issue');
+              expect(findActionButton().exists()).toBe(true);
+              expect(findActionButton().text()).not.toContain('Resolve with merge request');
+              expect(findActionButton().text()).toContain('Create issue');
               done();
             })
             .catch(done.fail);

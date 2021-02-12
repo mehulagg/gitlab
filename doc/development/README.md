@@ -121,6 +121,7 @@ In these cases, use the following workflow:
    - [User Experience (UX)](https://about.gitlab.com/handbook/engineering/ux/)
    - [Security](https://about.gitlab.com/handbook/engineering/security/)
    - [Quality](https://about.gitlab.com/handbook/engineering/quality/)
+     - [Engineering Productivity](https://about.gitlab.com/handbook/engineering/quality/engineering-productivity-team/)
    - [Infrastructure](https://about.gitlab.com/handbook/engineering/infrastructure/)
    - [Technical Writing](https://about.gitlab.com/handbook/engineering/ux/technical-writing/)
 
@@ -294,6 +295,7 @@ See [database guidelines](database/index.md).
 - [Compatibility with multiple versions of the application running at the same time](multi_version_compatibility.md)
 - [Features inside `.gitlab/`](features_inside_dot_gitlab.md)
 - [Dashboards for stage groups](stage_group_dashboards.md)
+- [Preventing transient bugs](transient/prevention-patterns.md)
 
 ## Other GitLab Development Kit (GDK) guides
 

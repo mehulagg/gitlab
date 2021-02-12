@@ -11,27 +11,27 @@ module Types
       field :iid,
             GraphQL::ID_TYPE,
             null: false,
-            description: 'Internal ID of the on-call schedule'
+            description: 'Internal ID of the on-call schedule.'
 
       field :name,
             GraphQL::STRING_TYPE,
             null: false,
-            description: 'Name of the on-call schedule'
+            description: 'Name of the on-call schedule.'
 
       field :description,
             GraphQL::STRING_TYPE,
             null: true,
-            description: 'Description of the on-call schedule'
+            description: 'Description of the on-call schedule.'
 
       field :timezone,
             GraphQL::STRING_TYPE,
             null: false,
-            description: 'Time zone of the on-call schedule'
+            description: 'Time zone of the on-call schedule.'
 
       field :rotations,
             OncallRotationType.connection_type,
             null: false,
-            description: 'On-call rotations for the on-call schedule'
+            description: 'On-call rotations for the on-call schedule.'
     end
   end
 end

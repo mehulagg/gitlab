@@ -1,5 +1,6 @@
 export default () => ({
   featureFlags: {},
+  defaultStageConfig: [],
 
   startDate: null,
   endDate: null,
@@ -22,6 +23,7 @@ export default () => ({
 
   isLoadingValueStreams: false,
   isCreatingValueStream: false,
+  isEditingValueStream: false,
   isDeletingValueStream: false,
 
   createValueStreamErrors: {},

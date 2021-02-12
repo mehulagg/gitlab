@@ -6,20 +6,23 @@ RSpec.describe Projects::DependenciesController do
   describe 'GET #index' do
     let_it_be(:developer) { create(:user) }
     let_it_be(:guest) { create(:user) }
+    let_it_be(:project) { create(:project, :repository, :private) }
+
     let(:params) { { namespace_id: project.namespace, project_id: project } }
 
     before do
+      project.add_developer(developer)
+      project.add_guest(guest)
+
       sign_in(user)
     end
 
+    include_context '"Security & Compliance" permissions' do
+      let(:user) { developer }
+      let(:valid_request) { get :index, params: params }
+    end
+
     context 'with authorized user' do
-      let_it_be(:project) { create(:project, :repository, :public) }
-
-      before do
-        project.add_developer(developer)
-        project.add_guest(guest)
-      end
-
       context 'when feature is available' do
         before do
           stub_licensed_features(dependency_scanning: true, license_scanning: true, security_dashboard: true)
@@ -138,14 +141,6 @@ RSpec.describe Projects::DependenciesController do
                   expect(json_response['dependencies'].length).to eq(3)
                 end
               end
-
-              context 'without authorized user to see vulnerabilities' do
-                let(:user) { guest }
-
-                it 'return vulnerable dependencies' do
-                  expect(json_response['dependencies']).to be_empty
-                end
-              end
             end
 
             context 'with pagination params' do
@@ -247,7 +242,6 @@ RSpec.describe Projects::DependenciesController do
     end
 
     context 'with unauthorized user' do
-      let(:project) { create(:project, :repository, :private) }
       let(:user) { guest }
 
       before do

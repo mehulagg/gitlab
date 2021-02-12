@@ -54,16 +54,12 @@ export default {
     data-testid="toggle-swimlanes"
   >
     <span
-      class="board-swimlanes-toggle-text gl-white-space-nowrap gl-font-weight-bold"
+      class="board-swimlanes-toggle-text gl-white-space-nowrap gl-font-weight-bold gl-line-height-normal"
       data-testid="toggle-swimlanes-label"
     >
       {{ __('Group by') }}
     </span>
-    <gl-dropdown
-      right
-      :text="dropdownLabel"
-      toggle-class="gl-ml-3 gl-border-none gl-inset-border-1-gray-200! border-radius-default"
-    >
+    <gl-dropdown right :text="dropdownLabel" class="gl-ml-3" toggle-class="gl-line-height-normal!">
       <gl-dropdown-item
         :is-check-item="true"
         :is-checked="!isShowingEpicsSwimlanes"

@@ -7,8 +7,8 @@ RSpec.describe GroupPolicy do
 
   let(:epic_rules) do
     %i(read_epic create_epic admin_epic destroy_epic read_confidential_epic
-       destroy_epic_link read_epic_board read_epic_list admin_epic_board
-       admin_epic_list)
+       destroy_epic_link read_epic_board read_epic_board_list admin_epic_board
+       admin_epic_board_list)
   end
 
   context 'when epics feature is disabled' do
@@ -59,7 +59,7 @@ RSpec.describe GroupPolicy do
       let(:current_user) { guest }
 
       it { is_expected.to be_allowed(:read_epic, :read_epic_board) }
-      it { is_expected.to be_disallowed(*(epic_rules - [:read_epic, :read_epic_board, :read_epic_list])) }
+      it { is_expected.to be_disallowed(*(epic_rules - [:read_epic, :read_epic_board, :read_epic_board_list])) }
     end
 
     context 'when user is not member' do

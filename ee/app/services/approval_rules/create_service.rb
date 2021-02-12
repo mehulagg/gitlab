@@ -26,6 +26,9 @@ module ApprovalRules
     def success
       track_onboarding_progress
 
+      merge_request_activity_counter
+        .track_approval_rule_added_action(user: current_user)
+
       super
     end
 

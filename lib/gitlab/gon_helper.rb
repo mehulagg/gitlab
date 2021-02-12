@@ -13,7 +13,6 @@ module Gitlab
       gon.asset_host             = ActionController::Base.asset_host
       gon.webpack_public_path    = webpack_public_path
       gon.relative_url_root      = Gitlab.config.gitlab.relative_url_root
-      gon.shortcuts_path         = Gitlab::Routing.url_helpers.help_page_path('shortcuts')
       gon.user_color_scheme      = Gitlab::ColorSchemes.for_user(current_user).css_class
 
       if Gitlab.config.sentry.enabled
@@ -33,6 +32,7 @@ module Gitlab
       gon.suggested_label_colors = LabelsHelper.suggested_colors
       gon.first_day_of_week      = current_user&.first_day_of_week || Gitlab::CurrentSettings.first_day_of_week
       gon.ee                     = Gitlab.ee?
+      gon.dot_com                = Gitlab.com?
 
       if current_user
         gon.current_user_id = current_user.id

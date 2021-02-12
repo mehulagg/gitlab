@@ -221,11 +221,51 @@ RSpec.describe Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter, :cl
     end
   end
 
+  describe '.track_marked_as_draft_action' do
+    subject { described_class.track_marked_as_draft_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_MARKED_AS_DRAFT_ACTION }
+    end
+  end
+
+  describe '.track_unmarked_as_draft_action' do
+    subject { described_class.track_unmarked_as_draft_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_UNMARKED_AS_DRAFT_ACTION }
+    end
+  end
+
   describe '.track_users_review_requested' do
     subject { described_class.track_users_review_requested(users: [user]) }
 
     it_behaves_like 'a tracked merge request unique event' do
       let(:action) { described_class::MR_REVIEW_REQUESTED_USERS_ACTION }
+    end
+  end
+
+  describe '.track_approval_rule_added_action' do
+    subject { described_class.track_approval_rule_added_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_APPROVAL_RULE_ADDED_USERS_ACTION }
+    end
+  end
+
+  describe '.track_approval_rule_edited_action' do
+    subject { described_class.track_approval_rule_edited_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_APPROVAL_RULE_EDITED_USERS_ACTION }
+    end
+  end
+
+  describe '.track_approval_rule_deleted_action' do
+    subject { described_class.track_approval_rule_deleted_action(user: user) }
+
+    it_behaves_like 'a tracked merge request unique event' do
+      let(:action) { described_class::MR_APPROVAL_RULE_DELETED_USERS_ACTION }
     end
   end
 end

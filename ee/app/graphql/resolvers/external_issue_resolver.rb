@@ -33,7 +33,10 @@ module Resolvers
 
     def serialize_external_issue(external_issue, external_type)
       case external_type
-      when 'jira' then ::Integrations::Jira::IssueSerializer.new.represent(external_issue, project: object.vulnerability.project)
+      when 'jira'
+        ::Integrations::Jira::IssueSerializer
+          .new
+          .represent(external_issue, project: object.vulnerability.project, only: %i[title references status external_tracker web_url created_at updated_at] )
       end
     end
   end

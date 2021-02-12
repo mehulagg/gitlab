@@ -38,7 +38,7 @@ RSpec.describe Groups::Analytics::RepositoryAnalyticsController do
         allow(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event)
       end
 
-      it_behaves_like 'tracking unique hll events', :usage_data_i_testing_group_code_coverage_visit_total do
+      it_behaves_like 'tracking unique hll events' do
         subject(:request) { get :show, params: { group_id: group } }
 
         let(:target_id) { 'i_testing_group_code_coverage_visit_total' }

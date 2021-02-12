@@ -13,6 +13,7 @@ import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import query from '../queries/iteration.query.graphql';
 import { Namespace } from '../constants';
 import IterationForm from './iteration_form.vue';
@@ -45,17 +46,17 @@ export default {
   apollo: {
     iteration: {
       query,
+      /* eslint-disable @gitlab/require-i18n-strings */
       variables() {
         return {
           fullPath: this.fullPath,
-          id: `gid://gitlab/Iteration/${this.iterationId}`,
-          iid: this.iterationIid,
-          hasId: Boolean(this.iterationId),
-          hasIid: Boolean(this.iterationIid),
+          id: convertToGraphQLId('Iteration', this.iterationId),
+          isGroup: this.namespaceType === Namespace.Group,
         };
       },
+      /* eslint-enable @gitlab/require-i18n-strings */
       update(data) {
-        return data.group?.iterations?.nodes[0] || data.iteration || {};
+        return data[this.namespaceType]?.iterations?.nodes[0] || {};
       },
       error(err) {
         this.error = err.message;
@@ -69,11 +70,6 @@ export default {
       required: true,
     },
     iterationId: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
-    iterationIid: {
       type: String,
       required: false,
       default: undefined,

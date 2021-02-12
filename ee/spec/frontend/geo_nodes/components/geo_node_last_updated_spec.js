@@ -11,7 +11,8 @@ import { differenceInMilliseconds } from '~/lib/utils/datetime_utility';
 describe('GeoNodeLastUpdated', () => {
   let wrapper;
 
-  const staleStatusTime = differenceInMilliseconds(STATUS_DELAY_THRESHOLD_MS);
+  // The threshold is exclusive so -1
+  const staleStatusTime = differenceInMilliseconds(STATUS_DELAY_THRESHOLD_MS) - 1;
   const nonStaleStatusTime = new Date().getTime();
 
   const defaultProps = {

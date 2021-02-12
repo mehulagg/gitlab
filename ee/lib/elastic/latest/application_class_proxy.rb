@@ -10,6 +10,11 @@ module Elastic
       def search(query, search_options = {})
         es_options = routing_options(search_options)
 
+        # Counts need to be fast as we load one count per type of document
+        # on every page load. Fail early if they are slow since they don't
+        # need to be accurate.
+        es_options[:timeout] = '1s' if search_options[:count_only]
+
         # Calling elasticsearch-ruby method
         super(query, es_options)
       end
@@ -178,6 +183,18 @@ module Elastic
         when :created_at_desc
           query_hash.merge(sort: {
             created_at: {
+              order: 'desc'
+            }
+          })
+        when :updated_at_asc
+          query_hash.merge(sort: {
+            updated_at: {
+              order: 'asc'
+            }
+          })
+        when :updated_at_desc
+          query_hash.merge(sort: {
+            updated_at: {
               order: 'desc'
             }
           })

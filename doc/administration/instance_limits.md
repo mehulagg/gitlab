@@ -96,6 +96,13 @@ Read more on the [Rack Attack initializer](../security/rack_attack.md) method of
 
 - **Default rate limit** - Disabled
 
+### Member Invitations
+
+Limit the maximum daily member invitations allowed per group hierarchy.
+
+- GitLab.com: Free members may invite 20 members per day.
+- Self-managed: Invites are not limited.
+
 ## Gitaly concurrency limit
 
 Clone traffic can put a large strain on your Gitaly service. To prevent such workloads from overwhelming your Gitaly server, you can set concurrency limits in Gitaly’s configuration file.
@@ -157,8 +164,6 @@ or `git push --mirror` is used.
 Read more in the [CI documentation](../ci/yaml/README.md#processing-git-pushes).
 
 ## Retention of activity history
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/21164) in GitLab 8.12.
 
 Activity history for projects and individuals' profiles was limited to one year until [GitLab 11.4](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/52246) when it was extended to two years, and in [GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/issues/33840) to three years.
 
@@ -260,9 +265,11 @@ each time a new pipeline is created. An active pipeline is any pipeline in one o
 If a new pipeline would cause the total number of jobs to exceed the limit, the pipeline
 will fail with a `job_activity_limit_exceeded` error.
 
-- On GitLab.com different [limits are defined per plan](../user/gitlab_com/index.md#gitlab-cicd) and they affect all projects under that plan.
-- On [GitLab Starter](https://about.gitlab.com/pricing/#self-managed) tier or higher self-managed installations, this limit is defined under a `default` plan that affects all projects.
-  This limit is disabled (`0`) by default.
+- GitLab SaaS subscribers have different limits [defined per plan](../user/gitlab_com/index.md#gitlab-cicd),
+  and they affect all projects under that plan.
+- On [GitLab Premium](https://about.gitlab.com/pricing/) self-managed or
+  higher installations, this limit is defined under a `default` plan that affects all
+  projects. This limit is disabled (`0`) by default.
 
 To set this limit on a self-managed installation, run the following in the
 [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
@@ -285,7 +292,7 @@ any job with an [`environment`](../ci/environments/index.md) specified. The numb
 of deployments in a pipeline is checked at pipeline creation. Pipelines that have
 too many deployments fail with a `deployments_limit_exceeded` error.
 
-The default limit is 500 for all [self-managed and GitLab.com plans](https://about.gitlab.com/pricing/).
+The default limit is 500 for all [GitLab self-managed and SaaS plans](https://about.gitlab.com/pricing/).
 
 To change the limit on a self-managed installation, change the `default` plan's limit with the following
 [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session) command:
@@ -309,8 +316,11 @@ checked each time a new subscription is created.
 If a new subscription would cause the total number of subscription to exceed the
 limit, the subscription will be considered invalid.
 
-- On GitLab.com different [limits are defined per plan](../user/gitlab_com/index.md#gitlab-cicd) and they affect all projects under that plan.
-- On [GitLab Starter](https://about.gitlab.com/pricing/#self-managed) tier or higher self-managed installations, this limit is defined under a `default` plan that affects all projects. By default, there is a limit of `2` subscriptions.
+- GitLab SaaS subscribers have different limits [defined per plan](../user/gitlab_com/index.md#gitlab-cicd),
+  and they affect all projects under that plan.
+- On [GitLab Premium](https://about.gitlab.com/pricing/) self-managed
+  or higher installations, this limit is defined under a `default` plan that
+  affects all projects. By default, there is a limit of `2` subscriptions.
 
 To set this limit on a self-managed installation, run the following in the
 [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
@@ -330,11 +340,11 @@ checked each time a new pipeline schedule is created. If a new pipeline schedule
 would cause the total number of pipeline schedules to exceed the limit, the
 pipeline schedule will not be created.
 
-On GitLab.com, different limits are [defined per plan](../user/gitlab_com/index.md#gitlab-cicd),
+GitLab SaaS subscribers have different limits [defined per plan](../user/gitlab_com/index.md#gitlab-cicd),
 and they affect all projects under that plan.
 
-On self-managed instances ([GitLab Starter](https://about.gitlab.com/pricing/#self-managed)
-or higher tiers), this limit is defined under a `default` plan that affects all
+On [GitLab Premium](https://about.gitlab.com/pricing/) self-managed or
+higher installations, this limit is defined under a `default` plan that affects all
 projects. By default, there is a limit of `10` pipeline schedules.
 
 To set this limit on a self-managed installation, run the following in the
@@ -408,7 +418,7 @@ setting is used:
 | `ci_max_artifact_size_terraform`            | 5 MB ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37018) in GitLab 13.3) |
 | `ci_max_artifact_size_trace`                | 0             |
 
-For example, to set the `ci_max_artifact_size_junit` limit to 10MB on a self-managed
+For example, to set the `ci_max_artifact_size_junit` limit to 10 MB on a self-managed
 installation, run the following in the [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
 
 ```ruby
@@ -612,3 +622,7 @@ Plan.default.actual_limits.update!(generic_packages_max_file_size: 100.megabytes
 ```
 
 Set the limit to `0` to allow any file size.
+
+### Package versions returned
+
+When asking for versions of a given NuGet package name, the GitLab Package Registry returns a maximum of 300 versions.

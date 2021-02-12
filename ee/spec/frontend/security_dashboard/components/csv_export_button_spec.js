@@ -4,7 +4,6 @@ import MockAdapter from 'axios-mock-adapter';
 import CsvExportButton, {
   STORAGE_KEY,
 } from 'ee/security_dashboard/components/csv_export_button.vue';
-import { useFakeDate } from 'helpers/fake_date';
 import { TEST_HOST } from 'helpers/test_constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
@@ -14,7 +13,6 @@ import statusCodes from '~/lib/utils/http_status';
 
 jest.mock('~/flash');
 jest.mock('~/lib/utils/downloader');
-useFakeDate();
 
 const mockReportDate = formatDate(new Date(), 'isoDateTime');
 const vulnerabilitiesExportEndpoint = `${TEST_HOST}/vulnerability_findings.csv`;

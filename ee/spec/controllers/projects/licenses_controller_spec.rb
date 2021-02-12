@@ -13,6 +13,14 @@ RSpec.describe Projects::LicensesController do
       sign_in(user)
     end
 
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { get :index, params: params }
+
+      before_request do
+        project.add_reporter(user)
+      end
+    end
+
     context 'with authorized user' do
       context 'when feature is available' do
         before do
@@ -347,6 +355,7 @@ RSpec.describe Projects::LicensesController do
   end
 
   describe "POST #create" do
+    let(:current_user) { create(:user) }
     let(:project) { create(:project, :repository, :private) }
     let(:mit_license) { create(:software_license, :mit) }
     let(:default_params) do
@@ -360,9 +369,16 @@ RSpec.describe Projects::LicensesController do
       }
     end
 
-    context "when authenticated" do
-      let(:current_user) { create(:user) }
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { post :create, xhr: true, params: default_params }
 
+      before_request do
+        project.add_reporter(current_user)
+        sign_in(current_user)
+      end
+    end
+
+    context "when authenticated" do
       before do
         stub_licensed_features(license_scanning: true)
         sign_in(current_user)
@@ -465,6 +481,7 @@ RSpec.describe Projects::LicensesController do
   end
 
   describe "PATCH #update" do
+    let(:current_user) { create(:user) }
     let(:project) { create(:project, :repository, :private) }
     let(:software_license_policy) { create(:software_license_policy, project: project, software_license: mit_license) }
     let(:mit_license) { create(:software_license, :mit) }
@@ -478,9 +495,16 @@ RSpec.describe Projects::LicensesController do
       }
     end
 
-    context "when authenticated" do
-      let(:current_user) { create(:user) }
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { post :create, xhr: true, params: default_params }
 
+      before_request do
+        project.add_reporter(current_user)
+        sign_in(current_user)
+      end
+    end
+
+    context "when authenticated" do
       before do
         stub_licensed_features(license_scanning: true)
         sign_in(current_user)

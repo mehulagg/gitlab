@@ -1,0 +1,5 @@
+---
+title: Fix blank alert field when creating an issue from a vulnerability
+merge_request: 53656
+author:
+type: fixed

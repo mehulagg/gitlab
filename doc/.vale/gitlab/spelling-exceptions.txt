@@ -9,12 +9,14 @@ allowlist
 allowlisted
 allowlisting
 allowlists
+anonymization
 anonymized
 Ansible
 Anthos
 approvers
 architected
 architecting
+archiver
 Arel
 Artifactory
 Asana
@@ -81,6 +83,7 @@ Caddy
 callstack
 callstacks
 Camo
+canonicalized
 CentOS
 Certbot
 changeset
@@ -181,6 +184,7 @@ failsafe
 Falco
 falsy
 fastlane
+Fastzip
 favicon
 favorited
 Figma
@@ -198,6 +202,8 @@ fuzzer
 Gantt
 Gemnasium
 Gemojione
+Getter
+Getters
 gettext
 Git
 Gitaly
@@ -359,6 +365,8 @@ Nanoc
 negatable
 Netlify
 Nokogiri
+noteable
+noteables
 npm
 nullability
 nullable
@@ -689,6 +697,7 @@ unreplicated
 unresolve
 unresolved
 unresolving
+unsanitized
 unschedule
 unscoped
 unshare
@@ -736,6 +745,7 @@ WebdriverIO
 Webex
 webpack
 webserver
+Webservice
 websocket
 websockets
 whitepaper

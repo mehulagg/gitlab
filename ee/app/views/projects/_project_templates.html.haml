@@ -2,7 +2,7 @@
   - project_template_count = current_user.available_custom_project_templates.count
   - group_id = params[:namespace_id]
 
-  .project-templates-buttons.col-sm-12
+  .project-templates-buttons
     %ul.nav-tabs.nav-links.nav.scrolling-tabs
       %li.built-in-tab
         %a.nav-link.active{ href: "#built-in", data: { toggle: 'tab'} }

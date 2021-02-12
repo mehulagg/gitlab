@@ -30,7 +30,7 @@ module Resolvers
       private
 
       def authorize!
-        Ability.allowed?(context[:current_user], :read_epic_list, epic_board.group) || raise_resource_not_available_error!
+        Ability.allowed?(context[:current_user], :read_epic_board_list, epic_board.group) || raise_resource_not_available_error!
       end
 
       def preloads

@@ -47,8 +47,9 @@ describe('RotationsListSectionComponent', () => {
   });
 
   describe('when the timeframe includes today', () => {
+    useFakeDate(2021, 0, 14);
+
     beforeEach(() => {
-      useFakeDate(2021, 0, 14);
       createComponent();
     });
 
@@ -77,8 +78,9 @@ describe('RotationsListSectionComponent', () => {
   });
 
   describe('when the timeframe does not include today', () => {
+    useFakeDate(2021, 0, 31);
+
     beforeEach(() => {
-      useFakeDate(2021, 0, 31);
       createComponent();
     });
 

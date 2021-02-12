@@ -14,7 +14,7 @@ RSpec.describe 'Pipeline', :js do
     project.add_developer(user)
   end
 
-  describe 'GET /:project/pipelines/:id' do
+  describe 'GET /:project/-/pipelines/:id' do
     let(:pipeline) { create(:ci_pipeline, :with_job, project: project, ref: 'master', sha: project.commit.id, user: user) }
 
     subject { visit project_pipeline_path(project, pipeline) }
@@ -93,7 +93,7 @@ RSpec.describe 'Pipeline', :js do
     end
   end
 
-  describe 'GET /:project/pipelines/:id/security' do
+  describe 'GET /:project/-/pipelines/:id/security' do
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
 
     before do
@@ -129,7 +129,7 @@ RSpec.describe 'Pipeline', :js do
     end
   end
 
-  describe 'GET /:project/pipelines/:id/licenses' do
+  describe 'GET /:project/-/pipelines/:id/licenses' do
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
 
     before do
@@ -167,7 +167,7 @@ RSpec.describe 'Pipeline', :js do
     end
   end
 
-  describe 'GET /:project/pipelines/:id/codequality_report', :aggregate_failures do
+  describe 'GET /:project/-/pipelines/:id/codequality_report', :aggregate_failures do
     shared_examples_for 'full codequality report' do
       context 'when licensed' do
         before do

@@ -1545,7 +1545,7 @@ RSpec.describe ProjectPolicy do
       :developer  | false | nil   | false
       :developer  | true  | nil   | false
       :maintainer | false | nil   | false
-      :maintainer | true  | nil   | true
+      :maintainer | true  | nil   | false
       :owner      | false | nil   | false
       :owner      | true  | nil   | true
       :admin      | false | false | false
@@ -1745,6 +1745,82 @@ RSpec.describe ProjectPolicy do
         end
 
         it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+      end
+    end
+  end
+
+  describe 'read_analytics' do
+    context 'with various analytics features' do
+      let_it_be(:project_with_analytics_disabled) { create(:project, :analytics_disabled) }
+      let_it_be(:project_with_analytics_private) { create(:project, :analytics_private) }
+      let_it_be(:project_with_analytics_enabled) { create(:project, :analytics_enabled) }
+
+      before do
+        stub_licensed_features(issues_analytics: true, code_review_analytics: true, project_merge_request_analytics: true)
+
+        project_with_analytics_disabled.add_developer(developer)
+        project_with_analytics_private.add_developer(developer)
+        project_with_analytics_enabled.add_developer(developer)
+      end
+
+      context 'when analytics is enabled for the project' do
+        let(:project) { project_with_analytics_disabled }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_disallowed(:read_code_review_analytics) }
+          it { is_expected.to be_disallowed(:read_issue_analytics) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_disallowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_disallowed(:read_code_review_analytics) }
+          it { is_expected.to be_disallowed(:read_issue_analytics) }
+        end
+      end
+
+      context 'when analytics is private for the project' do
+        let(:project) { project_with_analytics_private }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_disallowed(:read_code_review_analytics) }
+          it { is_expected.to be_disallowed(:read_issue_analytics) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_allowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_allowed(:read_code_review_analytics) }
+          it { is_expected.to be_allowed(:read_issue_analytics) }
+        end
+      end
+
+      context 'when analytics is enabled for the project' do
+        let(:project) { project_with_analytics_private }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_disallowed(:read_code_review_analytics) }
+          it { is_expected.to be_disallowed(:read_issue_analytics) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_allowed(:read_project_merge_request_analytics) }
+          it { is_expected.to be_allowed(:read_code_review_analytics) }
+          it { is_expected.to be_allowed(:read_issue_analytics) }
+        end
       end
     end
   end

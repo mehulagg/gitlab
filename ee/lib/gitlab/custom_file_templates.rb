@@ -43,11 +43,15 @@ module Gitlab
       by_namespace + by_instance
     end
 
-    def find(name)
+    def find(name, source_template_project_id = nil)
       namespace_template_projects_hash.each do |namespace, project|
+        next if source_template_project_id && project&.id != source_template_project_id.to_i
+
         found = template_for(project, name, category_for(namespace))
         return found if found
       end
+
+      return if source_template_project_id && instance_template_project&.id != source_template_project_id.to_i
 
       template_for(instance_template_project, name, _('Instance'))
     end
@@ -78,7 +82,7 @@ module Gitlab
     # ordered from most-specific to least-specific
     def namespace_template_projects_hash
       strong_memoize(:namespace_template_projects_hash) do
-        next [] unless project.present?
+        next {} unless project.present?
 
         project
           .ancestors_upto(nil)
@@ -98,18 +102,18 @@ module Gitlab
     def templates_for(project, category)
       return [] unless project
 
-      finder.all(project).map { |template| translate(template, category: category) }
+      finder.all(project).map { |template| translate(template, project, category: category) }
     end
 
     def template_for(project, name, category)
       return unless project
 
-      translate(finder.find(name, project), category: category)
+      translate(finder.find(name, project), project, category: category)
     rescue ::Gitlab::Template::Finders::RepoTemplateFinder::FileNotFoundError
       nil
     end
 
-    def translate(template, category:)
+    def translate(template, project, category:)
       return unless template
 
       template.category = category
@@ -122,6 +126,7 @@ module Gitlab
       LicenseTemplate.new(
         key: template.key,
         name: template.name,
+        project: project,
         nickname: template.name,
         category: template.category,
         content: -> { template.content }

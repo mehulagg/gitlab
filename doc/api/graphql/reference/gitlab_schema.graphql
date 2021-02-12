@@ -1078,6 +1078,56 @@ Identifier of Analytics::DevopsAdoption::Segment.
 scalar AnalyticsDevopsAdoptionSegmentID
 
 """
+Data associated with configuring API fuzzing scans in GitLab CI
+"""
+type ApiFuzzingCiConfiguration {
+  """
+  All available scan modes.
+  """
+  scanModes: [ApiFuzzingScanMode!]
+
+  """
+  All default scan profiles.
+  """
+  scanProfiles: [ApiFuzzingScanProfile!]
+}
+
+"""
+All possible ways to specify the API surface for an API fuzzing scan
+"""
+enum ApiFuzzingScanMode {
+  """
+  The API surface is specified by a HAR file.
+  """
+  HAR
+
+  """
+  The API surface is specified by a OPENAPI file.
+  """
+  OPENAPI
+}
+
+"""
+An API Fuzzing scan profile.
+"""
+type ApiFuzzingScanProfile {
+  """
+  A short description of the profile.
+  """
+  description: String
+
+  """
+  The unique name of the profile.
+  """
+  name: String
+
+  """
+  A syntax highlit HTML representation of the YAML.
+  """
+  yaml: String
+}
+
+"""
 User availability status
 """
 enum AvailabilityEnum {
@@ -1411,12 +1461,12 @@ Represents a project or group board
 """
 type Board {
   """
-  The board assignee
+  The board assignee.
   """
   assignee: User
 
   """
-  Epics associated with board issues
+  Epics associated with board issues.
   """
   epics(
     """
@@ -1466,7 +1516,7 @@ type Board {
   iteration: Iteration
 
   """
-  Labels of the board
+  Labels of the board.
   """
   labels(
     """
@@ -1526,7 +1576,7 @@ type Board {
   ): BoardListConnection
 
   """
-  The board milestone
+  The board milestone.
   """
   milestone: Milestone
 
@@ -1546,7 +1596,7 @@ type Board {
   webUrl: String!
 
   """
-  Weight of the board
+  Weight of the board.
   """
   weight: Int
 }
@@ -1589,7 +1639,7 @@ type BoardEdge {
 """
 Represents an epic on an issue board
 """
-type BoardEpic implements CurrentUserTodos & Noteable {
+type BoardEpic implements CurrentUserTodos & Eventable & Noteable {
   """
   Author of the epic.
   """
@@ -1829,6 +1879,31 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   dueDateIsFixed: Boolean
 
   """
+  A list of events associated with the object.
+  """
+  events(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): EventConnection
+
+  """
   Group to which the epic belongs.
   """
   group: Group!
@@ -2049,7 +2124,7 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   userPermissions: EpicPermissions!
 
   """
-  User preferences for the epic on the issue board
+  User preferences for the epic on the issue board.
   """
   userPreferences: BoardEpicUserPreferences
 
@@ -2104,7 +2179,7 @@ Represents user preferences for a board epic
 """
 type BoardEpicUserPreferences {
   """
-  Indicates epic should be displayed as collapsed
+  Indicates epic should be displayed as collapsed.
   """
   collapsed: Boolean!
 }
@@ -2126,22 +2201,22 @@ input BoardIssueInput {
   authorUsername: String
 
   """
-  Filter by epic ID. Incompatible with epicWildcardId
+  Filter by epic ID. Incompatible with epicWildcardId.
   """
   epicId: EpicID
 
   """
-  Filter by epic ID wildcard. Incompatible with epicId
+  Filter by epic ID wildcard. Incompatible with epicId.
   """
   epicWildcardId: EpicWildcardId
 
   """
-  Filter by iteration title
+  Filter by iteration title.
   """
   iterationTitle: String
 
   """
-  Filter by iteration ID wildcard
+  Filter by iteration ID wildcard.
   """
   iterationWildcardId: IterationWildcardId
 
@@ -2176,7 +2251,7 @@ input BoardIssueInput {
   search: String
 
   """
-  Filter by weight
+  Filter by weight.
   """
   weight: String
 }
@@ -2186,7 +2261,7 @@ Represents a list for an issue board
 """
 type BoardList {
   """
-  Assignee in the list
+  Assignee in the list.
   """
   assignee: User
 
@@ -2236,7 +2311,7 @@ type BoardList {
   issuesCount: Int
 
   """
-  Iteration of the list
+  Iteration of the list.
   """
   iteration: Iteration
 
@@ -2246,7 +2321,7 @@ type BoardList {
   label: Label
 
   """
-  The current limit metric for the list
+  The current limit metric for the list.
   """
   limitMetric: ListLimitMetric
 
@@ -2256,17 +2331,17 @@ type BoardList {
   listType: String!
 
   """
-  Maximum number of issues in the list
+  Maximum number of issues in the list.
   """
   maxIssueCount: Int
 
   """
-  Maximum weight of issues in the list
+  Maximum weight of issues in the list.
   """
   maxIssueWeight: Int
 
   """
-  Milestone of the list
+  Milestone of the list.
   """
   milestone: Milestone
 
@@ -2281,7 +2356,7 @@ type BoardList {
   title: String!
 
   """
-  Total weight of all issues in the list
+  Total weight of all issues in the list.
   """
   totalWeight: Int
 }
@@ -2458,29 +2533,36 @@ Represents the total number of issues and their weights for a particular day
 """
 type BurnupChartDailyTotals {
   """
-  Number of closed issues as of this day
+  Number of closed issues as of this day.
   """
   completedCount: Int!
 
   """
-  Total weight of closed issues as of this day
+  Total weight of closed issues as of this day.
   """
   completedWeight: Int!
 
   """
-  Date for burnup totals
+  Date for burnup totals.
   """
   date: ISO8601Date!
 
   """
-  Number of issues as of this day
+  Number of issues as of this day.
   """
   scopeCount: Int!
 
   """
-  Total weight of issues as of this day
+  Total weight of issues as of this day.
   """
   scopeWeight: Int!
+}
+
+type CiApplicationSettings {
+  """
+  Whether to keep the latest jobs artifacts.
+  """
+  keepLatestArtifact: Boolean
 }
 
 type CiBuildNeed {
@@ -3237,27 +3319,27 @@ type CiStageEdge {
 
 type ClusterAgent {
   """
-  Timestamp the cluster agent was created
+  Timestamp the cluster agent was created.
   """
   createdAt: Time
 
   """
-  ID of the cluster agent
+  ID of the cluster agent.
   """
   id: ID!
 
   """
-  Name of the cluster agent
+  Name of the cluster agent.
   """
   name: String
 
   """
-  The project this cluster agent is associated with
+  The project this cluster agent is associated with.
   """
   project: Project
 
   """
-  Tokens associated with the cluster agent
+  Tokens associated with the cluster agent.
   """
   tokens(
     """
@@ -3282,7 +3364,7 @@ type ClusterAgent {
   ): ClusterAgentTokenConnection
 
   """
-  Timestamp the cluster agent was updated
+  Timestamp the cluster agent was updated.
   """
   updatedAt: Time
 }
@@ -3359,17 +3441,17 @@ type ClusterAgentEdge {
 
 type ClusterAgentToken {
   """
-  Cluster agent this token is associated with
+  Cluster agent this token is associated with.
   """
   clusterAgent: ClusterAgent
 
   """
-  Timestamp the token was created
+  Timestamp the token was created.
   """
   createdAt: Time
 
   """
-  Global ID of the token
+  Global ID of the token.
   """
   id: ClustersAgentTokenID!
 }
@@ -3870,22 +3952,22 @@ Represents a ComplianceFramework associated with a Project
 """
 type ComplianceFramework {
   """
-  Hexadecimal representation of compliance framework's label color
+  Hexadecimal representation of compliance framework's label color.
   """
   color: String!
 
   """
-  Description of the compliance framework
+  Description of the compliance framework.
   """
   description: String!
 
   """
-  Compliance framework ID
+  Compliance framework ID.
   """
   id: ID!
 
   """
-  Name of the compliance framework
+  Name of the compliance framework.
   """
   name: String!
 
@@ -4369,6 +4451,61 @@ type ContainerRepositoryEdge {
 Identifier of ContainerRepository.
 """
 scalar ContainerRepositoryID
+
+"""
+Values for sorting container repositories
+"""
+enum ContainerRepositorySort {
+  """
+  Created at ascending order
+  """
+  CREATED_ASC
+
+  """
+  Created at descending order
+  """
+  CREATED_DESC
+
+  """
+  Name by ascending order
+  """
+  NAME_ASC
+
+  """
+  Name by descending order
+  """
+  NAME_DESC
+
+  """
+  Updated at ascending order
+  """
+  UPDATED_ASC
+
+  """
+  Updated at descending order
+  """
+  UPDATED_DESC
+
+  """
+  Created at ascending order
+  """
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5.")
+
+  """
+  Created at descending order
+  """
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5.")
+
+  """
+  Updated at ascending order
+  """
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5.")
+
+  """
+  Updated at descending order
+  """
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5.")
+}
 
 """
 Status of a container repository
@@ -5741,6 +5878,36 @@ type DastProfileCreatePayload {
 }
 
 """
+Autogenerated input type of DastProfileDelete
+"""
+input DastProfileDeleteInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  ID of the profile to be deleted.
+  """
+  id: DastProfileID!
+}
+
+"""
+Autogenerated return type of DastProfileDelete
+"""
+type DastProfileDeletePayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+}
+
+"""
 An edge in a connection.
 """
 type DastProfileEdge {
@@ -5760,6 +5927,46 @@ Identifier of Dast::Profile.
 """
 scalar DastProfileID
 
+"""
+Autogenerated input type of DastProfileRun
+"""
+input DastProfileRunInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Full path for the project the scanner profile belongs to.
+  """
+  fullPath: ID!
+
+  """
+  ID of the profile to be used for the scan.
+  """
+  id: DastProfileID!
+}
+
+"""
+Autogenerated return type of DastProfileRun
+"""
+type DastProfileRunPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  URL of the pipeline that was created.
+  """
+  pipelineUrl: String
+}
+
 enum DastScanTypeEnum {
   """
   Active DAST scan. This scan will make active attacks against the target site.
@@ -5777,22 +5984,22 @@ Represents a DAST scanner profile
 """
 type DastScannerProfile {
   """
-  Relative web path to the edit page of a scanner profile
+  Relative web path to the edit page of a scanner profile.
   """
   editPath: String
 
   """
-  ID of the DAST scanner profile Deprecated in 13.6: Use `id`.
+  ID of the DAST scanner profile. Deprecated in 13.6: Use `id`.
   """
   globalId: DastScannerProfileID! @deprecated(reason: "Use `id`. Deprecated in 13.6.")
 
   """
-  ID of the DAST scanner profile
+  ID of the DAST scanner profile.
   """
   id: DastScannerProfileID!
 
   """
-  Name of the DAST scanner profile
+  Name of the DAST scanner profile.
   """
   profileName: String
 
@@ -5807,12 +6014,12 @@ type DastScannerProfile {
   showDebugMessages: Boolean!
 
   """
-  The maximum number of minutes allowed for the spider to traverse the site
+  The maximum number of minutes allowed for the spider to traverse the site.
   """
   spiderTimeout: Int
 
   """
-  The maximum number of seconds allowed for the site under test to respond to a request
+  The maximum number of seconds allowed for the site under test to respond to a request.
   """
   targetTimeout: Int
 
@@ -6048,27 +6255,27 @@ Represents a DAST Site Profile
 """
 type DastSiteProfile {
   """
-  Relative web path to the edit page of a site profile
+  Relative web path to the edit page of a site profile.
   """
   editPath: String
 
   """
-  ID of the site profile
+  ID of the site profile.
   """
   id: DastSiteProfileID!
 
   """
-  Normalized URL of the target to be scanned
+  Normalized URL of the target to be scanned.
   """
   normalizedTargetUrl: String
 
   """
-  The name of the site profile
+  The name of the site profile.
   """
   profileName: String
 
   """
-  The URL of the target to be scanned
+  The URL of the target to be scanned.
   """
   targetUrl: String
 
@@ -6078,7 +6285,7 @@ type DastSiteProfile {
   userPermissions: DastSiteProfilePermissions!
 
   """
-  The current validation status of the site profile
+  The current validation status of the site profile.
   """
   validationStatus: DastSiteProfileValidationStatusEnum
 }
@@ -6350,17 +6557,17 @@ Represents a DAST Site Validation
 """
 type DastSiteValidation {
   """
-  Global ID of the site validation
+  Global ID of the site validation.
   """
   id: DastSiteValidationID!
 
   """
-  Normalized URL of the target to be validated
+  Normalized URL of the target to be validated.
   """
   normalizedTargetUrl: String
 
   """
-  Status of the site validation
+  Status of the site validation.
   """
   status: DastSiteProfileValidationStatusEnum!
 }
@@ -7824,22 +8031,22 @@ Segment
 """
 type DevopsAdoptionSegment {
   """
-  Assigned groups
+  Assigned groups.
   """
   groups: [Group!]
 
   """
-  ID of the segment
+  ID of the segment.
   """
   id: ID!
 
   """
-  The latest adoption metrics for the segment
+  The latest adoption metrics for the segment.
   """
   latestSnapshot: DevopsAdoptionSnapshot
 
   """
-  Name of the segment
+  Name of the segment.
   """
   name: String!
 }
@@ -7884,52 +8091,52 @@ Snapshot
 """
 type DevopsAdoptionSnapshot {
   """
-  At least one deployment succeeded
+  At least one deployment succeeded.
   """
   deploySucceeded: Boolean!
 
   """
-  The end time for the snapshot where the data points were collected
+  The end time for the snapshot where the data points were collected.
   """
   endTime: Time!
 
   """
-  At least one issue was opened
+  At least one issue was opened.
   """
   issueOpened: Boolean!
 
   """
-  At least one merge request was approved
+  At least one merge request was approved.
   """
   mergeRequestApproved: Boolean!
 
   """
-  At least one merge request was opened
+  At least one merge request was opened.
   """
   mergeRequestOpened: Boolean!
 
   """
-  At least one pipeline succeeded
+  At least one pipeline succeeded.
   """
   pipelineSucceeded: Boolean!
 
   """
-  The time the snapshot was recorded
+  The time the snapshot was recorded.
   """
   recordedAt: Time!
 
   """
-  At least one runner was used
+  At least one runner was used.
   """
   runnerConfigured: Boolean!
 
   """
-  At least one security scan succeeded
+  At least one security scan succeeded.
   """
   securityScanSucceeded: Boolean!
 
   """
-  The start time for the snapshot where the data points were collected
+  The start time for the snapshot where the data points were collected.
   """
   startTime: Time!
 }
@@ -8500,7 +8707,7 @@ type EnvironmentsCanaryIngressUpdatePayload {
 """
 Represents an epic
 """
-type Epic implements CurrentUserTodos & Noteable {
+type Epic implements CurrentUserTodos & Eventable & Noteable {
   """
   Author of the epic.
   """
@@ -8738,6 +8945,31 @@ type Epic implements CurrentUserTodos & Noteable {
   Indicates if the due date has been manually set.
   """
   dueDateIsFixed: Boolean
+
+  """
+  A list of events associated with the object.
+  """
+  events(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): EventConnection
 
   """
   Group to which the epic belongs.
@@ -9225,22 +9457,22 @@ Counts of descendent epics
 """
 type EpicDescendantCount {
   """
-  Number of closed child epics
+  Number of closed child epics.
   """
   closedEpics: Int
 
   """
-  Number of closed epic issues
+  Number of closed epic issues.
   """
   closedIssues: Int
 
   """
-  Number of opened child epics
+  Number of opened child epics.
   """
   openedEpics: Int
 
   """
-  Number of opened epic issues
+  Number of opened epic issues.
   """
   openedIssues: Int
 }
@@ -9250,12 +9482,12 @@ Total weight of open and closed descendant issues
 """
 type EpicDescendantWeights {
   """
-  Total weight of completed (closed) issues in this epic, including epic descendants
+  Total weight of completed (closed) issues in this epic, including epic descendants.
   """
   closedIssues: Int
 
   """
-  Total weight of opened issues in this epic, including epic descendants
+  Total weight of opened issues in this epic, including epic descendants.
   """
   openedIssues: Int
 }
@@ -9280,17 +9512,17 @@ Health status of child issues
 """
 type EpicHealthStatus {
   """
-  Number of issues at risk
+  Number of issues at risk.
   """
   issuesAtRisk: Int
 
   """
-  Number of issues that need attention
+  Number of issues that need attention.
   """
   issuesNeedingAttention: Int
 
   """
-  Number of issues on track
+  Number of issues on track.
   """
   issuesOnTrack: Int
 }
@@ -9465,7 +9697,7 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   epic: Epic
 
   """
-  ID of the epic-issue relation
+  ID of the epic-issue relation.
   """
   epicIssueId: ID!
 
@@ -9485,7 +9717,7 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   humanTotalTimeSpent: String
 
   """
-  Global ID of the epic-issue relation
+  Global ID of the epic-issue relation.
   """
   id: ID
 
@@ -9605,7 +9837,7 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   ): String!
 
   """
-  URI path of the epic-issue relation
+  URI path of the epic-issue relation.
   """
   relationPath: String
 
@@ -9740,7 +9972,7 @@ type EpicIssueConnection {
   pageInfo: PageInfo!
 
   """
-  Total weight of issues collection
+  Total weight of issues collection.
   """
   weight: Int!
 }
@@ -9994,22 +10226,22 @@ A node of an epic tree.
 """
 input EpicTreeNodeFieldsInputType {
   """
-  The ID of the epic_issue or issue that the actual epic or issue is switched with
+  The ID of the epic_issue or issue that the actual epic or issue is switched with.
   """
   adjacentReferenceId: EpicTreeSortingID
 
   """
-  The ID of the epic_issue or epic that is being moved
+  The ID of the epic_issue or epic that is being moved.
   """
   id: EpicTreeSortingID!
 
   """
-  ID of the new parent epic
+  ID of the new parent epic.
   """
   newParentId: EpicID
 
   """
-  The type of the switch, after or before allowed
+  The type of the switch, after or before allowed.
   """
   relativePosition: MoveType
 }
@@ -10067,6 +10299,168 @@ enum EpicWildcardId {
   No epic is assigned
   """
   NONE
+}
+
+"""
+Representing an event
+"""
+type Event {
+  """
+  Action of the event.
+  """
+  action: EventAction!
+
+  """
+  Author of this event.
+  """
+  author: User!
+
+  """
+  When this event was created.
+  """
+  createdAt: Time!
+
+  """
+  ID of the event.
+  """
+  id: ID!
+
+  """
+  When this event was updated.
+  """
+  updatedAt: Time!
+}
+
+"""
+Event action
+"""
+enum EventAction {
+  """
+  Approved action
+  """
+  APPROVED
+
+  """
+  Archived action
+  """
+  ARCHIVED
+
+  """
+  Closed action
+  """
+  CLOSED
+
+  """
+  Commented action
+  """
+  COMMENTED
+
+  """
+  Created action
+  """
+  CREATED
+
+  """
+  Destroyed action
+  """
+  DESTROYED
+
+  """
+  Expired action
+  """
+  EXPIRED
+
+  """
+  Joined action
+  """
+  JOINED
+
+  """
+  Left action
+  """
+  LEFT
+
+  """
+  Merged action
+  """
+  MERGED
+
+  """
+  Pushed action
+  """
+  PUSHED
+
+  """
+  Reopened action
+  """
+  REOPENED
+
+  """
+  Updated action
+  """
+  UPDATED
+}
+
+"""
+The connection type for Event.
+"""
+type EventConnection {
+  """
+  A list of edges.
+  """
+  edges: [EventEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [Event]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type EventEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: Event
+}
+
+interface Eventable {
+  """
+  A list of events associated with the object.
+  """
+  events(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): EventConnection
 }
 
 """
@@ -10129,69 +10523,69 @@ Represents an external issue
 """
 type ExternalIssue {
   """
-  Timestamp of when the issue was created
+  Timestamp of when the issue was created.
   """
   createdAt: Time
 
   """
-  Type of external tracker
+  Type of external tracker.
   """
   externalTracker: String
 
   """
-  Relative reference of the issue in the external tracker
+  Relative reference of the issue in the external tracker.
   """
   relativeReference: String
 
   """
-  Status of the issue in the external tracker
+  Status of the issue in the external tracker.
   """
   status: String
 
   """
-  Title of the issue in the external tracker
+  Title of the issue in the external tracker.
   """
   title: String
 
   """
-  Timestamp of when the issue was updated
+  Timestamp of when the issue was updated.
   """
   updatedAt: Time
 
   """
-  URL to the issue in the external tracker
+  URL to the issue in the external tracker.
   """
   webUrl: String
 }
 
 type GeoNode {
   """
-  The maximum concurrency of container repository sync for this secondary node
+  The maximum concurrency of container repository sync for this secondary node.
   """
   containerRepositoriesMaxCapacity: Int
 
   """
-  Indicates whether this Geo node is enabled
+  Indicates whether this Geo node is enabled.
   """
   enabled: Boolean
 
   """
-  The maximum concurrency of LFS/attachment backfill for this secondary node
+  The maximum concurrency of LFS/attachment backfill for this secondary node.
   """
   filesMaxCapacity: Int
 
   """
-  ID of this GeoNode
+  ID of this GeoNode.
   """
   id: ID!
 
   """
-  The URL defined on the primary node that secondary nodes should use to contact it
+  The URL defined on the primary node that secondary nodes should use to contact it.
   """
   internalUrl: String
 
   """
-  Find merge request diff registries on this Geo node
+  Find merge request diff registries on this Geo node.
   """
   mergeRequestDiffRegistries(
     """
@@ -10221,17 +10615,17 @@ type GeoNode {
   ): MergeRequestDiffRegistryConnection
 
   """
-  The interval (in days) in which the repository verification is valid. Once expired, it will be reverified
+  The interval (in days) in which the repository verification is valid. Once expired, it will be reverified.
   """
   minimumReverificationInterval: Int
 
   """
-  The unique identifier for this Geo node
+  The unique identifier for this Geo node.
   """
   name: String
 
   """
-  Package file registries of the GeoNode
+  Package file registries of the GeoNode.
   """
   packageFileRegistries(
     """
@@ -10261,17 +10655,17 @@ type GeoNode {
   ): PackageFileRegistryConnection
 
   """
-  Indicates whether this Geo node is the primary
+  Indicates whether this Geo node is the primary.
   """
   primary: Boolean
 
   """
-  The maximum concurrency of repository backfill for this secondary node
+  The maximum concurrency of repository backfill for this secondary node.
   """
   reposMaxCapacity: Int
 
   """
-  The namespaces that should be synced, if `selective_sync_type` == `namespaces`
+  The namespaces that should be synced, if `selective_sync_type` == `namespaces`.
   """
   selectiveSyncNamespaces(
     """
@@ -10296,17 +10690,17 @@ type GeoNode {
   ): NamespaceConnection
 
   """
-  The repository storages whose projects should be synced, if `selective_sync_type` == `shards`
+  The repository storages whose projects should be synced, if `selective_sync_type` == `shards`.
   """
   selectiveSyncShards: [String!]
 
   """
-  Indicates if syncing is limited to only specific groups, or shards
+  Indicates if syncing is limited to only specific groups, or shards.
   """
   selectiveSyncType: String
 
   """
-  Find snippet repository registries on this Geo node
+  Find snippet repository registries on this Geo node.
   """
   snippetRepositoryRegistries(
     """
@@ -10336,12 +10730,12 @@ type GeoNode {
   ): SnippetRepositoryRegistryConnection
 
   """
-  Indicates if this secondary node will replicate blobs in Object Storage
+  Indicates if this secondary node will replicate blobs in Object Storage.
   """
   syncObjectStorage: Boolean
 
   """
-  Find terraform state version registries on this Geo node
+  Find terraform state version registries on this Geo node.
   """
   terraformStateVersionRegistries(
     """
@@ -10371,12 +10765,12 @@ type GeoNode {
   ): TerraformStateVersionRegistryConnection
 
   """
-  The user-facing URL for this Geo node
+  The user-facing URL for this Geo node.
   """
   url: String
 
   """
-  The maximum concurrency of repository verification for this secondary node
+  The maximum concurrency of repository verification for this secondary node.
   """
   verificationMaxCapacity: Int
 }
@@ -10445,12 +10839,12 @@ type GrafanaIntegration {
 
 type Group {
   """
-  Size limit for repositories in the namespace in bytes
+  Size limit for repositories in the namespace in bytes.
   """
   actualRepositorySizeLimit: Float
 
   """
-  Additional storage purchased for the root namespace in bytes
+  Additional storage purchased for the root namespace in bytes.
   """
   additionalPurchasedStorageSize: Float
 
@@ -10505,7 +10899,7 @@ type Group {
   ): BoardConnection
 
   """
-  Represents the code coverage activity for this group
+  Represents the code coverage activity for this group.
   """
   codeCoverageActivities(
     """
@@ -10593,6 +10987,11 @@ type Group {
     Filter the container repositories by their name.
     """
     name: String
+
+    """
+    Sort container repositories by this criteria.
+    """
+    sort: ContainerRepositorySort = created_desc
   ): ContainerRepositoryConnection
 
   """
@@ -10601,7 +11000,7 @@ type Group {
   containerRepositoriesCount: Int!
 
   """
-  Includes at least one project where the repository size exceeds the limit
+  Includes at least one project where the repository size exceeds the limit.
   """
   containsLockedProjects: Boolean!
 
@@ -10646,7 +11045,7 @@ type Group {
   emailsDisabled: Boolean
 
   """
-  Find a single epic
+  Find a single epic.
   """
   epic(
     """
@@ -10724,7 +11123,7 @@ type Group {
   ): Epic
 
   """
-  Find a single epic board
+  Find a single epic board.
   """
   epicBoard(
     """
@@ -10734,7 +11133,7 @@ type Group {
   ): EpicBoard
 
   """
-  Find epic boards
+  Find epic boards.
   """
   epicBoards(
     """
@@ -10759,7 +11158,7 @@ type Group {
   ): EpicBoardConnection
 
   """
-  Find epics
+  Find epics.
   """
   epics(
     """
@@ -10917,7 +11316,7 @@ type Group {
   id: ID!
 
   """
-  Status of the temporary storage increase
+  Status of the temporary storage increase.
   """
   isTemporaryStorageIncreaseEnabled: Boolean!
 
@@ -11052,7 +11451,7 @@ type Group {
   ): IssueConnection
 
   """
-  Find iterations
+  Find iterations.
   """
   iterations(
     """
@@ -11398,7 +11797,7 @@ type Group {
   ): ProjectConnection!
 
   """
-  Number of projects in the root namespace where the repository size exceeds the limit
+  Number of projects in the root namespace where the repository size exceeds the limit.
   """
   repositorySizeExcessProjectCount: Int!
 
@@ -11423,12 +11822,12 @@ type Group {
   shareWithGroupLock: Boolean
 
   """
-  Group statistics
+  Group statistics.
   """
   stats: GroupStats
 
   """
-  Total storage limit of the root namespace in bytes
+  Total storage limit of the root namespace in bytes.
   """
   storageSizeLimit: Float
 
@@ -11438,12 +11837,12 @@ type Group {
   subgroupCreationLevel: String
 
   """
-  Date until the temporary storage increase is active
+  Date until the temporary storage increase is active.
   """
   temporaryStorageIncreaseEndsOn: Time
 
   """
-  Time logged in issues by group members
+  Time logged in issues by group members.
   """
   timelogs(
     """
@@ -11488,12 +11887,12 @@ type Group {
   ): TimelogConnection!
 
   """
-  Total repository size of all projects in the root namespace in bytes
+  Total repository size of all projects in the root namespace in bytes.
   """
   totalRepositorySize: Float
 
   """
-  Total excess repository size of all projects in the root namespace in bytes
+  Total excess repository size of all projects in the root namespace in bytes.
   """
   totalRepositorySizeExcess: Float
 
@@ -11513,7 +11912,7 @@ type Group {
   visibility: String
 
   """
-  Vulnerabilities reported on the projects in the group and its subgroups
+  Vulnerabilities reported on the projects in the group and its subgroups.
   """
   vulnerabilities(
     """
@@ -11578,7 +11977,7 @@ type Group {
   ): VulnerabilityConnection
 
   """
-  Number of vulnerabilities per day for the projects in the group and its subgroups
+  Number of vulnerabilities per day for the projects in the group and its subgroups.
   """
   vulnerabilitiesCountByDay(
     """
@@ -11614,7 +12013,7 @@ type Group {
 
   """
   Number of vulnerabilities per severity level, per day, for the projects in the
-  group and its subgroups Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.
+  group and its subgroups. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.
   """
   vulnerabilitiesCountByDayAndSeverity(
     """
@@ -11649,7 +12048,7 @@ type Group {
   ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
 
   """
-  Represents vulnerable project counts for each grade
+  Represents vulnerable project counts for each grade.
   """
   vulnerabilityGrades(
     """
@@ -11659,7 +12058,7 @@ type Group {
   ): [VulnerableProjectsByGrade!]!
 
   """
-  Vulnerability scanners reported on the project vulnerabilities of the group and its subgroups
+  Vulnerability scanners reported on the project vulnerabilities of the group and its subgroups.
   """
   vulnerabilityScanners(
     """
@@ -11684,7 +12083,7 @@ type Group {
   ): VulnerabilityScannerConnection
 
   """
-  Counts for each vulnerability severity in the group and its subgroups
+  Counts for each vulnerability severity in the group and its subgroups.
   """
   vulnerabilitySeveritiesCount(
     """
@@ -11858,7 +12257,7 @@ Contains statistics about a group
 """
 type GroupStats {
   """
-  Statistics related to releases within the group
+  Statistics related to releases within the group.
   """
   releaseStats: GroupReleaseStats
 }
@@ -12197,22 +12596,22 @@ Describes an incident management on-call schedule
 """
 type IncidentManagementOncallSchedule {
   """
-  Description of the on-call schedule
+  Description of the on-call schedule.
   """
   description: String
 
   """
-  Internal ID of the on-call schedule
+  Internal ID of the on-call schedule.
   """
   iid: ID!
 
   """
-  Name of the on-call schedule
+  Name of the on-call schedule.
   """
   name: String!
 
   """
-  On-call rotations for the on-call schedule
+  On-call rotations for the on-call schedule.
   """
   rotations(
     """
@@ -12237,7 +12636,7 @@ type IncidentManagementOncallSchedule {
   ): IncidentManagementOncallRotationConnection!
 
   """
-  Time zone of the on-call schedule
+  Time zone of the on-call schedule.
   """
   timezone: String!
 }
@@ -12334,7 +12733,7 @@ type IncidentManagementOncallShiftEdge {
 
 type InstanceSecurityDashboard {
   """
-  Projects selected in Instance Security Dashboard
+  Projects selected in Instance Security Dashboard.
   """
   projects(
     """
@@ -12359,12 +12758,12 @@ type InstanceSecurityDashboard {
   ): ProjectConnection!
 
   """
-  Represents vulnerable project counts for each grade
+  Represents vulnerable project counts for each grade.
   """
   vulnerabilityGrades: [VulnerableProjectsByGrade!]!
 
   """
-  Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard
+  Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard.
   """
   vulnerabilityScanners(
     """
@@ -12389,7 +12788,7 @@ type InstanceSecurityDashboard {
   ): VulnerabilityScannerConnection
 
   """
-  Counts for each vulnerability severity from projects selected in Instance Security Dashboard
+  Counts for each vulnerability severity from projects selected in Instance Security Dashboard.
   """
   vulnerabilitySeveritiesCount(
     """
@@ -12941,7 +13340,7 @@ type IssueConnection {
   pageInfo: PageInfo!
 
   """
-  Total weight of issues collection
+  Total weight of issues collection.
   """
   weight: Int!
 }
@@ -13736,12 +14135,12 @@ Represents an iteration object
 """
 type Iteration implements TimeboxReportInterface {
   """
-  Timestamp of iteration creation
+  Timestamp of iteration creation.
   """
   createdAt: Time!
 
   """
-  Description of the iteration
+  Description of the iteration.
   """
   description: String
 
@@ -13751,62 +14150,62 @@ type Iteration implements TimeboxReportInterface {
   descriptionHtml: String
 
   """
-  Timestamp of the iteration due date
+  Timestamp of the iteration due date.
   """
   dueDate: Time
 
   """
-  ID of the iteration
+  ID of the iteration.
   """
   id: ID!
 
   """
-  Internal ID of the iteration
+  Internal ID of the iteration.
   """
   iid: ID!
 
   """
-  Historically accurate report about the timebox
+  Historically accurate report about the timebox.
   """
   report: TimeboxReport
 
   """
-  Web path of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts
+  Web path of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts.
   """
   scopedPath: String
 
   """
-  Web URL of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts
+  Web URL of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts.
   """
   scopedUrl: String
 
   """
-  Timestamp of the iteration start date
+  Timestamp of the iteration start date.
   """
   startDate: Time
 
   """
-  State of the iteration
+  State of the iteration.
   """
   state: IterationState!
 
   """
-  Title of the iteration
+  Title of the iteration.
   """
   title: String!
 
   """
-  Timestamp of last iteration update
+  Timestamp of last iteration update.
   """
   updatedAt: Time!
 
   """
-  Web path of the iteration
+  Web path of the iteration.
   """
   webPath: String!
 
   """
-  Web URL of the iteration
+  Web URL of the iteration.
   """
   webUrl: String!
 }
@@ -14539,12 +14938,12 @@ type MergeRequest implements CurrentUserTodos & Noteable {
   allowCollaboration: Boolean
 
   """
-  Number of approvals left
+  Number of approvals left.
   """
   approvalsLeft: Int
 
   """
-  Number of approvals required
+  Number of approvals required.
   """
   approvalsRequired: Int
 
@@ -14854,6 +15253,7 @@ type MergeRequest implements CurrentUserTodos & Noteable {
   mergeStatus: String
 
   """
+  Number of merge requests in the merge train.
   """
   mergeTrainsCount: Int
 
@@ -15289,7 +15689,7 @@ type MergeRequestDiffRegistry {
   lastSyncedAt: Time
 
   """
-  ID of the Merge Request diff
+  ID of the Merge Request diff.
   """
   mergeRequestDiffId: ID!
 
@@ -15911,27 +16311,27 @@ Represents a metric image upload
 """
 type MetricImage {
   """
-  File name of the metric image
+  File name of the metric image.
   """
   fileName: String
 
   """
-  File path of the metric image
+  File path of the metric image.
   """
   filePath: String
 
   """
-  ID of the metric upload
+  ID of the metric upload.
   """
   id: ID!
 
   """
-  Internal ID of the metric upload
+  Internal ID of the metric upload.
   """
   iid: ID!
 
   """
-  URL of the metric source
+  URL of the metric source.
   """
   url: String!
 }
@@ -16085,7 +16485,7 @@ type Milestone implements TimeboxReportInterface {
   projectMilestone: Boolean!
 
   """
-  Historically accurate report about the timebox
+  Historically accurate report about the timebox.
   """
   report: TimeboxReport
 
@@ -16250,6 +16650,8 @@ type Mutation {
   createTestCase(input: CreateTestCaseInput!): CreateTestCasePayload
   dastOnDemandScanCreate(input: DastOnDemandScanCreateInput!): DastOnDemandScanCreatePayload
   dastProfileCreate(input: DastProfileCreateInput!): DastProfileCreatePayload
+  dastProfileDelete(input: DastProfileDeleteInput!): DastProfileDeletePayload
+  dastProfileRun(input: DastProfileRunInput!): DastProfileRunPayload
   dastScannerProfileCreate(input: DastScannerProfileCreateInput!): DastScannerProfileCreatePayload
   dastScannerProfileDelete(input: DastScannerProfileDeleteInput!): DastScannerProfileDeletePayload
   dastScannerProfileUpdate(input: DastScannerProfileUpdateInput!): DastScannerProfileUpdatePayload
@@ -16407,12 +16809,12 @@ enum MutationOperationMode {
 
 type Namespace {
   """
-  Size limit for repositories in the namespace in bytes
+  Size limit for repositories in the namespace in bytes.
   """
   actualRepositorySizeLimit: Float
 
   """
-  Additional storage purchased for the root namespace in bytes
+  Additional storage purchased for the root namespace in bytes.
   """
   additionalPurchasedStorageSize: Float
 
@@ -16448,7 +16850,7 @@ type Namespace {
   ): ComplianceFrameworkConnection
 
   """
-  Includes at least one project where the repository size exceeds the limit
+  Includes at least one project where the repository size exceeds the limit.
   """
   containsLockedProjects: Boolean!
 
@@ -16478,7 +16880,7 @@ type Namespace {
   id: ID!
 
   """
-  Status of the temporary storage increase
+  Status of the temporary storage increase.
   """
   isTemporaryStorageIncreaseEnabled: Boolean!
 
@@ -16548,7 +16950,7 @@ type Namespace {
   ): ProjectConnection!
 
   """
-  Number of projects in the root namespace where the repository size exceeds the limit
+  Number of projects in the root namespace where the repository size exceeds the limit.
   """
   repositorySizeExcessProjectCount: Int!
 
@@ -16563,22 +16965,22 @@ type Namespace {
   rootStorageStatistics: RootStorageStatistics
 
   """
-  Total storage limit of the root namespace in bytes
+  Total storage limit of the root namespace in bytes.
   """
   storageSizeLimit: Float
 
   """
-  Date until the temporary storage increase is active
+  Date until the temporary storage increase is active.
   """
   temporaryStorageIncreaseEndsOn: Time
 
   """
-  Total repository size of all projects in the root namespace in bytes
+  Total repository size of all projects in the root namespace in bytes.
   """
   totalRepositorySize: Float
 
   """
-  Total excess repository size of all projects in the root namespace in bytes
+  Total excess repository size of all projects in the root namespace in bytes.
   """
   totalRepositorySizeExcess: Float
 
@@ -16690,12 +17092,12 @@ input NegatedBoardIssueInput {
   authorUsername: String
 
   """
-  Filter by epic ID. Incompatible with epicWildcardId
+  Filter by epic ID. Incompatible with epicWildcardId.
   """
   epicId: EpicID
 
   """
-  Filter by iteration title
+  Filter by iteration title.
   """
   iterationTitle: String
 
@@ -16720,7 +17122,7 @@ input NegatedBoardIssueInput {
   releaseTag: String
 
   """
-  Filter by weight
+  Filter by weight.
   """
   weight: String
 }
@@ -17531,7 +17933,7 @@ type PackageFileRegistry {
   lastSyncedAt: Time
 
   """
-  ID of the PackageFile
+  ID of the PackageFile.
   """
   packageFileId: ID!
 
@@ -17712,6 +18114,11 @@ enum PackageTypeEnum {
   Packages from the PyPI package manager
   """
   PYPI
+
+  """
+  Packages from the Rubygems package manager
+  """
+  RUBYGEMS
 }
 
 """
@@ -18008,7 +18415,7 @@ type Pipeline {
   retryable: Boolean!
 
   """
-  Vulnerability and scanned resource counts for each security scanner of the pipeline
+  Vulnerability and scanned resource counts for each security scanner of the pipeline.
   """
   securityReportSummary: SecurityReportSummary
 
@@ -18315,7 +18722,7 @@ enum PipelineStatusEnum {
 
 type Project {
   """
-  Size limit for the repository in bytes
+  Size limit for the repository in bytes.
   """
   actualRepositorySizeLimit: Float
 
@@ -18450,7 +18857,7 @@ type Project {
   ): AlertManagementIntegrationConnection
 
   """
-  Extract alert fields from payload for custom mapping
+  Extract alert fields from payload for custom mapping.
   """
   alertManagementPayloadFields(
     """
@@ -18464,6 +18871,11 @@ type Project {
   requests of the project can also be merged with skipped jobs.
   """
   allowMergeOnSkippedPipeline: Boolean
+
+  """
+  API fuzzing configuration for the project. Available only when feature flag `api_fuzzing_configuration_ui` is enabled.
+  """
+  apiFuzzingCiConfiguration: ApiFuzzingCiConfiguration
 
   """
   Indicates the archived status of the project.
@@ -18526,7 +18938,7 @@ type Project {
   ciCdSettings: ProjectCiCdSetting
 
   """
-  Find a single cluster agent by name
+  Find a single cluster agent by name.
   """
   clusterAgent(
     """
@@ -18536,7 +18948,7 @@ type Project {
   ): ClusterAgent
 
   """
-  Cluster agents associated with the project
+  Cluster agents associated with the project.
   """
   clusterAgents(
     """
@@ -18561,12 +18973,12 @@ type Project {
   ): ClusterAgentConnection
 
   """
-  Code coverage summary associated with the project
+  Code coverage summary associated with the project.
   """
   codeCoverageSummary: CodeCoverageSummary
 
   """
-  Compliance frameworks associated with the project
+  Compliance frameworks associated with the project.
   """
   complianceFrameworks(
     """
@@ -18628,6 +19040,11 @@ type Project {
     Filter the container repositories by their name.
     """
     name: String
+
+    """
+    Sort container repositories by this criteria.
+    """
+    sort: ContainerRepositorySort = created_desc
   ): ContainerRepositoryConnection
 
   """
@@ -18862,7 +19279,7 @@ type Project {
   importStatus: String
 
   """
-  Incident Management On-call schedules of the project
+  Incident Management On-call schedules of the project.
   """
   incidentManagementOncallSchedules(
     """
@@ -19207,7 +19624,7 @@ type Project {
   issuesEnabled: Boolean
 
   """
-  Find iterations
+  Find iterations.
   """
   iterations(
     """
@@ -19751,7 +20168,7 @@ type Project {
   repository: Repository
 
   """
-  Size of repository that exceeds the limit in bytes
+  Size of repository that exceeds the limit in bytes.
   """
   repositorySizeExcess: Float
 
@@ -19761,7 +20178,7 @@ type Project {
   requestAccessEnabled: Boolean
 
   """
-  Find a single requirement
+  Find a single requirement.
   """
   requirement(
     """
@@ -19796,12 +20213,12 @@ type Project {
   ): Requirement
 
   """
-  Number of requirements for the project by their state
+  Number of requirements for the project by their state.
   """
   requirementStatesCount: RequirementStatesCount
 
   """
-  Find requirements
+  Find requirements.
   """
   requirements(
     """
@@ -19861,12 +20278,12 @@ type Project {
   sastCiConfiguration: SastCiConfiguration
 
   """
-  Path to project's security dashboard
+  Path to project's security dashboard.
   """
   securityDashboardPath: String
 
   """
-  Information about security analyzers used in the project
+  Information about security analyzers used in the project.
   """
   securityScanners: SecurityScanners
 
@@ -20051,7 +20468,7 @@ type Project {
   visibility: String
 
   """
-  Vulnerabilities reported on the project
+  Vulnerabilities reported on the project.
   """
   vulnerabilities(
     """
@@ -20116,7 +20533,7 @@ type Project {
   ): VulnerabilityConnection
 
   """
-  Number of vulnerabilities per day for the project
+  Number of vulnerabilities per day for the project.
   """
   vulnerabilitiesCountByDay(
     """
@@ -20151,7 +20568,7 @@ type Project {
   ): VulnerabilitiesCountByDayConnection
 
   """
-  Vulnerability scanners reported on the project vulnerabilities
+  Vulnerability scanners reported on the project vulnerabilities.
   """
   vulnerabilityScanners(
     """
@@ -20176,7 +20593,7 @@ type Project {
   ): VulnerabilityScannerConnection
 
   """
-  Counts for each vulnerability severity in the project
+  Counts for each vulnerability severity in the project.
   """
   vulnerabilitySeveritiesCount(
     """
@@ -20844,6 +21261,11 @@ type PromoteToEpicPayload {
 
 type Query {
   """
+  CI related settings that apply to the entire instance.
+  """
+  ciApplicationSettings: CiApplicationSettings
+
+  """
   Get linted and processed contents of a CI config. Should not be requested more than once per request.
   """
   ciConfig(
@@ -20884,7 +21306,7 @@ type Query {
   designManagement: DesignManagement!
 
   """
-  Get configured DevOps adoption segments on the instance
+  Get configured DevOps adoption segments on the instance.
   """
   devopsAdoptionSegments(
     """
@@ -20919,7 +21341,7 @@ type Query {
   ): String!
 
   """
-  Find a Geo node
+  Find a Geo node.
   """
   geoNode(
     """
@@ -20939,7 +21361,7 @@ type Query {
   ): Group
 
   """
-  Fields related to Instance Security Dashboard
+  Fields related to Instance Security Dashboard.
   """
   instanceSecurityDashboard: InstanceSecurityDashboard
 
@@ -20994,11 +21416,11 @@ type Query {
   ): Issue
 
   """
-  Find an iteration
+  Find an iteration.
   """
   iteration(
     """
-    Find an iteration by its ID
+    Find an iteration by its ID.
     """
     id: IterationID!
   ): Iteration
@@ -21269,7 +21691,7 @@ type Query {
   ): UserConnection
 
   """
-  Vulnerabilities reported on projects on the current user's instance security dashboard
+  Vulnerabilities reported on projects on the current user's instance security dashboard.
   """
   vulnerabilities(
     """
@@ -21334,7 +21756,7 @@ type Query {
   ): VulnerabilityConnection
 
   """
-  Number of vulnerabilities per day for the projects on the current user's instance security dashboard
+  Number of vulnerabilities per day for the projects on the current user's instance security dashboard.
   """
   vulnerabilitiesCountByDay(
     """
@@ -21370,7 +21792,7 @@ type Query {
 
   """
   Number of vulnerabilities per severity level, per day, for the projects on the
-  current user's instance security dashboard Deprecated in 13.3: Use
+  current user's instance security dashboard. Deprecated in 13.3: Use
   `vulnerabilitiesCountByDay`.
   """
   vulnerabilitiesCountByDayAndSeverity(
@@ -21406,11 +21828,11 @@ type Query {
   ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
 
   """
-  Find a vulnerability
+  Find a vulnerability.
   """
   vulnerability(
     """
-    The Global ID of the Vulnerability
+    The Global ID of the Vulnerability.
     """
     id: VulnerabilityID!
   ): Vulnerability
@@ -22280,17 +22702,17 @@ Represents a requirement
 """
 type Requirement {
   """
-  Author of the requirement
+  Author of the requirement.
   """
   author: User!
 
   """
-  Timestamp of when the requirement was created
+  Timestamp of when the requirement was created.
   """
   createdAt: Time!
 
   """
-  Description of the requirement
+  Description of the requirement.
   """
   description: String
 
@@ -22300,37 +22722,37 @@ type Requirement {
   descriptionHtml: String
 
   """
-  ID of the requirement
+  ID of the requirement.
   """
   id: ID!
 
   """
-  Internal ID of the requirement
+  Internal ID of the requirement.
   """
   iid: ID!
 
   """
-  Indicates if latest test report was created by user
+  Indicates if latest test report was created by user.
   """
   lastTestReportManuallyCreated: Boolean
 
   """
-  Latest requirement test report state
+  Latest requirement test report state.
   """
   lastTestReportState: TestReportState
 
   """
-  Project to which the requirement belongs
+  Project to which the requirement belongs.
   """
   project: Project!
 
   """
-  State of the requirement
+  State of the requirement.
   """
   state: RequirementState!
 
   """
-  Test reports of the requirement
+  Test reports of the requirement.
   """
   testReports(
     """
@@ -22360,7 +22782,7 @@ type Requirement {
   ): TestReportConnection
 
   """
-  Title of the requirement
+  Title of the requirement.
   """
   title: String
 
@@ -22370,7 +22792,7 @@ type Requirement {
   titleHtml: String
 
   """
-  Timestamp of when the requirement was last updated
+  Timestamp of when the requirement was last updated.
   """
   updatedAt: Time!
 
@@ -22458,12 +22880,12 @@ Counts of requirements by their state
 """
 type RequirementStatesCount {
   """
-  Number of archived requirements
+  Number of archived requirements.
   """
   archived: Int
 
   """
-  Number of opened requirements
+  Number of opened requirements.
   """
   opened: Int
 }
@@ -23142,12 +23564,12 @@ Represents a resource scanned by a security scan
 """
 type ScannedResource {
   """
-  The HTTP request method used to access the URL
+  The HTTP request method used to access the URL.
   """
   requestMethod: String
 
   """
-  The URL scanned by the scanner
+  The URL scanned by the scanner.
   """
   url: String
 }
@@ -23232,7 +23654,7 @@ Represents a section of a summary of a security report
 """
 type SecurityReportSummarySection {
   """
-  A list of the first 20 scanned resources
+  A list of the first 20 scanned resources.
   """
   scannedResources(
     """
@@ -23257,17 +23679,17 @@ type SecurityReportSummarySection {
   ): ScannedResourceConnection
 
   """
-  Total number of scanned resources
+  Total number of scanned resources.
   """
   scannedResourcesCount: Int
 
   """
-  Path to download all the scanned resources in CSV format
+  Path to download all the scanned resources in CSV format.
   """
   scannedResourcesCsvPath: String
 
   """
-  Total number of vulnerabilities
+  Total number of vulnerabilities.
   """
   vulnerabilitiesCount: Int
 }
@@ -24470,7 +24892,7 @@ type SnippetRepositoryRegistry {
   retryCount: Int
 
   """
-  ID of the Snippet Repository
+  ID of the Snippet Repository.
   """
   snippetRepositoryId: ID!
 
@@ -24928,7 +25350,7 @@ type TerraformStateVersionRegistry {
   state: RegistryState
 
   """
-  ID of the terraform state version
+  ID of the terraform state version.
   """
   terraformStateVersionId: ID!
 }
@@ -24973,22 +25395,22 @@ Represents a requirement test report
 """
 type TestReport {
   """
-  Author of the test report
+  Author of the test report.
   """
   author: User
 
   """
-  Timestamp of when the test report was created
+  Timestamp of when the test report was created.
   """
   createdAt: Time!
 
   """
-  ID of the test report
+  ID of the test report.
   """
   id: ID!
 
   """
-  State of the test report
+  State of the test report.
   """
   state: TestReportState!
 }
@@ -25046,17 +25468,17 @@ Represents the time report stats for timeboxes
 """
 type TimeReportStats {
   """
-  Completed issues metrics
+  Completed issues metrics.
   """
   complete: TimeboxMetrics
 
   """
-  Incomplete issues metrics
+  Incomplete issues metrics.
   """
   incomplete: TimeboxMetrics
 
   """
-  Total issues metrics
+  Total issues metrics.
   """
   total: TimeboxMetrics
 }
@@ -25066,12 +25488,12 @@ Represents measured stats metrics for timeboxes
 """
 type TimeboxMetrics {
   """
-  The count metric
+  The count metric.
   """
   count: Int!
 
   """
-  The weight metric
+  The weight metric.
   """
   weight: Int!
 }
@@ -25081,19 +25503,19 @@ Represents a historically accurate report about the timebox
 """
 type TimeboxReport {
   """
-  Daily scope and completed totals for burnup charts
+  Daily scope and completed totals for burnup charts.
   """
   burnupTimeSeries: [BurnupChartDailyTotals!]
 
   """
-  Represents the time report stats for the timebox
+  Represents the time report stats for the timebox.
   """
   stats: TimeReportStats
 }
 
 interface TimeboxReportInterface {
   """
-  Historically accurate report about the timebox
+  Historically accurate report about the timebox.
   """
   report: TimeboxReport
 }
@@ -25115,27 +25537,27 @@ input Timeframe {
 
 type Timelog {
   """
-  The issue that logged time was added to
+  The issue that logged time was added to.
   """
   issue: Issue
 
   """
-  The note where the quick action to add the logged time was executed
+  The note where the quick action to add the logged time was executed.
   """
   note: Note
 
   """
-  Timestamp of when the time tracked was spent at
+  Timestamp of when the time tracked was spent at.
   """
   spentAt: Time
 
   """
-  The time spent displayed in seconds
+  The time spent displayed in seconds.
   """
   timeSpent: Int!
 
   """
-  The user that logged the time
+  The user that logged the time.
   """
   user: User!
 }
@@ -26844,6 +27266,11 @@ type User {
   avatarUrl: String
 
   """
+  Indicates if the user is a bot.
+  """
+  bot: Boolean!
+
+  """
   User email. Deprecated in 13.7: Use public_email.
   """
   email: String @deprecated(reason: "Use public_email. Deprecated in 13.7.")
@@ -27280,7 +27707,7 @@ type VulnerabilitiesCountByDay {
   critical: Int!
 
   """
-  Date for the count
+  Date for the count.
   """
   date: ISO8601Date!
 
@@ -27305,7 +27732,7 @@ type VulnerabilitiesCountByDay {
   medium: Int!
 
   """
-  Total number of vulnerabilities on a particular day
+  Total number of vulnerabilities on a particular day.
   """
   total: Int!
 
@@ -27320,17 +27747,17 @@ Represents the number of vulnerabilities for a particular severity on a particul
 """
 type VulnerabilitiesCountByDayAndSeverity {
   """
-  Number of vulnerabilities
+  Number of vulnerabilities.
   """
   count: Int
 
   """
-  Date for the count
+  Date for the count.
   """
   day: ISO8601Date
 
   """
-  Severity of the counted vulnerabilities
+  Severity of the counted vulnerabilities.
   """
   severity: VulnerabilitySeverity
 }
@@ -27415,7 +27842,7 @@ Represents a vulnerability
 """
 type Vulnerability implements Noteable {
   """
-  Timestamp of when the vulnerability state was changed to confirmed
+  Timestamp of when the vulnerability state was changed to confirmed.
   """
   confirmedAt: Time
 
@@ -27425,17 +27852,17 @@ type Vulnerability implements Noteable {
   confirmedBy: User
 
   """
-  Description of the vulnerability
+  Description of the vulnerability.
   """
   description: String
 
   """
-  Details of the vulnerability
+  Details of the vulnerability.
   """
   details: [VulnerabilityDetail!]!
 
   """
-  Timestamp of when the vulnerability was first detected
+  Timestamp of when the vulnerability was first detected.
   """
   detectedAt: Time!
 
@@ -27465,7 +27892,7 @@ type Vulnerability implements Noteable {
   ): DiscussionConnection!
 
   """
-  Timestamp of when the vulnerability state was changed to dismissed
+  Timestamp of when the vulnerability state was changed to dismissed.
   """
   dismissedAt: Time
 
@@ -27475,7 +27902,7 @@ type Vulnerability implements Noteable {
   dismissedBy: User
 
   """
-  List of external issue links related to the vulnerability
+  List of external issue links related to the vulnerability.
   """
   externalIssueLinks(
     """
@@ -27505,7 +27932,7 @@ type Vulnerability implements Noteable {
   hasSolutions: Boolean
 
   """
-  GraphQL ID of the vulnerability
+  GraphQL ID of the vulnerability.
   """
   id: ID!
 
@@ -27515,7 +27942,7 @@ type Vulnerability implements Noteable {
   identifiers: [VulnerabilityIdentifier!]!
 
   """
-  List of issue links related to the vulnerability
+  List of issue links related to the vulnerability.
   """
   issueLinks(
     """
@@ -27545,7 +27972,7 @@ type Vulnerability implements Noteable {
   ): VulnerabilityIssueLinkConnection!
 
   """
-  Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability
+  Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability.
   """
   location: VulnerabilityLocation
 
@@ -27585,7 +28012,7 @@ type Vulnerability implements Noteable {
   primaryIdentifier: VulnerabilityIdentifier
 
   """
-  The project on which the vulnerability was found
+  The project on which the vulnerability was found.
   """
   project: Project
 
@@ -27597,7 +28024,7 @@ type Vulnerability implements Noteable {
   reportType: VulnerabilityReportType
 
   """
-  Timestamp of when the vulnerability state was changed to resolved
+  Timestamp of when the vulnerability state was changed to resolved.
   """
   resolvedAt: Time
 
@@ -27607,7 +28034,7 @@ type Vulnerability implements Noteable {
   resolvedBy: User
 
   """
-  Indicates whether the vulnerability is fixed on the default branch or not
+  Indicates whether the vulnerability is fixed on the default branch or not.
   """
   resolvedOnDefaultBranch: Boolean!
 
@@ -27627,12 +28054,12 @@ type Vulnerability implements Noteable {
   state: VulnerabilityState
 
   """
-  Title of the vulnerability
+  Title of the vulnerability.
   """
   title: String
 
   """
-  Number of user notes attached to the vulnerability
+  Number of user notes attached to the vulnerability.
   """
   userNotesCount: Int!
 
@@ -27642,7 +28069,7 @@ type Vulnerability implements Noteable {
   userPermissions: VulnerabilityPermissions!
 
   """
-  URL to the vulnerability's details page
+  URL to the vulnerability's details page.
   """
   vulnerabilityPath: String
 }
@@ -28157,17 +28584,17 @@ Represents an external issue link of a vulnerability
 """
 type VulnerabilityExternalIssueLink {
   """
-  The external issue attached to the issue link
+  The external issue attached to the issue link.
   """
   externalIssue: ExternalIssue
 
   """
-  GraphQL ID of the external issue link
+  GraphQL ID of the external issue link.
   """
   id: VulnerabilitiesExternalIssueLinkID!
 
   """
-  Type of the external issue link
+  Type of the external issue link.
   """
   linkType: VulnerabilityExternalIssueLinkType!
 }
@@ -28323,22 +28750,22 @@ Represents a vulnerability identifier
 """
 type VulnerabilityIdentifier {
   """
-  External ID of the vulnerability identifier
+  External ID of the vulnerability identifier.
   """
   externalId: String
 
   """
-  External type of the vulnerability identifier
+  External type of the vulnerability identifier.
   """
   externalType: String
 
   """
-  Name of the vulnerability identifier
+  Name of the vulnerability identifier.
   """
   name: String
 
   """
-  URL of the vulnerability identifier
+  URL of the vulnerability identifier.
   """
   url: String
 }
@@ -28348,17 +28775,17 @@ Represents an issue link of a vulnerability
 """
 type VulnerabilityIssueLink {
   """
-  GraphQL ID of the vulnerability
+  GraphQL ID of the vulnerability.
   """
   id: ID!
 
   """
-  The issue attached to issue link
+  The issue attached to issue link.
   """
   issue: Issue!
 
   """
-  Type of the issue link
+  Type of the issue link.
   """
   linkType: VulnerabilityIssueLinkType!
 }
@@ -28416,17 +28843,17 @@ Represents the location of a vulnerability found by a container security scan
 """
 type VulnerabilityLocationContainerScanning {
   """
-  Dependency containing the vulnerability
+  Dependency containing the vulnerability.
   """
   dependency: VulnerableDependency
 
   """
-  Name of the vulnerable container image
+  Name of the vulnerable container image.
   """
   image: String
 
   """
-  Operating system that runs on the vulnerable container image
+  Operating system that runs on the vulnerable container image.
   """
   operatingSystem: String
 }
@@ -28436,32 +28863,32 @@ Represents the location of a vulnerability found by a Coverage Fuzzing scan
 """
 type VulnerabilityLocationCoverageFuzzing {
   """
-  Blob path to the vulnerable file
+  Blob path to the vulnerable file.
   """
   blobPath: String
 
   """
-  Number of the last relevant line in the vulnerable file
+  Number of the last relevant line in the vulnerable file.
   """
   endLine: String
 
   """
-  Path to the vulnerable file
+  Path to the vulnerable file.
   """
   file: String
 
   """
-  Number of the first relevant line in the vulnerable file
+  Number of the first relevant line in the vulnerable file.
   """
   startLine: String
 
   """
-  Class containing the vulnerability
+  Class containing the vulnerability.
   """
   vulnerableClass: String
 
   """
-  Method containing the vulnerability
+  Method containing the vulnerability.
   """
   vulnerableMethod: String
 }
@@ -28471,22 +28898,22 @@ Represents the location of a vulnerability found by a DAST scan
 """
 type VulnerabilityLocationDast {
   """
-  Domain name of the vulnerable request
+  Domain name of the vulnerable request.
   """
   hostname: String
 
   """
-  Query parameter for the URL on which the vulnerability occurred
+  Query parameter for the URL on which the vulnerability occurred.
   """
   param: String
 
   """
-  URL path and query string of the vulnerable request
+  URL path and query string of the vulnerable request.
   """
   path: String
 
   """
-  HTTP method of the vulnerable request
+  HTTP method of the vulnerable request.
   """
   requestMethod: String
 }
@@ -28496,17 +28923,17 @@ Represents the location of a vulnerability found by a dependency security scan
 """
 type VulnerabilityLocationDependencyScanning {
   """
-  Blob path to the vulnerable file
+  Blob path to the vulnerable file.
   """
   blobPath: String
 
   """
-  Dependency containing the vulnerability
+  Dependency containing the vulnerability.
   """
   dependency: VulnerableDependency
 
   """
-  Path to the vulnerable file
+  Path to the vulnerable file.
   """
   file: String
 }
@@ -28516,32 +28943,32 @@ Represents the location of a vulnerability found by a SAST scan
 """
 type VulnerabilityLocationSast {
   """
-  Blob path to the vulnerable file
+  Blob path to the vulnerable file.
   """
   blobPath: String
 
   """
-  Number of the last relevant line in the vulnerable file
+  Number of the last relevant line in the vulnerable file.
   """
   endLine: String
 
   """
-  Path to the vulnerable file
+  Path to the vulnerable file.
   """
   file: String
 
   """
-  Number of the first relevant line in the vulnerable file
+  Number of the first relevant line in the vulnerable file.
   """
   startLine: String
 
   """
-  Class containing the vulnerability
+  Class containing the vulnerability.
   """
   vulnerableClass: String
 
   """
-  Method containing the vulnerability
+  Method containing the vulnerability.
   """
   vulnerableMethod: String
 }
@@ -28551,32 +28978,32 @@ Represents the location of a vulnerability found by a secret detection scan
 """
 type VulnerabilityLocationSecretDetection {
   """
-  Blob path to the vulnerable file
+  Blob path to the vulnerable file.
   """
   blobPath: String
 
   """
-  Number of the last relevant line in the vulnerable file
+  Number of the last relevant line in the vulnerable file.
   """
   endLine: String
 
   """
-  Path to the vulnerable file
+  Path to the vulnerable file.
   """
   file: String
 
   """
-  Number of the first relevant line in the vulnerable file
+  Number of the first relevant line in the vulnerable file.
   """
   startLine: String
 
   """
-  Class containing the vulnerability
+  Class containing the vulnerability.
   """
   vulnerableClass: String
 
   """
-  Method containing the vulnerability
+  Method containing the vulnerability.
   """
   vulnerableMethod: String
 }
@@ -28719,22 +29146,22 @@ Represents a vulnerability scanner
 """
 type VulnerabilityScanner {
   """
-  External ID of the vulnerability scanner
+  External ID of the vulnerability scanner.
   """
   externalId: String
 
   """
-  Name of the vulnerability scanner
+  Name of the vulnerability scanner.
   """
   name: String
 
   """
-  Type of the vulnerability report
+  Type of the vulnerability report.
   """
   reportType: VulnerabilityReportType
 
   """
-  Vendor of the vulnerability scanner
+  Vendor of the vulnerability scanner.
   """
   vendor: String
 }
@@ -28891,12 +29318,12 @@ Represents a vulnerable dependency. Used in vulnerability location data
 """
 type VulnerableDependency {
   """
-  The package associated with the vulnerable dependency
+  The package associated with the vulnerable dependency.
   """
   package: VulnerablePackage
 
   """
-  The version of the vulnerable dependency
+  The version of the vulnerable dependency.
   """
   version: String
 }
@@ -28906,7 +29333,7 @@ Represents a vulnerable package. Used in vulnerability dependency data
 """
 type VulnerablePackage {
   """
-  The name of the vulnerable package
+  The name of the vulnerable package.
   """
   name: String
 }
@@ -28916,17 +29343,17 @@ Represents vulnerability letter grades with associated projects
 """
 type VulnerableProjectsByGrade {
   """
-  Number of projects within this grade
+  Number of projects within this grade.
   """
   count: Int!
 
   """
-  Grade based on the highest severity vulnerability present
+  Grade based on the highest severity vulnerability present.
   """
   grade: VulnerabilityGrade!
 
   """
-  Projects within this grade
+  Projects within this grade.
   """
   projects(
     """

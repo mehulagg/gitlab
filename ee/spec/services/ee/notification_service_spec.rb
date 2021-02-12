@@ -862,4 +862,18 @@ RSpec.describe EE::NotificationService, :mailer do
       end
     end
   end
+
+  context 'IncidentManagement::Oncall' do
+    describe '#notify_oncall_users_of_alert' do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:alert) { create(:alert_management_alert) }
+      let_it_be(:project) { alert.project }
+
+      it 'sends an email to the specified users' do
+        expect(Notify).to receive(:prometheus_alert_fired_email).with(project, user, alert).and_call_original
+
+        subject.notify_oncall_users_of_alert([user], alert)
+      end
+    end
+  end
 end

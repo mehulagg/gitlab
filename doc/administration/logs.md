@@ -93,6 +93,8 @@ which correspond to:
 
 1. `elasticsearch_calls`: total number of calls to Elasticsearch
 1. `elasticsearch_duration_s`: total time taken by Elasticsearch calls
+1. `elasticsearch_timed_out_count`: total number of calls to Elasticsearch that
+   timed out and therefore returned partial results
 
 ActionCable connection and subscription events are also logged to this file and they follow the same
 format above. The `method`, `path`, and `format` fields are not applicable, and are always empty.
@@ -413,11 +415,14 @@ For example:
 
 ## Sidekiq Logs
 
+NOTE:
+In Omnibus GitLab `12.10` or earlier, the Sidekiq log lives in `/var/log/gitlab/gitlab-rails/sidekiq.log`.
+
 For Omnibus installations, some Sidekiq logs reside in `/var/log/gitlab/sidekiq/current` and as follows.
 
 ### `sidekiq.log`
 
-This file lives in `/var/log/gitlab/gitlab-rails/sidekiq.log` for
+This file lives in `/var/log/gitlab/sidekiq/current` for
 Omnibus GitLab packages or in `/home/git/gitlab/log/sidekiq.log` for
 installations from source.
 

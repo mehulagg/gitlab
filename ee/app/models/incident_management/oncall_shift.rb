@@ -21,6 +21,10 @@ module IncidentManagement
 
       where("tstzrange(starts_at, ends_at, '[)') && tstzrange(?, ?, '[)')", starts_at, ends_at)
     end
+    scope :for_timestamp, -> (timestamp) do
+      where('incident_management_oncall_shifts.starts_at <= :timestamp AND '\
+            'incident_management_oncall_shifts.ends_at > :timestamp', timestamp: timestamp)
+    end
 
     private
 

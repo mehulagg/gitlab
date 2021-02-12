@@ -444,6 +444,13 @@ class ApplicationSetting < ApplicationRecord
             presence: true,
             numericality: { only_integer: true, greater_than: 0 }
 
+  validates :notes_create_limit,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
+  validates :notes_create_limit_allowlist,
+            length: { maximum: 100, message: N_('is too long (maximum is 100 entries)') },
+            allow_nil: false
+
   attr_encrypted :asset_proxy_secret_key,
                  mode: :per_attribute_iv,
                  key: Settings.attr_encrypted_db_key_base_truncated,
@@ -523,6 +530,10 @@ class ApplicationSetting < ApplicationRecord
   rescue ActiveRecord::RecordNotUnique
     # We already have an ApplicationSetting record, so just return it.
     current_without_cache
+  end
+
+  def self.find_or_create_without_cache
+    current_without_cache || create_from_defaults
   end
 
   # Due to the frequency with which settings are accessed, it is

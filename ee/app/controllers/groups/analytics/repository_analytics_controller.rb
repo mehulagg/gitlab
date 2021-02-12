@@ -10,7 +10,7 @@ class Groups::Analytics::RepositoryAnalyticsController < Groups::Analytics::Appl
   before_action only: [:show] do
     push_frontend_feature_flag(:usage_data_i_testing_group_code_coverage_project_click_total, @group, default_enabled: :yaml)
   end
-  track_redis_hll_event :show, name: 'i_testing_group_code_coverage_visit_total', feature: :usage_data_i_testing_group_code_coverage_visit_total, feature_default_enabled: true
+  track_redis_hll_event :show, name: 'i_testing_group_code_coverage_visit_total'
 
   def show
     track_event(**pageview_tracker_params)

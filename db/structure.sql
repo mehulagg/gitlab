@@ -9412,6 +9412,9 @@ CREATE TABLE application_settings (
     enforce_ssh_key_expiration boolean DEFAULT false NOT NULL,
     git_two_factor_session_expiry integer DEFAULT 15 NOT NULL,
     asset_proxy_allowlist text,
+    keep_latest_artifact boolean DEFAULT true NOT NULL,
+    notes_create_limit integer DEFAULT 300 NOT NULL,
+    notes_create_limit_allowlist text[] DEFAULT '{}'::text[] NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
@@ -10379,7 +10382,8 @@ CREATE TABLE ci_daily_build_group_report_results (
     ref_path text NOT NULL,
     group_name text NOT NULL,
     data jsonb NOT NULL,
-    default_branch boolean DEFAULT false NOT NULL
+    default_branch boolean DEFAULT false NOT NULL,
+    group_id bigint
 );
 
 CREATE SEQUENCE ci_daily_build_group_report_results_id_seq
@@ -14285,22 +14289,6 @@ CREATE TABLE namespace_limits (
     temporary_storage_increase_ends_on date
 );
 
-CREATE TABLE namespace_onboarding_actions (
-    id bigint NOT NULL,
-    namespace_id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    action smallint NOT NULL
-);
-
-CREATE SEQUENCE namespace_onboarding_actions_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE namespace_onboarding_actions_id_seq OWNED BY namespace_onboarding_actions.id;
-
 CREATE TABLE namespace_package_settings (
     namespace_id bigint NOT NULL,
     maven_duplicates_allowed boolean DEFAULT true NOT NULL,
@@ -15254,6 +15242,58 @@ CREATE TABLE packages_pypi_metadata (
     CONSTRAINT check_379019d5da CHECK ((char_length(required_python) <= 255))
 );
 
+CREATE TABLE packages_rubygems_metadata (
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    package_id bigint NOT NULL,
+    authors text,
+    files text,
+    summary text,
+    description text,
+    email text,
+    homepage text,
+    licenses text,
+    metadata text,
+    author text,
+    bindir text,
+    cert_chain text,
+    executables text,
+    extensions text,
+    extra_rdoc_files text,
+    platform text,
+    post_install_message text,
+    rdoc_options text,
+    require_paths text,
+    required_ruby_version text,
+    required_rubygems_version text,
+    requirements text,
+    rubygems_version text,
+    signing_key text,
+    CONSTRAINT check_0154a18c82 CHECK ((char_length(description) <= 1024)),
+    CONSTRAINT check_22814c771b CHECK ((char_length(email) <= 255)),
+    CONSTRAINT check_242293030e CHECK ((char_length(extensions) <= 255)),
+    CONSTRAINT check_27619a7922 CHECK ((char_length(rubygems_version) <= 255)),
+    CONSTRAINT check_3d1b6f3a39 CHECK ((char_length(post_install_message) <= 255)),
+    CONSTRAINT check_545f7606f9 CHECK ((char_length(required_rubygems_version) <= 255)),
+    CONSTRAINT check_5988451714 CHECK ((char_length(executables) <= 255)),
+    CONSTRAINT check_5f9c84ea17 CHECK ((char_length(platform) <= 255)),
+    CONSTRAINT check_64f1cecf05 CHECK ((char_length(requirements) <= 255)),
+    CONSTRAINT check_6ac7043c50 CHECK ((char_length(extra_rdoc_files) <= 255)),
+    CONSTRAINT check_6ff3abe325 CHECK ((char_length(cert_chain) <= 255)),
+    CONSTRAINT check_7cb01436df CHECK ((char_length(licenses) <= 255)),
+    CONSTRAINT check_8be21d92e7 CHECK ((char_length(summary) <= 1024)),
+    CONSTRAINT check_946cb96acb CHECK ((char_length(homepage) <= 255)),
+    CONSTRAINT check_9824fc9efc CHECK ((char_length(bindir) <= 255)),
+    CONSTRAINT check_994b68eb64 CHECK ((char_length(authors) <= 255)),
+    CONSTRAINT check_9d42fa48ae CHECK ((char_length(signing_key) <= 255)),
+    CONSTRAINT check_b0f4f8c853 CHECK ((char_length(files) <= 255)),
+    CONSTRAINT check_b7b296b420 CHECK ((char_length(author) <= 255)),
+    CONSTRAINT check_bf16b21a47 CHECK ((char_length(rdoc_options) <= 255)),
+    CONSTRAINT check_ca641a3354 CHECK ((char_length(required_ruby_version) <= 255)),
+    CONSTRAINT check_ea02f4800f CHECK ((char_length(metadata) <= 255)),
+    CONSTRAINT check_f76bad1a9a CHECK ((char_length(require_paths) <= 255))
+);
+
 CREATE TABLE packages_tags (
     id bigint NOT NULL,
     package_id integer NOT NULL,
@@ -15465,7 +15505,9 @@ CREATE TABLE plan_limits (
     project_feature_flags integer DEFAULT 200 NOT NULL,
     ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL,
     ci_pipeline_deployments integer DEFAULT 500 NOT NULL,
-    pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL
+    pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL,
+    daily_invites integer DEFAULT 0 NOT NULL,
+    rubygems_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -18086,6 +18128,24 @@ CREATE SEQUENCE vulnerability_feedback_id_seq
 
 ALTER SEQUENCE vulnerability_feedback_id_seq OWNED BY vulnerability_feedback.id;
 
+CREATE TABLE vulnerability_finding_fingerprints (
+    id bigint NOT NULL,
+    finding_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    algorithm_type integer NOT NULL,
+    fingerprint_sha256 bytea NOT NULL
+);
+
+CREATE SEQUENCE vulnerability_finding_fingerprints_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vulnerability_finding_fingerprints_id_seq OWNED BY vulnerability_finding_fingerprints.id;
+
 CREATE TABLE vulnerability_finding_links (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -19021,8 +19081,6 @@ ALTER TABLE ONLY metrics_users_starred_dashboards ALTER COLUMN id SET DEFAULT ne
 
 ALTER TABLE ONLY milestones ALTER COLUMN id SET DEFAULT nextval('milestones_id_seq'::regclass);
 
-ALTER TABLE ONLY namespace_onboarding_actions ALTER COLUMN id SET DEFAULT nextval('namespace_onboarding_actions_id_seq'::regclass);
-
 ALTER TABLE ONLY namespace_statistics ALTER COLUMN id SET DEFAULT nextval('namespace_statistics_id_seq'::regclass);
 
 ALTER TABLE ONLY namespaces ALTER COLUMN id SET DEFAULT nextval('namespaces_id_seq'::regclass);
@@ -19326,6 +19384,8 @@ ALTER TABLE ONLY vulnerability_exports ALTER COLUMN id SET DEFAULT nextval('vuln
 ALTER TABLE ONLY vulnerability_external_issue_links ALTER COLUMN id SET DEFAULT nextval('vulnerability_external_issue_links_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_feedback ALTER COLUMN id SET DEFAULT nextval('vulnerability_feedback_id_seq'::regclass);
+
+ALTER TABLE ONLY vulnerability_finding_fingerprints ALTER COLUMN id SET DEFAULT nextval('vulnerability_finding_fingerprints_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_finding_links ALTER COLUMN id SET DEFAULT nextval('vulnerability_finding_links_id_seq'::regclass);
 
@@ -20365,9 +20425,6 @@ ALTER TABLE ONLY namespace_aggregation_schedules
 ALTER TABLE ONLY namespace_limits
     ADD CONSTRAINT namespace_limits_pkey PRIMARY KEY (namespace_id);
 
-ALTER TABLE ONLY namespace_onboarding_actions
-    ADD CONSTRAINT namespace_onboarding_actions_pkey PRIMARY KEY (id);
-
 ALTER TABLE ONLY namespace_package_settings
     ADD CONSTRAINT namespace_package_settings_pkey PRIMARY KEY (namespace_id);
 
@@ -20508,6 +20565,9 @@ ALTER TABLE ONLY packages_packages
 
 ALTER TABLE ONLY packages_pypi_metadata
     ADD CONSTRAINT packages_pypi_metadata_pkey PRIMARY KEY (package_id);
+
+ALTER TABLE ONLY packages_rubygems_metadata
+    ADD CONSTRAINT packages_rubygems_metadata_pkey PRIMARY KEY (package_id);
 
 ALTER TABLE ONLY packages_tags
     ADD CONSTRAINT packages_tags_pkey PRIMARY KEY (id);
@@ -20899,6 +20959,9 @@ ALTER TABLE ONLY vulnerability_external_issue_links
 ALTER TABLE ONLY vulnerability_feedback
     ADD CONSTRAINT vulnerability_feedback_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY vulnerability_finding_fingerprints
+    ADD CONSTRAINT vulnerability_finding_fingerprints_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY vulnerability_finding_links
     ADD CONSTRAINT vulnerability_finding_links_pkey PRIMARY KEY (id);
 
@@ -21236,6 +21299,10 @@ CREATE INDEX idx_security_scans_on_scan_type ON security_scans USING btree (scan
 
 CREATE UNIQUE INDEX idx_serverless_domain_cluster_on_clusters_applications_knative ON serverless_domain_cluster USING btree (clusters_applications_knative_id);
 
+CREATE UNIQUE INDEX idx_vuln_fingerprints_on_occurrences_id_and_fingerprint ON vulnerability_finding_fingerprints USING btree (finding_id, fingerprint_sha256);
+
+CREATE UNIQUE INDEX idx_vuln_fingerprints_uniqueness ON vulnerability_finding_fingerprints USING btree (finding_id, algorithm_type, fingerprint_sha256);
+
 CREATE UNIQUE INDEX idx_vulnerability_ext_issue_links_on_vulne_id_and_ext_issue ON vulnerability_external_issue_links USING btree (vulnerability_id, external_type, external_project_key, external_issue_key);
 
 CREATE UNIQUE INDEX idx_vulnerability_ext_issue_links_on_vulne_id_and_link_type ON vulnerability_external_issue_links USING btree (vulnerability_id, link_type) WHERE (link_type = 1);
@@ -21545,6 +21612,8 @@ CREATE INDEX index_ci_builds_on_user_id_and_created_at_and_type_eq_ci_build ON c
 CREATE INDEX index_ci_builds_project_id_and_status_for_live_jobs_partial2 ON ci_builds USING btree (project_id, status) WHERE (((type)::text = 'Ci::Build'::text) AND ((status)::text = ANY (ARRAY[('running'::character varying)::text, ('pending'::character varying)::text, ('created'::character varying)::text])));
 
 CREATE UNIQUE INDEX index_ci_builds_runner_session_on_build_id ON ci_builds_runner_session USING btree (build_id);
+
+CREATE INDEX index_ci_daily_build_group_report_results_on_group_id ON ci_daily_build_group_report_results USING btree (group_id);
 
 CREATE INDEX index_ci_daily_build_group_report_results_on_last_pipeline_id ON ci_daily_build_group_report_results USING btree (last_pipeline_id);
 
@@ -22529,8 +22598,6 @@ CREATE INDEX index_mr_metrics_on_target_project_id_merged_at_nulls_last ON merge
 CREATE INDEX index_mr_metrics_on_target_project_id_merged_at_time_to_merge ON merge_request_metrics USING btree (target_project_id, merged_at, created_at) WHERE (merged_at > created_at);
 
 CREATE UNIQUE INDEX index_namespace_aggregation_schedules_on_namespace_id ON namespace_aggregation_schedules USING btree (namespace_id);
-
-CREATE INDEX index_namespace_onboarding_actions_on_namespace_id ON namespace_onboarding_actions USING btree (namespace_id);
 
 CREATE UNIQUE INDEX index_namespace_root_storage_statistics_on_namespace_id ON namespace_root_storage_statistics USING btree (namespace_id);
 
@@ -23537,6 +23604,8 @@ CREATE INDEX index_vulnerability_feedback_on_issue_id_not_null ON vulnerability_
 CREATE INDEX index_vulnerability_feedback_on_merge_request_id ON vulnerability_feedback USING btree (merge_request_id);
 
 CREATE INDEX index_vulnerability_feedback_on_pipeline_id ON vulnerability_feedback USING btree (pipeline_id);
+
+CREATE INDEX index_vulnerability_finding_fingerprints_on_finding_id ON vulnerability_finding_fingerprints USING btree (finding_id);
 
 CREATE INDEX index_vulnerability_findings_remediations_on_remediation_id ON vulnerability_findings_remediations USING btree (vulnerability_remediation_id);
 
@@ -24639,6 +24708,9 @@ ALTER TABLE ONLY system_note_metadata
 ALTER TABLE ONLY vulnerability_remediations
     ADD CONSTRAINT fk_fc61a535a0 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_daily_build_group_report_results
+    ADD CONSTRAINT fk_fd1858fefd FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY merge_requests
     ADD CONSTRAINT fk_fd82eae0b9 FOREIGN KEY (head_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE SET NULL;
 
@@ -25064,9 +25136,6 @@ ALTER TABLE ONLY merge_request_assignees
 
 ALTER TABLE ONLY packages_dependency_links
     ADD CONSTRAINT fk_rails_4437bf4070 FOREIGN KEY (dependency_id) REFERENCES packages_dependencies(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY namespace_onboarding_actions
-    ADD CONSTRAINT fk_rails_4504f6875a FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY project_auto_devops
     ADD CONSTRAINT fk_rails_45436b12b2 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -25520,6 +25589,9 @@ ALTER TABLE ONLY scim_identities
 
 ALTER TABLE ONLY packages_debian_project_distributions
     ADD CONSTRAINT fk_rails_94b95e1f84 FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY packages_rubygems_metadata
+    ADD CONSTRAINT fk_rails_95a3f5ce78 FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY packages_pypi_metadata
     ADD CONSTRAINT fk_rails_9698717cdd FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE CASCADE;
@@ -26057,6 +26129,9 @@ ALTER TABLE ONLY merge_trains
 
 ALTER TABLE ONLY ci_runner_namespaces
     ADD CONSTRAINT fk_rails_f9d9ed3308 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY vulnerability_finding_fingerprints
+    ADD CONSTRAINT fk_rails_fa411253b2 FOREIGN KEY (finding_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY requirements_management_test_reports
     ADD CONSTRAINT fk_rails_fb3308ad55 FOREIGN KEY (requirement_id) REFERENCES requirements(id) ON DELETE CASCADE;

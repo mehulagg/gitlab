@@ -22,6 +22,7 @@ RSpec.describe PolicyHelper do
       create_agent_help_path: kind_of(String),
       environments_endpoint: kind_of(String),
       project_path: project.full_path,
+      project_id: project.id,
       threat_monitoring_path: kind_of(String)
     }
   end

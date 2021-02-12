@@ -1027,9 +1027,6 @@ msgstr ""
 msgid "+ %{numberOfHiddenAssignees} more"
 msgstr ""
 
-msgid "+ %{numberOfHiddenReviewers} more"
-msgstr ""
-
 msgid "+%d more"
 msgid_plural "+%d more"
 msgstr[0] ""
@@ -1391,6 +1388,102 @@ msgid "API Help"
 msgstr ""
 
 msgid "API Token"
+msgstr ""
+
+msgid "APIFuzzing|API Fuzzing Configuration"
+msgstr ""
+
+msgid "APIFuzzing|Authentication is handled by providing HTTP basic authentication token as a header or cookie. %{linkStart}More information%{linkEnd}."
+msgstr ""
+
+msgid "APIFuzzing|Base URL of API fuzzing target."
+msgstr ""
+
+msgid "APIFuzzing|Choose a method"
+msgstr ""
+
+msgid "APIFuzzing|Choose a profile"
+msgstr ""
+
+msgid "APIFuzzing|Code snippet for the API Fuzzing configuration"
+msgstr ""
+
+msgid "APIFuzzing|Copy code and open .gitlab-ci.yml file"
+msgstr ""
+
+msgid "APIFuzzing|Copy code only"
+msgstr ""
+
+msgid "APIFuzzing|Customize common API fuzzing settings to suit your requirements. For details of more advanced configuration options, see the %{docsLinkStart}GitLab API Fuzzing documentation%{docsLinkEnd}."
+msgstr ""
+
+msgid "APIFuzzing|Enable authentication"
+msgstr ""
+
+msgid "APIFuzzing|Ex: $TestPassword"
+msgstr ""
+
+msgid "APIFuzzing|Ex: $TestUsername"
+msgstr ""
+
+msgid "APIFuzzing|Ex: Project_Test/File/example_fuzz.har"
+msgstr ""
+
+msgid "APIFuzzing|Ex: Project_Test/File/example_fuzz.json"
+msgstr ""
+
+msgid "APIFuzzing|Generate code snippet"
+msgstr ""
+
+msgid "APIFuzzing|HAR files may contain sensitive information such as authentication tokens, API keys, and session cookies. We recommend that you review the HAR files' contents before adding them to a repository."
+msgstr ""
+
+msgid "APIFuzzing|Instead of entering the password directly, enter the key of the CI variable set to the password."
+msgstr ""
+
+msgid "APIFuzzing|Instead of entering the username directly, enter the key of the CI variable set to the username."
+msgstr ""
+
+msgid "APIFuzzing|Make sure your credentials are secured"
+msgstr ""
+
+msgid "APIFuzzing|Password for basic authentication"
+msgstr ""
+
+msgid "APIFuzzing|Scan mode"
+msgstr ""
+
+msgid "APIFuzzing|Scan profile"
+msgstr ""
+
+msgid "APIFuzzing|Show code snippet for the profile"
+msgstr ""
+
+msgid "APIFuzzing|Target URL"
+msgstr ""
+
+msgid "APIFuzzing|The configuration could not be saved, please try again later."
+msgstr ""
+
+msgid "APIFuzzing|There are two ways to perform scans."
+msgstr ""
+
+msgid "APIFuzzing|To prevent a security leak, authentication info must be added as a %{ciVariablesLinkStart}CI variable%{ciVariablesLinkEnd}. A user with maintainer access rights can manage CI variables in the %{ciSettingsLinkStart}Settings%{ciSettingsLinkEnd} area. We detected that you are not a maintainer. Commit your changes and assign them to a maintainer to update the credentials before merging."
+msgstr ""
+
+msgid "APIFuzzing|To prevent a security leak, authentication info must be added as a %{ciVariablesLinkStart}CI variable%{ciVariablesLinkEnd}. As a user with maintainer access rights, you can manage CI variables in the %{ciSettingsLinkStart}Settings%{ciSettingsLinkEnd} area."
+msgstr ""
+
+msgid "APIFuzzing|Use this tool to generate API fuzzing configuration YAML to copy into your .gitlab-ci.yml file. This tool does not reflect or update your .gitlab-ci.yml file automatically."
+msgstr ""
+
+msgid "APIFuzzing|Username for basic authentication"
+msgstr ""
+
+msgid "APIFuzzing|We recommend that you review the JSON specifications file before adding it to a repository."
+msgstr ""
+
+msgid "APIFuzzing|You may need a maintainer's help to secure your credentials."
 msgstr ""
 
 msgid "AWS Access Key"
@@ -1830,6 +1923,9 @@ msgstr ""
 msgid "AddContextCommits|Add/remove"
 msgstr ""
 
+msgid "AddMember|Invite limit of %{daily_invites} per day exceeded"
+msgstr ""
+
 msgid "AddMember|No users specified."
 msgstr ""
 
@@ -2070,6 +2166,9 @@ msgstr ""
 msgid "AdminSettings|Integrations configured here will automatically apply to all projects on this instance."
 msgstr ""
 
+msgid "AdminSettings|Keep the latest artifacts for all jobs in the latest successful pipelines"
+msgstr ""
+
 msgid "AdminSettings|Maximum duration of a session for Git operations when 2FA is enabled."
 msgstr ""
 
@@ -2107,6 +2206,9 @@ msgid "AdminSettings|Some settings have moved"
 msgstr ""
 
 msgid "AdminSettings|Specify a domain to use by default for every project's Auto Review Apps and Auto Deploy stages."
+msgstr ""
+
+msgid "AdminSettings|The latest artifacts for all jobs in the most recent successful pipelines in each project are stored and do not expire."
 msgstr ""
 
 msgid "AdminSettings|The required pipeline configuration can be selected from the %{code_start}gitlab-ci%{code_end} directory inside of the configured %{link_start}instance template repository%{link_end} or from GitLab provided configurations."
@@ -2370,6 +2472,12 @@ msgstr ""
 msgid "AdminUsers|Unblock user %{username}?"
 msgstr ""
 
+msgid "AdminUsers|Unlock"
+msgstr ""
+
+msgid "AdminUsers|Unlock user %{username}?"
+msgstr ""
+
 msgid "AdminUsers|User will not be able to access git repositories"
 msgstr ""
 
@@ -2622,12 +2730,6 @@ msgid "AlertMappingBuilder|Select key"
 msgstr ""
 
 msgid "AlertMappingBuilder|Title is a required field for alerts in GitLab. Should the payload field you specified not be available, specifiy which field we should use instead. "
-msgstr ""
-
-msgid "AlertService|Review your external service's documentation to learn where to provide this information to your external service, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint."
-msgstr ""
-
-msgid "AlertService|You must provide this URL and authorization key to authorize an external service to send alerts to GitLab. You can provide this URL and key to multiple services. After configuring an external service, alerts from your service will display on the GitLab %{linkStart}Alerts%{linkEnd} page."
 msgstr ""
 
 msgid "AlertSettings|1. Select integration type"
@@ -4130,6 +4232,9 @@ msgid "Authenticated web request rate limit"
 msgstr ""
 
 msgid "Authenticating"
+msgstr ""
+
+msgid "Authentication"
 msgstr ""
 
 msgid "Authentication Failure"
@@ -7094,6 +7199,9 @@ msgstr ""
 msgid "Code"
 msgstr ""
 
+msgid "Code Coverage: %{coveragePercentage}"
+msgstr ""
+
 msgid "Code Coverage: %{coveragePercentage}%{percentSymbol}"
 msgstr ""
 
@@ -7396,6 +7504,12 @@ msgstr ""
 msgid "Compliance Dashboard"
 msgstr ""
 
+msgid "Compliance framework"
+msgstr ""
+
+msgid "Compliance framework  (optional)"
+msgstr ""
+
 msgid "Compliance framework (optional)"
 msgstr ""
 
@@ -7498,6 +7612,9 @@ msgstr ""
 msgid "Configure limit for issues created per minute by web and API requests."
 msgstr ""
 
+msgid "Configure limit for notes created per minute by web and API requests."
+msgstr ""
+
 msgid "Configure limits for Project/Group Import/Export."
 msgstr ""
 
@@ -7550,9 +7667,6 @@ msgid "ConfluenceService|The URL of the Confluence Workspace"
 msgstr ""
 
 msgid "ConfluenceService|Your GitLab Wiki can be accessed here: %{wiki_link}. To re-enable your GitLab Wiki, disable this integration"
-msgstr ""
-
-msgid "Congratulations! You have enabled Two-factor Authentication!"
 msgstr ""
 
 msgid "Congratulations, your free trial is activated."
@@ -7736,13 +7850,7 @@ msgstr ""
 msgid "ContainerRegistry|Expiration policy will run in %{time}"
 msgstr ""
 
-msgid "ContainerRegistry|Filter by name"
-msgstr ""
-
 msgid "ContainerRegistry|If you are not already logged in, you need to authenticate to the Container Registry by using your GitLab username and password. If you have %{twofaDocLinkStart}Two-Factor Authentication%{twofaDocLinkEnd} enabled, use a %{personalAccessTokensDocLinkStart}Personal Access Token%{personalAccessTokensDocLinkEnd} instead of a password."
-msgstr ""
-
-msgid "ContainerRegistry|Image Repositories"
 msgstr ""
 
 msgid "ContainerRegistry|Image repository deletion failed"
@@ -8454,6 +8562,9 @@ msgstr ""
 msgid "CreateValueStreamForm|All default stages are currently visible"
 msgstr ""
 
+msgid "CreateValueStreamForm|Code stage start"
+msgstr ""
+
 msgid "CreateValueStreamForm|Create from default template"
 msgstr ""
 
@@ -8481,6 +8592,9 @@ msgstr ""
 msgid "CreateValueStreamForm|Enter value stream name"
 msgstr ""
 
+msgid "CreateValueStreamForm|Issue stage end"
+msgstr ""
+
 msgid "CreateValueStreamForm|Maximum length %{maxLength} characters"
 msgstr ""
 
@@ -8488,6 +8602,9 @@ msgid "CreateValueStreamForm|Name is required"
 msgstr ""
 
 msgid "CreateValueStreamForm|New stage"
+msgstr ""
+
+msgid "CreateValueStreamForm|Plan stage start"
 msgstr ""
 
 msgid "CreateValueStreamForm|Please select a start event first"
@@ -8658,13 +8775,13 @@ msgstr ""
 msgid "CurrentUser|Buy Pipeline minutes"
 msgstr ""
 
+msgid "CurrentUser|Edit profile"
+msgstr ""
+
 msgid "CurrentUser|One of your groups is running out"
 msgstr ""
 
-msgid "CurrentUser|Profile"
-msgstr ""
-
-msgid "CurrentUser|Settings"
+msgid "CurrentUser|Preferences"
 msgstr ""
 
 msgid "CurrentUser|Start an Ultimate trial"
@@ -8734,6 +8851,9 @@ msgid "Customer Portal"
 msgstr ""
 
 msgid "Customizable by an administrator."
+msgstr ""
+
+msgid "Customizable by owners."
 msgstr ""
 
 msgid "Customize colors"
@@ -9111,6 +9231,9 @@ msgid "DastProfiles|Profile name"
 msgstr ""
 
 msgid "DastProfiles|Request headers"
+msgstr ""
+
+msgid "DastProfiles|Run scan"
 msgstr ""
 
 msgid "DastProfiles|Run the AJAX spider, in addition to the traditional spider, to crawl the target site."
@@ -11844,6 +11967,9 @@ msgstr ""
 msgid "Evidence collection"
 msgstr ""
 
+msgid "Ex: Example.com"
+msgstr ""
+
 msgid "Exactly one of %{attributes} is required"
 msgstr ""
 
@@ -12289,9 +12415,6 @@ msgid "Failed to update issue status"
 msgstr ""
 
 msgid "Failed to update issues, please try again."
-msgstr ""
-
-msgid "Failed to update tag!"
 msgstr ""
 
 msgid "Failed to update the Canary Ingress."
@@ -12923,7 +13046,7 @@ msgstr ""
 msgid "Free Trial"
 msgstr ""
 
-msgid "Free Trial of GitLab.com Gold"
+msgid "Free Trial of GitLab.com Ultimate"
 msgstr ""
 
 msgid "Freeze end"
@@ -14504,6 +14627,12 @@ msgstr ""
 msgid "Guideline"
 msgstr ""
 
+msgid "HAR (HTTP Archive)"
+msgstr ""
+
+msgid "HAR file path"
+msgstr ""
+
 msgid "HTTP Basic: Access denied\\nYou must use a personal access token with 'api' scope for Git over HTTP.\\nYou can generate one at %{profile_personal_access_tokens_url}"
 msgstr ""
 
@@ -15732,9 +15861,6 @@ msgstr ""
 msgid "Install GitLab Runner on Kubernetes"
 msgstr ""
 
-msgid "Install a soft token authenticator like %{free_otp_link} or Google Authenticator from your application repository and use that app to scan this QR code. More information is available in the %{help_link_start}documentation%{help_link_end}."
-msgstr ""
-
 msgid "Install on clusters"
 msgstr ""
 
@@ -16667,6 +16793,9 @@ msgstr ""
 msgid "JiraService|Jira workflow transition IDs"
 msgstr ""
 
+msgid "JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}."
+msgstr ""
+
 msgid "JiraService|Open Jira"
 msgstr ""
 
@@ -16689,6 +16818,9 @@ msgid "JiraService|Sign in to GitLab.com to get started."
 msgstr ""
 
 msgid "JiraService|This feature requires a Premium plan."
+msgstr ""
+
+msgid "JiraService|This issue is synchronized with Jira"
 msgstr ""
 
 msgid "JiraService|Use a password for server version and an API token for cloud version"
@@ -17559,6 +17691,9 @@ msgstr ""
 msgid "List of all merge commits"
 msgstr ""
 
+msgid "List of users to be excluded from the limit"
+msgstr ""
+
 msgid "List options"
 msgstr ""
 
@@ -17956,6 +18091,9 @@ msgid "Max access level"
 msgstr ""
 
 msgid "Max file size is 200 KB."
+msgstr ""
+
+msgid "Max requests per minute per user"
 msgstr ""
 
 msgid "Max role"
@@ -19840,6 +19978,9 @@ msgstr ""
 msgid "No commits present here"
 msgstr ""
 
+msgid "No compliance frameworks are in use."
+msgstr ""
+
 msgid "No compliance frameworks are in use. Create one using the GraphQL API."
 msgstr ""
 
@@ -20137,13 +20278,19 @@ msgstr ""
 msgid "NoteForm|Note"
 msgstr ""
 
+msgid "Notes Rate Limits"
+msgstr ""
+
 msgid "Notes|Are you sure you want to cancel creating this comment?"
 msgstr ""
 
 msgid "Notes|Collapse replies"
 msgstr ""
 
-msgid "Notes|Private comments are accessible by internal staff only"
+msgid "Notes|Confidential comments are only visible to project members"
+msgstr ""
+
+msgid "Notes|Make this comment confidential"
 msgstr ""
 
 msgid "Notes|Show all activity"
@@ -20156,6 +20303,9 @@ msgid "Notes|Show history only"
 msgstr ""
 
 msgid "Notes|This comment has changed since you started editing, please review the %{open_link}updated comment%{close_link} to ensure information is not lost"
+msgstr ""
+
+msgid "Notes|This comment is confidential and only visible to project members"
 msgstr ""
 
 msgid "Notes|You're only seeing %{boldStart}other activity%{boldEnd} in the feed. To add a comment, switch to one of the following options."
@@ -20652,6 +20802,12 @@ msgstr ""
 msgid "Open"
 msgstr ""
 
+msgid "Open API"
+msgstr ""
+
+msgid "Open API specification file path"
+msgstr ""
+
 msgid "Open Selection"
 msgstr ""
 
@@ -20790,9 +20946,6 @@ msgstr ""
 msgid "Outdent"
 msgstr ""
 
-msgid "Overall Activity"
-msgstr ""
-
 msgid "Overridden"
 msgstr ""
 
@@ -20845,6 +20998,9 @@ msgid "Package type must be NuGet"
 msgstr ""
 
 msgid "Package type must be PyPi"
+msgstr ""
+
+msgid "Package type must be RubyGems"
 msgstr ""
 
 msgid "PackageRegistry|%{boldStart}Allow duplicates%{boldEnd} - Packages with the same name and version are accepted."
@@ -24687,6 +24843,12 @@ msgstr ""
 msgid "RepositoriesAnalytics|Average Coverage by Job"
 msgstr ""
 
+msgid "RepositoriesAnalytics|Average coverage"
+msgstr ""
+
+msgid "RepositoriesAnalytics|Average test coverage last 30 days"
+msgstr ""
+
 msgid "RepositoriesAnalytics|Coverage"
 msgstr ""
 
@@ -24712,6 +24874,12 @@ msgid "RepositoriesAnalytics|Last Update"
 msgstr ""
 
 msgid "RepositoriesAnalytics|Latest test coverage results"
+msgstr ""
+
+msgid "RepositoriesAnalytics|No test coverage to display"
+msgstr ""
+
+msgid "RepositoriesAnalytics|Overall activity"
 msgstr ""
 
 msgid "RepositoriesAnalytics|Please select a project or multiple projects to display their most recent test coverage data."
@@ -24941,9 +25109,6 @@ msgid "Reset template"
 msgstr ""
 
 msgid "Reset to project defaults"
-msgstr ""
-
-msgid "Resetting the authorization key for this project will require updating the authorization key in every alert source it is enabled in."
 msgstr ""
 
 msgid "Resetting the authorization key will invalidate the previous key. Existing alert configurations will need to be updated with the new key."
@@ -25788,10 +25953,16 @@ msgstr ""
 msgid "SecurityConfiguration|Available for on-demand DAST"
 msgstr ""
 
+msgid "SecurityConfiguration|Available with %{linkStart}upgrade or free trial%{linkEnd}"
+msgstr ""
+
 msgid "SecurityConfiguration|By default, all analyzers are applied in order to cover all languages across your project, and only run if the language is detected in the Merge Request."
 msgstr ""
 
 msgid "SecurityConfiguration|Configure"
+msgstr ""
+
+msgid "SecurityConfiguration|Configure via Merge Request"
 msgstr ""
 
 msgid "SecurityConfiguration|Could not retrieve configuration data. Please refresh the page, or try again later."
@@ -25831,6 +26002,9 @@ msgid "SecurityConfiguration|SAST Analyzers"
 msgstr ""
 
 msgid "SecurityConfiguration|SAST Configuration"
+msgstr ""
+
+msgid "SecurityConfiguration|SAST merge request creation mutation failed"
 msgstr ""
 
 msgid "SecurityConfiguration|Security Control"
@@ -26007,13 +26181,13 @@ msgstr ""
 msgid "SecurityReports|Severity"
 msgstr ""
 
+msgid "SecurityReports|Sometimes a scanner can't determine a finding's severity. Those findings may still be a potential source of risk though. Please review these manually."
+msgstr ""
+
 msgid "SecurityReports|Sorry, your filter produced no results"
 msgstr ""
 
 msgid "SecurityReports|Status"
-msgstr ""
-
-msgid "SecurityReports|The rating \"unknown\" indicates that the underlying scanner doesn’t contain or provide a severity rating."
 msgstr ""
 
 msgid "SecurityReports|The security dashboard displays the latest security findings for projects you wish to monitor. Add projects to your group to view their vulnerabilities here."
@@ -26234,7 +26408,7 @@ msgstr ""
 msgid "Select projects"
 msgstr ""
 
-msgid "Select required regulatory standard"
+msgid "Select required regulatory standard."
 msgstr ""
 
 msgid "Select reviewer(s)"
@@ -28567,6 +28741,9 @@ msgstr ""
 msgid "Terraform|Locked by %{user} %{timeAgo}"
 msgstr ""
 
+msgid "Terraform|Locking state"
+msgstr ""
+
 msgid "Terraform|Name"
 msgstr ""
 
@@ -28598,6 +28775,9 @@ msgid "Terraform|Unknown User"
 msgstr ""
 
 msgid "Terraform|Unlock"
+msgstr ""
+
+msgid "Terraform|Unlocking state"
 msgstr ""
 
 msgid "Terraform|You are about to remove the State file %{name}. This will permanently delete all the State versions and history. The infrastructure provisioned previously\twill remain intact, only the state file with all its versions are to be removed. This action is non-revertible."
@@ -29320,7 +29500,7 @@ msgstr ""
 msgid "There was a problem fetching project users."
 msgstr ""
 
-msgid "There was a problem fetching the keep latest artifact setting."
+msgid "There was a problem fetching the keep latest artifacts setting."
 msgstr ""
 
 msgid "There was a problem fetching users."
@@ -29335,7 +29515,7 @@ msgstr ""
 msgid "There was a problem sending the confirmation email"
 msgstr ""
 
-msgid "There was a problem updating the keep latest artifact setting."
+msgid "There was a problem updating the keep latest artifacts setting."
 msgstr ""
 
 msgid "There was an error %{message} todo."
@@ -29381,6 +29561,9 @@ msgid "There was an error fetching the Geo Settings"
 msgstr ""
 
 msgid "There was an error fetching the Node's Groups"
+msgstr ""
+
+msgid "There was an error fetching the Search Counts"
 msgstr ""
 
 msgid "There was an error fetching the deploy freezes."
@@ -29687,6 +29870,9 @@ msgid "This epic already has the maximum number of child epics."
 msgstr ""
 
 msgid "This epic does not exist or you don't have sufficient permission."
+msgstr ""
+
+msgid "This feature is disabled at the instance level."
 msgstr ""
 
 msgid "This feature requires local storage to be enabled"
@@ -31294,9 +31480,6 @@ msgstr ""
 msgid "Update failed"
 msgstr ""
 
-msgid "Update failed. Please try again."
-msgstr ""
-
 msgid "Update it"
 msgstr ""
 
@@ -32513,6 +32696,9 @@ msgstr ""
 msgid "We heard back from your device. You have been authenticated."
 msgstr ""
 
+msgid "We recommend cloud-based mobile authenticator apps such as Authy, Duo Mobile, and LastPass. They can restore access if you lose your hardware device."
+msgstr ""
+
 msgid "We recommend that you buy more Pipeline minutes to avoid any interruption of service."
 msgstr ""
 
@@ -33427,6 +33613,9 @@ msgstr ""
 msgid "You have reached your project limit"
 msgstr ""
 
+msgid "You have set up 2FA for your account! If you lose access to your 2FA device, you can use your recovery codes to access your account. Alternatively, if you upload an SSH key, you can %{anchorOpen}use that key to generate additional recovery codes%{anchorClose}."
+msgstr ""
+
 msgid "You have successfully purchased a %{plan} plan subscription for %{seats}. You’ll receive a receipt via email."
 msgstr ""
 
@@ -34123,6 +34312,9 @@ msgid "ciReport|Coverage Fuzzing"
 msgstr ""
 
 msgid "ciReport|Coverage fuzzing"
+msgstr ""
+
+msgid "ciReport|Create Jira issue"
 msgstr ""
 
 msgid "ciReport|Create a merge request to implement this solution, or download and apply the patch manually."

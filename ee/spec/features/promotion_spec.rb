@@ -266,6 +266,10 @@ RSpec.describe 'Promotions', :js do
       sign_in(user)
     end
 
+    include_context '"Security & Compliance" permissions' do
+      let(:response) { inspect_requests { visit project_audit_events_path(project) }.first }
+    end
+
     it 'appears on the page' do
       visit project_audit_events_path(project)
 

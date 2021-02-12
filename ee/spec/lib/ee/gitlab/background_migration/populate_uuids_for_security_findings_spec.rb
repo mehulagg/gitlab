@@ -36,7 +36,7 @@ RSpec.describe ::Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings d
   let(:security_scan_1) { security_scans.create!(build_id: ci_build_1.id, scan_type: scan_types[:sast]) }
   let(:security_scan_2) { security_scans.create!(build_id: ci_build_2.id, scan_type: scan_types[:dast]) }
   let(:security_scan_3) { security_scans.create!(build_id: ci_build_3.id, scan_type: scan_types[:dast]) }
-  let(:sast_file) { fixture_file_upload(Rails.root.join('ee/spec/fixtures/security_reports/master/gl-sast-report.json'), 'application/json') }
+  let(:sast_file) { fixture_file_upload(Rails.root.join('spec/fixtures/security_reports/master/gl-sast-report.json'), 'application/json') }
   let(:dast_file) { fixture_file_upload(Rails.root.join('ee/spec/fixtures/security_reports/master/gl-dast-report.json'), 'application/json') }
 
   let!(:finding_1) { security_findings.create!(scan_id: security_scan_1.id, scanner_id: scanner.id, severity: 0, confidence: 0, position: 0, project_fingerprint: fingerprint_1) }

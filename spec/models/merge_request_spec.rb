@@ -365,7 +365,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
   describe '.by_commit_sha' do
     subject(:by_commit_sha) { described_class.by_commit_sha(sha) }
 
-    let!(:merge_request) { create(:merge_request, :with_diffs) }
+    let!(:merge_request) { create(:merge_request) }
 
     context 'with sha contained in latest merge request diff' do
       let(:sha) { 'b83d6e391c22777fca1ed3012fce84f633d7fed0' }
@@ -431,7 +431,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when commit is a part of the merge request' do
-      let!(:merge_request) { create(:merge_request, :with_diffs) }
+      let!(:merge_request) { create(:merge_request) }
       let(:sha) { 'b83d6e391c22777fca1ed3012fce84f633d7fed0' }
 
       it { is_expected.to eq([merge_request]) }
@@ -451,7 +451,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when commit is part of the merge request and a squash commit at the same time' do
-      let!(:merge_request) { create(:merge_request, :with_diffs) }
+      let!(:merge_request) { create(:merge_request) }
       let(:sha) { merge_request.commits.first.id }
 
       before do
@@ -825,7 +825,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     let(:last_branch_commit) { subject.source_project.repository.commit(Gitlab::Git::BRANCH_REF_PREFIX + subject.source_branch) }
 
     context 'with diffs' do
-      subject { create(:merge_request, :with_diffs) }
+      subject { create(:merge_request) }
 
       it 'returns the sha of the source branch last commit' do
         expect(subject.source_branch_sha).to eq(last_branch_commit.sha)
@@ -892,7 +892,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     let(:options) { { paths: ['a/b', 'b/a', 'c/*'] } }
 
     context 'when there are MR diffs' do
-      let(:merge_request) { create(:merge_request, :with_diffs) }
+      let(:merge_request) { create(:merge_request) }
 
       it 'delegates to the MR diffs' do
         expect(merge_request.merge_request_diff).to receive(:raw_diffs).with(options)
@@ -941,7 +941,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
   describe '#note_positions_for_paths' do
     let(:user) { create(:user) }
-    let(:merge_request) { create(:merge_request, :with_diffs) }
+    let(:merge_request) { create(:merge_request) }
     let(:project) { merge_request.project }
     let!(:diff_note) do
       create(:diff_note_on_merge_request, project: project, noteable: merge_request)
@@ -2051,6 +2051,50 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
         expect(merge_request.has_terraform_reports?).to be_falsey
       end
+    end
+  end
+
+  describe '#has_sast_reports?' do
+    subject { merge_request.has_sast_reports? }
+
+    let(:project) { create(:project, :repository) }
+
+    before do
+      stub_licensed_features(sast: true)
+    end
+
+    context 'when head pipeline has sast reports' do
+      let(:merge_request) { create(:merge_request, :with_sast_reports, source_project: project) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when head pipeline does not have sast reports' do
+      let(:merge_request) { create(:merge_request, source_project: project) }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#has_secret_detection_reports?' do
+    subject { merge_request.has_secret_detection_reports? }
+
+    let(:project) { create(:project, :repository) }
+
+    before do
+      stub_licensed_features(secret_detection: true)
+    end
+
+    context 'when head pipeline has secret detection reports' do
+      let(:merge_request) { create(:merge_request, :with_secret_detection_reports, source_project: project) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when head pipeline does not have secrets detection reports' do
+      let(:merge_request) { create(:merge_request, source_project: project) }
+
+      it { is_expected.to be_falsey }
     end
   end
 
@@ -4585,6 +4629,36 @@ RSpec.describe MergeRequest, factory_default: :keep do
       expect { subject.update_and_mark_in_progress_merge_commit_sha(ref) }
         .to change { subject.in_progress_merge_commit_sha }
         .from(nil).to(ref)
+    end
+  end
+
+  describe '#enabled_reports' do
+    let(:project) { create(:project, :repository) }
+
+    where(:report_type, :with_reports, :feature) do
+      :sast                | :with_sast_reports                | :sast
+      :secret_detection    | :with_secret_detection_reports    | :secret_detection
+    end
+
+    with_them do
+      subject { merge_request.enabled_reports[report_type] }
+
+      before do
+        stub_feature_flags(drop_license_management_artifact: false)
+        stub_licensed_features({ feature => true })
+      end
+
+      context "when head pipeline has reports" do
+        let(:merge_request) { create(:merge_request, with_reports, source_project: project) }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context "when head pipeline does not have reports" do
+        let(:merge_request) { create(:merge_request, source_project: project) }
+
+        it { is_expected.to be_falsy }
+      end
     end
   end
 end

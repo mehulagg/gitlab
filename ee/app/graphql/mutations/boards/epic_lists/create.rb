@@ -15,7 +15,7 @@ module Mutations
               null: true,
               description: 'Epic list in the epic board.'
 
-        authorize :admin_epic_list
+        authorize :admin_epic_board_list
 
         private
 

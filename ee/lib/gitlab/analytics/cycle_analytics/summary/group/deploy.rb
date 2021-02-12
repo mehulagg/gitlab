@@ -20,7 +20,7 @@ module Gitlab
 
             # rubocop: disable CodeReuse/ActiveRecord
             def deployments_count
-              @deployments_count ||= if Feature.enabled?(:query_deploymenys_via_finished_at_in_vsa)
+              @deployments_count ||= if Feature.enabled?(:query_deploymenys_via_finished_at_in_vsa, default_enabled: :yaml)
                                        deployments = DeploymentsFinder
                                          .new(group: group, finished_after: options[:from], finished_before: options[:to], status: :success)
                                          .execute

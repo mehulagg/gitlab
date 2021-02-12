@@ -311,6 +311,13 @@ Settings.pages['storage_path']      = Settings.pages['path']
 Settings.pages['object_store']      = ObjectStoreSettings.legacy_parse(Settings.pages['object_store'])
 
 #
+# GitLab documentation
+#
+Settings['gitlab_docs'] ||= Settingslogic.new({})
+Settings.gitlab_docs['enabled'] ||= false
+Settings.gitlab_docs['host'] = nil unless Settings.gitlab_docs.enabled
+
+#
 # Geo
 #
 Gitlab.ee do
@@ -819,6 +826,7 @@ Settings.forti_token_cloud['enabled'] = false if Settings.forti_token_cloud['ena
 Settings['extra'] ||= Settingslogic.new({})
 Settings.extra['matomo_site_id'] ||= Settings.extra['piwik_site_id'] if Settings.extra['piwik_site_id'].present?
 Settings.extra['matomo_url'] ||= Settings.extra['piwik_url'] if Settings.extra['piwik_url'].present?
+Settings.extra['matomo_disable_cookies'] = false if Settings.extra['matomo_disable_cookies'].nil?
 
 #
 # Rack::Attack settings

@@ -45,6 +45,7 @@ export default {
         :endpoint="endpoint"
         :update-endpoint="updateEndpoint"
         :project-path="groupPath"
+        :project-id="0"
         :markdown-preview-path="markdownPreviewPath"
         :markdown-docs-path="markdownDocsPath"
         :can-update="canUpdate"

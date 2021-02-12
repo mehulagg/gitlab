@@ -78,7 +78,8 @@ module Resolvers
 
     def preloads
       {
-        parent: [:parent]
+        parent: [:parent],
+        events: { events: [:target] }
       }
     end
 

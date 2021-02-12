@@ -1,0 +1,9 @@
+mutation dastProfileCreate($input: DastProfileCreateInput!) {
+  dastProfileCreate(input: $input) {
+    dastProfile {
+      editPath
+    }
+    pipelineUrl
+    errors
+  }
+}

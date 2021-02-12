@@ -13,6 +13,6 @@ RSpec.describe Gitlab::AlertManagement::Payload::Cilium do
   it 'parses cilium specific fields' do
     expect(parsed_payload.title).to eq('Cilium Alert')
     expect(parsed_payload.description).to eq('POLICY_DENIED')
-    expect(parsed_payload.gitlab_fingerprint).to eq('a94a8fe5ccb19ba61c4c0873d391e987982fbbd3')
+    expect(parsed_payload.gitlab_fingerprint).to eq('b2ad2a791756abe01692270c6a846129a09891b3')
   end
 end

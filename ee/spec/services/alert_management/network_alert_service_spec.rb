@@ -26,16 +26,6 @@ RSpec.describe AlertManagement::NetworkAlertService do
 
     subject(:execute) { service.execute }
 
-    context 'with minimal payload' do
-      let(:payload_raw) do
-        {}.with_indifferent_access
-      end
-
-      let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
-
-      it_behaves_like 'creates an alert management alert'
-    end
-
     context 'with valid payload' do
       let(:payload_raw) { build(:network_alert_payload) }
 
@@ -55,7 +45,7 @@ RSpec.describe AlertManagement::NetworkAlertService do
           ended_at: nil,
           environment_id: nil,
           events:  1,
-          fingerprint: 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3',
+          fingerprint: '89269ffa3902af37f036a77bc9ea57cdee3a52c2',
           hosts: [],
           issue_id: nil,
           monitoring_tool: 'Cilium',
@@ -77,7 +67,7 @@ RSpec.describe AlertManagement::NetworkAlertService do
         let!(:alert) do
           create(
             :alert_management_alert,
-            project: project, domain: :threat_monitoring, fingerprint: Digest::SHA1.hexdigest(fingerprint)
+            project: project, domain: :threat_monitoring, fingerprint: '89269ffa3902af37f036a77bc9ea57cdee3a52c2'
           )
         end
 
@@ -85,7 +75,7 @@ RSpec.describe AlertManagement::NetworkAlertService do
       end
 
       context 'existing alert with same fingerprint' do
-        let(:fingerprint_sha) { Digest::SHA1.hexdigest(fingerprint) }
+        let(:fingerprint_sha) { '89269ffa3902af37f036a77bc9ea57cdee3a52c2' }
         let!(:alert) do
           create(:alert_management_alert, domain: :threat_monitoring, project: project, fingerprint: fingerprint_sha)
         end
@@ -167,9 +157,7 @@ RSpec.describe AlertManagement::NetworkAlertService do
     end
 
     context 'error duing save' do
-      let(:payload_raw) do
-        {}.with_indifferent_access
-      end
+      let(:payload_raw) { build(:network_alert_payload) }
 
       let(:logger) { double(warn: {}) }
       let(:payload) { ActionController::Parameters.new(payload_raw).permit! }

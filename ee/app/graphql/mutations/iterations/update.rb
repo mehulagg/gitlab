@@ -55,7 +55,7 @@ module Mutations
 
         response = ::Iterations::UpdateService.new(parent, current_user, args).execute(iteration)
 
-        response_object = response.payload[:iteration] if response.success?
+        response_object = response.success? ? response.payload[:iteration] : nil
         response_errors = response.error? ? (response.payload[:errors] || response.message) : []
 
         {
@@ -67,8 +67,9 @@ module Mutations
       private
 
       def find_object(parent:, id:)
-        ::Resolvers::IterationsResolver.new(object: parent, context: context, field: nil)
-          .resolve(id: id).first
+        params = IterationsFinder.params_for_parent(parent).merge!(id: id)
+
+        IterationsFinder.new(context[:current_user], params).execute.first
       end
 
       def validate_arguments!(args)
@@ -78,9 +79,9 @@ module Mutations
       # Originally accepted a raw model id. Now accept a gid, but allow a raw id
       # for backward compatibility
       def id_from_args(args)
-        GitlabSchema.parse_gid(args[:id], expected_type: ::Iteration)
+        GitlabSchema.parse_gid(args[:id], expected_type: ::Iteration).model_id
       rescue Gitlab::Graphql::Errors::ArgumentError
-        ::Gitlab::GlobalId.as_global_id(args[:id].to_i, model_name: 'Iteration')
+        args[:id].to_i
       end
     end
   end

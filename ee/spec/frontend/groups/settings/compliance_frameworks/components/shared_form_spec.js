@@ -28,6 +28,15 @@ describe('SharedForm', () => {
       },
       stubs: {
         GlFormGroup,
+        GlFormInput: {
+          name: 'gl-form-input-stub',
+          props: ['state'],
+          template: `
+            <div>
+              <slot></slot>
+            </div>
+          `,
+        },
         GlSprintf,
       },
     });
@@ -67,10 +76,11 @@ describe('SharedForm', () => {
       ${null}     | ${null}
       ${''}       | ${false}
       ${'foobar'} | ${true}
-    `('sets the correct state to the name input group', ({ name, validity }) => {
+    `('sets the correct state to the name input and group', ({ name, validity }) => {
       wrapper = createComponent({ name });
 
       expect(findNameGroup().props('state')).toBe(validity);
+      expect(findNameInput().props('state')).toBe(validity);
     });
 
     it.each`
@@ -78,10 +88,11 @@ describe('SharedForm', () => {
       ${null}     | ${null}
       ${''}       | ${false}
       ${'foobar'} | ${true}
-    `('sets the correct state to the description input group', ({ description, validity }) => {
+    `('sets the correct state to the description input and group', ({ description, validity }) => {
       wrapper = createComponent({ description });
 
       expect(findDescriptionGroup().props('state')).toBe(validity);
+      expect(findDescriptionInput().props('state')).toBe(validity);
     });
 
     it.each`

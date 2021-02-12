@@ -5,7 +5,8 @@ import { convertToGraphQLId } from '~/graphql_shared/utils';
 
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
 import updateComplianceFrameworkMutation from '../graphql/queries/update_compliance_framework.mutation.graphql';
-import { initialiseFormData, FETCH_ERROR, SAVE_ERROR } from '../constants';
+import { FETCH_ERROR, SAVE_ERROR } from '../constants';
+import { initialiseFormData } from '../utils';
 import SharedForm from './shared_form.vue';
 import FormStatus from './form_status.vue';
 
@@ -35,7 +36,8 @@ export default {
   },
   data() {
     return {
-      errorMessage: '',
+      initErrorMessage: '',
+      saveErrorMessage: '',
       formData: initialiseFormData(),
       saving: false,
     };
@@ -53,7 +55,7 @@ export default {
         this.formData = this.extractComplianceFramework(data);
       },
       error(error) {
-        this.setError(error, FETCH_ERROR);
+        this.setInitError(error, FETCH_ERROR);
       },
     },
   },
@@ -64,8 +66,13 @@ export default {
     isLoading() {
       return this.$apollo.loading || this.saving;
     },
-    hasFormData() {
-      return Boolean(this.formData?.name);
+    showForm() {
+      return (
+        Object.values(this.formData).filter((d) => d !== null).length > 0 && !this.initErrorMessage
+      );
+    },
+    errorMessage() {
+      return this.initErrorMessage || this.saveErrorMessage;
     },
   },
   methods: {
@@ -73,7 +80,7 @@ export default {
       const complianceFrameworks = data.namespace?.complianceFrameworks?.nodes || [];
 
       if (!complianceFrameworks.length) {
-        this.setError(new Error(FETCH_ERROR), FETCH_ERROR);
+        this.setInitError(new Error(FETCH_ERROR), FETCH_ERROR);
 
         return initialiseFormData();
       }
@@ -86,13 +93,17 @@ export default {
         color,
       };
     },
-    setError(error, userFriendlyText) {
-      this.errorMessage = userFriendlyText;
+    setInitError(error, userFriendlyText) {
+      this.initErrorMessage = userFriendlyText;
+      Sentry.captureException(error);
+    },
+    setSavingError(error, userFriendlyText) {
+      this.saveErrorMessage = userFriendlyText;
       Sentry.captureException(error);
     },
     async onSubmit() {
       this.saving = true;
-      this.errorMessage = '';
+      this.saveErrorMessage = '';
 
       try {
         const { name, description, color } = this.formData;
@@ -113,13 +124,13 @@ export default {
         const [error] = data?.updateComplianceFramework?.errors || [];
 
         if (error) {
-          this.setError(new Error(error), error);
+          this.setSavingError(new Error(error), error);
         } else {
           this.saving = false;
           visitUrl(this.groupEditPath);
         }
       } catch (e) {
-        this.setError(e, SAVE_ERROR);
+        this.setSavingError(e, SAVE_ERROR);
       }
 
       this.saving = false;
@@ -130,7 +141,7 @@ export default {
 <template>
   <form-status :loading="isLoading" :error="errorMessage">
     <shared-form
-      v-if="hasFormData"
+      v-if="showForm"
       :group-edit-path="groupEditPath"
       :name.sync="formData.name"
       :description.sync="formData.description"

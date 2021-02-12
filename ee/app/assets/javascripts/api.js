@@ -194,6 +194,13 @@ export default {
     return axios.post(url, data);
   },
 
+  cycleAnalyticsUpdateValueStream({ groupId, valueStreamId, data }) {
+    const url = Api.buildUrl(this.cycleAnalyticsValueStreamPath)
+      .replace(':id', groupId)
+      .replace(':value_stream_id', valueStreamId);
+    return axios.put(url, data);
+  },
+
   cycleAnalyticsDeleteValueStream(groupId, valueStreamId) {
     const url = Api.buildUrl(this.cycleAnalyticsValueStreamPath)
       .replace(':id', groupId)

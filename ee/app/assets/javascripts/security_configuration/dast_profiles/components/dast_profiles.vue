@@ -176,7 +176,7 @@ export default {
           mutation: deletion.mutation,
           variables: {
             input: {
-              fullPath: projectFullPath,
+              ...(profileType !== 'dastProfiles' ? { fullPath: projectFullPath } : {}),
               id: profileId,
             },
           },

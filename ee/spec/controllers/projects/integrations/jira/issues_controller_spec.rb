@@ -195,6 +195,8 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
     end
 
     context 'when `jira_issues_show_integration` feature is enabled' do
+      let(:jira_issue) { {} }
+
       before do
         stub_feature_flags(jira_issues_show_integration: true)
       end
@@ -207,15 +209,15 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       end
 
       it 'returns JSON response' do
-        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1, format: :json }
+        expect_next_found_instance_of(JiraService) do |service|
+          expect(service).to receive(:find_issue).with('1', rendered_fields: true).and_return(jira_issue)
+        end
 
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response).to include(
-          'title_html',
-          'description_html',
-          'author',
-          'labels'
-        )
+        expect_next_instance_of(Integrations::Jira::IssueDetailSerializer) do |serializer|
+          expect(serializer).to receive(:represent).with(jira_issue, project: project)
+        end
+
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1, format: :json }
       end
     end
   end

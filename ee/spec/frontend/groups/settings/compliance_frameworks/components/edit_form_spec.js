@@ -28,15 +28,15 @@ jest.mock('~/lib/utils/url_utility');
 
 describe('EditForm', () => {
   let wrapper;
-  const sentryError = new Error('Network error');
-  const sentrySaveError = new Error('Invalid values given');
   const propsData = {
     graphqlFieldName: 'ComplianceManagement::Framework',
-    groupPath: 'group-1',
     groupEditPath: 'group-1/edit',
+    groupPath: 'group-1',
     id: '1',
-    scopedLabelsHelpPath: 'help/scoped-labels',
   };
+
+  const sentryError = new Error('Network error');
+  const sentrySaveError = new Error('Invalid values given');
 
   const fetchOne = jest.fn().mockResolvedValue(validFetchOneResponse);
   const fetchEmpty = jest.fn().mockResolvedValue(emptyFetchResponse);
@@ -96,7 +96,7 @@ describe('EditForm', () => {
       await waitForPromises();
 
       expect(fetchOne).toHaveBeenCalledTimes(1);
-      expect(findForm().props()).toMatchObject({
+      expect(findForm().props()).toStrictEqual({
         name: frameworkFoundResponse.name,
         description: frameworkFoundResponse.description,
         color: frameworkFoundResponse.color,

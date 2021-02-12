@@ -114,11 +114,12 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
         end
 
-        resources :iterations, only: [:index]
+        # Added for backward compatibility with https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39543
+        # TODO: Cleanup https://gitlab.com/gitlab-org/gitlab/-/issues/320814
+        get 'iterations/inherited/:id', to: redirect('%{namespace_id}/%{project_id}/-/iterations/%{id}'),
+            as: :legacy_project_iterations_inherited
 
-        namespace :iterations do
-          resources :inherited, only: [:show], constraints: { id: /\d+/ }
-        end
+        resources :iterations, only: [:index, :show], constraints: { id: /\d+/ }
 
         namespace :incident_management, path: '' do
           resources :oncall_schedules, only: [:index], path: 'oncall_schedules'

@@ -1,5 +1,5 @@
-import dastSavedScansQuery from 'ee/security_configuration/dast_profiles/graphql/dast_saved_scans.query.graphql';
-import dastSavedScansDelete from 'ee/security_configuration/dast_profiles/graphql/dast_saved_scans_delete.mutation.graphql';
+import dastProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_profiles.query.graphql';
+import dastProfileDelete from 'ee/security_configuration/dast_profiles/graphql/dast_profile_delete.mutation.graphql';
 import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
 import dastSiteProfilesDelete from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles_delete.mutation.graphql';
 import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
@@ -13,16 +13,16 @@ import { s__ } from '~/locale';
 export const getProfileSettings = ({ createNewProfilePaths, isDastSavedScansEnabled }) => ({
   ...(isDastSavedScansEnabled
     ? {
-        savedScans: {
-          profileType: 'savedScans',
+        dastProfiles: {
+          profileType: 'dastProfiles',
           createNewProfilePath: createNewProfilePaths.savedScan,
           graphQL: {
-            query: dastSavedScansQuery,
+            query: dastProfilesQuery,
             deletion: {
-              mutation: dastSavedScansDelete,
+              mutation: dastProfileDelete,
               optimisticResponse: dastProfilesDeleteResponse({
-                mutationName: 'savedScanDelete',
-                payloadTypeName: 'DastSavedScanDeletePayload',
+                mutationName: 'dastProfileDelete',
+                payloadTypeName: 'DastProfileDeletePayload',
               }),
             },
           },

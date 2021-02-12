@@ -38,18 +38,6 @@ RSpec.describe IncidentManagement::OncallParticipant do
     end
   end
 
-  describe 'scopes' do
-    describe '.ordered_asc' do
-      let_it_be(:participant1) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-      let_it_be(:participant2) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-      let_it_be(:participant3) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-
-      subject { described_class.ordered_asc }
-
-      it { is_expected.to eq([participant1, participant2, participant3]) }
-    end
-  end
-
   private
 
   def remove_user_from_project(user, project)

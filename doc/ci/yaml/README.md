@@ -2024,8 +2024,10 @@ This example creates four paths of execution:
   - For GitLab.com, the limit is 50. For more information, see our
     [infrastructure issue](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/7541).
   - For self-managed instances, the limit is: 50. This limit [can be changed](#changing-the-needs-job-limit).
-- If `needs:` refers to a job that is marked as `parallel:`.
-  the current job depends on all parallel jobs being created.
+- If `needs:` refers to a job that uses the [`parallel`](#parallel) keyword,
+  it depends on all jobs created in parallel, not just one job. It also downloads
+  artifacts from all the parallel jobs by default. If the artifacts have the same
+  name, they overwrite each other and only the last one downloaded is saved.
 - `needs:` is similar to `dependencies:` in that it must use jobs from prior stages,
   meaning it's impossible to create circular dependencies. Depending on jobs in the
   current stage is not possible either, but support [is planned](https://gitlab.com/gitlab-org/gitlab/-/issues/30632).
@@ -3331,7 +3333,9 @@ job:
 The latest artifacts for refs are locked against deletion, and kept regardless of
 the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
 GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
-in GitLab 13.4. In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026), you can [disable this behavior in the CI/CD settings](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs).
+in GitLab 13.4.
+
+In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026), you can [disable this behavior at the project level in the CI/CD settings](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs). In [GitLab 13.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/276583), you can [disable this behavior instance-wide](../../user/admin_area/settings/continuous_integration.md#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines).
 
 #### `artifacts:reports`
 
@@ -4354,6 +4358,9 @@ You can use [CI/CD variables](../variables/README.md) to configure runner Git be
 - [`GIT_FETCH_EXTRA_FLAGS`](../runners/README.md#git-fetch-extra-flags)
 - [`GIT_DEPTH`](../runners/README.md#shallow-cloning) (shallow cloning)
 - [`GIT_CLONE_PATH`](../runners/README.md#custom-build-directories) (custom build directories)
+- [`TRANSFER_METER_FREQUENCY`](../runners/README.md#artifact-and-cache-settings) (artifact/cache meter update frequency)
+- [`ARTIFACT_COMPRESSION_LEVEL`](../runners/README.md#artifact-and-cache-settings) (artifact archiver compression level)
+- [`CACHE_COMPRESSION_LEVEL`](../runners/README.md#artifact-and-cache-settings) (cache archiver compression level)
 
 You can also use variables to configure how many times a runner
 [attempts certain stages of job execution](../runners/README.md#job-stages-attempts).
@@ -4589,6 +4596,94 @@ GitLab CI/CD. In the following example, `.hidden_job` is ignored:
 Use this feature to ignore jobs, or use the
 [special YAML features](#special-yaml-features) and transform the hidden jobs
 into templates.
+
+### `!reference` tags
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/266173) in GitLab 13.9.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-reference-tags). **(FREE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+Use the `!reference` custom YAML tag to select keyword configuration from other job
+sections and reuse it in the current section. Unlike [YAML anchors](#anchors), you can
+use `!reference` tags to reuse configuration from [included](#include) configuration
+files as well.
+
+In this example, a `script` and an `after_script` from two different locations are
+reused in the `test` job:
+
+- `setup.yml`:
+
+  ```yaml
+  .setup:
+    script:
+      - echo creating environment
+  ```
+
+- `.gitlab-ci.yml`:
+
+  ```yaml
+  include:
+    - local: setup.yml
+
+  .teardown:
+    after_script:
+      - echo deleting environment
+
+  test:
+    script:
+      - !reference [.setup, script]
+      - echo running my own command
+    after_script:
+      - !reference [.teardown, after_script]
+  ```
+
+In this example, `test-vars-1` reuses the all the variables in `.vars`, while `test-vars-2`
+selects a specific variable and reuses it as a new `MY_VAR` variable.
+
+```yaml
+.vars:
+  variables:
+    URL: "http://my-url.internal"
+    IMPORTANT_VAR: "the details"
+
+test-vars-1:
+  variables: !reference [.vars, variables]
+  script:
+    - printenv
+
+test-vars-2:
+  variables:
+    MY_VAR: !reference [.vars, variables, IMPORTANT_VAR]
+  script:
+    - printenv
+```
+
+You can't reuse a section that already includes a `!reference` tag. Only one level
+of nesting is supported.
+
+#### Enable or disable `!reference` tags **(FREE SELF)**
+
+The `!reference` tag is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_custom_yaml_tags)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_custom_yaml_tags)
+```
 
 ## Skip Pipeline
 

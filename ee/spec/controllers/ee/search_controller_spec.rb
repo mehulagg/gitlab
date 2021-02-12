@@ -17,7 +17,7 @@ RSpec.describe SearchController do
       end
 
       context 'i_search_advanced' do
-        it_behaves_like 'tracking unique hll events', :search_track_unique_users do
+        it_behaves_like 'tracking unique hll events' do
           subject(:request) { get :show, params: { scope: 'projects', search: 'term' } }
 
           let(:target_id) { 'i_search_advanced' }
@@ -37,7 +37,7 @@ RSpec.describe SearchController do
             stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
           end
 
-          it_behaves_like 'tracking unique hll events', :search_track_unique_users do
+          it_behaves_like 'tracking unique hll events' do
             subject(:request) { get :show, params: request_params }
 
             let(:expected_type) { instance_of(String) }
@@ -54,7 +54,7 @@ RSpec.describe SearchController do
               stub_licensed_features(elastic_search: true)
             end
 
-            it_behaves_like 'tracking unique hll events', :search_track_unique_users do
+            it_behaves_like 'tracking unique hll events' do
               subject(:request) { get :show, params: request_params }
 
               let(:expected_type) { instance_of(String) }

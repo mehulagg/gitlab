@@ -199,6 +199,7 @@ export default {
     },
     hideDropdown() {
       this.isDropdownShowing = this.isDropdownVariantStandalone;
+      this.$emit('hide');
     },
     toggleFormDropdown() {
       const { dropdown } = this.$refs.dropdown.$refs;

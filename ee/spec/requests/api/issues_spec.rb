@@ -536,14 +536,13 @@ RSpec.describe API::Issues, :mailer do
     include WorkhorseHelpers
     using RSpec::Parameterized::TableSyntax
 
+    include_context 'workhorse headers'
+
     let(:issue) { create(:incident, project: project) }
 
     let(:file) { fixture_file_upload('spec/fixtures/rails_sample.jpg', 'image/jpg') }
     let(:file_name) { 'rails_sample.jpg' }
     let(:url) { 'http://gitlab.com' }
-
-    let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-    let(:workhorse_header) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
 
     let(:params) { { url: url } }
 
@@ -553,7 +552,7 @@ RSpec.describe API::Issues, :mailer do
         method: :post,
         file_key: :file,
         params: params.merge(file: file),
-        headers: workhorse_header,
+        headers: workhorse_headers,
         send_rewritten_field: true
       )
     end

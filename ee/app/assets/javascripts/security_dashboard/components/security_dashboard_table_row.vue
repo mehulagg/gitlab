@@ -43,9 +43,6 @@ export default {
   computed: {
     ...mapState(['dashboardType']),
     ...mapState('vulnerabilities', ['selectedVulnerabilities']),
-    severity() {
-      return this.vulnerability.severity || ' ';
-    },
     vulnerabilityIdentifier() {
       return getPrimaryIdentifier(this.vulnerability.identifiers, 'external_type');
     },
@@ -126,7 +123,11 @@ export default {
     <div class="table-section section-15">
       <div class="table-mobile-header" role="rowheader">{{ s__('Reports|Severity') }}</div>
       <div class="table-mobile-content">
-        <severity-badge :severity="severity" class="text-right text-md-left" />
+        <severity-badge
+          v-if="vulnerability.severity"
+          :severity="vulnerability.severity"
+          class="text-right text-md-left"
+        />
       </div>
     </div>
 

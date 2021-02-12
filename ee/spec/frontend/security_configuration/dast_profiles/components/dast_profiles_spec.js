@@ -26,7 +26,7 @@ describe('EE - DastProfiles', () => {
     const defaultMocks = {
       $apollo: {
         queries: {
-          savedScans: {
+          dastProfiles: {
             fetchMore: jest.fn().mockResolvedValue(),
           },
           siteProfiles: {
@@ -139,7 +139,7 @@ describe('EE - DastProfiles', () => {
 
     describe.each`
       tabName               | index | givenLocationHash
-      ${'Saved Scans'}      | ${0}  | ${'saved-scans'}
+      ${'Saved Scans'}      | ${0}  | ${'dast-profiles'}
       ${'Site Profiles'}    | ${1}  | ${'site-profiles'}
       ${'Scanner Profiles'} | ${2}  | ${'scanner-profiles'}
     `('with location hash set to "$givenLocationHash"', ({ tabName, index, givenLocationHash }) => {
@@ -171,9 +171,34 @@ describe('EE - DastProfiles', () => {
     });
   });
 
+  it.each`
+    profileType          | key                            | givenData                              | expectedValue | exposedAsProp
+    ${'dastProfiles'}    | ${'errorMessage'}              | ${{ errorMessage: 'foo' }}             | ${'foo'}      | ${true}
+    ${'dastProfiles'}    | ${'errorDetails'}              | ${{ errorDetails: ['foo'] }}           | ${['foo']}    | ${true}
+    ${'dastProfiles'}    | ${'has-more-profiles-to-load'} | ${{ pageInfo: { hasNextPage: true } }} | ${'true'}     | ${false}
+    ${'siteProfiles'}    | ${'error-message'}             | ${{ errorMessage: 'foo' }}             | ${'foo'}      | ${false}
+    ${'siteProfiles'}    | ${'error-details'}             | ${{ errorDetails: ['foo'] }}           | ${'foo'}      | ${false}
+    ${'siteProfiles'}    | ${'has-more-profiles-to-load'} | ${{ pageInfo: { hasNextPage: true } }} | ${'true'}     | ${false}
+    ${'scannerProfiles'} | ${'error-message'}             | ${{ errorMessage: 'foo' }}             | ${'foo'}      | ${false}
+    ${'scannerProfiles'} | ${'error-details'}             | ${{ errorDetails: ['foo'] }}           | ${'foo'}      | ${false}
+    ${'scannerProfiles'} | ${'has-more-profiles-to-load'} | ${{ pageInfo: { hasNextPage: true } }} | ${'true'}     | ${false}
+  `(
+    'passes down $key properly for $profileType',
+    async ({ profileType, key, givenData, expectedValue, exposedAsProp }) => {
+      const propGetter = exposedAsProp ? 'props' : 'attributes';
+      createComponent();
+      wrapper.setData({
+        profileTypes: { [profileType]: givenData },
+      });
+      await wrapper.vm.$nextTick();
+
+      expect(getProfilesComponent(profileType)[propGetter](key)).toEqual(expectedValue);
+    },
+  );
+
   describe.each`
     description                | profileType
-    ${'Saved Scans List'}      | ${'savedScans'}
+    ${'Saved Scans List'}      | ${'dastProfiles'}
     ${'Site Profiles List'}    | ${'siteProfiles'}
     ${'Scanner Profiles List'} | ${'scannerProfiles'}
   `('$description', ({ profileType }) => {
@@ -185,19 +210,6 @@ describe('EE - DastProfiles', () => {
       createComponent({ mocks: { $apollo: { queries: { [profileType]: { loading: true } } } } });
 
       expect(getProfilesComponent(profileType).attributes('is-loading')).toBe('true');
-    });
-
-    it.each`
-      givenData                                                                   | propName                       | expectedPropValue
-      ${{ profileTypes: { [profileType]: { errorMessage: 'foo' } } }}             | ${'error-message'}             | ${'foo'}
-      ${{ profileTypes: { [profileType]: { errorDetails: ['foo'] } } }}           | ${'error-details'}             | ${'foo'}
-      ${{ profileTypes: { [profileType]: { pageInfo: { hasNextPage: true } } } }} | ${'has-more-profiles-to-load'} | ${'true'}
-    `('passes down $propName correctly', async ({ givenData, propName, expectedPropValue }) => {
-      wrapper.setData(givenData);
-
-      await wrapper.vm.$nextTick();
-
-      expect(getProfilesComponent(profileType).attributes(propName)).toEqual(expectedPropValue);
     });
 
     it('fetches more results when "@load-more-profiles" is emitted', () => {

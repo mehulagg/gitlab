@@ -5,14 +5,14 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, howto
 ---
 
-# Threads
+# Threads **(FREE)**
 
-The ability to contribute conversationally is offered throughout GitLab.
+You can use words to communicate with other users all over GitLab.
 
-You can leave a comment in the following places:
+For example, you can leave a comment in the following places:
 
 - Issues
-- Epics **(ULTIMATE)**
+- Epics
 - Merge requests
 - Snippets
 - Commits
@@ -281,6 +281,23 @@ edit existing comments. Non-team members are restricted from adding or editing c
 
 Additionally, locked issues and merge requests can not be reopened.
 
+## Confidential Comments
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207473) in GitLab 13.9.
+> - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to enable it. **(FREE SELF)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+When creating a comment, you can decide to make it visible only to the project members (users with Reporter and higher permissions).
+
+To create a confidential comment, select the **Make this comment confidential** checkbox before you submit it.
+
+![Confidential comments](img/confidential_comments_v13_9.png)
+
 ## Merge Request Reviews
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/4213) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.4.
@@ -408,7 +425,7 @@ the merge request authored by the user that applied them.
 
 1. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/25381) in GitLab 13.9,
    you can opt to add a custom commit message to describe your change. If you don't
-   specify it, the default commit message will be used. Note that [this feature may not be available to you](#enable-or-disable-custom-commit-messages-for-suggestions). 
+   specify it, the default commit message will be used. Note that [this feature may not be available to you](#enable-or-disable-custom-commit-messages-for-suggestions).
    Also, it is not supported for [batch suggestions](#batch-suggestions).
 
    ![Custom commit](img/custom_commit_v13_9.png)
@@ -417,25 +434,6 @@ After the author applies a Suggestion, it will be marked with the **Applied** la
 the thread will be automatically resolved, and GitLab will create a new commit
 and push the suggested change directly into the codebase in the merge request's
 branch. [Developer permission](../permissions.md) is required to do so.
-
-### Enable or disable Custom commit messages for suggestions **(FREE SELF)**
-
-Custom commit messages for suggestions is under development but ready for production use. It is
-deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can opt to disable it.
-
-To disable custom commit messages for suggestions:
-
-```ruby
-Feature.disable(:suggestions_custom_commit)
-```
-
-To enable custom commit messages for suggestions:
-
-```ruby
-Feature.enable(:suggestions_custom_commit)
-```
 
 ### Multi-line Suggestions
 
@@ -532,27 +530,6 @@ to your branch to address your reviewers' requests.
 
    ![A code change suggestion displayed, with the button to apply the batch of suggestions highlighted.](img/apply_batch_of_suggestions_v13_1.jpg "Apply a batch of suggestions")
 
-#### Enable or disable Batch Suggestions **(FREE SELF)**
-
-Batch Suggestions is
-deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can opt to disable it for your instance.
-
-To enable it:
-
-```ruby
-# Instance-wide
-Feature.enable(:batch_suggestions)
-```
-
-To disable it:
-
-```ruby
-# Instance-wide
-Feature.disable(:batch_suggestions)
-```
-
 ## Start a thread by replying to a standard comment
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30299) in GitLab 11.9
@@ -585,3 +562,62 @@ In the comment, click the **More Actions** menu and click **Assign to commenting
 Click the button again to unassign the commenter.
 
 ![Assign to commenting user](img/quickly_assign_commenter_v13_1.png)
+
+## Enable or disable Confidential Comments **(FREE SELF)**
+
+Confidential Comments is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:confidential_notes)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:confidential_notes)
+```
+
+## Enable or disable Custom commit messages for suggestions **(FREE SELF)**
+
+Custom commit messages for suggestions is under development but ready for production use. It is
+deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can opt to disable it.
+
+To disable custom commit messages for suggestions:
+
+```ruby
+Feature.disable(:suggestions_custom_commit)
+```
+
+To enable custom commit messages for suggestions:
+
+```ruby
+Feature.enable(:suggestions_custom_commit)
+```
+
+## Enable or disable Batch Suggestions **(FREE SELF)**
+
+Batch Suggestions is
+deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can opt to disable it for your instance.
+
+To enable it:
+
+```ruby
+# Instance-wide
+Feature.enable(:batch_suggestions)
+```
+
+To disable it:
+
+```ruby
+# Instance-wide
+Feature.disable(:batch_suggestions)
+```

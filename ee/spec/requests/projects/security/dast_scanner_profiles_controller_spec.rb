@@ -24,6 +24,15 @@ RSpec.describe Projects::Security::DastScannerProfilesController, type: :request
   end
 
   shared_examples 'a GET request' do
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { get path }
+
+      before_request do
+        project.add_developer(user)
+        login_as(user)
+      end
+    end
+
     context 'feature available' do
       include_context 'on-demand scans feature available'
 

@@ -22,10 +22,15 @@ module Gitlab
       MR_REMOVE_MULTILINE_COMMENT_ACTION = 'i_code_review_user_remove_multiline_mr_comment'
       MR_ADD_SUGGESTION_ACTION = 'i_code_review_user_add_suggestion'
       MR_APPLY_SUGGESTION_ACTION = 'i_code_review_user_apply_suggestion'
+      MR_MARKED_AS_DRAFT_ACTION = 'i_code_review_user_marked_as_draft'
+      MR_UNMARKED_AS_DRAFT_ACTION = 'i_code_review_user_unmarked_as_draft'
       MR_RESOLVE_THREAD_ACTION = 'i_code_review_user_resolve_thread'
       MR_UNRESOLVE_THREAD_ACTION = 'i_code_review_user_unresolve_thread'
       MR_ASSIGNED_USERS_ACTION = 'i_code_review_user_assigned'
       MR_REVIEW_REQUESTED_USERS_ACTION = 'i_code_review_user_review_requested'
+      MR_APPROVAL_RULE_ADDED_USERS_ACTION = 'i_code_review_user_approval_rule_added'
+      MR_APPROVAL_RULE_EDITED_USERS_ACTION = 'i_code_review_user_approval_rule_edited'
+      MR_APPROVAL_RULE_DELETED_USERS_ACTION = 'i_code_review_user_approval_rule_deleted'
       MR_EDIT_MR_TITLE_ACTION = 'i_code_review_edit_mr_title'
       MR_EDIT_MR_DESC_ACTION = 'i_code_review_edit_mr_desc'
 
@@ -98,6 +103,14 @@ module Gitlab
           track_unique_action_by_user(MR_ADD_SUGGESTION_ACTION, user)
         end
 
+        def track_marked_as_draft_action(user:)
+          track_unique_action_by_user(MR_MARKED_AS_DRAFT_ACTION, user)
+        end
+
+        def track_unmarked_as_draft_action(user:)
+          track_unique_action_by_user(MR_UNMARKED_AS_DRAFT_ACTION, user)
+        end
+
         def track_apply_suggestion_action(user:)
           track_unique_action_by_user(MR_APPLY_SUGGESTION_ACTION, user)
         end
@@ -116,6 +129,18 @@ module Gitlab
 
         def track_description_edit_action(user:)
           track_unique_action_by_user(MR_EDIT_MR_DESC_ACTION, user)
+        end
+
+        def track_approval_rule_added_action(user:)
+          track_unique_action_by_user(MR_APPROVAL_RULE_ADDED_USERS_ACTION, user)
+        end
+
+        def track_approval_rule_edited_action(user:)
+          track_unique_action_by_user(MR_APPROVAL_RULE_EDITED_USERS_ACTION, user)
+        end
+
+        def track_approval_rule_deleted_action(user:)
+          track_unique_action_by_user(MR_APPROVAL_RULE_DELETED_USERS_ACTION, user)
         end
 
         private

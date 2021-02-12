@@ -29,7 +29,7 @@ No matter how you use GitLab, we have documentation for you.
 | [**Contributing to GitLab**](#contributing-to-gitlab)<br/>At GitLab, everyone can contribute!                        | [**New to Git and GitLab?**](#new-to-git-and-gitlab)<br/>We have the resources to get you started. |
 | [**Build an integration with GitLab**](#build-an-integration-with-gitlab)<br/>Consult our integration documentation. | [**Coming to GitLab from another platform?**](#coming-to-gitlab-from-another-platform)<br/>Consult our guides. |
 | [**Install GitLab**](https://about.gitlab.com/install/)<br/>Installation options for different platforms.            | [**Customers**](subscriptions/index.md)<br/>Information for new and existing customers. |
-| [**Update GitLab**](update/README.md)<br/>Update your GitLab self-managed instance to the latest version.            | [**Reference Architectures**](administration/reference_architectures/index.md)<br/>GitLab reference architectures. |
+| [**Update GitLab**](update/index.md)<br/>Update your GitLab self-managed instance to the latest version.            | [**Reference Architectures**](administration/reference_architectures/index.md)<br/>GitLab reference architectures. |
 | [**GitLab releases**](https://about.gitlab.com/releases/)<br/>What's new in GitLab.                                  |  |
 
 ## Popular topics
@@ -66,7 +66,7 @@ We have the following documentation to rapidly uplift your GitLab knowledge:
 
 | Topic                                                                                             | Description |
 |:--------------------------------------------------------------------------------------------------|:------------|
-| [GitLab basics guides](gitlab-basics/README.md)                                                   | Start working on the command line and with GitLab. |
+| [GitLab basics guides](gitlab-basics/index.md)                                                   | Start working on the command line and with GitLab. |
 | [GitLab workflow overview](https://about.gitlab.com/blog/2016/10/25/gitlab-workflow-an-overview/) | Enhance your workflow with the best of GitLab Workflow. |
 | [Get started with GitLab CI/CD](ci/quick_start/index.md)                                         | Quickly implement GitLab CI/CD. |
 | [Auto DevOps](topics/autodevops/index.md)                                                         | Learn more about Auto DevOps in GitLab. |
@@ -80,7 +80,7 @@ Learn more about GitLab account management:
 |:-----------------------------------------------------------|:------------|
 | [User account](user/profile/index.md)                      | Manage your account. |
 | [Authentication](topics/authentication/index.md)           | Account security with two-factor authentication, set up your SSH keys, and deploy keys for secure access to your projects. |
-| [Profile settings](user/profile/index.md#profile-settings) | Manage your profile settings, two factor authentication, and more. |
+| [User settings](user/profile/index.md#user-settings) | Manage your user settings, two factor authentication, and more. |
 | [User permissions](user/permissions.md)                    | Learn what each role in a project can do. |
 
 ### Git and GitLab
@@ -122,5 +122,5 @@ Learn how to contribute to GitLab with the following resources:
 | Topic                                                       | Description |
 |:------------------------------------------------------------|:------------|
 | [Development](development/README.md)                        | How to contribute to GitLab development. |
-| [Legal](legal/README.md)                                    | Contributor license agreements. |
+| [Legal](legal/index.md)                                    | Contributor license agreements. |
 | [Writing documentation](development/documentation/index.md) | How to contribute to GitLab Docs. |

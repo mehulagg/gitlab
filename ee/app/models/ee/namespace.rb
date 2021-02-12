@@ -173,7 +173,7 @@ module EE
           root_ancestor.actual_plan
         else
           subscription = find_or_create_subscription
-          subscription&.hosted_plan
+          hosted_plan_for(subscription)
         end
       end || fallback_plan
     end
@@ -440,6 +440,17 @@ module EE
         all_projects
           .with_total_repository_size_greater_than(::Project.arel_table[:repository_size_limit])
           .without_unlimited_repository_size_limit
+      end
+    end
+
+    def hosted_plan_for(subscription)
+      return unless subscription
+
+      plan = subscription.hosted_plan
+      if plan && !subscription.legacy?
+        ::Subscriptions::NewPlanPresenter.new(plan)
+      else
+        plan
       end
     end
   end

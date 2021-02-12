@@ -7,9 +7,9 @@ module Types
     description 'Represents measured stats metrics for timeboxes'
 
     field :count, GraphQL::INT_TYPE, null: false,
-          description: 'The count metric'
+          description: 'The count metric.'
 
     field :weight, GraphQL::INT_TYPE, null: false,
-          description: 'The weight metric'
+          description: 'The weight metric.'
   end
 end

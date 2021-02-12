@@ -288,7 +288,7 @@ In [GitLab Premium or higher](https://about.gitlab.com/pricing/), GitLab adminis
 
 There are two different ways to add a new project to a group:
 
-- Select a group, and then click **New project**. You can then continue [creating your project](../../gitlab-basics/create-project.md).
+- Select a group, and then click **New project**. You can then continue [creating your project](../../user/project/working_with_projects.md#create-a-project).
 
   ![New project](img/create_new_project_from_group_v13_6.png)
 
@@ -504,7 +504,7 @@ From GitLab 10.5, you can transfer groups in the following ways:
 
 When transferring groups, note:
 
-- Changing a group's parent can have unintended side effects. See [Redirects when changing repository paths](../project/index.md#redirects-when-changing-repository-paths).
+- Changing a group's parent can have unintended side effects. See [Redirects when changing repository paths](../project/repository/index.md#redirects-when-changing-repository-paths).
 - You can only transfer groups to groups you manage.
 - You must update your local repositories to point to the new location.
 - If the immediate parent group's visibility is lower than the group's current visibility, visibility levels for subgroups and projects will change to match the new parent group's visibility.
@@ -527,7 +527,7 @@ access further configurations for your group.
 #### Changing a group's path
 
 Changing a group's path (group URL) can have unintended side effects. Read
-[how redirects will behave](../project/index.md#redirects-when-changing-repository-paths)
+[how redirects will behave](../project/repository/index.md#redirects-when-changing-repository-paths)
 before proceeding.
 
 If you are vacating the path so it can be claimed by another group or user,
@@ -854,17 +854,7 @@ With [GitLab Issue Analytics](issues_analytics/index.md), you can see a bar char
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263478) in GitLab 13.6.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/276003) in GitLab 13.7.
 
-With [GitLab Repositories Analytics](repositories_analytics/index.md), you can download a CSV of the latest coverage data for all the projects in your group.
-
-### Check code coverage for all projects
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263478) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
-
-See the overall activity of all projects with code coverage with [GitLab Repositories Analytics](repositories_analytics/index.md).
-
-It displays the current code coverage data available for your projects:
-
-![Group repositories analytics](img/group_code_coverage_analytics_v13_7.png)
+With [GitLab Repositories Analytics](repositories_analytics/index.md), you can view overall activity of all projects with code coverage.
 
 ## Dependency Proxy
 

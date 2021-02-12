@@ -8,6 +8,8 @@ class Projects::IterationsController < Projects::ApplicationController
 
   def index; end
 
+  def show; end
+
   private
 
   def check_iterations_available!
