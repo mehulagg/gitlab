@@ -4,7 +4,7 @@ module Integrations
   module Jira
     class IssueDetailEntity < ::Integrations::Jira::IssueEntity
       expose :description_html do |jira_issue|
-        Banzai::Pipeline::GfmPipeline.call(jira_issue.renderedFields['description'], project: nil)[:output].to_html
+        EE::Banzai::Pipeline::JiraGfmPipeline.call(jira_issue.renderedFields['description'], project: nil)[:output].to_html
       end
 
       expose :state do |jira_issue|
