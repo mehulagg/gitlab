@@ -448,6 +448,12 @@ class Service < ApplicationRecord
 
   private
 
+  def log_usage(action, user_id)
+    key = "i_ecosystem_#{to_param}_service_#{action}"
+
+    Gitlab::UsageDataCounters::HLLRedisCounter.track_event(key, values: user_id)
+  end
+
   def validate_is_instance_or_template
     errors.add(:template, 'The service should be a service template or instance-level integration') if template? && instance?
   end

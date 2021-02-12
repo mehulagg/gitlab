@@ -281,9 +281,7 @@ class JiraService < IssueTrackerService
   end
 
   def log_usage(action, user)
-    key = "i_ecosystem_jira_service_#{action}"
-
-    Gitlab::UsageDataCounters::HLLRedisCounter.track_event(key, values: user.id)
+    super(action, user.id)
   end
 
   def add_issue_solved_comment(issue, commit_id, commit_url)

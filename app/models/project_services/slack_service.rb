@@ -36,6 +36,14 @@ class SlackService < ChatNotificationService
     super
   end
 
+  def log_usage(action, user_id)
+    return unless user_id
+
+    action = "#{action}_notification"
+
+    super(action, user_id)
+  end
+
   module Notifier
     private
 

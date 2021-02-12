@@ -141,7 +141,11 @@ RSpec.shared_examples 'slack or mattermost notifications' do |service_name|
     end
 
     it "calls #{service_name} API for deployment events" do
-      deployment_event_data = { object_kind: 'deployment' }
+      environment = create(:environment, name: "myenvironment")
+      project = create(:project, :repository)
+      commit = project.commit('HEAD')
+      deployment = create(:deployment, status: :success, environment: environment, project: project, sha: commit.sha)
+      deployment_event_data = Gitlab::DataBuilder::Deployment.build(deployment)
 
       chat_service.execute(deployment_event_data)
 

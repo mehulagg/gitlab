@@ -77,6 +77,7 @@ class ChatNotificationService < Service
     return unless webhook.present?
 
     object_kind = data[:object_kind]
+    user_id = data.dig(:user, :id)
 
     data = custom_data(data)
 
@@ -97,9 +98,12 @@ class ChatNotificationService < Service
     opts[:channel] = channels if channels.present?
     opts[:username] = username if username
 
-    return false unless notify(message, opts)
+    if notify(message, opts)
+      log_usage(event_type, user_id)
+      return true
+    end
 
-    true
+    false
   end
 
   def event_channel_names
