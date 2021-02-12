@@ -8,7 +8,10 @@ import BoardCardLayoutDeprecated from './board_card_layout_deprecated.vue';
 export default {
   name: 'BoardsIssueCard',
   components: {
-    BoardCardLayout: gon.features?.graphqlBoardLists ? BoardCardLayout : BoardCardLayoutDeprecated,
+    BoardCardLayout:
+      gon.features?.graphqlBoardLists || gon.features?.epicBoards
+        ? BoardCardLayout
+        : BoardCardLayoutDeprecated,
   },
   props: {
     list: {

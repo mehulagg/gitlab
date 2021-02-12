@@ -100,7 +100,7 @@ describe('BoardCardAssigneeDropdown', () => {
 
   beforeEach(() => {
     store.state.activeId = '1';
-    store.state.issues = {
+    store.state.boardItems = {
       1: {
         iid,
         assignees: [{ username: activeIssueName, name: activeIssueName, id: activeIssueName }],
@@ -247,7 +247,7 @@ describe('BoardCardAssigneeDropdown', () => {
   `(
     'when assignees have a length of $assignees.length, it renders $expected',
     ({ assignees, expected }) => {
-      store.state.issues['1'].assignees = assignees;
+      store.state.boardItems['1'].assignees = assignees;
 
       createComponent();
 

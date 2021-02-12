@@ -32,9 +32,9 @@ export default {
   },
   computed: {
     ...mapState(['filterParams']),
-    ...mapGetters(['getIssuesByList']),
-    listIssues() {
-      return this.getIssuesByList(this.list.id);
+    ...mapGetters(['getBoardItemsByList']),
+    listItems() {
+      return this.getBoardItemsByList(this.list.id);
     },
     isListDraggable() {
       return isListDraggable(this.list);
@@ -73,7 +73,7 @@ export default {
       <board-list
         ref="board-list"
         :disabled="disabled"
-        :issues="listIssues"
+        :board-items="listItems"
         :list="list"
         :can-admin-list="canAdminList"
       />

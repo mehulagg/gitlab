@@ -1,4 +1,5 @@
 #import "~/graphql_shared/fragments/epic.fragment.graphql"
+#import "~/graphql_shared/fragments/label.fragment.graphql"
 
 query ListEpics(
   $fullPath: ID!
@@ -16,6 +17,12 @@ query ListEpics(
             edges {
               node {
                 ...EpicNode
+                relativePosition
+                labels {
+                  nodes {
+                    ...Label
+                  }
+                }
               }
             }
             pageInfo {

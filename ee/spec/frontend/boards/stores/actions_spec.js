@@ -794,7 +794,7 @@ describe('setActiveIssueEpic', () => {
 });
 
 describe('setActiveIssueWeight', () => {
-  const state = { issues: { [mockIssue.id]: mockIssue } };
+  const state = { boardItems: { [mockIssue.id]: mockIssue } };
   const getters = { activeIssue: mockIssue };
   const testWeight = mockIssue.weight + 1;
   const input = {
@@ -863,8 +863,8 @@ describe('moveIssue', () => {
     boardType: 'group',
     disabled: false,
     boardLists: mockLists,
-    issuesByListId: listIssues,
-    issues,
+    boardItemsByListId: listIssues,
+    boardItems: issues,
   };
 
   it('should commit MOVE_ISSUE mutation and MOVE_ISSUE_SUCCESS mutation when successful', (done) => {
