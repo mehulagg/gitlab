@@ -53,6 +53,14 @@ module Types
             null: true,
             description: 'Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month.',
             resolver: ::Resolvers::IncidentManagement::OncallShiftsResolver
+
+      def active_period_start
+        object.active_period_start&.strftime('%H:%M')
+      end
+
+      def active_period_end
+        object.active_period_end&.strftime('%H:%M')
+      end
     end
   end
 end

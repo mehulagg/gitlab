@@ -69,8 +69,8 @@ module IncidentManagement
 
       strong_memoize(:active_period_times) do
         {
-          start: active_period_start.to_time,
-          end: active_period_end.to_time
+          start: active_period_start,
+          end: active_period_end
         }
       end
     end
@@ -87,7 +87,7 @@ module IncidentManagement
     def active_period_end_after_start
       return unless active_period_start && active_period_end
 
-      unless active_period_end.to_time > active_period_start.to_time
+      unless active_period_end > active_period_start
         errors.add(:active_period_end, _('must be later than active period start'))
       end
     end

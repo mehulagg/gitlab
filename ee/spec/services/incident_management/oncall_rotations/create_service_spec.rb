@@ -155,8 +155,8 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
           it 'saves the active period times' do
             oncall_rotation = execute.payload[:oncall_rotation]
 
-            expect(oncall_rotation.active_period_start).to eq(active_period_start)
-            expect(oncall_rotation.active_period_end).to eq(active_period_end)
+            expect(oncall_rotation.active_period_start.strftime('%H:%M')).to eq(active_period_start)
+            expect(oncall_rotation.active_period_end.strftime('%H:%M')).to eq(active_period_end)
           end
         end
 
