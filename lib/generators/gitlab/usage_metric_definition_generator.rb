@@ -47,7 +47,12 @@ module Gitlab
     def distribution
       value = ['ce']
       value << 'ee' if ee?
-      value
+      value.to_yaml.sub('---', '').strip
+    end
+
+    def milestone
+      milestone = File.read('VERSION')
+      milestone.gsub(/^(\d+\.\d+).*$/, '\1').chomp
     end
 
     private
