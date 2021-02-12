@@ -19,6 +19,7 @@ RSpec.describe 'Billing plan pages', :feature do
   end
 
   before do
+    stub_feature_flags(show_billing_eoa_banner: true)
     stub_feature_flags(hide_deprecated_billing_plans: false)
     stub_experiment_for_subject(contact_sales_btn_in_app: true)
     stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}&namespace_id=#{namespace.id}")
@@ -32,6 +33,16 @@ RSpec.describe 'Billing plan pages', :feature do
   def external_upgrade_url(namespace, plan)
     if Plan::PAID_HOSTED_PLANS.include?(plan.name)
       "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{namespace.id}/upgrade/#{plan.name}-external-id"
+    end
+  end
+
+  shared_examples 'EoA banner' do
+    it 'does not display the banner', :js do
+      travel_to(Date.parse(EE::UserCalloutsHelper::EOA_BRONZE_PLAN_END_DATE) - 1.day) do
+        visit page_path
+
+        expect(page).not_to have_content("End of availability for the Bronze Plan")
+      end
     end
   end
 
@@ -180,6 +191,22 @@ RSpec.describe 'Billing plan pages', :feature do
         create(:gitlab_subscription, namespace: namespace, hosted_plan: plan, seats: 15)
       end
 
+      it 'persists the EoA bronze banner when dismissed', :js do
+        travel_to(Date.parse(EE::UserCalloutsHelper::EOA_BRONZE_PLAN_END_DATE) - 1.day) do
+          visit page_path
+
+          page.within(".js-eoa-bronze-plan-banner") do
+            expect(page).to have_content("End of availability for the Bronze Plan")
+
+            click_button "Dismiss"
+          end
+
+          visit page_path
+
+          expect(page).not_to have_content("End of availability for the Bronze Plan")
+        end
+      end
+
       it_behaves_like 'plan with header'
       it_behaves_like 'downgradable plan'
       it_behaves_like 'upgradable plan'
@@ -199,6 +226,7 @@ RSpec.describe 'Billing plan pages', :feature do
       it_behaves_like 'upgradable plan'
       it_behaves_like 'can contact sales'
       it_behaves_like 'plan with subscription table'
+      it_behaves_like 'EoA banner'
     end
 
     context 'on gold plan' do
@@ -212,6 +240,7 @@ RSpec.describe 'Billing plan pages', :feature do
       it_behaves_like 'downgradable plan'
       it_behaves_like 'non-upgradable plan'
       it_behaves_like 'plan with subscription table'
+      it_behaves_like 'EoA banner'
     end
   end
 
