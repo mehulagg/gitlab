@@ -12,6 +12,7 @@ Rails.application.configure do
   config.active_record.verbose_query_logs  = true
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = true
+  config.action_controller.enable_fragment_cache_logging = true
 
   # Show a warning when a large data set is loaded into memory
   config.active_record.warn_on_records_fetched_greater_than = 1000

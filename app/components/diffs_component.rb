@@ -2,13 +2,16 @@
 
 # A component for rendering a collection of diffs
 #
-# `context` is required, and can be, for example, a `Commit` or a `MergeRequest`
+# `context` is required, and can be, for example, a `Commit` or a `MergeRequest`.
+#   This should respond to `cache_key`
 
 class DiffsComponent < BaseComponent
   attr_reader :context, :diffs, :discussions, :environment
 
   alias_method :merge_request, :context
   alias_method :commit, :context
+
+  CACHE_EXPIRY = 7.days
 
   def initialize(context:, diffs:, discussions:, environment: nil, page_context: nil, show_whitespace_toggle: true, diff_notes_disabled: false)
     @context = context
@@ -28,9 +31,23 @@ class DiffsComponent < BaseComponent
     diffs.diff_files
   end
 
+  def cache_key_base
+    @cache_key_base ||= [
+      :diffs,
+      controller.controller_path,
+      project,
+      context,
+      helpers.diff_view,
+      params[:expanded],
+      params[:w] # whitespace toggle
+    ]
+  end
+
   def header_cache_key
-    #TODO: This needs to expire when the commit is updated somehow, like on force push
-    @header_cache_key ||= [project, context, controller.controller_path, params[:page]]
+    cache_key_base.concat([
+      params[:page],
+      :header
+    ])
   end
 
   def page_context
