@@ -107,8 +107,7 @@ the tiers are no longer mentioned in GitLab documentation:
 - Search:
   - [Filtering merge requests by approvers](../user/search/index.md#filtering-merge-requests-by-approvers)
   - [Filtering merge requests by "approved by"](../user/search/index.md#filtering-merge-requests-by-approved-by)
-  - [Advanced Global Search (Elasticsearch)](../user/search/advanced_global_search.md)
-  - [Advanced Search Syntax](../user/search/advanced_search_syntax.md)
+  - [Global Search (Elasticsearch)](../user/search/global_search.md)
 - [Service Desk](../user/project/service_desk.md)
 - [Storage usage statistics](../user/usage_quotas.md#storage-usage-statistics)
 

@@ -293,18 +293,12 @@ redirected to the commit result and given the option to return to the search res
 
 ![project SHA search redirect](img/project_search_sha_redirect.png)
 
-## Advanced Search **(PREMIUM)**
+## Global Search **(PREMIUM)**
 
 Leverage Elasticsearch for faster, more advanced code search across your entire
 GitLab instance.
 
-[Learn how to use the Advanced Search.](advanced_global_search.md)
-
-## Advanced Search Syntax **(PREMIUM)**
-
-Use advanced queries for more targeted search results.
-
-[Learn how to use the Advanced Search Syntax.](advanced_search_syntax.md)
+[Learn how to use the Global Search.](global_search.md)
 
 ## Search project settings
 
