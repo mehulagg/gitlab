@@ -12,7 +12,7 @@ ENV CHROME_URL="https://s3.amazonaws.com/gitlab-google-chrome-stable/${CHROME_DE
 # Update APT sources and install dependencies
 #
 RUN sed -i "s/httpredir.debian.org/ftp.us.debian.org/" /etc/apt/sources.list
-RUN apt-get update && apt-get install -y wget unzip xvfb lsb-release git git-lfs
+RUN apt-get update && apt-get install -y wget unzip xvfb lsb-release git git-lfs libnss3-tools
 
 ##
 # Install Docker
@@ -36,6 +36,24 @@ RUN curl --silent --show-error --fail -O "${CHROME_URL}" && \
 RUN wget -q "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip"
 RUN unzip chromedriver_linux64.zip -d /usr/local/bin
 RUN rm -f chromedriver_linux64.zip
+
+##
+# Install client certificate
+#
+RUN mkdir -p /etc/pki/nssdb
+RUN certutil -N -d sql:/etc/pki/nssdb
+RUN chmod -R a+r /etc/pki/
+COPY ./qa/tls_certificates/client/client.p12 /tmp/client.p12
+RUN pk12util -d sql:/etc/pki/nssdb -i /tmp/client.p12 -W ''
+RUN certutil -d sql:/etc/pki/nssdb/ -L
+
+##
+# Install root certificate
+#
+RUN mkdir -p /usr/share/ca-certificates/gitlab
+ADD ./qa/tls_certificates/authority/ca.crt /usr/share/ca-certificates/gitlab/
+RUN echo 'gitlab/ca.crt' >> /etc/ca-certificates.conf
+RUN chmod -R 644 /usr/share/ca-certificates/gitlab && update-ca-certificates
 
 ##
 # Install gcloud and kubectl CLI used in Auto DevOps test to create K8s
