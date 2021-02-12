@@ -214,8 +214,6 @@ module DiffHelper
     )
   end
 
-  private
-
   def diff_btn(title, name, selected)
     params_copy = safe_params.dup
     params_copy[:view] = name

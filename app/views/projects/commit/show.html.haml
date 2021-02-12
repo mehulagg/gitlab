@@ -12,7 +12,11 @@
 .container-fluid{ class: [limited_container_width, container_class] }
   = render "commit_box"
   = render "ci_menu"
-  = render "projects/diffs/diffs", diffs: @diffs, environment: @environment, diff_page_context: "is-commit"
+
+  - if Feature.enabled?(:diffs_component, @project, type: :ops, default_enabled: true)
+    = render DiffsComponent.new(context: @commit, diffs: @diffs, discussions: @discussions, environment: @environment, page_context: "is-commit")
+  - else
+    = render "projects/diffs/diffs", diffs: @diffs, environment: @environment, diff_page_context: "is-commit"
 
   .limited-width-notes
     = render "shared/notes/notes_with_form", :autocomplete => true

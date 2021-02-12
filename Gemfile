@@ -105,6 +105,9 @@ gem 'kaminari', '~> 1.0'
 # HAML
 gem 'hamlit', '~> 2.14.4'
 
+# Add view_component support, to be removed after upgrading to Rails 6.1
+gem 'view_component', require: 'view_component/engine'
+
 # Files attachments
 gem 'carrierwave', '~> 1.3'
 gem 'mini_magick', '~> 4.10.1'
