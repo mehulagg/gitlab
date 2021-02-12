@@ -65,10 +65,9 @@ request is as follows:
       template already provided in the "Description" field.
    1. If you are contributing documentation, choose `Documentation` from the
       "Choose a template" menu and fill in the description according to the template.
-   1. Mention the issue(s) your merge request solves, using the `Solves #XXX`,
-      `Closes #XXX`, or `Refs #XXX` syntax.
-      Referenced issues are not [auto-closed](../../user/project/issues/managing_issues.md#closing-issues-automatically)
-      once the merge request is merged and must be closed manually.
+   1. Use the syntax `Solves #XXX`, `Closes #XXX`, or `Refs #XXX` to mention the issue(s) your merge
+      request addresses. Referenced issues do not [close automatically](../../user/project/issues/managing_issues.md#closing-issues-automatically).
+      You must close them manually once the merge request is merged.
 1. If you're allowed to, set a relevant milestone and [labels](issue_workflow.md).
 1. UI changes should use available components from the GitLab Design System,
    [Pajamas](https://design.gitlab.com/). The MR must include *Before* and
