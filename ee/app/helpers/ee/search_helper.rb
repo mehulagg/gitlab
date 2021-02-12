@@ -88,7 +88,7 @@ module EE
 
       tags = {}
       tags[:doc_link_start], tags[:doc_link_end] = tag.a(PLACEHOLDER,
-                                                         href: help_page_path('user/search/advanced_search_syntax.md'),
+                                                         href: help_page_path('user/search/global_search'),
                                                          rel: :noopener,
                                                          target: '_blank')
                                                      .split(PLACEHOLDER)
@@ -107,9 +107,9 @@ module EE
       # making sure all the tags are marked `html_safe`
       message =
         if enabled
-          _('%{doc_link_start}Advanced search%{doc_link_end} is enabled.')
+          _('%{doc_link_start}Global search%{doc_link_end} is enabled.')
         else
-          _('%{doc_link_start}Advanced search%{doc_link_end} is disabled since %{ref_elem} is not the default branch; %{default_branch_link_start}search on %{default_branch} instead%{default_branch_link_end}.')
+          _('%{doc_link_start}Global search%{doc_link_end} is disabled since %{ref_elem} is not the default branch; %{default_branch_link_start}search on %{default_branch} instead%{default_branch_link_end}.')
         end % tags.transform_values(&:html_safe)
 
       # wrap it inside a `div` for testing purposes
