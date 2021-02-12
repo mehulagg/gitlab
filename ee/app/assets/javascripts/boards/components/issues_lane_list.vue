@@ -87,9 +87,12 @@ export default {
     highlighted: {
       handler() {
         if (this.highlighted) {
-          this.$el.scrollIntoView(false);
+          this.$nextTick(() => {
+            this.$el.scrollIntoView(false);
+          });
         }
       },
+      immediate: true,
     },
   },
   created() {
