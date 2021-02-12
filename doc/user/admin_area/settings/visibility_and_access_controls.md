@@ -123,8 +123,8 @@ For more details on group visibility, see [Public access](../../../public_access
 
 To set the restricted visibility levels for projects, snippets, and selected pages:
 
-1. Check the desired visibility levels to restrict.
-1. Click **Save changes**.
+1. Select the desired visibility levels to restrict.
+1. Select **Save changes**.
 
 For more details on project visibility, see [Public access](../../../public_access/public_access.md).
 
