@@ -291,7 +291,7 @@ RSpec.describe MergeRequest do
   describe '#has_security_reports?' do
     subject { merge_request.has_security_reports? }
 
-    let(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
 
     before do
       stub_licensed_features(dast: true)
