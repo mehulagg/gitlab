@@ -753,18 +753,49 @@ You must have permission to run an on-demand DAST scan against a protected branc
 The default branch is automatically protected. For more information, see
 [Pipeline security on protected branches](../../../ci/pipelines/index.md#pipeline-security-on-protected-branches).
 
-To run an on-demand DAST scan, you need:
+Prerequisites:
 
 - A [scanner profile](#create-a-scanner-profile).
 - A [site profile](#create-a-site-profile).
 - If you are running an active scan the site profile must be [validated](#validate-a-site-profile).
 
+To run an on-demand scan, you must either:
+
+- [Create an on-demand scan](#create-an-on-demand-scan).
+- [Run a saved on-demand scan](#run-a-saved-on-demand-scan).
+
+### Create an on-demand scan
+
 1. From your project's home page, go to **Security & Compliance > On-demand Scans** in the left sidebar.
 1. In **Scanner profile**, select a scanner profile from the dropdown.
 1. In **Site profile**, select a site profile from the dropdown.
-1. Click **Run scan**.
+1. To run the on-demand scan now _and_ save it for later reuse, select **Save and run scan**, otherwise select **Save scan**.
 
 The on-demand DAST scan runs and the project's dashboard shows the results.
+
+#### Run a saved on-demand scan
+
+1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Select the **Saved Scans** tab.
+1. In the scan's row select **Run scan**.
+
+#### Edit an on-demand scan
+
+1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Select **Manage** in the **DAST Profiles** row.
+1. Select the **Saved Scans** tab.
+1. In the scanner's row select the **More actions** (**{ellipsis_v}**) menu, then select **Edit**.
+1. Edit the form.
+1. Select **Save scan**.
+
+#### Delete an on-demand scan
+
+1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Select **Manage** in the **DAST Profiles** row.
+1. Select the **Saved Scans** tab.
+1. In the scanner's row select the **More actions** (**{ellipsis_v}**) menu, then select **Delete**.
+1. Edit the form.
+1. Select **Delete** to confirm the deletion.
 
 ## Site profile
 
