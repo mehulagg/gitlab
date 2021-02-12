@@ -40,7 +40,7 @@ RSpec.describe HistoricalData do
   end
 
   describe '.max_historical_user_count' do
-    let(:current_license) { create(:license, starts_at: Date.current - 1.month) }
+    let(:current_license) { create(:license, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month) }
 
     before do
       # stub current license to cover a shorter period (one month ago until a date in the future) than the one
@@ -110,7 +110,9 @@ RSpec.describe HistoricalData do
 
       with_them do
         let(:plan) { gl_plan }
-        let(:current_license) { create(:license, plan: plan, starts_at: Date.current - 1.month) }
+        let(:current_license) do
+          create(:license, plan: plan, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month)
+        end
 
         it 'does not count guest users' do
           expect(described_class.max_historical_user_count).to eq(expected_count)

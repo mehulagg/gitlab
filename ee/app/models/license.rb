@@ -659,14 +659,10 @@ class License < ApplicationRecord
   end
 
   def previous_started_at
-    strong_memoize(:previous_started_at) do
-      (License.previous&.starts_at || starts_at - 1.year).beginning_of_day
-    end
+    (License.previous&.starts_at || starts_at - 1.year).beginning_of_day
   end
 
   def previous_expired_at
-    strong_memoize(:previous_expired_at) do
-      (License.previous&.expires_at || starts_at).end_of_day
-    end
+    (License.previous&.expires_at || starts_at).end_of_day
   end
 end
