@@ -301,6 +301,7 @@ module EE
     end
 
     def show_discover_project_security?(project)
+      # hack return true here
       !!current_user &&
         ::Gitlab.com? &&
         !project.feature_available?(:security_dashboard) &&

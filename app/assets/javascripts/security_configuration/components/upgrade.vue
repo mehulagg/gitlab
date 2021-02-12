@@ -10,6 +10,17 @@ export default {
   i18n: {
     UPGRADE_CTA,
   },
+  methods: {
+    getLink: () => {
+      // if (window.gon?.dot_com) {
+      //   return DISCOVER_SECURITY_HREF;
+      // } else {
+      //   return PRICING_HREF;
+      // }
+      // They're viewing a project in a group/namespace they are an admin of
+      // They're on any plan except Ultimate
+    },
+  },
 };
 </script>
 
@@ -17,7 +28,7 @@ export default {
   <span>
     <gl-sprintf :message="$options.i18n.UPGRADE_CTA">
       <template #link="{ content }">
-        <gl-link target="_blank" href="https://about.gitlab.com/pricing/">
+        <gl-link target="_blank" :href="getLink()">
           {{ content }}
         </gl-link>
       </template>

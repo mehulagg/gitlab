@@ -66,6 +66,9 @@ export const UPGRADE_CTA = s__(
   'SecurityConfiguration|Available with %{linkStart}upgrade or free trial%{linkEnd}',
 );
 
+export const PRICING_HREF = 'https://about.gitlab.com/pricing/';
+export const DISCOVER_SECURITY_HREF = 'https://about.gitlab.com/pricing/';
+
 export const features = [
   {
     name: SAST_NAME,
