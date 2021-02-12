@@ -339,6 +339,51 @@ include:
   - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
 ```
 
+#### Run both branch and merge request pipelines without duplication
+
+> [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/201845) GitLab 13.8.
+
+You can use the [`CI_OPEN_MERGE_REQUESTS` variable](../variables/predefined_variables)
+in `workflow` rules to switch from branch pipelines to merge request pipelines when
+a merge request is created. Use this variable to:
+
+- Run jobs in branch pipelines when there is no merge request open for the branch.
+- Run jobs in merge request pipelines when there is a merge request open for the branch.
+
+This example runs branch and merge request pipelines only, but does not run
+pipelines for any other case. The configuration can be translated as:
+
+- If the pipeline is triggered by a merge request, run a merge request pipeline.
+- If the pipeline is triggered by a change to a branch, but a merge request is open
+  for that branch, do not run a branch pipeline.
+- If the pipeline is triggered by a change to a branch, but without any open merge requests,
+  run a branch pipeline.
+
+```yaml
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+```
+
+Alternatively, you can add a rule to an existing `workflow` section that prevents
+[duplicated pipelines](#prevent-duplicate-pipelines). Add this rule at the top of
+the `workflow` section, followed by the other rules that were already there:
+
+```yaml
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE == "push" && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - ...                # Previously defined workflow rules here
+```
+
+Some [pipelines triggered by the API](../triggers/README.md) also have a `$CI_COMMIT_BRANCH`
+set. The `$CI_PIPELINE_SOURCE == "push"` is needed to make sure those triggered pipelines
+are not blocked by the rule.
+
 ### `include`
 
 > - Introduced in [GitLab Premium](https://about.gitlab.com/pricing/) 10.5.
@@ -1109,6 +1154,8 @@ Jobs defined with `rules` can trigger multiple pipelines with the same action. Y
 don't have to explicitly configure rules for each type of pipeline to trigger them
 accidentally. Rules that are too broad could cause simultaneous pipelines of a different
 type to run unexpectedly.
+
+You can prevent duplicate pipelines with [`workflow` rules](#run-both-branch-and-merge-request-pipelines-without-duplication).
 
 Some configurations that have the potential to cause duplicate pipelines cause a
 [pipeline warning](../troubleshooting.md#pipeline-warnings) to be displayed.
