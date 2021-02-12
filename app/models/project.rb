@@ -291,6 +291,8 @@ class Project < ApplicationRecord
   # The relation :ci_pipelines includes all those that directly contribute to the
   # latest status of a ref. This does not include dangling pipelines such as those
   # from webide, child pipelines, etc.
+  #
+  # This is just a test
   has_many :ci_pipelines,
           -> { ci_sources },
           class_name: 'Ci::Pipeline',
