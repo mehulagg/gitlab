@@ -1,5 +1,5 @@
 <script>
-import { GlPagination } from '@gitlab/ui';
+import { GlPagination, GlFilteredSearchToken } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import Api from '~/api';
@@ -278,6 +278,18 @@ export default {
           operators: [{ value: '=', description: __('is'), default: 'true' }],
           fetchPath: this.projectPath,
           fetchAuthors: Api.projectUsers.bind(Api),
+        },
+        {
+          type: 'status',
+          icon: 'requirements',
+          title: __('Status'),
+          unique: true,
+          token: GlFilteredSearchToken,
+          operators: [{ value: '=', description: __('is'), default: 'true' }],
+          options: [
+            { icon: 'status_success', value: TestReportStatus.Passed, title: __('Passed') },
+            { icon: 'status_failed', value: TestReportStatus.Failed, title: __('Failed') },
+          ],
         },
       ];
     },
