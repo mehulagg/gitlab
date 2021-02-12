@@ -152,6 +152,7 @@
   animation-name: board-column-flash-border;
   animation-duration: 1.2s;
   animation-fill-mode: forwards;
+  animation-timing-function: ease-in-out;
 }
 
 @keyframes board-column-flash-border {
@@ -162,7 +163,7 @@
 
   25%, 75% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(0.99);
   }
 
   50% {
