@@ -3,6 +3,7 @@ import { KeyCode, KeyMod, Range } from 'monaco-editor';
 import Disposable from '~/ide/lib/common/disposable';
 import { editorOptions } from '~/ide/lib/editor_options';
 import keymap from '~/ide/lib/keymap.json';
+import ModelManager from '~/ide/lib/common/model_manager';
 import { EditorLiteExtension } from '~/editor/extensions/editor_lite_extension_base';
 import { EDITOR_TYPE_DIFF } from '~/editor/constants';
 
@@ -11,11 +12,11 @@ const isDiffEditorType = (instance) => {
 };
 
 export class EditorWebIdeExtension extends EditorLiteExtension {
-  constructor({ instance, modelManager, ...options } = {}) {
+  constructor({ instance, ...options } = {}) {
     super({
       instance,
       ...options,
-      modelManager,
+      modelManager: new ModelManager(),
       disposable: new Disposable(),
       debouncedUpdate: debounce(() => {
         instance.updateDimensions();

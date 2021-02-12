@@ -14,7 +14,6 @@ import {
 } from '~/performance/constants';
 import { performanceMarkAndMeasure } from '~/performance/utils';
 import { defaultDiffEditorOptions, defaultEditorOptions } from '~/ide/lib/editor_options';
-import ModelManager from '~/ide/lib/common/model_manager';
 import { EDITOR_TYPE_DIFF } from '~/editor/constants';
 import EditorLite from '~/editor/editor_lite';
 import { EditorWebIdeExtension } from '~/editor/extensions/editor_lite_webide_ext';
@@ -51,7 +50,6 @@ export default {
       images: {},
       rules: {},
       globalEditor: null,
-      modelManager: new ModelManager(),
     };
   },
   computed: {
@@ -279,7 +277,6 @@ export default {
         this.editor.use(
           new EditorWebIdeExtension({
             instance: this.editor,
-            modelManager: this.modelManager,
             store: this.$store,
             file: this.file,
             options: this.editorOptions,
