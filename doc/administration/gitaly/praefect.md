@@ -498,6 +498,10 @@ application server, or a Gitaly node.
    }
    ```
 
+   NOTE:
+   In [GitLab 13.8 and earlier](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/4988),
+   Gitaly nodes were configured directly under the virtual storage, and not under the `nodes` key.
+
 1. [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2013) in GitLab 13.1 and later, enable [distribution of reads](#distributed-reads).
 
 1. Save the changes to `/etc/gitlab/gitlab.rb` and [reconfigure
