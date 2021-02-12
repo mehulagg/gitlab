@@ -266,6 +266,7 @@ class GfmAutoComplete {
       },
       // eslint-disable-next-line no-template-curly-in-string
       insertTpl: '${atwho-at}${username}',
+      limit: 10,
       searchKey: 'search',
       alwaysHighlightFirst: true,
       skipSpecialCharacterTest: true,
@@ -310,6 +311,30 @@ class GfmAutoComplete {
           }
 
           return data;
+        },
+        sorter(query, items) {
+          if (!query) {
+            return items;
+          }
+
+          const lowercaseQuery = query.toLowerCase();
+          const members = items.slice();
+
+          return members.sort((a, b) => {
+            if (GfmAutoComplete.Members.nameOrUsernameStartsWith(a, lowercaseQuery)) {
+              return -1;
+            }
+            if (GfmAutoComplete.Members.nameOrUsernameStartsWith(b, lowercaseQuery)) {
+              return 1;
+            }
+            if (GfmAutoComplete.Members.nameOrUsernameIncludes(a, lowercaseQuery)) {
+              return -1;
+            }
+            if (GfmAutoComplete.Members.nameOrUsernameIncludes(b, lowercaseQuery)) {
+              return 1;
+            }
+            return 0;
+          });
         },
       },
     });
@@ -771,6 +796,14 @@ GfmAutoComplete.Members = {
     return `<li>${avatarTag} ${username} <small>${escape(
       title,
     )}${availabilityStatus}</small> ${icon}</li>`;
+  },
+  nameOrUsernameStartsWith(member, query) {
+    // `member.search` is a name:username string like `MargeSimpson msimpson`
+    return member.search.split(' ').some((name) => name.toLowerCase().startsWith(query));
+  },
+  nameOrUsernameIncludes(member, query) {
+    // `member.search` is a name:username string like `MargeSimpson msimpson`
+    return member.search.toLowerCase().includes(query);
   },
 };
 GfmAutoComplete.Labels = {
