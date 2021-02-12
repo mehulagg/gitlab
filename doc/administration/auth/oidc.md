@@ -157,12 +157,10 @@ for more details:
 
 ### Microsoft Azure
 
-Sign in to the [Azure Portal](https://portal.azure.com), and follow the
-instructions in the [Microsoft Quickstart
-documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app)
+The OpenID Connect protocol for Microsoft Azure uses the [Microsoft identity platform (v2) endpoints](https://docs.microsoft.com/en-us/azure/active-directory/azuread-dev/azure-ad-endpoint-comparison).
+To get started, sign in to the [Azure Portal](https://portal.azure.com),
+and follow the instructions in the [Microsoft Quickstart documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app)
 to obtain the tenant ID, client ID, and client secret for your app.
-
-For more details, see the [Microsoft documentation for more details of the OpenID connect protocol](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc).
 
 Example Omnibus configuration block:
 
@@ -187,6 +185,8 @@ Example Omnibus configuration block:
    }
  }
 ```
+
+For more details, see the [Microsoft documentation for more details of the OpenID connect protocol](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc).
 
 ## Troubleshooting
 
