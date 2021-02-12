@@ -139,20 +139,19 @@
 }
 
 .board-column-highlighted::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    pointer-events: none;
-    opacity: 0;
-    z-index: -1;
-    box-shadow: 0 0 6px 3px $blue-200;
-    animation-name: board-column-flash-border;
-    animation-duration: 1.2s;
-    animation-fill-mode: forwards;
-  }
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: -1;
+  box-shadow: 0 0 6px 3px $blue-200;
+  animation-name: board-column-flash-border;
+  animation-duration: 1.2s;
+  animation-fill-mode: forwards;
 }
 
 @keyframes board-column-flash-border {
