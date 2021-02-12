@@ -156,17 +156,26 @@ RSpec.describe GeoNode, :request_store, :geo, type: :model do
             expect(node).to be_valid
 
             expect(node.oauth_application).to be_present
-            expect(node.oauth_application.redirect_uri).to eq(node.oauth_callback_url)
+            expect(node.oauth_application).to have_attributes(
+              confidential: true,
+              trusted: true,
+              redirect_uri: node.oauth_callback_url
+            )
           end
         end
 
-        it 'overwrites redirect_uri' do
+        it 'overwrites default attributes' do
+          node.oauth_application.confidential = false
+          node.oauth_application.trusted = false
           node.oauth_application.redirect_uri = 'http://wrong-callback-url'
           node.oauth_application.save!
 
           expect(node).to be_valid
-
-          expect(node.oauth_application.redirect_uri).to eq(node.oauth_callback_url)
+          expect(node.oauth_application).to have_attributes(
+            confidential: true,
+            trusted: true,
+            redirect_uri: node.oauth_callback_url
+          )
         end
       end
 

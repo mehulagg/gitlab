@@ -2,8 +2,8 @@
 
 class GeoNode < ApplicationRecord
   include Presentable
-  include Geo::SelectiveSync
   include StripAttribute
+  include Geo::SelectiveSync
 
   SELECTIVE_SYNC_TYPES = %w[namespaces shards].freeze
 
@@ -379,6 +379,8 @@ class GeoNode < ApplicationRecord
 
     self.build_oauth_application if oauth_application.nil?
     self.oauth_application.name = "Geo node: #{self.url}"
+    self.oauth_application.trusted = true
+    self.oauth_application.confidential = true
     self.oauth_application.redirect_uri = oauth_callback_url
   end
 
