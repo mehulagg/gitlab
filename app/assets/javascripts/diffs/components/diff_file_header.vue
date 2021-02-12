@@ -339,13 +339,13 @@ export default {
       <gl-form-checkbox
         v-if="isReviewable && showLocalFileReviews"
         v-gl-tooltip.hover
+        class="gl-mr-5"
         data-testid="fileReviewCheckbox"
-        class="gl-mb-0"
         :title="$options.i18n.fileReviewTooltip"
         :checked="reviewed"
         @change="toggleReview"
       >
-        <span class="gl-line-height-20">
+        <span>
           {{ $options.i18n.fileReviewLabel }}
         </span>
       </gl-form-checkbox>

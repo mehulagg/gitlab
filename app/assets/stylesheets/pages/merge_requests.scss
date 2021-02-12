@@ -439,6 +439,20 @@ $mr-widget-min-height: 69px;
   }
 }
 
+.gl-form-checkbox {
+  display: grid;
+  place-items: center;
+
+  label {
+    font-weight: normal;
+  }
+
+  input.custom-control-input {
+    height: 1rem;
+  }
+}
+
+
 .nothing-here-block {
   img {
     width: 230px;
