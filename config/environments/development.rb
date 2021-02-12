@@ -11,7 +11,7 @@ Rails.application.configure do
   # Show full error reports and disable caching
   config.active_record.verbose_query_logs  = true
   config.consider_all_requests_local       = true
-  config.action_controller.perform_caching = false
+  config.action_controller.perform_caching = true
 
   # Show a warning when a large data set is loaded into memory
   config.active_record.warn_on_records_fetched_greater_than = 1000
