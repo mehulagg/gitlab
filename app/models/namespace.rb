@@ -17,6 +17,8 @@ class Namespace < ApplicationRecord
   # Prevent users from creating unreasonably deep level of nesting.
   # The number 20 was taken based on maximum nesting level of
   # Android repo (15) + some extra backup.
+  #
+  # This is just a test.
   NUMBER_OF_ANCESTORS_ALLOWED = 20
 
   SHARED_RUNNERS_SETTINGS = %w[disabled_and_unoverridable disabled_with_override enabled].freeze
