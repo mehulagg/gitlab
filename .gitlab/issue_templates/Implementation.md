@@ -41,9 +41,10 @@ Steps and the parts of the code that will need to get updated. The plan can also
 call-out responsibilities for other team members or teams.
 -->
 
-- [ ] ~frontend Step 1
-  - [ ] `@person` Step 1a
-- [ ] ~frontend Step 2
+| Task # | Issue      | Description      | Department(s) |
+| ------ | ---------- | ---------------- | ------------- |
+| 1      | issue_link | task_description | ~backend      |
+| 2      | issue_link | task_description | ~frontend     |
 
 
 <!--
