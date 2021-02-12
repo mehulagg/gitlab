@@ -32,12 +32,12 @@ export function fullEpicBoardId(epicBoardId) {
 }
 
 export function formatListEpics(listEpics) {
-  const epics = {};
-  let listEpicsCount;
+  const boardItems = {};
+  let listItemsCount;
 
   const listData = listEpics.nodes.reduce((map, list) => {
     // TODO update when list.epics.count is available: https://gitlab.com/gitlab-org/gitlab/-/issues/301017
-    listEpicsCount = list.epics.edges.length;
+    listItemsCount = list.epics.edges.length;
     let sortedEpics = list.epics.edges.map((epicNode) => ({
       ...epicNode.node,
     }));
@@ -55,14 +55,14 @@ export function formatListEpics(listEpics) {
           assignees: i.assignees?.nodes || [],
         };
 
-        epics[id] = listEpic;
+        boardItems[id] = listEpic;
 
         return id;
       }),
     };
   }, {});
 
-  return { listData, epics, listEpicsCount };
+  return { listData, boardItems, listItemsCount };
 }
 
 export function formatEpicListsPageInfo(lists) {

@@ -43,7 +43,9 @@ describe('ee/BoardContentSidebar', () => {
   beforeEach(() => {
     store = createStore();
     store.state.sidebarType = ISSUABLE;
-    store.state.issues = { 1: { title: 'One', referencePath: 'path#2', assignees: [], iid: '2' } };
+    store.state.boardItems = {
+      1: { title: 'One', referencePath: 'path#2', assignees: [], iid: '2' },
+    };
     store.state.activeIssue = { title: 'One', referencePath: 'path#2', assignees: [], iid: '2' };
     store.state.activeId = '1';
 
