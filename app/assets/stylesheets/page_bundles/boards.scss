@@ -138,6 +138,11 @@
   border: 1px solid var(--gray-100, $gray-100);
 }
 
+// to highlight columns we have animated pulse of box-shadow
+// we don't want to actually animate the box-shadow property
+// because that causes costly repaints. Instead we can add a
+// pseudo-element that is the same size as our element, then
+// animate opacity/transform to give a soothing single pulse
 .board-column-highlighted::after {
   content: '';
   position: absolute;
@@ -156,12 +161,14 @@
 }
 
 @keyframes board-column-flash-border {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0;
     transform: scale(0.98);
   }
 
-  25%, 75% {
+  25%,
+  75% {
     opacity: 1;
     transform: scale(0.99);
   }
