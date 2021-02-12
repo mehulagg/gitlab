@@ -23,8 +23,8 @@
 /doc/administration/snippets/ @aqualls
 /doc/administration/troubleshooting @axil @marcia @mjang1
 /doc/ci/ @marcel.amirault @sselhorn
-/doc/ci/release/ @axil
 /doc/ci/environments/ @axil
+/doc/ci/release/ @axil
 /doc/ci/services/ @sselhorn
 /doc/ci/test_cases/ @msedlakjakubowski
 /doc/development/ @marcia @mjang1
