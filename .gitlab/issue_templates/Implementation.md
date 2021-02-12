@@ -46,6 +46,27 @@ call-out responsibilities for other team members or teams.
 | 1      | issue_link | task_description | ~backend      |
 | 2      | issue_link | task_description | ~frontend     |
 
+## Decisions
+
+<!--
+Summarize cross-department decisions that affect the overall implementation. For example:
+
+### GraphQL schema
+
+#### `createEntity` mutation
+
+Summarize the mutation's purpose.
+
+```graphql
+mutation createEntity($input: EntityInput!) {
+  createEntity(input: $input) {
+    errors
+  }
+}
+```
+
+-->
+
 
 <!--
 Workflow and other relevant labels
