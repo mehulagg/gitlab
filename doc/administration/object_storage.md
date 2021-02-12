@@ -75,8 +75,7 @@ types. If you want to use local storage for specific object types, you can
 
 Most types of objects, such as CI artifacts, LFS files, upload
 attachments, and so on can be saved in object storage by specifying a single
-credential for object storage with multiple buckets. A [different bucket
-for each type must be used](#use-separate-buckets).
+credential for object storage with multiple buckets.
 
 When the consolidated form is:
 
