@@ -350,7 +350,7 @@ describe('OnDemandScansForm', () => {
             actionFunction();
           });
 
-          it(`triggers dastProfileUpdateMutation mutation with runAfterCreate set to ${runAfterCreate}`, async () => {
+          it(`triggers dastProfileUpdateMutation mutation with runAfterUpdate set to ${runAfterUpdate}`, async () => {
             expect(subject.vm.$apollo.mutate).toHaveBeenCalledWith({
               mutation: dastProfileUpdateMutation,
               variables: {
@@ -361,7 +361,7 @@ describe('OnDemandScansForm', () => {
                   dastScannerProfileId: passiveScannerProfile.id,
                   dastSiteProfileId: nonValidatedSiteProfile.id,
                   fullPath: projectPath,
-                  runAfterCreate,
+                  runAfterUpdate,
                 },
               },
             });
