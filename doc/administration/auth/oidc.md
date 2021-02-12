@@ -130,8 +130,7 @@ different providers with Omnibus GitLab.
 
 ### Google
 
-See the [Google
-documentation](https://developers.google.com/identity/protocols/oauth2/openid-connect)
+See the [Google documentation](https://developers.google.com/identity/protocols/oauth2/openid-connect)
 for more details:
 
 ```ruby
@@ -158,7 +157,14 @@ for more details:
 
 ### Microsoft Azure
 
-See the [Microsoft documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oid) for more details:
+Sign in to the [Azure Portal](https://portal.azure.com), and follow the
+instructions in the [Microsoft Quickstart
+documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app)
+to obtain the tenant ID, client ID, and client secret for your app.
+
+For more details, see the [Microsoft documentation for more details of the OpenID connect protocol](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc).
+
+Example Omnibus configuration block:
 
 ```ruby
  gitlab_rails['omniauth_providers'] = [
