@@ -23,11 +23,7 @@ class ApprovalState
   def self.filter_author(users, merge_request)
     return users if merge_request.target_project.merge_requests_author_approval?
 
-    if users.is_a?(ActiveRecord::Relation) && !users.loaded?
-      users.where.not(id: merge_request.author_id)
-    else
-      users - [merge_request.author]
-    end
+    users - [merge_request.author]
   end
 
   # Excludes the author if 'committers-approval' is explicitly disabled on project settings.
