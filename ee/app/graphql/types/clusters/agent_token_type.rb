@@ -19,6 +19,11 @@ module Types
             null: true,
             description: 'Timestamp the token was created.'
 
+      field :description,
+            GraphQL::STRING_TYPE,
+            null: true,
+            description: 'Description of the token.'
+
       field :id,
             ::Types::GlobalIDType[::Clusters::AgentToken],
             null: false,

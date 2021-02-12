@@ -3,10 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe Clusters::AgentTokens::CreateService do
-  subject(:service) { described_class.new(container: project, current_user: user) }
+  subject(:service) { described_class.new(container: project, current_user: user, params: params) }
 
   let_it_be(:user) { create(:user) }
   let(:cluster_agent) { create(:cluster_agent) }
+  let(:params) { { agent_id: cluster_agent.id } }
   let(:project) { cluster_agent.project }
 
   before do
@@ -16,11 +17,11 @@ RSpec.describe Clusters::AgentTokens::CreateService do
   describe '#execute' do
     context 'without premium plan' do
       it 'does not create a new token' do
-        expect { service.execute(cluster_agent) }.not_to change(Clusters::AgentToken, :count)
+        expect { service.execute }.not_to change(Clusters::AgentToken, :count)
       end
 
       it 'returns missing license error' do
-        result = service.execute(cluster_agent)
+        result = service.execute
 
         expect(result.status).to eq(:error)
         expect(result.message).to eq('This feature is only available for premium plans')
@@ -32,30 +33,40 @@ RSpec.describe Clusters::AgentTokens::CreateService do
         end
 
         it 'does not create a new token due to user permissions' do
-          expect { service.execute(cluster_agent) }.not_to change(::Clusters::AgentToken, :count)
+          expect { service.execute }.not_to change(::Clusters::AgentToken, :count)
         end
 
         it 'returns permission errors', :aggregate_failures do
-          result = service.execute(cluster_agent)
+          result = service.execute
 
           expect(result.status).to eq(:error)
           expect(result.message).to eq('User has insufficient permissions to create a token for this project')
         end
 
         context 'with user permissions' do
+          let(:description) { 'token description' }
+          let(:params) { { agent_id: cluster_agent.id, description: description } }
+
           before do
             project.add_maintainer(user)
           end
 
           it 'creates a new token' do
-            expect { service.execute(cluster_agent) }.to change { ::Clusters::AgentToken.count }.by(1)
+            expect { service.execute }.to change { ::Clusters::AgentToken.count }.by(1)
           end
 
           it 'returns success status', :aggregate_failures do
-            result = service.execute(cluster_agent)
+            result = service.execute
 
             expect(result.status).to eq(:success)
+            expect(result.message).to be_nil
+          end
+
+          it 'returns token information', :aggregate_failures do
+            result = service.execute
+
             expect(result.payload[:secret]).not_to be_nil
+            expect(result.payload[:token].description).to eq(description)
           end
         end
       end
