@@ -3,7 +3,8 @@ import {
   GlAvatarLabeled,
   GlAvatarLink,
   GlBadge,
-  GlButton,
+  GlDropdown,
+  GlDropdownItem,
   GlPagination,
   GlSearchBoxByType,
   GlTable,
@@ -30,7 +31,8 @@ export default {
     GlAvatarLabeled,
     GlAvatarLink,
     GlBadge,
-    GlButton,
+    GlDropdown,
+    GlDropdownItem,
     GlPagination,
     GlSearchBoxByType,
     GlTable,
@@ -174,12 +176,13 @@ export default {
       </template>
 
       <template #cell(actions)="data">
-        <gl-button
-          v-gl-modal="$options.removeMemberModalId"
-          variant="danger"
-          icon="remove"
-          @click="setMemberToRemove(data.item.user)"
-        />
+        <gl-dropdown icon="ellipsis_h" :right="true">
+          <gl-dropdown-item
+            v-gl-modal="$options.removeMemberModalId"
+            @click="setMemberToRemove(data.item.user)"
+            >{{ __('Remove user') }}</gl-dropdown-item
+          >
+        </gl-dropdown>
       </template>
     </gl-table>
 

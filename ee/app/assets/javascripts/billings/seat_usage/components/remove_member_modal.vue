@@ -39,7 +39,7 @@ export default {
       required: true,
     },
     namespaceId: {
-      type: Number,
+      type: Number | String,
       required: true,
     },
   },
