@@ -733,8 +733,8 @@ the scan. You must start it manually.
 
 An on-demand DAST scan:
 
-- Uses settings in the site profile and scanner profile you select when you run the scan,
-  instead of those in the `.gitlab-ci.yml` file.
+- Uses settings in the [site profile](#site-profile) and [scanner profile](#scanner-profile)
+  you select when you run the scan, instead of those in the `.gitlab-ci.yml` file.
 - Is associated with your project's default branch.
 
 ### On-demand scan modes
@@ -759,12 +759,12 @@ Prerequisites:
 - A [site profile](#create-a-site-profile).
 - If you are running an active scan the site profile must be [validated](#validate-a-site-profile).
 
-To run an on-demand scan, you must either:
+To run an on-demand scan, either:
 
-- [Create an on-demand scan](#create-an-on-demand-scan).
+- [Run a custom on-demand scan](#run-a-custom-on-demand-scan).
 - [Run a saved on-demand scan](#run-a-saved-on-demand-scan).
 
-### Create an on-demand scan
+### Run a custom on-demand scan
 
 1. From your project's home page, go to **Security & Compliance > On-demand Scans** in the left sidebar.
 1. In **Scanner profile**, select a scanner profile from the dropdown.
