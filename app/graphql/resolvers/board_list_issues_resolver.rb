@@ -14,6 +14,8 @@ module Resolvers
 
     def resolve(**args)
       filter_params = issue_filters(args[:filters]).merge(board_id: list.board.id, id: list.id)
+      filter_params[:with_cte] = true
+
       service = ::Boards::Issues::ListService.new(list.board.resource_parent, context[:current_user], filter_params)
 
       offset_pagination(service.execute)

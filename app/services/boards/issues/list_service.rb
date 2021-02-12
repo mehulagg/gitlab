@@ -24,7 +24,7 @@ module Boards
       private
 
       def ordered_items
-        items.order_by_position_and_priority(with_cte: params[:search].present?)
+        items.order_by_position_and_priority(with_cte: params[:search].present? || params[:with_cte])
       end
 
       def finder
