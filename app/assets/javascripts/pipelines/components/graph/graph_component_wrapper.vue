@@ -41,6 +41,7 @@ export default {
         headers: {
           'X-GITLAB-GRAPHQL-FEATURE-CORRELATION': 'verify/ci/pipeline-graph',
           'X-GITLAB-GRAPHQL-RESOURCE-ETAG': 'pipelines/id/123',
+          'X-REQUESTED_WITH': 'XMLHttpRequest',
         },
       },
       query: getPipelineDetails,

@@ -64,6 +64,8 @@ module Ci
       each_pipelines_merge_request_path(pipeline) do |path|
         store.touch(path)
       end
+
+      # TODO: Touch GraphQL caches
     end
   end
 end
