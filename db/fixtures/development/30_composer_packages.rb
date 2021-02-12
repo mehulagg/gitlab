@@ -89,7 +89,7 @@ Gitlab::Seeder.quiet do
 
   unless ENV[flag]
     puts "Use the `#{flag}` environment variable to seed composer packages"
-    next
+    exit
   end
 
   Sidekiq::Testing.inline! do
