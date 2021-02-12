@@ -57,10 +57,13 @@ export default {
     list: {
       handler() {
         if (this.list.highlighted) {
-          this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          this.$nextTick(() => {
+            this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
         }
       },
       deep: true,
+      immediate: true,
     },
   },
   mounted() {

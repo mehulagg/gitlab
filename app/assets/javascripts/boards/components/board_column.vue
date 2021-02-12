@@ -54,9 +54,12 @@ export default {
     highlighted: {
       handler() {
         if (this.highlighted) {
-          this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          this.$nextTick(() => {
+            this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
         }
       },
+      immediate: true,
     },
   },
   methods: {
