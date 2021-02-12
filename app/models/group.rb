@@ -247,6 +247,12 @@ class Group < Namespace
     level <= parent.visibility_level
   end
 
+  def nature_of_parent
+    if subgroup? && parent.user?
+      errors.add(:parent_id, 'a group cannot have a namespace as their parent')
+    end
+  end
+
   def visibility_level_allowed_by_projects?(level = self.visibility_level)
     !projects.where('visibility_level > ?', level).exists?
   end

@@ -63,6 +63,7 @@ class Namespace < ApplicationRecord
 
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
+  validate :nature_of_parent
   validate :nesting_level_allowed
   validate :changing_shared_runners_enabled_is_allowed
   validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed
@@ -435,6 +436,10 @@ class Namespace < ApplicationRecord
     if ancestors.count > Group::NUMBER_OF_ANCESTORS_ALLOWED
       errors.add(:parent_id, 'has too deep level of nesting')
     end
+  end
+
+  def nature_of_parent
+    errors.add(:parent_id, 'a namespace cannot have a parent') if has_parent?
   end
 
   def sync_share_with_group_lock_with_parent
