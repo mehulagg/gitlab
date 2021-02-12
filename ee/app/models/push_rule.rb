@@ -49,7 +49,6 @@ class PushRule < ApplicationRecord
   end
 
   def commit_signature_allowed?(commit)
-    return true unless available?(:reject_unsigned_commits)
     return true unless reject_unsigned_commits
 
     commit.has_signature?
@@ -100,6 +99,8 @@ class PushRule < ApplicationRecord
   end
 
   def reject_unsigned_commits
+    return false unless available?(:reject_unsigned_commits)
+
     read_setting_with_global_default(:reject_unsigned_commits)
   end
   alias_method :reject_unsigned_commits?, :reject_unsigned_commits

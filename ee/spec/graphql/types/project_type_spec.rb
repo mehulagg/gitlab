@@ -222,6 +222,61 @@ RSpec.describe GitlabSchema.types['Project'] do
     end
   end
 
+  describe 'push rules' do
+    let_it_be(:project) { create(:project) }
+    let(:query) do
+      %(
+          query{
+            project(fullPath:"#{project.full_path}"){
+              pushRules {
+                rejectUnsignedCommits
+              }
+            }
+          }
+        )
+    end
+    subject(:response) do
+      gql_response = GitlabSchema.execute(query, context: { current_user: user })
+
+      gql_response.dig(*%w[data project pushRules])
+    end
+
+    before do
+      push_rule = create(:push_rule, project: project)
+      push_rule.update(reject_unsigned_commits: true)
+
+      stub_licensed_features(reject_unsigned_commits: true)
+    end
+
+    it 'uses PushRulesType' do
+      expect(described_class.fields['pushRules']).to have_graphql_type(Types::PushRulesType)
+    end
+
+    it 'returns pushRules' do
+      expect(response).to eq("rejectUnsignedCommits" => true)
+    end
+
+    context 'without push_rules license' do
+      before do
+        stub_licensed_features(push_rules: false)
+      end
+
+      it 'returns nil' do
+        expect(response).to be_nil
+      end
+    end
+
+    context 'without reject_unsinged_commits license' do
+      before do
+        stub_licensed_features(reject_unsigned_commits: false)
+      end
+
+      it 'returns reject_unsigned_commits: false' do
+        expect(response).to eq("rejectUnsignedCommits" => false)
+      end
+    end
+  end
+
   private
 
   def query_for_project(project)
