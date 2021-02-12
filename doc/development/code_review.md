@@ -350,6 +350,7 @@ experience, refactors the existing code). Then:
   - For non-mandatory suggestions, decorate with (non-blocking) so the author knows they can
     optionally resolve within the merge request or follow-up at a later stage.
   - There's a [Chrome/Firefox add-on](https://gitlab.com/conventionalcomments/conventional-comments-button) which you can use to apply [Conventional Comment](https://conventionalcomments.org/) prefixes.
+- Ensure there are no open dependencies by checking related issues for blocking issues, clarifying with the author if necessary. If blocked by one or more open MRs, set an [MR dependency](../user/project/merge_requests/merge_request_dependencies.md). 
 - After a round of line notes, it can be helpful to post a summary note such as
   "Looks good to me", or "Just a couple things to address."
 - Assign the merge request to the author if changes are required following your
@@ -364,7 +365,6 @@ Before taking the decision to merge:
   Unless a strong case can be made for the violation, these should be resolved
   before merging. A comment must to be posted if the MR is merged with any failed job.
 - If the MR contains both Quality and non-Quality-related changes, the MR should be merged by the relevant maintainer for user-facing changes (backend, frontend, or database) after the Quality related changes are approved by a Software Engineer in Test.
-- Ensure there are no open dependencies by checking related issues for blocking issues. If blocked by one or more open MRs, set an [MR dependency](../user/project/merge_requests/merge_request_dependencies.md) and delay the merge. 
 
 If a merge request is fundamentally ready, but needs only trivial fixes (such as
 typos), consider demonstrating a [bias for
