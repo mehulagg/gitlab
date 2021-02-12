@@ -6,22 +6,25 @@ module Gitlab
       # When SERIALIZE_KEYS is updated, to reset the redis cache entries you'll
       #   need to bump the VERSION constant on Gitlab::Diff::HighlightCache
       #
-      SERIALIZE_KEYS = %i(line_code rich_text text type index old_pos new_pos).freeze
+      SERIALIZE_KEYS = %i(line_code rich_text text type index old_pos new_pos highlight_diffs).freeze
 
-      attr_reader :line_code
+      attr_reader :line_code, :highlight_diffs
       attr_writer :rich_text
       attr_accessor :text, :index, :type, :old_pos, :new_pos
 
-      def initialize(text, type, index, old_pos, new_pos, parent_file: nil, line_code: nil, rich_text: nil)
+      # rubocop: disable Metrics/ParameterLists
+      def initialize(text, type, index, old_pos, new_pos, parent_file: nil, line_code: nil, rich_text: nil, highlight_diffs: nil)
         @text, @type, @index = text, type, index
         @old_pos, @new_pos = old_pos, new_pos
         @parent_file = parent_file
         @rich_text = rich_text
+        @highlight_diffs = highlight_diffs
 
         # When line code is not provided from cache store we build it
         # using the parent_file(Diff::File or Conflict::File).
         @line_code = line_code || calculate_line_code
       end
+      # rubocop: enable Metrics/ParameterLists
 
       def self.init_from_hash(hash)
         new(hash[:text],
