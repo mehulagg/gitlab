@@ -347,6 +347,16 @@ module GitlabRoutingHelper
     Gitlab::UrlBuilder.wiki_page_url(wiki, page, only_path: true, **options)
   end
 
+  # Usage Quotas
+
+  def usage_quota_path(namespace)
+    if namespace.group?
+      group_usage_quotas_path(namespace)
+    else
+      profile_usage_quotas_path
+    end
+  end
+
   private
 
   def snippet_query_params(snippet, *args)
