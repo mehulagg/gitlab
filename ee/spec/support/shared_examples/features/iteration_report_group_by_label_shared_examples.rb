@@ -6,6 +6,9 @@ RSpec.shared_examples 'iteration report group by label' do
 
     # Select label `label1` from the labels dropdown picker
     click_button 'Label'
+
+    wait_for_requests
+
     click_link label1.title
     send_keys(:escape)
   end
