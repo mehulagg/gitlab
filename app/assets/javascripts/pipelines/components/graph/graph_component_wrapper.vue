@@ -54,7 +54,8 @@ export default {
       update(data) {
         return unwrapPipelineData(this.pipelineProjectPath, data);
       },
-      error() {
+      error(err) {
+        console.log(err);
         this.reportFailure(LOAD_FAILURE);
       },
     },
