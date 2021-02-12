@@ -7,6 +7,7 @@ module Gitlab
       GITLAB_RAILS_SOURCE = 'gitlab-rails'.freeze
 
       def initialize(namespace: nil, project: nil, user: nil, **data)
+        @namespace = namespace
         @data = data
       end
 
@@ -26,12 +27,17 @@ module Gitlab
         GITLAB_RAILS_SOURCE
       end
 
+      def plan
+        @namespace&.actual_plan&.name
+      end
+
       private
 
       def to_h
         {
           environment: environment,
-          source: source
+          source: source,
+          plan: plan
         }.merge(@data)
       end
     end
