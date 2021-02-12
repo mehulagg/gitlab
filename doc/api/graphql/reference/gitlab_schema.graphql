@@ -20191,6 +20191,11 @@ type Project {
   publicJobs: Boolean
 
   """
+  The project's push rules settings.
+  """
+  pushRules: PushRules
+
+  """
   A single release of the project.
   """
   release(
@@ -21330,6 +21335,16 @@ type PromoteToEpicPayload {
   The issue after mutation.
   """
   issue: Issue
+}
+
+"""
+Represents rules that commit pushes must follow
+"""
+type PushRules {
+  """
+  Only commits signed through GPG are allowed.
+  """
+  rejectUnsignedCommits: Boolean!
 }
 
 type Query {
