@@ -55,8 +55,16 @@ module GDK
         url.start_with?('/')
       end
 
+      def url_is_spa_script?(url)
+        return true
+      end
+
       def has_local_url?
         @has_local_url ||= urls.any? { |url| url_is_local?(url) }
+      end
+
+      def has_spa_script?
+        @has_local_url ||= urls.any? { |url| url_is_spa_script?(url) }
       end
 
       def report_folder_name
@@ -68,13 +76,16 @@ module GDK
 
       def run_sitespeed
         # Start Sitespeed through docker
-        docker_command = 'docker run --cap-add=NET_ADMIN --shm-size 2g --rm -v "$(pwd):/sitespeed.io" sitespeedio/sitespeed.io:15.9.0 -b chrome '
+        docker_command = 'docker run --cap-add=NET_ADMIN --shm-size 2g --rm -v "$(pwd):/sitespeed.io" sitespeedio/sitespeed.io:16.8.0 -b chrome '
         # 4 repetitions
-        docker_command += '-n 4 '
+        docker_command += '-n 1 '
         # Limit Cable Connection
         docker_command += '-c cable '
         # Deactivate the performance bar as it slows the measurements down
         docker_command += '--cookie perf_bar_enabled=false '
+
+        docker_command += '--multi --spa ' if has_spa_script?
+      
         docker_command += "--outputFolder sitespeed-result/#{report_folder_name} "
         docker_command += local_urls.join(' ')
 
