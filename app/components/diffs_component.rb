@@ -83,16 +83,6 @@ class DiffsComponent < BaseComponent
     end
   end
 
-  def render_overflow_warning?
-    if diffs.raw_diff_files.any?(&:too_large?)
-      Gitlab::Metrics.add_event(:diffs_overflow_single_file_limits)
-    end
-
-    diffs.raw_diff_files.overflow?.tap do |overflown|
-      Gitlab::Metrics.add_event(:diffs_overflow_collection_limits) if overflown
-    end
-  end
-
   def expand_diffs_toggle
     return if diffs_expanded?
     return unless diff_files.any? { |diff_file| diff_file.collapsed? }
