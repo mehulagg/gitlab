@@ -5145,6 +5145,15 @@ State of a GitLab merge request.
 | `merged` | Merge Request has been merged |
 | `opened` |  |
 
+### MergeRequestStateEvent
+
+Action to perform on a Merge Request.
+
+| Value | Description |
+| ----- | ----------- |
+| `CLOSE` | Close the merge request if it is open. |
+| `OPEN` | Open the merge request if it is closed. |
+
 ### MilestoneStateEnum
 
 Current state of milestone.
