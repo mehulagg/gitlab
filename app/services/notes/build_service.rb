@@ -5,6 +5,7 @@ module Notes
     def execute
       should_resolve = false
       in_reply_to_discussion_id = params.delete(:in_reply_to_discussion_id)
+      confidential = params.delete(:confidential)
 
       if in_reply_to_discussion_id.present?
         discussion = find_discussion(in_reply_to_discussion_id)
@@ -17,6 +18,7 @@ module Notes
 
         discussion = discussion.convert_to_discussion! if discussion.can_convert_to_discussion?
 
+        confidential = discussion.notes.first.confidential
         params.merge!(discussion.reply_attributes)
         should_resolve = discussion.resolved?
       end
@@ -24,6 +26,7 @@ module Notes
       note = Note.new(params)
       note.project = project
       note.author = current_user
+      note.confidential = confidential || false
 
       if should_resolve
         note.resolve_without_save(current_user)
