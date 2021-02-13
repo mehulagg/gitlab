@@ -988,6 +988,9 @@ msgstr ""
 msgid "(+%{count}&nbsp;rules)"
 msgstr ""
 
+msgid "(Group Managed Account)"
+msgstr ""
+
 msgid "(No changes)"
 msgstr ""
 
