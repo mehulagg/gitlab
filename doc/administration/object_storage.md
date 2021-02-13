@@ -231,11 +231,23 @@ The connection settings match those provided by [fog-aws](https://github.com/fog
 | `aws_secret_access_key` | AWS credentials, or compatible | |
 | `aws_signature_version` | AWS signature version to use. `2` or `4` are valid options. Digital Ocean Spaces and other providers may need `2`. | `4` |
 | `enable_signature_v4_streaming` | Set to `true` to enable HTTP chunked transfers with [AWS v4 signatures](https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html). Oracle Cloud S3 needs this to be `false`. | `true` |
-| `region` | AWS region. | |
+| `region` | AWS region. | `us-east-1` |
 | `host` | S3 compatible host for when not using AWS, e.g. `localhost` or `storage.example.com`. HTTPS and port 443 is assumed. | `s3.amazonaws.com` |
-| `endpoint` | Can be used when configuring an S3 compatible service such as [MinIO](https://min.io), by entering a URL such as `http://127.0.0.1:9000`. This takes precedence over `host`. | (optional) |
+| `endpoint` | Can be used when configuring an S3 compatible service such as [MinIO](https://min.io), by entering a URL such as `http://127.0.0.1:9000`, or Digital Ocean Spaces. This takes precedence over `host`. Used when `region` is specified. | `https://s3.{region}.amazonaws.com` |
 | `path_style` | Set to `true` to use `host/bucket_name/object` style paths instead of `bucket_name.host/object`. Leave as `false` for AWS S3. | `false` |
-| `use_iam_profile` | Set to `true` to use IAM profile instead of access keys | `false`
+| `use_iam_profile` | Set to `true` to use IAM profile instead of access keys | `false` |
+
+
+#### Digital Ocean Spaces S3 connection settings
+
+Note that Digital Ocean Spaces (S3) must be sure to use the following settings:
+
+| Setting | Value |
+|---------|-------|
+| `region` | [A Digital Ocean Spaces region name](https://www.digitalocean.com/docs/spaces/#regional-availability), such as `ams3`, `nyc3`, etc. |
+| `endpoint` | `https://{region}.digitaloceanspaces.com` (example: `https://nyc3.digitaloceanspaces.com`) |
+| `aws_signature_version` | `2` |
+| `path_style` | `true` |
 
 #### Oracle Cloud S3 connection settings
 
