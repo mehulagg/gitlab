@@ -19,6 +19,7 @@ module Gitlab
         scope :verification_succeeded, -> { none }
         scope :verification_failed, -> { none }
         scope :available_replicables, -> { all }
+        scope :available_verifiables, -> { self.respond_to?(:with_files_stored_locally) ? available_replicables.with_files_stored_locally : available_replicables }
       end
 
       class_methods do

@@ -28,15 +28,15 @@ module Gitlab
         sha_attribute :verification_checksum
 
         # rubocop:disable CodeReuse/ActiveRecord
-        scope :verification_pending, -> { with_verification_state(:verification_pending) }
-        scope :verification_started, -> { with_verification_state(:verification_started) }
-        scope :verification_succeeded, -> { with_verification_state(:verification_succeeded) }
-        scope :verification_failed, -> { with_verification_state(:verification_failed) }
+        scope :verification_pending, -> { available_verifiables.with_verification_state(:verification_pending) }
+        scope :verification_started, -> { available_verifiables.with_verification_state(:verification_started) }
+        scope :verification_succeeded, -> { available_verifiables.with_verification_state(:verification_succeeded) }
+        scope :verification_failed, -> { available_verifiables.with_verification_state(:verification_failed) }
         scope :checksummed, -> { where.not(verification_checksum: nil) }
         scope :not_checksummed, -> { where(verification_checksum: nil) }
         scope :verification_timed_out, -> { verification_started.where("verification_started_at < ?", VERIFICATION_TIMEOUT.ago) }
         scope :retry_due, -> { where(arel_table[:verification_retry_at].eq(nil).or(arel_table[:verification_retry_at].lt(Time.current))) }
-        scope :needs_verification, -> { with_verification_state(:verification_pending).or(with_verification_state(:verification_failed).retry_due) }
+        scope :needs_verification, -> { available_verifiables.merge(with_verification_state(:verification_pending).or(with_verification_state(:verification_failed).retry_due)) }
         scope :needs_reverification, -> { verification_succeeded.where("verified_at < ?", ::Gitlab::Geo.current_node.minimum_reverification_interval.days.ago) }
         # rubocop:enable CodeReuse/ActiveRecord
 
