@@ -59,21 +59,18 @@ RSpec.describe Gitlab::Geo::VerificationState do
       expect(subject.class.verification_pending_batch(batch_size: 2)).to match_array(expected)
     end
 
-    context 'other verification states' do
-      it 'does not include them' do
-        subject.verification_started!
+    it 'excludes non-pending verification states' do
+      subject.verification_started!
 
-        expect(subject.class.verification_pending_batch(batch_size: 3)).not_to include(subject.id)
+      expect(subject.class.verification_pending_batch(batch_size: 3)).not_to include(subject.id)
 
-        subject.verification_succeeded_with_checksum!('foo', Time.current)
+      subject.verification_succeeded_with_checksum!('foo', Time.current)
 
-        expect(subject.class.verification_pending_batch(batch_size: 3)).not_to include(subject.id)
+      expect(subject.class.verification_pending_batch(batch_size: 3)).not_to include(subject.id)
 
-        subject.verification_started
-        subject.verification_failed_with_message!('foo')
+      subject.verification_failed_with_message!('foo')
 
-        expect(subject.class.verification_pending_batch(batch_size: 3)).not_to include(subject.id)
-      end
+      expect(subject.class.verification_pending_batch(batch_size: 3)).not_to include(subject.id)
     end
   end
 
@@ -119,20 +116,18 @@ RSpec.describe Gitlab::Geo::VerificationState do
         expect(subject.class.verification_failed_batch(batch_size: 2)).to match_array(expected)
       end
 
-      context 'other verification states' do
-        it 'does not include them' do
-          subject.verification_started!
+      it 'excludes non-failed verification states' do
+        subject.verification_started!
 
-          expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
+        expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
 
-          subject.verification_succeeded_with_checksum!('foo', Time.current)
+        subject.verification_succeeded_with_checksum!('foo', Time.current)
 
-          expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
+        expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
 
-          subject.verification_pending!
+        subject.verification_pending!
 
-          expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
-        end
+        expect(subject.class.verification_failed_batch(batch_size: 5)).not_to include(subject.id)
       end
     end
 

@@ -113,9 +113,13 @@ module Gitlab
         end
 
         # Overridden by Geo::VerifiableRegistry
+        # rubocop:disable CodeReuse/ActiveRecord
         def verification_pending_batch_relation(batch_size:)
-          verification_pending.order(Gitlab::Database.nulls_first_order(:verified_at)).limit(batch_size) # rubocop:disable CodeReuse/ActiveRecord
+          verification_pending
+            .order(Gitlab::Database.nulls_first_order(:verified_at))
+            .limit(batch_size)
         end
+        # rubocop:enable CodeReuse/ActiveRecord
 
         # Returns IDs of records that failed to verify (calculate and save checksum).
         #
@@ -129,9 +133,14 @@ module Gitlab
         end
 
         # Overridden by Geo::VerifiableRegistry
+        # rubocop:disable CodeReuse/ActiveRecord
         def verification_failed_batch_relation(batch_size:)
-          verification_failed.retry_due.order(Gitlab::Database.nulls_first_order(:verification_retry_at)).limit(batch_size) # rubocop:disable CodeReuse/ActiveRecord
+          verification_failed
+            .retry_due
+            .order(Gitlab::Database.nulls_first_order(:verification_retry_at))
+            .limit(batch_size)
         end
+        # rubocop:enable CodeReuse/ActiveRecord
 
         # @return [Integer] number of records that need verification
         def needs_verification_count(limit:)
