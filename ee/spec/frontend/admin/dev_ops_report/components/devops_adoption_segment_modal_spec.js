@@ -1,10 +1,10 @@
-import { ApolloMutation } from 'vue-apollo';
-import { shallowMount } from '@vue/test-utils';
 import { GlModal, GlFormInput, GlSprintf, GlAlert, GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
-import waitForPromises from 'helpers/wait_for_promises';
+import { ApolloMutation } from 'vue-apollo';
 import DevopsAdoptionSegmentModal from 'ee/admin/dev_ops_report/components/devops_adoption_segment_modal.vue';
 import { DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from 'ee/admin/dev_ops_report/constants';
+import waitForPromises from 'helpers/wait_for_promises';
 import * as Sentry from '~/sentry/wrapper';
 import {
   groupNodes,

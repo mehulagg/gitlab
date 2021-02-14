@@ -1,9 +1,9 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import $ from 'jquery';
 import Vuex from 'vuex';
-import waitForPromises from 'helpers/wait_for_promises';
 import Api from 'ee/api';
 import BranchesSelect from 'ee/approvals/components/branches_select.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 
 const TEST_DEFAULT_BRANCH = { name: 'Any branch' };
 const TEST_PROJECT_ID = '1';

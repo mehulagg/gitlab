@@ -1,11 +1,11 @@
-import { nextTick } from 'vue';
-import { mount, shallowMount } from '@vue/test-utils';
-import { within } from '@testing-library/dom';
 import { GlAlert, GlDropdown, GlDropdownItem } from '@gitlab/ui';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { within } from '@testing-library/dom';
+import { mount, shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import JiraIssueCreationVulnerabilities, {
   i18n,
 } from 'ee/integrations/edit/components/jira_issue_creation_vulnerabilities.vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { createStore } from '~/integrations/edit/store';
 
 describe('JiraIssuesFields', () => {

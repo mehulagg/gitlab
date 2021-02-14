@@ -2,11 +2,11 @@ import { GlSprintf, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { useFakeDate } from 'helpers/fake_date';
-import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
-import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
-import * as Sentry from '~/sentry/wrapper';
+import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
+import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
+import * as Sentry from '~/sentry/wrapper';
 
 jest.mock('~/flash');
 jest.mock('~/sentry/wrapper');

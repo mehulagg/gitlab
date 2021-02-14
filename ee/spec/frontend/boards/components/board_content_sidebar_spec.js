@@ -4,11 +4,11 @@ import BoardContentSidebar from 'ee_component/boards/components/board_content_si
 import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
 import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
-import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
-import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
-import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
+import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
+import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
+import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
 import { ISSUABLE } from '~/boards/constants';
 import { createStore } from '~/boards/stores';
 

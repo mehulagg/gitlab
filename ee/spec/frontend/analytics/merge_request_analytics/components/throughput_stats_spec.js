@@ -1,6 +1,6 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlSkeletonLoader } from '@gitlab/ui';
 import { GlSingleStat } from '@gitlab/ui/dist/charts';
+import { shallowMount } from '@vue/test-utils';
 import ThroughputStats from 'ee/analytics/merge_request_analytics/components/throughput_stats';
 import { stats } from '../mock_data';
 

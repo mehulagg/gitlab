@@ -1,11 +1,11 @@
 import { severityFilter } from 'ee/security_dashboard/helpers';
+import { DISMISSAL_STATES } from 'ee/security_dashboard/store/modules/filters/constants';
 import {
   SET_FILTER,
   SET_HIDE_DISMISSED,
 } from 'ee/security_dashboard/store/modules/filters/mutation_types';
 import mutations from 'ee/security_dashboard/store/modules/filters/mutations';
 import createState from 'ee/security_dashboard/store/modules/filters/state';
-import { DISMISSAL_STATES } from 'ee/security_dashboard/store/modules/filters/constants';
 
 const criticalOption = severityFilter.options.find((x) => x.id === 'CRITICAL');
 const highOption = severityFilter.options.find((x) => x.id === 'HIGH');

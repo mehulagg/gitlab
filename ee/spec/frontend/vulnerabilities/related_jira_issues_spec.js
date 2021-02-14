@@ -1,8 +1,8 @@
-import { nextTick } from 'vue';
-import { mount, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlLink } from '@gitlab/ui';
 import { within } from '@testing-library/dom';
+import { mount, shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
+import { nextTick } from 'vue';
 import RelatedJiraIssues, { i18n } from 'ee/vulnerabilities/components/related_jira_issues.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import axios from '~/lib/utils/axios_utils';

@@ -1,8 +1,8 @@
 import { GlForm, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import SharedForm from 'ee/groups/settings/compliance_frameworks/components/shared_form.vue';
 import { GlFormGroup } from 'jest/registry/shared/stubs';
 
-import SharedForm from 'ee/groups/settings/compliance_frameworks/components/shared_form.vue';
 import ColorPicker from '~/vue_shared/components/color_picker/color_picker.vue';
 
 import { frameworkFoundResponse, suggestedLabelColors } from '../mock_data';

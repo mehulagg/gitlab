@@ -1,12 +1,12 @@
 import { mount, shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import { ERROR_RUN_SCAN, ERROR_MESSAGES } from 'ee/on_demand_scans/settings';
-import Component from 'ee/security_configuration/dast_profiles/components/dast_saved_scans_list.vue';
 import ProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
-import waitForPromises from 'helpers/wait_for_promises';
+import Component from 'ee/security_configuration/dast_profiles/components/dast_saved_scans_list.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import { redirectTo } from '~/lib/utils/url_utility';
+import waitForPromises from 'helpers/wait_for_promises';
 import createFlash from '~/flash';
+import { redirectTo } from '~/lib/utils/url_utility';
 import { savedScans } from '../mocks/mock_data';
 
 jest.mock('~/lib/utils/url_utility');
