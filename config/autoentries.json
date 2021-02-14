@@ -1,0 +1,1651 @@
+{
+  "pages.admin.abuse_reports": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/abuse_reports/index.js"
+  ],
+  "pages.admin.application_settings.general": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/application_settings/index.js",
+    "ee/pages/admin/application_settings/general/index.js"
+  ],
+  "pages.admin.application_settings": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/application_settings/index.js"
+  ],
+  "pages.admin.application_settings.integrations": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/application_settings/index.js",
+    "ee/pages/admin/application_settings/integrations/index.js"
+  ],
+  "pages.admin.application_settings.metrics_and_profiling": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/application_settings/index.js",
+    "./pages/admin/application_settings/metrics_and_profiling/index.js"
+  ],
+  "pages.admin.broadcast_messages": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/broadcast_messages/index.js"
+  ],
+  "pages.admin.clusters.destroy": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/clusters/index.js",
+    "./pages/admin/clusters/destroy/index.js"
+  ],
+  "pages.admin.clusters.edit": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/clusters/index.js",
+    "./pages/admin/clusters/edit/index.js"
+  ],
+  "pages.admin.clusters": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/clusters/index.js"
+  ],
+  "pages.admin.clusters.index": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/clusters/index.js",
+    "./pages/admin/clusters/index/index.js"
+  ],
+  "pages.admin.clusters.new": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/clusters/index.js",
+    "./pages/admin/clusters/new/index.js"
+  ],
+  "pages.admin.clusters.show": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/clusters/index.js",
+    "./pages/admin/clusters/show/index.js"
+  ],
+  "pages.admin.credentials": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/credentials/index.js"
+  ],
+  "pages.admin.dev_ops_report": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/dev_ops_report/index.js"
+  ],
+  "pages.admin.groups.edit": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/groups/edit/index.js"
+  ],
+  "pages.admin.groups.new": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/groups/new/index.js"
+  ],
+  "pages.admin.groups.show": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/groups/show/index.js"
+  ],
+  "pages.admin.impersonation_tokens": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/impersonation_tokens/index.js"
+  ],
+  "pages.admin": [
+    "./main",
+    "./pages/admin/index.js"
+  ],
+  "pages.admin.instance_statistics": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/instance_statistics/index.js"
+  ],
+  "pages.admin.integrations.edit": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/integrations/edit/index.js"
+  ],
+  "pages.admin.jobs.index": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/jobs/index/index.js"
+  ],
+  "pages.admin.keys": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/keys/index.js"
+  ],
+  "pages.admin.labels.edit": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/labels/edit/index.js"
+  ],
+  "pages.admin.labels.new": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/labels/new/index.js"
+  ],
+  "pages.admin.projects": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/projects/index.js"
+  ],
+  "pages.admin.projects.index": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/projects/index.js",
+    "./pages/admin/projects/index/index.js"
+  ],
+  "pages.admin.runners": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/runners/index.js"
+  ],
+  "pages.admin.serverless.domains": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/serverless/domains/index.js"
+  ],
+  "pages.admin.services.edit": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/services/edit/index.js"
+  ],
+  "pages.admin.services.index": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/services/index/index.js"
+  ],
+  "pages.admin.sessions": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/sessions/index.js"
+  ],
+  "pages.admin.users": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/users/index.js"
+  ],
+  "pages.admin.users.keys": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/users/index.js",
+    "./pages/admin/users/keys/index.js"
+  ],
+  "pages.admin.users.new": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/users/index.js",
+    "./pages/admin/users/new/index.js"
+  ],
+  "pages.dashboard.activity": [
+    "./main",
+    "ee/pages/dashboard/index.js",
+    "./pages/dashboard/activity/index.js"
+  ],
+  "pages.dashboard.groups.index": [
+    "./main",
+    "ee/pages/dashboard/index.js",
+    "./pages/dashboard/groups/index/index.js"
+  ],
+  "pages.dashboard.issues": [
+    "./main",
+    "ee/pages/dashboard/index.js",
+    "./pages/dashboard/issues/index.js"
+  ],
+  "pages.dashboard.merge_requests": [
+    "./main",
+    "ee/pages/dashboard/index.js",
+    "./pages/dashboard/merge_requests/index.js"
+  ],
+  "pages.dashboard.milestones.index": [
+    "./main",
+    "ee/pages/dashboard/index.js",
+    "./pages/dashboard/milestones/index/index.js"
+  ],
+  "pages.dashboard.milestones.show": [
+    "./main",
+    "ee/pages/dashboard/index.js",
+    "./pages/dashboard/milestones/show/index.js"
+  ],
+  "pages.dashboard.projects.index": [
+    "./main",
+    "ee/pages/dashboard/index.js",
+    "./pages/dashboard/projects/index/index.js"
+  ],
+  "pages.dashboard.todos.index": [
+    "./main",
+    "ee/pages/dashboard/index.js",
+    "./pages/dashboard/todos/index/index.js"
+  ],
+  "pages.explore.groups": [
+    "./main",
+    "./pages/explore/groups/index.js"
+  ],
+  "pages.explore.projects": [
+    "./main",
+    "./pages/explore/projects/index.js"
+  ],
+  "pages.groups.activity": [
+    "./main",
+    "./pages/groups/activity/index.js"
+  ],
+  "pages.groups.boards": [
+    "./main",
+    "./pages/groups/boards/index.js"
+  ],
+  "pages.groups.clusters.destroy": [
+    "./main",
+    "./pages/groups/clusters/index.js",
+    "./pages/groups/clusters/destroy/index.js"
+  ],
+  "pages.groups.clusters.edit": [
+    "./main",
+    "./pages/groups/clusters/index.js",
+    "./pages/groups/clusters/edit/index.js"
+  ],
+  "pages.groups.clusters": [
+    "./main",
+    "./pages/groups/clusters/index.js"
+  ],
+  "pages.groups.clusters.index": [
+    "./main",
+    "./pages/groups/clusters/index.js",
+    "./pages/groups/clusters/index/index.js"
+  ],
+  "pages.groups.clusters.new": [
+    "./main",
+    "./pages/groups/clusters/index.js",
+    "./pages/groups/clusters/new/index.js"
+  ],
+  "pages.groups.clusters.show": [
+    "./main",
+    "./pages/groups/clusters/index.js",
+    "./pages/groups/clusters/show/index.js"
+  ],
+  "pages.groups.dependency_proxies": [
+    "./main",
+    "./pages/groups/dependency_proxies/index.js"
+  ],
+  "pages.groups.details": [
+    "./main",
+    "./pages/groups/details/index.js"
+  ],
+  "pages.groups.edit": [
+    "./main",
+    "ee/pages/groups/edit/index.js"
+  ],
+  "pages.groups.group_members": [
+    "./main",
+    "./pages/groups/group_members/index.js"
+  ],
+  "pages.groups.issues": [
+    "./main",
+    "./pages/groups/issues/index.js"
+  ],
+  "pages.groups.labels.edit": [
+    "./main",
+    "./pages/groups/labels/edit/index.js"
+  ],
+  "pages.groups.labels.index": [
+    "./main",
+    "./pages/groups/labels/index/index.js"
+  ],
+  "pages.groups.labels.new": [
+    "./main",
+    "./pages/groups/labels/new/index.js"
+  ],
+  "pages.groups.merge_requests": [
+    "./main",
+    "./pages/groups/merge_requests/index.js"
+  ],
+  "pages.groups.milestones.edit": [
+    "./main",
+    "./pages/groups/milestones/edit/index.js"
+  ],
+  "pages.groups.milestones.new": [
+    "./main",
+    "./pages/groups/milestones/new/index.js"
+  ],
+  "pages.groups.milestones.show": [
+    "./main",
+    "ee/pages/groups/milestones/show/index.js"
+  ],
+  "pages.groups.new": [
+    "./main",
+    "ee/pages/groups/new/index.js"
+  ],
+  "pages.groups.packages.index": [
+    "./main",
+    "./pages/groups/packages/index/index.js"
+  ],
+  "pages.groups.registry.repositories": [
+    "./main",
+    "./pages/groups/registry/repositories/index.js"
+  ],
+  "pages.groups.security.credentials": [
+    "./main",
+    "./pages/groups/security/credentials/index.js"
+  ],
+  "pages.groups.settings.badges": [
+    "./main",
+    "./pages/groups/settings/badges/index.js"
+  ],
+  "pages.groups.settings.ci_cd.show": [
+    "./main",
+    "./pages/groups/settings/ci_cd/show/index.js"
+  ],
+  "pages.groups.settings.integrations.edit": [
+    "./main",
+    "./pages/groups/settings/integrations/edit/index.js"
+  ],
+  "pages.groups.settings.packages_and_registries": [
+    "./main",
+    "./pages/groups/settings/packages_and_registries/index.js"
+  ],
+  "pages.groups.settings.repository.show": [
+    "./main",
+    "./pages/groups/settings/repository/show/index.js"
+  ],
+  "pages.groups.show": [
+    "./main",
+    "ee/pages/groups/show/index.js"
+  ],
+  "pages.help.index": [
+    "./main",
+    "./pages/help/index/index.js"
+  ],
+  "pages.help.show": [
+    "./main",
+    "./pages/help/show/index.js"
+  ],
+  "pages.help.ui": [
+    "./main",
+    "./pages/help/ui/index.js"
+  ],
+  "pages.ide": [
+    "./main",
+    "./pages/ide/index.js"
+  ],
+  "pages.import.bitbucket_server.status": [
+    "./main",
+    "./pages/import/bitbucket_server/status/index.js"
+  ],
+  "pages.import.bitbucket.status": [
+    "./main",
+    "./pages/import/bitbucket/status/index.js"
+  ],
+  "pages.import.bulk_imports": [
+    "./main",
+    "./pages/import/bulk_imports/index.js"
+  ],
+  "pages.import.fogbugz.new_user_map": [
+    "./main",
+    "./pages/import/fogbugz/new_user_map/index.js"
+  ],
+  "pages.import.fogbugz.status": [
+    "./main",
+    "./pages/import/fogbugz/status/index.js"
+  ],
+  "pages.import.gitea.status": [
+    "./main",
+    "./pages/import/gitea/status/index.js"
+  ],
+  "pages.import.github.status": [
+    "./main",
+    "./pages/import/github/status/index.js"
+  ],
+  "pages.import.gitlab_projects.new": [
+    "./main",
+    "./pages/import/gitlab_projects/new/index.js"
+  ],
+  "pages.import.gitlab.status": [
+    "./main",
+    "./pages/import/gitlab/status/index.js"
+  ],
+  "pages.import.manifest.status": [
+    "./main",
+    "./pages/import/manifest/status/index.js"
+  ],
+  "pages.ldap.omniauth_callbacks": [
+    "./main",
+    "./pages/ldap/omniauth_callbacks/index.js"
+  ],
+  "pages.milestones.shared": [
+    "./main",
+    "./pages/milestones/shared/index.js"
+  ],
+  "pages.oauth": [
+    "./main",
+    "./pages/oauth/index.js"
+  ],
+  "pages.omniauth_callbacks": [
+    "./main",
+    "./pages/omniauth_callbacks/index.js"
+  ],
+  "pages.profiles.accounts.show": [
+    "./main",
+    "./pages/profiles/index.js",
+    "./pages/profiles/accounts/show/index.js"
+  ],
+  "pages.profiles": [
+    "./main",
+    "./pages/profiles/index.js"
+  ],
+  "pages.profiles.index": [
+    "./main",
+    "./pages/profiles/index.js",
+    "./pages/profiles/index/index.js"
+  ],
+  "pages.profiles.keys": [
+    "./main",
+    "./pages/profiles/index.js",
+    "./pages/profiles/keys/index.js"
+  ],
+  "pages.profiles.notifications.show": [
+    "./main",
+    "./pages/profiles/index.js",
+    "./pages/profiles/notifications/show/index.js"
+  ],
+  "pages.profiles.personal_access_tokens": [
+    "./main",
+    "./pages/profiles/index.js",
+    "./pages/profiles/personal_access_tokens/index.js"
+  ],
+  "pages.profiles.preferences.show": [
+    "./main",
+    "./pages/profiles/index.js",
+    "./pages/profiles/preferences/show/index.js"
+  ],
+  "pages.profiles.show": [
+    "./main",
+    "./pages/profiles/index.js",
+    "./pages/profiles/show/index.js"
+  ],
+  "pages.profiles.two_factor_auths": [
+    "./main",
+    "./pages/profiles/index.js",
+    "./pages/profiles/two_factor_auths/index.js"
+  ],
+  "pages.projects.activity": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/activity/index.js"
+  ],
+  "pages.projects.alert_management.details": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/alert_management/details/index.js"
+  ],
+  "pages.projects.alert_management.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/alert_management/index/index.js"
+  ],
+  "pages.projects.artifacts.browse": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/artifacts/browse/index.js"
+  ],
+  "pages.projects.artifacts.file": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/artifacts/file/index.js"
+  ],
+  "pages.projects.blame.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/blame/show/index.js"
+  ],
+  "pages.projects.blob.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/blob/edit/index.js"
+  ],
+  "pages.projects.blob.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/blob/new/index.js"
+  ],
+  "pages.projects.blob.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/blob/show/index.js"
+  ],
+  "pages.projects.boards": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/boards/index.js"
+  ],
+  "pages.projects.branches.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/branches/index/index.js"
+  ],
+  "pages.projects.branches.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/branches/new/index.js"
+  ],
+  "pages.projects.ci.lints.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/ci/lints/show/index.js"
+  ],
+  "pages.projects.ci.pipeline_editor.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/ci/pipeline_editor/show/index.js"
+  ],
+  "pages.projects.clusters.destroy": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/clusters/index.js",
+    "./pages/projects/clusters/destroy/index.js"
+  ],
+  "pages.projects.clusters.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/clusters/index.js",
+    "./pages/projects/clusters/edit/index.js"
+  ],
+  "pages.projects.clusters": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/clusters/index.js"
+  ],
+  "pages.projects.clusters.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/clusters/index.js",
+    "./pages/projects/clusters/index/index.js"
+  ],
+  "pages.projects.clusters.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/clusters/index.js",
+    "./pages/projects/clusters/new/index.js"
+  ],
+  "pages.projects.clusters.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/clusters/index.js",
+    "./pages/projects/clusters/show/index.js"
+  ],
+  "pages.projects.commit.pipelines": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/commit/pipelines/index.js"
+  ],
+  "pages.projects.commit.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/commit/show/index.js"
+  ],
+  "pages.projects.commits.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/commits/show/index.js"
+  ],
+  "pages.projects.compare": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/compare/index.js"
+  ],
+  "pages.projects.compare.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/compare/index.js",
+    "./pages/projects/compare/index/index.js"
+  ],
+  "pages.projects.compare.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/compare/index.js",
+    "./pages/projects/compare/show/index.js"
+  ],
+  "pages.projects.cycle_analytics.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/cycle_analytics/show/index.js"
+  ],
+  "pages.projects.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/edit/index.js"
+  ],
+  "pages.projects.environments.folder": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/environments/folder/index.js"
+  ],
+  "pages.projects.environments.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/environments/index/index.js"
+  ],
+  "pages.projects.environments.metrics": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/environments/metrics/index.js"
+  ],
+  "pages.projects.environments.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/environments/show/index.js"
+  ],
+  "pages.projects.environments.terminal": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/environments/terminal/index.js"
+  ],
+  "pages.projects.error_tracking.details": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/error_tracking/details/index.js"
+  ],
+  "pages.projects.error_tracking.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/error_tracking/index/index.js"
+  ],
+  "pages.projects.feature_flags_user_lists.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/feature_flags_user_lists/edit/index.js"
+  ],
+  "pages.projects.feature_flags_user_lists.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/feature_flags_user_lists/new/index.js"
+  ],
+  "pages.projects.feature_flags_user_lists.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/feature_flags_user_lists/show/index.js"
+  ],
+  "pages.projects.feature_flags.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/feature_flags/edit/index.js"
+  ],
+  "pages.projects.feature_flags.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/feature_flags/index/index.js"
+  ],
+  "pages.projects.feature_flags.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/feature_flags/new/index.js"
+  ],
+  "pages.projects.find_file.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/find_file/show/index.js"
+  ],
+  "pages.projects.forks.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/forks/new/index.js"
+  ],
+  "pages.projects.graphs.charts": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/graphs/charts/index.js"
+  ],
+  "pages.projects.graphs.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/graphs/show/index.js"
+  ],
+  "pages.projects.import.jira": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/import/jira/index.js"
+  ],
+  "pages.projects.imports.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/imports/show/index.js"
+  ],
+  "pages.projects.incidents.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/incidents/index/index.js"
+  ],
+  "pages.projects.incidents.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/incidents/show/index.js"
+  ],
+  "pages.projects": [
+    "./main",
+    "./pages/projects/index.js"
+  ],
+  "pages.projects.issues.designs": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/issues/designs/index.js"
+  ],
+  "pages.projects.issues.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/issues/edit/index.js"
+  ],
+  "pages.projects.issues.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/issues/index/index.js"
+  ],
+  "pages.projects.issues.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/issues/new/index.js"
+  ],
+  "pages.projects.issues.service_desk": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/issues/service_desk/index.js"
+  ],
+  "pages.projects.issues.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/issues/show/index.js"
+  ],
+  "pages.projects.jobs.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/jobs/index/index.js"
+  ],
+  "pages.projects.jobs.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/jobs/show/index.js"
+  ],
+  "pages.projects.jobs.terminal": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/jobs/terminal/index.js"
+  ],
+  "pages.projects.labels.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/labels/edit/index.js"
+  ],
+  "pages.projects.labels.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/labels/index/index.js"
+  ],
+  "pages.projects.labels.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/labels/new/index.js"
+  ],
+  "pages.projects.logs": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/logs/index.js"
+  ],
+  "pages.projects.merge_requests.conflicts": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/merge_requests/conflicts/index.js"
+  ],
+  "pages.projects.merge_requests.creations": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/merge_requests/creations/index.js"
+  ],
+  "pages.projects.merge_requests.creations.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/merge_requests/creations/index.js",
+    "ee/pages/projects/merge_requests/creations/new/index.js"
+  ],
+  "pages.projects.merge_requests.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/merge_requests/edit/index.js"
+  ],
+  "pages.projects.merge_requests.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/merge_requests/index/index.js"
+  ],
+  "pages.projects.merge_requests.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/merge_requests/show/index.js"
+  ],
+  "pages.projects.metrics_dashboard": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/metrics_dashboard/index.js"
+  ],
+  "pages.projects.milestones.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/milestones/edit/index.js"
+  ],
+  "pages.projects.milestones.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/milestones/index/index.js"
+  ],
+  "pages.projects.milestones.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/milestones/new/index.js"
+  ],
+  "pages.projects.milestones.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/milestones/show/index.js"
+  ],
+  "pages.projects.network.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/network/show/index.js"
+  ],
+  "pages.projects.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/new/index.js"
+  ],
+  "pages.projects.packages.packages.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/packages/packages/index/index.js"
+  ],
+  "pages.projects.packages.packages.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/packages/packages/show/index.js"
+  ],
+  "pages.projects.pages_domains.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/pages_domains/new/index.js"
+  ],
+  "pages.projects.pages_domains.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/pages_domains/show/index.js"
+  ],
+  "pages.projects.pipeline_schedules.create": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/pipeline_schedules/create/index.js"
+  ],
+  "pages.projects.pipeline_schedules.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/pipeline_schedules/edit/index.js"
+  ],
+  "pages.projects.pipeline_schedules.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/pipeline_schedules/index/index.js"
+  ],
+  "pages.projects.pipeline_schedules.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/pipeline_schedules/new/index.js"
+  ],
+  "pages.projects.pipeline_schedules.update": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/pipeline_schedules/update/index.js"
+  ],
+  "pages.projects.pipelines.builds": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/pipelines/builds/index.js"
+  ],
+  "pages.projects.pipelines.charts": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/pipelines/charts/index.js"
+  ],
+  "pages.projects.pipelines.dag": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/pipelines/dag/index.js"
+  ],
+  "pages.projects.pipelines.failures": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/pipelines/failures/index.js"
+  ],
+  "pages.projects.pipelines.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/pipelines/index/index.js"
+  ],
+  "pages.projects.pipelines.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/pipelines/new/index.js"
+  ],
+  "pages.projects.pipelines.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/pipelines/show/index.js"
+  ],
+  "pages.projects.pipelines.test_report": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/pipelines/test_report/index.js"
+  ],
+  "pages.projects.product_analytics.graphs": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/product_analytics/graphs/index.js"
+  ],
+  "pages.projects.project_members": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/project_members/index.js"
+  ],
+  "pages.projects.prometheus.metrics.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/prometheus/metrics/edit/index.js"
+  ],
+  "pages.projects.prometheus.metrics.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/prometheus/metrics/new/index.js"
+  ],
+  "pages.projects.registry.repositories": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/registry/repositories/index.js"
+  ],
+  "pages.projects.releases.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/releases/edit/index.js"
+  ],
+  "pages.projects.releases.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/releases/index/index.js"
+  ],
+  "pages.projects.releases.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/releases/new/index.js"
+  ],
+  "pages.projects.releases.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/releases/show/index.js"
+  ],
+  "pages.projects.serverless": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/serverless/index.js"
+  ],
+  "pages.projects.services.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/services/edit/index.js"
+  ],
+  "pages.projects.settings.access_tokens": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/settings/access_tokens/index.js"
+  ],
+  "pages.projects.settings.ci_cd.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/settings/ci_cd/show/index.js"
+  ],
+  "pages.projects.settings.integrations.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/settings/integrations/show/index.js"
+  ],
+  "pages.projects.settings.operations.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/settings/operations/show/index.js"
+  ],
+  "pages.projects.settings.repository.create_deploy_token": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/settings/repository/create_deploy_token/index.js"
+  ],
+  "pages.projects.settings.repository.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/settings/repository/show/index.js"
+  ],
+  "pages.projects.shared.permissions": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/shared/permissions/index.js"
+  ],
+  "pages.projects.shared.web_ide_link": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/shared/web_ide_link/index.js"
+  ],
+  "pages.projects.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/show/index.js"
+  ],
+  "pages.projects.snippets.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/snippets/edit/index.js"
+  ],
+  "pages.projects.snippets.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/snippets/new/index.js"
+  ],
+  "pages.projects.snippets.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/snippets/show/index.js"
+  ],
+  "pages.projects.static_site_editor.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/static_site_editor/show/index.js"
+  ],
+  "pages.projects.tags.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/tags/index/index.js"
+  ],
+  "pages.projects.tags.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/tags/new/index.js"
+  ],
+  "pages.projects.tags.releases": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/tags/releases/index.js"
+  ],
+  "pages.projects.tags.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/tags/show/index.js"
+  ],
+  "pages.projects.terraform.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/terraform/index/index.js"
+  ],
+  "pages.projects.tree.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/tree/show/index.js"
+  ],
+  "pages.projects.wikis": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/wikis/index.js"
+  ],
+  "pages.registrations.new": [
+    "./main",
+    "./pages/registrations/new/index.js"
+  ],
+  "pages.root": [
+    "./main",
+    "ee/pages/root/index.js"
+  ],
+  "pages.search.show": [
+    "./main",
+    "ee/pages/search/show/index.js"
+  ],
+  "pages.sessions": [
+    "./main",
+    "ee/pages/sessions/index.js"
+  ],
+  "pages.sessions.new": [
+    "./main",
+    "ee/pages/sessions/index.js",
+    "./pages/sessions/new/index.js"
+  ],
+  "pages.shared.wikis": [
+    "./main",
+    "./pages/shared/wikis/index.js"
+  ],
+  "pages.snippets.edit": [
+    "./main",
+    "./pages/snippets/edit/index.js"
+  ],
+  "pages.snippets.new": [
+    "./main",
+    "./pages/snippets/new/index.js"
+  ],
+  "pages.snippets.show": [
+    "./main",
+    "./pages/snippets/show/index.js"
+  ],
+  "pages.users": [
+    "./main",
+    "./pages/users/index.js"
+  ],
+  "pages.admin.application_settings.ci_cd": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/application_settings/index.js",
+    "ee/pages/admin/application_settings/ci_cd/index.js"
+  ],
+  "pages.admin.audit_logs": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/audit_logs/index.js"
+  ],
+  "pages.admin.dev_ops_report.show": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/dev_ops_report/index.js",
+    "ee/pages/admin/dev_ops_report/show/index.js"
+  ],
+  "pages.admin.emails.show": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/emails/show/index.js"
+  ],
+  "pages.admin.geo.designs": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/geo/index.js",
+    "ee/pages/admin/geo/designs/index.js"
+  ],
+  "pages.admin.geo": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/geo/index.js"
+  ],
+  "pages.admin.geo.nodes_beta": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/geo/index.js",
+    "ee/pages/admin/geo/nodes_beta/index.js"
+  ],
+  "pages.admin.geo.nodes.edit": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/geo/index.js",
+    "ee/pages/admin/geo/nodes/index.js",
+    "ee/pages/admin/geo/nodes/edit/index.js"
+  ],
+  "pages.admin.geo.nodes": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/geo/index.js",
+    "ee/pages/admin/geo/nodes/index.js"
+  ],
+  "pages.admin.geo.nodes.new": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/geo/index.js",
+    "ee/pages/admin/geo/nodes/index.js",
+    "ee/pages/admin/geo/nodes/new/index.js"
+  ],
+  "pages.admin.geo.replicables": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/geo/index.js",
+    "ee/pages/admin/geo/replicables/index.js"
+  ],
+  "pages.admin.geo.settings": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/geo/index.js",
+    "ee/pages/admin/geo/settings/index.js"
+  ],
+  "pages.admin.licenses.new": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/licenses/new/index.js"
+  ],
+  "pages.admin.push_rules": [
+    "./main",
+    "./pages/admin/index.js",
+    "ee/pages/admin/push_rules/index.js"
+  ],
+  "pages.admin.users.edit": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/users/index.js",
+    "ee/pages/admin/users/edit/index.js"
+  ],
+  "pages.admin.users.pipeline_minutes": [
+    "./main",
+    "./pages/admin/index.js",
+    "./pages/admin/users/index.js",
+    "ee/pages/admin/users/pipeline_minutes/index.js"
+  ],
+  "pages.analytics.productivity_analytics": [
+    "./main",
+    "ee/pages/analytics/productivity_analytics/index.js"
+  ],
+  "pages.dashboard": [
+    "./main",
+    "ee/pages/dashboard/index.js"
+  ],
+  "pages.groups.analytics.ci_cd_analytics": [
+    "./main",
+    "ee/pages/groups/analytics/ci_cd_analytics/index.js"
+  ],
+  "pages.groups.analytics.cycle_analytics": [
+    "./main",
+    "ee/pages/groups/analytics/cycle_analytics/index.js"
+  ],
+  "pages.groups.analytics.merge_request_analytics": [
+    "./main",
+    "ee/pages/groups/analytics/merge_request_analytics/index.js"
+  ],
+  "pages.groups.analytics.productivity_analytics": [
+    "./main",
+    "ee/pages/groups/analytics/productivity_analytics/index.js"
+  ],
+  "pages.groups.analytics.repository_analytics": [
+    "./main",
+    "ee/pages/groups/analytics/repository_analytics/index.js"
+  ],
+  "pages.groups.audit_events": [
+    "./main",
+    "ee/pages/groups/audit_events/index.js"
+  ],
+  "pages.groups.billings": [
+    "./main",
+    "ee/pages/groups/billings/index.js"
+  ],
+  "pages.groups.contribution_analytics.show": [
+    "./main",
+    "ee/pages/groups/contribution_analytics/show/index.js"
+  ],
+  "pages.groups.epics.index": [
+    "./main",
+    "ee/pages/groups/epics/index/index.js"
+  ],
+  "pages.groups.epics.new": [
+    "./main",
+    "ee/pages/groups/epics/new/index.js"
+  ],
+  "pages.groups.epics.show": [
+    "./main",
+    "ee/pages/groups/epics/show/index.js"
+  ],
+  "pages.groups.insights": [
+    "./main",
+    "ee/pages/groups/insights/index.js"
+  ],
+  "pages.groups.issues_analytics": [
+    "./main",
+    "ee/pages/groups/issues_analytics/index.js"
+  ],
+  "pages.groups.iterations.edit": [
+    "./main",
+    "ee/pages/groups/iterations/index.js",
+    "ee/pages/groups/iterations/edit/index.js"
+  ],
+  "pages.groups.iterations": [
+    "./main",
+    "ee/pages/groups/iterations/index.js"
+  ],
+  "pages.groups.iterations.new": [
+    "./main",
+    "ee/pages/groups/iterations/index.js",
+    "ee/pages/groups/iterations/new/index.js"
+  ],
+  "pages.groups.iterations.show": [
+    "./main",
+    "ee/pages/groups/iterations/index.js",
+    "ee/pages/groups/iterations/show/index.js"
+  ],
+  "pages.groups.ldap_group_links": [
+    "./main",
+    "ee/pages/groups/ldap_group_links/index.js"
+  ],
+  "pages.groups.omniauth_callbacks": [
+    "./main",
+    "ee/pages/groups/omniauth_callbacks/index.js"
+  ],
+  "pages.groups.roadmap.show": [
+    "./main",
+    "ee/pages/groups/roadmap/show/index.js"
+  ],
+  "pages.groups.saml_providers": [
+    "./main",
+    "ee/pages/groups/saml_providers/index.js"
+  ],
+  "pages.groups.saml_providers.saml_members.store": [
+    "./main",
+    "ee/pages/groups/saml_providers/index.js",
+    "ee/pages/groups/saml_providers/saml_members/store/index.js"
+  ],
+  "pages.groups.seat_usage.show": [
+    "./main",
+    "ee/pages/groups/seat_usage/show/index.js"
+  ],
+  "pages.groups.security.compliance_dashboards": [
+    "./main",
+    "ee/pages/groups/security/compliance_dashboards/index.js"
+  ],
+  "pages.groups.security.dashboard.show": [
+    "./main",
+    "ee/pages/groups/security/dashboard/show/index.js"
+  ],
+  "pages.groups.security.discover.show": [
+    "./main",
+    "ee/pages/groups/security/discover/show/index.js"
+  ],
+  "pages.groups.security.vulnerabilities.index": [
+    "./main",
+    "ee/pages/groups/security/vulnerabilities/index/index.js"
+  ],
+  "pages.groups.sso": [
+    "./main",
+    "ee/pages/groups/sso/index.js"
+  ],
+  "pages.groups.usage_quotas": [
+    "./main",
+    "ee/pages/groups/usage_quotas/index.js"
+  ],
+  "pages.groups.wikis": [
+    "./main",
+    "ee/pages/groups/wikis/index.js"
+  ],
+  "pages.operations.environments": [
+    "./main",
+    "ee/pages/operations/environments/index.js"
+  ],
+  "pages.operations.index": [
+    "./main",
+    "ee/pages/operations/index/index.js"
+  ],
+  "pages.profiles.billings": [
+    "./main",
+    "./pages/profiles/index.js",
+    "ee/pages/profiles/billings/index.js"
+  ],
+  "pages.profiles.slacks": [
+    "./main",
+    "./pages/profiles/index.js",
+    "ee/pages/profiles/slacks/index.js"
+  ],
+  "pages.profiles.usage_quotas": [
+    "./main",
+    "./pages/profiles/index.js",
+    "ee/pages/profiles/usage_quotas/index.js"
+  ],
+  "pages.projects.analytics.code_reviews.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/analytics/code_reviews/index/index.js"
+  ],
+  "pages.projects.analytics.issues_analytics": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/analytics/issues_analytics/index.js"
+  ],
+  "pages.projects.analytics.merge_request_analytics": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/analytics/merge_request_analytics/index.js"
+  ],
+  "pages.projects.audit_events": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/audit_events/index.js"
+  ],
+  "pages.projects.dependencies.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/dependencies/index/index.js"
+  ],
+  "pages.projects.incident_management.oncall_schedules.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/incident_management/oncall_schedules/index/index.js"
+  ],
+  "pages.projects.insights": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/insights/index.js"
+  ],
+  "pages.projects.integrations.jira.issues": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/integrations/jira/issues/index.js"
+  ],
+  "pages.projects.integrations.jira.issues.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/integrations/jira/issues/index.js",
+    "ee/pages/projects/integrations/jira/issues/show/index.js"
+  ],
+  "pages.projects.iterations": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/iterations/index.js"
+  ],
+  "pages.projects.iterations.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/iterations/index.js",
+    "ee/pages/projects/iterations/show/index.js"
+  ],
+  "pages.projects.licenses.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/licenses/index/index.js"
+  ],
+  "pages.projects.merge_conflicts": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/merge_conflicts/index.js"
+  ],
+  "pages.projects.merge_requests.creations.diffs": [
+    "./main",
+    "./pages/projects/index.js",
+    "./pages/projects/merge_requests/creations/index.js",
+    "ee/pages/projects/merge_requests/creations/diffs/index.js"
+  ],
+  "pages.projects.on_demand_scans.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/on_demand_scans/edit/index.js"
+  ],
+  "pages.projects.on_demand_scans.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/on_demand_scans/index/index.js"
+  ],
+  "pages.projects.on_demand_scans.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/on_demand_scans/new/index.js"
+  ],
+  "pages.projects.pipelines.codequality_report": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/pipelines/codequality_report/index.js"
+  ],
+  "pages.projects.pipelines.licenses": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/pipelines/licenses/index.js"
+  ],
+  "pages.projects.pipelines.security": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/pipelines/security/index.js"
+  ],
+  "pages.projects.quality.test_cases": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/quality/test_cases/index.js"
+  ],
+  "pages.projects.quality.test_cases.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/quality/test_cases/index.js",
+    "ee/pages/projects/quality/test_cases/new/index.js"
+  ],
+  "pages.projects.quality.test_cases.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/quality/test_cases/index.js",
+    "ee/pages/projects/quality/test_cases/show/index.js"
+  ],
+  "pages.projects.requirements_management.requirements": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/requirements_management/requirements/index.js"
+  ],
+  "pages.projects.security.configuration": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/security/configuration/index.js"
+  ],
+  "pages.projects.security.dashboard.index": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/security/dashboard/index/index.js"
+  ],
+  "pages.projects.security.dast_profiles": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/security/dast_profiles/index.js"
+  ],
+  "pages.projects.security.dast_scanner_profiles.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/security/dast_scanner_profiles/edit/index.js"
+  ],
+  "pages.projects.security.dast_scanner_profiles.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/security/dast_scanner_profiles/new/index.js"
+  ],
+  "pages.projects.security.dast_site_profiles.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/security/dast_site_profiles/edit/index.js"
+  ],
+  "pages.projects.security.dast_site_profiles.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/security/dast_site_profiles/new/index.js"
+  ],
+  "pages.projects.security.discover.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/security/discover/show/index.js"
+  ],
+  "pages.projects.security.sast_configuration": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/security/sast_configuration/index.js"
+  ],
+  "pages.projects.security.vulnerabilities.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/security/vulnerabilities/show/index.js"
+  ],
+  "pages.projects.security.vulnerability_report": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/security/vulnerability_report/index.js"
+  ],
+  "pages.projects.threat_monitoring.edit": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/threat_monitoring/edit/index.js"
+  ],
+  "pages.projects.threat_monitoring.new": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/threat_monitoring/new/index.js"
+  ],
+  "pages.projects.threat_monitoring.show": [
+    "./main",
+    "./pages/projects/index.js",
+    "ee/pages/projects/threat_monitoring/show/index.js"
+  ],
+  "pages.registrations.groups.new": [
+    "./main",
+    "ee/pages/registrations/groups/new/index.js"
+  ],
+  "pages.registrations.projects.new": [
+    "./main",
+    "ee/pages/registrations/projects/new/index.js"
+  ],
+  "pages.registrations.update_registration": [
+    "./main",
+    "ee/pages/registrations/update_registration/index.js"
+  ],
+  "pages.registrations.welcome": [
+    "./main",
+    "ee/pages/registrations/welcome/index.js"
+  ],
+  "pages.security.dashboard.settings": [
+    "./main",
+    "ee/pages/security/dashboard/settings/index.js"
+  ],
+  "pages.security.dashboard.show": [
+    "./main",
+    "ee/pages/security/dashboard/show/index.js"
+  ],
+  "pages.security.vulnerabilities.index": [
+    "./main",
+    "ee/pages/security/vulnerabilities/index/index.js"
+  ],
+  "pages.subscriptions.groups.edit": [
+    "./main",
+    "ee/pages/subscriptions/groups/edit/index.js"
+  ],
+  "pages.subscriptions.new": [
+    "./main",
+    "ee/pages/subscriptions/new/index.js"
+  ],
+  "pages.trial_registrations.new": [
+    "./main",
+    "ee/pages/trial_registrations/new/index.js"
+  ],
+  "pages.trials.apply": [
+    "./main",
+    "ee/pages/trials/index.js",
+    "ee/pages/trials/apply/index.js"
+  ],
+  "pages.trials.create_lead": [
+    "./main",
+    "ee/pages/trials/index.js",
+    "ee/pages/trials/create_lead/index.js"
+  ],
+  "pages.trials": [
+    "./main",
+    "ee/pages/trials/index.js"
+  ],
+  "pages.trials.new": [
+    "./main",
+    "ee/pages/trials/index.js",
+    "ee/pages/trials/new/index.js"
+  ],
+  "pages.trials.select": [
+    "./main",
+    "ee/pages/trials/index.js",
+    "ee/pages/trials/select/index.js"
+  ]
+}
