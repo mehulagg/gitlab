@@ -13,7 +13,6 @@ import {
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
-
 import { __ } from '~/locale';
 import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
 

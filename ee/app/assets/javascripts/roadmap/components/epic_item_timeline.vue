@@ -15,7 +15,6 @@ import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
 import WeeksPresetMixin from '../mixins/weeks_preset_mixin';
 import { generateKey } from '../utils/epic_utils';
 
-
 export default {
   cellWidth: TIMELINE_CELL_MIN_WIDTH,
   components: {

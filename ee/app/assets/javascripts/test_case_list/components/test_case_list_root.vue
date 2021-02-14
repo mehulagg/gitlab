@@ -12,7 +12,6 @@ import { s__, __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 
-
 import { TestCaseTabs, AvailableSortOptions, DEFAULT_PAGE_SIZE } from '../constants';
 import projectTestCases from '../queries/project_test_cases.query.graphql';
 import TestCaseListEmptyState from './test_case_list_empty_state.vue';

@@ -4,7 +4,6 @@ import { GlModal } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 
-
 import { sprintf } from '~/locale';
 
 import { ChildType, RemoveItemModalProps, itemRemoveModalId } from '../constants';

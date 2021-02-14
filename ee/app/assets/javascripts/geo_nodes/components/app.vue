@@ -8,7 +8,6 @@ import SmartInterval from '~/smart_interval';
 import { NODE_ACTIONS } from '../constants';
 import eventHub from '../event_hub';
 
-
 import GeoNodeItem from './geo_node_item.vue';
 
 export default {

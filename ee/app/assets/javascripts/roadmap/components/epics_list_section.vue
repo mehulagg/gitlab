@@ -7,7 +7,6 @@ import { EPIC_DETAILS_CELL_WIDTH, TIMELINE_CELL_MIN_WIDTH, EPIC_ITEM_HEIGHT } fr
 import eventHub from '../event_hub';
 import { generateKey } from '../utils/epic_utils';
 
-
 import CurrentDayIndicator from './current_day_indicator.vue';
 import EpicItem from './epic_item.vue';
 

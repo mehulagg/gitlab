@@ -2,7 +2,6 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { DASHBOARD_TYPES } from './constants';
 
-
 import filters from './modules/filters/index';
 import pipelineJobs from './modules/pipeline_jobs/index';
 import unscannedProjects from './modules/unscanned_projects/index';

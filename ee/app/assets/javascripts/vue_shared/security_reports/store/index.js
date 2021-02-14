@@ -11,7 +11,6 @@ import secretDetection from './modules/secret_detection';
 import mutations from './mutations';
 import state from './state';
 
-
 Vue.use(Vuex);
 
 export default () =>

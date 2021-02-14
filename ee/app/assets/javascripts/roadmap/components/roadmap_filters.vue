@@ -15,7 +15,6 @@ import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filte
 import { EPICS_STATES, PRESET_TYPES } from '../constants';
 import EpicsFilteredSearchMixin from '../mixins/filtered_search_mixin';
 
-
 export default {
   epicStates: EPICS_STATES,
   availablePresets: [

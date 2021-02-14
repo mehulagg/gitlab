@@ -13,8 +13,6 @@ import listModule from './modules/list';
 import mediator from './plugins/mediator';
 import createState from './state';
 
-
-
 Vue.use(Vuex);
 
 export default (settings = {}) =>

@@ -8,7 +8,6 @@ import geoNodesApp from './components/app.vue';
 import GeoNodesService from './service/geo_nodes_service';
 import GeoNodesStore from './store/geo_nodes_store';
 
-
 Vue.use(Translate);
 Vue.use(GlToast);
 

@@ -18,8 +18,6 @@ import { PRESET_TYPES, EPIC_DETAILS_CELL_WIDTH } from './constants';
 import createStore from './store';
 import { getTimeframeForPreset } from './utils/roadmap_utils';
 
-
-
 Vue.use(Translate);
 
 export default () => {

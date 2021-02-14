@@ -11,7 +11,6 @@ import { IssuableListTabs, DEFAULT_PAGE_SIZE } from '~/issuable_list/constants';
 import { parsePikadayDate, dateInWords } from '~/lib/utils/datetime_utility';
 import { s__, sprintf } from '~/locale';
 
-
 import { EpicsSortOptions } from '../constants';
 import groupEpics from '../queries/group_epics.query.graphql';
 

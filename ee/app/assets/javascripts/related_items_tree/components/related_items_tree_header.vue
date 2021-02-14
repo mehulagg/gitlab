@@ -2,7 +2,6 @@
 import { GlTooltip, GlIcon } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 
-
 import { issuableTypesMap } from '~/related_issues/constants';
 
 import EpicHealthStatus from './epic_health_status.vue';

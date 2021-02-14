@@ -3,7 +3,6 @@ import { GlEmptyState, GlButton, GlIcon, GlSprintf } from '@gitlab/ui';
 import { IssuableStates } from '~/issuable_list/constants';
 import { __, s__ } from '~/locale';
 
-
 export default {
   FilterStateEmptyMessage: {
     [IssuableStates.Opened]: __('There are no open issues'),

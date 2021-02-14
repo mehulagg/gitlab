@@ -13,8 +13,6 @@ import {
   extendTimeframeForPreset,
 } from '../utils/roadmap_utils';
 
-
-
 import * as types from './mutation_types';
 
 export const setInitialData = ({ commit }, data) => commit(types.SET_INITIAL_DATA, data);

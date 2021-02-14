@@ -5,7 +5,6 @@ import { mapState, mapActions } from 'vuex';
 import { ChildType } from '../constants';
 import TreeDragAndDropMixin from '../mixins/tree_dd_mixin';
 
-
 export default {
   components: {
     GlButton,

@@ -12,7 +12,6 @@ import RelatedItemsTreeBody from './related_items_tree_body.vue';
 import RelatedItemsTreeHeader from './related_items_tree_header.vue';
 import TreeItemRemoveModal from './tree_item_remove_modal.vue';
 
-
 const FORM_SLOTS = {
   addItem: 'addItem',
   createEpic: 'createEpic',
