@@ -9,6 +9,7 @@ RSpec.describe GitlabSchema.types['Issue'] do
   it { expect(described_class).to have_graphql_field(:health_status) }
   it { expect(described_class).to have_graphql_field(:blocked) }
   it { expect(described_class).to have_graphql_field(:blocked_by_count) }
+  it { expect(described_class).to have_graphql_field(:blocked_by_issues) }
   it { expect(described_class).to have_graphql_field(:sla_due_at) }
   it { expect(described_class).to have_graphql_field(:metric_images) }
 

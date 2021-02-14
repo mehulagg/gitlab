@@ -47,12 +47,12 @@ RSpec.describe 'getting an issue list for a project' do
   describe 'blocked' do
     let_it_be(:group) { create(:group, :public) }
     let_it_be(:project) { create(:project, namespace: group) }
-    let_it_be(:unrelated_issue) { create(:issue, project: project) }
-    let_it_be(:blocked_issue1) { create(:issue, project: project) }
-    let_it_be(:blocking_issue1) { create(:issue, project: project) }
-    let_it_be(:blocked_issue2) { create(:issue, project: project) }
-    let_it_be(:blocking_issue2) { create(:issue, :confidential, project: project) }
-    let_it_be(:blocking_issue3) { create(:issue, project: project) }
+    let_it_be(:unrelated_issue) { create(:issue, project: project, id: 1) }
+    let_it_be(:blocked_issue1) { create(:issue, project: project, id: 2) }
+    let_it_be(:blocking_issue1) { create(:issue, project: project, id: 3) }
+    let_it_be(:blocked_issue2) { create(:issue, project: project, id: 4) }
+    let_it_be(:blocking_issue2) { create(:issue, :confidential, project: project, id: 5) }
+    let_it_be(:blocking_issue3) { create(:issue, project: project, id: 6) }
 
     let_it_be(:issue_link1) { create(:issue_link, source: blocking_issue1, target: blocked_issue1, link_type: 'blocks') }
     let_it_be(:issue_link2) { create(:issue_link, source: blocking_issue2, target: blocked_issue2, link_type: 'blocks') }
@@ -72,12 +72,15 @@ RSpec.describe 'getting an issue list for a project' do
           id
           blocked
           blockedByCount
+          blockedByIssues {
+            nodes { id }
+          }
         }
       QUERY
     end
 
     before do
-      group.add_developer(current_user)
+      group.add_maintainer(current_user)
     end
 
     context 'working query' do
@@ -94,16 +97,37 @@ RSpec.describe 'getting an issue list for a project' do
       post_graphql(single_issue_query, current_user: current_user)
     end
 
-    it 'returns the correct result', :aggregate_failures do
-      check_result(blocked_issue1, true, 1)
-      check_result(blocked_issue2, true, 2)
-      check_result(blocking_issue1, false, 0)
-      check_result(blocking_issue2, false, 0)
+    context 'correct result' do
+      before do
+        post_graphql(query, current_user: current_user)
+      end
+
+      it 'returns the correct blocked count result', :aggregate_failures do
+        expect_blocked_count(blocked_issue1, true, 1)
+        expect_blocked_count(blocked_issue2, true, 2)
+        expect_blocked_count(blocking_issue1, false, 0)
+        expect_blocked_count(blocking_issue2, false, 0)
+        expect_blocked_count(blocking_issue3, false, 0)
+      end
+
+      it 'returns the correct blocked issue detail result', :aggregate_failures do
+        expect_blocking_issues(blocked_issue1, [blocking_issue1])
+        expect_blocking_issues(blocked_issue2, [blocking_issue2, blocking_issue3])
+        expect_blocking_issues(blocking_issue1, [])
+        expect_blocking_issues(blocking_issue2, [])
+        expect_blocking_issues(blocking_issue3, [])
+        expect_blocking_issues(unrelated_issue, [])
+      end
     end
 
-    def check_result(issue, expected_blocked, expected_blocked_count)
-      post_graphql(query, current_user: current_user)
+    def expect_blocking_issues(issue, expected_blocking_issues)
+      nodes = graphql_data.dig('project', 'issues', 'nodes')
+      node = nodes.find { |r| r['id'] == issue.to_global_id.to_s }
 
+      expect(node['blockedByIssues']['nodes']).to match_array expected_blocking_issues.map { |i| { "id" => i.to_global_id.to_s }}
+    end
+
+    def expect_blocked_count(issue, expected_blocked, expected_blocked_count)
       nodes = graphql_data.dig('project', 'issues', 'nodes')
       node = nodes.find { |r| r['id'] == issue.to_global_id.to_s }
 
