@@ -12614,7 +12614,7 @@ Describes an incident management on-call rotation
 """
 type IncidentManagementOncallRotation {
   """
-  Active period start time for the on-call rotation.
+  Active period end time for the on-call rotation.
   """
   activePeriodEnd: String
 
@@ -17573,7 +17573,7 @@ type OncallParticipantTypeEdge {
 }
 
 """
-Time active period type for on-call rotation
+Active period time range for on-call rotation
 """
 input OncallRotationActivePeriodType {
   """

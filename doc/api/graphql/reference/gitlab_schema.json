@@ -34200,7 +34200,7 @@
           "fields": [
             {
               "name": "activePeriodEnd",
-              "description": "Active period start time for the on-call rotation.",
+              "description": "Active period end time for the on-call rotation.",
               "args": [
 
               ],
@@ -51703,7 +51703,7 @@
         {
           "kind": "INPUT_OBJECT",
           "name": "OncallRotationActivePeriodType",
-          "description": "Time active period type for on-call rotation",
+          "description": "Active period time range for on-call rotation",
           "fields": null,
           "inputFields": [
             {

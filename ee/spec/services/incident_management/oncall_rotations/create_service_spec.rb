@@ -163,7 +163,13 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
         it_behaves_like 'successfully creates rotation'
         it_behaves_like 'saved the active period times'
 
-        context 'when only one interval is set' do
+        context 'when only active period end time is set' do
+          let(:active_period_start) { nil }
+
+          it_behaves_like 'error response', "Active period start can't be blank"
+        end
+
+        context 'when only active period start time is set' do
           let(:active_period_end) { nil }
 
           it_behaves_like 'error response', "Active period end can't be blank"

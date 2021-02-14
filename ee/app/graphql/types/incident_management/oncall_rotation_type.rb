@@ -41,7 +41,7 @@ module Types
       field :active_period_end,
             GraphQL::STRING_TYPE,
             null: true,
-            description: 'Active period start time for the on-call rotation.'
+            description: 'Active period end time for the on-call rotation.'
 
       field :participants,
             ::Types::IncidentManagement::OncallParticipantType.connection_type,

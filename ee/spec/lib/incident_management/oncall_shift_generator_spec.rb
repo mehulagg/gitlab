@@ -761,6 +761,14 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
           [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC']
       end
 
+      context 'when timestamp is at the end of a shift' do
+        let(:timestamp) { rotation_start_time + shift_length }
+
+        it_behaves_like 'unsaved shift',
+          'the second shift',
+          [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC']
+      end
+
       context 'with shift active period times set' do
         before do
           rotation.update!(
@@ -781,6 +789,12 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
           it_behaves_like 'unsaved shift',
             'the first shift of the shift cycle (split by the active period)',
             [:participant1, '2020-12-08 08:00:00 UTC', '2020-12-08 17:00:00 UTC']
+        end
+
+        context 'when timestamp is the same time as active period end' do
+          let(:timestamp) { rotation_start_time.change(hour: 17) }
+
+          it { is_expected.to be_nil }
         end
 
         context 'when timestamp is the after the active period ends' do

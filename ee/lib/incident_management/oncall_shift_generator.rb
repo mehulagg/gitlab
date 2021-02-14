@@ -54,7 +54,7 @@ module IncidentManagement
 
       new_shifts = Array(shift_cycle_for(elapsed_shift_cycle_count, shift_cycle_starts_at))
 
-      new_shifts.detect { |shift| timestamp.between?(shift.starts_at, shift.ends_at) }
+      new_shifts.detect { |shift| timestamp.between?(shift.starts_at, shift.ends_at) && timestamp < shift.ends_at }
     end
 
     private
