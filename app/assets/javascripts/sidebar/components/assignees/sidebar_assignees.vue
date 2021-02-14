@@ -101,6 +101,12 @@ export default {
           return new Flash(__('Error occurred when saving assignees'));
         });
     },
+    exposeAvailabilityStatus(users) {
+      return users.map(({ status, ...rest }) => ({
+        ...rest,
+        availability: status?.availability || '',
+      }));
+    },
   },
 };
 </script>
@@ -123,7 +129,7 @@ export default {
     <assignees
       v-if="!store.isFetching.assignees"
       :root-path="relativeUrlRoot"
-      :users="store.assignees"
+      :users="exposeAvailabilityStatus(store.assignees)"
       :editable="store.editable"
       :issuable-type="issuableType"
       class="value"

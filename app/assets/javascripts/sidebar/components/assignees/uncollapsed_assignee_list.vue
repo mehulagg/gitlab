@@ -55,8 +55,7 @@ export default {
       if (!this.hasOneUser) {
         return false;
       }
-      const { availability = '' } = this.firstUser;
-      return isUserBusy(availability);
+      return isUserBusy(this.firstUser?.availability);
     },
   },
   methods: {
@@ -76,6 +75,7 @@ export default {
     :issuable-type="issuableType"
   >
     <div class="ml-2 gl-line-height-normal">
+      <!-- TODO: replace with component -->
       <div v-if="userBusy">{{ firstUser.name }} {{ s__('UserAvailability|(Busy)') }}</div>
       <div v-else>{{ firstUser.name }}</div>
       <div>{{ username }}</div>
