@@ -9,12 +9,12 @@ import '~/commons';
 import Vue from 'vue';
 import jasmineDiff from 'jasmine-diff';
 import { config as testUtilsConfig } from '@vue/test-utils';
+import { getDefaultAdapter } from '~/lib/utils/axios_utils';
 import Translate from '~/vue_shared/translate';
 
-import { getDefaultAdapter } from '~/lib/utils/axios_utils';
+import customMatchers from './matchers';
 import { FIXTURES_PATH, TEST_HOST } from './test_constants';
 
-import customMatchers from './matchers';
 
 // Tech debt issue TBD
 testUtilsConfig.logModifiedComponents = false;
