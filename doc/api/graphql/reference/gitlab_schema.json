@@ -53351,8 +53351,8 @@
               "deprecationReason": null
             },
             {
-              "name": "NPM",
-              "description": "Packages from the NPM package manager",
+              "name": "npm",
+              "description": "Packages from the npm package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
