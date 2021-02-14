@@ -14,8 +14,6 @@ import DropdownTitle from './dropdown_title.vue';
 import DropdownValue from './dropdown_value.vue';
 import labelsSelectModule from './store';
 
-
-
 Vue.use(Vuex);
 
 export default {

@@ -15,7 +15,6 @@ import RecentSearchesStore from '~/filtered_search/stores/recent_searches_store'
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 
-
 import { SortDirection } from './constants';
 import { stripQuotes, uniqueTokens } from './filtered_search_utils';
 

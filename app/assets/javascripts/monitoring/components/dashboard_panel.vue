@@ -36,7 +36,6 @@ import MonitorSingleStatChart from './charts/single_stat.vue';
 import MonitorStackedColumnChart from './charts/stacked_column.vue';
 import MonitorTimeSeriesChart from './charts/time_series.vue';
 
-
 const events = {
   timeRangeZoom: 'timerangezoom',
   expand: 'expand',

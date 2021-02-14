@@ -29,7 +29,6 @@ import {
 import deleteContainerRepositoryTagsMutation from '../graphql/mutations/delete_container_repository_tags.mutation.graphql';
 import getContainerRepositoryDetailsQuery from '../graphql/queries/get_container_repository_details.query.graphql';
 
-
 export default {
   name: 'RegistryDetailsPage',
   components: {

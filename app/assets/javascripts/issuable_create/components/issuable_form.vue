@@ -4,7 +4,6 @@ import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 import { DropdownVariant } from '~/vue_shared/components/sidebar/labels_select_vue/constants';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
-
 export default {
   LabelSelectVariant: DropdownVariant,
   components: {

@@ -31,7 +31,6 @@ import {
 } from '../constants/index';
 import getContainerRepositoriesDetails from '../graphql/queries/get_container_repositories_details.query.graphql';
 
-
 export default {
   name: 'RegistryListPage',
   components: {

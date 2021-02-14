@@ -4,7 +4,6 @@ import { GRAPHQL_PAGE_SIZE } from '../constants/index';
 import deleteContainerRepositoryMutation from '../graphql/mutations/delete_container_repository.mutation.graphql';
 import getContainerRepositoryDetailsQuery from '../graphql/queries/get_container_repository_details.query.graphql';
 
-
 export default {
   props: {
     id: {

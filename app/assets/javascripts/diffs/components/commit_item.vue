@@ -9,8 +9,6 @@ import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
-
-
 import { setUrlParams } from '../../lib/utils/url_utility';
 import initUserPopovers from '../../user_popovers';
 

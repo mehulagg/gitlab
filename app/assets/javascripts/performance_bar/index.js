@@ -7,7 +7,6 @@ import initPerformanceBarLog from './performance_bar_log';
 import PerformanceBarService from './services/performance_bar_service';
 import PerformanceBarStore from './stores/performance_bar_store';
 
-
 Vue.use(Translate);
 
 const initPerformanceBar = (el) => {

@@ -39,7 +39,6 @@ import MergeConflictWarning from './merge_conflict_warning.vue';
 import NoChanges from './no_changes.vue';
 import TreeList from './tree_list.vue';
 
-
 export default {
   name: 'DiffsApp',
   components: {

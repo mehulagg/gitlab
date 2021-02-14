@@ -15,7 +15,6 @@ import FeatureFlagsTab from './feature_flags_tab.vue';
 import FeatureFlagsTable from './feature_flags_table.vue';
 import UserListsTable from './user_lists_table.vue';
 
-
 const SCOPES = { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE };
 
 export default {

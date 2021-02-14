@@ -10,7 +10,6 @@ import { TREE_LIST_STORAGE_KEY, DIFF_WHITESPACE_COOKIE_NAME } from './constants'
 import { getReviewsForMergeRequest } from './utils/file_reviews';
 import { getDerivedMergeRequestInformation } from './utils/merge_request';
 
-
 export default function initDiffsApp(store) {
   const fileFinderEl = document.getElementById('js-diff-file-finder');
 

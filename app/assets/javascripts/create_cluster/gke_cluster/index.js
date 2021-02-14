@@ -9,7 +9,6 @@ import gapiLoader from './gapi_loader';
 
 import store from './store';
 
-
 const mountComponent = (entryPoint, component, componentName, extraProps = {}) => {
   const el = document.querySelector(entryPoint);
   if (!el) return false;

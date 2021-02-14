@@ -30,7 +30,6 @@ import { sprintf, __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
 import IssueAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
 
-
 export default {
   i18n: {
     openedAgo: __('opened %{timeAgoString} by %{user}'),

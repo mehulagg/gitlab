@@ -30,7 +30,6 @@ import TableHeaderRow from './nodes/table_header_row';
 import TableRow from './nodes/table_row';
 import TableCell from './nodes/table_cell';
 
-
 import TableOfContents from './nodes/table_of_contents';
 import TaskList from './nodes/task_list';
 import TaskListItem from './nodes/task_list_item';
@@ -39,14 +38,11 @@ import Video from './nodes/video';
 import OrderedList from './nodes/ordered_list';
 import ListItem from './nodes/list_item';
 
-
 import OrderedTaskList from './nodes/ordered_task_list';
 import Paragraph from './nodes/paragraph';
 
 import Summary from './nodes/summary';
 import Text from './nodes/text';
-
-
 
 // The filters referenced in lib/banzai/pipeline/gfm_pipeline.rb transform
 // GitLab Flavored Markdown (GFM) to HTML.

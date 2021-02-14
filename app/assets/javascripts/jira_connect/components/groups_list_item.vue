@@ -3,7 +3,6 @@ import { GlAvatar, GlButton, GlIcon } from '@gitlab/ui';
 import { addSubscription } from '~/jira_connect/api';
 import { s__ } from '~/locale';
 
-
 export default {
   components: {
     GlAvatar,

@@ -8,7 +8,6 @@ import { __, sprintf } from '~/locale';
 import IssuableAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
-
 export default {
   components: {
     GlLink,

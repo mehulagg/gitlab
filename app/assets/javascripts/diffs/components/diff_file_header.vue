@@ -26,7 +26,6 @@ import { DIFF_FILE_HEADER } from '../i18n';
 import { collapsedType, isCollapsed } from '../utils/diff_file';
 import { reviewable } from '../utils/file_reviews';
 
-
 import DiffStats from './diff_stats.vue';
 
 export default {

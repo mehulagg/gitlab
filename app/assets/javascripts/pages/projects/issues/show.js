@@ -15,7 +15,6 @@ import initSentryErrorStackTraceApp from '~/sentry_error_stack_trace';
 import initIssuableHeaderWarning from '~/vue_shared/components/issuable/init_issuable_header_warning';
 import ZenMode from '~/zen_mode';
 
-
 export default function initShowIssue() {
   const initialDataEl = document.getElementById('js-issuable-app');
   const { issueType, ...issuableData } = parseIssuableData(initialDataEl);

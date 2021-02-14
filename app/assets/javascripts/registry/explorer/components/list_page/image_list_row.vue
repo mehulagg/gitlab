@@ -16,7 +16,6 @@ import {
 } from '../../constants/index';
 import DeleteButton from '../delete_button.vue';
 
-
 export default {
   name: 'ImageListRow',
   components: {
