@@ -2,7 +2,6 @@ import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { stubComponent } from 'helpers/stub_component';
 
-
 import EditArea from '~/static_site_editor/components/edit_area.vue';
 import EditDrawer from '~/static_site_editor/components/edit_drawer.vue';
 import EditHeader from '~/static_site_editor/components/edit_header.vue';

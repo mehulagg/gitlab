@@ -3,7 +3,6 @@ import { addSubscription, removeSubscription, fetchGroups } from '~/jira_connect
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
 
-
 describe('JiraConnect API', () => {
   let mock;
   let response;

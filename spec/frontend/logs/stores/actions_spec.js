@@ -19,7 +19,6 @@ import Tracking from '~/tracking';
 
 import { defaultTimeRange } from '~/vue_shared/constants';
 
-
 import {
   mockPodName,
   mockEnvironmentsEndpoint,

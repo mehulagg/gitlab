@@ -13,7 +13,6 @@ import {
 } from '~/snippets/constants';
 import CloneDropdownButton from '~/vue_shared/components/clone_dropdown.vue';
 
-
 describe('Snippet view app', () => {
   let wrapper;
   const defaultProps = {

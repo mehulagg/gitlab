@@ -20,7 +20,6 @@ import {
   mockFixedTimeRange,
 } from '../../mock_data';
 
-
 jest.mock('lodash/throttle', () =>
   // this throttle mock executes immediately
   jest.fn((func) => {

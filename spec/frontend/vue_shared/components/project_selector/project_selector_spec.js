@@ -1,4 +1,3 @@
-
 import { GlSearchBoxByType, GlInfiniteScroll } from '@gitlab/ui';
 import { mount, createLocalVue } from '@vue/test-utils';
 import { head } from 'lodash';

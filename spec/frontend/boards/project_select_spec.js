@@ -4,7 +4,6 @@ import Vuex from 'vuex';
 import ProjectSelect from '~/boards/components/project_select.vue';
 import defaultState from '~/boards/stores/state';
 
-
 import { mockList, mockGroupProjects } from './mock_data';
 
 const localVue = createLocalVue();

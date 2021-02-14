@@ -1,7 +1,6 @@
 import { GlFormCheckbox, GlFormInput } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 
-
 import JiraIssuesFields from '~/integrations/edit/components/jira_issues_fields.vue';
 import eventHub from '~/integrations/edit/event_hub';
 

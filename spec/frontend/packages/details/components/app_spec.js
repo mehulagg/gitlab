@@ -3,7 +3,6 @@ import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import stubChildren from 'helpers/stub_children';
 
-
 import AdditionalMetadata from '~/packages/details/components/additional_metadata.vue';
 import PackagesApp from '~/packages/details/components/app.vue';
 import DependencyRow from '~/packages/details/components/dependency_row.vue';

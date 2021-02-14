@@ -4,7 +4,6 @@ import OverrideDropdown from '~/integrations/edit/components/override_dropdown.v
 import { integrationLevels, overrideDropdownDescriptions } from '~/integrations/edit/constants';
 import { createStore } from '~/integrations/edit/store';
 
-
 describe('OverrideDropdown', () => {
   let wrapper;
 

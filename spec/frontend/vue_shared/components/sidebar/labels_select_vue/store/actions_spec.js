@@ -6,7 +6,6 @@ import * as actions from '~/vue_shared/components/sidebar/labels_select_vue/stor
 import * as types from '~/vue_shared/components/sidebar/labels_select_vue/store/mutation_types';
 import defaultState from '~/vue_shared/components/sidebar/labels_select_vue/store/state';
 
-
 describe('LabelsSelect Actions', () => {
   let state;
   const mockInitialState = {

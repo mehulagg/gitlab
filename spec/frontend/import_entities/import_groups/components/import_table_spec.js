@@ -11,7 +11,6 @@ import setNewNameMutation from '~/import_entities/import_groups/graphql/mutation
 import setTargetNamespaceMutation from '~/import_entities/import_groups/graphql/mutations/set_target_namespace.mutation.graphql';
 import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
 
-
 import { availableNamespacesFixture, generateFakeEntry } from '../graphql/fixtures';
 
 const localVue = createLocalVue();

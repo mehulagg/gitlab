@@ -16,7 +16,6 @@ import Store from '~/pipelines/stores/pipelines_store';
 import NavigationTabs from '~/vue_shared/components/navigation_tabs.vue';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 
-
 import { pipelineWithStages, stageReply, users, mockSearch, branches } from './mock_data';
 
 jest.mock('~/flash');

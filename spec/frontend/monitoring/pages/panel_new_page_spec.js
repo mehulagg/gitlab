@@ -5,7 +5,6 @@ import PanelNewPage from '~/monitoring/pages/panel_new_page.vue';
 import { DASHBOARD_PAGE, PANEL_NEW_PAGE } from '~/monitoring/router/constants';
 import { createStore } from '~/monitoring/stores';
 
-
 const dashboard = 'dashboard.yml';
 
 // Button stub that can accept `to` as router links do

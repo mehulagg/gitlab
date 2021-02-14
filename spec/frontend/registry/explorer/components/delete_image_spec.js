@@ -5,7 +5,6 @@ import { GRAPHQL_PAGE_SIZE } from '~/registry/explorer/constants/index';
 import deleteContainerRepositoryMutation from '~/registry/explorer/graphql/mutations/delete_container_repository.mutation.graphql';
 import getContainerRepositoryDetailsQuery from '~/registry/explorer/graphql/queries/get_container_repository_details.query.graphql';
 
-
 describe('Delete Image', () => {
   let wrapper;
   const id = '1';

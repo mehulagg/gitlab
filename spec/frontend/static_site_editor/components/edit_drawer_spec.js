@@ -1,7 +1,6 @@
 import { GlDrawer } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
-
 import EditDrawer from '~/static_site_editor/components/edit_drawer.vue';
 import FrontMatterControls from '~/static_site_editor/components/front_matter_controls.vue';
 

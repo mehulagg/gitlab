@@ -9,7 +9,6 @@ import { deprecatedCreateFlash as flash } from '~/flash';
 import httpStatus from '~/lib/utils/http_status';
 import { featureAccessLevel } from '~/pages/projects/shared/permissions/constants';
 
-
 import { listObj, mockRawGroupProjects } from './mock_data';
 
 jest.mock('~/boards/eventhub');

@@ -3,7 +3,6 @@ import { mount } from '@vue/test-utils';
 import ActiveCheckbox from '~/integrations/edit/components/active_checkbox.vue';
 import { createStore } from '~/integrations/edit/store';
 
-
 describe('ActiveCheckbox', () => {
   let wrapper;
 

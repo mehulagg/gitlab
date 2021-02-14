@@ -9,7 +9,6 @@ import {
   willAlwaysRender,
 } from '~/vue_shared/components/rich_content_editor/services/renderers/render_utils';
 
-
 import { originToken, uneditableCloseToken, attributeDefinition } from './mock_data';
 
 describe('rich_content_editor/renderers/render_utils', () => {

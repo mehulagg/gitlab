@@ -14,7 +14,6 @@ import { SortDirection } from '~/vue_shared/components/filtered_search_bar/const
 import FilteredSearchBarRoot from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import { uniqueTokens } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 
-
 import {
   mockAvailableTokens,
   mockMembershipToken,

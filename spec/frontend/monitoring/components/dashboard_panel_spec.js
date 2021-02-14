@@ -7,8 +7,6 @@ import axios from '~/lib/utils/axios_utils';
 import invalidUrl from '~/lib/utils/invalid_url';
 import AlertWidget from '~/monitoring/components/alert_widget.vue';
 
-
-
 import MonitorAnomalyChart from '~/monitoring/components/charts/anomaly.vue';
 import MonitorBarChart from '~/monitoring/components/charts/bar.vue';
 import MonitorColumnChart from '~/monitoring/components/charts/column.vue';

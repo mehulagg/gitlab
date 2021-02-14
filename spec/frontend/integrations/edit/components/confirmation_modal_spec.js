@@ -3,7 +3,6 @@ import { shallowMount } from '@vue/test-utils';
 import ConfirmationModal from '~/integrations/edit/components/confirmation_modal.vue';
 import { createStore } from '~/integrations/edit/store';
 
-
 describe('ConfirmationModal', () => {
   let wrapper;
 

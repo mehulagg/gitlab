@@ -7,7 +7,6 @@ import {
 import { fileByFile } from '~/diffs/utils/preferences';
 import { getParameterValues } from '~/lib/utils/url_utility';
 
-
 jest.mock('~/lib/utils/url_utility');
 
 describe('diffs preferences', () => {
