@@ -450,7 +450,7 @@ class License < ApplicationRecord
 
   def daily_billable_users_count
     strong_memoize(:daily_billable_users_count) do
-      ::Analytics::InstanceStatistics::Measurement.find_latest_or_fallback(:billable_users).count
+      ::Analytics::UsageTrends::Measurement.find_latest_or_fallback(:billable_users).count
     end
   end
 
