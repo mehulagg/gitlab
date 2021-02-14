@@ -2,12 +2,18 @@
 
 module Security
   class MergeReportsService
-    ANALYZER_ORDER = {
+    DS_ANALYZERS_ORDER = {
       "bundler_audit" => 1,
       "retire.js" =>  2,
       "gemnasium" => 3,
       "gemnasium-maven" => 3,
       "gemnasium-python" => 3,
+      "unknown" => 999
+    }.freeze
+
+    SAST_ANALYZERS_ORDER = {
+      "bandit" => 1,
+      "semgrep" =>  2,
       "unknown" => 999
     }.freeze
 
@@ -92,10 +98,10 @@ module Security
         a_scanner_id, b_scanner_id = a.scanners.values[0].external_id, b.scanners.values[0].external_id
 
         # for custom analyzers
-        a_scanner_id = "unknown" if ANALYZER_ORDER[a_scanner_id].nil?
-        b_scanner_id = "unknown" if ANALYZER_ORDER[b_scanner_id].nil?
+        a_scanner_id = "unknown" if DS_ANALYZERS_ORDER[a_scanner_id].nil?
+        b_scanner_id = "unknown" if DS_ANALYZERS_ORDER[b_scanner_id].nil?
 
-        ANALYZER_ORDER[a_scanner_id] <=> ANALYZER_ORDER[b_scanner_id]
+        DS_ANALYZERS_ORDER[a_scanner_id] <=> DS_ANALYZERS_ORDER[b_scanner_id]
       end
     end
   end
