@@ -47,4 +47,76 @@ RSpec.describe Groups::EpicBoardsController do
       get :index, params: { group_id: group }, format: format
     end
   end
+
+  describe 'GET show' do
+    let!(:board) { create(:epic_board, group: group) }
+
+    context 'when format is HTML' do
+      it 'renders template' do
+        # epic board visits not supported yet
+        expect { read_board board: board }.not_to change(BoardGroupRecentVisit, :count)
+
+        expect(response).to render_template :show
+        expect(response.media_type).to eq 'text/html'
+      end
+
+      context 'with unauthorized user' do
+        let(:group) { create(:group, :private) }
+
+        before do
+          sign_in(create(:user))
+        end
+
+        it 'returns a not found 404 response' do
+          read_board board: board
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response.media_type).to eq 'text/html'
+        end
+      end
+
+      context 'when user is signed out' do
+        let(:group) { create(:group, :public) }
+
+        it 'does not save visit' do
+          sign_out(user)
+
+          # epic board visits not supported yet
+          expect { read_board board: board }.not_to change(BoardGroupRecentVisit, :count)
+
+          expect(response).to render_template :show
+          expect(response.media_type).to eq 'text/html'
+        end
+      end
+    end
+
+    context 'json request' do
+      it 'is not supported' do
+        read_board(board: board, format: :json)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when epic board does not belong to group' do
+      it 'returns a not found 404 response' do
+        another_board = create(:epic_board)
+        read_board board: another_board
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    it_behaves_like 'disabled when using an external authorization service' do
+      subject { read_board board: board }
+    end
+
+    def read_board(board:, format: :html)
+      get :show, params: {
+          group_id: group,
+          id: board.to_param
+      },
+          format: format
+    end
+  end
 end

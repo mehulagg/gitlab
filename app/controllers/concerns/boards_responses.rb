@@ -66,6 +66,8 @@ module BoardsResponses
   end
 
   def respond_with_board
+    return render_404 unless @board
+
     respond_with(@board) # rubocop:disable Gitlab/ModuleWithInstanceVariables
   end
 
