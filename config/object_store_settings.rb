@@ -131,7 +131,7 @@ class ObjectStoreSettings
       next unless overrides.fetch('enabled', true)
       next unless section
 
-      if section['enabled'] && target_config['bucket'].blank?
+      if section.fetch('enabled', true) && target_config['bucket'].blank?
         missing_bucket_for(store_type)
         next
       end

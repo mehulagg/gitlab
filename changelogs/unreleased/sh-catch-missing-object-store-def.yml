@@ -1,0 +1,5 @@
+---
+title: Detect missing consolidated object storage bucket
+merge_request: 54154
+author:
+type: fixed

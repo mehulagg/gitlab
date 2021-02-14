@@ -130,6 +130,16 @@ RSpec.describe ObjectStoreSettings do
         end
       end
 
+      context 'when no bucket has been defined for artifacts' do
+        before do
+          config['object_store']['objects']['artifacts'] = {}
+        end
+
+        it 'raises an error' do
+          expect { subject }.to raise_error('Object storage for artifacts must have a bucket specified')
+        end
+      end
+
       context 'when object storage is disabled for artifacts with no bucket' do
         before do
           config['artifacts'] = {
