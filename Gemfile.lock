@@ -776,6 +776,8 @@ GEM
     omniauth-authentiq (0.3.3)
       jwt (>= 1.5)
       omniauth-oauth2 (>= 1.5)
+    omniauth-azure-activedirectory-v2 (0.1.1)
+      omniauth-oauth2
     omniauth-azure-oauth2 (0.0.10)
       jwt (>= 1.0, < 3.0)
       omniauth (~> 1.0)
@@ -1448,6 +1450,7 @@ DEPENDENCIES
   omniauth-atlassian-oauth2 (~> 0.2.0)
   omniauth-auth0 (~> 2.0.0)
   omniauth-authentiq (~> 0.3.3)
+  omniauth-azure-activedirectory-v2
   omniauth-azure-oauth2 (~> 0.0.9)
   omniauth-cas3 (~> 1.1.4)
   omniauth-facebook (~> 4.0.0)
