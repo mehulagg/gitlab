@@ -1,7 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 
-
 import CreateForm from 'ee/groups/settings/compliance_frameworks/components/create_form.vue';
 import FormStatus from 'ee/groups/settings/compliance_frameworks/components/form_status.vue';
 import SharedForm from 'ee/groups/settings/compliance_frameworks/components/shared_form.vue';

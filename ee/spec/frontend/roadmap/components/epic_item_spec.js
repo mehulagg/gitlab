@@ -10,7 +10,6 @@ import { PRESET_TYPES } from 'ee/roadmap/constants';
 import createStore from 'ee/roadmap/store';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
-
 import {
   mockTimeframeInitialDate,
   mockEpic,

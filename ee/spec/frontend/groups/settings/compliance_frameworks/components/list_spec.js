@@ -2,7 +2,6 @@ import { GlAlert, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 
-
 import List from 'ee/groups/settings/compliance_frameworks/components/list.vue';
 import EmptyState from 'ee/groups/settings/compliance_frameworks/components/list_empty_state.vue';
 import ListItem from 'ee/groups/settings/compliance_frameworks/components/list_item.vue';
