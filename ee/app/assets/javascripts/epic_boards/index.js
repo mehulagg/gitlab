@@ -10,13 +10,13 @@ import BoardSidebar from 'ee_component/boards/components/board_sidebar';
 import toggleLabels from 'ee_component/boards/toggle_labels';
 
 import BoardContent from '~/boards/components/board_content.vue';
+import BoardAddIssuesModal from '~/boards/components/modal/index.vue';
+import mountMultipleBoardsSwitcher from '~/boards/mount_multiple_boards_switcher';
+import store from '~/boards/stores';
 import createDefaultClient from '~/lib/graphql';
 
-import store from '~/boards/stores';
 import '~/boards/filters/due_date_filters';
-import BoardAddIssuesModal from '~/boards/components/modal/index.vue';
 import { NavigationType, parseBoolean } from '~/lib/utils/common_utils';
-import mountMultipleBoardsSwitcher from '~/boards/mount_multiple_boards_switcher';
 
 Vue.use(VueApollo);
 

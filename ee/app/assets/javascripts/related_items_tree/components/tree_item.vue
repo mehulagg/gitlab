@@ -1,7 +1,7 @@
 <script>
+import { GlTooltipDirective, GlLoadingIcon, GlButton, GlIcon } from '@gitlab/ui';
 import { mapGetters, mapActions, mapState } from 'vuex';
 
-import { GlTooltipDirective, GlLoadingIcon, GlButton, GlIcon } from '@gitlab/ui';
 
 import { __ } from '~/locale';
 

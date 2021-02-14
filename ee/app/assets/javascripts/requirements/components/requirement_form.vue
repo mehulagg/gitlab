@@ -1,6 +1,5 @@
 <script>
 import '~/behaviors/markdown/render_gfm';
-import $ from 'jquery';
 import {
   GlDrawer,
   GlButton,
@@ -8,14 +7,15 @@ import {
   GlTooltipDirective,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
+import $ from 'jquery';
 import { isEmpty } from 'lodash';
+import IssuableBody from '~/issuable_show/components/issuable_body.vue';
+import { TAB_KEY_CODE } from '~/lib/utils/keycodes';
 import { __, sprintf } from '~/locale';
 import ZenMode from '~/zen_mode';
-import { TAB_KEY_CODE } from '~/lib/utils/keycodes';
-import IssuableBody from '~/issuable_show/components/issuable_body.vue';
 
-import RequirementMeta from '../mixins/requirement_meta';
 import { MAX_TITLE_LENGTH, TestReportStatus } from '../constants';
+import RequirementMeta from '../mixins/requirement_meta';
 import RequirementStatusBadge from './requirement_status_badge.vue';
 
 export default {

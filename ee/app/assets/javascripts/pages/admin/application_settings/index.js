@@ -1,9 +1,9 @@
 import '~/pages/admin/application_settings/index';
 import $ from 'jquery';
-import groupsSelect from '~/groups_select';
-import { s__ } from '~/locale';
 import Api from '~/api';
+import groupsSelect from '~/groups_select';
 import { loadCSSFile } from '~/lib/utils/css_utils';
+import { s__ } from '~/locale';
 
 const onLimitCheckboxChange = (checked, $limitByNamespaces, $limitByProjects) => {
   $limitByNamespaces.find('.select2').select2('data', null);

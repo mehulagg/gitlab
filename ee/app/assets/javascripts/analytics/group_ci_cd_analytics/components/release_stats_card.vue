@@ -1,9 +1,9 @@
 <script>
 import { GlCard, GlSkeletonLoader } from '@gitlab/ui';
-import { sprintf, n__, s__ } from '~/locale';
 import createFlash from '~/flash';
-import groupReleaseStatsQuery from '../graphql/group_release_stats.query.graphql';
+import { sprintf, n__, s__ } from '~/locale';
 import { STAT_ERROR_PLACEHOLDER } from '../constants';
+import groupReleaseStatsQuery from '../graphql/group_release_stats.query.graphql';
 
 export default {
   name: 'ReleaseStatsCard',

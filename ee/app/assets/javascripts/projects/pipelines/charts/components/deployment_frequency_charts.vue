@@ -1,10 +1,11 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
 import Api from 'ee/api';
-import { s__ } from '~/locale';
 import createFlash from '~/flash';
-import * as Sentry from '~/sentry/wrapper';
+import { s__ } from '~/locale';
 import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
+import * as Sentry from '~/sentry/wrapper';
+import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 import {
   allChartDefinitions,
   areaChartOptions,
@@ -12,7 +13,6 @@ import {
   chartDocumentationHref,
 } from './static_data';
 import { apiDataToChartSeries } from './util';
-import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 
 export default {
   name: 'DeploymentFrequencyCharts',

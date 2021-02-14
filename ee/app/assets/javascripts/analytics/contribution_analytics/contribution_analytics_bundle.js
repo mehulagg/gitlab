@@ -1,5 +1,5 @@
-import Vue from 'vue';
 import { sortBy } from 'lodash';
+import Vue from 'vue';
 import { __ } from '~/locale';
 import ColumnChart from './components/column_chart.vue';
 

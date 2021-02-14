@@ -1,5 +1,5 @@
-import Vue from 'vue';
 import { parseInt } from 'lodash';
+import Vue from 'vue';
 import {
   TABLE_TYPE_DEFAULT,
   TABLE_TYPE_FREE,

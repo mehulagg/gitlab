@@ -3,17 +3,17 @@ import { GlButton, GlIcon } from '@gitlab/ui';
 
 import EpicsFilteredSearchMixin from 'ee/roadmap/mixins/filtered_search_mixin';
 
-import { s__, sprintf } from '~/locale';
 import createFlash from '~/flash';
-import { parsePikadayDate, dateInWords } from '~/lib/utils/datetime_utility';
 
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 
 import { IssuableListTabs, DEFAULT_PAGE_SIZE } from '~/issuable_list/constants';
+import { parsePikadayDate, dateInWords } from '~/lib/utils/datetime_utility';
+import { s__, sprintf } from '~/locale';
 
-import groupEpics from '../queries/group_epics.query.graphql';
 
 import { EpicsSortOptions } from '../constants';
+import groupEpics from '../queries/group_epics.query.graphql';
 
 import EpicsListEmptyState from './epics_list_empty_state.vue';
 

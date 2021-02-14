@@ -1,25 +1,25 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
-import { once } from 'lodash';
 import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
+import { once } from 'lodash';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import { componentNames } from 'ee/reports/components/issue_body';
 import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
-import { LOADING } from '~/reports/constants';
+import { fetchPolicies } from '~/lib/graphql';
+import { mrStates } from '~/mr_popover/constants';
+import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
+import { LOADING } from '~/reports/constants';
 import Tracking from '~/tracking';
-import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
 import SecuritySummary from '~/vue_shared/security_reports/components/security_summary.vue';
-import { mrStates } from '~/mr_popover/constants';
-import { fetchPolicies } from '~/lib/graphql';
-import IssueModal from './components/modal.vue';
-import DastModal from './components/dast_modal.vue';
-import securityReportsMixin from './mixins/security_report_mixin';
-import createStore from './store';
-import { vulnerabilityModalMixin } from './mixins/vulnerability_modal_mixin';
-import { securityReportTypeEnumToReportType } from './constants';
 import ArtifactDownload from './components/artifact_download.vue';
+import DastModal from './components/dast_modal.vue';
+import IssueModal from './components/modal.vue';
+import { securityReportTypeEnumToReportType } from './constants';
 import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
+import securityReportsMixin from './mixins/security_report_mixin';
+import { vulnerabilityModalMixin } from './mixins/vulnerability_modal_mixin';
+import createStore from './store';
 import {
   MODULE_CONTAINER_SCANNING,
   MODULE_API_FUZZING,

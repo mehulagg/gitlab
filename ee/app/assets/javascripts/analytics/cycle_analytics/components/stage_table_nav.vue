@@ -1,8 +1,8 @@
 <script>
 import Sortable from 'sortablejs';
-import { STAGE_ACTIONS } from '../constants';
 import { NO_DRAG_CLASS } from '../../shared/constants';
 import sortableDefaultOptions from '../../shared/mixins/sortable_default_options';
+import { STAGE_ACTIONS } from '../constants';
 import AddStageButton from './add_stage_button.vue';
 import StageNavItem from './stage_nav_item.vue';
 

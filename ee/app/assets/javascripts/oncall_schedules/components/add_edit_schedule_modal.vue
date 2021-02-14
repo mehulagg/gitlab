@@ -1,10 +1,10 @@
 <script>
-import { isEmpty } from 'lodash';
 import { GlModal, GlAlert } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
 import { s__, __ } from '~/locale';
-import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import createOncallScheduleMutation from '../graphql/mutations/create_oncall_schedule.mutation.graphql';
 import updateOncallScheduleMutation from '../graphql/mutations/update_oncall_schedule.mutation.graphql';
+import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import { updateStoreOnScheduleCreate, updateStoreAfterScheduleEdit } from '../utils/cache_updates';
 import { isNameFieldValid } from '../utils/common_utils';
 import AddEditScheduleForm from './add_edit_schedule_form.vue';

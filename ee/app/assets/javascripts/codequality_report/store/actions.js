@@ -1,7 +1,7 @@
-import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { s__ } from '~/locale';
 import Api from '~/api';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { s__ } from '~/locale';
 
 import { parseCodeclimateMetrics } from '~/reports/codequality_report/store/utils/codequality_comparison';
 import { VIEW_EVENT_FEATURE_FLAG, VIEW_EVENT_NAME } from './constants';

@@ -1,6 +1,6 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import { __ } from '~/locale';
 import Tracking from '~/tracking';
 

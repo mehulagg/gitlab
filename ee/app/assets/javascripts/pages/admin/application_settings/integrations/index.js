@@ -1,7 +1,7 @@
 import $ from 'jquery';
+import { loadCSSFile } from '~/lib/utils/css_utils';
 import { s__ } from '~/locale';
 import PersistentUserCallout from '~/persistent_user_callout';
-import { loadCSSFile } from '~/lib/utils/css_utils';
 
 const onLimitCheckboxChange = (checked, $limitByNamespaces, $limitByProjects) => {
   $limitByNamespaces.find('.select2').select2('data', null);

@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import apolloProvider from './graphql/provider';
 import OnDemandScansForm from './components/on_demand_scans_form.vue';
+import apolloProvider from './graphql/provider';
 
 export default () => {
   const el = document.querySelector('#js-on-demand-scans-app');

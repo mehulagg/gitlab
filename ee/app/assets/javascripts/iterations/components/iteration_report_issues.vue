@@ -11,8 +11,8 @@ import {
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { __, sprintf } from '~/locale';
 import { Namespace } from '../constants';
 import iterationIssuesQuery from '../queries/iteration_issues.query.graphql';
 import iterationIssuesWithLabelFilterQuery from '../queries/iteration_issues_with_label_filter.query.graphql';

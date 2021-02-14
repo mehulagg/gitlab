@@ -1,19 +1,19 @@
 <script>
 import { GlModal, GlAlert } from '@gitlab/ui';
 import { set } from 'lodash';
-import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
-import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
+import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import {
   updateStoreAfterRotationAdd,
   updateStoreAfterRotationEdit,
 } from 'ee/oncall_schedules/utils/cache_updates';
 import { isNameFieldValid } from 'ee/oncall_schedules/utils/common_utils';
-import { s__, __ } from '~/locale';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
 import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
 import AddEditRotationForm from './add_edit_rotation_form.vue';
 
 export const i18n = {

@@ -3,19 +3,19 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 
 import AncestorsTree from 'ee/sidebar/components/ancestors_tree/ancestors_tree.vue';
 
-import SidebarDatePickerCollapsed from '~/vue_shared/components/sidebar/collapsed_grouped_date_picker.vue';
-import SidebarParticipants from '~/sidebar/components/participants/participants.vue';
-import ConfidentialIssueSidebar from '~/sidebar/components/confidential/confidential_issue_sidebar.vue';
 import notesEventHub from '~/notes/event_hub';
+import ConfidentialIssueSidebar from '~/sidebar/components/confidential/confidential_issue_sidebar.vue';
+import SidebarParticipants from '~/sidebar/components/participants/participants.vue';
 import sidebarEventHub from '~/sidebar/event_hub';
-import epicUtils from '../utils/epic_utils';
+import SidebarDatePickerCollapsed from '~/vue_shared/components/sidebar/collapsed_grouped_date_picker.vue';
 
 import { dateTypes } from '../constants';
-import SidebarHeader from './sidebar_items/sidebar_header.vue';
-import SidebarTodo from './sidebar_items/sidebar_todo.vue';
+import epicUtils from '../utils/epic_utils';
 import SidebarDatePicker from './sidebar_items/sidebar_date_picker.vue';
+import SidebarHeader from './sidebar_items/sidebar_header.vue';
 import SidebarLabels from './sidebar_items/sidebar_labels.vue';
 import SidebarSubscription from './sidebar_items/sidebar_subscription.vue';
+import SidebarTodo from './sidebar_items/sidebar_todo.vue';
 
 export default {
   dateTypes,

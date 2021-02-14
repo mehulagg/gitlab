@@ -1,9 +1,9 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
 import { camelCase, kebabCase } from 'lodash';
-import * as Sentry from '~/sentry/wrapper';
-import { __, s__ } from '~/locale';
 import { getLocationHash } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';

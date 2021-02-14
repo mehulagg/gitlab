@@ -1,7 +1,7 @@
 <script>
 import { GlFormGroup, GlFormInput, GlFormText } from '@gitlab/ui';
-import StageFieldActions from './stage_field_actions.vue';
 import { I18N, ADDITIONAL_DEFAULT_STAGE_EVENTS } from './constants';
+import StageFieldActions from './stage_field_actions.vue';
 
 const findStageEvent = (stageEvents = [], eid = null) => {
   if (!eid) return '';

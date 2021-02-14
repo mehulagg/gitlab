@@ -1,9 +1,9 @@
 <script>
-import { merge } from 'lodash';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
-import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
+import { merge } from 'lodash';
 import { __, n__, s__, sprintf } from '~/locale';
+import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 import commonChartOptions from './common_chart_options';
 
 export default {
