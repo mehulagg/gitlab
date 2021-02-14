@@ -1,8 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlModal } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import ConfirmationModal from '~/integrations/edit/components/confirmation_modal.vue';
 import { createStore } from '~/integrations/edit/store';
 
-import ConfirmationModal from '~/integrations/edit/components/confirmation_modal.vue';
 
 describe('ConfirmationModal', () => {
   let wrapper;

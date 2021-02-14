@@ -1,5 +1,5 @@
-import DropdownUtils from '~/filtered_search/dropdown_utils';
 import DropdownUser from '~/filtered_search/dropdown_user';
+import DropdownUtils from '~/filtered_search/dropdown_utils';
 import FilteredSearchTokenizer from '~/filtered_search/filtered_search_tokenizer';
 import IssuableFilteredTokenKeys from '~/filtered_search/issuable_filtered_search_token_keys';
 
