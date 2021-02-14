@@ -1,8 +1,8 @@
 <script>
 import { GlIcon, GlButton, GlDropdown, GlDropdownItem, GlFormGroup } from '@gitlab/ui';
+import { convertToFixedRange, isEqualTimeRanges, findTimeRange } from '~/lib/utils/datetime_range';
 import { __, sprintf } from '~/locale';
 
-import { convertToFixedRange, isEqualTimeRanges, findTimeRange } from '~/lib/utils/datetime_range';
 
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import DateTimePickerInput from './date_time_picker_input.vue';
