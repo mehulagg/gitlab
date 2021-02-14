@@ -155,7 +155,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 ## Package Registry administration
 
 - [Container Registry](packages/container_registry.md): Configure GitLab to act as a registry for containers.
-- [Package Registry](packages/index.md): Enable GitLab to act as registry for packages.
+- [Package Registry](packages/index.md): Enable GitLab to act as a registry for packages.
 - [Dependency Proxy](packages/dependency_proxy.md): Configure the Dependency Proxy, a local proxy for frequently used upstream images/packages.
 
 ### Repository settings
