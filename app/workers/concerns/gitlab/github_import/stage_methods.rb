@@ -57,14 +57,13 @@ module Gitlab
 
       def log_attributes(project_id, extra = {})
         extra.merge(
-          import_source: :github,
           project_id: project_id,
           import_stage: self.class.name
         )
       end
 
       def logger
-        @logger ||= Gitlab::Import::Logger.build
+        @logger ||= Gitlab::Import::Logger.build(:github_import)
       end
     end
   end

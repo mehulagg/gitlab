@@ -51,6 +51,7 @@ module Projects
 
       def log_lfs_link_results(lfs_objects_linked_count, iterations)
         Gitlab::Import::Logger.info(
+          import_type: :import_export, # FIXME
           class: self.class.name,
           project_id: project.id,
           project_path: project.full_path,

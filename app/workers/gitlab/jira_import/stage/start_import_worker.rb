@@ -28,12 +28,11 @@ module Gitlab
           return true if start(project.latest_jira_import)
 
           Gitlab::Import::Logger.info(
-            {
-              project_id: project.id,
-              project_path: project.full_path,
-              state: project&.jira_import_status,
-              message: 'inconsistent state while importing'
-            }
+            import_type: :jira_import,
+            project_id: project.id,
+            project_path: project.full_path,
+            state: project&.jira_import_status,
+            message: 'inconsistent state while importing'
           )
           false
         end

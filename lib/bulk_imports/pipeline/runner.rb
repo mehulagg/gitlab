@@ -91,6 +91,10 @@ module BulkImports
         BulkImports::Failure.create(attributes)
       end
 
+      def error(extra = {})
+        logger.error(log_base_params.merge(extra))
+      end
+
       def warn(extra = {})
         logger.warn(log_base_params.merge(extra))
       end
@@ -108,7 +112,7 @@ module BulkImports
       end
 
       def logger
-        @logger ||= Gitlab::Import::Logger.build
+        @logger ||= Gitlab::Import::Logger.build(:bulkimports_gitlab)
       end
     end
   end

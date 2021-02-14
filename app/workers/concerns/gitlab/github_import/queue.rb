@@ -18,6 +18,7 @@ module Gitlab
 
         sidekiq_retries_exhausted do |msg, e|
           Gitlab::Import::Logger.error(
+            import_type: :github_import,
             event: :github_importer_exhausted,
             message: msg['error_message'],
             class: msg['class'],

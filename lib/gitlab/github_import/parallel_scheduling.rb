@@ -196,7 +196,7 @@ module Gitlab
       end
 
       def logger
-        @logger ||= Gitlab::Import::Logger.build
+        @logger ||= Gitlab::Import::Logger.build(:github_import)
       end
     end
   end

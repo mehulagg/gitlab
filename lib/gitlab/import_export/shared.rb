@@ -30,7 +30,7 @@ module Gitlab
       def initialize(exportable)
         @exportable = exportable
         @errors     = []
-        @logger     = Gitlab::Import::Logger.build
+        @logger     = Gitlab::Import::Logger.build(:import_export)
       end
 
       def active_export_count

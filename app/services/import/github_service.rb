@@ -80,6 +80,7 @@ module Import
 
     def log_error(exception)
       Gitlab::Import::Logger.error(
+        import_type: :github_import,
         message: 'Import failed due to a GitHub error',
         status: exception.response_status,
         error: exception.response_body

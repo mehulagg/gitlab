@@ -94,6 +94,7 @@ module Import
 
     def log_error(message)
       Gitlab::Import::Logger.error(
+        import_type: :bitbucket_server_import,
         message: 'Import failed due to a BitBucket Server error',
         error: message
       )

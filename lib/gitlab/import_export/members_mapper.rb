@@ -142,7 +142,7 @@ module Gitlab
       end
 
       def logger
-        @logger ||= Gitlab::Import::Logger.build
+        @logger ||= Gitlab::Import::Logger.build(:import_export)
       end
     end
   end

@@ -38,7 +38,7 @@ module Gitlab
         @errors = []
         @users = {}
         @temp_branches = []
-        @logger = Gitlab::Import::Logger.build
+        @logger = Gitlab::Import::Logger.build(:bitbucket_server_import)
         @already_imported_cache_key = ALREADY_IMPORTED_CACHE_KEY %
           { project: project.id, collection: collection_method }
       end

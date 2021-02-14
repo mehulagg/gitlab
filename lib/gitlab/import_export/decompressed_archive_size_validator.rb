@@ -75,6 +75,7 @@ module Gitlab
 
       def log_error(error)
         Gitlab::Import::Logger.info(
+          import_type: :import_export,
           message: error,
           import_upload_archive_path: @archive_path,
           import_upload_archive_size: File.size(@archive_path)

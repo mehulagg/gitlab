@@ -37,6 +37,7 @@ module Gitlab
         Gem::Version.new(version) != Gem::Version.new(Gitlab::ImportExport.version)
       rescue => e
         Gitlab::Import::Logger.error(
+          import_type: :import_export,
           message: 'Import error',
           error: e.message
         )

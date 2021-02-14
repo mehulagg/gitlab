@@ -79,7 +79,7 @@ module Gitlab
       end
 
       def logger
-        @logger ||= Gitlab::Import::Logger.build
+        @logger ||= Gitlab::Import::Logger.build(:jira_import)
       end
     end
   end

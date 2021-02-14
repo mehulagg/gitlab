@@ -23,6 +23,7 @@ module Projects
       service.increment!
     rescue Repositories::HousekeepingService::LeaseTaken => e
       Gitlab::Import::Logger.info(
+        import_type: :import_export, # FIXME
         message: 'Project housekeeping failed',
         project_full_path: @project.full_path,
         project_id: @project.id,

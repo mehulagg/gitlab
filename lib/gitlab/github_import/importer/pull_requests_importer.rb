@@ -41,6 +41,7 @@ module Gitlab
           pname = project.path_with_namespace
 
           Gitlab::Import::Logger.info(
+            import_type: :github_import,
             message: 'GitHub importer finished updating repository',
             project_name: pname
           )

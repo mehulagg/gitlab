@@ -42,6 +42,7 @@ module Gitlab
         @project.repository.create_branch(@merge_request.source_branch, @diff_head_sha)
       rescue => err
         Gitlab::Import::Logger.warn(
+          import_type: :import_export,
           message: 'Import warning: Failed to create source branch',
           source_branch: @merge_request.source_branch,
           diff_head_sha: @diff_head_sha,
