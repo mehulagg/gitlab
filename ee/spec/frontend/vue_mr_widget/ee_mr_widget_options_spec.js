@@ -4,6 +4,8 @@ import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import PerformanceIssueBody from 'ee/vue_merge_request_widget/components/performance_issue_body.vue';
 import MrWidgetOptions from 'ee/vue_merge_request_widget/mr_widget_options.vue';
+// Force Jest to transpile and cache
+// eslint-disable-next-line no-unused-vars
 import _GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
 import {
   sastDiffSuccessMock,
@@ -20,15 +22,15 @@ import { trimText } from 'helpers/text_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { securityReportDownloadPathsQueryResponse } from 'jest/vue_shared/security_reports/mock_data';
 
-// Force Jest to transpile and cache
-// eslint-disable-next-line no-unused-vars
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
+
+// Force Jest to transpile and cache
+// eslint-disable-next-line no-unused-vars
 import _Deployment from '~/vue_merge_request_widget/components/deployment/deployment.vue';
 import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_download_paths.query.graphql';
 
-// eslint-disable-next-line no-unused-vars
 import mockData, {
   baseBrowserPerformance,
   headBrowserPerformance,
