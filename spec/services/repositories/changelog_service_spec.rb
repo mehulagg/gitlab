@@ -123,6 +123,29 @@ RSpec.describe Repositories::ChangelogService do
     end
   end
 
+  describe '#end_of_commit_range' do
+    let(:project) { create(:project, :empty_repo) }
+    let(:user) { project.creator }
+
+    context 'when a custom commit is specified' do
+      it 'returns the commit' do
+        service =
+          described_class.new(project, user, version: '1.0.0', to: 'foo')
+
+        expect(service.end_of_commit_range).to eq('foo')
+      end
+    end
+
+    context 'when no custom commit is specified' do
+      it 'returns the branch to commit to' do
+        service =
+          described_class.new(project, user, version: '1.0.0', branch: 'foo')
+
+        expect(service.end_of_commit_range).to eq('foo')
+      end
+    end
+  end
+
   def create_commit(project, user, params)
     params = { start_branch: 'master', branch_name: 'master' }.merge(params)
     Files::MultiService.new(project, user, params).execute.fetch(:result)

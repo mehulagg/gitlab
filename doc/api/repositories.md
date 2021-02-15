@@ -310,7 +310,7 @@ Supported attributes:
 | :-------- | :------- | :--------- | :---------- |
 | `version` | string   | yes | The version to generate the changelog for. The format must follow [semantic versioning](https://semver.org/). |
 | `from`    | string   | no | The start of the range of commits (as a SHA) to use for generating the changelog. This commit itself isn't included in the list. |
-| `to`      | string   | yes | The end of the range of commits (as a SHA) to use for the changelog. This commit _is_ included in the list. |
+| `to`      | string   | no | The end of the range of commits (as a SHA) to use for the changelog. This commit _is_ included in the list. |
 | `date`    | datetime | no | The date and time of the release, defaults to the current time. |
 | `branch`  | string   | no | The branch to commit the changelog changes to, defaults to the project's default branch. |
 | `trailer` | string   | no | The Git trailer to use for including commits, defaults to `Changelog`. |
@@ -339,6 +339,9 @@ version is `1.1.1`, or `1.2.0`, GitLab uses tag v1.1.0.
 If `from` is unspecified and no tag to use is found, the API produces an error.
 To solve such an error, you must explicitly specify a value for the `from`
 attribute.
+
+If `to` is unspecified, the API uses the last commit on the branch specified
+in the `branch` attribute.
 
 ### How it works
 
