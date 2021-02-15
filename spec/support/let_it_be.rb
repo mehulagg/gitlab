@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 TestProf::LetItBe.configure do |config|
-  config.default_modifiers[:freeze] = true
-end
-
-TestProf::LetItBe.configure do |config|
   config.alias_to :let_it_be_with_refind, refind: true
 end
 
