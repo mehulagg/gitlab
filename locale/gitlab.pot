@@ -1163,6 +1163,16 @@ msgid_plural "%d hours"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "1 issue selected"
+msgid_plural "%d issues selected"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "1 merge request selected"
+msgid_plural "%d merge request selected"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "1 merged merge request"
 msgid_plural "%{merge_requests} merged merge requests"
 msgstr[0] ""
@@ -12366,6 +12376,9 @@ msgid "Explore public groups"
 msgstr ""
 
 msgid "Export"
+msgstr ""
+
+msgid "Export %{name}"
 msgstr ""
 
 msgid "Export %{requirementsCount} requirements?"
