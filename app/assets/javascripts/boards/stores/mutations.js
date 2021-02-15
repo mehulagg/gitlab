@@ -280,9 +280,6 @@ export default {
   },
 
   [mutationTypes.REMOVE_LIST_FROM_HIGHLIGHTED_LISTS]: (state, listId) => {
-    const index = state.highlightedLists.indexOf(listId);
-    if (index > -1) {
-      state.highlightedLists.splice(index, 1);
-    }
+    state.highlightedLists = state.highlightedLists.filter((id) => id !== listId);
   },
 };
