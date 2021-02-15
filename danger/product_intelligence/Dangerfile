@@ -47,7 +47,7 @@ dictionary_changed_file  = all_changed_files.grep(%r{(doc/development/usage_ping
 
 snowplow_changed_files = all_changed_files.select do |file|
   if file.end_with?('.rb')
-    helper.changed_lines(file).grep(%r{Gitlab::Tracking\.event}).any?
+    helper.changed_lines(file).grep('Gitlab::Tracking.event').any?
   end
 end
 
