@@ -16,7 +16,6 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import boardsStore from '../stores/boards_store';
 
 export default {
-  inject: ['scopedLabelsAvailable'],
   i18n: {
     add: __('Add'),
     cancel: __('Cancel'),
@@ -40,6 +39,7 @@ export default {
   directives: {
     GlTooltip,
   },
+  inject: ['scopedLabelsAvailable'],
   data() {
     return {
       labels: [],
@@ -76,7 +76,7 @@ export default {
         list.highlighted = true;
         setTimeout(() => {
           list.highlighted = false;
-        }, 4000);
+        }, 2000);
       }
     },
     addList() {
@@ -90,16 +90,16 @@ export default {
         return;
       }
 
+      this.setAddColumnFormVisibility(false);
+
       if (this.columnExists({ id: this.selectedLabelId })) {
         const listId = this.getListByLabel(label).id;
         this.highlight(listId);
-        this.setAddColumnFormVisibility(false);
         return;
       }
 
       if (this.shouldUseGraphQL) {
         this.createList({ labelId: this.selectedLabelId });
-        this.setAddColumnFormVisibility(false);
       } else {
         boardsStore.new({
           title: label.title,
@@ -113,7 +113,6 @@ export default {
         });
 
         this.highlight(boardsStore.findListByLabelId(label.id).id);
-        this.setAddColumnFormVisibility(false);
       }
     },
 
@@ -231,10 +230,14 @@ export default {
       <div
         class="gl-display-flex gl-p-3 gl-border-t-1 gl-border-t-solid gl-border-gray-100 gl-bg-gray-10"
       >
-        <gl-button class="gl-ml-auto gl-mr-3" @click="setAddColumnFormVisibility(false)">{{
-          $options.i18n.cancel
-        }}</gl-button>
         <gl-button
+          data-testid="cancelAddNewColumn"
+          class="gl-ml-auto gl-mr-3"
+          @click="setAddColumnFormVisibility(false)"
+          >{{ $options.i18n.cancel }}</gl-button
+        >
+        <gl-button
+          data-testid="addNewColumnButton"
           :disabled="!selectedLabelId"
           variant="success"
           class="gl-mr-4"
