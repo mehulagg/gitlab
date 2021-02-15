@@ -8,7 +8,8 @@ import createPrometheusIntegrationMutation from '../graphql/mutations/create_pro
 import destroyHttpIntegrationMutation from '../graphql/mutations/destroy_http_integration.mutation.graphql';
 import resetHttpTokenMutation from '../graphql/mutations/reset_http_token.mutation.graphql';
 import resetPrometheusTokenMutation from '../graphql/mutations/reset_prometheus_token.mutation.graphql';
-import updateCurrentIntergrationMutation from '../graphql/mutations/update_current_intergration.mutation.graphql';
+import updateCurrentHttpIntegrationMutation from '../graphql/mutations/update_current_http_integration.mutation.graphql';
+import updateCurrentPrometheusIntegrationMutation from '../graphql/mutations/update_current_prometheus_integration.mutation.graphql';
 import updateHttpIntegrationMutation from '../graphql/mutations/update_http_integration.mutation.graphql';
 import updatePrometheusIntegrationMutation from '../graphql/mutations/update_prometheus_integration.mutation.graphql';
 import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
@@ -176,7 +177,7 @@ export default {
             return this.validateAlertPayload();
           }
 
-          this.clearCurrentIntegration();
+          this.clearCurrentIntegration({ type });
 
           return createFlash({
             message: this.$options.i18n.changesSaved,
@@ -214,7 +215,10 @@ export default {
               prometheusIntegrationResetToken?.integration;
 
             this.$apollo.mutate({
-              mutation: updateCurrentIntergrationMutation,
+              mutation:
+                type === this.$options.typeSet.http
+                  ? updateCurrentHttpIntegrationMutation
+                  : updateCurrentPrometheusIntegrationMutation,
               variables: {
                 ...integration,
               },
@@ -233,25 +237,29 @@ export default {
           this.isUpdating = false;
         });
     },
-    editIntegration({ id }) {
+    editIntegration({ id, type }) {
       const currentIntegration = this.integrations.list.find(
         (integration) => integration.id === id,
       );
       this.$apollo.mutate({
-        mutation: updateCurrentIntergrationMutation,
+        mutation:
+          type === this.$options.typeSet.http
+            ? updateCurrentHttpIntegrationMutation
+            : updateCurrentPrometheusIntegrationMutation,
         variables: {
-          id: currentIntegration.id,
-          name: currentIntegration.name,
-          active: currentIntegration.active,
-          token: currentIntegration.token,
-          type: currentIntegration.type,
-          url: currentIntegration.url,
-          apiUrl: currentIntegration.apiUrl,
-          samplePayload: currentIntegration.samplePayload,
+          ...currentIntegration, // TODO: Is it fine to pass through integration? Variables will depend on type
+          // id: currentIntegration.id,
+          // name: currentIntegration.name,
+          // active: currentIntegration.active,
+          // token: currentIntegration.token,
+          // type: currentIntegration.type,
+          // url: currentIntegration.url,
+          // apiUrl: currentIntegration.apiUrl,
+          // samplePayload: currentIntegration.samplePayload,
         },
       });
     },
-    deleteIntegration({ id }) {
+    deleteIntegration({ id, type }) {
       const { projectPath } = this;
 
       this.isUpdating = true;
@@ -270,7 +278,7 @@ export default {
           if (error) {
             return createFlash({ message: error });
           }
-          this.clearCurrentIntegration();
+          this.clearCurrentIntegration({ type });
           return createFlash({
             message: this.$options.i18n.integrationRemoved,
             type: FLASH_TYPES.SUCCESS,
@@ -283,9 +291,12 @@ export default {
           this.isUpdating = false;
         });
     },
-    clearCurrentIntegration() {
+    clearCurrentIntegration({ type }) {
       this.$apollo.mutate({
-        mutation: updateCurrentIntergrationMutation,
+        mutation:
+          type === this.$options.typeSet.http
+            ? updateCurrentHttpIntegrationMutation
+            : updateCurrentPrometheusIntegrationMutation,
         variables: {},
       });
     },

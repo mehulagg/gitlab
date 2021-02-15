@@ -120,12 +120,16 @@ export default {
       const { category, action } = trackAlertIntegrationsViewsOptions;
       Tracking.event(category, action);
     },
-    setIntegrationToDelete({ name, id }) {
+    setIntegrationToDelete({ name, id, type }) {
       this.integrationToDelete.id = id;
       this.integrationToDelete.name = name;
+      this.integrationToDelete.type = type;
     },
     deleteIntegration() {
-      this.$emit('delete-integration', { id: this.integrationToDelete.id });
+      this.$emit('delete-integration', {
+        id: this.integrationToDelete.id,
+        type: this.integrationToDelete.type,
+      });
       this.integrationToDelete = { ...integrationToDeleteDefault };
     },
   },
@@ -169,7 +173,10 @@ export default {
 
       <template #cell(actions)="{ item }">
         <gl-button-group class="gl-ml-3">
-          <gl-button icon="pencil" @click="$emit('edit-integration', { id: item.id })" />
+          <gl-button
+            icon="pencil"
+            @click="$emit('edit-integration', { id: item.id, type: item.type })"
+          />
           <gl-button
             v-gl-modal.deleteIntegration
             :disabled="item.type === $options.typeSet.prometheus"

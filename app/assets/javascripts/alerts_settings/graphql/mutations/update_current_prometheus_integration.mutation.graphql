@@ -1,0 +1,25 @@
+mutation updateCurrentIntegration(
+  $id: String
+  $name: String
+  $active: Boolean
+  $token: String
+  $type: String
+  $url: String
+  $apiUrl: String
+  $samplePayload: String
+  $payloadExample: JsonString
+  $payloadAttributeMappings: [AlertManagementPayloadAlertFieldInput!]
+) {
+  updateCurrentIntegration(
+    id: $id
+    name: $name
+    active: $active
+    token: $token
+    type: $type
+    url: $url
+    apiUrl: $apiUrl
+    samplePayload: $samplePayload
+    payloadExample: $payloadExample
+    payloadAttributeMappings: $payloadAttributeMappings
+  ) @client
+}

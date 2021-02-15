@@ -102,7 +102,15 @@ export default {
     isSelected(fieldValue, mapping) {
       return fieldValue === mapping;
     },
-    selectedValue(name) {
+    selectedValue({ mapping, name }) {
+      return (
+        this.payloadFields.find((item) => item.name === mapping)?.label ||
+        // TODO: Below - why do we have to uppercase here? Can we save gitlab field name as uppercase to match the DB?
+        this.savedMapping.find((item) => item.fieldName === name?.toUpperCase())?.label ||
+        this.$options.i18n.makeSelection
+      );
+    },
+    selectedFallbackValue() {
       return (
         this.payloadFields.find((item) => item.name === name)?.label ||
         this.$options.i18n.makeSelection
@@ -168,7 +176,7 @@ export default {
         <gl-dropdown
           :disabled="!gitlabField.mappingFields.length"
           aria-labelledby="parsedFieldsHeader"
-          :text="selectedValue(gitlabField.mapping)"
+          :text="selectedValue(gitlabField)"
           class="gl-w-full"
           :header-text="$options.i18n.selectMappingKey"
         >
@@ -193,7 +201,7 @@ export default {
           v-if="Boolean(gitlabField.numberOfFallbacks)"
           :disabled="!gitlabField.mappingFields.length"
           aria-labelledby="fallbackFieldsHeader"
-          :text="selectedValue(gitlabField.fallback)"
+          :text="selectedFallbackValue(gitlabField.fallback)"
           class="gl-w-full"
           :header-text="$options.i18n.selectMappingKey"
         >

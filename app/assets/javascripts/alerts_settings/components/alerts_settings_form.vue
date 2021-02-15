@@ -159,7 +159,7 @@ export default {
         error: null,
       },
       resetSamplePayloadConfirmed: false,
-      customMapping: null,
+      customMapping: null, // TODO: Can remove? This isn't referenced
       mapping: [],
       parsingPayload: false,
       currentIntegration: null,
@@ -236,7 +236,7 @@ export default {
       return this.currentIntegration !== null || !this.canAddIntegration;
     },
     savedMapping() {
-      return this.currentIntegration?.savedMapping;
+      return this.mapping;
     },
   },
   watch: {
@@ -247,7 +247,10 @@ export default {
       this.selectedIntegration = val.type;
       this.active = val.active;
       if (val.type === typeSet.http && this.showMappingBuilder) {
-        this.integrationTestPayload.json = val.samplePayload;
+        this.integrationTestPayload.json = val.payloadExample;
+        // TODO: Should we do a deep clone here?
+        // TODO: Handle case that payloadAttributeMappings is empty?
+        this.updateMapping([...val.payloadAttributeMappings]);
       }
       return this.integrationTypeSelect();
     },
@@ -296,7 +299,7 @@ export default {
       this.parsedPayload = [];
 
       if (this.currentIntegration) {
-        return this.$emit('clear-current-integration');
+        return this.$emit('clear-current-integration', { type: this.currentIntegration.type });
       }
 
       return this.resetFormValues();
@@ -360,7 +363,7 @@ export default {
         });
     },
     updateMapping(mapping) {
-      this.mapping = mapping;
+      this.mapping = mapping; // TODO: Not used, should this be `savedMapping`?
     },
   },
 };
