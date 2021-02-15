@@ -18,6 +18,7 @@ module ContainerExpirationPolicies
       cleanup_tags_service_before_truncate_size
       cleanup_tags_service_after_truncate_size
       cleanup_tags_service_before_delete_size
+      cleanup_tags_service_deleted_size
     ].freeze
 
     def perform_work
