@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ZoomUrlValidator do
+RSpec.describe Shared::ZoomUrlValidator do
   let(:zoom_meeting) { build(:zoom_meeting) }
 
   describe 'validations' do
