@@ -12,10 +12,10 @@ import { mapState, mapActions } from 'vuex';
 import { sprintf, __ } from '~/locale';
 import ValueStreamForm from './value_stream_form.vue';
 
-const findStageById = (defaultStageConfig, _id = '') => {
-  console.log('findStageById', defaultStageConfig, _id);
-  return defaultStageConfig.find(({ name }) => name.toLowerCase().trim() === _id);
-};
+const findStageById = (defaultStageConfig, targetName = '') =>
+  defaultStageConfig.find(
+    ({ name }) => name.toLowerCase().trim() === targetName.toLowerCase().trim(),
+  );
 
 const prepareCustomStage = ({ startEventLabel = {}, endEventLabel = {}, ...rest }) => ({
   ...rest,
@@ -37,7 +37,21 @@ const prepareDefaultStage = (defaultStageConfig, { name, ...rest }) => {
   };
 };
 
-// TODO: name spaces like the others
+// TODO: add specs
+export const generateInitialStageData = ({ defaultStageConfig, selectedValueStreamStages }) =>
+  selectedValueStreamStages.map(
+    ({ startEventIdentifier = null, endEventIdentifier = null, custom = false, ...rest }) => {
+      const stageData =
+        custom && startEventIdentifier && endEventIdentifier
+          ? prepareCustomStage({ ...rest, startEventIdentifier, endEventIdentifier })
+          : prepareDefaultStage(defaultStageConfig, rest);
+      return {
+        ...stageData,
+        custom,
+      };
+    },
+  );
+
 const I18N = {
   DELETE_NAME: __('Delete %{name}'),
   DELETE_CONFIRMATION: __('Are you sure you want to delete "%{name}" Value Stream?'),
@@ -136,36 +150,15 @@ export default {
       };
     },
     onEdit() {
-      // TODO: when editing a default stage name, I think we need to send `custom`???
-      // TODO: this will probably also break hwo we check for a default stage?
-
-      // TODO: hidden default value stream stages should be calculated when the form loads, separate MR
-      // TODO: trigger the modal with the selected value stream
       this.showModal = true;
       this.isEditing = true;
-      // TODO: move this to a util
+
       this.initialData = {
         ...this.selectedValueStream,
-        stages: this.selectedValueStreamStages.map(
-          // TODO: AFAICT default stages won't specify the start / end event identifiers
-          // TODO: i dont think this will hold true if you edit a default stage, it might then become custom?
-          // TODO: perhaps updating the stage only preserves one of the events that are used for the stage, not both...
-          // TODO: might need to re-think how we track default stages once they have been updated - maybe some additional UI to highlight it was a default?
-          // once the default stage is updated it becomes `custom` should we still allow selection of `issue_start_event`?
-
-          ({ startEventIdentifier = null, endEventIdentifier = null, custom = false, ...rest }) => {
-            const stageData =
-              custom && startEventIdentifier && endEventIdentifier
-                ? prepareCustomStage(rest)
-                : prepareDefaultStage(this.defaultStageConfig, rest);
-            return {
-              ...stageData,
-              startEventIdentifier,
-              endEventIdentifier,
-              custom,
-            };
-          },
-        ),
+        stages: generateInitialStageData({
+          defaultStageConfig: this.defaultStageConfig,
+          selectedValueStreamStages: this.selectedValueStreamStages,
+        }),
       };
     },
   },
