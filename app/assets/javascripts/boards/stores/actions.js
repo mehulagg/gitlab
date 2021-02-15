@@ -110,7 +110,11 @@ export default {
       .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
   },
 
-  highlightList: ({ commit }, listId) => {
+  highlightList: ({ commit, state }, listId) => {
+    if ([ListType.backlog, ListType.closed].includes(state.boardLists[listId].listType)) {
+      return;
+    }
+
     commit(types.ADD_LIST_TO_HIGHLIGHTED_LISTS, listId);
 
     setTimeout(() => {
