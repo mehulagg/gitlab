@@ -223,6 +223,7 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
         expect(worker).to receive(:log_extra_metadata_on_done).with(field, value) unless value.nil?
       end
       expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_tags_service_truncated, truncated)
+      expect(worker).to receive(:log_extra_metadata_on_done).with(:running_jobs_count, 0)
     end
   end
 

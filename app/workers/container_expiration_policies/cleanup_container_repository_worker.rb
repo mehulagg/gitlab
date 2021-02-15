@@ -118,6 +118,7 @@ module ContainerExpirationPolicies
                     after_truncate_size &&
                     before_truncate_size != after_truncate_size
       log_extra_metadata_on_done(:cleanup_tags_service_truncated, !!truncated)
+      log_extra_metadata_on_done(:running_jobs_count, running_jobs_count)
     end
   end
 end
