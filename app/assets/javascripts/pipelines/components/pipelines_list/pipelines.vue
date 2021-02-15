@@ -62,10 +62,6 @@ export default {
       type: String,
       required: true,
     },
-    autoDevopsHelpPath: {
-      type: String,
-      required: true,
-    },
     hasGitlabCi: {
       type: Boolean,
       required: true,
@@ -342,7 +338,6 @@ export default {
           :pipelines="state.pipelines"
           :pipeline-schedule-url="pipelineScheduleUrl"
           :update-graph-dropdown="updateGraphDropdown"
-          :auto-devops-help-path="autoDevopsHelpPath"
           :view-type="viewType"
         />
       </div>

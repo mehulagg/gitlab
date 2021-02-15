@@ -1,5 +1,6 @@
 <script>
 import { GlLink, GlPopover, GlSprintf, GlTooltipDirective, GlBadge } from '@gitlab/ui';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { SCHEDULE_ORIGIN } from '../../constants';
 
 export default {
@@ -26,10 +27,6 @@ export default {
       type: String,
       required: true,
     },
-    autoDevopsHelpPath: {
-      type: String,
-      required: true,
-    },
   },
   computed: {
     user() {
@@ -43,6 +40,9 @@ export default {
         this.targetProjectFullPath &&
           this.pipeline?.project?.full_path !== `/${this.targetProjectFullPath}`,
       );
+    },
+    autoDevopsHelpPath() {
+      return helpPagePath('topics/autodevops/index.md');
     },
   },
 };
@@ -109,9 +109,13 @@ export default {
         tabindex="0"
         data-testid="pipeline-url-autodevops"
         role="button"
-        ><gl-badge variant="info" size="sm">{{ __('Auto DevOps') }}</gl-badge></gl-link
       >
+        <gl-badge variant="info" size="sm">
+          {{ __('Auto DevOps') }}
+        </gl-badge>
+      </gl-link>
       <gl-popover
+        v-if="pipeline.flags.auto_devops"
         :target="`pipeline-url-autodevops-${pipeline.id}`"
         triggers="focus"
         placement="top"
@@ -131,9 +135,13 @@ export default {
             </gl-sprintf>
           </div>
         </template>
-        <gl-link :href="autoDevopsHelpPath" target="_blank" rel="noopener noreferrer nofollow">{{
-          __('Learn more about Auto DevOps')
-        }}</gl-link>
+        <gl-link
+          :href="autoDevopsHelpPath"
+          data-testid="pipeline-url-autodevops-link"
+          target="_blank"
+        >
+          {{ __('Learn more about Auto DevOps') }}
+        </gl-link>
       </gl-popover>
       <gl-badge
         v-if="pipeline.flags.stuck"
