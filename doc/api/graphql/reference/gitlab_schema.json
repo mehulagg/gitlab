@@ -52507,7 +52507,7 @@
             },
             {
               "name": "NPM",
-              "description": "Packages from the npm package manager",
+              "description": "Packages from the NPM package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
