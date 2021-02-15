@@ -87,6 +87,47 @@ RSpec.describe 'Multiple value streams', :js do
     end
   end
 
+  describe 'Edit value stream' do
+    before do
+      select_group(group)
+
+      page.find_button(_('Edit')).click
+    end
+
+    it 'includes additional form fields' do
+      expect(page).to have_selector(extended_form_fields_selector)
+      expect(page).to have_button("Save value stream")
+    end
+
+    it 'can update the value stream name' do
+      edited_name = "Edit default value stream"
+      fill_in 'create-value-stream-name', with: edited_name
+
+      page.find_button(_('Save Value Stream')).click
+      expect(page).to have_text(_("'%{name}' Value Stream created") % { name: custom_value_stream_name })
+    end
+
+    # it 'can create a value stream' do
+    #   create_value_stream
+
+    #   expect(page).to have_text(_("'%{name}' Value Stream created") % { name: custom_value_stream_name })
+    # end
+
+    # it 'can create a value stream with a custom stage and hidden defaults' do
+    #   add_custom_stage_to_form
+
+    #   # Hide some default stages
+    #   page.find("[data-testid='stage-action-hide-5']").click
+    #   page.find("[data-testid='stage-action-hide-3']").click
+    #   page.find("[data-testid='stage-action-hide-1']").click
+
+    #   create_value_stream
+
+    #   expect(page).to have_text(_("'%{name}' Value Stream created") % { name: custom_value_stream_name })
+    #   expect(page.all("[data-testid='gl-path-nav'] .gl-path-button").count).to eq(4)
+    # end
+  end
+
   describe 'with the `value_stream_analytics_extended_form` feature flag disabled' do
     before do
       stub_licensed_features(cycle_analytics_for_groups: true, type_of_work_analytics: true)
