@@ -41,9 +41,6 @@ import TaskListItem from './nodes/task_list_item';
 import Text from './nodes/text';
 import Video from './nodes/video';
 
-
-
-
 // The filters referenced in lib/banzai/pipeline/gfm_pipeline.rb transform
 // GitLab Flavored Markdown (GFM) to HTML.
 // The nodes and marks referenced here transform that same HTML to GFM to be copied to the clipboard.
