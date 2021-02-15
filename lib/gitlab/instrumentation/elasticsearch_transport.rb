@@ -16,7 +16,9 @@ module Gitlab
 
           ::Gitlab::Instrumentation::ElasticsearchTransport.increment_request_count
 
-          ::Gitlab::Instrumentation::ElasticsearchTransport.increment_timed_out_count if response&.body&.dig('timed_out')
+          if response&.body && response.body.is_a?(Hash) && response.body['timed_out']
+            ::Gitlab::Instrumentation::ElasticsearchTransport.increment_timed_out_count
+          end
 
           ::Gitlab::Instrumentation::ElasticsearchTransport.add_duration(duration)
           ::Gitlab::Instrumentation::ElasticsearchTransport.add_call_details(duration, method, path, params, body)

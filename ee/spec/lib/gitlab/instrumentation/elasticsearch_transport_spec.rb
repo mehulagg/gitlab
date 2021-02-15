@@ -105,4 +105,21 @@ RSpec.describe ::Gitlab::Instrumentation::ElasticsearchTransportInterceptor, :el
       expect(::Gitlab::Instrumentation::ElasticsearchTransport.get_timed_out_count).to eq(0)
     end
   end
+
+  context 'when the server returns a blank response body' do
+    it 'does not error' do
+      stub_request(:any, /#{elasticsearch_url}/).to_return(body: +'', status: 200)
+
+      Project.__elasticsearch__.client.perform_request(:get, '/')
+    end
+  end
+
+  context 'when the request raises some error' do
+    it 'does not raise a different error in ensure' do
+      stub_request(:any, /#{elasticsearch_url}/).to_return(body: +'', status: 500)
+
+      expect { Project.__elasticsearch__.client.perform_request(:get, '/') }
+        .to raise_error(::Elasticsearch::Transport::Transport::Errors::InternalServerError)
+    end
+  end
 end
