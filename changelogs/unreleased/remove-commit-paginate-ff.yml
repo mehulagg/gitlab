@@ -1,0 +1,5 @@
+---
+title: Remove paginate_commit_view feature flag
+merge_request: 54236
+author:
+type: changed
