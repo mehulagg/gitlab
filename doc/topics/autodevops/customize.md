@@ -151,7 +151,7 @@ You can override the default values in the `values.yaml` file in the
 - Adding a file named `.gitlab/auto-deploy-values.yaml` to your repository, which is
   automatically used, if found.
 - Adding a file with a different name or path to the repository, and setting the
-  `HELM_UPGRADE_VALUES_FILE` [CI/CD variable](#environment-variables) with
+  `HELM_UPGRADE_VALUES_FILE` [CI/CD variable](#cicd-variables) with
   the path and name.
 
 NOTE:
@@ -260,7 +260,7 @@ the [GitLab 12.10 based templates](https://gitlab.com/gitlab-org/auto-devops-v12
 To support applications requiring a database,
 [PostgreSQL](https://www.postgresql.org/) is provisioned by default. The credentials to access
 the database are preconfigured, but can be customized by setting the associated
-[CI/CD variables](#environment-variables). You can use these credentials to define a `DATABASE_URL`:
+[CI/CD variables](#cicd-variables). You can use these credentials to define a `DATABASE_URL`:
 
 ```yaml
 postgres://user:password@postgres-host:postgres-port/postgres-database
