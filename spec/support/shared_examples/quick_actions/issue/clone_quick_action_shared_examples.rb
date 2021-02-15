@@ -54,8 +54,6 @@ RSpec.shared_examples 'clone quick action' do
           # Note that this is missing one `-`
           add_note("/clone -with_notes #{target_project.full_path}")
 
-          wait_for_requests
-
           expect(page).to have_content 'Failed to clone this issue: wrong parameters.'
           expect(issue.reload).to be_open
         end
