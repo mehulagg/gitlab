@@ -1,4 +1,4 @@
-import { GlModal } from '@gitlab/ui';
+import { GlModal, GlFormInput } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { PRESET_OPTIONS_BLANK } from 'ee/analytics/cycle_analytics/components/create_value_stream_form/constants';
@@ -234,6 +234,11 @@ describe('ValueStreamForm', () => {
 
         it('validates existing fields when clicked', () => {
           expect(wrapper.vm.nameError).toEqual([]);
+
+          wrapper
+            .find('[data-testid="create-value-stream-name"]')
+            .find(GlFormInput)
+            .vm.$emit('input', '');
 
           clickAddStage();
 

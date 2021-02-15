@@ -25687,6 +25687,9 @@ msgstr ""
 msgid "Save Changes"
 msgstr ""
 
+msgid "Save Value Stream"
+msgstr ""
+
 msgid "Save application"
 msgstr ""
 
