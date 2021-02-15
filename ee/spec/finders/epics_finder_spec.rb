@@ -7,9 +7,9 @@ RSpec.describe EpicsFinder do
   let_it_be(:search_user) { create(:user) }
   let_it_be(:group) { create(:group, :private) }
   let_it_be(:another_group) { create(:group) }
-  let_it_be(:epic1) { create(:epic, :opened, group: group, title: 'This is awesome epic', created_at: 1.week.ago, end_date: 10.days.ago) }
-  let_it_be(:epic2) { create(:epic, :opened, group: group, created_at: 4.days.ago, author: user, start_date: 2.days.ago, end_date: 3.days.from_now) }
-  let_it_be(:epic3) { create(:epic, :closed, group: group, description: 'not so awesome', start_date: 5.days.ago, end_date: 3.days.ago) }
+  let_it_be(:epic1) { create(:epic, :opened, group: group, title: 'This is awesome epic', created_at: Time.parse('2020-09-08'), end_date: Time.parse('2020-09-05')) }
+  let_it_be(:epic2) { create(:epic, :opened, group: group, created_at: Time.parse('2020-09-11'), author: user, start_date: Time.parse('2020-09-13'), end_date: Time.parse('2020-09-18')) }
+  let_it_be(:epic3) { create(:epic, :closed, group: group, description: 'not so awesome', start_date: Time.parse('2020-09-10'), end_date: Time.parse('2020-09-12')) }
   let_it_be(:epic4) { create(:epic, :closed, group: another_group) }
 
   describe '#execute' do
@@ -73,15 +73,15 @@ RSpec.describe EpicsFinder do
 
         context 'by created_at' do
           it 'returns all epics created before the given date' do
-            expect(epics(created_before: 2.days.ago)).to contain_exactly(epic1, epic2)
+            expect(epics(created_before: Time.parse('2020-09-13'))).to contain_exactly(epic1, epic2)
           end
 
           it 'returns all epics created after the given date' do
-            expect(epics(created_after: 2.days.ago)).to contain_exactly(epic3)
+            expect(epics(created_after: Time.parse('2020-09-13'))).to contain_exactly(epic3)
           end
 
           it 'returns all epics created within the given interval' do
-            expect(epics(created_after: 5.days.ago, created_before: 1.day.ago)).to contain_exactly(epic2)
+            expect(epics(created_after: Time.parse('2020-09-10'), created_before: Time.parse('2020-09-14'))).to contain_exactly(epic2)
           end
         end
 
@@ -187,8 +187,8 @@ RSpec.describe EpicsFinder do
         context 'by timeframe' do
           it 'returns epics which start in the timeframe' do
             params = {
-              start_date: 2.days.ago.strftime('%Y-%m-%d'),
-              end_date: 1.day.ago.strftime('%Y-%m-%d')
+              start_date: '2020-09-13',
+              end_date: '2020-09-14'
             }
 
             expect(epics(params)).to contain_exactly(epic2)
@@ -196,8 +196,8 @@ RSpec.describe EpicsFinder do
 
           it 'returns epics which end in the timeframe' do
             params = {
-              start_date: 4.days.ago.strftime('%Y-%m-%d'),
-              end_date: 3.days.ago.strftime('%Y-%m-%d')
+              start_date: '2020-09-11',
+              end_date: '2020-09-12'
             }
 
             expect(epics(params)).to contain_exactly(epic3)
@@ -205,8 +205,8 @@ RSpec.describe EpicsFinder do
 
           it 'returns epics which start before and end after the timeframe' do
             params = {
-              start_date: 4.days.ago.strftime('%Y-%m-%d'),
-              end_date: 4.days.ago.strftime('%Y-%m-%d')
+              start_date: '2020-09-11',
+              end_date: '2020-09-11'
             }
 
             expect(epics(params)).to contain_exactly(epic3)
@@ -214,13 +214,13 @@ RSpec.describe EpicsFinder do
 
           describe 'when one of the timeframe params are missing' do
             it 'does not filter by timeframe if start_date is missing' do
-              only_end_date = epics(end_date: 1.year.ago.strftime('%Y-%m-%d'))
+              only_end_date = epics(end_date: '2019-09-15')
 
               expect(only_end_date).to eq(epics)
             end
 
             it 'does not filter by timeframe if end_date is missing' do
-              only_start_date = epics(start_date: 1.year.from_now.strftime('%Y-%m-%d'))
+              only_start_date = epics(start_date: '2021-09-15')
 
               expect(only_start_date).to eq(epics)
             end
