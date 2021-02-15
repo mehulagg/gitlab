@@ -1,9 +1,9 @@
 <script>
 import { GlFormTextarea } from '@gitlab/ui';
-import PolicyPreview from './policy_preview.vue';
 import fromYaml from './lib/from_yaml';
-import toYaml from './lib/to_yaml';
 import humanizeNetworkPolicy from './lib/humanize';
+import toYaml from './lib/to_yaml';
+import PolicyPreview from './policy_preview.vue';
 
 export default {
   components: {

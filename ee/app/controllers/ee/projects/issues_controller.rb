@@ -62,7 +62,7 @@ module EE
           errors << render_vulnerability_link_alert(error)
         end
 
-        flash[:alert] = errors.join('<br\>').html_safe
+        flash[:alert] = errors.join('<br\>').html_safe unless errors.blank?
       end
 
       def vulnerability

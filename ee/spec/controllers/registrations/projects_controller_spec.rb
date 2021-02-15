@@ -99,6 +99,7 @@ RSpec.describe Registrations::ProjectsController do
             expect(service).to receive(:execute).and_return(project)
           end
           expect(controller).to receive(:record_experiment_user).with(:trial_onboarding_issues, trial_onboarding_context)
+          expect(controller).to receive(:record_experiment_conversion_event).with(:trial_onboarding_issues)
           expect(subject).to redirect_to(trial_getting_started_users_sign_up_welcome_path(learn_gitlab_project_id: project.id))
         end
       end

@@ -8,6 +8,7 @@ RSpec.describe Integrations::Jira::IssueEntity do
   let(:reporter) do
     double(
       'displayName' => 'reporter',
+      'avatarUrls' => { '48x48' => 'http://reporter.avatar' },
       'name' => double # Default to Jira Server issue response, Jira Cloud replaces name with accountId
     )
   end
@@ -47,7 +48,10 @@ RSpec.describe Integrations::Jira::IssueEntity do
           text_color: '#283856'
         }
       ],
-      author: hash_including(name: 'reporter'),
+      author: hash_including(
+        name: 'reporter',
+        avatar_url: 'http://reporter.avatar'
+      ),
       assignees: [
         { name: 'assignee' }
       ],

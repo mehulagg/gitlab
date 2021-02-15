@@ -12,6 +12,7 @@ query project(
   $sort: VulnerabilitySort
   $hasIssues: Boolean
   $hasResolution: Boolean
+  $includeExternalIssueLinks: Boolean = false
 ) {
   project(fullPath: $fullPath) {
     vulnerabilities(
@@ -27,6 +28,16 @@ query project(
     ) {
       nodes {
         ...Vulnerability
+        externalIssueLinks @include(if: $includeExternalIssueLinks) {
+          nodes {
+            issue: externalIssue {
+              externalTracker
+              webUrl
+              title
+              iid: relativeReference
+            }
+          }
+        }
         hasSolutions
         mergeRequest {
           webUrl

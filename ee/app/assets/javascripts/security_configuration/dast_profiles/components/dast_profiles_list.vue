@@ -1,5 +1,4 @@
 <script>
-import { uniqueId } from 'lodash';
 import {
   GlAlert,
   GlButton,
@@ -11,6 +10,7 @@ import {
   GlDropdownItem,
   GlIcon,
 } from '@gitlab/ui';
+import { uniqueId } from 'lodash';
 import { visitUrl } from '~/lib/utils/url_utility';
 
 export default {

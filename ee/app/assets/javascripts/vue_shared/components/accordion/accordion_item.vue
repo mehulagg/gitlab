@@ -1,6 +1,6 @@
 <script>
-import { uniqueId } from 'lodash';
 import { GlSkeletonLoader, GlIcon } from '@gitlab/ui';
+import { uniqueId } from 'lodash';
 
 import accordionEventBus from './accordion_event_bus';
 

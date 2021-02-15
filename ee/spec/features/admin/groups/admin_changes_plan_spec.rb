@@ -28,7 +28,7 @@ RSpec.describe 'Changes GL.com plan for group' do
 
       click_button('Save changes')
 
-      expect(page).to have_content('Plan: Silver')
+      expect(page).to have_content('Plan: Premium (Formerly Silver)')
     end
   end
 
@@ -45,7 +45,7 @@ RSpec.describe 'Changes GL.com plan for group' do
 
       click_button('Save changes')
 
-      expect(page).to have_content('Plan: Silver')
+      expect(page).to have_content('Plan: Premium (Formerly Silver)')
     end
   end
 end

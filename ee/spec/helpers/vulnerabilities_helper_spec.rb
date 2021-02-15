@@ -176,6 +176,7 @@ RSpec.describe VulnerabilitiesHelper do
     context 'with jira vulnerabilities integration enabled' do
       before do
         allow(project).to receive(:jira_vulnerabilities_integration_enabled?).and_return(true)
+        allow(project).to receive(:configured_to_create_issues_from_vulnerabilities?).and_return(true)
       end
 
       let(:expected_jira_issue_description) do
@@ -237,6 +238,7 @@ RSpec.describe VulnerabilitiesHelper do
     context 'with jira vulnerabilities integration disabled' do
       before do
         allow(project).to receive(:jira_vulnerabilities_integration_enabled?).and_return(false)
+        allow(project).to receive(:configured_to_create_issues_from_vulnerabilities?).and_return(false)
       end
 
       it { expect(subject[:create_jira_issue_url]).to be_nil }

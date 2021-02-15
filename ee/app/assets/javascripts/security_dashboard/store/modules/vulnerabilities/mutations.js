@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import { s__, __ } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { s__, __ } from '~/locale';
 import * as types from './mutation_types';
 import { isSameVulnerability } from './utils';
 

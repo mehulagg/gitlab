@@ -6,7 +6,7 @@ RSpec.describe EE::API::Entities::Analytics::CodeReview::MergeRequest do
   subject(:entity_representation) { described_class.new(merge_request).as_json }
 
   let(:merge_request) do
-    create(:merge_request, :with_diffs, :with_productivity_metrics,
+    create(:merge_request, :with_productivity_metrics,
            milestone: milestone,
            source_project: project,
            metrics_data: { first_comment_at: 1.day.ago, merged_at: 1.hour.ago }

@@ -1,7 +1,7 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { mapActions } from 'vuex';
 import { GlIcon, GlLoadingIcon, GlTooltipDirective, GlSprintf } from '@gitlab/ui';
+import { mapActions } from 'vuex';
 import { isUserBusy } from '~/set_status_modal/utils';
 import timeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
@@ -210,9 +210,9 @@ export default {
         v-gl-tooltip:tooltipcontainer.bottom
         data-testid="confidentialIndicator"
         name="eye-slash"
-        :size="14"
-        :title="s__('Notes|Private comments are accessible by internal staff only')"
-        class="gl-ml-1 gl-text-gray-700 align-middle"
+        :size="16"
+        :title="s__('Notes|This comment is confidential and only visible to project members')"
+        class="gl-ml-1 gl-text-orange-700 align-middle"
       />
       <slot name="extra-controls"></slot>
       <gl-loading-icon

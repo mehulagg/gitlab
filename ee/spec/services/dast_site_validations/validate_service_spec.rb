@@ -129,6 +129,14 @@ RSpec.describe DastSiteValidations::ValidateService do
 
         it_behaves_like 'a validation'
 
+        context 'when the http response body has trailing newlines after the token' do
+          let(:token) { dast_site_validation.dast_site_token.token + "\n\n" }
+
+          it 'does not raise an exception' do
+            expect { subject }.not_to raise_error(DastSiteValidations::ValidateService::TokenNotFound)
+          end
+        end
+
         context 'when content type is incorrect' do
           let(:headers) { { 'Content-Type' => 'text/html; charset=UTF-8' } }
 

@@ -6,12 +6,21 @@ module Gitlab
       class Cilium < Gitlab::AlertManagement::Payload::Generic
         DEFAULT_TITLE = 'New: Alert'
 
-        attribute :description, paths: %w(flow dropReasonDesc)
+        attribute :description, paths: %w(flow verdict)
         attribute :title, paths: %w(ciliumNetworkPolicy metadata name), fallback: -> { DEFAULT_TITLE }
-        attribute :gitlab_fingerprint, paths: %w(fingerprint)
 
         def monitoring_tool
           Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:cilium]
+        end
+
+        private
+
+        def plain_gitlab_fingerprint
+          fpayload = self.payload.deep_dup
+          fpayload = fpayload['flow'].except('time', 'Summary')
+          fpayload['l4']['TCP'].delete('flags') if fpayload.dig('l4', 'TCP', 'flags')
+
+          fpayload.to_s
         end
       end
     end

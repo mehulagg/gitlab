@@ -1,12 +1,12 @@
 import {
+  ERRORS,
+  NAME_MAX_LENGTH,
+} from 'ee/analytics/cycle_analytics/components/create_value_stream_form/constants';
+import {
   initializeFormData,
   validateStage,
   validateValueStreamName,
 } from 'ee/analytics/cycle_analytics/components/create_value_stream_form/utils';
-import {
-  ERRORS,
-  NAME_MAX_LENGTH,
-} from 'ee/analytics/cycle_analytics/components/create_value_stream_form/constants';
 
 import { emptyErrorsState, emptyState, formInitialData } from './mock_data';
 

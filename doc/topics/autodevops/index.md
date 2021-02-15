@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Auto DevOps **(CORE)**
+# Auto DevOps **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/37115) in GitLab 10.0.
 > - Generally available on GitLab 11.0.
@@ -166,7 +166,7 @@ any of the following places:
   **Continuous Integration and Delivery** section
 
 The base domain variable `KUBE_INGRESS_BASE_DOMAIN` follows the same order of precedence
-as other environment [variables](../../ci/variables/README.md#priority-of-environment-variables).
+as other environment [variables](../../ci/variables/README.md#priority-of-cicd-variables).
 If the CI/CD variable is not set and the cluster setting is left blank, the instance-wide **Auto DevOps domain**
 setting is used if set.
 
@@ -286,7 +286,7 @@ used by Auto DevOps currently defines 3 environment names:
 Those environments are tied to jobs using [Auto Deploy](stages.md#auto-deploy), so
 except for the environment scope, they must have a different deployment domain.
 You must define a separate `KUBE_INGRESS_BASE_DOMAIN` variable for each of the above
-[based on the environment](../../ci/variables/README.md#limit-the-environment-scopes-of-environment-variables).
+[based on the environment](../../ci/variables/README.md#limit-the-environment-scopes-of-cicd-variables).
 
 The following table is an example of how to configure the three different clusters:
 

@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Terraform state administration (alpha) **(CORE)**
+# Terraform state administration (alpha) **(FREE)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2673) in GitLab 12.10.
 
@@ -17,6 +17,8 @@ The storage location of these files defaults to:
 - `/home/git/gitlab/shared/terraform_state` for source installations.
 
 These locations can be configured using the options described below.
+
+Use [external object storage](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer-terraform-state-dependency-proxy) configuration for [GitLab Helm chart](https://docs.gitlab.com/charts/) installations.
 
 ## Using local storage
 

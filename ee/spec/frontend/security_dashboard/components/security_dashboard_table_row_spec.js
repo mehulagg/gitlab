@@ -2,9 +2,10 @@ import { GlFormCheckbox } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import SecurityDashboardTableRow from 'ee/security_dashboard/components/security_dashboard_table_row.vue';
-import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import createStore from 'ee/security_dashboard/store';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
+import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import { trimText } from 'helpers/text_helper';
 import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
@@ -41,6 +42,7 @@ describe('Security Dashboard Table Row', () => {
   const findAllIssueCreated = () => wrapper.findAll('[data-testid="issues-icon"]');
   const hasSelectedClass = () => wrapper.classes('gl-bg-blue-50');
   const findCheckbox = () => wrapper.find(GlFormCheckbox);
+  const findSeverityBadge = () => wrapper.find(SeverityBadge);
 
   describe('when loading', () => {
     beforeEach(() => {
@@ -51,9 +53,8 @@ describe('Security Dashboard Table Row', () => {
       expect(findLoader().exists()).toBeTruthy();
     });
 
-    it('should render a ` ` for severity', () => {
-      expect(wrapper.vm.severity).toEqual(' ');
-      expect(findContent(0).text()).toEqual('');
+    it('should not render the severity', () => {
+      expect(findSeverityBadge().exists()).toBe(false);
     });
 
     it('should render a `` for the report type and scanner', () => {
@@ -78,7 +79,7 @@ describe('Security Dashboard Table Row', () => {
     });
 
     it('should render the severity', () => {
-      expect(findContent(0).text().toLowerCase()).toContain(vulnerability.severity);
+      expect(findSeverityBadge().text().toLowerCase()).toBe(vulnerability.severity);
     });
 
     it('should render the identifier cell', () => {

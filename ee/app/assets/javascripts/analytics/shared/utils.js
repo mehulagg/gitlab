@@ -22,6 +22,17 @@ export const buildValueStreamFromJson = (valueStream) => {
 };
 
 /**
+ * Creates an array of stage objects from a json string. Returns an empty array if no stages are present.
+ *
+ * @param {String} stages - JSON encoded array of stages
+ * @returns {Array} - An array of stage objects
+ */
+const buildDefaultStagesFromJSON = (stages = '') => {
+  if (!stages.length) return [];
+  return JSON.parse(stages);
+};
+
+/**
  * Creates a group object from a dataset. Returns null if no groupId is present.
  *
  * @param {Object} dataset - The container's dataset
@@ -70,7 +81,7 @@ export const buildProjectFromDataset = (dataset) => {
  * @param {String} data - JSON encoded array of projects
  * @returns {Array} - An array of project objects
  */
-const buildProjectsFromJSON = (projects = []) => {
+const buildProjectsFromJSON = (projects = '') => {
   if (!projects.length) return [];
   return JSON.parse(projects);
 };
@@ -93,6 +104,7 @@ export const buildCycleAnalyticsInitialData = ({
   groupAvatarUrl = null,
   labelsPath = '',
   milestonesPath = '',
+  defaultStages = null,
 } = {}) => ({
   selectedValueStream: buildValueStreamFromJson(valueStream),
   group: groupId
@@ -113,6 +125,9 @@ export const buildCycleAnalyticsInitialData = ({
     : [],
   labelsPath,
   milestonesPath,
+  defaultStageConfig: defaultStages
+    ? buildDefaultStagesFromJSON(defaultStages).map(convertObjectPropsToCamelCase)
+    : [],
 });
 
 export const filterBySearchTerm = (data = [], searchTerm = '', filterByKey = 'name') => {

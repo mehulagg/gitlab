@@ -132,7 +132,7 @@ License Compliance can be configured using environment variables.
 
 | Environment variable        | Required | Description |
 |-----------------------------|----------|-------------|
-| `ADDITIONAL_CA_CERT_BUNDLE` | no       | Bundle of trusted CA certificates (currently supported in Pip, Pipenv, Maven, Gradle, Yarn, and NPM projects). |
+| `ADDITIONAL_CA_CERT_BUNDLE` | no       | Bundle of trusted CA certificates (currently supported in Pip, Pipenv, Maven, Gradle, Yarn, and npm projects). |
 | `ASDF_JAVA_VERSION`         | no       | Version of Java to use for the scan. |
 | `ASDF_NODEJS_VERSION`       | no       | Version of Node.js to use for the scan. |
 | `ASDF_PYTHON_VERSION`       | no       | Version of Python to use for the scan. |
@@ -269,14 +269,14 @@ You can supply a custom root certificate to complete TLS verification by using t
 If you have a private Python repository you can use the `PIP_INDEX_URL` [environment variable](#available-variables)
 to specify its location.
 
-### Configuring NPM projects
+### Configuring npm projects
 
-You can configure NPM projects by using an [`.npmrc`](https://docs.npmjs.com/configuring-npm/npmrc.html/)
+You can configure npm projects by using an [`.npmrc`](https://docs.npmjs.com/configuring-npm/npmrc.html/)
 file.
 
-#### Using private NPM registries
+#### Using private npm registries
 
-If you have a private NPM registry you can use the
+If you have a private npm registry you can use the
 [`registry`](https://docs.npmjs.com/using-npm/config/#registry)
 setting to specify its location.
 
@@ -286,7 +286,7 @@ For example:
 registry = https://npm.example.com
 ```
 
-#### Custom root certificates for NPM
+#### Custom root certificates for npm
 
 You can supply a custom root certificate to complete TLS verification by using the
 `ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables).
@@ -367,7 +367,7 @@ source "https://gems.example.com"
 You can supply a custom root certificate to complete TLS verification by using the
 `ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables), or by
 specifying a [`BUNDLE_SSL_CA_CERT`](https://bundler.io/v2.0/man/bundle-config.1.html)
-[environment variable](../../../ci/variables/README.md#custom-environment-variables)
+[environment variable](../../../ci/variables/README.md#custom-cicd-variables)
 in the job definition.
 
 ### Configuring Cargo projects
@@ -391,7 +391,7 @@ To supply a custom root certificate to complete TLS verification, do one of the 
 
 - Use the `ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables).
 - Specify a [`CARGO_HTTP_CAINFO`](https://doc.rust-lang.org/cargo/reference/environment-variables.html)
-  [environment variable](../../../ci/variables/README.md#custom-environment-variables)
+  [environment variable](../../../ci/variables/README.md#custom-cicd-variables)
   in the job definition.
 
 ### Configuring Composer projects
@@ -424,7 +424,7 @@ For example:
 You can supply a custom root certificate to complete TLS verification by using the
 `ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables), or by
 specifying a [`COMPOSER_CAFILE`](https://getcomposer.org/doc/03-cli.md#composer-cafile)
-[environment variable](../../../ci/variables/README.md#custom-environment-variables)
+[environment variable](../../../ci/variables/README.md#custom-cicd-variables)
 in the job definition.
 
 ### Configuring Conan projects
@@ -663,7 +663,7 @@ Additional configuration may be needed for connecting to
 [private Conan registries](#using-private-bower-registries),
 [private Go registries](#using-private-go-registries),
 [private Maven repositories](#using-private-maven-repositories),
-[private NPM registries](#using-private-npm-registries),
+[private npm registries](#using-private-npm-registries),
 [private Python repositories](#using-private-python-repositories),
 and [private Yarn registries](#using-private-yarn-registries).
 

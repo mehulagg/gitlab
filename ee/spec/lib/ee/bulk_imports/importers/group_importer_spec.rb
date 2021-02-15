@@ -18,9 +18,10 @@ RSpec.describe BulkImports::Importers::GroupImporter do
   describe '#execute' do
     it "starts the entity and run its pipelines" do
       expect_to_run_pipeline BulkImports::Groups::Pipelines::GroupPipeline, context: context
+      expect_to_run_pipeline BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline, context: context
+      expect_to_run_pipeline BulkImports::Groups::Pipelines::MembersPipeline, context: context
       expect_to_run_pipeline BulkImports::Groups::Pipelines::LabelsPipeline, context: context
       expect_to_run_pipeline EE::BulkImports::Groups::Pipelines::EpicsPipeline, context: context
-      expect_to_run_pipeline BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline, context: context
 
       subject.execute
 
@@ -29,8 +30,8 @@ RSpec.describe BulkImports::Importers::GroupImporter do
   end
 
   def expect_to_run_pipeline(klass, context:)
-    expect_next_instance_of(klass) do |pipeline|
-      expect(pipeline).to receive(:run).with(context)
+    expect_next_instance_of(klass, context) do |pipeline|
+      expect(pipeline).to receive(:run)
     end
   end
 end

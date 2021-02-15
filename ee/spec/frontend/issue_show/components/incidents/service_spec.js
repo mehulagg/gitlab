@@ -1,5 +1,5 @@
-import { getMetricImages, uploadMetricImage } from 'ee/issue_show/components/incidents/service';
 import Api from 'ee/api';
+import { getMetricImages, uploadMetricImage } from 'ee/issue_show/components/incidents/service';
 import { fileList, fileListRaw } from './mock_data';
 
 jest.mock('ee/api', () => ({

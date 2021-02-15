@@ -4,12 +4,12 @@ import { GlButton, GlSkeletonLoader } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { __, sprintf } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { deprecatedCreateFlash as Flash } from '../../../flash';
 import simplePoll from '../../../lib/utils/simple_poll';
 import eventHub from '../../event_hub';
-import statusIcon from '../mr_widget_status_icon.vue';
-import rebaseQuery from '../../queries/states/rebase.query.graphql';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
-import { deprecatedCreateFlash as Flash } from '../../../flash';
+import rebaseQuery from '../../queries/states/rebase.query.graphql';
+import statusIcon from '../mr_widget_status_icon.vue';
 
 export default {
   name: 'MRWidgetRebase',
@@ -181,17 +181,12 @@ export default {
           >
             {{ __('Rebase') }}
           </gl-button>
-          <span
-            v-if="!rebasingError"
-            class="gl-font-weight-bold gl-ml-0!"
-            data-testid="rebase-message"
-            >{{
-              __(
-                'Fast-forward merge is not possible. Rebase the source branch onto the target branch.',
-              )
-            }}</span
-          >
-          <span v-else class="gl-font-weight-bold danger gl-ml-0!" data-testid="rebase-message">{{
+          <span v-if="!rebasingError" class="gl-font-weight-bold" data-testid="rebase-message">{{
+            __(
+              'Fast-forward merge is not possible. Rebase the source branch onto the target branch.',
+            )
+          }}</span>
+          <span v-else class="gl-font-weight-bold danger" data-testid="rebase-message">{{
             rebasingError
           }}</span>
         </div>

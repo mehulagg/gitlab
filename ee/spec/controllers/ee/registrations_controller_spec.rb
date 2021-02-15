@@ -74,39 +74,17 @@ RSpec.describe RegistrationsController do
       end
     end
 
-    context 'when user signup cap setting is enabled' do
+    context 'when user signup cap is set' do
       before do
-        stub_application_setting(new_user_signups_cap: true)
+        stub_application_setting(new_user_signups_cap: 1)
       end
 
       it_behaves_like 'blocked user by default'
-
-      context 'when feature flag is disabled' do
-        before do
-          stub_feature_flags(admin_new_user_signups_cap: false)
-        end
-
-        context 'when require admin approval setting is disabled' do
-          before do
-            stub_application_setting(require_admin_approval_after_user_signup: false)
-          end
-
-          it_behaves_like 'active user by default'
-        end
-
-        context 'when require admin approval setting is enabled' do
-          before do
-            stub_application_setting(require_admin_approval_after_user_signup: true)
-          end
-
-          it_behaves_like 'blocked user by default'
-        end
-      end
     end
 
-    context 'when user signup cap setting is disabled' do
+    context 'when user signup cap is not set' do
       before do
-        stub_application_setting(admin_new_user_signups_cap: false)
+        stub_application_setting(new_user_signups_cap: nil)
       end
 
       context 'when require admin approval setting is disabled' do

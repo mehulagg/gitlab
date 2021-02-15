@@ -41,13 +41,13 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
     end
   end
 
-  describe '#persisted?' do
+  describe '#started?' do
     it 'changes on object save' do
-      expect { record.save!(completed: true) }.to change { record.persisted? }.from(false).to(true)
+      expect { record.save!(completed: true) }.to change { record.started? }.from(false).to(true)
     end
   end
 
-  describe '.persisted_versions' do
+  describe '.load_versions' do
     let(:completed_versions) { 1.upto(5).map { |i| described_class.new(version: i, name: i, filename: nil) } }
     let(:in_progress_migration) { described_class.new(version: 10, name: 10, filename: nil) }
 
@@ -61,15 +61,15 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
     end
 
     it 'loads all records' do
-      expect(described_class.persisted_versions(completed: true)).to match_array(completed_versions.map(&:version))
-      expect(described_class.persisted_versions(completed: false)).to contain_exactly(in_progress_migration.version)
+      expect(described_class.load_versions(completed: true)).to match_array(completed_versions.map(&:version))
+      expect(described_class.load_versions(completed: false)).to contain_exactly(in_progress_migration.version)
     end
 
     it 'returns empty array if no index present' do
       es_helper.delete_migrations_index
 
-      expect(described_class.persisted_versions(completed: true)).to eq([])
-      expect(described_class.persisted_versions(completed: false)).to eq([])
+      expect(described_class.load_versions(completed: true)).to eq([])
+      expect(described_class.load_versions(completed: false)).to eq([])
     end
   end
 end

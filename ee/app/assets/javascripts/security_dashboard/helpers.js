@@ -1,8 +1,8 @@
 import isPlainObject from 'lodash/isPlainObject';
-import { BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
 import { REPORT_TYPES, SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
-import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
+import { BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
 import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
+import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { s__, __ } from '~/locale';
 import { DEFAULT_SCANNER } from './constants';

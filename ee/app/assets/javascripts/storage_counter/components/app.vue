@@ -7,16 +7,16 @@ import {
   GlIcon,
   GlKeysetPagination,
 } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { PROJECTS_PER_PAGE } from '../constants';
 import query from '../queries/storage.query.graphql';
 import { formatUsageSize, parseGetStorageResults } from '../utils';
-import { PROJECTS_PER_PAGE } from '../constants';
 import ProjectsTable from './projects_table.vue';
-import UsageGraph from './usage_graph.vue';
-import UsageStatistics from './usage_statistics.vue';
 import StorageInlineAlert from './storage_inline_alert.vue';
 import TemporaryStorageIncreaseModal from './temporary_storage_increase_modal.vue';
+import UsageGraph from './usage_graph.vue';
+import UsageStatistics from './usage_statistics.vue';
 
 export default {
   name: 'StorageCounterApp',

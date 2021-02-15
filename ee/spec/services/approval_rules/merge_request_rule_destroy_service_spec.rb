@@ -32,6 +32,13 @@ RSpec.describe ApprovalRules::MergeRequestRuleDestroyService do
       it 'returns successful status' do
         expect(result[:status]).to eq(:success)
       end
+
+      it 'tracks delete event via a usage counter' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .to receive(:track_approval_rule_deleted_action).once.with(user: user)
+
+        result
+      end
     end
 
     context 'when rule not successfully deleted' do
@@ -41,6 +48,13 @@ RSpec.describe ApprovalRules::MergeRequestRuleDestroyService do
 
       it 'returns error status' do
         expect(result[:status]).to eq(:error)
+      end
+
+      it 'does not track delete event via a usage counter' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .not_to receive(:track_approval_rule_deleted_action)
+
+        result
       end
     end
   end

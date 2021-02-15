@@ -14,7 +14,7 @@ RSpec.describe 'Pipeline', :js do
     project.add_developer(user)
   end
 
-  describe 'GET /:project/pipelines/:id' do
+  describe 'GET /:project/-/pipelines/:id' do
     let(:pipeline) { create(:ci_pipeline, :with_job, project: project, ref: 'master', sha: project.commit.id, user: user) }
 
     subject { visit project_pipeline_path(project, pipeline) }
@@ -93,7 +93,7 @@ RSpec.describe 'Pipeline', :js do
     end
   end
 
-  describe 'GET /:project/pipelines/:id/security' do
+  describe 'GET /:project/-/pipelines/:id/security' do
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
 
     before do
@@ -129,7 +129,7 @@ RSpec.describe 'Pipeline', :js do
     end
   end
 
-  describe 'GET /:project/pipelines/:id/licenses' do
+  describe 'GET /:project/-/pipelines/:id/licenses' do
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
 
     before do
@@ -167,36 +167,55 @@ RSpec.describe 'Pipeline', :js do
     end
   end
 
-  describe 'GET /:project/pipelines/:id/codequality_report', :aggregate_failures do
+  describe 'GET /:project/-/pipelines/:id/codequality_report', :aggregate_failures do
     shared_examples_for 'full codequality report' do
-      context 'with no code quality artifact' do
+      context 'when licensed' do
         before do
-          create(:ee_ci_build, pipeline: pipeline)
+          stub_licensed_features(full_codequality_report: true)
+        end
+
+        context 'with code quality artifact' do
+          before do
+            create(:ee_ci_build, :codequality, pipeline: pipeline)
+            visit codequality_report_project_pipeline_path(project, pipeline)
+          end
+
+          it 'shows code quality tab pane as active, quality issue with link to file, and events for data tracking' do
+            expect(page).to have_content('Code Quality')
+            expect(page).to have_css('#js-tab-codequality')
+
+            expect(page).to have_content('Method `new_array` has 12 arguments (exceeds 4 allowed). Consider refactoring.')
+            expect(find_link('foo.rb:10')[:href]).to end_with(project_blob_path(project, File.join(pipeline.commit.id, 'foo.rb')) + '#L10')
+
+            expect(page).to have_selector('[data-track-event="click_button"]')
+            expect(page).to have_selector('[data-track-label="get_codequality_report"]')
+          end
+        end
+
+        context 'with no code quality artifact' do
+          before do
+            create(:ee_ci_build, pipeline: pipeline)
+            visit project_pipeline_path(project, pipeline)
+          end
+
+          it 'does not show code quality tab' do
+            expect(page).not_to have_content('Code Quality')
+            expect(page).not_to have_css('#js-tab-codequality')
+          end
+        end
+      end
+
+      context 'when unlicensed' do
+        before do
+          stub_licensed_features(full_codequality_report: false)
+
+          create(:ee_ci_build, :codequality, pipeline: pipeline)
           visit project_pipeline_path(project, pipeline)
         end
 
         it 'does not show code quality tab' do
           expect(page).not_to have_content('Code Quality')
           expect(page).not_to have_css('#js-tab-codequality')
-        end
-      end
-
-      context 'with code quality artifact' do
-        before do
-          create(:ee_ci_build, :codequality, pipeline: pipeline)
-          visit codequality_report_project_pipeline_path(project, pipeline)
-          wait_for_requests
-        end
-
-        it 'shows code quality tab pane as active, quality issue with link to file, and events for data tracking' do
-          expect(page).to have_content('Code Quality')
-          expect(page).to have_css('#js-tab-codequality')
-
-          expect(page).to have_content('Method `new_array` has 12 arguments (exceeds 4 allowed). Consider refactoring.')
-          expect(find_link('foo.rb:10')[:href]).to end_with(project_blob_path(project, File.join(pipeline.commit.id, 'foo.rb')) + '#L10')
-
-          expect(page).to have_selector('[data-track-event="click_button"]')
-          expect(page).to have_selector('[data-track-label="get_codequality_report"]')
         end
       end
     end

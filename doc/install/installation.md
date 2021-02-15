@@ -9,7 +9,7 @@ type: howto
 
 This is the official installation guide to set up a production GitLab server
 using the source files. To set up a **development installation** or for many
-other installation options, see the [main installation page](README.md).
+other installation options, see the [main installation page](index.md).
 It was created for and tested on **Debian/Ubuntu** operating systems.
 Read [requirements.md](requirements.md) for hardware and operating system requirements.
 If you want to install on RHEL/CentOS, we recommend using the
@@ -110,7 +110,7 @@ Install the required packages (needed to compile Ruby and native extensions to R
 sudo apt-get install -y build-essential zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libre2-dev \
   libreadline-dev libncurses5-dev libffi-dev curl openssh-server checkinstall libxml2-dev \
   libxslt-dev libcurl4-openssl-dev libicu-dev logrotate rsync python-docutils pkg-config cmake \
-  runit
+  runit-systemd
 ```
 
 Ubuntu 14.04 (Trusty Tahr) doesn't have the `libre2-dev` package available, but

@@ -69,7 +69,7 @@ This test will be used later for continuously testing our app with GitLab CI/CD.
 ### Push to GitLab
 
 Since we have our app up and running locally, it's time to push the codebase to our remote repository.
-Let's create [a new project](../../../gitlab-basics/create-project.md) in GitLab named `laravel-sample`.
+Let's create [a new project](../../../user/project/working_with_projects.md#create-a-project) in GitLab named `laravel-sample`.
 After that, follow the command line instructions displayed on the project's homepage to initiate the repository on our machine and push the first commit.
 
 ```shell
@@ -119,7 +119,7 @@ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 cat ~/.ssh/id_rsa
 ```
 
-Now, let's add it to your GitLab project as a [variable](../../variables/README.md#gitlab-cicd-environment-variables).
+Now, let's add it to your GitLab project as a [CI/CD variable](../../variables/README.md).
 Variables are user-defined variables and are stored out of `.gitlab-ci.yml`, for security purposes.
 They can be added per project by navigating to the project's **Settings** > **CI/CD**.
 
@@ -544,7 +544,7 @@ services:
 ...
 ```
 
-If you wish to test your app with different PHP versions and [database management systems](../../services/README.md), you can define different `image` and `services` keywords for each test job.
+If you wish to test your app with different PHP versions and [database management systems](../../services/index.md), you can define different `image` and `services` keywords for each test job.
 
 #### Variables
 
@@ -589,7 +589,7 @@ unit_test:
 #### Deploy to production
 
 The job `deploy_production` will deploy the app to the production server.
-To deploy our app with Envoy, we had to set up the `$SSH_PRIVATE_KEY` variable as an [SSH private key](../../ssh_keys/README.md#ssh-keys-when-using-the-docker-executor).
+To deploy our app with Envoy, we had to set up the `$SSH_PRIVATE_KEY` variable as an [SSH private key](../../ssh_keys/index.md#ssh-keys-when-using-the-docker-executor).
 If the SSH keys have added successfully, we can run Envoy.
 
 As mentioned before, GitLab supports [Continuous Delivery](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/#continuous-delivery) methods as well.

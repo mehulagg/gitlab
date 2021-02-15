@@ -27,7 +27,7 @@ describe('Linked pipeline mini list', () => {
     it('should render a linked pipeline with the correct href', () => {
       const linkElement = component.$el.querySelector('.linked-pipeline-mini-item');
 
-      expect(linkElement.getAttribute('href')).toBe('/gitlab-org/gitlab-foss/pipelines/129');
+      expect(linkElement.getAttribute('href')).toBe('/gitlab-org/gitlab-foss/-/pipelines/129');
     });
 
     it('should render one ci status icon', () => {

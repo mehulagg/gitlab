@@ -27,6 +27,18 @@ describe('burndown_chart', () => {
     });
   };
 
+  it('hides chart while loading', () => {
+    createComponent({ loading: true });
+
+    expect(findChart().exists()).toBe(false);
+  });
+
+  it('shows chart when not loading', () => {
+    createComponent({ loading: false });
+
+    expect(findChart().exists()).toBe(true);
+  });
+
   describe('with single point', () => {
     it('does not show guideline', () => {
       createComponent({

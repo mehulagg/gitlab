@@ -57,7 +57,7 @@ Configuring environments involves:
 The rest of this section illustrates how to configure environments and deployments using
 an example scenario. It assumes you have already:
 
-- Created a [project](../../gitlab-basics/create-project.md) in GitLab.
+- Created a [project](../../user/project/working_with_projects.md#create-a-project) in GitLab.
 - Set up [a runner](../runners/README.md).
 
 In the scenario:
@@ -313,9 +313,9 @@ Dynamic environments are a fundamental part of [Review apps](../review_apps/inde
 The `name` and `url` keywords for dynamic environments can use most available CI/CD variables,
 including:
 
-- [Predefined environment variables](../variables/README.md#predefined-environment-variables)
-- [Project and group variables](../variables/README.md#gitlab-cicd-environment-variables)
-- [`.gitlab-ci.yml` variables](../yaml/README.md#variables)
+- [Predefined CI/CD variables](../variables/README.md#predefined-cicd-variables)
+- [Project and group CI/CD variables](../variables/README.md)
+- [`.gitlab-ci.yml` CI/CD variables](../yaml/README.md#variables)
 
 However, you cannot use variables defined:
 
@@ -1025,7 +1025,7 @@ with `review/` would have that particular variable.
 
 Some GitLab features can behave differently for each environment.
 For example, you can
-[create a secret variable to be injected only into a production environment](../variables/README.md#limit-the-environment-scopes-of-environment-variables).
+[create a secret variable to be injected only into a production environment](../variables/README.md#limit-the-environment-scopes-of-cicd-variables).
 
 In most cases, these features use the _environment specs_ mechanism, which offers
 an efficient way to implement scoping within each environment group.

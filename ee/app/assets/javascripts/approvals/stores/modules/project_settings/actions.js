@@ -1,12 +1,12 @@
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import * as types from '../base/mutation_types';
+import { __ } from '~/locale';
 import {
   mapApprovalRuleRequest,
   mapApprovalSettingsResponse,
   mapApprovalFallbackRuleRequest,
 } from '../../../mappers';
+import * as types from '../base/mutation_types';
 
 export const requestRules = ({ commit }) => {
   commit(types.SET_LOADING, true);

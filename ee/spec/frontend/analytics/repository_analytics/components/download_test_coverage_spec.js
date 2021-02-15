@@ -2,12 +2,10 @@ import { GlAlert, GlDropdown, GlDropdownItem, GlModal } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import DownloadTestCoverage from 'ee/analytics/repository_analytics/components/download_test_coverage.vue';
 import SelectProjectsDropdown from 'ee/analytics/repository_analytics/components/select_projects_dropdown.vue';
-import { useFakeDate } from 'helpers/fake_date';
 
 const localVue = createLocalVue();
 
 describe('Download test coverage component', () => {
-  useFakeDate();
   let wrapper;
 
   const findCodeCoverageModalButton = () =>
@@ -73,8 +71,6 @@ describe('Download test coverage component', () => {
     });
 
     describe('when selecting a project', () => {
-      // Due to the fake_date helper, we can always expect today's date to be 2020-07-06
-      // and the default date 30 days ago to be 2020-06-06
       const groupAnalyticsCoverageReportsPathWithDates = `${injectedProperties.groupAnalyticsCoverageReportsPath}?start_date=2020-06-06&end_date=2020-07-06`;
 
       describe('with all projects selected', () => {

@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlToken, GlAvatarLabeled, GlPopover } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { formatDate } from '~/lib/utils/datetime_utility';

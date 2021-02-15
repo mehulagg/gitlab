@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
 import {
   GlTable,
   GlAvatarLabeled,
@@ -10,6 +9,7 @@ import {
   GlBadge,
 } from '@gitlab/ui';
 import { parseInt, debounce } from 'lodash';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import { s__ } from '~/locale';
 
 const AVATAR_SIZE = 32;

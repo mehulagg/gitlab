@@ -1,7 +1,7 @@
 import dateFormat from 'dateformat';
-import { __, s__, sprintf } from '~/locale';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { nDaysBefore, nMonthsBefore, getStartOfDay, dayAfter } from '~/lib/utils/datetime_utility';
+import { __, s__, sprintf } from '~/locale';
 import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 
 // Compute all relative dates based on the _beginning_ of today.

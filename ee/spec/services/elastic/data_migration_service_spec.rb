@@ -75,12 +75,12 @@ RSpec.describe Elastic::DataMigrationService, :elastic do
     end
 
     it 'creates all migration versions' do
-      expect(Elastic::MigrationRecord.persisted_versions(completed: true).count).to eq(0)
+      expect(Elastic::MigrationRecord.load_versions(completed: true).count).to eq(0)
 
       subject.mark_all_as_completed!
       refresh_index!
 
-      expect(Elastic::MigrationRecord.persisted_versions(completed: true).count).to eq(subject.migrations.count)
+      expect(Elastic::MigrationRecord.load_versions(completed: true).count).to eq(subject.migrations.count)
     end
 
     it 'drops all cache keys' do

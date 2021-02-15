@@ -266,6 +266,15 @@ RSpec.describe SearchHelper do
       }
     }
 
+    mock_updated_sort = {
+      title: _('Last updated'),
+      sortable: true,
+      sortParam: {
+        asc: 'updated_asc',
+        desc: 'updated_desc'
+      }
+    }
+
     before do
       allow(self).to receive(:current_user).and_return(user)
     end
@@ -276,13 +285,13 @@ RSpec.describe SearchHelper do
       end
 
       it 'returns the correct data' do
-        expect(search_sort_options).to eq([mock_relevant_sort, mock_created_sort])
+        expect(search_sort_options).to eq([mock_relevant_sort, mock_created_sort, mock_updated_sort])
       end
     end
 
     context 'with basic search enabled' do
       it 'returns the correct data' do
-        expect(search_sort_options).to eq([mock_created_sort])
+        expect(search_sort_options).to eq([mock_created_sort, mock_updated_sort])
       end
     end
   end

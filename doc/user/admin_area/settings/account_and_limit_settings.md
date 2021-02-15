@@ -172,9 +172,9 @@ To set a limit on how long personal access tokens are valid:
 1. Fill in the **Maximum allowable lifetime for personal access tokens (days)** field.
 1. Click **Save changes**.
 
-Once a lifetime for personal access tokens is set, GitLab will:
+Once a lifetime for personal access tokens is set, GitLab:
 
-- Apply the lifetime for new personal access tokens, and require users to set an expiration date
+- Applies the lifetime for new personal access tokens, and require users to set an expiration date
   and a date no later than the allowed lifetime.
 - After three hours, revoke old tokens with no expiration date or with a lifetime longer than the
   allowed lifetime. Three hours is given to allow administrators to change the allowed lifetime,
@@ -194,10 +194,7 @@ To do this:
 ## Optional enforcement of Personal Access Token expiry **(ULTIMATE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214723) in GitLab Ultimate 13.1.
-> - It is deployed behind a feature flag, disabled by default.
-> - It is disabled on GitLab.com.
-> - It is not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-optional-enforcement-of-personal-access-token-expiry-feature). **(FREE SELF)**
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/296881) in GitLab 13.9.
 
 GitLab administrators can choose to prevent personal access tokens from expiring
 automatically. The tokens are usable after the expiry date, unless they are revoked explicitly.
@@ -207,23 +204,6 @@ To do this:
 1. Navigate to **Admin Area > Settings > General**.
 1. Expand the **Account and limit** section.
 1. Uncheck the **Enforce personal access token expiration** checkbox.
-
-### Enable or disable optional enforcement of Personal Access Token expiry Feature **(FREE SELF)**
-
-Optional Enforcement of Personal Access Token Expiry is deployed behind a feature flag and is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md) can enable it for your instance from the [rails console](../../../administration/feature_flags.md#start-the-gitlab-rails-console).
-
-To enable it:
-
-```ruby
-Feature.enable(:enforce_pat_expiration)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:enforce_pat_expiration)
-```
 
 ## Disabling user profile name changes **(PREMIUM SELF)**
 

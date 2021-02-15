@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlFormInput } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import CustomStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/custom_stage_fields.vue';
 import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
 import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selector.vue';

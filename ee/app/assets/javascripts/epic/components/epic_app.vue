@@ -1,8 +1,8 @@
 <script>
 import SidebarContext from '../sidebar_context';
 
-import EpicHeader from './epic_header.vue';
 import EpicBody from './epic_body.vue';
+import EpicHeader from './epic_header.vue';
 
 export default {
   components: {

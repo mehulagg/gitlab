@@ -8,14 +8,23 @@ RSpec.describe Projects::Security::ApiFuzzingConfigurationController do
   let_it_be(:developer) { create(:user) }
   let_it_be(:guest) { create(:user) }
 
+  subject(:request) { get :show, params: { namespace_id: project.namespace, project_id: project } }
+
   before_all do
     group.add_developer(developer)
     group.add_guest(guest)
   end
 
-  describe 'GET #show' do
-    subject(:request) { get :show, params: { namespace_id: project.namespace, project_id: project } }
+  include_context '"Security & Compliance" permissions' do
+    let(:valid_request) { request }
 
+    before_request do
+      stub_licensed_features(security_dashboard: true)
+      sign_in(developer)
+    end
+  end
+
+  describe 'GET #show' do
     render_views
 
     it_behaves_like SecurityDashboardsPermissions do

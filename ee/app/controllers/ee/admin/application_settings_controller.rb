@@ -57,12 +57,12 @@ module EE
           attrs += EE::ApplicationSettingsHelper.merge_request_appovers_rules_attributes
         end
 
-        if ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode)
+        if ::Gitlab::Geo.license_allows?
           attrs << :maintenance_mode
           attrs << :maintenance_mode_message
         end
 
-        attrs << :new_user_signups_cap if ::Feature.enabled?(:admin_new_user_signups_cap, default_enabled: true )
+        attrs << :new_user_signups_cap
 
         attrs
       end

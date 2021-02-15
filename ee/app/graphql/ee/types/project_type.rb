@@ -7,53 +7,53 @@ module EE
 
       prepended do
         field :security_scanners, ::Types::SecurityScanners, null: true,
-              description: 'Information about security analyzers used in the project',
+              description: 'Information about security analyzers used in the project.',
               method: :itself
 
         field :vulnerabilities,
               ::Types::VulnerabilityType.connection_type,
               null: true,
-              description: 'Vulnerabilities reported on the project',
+              description: 'Vulnerabilities reported on the project.',
               resolver: ::Resolvers::VulnerabilitiesResolver
 
         field :vulnerability_scanners,
               ::Types::VulnerabilityScannerType.connection_type,
               null: true,
-              description: 'Vulnerability scanners reported on the project vulnerabilities',
+              description: 'Vulnerability scanners reported on the project vulnerabilities.',
               resolver: ::Resolvers::Vulnerabilities::ScannersResolver
 
         field :vulnerabilities_count_by_day,
               ::Types::VulnerabilitiesCountByDayType.connection_type,
               null: true,
-              description: 'Number of vulnerabilities per day for the project',
+              description: 'Number of vulnerabilities per day for the project.',
               resolver: ::Resolvers::VulnerabilitiesCountPerDayResolver
 
         field :vulnerability_severities_count, ::Types::VulnerabilitySeveritiesCountType, null: true,
-              description: 'Counts for each vulnerability severity in the project',
+              description: 'Counts for each vulnerability severity in the project.',
               resolver: ::Resolvers::VulnerabilitySeveritiesCountResolver
 
         field :requirement, ::Types::RequirementsManagement::RequirementType, null: true,
-              description: 'Find a single requirement',
+              description: 'Find a single requirement.',
               resolver: ::Resolvers::RequirementsManagement::RequirementsResolver.single
 
         field :requirements, ::Types::RequirementsManagement::RequirementType.connection_type, null: true,
-              description: 'Find requirements',
+              description: 'Find requirements.',
               extras: [:lookahead],
               resolver: ::Resolvers::RequirementsManagement::RequirementsResolver
 
         field :requirement_states_count, ::Types::RequirementsManagement::RequirementStatesCountType, null: true,
-              description: 'Number of requirements for the project by their state'
+              description: 'Number of requirements for the project by their state.'
 
         field :compliance_frameworks, ::Types::ComplianceManagement::ComplianceFrameworkType.connection_type,
-              description: 'Compliance frameworks associated with the project',
+              description: 'Compliance frameworks associated with the project.',
               null: true
 
         field :security_dashboard_path, GraphQL::STRING_TYPE,
-              description: "Path to project's security dashboard",
+              description: "Path to project's security dashboard.",
               null: true
 
         field :iterations, ::Types::IterationType.connection_type, null: true,
-              description: 'Find iterations',
+              description: 'Find iterations.',
               resolver: ::Resolvers::IterationsResolver
 
         field :dast_profiles,
@@ -89,44 +89,61 @@ module EE
         field :cluster_agent,
               ::Types::Clusters::AgentType,
               null: true,
-              description: 'Find a single cluster agent by name',
+              description: 'Find a single cluster agent by name.',
               resolver: ::Resolvers::Clusters::AgentsResolver.single
 
         field :cluster_agents,
               ::Types::Clusters::AgentType.connection_type,
               extras: [:lookahead],
               null: true,
-              description: 'Cluster agents associated with the project',
+              description: 'Cluster agents associated with the project.',
               resolver: ::Resolvers::Clusters::AgentsResolver
 
         field :repository_size_excess,
               GraphQL::FLOAT_TYPE,
               null: true,
-              description: 'Size of repository that exceeds the limit in bytes'
+              description: 'Size of repository that exceeds the limit in bytes.'
 
         field :actual_repository_size_limit,
               GraphQL::FLOAT_TYPE,
               null: true,
-              description: 'Size limit for the repository in bytes',
+              description: 'Size limit for the repository in bytes.',
               method: :actual_size_limit
 
         field :code_coverage_summary,
               ::Types::Ci::CodeCoverageSummaryType,
               null: true,
-              description: 'Code coverage summary associated with the project',
+              description: 'Code coverage summary associated with the project.',
               resolver: ::Resolvers::Ci::CodeCoverageSummaryResolver
 
         field :alert_management_payload_fields,
               [::Types::AlertManagement::PayloadAlertFieldType],
               null: true,
-              description: 'Extract alert fields from payload for custom mapping',
+              description: 'Extract alert fields from payload for custom mapping.',
               resolver: ::Resolvers::AlertManagement::PayloadAlertFieldResolver
 
         field :incident_management_oncall_schedules,
               ::Types::IncidentManagement::OncallScheduleType.connection_type,
               null: true,
-              description: 'Incident Management On-call schedules of the project',
+              description: 'Incident Management On-call schedules of the project.',
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
+
+        field :api_fuzzing_ci_configuration,
+              ::Types::CiConfiguration::ApiFuzzingType,
+              null: true,
+              description: 'API fuzzing configuration for the project.',
+              feature_flag: :api_fuzzing_configuration_ui
+      end
+
+      def api_fuzzing_ci_configuration
+        return unless Ability.allowed?(current_user, :read_vulnerability, object)
+
+        configuration = ::Security::ApiFuzzing::CiConfiguration.new(project: object)
+
+        {
+          scan_modes: ::Security::ApiFuzzing::CiConfiguration::SCAN_MODES,
+          scan_profiles: configuration.scan_profiles
+        }
       end
 
       def dast_profiles

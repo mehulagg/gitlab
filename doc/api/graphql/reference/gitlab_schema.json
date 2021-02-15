@@ -2679,6 +2679,141 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "ApiFuzzingCiConfiguration",
+          "description": "Data associated with configuring API fuzzing scans in GitLab CI",
+          "fields": [
+            {
+              "name": "scanModes",
+              "description": "All available scan modes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "ENUM",
+                    "name": "ApiFuzzingScanMode",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "scanProfiles",
+              "description": "All default scan profiles.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ApiFuzzingScanProfile",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "ApiFuzzingScanMode",
+          "description": "All possible ways to specify the API surface for an API fuzzing scan",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "HAR",
+              "description": "The API surface is specified by a HAR file.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "OPENAPI",
+              "description": "The API surface is specified by a OPENAPI file.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "ApiFuzzingScanProfile",
+          "description": "An API Fuzzing scan profile.",
+          "fields": [
+            {
+              "name": "description",
+              "description": "A short description of the profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "The unique name of the profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "yaml",
+              "description": "A syntax highlit HTML representation of the YAML.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "ENUM",
           "name": "AvailabilityEnum",
           "description": "User availability status",
@@ -3694,7 +3829,7 @@
           "fields": [
             {
               "name": "assignee",
-              "description": "The board assignee",
+              "description": "The board assignee.",
               "args": [
 
               ],
@@ -3708,7 +3843,7 @@
             },
             {
               "name": "epics",
-              "description": "Epics associated with board issues",
+              "description": "Epics associated with board issues.",
               "args": [
                 {
                   "name": "issueFilters",
@@ -3831,7 +3966,7 @@
             },
             {
               "name": "labels",
-              "description": "Labels of the board",
+              "description": "Labels of the board.",
               "args": [
                 {
                   "name": "after",
@@ -3957,7 +4092,7 @@
             },
             {
               "name": "milestone",
-              "description": "The board milestone",
+              "description": "The board milestone.",
               "args": [
 
               ],
@@ -4021,7 +4156,7 @@
             },
             {
               "name": "weight",
-              "description": "Weight of the board",
+              "description": "Weight of the board.",
               "args": [
 
               ],
@@ -4721,6 +4856,59 @@
               "deprecationReason": null
             },
             {
+              "name": "events",
+              "description": "A list of events associated with the object.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "EventConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "group",
               "description": "Group to which the epic belongs.",
               "args": [
@@ -5321,7 +5509,7 @@
             },
             {
               "name": "userPreferences",
-              "description": "User preferences for the epic on the issue board",
+              "description": "User preferences for the epic on the issue board.",
               "args": [
 
               ],
@@ -5380,6 +5568,11 @@
             {
               "kind": "INTERFACE",
               "name": "CurrentUserTodos",
+              "ofType": null
+            },
+            {
+              "kind": "INTERFACE",
+              "name": "Eventable",
               "ofType": null
             }
           ],
@@ -5505,7 +5698,7 @@
           "fields": [
             {
               "name": "collapsed",
-              "description": "Indicates epic should be displayed as collapsed",
+              "description": "Indicates epic should be displayed as collapsed.",
               "args": [
 
               ],
@@ -5615,7 +5808,7 @@
             },
             {
               "name": "epicId",
-              "description": "Filter by epic ID. Incompatible with epicWildcardId",
+              "description": "Filter by epic ID. Incompatible with epicWildcardId.",
               "type": {
                 "kind": "SCALAR",
                 "name": "EpicID",
@@ -5625,7 +5818,7 @@
             },
             {
               "name": "iterationTitle",
-              "description": "Filter by iteration title",
+              "description": "Filter by iteration title.",
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
@@ -5635,7 +5828,7 @@
             },
             {
               "name": "weight",
-              "description": "Filter by weight",
+              "description": "Filter by weight.",
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
@@ -5665,7 +5858,7 @@
             },
             {
               "name": "epicWildcardId",
-              "description": "Filter by epic ID wildcard. Incompatible with epicId",
+              "description": "Filter by epic ID wildcard. Incompatible with epicId.",
               "type": {
                 "kind": "ENUM",
                 "name": "EpicWildcardId",
@@ -5675,7 +5868,7 @@
             },
             {
               "name": "iterationWildcardId",
-              "description": "Filter by iteration ID wildcard",
+              "description": "Filter by iteration ID wildcard.",
               "type": {
                 "kind": "ENUM",
                 "name": "IterationWildcardId",
@@ -5695,7 +5888,7 @@
           "fields": [
             {
               "name": "assignee",
-              "description": "Assignee in the list",
+              "description": "Assignee in the list.",
               "args": [
 
               ],
@@ -5818,7 +6011,7 @@
             },
             {
               "name": "iteration",
-              "description": "Iteration of the list",
+              "description": "Iteration of the list.",
               "args": [
 
               ],
@@ -5846,7 +6039,7 @@
             },
             {
               "name": "limitMetric",
-              "description": "The current limit metric for the list",
+              "description": "The current limit metric for the list.",
               "args": [
 
               ],
@@ -5878,7 +6071,7 @@
             },
             {
               "name": "maxIssueCount",
-              "description": "Maximum number of issues in the list",
+              "description": "Maximum number of issues in the list.",
               "args": [
 
               ],
@@ -5892,7 +6085,7 @@
             },
             {
               "name": "maxIssueWeight",
-              "description": "Maximum weight of issues in the list",
+              "description": "Maximum weight of issues in the list.",
               "args": [
 
               ],
@@ -5906,7 +6099,7 @@
             },
             {
               "name": "milestone",
-              "description": "Milestone of the list",
+              "description": "Milestone of the list.",
               "args": [
 
               ],
@@ -5952,7 +6145,7 @@
             },
             {
               "name": "totalWeight",
-              "description": "Total weight of all issues in the list",
+              "description": "Total weight of all issues in the list.",
               "args": [
 
               ],
@@ -6046,20 +6239,6 @@
           "fields": null,
           "inputFields": [
             {
-              "name": "boardId",
-              "description": "Global ID of the issue board to mutate.",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "BoardID",
-                  "ofType": null
-                }
-              },
-              "defaultValue": null
-            },
-            {
               "name": "backlog",
               "description": "Create the backlog list.",
               "type": {
@@ -6076,6 +6255,20 @@
                 "kind": "SCALAR",
                 "name": "LabelID",
                 "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "boardId",
+              "description": "Global ID of the issue board to mutate.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "BoardID",
+                  "ofType": null
+                }
               },
               "defaultValue": null
             },
@@ -6171,7 +6364,7 @@
             },
             {
               "name": "list",
-              "description": "List of the issue board.",
+              "description": "Issue list in the issue board.",
               "args": [
 
               ],
@@ -6450,7 +6643,7 @@
           "fields": [
             {
               "name": "completedCount",
-              "description": "Number of closed issues as of this day",
+              "description": "Number of closed issues as of this day.",
               "args": [
 
               ],
@@ -6468,7 +6661,7 @@
             },
             {
               "name": "completedWeight",
-              "description": "Total weight of closed issues as of this day",
+              "description": "Total weight of closed issues as of this day.",
               "args": [
 
               ],
@@ -6486,7 +6679,7 @@
             },
             {
               "name": "date",
-              "description": "Date for burnup totals",
+              "description": "Date for burnup totals.",
               "args": [
 
               ],
@@ -6504,7 +6697,7 @@
             },
             {
               "name": "scopeCount",
-              "description": "Number of issues as of this day",
+              "description": "Number of issues as of this day.",
               "args": [
 
               ],
@@ -6522,7 +6715,7 @@
             },
             {
               "name": "scopeWeight",
-              "description": "Total weight of issues as of this day",
+              "description": "Total weight of issues as of this day.",
               "args": [
 
               ],
@@ -6534,6 +6727,33 @@
                   "name": "Int",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CiApplicationSettings",
+          "description": null,
+          "fields": [
+            {
+              "name": "keepLatestArtifact",
+              "description": "Whether to keep the latest jobs artifacts.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -8755,7 +8975,7 @@
           "fields": [
             {
               "name": "createdAt",
-              "description": "Timestamp the cluster agent was created",
+              "description": "Timestamp the cluster agent was created.",
               "args": [
 
               ],
@@ -8769,7 +8989,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the cluster agent",
+              "description": "ID of the cluster agent.",
               "args": [
 
               ],
@@ -8787,7 +9007,7 @@
             },
             {
               "name": "name",
-              "description": "Name of the cluster agent",
+              "description": "Name of the cluster agent.",
               "args": [
 
               ],
@@ -8801,7 +9021,7 @@
             },
             {
               "name": "project",
-              "description": "The project this cluster agent is associated with",
+              "description": "The project this cluster agent is associated with.",
               "args": [
 
               ],
@@ -8815,7 +9035,7 @@
             },
             {
               "name": "tokens",
-              "description": "Tokens associated with the cluster agent",
+              "description": "Tokens associated with the cluster agent.",
               "args": [
                 {
                   "name": "after",
@@ -8868,7 +9088,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "Timestamp the cluster agent was updated",
+              "description": "Timestamp the cluster agent was updated.",
               "args": [
 
               ],
@@ -9113,7 +9333,7 @@
           "fields": [
             {
               "name": "clusterAgent",
-              "description": "Cluster agent this token is associated with",
+              "description": "Cluster agent this token is associated with.",
               "args": [
 
               ],
@@ -9127,7 +9347,7 @@
             },
             {
               "name": "createdAt",
-              "description": "Timestamp the token was created",
+              "description": "Timestamp the token was created.",
               "args": [
 
               ],
@@ -9141,7 +9361,7 @@
             },
             {
               "name": "id",
-              "description": "Global ID of the token",
+              "description": "Global ID of the token.",
               "args": [
 
               ],
@@ -10529,7 +10749,7 @@
           "fields": [
             {
               "name": "color",
-              "description": "Hexadecimal representation of compliance framework's label color",
+              "description": "Hexadecimal representation of compliance framework's label color.",
               "args": [
 
               ],
@@ -10547,7 +10767,7 @@
             },
             {
               "name": "description",
-              "description": "Description of the compliance framework",
+              "description": "Description of the compliance framework.",
               "args": [
 
               ],
@@ -10565,7 +10785,7 @@
             },
             {
               "name": "id",
-              "description": "Compliance framework ID",
+              "description": "Compliance framework ID.",
               "args": [
 
               ],
@@ -10583,7 +10803,7 @@
             },
             {
               "name": "name",
-              "description": "Name of the compliance framework",
+              "description": "Name of the compliance framework.",
               "args": [
 
               ],
@@ -11897,6 +12117,77 @@
           "inputFields": null,
           "interfaces": null,
           "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "ContainerRepositorySort",
+          "description": "Values for sorting container repositories",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "updated_desc",
+              "description": "Updated at descending order",
+              "isDeprecated": true,
+              "deprecationReason": "Use UPDATED_DESC. Deprecated in 13.5."
+            },
+            {
+              "name": "updated_asc",
+              "description": "Updated at ascending order",
+              "isDeprecated": true,
+              "deprecationReason": "Use UPDATED_ASC. Deprecated in 13.5."
+            },
+            {
+              "name": "created_desc",
+              "description": "Created at descending order",
+              "isDeprecated": true,
+              "deprecationReason": "Use CREATED_DESC. Deprecated in 13.5."
+            },
+            {
+              "name": "created_asc",
+              "description": "Created at ascending order",
+              "isDeprecated": true,
+              "deprecationReason": "Use CREATED_ASC. Deprecated in 13.5."
+            },
+            {
+              "name": "UPDATED_DESC",
+              "description": "Updated at descending order",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "UPDATED_ASC",
+              "description": "Updated at ascending order",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "CREATED_DESC",
+              "description": "Created at descending order",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "CREATED_ASC",
+              "description": "Created at ascending order",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "NAME_ASC",
+              "description": "Name by ascending order",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "NAME_DESC",
+              "description": "Name by descending order",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
           "possibleTypes": null
         },
         {
@@ -15668,12 +15959,96 @@
 
               ],
               "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "DastProfileDeleteInput",
+          "description": "Autogenerated input type of DastProfileDelete",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "ID of the profile to be deleted.",
+              "type": {
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "String",
+                  "name": "DastProfileID",
                   "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DastProfileDeletePayload",
+          "description": "Autogenerated return type of DastProfileDelete",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
                 }
               },
               "isDeprecated": false,
@@ -15743,6 +16118,302 @@
           "possibleTypes": null
         },
         {
+          "kind": "INPUT_OBJECT",
+          "name": "DastProfileRunInput",
+          "description": "Autogenerated input type of DastProfileRun",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "fullPath",
+              "description": "Full path for the project the scanner profile belongs to.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "id",
+              "description": "ID of the profile to be used for the scan.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "DastProfileID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DastProfileRunPayload",
+          "description": "Autogenerated return type of DastProfileRun",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipelineUrl",
+              "description": "URL of the pipeline that was created.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "DastProfileUpdateInput",
+          "description": "Autogenerated input type of DastProfileUpdate",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "id",
+              "description": "ID of the profile to be deleted.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "DastProfileID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "fullPath",
+              "description": "The project the profile belongs to.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "name",
+              "description": "The name of the profile.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "description",
+              "description": "The description of the profile. Defaults to an empty string.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": "\"\""
+            },
+            {
+              "name": "dastSiteProfileId",
+              "description": "ID of the site profile to be associated.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "DastSiteProfileID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "dastScannerProfileId",
+              "description": "ID of the scanner profile to be associated.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "DastScannerProfileID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "runAfterUpdate",
+              "description": "Run scan using profile after update. Defaults to false.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": "false"
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DastProfileUpdatePayload",
+          "description": "Autogenerated return type of DastProfileUpdate",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "dastProfile",
+              "description": "The updated profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastProfile",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipelineUrl",
+              "description": "The URL of the pipeline that was created. Requires the input argument `runAfterUpdate` to be set to `true` when calling the mutation, otherwise no pipeline will be created.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "ENUM",
           "name": "DastScanTypeEnum",
           "description": null,
@@ -15772,7 +16443,7 @@
           "fields": [
             {
               "name": "editPath",
-              "description": "Relative web path to the edit page of a scanner profile",
+              "description": "Relative web path to the edit page of a scanner profile.",
               "args": [
 
               ],
@@ -15786,7 +16457,7 @@
             },
             {
               "name": "globalId",
-              "description": "ID of the DAST scanner profile Deprecated in 13.6: Use `id`.",
+              "description": "ID of the DAST scanner profile. Deprecated in 13.6: Use `id`.",
               "args": [
 
               ],
@@ -15804,7 +16475,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the DAST scanner profile",
+              "description": "ID of the DAST scanner profile.",
               "args": [
 
               ],
@@ -15822,7 +16493,7 @@
             },
             {
               "name": "profileName",
-              "description": "Name of the DAST scanner profile",
+              "description": "Name of the DAST scanner profile.",
               "args": [
 
               ],
@@ -15868,7 +16539,7 @@
             },
             {
               "name": "spiderTimeout",
-              "description": "The maximum number of minutes allowed for the spider to traverse the site",
+              "description": "The maximum number of minutes allowed for the spider to traverse the site.",
               "args": [
 
               ],
@@ -15882,7 +16553,7 @@
             },
             {
               "name": "targetTimeout",
-              "description": "The maximum number of seconds allowed for the site under test to respond to a request",
+              "description": "The maximum number of seconds allowed for the site under test to respond to a request.",
               "args": [
 
               ],
@@ -16519,7 +17190,7 @@
           "fields": [
             {
               "name": "editPath",
-              "description": "Relative web path to the edit page of a site profile",
+              "description": "Relative web path to the edit page of a site profile.",
               "args": [
 
               ],
@@ -16533,7 +17204,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the site profile",
+              "description": "ID of the site profile.",
               "args": [
 
               ],
@@ -16551,7 +17222,7 @@
             },
             {
               "name": "normalizedTargetUrl",
-              "description": "Normalized URL of the target to be scanned",
+              "description": "Normalized URL of the target to be scanned.",
               "args": [
 
               ],
@@ -16565,7 +17236,7 @@
             },
             {
               "name": "profileName",
-              "description": "The name of the site profile",
+              "description": "The name of the site profile.",
               "args": [
 
               ],
@@ -16579,7 +17250,7 @@
             },
             {
               "name": "targetUrl",
-              "description": "The URL of the target to be scanned",
+              "description": "The URL of the target to be scanned.",
               "args": [
 
               ],
@@ -16611,7 +17282,7 @@
             },
             {
               "name": "validationStatus",
-              "description": "The current validation status of the site profile",
+              "description": "The current validation status of the site profile.",
               "args": [
 
               ],
@@ -17350,7 +18021,7 @@
           "fields": [
             {
               "name": "id",
-              "description": "Global ID of the site validation",
+              "description": "Global ID of the site validation.",
               "args": [
 
               ],
@@ -17368,7 +18039,7 @@
             },
             {
               "name": "normalizedTargetUrl",
-              "description": "Normalized URL of the target to be validated",
+              "description": "Normalized URL of the target to be validated.",
               "args": [
 
               ],
@@ -17382,7 +18053,7 @@
             },
             {
               "name": "status",
-              "description": "Status of the site validation",
+              "description": "Status of the site validation.",
               "args": [
 
               ],
@@ -21453,7 +22124,7 @@
           "fields": [
             {
               "name": "groups",
-              "description": "Assigned groups",
+              "description": "Assigned groups.",
               "args": [
 
               ],
@@ -21475,7 +22146,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the segment",
+              "description": "ID of the segment.",
               "args": [
 
               ],
@@ -21493,7 +22164,7 @@
             },
             {
               "name": "latestSnapshot",
-              "description": "The latest adoption metrics for the segment",
+              "description": "The latest adoption metrics for the segment.",
               "args": [
 
               ],
@@ -21507,7 +22178,7 @@
             },
             {
               "name": "name",
-              "description": "Name of the segment",
+              "description": "Name of the segment.",
               "args": [
 
               ],
@@ -21650,7 +22321,7 @@
           "fields": [
             {
               "name": "deploySucceeded",
-              "description": "At least one deployment succeeded",
+              "description": "At least one deployment succeeded.",
               "args": [
 
               ],
@@ -21668,7 +22339,7 @@
             },
             {
               "name": "endTime",
-              "description": "The end time for the snapshot where the data points were collected",
+              "description": "The end time for the snapshot where the data points were collected.",
               "args": [
 
               ],
@@ -21686,7 +22357,7 @@
             },
             {
               "name": "issueOpened",
-              "description": "At least one issue was opened",
+              "description": "At least one issue was opened.",
               "args": [
 
               ],
@@ -21704,7 +22375,7 @@
             },
             {
               "name": "mergeRequestApproved",
-              "description": "At least one merge request was approved",
+              "description": "At least one merge request was approved.",
               "args": [
 
               ],
@@ -21722,7 +22393,7 @@
             },
             {
               "name": "mergeRequestOpened",
-              "description": "At least one merge request was opened",
+              "description": "At least one merge request was opened.",
               "args": [
 
               ],
@@ -21740,7 +22411,7 @@
             },
             {
               "name": "pipelineSucceeded",
-              "description": "At least one pipeline succeeded",
+              "description": "At least one pipeline succeeded.",
               "args": [
 
               ],
@@ -21758,7 +22429,7 @@
             },
             {
               "name": "recordedAt",
-              "description": "The time the snapshot was recorded",
+              "description": "The time the snapshot was recorded.",
               "args": [
 
               ],
@@ -21776,7 +22447,7 @@
             },
             {
               "name": "runnerConfigured",
-              "description": "At least one runner was used",
+              "description": "At least one runner was used.",
               "args": [
 
               ],
@@ -21794,7 +22465,7 @@
             },
             {
               "name": "securityScanSucceeded",
-              "description": "At least one security scan succeeded",
+              "description": "At least one security scan succeeded.",
               "args": [
 
               ],
@@ -21812,7 +22483,7 @@
             },
             {
               "name": "startTime",
-              "description": "The start time for the snapshot where the data points were collected",
+              "description": "The start time for the snapshot where the data points were collected.",
               "args": [
 
               ],
@@ -24134,6 +24805,59 @@
               "deprecationReason": null
             },
             {
+              "name": "events",
+              "description": "A list of events associated with the object.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "EventConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "group",
               "description": "Group to which the epic belongs.",
               "args": [
@@ -24780,6 +25504,11 @@
               "kind": "INTERFACE",
               "name": "CurrentUserTodos",
               "ofType": null
+            },
+            {
+              "kind": "INTERFACE",
+              "name": "Eventable",
+              "ofType": null
             }
           ],
           "enumValues": null,
@@ -25292,6 +26021,128 @@
           "possibleTypes": null
         },
         {
+          "kind": "INPUT_OBJECT",
+          "name": "EpicBoardListCreateInput",
+          "description": "Autogenerated input type of EpicBoardListCreate",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "backlog",
+              "description": "Create the backlog list.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "labelId",
+              "description": "Global ID of an existing label.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "LabelID",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "boardId",
+              "description": "Global ID of the issue board to mutate.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "BoardsEpicBoardID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "EpicBoardListCreatePayload",
+          "description": "Autogenerated return type of EpicBoardListCreate",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "list",
+              "description": "Epic list in the epic board.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "EpicList",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "EpicConnection",
           "description": "The connection type for Epic.",
@@ -25365,7 +26216,7 @@
           "fields": [
             {
               "name": "closedEpics",
-              "description": "Number of closed child epics",
+              "description": "Number of closed child epics.",
               "args": [
 
               ],
@@ -25379,7 +26230,7 @@
             },
             {
               "name": "closedIssues",
-              "description": "Number of closed epic issues",
+              "description": "Number of closed epic issues.",
               "args": [
 
               ],
@@ -25393,7 +26244,7 @@
             },
             {
               "name": "openedEpics",
-              "description": "Number of opened child epics",
+              "description": "Number of opened child epics.",
               "args": [
 
               ],
@@ -25407,7 +26258,7 @@
             },
             {
               "name": "openedIssues",
-              "description": "Number of opened epic issues",
+              "description": "Number of opened epic issues.",
               "args": [
 
               ],
@@ -25434,7 +26285,7 @@
           "fields": [
             {
               "name": "closedIssues",
-              "description": "Total weight of completed (closed) issues in this epic, including epic descendants",
+              "description": "Total weight of completed (closed) issues in this epic, including epic descendants.",
               "args": [
 
               ],
@@ -25448,7 +26299,7 @@
             },
             {
               "name": "openedIssues",
-              "description": "Total weight of opened issues in this epic, including epic descendants",
+              "description": "Total weight of opened issues in this epic, including epic descendants.",
               "args": [
 
               ],
@@ -25520,7 +26371,7 @@
           "fields": [
             {
               "name": "issuesAtRisk",
-              "description": "Number of issues at risk",
+              "description": "Number of issues at risk.",
               "args": [
 
               ],
@@ -25534,7 +26385,7 @@
             },
             {
               "name": "issuesNeedingAttention",
-              "description": "Number of issues that need attention",
+              "description": "Number of issues that need attention.",
               "args": [
 
               ],
@@ -25548,7 +26399,7 @@
             },
             {
               "name": "issuesOnTrack",
-              "description": "Number of issues on track",
+              "description": "Number of issues on track.",
               "args": [
 
               ],
@@ -26014,7 +26865,7 @@
             },
             {
               "name": "epicIssueId",
-              "description": "ID of the epic-issue relation",
+              "description": "ID of the epic-issue relation.",
               "args": [
 
               ],
@@ -26074,7 +26925,7 @@
             },
             {
               "name": "id",
-              "description": "Global ID of the epic-issue relation",
+              "description": "Global ID of the epic-issue relation.",
               "args": [
 
               ],
@@ -26374,7 +27225,7 @@
             },
             {
               "name": "relationPath",
-              "description": "URI path of the epic-issue relation",
+              "description": "URI path of the epic-issue relation.",
               "args": [
 
               ],
@@ -26828,7 +27679,7 @@
             },
             {
               "name": "weight",
-              "description": "Total weight of issues collection",
+              "description": "Total weight of issues collection.",
               "args": [
 
               ],
@@ -27539,7 +28390,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The ID of the epic_issue or epic that is being moved",
+              "description": "The ID of the epic_issue or epic that is being moved.",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -27553,7 +28404,7 @@
             },
             {
               "name": "adjacentReferenceId",
-              "description": "The ID of the epic_issue or issue that the actual epic or issue is switched with",
+              "description": "The ID of the epic_issue or issue that the actual epic or issue is switched with.",
               "type": {
                 "kind": "SCALAR",
                 "name": "EpicTreeSortingID",
@@ -27563,7 +28414,7 @@
             },
             {
               "name": "relativePosition",
-              "description": "The type of the switch, after or before allowed",
+              "description": "The type of the switch, after or before allowed.",
               "type": {
                 "kind": "ENUM",
                 "name": "MoveType",
@@ -27573,7 +28424,7 @@
             },
             {
               "name": "newParentId",
-              "description": "ID of the new parent epic",
+              "description": "ID of the new parent epic.",
               "type": {
                 "kind": "SCALAR",
                 "name": "EpicID",
@@ -27720,6 +28571,385 @@
             }
           ],
           "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "Event",
+          "description": "Representing an event",
+          "fields": [
+            {
+              "name": "action",
+              "description": "Action of the event.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "EventAction",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "author",
+              "description": "Author of this event.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "User",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "createdAt",
+              "description": "When this event was created.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "ID of the event.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updatedAt",
+              "description": "When this event was updated.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "EventAction",
+          "description": "Event action",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "CREATED",
+              "description": "Created action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "UPDATED",
+              "description": "Updated action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "CLOSED",
+              "description": "Closed action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "REOPENED",
+              "description": "Reopened action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "PUSHED",
+              "description": "Pushed action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "COMMENTED",
+              "description": "Commented action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "MERGED",
+              "description": "Merged action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "JOINED",
+              "description": "Joined action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "LEFT",
+              "description": "Left action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "DESTROYED",
+              "description": "Destroyed action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "EXPIRED",
+              "description": "Expired action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "APPROVED",
+              "description": "Approved action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "ARCHIVED",
+              "description": "Archived action",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "EventConnection",
+          "description": "The connection type for Event.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "EventEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Event",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "EventEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "Event",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INTERFACE",
+          "name": "Eventable",
+          "description": null,
+          "fields": [
+            {
+              "name": "events",
+              "description": "A list of events associated with the object.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "EventConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": [
+            {
+              "kind": "OBJECT",
+              "name": "BoardEpic",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "Epic",
+              "ofType": null
+            }
+          ]
         },
         {
           "kind": "INPUT_OBJECT",
@@ -27882,7 +29112,7 @@
           "fields": [
             {
               "name": "createdAt",
-              "description": "Timestamp of when the issue was created",
+              "description": "Timestamp of when the issue was created.",
               "args": [
 
               ],
@@ -27896,7 +29126,7 @@
             },
             {
               "name": "externalTracker",
-              "description": "Type of external tracker",
+              "description": "Type of external tracker.",
               "args": [
 
               ],
@@ -27910,7 +29140,7 @@
             },
             {
               "name": "relativeReference",
-              "description": "Relative reference of the issue in the external tracker",
+              "description": "Relative reference of the issue in the external tracker.",
               "args": [
 
               ],
@@ -27924,7 +29154,7 @@
             },
             {
               "name": "status",
-              "description": "Status of the issue in the external tracker",
+              "description": "Status of the issue in the external tracker.",
               "args": [
 
               ],
@@ -27938,7 +29168,7 @@
             },
             {
               "name": "title",
-              "description": "Title of the issue in the external tracker",
+              "description": "Title of the issue in the external tracker.",
               "args": [
 
               ],
@@ -27952,7 +29182,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "Timestamp of when the issue was updated",
+              "description": "Timestamp of when the issue was updated.",
               "args": [
 
               ],
@@ -27966,7 +29196,7 @@
             },
             {
               "name": "webUrl",
-              "description": "URL to the issue in the external tracker",
+              "description": "URL to the issue in the external tracker.",
               "args": [
 
               ],
@@ -28003,7 +29233,7 @@
           "fields": [
             {
               "name": "containerRepositoriesMaxCapacity",
-              "description": "The maximum concurrency of container repository sync for this secondary node",
+              "description": "The maximum concurrency of container repository sync for this secondary node.",
               "args": [
 
               ],
@@ -28017,7 +29247,7 @@
             },
             {
               "name": "enabled",
-              "description": "Indicates whether this Geo node is enabled",
+              "description": "Indicates whether this Geo node is enabled.",
               "args": [
 
               ],
@@ -28031,7 +29261,7 @@
             },
             {
               "name": "filesMaxCapacity",
-              "description": "The maximum concurrency of LFS/attachment backfill for this secondary node",
+              "description": "The maximum concurrency of LFS/attachment backfill for this secondary node.",
               "args": [
 
               ],
@@ -28045,7 +29275,7 @@
             },
             {
               "name": "id",
-              "description": "ID of this GeoNode",
+              "description": "ID of this GeoNode.",
               "args": [
 
               ],
@@ -28063,7 +29293,7 @@
             },
             {
               "name": "internalUrl",
-              "description": "The URL defined on the primary node that secondary nodes should use to contact it",
+              "description": "The URL defined on the primary node that secondary nodes should use to contact it.",
               "args": [
 
               ],
@@ -28077,7 +29307,7 @@
             },
             {
               "name": "mergeRequestDiffRegistries",
-              "description": "Find merge request diff registries on this Geo node",
+              "description": "Find merge request diff registries on this Geo node.",
               "args": [
                 {
                   "name": "ids",
@@ -28148,7 +29378,7 @@
             },
             {
               "name": "minimumReverificationInterval",
-              "description": "The interval (in days) in which the repository verification is valid. Once expired, it will be reverified",
+              "description": "The interval (in days) in which the repository verification is valid. Once expired, it will be reverified.",
               "args": [
 
               ],
@@ -28162,7 +29392,7 @@
             },
             {
               "name": "name",
-              "description": "The unique identifier for this Geo node",
+              "description": "The unique identifier for this Geo node.",
               "args": [
 
               ],
@@ -28176,7 +29406,7 @@
             },
             {
               "name": "packageFileRegistries",
-              "description": "Package file registries of the GeoNode",
+              "description": "Package file registries of the GeoNode.",
               "args": [
                 {
                   "name": "ids",
@@ -28247,7 +29477,7 @@
             },
             {
               "name": "primary",
-              "description": "Indicates whether this Geo node is the primary",
+              "description": "Indicates whether this Geo node is the primary.",
               "args": [
 
               ],
@@ -28261,7 +29491,7 @@
             },
             {
               "name": "reposMaxCapacity",
-              "description": "The maximum concurrency of repository backfill for this secondary node",
+              "description": "The maximum concurrency of repository backfill for this secondary node.",
               "args": [
 
               ],
@@ -28275,7 +29505,7 @@
             },
             {
               "name": "selectiveSyncNamespaces",
-              "description": "The namespaces that should be synced, if `selective_sync_type` == `namespaces`",
+              "description": "The namespaces that should be synced, if `selective_sync_type` == `namespaces`.",
               "args": [
                 {
                   "name": "after",
@@ -28328,7 +29558,7 @@
             },
             {
               "name": "selectiveSyncShards",
-              "description": "The repository storages whose projects should be synced, if `selective_sync_type` == `shards`",
+              "description": "The repository storages whose projects should be synced, if `selective_sync_type` == `shards`.",
               "args": [
 
               ],
@@ -28350,7 +29580,7 @@
             },
             {
               "name": "selectiveSyncType",
-              "description": "Indicates if syncing is limited to only specific groups, or shards",
+              "description": "Indicates if syncing is limited to only specific groups, or shards.",
               "args": [
 
               ],
@@ -28364,7 +29594,7 @@
             },
             {
               "name": "snippetRepositoryRegistries",
-              "description": "Find snippet repository registries on this Geo node",
+              "description": "Find snippet repository registries on this Geo node.",
               "args": [
                 {
                   "name": "ids",
@@ -28435,7 +29665,7 @@
             },
             {
               "name": "syncObjectStorage",
-              "description": "Indicates if this secondary node will replicate blobs in Object Storage",
+              "description": "Indicates if this secondary node will replicate blobs in Object Storage.",
               "args": [
 
               ],
@@ -28449,7 +29679,7 @@
             },
             {
               "name": "terraformStateVersionRegistries",
-              "description": "Find terraform state version registries on this Geo node",
+              "description": "Find terraform state version registries on this Geo node.",
               "args": [
                 {
                   "name": "ids",
@@ -28520,7 +29750,7 @@
             },
             {
               "name": "url",
-              "description": "The user-facing URL for this Geo node",
+              "description": "The user-facing URL for this Geo node.",
               "args": [
 
               ],
@@ -28534,7 +29764,7 @@
             },
             {
               "name": "verificationMaxCapacity",
-              "description": "The maximum concurrency of repository verification for this secondary node",
+              "description": "The maximum concurrency of repository verification for this secondary node.",
               "args": [
 
               ],
@@ -28762,7 +29992,7 @@
           "fields": [
             {
               "name": "actualRepositorySizeLimit",
-              "description": "Size limit for repositories in the namespace in bytes",
+              "description": "Size limit for repositories in the namespace in bytes.",
               "args": [
 
               ],
@@ -28776,7 +30006,7 @@
             },
             {
               "name": "additionalPurchasedStorageSize",
-              "description": "Additional storage purchased for the root namespace in bytes",
+              "description": "Additional storage purchased for the root namespace in bytes.",
               "args": [
 
               ],
@@ -28908,7 +30138,7 @@
             },
             {
               "name": "codeCoverageActivities",
-              "description": "Represents the code coverage activity for this group",
+              "description": "Represents the code coverage activity for this group.",
               "args": [
                 {
                   "name": "startDate",
@@ -29051,6 +30281,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "sort",
+                  "description": "Sort container repositories by this criteria.",
+                  "type": {
+                    "kind": "ENUM",
+                    "name": "ContainerRepositorySort",
+                    "ofType": null
+                  },
+                  "defaultValue": "created_desc"
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -29119,7 +30359,7 @@
             },
             {
               "name": "containsLockedProjects",
-              "description": "Includes at least one project where the repository size exceeds the limit",
+              "description": "Includes at least one project where the repository size exceeds the limit.",
               "args": [
 
               ],
@@ -29232,7 +30472,7 @@
             },
             {
               "name": "epic",
-              "description": "Find a single epic",
+              "description": "Find a single epic.",
               "args": [
                 {
                   "name": "startDate",
@@ -29401,7 +30641,7 @@
             },
             {
               "name": "epicBoard",
-              "description": "Find a single epic board",
+              "description": "Find a single epic board.",
               "args": [
                 {
                   "name": "id",
@@ -29428,7 +30668,7 @@
             },
             {
               "name": "epicBoards",
-              "description": "Find epic boards",
+              "description": "Find epic boards.",
               "args": [
                 {
                   "name": "after",
@@ -29481,7 +30721,7 @@
             },
             {
               "name": "epics",
-              "description": "Find epics",
+              "description": "Find epics.",
               "args": [
                 {
                   "name": "startDate",
@@ -29853,7 +31093,7 @@
             },
             {
               "name": "isTemporaryStorageIncreaseEnabled",
-              "description": "Status of the temporary storage increase",
+              "description": "Status of the temporary storage increase.",
               "args": [
 
               ],
@@ -30170,7 +31410,7 @@
             },
             {
               "name": "iterations",
-              "description": "Find iterations",
+              "description": "Find iterations.",
               "args": [
                 {
                   "name": "startDate",
@@ -30952,7 +32192,7 @@
             },
             {
               "name": "repositorySizeExcessProjectCount",
-              "description": "Number of projects in the root namespace where the repository size exceeds the limit",
+              "description": "Number of projects in the root namespace where the repository size exceeds the limit.",
               "args": [
 
               ],
@@ -31026,7 +32266,7 @@
             },
             {
               "name": "stats",
-              "description": "Group statistics",
+              "description": "Group statistics.",
               "args": [
 
               ],
@@ -31040,7 +32280,7 @@
             },
             {
               "name": "storageSizeLimit",
-              "description": "Total storage limit of the root namespace in bytes",
+              "description": "Total storage limit of the root namespace in bytes.",
               "args": [
 
               ],
@@ -31068,7 +32308,7 @@
             },
             {
               "name": "temporaryStorageIncreaseEndsOn",
-              "description": "Date until the temporary storage increase is active",
+              "description": "Date until the temporary storage increase is active.",
               "args": [
 
               ],
@@ -31082,7 +32322,7 @@
             },
             {
               "name": "timelogs",
-              "description": "Time logged in issues by group members",
+              "description": "Time logged in issues by group members.",
               "args": [
                 {
                   "name": "startDate",
@@ -31179,7 +32419,7 @@
             },
             {
               "name": "totalRepositorySize",
-              "description": "Total repository size of all projects in the root namespace in bytes",
+              "description": "Total repository size of all projects in the root namespace in bytes.",
               "args": [
 
               ],
@@ -31193,7 +32433,7 @@
             },
             {
               "name": "totalRepositorySizeExcess",
-              "description": "Total excess repository size of all projects in the root namespace in bytes",
+              "description": "Total excess repository size of all projects in the root namespace in bytes.",
               "args": [
 
               ],
@@ -31253,7 +32493,7 @@
             },
             {
               "name": "vulnerabilities",
-              "description": "Vulnerabilities reported on the projects in the group and its subgroups",
+              "description": "Vulnerabilities reported on the projects in the group and its subgroups.",
               "args": [
                 {
                   "name": "projectId",
@@ -31426,7 +32666,7 @@
             },
             {
               "name": "vulnerabilitiesCountByDay",
-              "description": "Number of vulnerabilities per day for the projects in the group and its subgroups",
+              "description": "Number of vulnerabilities per day for the projects in the group and its subgroups.",
               "args": [
                 {
                   "name": "startDate",
@@ -31507,7 +32747,7 @@
             },
             {
               "name": "vulnerabilitiesCountByDayAndSeverity",
-              "description": "Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.",
+              "description": "Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.",
               "args": [
                 {
                   "name": "startDate",
@@ -31588,7 +32828,7 @@
             },
             {
               "name": "vulnerabilityGrades",
-              "description": "Represents vulnerable project counts for each grade",
+              "description": "Represents vulnerable project counts for each grade.",
               "args": [
                 {
                   "name": "includeSubgroups",
@@ -31623,7 +32863,7 @@
             },
             {
               "name": "vulnerabilityScanners",
-              "description": "Vulnerability scanners reported on the project vulnerabilities of the group and its subgroups",
+              "description": "Vulnerability scanners reported on the project vulnerabilities of the group and its subgroups.",
               "args": [
                 {
                   "name": "after",
@@ -31676,7 +32916,7 @@
             },
             {
               "name": "vulnerabilitySeveritiesCount",
-              "description": "Counts for each vulnerability severity in the group and its subgroups",
+              "description": "Counts for each vulnerability severity in the group and its subgroups.",
               "args": [
                 {
                   "name": "projectId",
@@ -32188,7 +33428,7 @@
           "fields": [
             {
               "name": "releaseStats",
-              "description": "Statistics related to releases within the group",
+              "description": "Statistics related to releases within the group.",
               "args": [
 
               ],
@@ -33133,7 +34373,7 @@
           "fields": [
             {
               "name": "description",
-              "description": "Description of the on-call schedule",
+              "description": "Description of the on-call schedule.",
               "args": [
 
               ],
@@ -33147,7 +34387,7 @@
             },
             {
               "name": "iid",
-              "description": "Internal ID of the on-call schedule",
+              "description": "Internal ID of the on-call schedule.",
               "args": [
 
               ],
@@ -33165,7 +34405,7 @@
             },
             {
               "name": "name",
-              "description": "Name of the on-call schedule",
+              "description": "Name of the on-call schedule.",
               "args": [
 
               ],
@@ -33183,7 +34423,7 @@
             },
             {
               "name": "rotations",
-              "description": "On-call rotations for the on-call schedule",
+              "description": "On-call rotations for the on-call schedule.",
               "args": [
                 {
                   "name": "after",
@@ -33240,7 +34480,7 @@
             },
             {
               "name": "timezone",
-              "description": "Time zone of the on-call schedule",
+              "description": "Time zone of the on-call schedule.",
               "args": [
 
               ],
@@ -33550,7 +34790,7 @@
           "fields": [
             {
               "name": "projects",
-              "description": "Projects selected in Instance Security Dashboard",
+              "description": "Projects selected in Instance Security Dashboard.",
               "args": [
                 {
                   "name": "after",
@@ -33607,7 +34847,7 @@
             },
             {
               "name": "vulnerabilityGrades",
-              "description": "Represents vulnerable project counts for each grade",
+              "description": "Represents vulnerable project counts for each grade.",
               "args": [
 
               ],
@@ -33633,7 +34873,7 @@
             },
             {
               "name": "vulnerabilityScanners",
-              "description": "Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard",
+              "description": "Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard.",
               "args": [
                 {
                   "name": "after",
@@ -33686,7 +34926,7 @@
             },
             {
               "name": "vulnerabilitySeveritiesCount",
-              "description": "Counts for each vulnerability severity from projects selected in Instance Security Dashboard",
+              "description": "Counts for each vulnerability severity from projects selected in Instance Security Dashboard.",
               "args": [
                 {
                   "name": "projectId",
@@ -35278,7 +36518,7 @@
             },
             {
               "name": "weight",
-              "description": "Total weight of issues collection",
+              "description": "Total weight of issues collection.",
               "args": [
 
               ],
@@ -37314,7 +38554,7 @@
           "fields": [
             {
               "name": "createdAt",
-              "description": "Timestamp of iteration creation",
+              "description": "Timestamp of iteration creation.",
               "args": [
 
               ],
@@ -37332,7 +38572,7 @@
             },
             {
               "name": "description",
-              "description": "Description of the iteration",
+              "description": "Description of the iteration.",
               "args": [
 
               ],
@@ -37360,7 +38600,7 @@
             },
             {
               "name": "dueDate",
-              "description": "Timestamp of the iteration due date",
+              "description": "Timestamp of the iteration due date.",
               "args": [
 
               ],
@@ -37374,7 +38614,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the iteration",
+              "description": "ID of the iteration.",
               "args": [
 
               ],
@@ -37392,7 +38632,7 @@
             },
             {
               "name": "iid",
-              "description": "Internal ID of the iteration",
+              "description": "Internal ID of the iteration.",
               "args": [
 
               ],
@@ -37410,7 +38650,7 @@
             },
             {
               "name": "report",
-              "description": "Historically accurate report about the timebox",
+              "description": "Historically accurate report about the timebox.",
               "args": [
 
               ],
@@ -37424,7 +38664,7 @@
             },
             {
               "name": "scopedPath",
-              "description": "Web path of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts",
+              "description": "Web path of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts.",
               "args": [
 
               ],
@@ -37438,7 +38678,7 @@
             },
             {
               "name": "scopedUrl",
-              "description": "Web URL of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts",
+              "description": "Web URL of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts.",
               "args": [
 
               ],
@@ -37452,7 +38692,7 @@
             },
             {
               "name": "startDate",
-              "description": "Timestamp of the iteration start date",
+              "description": "Timestamp of the iteration start date.",
               "args": [
 
               ],
@@ -37466,7 +38706,7 @@
             },
             {
               "name": "state",
-              "description": "State of the iteration",
+              "description": "State of the iteration.",
               "args": [
 
               ],
@@ -37484,7 +38724,7 @@
             },
             {
               "name": "title",
-              "description": "Title of the iteration",
+              "description": "Title of the iteration.",
               "args": [
 
               ],
@@ -37502,7 +38742,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "Timestamp of last iteration update",
+              "description": "Timestamp of last iteration update.",
               "args": [
 
               ],
@@ -37520,7 +38760,7 @@
             },
             {
               "name": "webPath",
-              "description": "Web path of the iteration",
+              "description": "Web path of the iteration.",
               "args": [
 
               ],
@@ -37538,7 +38778,7 @@
             },
             {
               "name": "webUrl",
-              "description": "Web URL of the iteration",
+              "description": "Web URL of the iteration.",
               "args": [
 
               ],
@@ -39745,7 +40985,7 @@
             },
             {
               "name": "approvalsLeft",
-              "description": "Number of approvals left",
+              "description": "Number of approvals left.",
               "args": [
 
               ],
@@ -39759,7 +40999,7 @@
             },
             {
               "name": "approvalsRequired",
-              "description": "Number of approvals required",
+              "description": "Number of approvals required.",
               "args": [
 
               ],
@@ -40402,6 +41642,24 @@
               "deprecationReason": null
             },
             {
+              "name": "hasSecurityReports",
+              "description": "Indicates if the source branch has any security reports.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "headPipeline",
               "description": "The pipeline running on the branch HEAD of the merge request.",
               "args": [
@@ -40580,7 +41838,7 @@
             },
             {
               "name": "mergeTrainsCount",
-              "description": "",
+              "description": "Number of merge requests in the merge train.",
               "args": [
 
               ],
@@ -41848,7 +43106,7 @@
             },
             {
               "name": "mergeRequestDiffId",
-              "description": "ID of the Merge Request diff",
+              "description": "ID of the Merge Request diff.",
               "args": [
 
               ],
@@ -43548,7 +44806,7 @@
           "fields": [
             {
               "name": "fileName",
-              "description": "File name of the metric image",
+              "description": "File name of the metric image.",
               "args": [
 
               ],
@@ -43562,7 +44820,7 @@
             },
             {
               "name": "filePath",
-              "description": "File path of the metric image",
+              "description": "File path of the metric image.",
               "args": [
 
               ],
@@ -43576,7 +44834,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the metric upload",
+              "description": "ID of the metric upload.",
               "args": [
 
               ],
@@ -43594,7 +44852,7 @@
             },
             {
               "name": "iid",
-              "description": "Internal ID of the metric upload",
+              "description": "Internal ID of the metric upload.",
               "args": [
 
               ],
@@ -43612,7 +44870,7 @@
             },
             {
               "name": "url",
-              "description": "URL of the metric source",
+              "description": "URL of the metric source.",
               "args": [
 
               ],
@@ -44078,7 +45336,7 @@
             },
             {
               "name": "report",
-              "description": "Historically accurate report about the timebox",
+              "description": "Historically accurate report about the timebox.",
               "args": [
 
               ],
@@ -45380,6 +46638,87 @@
               "deprecationReason": null
             },
             {
+              "name": "dastProfileDelete",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "DastProfileDeleteInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastProfileDeletePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "dastProfileRun",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "DastProfileRunInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastProfileRunPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "dastProfileUpdate",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "DastProfileUpdateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastProfileUpdatePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "dastScannerProfileCreate",
               "description": null,
               "args": [
@@ -46076,6 +47415,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "EpicBoardCreatePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "epicBoardListCreate",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "EpicBoardListCreateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "EpicBoardListCreatePayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -48366,7 +49732,7 @@
           "fields": [
             {
               "name": "actualRepositorySizeLimit",
-              "description": "Size limit for repositories in the namespace in bytes",
+              "description": "Size limit for repositories in the namespace in bytes.",
               "args": [
 
               ],
@@ -48380,7 +49746,7 @@
             },
             {
               "name": "additionalPurchasedStorageSize",
-              "description": "Additional storage purchased for the root namespace in bytes",
+              "description": "Additional storage purchased for the root namespace in bytes.",
               "args": [
 
               ],
@@ -48457,7 +49823,7 @@
             },
             {
               "name": "containsLockedProjects",
-              "description": "Includes at least one project where the repository size exceeds the limit",
+              "description": "Includes at least one project where the repository size exceeds the limit.",
               "args": [
 
               ],
@@ -48557,7 +49923,7 @@
             },
             {
               "name": "isTemporaryStorageIncreaseEnabled",
-              "description": "Status of the temporary storage increase",
+              "description": "Status of the temporary storage increase.",
               "args": [
 
               ],
@@ -48736,7 +50102,7 @@
             },
             {
               "name": "repositorySizeExcessProjectCount",
-              "description": "Number of projects in the root namespace where the repository size exceeds the limit",
+              "description": "Number of projects in the root namespace where the repository size exceeds the limit.",
               "args": [
 
               ],
@@ -48782,7 +50148,7 @@
             },
             {
               "name": "storageSizeLimit",
-              "description": "Total storage limit of the root namespace in bytes",
+              "description": "Total storage limit of the root namespace in bytes.",
               "args": [
 
               ],
@@ -48796,7 +50162,7 @@
             },
             {
               "name": "temporaryStorageIncreaseEndsOn",
-              "description": "Date until the temporary storage increase is active",
+              "description": "Date until the temporary storage increase is active.",
               "args": [
 
               ],
@@ -48810,7 +50176,7 @@
             },
             {
               "name": "totalRepositorySize",
-              "description": "Total repository size of all projects in the root namespace in bytes",
+              "description": "Total repository size of all projects in the root namespace in bytes.",
               "args": [
 
               ],
@@ -48824,7 +50190,7 @@
             },
             {
               "name": "totalRepositorySizeExcess",
-              "description": "Total excess repository size of all projects in the root namespace in bytes",
+              "description": "Total excess repository size of all projects in the root namespace in bytes.",
               "args": [
 
               ],
@@ -49181,7 +50547,7 @@
             },
             {
               "name": "epicId",
-              "description": "Filter by epic ID. Incompatible with epicWildcardId",
+              "description": "Filter by epic ID. Incompatible with epicWildcardId.",
               "type": {
                 "kind": "SCALAR",
                 "name": "EpicID",
@@ -49191,7 +50557,7 @@
             },
             {
               "name": "iterationTitle",
-              "description": "Filter by iteration title",
+              "description": "Filter by iteration title.",
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
@@ -49201,7 +50567,7 @@
             },
             {
               "name": "weight",
-              "description": "Filter by weight",
+              "description": "Filter by weight.",
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
@@ -51552,7 +52918,7 @@
             },
             {
               "name": "packageFileId",
-              "description": "ID of the PackageFile",
+              "description": "ID of the PackageFile.",
               "args": [
 
               ],
@@ -52047,6 +53413,12 @@
             {
               "name": "DEBIAN",
               "description": "Packages from the Debian package manager",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "RUBYGEMS",
+              "description": "Packages from the Rubygems package manager",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -52876,7 +54248,7 @@
             },
             {
               "name": "securityReportSummary",
-              "description": "Vulnerability and scanned resource counts for each security scanner of the pipeline",
+              "description": "Vulnerability and scanned resource counts for each security scanner of the pipeline.",
               "args": [
 
               ],
@@ -53950,7 +55322,7 @@
           "fields": [
             {
               "name": "actualRepositorySizeLimit",
-              "description": "Size limit for the repository in bytes",
+              "description": "Size limit for the repository in bytes.",
               "args": [
 
               ],
@@ -54260,7 +55632,7 @@
             },
             {
               "name": "alertManagementPayloadFields",
-              "description": "Extract alert fields from payload for custom mapping",
+              "description": "Extract alert fields from payload for custom mapping.",
               "args": [
                 {
                   "name": "payloadExample",
@@ -54302,6 +55674,20 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "apiFuzzingCiConfiguration",
+              "description": "API fuzzing configuration for the project. Available only when feature flag `api_fuzzing_configuration_ui` is enabled.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "ApiFuzzingCiConfiguration",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -54455,7 +55841,7 @@
             },
             {
               "name": "clusterAgent",
-              "description": "Find a single cluster agent by name",
+              "description": "Find a single cluster agent by name.",
               "args": [
                 {
                   "name": "name",
@@ -54482,7 +55868,7 @@
             },
             {
               "name": "clusterAgents",
-              "description": "Cluster agents associated with the project",
+              "description": "Cluster agents associated with the project.",
               "args": [
                 {
                   "name": "after",
@@ -54535,7 +55921,7 @@
             },
             {
               "name": "codeCoverageSummary",
-              "description": "Code coverage summary associated with the project",
+              "description": "Code coverage summary associated with the project.",
               "args": [
 
               ],
@@ -54549,7 +55935,7 @@
             },
             {
               "name": "complianceFrameworks",
-              "description": "Compliance frameworks associated with the project",
+              "description": "Compliance frameworks associated with the project.",
               "args": [
                 {
                   "name": "after",
@@ -54641,6 +56027,16 @@
                     "ofType": null
                   },
                   "defaultValue": null
+                },
+                {
+                  "name": "sort",
+                  "description": "Sort container repositories by this criteria.",
+                  "type": {
+                    "kind": "ENUM",
+                    "name": "ContainerRepositorySort",
+                    "ofType": null
+                  },
+                  "defaultValue": "created_desc"
                 },
                 {
                   "name": "after",
@@ -55262,7 +56658,7 @@
             },
             {
               "name": "incidentManagementOncallSchedules",
-              "description": "Incident Management On-call schedules of the project",
+              "description": "Incident Management On-call schedules of the project.",
               "args": [
                 {
                   "name": "after",
@@ -56072,7 +57468,7 @@
             },
             {
               "name": "iterations",
-              "description": "Find iterations",
+              "description": "Find iterations.",
               "args": [
                 {
                   "name": "startDate",
@@ -57329,7 +58725,7 @@
             },
             {
               "name": "repositorySizeExcess",
-              "description": "Size of repository that exceeds the limit in bytes",
+              "description": "Size of repository that exceeds the limit in bytes.",
               "args": [
 
               ],
@@ -57357,7 +58753,7 @@
             },
             {
               "name": "requirement",
-              "description": "Find a single requirement",
+              "description": "Find a single requirement.",
               "args": [
                 {
                   "name": "sort",
@@ -57446,7 +58842,7 @@
             },
             {
               "name": "requirementStatesCount",
-              "description": "Number of requirements for the project by their state",
+              "description": "Number of requirements for the project by their state.",
               "args": [
 
               ],
@@ -57460,7 +58856,7 @@
             },
             {
               "name": "requirements",
-              "description": "Find requirements",
+              "description": "Find requirements.",
               "args": [
                 {
                   "name": "sort",
@@ -57603,7 +58999,7 @@
             },
             {
               "name": "securityDashboardPath",
-              "description": "Path to project's security dashboard",
+              "description": "Path to project's security dashboard.",
               "args": [
 
               ],
@@ -57617,7 +59013,7 @@
             },
             {
               "name": "securityScanners",
-              "description": "Information about security analyzers used in the project",
+              "description": "Information about security analyzers used in the project.",
               "args": [
 
               ],
@@ -58086,7 +59482,7 @@
             },
             {
               "name": "vulnerabilities",
-              "description": "Vulnerabilities reported on the project",
+              "description": "Vulnerabilities reported on the project.",
               "args": [
                 {
                   "name": "projectId",
@@ -58259,7 +59655,7 @@
             },
             {
               "name": "vulnerabilitiesCountByDay",
-              "description": "Number of vulnerabilities per day for the project",
+              "description": "Number of vulnerabilities per day for the project.",
               "args": [
                 {
                   "name": "startDate",
@@ -58340,7 +59736,7 @@
             },
             {
               "name": "vulnerabilityScanners",
-              "description": "Vulnerability scanners reported on the project vulnerabilities",
+              "description": "Vulnerability scanners reported on the project vulnerabilities.",
               "args": [
                 {
                   "name": "after",
@@ -58393,7 +59789,7 @@
             },
             {
               "name": "vulnerabilitySeveritiesCount",
-              "description": "Counts for each vulnerability severity in the project",
+              "description": "Counts for each vulnerability severity in the project.",
               "args": [
                 {
                   "name": "projectId",
@@ -60514,6 +61910,20 @@
           "description": null,
           "fields": [
             {
+              "name": "ciApplicationSettings",
+              "description": "CI related settings that apply to the entire instance.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CiApplicationSettings",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "ciConfig",
               "description": "Get linted and processed contents of a CI config. Should not be requested more than once per request.",
               "args": [
@@ -60625,7 +62035,7 @@
             },
             {
               "name": "devopsAdoptionSegments",
-              "description": "Get configured DevOps adoption segments on the instance",
+              "description": "Get configured DevOps adoption segments on the instance.",
               "args": [
                 {
                   "name": "after",
@@ -60709,7 +62119,7 @@
             },
             {
               "name": "geoNode",
-              "description": "Find a Geo node",
+              "description": "Find a Geo node.",
               "args": [
                 {
                   "name": "name",
@@ -60759,7 +62169,7 @@
             },
             {
               "name": "instanceSecurityDashboard",
-              "description": "Fields related to Instance Security Dashboard",
+              "description": "Fields related to Instance Security Dashboard.",
               "args": [
 
               ],
@@ -60887,11 +62297,11 @@
             },
             {
               "name": "iteration",
-              "description": "Find an iteration",
+              "description": "Find an iteration.",
               "args": [
                 {
                   "name": "id",
-                  "description": "Find an iteration by its ID",
+                  "description": "Find an iteration by its ID.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -61534,7 +62944,7 @@
             },
             {
               "name": "vulnerabilities",
-              "description": "Vulnerabilities reported on projects on the current user's instance security dashboard",
+              "description": "Vulnerabilities reported on projects on the current user's instance security dashboard.",
               "args": [
                 {
                   "name": "projectId",
@@ -61707,7 +63117,7 @@
             },
             {
               "name": "vulnerabilitiesCountByDay",
-              "description": "Number of vulnerabilities per day for the projects on the current user's instance security dashboard",
+              "description": "Number of vulnerabilities per day for the projects on the current user's instance security dashboard.",
               "args": [
                 {
                   "name": "startDate",
@@ -61788,7 +63198,7 @@
             },
             {
               "name": "vulnerabilitiesCountByDayAndSeverity",
-              "description": "Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.",
+              "description": "Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.",
               "args": [
                 {
                   "name": "startDate",
@@ -61869,11 +63279,11 @@
             },
             {
               "name": "vulnerability",
-              "description": "Find a vulnerability",
+              "description": "Find a vulnerability.",
               "args": [
                 {
                   "name": "id",
-                  "description": "The Global ID of the Vulnerability",
+                  "description": "The Global ID of the Vulnerability.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -64204,7 +65614,7 @@
           "fields": [
             {
               "name": "author",
-              "description": "Author of the requirement",
+              "description": "Author of the requirement.",
               "args": [
 
               ],
@@ -64222,7 +65632,7 @@
             },
             {
               "name": "createdAt",
-              "description": "Timestamp of when the requirement was created",
+              "description": "Timestamp of when the requirement was created.",
               "args": [
 
               ],
@@ -64240,7 +65650,7 @@
             },
             {
               "name": "description",
-              "description": "Description of the requirement",
+              "description": "Description of the requirement.",
               "args": [
 
               ],
@@ -64268,7 +65678,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the requirement",
+              "description": "ID of the requirement.",
               "args": [
 
               ],
@@ -64286,7 +65696,7 @@
             },
             {
               "name": "iid",
-              "description": "Internal ID of the requirement",
+              "description": "Internal ID of the requirement.",
               "args": [
 
               ],
@@ -64304,7 +65714,7 @@
             },
             {
               "name": "lastTestReportManuallyCreated",
-              "description": "Indicates if latest test report was created by user",
+              "description": "Indicates if latest test report was created by user.",
               "args": [
 
               ],
@@ -64318,7 +65728,7 @@
             },
             {
               "name": "lastTestReportState",
-              "description": "Latest requirement test report state",
+              "description": "Latest requirement test report state.",
               "args": [
 
               ],
@@ -64332,7 +65742,7 @@
             },
             {
               "name": "project",
-              "description": "Project to which the requirement belongs",
+              "description": "Project to which the requirement belongs.",
               "args": [
 
               ],
@@ -64350,7 +65760,7 @@
             },
             {
               "name": "state",
-              "description": "State of the requirement",
+              "description": "State of the requirement.",
               "args": [
 
               ],
@@ -64368,7 +65778,7 @@
             },
             {
               "name": "testReports",
-              "description": "Test reports of the requirement",
+              "description": "Test reports of the requirement.",
               "args": [
                 {
                   "name": "sort",
@@ -64431,7 +65841,7 @@
             },
             {
               "name": "title",
-              "description": "Title of the requirement",
+              "description": "Title of the requirement.",
               "args": [
 
               ],
@@ -64459,7 +65869,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "Timestamp of when the requirement was last updated",
+              "description": "Timestamp of when the requirement was last updated.",
               "args": [
 
               ],
@@ -64746,7 +66156,7 @@
           "fields": [
             {
               "name": "archived",
-              "description": "Number of archived requirements",
+              "description": "Number of archived requirements.",
               "args": [
 
               ],
@@ -64760,7 +66170,7 @@
             },
             {
               "name": "opened",
-              "description": "Number of opened requirements",
+              "description": "Number of opened requirements.",
               "args": [
 
               ],
@@ -66753,7 +68163,7 @@
           "fields": [
             {
               "name": "requestMethod",
-              "description": "The HTTP request method used to access the URL",
+              "description": "The HTTP request method used to access the URL.",
               "args": [
 
               ],
@@ -66767,7 +68177,7 @@
             },
             {
               "name": "url",
-              "description": "The URL scanned by the scanner",
+              "description": "The URL scanned by the scanner.",
               "args": [
 
               ],
@@ -67017,7 +68427,7 @@
           "fields": [
             {
               "name": "scannedResources",
-              "description": "A list of the first 20 scanned resources",
+              "description": "A list of the first 20 scanned resources.",
               "args": [
                 {
                   "name": "after",
@@ -67070,7 +68480,7 @@
             },
             {
               "name": "scannedResourcesCount",
-              "description": "Total number of scanned resources",
+              "description": "Total number of scanned resources.",
               "args": [
 
               ],
@@ -67084,7 +68494,7 @@
             },
             {
               "name": "scannedResourcesCsvPath",
-              "description": "Path to download all the scanned resources in CSV format",
+              "description": "Path to download all the scanned resources in CSV format.",
               "args": [
 
               ],
@@ -67098,7 +68508,7 @@
             },
             {
               "name": "vulnerabilitiesCount",
-              "description": "Total number of vulnerabilities",
+              "description": "Total number of vulnerabilities.",
               "args": [
 
               ],
@@ -68889,217 +70299,217 @@
           "enumValues": [
             {
               "name": "ASANA_SERVICE",
-              "description": null,
+              "description": "AsanaService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "ASSEMBLA_SERVICE",
-              "description": null,
+              "description": "AssemblaService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "BAMBOO_SERVICE",
-              "description": null,
+              "description": "BambooService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "BUGZILLA_SERVICE",
-              "description": null,
+              "description": "BugzillaService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "BUILDKITE_SERVICE",
-              "description": null,
+              "description": "BuildkiteService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "CAMPFIRE_SERVICE",
-              "description": null,
+              "description": "CampfireService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "CONFLUENCE_SERVICE",
-              "description": null,
+              "description": "ConfluenceService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "CUSTOM_ISSUE_TRACKER_SERVICE",
-              "description": null,
+              "description": "CustomIssueTrackerService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "DATADOG_SERVICE",
-              "description": null,
+              "description": "DatadogService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "DISCORD_SERVICE",
-              "description": null,
+              "description": "DiscordService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "DRONE_CI_SERVICE",
-              "description": null,
+              "description": "DroneCiService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "EMAILS_ON_PUSH_SERVICE",
-              "description": null,
+              "description": "EmailsOnPushService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "EWM_SERVICE",
-              "description": null,
+              "description": "EwmService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "EXTERNAL_WIKI_SERVICE",
-              "description": null,
+              "description": "ExternalWikiService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "FLOWDOCK_SERVICE",
-              "description": null,
+              "description": "FlowdockService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "GITHUB_SERVICE",
-              "description": null,
+              "description": "GithubService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "HANGOUTS_CHAT_SERVICE",
-              "description": null,
+              "description": "HangoutsChatService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "HIPCHAT_SERVICE",
-              "description": null,
+              "description": "HipchatService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "IRKER_SERVICE",
-              "description": null,
+              "description": "IrkerService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "JENKINS_SERVICE",
-              "description": null,
+              "description": "JenkinsService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "JIRA_SERVICE",
-              "description": null,
+              "description": "JiraService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "MATTERMOST_SERVICE",
-              "description": null,
+              "description": "MattermostService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "MATTERMOST_SLASH_COMMANDS_SERVICE",
-              "description": null,
+              "description": "MattermostSlashCommandsService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "MICROSOFT_TEAMS_SERVICE",
-              "description": null,
+              "description": "MicrosoftTeamsService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "PACKAGIST_SERVICE",
-              "description": null,
+              "description": "PackagistService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "PIPELINES_EMAIL_SERVICE",
-              "description": null,
+              "description": "PipelinesEmailService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "PIVOTALTRACKER_SERVICE",
-              "description": null,
+              "description": "PivotaltrackerService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "PROMETHEUS_SERVICE",
-              "description": null,
+              "description": "PrometheusService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "PUSHOVER_SERVICE",
-              "description": null,
+              "description": "PushoverService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "REDMINE_SERVICE",
-              "description": null,
+              "description": "RedmineService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "SLACK_SERVICE",
-              "description": null,
+              "description": "SlackService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "SLACK_SLASH_COMMANDS_SERVICE",
-              "description": null,
+              "description": "SlackSlashCommandsService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "TEAMCITY_SERVICE",
-              "description": null,
+              "description": "TeamcityService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "UNIFY_CIRCUIT_SERVICE",
-              "description": null,
+              "description": "UnifyCircuitService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "WEBEX_TEAMS_SERVICE",
-              "description": null,
+              "description": "WebexTeamsService type",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "YOUTRACK_SERVICE",
-              "description": null,
+              "description": "YoutrackService type",
               "isDeprecated": false,
               "deprecationReason": null
             }
@@ -70448,7 +71858,7 @@
             },
             {
               "name": "snippetRepositoryId",
-              "description": "ID of the Snippet Repository",
+              "description": "ID of the Snippet Repository.",
               "args": [
 
               ],
@@ -71827,7 +73237,7 @@
             },
             {
               "name": "terraformStateVersionId",
-              "description": "ID of the terraform state version",
+              "description": "ID of the terraform state version.",
               "args": [
 
               ],
@@ -71970,7 +73380,7 @@
           "fields": [
             {
               "name": "author",
-              "description": "Author of the test report",
+              "description": "Author of the test report.",
               "args": [
 
               ],
@@ -71984,7 +73394,7 @@
             },
             {
               "name": "createdAt",
-              "description": "Timestamp of when the test report was created",
+              "description": "Timestamp of when the test report was created.",
               "args": [
 
               ],
@@ -72002,7 +73412,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the test report",
+              "description": "ID of the test report.",
               "args": [
 
               ],
@@ -72020,7 +73430,7 @@
             },
             {
               "name": "state",
-              "description": "State of the test report",
+              "description": "State of the test report.",
               "args": [
 
               ],
@@ -72196,7 +73606,7 @@
           "fields": [
             {
               "name": "complete",
-              "description": "Completed issues metrics",
+              "description": "Completed issues metrics.",
               "args": [
 
               ],
@@ -72210,7 +73620,7 @@
             },
             {
               "name": "incomplete",
-              "description": "Incomplete issues metrics",
+              "description": "Incomplete issues metrics.",
               "args": [
 
               ],
@@ -72224,7 +73634,7 @@
             },
             {
               "name": "total",
-              "description": "Total issues metrics",
+              "description": "Total issues metrics.",
               "args": [
 
               ],
@@ -72251,7 +73661,7 @@
           "fields": [
             {
               "name": "count",
-              "description": "The count metric",
+              "description": "The count metric.",
               "args": [
 
               ],
@@ -72269,7 +73679,7 @@
             },
             {
               "name": "weight",
-              "description": "The weight metric",
+              "description": "The weight metric.",
               "args": [
 
               ],
@@ -72300,7 +73710,7 @@
           "fields": [
             {
               "name": "burnupTimeSeries",
-              "description": "Daily scope and completed totals for burnup charts",
+              "description": "Daily scope and completed totals for burnup charts.",
               "args": [
 
               ],
@@ -72322,7 +73732,7 @@
             },
             {
               "name": "stats",
-              "description": "Represents the time report stats for the timebox",
+              "description": "Represents the time report stats for the timebox.",
               "args": [
 
               ],
@@ -72349,7 +73759,7 @@
           "fields": [
             {
               "name": "report",
-              "description": "Historically accurate report about the timebox",
+              "description": "Historically accurate report about the timebox.",
               "args": [
 
               ],
@@ -72424,7 +73834,7 @@
           "fields": [
             {
               "name": "issue",
-              "description": "The issue that logged time was added to",
+              "description": "The issue that logged time was added to.",
               "args": [
 
               ],
@@ -72438,7 +73848,7 @@
             },
             {
               "name": "note",
-              "description": "The note where the quick action to add the logged time was executed",
+              "description": "The note where the quick action to add the logged time was executed.",
               "args": [
 
               ],
@@ -72452,7 +73862,7 @@
             },
             {
               "name": "spentAt",
-              "description": "Timestamp of when the time tracked was spent at",
+              "description": "Timestamp of when the time tracked was spent at.",
               "args": [
 
               ],
@@ -72466,7 +73876,7 @@
             },
             {
               "name": "timeSpent",
-              "description": "The time spent displayed in seconds",
+              "description": "The time spent displayed in seconds.",
               "args": [
 
               ],
@@ -72484,7 +73894,7 @@
             },
             {
               "name": "user",
-              "description": "The user that logged the time",
+              "description": "The user that logged the time.",
               "args": [
 
               ],
@@ -77189,6 +78599,24 @@
               "deprecationReason": null
             },
             {
+              "name": "bot",
+              "description": "Indicates if the user is a bot.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "email",
               "description": "User email. Deprecated in 13.7: Use public_email.",
               "args": [
@@ -78370,7 +79798,7 @@
             },
             {
               "name": "date",
-              "description": "Date for the count",
+              "description": "Date for the count.",
               "args": [
 
               ],
@@ -78460,7 +79888,7 @@
             },
             {
               "name": "total",
-              "description": "Total number of vulnerabilities on a particular day",
+              "description": "Total number of vulnerabilities on a particular day.",
               "args": [
 
               ],
@@ -78509,7 +79937,7 @@
           "fields": [
             {
               "name": "count",
-              "description": "Number of vulnerabilities",
+              "description": "Number of vulnerabilities.",
               "args": [
 
               ],
@@ -78523,7 +79951,7 @@
             },
             {
               "name": "day",
-              "description": "Date for the count",
+              "description": "Date for the count.",
               "args": [
 
               ],
@@ -78537,7 +79965,7 @@
             },
             {
               "name": "severity",
-              "description": "Severity of the counted vulnerabilities",
+              "description": "Severity of the counted vulnerabilities.",
               "args": [
 
               ],
@@ -78798,7 +80226,7 @@
           "fields": [
             {
               "name": "confirmedAt",
-              "description": "Timestamp of when the vulnerability state was changed to confirmed",
+              "description": "Timestamp of when the vulnerability state was changed to confirmed.",
               "args": [
 
               ],
@@ -78826,7 +80254,7 @@
             },
             {
               "name": "description",
-              "description": "Description of the vulnerability",
+              "description": "Description of the vulnerability.",
               "args": [
 
               ],
@@ -78840,7 +80268,7 @@
             },
             {
               "name": "details",
-              "description": "Details of the vulnerability",
+              "description": "Details of the vulnerability.",
               "args": [
 
               ],
@@ -78866,7 +80294,7 @@
             },
             {
               "name": "detectedAt",
-              "description": "Timestamp of when the vulnerability was first detected",
+              "description": "Timestamp of when the vulnerability was first detected.",
               "args": [
 
               ],
@@ -78941,7 +80369,7 @@
             },
             {
               "name": "dismissedAt",
-              "description": "Timestamp of when the vulnerability state was changed to dismissed",
+              "description": "Timestamp of when the vulnerability state was changed to dismissed.",
               "args": [
 
               ],
@@ -78969,7 +80397,7 @@
             },
             {
               "name": "externalIssueLinks",
-              "description": "List of external issue links related to the vulnerability",
+              "description": "List of external issue links related to the vulnerability.",
               "args": [
                 {
                   "name": "after",
@@ -79040,7 +80468,7 @@
             },
             {
               "name": "id",
-              "description": "GraphQL ID of the vulnerability",
+              "description": "GraphQL ID of the vulnerability.",
               "args": [
 
               ],
@@ -79084,7 +80512,7 @@
             },
             {
               "name": "issueLinks",
-              "description": "List of issue links related to the vulnerability",
+              "description": "List of issue links related to the vulnerability.",
               "args": [
                 {
                   "name": "linkType",
@@ -79151,7 +80579,7 @@
             },
             {
               "name": "location",
-              "description": "Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability",
+              "description": "Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability.",
               "args": [
 
               ],
@@ -79250,7 +80678,7 @@
             },
             {
               "name": "project",
-              "description": "The project on which the vulnerability was found",
+              "description": "The project on which the vulnerability was found.",
               "args": [
 
               ],
@@ -79278,7 +80706,7 @@
             },
             {
               "name": "resolvedAt",
-              "description": "Timestamp of when the vulnerability state was changed to resolved",
+              "description": "Timestamp of when the vulnerability state was changed to resolved.",
               "args": [
 
               ],
@@ -79306,7 +80734,7 @@
             },
             {
               "name": "resolvedOnDefaultBranch",
-              "description": "Indicates whether the vulnerability is fixed on the default branch or not",
+              "description": "Indicates whether the vulnerability is fixed on the default branch or not.",
               "args": [
 
               ],
@@ -79366,7 +80794,7 @@
             },
             {
               "name": "title",
-              "description": "Title of the vulnerability",
+              "description": "Title of the vulnerability.",
               "args": [
 
               ],
@@ -79380,7 +80808,7 @@
             },
             {
               "name": "userNotesCount",
-              "description": "Number of user notes attached to the vulnerability",
+              "description": "Number of user notes attached to the vulnerability.",
               "args": [
 
               ],
@@ -79416,7 +80844,7 @@
             },
             {
               "name": "vulnerabilityPath",
-              "description": "URL to the vulnerability's details page",
+              "description": "URL to the vulnerability's details page.",
               "args": [
 
               ],
@@ -81077,7 +82505,7 @@
           "fields": [
             {
               "name": "externalIssue",
-              "description": "The external issue attached to the issue link",
+              "description": "The external issue attached to the issue link.",
               "args": [
 
               ],
@@ -81091,7 +82519,7 @@
             },
             {
               "name": "id",
-              "description": "GraphQL ID of the external issue link",
+              "description": "GraphQL ID of the external issue link.",
               "args": [
 
               ],
@@ -81109,7 +82537,7 @@
             },
             {
               "name": "linkType",
-              "description": "Type of the external issue link",
+              "description": "Type of the external issue link.",
               "args": [
 
               ],
@@ -81555,7 +82983,7 @@
           "fields": [
             {
               "name": "externalId",
-              "description": "External ID of the vulnerability identifier",
+              "description": "External ID of the vulnerability identifier.",
               "args": [
 
               ],
@@ -81569,7 +82997,7 @@
             },
             {
               "name": "externalType",
-              "description": "External type of the vulnerability identifier",
+              "description": "External type of the vulnerability identifier.",
               "args": [
 
               ],
@@ -81583,7 +83011,7 @@
             },
             {
               "name": "name",
-              "description": "Name of the vulnerability identifier",
+              "description": "Name of the vulnerability identifier.",
               "args": [
 
               ],
@@ -81597,7 +83025,7 @@
             },
             {
               "name": "url",
-              "description": "URL of the vulnerability identifier",
+              "description": "URL of the vulnerability identifier.",
               "args": [
 
               ],
@@ -81624,7 +83052,7 @@
           "fields": [
             {
               "name": "id",
-              "description": "GraphQL ID of the vulnerability",
+              "description": "GraphQL ID of the vulnerability.",
               "args": [
 
               ],
@@ -81642,7 +83070,7 @@
             },
             {
               "name": "issue",
-              "description": "The issue attached to issue link",
+              "description": "The issue attached to issue link.",
               "args": [
 
               ],
@@ -81660,7 +83088,7 @@
             },
             {
               "name": "linkType",
-              "description": "Type of the issue link",
+              "description": "Type of the issue link.",
               "args": [
 
               ],
@@ -81867,7 +83295,7 @@
           "fields": [
             {
               "name": "dependency",
-              "description": "Dependency containing the vulnerability",
+              "description": "Dependency containing the vulnerability.",
               "args": [
 
               ],
@@ -81881,7 +83309,7 @@
             },
             {
               "name": "image",
-              "description": "Name of the vulnerable container image",
+              "description": "Name of the vulnerable container image.",
               "args": [
 
               ],
@@ -81895,7 +83323,7 @@
             },
             {
               "name": "operatingSystem",
-              "description": "Operating system that runs on the vulnerable container image",
+              "description": "Operating system that runs on the vulnerable container image.",
               "args": [
 
               ],
@@ -81922,7 +83350,7 @@
           "fields": [
             {
               "name": "blobPath",
-              "description": "Blob path to the vulnerable file",
+              "description": "Blob path to the vulnerable file.",
               "args": [
 
               ],
@@ -81936,7 +83364,7 @@
             },
             {
               "name": "endLine",
-              "description": "Number of the last relevant line in the vulnerable file",
+              "description": "Number of the last relevant line in the vulnerable file.",
               "args": [
 
               ],
@@ -81950,7 +83378,7 @@
             },
             {
               "name": "file",
-              "description": "Path to the vulnerable file",
+              "description": "Path to the vulnerable file.",
               "args": [
 
               ],
@@ -81964,7 +83392,7 @@
             },
             {
               "name": "startLine",
-              "description": "Number of the first relevant line in the vulnerable file",
+              "description": "Number of the first relevant line in the vulnerable file.",
               "args": [
 
               ],
@@ -81978,7 +83406,7 @@
             },
             {
               "name": "vulnerableClass",
-              "description": "Class containing the vulnerability",
+              "description": "Class containing the vulnerability.",
               "args": [
 
               ],
@@ -81992,7 +83420,7 @@
             },
             {
               "name": "vulnerableMethod",
-              "description": "Method containing the vulnerability",
+              "description": "Method containing the vulnerability.",
               "args": [
 
               ],
@@ -82019,7 +83447,7 @@
           "fields": [
             {
               "name": "hostname",
-              "description": "Domain name of the vulnerable request",
+              "description": "Domain name of the vulnerable request.",
               "args": [
 
               ],
@@ -82033,7 +83461,7 @@
             },
             {
               "name": "param",
-              "description": "Query parameter for the URL on which the vulnerability occurred",
+              "description": "Query parameter for the URL on which the vulnerability occurred.",
               "args": [
 
               ],
@@ -82047,7 +83475,7 @@
             },
             {
               "name": "path",
-              "description": "URL path and query string of the vulnerable request",
+              "description": "URL path and query string of the vulnerable request.",
               "args": [
 
               ],
@@ -82061,7 +83489,7 @@
             },
             {
               "name": "requestMethod",
-              "description": "HTTP method of the vulnerable request",
+              "description": "HTTP method of the vulnerable request.",
               "args": [
 
               ],
@@ -82088,7 +83516,7 @@
           "fields": [
             {
               "name": "blobPath",
-              "description": "Blob path to the vulnerable file",
+              "description": "Blob path to the vulnerable file.",
               "args": [
 
               ],
@@ -82102,7 +83530,7 @@
             },
             {
               "name": "dependency",
-              "description": "Dependency containing the vulnerability",
+              "description": "Dependency containing the vulnerability.",
               "args": [
 
               ],
@@ -82116,7 +83544,7 @@
             },
             {
               "name": "file",
-              "description": "Path to the vulnerable file",
+              "description": "Path to the vulnerable file.",
               "args": [
 
               ],
@@ -82143,7 +83571,7 @@
           "fields": [
             {
               "name": "blobPath",
-              "description": "Blob path to the vulnerable file",
+              "description": "Blob path to the vulnerable file.",
               "args": [
 
               ],
@@ -82157,7 +83585,7 @@
             },
             {
               "name": "endLine",
-              "description": "Number of the last relevant line in the vulnerable file",
+              "description": "Number of the last relevant line in the vulnerable file.",
               "args": [
 
               ],
@@ -82171,7 +83599,7 @@
             },
             {
               "name": "file",
-              "description": "Path to the vulnerable file",
+              "description": "Path to the vulnerable file.",
               "args": [
 
               ],
@@ -82185,7 +83613,7 @@
             },
             {
               "name": "startLine",
-              "description": "Number of the first relevant line in the vulnerable file",
+              "description": "Number of the first relevant line in the vulnerable file.",
               "args": [
 
               ],
@@ -82199,7 +83627,7 @@
             },
             {
               "name": "vulnerableClass",
-              "description": "Class containing the vulnerability",
+              "description": "Class containing the vulnerability.",
               "args": [
 
               ],
@@ -82213,7 +83641,7 @@
             },
             {
               "name": "vulnerableMethod",
-              "description": "Method containing the vulnerability",
+              "description": "Method containing the vulnerability.",
               "args": [
 
               ],
@@ -82240,7 +83668,7 @@
           "fields": [
             {
               "name": "blobPath",
-              "description": "Blob path to the vulnerable file",
+              "description": "Blob path to the vulnerable file.",
               "args": [
 
               ],
@@ -82254,7 +83682,7 @@
             },
             {
               "name": "endLine",
-              "description": "Number of the last relevant line in the vulnerable file",
+              "description": "Number of the last relevant line in the vulnerable file.",
               "args": [
 
               ],
@@ -82268,7 +83696,7 @@
             },
             {
               "name": "file",
-              "description": "Path to the vulnerable file",
+              "description": "Path to the vulnerable file.",
               "args": [
 
               ],
@@ -82282,7 +83710,7 @@
             },
             {
               "name": "startLine",
-              "description": "Number of the first relevant line in the vulnerable file",
+              "description": "Number of the first relevant line in the vulnerable file.",
               "args": [
 
               ],
@@ -82296,7 +83724,7 @@
             },
             {
               "name": "vulnerableClass",
-              "description": "Class containing the vulnerability",
+              "description": "Class containing the vulnerability.",
               "args": [
 
               ],
@@ -82310,7 +83738,7 @@
             },
             {
               "name": "vulnerableMethod",
-              "description": "Method containing the vulnerability",
+              "description": "Method containing the vulnerability.",
               "args": [
 
               ],
@@ -82769,7 +84197,7 @@
           "fields": [
             {
               "name": "externalId",
-              "description": "External ID of the vulnerability scanner",
+              "description": "External ID of the vulnerability scanner.",
               "args": [
 
               ],
@@ -82783,7 +84211,7 @@
             },
             {
               "name": "name",
-              "description": "Name of the vulnerability scanner",
+              "description": "Name of the vulnerability scanner.",
               "args": [
 
               ],
@@ -82797,7 +84225,7 @@
             },
             {
               "name": "reportType",
-              "description": "Type of the vulnerability report",
+              "description": "Type of the vulnerability report.",
               "args": [
 
               ],
@@ -82811,7 +84239,7 @@
             },
             {
               "name": "vendor",
-              "description": "Vendor of the vulnerability scanner",
+              "description": "Vendor of the vulnerability scanner.",
               "args": [
 
               ],
@@ -83200,7 +84628,7 @@
           "fields": [
             {
               "name": "package",
-              "description": "The package associated with the vulnerable dependency",
+              "description": "The package associated with the vulnerable dependency.",
               "args": [
 
               ],
@@ -83214,7 +84642,7 @@
             },
             {
               "name": "version",
-              "description": "The version of the vulnerable dependency",
+              "description": "The version of the vulnerable dependency.",
               "args": [
 
               ],
@@ -83241,7 +84669,7 @@
           "fields": [
             {
               "name": "name",
-              "description": "The name of the vulnerable package",
+              "description": "The name of the vulnerable package.",
               "args": [
 
               ],
@@ -83268,7 +84696,7 @@
           "fields": [
             {
               "name": "count",
-              "description": "Number of projects within this grade",
+              "description": "Number of projects within this grade.",
               "args": [
 
               ],
@@ -83286,7 +84714,7 @@
             },
             {
               "name": "grade",
-              "description": "Grade based on the highest severity vulnerability present",
+              "description": "Grade based on the highest severity vulnerability present.",
               "args": [
 
               ],
@@ -83304,7 +84732,7 @@
             },
             {
               "name": "projects",
-              "description": "Projects within this grade",
+              "description": "Projects within this grade.",
               "args": [
                 {
                   "name": "after",

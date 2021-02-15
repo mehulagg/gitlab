@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
 import {
   GlTable,
   GlEmptyState,
@@ -10,13 +9,14 @@ import {
   GlLink,
   GlToggle,
 } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 import EnvironmentPicker from './environment_picker.vue';
 import NetworkPolicyEditor from './network_policy_editor.vue';
-import PolicyDrawer from './policy_editor/policy_drawer.vue';
 import { CiliumNetworkPolicyKind } from './policy_editor/constants';
+import PolicyDrawer from './policy_editor/policy_drawer.vue';
 
 export default {
   components: {

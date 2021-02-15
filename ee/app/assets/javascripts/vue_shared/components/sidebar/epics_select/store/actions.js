@@ -1,12 +1,12 @@
 import Api from 'ee/api';
 import { noneEpic } from 'ee/vue_shared/constants';
+import boardsStore from '~/boards/stores/boards_store';
 import { deprecatedCreateFlash as flash } from '~/flash';
-import { s__, __ } from '~/locale';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { formatDate, timeFor } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
 
-import boardsStore from '~/boards/stores/boards_store';
 import * as types from './mutation_types';
 
 export const setInitialData = ({ commit }, data) => commit(types.SET_INITIAL_DATA, data);
@@ -125,6 +125,11 @@ export const assignIssueToEpic = ({ state, dispatch }, epic) => {
         data,
         epic,
       });
+    })
+    .catch((error) => {
+      // Handle specific format "#ID cannot be added: reason"
+      const message = error.response.data.message.split(':')[1].trim();
+      dispatch('receiveIssueUpdateFailure', message);
     })
     .catch(() => {
       // Shows flash error for Epic change failure

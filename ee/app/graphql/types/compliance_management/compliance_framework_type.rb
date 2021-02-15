@@ -9,19 +9,19 @@ module Types
 
       field :id, GraphQL::ID_TYPE,
             null: false,
-            description: 'Compliance framework ID'
+            description: 'Compliance framework ID.'
 
       field :name, GraphQL::STRING_TYPE,
             null: false,
-            description: 'Name of the compliance framework'
+            description: 'Name of the compliance framework.'
 
       field :description, GraphQL::STRING_TYPE,
             null: false,
-            description: 'Description of the compliance framework'
+            description: 'Description of the compliance framework.'
 
       field :color, GraphQL::STRING_TYPE,
             null: false,
-            description: 'Hexadecimal representation of compliance framework\'s label color'
+            description: 'Hexadecimal representation of compliance framework\'s label color.'
 
       field :pipeline_configuration_full_path, GraphQL::STRING_TYPE,
             null: true,

@@ -1,14 +1,14 @@
 import { shallowMount } from '@vue/test-utils';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import EpicsListEmpty from 'ee/roadmap/components/epics_list_empty.vue';
-import { mockTimeframeInitialDate, mockSvgPath } from 'ee_jest/roadmap/mock_data';
 import { PRESET_TYPES } from 'ee/roadmap/constants';
-import { TEST_HOST } from 'helpers/test_constants';
 import {
   getTimeframeForQuartersView,
   getTimeframeForWeeksView,
   getTimeframeForMonthsView,
 } from 'ee/roadmap/utils/roadmap_utils';
+import { mockTimeframeInitialDate, mockSvgPath } from 'ee_jest/roadmap/mock_data';
+import { TEST_HOST } from 'helpers/test_constants';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const TEST_EPICS_PATH = '/epics';
 const TEST_NEW_EPIC_PATH = '/epics/new';

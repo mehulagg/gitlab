@@ -20,6 +20,7 @@ export default () => {
     threatMonitoringPath,
     policy,
     projectPath,
+    projectId,
     environmentId,
   } = el.dataset;
 
@@ -35,7 +36,7 @@ export default () => {
     store.dispatch('threatMonitoring/setCurrentEnvironmentId', parseInt(environmentId, 10));
   }
 
-  const props = { threatMonitoringPath };
+  const props = { threatMonitoringPath, projectId };
   if (policy) {
     props.existingPolicy = JSON.parse(policy);
   }

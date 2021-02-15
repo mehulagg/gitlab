@@ -1,7 +1,7 @@
 import { debounce } from 'lodash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as Flash } from '~/flash';
 
 const USERNAME_SUGGEST_DEBOUNCE_TIME = 300;
 

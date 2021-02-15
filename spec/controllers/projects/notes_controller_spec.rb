@@ -315,7 +315,7 @@ RSpec.describe Projects::NotesController do
     let(:note_text) { 'some note' }
     let(:request_params) do
       {
-        note: { note: note_text, noteable_id: merge_request.id, noteable_type: 'MergeRequest' },
+        note: { note: note_text, noteable_id: merge_request.id, noteable_type: 'MergeRequest' }.merge(extra_note_params),
         namespace_id: project.namespace,
         project_id: project,
         merge_request_diff_head_sha: 'sha',
@@ -325,6 +325,7 @@ RSpec.describe Projects::NotesController do
     end
 
     let(:extra_request_params) { {} }
+    let(:extra_note_params) { {} }
 
     let(:project_visibility) { Gitlab::VisibilityLevel::PUBLIC }
     let(:merge_requests_access_level) { ProjectFeature::ENABLED }
@@ -420,6 +421,41 @@ RSpec.describe Projects::NotesController do
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response).to have_key 'discussion'
           expect(json_response.dig('discussion', 'notes', 0, 'note')).to eq(request_params[:note][:note])
+        end
+      end
+
+      context 'when creating a confidential note' do
+        let(:extra_request_params) { { format: :json } }
+
+        context 'when `confidential` parameter is not provided' do
+          it 'sets `confidential` to `false` in JSON response' do
+            create!
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['confidential']).to be false
+          end
+        end
+
+        context 'when `confidential` parameter is `false`' do
+          let(:extra_note_params) { { confidential: false } }
+
+          it 'sets `confidential` to `false` in JSON response' do
+            create!
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['confidential']).to be false
+          end
+        end
+
+        context 'when `confidential` parameter is `true`' do
+          let(:extra_note_params) { { confidential: true } }
+
+          it 'sets `confidential` to `true` in JSON response' do
+            create!
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['confidential']).to be true
+          end
         end
       end
 
@@ -725,6 +761,51 @@ RSpec.describe Projects::NotesController do
         it 'does not create a new note' do
           expect { post :create, params: request_params }.not_to change { Note.count }
         end
+      end
+    end
+
+    context 'when the endpoint receives requests above the limit' do
+      before do
+        stub_application_setting(notes_create_limit: 3)
+      end
+
+      it 'prevents from creating more notes', :request_store do
+        3.times { create! }
+
+        expect { create! }
+          .to change { Gitlab::GitalyClient.get_request_count }.by(0)
+
+        create!
+        expect(response.body).to eq(_('This endpoint has been requested too many times. Try again later.'))
+        expect(response).to have_gitlab_http_status(:too_many_requests)
+      end
+
+      it 'logs the event in auth.log' do
+        attributes = {
+          message: 'Application_Rate_Limiter_Request',
+          env: :notes_create_request_limit,
+          remote_ip: '0.0.0.0',
+          request_method: 'POST',
+          path: "/#{project.full_path}/notes",
+          user_id: user.id,
+          username: user.username
+        }
+
+        expect(Gitlab::AuthLogger).to receive(:error).with(attributes).once
+
+        project.add_developer(user)
+        sign_in(user)
+
+        4.times { create! }
+      end
+
+      it 'allows user in allow-list to create notes, even if the case is different' do
+        user.update_attribute(:username, user.username.titleize)
+        stub_application_setting(notes_create_limit_allowlist: ["#{user.username.downcase}"])
+        3.times { create! }
+
+        create!
+        expect(response).to have_gitlab_http_status(:found)
       end
     end
   end

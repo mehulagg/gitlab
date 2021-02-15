@@ -150,12 +150,22 @@ RSpec.describe JiraService do
       end
 
       it 'creates issue in Jira API' do
-        issue = jira_service.create_issue("Special Summary!?", "*ID*: 2\n_Issue_: !")
+        issue = jira_service.create_issue("Special Summary!?", "*ID*: 2\n_Issue_: !", build(:user))
 
         expect(WebMock).to have_requested(:post, 'http://jira.example.com/rest/api/2/issue').with(
           body: { fields: { project: { id: '11223' }, issuetype: { id: '10001' }, summary: 'Special Summary!?', description: "*ID*: 2\n_Issue_: !" } }.to_json
         ).once
         expect(issue.id).to eq('10000')
+      end
+
+      it 'tracks usage' do
+        user = build_stubbed(:user)
+
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+          .to receive(:track_event)
+          .with('i_ecosystem_jira_service_create_issue', values: user.id)
+
+        jira_service.create_issue('x', 'y', user)
       end
     end
 
@@ -167,7 +177,7 @@ RSpec.describe JiraService do
       end
 
       it 'returns issue with errors' do
-        issue = jira_service.create_issue('', "*ID*: 2\n_Issue_: !")
+        issue = jira_service.create_issue('', "*ID*: 2\n_Issue_: !", build(:user))
 
         expect(WebMock).to have_requested(:post, 'http://jira.example.com/rest/api/2/issue').with(
           body: { fields: { project: { id: '11223' }, issuetype: { id: '10001' }, summary: '', description: "*ID*: 2\n_Issue_: !" } }.to_json

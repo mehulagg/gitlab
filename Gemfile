@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 
 gem 'rails', '~> 6.0.3.1'
@@ -293,7 +295,7 @@ gem 'gon', '~> 6.2'
 gem 'request_store', '~> 1.5'
 gem 'base32', '~> 0.3.0'
 
-gem "gitlab-license", "~> 1.0"
+gem "gitlab-license", "~> 1.3"
 
 # Protect against bruteforcing
 gem 'rack-attack', '~> 6.3.0'
@@ -345,7 +347,7 @@ group :development do
   gem 'better_errors', '~> 2.7.1'
 
   # thin instead webrick
-  gem 'thin', '~> 1.7.0'
+  gem 'thin', '~> 1.8.0'
 end
 
 group :development, :test do
@@ -464,7 +466,7 @@ group :ed25519 do
 end
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.8.0.pre.rc3'
+gem 'gitaly', '~> 13.9.0.pre.rc1'
 
 gem 'grpc', '~> 1.30.2'
 
@@ -519,3 +521,5 @@ gem 'webauthn', '~> 2.3'
 
 # IPAddress utilities
 gem 'ipaddress', '~> 0.8.3'
+
+gem 'parslet', '~> 1.8'

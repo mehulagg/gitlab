@@ -13,6 +13,7 @@ This document outlines the style guide for the GitLab [GraphQL API](../api/graph
 <!-- vale gitlab.Spelling = NO -->
 We use the [GraphQL Ruby gem](https://graphql-ruby.org/) written by [Robert Mosolgo](https://github.com/rmosolgo/).
 <!-- vale gitlab.Spelling = YES -->
+In addition, we have a subscription to [GraphQL Pro](https://www.graphql.pro). For details see [GraphQL Pro subscription](graphql_guide/graphql_pro.md).
 
 All GraphQL queries are directed to a single endpoint
 ([`app/controllers/graphql_controller.rb#execute`](https://gitlab.com/gitlab-org/gitlab/blob/master/app%2Fcontrollers%2Fgraphql_controller.rb)),
@@ -66,6 +67,10 @@ Complexity is explained [on our client-facing API page](../api/graphql/index.md#
 
 Fields default to adding `1` to a query's complexity score, but developers can
 [specify a custom complexity](#field-complexity) when defining a field.
+
+To estimate the complexity of a query, you can run the
+[`gitlab:graphql:analyze`](rake_tasks.md#analyze-graphql-queries)
+Rake task.
 
 ### Request timeout
 

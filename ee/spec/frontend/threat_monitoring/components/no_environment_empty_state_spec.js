@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlEmptyState, GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import {
   EMPTY_STATE_DESCRIPTION,
   NO_ENVIRONMENT_TITLE,

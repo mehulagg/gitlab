@@ -48,6 +48,7 @@ export default {
       data: 'valueStreams',
       selectedValueStream: 'selectedValueStream',
       initialFormErrors: 'createValueStreamErrors',
+      defaultStageConfig: 'defaultStageConfig',
     }),
     hasValueStreams() {
       return Boolean(this.data.length);
@@ -127,6 +128,7 @@ export default {
     <value-stream-form
       :initial-form-errors="initialFormErrors"
       :has-extended-form-fields="hasExtendedFormFields"
+      :default-stage-config="defaultStageConfig"
     />
     <gl-modal
       data-testid="delete-value-stream-modal"

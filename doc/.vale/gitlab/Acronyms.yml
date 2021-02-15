@@ -93,7 +93,6 @@ exceptions:
   - NFS
   - NGINX
   - NOTE
-  - NPM
   - NTP
   - ONLY
   - OWASP
@@ -143,6 +142,7 @@ exceptions:
   - SVG
   - SVN
   - TCP
+  - TIFF
   - TIP
   - TLD
   - TLS

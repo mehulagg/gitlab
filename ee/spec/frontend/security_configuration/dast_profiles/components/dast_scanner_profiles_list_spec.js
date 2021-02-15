@@ -1,7 +1,7 @@
 import { mount, shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
-import Component from 'ee/security_configuration/dast_profiles/components/dast_scanner_profiles_list.vue';
 import ProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
+import Component from 'ee/security_configuration/dast_profiles/components/dast_scanner_profiles_list.vue';
 import { scannerProfiles } from '../mocks/mock_data';
 
 describe('EE - DastScannerProfileList', () => {

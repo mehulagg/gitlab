@@ -127,6 +127,10 @@ RSpec.describe Projects::IssuesController do
             expect(issue.confidential).to be false
           end
 
+          it 'does not show an error message' do
+            expect(flash[:alert]).to be_nil
+          end
+
           context 'when vulnerability already has a linked issue' do
             render_views
 

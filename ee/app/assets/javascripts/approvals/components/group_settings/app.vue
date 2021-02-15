@@ -1,8 +1,8 @@
 <script>
 import { GlSprintf, GlLink } from '@gitlab/ui';
-import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { __ } from '~/locale';
+import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
 import ApprovalSettings from '../approval_settings.vue';
 
 export default {

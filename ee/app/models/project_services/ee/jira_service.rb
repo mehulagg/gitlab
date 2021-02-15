@@ -53,7 +53,7 @@ module EE
       "#{url}/secure/CreateIssueDetails!init.jspa?pid=#{jira_project_id}&issuetype=#{vulnerabilities_issuetype}&summary=#{escaped_summary}&description=#{escaped_description}"[0..MAX_URL_LENGTH]
     end
 
-    def create_issue(summary, description)
+    def create_issue(summary, description, current_user)
       return if client_url.blank?
 
       jira_request do
@@ -66,6 +66,7 @@ module EE
             description: description
           }
         )
+        log_usage(:create_issue, current_user)
         issue
       end
     end

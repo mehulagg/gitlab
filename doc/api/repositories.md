@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, api
 ---
 
-# Repositories API **(CORE)**
+# Repositories API **(FREE)**
 
 ## List repository tree
 
@@ -309,13 +309,36 @@ Supported attributes:
 | Attribute | Type     | Required   | Description |
 | :-------- | :------- | :--------- | :---------- |
 | `version` | string   | yes | The version to generate the changelog for. The format must follow [semantic versioning](https://semver.org/). |
-| `from`    | string   | yes | The start of the range of commits (as a SHA) to use for generating the changelog. This commit itself isn't included in the list. |
+| `from`    | string   | no | The start of the range of commits (as a SHA) to use for generating the changelog. This commit itself isn't included in the list. |
 | `to`      | string   | yes | The end of the range of commits (as a SHA) to use for the changelog. This commit _is_ included in the list. |
 | `date`    | datetime | no | The date and time of the release, defaults to the current time. |
 | `branch`  | string   | no | The branch to commit the changelog changes to, defaults to the project's default branch. |
 | `trailer` | string   | no | The Git trailer to use for including commits, defaults to `Changelog`. |
 | `file`    | string   | no | The file to commit the changes to, defaults to `CHANGELOG.md`. |
 | `message` | string   | no | The commit message to produce when committing the changes, defaults to `Add changelog for version X` where X is the value of the `version` argument. |
+
+If the `from` attribute is unspecified, GitLab uses the Git tag of the last
+version that came before the version specified in the `version` attribute. For
+this to work, your project must create Git tags for versions using the
+following format:
+
+```plaintext
+vX.Y.Z
+```
+
+Where `X.Y.Z` is a version that follows semantic versioning. For example,
+consider a project with the following tags:
+
+- v1.0.0
+- v1.1.0
+- v2.0.0
+
+If the `version` attribute is `2.1.0`, GitLab uses tag v2.0.0. And when the
+version is `1.1.1`, or `1.2.0`, GitLab uses tag v1.1.0.
+
+If `from` is unspecified and no tag to use is found, the API produces an error.
+To solve such an error, you must explicitly specify a value for the `from`
+attribute.
 
 ### How it works
 
@@ -410,6 +433,7 @@ follows:
 - [{{ title }}]({{ commit.reference }})\
 {% if author.contributor %} by {{ author.reference }}{% end %}\
 {% if merge_request %} ([merge request]({{ merge_request.reference }})){% end %}
+
 {% end %}
 
 {% end %}
@@ -457,11 +481,40 @@ If a line ends in a backslash, the next newline is ignored. This allows you to
 wrap code across multiple lines, without introducing unnecessary newlines in the
 Markdown output.
 
+Tags that use `{%` and `%}` (known as expression tags) consume the newline that
+directly follows them, if any. This means that this:
+
+```plaintext
+---
+{% if foo %}
+bar
+{% end %}
+---
+```
+
+Compiles into this:
+
+```plaintext
+---
+bar
+---
+```
+
+Instead of this:
+
+```plaintext
+---
+
+bar
+
+---
+```
+
 You can specify a custom template in your configuration like so:
 
 ```yaml
 ---
-template: >
+template: |
   {% if categories %}
   {% each categories %}
   ### {{ title }}
@@ -469,6 +522,7 @@ template: >
   {% each entries %}
   - [{{ title }}]({{ commit.reference }})\
   {% if author.contributor %} by {{ author.reference }}{% end %}
+
   {% end %}
 
   {% end %}
@@ -476,6 +530,9 @@ template: >
   No changes.
   {% end %}
 ```
+
+Note that when specifying the template you should use `template: |` and not
+`template: >`, as the latter doesn't preserve newlines in the template.
 
 ### Template data
 

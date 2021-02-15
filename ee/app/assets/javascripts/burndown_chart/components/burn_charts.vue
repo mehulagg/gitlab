@@ -1,18 +1,18 @@
 <script>
 import { GlAlert, GlButton, GlButtonGroup, GlSprintf } from '@gitlab/ui';
 import dateFormat from 'dateformat';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { __ } from '~/locale';
-import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
+import { __ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import BurndownChartData from '../burn_chart_data';
 import { Namespace } from '../constants';
 import BurnupQuery from '../graphql/burnup.query.graphql';
-import BurndownChartData from '../burn_chart_data';
 import BurndownChart from './burndown_chart.vue';
 import BurnupChart from './burnup_chart.vue';
-import TimeboxSummaryCards from './timebox_summary_cards.vue';
 import OpenTimeboxSummary from './open_timebox_summary.vue';
+import TimeboxSummaryCards from './timebox_summary_cards.vue';
 
 export default {
   components: {
@@ -369,6 +369,7 @@ export default {
         :open-issues-count="issuesCount"
         :open-issues-weight="issuesWeight"
         :issues-selected="issuesSelected"
+        :loading="loading"
         class="col-md-6"
       />
       <burnup-chart
@@ -376,6 +377,7 @@ export default {
         :due-date="dueDate"
         :burnup-data="burnupData"
         :issues-selected="issuesSelected"
+        :loading="loading"
         class="col-md-6"
       />
     </div>

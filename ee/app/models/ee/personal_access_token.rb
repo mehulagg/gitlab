@@ -47,8 +47,7 @@ module EE
       end
 
       def enforce_pat_expiration_feature_available?
-        License.feature_available?(:enforce_pat_expiration) &&
-          ::Feature.enabled?(:enforce_pat_expiration, type: :licensed, default_enabled: false)
+        License.feature_available?(:enforce_personal_access_token_expiration)
       end
     end
 
