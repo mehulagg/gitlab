@@ -92,7 +92,7 @@ When running Gitaly on its own server, note the following regarding GitLab versi
   for Git repository data, except for the
   [Elasticsearch indexer](https://gitlab.com/gitlab-org/gitlab-elasticsearch-indexer).
 - From GitLab 11.8, the Elasticsearch indexer also uses Gitaly for data access. NFS can still be
-  leveraged for redundancy on block-level Git data, but has to be mounted only on the Gitaly
+  leveraged for redundancy on block-level Git data, should be mounted only on the Gitaly
   servers.
 - From GitLab 11.8 to 12.2, it is possible to use Elasticsearch in a Gitaly setup that doesn't use
   NFS. To use Elasticsearch in these versions, the
