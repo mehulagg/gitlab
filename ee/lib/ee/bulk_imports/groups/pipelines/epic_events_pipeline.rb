@@ -4,11 +4,11 @@ module EE
   module BulkImports
     module Groups
       module Pipelines
-        class EpicAwardEmojiPipeline
+        class EpicEventsPipeline
           include ::BulkImports::Pipeline
 
           extractor ::BulkImports::Common::Extractors::GraphqlExtractor,
-            query: EE::BulkImports::Groups::Graphql::GetEpicAwardEmojiQuery
+            query: EE::BulkImports::Groups::Graphql::GetEpicEventsQuery
 
           transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
           transformer ::BulkImports::Common::Transformers::UserReferencesTransformer

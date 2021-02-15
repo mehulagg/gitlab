@@ -3,7 +3,7 @@
 module BulkImports
   module Common
     module Transformers
-      class AwardEmojiTransformer
+      class UserReferencesTransformer
         def initialize(*args); end
 
         def transform(context, data)
