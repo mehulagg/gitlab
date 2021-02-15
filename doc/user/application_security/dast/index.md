@@ -43,12 +43,25 @@ To enable GitLab DAST, either:
 
 - Enable [Auto DAST](../../../topics/autodevops/stages.md#auto-dast), provided by
   [Auto DevOps](../../../topics/autodevops/index.md).
-- [Include the GitLab DAST CI job](#configuration) in your existing `.gitlab-ci.yml` file.
+- [Include a GitLab DAST template](#gitlab-dast-ci-template) in your existing `.gitlab-ci.yml` file.
 
-### Include the standard GitLab DAST CI template
+### GitLab DAST CI template
 
-The GitLab DAST job is defined in the [DAST template]([`DAST.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST.gitlab-ci.yml))
-provided with GitLab.
+The GitLab DAST job is defined in a CI/CD template. The following templates are available:
+
+- [`DAST.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST.gitlab-ci.yml):
+  Stable version of the DAST CI/CD template.
+- [`DAST.latest.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/DAST.latest.gitlab-ci.yml):
+  Latest version of the DAST template. ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/254325)
+  in GitLab 13.8). Please note that the latest version may include breaking changes. Check the
+  [DAST troubleshooting guide](#troubleshooting) if you experience problems.
+
+See the CI [docs](../../../development/cicd/templates.md#latest-version)
+on template versioning for more information.
+
+Use the stable template unless you need a feature provided only in the latest template.
+
+#### Include the GitLab DAST template
 
 The method of including the GitLab DAST job as part of your pipeline depends on the GitLab version:
 
@@ -67,19 +80,7 @@ The method of including the GitLab DAST job as part of your pipeline depends on 
 
 - In GitLab 11.8 and earlier, copy the template's content into your `.gitlab_ci.yml` file.
 
-### Include the latest GitLab DAST CI template
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/254325) in GitLab 13.8
-
-To use the latest version of the DAST template, include
-`DAST.latest.gitlab-ci.yml` instead of `DAST.gitlab-ci.yml`.
-See the CI [docs](../../../development/cicd/templates.md#latest-version)
-on template versioning for more information.
-
-Please note that the latest version may include breaking changes. Check the
-[DAST troubleshooting guide](#troubleshooting) if you experience problems.
-
-### Template options
+#### Template options
 
 There are two ways to define the URL to be scanned by DAST:
 
