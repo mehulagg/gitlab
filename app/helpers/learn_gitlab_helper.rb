@@ -15,7 +15,8 @@ module LearnGitlabHelper
       [
         action,
         url: url,
-        completed: attributes[OnboardingProgress.column_name(action)].present?
+        completed: attributes[OnboardingProgress.column_name(action)].present?,
+        svg: image_path("learn_gitlab/#{action}.svg")
       ]
     end.to_h
   end
