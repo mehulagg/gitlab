@@ -1029,11 +1029,13 @@ RSpec.describe License do
 
       with_them do
         let(:plan) { gl_plan }
-        let!(:license) do
-          create_current_license(plan: plan, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month)
+        let(:license) do
+          create(:license, plan: plan, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month)
         end
 
         before do
+          license
+
           create(:group_member, :guest)
           create(:group_member, :reporter)
 
