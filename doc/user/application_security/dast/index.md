@@ -780,6 +780,7 @@ The on-demand DAST scan runs and the project's dashboard shows the results.
 To list saved on-demand scans:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Select **Manage** in the **DAST Profiles** row.
 1. Select the **Saved Scans** tab.
 
 The list of saved scans is shown.
