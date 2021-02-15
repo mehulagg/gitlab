@@ -54,13 +54,15 @@ export default {
       },
       deep: true,
     },
-    list: {
-      deep: true,
-      handler() {
-        if (this.list.highlighted) {
-          this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    'list.highlighted': {
+      handler(highlighted) {
+        if (highlighted) {
+          this.$nextTick(() => {
+            this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
         }
       },
+      immediate: true,
     },
   },
   mounted() {
@@ -106,7 +108,7 @@ export default {
   >
     <div
       class="board-inner gl-display-flex gl-flex-direction-column gl-relative gl-h-full gl-rounded-base"
-      :class="{ 'gl-shadow-blue-200-x0-y0-b4-s2 gl-bg-blue-50': list.highlighted }"
+      :class="{ 'board-column-highlighted': list.highlighted }"
     >
       <board-list-header :can-admin-list="canAdminList" :list="list" :disabled="disabled" />
       <board-list ref="board-list" :disabled="disabled" :issues="listIssues" :list="list" />

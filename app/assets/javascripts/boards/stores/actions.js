@@ -1,7 +1,7 @@
 import { pick } from 'lodash';
 
 import boardListsQuery from 'ee_else_ce/boards/graphql/board_lists.query.graphql';
-import { BoardType, ListType, inactiveId } from '~/boards/constants';
+import { BoardType, ListType, inactiveId, flashAnimationDuration } from '~/boards/constants';
 import createFlash from '~/flash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
@@ -110,6 +110,14 @@ export default {
       .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
   },
 
+  highlightList: ({ commit }, listId) => {
+    commit(types.ADD_LIST_TO_HIGHLIGHTED_LISTS, listId);
+
+    setTimeout(() => {
+      commit(types.REMOVE_LIST_FROM_HIGHLIGHTED_LISTS, listId);
+    }, flashAnimationDuration);
+  },
+
   createList: (
     { state, commit, dispatch, getters },
     { backlog, labelId, milestoneId, assigneeId },
@@ -140,6 +148,7 @@ export default {
         } else {
           const list = data.boardListCreate?.list;
           dispatch('addList', list);
+          dispatch('highlightList', list.id);
         }
       })
       .catch(() => commit(types.CREATE_LIST_FAILURE));
@@ -544,14 +553,6 @@ export default {
 
   setAddColumnFormVisibility: ({ state }, visible) => {
     state.addColumnFormVisible = visible;
-  },
-
-  highlightList: ({ state }, listId) => {
-    state.boardLists[listId].highlighted = true;
-
-    setTimeout(() => {
-      state.boardLists[listId].highlighted = false;
-    }, 4000);
   },
 
   setSelectedProject: ({ commit }, project) => {
