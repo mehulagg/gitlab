@@ -76,7 +76,7 @@ describe('Board Column Component', () => {
 
       await nextTick();
 
-      expect(wrapper.vm.$el.scrollIntoView).toHaveBeenCalled();
+      expect(wrapper.element.scrollIntoView).toHaveBeenCalled();
     });
   });
 });

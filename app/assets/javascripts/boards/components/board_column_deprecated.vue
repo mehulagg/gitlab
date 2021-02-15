@@ -54,15 +54,14 @@ export default {
       },
       deep: true,
     },
-    list: {
-      handler() {
-        if (this.list.highlighted) {
+    'list.highlighted': {
+      handler(highlighted) {
+        if (highlighted) {
           this.$nextTick(() => {
             this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           });
         }
       },
-      deep: true,
       immediate: true,
     },
   },

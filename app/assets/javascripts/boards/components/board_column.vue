@@ -52,8 +52,8 @@ export default {
       immediate: true,
     },
     highlighted: {
-      handler() {
-        if (this.highlighted) {
+      handler(highlighted) {
+        if (highlighted) {
           this.$nextTick(() => {
             this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           });

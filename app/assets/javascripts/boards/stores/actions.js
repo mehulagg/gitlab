@@ -110,7 +110,7 @@ export default {
       .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
   },
 
-  highlightList: ({ state, commit }, listId) => {
+  highlightList: ({ commit }, listId) => {
     commit(types.ADD_LIST_TO_HIGHLIGHTED_LISTS, listId);
 
     setTimeout(() => {
