@@ -34,3 +34,8 @@ pre-push:
       files: git diff --name-only $(git merge-base origin/master HEAD)..HEAD
       glob: "doc/*.md"
       run: if command -v vale 2> /dev/null; then vale --config .vale.ini --minAlertLevel error {files}; else echo "Vale not found. Install Vale"; fi
+    graphql_schema:
+      tags: backend style
+      files: git diff --name-only $(git merge-base origin/master HEAD)..HEAD
+      glob: "*.rb"
+      run: bundle exec rake gitlab:graphql:check_schema
