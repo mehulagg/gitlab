@@ -171,11 +171,13 @@ export default {
             <slot name="actions" :profile="item"></slot>
 
             <gl-dropdown
+              v-gl-tooltip
               class="gl-display-none gl-md-display-inline-flex!"
               toggle-class="gl-border-0! gl-shadow-none!"
               no-caret
               right
               category="tertiary"
+              :title="__('More actions')"
             >
               <template #button-content>
                 <gl-icon name="ellipsis_v" />
