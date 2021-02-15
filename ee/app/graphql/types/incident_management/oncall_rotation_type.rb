@@ -33,15 +33,10 @@ module Types
             null: true,
             description: 'Unit of the on-call rotation length.'
 
-      field :active_period_start,
-            GraphQL::STRING_TYPE,
+      field :active_period,
+            Types::IncidentManagement::OncallRotationActivePeriodType,
             null: true,
-            description: 'Active period start time for the on-call rotation.'
-
-      field :active_period_end,
-            GraphQL::STRING_TYPE,
-            null: true,
-            description: 'Active period end time for the on-call rotation.'
+            description: 'Active period for the on-call rotation.'
 
       field :participants,
             ::Types::IncidentManagement::OncallParticipantType.connection_type,

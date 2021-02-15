@@ -34199,28 +34199,14 @@
           "description": "Describes an incident management on-call rotation",
           "fields": [
             {
-              "name": "activePeriodEnd",
-              "description": "Active period end time for the on-call rotation.",
+              "name": "activePeriod",
+              "description": "Active period for the on-call rotation.",
               "args": [
 
               ],
               "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "activePeriodStart",
-              "description": "Active period start time for the on-call rotation.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
+                "kind": "OBJECT",
+                "name": "OncallRotationActivePeriodType",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -51702,7 +51688,7 @@
         },
         {
           "kind": "INPUT_OBJECT",
-          "name": "OncallRotationActivePeriodType",
+          "name": "OncallRotationActivePeriodInputType",
           "description": "Active period time range for on-call rotation",
           "fields": null,
           "inputFields": [
@@ -51736,6 +51722,47 @@
             }
           ],
           "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "OncallRotationActivePeriodType",
+          "description": "Active period time range for on-call rotation",
+          "fields": [
+            {
+              "name": "from",
+              "description": "The start of the rotation interval.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "to",
+              "description": "The end of the rotation interval.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
           "enumValues": null,
           "possibleTypes": null
         },
@@ -51820,7 +51847,7 @@
               "description": "The active period of time that the on-call rotation should take place.",
               "type": {
                 "kind": "INPUT_OBJECT",
-                "name": "OncallRotationActivePeriodType",
+                "name": "OncallRotationActivePeriodInputType",
                 "ofType": null
               },
               "defaultValue": null

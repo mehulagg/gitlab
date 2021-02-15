@@ -4,7 +4,7 @@ module Types
   module IncidentManagement
     # rubocop: disable Graphql/AuthorizeTypes
     class OncallRotationActivePeriodInputType < BaseInputObject
-      graphql_name 'OncallRotationActivePeriodType'
+      graphql_name 'OncallRotationActivePeriodInputType'
       description 'Active period time range for on-call rotation'
 
       argument :from, GraphQL::STRING_TYPE,

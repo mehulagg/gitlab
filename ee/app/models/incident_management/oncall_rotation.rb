@@ -4,6 +4,23 @@ module IncidentManagement
   class OncallRotation < ApplicationRecord
     include Gitlab::Utils::StrongMemoize
 
+    ActivePeriod = Struct.new(:start_time, :end_time) do
+      def present?
+        start_time && end_time
+      end
+
+      def end_after_start?
+        end_time > start_time if present?
+      end
+
+      def for_date(date)
+        [
+          date.change(hour: start_time.hour, min: start_time.min),
+          date.change(hour: end_time.hour, min: end_time.min)
+        ]
+      end
+    end
+
     self.table_name = 'incident_management_oncall_rotations'
 
     enum length_unit: {
@@ -58,38 +75,21 @@ module IncidentManagement
       weeks? ? (7 * length) : length
     end
 
+    def active_period
+      ActivePeriod.new(active_period_start, active_period_end)
+    end
+
     def has_shift_active_period?
-      return false if hours?
-
-      active_period_start.present?
-    end
-
-    def active_period_times
-      return unless has_shift_active_period?
-
-      strong_memoize(:active_period_times) do
-        {
-          start: active_period_start,
-          end: active_period_end
-        }
-      end
-    end
-
-    def active_period(date)
-      [
-        date.change(hour: active_period_times[:start].hour, min: active_period_times[:start].min),
-        date.change(hour: active_period_times[:end].hour, min: active_period_times[:end].min)
-      ]
+      !hours? && active_period.present?
     end
 
     private
 
     def active_period_end_after_start
-      return unless active_period_start && active_period_end
+      return unless active_period.present?
+      return if active_period.end_after_start?
 
-      unless active_period_end > active_period_start
-        errors.add(:active_period_end, _('must be later than active period start'))
-      end
+      errors.add(:active_period_end, _('must be later than active period start'))
     end
 
     def no_active_period_for_hourly_shifts

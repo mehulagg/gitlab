@@ -1931,8 +1931,7 @@ Describes an incident management on-call rotation.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `activePeriodEnd` | String | Active period end time for the on-call rotation. |
-| `activePeriodStart` | String | Active period start time for the on-call rotation. |
+| `activePeriod` | OncallRotationActivePeriodType | Active period for the on-call rotation. |
 | `id` | IncidentManagementOncallRotationID! | ID of the on-call rotation. |
 | `length` | Int | Length of the on-call schedule, in the units specified by lengthUnit. |
 | `lengthUnit` | OncallRotationUnitEnum | Unit of the on-call rotation length. |
@@ -2646,6 +2645,15 @@ The rotation participant and color palette.
 | `colorWeight` | String | The color weight to assign to for the on-call user, for example "500". Max 4 chars. For easy identification of the user. |
 | `id` | IncidentManagementOncallParticipantID! | ID of the on-call participant. |
 | `user` | User! | The user who is participating. |
+
+### OncallRotationActivePeriodType
+
+Active period time range for on-call rotation.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `from` | String | The start of the rotation interval. |
+| `to` | String | The end of the rotation interval. |
 
 ### OncallRotationCreatePayload
 

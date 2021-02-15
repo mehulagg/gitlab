@@ -65,7 +65,7 @@ RSpec.describe IncidentManagement::OncallRotation do
         end
       end
 
-      context 'end time after start time' do
+      context 'end time before start time' do
         it 'raises a validation error if an active period is set' do
           subject.active_period_start = '17:00'
           subject.active_period_end = '08:00'
