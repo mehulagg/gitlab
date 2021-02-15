@@ -42,6 +42,21 @@ module EE
         gl_license = create(:gitlab_license, options)
         create(:license, data: gl_license.export)
       end
+
+      ::Project.prepend ClearLicensedFeatureAvailableCache
+    end
+
+    # This patch helps `stub_licensed_features` to work properly
+    # without the need of clearing caches manually in `before` blocks or
+    # using `let_it_be_refind` deliberately.
+    #
+    # See https://gitlab.com/gitlab-org/gitlab/-/issues/10385
+    module ClearLicensedFeatureAvailableCache
+      def licensed_feature_available?(*)
+        clear_memoization(:licensed_feature_available)
+
+        super
+      end
     end
   end
 end
