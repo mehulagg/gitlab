@@ -964,6 +964,161 @@ RSpec.describe License do
     end
   end
 
+  describe '#historical_data' do
+    let_it_be(:now) { DateTime.new(2014, 12, 15) }
+    let_it_be(:license) { create(:license, starts_at: Date.new(2014, 7, 1), expires_at: Date.new(2014, 12, 31)) }
+
+    before_all do
+      (1..12).each do |i|
+        HistoricalData.create!(recorded_at: Date.new(2014, i, 1), active_user_count: i * 100)
+      end
+
+      HistoricalData.create!(recorded_at: license.starts_at - 1.day, active_user_count: 1)
+      HistoricalData.create!(recorded_at: license.expires_at + 1.day, active_user_count: 2)
+      HistoricalData.create!(recorded_at: now - 1.year - 1.day, active_user_count: 3)
+      HistoricalData.create!(recorded_at: now + 1.day, active_user_count: 4)
+    end
+
+    around do |example|
+      travel_to(now) { example.run }
+    end
+
+    context 'with a license that has a start and end date' do
+      it 'returns correct number of records within the license range' do
+        expect(license.historical_data.count).to eq(7)
+      end
+    end
+
+    context 'with a license that has no end date' do
+      let_it_be(:license) { create(:license, starts_at: Date.new(2014, 7, 1), expires_at: nil) }
+
+      it 'returns correct number of records within the past year' do
+        expect(license.historical_data.count).to eq(6)
+      end
+    end
+  end
+
+  describe '#historical_max' do
+    subject(:historical_max) { license.historical_max }
+
+    let(:license) { create(:license, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month) }
+
+    context 'when using parameters' do
+      before do
+        (1..12).each do |i|
+          HistoricalData.create!(recorded_at: Date.new(2014, i, 1), active_user_count: i * 100)
+        end
+      end
+
+      it 'returns max user count for the given time range' do
+        from = Date.new(2014, 6, 1)
+        to = Date.new(2014, 9, 1)
+
+        expect(license.historical_max(from: from, to: to)).to eq(900)
+      end
+    end
+
+    context 'with different plans for the license' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:gl_plan, :expected_count) do
+        ::License::STARTER_PLAN  | 2
+        ::License::PREMIUM_PLAN  | 2
+        ::License::ULTIMATE_PLAN | 1
+      end
+
+      with_them do
+        let(:plan) { gl_plan }
+        let!(:license) do
+          create_current_license(plan: plan, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month)
+        end
+
+        before do
+          create(:group_member, :guest)
+          create(:group_member, :reporter)
+
+          HistoricalData.track!
+        end
+
+        it 'does not count guest users' do
+          expect(historical_max).to eq(expected_count)
+        end
+      end
+    end
+
+    context 'with data inside and outside of the license period' do
+      before do
+        HistoricalData.create!(recorded_at: license.starts_at.ago(2.days), active_user_count: 20)
+        HistoricalData.create!(recorded_at: license.starts_at.in(2.days), active_user_count: 10)
+        HistoricalData.create!(recorded_at: license.starts_at.in(5.days), active_user_count: 15)
+        HistoricalData.create!(recorded_at: license.expires_at.in(2.days), active_user_count: 25)
+      end
+
+      it 'returns max value for active_user_count for within the license period only' do
+        expect(historical_max).to eq(15)
+      end
+    end
+
+    context 'when license has no start date' do
+      let(:license) { create(:license, starts_at: nil, expires_at: Date.current + 1.month) }
+
+      before do
+        HistoricalData.create!(recorded_at: Date.yesterday.ago(1.year), active_user_count: 15)
+        HistoricalData.create!(recorded_at: Date.current.ago(1.year), active_user_count: 12)
+        HistoricalData.create!(recorded_at: license.expires_at.ago(2.days), active_user_count: 10)
+      end
+
+      it 'returns max value for active_user_count from up to a year ago' do
+        expect(historical_max).to eq(12)
+      end
+    end
+
+    context 'when license has no expiration date' do
+      let(:license) { create(:license, starts_at: Date.current.ago(1.month), expires_at: nil) }
+
+      before do
+        HistoricalData.create!(recorded_at: license.starts_at.in(2.days), active_user_count: 10)
+        HistoricalData.create!(recorded_at: Date.tomorrow, active_user_count: 15)
+      end
+
+      it 'returns max value for active_user_count until today' do
+        expect(historical_max).to eq(10)
+      end
+    end
+  end
+
+  describe '#starts_at_for_historical_data' do
+    context 'when start date is present' do
+      it 'returns the beginning of day for starts at' do
+        expect(license.starts_at_for_historical_data).to eq(license.starts_at.beginning_of_day)
+      end
+    end
+
+    context 'when start date is nil' do
+      let(:license) { create(:license, starts_at: nil, expires_at: Date.current + 1.month) }
+
+      it 'returns the beginning of day for the day a year ago' do
+        expect(license.starts_at_for_historical_data).to eq((Time.current - 1.year).beginning_of_day)
+      end
+    end
+  end
+
+  describe '#expires_at_for_historical_data' do
+    context 'when expiration date is present' do
+      it 'returns the end of day for expires at' do
+        expect(license.expires_at_for_historical_data).to eq(license.expires_at.end_of_day)
+      end
+    end
+
+    context 'when expiration date is nil' do
+      let(:license) { create(:license, starts_at: Date.current - 1.month, expires_at: nil) }
+
+      it 'returns the end of day for today' do
+        expect(license.expires_at_for_historical_data).to eq(Time.current.end_of_day)
+      end
+    end
+  end
+
   describe '#maximum_user_count' do
     let(:now) { Date.current }
 

@@ -183,7 +183,7 @@ RSpec.describe Gitlab::UsageData do
 
       expect(subject[:license_md5]).to eq(Digest::MD5.hexdigest(license.data))
       expect(subject[:license_id]).to eq(license.license_id)
-      expect(subject[:historical_max_users]).to eq(::HistoricalData.max_historical_user_count)
+      expect(subject[:historical_max_users]).to eq(license.historical_max)
       expect(subject[:licensee]).to eq(license.licensee)
       expect(subject[:license_user_count]).to eq(license.restricted_user_count)
       expect(subject[:license_starts_at]).to eq(license.starts_at)

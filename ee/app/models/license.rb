@@ -501,8 +501,23 @@ class License < ApplicationRecord
     overage(maximum_user_count)
   end
 
+  def historical_data
+    HistoricalData.during(starts_at_for_historical_data...expires_at_for_historical_data)
+  end
+
   def historical_max(from: nil, to: nil)
-    HistoricalData.max_historical_user_count(license: self, from: from, to: to)
+    from ||= starts_at_for_historical_data
+    to ||= expires_at_for_historical_data
+
+    HistoricalData.max_historical_user_count(from: from, to: to)
+  end
+
+  def starts_at_for_historical_data
+    (starts_at || Time.current - 1.year).beginning_of_day
+  end
+
+  def expires_at_for_historical_data
+    (expires_at || Time.current).end_of_day
   end
 
   def maximum_user_count
