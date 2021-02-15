@@ -750,6 +750,10 @@ class Project < ApplicationRecord
       '&gt;'
     end
 
+    def fire_event
+      Gitlab::Tracking.event('category', 'action')
+    end
+
     # Pattern used to extract `namespace/project>` project references from text.
     # '>' or its escaped form ('&gt;') are checked for because '>' is sometimes escaped
     # when the reference comes from an external source.
