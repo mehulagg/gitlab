@@ -14,16 +14,8 @@ namespace :gitlab do
       puts "Email associated with license: #{license[:licensee]['Email']}"
     end
 
-    task :load, [:mode] => :environment do |_, args|
-      args.with_defaults(mode: 'default')
-      verbose = args[:mode] == 'verbose'
-
+    task :load, [:mode] => :environment do
       flag = 'GITLAB_LICENSE_FILE'
-
-      if ENV[flag].blank? && verbose
-        puts "Skipped. Use the `#{flag}` environment variable to seed the License file of the given path."
-        next
-      end
 
       default_license_file = Settings.source.dirname + 'Gitlab.gitlab-license'
       license_file = ENV.fetch(flag, default_license_file)
@@ -38,6 +30,8 @@ namespace :gitlab do
       elsif !ENV[flag].blank?
         puts "License File Missing:\n\nFilePath: #{license_file}".color(:red)
         raise "License File Missing"
+      else
+        puts "Skipped. Use the `#{flag}` environment variable to seed the License file of the given path."
       end
     end
   end

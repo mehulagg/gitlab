@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 Gitlab::Seeder.quiet do
-  Rake::Task['gitlab:license:load'].invoke('verbose')
+  Rake::Task['gitlab:license:load'].invoke
 end
