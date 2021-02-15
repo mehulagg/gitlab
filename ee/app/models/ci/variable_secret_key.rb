@@ -2,9 +2,13 @@
 
 module Ci
   class VariableSecretKey < ApplicationRecord
+    self.table_name = "ci_variable_secret_keys"
+
     CIPHER = 'aes-256-gcm'
 
-    self.table_name = "ci_variable_secret_keys"
+    validates :encrypted_secret_key, length: { maximum: 255 }, presence: true
+    validates :encrypted_secret_key_iv, length: { maximum: 255 }, presence: true, uniqueness: true
+    validates :encrypted_secret_key_salt, length: { maximum: 255 }, presence: true
 
     # has_many :variable_initialization_vectors, class_name: 'Ci::VariableInitializationVector'
     # has_many :variables, through: :variable_initialization_vectors, class_name: 'Ci::VariableInitializationVector'

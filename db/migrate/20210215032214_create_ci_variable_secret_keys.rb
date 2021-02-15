@@ -10,7 +10,7 @@ class CreateCiVariableSecretKeys < ActiveRecord::Migration[6.0]
       t.timestamps_with_timezone
 
       t.text :encrypted_secret_key, null: false
-      t.text :encrypted_secret_key_iv, null: false
+      t.text :encrypted_secret_key_iv, null: false, unique: true
       t.text :encrypted_secret_key_salt, null: false
 
       t.text_limit :encrypted_secret_key, 255
