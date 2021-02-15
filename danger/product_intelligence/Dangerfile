@@ -46,7 +46,9 @@ metrics_changed_files    = all_changed_files.grep(%r{((ee/)?config/metrics/.*\.y
 dictionary_changed_file  = all_changed_files.grep(%r{(doc/development/usage_ping/dictionary.md)})
 
 snowplow_changed_files = all_changed_files.select do |file|
-  helper.changed_lines(file).grep(%r{Gitlab::Tracking\.event}).any?
+  if file.end_with?('.rb')
+    helper.changed_lines(file).grep(%r{Gitlab::Tracking\.event}).any?
+  end
 end
 
 matching_changed_files = usage_data_changed_files + tracking_changed_files + metrics_changed_files + dictionary_changed_file + snowplow_changed_files
