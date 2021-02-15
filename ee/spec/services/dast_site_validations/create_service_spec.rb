@@ -12,10 +12,6 @@ RSpec.describe DastSiteValidations::CreateService do
   subject { described_class.new(container: dast_site.project, params: params).execute }
 
   describe 'execute', :clean_gitlab_redis_shared_state do
-    before do
-      project.clear_memoization(:licensed_feature_available)
-    end
-
     context 'when on demand scan feature is disabled' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: true)
