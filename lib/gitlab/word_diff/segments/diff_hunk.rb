@@ -16,6 +16,10 @@ module Gitlab
           line.match(/\+[0-9]*/)[0].to_i.abs rescue 0
         end
 
+        def first_line?
+          old_line <= 1 && new_line <= 1
+        end
+
         def to_s
           line
         end

@@ -6,10 +6,8 @@ module Gitlab
       include Enumerable
 
       def initialize
-        @line_obj_index = 0
-        @line_old = 1
-        @line_new = 1
         @chunks = ChunkCollection.new
+        @counter = Counter.new
       end
 
       def parse(lines, diff_file: nil)
@@ -21,23 +19,22 @@ module Gitlab
 
             case segment
             when Segments::DiffHunk
-              set_line(old: segment.old_line, new: segment.new_line)
+              next if segment.first_line?
 
-              next if top_of_file?
+              counter.set_line_num(old: segment.old_line, new: segment.new_line)
 
-              yielder << Gitlab::Diff::Line.new(segment.to_s, 'match', line_obj_index, line_old, line_new, parent_file: diff_file)
-              @line_obj_index += 1
+              yielder << Gitlab::Diff::Line.new(segment.to_s, 'match', counter.line_obj_index, counter.line_old, counter.line_new, parent_file: diff_file)
+              counter.increase_obj_index
 
             when Segments::Chunk
               @chunks.add(segment)
 
             when Segments::Newline
-              yielder << Gitlab::Diff::Line.new(@chunks.content, 'word-diff', line_obj_index, line_old, line_new, parent_file: diff_file, highlight_diffs: @chunks.highlight_diffs)
+              yielder << Gitlab::Diff::Line.new(@chunks.content, 'word-diff', counter.line_obj_index, counter.line_old, counter.line_new, parent_file: diff_file, highlight_diffs: @chunks.highlight_diffs)
 
               @chunks.reset
-              @line_obj_index += 1
-              @line_new += 1
-              @line_old += 1
+              counter.increase_obj_index
+              counter.increase_line_num
             end
           end
         end
@@ -45,16 +42,7 @@ module Gitlab
 
       private
 
-      attr_reader :line_obj_index, :line_old, :line_new
-
-      def set_line(old:, new:)
-        @line_old = old
-        @line_new = new
-      end
-
-      def top_of_file?
-        line_old <= 1 && line_new <= 1
-      end
+      attr_reader :counter
     end
   end
 end
