@@ -46,9 +46,9 @@ RSpec.describe 'factories' do
     .partition { |factory| skip_factory_defaults.include?(factory.name) }
 
   context 'with factory defaults', factory_default: :keep do
-    let_it_be(:namespace) { create_default(:namespace) }
-    let_it_be(:project) { create_default(:project, :repository) }
-    let_it_be(:user) { create_default(:user) }
+    let_it_be(:namespace) { create_default(:namespace).freeze }
+    let_it_be(:project) { create_default(:project, :repository).freeze }
+    let_it_be(:user) { create_default(:user).freeze }
 
     before do
       factories_based_on_view.each do |factory|

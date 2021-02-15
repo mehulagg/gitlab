@@ -8,8 +8,8 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
   include Ci::SourcePipelineHelpers
 
   let_it_be(:user) { create(:user) }
-  let_it_be(:namespace) { create_default(:namespace) }
-  let_it_be(:project) { create_default(:project, :repository) }
+  let_it_be(:namespace) { create_default(:namespace).freeze }
+  let_it_be(:project) { create_default(:project, :repository).freeze }
 
   let(:pipeline) do
     create(:ci_empty_pipeline, status: :created, project: project)
