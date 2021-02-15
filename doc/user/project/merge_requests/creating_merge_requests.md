@@ -32,9 +32,11 @@ button and start a merge request from there.
 
 On the **New Merge Request** page, start by filling in the title
 and description for the merge request. If there are already
-commits on the branch, the title is prefilled with the first
-line of the first multi-line commit message, and the description is
-prefilled with any additional lines in that commit message. If there are no multi-line commit messages, the branch name is used.
+commits on the branch, the title is prefilled with either:
+- The first line of the first multi-line commit message
+  and the description is prefilled with any additional lines
+  in that commit message.
+- The branch name, if there are no multi-line commit messages.
 
 The title is the only field that is mandatory in all cases.
 
