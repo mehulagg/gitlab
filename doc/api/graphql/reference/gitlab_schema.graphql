@@ -25916,7 +25916,14 @@ type TodoRestorePayload {
 }
 
 enum TodoStateEnum {
+  """
+  The state of the todo is pending.
+  """
   done
+
+  """
+  The state of the todo is pending.
+  """
   pending
 }
 

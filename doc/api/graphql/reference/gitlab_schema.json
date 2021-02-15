@@ -74826,13 +74826,13 @@
           "enumValues": [
             {
               "name": "pending",
-              "description": null,
+              "description": "The state of the todo is pending.",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "done",
-              "description": null,
+              "description": "The state of the todo is pending.",
               "isDeprecated": false,
               "deprecationReason": null
             }
