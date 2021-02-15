@@ -65,8 +65,7 @@ class AuditEventService
   end
 
   def resolve_ip_address(details, author)
-    details[:ip_address].presence ||
-      Gitlab::RequestContext.instance.client_ip ||
+    Gitlab::RequestContext.instance.client_ip ||
       author.current_sign_in_ip
   end
 
