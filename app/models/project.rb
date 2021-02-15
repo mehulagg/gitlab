@@ -2372,7 +2372,11 @@ class Project < ApplicationRecord
   end
 
   def leave_pool_repository
-    pool_repository&.mark_obsolete_if_last(repository) && update_column(:pool_repository_id, nil)
+    pool_repository
+    .update_if_source_is_leaving(self)
+    &.mark_obsolete_if_last(repository)
+
+    update_column(:pool_repository_id, nil)
   end
 
   def link_pool_repository

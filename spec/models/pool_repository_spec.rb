@@ -24,6 +24,37 @@ RSpec.describe PoolRepository do
     end
   end
 
+  describe '#update_if_source_is_leaving' do
+    let_it_be_with_reload(:pool) { create(:pool_repository, :ready) }
+
+    context 'when the deleted project is not the source' do
+      let_it_be(:member_project) { create(:project, :repository, pool_repository: pool) }
+      it 'does not update the source_project' do
+        expect do
+          pool.update_if_source_is_leaving(member_project)
+        end.not_to change {pool.source_project}
+      end
+    end
+
+    context 'when the deleted project is the source' do
+      context 'when there are other member projects' do
+        let_it_be(:member_project) { create(:project, :repository, pool_repository: pool) }
+        it 'makes another member project the new source' do
+          pool.update_if_source_is_leaving(pool.source_project)
+          expect(pool.source_project.id).to eq(member_project.id)
+        end
+      end
+
+      context 'when there are no other member projects' do
+        it 'does not update the source project' do
+          expect do
+            pool.update_if_source_is_leaving(pool.source_project)
+          end.not_to change {pool.source_project}
+        end
+      end
+    end
+  end
+
   describe '#mark_obsolete_if_last' do
     let(:pool) { create(:pool_repository, :ready) }
 

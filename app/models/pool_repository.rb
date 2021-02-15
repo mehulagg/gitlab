@@ -81,6 +81,17 @@ class PoolRepository < ApplicationRecord
     object_pool.link(repository.raw)
   end
 
+  # If the source project leaves the pool, choose a new source from existing members
+  def update_if_source_is_leaving(project)
+    remaining_projects = member_projects.where.not(id: project.id)
+
+    if source_project.id == project.id && remaining_projects.exists?
+      update_attribute(:source_project, remaining_projects.first)
+    end
+
+    self
+  end
+
   def mark_obsolete_if_last(repository)
     if member_projects.where.not(id: repository.project.id).exists?
       true
