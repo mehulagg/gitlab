@@ -2,26 +2,14 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::CanMutateSpammable do
-  let(:mutation_class) do
-    Class.new(Mutations::BaseMutation) do
-      include Mutations::CanMutateSpammable
-    end
+RSpec.describe Spam::Concerns::HasSpamActionResponseFields do
+  subject do
+    clazz = Class.new
+    clazz.include described_class
+    clazz.new
   end
 
-  let(:request) { double(:request) }
-  let(:query) { double(:query, schema: GitlabSchema) }
-  let(:context) { GraphQL::Query::Context.new(query: query, object: nil, values: { request: request }) }
-
-  subject(:mutation) { mutation_class.new(object: nil, context: context, field: nil) }
-
-  describe '#additional_spam_params' do
-    it 'returns additional spam-related params' do
-      expect(subject.send(:additional_spam_params)).to eq({ api: true, request: request })
-    end
-  end
-
-  describe '#with_spam_action_fields' do
+  describe '#with_spam_action_response_fields' do
     let(:spam_log) { double(:spam_log, id: 1) }
     let(:spammable) { double(:spammable, spam?: true, render_recaptcha?: true, spam_log: spam_log) }
 
