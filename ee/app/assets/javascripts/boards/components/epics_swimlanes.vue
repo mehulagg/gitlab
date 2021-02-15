@@ -136,7 +136,7 @@ export default {
           />
         </div>
       </component>
-      <div class="board-epics-swimlanes gl-display-table">
+      <div class="board-epics-swimlanes gl-display-table gl-pb-5">
         <epic-lane
           v-for="epic in epics"
           :key="epic.id"
