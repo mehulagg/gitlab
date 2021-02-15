@@ -4,7 +4,7 @@ import boardListsQuery from 'ee_else_ce/boards/graphql/board_lists.query.graphql
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { convertObjectPropsToCamelCase, urlParamsToObject } from '~/lib/utils/common_utils';
-import { BoardType, ListType, inactiveId } from '~/boards/constants';
+import { BoardType, ListType, inactiveId, flashAnimationDuration } from '~/boards/constants';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
@@ -110,15 +110,12 @@ export default {
       .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
   },
 
-  highlightList: ({ state }, listId) => {
-    state.highlightedLists.push(listId);
+  highlightList: ({ state, commit }, listId) => {
+    commit(types.ADD_LIST_TO_HIGHLIGHTED_LISTS, listId);
 
     setTimeout(() => {
-      const index = state.highlightedLists.indexOf(listId);
-      if (index > -1) {
-        state.highlightedLists.splice(index, 1);
-      }
-    }, 2000);
+      commit(types.REMOVE_LIST_FROM_HIGHLIGHTED_LISTS, listId);
+    }, flashAnimationDuration);
   },
 
   createList: (

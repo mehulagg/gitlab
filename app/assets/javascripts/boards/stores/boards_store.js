@@ -15,7 +15,7 @@ import axios from '~/lib/utils/axios_utils';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '../eventhub';
-import { ListType } from '../constants';
+import { ListType, flashAnimationDuration } from '../constants';
 import IssueProject from '../models/project';
 import ListLabel from '../models/label';
 import ListAssignee from '../models/assignee';
@@ -109,7 +109,7 @@ const boardsStore = {
         list.highlighted = true;
         setTimeout(() => {
           list.highlighted = false;
-        }, 2000);
+        }, flashAnimationDuration);
 
         // Remove any new issues from the backlog
         // as they will be visible in the new list
