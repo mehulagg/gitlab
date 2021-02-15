@@ -181,7 +181,7 @@ export default {
       </div>
       <div
         v-if="hasMoreUnassignedIssues"
-        class="gl-p-3 gl-pr-0 gl-sticky gl-left-0 gl-max-w-fullscreen"
+        class="gl-p-3 gl-sticky gl-left-0 gl-max-w-fullscreen"
         style="max-width: 100vw"
       >
         <gl-button
