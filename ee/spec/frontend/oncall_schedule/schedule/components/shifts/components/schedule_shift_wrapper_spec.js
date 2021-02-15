@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import ScheduleShiftWrapper from 'ee/oncall_schedules/components/schedule/components/shifts/components/schedule_shift_wrapper.vue';
 import DaysScheduleShift from 'ee/oncall_schedules/components/schedule/components/shifts/components/days_schedule_shift.vue';
+import ScheduleShiftWrapper from 'ee/oncall_schedules/components/schedule/components/shifts/components/schedule_shift_wrapper.vue';
 import WeeksScheduleShift from 'ee/oncall_schedules/components/schedule/components/shifts/components/weeks_schedule_shift.vue';
 import { PRESET_TYPES, DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
 import { nDaysAfter } from '~/lib/utils/datetime_utility';

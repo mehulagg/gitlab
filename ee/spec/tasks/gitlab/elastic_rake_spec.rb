@@ -69,13 +69,13 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
 
     it 'marks all migrations as completed' do
       expect(Elastic::DataMigrationService).to receive(:mark_all_as_completed!).and_call_original
-      expect(Elastic::MigrationRecord.persisted_versions(completed: true)).to eq([])
+      expect(Elastic::MigrationRecord.load_versions(completed: true)).to eq([])
 
       subject
       refresh_index!
 
       migrations = Elastic::DataMigrationService.migrations.map(&:version)
-      expect(Elastic::MigrationRecord.persisted_versions(completed: true)).to eq(migrations)
+      expect(Elastic::MigrationRecord.load_versions(completed: true)).to eq(migrations)
     end
   end
 

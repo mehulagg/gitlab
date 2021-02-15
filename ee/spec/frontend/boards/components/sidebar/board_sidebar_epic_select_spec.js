@@ -1,12 +1,12 @@
-import Vuex from 'vuex';
 import { shallowMount } from '@vue/test-utils';
-import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
+import Vuex from 'vuex';
 import BoardSidebarEpicSelect from 'ee/boards/components/sidebar/board_sidebar_epic_select.vue';
+import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
 import { stubComponent } from 'helpers/stub_component';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import getters from '~/boards/stores/getters';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createFlash from '~/flash';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import {
   mockIssue3 as mockIssueWithoutEpic,
   mockIssueWithEpic,

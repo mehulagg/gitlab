@@ -1,6 +1,6 @@
 <script>
-import { escape } from 'lodash';
 import { GlIcon } from '@gitlab/ui';
+import { escape } from 'lodash';
 import { __, n__, sprintf } from '~/locale';
 
 export default {

@@ -1,10 +1,10 @@
 import { GlTable, GlButton, GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import DevopsAdoptionTable from 'ee/admin/dev_ops_report/components/devops_adoption_table.vue';
 import DevopsAdoptionTableCellFlag from 'ee/admin/dev_ops_report/components/devops_adoption_table_cell_flag.vue';
 import { DEVOPS_ADOPTION_TABLE_TEST_IDS as TEST_IDS } from 'ee/admin/dev_ops_report/constants';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { devopsAdoptionSegmentsData, devopsAdoptionTableHeaders } from '../mock_data';
 

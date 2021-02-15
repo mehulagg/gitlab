@@ -24,7 +24,10 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
         $apollo,
         fetchNextPage: () => {},
       },
-      provide: { hasVulnerabilities: true },
+      provide: {
+        hasVulnerabilities: true,
+        hasJiraVulnerabilitiesIntegrationEnabled: false,
+      },
     });
   };
 

@@ -1,14 +1,14 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlModal, GlAlert, GlSprintf } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import createMockApollo from 'helpers/mock_apollo_helper';
-import waitForPromises from 'helpers/wait_for_promises';
-import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
-import destroyOncallRotationMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_rotation.mutation.graphql';
 import DeleteRotationModal, {
   i18n,
 } from 'ee/oncall_schedules/components/rotations/components/delete_rotation_modal.vue';
 import { deleteRotationModalId } from 'ee/oncall_schedules/constants';
+import destroyOncallRotationMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_rotation.mutation.graphql';
+import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import {
   getOncallSchedulesQueryResponse,
   destroyRotationResponse,

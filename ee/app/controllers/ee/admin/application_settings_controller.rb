@@ -57,7 +57,7 @@ module EE
           attrs += EE::ApplicationSettingsHelper.merge_request_appovers_rules_attributes
         end
 
-        if ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode)
+        if ::Gitlab::Geo.license_allows?
           attrs << :maintenance_mode
           attrs << :maintenance_mode_message
         end

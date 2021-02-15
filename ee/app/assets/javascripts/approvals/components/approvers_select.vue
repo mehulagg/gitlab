@@ -2,9 +2,9 @@
 import $ from 'jquery';
 import { escape, debounce } from 'lodash';
 import Api from 'ee/api';
-import { __ } from '~/locale';
 import { renderAvatar } from '~/helpers/avatar_helper';
 import { loadCSSFile } from '~/lib/utils/css_utils';
+import { __ } from '~/locale';
 import { TYPE_USER, TYPE_GROUP } from '../constants';
 
 function addType(type) {

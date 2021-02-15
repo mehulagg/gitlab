@@ -5,11 +5,17 @@ module Projects
     include SecurityAndCompliancePermissions
 
     before_action :authorize_read_threat_monitoring!
+
     before_action do
       push_frontend_feature_flag(:threat_monitoring_alerts, project)
     end
 
     feature_category :web_firewall
+
+    def alert_details
+      render_404 unless Feature.enabled?(:threat_monitoring_alerts, project)
+      @alert_id = params[:id]
+    end
 
     def edit
       @environment = project.environments.find(params[:environment_id])

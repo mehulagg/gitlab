@@ -1,6 +1,6 @@
 import { mount, shallowMount } from '@vue/test-utils';
-import { stubTransition } from 'helpers/stub_transition';
 import ExpandableSection from 'ee/security_configuration/components/expandable_section.vue';
+import { stubTransition } from 'helpers/stub_transition';
 
 describe('ExpandableSection component', () => {
   let wrapper;

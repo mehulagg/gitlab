@@ -1,11 +1,11 @@
-import { mount } from '@vue/test-utils';
 import { GlCard } from '@gitlab/ui';
-import { useFakeDate } from 'helpers/fake_date';
-import RotationsListSection from 'ee/oncall_schedules/components/schedule/components/rotations_list_section.vue';
-import CurrentDayIndicator from 'ee/oncall_schedules/components/schedule/components/current_day_indicator.vue';
+import { mount } from '@vue/test-utils';
 import RotationsAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
+import CurrentDayIndicator from 'ee/oncall_schedules/components/schedule/components/current_day_indicator.vue';
+import RotationsListSection from 'ee/oncall_schedules/components/schedule/components/rotations_list_section.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
+import { useFakeDate } from 'helpers/fake_date';
 import { scheduleIid } from '../../mocks/apollo_mock';
 import mockRotations from '../../mocks/mock_rotation.json';
 

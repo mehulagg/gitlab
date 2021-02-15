@@ -1,5 +1,4 @@
 <script>
-import dateformat from 'dateformat';
 import {
   GlLoadingIcon,
   GlButton,
@@ -8,9 +7,8 @@ import {
   GlModalDirective,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import dateformat from 'dateformat';
 import * as Sentry from '~/sentry/wrapper';
-import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
-import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
@@ -19,6 +17,8 @@ import {
   DATE_TIME_FORMAT,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
 } from '../constants';
+import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
+import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
 import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
 import DevopsAdoptionSegmentModal from './devops_adoption_segment_modal.vue';
 import DevopsAdoptionTable from './devops_adoption_table.vue';

@@ -10,14 +10,14 @@ import {
   GlLink,
   GlSprintf,
 } from '@gitlab/ui';
-import * as Sentry from '~/sentry/wrapper';
-import { __, s__ } from '~/locale';
 import { isEmptyValue } from '~/lib/utils/forms';
-import { SCAN_MODES, CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
-import createApiFuzzingConfigurationMutation from '../graphql/create_api_fuzzing_configuration.mutation.graphql';
+import { __, s__ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
 import DropdownInput from '../../components/dropdown_input.vue';
 import DynamicFields from '../../components/dynamic_fields.vue';
 import FormInput from '../../components/form_input.vue';
+import { SCAN_MODES, CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
+import createApiFuzzingConfigurationMutation from '../graphql/create_api_fuzzing_configuration.mutation.graphql';
 import ConfigurationSnippetModal from './configuration_snippet_modal.vue';
 
 export default {

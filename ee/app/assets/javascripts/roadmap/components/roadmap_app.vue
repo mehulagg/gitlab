@@ -1,16 +1,16 @@
 <script>
-import Cookies from 'js-cookie';
 import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import Cookies from 'js-cookie';
 import { mapState, mapActions } from 'vuex';
 import { __, s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
-import eventHub from '../event_hub';
 import {
   EXTEND_AS,
   EPICS_LIMIT_DISMISSED_COOKIE_NAME,
   EPICS_LIMIT_DISMISSED_COOKIE_TIMEOUT,
 } from '../constants';
+import eventHub from '../event_hub';
 import EpicsListEmpty from './epics_list_empty.vue';
 import RoadmapFilters from './roadmap_filters.vue';
 import RoadmapShell from './roadmap_shell.vue';

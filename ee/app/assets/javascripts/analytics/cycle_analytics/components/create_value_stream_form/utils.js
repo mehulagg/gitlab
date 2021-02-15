@@ -1,5 +1,5 @@
-import { isStartEvent, getAllowedEndEvents, eventToOption, eventsByIdentifier } from '../../utils';
 import { DEFAULT_STAGE_NAMES } from '../../constants';
+import { isStartEvent, getAllowedEndEvents, eventToOption, eventsByIdentifier } from '../../utils';
 import { I18N, ERRORS, defaultErrors, defaultFields, NAME_MAX_LENGTH } from './constants';
 
 /**

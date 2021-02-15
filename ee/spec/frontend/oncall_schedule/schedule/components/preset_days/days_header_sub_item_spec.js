@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import DaysHeaderSubItem from 'ee/oncall_schedules/components/schedule/components/preset_days/days_header_sub_item.vue';
 import updateShiftTimeUnitWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_shift_time_unit_width.mutation.graphql';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('ee/oncall_schedules/components/schedule/components/preset_days/days_header_sub_item.vue', () => {

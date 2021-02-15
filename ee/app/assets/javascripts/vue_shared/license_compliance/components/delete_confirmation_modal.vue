@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import { GlModal, GlSprintf } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { s__, __ } from '~/locale';
 

@@ -59,6 +59,7 @@ RSpec.describe 'User views iteration' do
       stub_licensed_features(iterations: true)
       sign_in(user)
       visit url
+      wait_for_requests
     end
 
     it_behaves_like 'render iteration page'

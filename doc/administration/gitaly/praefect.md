@@ -477,24 +477,30 @@ application server, or a Gitaly node.
 
    ```ruby
    # Name of storage hash must match storage name in git_data_dirs on GitLab
-   # server ('praefect') and in git_data_dirs on Gitaly nodes ('gitaly-1')
+   # server ('default') and in git_data_dirs on Gitaly nodes ('gitaly-1')
    praefect['virtual_storages'] = {
      'default' => {
-       'gitaly-1' => {
-         'address' => 'tcp://GITALY_HOST_1:8075',
-         'token'   => 'PRAEFECT_INTERNAL_TOKEN',
-       },
-       'gitaly-2' => {
-         'address' => 'tcp://GITALY_HOST_2:8075',
-         'token'   => 'PRAEFECT_INTERNAL_TOKEN'
-       },
-       'gitaly-3' => {
-         'address' => 'tcp://GITALY_HOST_3:8075',
-         'token'   => 'PRAEFECT_INTERNAL_TOKEN'
+       'nodes' => {
+         'gitaly-1' => {
+           'address' => 'tcp://GITALY_HOST_1:8075',
+           'token'   => 'PRAEFECT_INTERNAL_TOKEN',
+         },
+         'gitaly-2' => {
+           'address' => 'tcp://GITALY_HOST_2:8075',
+           'token'   => 'PRAEFECT_INTERNAL_TOKEN'
+         },
+         'gitaly-3' => {
+           'address' => 'tcp://GITALY_HOST_3:8075',
+           'token'   => 'PRAEFECT_INTERNAL_TOKEN'
+         }
        }
      }
    }
    ```
+
+   NOTE:
+   In [GitLab 13.8 and earlier](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/4988),
+   Gitaly nodes were configured directly under the virtual storage, and not under the `nodes` key.
 
 1. [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2013) in GitLab 13.1 and later, enable [distribution of reads](#distributed-reads).
 
@@ -686,7 +692,7 @@ because we rely on Praefect to route operations correctly.
 Particular attention should be shown to:
 
 - The `gitaly['auth_token']` configured in this section must match the `token`
-  value under `praefect['virtual_storages']` on the Praefect node. This was set
+  value under `praefect['virtual_storages']['nodes']` on the Praefect node. This was set
   in the [previous section](#praefect). This document uses the placeholder
   `PRAEFECT_INTERNAL_TOKEN` throughout.
 - The storage names in `git_data_dirs` configured in this section must match the
@@ -1140,11 +1146,7 @@ You can configure:
   praefect['virtual_storages'] = {
     'default' => {
       'default_replication_factor' => 1,
-      # nodes...
-      'gitaly-1' => {
-        'address' => 'tcp://GITALY_HOST_1:8075',
-        'token'   => 'PRAEFECT_INTERNAL_TOKEN',
-      },
+      # ...
     }
   }
   ```
@@ -1416,10 +1418,10 @@ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.t
 If your GitLab instance already has repositories on single Gitaly nodes, these aren't migrated to
 Gitaly Cluster automatically.
 
-Project repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md):
+Project repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md). Note that this API cannot move all repository types. For moving other repositories types, see:
 
-NOTE:
-The Project repository storage moves API [cannot move all repository types](../../api/project_repository_storage_moves.md#limitations).
+- [Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md).
+- [Group repository storage moves API](../../api/group_repository_storage_moves.md).
 
 To move repositories to Gitaly Cluster:
 
@@ -1440,7 +1442,9 @@ To move repositories to Gitaly Cluster:
    using the API to confirm that all projects have moved. No projects should be returned
    with `repository_storage` field set to the old storage.
 
-In a similar way, you can move Snippet repositories using the [Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md):
+In a similar way, you can move other repository types by using the
+[Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md) **(FREE SELF)**
+or the [Groups repository storage moves API](../../api/group_repository_storage_moves.md) **(PREMIUM SELF)**.
 
 ## Debugging Praefect
 

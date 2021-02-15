@@ -25,11 +25,13 @@ RSpec.describe Project do
 
     it { is_expected.to have_one(:import_state).class_name('ProjectImportState') }
     it { is_expected.to have_one(:repository_state).class_name('ProjectRepositoryState').inverse_of(:project) }
+    it { is_expected.to have_one(:push_rule).inverse_of(:project) }
     it { is_expected.to have_one(:status_page_setting).class_name('StatusPage::ProjectSetting') }
     it { is_expected.to have_one(:compliance_framework_setting).class_name('ComplianceManagement::ComplianceFramework::ProjectSettings') }
     it { is_expected.to have_one(:compliance_management_framework).class_name('ComplianceManagement::Framework') }
     it { is_expected.to have_one(:security_setting).class_name('ProjectSecuritySetting') }
     it { is_expected.to have_one(:vulnerability_statistic).class_name('Vulnerabilities::Statistic') }
+    it { is_expected.to have_one(:security_orchestration_policy_configuration).class_name('Security::OrchestrationPolicyConfiguration').inverse_of(:project) }
 
     it { is_expected.to have_many(:path_locks) }
     it { is_expected.to have_many(:vulnerability_feedback) }

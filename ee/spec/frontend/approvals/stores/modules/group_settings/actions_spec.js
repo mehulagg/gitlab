@@ -1,11 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
-import * as types from 'ee/approvals/stores/modules/group_settings/mutation_types';
 import * as actions from 'ee/approvals/stores/modules/group_settings/actions';
+import * as types from 'ee/approvals/stores/modules/group_settings/mutation_types';
 import getInitialState from 'ee/approvals/stores/modules/group_settings/state';
 import testAction from 'helpers/vuex_action_helper';
 import createFlash from '~/flash';
-import httpStatus from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
+import httpStatus from '~/lib/utils/http_status';
 
 jest.mock('~/flash');
 

@@ -2,9 +2,9 @@ import Vue from 'vue';
 import mountInviteMembers from 'ee/groups/invite';
 import mountVisibilityLevelDropdown from '~/groups/visibility_level';
 import 'ee/pages/trials/country_select';
-import { STEPS, SIGNUP_ONBOARDING_FLOW_STEPS } from '../../constants';
 import ProgressBar from '../../components/progress_bar.vue';
 import RegistrationTrialToggle from '../../components/registration_trial_toggle.vue';
+import { STEPS, SIGNUP_ONBOARDING_FLOW_STEPS } from '../../constants';
 
 function mountProgressBar() {
   const el = document.getElementById('progress-bar');

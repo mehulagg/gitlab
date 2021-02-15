@@ -10,8 +10,6 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import { capitalize } from 'lodash';
-import { s__, __ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 import { fetchPolicies } from '~/lib/graphql';
 import {
   formatDate,
@@ -20,13 +18,15 @@ import {
   nDaysBefore,
   nDaysAfter,
 } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
 import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
 import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
-import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
-import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
+import DeleteScheduleModal from './delete_schedule_modal.vue';
 import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
+import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
 
 export const i18n = {

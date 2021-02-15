@@ -1,19 +1,19 @@
-import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import { within, fireEvent } from '@testing-library/dom';
+import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import { merge } from 'lodash';
 import VueApollo from 'vue-apollo';
-import createApolloProvider from 'helpers/mock_apollo_helper';
-import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validations.query.graphql';
-import Component from 'ee/security_configuration/dast_profiles/components/dast_site_profiles_list.vue';
 import ProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
+import Component from 'ee/security_configuration/dast_profiles/components/dast_site_profiles_list.vue';
 import { updateSiteProfilesStatuses } from 'ee/security_configuration/dast_profiles/graphql/cache_utils';
 import {
   DAST_SITE_VALIDATION_STATUS,
   DAST_SITE_VALIDATION_MODAL_ID,
   DAST_SITE_VALIDATION_REVOKE_MODAL_ID,
 } from 'ee/security_configuration/dast_site_validation/constants';
-import { siteProfiles } from '../mocks/mock_data';
+import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validations.query.graphql';
+import createApolloProvider from 'helpers/mock_apollo_helper';
 import * as responses from '../mocks/apollo_mock';
+import { siteProfiles } from '../mocks/mock_data';
 
 jest.mock('ee/security_configuration/dast_profiles/graphql/cache_utils', () => ({
   updateSiteProfilesStatuses: jest.fn(),

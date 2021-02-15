@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlFormCheckbox,
@@ -7,10 +6,11 @@ import {
   GlSprintf,
   GlIcon,
 } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
 import getPrimaryIdentifier from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
-import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import { DASHBOARD_TYPES } from '../store/constants';
 import VulnerabilityActionButtons from './vulnerability_action_buttons.vue';

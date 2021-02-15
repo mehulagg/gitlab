@@ -1,14 +1,14 @@
 <script>
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { visitUrl } from '~/lib/utils/url_utility';
 import * as Sentry from '~/sentry/wrapper';
-import { convertToGraphQLId } from '~/graphql_shared/utils';
 
+import { FETCH_ERROR, SAVE_ERROR } from '../constants';
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
 import updateComplianceFrameworkMutation from '../graphql/queries/update_compliance_framework.mutation.graphql';
-import { FETCH_ERROR, SAVE_ERROR } from '../constants';
 import { initialiseFormData } from '../utils';
-import SharedForm from './shared_form.vue';
 import FormStatus from './form_status.vue';
+import SharedForm from './shared_form.vue';
 
 export default {
   components: {

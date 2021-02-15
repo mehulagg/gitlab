@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlToggle, GlFormTextarea, GlForm, GlLoadingIcon } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import MaintenanceModeSettingsApp from 'ee/maintenance_mode_settings/components/app.vue';
 import { MOCK_BASIC_SETTINGS_DATA } from '../mock_data';
 

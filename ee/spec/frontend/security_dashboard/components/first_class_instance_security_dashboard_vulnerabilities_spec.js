@@ -47,7 +47,10 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
         fetchNextPage: () => {},
       },
       data,
-      provide: { hasVulnerabilities: true },
+      provide: {
+        hasVulnerabilities: true,
+        hasJiraVulnerabilitiesIntegrationEnabled: false,
+      },
     });
   };
 

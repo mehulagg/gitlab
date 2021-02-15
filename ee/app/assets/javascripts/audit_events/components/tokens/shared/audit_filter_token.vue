@@ -6,9 +6,9 @@ import {
   GlAvatar,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
-import { sprintf, s__, __ } from '~/locale';
-import httpStatusCodes from '~/lib/utils/http_status';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import httpStatusCodes from '~/lib/utils/http_status';
+import { sprintf, s__, __ } from '~/locale';
 import { isNumeric } from '../../../utils';
 
 export default {

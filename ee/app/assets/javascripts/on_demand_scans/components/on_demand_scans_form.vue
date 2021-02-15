@@ -18,14 +18,17 @@ import {
 } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import { initFormField } from 'ee/security_configuration/utils';
-import { s__ } from '~/locale';
-import validation from '~/vue_shared/directives/validation';
-import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
-import { serializeFormObject } from '~/lib/utils/forms';
-import * as Sentry from '~/sentry/wrapper';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { redirectTo, queryToObject } from '~/lib/utils/url_utility';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
+import { serializeFormObject } from '~/lib/utils/forms';
+import { redirectTo, queryToObject } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
+import validation from '~/vue_shared/directives/validation';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
+import dastProfileCreateMutation from '../graphql/dast_profile_create.mutation.graphql';
+import dastProfileUpdateMutation from '../graphql/dast_profile_update.mutation.graphql';
 import {
   ERROR_RUN_SCAN,
   ERROR_FETCH_SCANNER_PROFILES,
@@ -37,12 +40,9 @@ import {
   TYPE_SITE_PROFILE,
   TYPE_SCANNER_PROFILE,
 } from '../settings';
-import dastProfileCreateMutation from '../graphql/dast_profile_create.mutation.graphql';
-import dastProfileUpdateMutation from '../graphql/dast_profile_update.mutation.graphql';
-import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
-import ProfileSelectorSummaryCell from './profile_selector/summary_cell.vue';
 import ScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
 import SiteProfileSelector from './profile_selector/site_profile_selector.vue';
+import ProfileSelectorSummaryCell from './profile_selector/summary_cell.vue';
 
 export const ON_DEMAND_SCANS_STORAGE_KEY = 'on-demand-scans-new-form';
 
@@ -255,7 +255,7 @@ export default {
       : this.selectedScannerProfileId;
   },
   methods: {
-    onSubmit({ runAfterCreate = true, button = this.$options.saveAndRunScanBtnId } = {}) {
+    onSubmit({ runAfter = true, button = this.$options.saveAndRunScanBtnId } = {}) {
       if (this.glFeatures.dastSavedScans) {
         this.form.showValidation = true;
         if (!this.form.state) {
@@ -279,7 +279,7 @@ export default {
           ...input,
           ...(this.isEdit ? { id: this.dastScan.id } : {}),
           ...serializeFormObject(this.form.fields),
-          runAfterCreate,
+          [this.isEdit ? 'runAfterUpdate' : 'runAfterCreate']: runAfter,
         };
       }
 
@@ -296,7 +296,7 @@ export default {
           if (errors?.length) {
             this.showErrors(ERROR_RUN_SCAN, errors);
             this.loading = false;
-          } else if (this.glFeatures.dastSavedScans && !runAfterCreate) {
+          } else if (this.glFeatures.dastSavedScans && !runAfter) {
             redirectTo(response.dastProfile.editPath);
             this.clearStorage = true;
           } else {
@@ -565,7 +565,7 @@ export default {
           data-testid="on-demand-scan-save-button"
           :disabled="isSaveButtonDisabled"
           :loading="loading === $options.saveScanBtnId"
-          @click="onSubmit({ runAfterCreate: false, button: $options.saveScanBtnId })"
+          @click="onSubmit({ runAfter: false, button: $options.saveScanBtnId })"
         >
           {{ s__('OnDemandScans|Save scan') }}
         </gl-button>

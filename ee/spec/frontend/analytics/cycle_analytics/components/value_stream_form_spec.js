@@ -1,10 +1,10 @@
 import { GlModal } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import ValueStreamForm from 'ee/analytics/cycle_analytics/components/value_stream_form.vue';
-import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/default_stage_fields.vue';
-import CustomStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/custom_stage_fields.vue';
 import { PRESET_OPTIONS_BLANK } from 'ee/analytics/cycle_analytics/components/create_value_stream_form/constants';
+import CustomStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/custom_stage_fields.vue';
+import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/default_stage_fields.vue';
+import ValueStreamForm from 'ee/analytics/cycle_analytics/components/value_stream_form.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { customStageEvents as formEvents, defaultStageConfig } from '../mock_data';
 

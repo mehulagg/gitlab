@@ -53,7 +53,7 @@ RSpec.describe Gitlab::AlertManagement::Payload::Generic do
     describe '#severity' do
       subject { parsed_payload.severity }
 
-      it { is_expected.to eq('low') }
+      it { is_expected.to eq(:low) }
     end
 
     describe '#environment_name' do
@@ -178,7 +178,7 @@ RSpec.describe Gitlab::AlertManagement::Payload::Generic do
           describe '#severity' do
             subject { parsed_payload.severity }
 
-            it { is_expected.to eq('high') }
+            it { is_expected.to eq(:high) }
           end
 
           describe '#environment_name' do

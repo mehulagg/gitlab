@@ -1,14 +1,13 @@
-import VueApollo from 'vue-apollo';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 
-import waitForPromises from 'helpers/wait_for_promises';
-import createMockApollo from 'helpers/mock_apollo_helper';
-
-import createComplianceFrameworkMutation from 'ee/groups/settings/compliance_frameworks/graphql/queries/create_compliance_framework.mutation.graphql';
 import CreateForm from 'ee/groups/settings/compliance_frameworks/components/create_form.vue';
-import SharedForm from 'ee/groups/settings/compliance_frameworks/components/shared_form.vue';
 import FormStatus from 'ee/groups/settings/compliance_frameworks/components/form_status.vue';
+import SharedForm from 'ee/groups/settings/compliance_frameworks/components/shared_form.vue';
 import { SAVE_ERROR } from 'ee/groups/settings/compliance_frameworks/constants';
+import createComplianceFrameworkMutation from 'ee/groups/settings/compliance_frameworks/graphql/queries/create_compliance_framework.mutation.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import { visitUrl } from '~/lib/utils/url_utility';
 
 import * as Sentry from '~/sentry/wrapper';

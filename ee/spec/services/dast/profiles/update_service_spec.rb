@@ -3,21 +3,23 @@
 require 'spec_helper'
 
 RSpec.describe Dast::Profiles::UpdateService do
-  let_it_be(:project) { create(:project) }
+  let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:dast_profile) { create(:dast_profile, project: project) }
+  let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project) }
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
-  let_it_be(:params) do
+  let(:default_params) do
     {
-      id: dast_profile.id,
+      dast_profile: dast_profile,
       dast_site_profile_id: dast_site_profile.id,
       dast_scanner_profile_id: dast_scanner_profile.id,
       name: SecureRandom.hex,
       description: SecureRandom.hex
     }
   end
+
+  let(:params) { default_params }
 
   subject do
     described_class.new(
@@ -81,7 +83,7 @@ RSpec.describe Dast::Profiles::UpdateService do
         end
 
         it 'updates the dast_profile' do
-          updated_dast_profile = subject.payload.reload
+          updated_dast_profile = subject.payload[:dast_profile].reload
 
           aggregate_failures do
             expect(updated_dast_profile.dast_site_profile.id).to eq(params[:dast_site_profile_id])
@@ -91,13 +93,29 @@ RSpec.describe Dast::Profiles::UpdateService do
           end
         end
 
-        context 'when id param is missing' do
+        context 'when param run_after_update: true' do
+          let(:params) { default_params.merge(run_after_update: true) }
+
+          it 'calls DastOnDemandScans::CreateService' do
+            params = { dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile }
+
+            expect(DastOnDemandScans::CreateService).to receive(:new).with(hash_including(params: params)).and_call_original
+
+            subject
+          end
+
+          it 'creates a ci_pipeline' do
+            expect { subject }.to change { Ci::Pipeline.count }.by(1)
+          end
+        end
+
+        context 'when dast_profile param is missing' do
           let(:params) { {} }
 
           it 'communicates failure' do
             aggregate_failures do
               expect(subject.status).to eq(:error)
-              expect(subject.message).to eq('ID parameter missing')
+              expect(subject.message).to eq('Profile parameter missing')
             end
           end
         end

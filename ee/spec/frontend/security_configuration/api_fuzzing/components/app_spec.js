@@ -1,13 +1,13 @@
-import Vue from 'vue';
-import VueApollo from 'vue-apollo';
+import { GlAlert, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
-import { GlAlert, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
-import { stripTypenames } from 'helpers/graphql_helpers';
-import createMockApollo from 'helpers/mock_apollo_helper';
-import apiFuzzingCiConfigurationQuery from 'ee/security_configuration/api_fuzzing/graphql/api_fuzzing_ci_configuration.query.graphql';
+import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 import App from 'ee/security_configuration/api_fuzzing/components/app.vue';
 import ConfigurationForm from 'ee/security_configuration/api_fuzzing/components/configuration_form.vue';
+import apiFuzzingCiConfigurationQuery from 'ee/security_configuration/api_fuzzing/graphql/api_fuzzing_ci_configuration.query.graphql';
+import { stripTypenames } from 'helpers/graphql_helpers';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { apiFuzzingConfigurationQueryResponse } from '../mock_data';
 
 Vue.use(VueApollo);

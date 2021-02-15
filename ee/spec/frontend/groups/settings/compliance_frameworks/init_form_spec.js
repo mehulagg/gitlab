@@ -1,8 +1,8 @@
 import { createWrapper } from '@vue/test-utils';
 
-import { createComplianceFrameworksFormApp } from 'ee/groups/settings/compliance_frameworks/init_form';
 import CreateForm from 'ee/groups/settings/compliance_frameworks/components/create_form.vue';
 import EditForm from 'ee/groups/settings/compliance_frameworks/components/edit_form.vue';
+import { createComplianceFrameworksFormApp } from 'ee/groups/settings/compliance_frameworks/init_form';
 import { suggestedLabelColors } from './mock_data';
 
 describe('createComplianceFrameworksFormApp', () => {

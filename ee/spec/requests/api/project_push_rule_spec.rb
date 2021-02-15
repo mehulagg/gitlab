@@ -4,9 +4,10 @@ require 'spec_helper'
 
 RSpec.describe API::ProjectPushRule, 'ProjectPushRule', api: true do
   include ApiHelpers
-  let(:user) { create(:user) }
-  let(:user3) { create(:user) }
-  let!(:project) { create(:project, :repository, creator_id: user.id, namespace: user.namespace) }
+
+  let_it_be(:user) { create(:user) }
+  let_it_be(:user3) { create(:user) }
+  let_it_be(:project) { create(:project, :repository, creator_id: user.id, namespace: user.namespace) }
 
   before do
     stub_licensed_features(push_rules: push_rules_enabled,
@@ -192,6 +193,15 @@ RSpec.describe API::ProjectPushRule, 'ProjectPushRule', api: true do
           end
         end
       end
+
+      context 'invalid params', :aggregate_failures do
+        let(:rules_params) { { max_file_size: -10 } }
+
+        it 'returns an error' do
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to match('max_file_size' => ['must be greater than or equal to 0'])
+        end
+      end
     end
 
     it 'adds push rule to project with no file size' do
@@ -217,16 +227,14 @@ RSpec.describe API::ProjectPushRule, 'ProjectPushRule', api: true do
         expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
-  end
-
-  describe "POST /projects/:id/push_rule" do
-    before do
-      create(:push_rule, project: project)
-    end
 
     context "with existing push rule" do
-      it "does not add push rule to project" do
-        post api("/projects/#{project.id}/push_rule", user), params: { deny_delete_tag: true }
+      before do
+        create(:push_rule, project: project)
+      end
+
+      it 'returns an error response' do
+        post api("/projects/#{project.id}/push_rule", user), params: rules_params
 
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
       end
@@ -234,114 +242,144 @@ RSpec.describe API::ProjectPushRule, 'ProjectPushRule', api: true do
   end
 
   describe "PUT /projects/:id/push_rule" do
-    before do
-      create(:push_rule, project: project,
-             deny_delete_tag: true, commit_message_regex: 'Mended')
+    subject(:request) do
       put api("/projects/#{project.id}/push_rule", user), params: new_settings
     end
 
-    context "setting deny_delete_tag and commit_message_regex" do
-      let(:new_settings) do
-        { deny_delete_tag: false, commit_message_regex: 'Fixes \d+\..*' }
+    context 'with existing push rule' do
+      let_it_be(:push_rule) { create(:push_rule, project: project, deny_delete_tag: true, commit_message_regex: 'Mended') }
+
+      context "setting deny_delete_tag and commit_message_regex" do
+        let(:new_settings) do
+          { deny_delete_tag: false, commit_message_regex: 'Fixes \d+\..*' }
+        end
+
+        it "is successful" do
+          request
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+
+        it 'includes the expected settings' do
+          request
+
+          subset = new_settings.transform_keys(&:to_s)
+          expect(json_response).to include(subset)
+        end
       end
 
-      it "is successful" do
-        expect(response).to have_gitlab_http_status(:ok)
+      context "setting commit_committer_check" do
+        let(:new_settings) { { commit_committer_check: true } }
+
+        it "is successful" do
+          request
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+
+        it "sets the commit_committer_check" do
+          request
+
+          expect(json_response).to include('commit_committer_check' => true)
+        end
+
+        context 'the commit_committer_check feature is not enabled' do
+          let(:ccc_enabled) { false }
+
+          it "is an error to provide this parameter" do
+            request
+
+            expect(response).to have_gitlab_http_status(:forbidden)
+          end
+        end
       end
 
-      it 'includes the expected settings' do
-        subset = new_settings.transform_keys(&:to_s)
-        expect(json_response).to include(subset)
+      context "setting reject_unsigned_commits" do
+        let(:new_settings) { { reject_unsigned_commits: true } }
+
+        it "is successful" do
+          request
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+
+        it "sets the reject_unsigned_commits" do
+          request
+
+          expect(json_response).to include('reject_unsigned_commits' => true)
+        end
+
+        context 'the reject_unsigned_commits feature is not enabled' do
+          let(:ruc_enabled) { false }
+
+          it "is an error to provide the this parameter" do
+            request
+
+            expect(response).to have_gitlab_http_status(:forbidden)
+          end
+        end
+      end
+
+      context "not providing parameters" do
+        let(:new_settings) { {} }
+
+        it "is an error" do
+          request
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
+      end
+
+      context 'invalid params', :aggregate_failures do
+        let(:new_settings) { { max_file_size: -10 } }
+
+        it 'returns an error' do
+          request
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to match('max_file_size' => ['must be greater than or equal to 0'])
+        end
       end
     end
 
-    context "setting commit_committer_check" do
+    context 'without existing push rule' do
       let(:new_settings) { { commit_committer_check: true } }
 
-      it "is successful" do
-        expect(response).to have_gitlab_http_status(:ok)
+      it 'returns an error response', :aggregate_failures do
+        expect { request }.not_to change { PushRule.count }
+
+        expect(response).to have_gitlab_http_status(:not_found)
       end
-
-      it "sets the commit_committer_check" do
-        expect(json_response).to include('commit_committer_check' => true)
-      end
-
-      context 'the commit_committer_check feature is not enabled' do
-        let(:ccc_enabled) { false }
-
-        it "is an error to provide this parameter" do
-          expect(response).to have_gitlab_http_status(:forbidden)
-        end
-      end
-    end
-
-    context "setting reject_unsigned_commits" do
-      let(:new_settings) { { reject_unsigned_commits: true } }
-
-      it "is successful" do
-        expect(response).to have_gitlab_http_status(:ok)
-      end
-
-      it "sets the reject_unsigned_commits" do
-        expect(json_response).to include('reject_unsigned_commits' => true)
-      end
-
-      context 'the reject_unsigned_commits feature is not enabled' do
-        let(:ruc_enabled) { false }
-
-        it "is an error to provide the this parameter" do
-          expect(response).to have_gitlab_http_status(:forbidden)
-        end
-      end
-    end
-
-    context "not providing parameters" do
-      let(:new_settings) { {} }
-
-      it "is an error" do
-        expect(response).to have_gitlab_http_status(:bad_request)
-      end
-    end
-  end
-
-  describe "PUT /projects/:id/push_rule" do
-    it "gets error on non existing project push rule" do
-      put api("/projects/#{project.id}/push_rule", user),
-        params: { deny_delete_tag: false, commit_message_regex: 'Fixes \d+\..*' }
-
-      expect(response).to have_gitlab_http_status(:not_found)
     end
 
     it "does not update push rule for unauthorized user" do
-      post api("/projects/#{project.id}/push_rule", user3), params: { deny_delete_tag: true }
+      put api("/projects/#{project.id}/push_rule", user3), params: { deny_delete_tag: true }
 
       expect(response).to have_gitlab_http_status(:forbidden)
     end
   end
 
   describe "DELETE /projects/:id/push_rule" do
-    before do
-      create(:push_rule, project: project)
-    end
+    context 'for existing push rule' do
+      let_it_be(:push_rule) { create(:push_rule, project: project) }
 
-    context "maintainer" do
-      it "deletes push rule from project" do
-        delete api("/projects/#{project.id}/push_rule", user)
+      context "maintainer" do
+        it "deletes push rule from project" do
+          delete api("/projects/#{project.id}/push_rule", user)
 
-        expect(response).to have_gitlab_http_status(:no_content)
+          expect(response).to have_gitlab_http_status(:no_content)
+        end
+      end
+
+      context "user with developer_access" do
+        it "returns a 403 error" do
+          delete api("/projects/#{project.id}/push_rule", user3)
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
       end
     end
 
-    context "user with developer_access" do
-      it "returns a 403 error" do
-        delete api("/projects/#{project.id}/push_rule", user3)
-
-        expect(response).to have_gitlab_http_status(:forbidden)
-      end
-    end
-  end
-
-  describe "DELETE /projects/:id/push_rule" do
     context "for non existing push rule" do
       it "deletes push rule from project" do
         delete api("/projects/#{project.id}/push_rule", user)

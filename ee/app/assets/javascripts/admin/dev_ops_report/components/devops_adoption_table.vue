@@ -16,8 +16,8 @@ import {
   DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_BY_STORAGE_KEY,
   DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_DESC_STORAGE_KEY,
 } from '../constants';
-import DevopsAdoptionTableCellFlag from './devops_adoption_table_cell_flag.vue';
 import DevopsAdoptionDeleteModal from './devops_adoption_delete_modal.vue';
+import DevopsAdoptionTableCellFlag from './devops_adoption_table_cell_flag.vue';
 
 const NAME_HEADER = 'name';
 

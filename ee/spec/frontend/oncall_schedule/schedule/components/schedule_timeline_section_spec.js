@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
-import ScheduleTimelineSection from 'ee/oncall_schedules/components/schedule/components/schedule_timeline_section.vue';
-import WeeksHeaderItem from 'ee/oncall_schedules/components/schedule/components/preset_weeks/weeks_header_item.vue';
 import DaysHeaderItem from 'ee/oncall_schedules/components/schedule/components/preset_days/days_header_item.vue';
+import WeeksHeaderItem from 'ee/oncall_schedules/components/schedule/components/preset_weeks/weeks_header_item.vue';
+import ScheduleTimelineSection from 'ee/oncall_schedules/components/schedule/components/schedule_timeline_section.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import { getOncallSchedulesQueryResponse } from '../../mocks/apollo_mock';

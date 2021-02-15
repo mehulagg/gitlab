@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-msgid " %{project_name}#%{issuable_iid} &middot; opened %{issuable_created} by %{author}"
+msgid " %{project_name}#%{issuable_iid} &middot; opened %{issuable_created} by %{author} &middot; updated %{issuable_updated}"
 msgstr ""
 
 msgid " %{start} to %{end}"
@@ -986,6 +986,9 @@ msgid "(%{value}) has already been taken"
 msgstr ""
 
 msgid "(+%{count}&nbsp;rules)"
+msgstr ""
+
+msgid "(Group Managed Account)"
 msgstr ""
 
 msgid "(No changes)"
@@ -2891,9 +2894,6 @@ msgstr ""
 msgid "Alerts"
 msgstr ""
 
-msgid "Alerts endpoint is deprecated and should not be created or modified. Use HTTP Integrations instead."
-msgstr ""
-
 msgid "AlertsIntegrations|Alerts will be created through this integration"
 msgstr ""
 
@@ -3507,6 +3507,9 @@ msgid "An error ocurred while loading your content. Please try again."
 msgstr ""
 
 msgid "An example project for managing Kubernetes clusters integrated with GitLab"
+msgstr ""
+
+msgid "An example project that shows off the best practices for setting up GitLab for your own organization, including sample issues, merge requests, and milestones"
 msgstr ""
 
 msgid "An example showing how to use Jsonnet with GitLab dynamic child pipelines"
@@ -8481,6 +8484,9 @@ msgstr ""
 msgid "Create new"
 msgstr ""
 
+msgid "Create new %{name} by email"
+msgstr ""
+
 msgid "Create new Value Stream"
 msgstr ""
 
@@ -10863,6 +10869,9 @@ msgstr ""
 msgid "Email Notification"
 msgstr ""
 
+msgid "Email a new %{name} to this project"
+msgstr ""
+
 msgid "Email address to use for Support Desk"
 msgstr ""
 
@@ -10933,12 +10942,6 @@ msgid "EmailParticipantsWarning|%{emails}, %{andMore} will be notified of your c
 msgstr ""
 
 msgid "EmailParticipantsWarning|and %{moreCount} more"
-msgstr ""
-
-msgid "EmailToken|reset it"
-msgstr ""
-
-msgid "EmailToken|resetting..."
 msgstr ""
 
 msgid "Emails"
@@ -11226,19 +11229,13 @@ msgstr ""
 msgid "Enter one or more user ID separated by commas"
 msgstr ""
 
+msgid "Enter the %{name} description"
+msgstr ""
+
+msgid "Enter the %{name} title"
+msgstr ""
+
 msgid "Enter the code from the two-factor app on your mobile device. If you've lost your device, you may enter one of your recovery codes."
-msgstr ""
-
-msgid "Enter the issue description"
-msgstr ""
-
-msgid "Enter the issue title"
-msgstr ""
-
-msgid "Enter the merge request description"
-msgstr ""
-
-msgid "Enter the merge request title"
 msgstr ""
 
 msgid "Enter the name of your application, and we'll return a unique %{type}."
@@ -11523,6 +11520,9 @@ msgstr ""
 msgid "Epic"
 msgstr ""
 
+msgid "Epic Boards"
+msgstr ""
+
 msgid "Epic cannot be found."
 msgstr ""
 
@@ -11545,6 +11545,12 @@ msgid "Epics let you manage your portfolio of projects more efficiently and with
 msgstr ""
 
 msgid "Epics, Issues, and Merge Requests"
+msgstr ""
+
+msgid "Epics|%{startDate} – %{dueDate}"
+msgstr ""
+
+msgid "Epics|%{startDate} – No due date"
 msgstr ""
 
 msgid "Epics|Add a new epic"
@@ -11574,6 +11580,9 @@ msgstr ""
 msgid "Epics|Leave empty to inherit from milestone dates"
 msgstr ""
 
+msgid "Epics|No start date – %{dueDate}"
+msgstr ""
+
 msgid "Epics|Remove epic"
 msgstr ""
 
@@ -11599,6 +11608,9 @@ msgid "Epics|Something went wrong while creating issue."
 msgstr ""
 
 msgid "Epics|Something went wrong while fetching child epics."
+msgstr ""
+
+msgid "Epics|Something went wrong while fetching epics list."
 msgstr ""
 
 msgid "Epics|Something went wrong while fetching group epics."
@@ -13503,9 +13515,6 @@ msgid "Get started"
 msgstr ""
 
 msgid "Get started with GitLab"
-msgstr ""
-
-msgid "Get started with a project that follows best practices for setting up GitLab for your own organization, including sample Issues, Merge Requests, and Milestones"
 msgstr ""
 
 msgid "Get started with error tracking"
@@ -16286,7 +16295,40 @@ msgstr ""
 msgid "InviteEmail|%{inviter} invited you to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} as a %{role}"
 msgstr ""
 
+msgid "InviteEmail|%{inviter} invited you to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} with the %{role} permission level."
+msgstr ""
+
+msgid "InviteEmail|As a developer, you have full access to projects, so you can take an idea from concept to production."
+msgstr ""
+
+msgid "InviteEmail|As a guest, you can view projects, leave comments, and create issues."
+msgstr ""
+
+msgid "InviteEmail|As a maintainer, you have full access to projects. You can push commits to master and deploy to production."
+msgstr ""
+
+msgid "InviteEmail|As a reporter, you can view projects and reports, and leave comments on issues."
+msgstr ""
+
+msgid "InviteEmail|As a user with minimal access, you can view the high-level group from the UI and API."
+msgstr ""
+
+msgid "InviteEmail|As an owner, you have full access to projects and can manage access to the group, including inviting new members."
+msgstr ""
+
+msgid "InviteEmail|Groups assemble related projects together and grant members access to several projects at once."
+msgstr ""
+
 msgid "InviteEmail|Join now"
+msgstr ""
+
+msgid "InviteEmail|Projects can be used to host your code, track issues, collaborate on code, and continuously build, test, and deploy your app with built-in GitLab CI/CD."
+msgstr ""
+
+msgid "InviteEmail|What can I do with the %{role} permission level?"
+msgstr ""
+
+msgid "InviteEmail|What is a GitLab %{project_or_group}?"
 msgstr ""
 
 msgid "InviteEmail|You are invited to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} as a %{role}"
@@ -19529,6 +19571,12 @@ msgstr ""
 msgid "NetworkPolicies|Allow"
 msgstr ""
 
+msgid "NetworkPolicies|Allow all inbound traffic to %{selector} from %{ruleSelector} on %{ports}"
+msgstr ""
+
+msgid "NetworkPolicies|Allow all outbound traffic from %{selector} to %{ruleSelector} on %{ports}"
+msgstr ""
+
 msgid "NetworkPolicies|Are you sure you want to delete this policy? This action cannot be undone."
 msgstr ""
 
@@ -19545,12 +19593,6 @@ msgid "NetworkPolicies|Delete policy"
 msgstr ""
 
 msgid "NetworkPolicies|Delete policy: %{policy}"
-msgstr ""
-
-msgid "NetworkPolicies|Deny all inbound traffic to %{selector} from %{ruleSelector} on %{ports}"
-msgstr ""
-
-msgid "NetworkPolicies|Deny all outbound traffic from %{selector} to %{ruleSelector} on %{ports}"
 msgstr ""
 
 msgid "NetworkPolicies|Deny all traffic"
@@ -21675,6 +21717,9 @@ msgstr ""
 msgid "Pipelines|Copy trigger token"
 msgstr ""
 
+msgid "Pipelines|Could not load merged YAML content"
+msgstr ""
+
 msgid "Pipelines|Description"
 msgstr ""
 
@@ -21709,6 +21754,9 @@ msgid "Pipelines|Lint"
 msgstr ""
 
 msgid "Pipelines|Loading Pipelines"
+msgstr ""
+
+msgid "Pipelines|Merged YAML is view only"
 msgstr ""
 
 msgid "Pipelines|More Information"
@@ -21781,6 +21829,9 @@ msgid "Pipelines|Trigger user has insufficient permissions to project"
 msgstr ""
 
 msgid "Pipelines|Validating GitLab CI configuration…"
+msgstr ""
+
+msgid "Pipelines|View merged YAML"
 msgstr ""
 
 msgid "Pipelines|Visualize"
@@ -23929,6 +23980,9 @@ msgid "ProtectedEnvironment|Your environment has been unprotected"
 msgstr ""
 
 msgid "Protip:"
+msgstr ""
+
+msgid "Protip: %{linkStart}Auto DevOps%{linkEnd} uses Kubernetes clusters to deploy your code!"
 msgstr ""
 
 msgid "Protocol"
@@ -29317,6 +29371,9 @@ msgstr ""
 msgid "The status of the table below only applies to the default branch and is based on the %{linkStart}latest pipeline%{linkEnd}. Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan."
 msgstr ""
 
+msgid "The subject will be used as the title of the new issue, and the message will be the description. %{quickActionsLinkStart}Quick actions%{quickActionsLinkEnd} and styling with %{markdownLinkStart}Markdown%{markdownLinkEnd} are supported."
+msgstr ""
+
 msgid "The tag name can't be changed for an existing release."
 msgstr ""
 
@@ -29401,6 +29458,9 @@ msgstr ""
 msgid "There are no charts configured for this page"
 msgstr ""
 
+msgid "There are no closed epics"
+msgstr ""
+
 msgid "There are no closed issues"
 msgstr ""
 
@@ -29423,6 +29483,9 @@ msgid "There are no labels yet"
 msgstr ""
 
 msgid "There are no matching files"
+msgstr ""
+
+msgid "There are no open epics"
 msgstr ""
 
 msgid "There are no open issues"
@@ -29561,9 +29624,6 @@ msgid "There was an error fetching the Geo Settings"
 msgstr ""
 
 msgid "There was an error fetching the Node's Groups"
-msgstr ""
-
-msgid "There was an error fetching the Search Counts"
 msgstr ""
 
 msgid "There was an error fetching the deploy freezes."
@@ -29926,6 +29986,9 @@ msgstr ""
 msgid "This is a merge train pipeline"
 msgstr ""
 
+msgid "This is a private email address %{helpIcon} generated just for you. Anyone who gets ahold of it can create issues or merge requests as if they were you. You should %{resetLinkStart}reset it%{resetLinkEnd} if that ever happens."
+msgstr ""
+
 msgid "This is a security log of important events involving your account."
 msgstr ""
 
@@ -30221,6 +30284,9 @@ msgid "Thread to reply to cannot be found"
 msgstr ""
 
 msgid "Threat Monitoring"
+msgstr ""
+
+msgid "ThreatMonitoring|Alert Details"
 msgstr ""
 
 msgid "ThreatMonitoring|Alerts"
@@ -33347,6 +33413,9 @@ msgid "You can always edit this later"
 msgstr ""
 
 msgid "You can create a new %{link}."
+msgstr ""
+
+msgid "You can create a new %{name} inside this project by sending an email to the following email address:"
 msgstr ""
 
 msgid "You can create a new Personal Access Token by visiting %{link}"

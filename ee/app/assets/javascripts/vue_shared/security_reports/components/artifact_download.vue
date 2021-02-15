@@ -1,10 +1,10 @@
 <script>
 import { reportTypeToSecurityReportTypeEnum } from 'ee/vue_shared/security_reports/constants';
-import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_download_paths.query.graphql';
-import SecurityReportDownloadDropdown from '~/vue_shared/security_reports/components/security_report_download_dropdown.vue';
-import { extractSecurityReportArtifacts } from '~/vue_shared/security_reports/utils';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
+import SecurityReportDownloadDropdown from '~/vue_shared/security_reports/components/security_report_download_dropdown.vue';
+import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_download_paths.query.graphql';
+import { extractSecurityReportArtifacts } from '~/vue_shared/security_reports/utils';
 
 export default {
   components: {

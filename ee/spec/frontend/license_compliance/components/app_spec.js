@@ -3,7 +3,6 @@ import { shallowMount, mount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import { stubTransition } from 'helpers/stub_transition';
 import LicenseComplianceApp from 'ee/license_compliance/components/app.vue';
 import DetectedLicensesTable from 'ee/license_compliance/components/detected_licenses_table.vue';
 import PipelineInfo from 'ee/license_compliance/components/pipeline_info.vue';
@@ -18,6 +17,7 @@ import {
   blacklistedLicense,
 } from 'ee_jest/vue_shared/license_compliance/mock_data';
 import setWindowLocation from 'helpers/set_window_location_helper';
+import { stubTransition } from 'helpers/stub_transition';
 import { TEST_HOST } from 'helpers/test_constants';
 
 Vue.use(Vuex);
