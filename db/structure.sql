@@ -10959,6 +10959,27 @@ CREATE SEQUENCE ci_triggers_id_seq
 
 ALTER SEQUENCE ci_triggers_id_seq OWNED BY ci_triggers.id;
 
+CREATE TABLE ci_variable_secret_keys (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    encrypted_secret_key text NOT NULL,
+    encrypted_secret_key_iv text NOT NULL,
+    encrypted_secret_key_salt text NOT NULL,
+    CONSTRAINT check_3d16c12fa5 CHECK ((char_length(encrypted_secret_key_salt) <= 255)),
+    CONSTRAINT check_b3d61e5dbd CHECK ((char_length(encrypted_secret_key_iv) <= 255)),
+    CONSTRAINT check_d96d7026c0 CHECK ((char_length(encrypted_secret_key) <= 255))
+);
+
+CREATE SEQUENCE ci_variable_secret_keys_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_variable_secret_keys_id_seq OWNED BY ci_variable_secret_keys.id;
+
 CREATE TABLE ci_variables (
     id integer NOT NULL,
     key character varying NOT NULL,
@@ -18787,6 +18808,8 @@ ALTER TABLE ONLY ci_trigger_requests ALTER COLUMN id SET DEFAULT nextval('ci_tri
 
 ALTER TABLE ONLY ci_triggers ALTER COLUMN id SET DEFAULT nextval('ci_triggers_id_seq'::regclass);
 
+ALTER TABLE ONLY ci_variable_secret_keys ALTER COLUMN id SET DEFAULT nextval('ci_variable_secret_keys_id_seq'::regclass);
+
 ALTER TABLE ONLY ci_variables ALTER COLUMN id SET DEFAULT nextval('ci_variables_id_seq'::regclass);
 
 ALTER TABLE ONLY cluster_agent_tokens ALTER COLUMN id SET DEFAULT nextval('cluster_agent_tokens_id_seq'::regclass);
@@ -19922,6 +19945,9 @@ ALTER TABLE ONLY ci_trigger_requests
 
 ALTER TABLE ONLY ci_triggers
     ADD CONSTRAINT ci_triggers_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_variable_secret_keys
+    ADD CONSTRAINT ci_variable_secret_keys_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY ci_variables
     ADD CONSTRAINT ci_variables_pkey PRIMARY KEY (id);
