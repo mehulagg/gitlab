@@ -135,7 +135,7 @@ class NotifyPreview < ActionMailer::Preview
 
   def pages_domain_enabled_email
     cleanup do
-      pages_domain = PagesDomain.new(domain: 'my.example.com', project: project, verified_at: Time.now, enabled_until: 1.week.from_now)
+      pages_domain = PagesDomain.new(domain: 'my.example.com', project: project, verified_at: Time.current, enabled_until: 1.week.from_now)
 
       Notify.pages_domain_enabled_email(pages_domain, user).message
     end

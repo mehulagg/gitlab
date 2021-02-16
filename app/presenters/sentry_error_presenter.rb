@@ -21,7 +21,7 @@ class SentryErrorPresenter < Gitlab::View::Presenter::Delegated
     utc_offset = Time.zone_offset('UTC')
 
     error.frequency.map do |f|
-      FrequencyStruct.new(time: Time.at(f[0], in: utc_offset), count: f[1])
+      FrequencyStruct.new(time: Time.at(f[0], in: utc_offset), count: f[1]) # rubocop: disable Rails/TimeZone
     end
   end
 end

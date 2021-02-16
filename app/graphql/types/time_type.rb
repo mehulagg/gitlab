@@ -6,7 +6,7 @@ module Types
     description 'Time represented in ISO 8601'
 
     def self.coerce_input(value, ctx)
-      Time.parse(value)
+      Time.zone.parse(value)
     rescue ArgumentError, TypeError => e
       raise GraphQL::CoercionError, e.message
     end

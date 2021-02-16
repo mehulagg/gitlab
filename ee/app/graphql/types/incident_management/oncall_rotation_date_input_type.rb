@@ -22,7 +22,7 @@ module Types
         raise Gitlab::Graphql::Errors::ArgumentError, 'Date given is invalid' unless DATE_FORMAT.match(date)
         raise Gitlab::Graphql::Errors::ArgumentError, 'Time given is invalid' unless TIME_FORMAT.match(time)
 
-        Time.parse("#{date} #{time}")
+        Time.parse("#{date} #{time}") # rubocop: disable Rails/TimeZone
       rescue ArgumentError, TypeError
         raise Gitlab::Graphql::Errors::ArgumentError, 'Date & time is invalid'
       end

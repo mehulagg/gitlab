@@ -162,7 +162,7 @@ class NotesFinder
     return notes unless @params[:last_fetched_at]
 
     # Default to 0 to remain compatible with old clients
-    last_fetched_at = @params.fetch(:last_fetched_at, Time.at(0))
+    last_fetched_at = @params.fetch(:last_fetched_at, Time.zone.at(0))
 
     # Use overlapping intervals to avoid worrying about race conditions
     last_fetched_at -= FETCH_OVERLAP

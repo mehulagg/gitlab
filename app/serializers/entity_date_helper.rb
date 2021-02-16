@@ -7,7 +7,7 @@ module EntityDateHelper
   def interval_in_words(diff)
     return 'Not started' unless diff
 
-    distance_of_time_in_words(Time.now, diff, scope: 'datetime.time_ago_in_words')
+    distance_of_time_in_words(Time.zone.now, diff, scope: 'datetime.time_ago_in_words')
   end
 
   # Converts seconds into a hash such as:
@@ -52,8 +52,8 @@ module EntityDateHelper
     elsif start_date&.future?
       content_tag(:strong, _('Upcoming'))
     elsif due_date
-      is_upcoming = (due_date - Date.today).to_i > 0
-      time_ago = distance_of_time_in_words(due_date, Date.today)
+      is_upcoming = (due_date - Date.current).to_i > 0
+      time_ago = distance_of_time_in_words(due_date, Date.current)
 
       # https://gitlab.com/gitlab-org/gitlab-foss/issues/49440
       #
@@ -66,7 +66,7 @@ module EntityDateHelper
 
       "#{content} #{remaining_or_ago}".html_safe
     elsif start_date&.past?
-      days = (Date.today - start_date).to_i
+      days = (Date.current - start_date).to_i
       "#{content_tag(:strong, days)} #{'day'.pluralize(days)} elapsed".html_safe
     end
   end
