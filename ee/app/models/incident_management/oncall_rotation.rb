@@ -76,7 +76,9 @@ module IncidentManagement
     end
 
     def active_period
-      ActivePeriod.new(active_period_start, active_period_end)
+      strong_memoize(:active_period) do
+        ActivePeriod.new(active_period_start, active_period_end)
+      end
     end
 
     def has_shift_active_period?
