@@ -32,17 +32,13 @@ class Groups::Analytics::CoverageReportsController < Groups::Analytics::Applicat
   end
 
   def report_results
-    if ::Gitlab::Ci::Features.use_coverage_data_new_finder?(@group)
-      ::Ci::Testing::DailyBuildGroupReportResultsFinder.new(
-        params: new_finder_params,
-        current_user: current_user
-      ).execute
-    else
-      Ci::DailyBuildGroupReportResultsByGroupFinder.new(**finder_params).execute
-    end
+    ::Ci::DailyBuildGroupReportResultsFinder.new(
+      params: finder_params,
+      current_user: current_user
+    ).execute
   end
 
-  def new_finder_params
+  def finder_params
     {
       group: @group,
       coverage: true,
@@ -50,17 +46,6 @@ class Groups::Analytics::CoverageReportsController < Groups::Analytics::Applicat
       end_date: Date.parse(params.require(:end_date)),
       ref_path: params[:ref_path],
       sort: true
-    }
-  end
-
-  def finder_params
-    {
-      current_user: current_user,
-      group: @group,
-      project_ids: params.permit(project_ids: [])[:project_ids],
-      ref_path: params[:ref_path],
-      start_date: Date.parse(params.require(:start_date)),
-      end_date: Date.parse(params.require(:end_date))
     }
   end
 
