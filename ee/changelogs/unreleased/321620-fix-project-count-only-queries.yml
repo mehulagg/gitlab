@@ -1,0 +1,5 @@
+---
+title: 'Advanced Search: fix project count_only queries'
+merge_request: 54303
+author:
+type: fixed

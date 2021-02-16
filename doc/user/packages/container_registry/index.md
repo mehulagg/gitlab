@@ -144,7 +144,7 @@ Before you can build and push images by using GitLab CI/CD, you must authenticat
 
 To use CI/CD to authenticate, you can use:
 
-- The `CI_REGISTRY_USER` variable.
+- The `CI_REGISTRY_USER` CI/CD variable.
 
   This variable has read-write access to the Container Registry and is valid for
   one job only. Its password is also automatically created and assigned to `CI_REGISTRY_PASSWORD`.
@@ -209,7 +209,7 @@ build:
     - docker push $CI_REGISTRY/group/project/image:latest
 ```
 
-You can also make use of [other variables](../../../ci/variables/README.md) to avoid hard-coding:
+You can also make use of [other CI/CD variables](../../../ci/variables/README.md) to avoid hard-coding:
 
 ```yaml
 build:
@@ -382,7 +382,7 @@ The following example defines two stages: `build`, and `clean`. The
 `build_image` job builds the Docker image for the branch, and the
 `delete_image` job deletes it. The `reg` executable is downloaded and used to
 remove the image matching the `$CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG`
-[environment variable](../../../ci/variables/predefined_variables.md).
+[predefined CI/CD variable](../../../ci/variables/predefined_variables.md).
 
 To use this example, change the `IMAGE_TAG` variable to match your needs:
 
@@ -559,23 +559,29 @@ Here are examples of regex patterns you may want to use:
   v.+
   ```
 
-- Match tags that contain `master`:
+- Match only the tag named `master`:
 
   ```plaintext
   master
   ```
 
-- Match tags that either start with `v`, contain `master`, or contain `release`:
+- Match tags that are either named or start with `release`:
 
   ```plaintext
-  (?:v.+|master|release)
+  release.*
+  ```
+
+- Match tags that either start with `v`, are named `master`, or begin with `release`:
+
+  ```plaintext
+  (?:v.+|master|release.*)
   ```
 
 ### Set cleanup limits to conserve resources 
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/288812) in GitLab 13.9.
 > - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
+> - It's enabled on GitLab.com.
 > - It's not recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-cleanup-policy-limits).
 
@@ -649,7 +655,7 @@ If you see the following message:
 
 Check the regex patterns to ensure they are valid.
 
-You can use [Rubular](https://rubular.com/) to check your regex.
+GitLab uses [RE2 syntax](https://github.com/google/re2/wiki/Syntax) for regular expressions in the cleanup policy. You can test them with the [regex101 regex tester](https://regex101.com/).
 View some common [regex pattern examples](#regex-pattern-examples).
 
 ## Use the Container Registry to store Helm Charts

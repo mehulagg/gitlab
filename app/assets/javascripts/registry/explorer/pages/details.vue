@@ -2,30 +2,32 @@
 import { GlKeysetPagination, GlResizeObserverDirective } from '@gitlab/ui';
 import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
 import createFlash from '~/flash';
-import Tracking from '~/tracking';
 import axios from '~/lib/utils/axios_utils';
 import { joinPaths } from '~/lib/utils/url_utility';
+import Tracking from '~/tracking';
+import DeleteImage from '../components/delete_image.vue';
 import DeleteAlert from '../components/details_page/delete_alert.vue';
-import PartialCleanupAlert from '../components/details_page/partial_cleanup_alert.vue';
 import DeleteModal from '../components/details_page/delete_modal.vue';
 import DetailsHeader from '../components/details_page/details_header.vue';
+import EmptyState from '../components/details_page/empty_state.vue';
+import PartialCleanupAlert from '../components/details_page/partial_cleanup_alert.vue';
+import StatusAlert from '../components/details_page/status_alert.vue';
 import TagsList from '../components/details_page/tags_list.vue';
 import TagsLoader from '../components/details_page/tags_loader.vue';
-import EmptyState from '../components/details_page/empty_state.vue';
-
-import getContainerRepositoryDetailsQuery from '../graphql/queries/get_container_repository_details.query.graphql';
-import deleteContainerRepositoryTagsMutation from '../graphql/mutations/delete_container_repository_tags.mutation.graphql';
 
 import {
   ALERT_SUCCESS_TAG,
   ALERT_DANGER_TAG,
   ALERT_SUCCESS_TAGS,
   ALERT_DANGER_TAGS,
+  ALERT_DANGER_IMAGE,
   GRAPHQL_PAGE_SIZE,
   FETCH_IMAGES_LIST_ERROR_MESSAGE,
   UNFINISHED_STATUS,
   MISSING_OR_DELETE_IMAGE_BREADCRUMB,
 } from '../constants/index';
+import deleteContainerRepositoryTagsMutation from '../graphql/mutations/delete_container_repository_tags.mutation.graphql';
+import getContainerRepositoryDetailsQuery from '../graphql/queries/get_container_repository_details.query.graphql';
 
 export default {
   name: 'RegistryDetailsPage',
@@ -38,6 +40,8 @@ export default {
     TagsList,
     TagsLoader,
     EmptyState,
+    StatusAlert,
+    DeleteImage,
   },
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
@@ -71,6 +75,7 @@ export default {
       mutationLoading: false,
       deleteAlertType: null,
       hidePartialCleanupWarning: false,
+      deleteImageAlert: false,
     };
   },
   computed: {
@@ -105,6 +110,9 @@ export default {
     hasNoTags() {
       return this.tags.length === 0;
     },
+    pageActionsAreDisabled() {
+      return Boolean(this.image?.status);
+    },
   },
   methods: {
     updateBreadcrumb() {
@@ -112,11 +120,19 @@ export default {
       this.breadCrumbState.updateName(name);
     },
     deleteTags(toBeDeleted) {
+      this.deleteImageAlert = false;
       this.itemsToBeDeleted = this.tags.filter((tag) => toBeDeleted[tag.name]);
       this.track('click_button');
       this.$refs.deleteModal.show();
     },
-    async handleDelete() {
+    confirmDelete() {
+      if (this.deleteImageAlert) {
+        this.$refs.deleteImage.doDelete();
+      } else {
+        this.handleDeleteTag();
+      }
+    },
+    async handleDeleteTag() {
       this.track('confirm_delete');
       const { itemsToBeDeleted } = this;
       this.itemsToBeDeleted = [];
@@ -184,6 +200,18 @@ export default {
         feature_name: this.config.userCalloutId,
       });
     },
+    deleteImage() {
+      this.deleteImageAlert = true;
+      this.itemsToBeDeleted = [{ path: this.image.path }];
+      this.$refs.deleteModal.show();
+    },
+    deleteImageError() {
+      this.deleteAlertType = ALERT_DANGER_IMAGE;
+    },
+    deleteImageIniit() {
+      this.itemsToBeDeleted = [];
+      this.mutationLoading = true;
+    },
   },
 };
 </script>
@@ -205,13 +233,25 @@ export default {
         @dismiss="dismissPartialCleanupWarning"
       />
 
-      <details-header :image="image" :metadata-loading="isLoading" />
+      <status-alert v-if="image.status" :status="image.status" />
+
+      <details-header
+        :image="image"
+        :metadata-loading="isLoading"
+        :disabled="pageActionsAreDisabled"
+        @delete="deleteImage"
+      />
 
       <tags-loader v-if="isLoading" />
       <template v-else>
         <empty-state v-if="hasNoTags" :no-containers-image="config.noContainersImage" />
         <template v-else>
-          <tags-list :tags="tags" :is-mobile="isMobile" @delete="deleteTags" />
+          <tags-list
+            :tags="tags"
+            :is-mobile="isMobile"
+            :disabled="pageActionsAreDisabled"
+            @delete="deleteTags"
+          />
           <div class="gl-display-flex gl-justify-content-center">
             <gl-keyset-pagination
               v-if="showPagination"
@@ -225,10 +265,20 @@ export default {
         </template>
       </template>
 
+      <delete-image
+        :id="image.id"
+        ref="deleteImage"
+        use-update-fn
+        @start="deleteImageIniit"
+        @error="deleteImageError"
+        @end="mutationLoading = false"
+      />
+
       <delete-modal
         ref="deleteModal"
         :items-to-be-deleted="itemsToBeDeleted"
-        @confirmDelete="handleDelete"
+        :delete-image="deleteImageAlert"
+        @confirmDelete="confirmDelete"
         @cancel="track('cancel_delete')"
       />
     </template>

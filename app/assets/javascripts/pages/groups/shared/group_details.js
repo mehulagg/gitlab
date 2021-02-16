@@ -1,16 +1,16 @@
 /* eslint-disable no-new */
 
-import { getPagePath, getDashPath } from '~/lib/utils/common_utils';
+import ShortcutsNavigation from '~/behaviors/shortcuts/shortcuts_navigation';
 import { ACTIVE_TAB_SHARED, ACTIVE_TAB_ARCHIVED } from '~/groups/constants';
+import initInviteMembersBanner from '~/groups/init_invite_members_banner';
+import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
+import initInviteMembersTrigger from '~/invite_members/init_invite_members_trigger';
+import { getPagePath, getDashPath } from '~/lib/utils/common_utils';
+import initNotificationsDropdown from '~/notifications';
 import notificationsDropdown from '~/notifications_dropdown';
 import NotificationsForm from '~/notifications_form';
 import ProjectsList from '~/projects_list';
-import ShortcutsNavigation from '~/behaviors/shortcuts/shortcuts_navigation';
 import GroupTabs from './group_tabs';
-import initInviteMembersBanner from '~/groups/init_invite_members_banner';
-import initInviteMembersTrigger from '~/invite_members/init_invite_members_trigger';
-import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
-import initNotificationsDropdown from '~/notifications';
 
 export default function initGroupDetails(actionName = 'show') {
   const loadableActions = [ACTIVE_TAB_SHARED, ACTIVE_TAB_ARCHIVED];

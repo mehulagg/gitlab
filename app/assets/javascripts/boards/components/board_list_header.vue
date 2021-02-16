@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlButtonGroup,
@@ -9,14 +8,15 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
+import { isListDraggable } from '~/boards/boards_util';
+import { isScopedLabel } from '~/lib/utils/common_utils';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { n__, s__, __ } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
-import { isScopedLabel } from '~/lib/utils/common_utils';
-import { isListDraggable } from '~/boards/boards_util';
-import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
+import AccessorUtilities from '../../lib/utils/accessor';
 import { inactiveId, LIST, ListType } from '../constants';
 import eventHub from '../eventhub';
-import AccessorUtilities from '../../lib/utils/accessor';
 import IssueCount from './issue_count.vue';
 
 export default {
@@ -86,16 +86,16 @@ export default {
       return !this.disabled && this.listType !== ListType.closed;
     },
     showMilestoneListDetails() {
-      return (
-        this.listType === ListType.milestone &&
-        this.list.milestone &&
-        (!this.list.collapsed || !this.isSwimlanesHeader)
-      );
+      return this.listType === ListType.milestone && this.list.milestone && this.showListDetails;
     },
     showAssigneeListDetails() {
-      return (
-        this.listType === ListType.assignee && (!this.list.collapsed || !this.isSwimlanesHeader)
-      );
+      return this.listType === ListType.assignee && this.showListDetails;
+    },
+    showIterationListDetails() {
+      return this.listType === ListType.iteration && this.showListDetails;
+    },
+    showListDetails() {
+      return !this.list.collapsed || !this.isSwimlanesHeader;
     },
     issuesCount() {
       return this.list.issuesCount;
@@ -216,6 +216,17 @@ export default {
         }"
       >
         <gl-icon name="timer" />
+      </span>
+
+      <span
+        v-if="showIterationListDetails"
+        aria-hidden="true"
+        :class="{
+          'gl-mt-3 gl-rotate-90': list.collapsed,
+          'gl-mr-2': !list.collapsed,
+        }"
+      >
+        <gl-icon name="iteration" />
       </span>
 
       <a

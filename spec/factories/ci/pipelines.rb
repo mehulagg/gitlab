@@ -93,6 +93,30 @@ FactoryBot.define do
         end
       end
 
+      trait :with_codequality_report do
+        status { :success }
+
+        after(:build) do |pipeline, evaluator|
+          pipeline.builds << build(:ci_build, :codequality_report, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
+      trait :with_sast_report do
+        status { :success }
+
+        after(:build) do |pipeline, evaluator|
+          pipeline.builds << build(:ci_build, :sast_report, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
+      trait :with_secret_detection_report do
+        status { :success }
+
+        after(:build) do |pipeline, evaluator|
+          pipeline.builds << build(:ci_build, :secret_detection_report, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
       trait :with_test_reports do
         status { :success }
 
@@ -155,9 +179,9 @@ FactoryBot.define do
         end
       end
 
-      trait :with_quality_report_artifact do
+      trait :with_codequality_mr_diff_report do
         after(:build) do |pipeline, evaluator|
-          pipeline.pipeline_artifacts << build(:ci_pipeline_artifact, :with_codequality_report, pipeline: pipeline, project: pipeline.project)
+          pipeline.pipeline_artifacts << build(:ci_pipeline_artifact, :with_codequality_mr_diff_report, pipeline: pipeline, project: pipeline.project)
         end
       end
 

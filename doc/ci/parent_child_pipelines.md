@@ -180,7 +180,10 @@ pipelines, which was later increased to two. A parent pipeline can trigger many 
 pipelines, and these child pipelines can trigger their own child pipelines. It's not
 possible to trigger another level of child pipelines.
 
-## Pass variables to a child pipeline
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For an overview, see [Nested Dynamic Pipelines](https://youtu.be/C5j3ju9je2M).
 
-You can [pass variables to a downstream pipeline](multi_project_pipelines.md#passing-variables-to-a-downstream-pipeline)
+## Pass CI/CD variables to a child pipeline
+
+You can [pass CI/CD variables to a downstream pipeline](multi_project_pipelines.md#passing-cicd-variables-to-a-downstream-pipeline)
 the same way as for multi-project pipelines.

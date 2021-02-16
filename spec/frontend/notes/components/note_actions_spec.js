@@ -1,12 +1,12 @@
-import Vue from 'vue';
 import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import Vue from 'vue';
 import { TEST_HOST } from 'spec/test_constants';
-import createStore from '~/notes/stores';
-import noteActions from '~/notes/components/note_actions.vue';
 import axios from '~/lib/utils/axios_utils';
-import { userDataMock } from '../mock_data';
 import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
+import noteActions from '~/notes/components/note_actions.vue';
+import createStore from '~/notes/stores';
+import { userDataMock } from '../mock_data';
 
 describe('noteActions', () => {
   let wrapper;

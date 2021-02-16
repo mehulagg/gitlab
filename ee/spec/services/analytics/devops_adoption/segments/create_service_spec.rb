@@ -8,7 +8,7 @@ RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
   let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:group) { create(:group) }
 
-  let(:params) { { name: 'my service', groups: [group] } }
+  let(:params) { { namespace: group } }
   let(:segment) { subject.payload[:segment] }
 
   subject { described_class.new(params: params, current_user: admin).execute }
@@ -19,8 +19,7 @@ RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
 
   it 'persists the segment' do
     expect(subject).to be_success
-    expect(segment.name).to eq('my service')
-    expect(segment.groups).to eq([group])
+    expect(segment.namespace).to eq(group)
   end
 
   it 'schedules for snapshot creation' do
@@ -43,36 +42,15 @@ RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
     end
   end
 
-  context 'when params are invalid' do
+  context 'when namespace is not given' do
     before do
-      params.delete(:name)
+      params.delete(:namespace)
     end
 
-    it 'does not persist the segment' do
+    it "doesn't save the segment" do
       expect(subject).to be_error
-      expect(segment.errors[:name]).not_to be_empty
-    end
-  end
-
-  context 'when groups are not given' do
-    before do
-      params.delete(:groups)
-    end
-
-    it 'persists the segment without groups' do
-      expect(subject).to be_success
-      expect(segment.segment_selections).to be_empty
-    end
-  end
-
-  context 'when duplicated groups are given' do
-    before do
-      params[:groups] = [group] * 5
-    end
-
-    it 'persists the segments with unique groups' do
-      expect(subject).to be_success
-      expect(segment.groups).to eq([group])
+      expect(subject.message).to eq('Validation error')
+      expect(segment.namespace).to be_nil
     end
   end
 end

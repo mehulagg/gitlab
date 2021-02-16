@@ -137,6 +137,12 @@ describe('EpicsSelect', () => {
 
           expect(wrapperStandalone.vm.isDropdownShowing).toBe(true);
         });
+
+        it('should emit `hide` event', () => {
+          wrapperStandalone.vm.hideDropdown();
+
+          expect(wrapperStandalone.emitted().hide.length).toBe(1);
+        });
       });
 
       describe('handleItemSelect', () => {

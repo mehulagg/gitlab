@@ -18,6 +18,7 @@ many organizations .
 > - **Supported users (approximate):** 1,000
 > - **High Availability:** No. For a highly-available environment, you can
 >   follow the [3K reference architecture](3k_users.md).
+> - **Test requests per second (RPS) rates:** API: 20 RPS, Web: 2 RPS, Git (Pull): 2 RPS, Git (Push): 1 RPS
 
 | Users        | Configuration           | GCP            | AWS             | Azure          |
 |--------------|-------------------------|----------------|-----------------|----------------|
@@ -41,7 +42,7 @@ the swap available when needed.
 ## Setup instructions
 
 To install GitLab for this default reference architecture, use the standard
-[installation instructions](../../install/README.md).
+[installation instructions](../../install/index.md).
 
 You can also optionally configure GitLab to use an [external PostgreSQL service](../postgresql/external.md)
 or an [external object storage service](../object_storage.md) for added

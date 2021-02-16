@@ -1,5 +1,5 @@
 <script>
-/* eslint-disable vue/require-default-prop, vue/no-v-html */
+/* eslint-disable vue/require-default-prop */
 import {
   GlIcon,
   GlLink,
@@ -7,11 +7,12 @@ import {
   GlSprintf,
   GlTooltip,
   GlTooltipDirective,
+  GlSafeHtmlDirective,
 } from '@gitlab/ui';
 import mrWidgetPipelineMixin from 'ee_else_ce/vue_merge_request_widget/mixins/mr_widget_pipeline';
 import { s__, n__ } from '~/locale';
-import PipelineStage from '~/pipelines/components/pipelines_list/stage.vue';
 import PipelineArtifacts from '~/pipelines/components/pipelines_list/pipelines_artifacts.vue';
+import PipelineStage from '~/pipelines/components/pipelines_list/stage.vue';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 
@@ -32,6 +33,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    SafeHtml: GlSafeHtmlDirective,
   },
   mixins: [mrWidgetPipelineMixin],
   props: {
@@ -155,13 +157,14 @@ export default {
       >
         {{ $options.monitoringPipelineText }}
         <gl-link
+          v-gl-tooltip
           :href="ciTroubleshootingDocsPath"
           target="_blank"
+          :title="__('About this feature')"
           class="gl-display-flex gl-align-items-center gl-ml-2"
         >
           <gl-icon
             name="question"
-            :size="12"
             :aria-label="__('Link to go to GitLab pipeline documentation')"
           />
         </gl-link>
@@ -200,10 +203,10 @@ export default {
               <template v-if="showSourceBranch">
                 {{ s__('Pipeline|on') }}
                 <tooltip-on-truncate
+                  v-safe-html="sourceBranchLink"
                   :title="sourceBranch"
                   truncate-target="child"
                   class="label-branch label-truncate gl-font-weight-normal"
-                  v-html="sourceBranchLink"
                 />
               </template>
             </div>

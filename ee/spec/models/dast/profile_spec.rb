@@ -19,6 +19,7 @@ RSpec.describe Dast::Profile, type: :model do
     it { is_expected.to validate_presence_of(:project_id) }
     it { is_expected.to validate_presence_of(:dast_site_profile_id) }
     it { is_expected.to validate_presence_of(:dast_scanner_profile_id) }
+    it { is_expected.to validate_presence_of(:name) }
 
     context 'when the project_id and dast_site_profile.project_id do not match' do
       let(:project) { create(:project) }
@@ -44,6 +45,17 @@ RSpec.describe Dast::Profile, type: :model do
         aggregate_failures do
           expect(subject.valid?).to be_falsey
           expect(subject.errors.full_messages).to include('Project must match dast_scanner_profile.project_id')
+        end
+      end
+    end
+
+    context 'when the description is nil' do
+      subject { build(:dast_profile, description: nil) }
+
+      it 'is not valid' do
+        aggregate_failures do
+          expect(subject.valid?).to be_falsey
+          expect(subject.errors.full_messages).to include('Description can\'t be nil')
         end
       end
     end

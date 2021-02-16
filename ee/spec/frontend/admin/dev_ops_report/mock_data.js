@@ -42,13 +42,11 @@ export const groupPageInfo = {
 export const devopsAdoptionSegmentsData = {
   nodes: [
     {
-      name: 'Segment 1',
       id: 1,
-      groups: [
-        {
-          id: 'gid://gitlab/Group/1',
-        },
-      ],
+      namespace: {
+        fullName: 'Group 1',
+        id: 'gid://gitlab/Group/1',
+      },
       latestSnapshot: {
         issueOpened: true,
         mergeRequestOpened: true,
@@ -63,13 +61,11 @@ export const devopsAdoptionSegmentsData = {
       __typename: 'devopsSegment',
     },
     {
-      name: 'Segment 2',
       id: 2,
-      groups: [
-        {
-          id: 'gid://gitlab/Group/1',
-        },
-      ],
+      namespace: {
+        fullName: 'Group 2',
+        id: 'gid://gitlab/Group/2',
+      },
       latestSnapshot: null,
       __typename: 'devopsSegment',
     },
@@ -137,4 +133,4 @@ export const genericErrorMessage = 'An error occured while saving the group. Ple
 export const dataErrorMessage = 'Name already taken.';
 
 export const genericDeleteErrorMessage =
-  'An error occured while deleting the group. Please try again.';
+  'An error occured while removing the group. Please try again.';

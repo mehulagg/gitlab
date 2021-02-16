@@ -27,8 +27,6 @@ module EE
     def get_project_nav_tabs(project, current_user)
       nav_tabs = super
 
-      nav_tabs += get_project_security_nav_tabs(project, current_user)
-
       if can?(current_user, :read_code_review_analytics, project)
         nav_tabs << :code_review
       end
@@ -160,9 +158,9 @@ module EE
       @project.feature_available?(:merge_trains)
     end
 
+    override :sidebar_security_paths
     def sidebar_security_paths
-      %w[
-        projects/security/configuration#show
+      super + %w[
         projects/security/sast_configuration#show
         projects/security/api_fuzzing_configuration#show
         projects/security/vulnerabilities#show
@@ -181,6 +179,7 @@ module EE
         projects/threat_monitoring#show
         projects/threat_monitoring#new
         projects/threat_monitoring#edit
+        projects/threat_monitoring#alert_details
         projects/audit_events#index
       ]
     end
@@ -199,9 +198,9 @@ module EE
       ]
     end
 
+    override :sidebar_security_configuration_paths
     def sidebar_security_configuration_paths
-      %w[
-        projects/security/configuration#show
+      super + %w[
         projects/security/sast_configuration#show
         projects/security/api_fuzzing_configuration#show
         projects/security/dast_profiles#show
@@ -237,6 +236,7 @@ module EE
       if project.vulnerabilities.none?
         {
           has_vulnerabilities: 'false',
+          has_jira_vulnerabilities_integration_enabled: project.configured_to_create_issues_from_vulnerabilities?.to_s,
           empty_state_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
           no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
@@ -245,6 +245,7 @@ module EE
       else
         {
           has_vulnerabilities: 'true',
+          has_jira_vulnerabilities_integration_enabled: project.configured_to_create_issues_from_vulnerabilities?.to_s,
           project: { id: project.id, name: project.name },
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: api_v4_security_projects_vulnerability_exports_path(id: project.id),
@@ -324,14 +325,20 @@ module EE
 
     private
 
+    override :can_read_security_configuration?
+    def can_read_security_configuration?(project, current_user)
+      super || (project.feature_available?(:security_dashboard) &&
+        can?(current_user, :read_project_security_dashboard, project))
+    end
+
+    override :get_project_security_nav_tabs
     def get_project_security_nav_tabs(project, current_user)
       return [] unless can?(current_user, :access_security_and_compliance, project)
 
-      nav_tabs = [:security_and_compliance]
+      nav_tabs = super.union([:security_and_compliance])
 
       if can?(current_user, :read_project_security_dashboard, project)
         nav_tabs << :security
-        nav_tabs << :security_configuration
       end
 
       if can?(current_user, :read_on_demand_scans, @project)

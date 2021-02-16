@@ -1,11 +1,11 @@
-import { mount, shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem, GlForm, GlSprintf, GlLoadingIcon } from '@gitlab/ui';
+import { mount, shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
-import httpStatusCodes from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
-import PipelineNewForm from '~/pipeline_new/components/pipeline_new_form.vue';
+import httpStatusCodes from '~/lib/utils/http_status';
 import { redirectTo } from '~/lib/utils/url_utility';
+import PipelineNewForm from '~/pipeline_new/components/pipeline_new_form.vue';
 import {
   mockBranches,
   mockTags,
@@ -242,6 +242,9 @@ describe('Pipeline New Form', () => {
   describe('when yml defines a variable', () => {
     const mockYmlKey = 'yml_var';
     const mockYmlValue = 'yml_var_val';
+    const mockYmlMultiLineValue = `A value
+    with multiple
+    lines`;
     const mockYmlDesc = 'A var from yml.';
 
     it('loading icon is shown when content is requested and hidden when received', async () => {
@@ -259,6 +262,21 @@ describe('Pipeline New Form', () => {
       await waitForPromises();
 
       expect(findLoadingIcon().exists()).toBe(false);
+    });
+
+    it('multi-line strings are added to the value field without removing line breaks', async () => {
+      createComponent('', mockParams, mount);
+
+      mock.onGet(configVariablesPath).reply(httpStatusCodes.OK, {
+        [mockYmlKey]: {
+          value: mockYmlMultiLineValue,
+          description: mockYmlDesc,
+        },
+      });
+
+      await waitForPromises();
+
+      expect(findValueInputs().at(0).element.value).toBe(mockYmlMultiLineValue);
     });
 
     describe('with description', () => {

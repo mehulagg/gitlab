@@ -1,10 +1,10 @@
 <script>
 import { GlLink, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { s__, sprintf } from '~/locale';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { formatUsageSize, usageRatioToThresholdLevel } from '../utils';
 import { ALERT_THRESHOLD, ERROR_THRESHOLD, WARNING_THRESHOLD } from '../constants';
+import { formatUsageSize, usageRatioToThresholdLevel } from '../utils';
 
 export default {
   i18n: {

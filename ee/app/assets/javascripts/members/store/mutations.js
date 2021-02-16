@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import CEMutations from '~/members/store/mutations';
 import { s__ } from '~/locale';
+import CEMutations from '~/members/store/mutations';
 import { findMember } from '~/members/store/utils';
 import * as types from './mutation_types';
 

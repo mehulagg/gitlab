@@ -288,7 +288,7 @@ In [GitLab Premium or higher](https://about.gitlab.com/pricing/), GitLab adminis
 
 There are two different ways to add a new project to a group:
 
-- Select a group, and then click **New project**. You can then continue [creating your project](../../gitlab-basics/create-project.md).
+- Select a group, and then click **New project**. You can then continue [creating your project](../../user/project/working_with_projects.md#create-a-project).
 
   ![New project](img/create_new_project_from_group_v13_6.png)
 
@@ -459,20 +459,19 @@ Group wikis work the same way as [project wikis](../project/wiki/index.md), plea
 Group wikis can be edited by members with [Developer permissions](../../user/permissions.md#group-members-permissions)
 and above.
 
+Group wiki repositories can be moved through the [Group repository storage moves API](../../api/group_repository_storage_moves.md).
+
 ### Group wikis limitations
 
 There are a few limitations compared to project wikis:
 
 - Git LFS is not supported.
-- Group wikis are not included in global search, group exports, and Geo replication.
+- Group wikis are not included in global search and Geo replication.
 - Changes to group wikis don't show up in the group's activity feed.
-- Group wikis [can't be moved](../../api/project_repository_storage_moves.md#limitations) using the project
-  repository moves API.
 
 For updates, you can follow:
 
 - [The epic tracking feature parity with project wikis](https://gitlab.com/groups/gitlab-org/-/epics/2782).
-- [The issue for adding the ability to move group wikis using the API](https://gitlab.com/gitlab-org/gitlab/-/issues/219003).
 
 ## Group Security Dashboard **(ULTIMATE)**
 
@@ -504,7 +503,7 @@ From GitLab 10.5, you can transfer groups in the following ways:
 
 When transferring groups, note:
 
-- Changing a group's parent can have unintended side effects. See [Redirects when changing repository paths](../project/index.md#redirects-when-changing-repository-paths).
+- Changing a group's parent can have unintended side effects. See [Redirects when changing repository paths](../project/repository/index.md#redirects-when-changing-repository-paths).
 - You can only transfer groups to groups you manage.
 - You must update your local repositories to point to the new location.
 - If the immediate parent group's visibility is lower than the group's current visibility, visibility levels for subgroups and projects will change to match the new parent group's visibility.
@@ -527,7 +526,7 @@ access further configurations for your group.
 #### Changing a group's path
 
 Changing a group's path (group URL) can have unintended side effects. Read
-[how redirects will behave](../project/index.md#redirects-when-changing-repository-paths)
+[how redirects will behave](../project/repository/index.md#redirects-when-changing-repository-paths)
 before proceeding.
 
 If you are vacating the path so it can be claimed by another group or user,
@@ -560,7 +559,7 @@ You can change settings that are specific to repositories in your group.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43290) in GitLab 13.6.
 
 By default, when you create a new project in GitLab, the initial branch is called `master`.
-For groups, a group administrator can customize the initial branch name to something
+For groups, a group owner can customize the initial branch name to something
 else. This way, every new project created under that group from then on will start from the custom branch name rather than `master`. To do so:
 
 1. Go to the **Group page > Settings > Repository** and expand **Default initial
@@ -854,17 +853,7 @@ With [GitLab Issue Analytics](issues_analytics/index.md), you can see a bar char
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263478) in GitLab 13.6.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/276003) in GitLab 13.7.
 
-With [GitLab Repositories Analytics](repositories_analytics/index.md), you can download a CSV of the latest coverage data for all the projects in your group.
-
-### Check code coverage for all projects
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263478) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
-
-See the overall activity of all projects with code coverage with [GitLab Repositories Analytics](repositories_analytics/index.md).
-
-It displays the current code coverage data available for your projects:
-
-![Group repositories analytics](img/group_code_coverage_analytics_v13_7.png)
+With [GitLab Repositories Analytics](repositories_analytics/index.md), you can view overall activity of all projects with code coverage.
 
 ## Dependency Proxy
 
@@ -881,3 +870,13 @@ questions that you know someone might ask.
 Each scenario can be a third-level heading, e.g. `### Getting error message X`.
 If you have none to add when creating a doc, leave this section in place
 but commented out to help encourage others to add to it in the future. -->
+
+## DORA4 analytics overview **(ULTIMATE ONLY)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/291747) in GitLab [Ultimate](https://about.gitlab.com/pricing/) 13.9 as a [Beta feature](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta).
+
+Group details include the following analytics:
+
+- Deployment Frequency
+
+For more information, see [DORA4 Project Analytics API](../../api/dora4_group_analytics.md).

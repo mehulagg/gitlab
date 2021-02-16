@@ -6,6 +6,7 @@ module Projects
       class NotesController < Projects::ApplicationController
         extend ::Gitlab::Utils::Override
 
+        include SecurityAndCompliancePermissions
         include SecurityDashboardsPermissions
         include NotesActions
         include NotesHelper

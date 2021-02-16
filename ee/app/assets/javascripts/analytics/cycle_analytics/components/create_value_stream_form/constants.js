@@ -1,5 +1,4 @@
 import { __, s__, sprintf } from '~/locale';
-import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 
 export const NAME_MAX_LENGTH = 100;
 
@@ -8,7 +7,7 @@ export const I18N = {
   FORM_CREATED: s__("CreateValueStreamForm|'%{name}' Value Stream created"),
   RECOVER_HIDDEN_STAGE: s__('CreateValueStreamForm|Recover hidden stage'),
   RESTORE_HIDDEN_STAGE: s__('CreateValueStreamForm|Restore stage'),
-  RESTORE_STAGES: s__('CreateValueStreamForm|Restore defaults'),
+  RESTORE_DEFAULTS: s__('CreateValueStreamForm|Restore defaults'),
   RECOVER_STAGE_TITLE: s__('CreateValueStreamForm|Default stages'),
   RECOVER_STAGES_VISIBLE: s__('CreateValueStreamForm|All default stages are currently visible'),
   SELECT_START_EVENT: s__('CreateValueStreamForm|Select start event'),
@@ -32,6 +31,9 @@ export const I18N = {
   HIDDEN_DEFAULT_STAGE: s__('CreateValueStreamForm|%{name} (default)'),
   TEMPLATE_DEFAULT: s__('CreateValueStreamForm|Create from default template'),
   TEMPLATE_BLANK: s__('CreateValueStreamForm|Create from no template'),
+  ISSUE_STAGE_END: s__('CreateValueStreamForm|Issue stage end'),
+  PLAN_STAGE_START: s__('CreateValueStreamForm|Plan stage start'),
+  CODE_STAGE_START: s__('CreateValueStreamForm|Code stage start'),
 };
 
 export const ERRORS = {
@@ -73,51 +75,6 @@ export const defaultFields = {
 
 export const defaultCustomStageFields = { ...defaultFields, custom: true };
 
-/**
- * These stage configs are copied from the https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/cycle_analytics
- * This is a stopgap solution and we should eventually provide these from an API endpoint
- *
- * More information: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49094#note_464116439
- */
-const BASE_DEFAULT_STAGE_CONFIG = [
-  {
-    id: 'issue',
-    startEventIdentifier: ['issue_created'],
-    endEventIdentifier: ['issue_first_associated_with_milestone', 'issue_first_added_to_board'],
-  },
-  {
-    id: 'plan',
-    startEventIdentifier: ['issue_first_associated_with_milestone', 'issue_first_added_to_board'],
-    endEventIdentifier: ['issue_first_mentioned_in_commit'],
-  },
-  {
-    id: 'code',
-    startEventIdentifier: ['issue_first_mentioned_in_commit'],
-    endEventIdentifier: ['merge_request_created'],
-  },
-  {
-    id: 'test',
-    startEventIdentifier: ['merge_request_last_build_started'],
-    endEventIdentifier: ['merge_request_last_build_finished'],
-  },
-  {
-    id: 'review',
-    startEventIdentifier: ['merge_request_created'],
-    endEventIdentifier: ['merge_request_merged'],
-  },
-  {
-    id: 'staging',
-    startEventIdentifier: ['merge_request_merged'],
-    endEventIdentifier: ['merge_request_first_deployed_to_production'],
-  },
-];
-
-export const DEFAULT_STAGE_CONFIG = BASE_DEFAULT_STAGE_CONFIG.map(({ id, ...rest }) => ({
-  ...rest,
-  custom: false,
-  name: capitalizeFirstCharacter(id),
-}));
-
 export const PRESET_OPTIONS_DEFAULT = 'default';
 export const PRESET_OPTIONS_BLANK = 'blank';
 export const PRESET_OPTIONS = [
@@ -128,5 +85,24 @@ export const PRESET_OPTIONS = [
   {
     text: I18N.TEMPLATE_BLANK,
     value: PRESET_OPTIONS_BLANK,
+  },
+];
+
+// These events can only be set on the back end, they are used in the
+// initial configuration of some default stages, but should not be
+// selectable by users via the form, they are added here only for display
+// purposes when we are editing a default value stream
+export const ADDITIONAL_DEFAULT_STAGE_EVENTS = [
+  {
+    identifier: 'issue_stage_end',
+    name: I18N.ISSUE_STAGE_END,
+  },
+  {
+    identifier: 'plan_stage_start',
+    name: I18N.PLAN_STAGE_START,
+  },
+  {
+    identifier: 'code_stage_start',
+    name: I18N.CODE_STAGE_START,
   },
 ];

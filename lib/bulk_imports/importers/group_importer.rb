@@ -10,7 +10,7 @@ module BulkImports
       def execute
         context = BulkImports::Pipeline::Context.new(entity)
 
-        pipelines.each { |pipeline| pipeline.new.run(context) }
+        pipelines.each { |pipeline| pipeline.new(context).run }
 
         entity.finish!
       end
@@ -23,6 +23,7 @@ module BulkImports
         [
           BulkImports::Groups::Pipelines::GroupPipeline,
           BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline,
+          BulkImports::Groups::Pipelines::MembersPipeline,
           BulkImports::Groups::Pipelines::LabelsPipeline
         ]
       end

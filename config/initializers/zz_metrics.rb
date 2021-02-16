@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This file was prefixed with zz_ because we want to load it the last!
 # See: https://gitlab.com/gitlab-org/gitlab-foss/issues/55611
 
@@ -88,6 +90,7 @@ def instrument_classes(instrumentation)
 
   instrumentation.instrument_methods(Gitlab::Highlight)
   instrumentation.instrument_instance_methods(Gitlab::Highlight)
+  instrumentation.instrument_instance_method(Gitlab::Ci::Config::Yaml::Tags::Resolver, :to_hash)
 
   Gitlab.ee do
     instrumentation.instrument_instance_methods(Elastic::Latest::GitInstanceProxy)

@@ -2,6 +2,8 @@
 
 module Projects
   class DependenciesController < Projects::ApplicationController
+    include SecurityAndCompliancePermissions
+
     before_action :authorize_read_dependency_list!
 
     feature_category :dependency_scanning

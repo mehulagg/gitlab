@@ -9,9 +9,9 @@ import {
   GlModal,
   GlModalDirective,
 } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
 import { pikadayToString } from '~/lib/utils/datetime_utility';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
 import SelectProjectsDropdown from './select_projects_dropdown.vue';
 
 export default {

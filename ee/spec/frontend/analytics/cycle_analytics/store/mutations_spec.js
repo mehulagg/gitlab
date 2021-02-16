@@ -49,6 +49,10 @@ describe('Value Stream Analytics mutations', () => {
     ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${'isCreatingValueStream'}   | ${false}
     ${types.REQUEST_CREATE_VALUE_STREAM}         | ${'createValueStreamErrors'} | ${{}}
     ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${'createValueStreamErrors'} | ${{}}
+    ${types.REQUEST_UPDATE_VALUE_STREAM}         | ${'isEditingValueStream'}    | ${true}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${'isEditingValueStream'}    | ${false}
+    ${types.REQUEST_UPDATE_VALUE_STREAM}         | ${'createValueStreamErrors'} | ${{}}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${'createValueStreamErrors'} | ${{}}
     ${types.REQUEST_DELETE_VALUE_STREAM}         | ${'isDeletingValueStream'}   | ${true}
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'isDeletingValueStream'}   | ${false}
     ${types.REQUEST_DELETE_VALUE_STREAM}         | ${'deleteValueStreamError'}  | ${null}
@@ -61,17 +65,32 @@ describe('Value Stream Analytics mutations', () => {
     expect(state[stateKey]).toEqual(value);
   });
 
+  const valueStreamErrors = {
+    data: { stages },
+    errors: {
+      name: ['is required'],
+      stages: { 1: { name: "Can't be blank" } },
+    },
+  };
+
+  const expectedValueStreamErrors = {
+    name: ['is required'],
+    stages: [{}, { name: "Can't be blank" }, {}, {}, {}, {}, {}, {}],
+  };
+
   it.each`
-    mutation                                     | payload                                                    | expectedState
-    ${types.SET_FEATURE_FLAGS}                   | ${{ hasDurationChart: true }}                              | ${{ featureFlags: { hasDurationChart: true } }}
-    ${types.SET_SELECTED_PROJECTS}               | ${selectedProjects}                                        | ${{ selectedProjects }}
-    ${types.SET_DATE_RANGE}                      | ${{ startDate, endDate }}                                  | ${{ startDate, endDate }}
-    ${types.SET_SELECTED_STAGE}                  | ${{ id: 'first-stage' }}                                   | ${{ selectedStage: { id: 'first-stage' } }}
-    ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR}   | ${{ data: { stages }, errors: { name: ['is required'] } }} | ${{ createValueStreamErrors: { name: ['is required'] }, isCreatingValueStream: false }}
-    ${types.RECEIVE_DELETE_VALUE_STREAM_ERROR}   | ${'Some error occurred'}                                   | ${{ deleteValueStreamError: 'Some error occurred' }}
-    ${types.RECEIVE_VALUE_STREAMS_SUCCESS}       | ${valueStreams}                                            | ${{ valueStreams, isLoadingValueStreams: false }}
-    ${types.SET_SELECTED_VALUE_STREAM}           | ${valueStreams[1].id}                                      | ${{ selectedValueStream: {} }}
-    ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}                                         | ${{ selectedValueStream: valueStreams[1] }}
+    mutation                                     | payload                       | expectedState
+    ${types.SET_FEATURE_FLAGS}                   | ${{ hasDurationChart: true }} | ${{ featureFlags: { hasDurationChart: true } }}
+    ${types.SET_SELECTED_PROJECTS}               | ${selectedProjects}           | ${{ selectedProjects }}
+    ${types.SET_DATE_RANGE}                      | ${{ startDate, endDate }}     | ${{ startDate, endDate }}
+    ${types.SET_SELECTED_STAGE}                  | ${{ id: 'first-stage' }}      | ${{ selectedStage: { id: 'first-stage' } }}
+    ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR}   | ${valueStreamErrors}          | ${{ createValueStreamErrors: expectedValueStreamErrors, isCreatingValueStream: false }}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_ERROR}   | ${valueStreamErrors}          | ${{ createValueStreamErrors: expectedValueStreamErrors, isEditingValueStream: false }}
+    ${types.RECEIVE_DELETE_VALUE_STREAM_ERROR}   | ${'Some error occurred'}      | ${{ deleteValueStreamError: 'Some error occurred' }}
+    ${types.RECEIVE_VALUE_STREAMS_SUCCESS}       | ${valueStreams}               | ${{ valueStreams, isLoadingValueStreams: false }}
+    ${types.SET_SELECTED_VALUE_STREAM}           | ${valueStreams[1].id}         | ${{ selectedValueStream: {} }}
+    ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}            | ${{ selectedValueStream: valueStreams[1] }}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}            | ${{ selectedValueStream: valueStreams[1] }}
   `(
     '$mutation with payload $payload will update state with $expectedState',
     ({ mutation, payload, expectedState }) => {

@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import AccessorUtilities from '~/lib/utils/accessor';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __ } from '~/locale';
+import AccessorUtilities from '~/lib/utils/accessor';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
 import * as types from './mutation_types';
 
 export const updatePageInfo = (state, headers) => {

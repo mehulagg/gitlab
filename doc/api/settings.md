@@ -85,7 +85,8 @@ Example response:
   "wiki_page_max_content_bytes": 52428800,
   "require_admin_approval_after_user_signup": false,
   "personal_access_token_prefix": "GL-",
-  "rate_limiting_response_text": null
+  "rate_limiting_response_text": null,
+  "keep_latest_artifact": true
 }
 ```
 
@@ -179,7 +180,8 @@ Example response:
   "wiki_page_max_content_bytes": 52428800,
   "require_admin_approval_after_user_signup": false,
   "personal_access_token_prefix": "GL-",
-  "rate_limiting_response_text": null
+  "rate_limiting_response_text": null,
+  "keep_latest_artifact": true
 }
 ```
 
@@ -282,6 +284,7 @@ listed in the descriptions of the relevant settings.
 | `first_day_of_week`                      | integer          | no                                   | Start day of the week for calendar views and date pickers. Valid values are `0` (default) for Sunday, `1` for Monday, and `6` for Saturday. |
 | `geo_node_allowed_ips`                   | string           | yes                                  | **(PREMIUM)** Comma-separated list of IPs and CIDRs of allowed secondary nodes. For example, `1.1.1.1, 2.2.2.0/24`. |
 | `geo_status_timeout`                     | integer          | no                                   | **(PREMIUM)** The amount of seconds after which a request to get a secondary node status times out. |
+| `git_two_factor_session_expiry`          | integer          | no                                   | **(PREMIUM)** Maximum duration (in minutes) of a session for Git operations when 2FA is enabled. |
 | `gitaly_timeout_default`                 | integer          | no                                   | Default Gitaly timeout, in seconds. This timeout is not enforced for Git fetch/push operations or Sidekiq jobs. Set to `0` to disable timeouts. |
 | `gitaly_timeout_fast`                    | integer          | no                                   | Gitaly fast operation timeout, in seconds. Some Gitaly operations are expected to be fast. If they exceed this threshold, there may be a problem with a storage shard and 'failing fast' can help maintain the stability of the GitLab instance. Set to `0` to disable timeouts. |
 | `gitaly_timeout_medium`                  | integer          | no                                   | Medium Gitaly timeout, in seconds. This should be a value between the Fast and the Default timeout. Set to `0` to disable timeouts. |
@@ -302,7 +305,7 @@ listed in the descriptions of the relevant settings.
 | `housekeeping_incremental_repack_period` | integer          | required by: `housekeeping_enabled`  | Number of Git pushes after which an incremental `git repack` is run. |
 | `html_emails_enabled`                    | boolean          | no                                   | Enable HTML emails. |
 | `import_sources`                         | array of strings | no                                   | Sources to allow project import from, possible values: `github`, `bitbucket`, `bitbucket_server`, `gitlab`, `fogbugz`, `git`, `gitlab_project`, `gitea`, `manifest`, and `phabricator`. |
-| `invisible_captcha_enabled`              | boolean          | no                                   | Enable Invisible Captcha spam detection during sign-up. Disabled by default. |
+| `invisible_captcha_enabled`              | boolean          | no                                   | <!-- vale gitlab.Spelling = NO --> Enable Invisible Captcha <!-- vale gitlab.Spelling = YES --> spam detection during sign-up. Disabled by default. |
 | `issues_create_limit`                    | integer          | no                                   | Max number of issue creation requests per minute per user. Disabled by default.|
 | `local_markdown_version`                 | integer          | no                                   | Increase this value when any cached Markdown should be invalidated. |
 | `maintenance_mode_message`               | string           | no                                   | **(PREMIUM)** Message displayed when instance is in maintenance mode |
@@ -317,7 +320,7 @@ listed in the descriptions of the relevant settings.
 | `mirror_capacity_threshold`              | integer          | no                                   | **(PREMIUM)** Minimum capacity to be available before scheduling more mirrors preemptively |
 | `mirror_max_capacity`                    | integer          | no                                   | **(PREMIUM)** Maximum number of mirrors that can be synchronizing at the same time. |
 | `mirror_max_delay`                       | integer          | no                                   | **(PREMIUM)** Maximum time (in minutes) between updates that a mirror can have when scheduled to synchronize. |
-| `npm_package_requests_forwarding`        | boolean          | no                                   | **(PREMIUM)** Use npmjs.org as a default remote repository when the package is not found in the GitLab NPM Registry  |
+| `npm_package_requests_forwarding`        | boolean          | no                                   | **(PREMIUM)** Use npmjs.org as a default remote repository when the package is not found in the GitLab Package Registry for npm  |
 | `outbound_local_requests_whitelist`      | array of strings | no                                   | Define a list of trusted domains or IP addresses to which local requests are allowed when local requests for hooks and services are disabled.
 | `pages_domain_verification_enabled`      | boolean          | no                                   | Require users to prove ownership of custom domains. Domain verification is an essential security measure for public GitLab sites. Users are required to demonstrate they control a domain before it is enabled. |
 | `password_authentication_enabled_for_git` | boolean         | no                                   | Enable authentication for Git over HTTP(S) via a GitLab account password. Default is `true`. |
@@ -343,7 +346,7 @@ listed in the descriptions of the relevant settings.
 | `receive_max_input_size`                 | integer          | no                                   | Maximum push size (MB). |
 | `repository_checks_enabled`              | boolean          | no                                   | GitLab periodically runs `git fsck` in all project and wiki repositories to look for silent disk corruption issues. |
 | `repository_size_limit`                  | integer          | no                                   | **(PREMIUM)** Size limit per repository (MB) |
-| `repository_storages_weighted`           | hash of strings to integers | no                        | (GitLab 13.1 and later) Hash of names of taken from `gitlab.yml` to [weights](../administration/repository_storage_paths.md#choose-where-new-repositories-are-stored). New projects are created in one of these stores, chosen by a weighted random selection. |
+| `repository_storages_weighted`           | hash of strings to integers | no                        | (GitLab 13.1 and later) Hash of names of taken from `gitlab.yml` to [weights](../administration/repository_storage_paths.md#configure-where-new-repositories-are-stored). New projects are created in one of these stores, chosen by a weighted random selection. |
 | `repository_storages`                    | array of strings | no                                   | (GitLab 13.0 and earlier) List of names of enabled storage paths, taken from `gitlab.yml`. New projects are created in one of these stores, chosen at random. |
 | `require_admin_approval_after_user_signup`      | boolean          | no                                   | When enabled, any user that signs up for an account using the registration form is placed under a **Pending approval** state and has to be explicitly [approved](../user/admin_area/approving_users.md) by an administrator. |
 | `require_two_factor_authentication`      | boolean          | no                                   | (**If enabled, requires:** `two_factor_grace_period`) Require all users to set up Two-factor authentication. |

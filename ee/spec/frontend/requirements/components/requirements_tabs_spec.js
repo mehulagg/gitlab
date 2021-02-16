@@ -11,7 +11,6 @@ const createComponent = ({
   requirementsCount = mockRequirementsCount,
   showCreateForm = false,
   canCreateRequirement = true,
-  showUploadCsv = true,
 } = {}) =>
   shallowMount(RequirementsTabs, {
     propsData: {
@@ -19,7 +18,6 @@ const createComponent = ({
       requirementsCount,
       showCreateForm,
       canCreateRequirement,
-      showUploadCsv,
     },
     stubs: {
       GlTabs,

@@ -1,8 +1,8 @@
 <script>
 import { GlSafeHtmlDirective, GlAccordion, GlAccordionItem } from '@gitlab/ui';
 import { mapState } from 'vuex';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __, n__, sprintf, s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import App from '../app.vue';
 import MrRules from './mr_rules.vue';
 import MrRulesHiddenInputs from './mr_rules_hidden_inputs.vue';
@@ -28,7 +28,7 @@ export default {
       return s__('ApprovalRule|Approval rules');
     },
     isCollapseFeatureEnabled() {
-      return this.glFeatures.mergeRequestReviewers && this.glFeatures.mrCollapsedApprovalRules;
+      return this.glFeatures.mrCollapsedApprovalRules;
     },
     hasOptionalRules() {
       return this.rules.every((r) => r.approvalsRequired === 0);

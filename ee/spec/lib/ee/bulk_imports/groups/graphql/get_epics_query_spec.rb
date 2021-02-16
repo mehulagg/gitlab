@@ -3,14 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe EE::BulkImports::Groups::Graphql::GetEpicsQuery do
-  describe '#variables' do
-    let(:entity) { double(source_full_path: 'test', next_page_for: 'next_page') }
+  it 'has a valid query' do
+    context = BulkImports::Pipeline::Context.new(create(:bulk_import_entity))
 
-    it 'returns query variables based on entity information' do
-      expected = { full_path: entity.source_full_path, cursor: entity.next_page_for }
+    result = GitlabSchema.execute(
+      described_class.to_s,
+      variables: described_class.variables(context)
+    ).to_h
 
-      expect(described_class.variables(entity)).to eq(expected)
-    end
+    expect(result['errors']).to be_blank
   end
 
   describe '#data_path' do

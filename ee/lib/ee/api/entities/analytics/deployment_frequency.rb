@@ -5,9 +5,11 @@ module EE
     module Entities
       module Analytics
         class DeploymentFrequency < Grape::Entity
+          format_with(:iso8601_date) { |datetime| datetime.to_date.iso8601 }
+
           expose :value
-          expose :from
-          expose :to
+          expose :from, format_with: :iso8601_date
+          expose :to, format_with: :iso8601_date
         end
       end
     end

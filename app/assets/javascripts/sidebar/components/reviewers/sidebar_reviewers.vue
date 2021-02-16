@@ -1,12 +1,12 @@
 <script>
 // NOTE! For the first iteration, we are simply copying the implementation of Assignees
 // It will soon be overhauled in Issue https://gitlab.com/gitlab-org/gitlab/-/issues/233736
-import { deprecatedCreateFlash as Flash } from '~/flash';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
+import { deprecatedCreateFlash as Flash } from '~/flash';
+import { __ } from '~/locale';
 import eventHub from '~/sidebar/event_hub';
 import Store from '~/sidebar/stores/sidebar_store';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { __ } from '~/locale';
 import ReviewerTitle from './reviewer_title.vue';
 import Reviewers from './reviewers.vue';
 
@@ -83,6 +83,9 @@ export default {
           return new Flash(__('Error occurred when saving reviewers'));
         });
     },
+    requestReview(data) {
+      this.mediator.requestReview(data);
+    },
   },
 };
 </script>
@@ -101,6 +104,7 @@ export default {
       :editable="store.editable"
       :issuable-type="issuableType"
       class="value"
+      @request-review="requestReview"
     />
   </div>
 </template>

@@ -1,0 +1,56 @@
+#import "~/graphql_shared/fragments/author.fragment.graphql"
+#import "~/graphql_shared/fragments/label.fragment.graphql"
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
+query groupEpics(
+  $groupPath: ID!
+  $state: EpicState
+  $authorUsername: String
+  $labelName: [String!]
+  $milestoneTitle: String = ""
+  $confidential: Boolean
+  $sortBy: EpicSort
+  $firstPageSize: Int
+  $lastPageSize: Int
+  $prevPageCursor: String = ""
+  $nextPageCursor: String = ""
+) {
+  group(fullPath: $groupPath) {
+    epics(
+      state: $state
+      authorUsername: $authorUsername
+      labelName: $labelName
+      milestoneTitle: $milestoneTitle
+      confidential: $confidential
+      sort: $sortBy
+      first: $firstPageSize
+      last: $lastPageSize
+      after: $nextPageCursor
+      before: $prevPageCursor
+    ) {
+      nodes {
+        id
+        iid
+        title
+        createdAt
+        updatedAt
+        startDate
+        dueDate
+        webUrl
+        userDiscussionsCount
+        confidential
+        author {
+          ...Author
+        }
+        labels {
+          nodes {
+            ...Label
+          }
+        }
+      }
+      pageInfo {
+        ...PageInfo
+      }
+    }
+  }
+}

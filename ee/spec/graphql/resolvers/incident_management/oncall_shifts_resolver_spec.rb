@@ -10,7 +10,7 @@ RSpec.describe Resolvers::IncidentManagement::OncallShiftsResolver do
   let_it_be(:project) { rotation.project }
   let(:args) { { start_time: rotation.starts_at, end_time: rotation.starts_at + rotation.shift_duration } }
 
-  subject(:shifts) { sync(resolve_oncall_shifts(args)) }
+  subject(:shifts) { sync(resolve_oncall_shifts(args).to_a) }
 
   before do
     stub_licensed_features(oncall_schedules: true)

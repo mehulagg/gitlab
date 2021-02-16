@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlFormGroup } from '@gitlab/ui';
-import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
+import { shallowMount } from '@vue/test-utils';
 import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/default_stage_fields.vue';
+import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
 import { customStageEvents as stageEvents } from '../../mock_data';
 
 let wrapper = null;
@@ -14,8 +14,8 @@ const ISSUE_CREATED = { id: 'issue_created', name: 'Issue created' };
 const ISSUE_CLOSED = { id: 'issue_closed', name: 'Issue closed' };
 const defaultStage = {
   name: 'Cool new stage',
-  startEventIdentifier: [ISSUE_CREATED.id],
-  endEventIdentifier: [ISSUE_CLOSED.id],
+  startEventIdentifier: ISSUE_CREATED.id,
+  endEventIdentifier: ISSUE_CLOSED.id,
   endEventLabel: 'some_label',
 };
 

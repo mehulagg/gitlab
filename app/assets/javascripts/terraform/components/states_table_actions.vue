@@ -9,11 +9,11 @@ import {
   GlModal,
   GlSprintf,
 } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { s__, sprintf } from '~/locale';
 import addDataToState from '../graphql/mutations/add_data_to_state.mutation.graphql';
 import lockState from '../graphql/mutations/lock_state.mutation.graphql';
-import unlockState from '../graphql/mutations/unlock_state.mutation.graphql';
 import removeState from '../graphql/mutations/remove_state.mutation.graphql';
+import unlockState from '../graphql/mutations/unlock_state.mutation.graphql';
 
 export default {
   components: {
@@ -52,6 +52,7 @@ export default {
     ),
     modalRemove: s__('Terraform|Remove'),
     remove: s__('Terraform|Remove state file and versions'),
+    removeSuccessful: s__('Terraform|%{name} successfully removed'),
     unlock: s__('Terraform|Unlock'),
   },
   computed: {
@@ -63,6 +64,9 @@ export default {
     },
     disableModalSubmit() {
       return this.removeConfirmText !== this.state.name;
+    },
+    loading() {
+      return this.state.loadingLock || this.state.loadingRemove;
     },
     primaryModalProps() {
       return {
@@ -77,9 +81,23 @@ export default {
       this.removeConfirmText = '';
     },
     lock() {
+      this.updateStateCache({
+        _showDetails: false,
+        errorMessages: [],
+        loadingLock: true,
+        loadingRemove: false,
+      });
+
       this.stateActionMutation(lockState);
     },
     unlock() {
+      this.updateStateCache({
+        _showDetails: false,
+        errorMessages: [],
+        loadingLock: true,
+        loadingRemove: false,
+      });
+
       this.stateActionMutation(unlockState);
     },
     updateStateCache(newData) {
@@ -96,17 +114,22 @@ export default {
     remove() {
       if (!this.disableModalSubmit) {
         this.hideModal();
-        this.stateActionMutation(removeState);
+
+        this.updateStateCache({
+          _showDetails: false,
+          errorMessages: [],
+          loadingLock: false,
+          loadingRemove: true,
+        });
+
+        this.stateActionMutation(
+          removeState,
+          sprintf(this.$options.i18n.removeSuccessful, { name: this.state.name }),
+        );
       }
     },
-    stateActionMutation(mutation) {
+    stateActionMutation(mutation, successMessage = null) {
       let errorMessages = [];
-
-      this.updateStateCache({
-        _showDetails: false,
-        errorMessages,
-        loadingActions: true,
-      });
 
       this.$apollo
         .mutate({
@@ -124,6 +147,10 @@ export default {
             data?.terraformStateLock?.errors ||
             data?.terraformStateUnlock?.errors ||
             [];
+
+          if (errorMessages.length === 0 && successMessage) {
+            this.$toast.show(successMessage);
+          }
         })
         .catch(() => {
           errorMessages = [this.$options.i18n.errorUpdate];
@@ -132,7 +159,8 @@ export default {
           this.updateStateCache({
             _showDetails: Boolean(errorMessages.length),
             errorMessages,
-            loadingActions: false,
+            loadingLock: false,
+            loadingRemove: false,
           });
         });
     },
@@ -146,7 +174,7 @@ export default {
       icon="ellipsis_v"
       right
       :data-testid="`terraform-state-actions-${state.name}`"
-      :disabled="state.loadingActions"
+      :disabled="loading"
       toggle-class="gl-px-3! gl-shadow-none!"
     >
       <template #button-content>

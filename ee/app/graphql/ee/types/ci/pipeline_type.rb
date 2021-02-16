@@ -11,7 +11,7 @@ module EE
             ::Types::SecurityReportSummaryType,
             null: true,
             extras: [:lookahead],
-            description: 'Vulnerability and scanned resource counts for each security scanner of the pipeline',
+            description: 'Vulnerability and scanned resource counts for each security scanner of the pipeline.',
             resolver: ::Resolvers::SecurityReportSummaryResolver
         end
       end

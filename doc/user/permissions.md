@@ -183,13 +183,14 @@ The following table depicts the various user permission levels in a project.
 | Delete pipelines                                  |         |            |             |          | ✓      |
 | Delete merge request                              |         |            |             |          | ✓      |
 | Disable notification emails                       |         |            |             |          | ✓      |
+| Administer project compliance frameworks          |         |            |             |          | ✓      |
 | Force push to protected branches (*4*)            |         |            |             |          |        |
 | Remove protected branches (*4*)                   |         |            |             |          |        |
 
 1. Guest users are able to perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
 1. Guest users can only view the confidential issues they created themselves.
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
-1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [Protected Branches](project/protected_branches.md).
+1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [protected branches](project/protected_branches.md).
 1. If the [branch is protected](project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings), this depends on the access Developers and Maintainers are given.
 1. Guest users can access GitLab [**Releases**](project/releases/index.md) for downloading assets but are not allowed to download the source code nor see repository information like tags and commits.
 1. Actions are limited only to records owned (referenced) by user.
@@ -293,6 +294,7 @@ group.
 | View Billing **(FREE SAAS)**                           |       |          |           |            | ✓ (4) |
 | View Usage Quotas **(FREE SAAS)**                      |       |          |           |            | ✓ (4) |
 | Filter members by 2FA status                           |       |          |           |            | ✓     |
+| Administer project compliance frameworks               |       |          |           |            | ✓     |
 
 1. Groups can be set to [allow either Owners or Owners and
   Maintainers to create subgroups](group/subgroups/index.md#creating-a-subgroup)
@@ -522,4 +524,4 @@ Read through the documentation on [LDAP users permissions](group/index.md#manage
 ## Project aliases
 
 Project aliases can only be read, created and deleted by a GitLab administrator.
-Read through the documentation on [Project aliases](../user/project/index.md#project-aliases) to learn more.
+Read through the documentation on [Project aliases](../user/project/import/index.md#project-aliases) to learn more.

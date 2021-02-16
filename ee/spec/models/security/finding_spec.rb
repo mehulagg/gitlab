@@ -129,4 +129,21 @@ RSpec.describe Security::Finding do
 
     it { is_expected.to eq(expected_findings) }
   end
+
+  describe '.count_by_scan_type' do
+    let!(:sast_scan) { create(:security_scan, scan_type: :sast) }
+    let!(:dast_scan) { create(:security_scan, scan_type: :dast) }
+    let!(:finding_1) { create(:security_finding, scan: sast_scan) }
+    let!(:finding_2) { create(:security_finding, scan: sast_scan) }
+    let!(:finding_3) { create(:security_finding, scan: dast_scan) }
+
+    subject { described_class.count_by_scan_type }
+
+    it {
+      is_expected.to eq({
+        Security::Scan.scan_types['dast'] => 1,
+        Security::Scan.scan_types['sast'] => 2
+      })
+    }
+  end
 end

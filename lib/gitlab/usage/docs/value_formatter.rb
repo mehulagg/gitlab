@@ -7,10 +7,10 @@ module Gitlab
         def self.format(key, value)
           case key
           when :key_path
-            "**#{value}**"
+            "**`#{value}`**"
           when :data_source
-            value.capitalize
-          when :group
+            value.to_s.capitalize
+          when :product_group
             "`#{value}`"
           when :introduced_by_url
             "[Introduced by](#{value})"

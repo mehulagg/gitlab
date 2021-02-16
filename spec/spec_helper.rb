@@ -34,6 +34,7 @@ require 'rspec-parameterized'
 require 'shoulda/matchers'
 require 'test_prof/recipes/rspec/let_it_be'
 require 'test_prof/factory_default'
+require 'parslet/rig/rspec'
 
 rspec_profiling_is_configured =
   ENV['RSPEC_PROFILING_POSTGRES_URL'].present? ||
@@ -220,7 +221,7 @@ RSpec.configure do |config|
 
       # Merge request widget GraphQL requests are disabled in the tests
       # for now whilst we migrate as much as we can over the GraphQL
-      stub_feature_flags(merge_request_widget_graphql: false)
+      # stub_feature_flags(merge_request_widget_graphql: false)
 
       # Using FortiAuthenticator as OTP provider is disabled by default in
       # tests, until we introduce it in user settings

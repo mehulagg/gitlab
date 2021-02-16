@@ -1,7 +1,8 @@
 import Store from 'ee_else_ce/sidebar/stores/sidebar_store';
 import { __ } from '~/locale';
-import { visitUrl } from '../lib/utils/url_utility';
+import toast from '~/vue_shared/plugins/global_toast';
 import { deprecatedCreateFlash as Flash } from '../flash';
+import { visitUrl } from '../lib/utils/url_utility';
 import Service from './services/sidebar_service';
 
 export default class SidebarMediator {
@@ -49,6 +50,17 @@ export default class SidebarMediator {
     const data = { reviewer_ids: reviewers };
 
     return this.service.update(field, data);
+  }
+
+  requestReview({ userId, callback }) {
+    return this.service
+      .requestReview(userId)
+      .then(() => {
+        this.store.updateReviewer(userId);
+        toast(__('Requested review'));
+        callback(userId, true);
+      })
+      .catch(() => callback(userId, false));
   }
 
   setMoveToProjectId(projectId) {

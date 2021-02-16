@@ -14,6 +14,7 @@ describe('Vulnerabilities app component', () => {
     wrapper = shallowMount(ProjectVulnerabilitiesApp, {
       provide: {
         projectFullPath: '#',
+        hasJiraVulnerabilitiesIntegrationEnabled: false,
       },
       propsData: {
         dashboardDocumentation: '#',

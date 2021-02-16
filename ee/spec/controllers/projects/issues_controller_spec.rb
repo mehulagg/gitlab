@@ -112,6 +112,12 @@ RSpec.describe Projects::IssuesController do
             expect(project.issues.last.vulnerability_links.first.vulnerability).to eq(vulnerability)
           end
 
+          it 'creates vulnerability feedback' do
+            send_request
+
+            expect(project.issues.last).to eq(Vulnerabilities::Feedback.last.issue)
+          end
+
           it 'overwrites the default fields' do
             send_request
 
@@ -119,6 +125,10 @@ RSpec.describe Projects::IssuesController do
             expect(issue.title).to eq('Title')
             expect(issue.description).to eq('Description')
             expect(issue.confidential).to be false
+          end
+
+          it 'does not show an error message' do
+            expect(flash[:alert]).to be_nil
           end
 
           context 'when vulnerability already has a linked issue' do

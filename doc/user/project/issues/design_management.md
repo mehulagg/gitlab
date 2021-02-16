@@ -1,6 +1,6 @@
 ---
-stage: Create
-group: Knowledge
+stage: Plan
+group: Product Planning
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 ---
 
@@ -259,4 +259,4 @@ This will be rendered as:
 User activity events on designs (creation, deletion, and updates) are tracked by GitLab and
 displayed on the [user profile](../../profile/index.md#user-profile),
 [group](../../group/index.md#view-group-activity),
-and [project](../index.md#project-activity) activity pages.
+and [project](../working_with_projects.md#project-activity) activity pages.

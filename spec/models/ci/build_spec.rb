@@ -1860,7 +1860,7 @@ RSpec.describe Ci::Build do
     subject { build.artifacts_file_for_type(file_type) }
 
     it 'queries artifacts for type' do
-      expect(build).to receive_message_chain(:job_artifacts, :find_by).with(file_type: Ci::JobArtifact.file_types[file_type])
+      expect(build).to receive_message_chain(:job_artifacts, :find_by).with(file_type: [Ci::JobArtifact.file_types[file_type]])
 
       subject
     end
@@ -4041,18 +4041,6 @@ RSpec.describe Ci::Build do
           expect { subject }.not_to raise_error
 
           expect(coverage_report.files.keys).to match_array(['src/main/java/com/example/javademo/User.java'])
-        end
-
-        context 'and smart_cobertura_parser feature flag is disabled' do
-          before do
-            stub_feature_flags(smart_cobertura_parser: false)
-          end
-
-          it 'parses blobs and add the results to the coverage report with unmodified paths' do
-            expect { subject }.not_to raise_error
-
-            expect(coverage_report.files.keys).to match_array(['com/example/javademo/User.java'])
-          end
         end
       end
 

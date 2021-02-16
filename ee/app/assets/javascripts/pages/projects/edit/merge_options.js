@@ -23,7 +23,7 @@ const disableMergeTrains = () => {
   mergeTrainsCheckbox.checked = false;
 };
 
-export default function () {
+export default function initMergeOptions() {
   const { projectFullPath } = containerEl.dataset;
   const defaultClient = createDefaultClient();
 

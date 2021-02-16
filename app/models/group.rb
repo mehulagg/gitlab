@@ -48,6 +48,7 @@ class Group < Namespace
 
   has_many :labels, class_name: 'GroupLabel'
   has_many :variables, class_name: 'Ci::GroupVariable'
+  has_many :daily_build_group_report_results, class_name: 'Ci::DailyBuildGroupReportResult'
   has_many :custom_attributes, class_name: 'GroupCustomAttribute'
 
   has_many :boards
@@ -75,7 +76,7 @@ class Group < Namespace
   has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
   has_many :dependency_proxy_manifests, class_name: 'DependencyProxy::Manifest'
 
-  # debian_distributions must be destroyed by ruby code in order to properly remove carrierwave uploads
+  # debian_distributions and associated component_files must be destroyed by ruby code in order to properly remove carrierwave uploads
   has_many :debian_distributions, class_name: 'Packages::Debian::GroupDistribution', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   accepts_nested_attributes_for :variables, allow_destroy: true

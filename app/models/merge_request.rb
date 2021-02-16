@@ -921,6 +921,10 @@ class MergeRequest < ApplicationRecord
     closed? && !source_project_missing? && source_branch_exists?
   end
 
+  def can_be_closed?
+    opened?
+  end
+
   def ensure_merge_request_diff
     merge_request_diff.persisted? || create_merge_request_diff
   end
@@ -1484,8 +1488,26 @@ class MergeRequest < ApplicationRecord
     compare_reports(Ci::GenerateCoverageReportsService)
   end
 
-  def has_codequality_reports?
+  def has_codequality_mr_diff_report?
     return false unless ::Gitlab::Ci::Features.display_quality_on_mr_diff?(project)
+
+    actual_head_pipeline&.has_codequality_mr_diff_report?
+  end
+
+  # TODO: this method and compare_test_reports use the same
+  # result type, which is handled by the controller's #reports_response.
+  # we should minimize mistakes by isolating the common parts.
+  # issue: https://gitlab.com/gitlab-org/gitlab/issues/34224
+  def find_codequality_mr_diff_reports
+    unless has_codequality_mr_diff_report?
+      return { status: :error, status_reason: 'This merge request does not have codequality mr diff reports' }
+    end
+
+    compare_reports(Ci::GenerateCodequalityMrDiffReportService)
+  end
+
+  def has_codequality_reports?
+    return false unless ::Gitlab::Ci::Features.display_codequality_backend_comparison?(project)
 
     actual_head_pipeline&.has_reports?(Ci::JobArtifact.codequality_reports)
   end
@@ -1534,6 +1556,26 @@ class MergeRequest < ApplicationRecord
 
       data
     end || { status: :parsing }
+  end
+
+  def has_sast_reports?
+    !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.sast_reports)
+  end
+
+  def has_secret_detection_reports?
+    !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.secret_detection_reports)
+  end
+
+  def compare_sast_reports(current_user)
+    return missing_report_error("SAST") unless has_sast_reports?
+
+    compare_reports(::Ci::CompareSecurityReportsService, current_user, 'sast')
+  end
+
+  def compare_secret_detection_reports(current_user)
+    return missing_report_error("secret detection") unless has_secret_detection_reports?
+
+    compare_reports(::Ci::CompareSecurityReportsService, current_user, 'secret_detection')
   end
 
   def calculate_reactive_cache(identifier, current_user_id = nil, report_type = nil, *args)
@@ -1766,7 +1808,7 @@ class MergeRequest < ApplicationRecord
   end
 
   def allows_reviewers?
-    Feature.enabled?(:merge_request_reviewers, project, default_enabled: true)
+    true
   end
 
   def allows_multiple_reviewers?
@@ -1781,7 +1823,18 @@ class MergeRequest < ApplicationRecord
     merge_request_reviewers.find_by(user_id: user.id)
   end
 
+  def enabled_reports
+    {
+      sast: report_type_enabled?(:sast),
+      secret_detection: report_type_enabled?(:secret_detection)
+    }
+  end
+
   private
+
+  def missing_report_error(report_type)
+    { status: :error, status_reason: "This merge request does not have #{report_type} reports" }
+  end
 
   def with_rebase_lock
     if Feature.enabled?(:merge_request_rebase_nowait_lock, default_enabled: true)
@@ -1823,6 +1876,10 @@ class MergeRequest < ApplicationRecord
 
     key = Gitlab::Routing.url_helpers.cached_widget_project_json_merge_request_path(project, self, format: :json)
     Gitlab::EtagCaching::Store.new.touch(key)
+  end
+
+  def report_type_enabled?(report_type)
+    !!actual_head_pipeline&.batch_lookup_report_artifact_for_file_type(report_type)
   end
 end
 

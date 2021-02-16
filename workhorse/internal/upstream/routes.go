@@ -55,7 +55,7 @@ type uploadPreparers struct {
 const (
 	apiPattern           = `^/api/`
 	ciAPIPattern         = `^/ci/api/`
-	gitProjectPattern    = `^/([^/]+/){1,}[^/]+\.git/`
+	gitProjectPattern    = `^/.+\.git/`
 	projectPattern       = `^/([^/]+/){1,}[^/]+/`
 	snippetUploadPattern = `^/uploads/personal_snippet`
 	userUploadPattern    = `^/uploads/user`
@@ -263,6 +263,9 @@ func (u *upstream) configureRoutes() {
 
 		// Debian Artifact Repository
 		u.route("PUT", apiPattern+`v4/projects/[0-9]+/packages/debian/`, upload.BodyUploader(api, signingProxy, preparers.packages)),
+
+		// Gem Artifact Repository
+		u.route("POST", apiPattern+`v4/projects/[0-9]+/packages/rubygems/`, upload.BodyUploader(api, signingProxy, preparers.packages)),
 
 		// We are porting API to disk acceleration
 		// we need to declare each routes until we have fixed all the routes on the rails codebase.

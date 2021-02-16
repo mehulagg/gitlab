@@ -18,7 +18,10 @@ module Gitlab
         # all models. https://gitlab.com/gitlab-org/gitlab/-/issues/280768
         scope :verification_succeeded, -> { none }
         scope :verification_failed, -> { none }
+
+        # These scopes are intended to be overridden as needed
         scope :available_replicables, -> { all }
+        scope :available_verifiables, -> { self.respond_to?(:with_files_stored_locally) ? available_replicables.with_files_stored_locally : available_replicables }
       end
 
       class_methods do
@@ -46,44 +49,6 @@ module Gitlab
       # @return [Gitlab::Geo::Replicator]
       def replicator
         raise NotImplementedError, 'There is no Replicator defined for this model'
-      end
-
-      # Returns a checksum of the file (assumed to be a "blob" type)
-      #
-      # @return [String] SHA256 hash of the carrierwave file
-      def calculate_checksum
-        return unless checksummable?
-
-        self.class.hexdigest(replicator.carrierwave_uploader.path)
-      end
-
-      # Checks whether model needs checksum to be performed
-      #
-      # Conditions:
-      # - No checksum is present
-      # - It's capable of generating a checksum of itself
-      #
-      # @return [Boolean]
-      def needs_checksum?
-        verification_checksum.nil? && checksummable?
-      end
-
-      # Return whether its capable of generating a checksum of itself
-      #
-      # @return [Boolean] whether it can generate a checksum
-      def checksummable?
-        local? && file_exist?
-      end
-
-      # This checks for existence of the file on storage
-      #
-      # @return [Boolean] whether the file exists on storage
-      def file_exist?
-        if local?
-          File.exist?(replicator.carrierwave_uploader.path)
-        else
-          replicator.carrierwave_uploader.exists?
-        end
       end
 
       def in_replicables_for_current_secondary?

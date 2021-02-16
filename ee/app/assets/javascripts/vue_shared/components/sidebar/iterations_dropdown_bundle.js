@@ -1,12 +1,12 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import IterationDropdown from 'ee/sidebar/components/iteration_dropdown.vue';
-import createDefaultClient from '~/lib/graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import createDefaultClient from '~/lib/graphql';
 
 Vue.use(VueApollo);
 
-export default function () {
+export default function initIterationsDropdownBundle() {
   const el = document.querySelector('#js-iteration-dropdown');
   const iterationField = document.getElementById('issue_iteration_id');
 

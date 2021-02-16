@@ -107,18 +107,6 @@ RSpec.describe User do
         allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
       end
 
-      context 'when feature is disabled' do
-        before do
-          stub_feature_flags(admin_new_user_signups_cap: false)
-        end
-
-        it 'does not call SetUserStatusBasedOnUserCapSettingWorker' do
-          expect(SetUserStatusBasedOnUserCapSettingWorker).not_to receive(:perform_async)
-
-          create(:user, state: 'blocked_pending_approval')
-        end
-      end
-
       context 'when user cap is not set' do
         it 'does not call SetUserStatusBasedOnUserCapSettingWorker' do
           expect(SetUserStatusBasedOnUserCapSettingWorker).not_to receive(:perform_async)

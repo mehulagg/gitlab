@@ -1,7 +1,7 @@
-import Vue from 'vue';
 import { union, unionBy } from 'lodash';
-import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
+import Vue from 'vue';
 import { moveIssueListHelper } from '~/boards/boards_util';
+import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
 import { s__ } from '~/locale';
 import * as mutationTypes from './mutation_types';
 

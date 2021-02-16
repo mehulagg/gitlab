@@ -1,12 +1,12 @@
 import MockAdapter from 'axios-mock-adapter';
 import * as actions from 'ee/codequality_report/store/actions';
-import * as types from 'ee/codequality_report/store/mutation_types';
 import { VIEW_EVENT_NAME, VIEW_EVENT_FEATURE_FLAG } from 'ee/codequality_report/store/constants';
+import * as types from 'ee/codequality_report/store/mutation_types';
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
+import Api from '~/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import Api from '~/api';
 import { unparsedIssues, parsedIssues } from '../mock_data';
 
 jest.mock('~/api.js');

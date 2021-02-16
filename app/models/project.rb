@@ -117,7 +117,7 @@ class Project < ApplicationRecord
 
   use_fast_destroy :build_trace_chunks
 
-  after_destroy -> { run_after_commit { remove_pages } }
+  after_destroy -> { run_after_commit { legacy_remove_pages } }
   after_destroy :remove_exports
 
   after_validation :check_pending_delete
@@ -200,7 +200,7 @@ class Project < ApplicationRecord
   # Packages
   has_many :packages, class_name: 'Packages::Package'
   has_many :package_files, through: :packages, class_name: 'Packages::PackageFile'
-  # debian_distributions must be destroyed by ruby code in order to properly remove carrierwave uploads
+  # debian_distributions and associated component_files must be destroyed by ruby code in order to properly remove carrierwave uploads
   has_many :debian_distributions, class_name: 'Packages::Debian::ProjectDistribution', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   has_one :import_state, autosave: true, class_name: 'ProjectImportState', inverse_of: :project
@@ -411,7 +411,7 @@ class Project < ApplicationRecord
   delegate :dashboard_timezone, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci
   delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
-  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, to: :ci_cd_settings, prefix: :ci
+  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, :keep_latest_artifacts_available?, to: :ci_cd_settings
   delegate :restrict_user_defined_variables, :restrict_user_defined_variables=, :restrict_user_defined_variables?,
     to: :ci_cd_settings
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
@@ -837,8 +837,12 @@ class Project < ApplicationRecord
     webide_pipelines.running_or_pending.for_user(user)
   end
 
-  def latest_pipeline_locked
-    ci_keep_latest_artifact? ? :artifacts_locked : :unlocked
+  def default_pipeline_lock
+    if keep_latest_artifacts_available?
+      return :artifacts_locked
+    end
+
+    :unlocked
   end
 
   def autoclose_referenced_issues
@@ -1347,9 +1351,9 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
-    return %w(datadog alerts) unless Feature.enabled?(:datadog_ci_integration, self)
+    return %w(datadog) unless Feature.enabled?(:datadog_ci_integration, self)
 
-    %w(alerts)
+    []
   end
 
   def find_or_initialize_service(name)
@@ -1788,15 +1792,15 @@ class Project < ApplicationRecord
                .delete_all
   end
 
-  # TODO: what to do here when not using Legacy Storage? Do we still need to rename and delay removal?
+  # TODO: remove this method https://gitlab.com/gitlab-org/gitlab/-/issues/320775
   # rubocop: disable CodeReuse/ServiceClass
-  def remove_pages
+  def legacy_remove_pages
+    return unless Feature.enabled?(:pages_update_legacy_storage, default_enabled: true)
+
     # Projects with a missing namespace cannot have their pages removed
     return unless namespace
 
     mark_pages_as_not_deployed unless destroyed?
-
-    DestroyPagesDeploymentsWorker.perform_async(id)
 
     # 1. We rename pages to temporary directory
     # 2. We wait 5 minutes, due to NFS caching

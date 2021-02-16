@@ -1,0 +1,12 @@
+query apiFuzzingCiConfiguration($fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    apiFuzzingCiConfiguration {
+      scanModes
+      scanProfiles {
+        name
+        description
+        yaml
+      }
+    }
+  }
+}

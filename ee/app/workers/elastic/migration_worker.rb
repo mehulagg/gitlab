@@ -51,23 +51,25 @@ module Elastic
     private
 
     def execute_migration(migration)
-      if migration.persisted? && !migration.batched?
+      if migration.started? && !migration.batched?
         logger.info "MigrationWorker: migration[#{migration.name}] did not execute migrate method since it was already executed. Waiting for migration to complete"
-      else
-        pause_indexing!(migration)
 
-        logger.info "MigrationWorker: migration[#{migration.name}] executing migrate method"
-        migration.migrate
+        return
+      end
 
-        if migration.batched? && !migration.completed?
-          logger.info "MigrationWorker: migration[#{migration.name}] kicking off next migration batch"
-          Elastic::MigrationWorker.perform_in(migration.throttle_delay)
-        end
+      pause_indexing!(migration)
+
+      logger.info "MigrationWorker: migration[#{migration.name}] executing migrate method"
+      migration.migrate
+
+      if migration.batched? && !migration.completed?
+        logger.info "MigrationWorker: migration[#{migration.name}] kicking off next migration batch"
+        Elastic::MigrationWorker.perform_in(migration.throttle_delay)
       end
     end
 
     def current_migration
-      completed_migrations = Elastic::MigrationRecord.persisted_versions(completed: true)
+      completed_migrations = Elastic::MigrationRecord.load_versions(completed: true)
 
       Elastic::DataMigrationService.migrations.find { |migration| !completed_migrations.include?(migration.version) }
     end

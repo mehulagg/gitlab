@@ -138,7 +138,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       end
     end
 
-    resources :epic_boards, only: [:index]
+    resources :epic_boards, only: [:index, :show]
 
     namespace :security do
       resource :dashboard, only: [:show], controller: :dashboard

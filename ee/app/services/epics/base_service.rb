@@ -2,13 +2,32 @@
 
 module Epics
   class BaseService < IssuableBaseService
-    attr_reader :group
+    extend ::Gitlab::Utils::Override
+
+    attr_reader :group, :parent_epic
 
     def initialize(group, current_user, params = {})
       @group, @current_user, @params = group, current_user, params
     end
 
     private
+
+    override :handle_quick_actions
+    def handle_quick_actions(epic)
+      super
+
+      set_quick_action_params
+    end
+
+    def set_quick_action_params
+      @parent_epic = params.delete(:quick_action_assign_to_parent_epic)
+    end
+
+    def assign_parent_epic_for(epic)
+      return unless parent_epic
+
+      EpicLinks::CreateService.new(parent_epic, current_user, { target_issuable: epic }).execute
+    end
 
     def available_labels
       @available_labels ||= LabelsFinder.new(

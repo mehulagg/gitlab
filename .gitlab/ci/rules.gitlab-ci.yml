@@ -112,6 +112,7 @@
 .workhorse-patterns: &workhorse-patterns
   - "GITLAB_WORKHORSE_VERSION"
   - "workhorse/**/*"
+  - ".gitlab/ci/workhorse.gitlab-ci.yml"
 
 .yaml-lint-patterns: &yaml-lint-patterns
   - ".gitlab-ci.yml"
@@ -879,6 +880,7 @@
     - <<: *if-not-ee
       when: never
     - <<: *if-master-schedule-2-hourly
+      allow_failure: true
     - <<: *if-merge-request-title-run-all-rspec
 
 .rails:rules:master-schedule-nightly--code-backstage:

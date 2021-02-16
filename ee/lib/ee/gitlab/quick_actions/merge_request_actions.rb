@@ -15,7 +15,6 @@ module EE
           types MergeRequest
           condition do
             quick_action_target.allows_multiple_reviewers? &&
-              ::Feature.enabled?(:merge_request_reviewers, project, default_enabled: :yaml) &&
               quick_action_target.persisted? &&
               current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
           end

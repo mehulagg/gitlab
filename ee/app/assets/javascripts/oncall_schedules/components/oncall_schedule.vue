@@ -4,14 +4,10 @@ import {
   GlCard,
   GlButtonGroup,
   GlButton,
-  GlDropdown,
-  GlDropdownItem,
   GlModalDirective,
   GlTooltipDirective,
 } from '@gitlab/ui';
 import { capitalize } from 'lodash';
-import { s__, __ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 import { fetchPolicies } from '~/lib/graphql';
 import {
   formatDate,
@@ -20,14 +16,16 @@ import {
   nDaysBefore,
   nDaysAfter,
 } from '~/lib/utils/datetime_utility';
-import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
-import DeleteScheduleModal from './delete_schedule_modal.vue';
-import EditScheduleModal from './add_edit_schedule_modal.vue';
-import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
-import RotationsListSection from './schedule/components/rotations_list_section.vue';
-import { getTimeframeForWeeksView } from './schedule/utils';
+import { s__, __ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
 import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
 import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
+import EditScheduleModal from './add_edit_schedule_modal.vue';
+import DeleteScheduleModal from './delete_schedule_modal.vue';
+import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
+import RotationsListSection from './schedule/components/rotations_list_section.vue';
+import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
+import { getTimeframeForWeeksView } from './schedule/utils';
 
 export const i18n = {
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{timezone}'),
@@ -50,8 +48,6 @@ export default {
     GlButton,
     GlButtonGroup,
     GlCard,
-    GlDropdown,
-    GlDropdownItem,
     GlSprintf,
     AddEditRotationModal,
     DeleteScheduleModal,
@@ -86,7 +82,7 @@ export default {
       },
       update(data) {
         const nodes = data.project?.incidentManagementOncallSchedules?.nodes ?? [];
-        const schedule = nodes.pop() || {};
+        const schedule = nodes.length ? nodes[nodes.length - 1] : null;
         return schedule?.rotations.nodes ?? [];
       },
       error(error) {
@@ -202,16 +198,17 @@ export default {
           <template #timezone>{{ schedule.timezone }}</template>
         </gl-sprintf>
         | {{ offset }}
-        <gl-dropdown right :text="formatPresetType(presetType)">
-          <gl-dropdown-item
+        <gl-button-group data-testid="shift-preset-change">
+          <gl-button
             v-for="type in $options.PRESET_TYPES"
             :key="type"
-            :is-check-item="true"
-            :is-checked="type === presetType"
+            :selected="type === presetType"
+            :title="formatPresetType(type)"
             @click="switchPresetType(type)"
-            >{{ formatPresetType(type) }}</gl-dropdown-item
           >
-        </gl-dropdown>
+            {{ formatPresetType(type) }}
+          </gl-button>
+        </gl-button-group>
       </p>
       <div class="gl-w-full gl-display-flex gl-align-items-center gl-pb-3">
         <gl-button-group>

@@ -34,6 +34,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
   it { is_expected.to have_many(:auto_canceled_jobs) }
   it { is_expected.to have_many(:sourced_pipelines) }
   it { is_expected.to have_many(:triggered_pipelines) }
+  it { is_expected.to have_many(:pipeline_artifacts) }
 
   it { is_expected.to have_one(:chat_data) }
   it { is_expected.to have_one(:source_pipeline) }
@@ -41,14 +42,15 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
   it { is_expected.to have_one(:source_job) }
   it { is_expected.to have_one(:pipeline_config) }
 
-  it { is_expected.to validate_presence_of(:sha) }
-  it { is_expected.to validate_presence_of(:status) }
-
   it { is_expected.to respond_to :git_author_name }
   it { is_expected.to respond_to :git_author_email }
   it { is_expected.to respond_to :short_sha }
   it { is_expected.to delegate_method(:full_path).to(:project).with_prefix }
-  it { is_expected.to have_many(:pipeline_artifacts) }
+
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:sha) }
+    it { is_expected.to validate_presence_of(:status) }
+  end
 
   describe 'associations' do
     it 'has a bidirectional relationship with projects' do
@@ -3510,16 +3512,16 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     end
   end
 
-  describe '#has_codequality_reports?' do
-    subject { pipeline.has_codequality_reports? }
+  describe '#has_codequality_mr_diff_report?' do
+    subject { pipeline.has_codequality_mr_diff_report? }
 
-    context 'when pipeline has a codequality artifact' do
-      let(:pipeline) { create(:ci_pipeline, :with_quality_report_artifact, :running, project: project) }
+    context 'when pipeline has a codequality mr diff report' do
+      let(:pipeline) { create(:ci_pipeline, :with_codequality_mr_diff_report, :running, project: project) }
 
       it { expect(subject).to be_truthy }
     end
 
-    context 'when pipeline does not have a codequality artifact' do
+    context 'when pipeline does not have a codequality mr diff report' do
       let(:pipeline) { create(:ci_pipeline, :success, project: project) }
 
       it { expect(subject).to be_falsey }

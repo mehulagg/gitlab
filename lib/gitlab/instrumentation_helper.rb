@@ -7,16 +7,33 @@ module Gitlab
     DURATION_PRECISION = 6 # microseconds
 
     def keys
-      @keys ||= [:gitaly_calls,
-                 :gitaly_duration_s,
-                 :rugged_calls,
-                 :rugged_duration_s,
-                 :elasticsearch_calls,
-                 :elasticsearch_duration_s,
-                 *::Gitlab::Instrumentation::Redis.known_payload_keys,
-                 *::Gitlab::Metrics::Subscribers::ActiveRecord::DB_COUNTERS,
-                 *::Gitlab::Metrics::Subscribers::ExternalHttp::KNOWN_PAYLOAD_KEYS,
-                 *::Gitlab::Metrics::Subscribers::RackAttack::PAYLOAD_KEYS]
+      @keys ||= [
+        :cpu_s,
+        :gitaly_calls,
+        :gitaly_duration_s,
+        :rugged_calls,
+        :rugged_duration_s,
+        :elasticsearch_calls,
+        :elasticsearch_duration_s,
+        :elasticsearch_timed_out_count,
+        *::Gitlab::Memory::Instrumentation::KEY_MAPPING.values,
+        *::Gitlab::Instrumentation::Redis.known_payload_keys,
+        *::Gitlab::Metrics::Subscribers::ActiveRecord::DB_COUNTERS,
+        *::Gitlab::Metrics::Subscribers::ExternalHttp::KNOWN_PAYLOAD_KEYS,
+        *::Gitlab::Metrics::Subscribers::RackAttack::PAYLOAD_KEYS
+      ]
+    end
+
+    def init_instrumentation_data(request_ip: nil)
+      # Set `request_start_time` only if this is request
+      # This is done, as `request_start_time` imply `request_deadline`
+      if request_ip
+        Gitlab::RequestContext.instance.client_ip = request_ip
+        Gitlab::RequestContext.instance.request_start_time = Gitlab::Metrics::System.real_time
+      end
+
+      Gitlab::RequestContext.instance.start_thread_cpu_time = Gitlab::Metrics::System.thread_cpu_time
+      Gitlab::RequestContext.instance.thread_memory_allocations = Gitlab::Memory::Instrumentation.start_thread_memory_allocations
     end
 
     def add_instrumentation_data(payload)
@@ -28,6 +45,8 @@ module Gitlab
       instrument_active_record(payload)
       instrument_external_http(payload)
       instrument_rack_attack(payload)
+      instrument_cpu(payload)
+      instrument_thread_memory_allocations(payload)
     end
 
     def instrument_gitaly(payload)
@@ -61,6 +80,7 @@ module Gitlab
 
       payload[:elasticsearch_calls] = elasticsearch_calls
       payload[:elasticsearch_duration_s] = Gitlab::Instrumentation::ElasticsearchTransport.query_time
+      payload[:elasticsearch_timed_out_count] = Gitlab::Instrumentation::ElasticsearchTransport.get_timed_out_count
     end
 
     def instrument_external_http(payload)
@@ -89,6 +109,19 @@ module Gitlab
       payload.merge!(::Gitlab::Metrics::Subscribers::RackAttack.payload)
     end
 
+    def instrument_cpu(payload)
+      cpu_s = ::Gitlab::Metrics::System.thread_cpu_duration(
+        ::Gitlab::RequestContext.instance.start_thread_cpu_time)
+
+      payload[:cpu_s] = cpu_s.round(DURATION_PRECISION) if cpu_s
+    end
+
+    def instrument_thread_memory_allocations(payload)
+      counters = ::Gitlab::Memory::Instrumentation.measure_thread_memory_allocations(
+        ::Gitlab::RequestContext.instance.thread_memory_allocations)
+      payload.merge!(counters) if counters
+    end
+
     # Returns the queuing duration for a Sidekiq job in seconds, as a float, if the
     # `enqueued_at` field or `created_at` field is available.
     #
@@ -115,7 +148,7 @@ module Gitlab
     #
     # @param [Time] start
     def self.elapsed_by_absolute_time(start)
-      (Time.now - start).to_f.round(6)
+      (Time.now - start).to_f.round(DURATION_PRECISION)
     end
     private_class_method :elapsed_by_absolute_time
 

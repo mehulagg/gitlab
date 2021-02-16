@@ -14,8 +14,8 @@ RSpec.describe 'Merge request > User sets approvers', :js do
   context 'with feature flag off' do
     let!(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
 
-    def visit_mr(merge_request_reviewers: false, mr_collapsed_approval_rules: false)
-      stub_feature_flags(merge_request_reviewers: merge_request_reviewers, mr_collapsed_approval_rules: mr_collapsed_approval_rules)
+    def visit_mr(mr_collapsed_approval_rules: false)
+      stub_feature_flags(mr_collapsed_approval_rules: mr_collapsed_approval_rules)
       project.add_developer(user)
       sign_in(user)
       visit edit_project_merge_request_path(project, merge_request)
@@ -25,18 +25,8 @@ RSpec.describe 'Merge request > User sets approvers', :js do
       expect(page).to have_button('Add approval rule')
     end
 
-    it 'does not hide approval rules inside collapse when only merge_request_reviewers is off' do
-      visit_mr(merge_request_reviewers: false, mr_collapsed_approval_rules: true)
-      non_collapse_approval_rules
-    end
-
     it 'does not hide approval rules inside collapse when mr_collapsed_approval_rules is off' do
-      visit_mr(merge_request_reviewers: true, mr_collapsed_approval_rules: false)
-      non_collapse_approval_rules
-    end
-
-    it 'does not hide approval rules inside collapse when merge_request_reviewers and mr_collapsed_approval_rules are off' do
-      visit_mr(merge_request_reviewers: false, mr_collapsed_approval_rules: false)
+      visit_mr(mr_collapsed_approval_rules: false)
       non_collapse_approval_rules
     end
   end

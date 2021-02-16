@@ -16,6 +16,7 @@ RSpec.describe DastSiteProfile, type: :model do
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
     it { is_expected.to validate_presence_of(:project_id) }
     it { is_expected.to validate_presence_of(:dast_site_id) }
+    it { is_expected.to validate_presence_of(:name) }
 
     context 'when the project_id and dast_site.project_id do not match' do
       let(:project) { create(:project) }

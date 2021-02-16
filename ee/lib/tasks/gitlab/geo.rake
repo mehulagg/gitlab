@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :geo do
     desc "Gitlab | Geo | Check replication/verification status"

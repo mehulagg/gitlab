@@ -2,9 +2,9 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import Iterations from './components/iterations.vue';
 import IterationForm from './components/iteration_form.vue';
 import IterationReport from './components/iteration_report.vue';
+import Iterations from './components/iterations.vue';
 
 Vue.use(VueApollo);
 
@@ -60,7 +60,6 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   const {
     fullPath,
     iterationId,
-    iterationIid,
     labelsFetchPath,
     editIterationPath,
     previewMarkdownPath,
@@ -75,7 +74,6 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
         props: {
           fullPath,
           iterationId,
-          iterationIid,
           labelsFetchPath,
           canEdit,
           editIterationPath,

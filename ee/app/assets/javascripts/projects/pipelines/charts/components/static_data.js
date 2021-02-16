@@ -1,7 +1,7 @@
 import dateFormat from 'dateformat';
-import { s__, sprintf } from '~/locale';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { nDaysBefore, nMonthsBefore, getStartOfDay, dayAfter } from '~/lib/utils/datetime_utility';
+import { __, s__, sprintf } from '~/locale';
 import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 
 // Compute all relative dates based on the _beginning_ of today.
@@ -30,15 +30,11 @@ const sharedRequestParams = {
 export const allChartDefinitions = [
   {
     id: LAST_WEEK,
-    title: sprintf(
-      s__(
-        'DeploymentFrequencyCharts|Deployments to production for last week (%{startDate} - %{endDate})',
-      ),
-      {
-        startDate: dateFormat(lastWeek, titleDateFormatString, true),
-        endDate: dateFormat(startOfToday, titleDateFormatString, true),
-      },
-    ),
+    title: __('Last week'),
+    range: sprintf(s__('DeploymentFrequencyCharts|%{startDate} - %{endDate}'), {
+      startDate: dateFormat(lastWeek, titleDateFormatString, true),
+      endDate: dateFormat(startOfToday, titleDateFormatString, true),
+    }),
     startDate: lastWeek,
     endDate: startOfTomorrow,
     requestParams: {
@@ -49,15 +45,11 @@ export const allChartDefinitions = [
   },
   {
     id: LAST_MONTH,
-    title: sprintf(
-      s__(
-        'DeploymentFrequencyCharts|Deployments to production for last month (%{startDate} - %{endDate})',
-      ),
-      {
-        startDate: dateFormat(lastMonth, titleDateFormatString, true),
-        endDate: dateFormat(startOfToday, titleDateFormatString, true),
-      },
-    ),
+    title: __('Last month'),
+    range: sprintf(s__('DeploymentFrequencyCharts|%{startDate} - %{endDate}'), {
+      startDate: dateFormat(lastMonth, titleDateFormatString, true),
+      endDate: dateFormat(startOfToday, titleDateFormatString, true),
+    }),
     startDate: lastMonth,
     endDate: startOfTomorrow,
     requestParams: {
@@ -68,15 +60,11 @@ export const allChartDefinitions = [
   },
   {
     id: LAST_90_DAYS,
-    title: sprintf(
-      s__(
-        'DeploymentFrequencyCharts|Deployments to production for the last 90 days (%{startDate} - %{endDate})',
-      ),
-      {
-        startDate: dateFormat(last90Days, titleDateFormatString, true),
-        endDate: dateFormat(startOfToday, titleDateFormatString, true),
-      },
-    ),
+    title: __('Last 90 days'),
+    range: sprintf(s__('%{startDate} - %{endDate}'), {
+      startDate: dateFormat(last90Days, titleDateFormatString, true),
+      endDate: dateFormat(startOfToday, titleDateFormatString, true),
+    }),
     startDate: last90Days,
     endDate: startOfTomorrow,
     requestParams: {

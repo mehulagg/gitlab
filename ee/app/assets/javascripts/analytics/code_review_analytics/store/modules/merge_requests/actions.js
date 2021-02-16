@@ -1,7 +1,7 @@
 import API from 'ee/api';
-import { __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import * as types from './mutation_types';
 

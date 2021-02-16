@@ -1,22 +1,22 @@
-import Vue from 'vue';
-import VueApollo from 'vue-apollo';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlButton, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import { getByText } from '@testing-library/dom';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import createMockApollo from 'helpers/mock_apollo_helper';
-import waitForPromises from 'helpers/wait_for_promises';
-import getGroupsQuery from 'ee/admin/dev_ops_report/graphql/queries/get_groups.query.graphql';
-import devopsAdoptionSegments from 'ee/admin/dev_ops_report/graphql/queries/devops_adoption_segments.query.graphql';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 import DevopsAdoptionApp from 'ee/admin/dev_ops_report/components/devops_adoption_app.vue';
 import DevopsAdoptionEmptyState from 'ee/admin/dev_ops_report/components/devops_adoption_empty_state.vue';
-import DevopsAdoptionTable from 'ee/admin/dev_ops_report/components/devops_adoption_table.vue';
 import DevopsAdoptionSegmentModal from 'ee/admin/dev_ops_report/components/devops_adoption_segment_modal.vue';
+import DevopsAdoptionTable from 'ee/admin/dev_ops_report/components/devops_adoption_table.vue';
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   MAX_SEGMENTS,
 } from 'ee/admin/dev_ops_report/constants';
+import devopsAdoptionSegments from 'ee/admin/dev_ops_report/graphql/queries/devops_adoption_segments.query.graphql';
+import getGroupsQuery from 'ee/admin/dev_ops_report/graphql/queries/get_groups.query.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import waitForPromises from 'helpers/wait_for_promises';
 import * as Sentry from '~/sentry/wrapper';
 import {
   groupNodes,

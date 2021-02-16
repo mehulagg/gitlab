@@ -1,0 +1,5 @@
+---
+title: Fix issue where maintainers could not set compliance framework for projects
+merge_request: 54071
+author:
+type: fixed

@@ -38,7 +38,7 @@ export function mockPipelineData(
       path: '/test',
     },
     active: false,
-    path: '/test/test-project/pipelines/1',
+    path: '/test/test-project/-/pipelines/1',
     details: {
       status: {
         icon: `status_${status}`,
@@ -47,7 +47,7 @@ export function mockPipelineData(
         group: status,
         tooltip: status,
         has_details: true,
-        details_path: '/test/test-project/pipelines/1',
+        details_path: '/test/test-project/-/pipelines/1',
         illustration: null,
       },
       finished_at: finishedTimeStamp,

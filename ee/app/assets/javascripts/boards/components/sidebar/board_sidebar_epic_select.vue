@@ -1,9 +1,9 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import createFlash from '~/flash';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __, s__ } from '~/locale';
 import { fullEpicId } from '../../boards_util';
 
@@ -64,15 +64,25 @@ export default {
   },
   methods: {
     ...mapActions(['setActiveIssueEpic', 'fetchEpicForActiveIssue']),
-    openEpicsDropdown() {
-      if (!this.loading) {
-        this.$refs.epicSelect.handleEditClick();
+    handleOpen() {
+      if (!this.epicFetchInProgress) {
+        this.$refs.epicSelect.toggleFormDropdown();
+      } else {
+        this.$refs.sidebarItem.collapse();
       }
     },
-    async setEpic(selectedEpic) {
+    handleClose() {
       this.$refs.sidebarItem.collapse();
+      this.$refs.epicSelect.toggleFormDropdown();
+    },
+    async setEpic(selectedEpic) {
+      this.handleClose();
 
       const epicId = selectedEpic?.id ? fullEpicId(selectedEpic.id) : null;
+      const assignedEpicId = this.epic?.id ? fullEpicId(this.epic.id) : null;
+      if (epicId === assignedEpicId) {
+        return;
+      }
 
       try {
         await this.setActiveIssueEpic(epicId);
@@ -89,7 +99,8 @@ export default {
     ref="sidebarItem"
     :title="$options.i18n.epic"
     :loading="epicFetchInProgress"
-    @open="openEpicsDropdown"
+    @open="handleOpen"
+    @close="handleClose"
   >
     <template v-if="epicData.title" #collapsed>
       <a class="gl-text-gray-900! gl-font-weight-bold" href="#">
@@ -107,6 +118,7 @@ export default {
       variant="standalone"
       :show-header="false"
       @epicSelect="setEpic"
+      @hide="handleClose"
     />
   </board-editable-item>
 </template>

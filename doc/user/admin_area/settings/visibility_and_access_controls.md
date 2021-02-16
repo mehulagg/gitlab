@@ -20,7 +20,7 @@ To access the visibility and access control options:
 This global option defines the branch protection that applies to every repository's default branch. [Branch protection](../../project/protected_branches.md) specifies which roles can push to branches and which roles can delete
 branches. In this case _Default_ refers to a repository's default branch, which in most cases is `master`.
 
-This setting applies only to each repositories' default branch. To protect other branches, you must configure branch protection in repository. For details, see [Protected Branches](../../project/protected_branches.md).
+This setting applies only to each repositories' default branch. To protect other branches, you must configure branch protection in repository. For details, see [protected branches](../../project/protected_branches.md).
 
 To change the default branch protection:
 
@@ -124,10 +124,10 @@ For more details on group visibility, see [Public access](../../../public_access
 
 ## Restricted visibility levels
 
-To set the available visibility levels for projects, snippets, and selected pages:
+To set the restricted visibility levels for projects, snippets, and selected pages:
 
-1. Check the desired visibility levels.
-1. Click **Save changes**.
+1. Select the desired visibility levels to restrict.
+1. Select **Save changes**.
 
 For more details on project visibility, see [Public access](../../../public_access/public_access.md).
 

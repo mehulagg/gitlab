@@ -48,7 +48,9 @@ export default {
     },
     itemValue(nodeDetailItem) {
       return {
-        totalCount: nodeDetailItem.itemValue.totalCount,
+        totalCount: this.nodeTypePrimary
+          ? nodeDetailItem.itemValue.checksumTotalCount
+          : nodeDetailItem.itemValue.verificationTotalCount,
         successCount: this.nodeTypePrimary
           ? nodeDetailItem.itemValue.checksumSuccessCount
           : nodeDetailItem.itemValue.verificationSuccessCount,

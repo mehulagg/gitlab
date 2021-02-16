@@ -5,11 +5,11 @@ class SearchController < ApplicationController
   include SearchHelper
   include RedisTracking
 
-  track_redis_hll_event :show, name: 'i_search_total', feature: :search_track_unique_users, feature_default_enabled: true
+  track_redis_hll_event :show, name: 'i_search_total'
 
   around_action :allow_gitaly_ref_name_caching
 
-  before_action :block_anonymous_global_searches
+  before_action :block_anonymous_global_searches, except: :opensearch
   skip_before_action :authenticate_user!
   requires_cross_project_access if: -> do
     search_term_present = params[:search].present? || params[:term].present?

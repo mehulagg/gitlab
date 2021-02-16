@@ -13,6 +13,7 @@ module EE
           push_frontend_feature_flag(:missing_mr_security_scan_types, @project)
           push_frontend_feature_flag(:usage_data_i_testing_metrics_report_widget_total, @project, default_enabled: true)
           push_frontend_feature_flag(:usage_data_i_testing_web_performance_widget_total, @project, default_enabled: true)
+          push_frontend_feature_flag(:usage_data_i_testing_load_performance_widget_total, @project, default_enabled: true)
         end
 
         before_action :whitelist_query_limiting_ee_merge, only: [:merge]
@@ -43,14 +44,6 @@ module EE
 
       def dependency_scanning_reports
         reports_response(merge_request.compare_dependency_scanning_reports(current_user), head_pipeline)
-      end
-
-      def sast_reports
-        reports_response(merge_request.compare_sast_reports(current_user), head_pipeline)
-      end
-
-      def secret_detection_reports
-        reports_response(merge_request.compare_secret_detection_reports(current_user), head_pipeline)
       end
 
       def dast_reports

@@ -82,7 +82,7 @@ class ProjectPolicy < BasePolicy
 
   with_scope :subject
   condition(:metrics_dashboard_allowed) do
-    feature_available?(:metrics_dashboard)
+    access_allowed_to?(:metrics_dashboard)
   end
 
   with_scope :global
@@ -161,7 +161,7 @@ class ProjectPolicy < BasePolicy
   features.each do |f|
     # these are scored high because they are unlikely
     desc "Project has #{f} disabled"
-    condition(:"#{f}_disabled", score: 32) { !feature_available?(f.to_sym) }
+    condition(:"#{f}_disabled", score: 32) { !access_allowed_to?(f.to_sym) }
   end
 
   # `:read_project` may be prevented in EE, but `:read_project_for_iids` should
@@ -221,6 +221,7 @@ class ProjectPolicy < BasePolicy
     enable :read_pages_content
     enable :read_release
     enable :read_analytics
+    enable :read_insights
   end
 
   # These abilities are not allowed to admins that are not members of the project,
@@ -450,6 +451,9 @@ class ProjectPolicy < BasePolicy
 
   rule { analytics_disabled }.policy do
     prevent(:read_analytics)
+    prevent(:read_insights)
+    prevent(:read_cycle_analytics)
+    prevent(:read_repository_graphs)
   end
 
   rule { wiki_disabled }.policy do
@@ -523,6 +527,7 @@ class ProjectPolicy < BasePolicy
     enable :read_cycle_analytics
     enable :read_pages_content
     enable :read_analytics
+    enable :read_insights
 
     # NOTE: may be overridden by IssuePolicy
     enable :read_issue
@@ -579,6 +584,10 @@ class ProjectPolicy < BasePolicy
     enable :read_design
     enable :read_design_activity
     enable :read_issue_link
+  end
+
+  rule { can?(:developer_access) }.policy do
+    enable :read_security_configuration
   end
 
   # Design abilities could also be prevented in the issue policy.
@@ -692,7 +701,7 @@ class ProjectPolicy < BasePolicy
     project.team.max_member_access(@user.id)
   end
 
-  def feature_available?(feature)
+  def access_allowed_to?(feature)
     return false unless project.project_feature
 
     case project.project_feature.access_level(feature)

@@ -49,16 +49,20 @@ module EE
           end
         end
 
+        if License.feature_available?(:git_two_factor_enforcement) && ::Feature.enabled?(:two_factor_for_cli)
+          attrs << :git_two_factor_session_expiry
+        end
+
         if License.feature_available?(:admin_merge_request_approvers_rules)
           attrs += EE::ApplicationSettingsHelper.merge_request_appovers_rules_attributes
         end
 
-        if ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode)
+        if ::Gitlab::Geo.license_allows?
           attrs << :maintenance_mode
           attrs << :maintenance_mode_message
         end
 
-        attrs << :new_user_signups_cap if ::Feature.enabled?(:admin_new_user_signups_cap, default_enabled: true )
+        attrs << :new_user_signups_cap
 
         attrs
       end

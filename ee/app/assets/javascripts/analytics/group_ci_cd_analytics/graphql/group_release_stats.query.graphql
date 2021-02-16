@@ -1,0 +1,10 @@
+query GroupReleaseStats($fullPath: ID!) {
+  group(fullPath: $fullPath) {
+    stats {
+      releaseStats {
+        releasesCount
+        releasesPercentage
+      }
+    }
+  }
+}

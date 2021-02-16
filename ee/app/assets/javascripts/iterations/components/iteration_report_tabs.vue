@@ -1,9 +1,9 @@
 <script>
 import { GlBadge, GlFormSelect, GlTab, GlTabs } from '@gitlab/ui';
 import { differenceBy, unionBy } from 'lodash';
-import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
-import { DropdownVariant } from '~/vue_shared/components/sidebar/labels_select_vue/constants';
 import { __ } from '~/locale';
+import { DropdownVariant } from '~/vue_shared/components/sidebar/labels_select_vue/constants';
+import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import { GroupBy, Namespace } from '../constants';
 import IterationReportIssues from './iteration_report_issues.vue';
 

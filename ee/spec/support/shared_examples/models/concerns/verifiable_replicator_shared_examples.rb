@@ -12,6 +12,12 @@
 RSpec.shared_examples 'a verifiable replicator' do
   include EE::GeoHelpers
 
+  describe 'events' do
+    it 'has checksum_succeeded event' do
+      expect(described_class.supported_events).to include(:checksum_succeeded)
+    end
+  end
+
   describe '.verification_enabled?' do
     context 'when replication is enabled' do
       before do
@@ -52,14 +58,14 @@ RSpec.shared_examples 'a verifiable replicator' do
         allow(described_class).to receive(:verification_enabled?).and_return(true)
       end
 
-      it 'returns the number of available replicables where verification succeeded' do
-        model_record.verification_started!
+      it 'returns the number of available verifiables where verification succeeded' do
+        model_record.verification_started
         model_record.verification_succeeded_with_checksum!('some checksum', Time.current)
 
         expect(described_class.checksummed_count).to eq(1)
       end
 
-      it 'excludes other verification states' do
+      it 'excludes non-success verification states' do
         model_record.verification_started!
 
         expect(described_class.checksummed_count).to eq(0)
@@ -89,7 +95,7 @@ RSpec.shared_examples 'a verifiable replicator' do
         allow(described_class).to receive(:verification_enabled?).and_return(true)
       end
 
-      it 'returns the number of available replicables where verification failed' do
+      it 'returns the number of available verifiables where verification failed' do
         model_record.verification_started!
         model_record.verification_failed_with_message!('some error message')
 
@@ -137,6 +143,26 @@ RSpec.shared_examples 'a verifiable replicator' do
 
         described_class.trigger_background_verification
       end
+
+      context 'for a Geo secondary' do
+        it 'does not enqueue ReverificationBatchWorker' do
+          stub_secondary_node
+
+          expect(::Geo::ReverificationBatchWorker).not_to receive(:perform_async)
+
+          described_class.trigger_background_verification
+        end
+      end
+
+      context 'for a Geo primary' do
+        it 'enqueues ReverificationBatchWorker' do
+          stub_primary_node
+
+          expect(::Geo::ReverificationBatchWorker).to receive(:perform_async).with(described_class.replicable_name)
+
+          described_class.trigger_background_verification
+        end
+      end
     end
 
     context 'when verification is disabled' do
@@ -182,6 +208,23 @@ RSpec.shared_examples 'a verifiable replicator' do
       expect(described_class).to receive(:needs_verification_count).with(limit: expected_limit).and_return(21)
 
       expect(described_class.remaining_verification_batch_count(max_batch_count: 4)).to eq(3)
+    end
+  end
+
+  describe '.remaining_reverification_batch_count' do
+    it 'converts needs_reverification_count to number of batches' do
+      expected_limit = 4000
+      expect(described_class).to receive(:needs_reverification_count).with(limit: expected_limit).and_return(1500)
+
+      expect(described_class.remaining_reverification_batch_count(max_batch_count: 4)).to eq(2)
+    end
+  end
+
+  describe '.reverify_batch!' do
+    it 'calls #reverify_batch' do
+      allow(described_class).to receive(:reverify_batch).with(batch_size: described_class::DEFAULT_REVERIFICATION_BATCH_SIZE)
+
+      described_class.reverify_batch!
     end
   end
 
@@ -299,8 +342,11 @@ RSpec.shared_examples 'a verifiable replicator' do
 
   describe '#after_verifiable_update' do
     it 'calls verify_async if needed' do
+      allow(described_class).to receive(:verification_enabled?).and_return(true)
+      allow(replicator).to receive(:primary_checksum).and_return(nil)
+      allow(replicator).to receive(:checksummable?).and_return(true)
+
       expect(replicator).to receive(:verify_async)
-      expect(replicator).to receive(:needs_checksum?).and_return(true)
 
       replicator.after_verifiable_update
     end
@@ -329,8 +375,8 @@ RSpec.shared_examples 'a verifiable replicator' do
     it 'wraps the checksum calculation in track_checksum_attempt!' do
       tracker = double('tracker')
       allow(replicator).to receive(:verification_state_tracker).and_return(tracker)
+      allow(replicator).to receive(:calculate_checksum).and_return('abc123')
 
-      expect(model_record).to receive(:calculate_checksum)
       expect(tracker).to receive(:track_checksum_attempt!).and_yield
 
       replicator.verify
@@ -358,6 +404,88 @@ RSpec.shared_examples 'a verifiable replicator' do
         allow(replicator).to receive(:registry).and_return(registry)
 
         expect(replicator.verification_state_tracker).to eq(registry)
+      end
+    end
+  end
+
+  describe '#handle_after_checksum_succeeded' do
+    context 'on a Geo primary' do
+      before do
+        stub_primary_node
+      end
+
+      it 'creates checksum_succeeded event' do
+        expect { replicator.handle_after_checksum_succeeded }.to change { ::Geo::Event.count }.by(1)
+        expect(::Geo::Event.last.event_name).to eq 'checksum_succeeded'
+      end
+
+      it 'is called on verification success' do
+        model_record.verification_started
+
+        expect { model_record.verification_succeeded_with_checksum!('abc123', Time.current) }.to change { ::Geo::Event.count }.by(1)
+        expect(::Geo::Event.last.event_name).to eq 'checksum_succeeded'
+      end
+    end
+
+    context 'on a Geo secondary' do
+      before do
+        stub_secondary_node
+      end
+
+      it 'does not create an event' do
+        expect { replicator.handle_after_checksum_succeeded }.not_to change { ::Geo::Event.count }
+      end
+    end
+  end
+
+  describe '#consume_event_checksum_succeeded' do
+    context 'with a persisted model_record' do
+      before do
+        model_record.save!
+      end
+
+      context 'on a Geo primary' do
+        before do
+          stub_primary_node
+        end
+
+        it 'does nothing' do
+          expect(replicator).not_to receive(:registry)
+
+          replicator.consume_event_checksum_succeeded
+        end
+      end
+
+      context 'on a Geo secondary' do
+        let(:registry) { replicator.registry }
+
+        before do
+          stub_secondary_node
+        end
+
+        context 'with a registry which is verified' do
+          it 'sets state to verification_pending' do
+            registry.verification_started
+            registry.verification_succeeded_with_checksum!('foo', Time.current)
+
+            expect do
+              replicator.consume_event_checksum_succeeded
+            end.to change { registry.reload.verification_state }
+              .from(verification_state_value(:verification_succeeded))
+              .to(verification_state_value(:verification_pending))
+          end
+        end
+
+        context 'with a registry which is pending verification' do
+          it 'does not change state from verification_pending' do
+            registry.save!
+
+            expect do
+              replicator.consume_event_checksum_succeeded
+            end.not_to change { registry.reload.verification_state }
+              .from(verification_state_value(:verification_pending))
+          end
+        end
       end
     end
   end
@@ -417,5 +545,9 @@ RSpec.shared_examples 'a verifiable replicator' do
         end
       end
     end
+  end
+
+  def verification_state_value(state_name)
+    model_record.class.verification_state_value(state_name)
   end
 end

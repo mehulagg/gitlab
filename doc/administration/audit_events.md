@@ -4,12 +4,12 @@ group: Compliance
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Audit Events **(STARTER)**
+# Audit Events **(PREMIUM)**
 
 GitLab offers a way to view the changes made within the GitLab server for owners and administrators on a [paid plan](https://about.gitlab.com/pricing/).
 
 GitLab system administrators can also take advantage of the logs located on the
-file system. See [the logs system documentation](logs.md) for more details.
+file system. See [the logs system documentation](logs.md#audit_jsonlog) for more details.
 
 You can generate an [Audit report](audit_reports.md) of audit events.
 
@@ -36,13 +36,18 @@ There are two kinds of events logged:
 - Instance events scoped to the whole GitLab instance, used by your Compliance team to
   perform formal audits.
 
-### Impersonation data **(PREMIUM)**
+### Impersonation data
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/536) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.0.
 
-Impersonation is where an administrator uses credentials to perform an action as a different user.
+When a user is being [impersonated](../user/admin_area/index.md#user-impersonation), their actions are logged as audit events as usual, with two additional details:
 
-### Group events **(STARTER)**
+1. Usual audit events include information about the impersonating administrator. These are visible in their respective Audit Event pages depending on their type (Group/Project/User).
+1. Extra audit events are recorded for the start and stop of the administrator's impersonation session. These are visible in the instance Audit Events.
+
+![audit events](img/impersonated_audit_events_v13_8.png)
+
+### Group events **(PREMIUM)**
 
 A user with a Owner role (or above) can retrieve group audit events of all users.
 A user with a Developer or Maintainer role is limited to group audit events based on their individual actions.
@@ -72,7 +77,7 @@ From there, you can see the following actions:
 
 Group events can also be accessed via the [Group Audit Events API](../api/audit_events.md#group-audit-events)
 
-### Project events **(STARTER)**
+### Project events **(PREMIUM)**
 
 A user with a Maintainer role (or above) can retrieve project audit events of all users.
 A user with a Developer role is limited to project audit events based on their individual actions.

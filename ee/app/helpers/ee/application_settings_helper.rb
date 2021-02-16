@@ -111,6 +111,7 @@ module EE
        %i[
         email_additional_text
         file_template_project_id
+        git_two_factor_session_expiry
         group_owners_can_manage_default_branch_protection
         default_project_deletion_protection
         deletion_adjourned_period

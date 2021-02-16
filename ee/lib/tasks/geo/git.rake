@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :geo do
   namespace :git do
     namespace :housekeeping do

@@ -60,39 +60,6 @@ RSpec.describe Projects::MergeRequestsController do
     sign_in(viewer)
   end
 
-  describe 'GET index' do
-    def get_merge_requests
-      get :index,
-        params: {
-          namespace_id: project.namespace.to_param,
-          project_id: project,
-          state: 'opened'
-        }
-    end
-
-    context 'when filtering by opened state' do
-      context 'with opened merge requests' do
-        render_views
-        it 'avoids N+1' do
-          other_user = create(:user)
-          create(:merge_request, :unique_branches, target_project: project, source_project: project)
-          create_list(:approval_merge_request_rule, 5, merge_request: merge_request, users: [user, other_user], approvals_required: 2)
-
-          control_count = ActiveRecord::QueryRecorder.new { get_merge_requests }.count
-
-          create_list(:approval, 10)
-          create_list(:merge_request, 20, :unique_branches, target_project: project, source_project: project).each do |mr|
-            create(:approval_merge_request_rule, merge_request: merge_request, users: [user, other_user], approvals_required: 2)
-          end
-
-          expect do
-            get_merge_requests
-          end.not_to exceed_query_limit(control_count)
-        end
-      end
-    end
-  end
-
   describe 'PUT update' do
     let_it_be_with_reload(:merge_request) do
       create(:merge_request_with_diffs, source_project: project, author: author)

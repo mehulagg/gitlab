@@ -1,5 +1,20 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.8.4 (2021-02-11)
+
+### Security (1 change)
+
+- Geo: Pass GL-ID in a JWT token when proxy-push from secondary.
+
+
+## 13.8.3 (2021-02-05)
+
+### Fixed (2 changes)
+
+- Fix Geo replication and verification status for replicables with no data to sync. !52253
+- Handle network unreachable for ES settings check. !52586
+
+
 ## 13.8.2 (2021-02-01)
 
 ### Security (2 changes)
@@ -125,6 +140,13 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Update repository mirroring UI text. !51311
 - Update what's new UI text. !51422
 - Enable DevOps Adoption Report feature flag if any Segments already exist. !51602
+
+
+## 13.7.7 (2021-02-11)
+
+### Security (1 change)
+
+- Geo: Pass GL-ID in a JWT token when proxy-push from secondary.
 
 
 ## 13.7.6 (2021-02-01)
@@ -314,6 +336,13 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Convert group saml buttons to gl-button styles. !49852
 - Convert group settings expand button to gl-button. !49857
 - Rename code coverage analytics sections. !49931
+
+
+## 13.6.7 (2021-02-11)
+
+### Security (1 change)
+
+- Geo: Pass GL-ID in a JWT token when proxy-push from secondary.
 
 
 ## 13.6.6 (2021-02-01)

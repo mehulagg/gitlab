@@ -1,10 +1,13 @@
+import { GlToast } from '@gitlab/ui';
 import Vue from 'vue';
-import Translate from '~/vue_shared/translate';
+
 import { parseBoolean } from '~/lib/utils/common_utils';
+import Translate from '~/vue_shared/translate';
 import SettingsApp from './components/group_settings_app.vue';
 import { apolloProvider } from './graphql';
 
 Vue.use(Translate);
+Vue.use(GlToast);
 
 export default () => {
   const el = document.getElementById('js-packages-and-registries-settings');

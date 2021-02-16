@@ -1,6 +1,4 @@
 <script>
-import Vue from 'vue';
-import { uniqueId } from 'lodash';
 import {
   GlAlert,
   GlIcon,
@@ -9,6 +7,7 @@ import {
   GlFormGroup,
   GlFormInput,
   GlFormSelect,
+  GlFormTextarea,
   GlLink,
   GlDropdown,
   GlDropdownItem,
@@ -18,12 +17,14 @@ import {
   GlLoadingIcon,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
-import * as Sentry from '~/sentry/wrapper';
-import { s__, __, n__ } from '~/locale';
+import { uniqueId } from 'lodash';
+import Vue from 'vue';
 import axios from '~/lib/utils/axios_utils';
-import { redirectTo } from '~/lib/utils/url_utility';
 import { backOff } from '~/lib/utils/common_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
+import { redirectTo } from '~/lib/utils/url_utility';
+import { s__, __, n__ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
 import { VARIABLE_TYPE, FILE_TYPE, CONFIG_VARIABLES_TIMEOUT } from '../constants';
 
 export default {
@@ -38,6 +39,9 @@ export default {
   errorTitle: __('Pipeline cannot be run.'),
   warningTitle: __('The form contains the following warning:'),
   maxWarningsSummary: __('%{total} warnings found: showing first %{warningsDisplayed}'),
+  // this height value is used inline on the textarea to match the input field height
+  // it's used to prevent the overwrite if 'gl-h-7' or 'gl-h-7!' were used
+  textAreaStyle: { height: '32px' },
   components: {
     GlAlert,
     GlIcon,
@@ -46,6 +50,7 @@ export default {
     GlFormGroup,
     GlFormInput,
     GlFormSelect,
+    GlFormTextarea,
     GlLink,
     GlDropdown,
     GlDropdownItem,
@@ -426,10 +431,12 @@ export default {
             data-testid="pipeline-form-ci-variable-key"
             @change="addEmptyVariable(refFullName)"
           />
-          <gl-form-input
+          <gl-form-textarea
             v-model="variable.value"
             :placeholder="s__('CiVariables|Input variable value')"
             class="gl-mb-3"
+            :style="$options.textAreaStyle"
+            :no-resize="false"
             data-testid="pipeline-form-ci-variable-value"
           />
 

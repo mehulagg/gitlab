@@ -10,13 +10,12 @@ RSpec.describe ApprovalWrappedCodeOwnerRule do
   subject { described_class.new(merge_request, rule) }
 
   describe '#approvals_required' do
-    where(:feature_enabled, :optional_sections_enabled, :optional_section, :approver_count, :expected_required_approvals) do
-      true  | true  | false | 0 | 0
-      true  | true  | false | 2 | 1
-      true  | false | true  | 2 | 1
-      true  | true  | true  | 2 | 0
-      false | true  | false | 2 | 0
-      false | true  | false | 0 | 0
+    where(:feature_enabled, :optional_section, :approver_count, :expected_required_approvals) do
+      true  | false | 0 | 0
+      true  | false | 2 | 1
+      true  | true  | 2 | 0
+      false | false | 2 | 0
+      false | false | 0 | 0
     end
 
     with_them do
@@ -33,8 +32,6 @@ RSpec.describe ApprovalWrappedCodeOwnerRule do
           allow(subject.project)
             .to receive(:code_owner_approval_required_available?).and_return(true)
           allow(Gitlab::CodeOwners).to receive(:optional_section?).and_return(optional_section)
-
-          stub_feature_flags(optional_code_owners_sections: optional_sections_enabled)
         end
 
         context "when the project doesn't require code owner approval on all MRs" do

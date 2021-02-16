@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Managed Apps **(CORE)**
+# GitLab Managed Apps **(FREE)**
 
 GitLab provides **GitLab Managed Apps** for various
 applications which can be added directly to your configured cluster. These
@@ -416,6 +416,8 @@ You can check the recommended variables for each cluster type in the official do
 
 - [Google GKE](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-gke/#deploy-cilium)
 - [AWS EKS](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-eks/#deploy-cilium)
+
+Do not use `clusterType` for sandbox environments like [Minikube](https://minikube.sigs.k8s.io/docs/).
 
 You can customize Cilium's Helm variables by defining the
 `.gitlab/managed-apps/cilium/values.yaml` file in your cluster

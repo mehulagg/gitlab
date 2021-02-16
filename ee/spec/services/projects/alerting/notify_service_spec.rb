@@ -6,6 +6,7 @@ RSpec.describe Projects::Alerting::NotifyService do
   let_it_be(:project, refind: true) { create(:project) }
 
   describe '#execute' do
+    let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
     let(:service) { described_class.new(project, payload) }
     let(:token) { integration.token }
     let(:payload) do
@@ -13,8 +14,6 @@ RSpec.describe Projects::Alerting::NotifyService do
         'title' => 'Test alert title'
       }
     end
-
-    let(:integration) { create(:alert_management_http_integration, project: project) }
 
     subject { service.execute(token, integration) }
 
@@ -63,6 +62,20 @@ RSpec.describe Projects::Alerting::NotifyService do
           end
         end
       end
+    end
+
+    context 'with on-call schedules' do
+      let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
+      let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
+      let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
+      let(:notification_args) do
+        [
+          [participant.user],
+          having_attributes(class: AlertManagement::Alert, title: payload['title'])
+        ]
+      end
+
+      it_behaves_like 'Alert Notification Service sends notification email to on-call users'
     end
   end
 end

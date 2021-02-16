@@ -702,12 +702,25 @@ RSpec.describe Namespace do
 
       context 'when namespace has a subscription associated' do
         before do
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+          create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan, start_date: start_date)
         end
 
-        it 'returns the plan from the subscription' do
-          expect(namespace.actual_plan).to eq(gold_plan)
-          expect(namespace.gitlab_subscription).to be_present
+        context 'when this subscription was purchased before EoA rollout (legacy)' do
+          let(:start_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date - 3.days }
+
+          it 'returns the legacy plan from the subscription' do
+            expect(namespace.actual_plan).to eq(gold_plan)
+            expect(namespace.gitlab_subscription).to be_present
+          end
+        end
+
+        context 'when this subscription was purchase after EoA rollout (new plan)' do
+          let(:start_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date + 3.days }
+
+          it 'returns the new plan from the subscription' do
+            expect(namespace.actual_plan).to be_an_instance_of(Subscriptions::NewPlanPresenter)
+            expect(namespace.gitlab_subscription).to be_present
+          end
         end
       end
 
@@ -1602,12 +1615,49 @@ RSpec.describe Namespace do
     end
   end
 
-  describe 'ensure namespace limit' do
-    it 'has namespace limit upon namespace initialization' do
-      namespace = build(:namespace)
+  describe '#namespace_limit' do
+    let(:namespace) { create(:namespace, parent: parent) }
 
-      expect(namespace.namespace_limit).to be_present
-      expect(namespace.namespace_limit).not_to be_persisted
+    subject(:namespace_limit) { namespace.namespace_limit }
+
+    context 'when there is a parent namespace' do
+      let_it_be(:parent) { create(:namespace) }
+
+      context 'with a namespace limit' do
+        it 'returns the parent namespace limit' do
+          parent_limit = create(:namespace_limit, namespace: parent)
+
+          expect(namespace_limit).to eq parent_limit
+          expect(namespace_limit).to be_persisted
+        end
+      end
+
+      context 'with no namespace limit' do
+        it 'builds namespace limit' do
+          expect(namespace_limit).to be_present
+          expect(namespace_limit).not_to be_persisted
+        end
+      end
+    end
+
+    context 'when there is no parent ancestor' do
+      let(:parent) { nil }
+
+      context 'with a namespace limit' do
+        it 'returns the namespace limit' do
+          limit = create(:namespace_limit, namespace: namespace)
+
+          expect(namespace_limit).to be_persisted
+          expect(namespace_limit).to eq limit
+        end
+      end
+
+      context 'with no namespace limit' do
+        it 'builds namespace limit' do
+          expect(namespace_limit).to be_present
+          expect(namespace_limit).not_to be_persisted
+        end
+      end
     end
   end
 

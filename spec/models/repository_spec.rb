@@ -1136,11 +1136,11 @@ RSpec.describe Repository do
       expect(repository.license_key).to be_nil
     end
 
-    it 'returns nil when the content is not recognizable' do
+    it 'returns other when the content is not recognizable' do
       repository.create_file(user, 'LICENSE', 'Gitlab B.V.',
         message: 'Add LICENSE', branch_name: 'master')
 
-      expect(repository.license_key).to be_nil
+      expect(repository.license_key).to eq('other')
     end
 
     it 'returns nil when the commit SHA does not exist' do
@@ -1180,11 +1180,12 @@ RSpec.describe Repository do
       expect(repository.license).to be_nil
     end
 
-    it 'returns nil when the content is not recognizable' do
+    it 'returns other when the content is not recognizable' do
+      license = Licensee::License.new('other')
       repository.create_file(user, 'LICENSE', 'Gitlab B.V.',
         message: 'Add LICENSE', branch_name: 'master')
 
-      expect(repository.license).to be_nil
+      expect(repository.license).to eq(license)
     end
 
     it 'returns the license' do
@@ -1948,8 +1949,8 @@ RSpec.describe Repository do
         :root_ref,
         :merged_branch_names,
         :has_visible_content?,
-        :issue_template_names,
-        :merge_request_template_names,
+        :issue_template_names_by_category,
+        :merge_request_template_names_by_category,
         :user_defined_metrics_dashboard_paths,
         :xcode_project?,
         :has_ambiguous_refs?

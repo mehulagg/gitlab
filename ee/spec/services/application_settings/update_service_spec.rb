@@ -234,16 +234,6 @@ RSpec.describe ApplicationSettings::UpdateService do
           include_examples 'worker is called'
         end
       end
-
-      context 'when feature is disabled' do
-        let(:opts) { { new_user_signups_cap: 10 } }
-
-        before do
-          stub_feature_flags(admin_new_user_signups_cap: false)
-        end
-
-        include_examples 'worker is not called'
-      end
     end
   end
 end

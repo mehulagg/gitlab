@@ -33,10 +33,13 @@ function spec({ rules, isEnabled, endpointMatchMode, endpointLabels }) {
  Return yaml representation of a policy.
 */
 export default function toYaml(policy) {
-  const { annotations, name, resourceVersion, description } = policy;
+  const { annotations, name, resourceVersion, description, labels } = policy;
   const metadata = { name };
   if (annotations) {
     metadata.annotations = annotations;
+  }
+  if (labels) {
+    metadata.labels = labels;
   }
   if (resourceVersion) {
     metadata.resourceVersion = resourceVersion;

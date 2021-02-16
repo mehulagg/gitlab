@@ -8,10 +8,11 @@ RSpec.describe ResourceEvents::ChangeWeightService do
   let(:issue) { create(:issue, weight: 3) }
   let(:created_at_time) { Time.utc(2019, 1, 1, 12, 30, 48, '123.123'.to_r) }
 
-  subject { described_class.new(issue, user, created_at_time).execute }
+  subject { described_class.new(issue, user).execute }
 
   before do
     ResourceWeightEvent.new(issue: issue, user: user).save!
+    issue.system_note_timestamp = created_at_time
   end
 
   it 'creates the expected event record' do

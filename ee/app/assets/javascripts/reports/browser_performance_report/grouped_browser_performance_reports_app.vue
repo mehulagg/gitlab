@@ -1,9 +1,9 @@
 <script>
 import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
+import api from '~/api';
 import ReportSection from '~/reports/components/report_section.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import api from '~/api';
 
 export default {
   name: 'GroupedBrowserPerformanceReportsApp',

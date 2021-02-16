@@ -1,9 +1,9 @@
 <script>
-import { merge } from 'lodash';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
-import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
+import { merge } from 'lodash';
 import { __, n__, sprintf } from '~/locale';
+import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 import commonChartOptions from './common_chart_options';
 
 export default {
@@ -29,6 +29,11 @@ export default {
       type: Array,
       required: false,
       default: () => [],
+    },
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -114,8 +119,10 @@ export default {
     <div class="burndown-header d-flex align-items-center">
       <h3>{{ __('Burnup chart') }}</h3>
     </div>
-    <resizable-chart-container class="js-burnup-chart">
+    <resizable-chart-container v-if="!loading" class="js-burnup-chart">
       <gl-line-chart
+        slot-scope="{ width }"
+        :width="width"
         :data="dataSeries"
         :option="options"
         :format-tooltip-text="formatTooltipText"

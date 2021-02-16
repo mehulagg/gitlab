@@ -1,14 +1,13 @@
-import VueApollo from 'vue-apollo';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 
-import waitForPromises from 'helpers/wait_for_promises';
-import createMockApollo from 'helpers/mock_apollo_helper';
-
-import createComplianceFrameworkMutation from 'ee/groups/settings/compliance_frameworks/graphql/queries/create_compliance_framework.mutation.graphql';
 import CreateForm from 'ee/groups/settings/compliance_frameworks/components/create_form.vue';
-import SharedForm from 'ee/groups/settings/compliance_frameworks/components/shared_form.vue';
 import FormStatus from 'ee/groups/settings/compliance_frameworks/components/form_status.vue';
+import SharedForm from 'ee/groups/settings/compliance_frameworks/components/shared_form.vue';
 import { SAVE_ERROR } from 'ee/groups/settings/compliance_frameworks/constants';
+import createComplianceFrameworkMutation from 'ee/groups/settings/compliance_frameworks/graphql/queries/create_compliance_framework.mutation.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import { visitUrl } from '~/lib/utils/url_utility';
 
 import * as Sentry from '~/sentry/wrapper';
@@ -21,13 +20,15 @@ jest.mock('~/lib/utils/url_utility');
 
 describe('CreateForm', () => {
   let wrapper;
-  const sentryError = new Error('Network error');
-  const sentrySaveError = new Error('Invalid values given');
+
   const propsData = {
     groupPath: 'group-1',
     groupEditPath: 'group-1/edit',
-    scopedLabelsHelpPath: 'help/scoped-labels',
+    pipelineConfigurationFullPathEnabled: true,
   };
+
+  const sentryError = new Error('Network error');
+  const sentrySaveError = new Error('Invalid values given');
 
   const create = jest.fn().mockResolvedValue(validCreateResponse);
   const createWithNetworkErrors = jest.fn().mockRejectedValue(sentryError);
@@ -50,11 +51,12 @@ describe('CreateForm', () => {
     });
   }
 
-  async function submitForm(name, description, color) {
+  async function submitForm(name, description, pipelineConfiguration, color) {
     await waitForPromises();
 
     findForm().vm.$emit('update:name', name);
     findForm().vm.$emit('update:description', description);
+    findForm().vm.$emit('update:pipelineConfigurationFullPath', pipelineConfiguration);
     findForm().vm.$emit('update:color', color);
     findForm().vm.$emit('submit');
 
@@ -78,6 +80,7 @@ describe('CreateForm', () => {
   describe('onSubmit', () => {
     const name = 'Test';
     const description = 'Test description';
+    const pipelineConfigurationFullPath = 'file.yml@group/project';
     const color = '#000000';
     const creationProps = {
       input: {
@@ -85,6 +88,7 @@ describe('CreateForm', () => {
         params: {
           name,
           description,
+          pipelineConfigurationFullPath,
           color,
         },
       },
@@ -94,7 +98,7 @@ describe('CreateForm', () => {
       jest.spyOn(Sentry, 'captureException');
       wrapper = createComponent([[createComplianceFrameworkMutation, createWithNetworkErrors]]);
 
-      await submitForm(name, description, color);
+      await submitForm(name, description, pipelineConfigurationFullPath, color);
 
       expect(createWithNetworkErrors).toHaveBeenCalledWith(creationProps);
       expect(findFormStatus().props('loading')).toBe(false);
@@ -107,7 +111,7 @@ describe('CreateForm', () => {
       jest.spyOn(Sentry, 'captureException');
       wrapper = createComponent([[createComplianceFrameworkMutation, createWithErrors]]);
 
-      await submitForm(name, description, color);
+      await submitForm(name, description, pipelineConfigurationFullPath, color);
 
       expect(createWithErrors).toHaveBeenCalledWith(creationProps);
       expect(findFormStatus().props('loading')).toBe(false);
@@ -119,7 +123,7 @@ describe('CreateForm', () => {
     it('saves inputted values and redirects', async () => {
       wrapper = createComponent([[createComplianceFrameworkMutation, create]]);
 
-      await submitForm(name, description, color);
+      await submitForm(name, description, pipelineConfigurationFullPath, color);
 
       expect(create).toHaveBeenCalledWith(creationProps);
       expect(findFormStatus().props('loading')).toBe(false);

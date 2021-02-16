@@ -1,3 +1,5 @@
+accessor
+accessors
 Akismet
 Alertmanager
 Algolia
@@ -7,12 +9,14 @@ allowlist
 allowlisted
 allowlisting
 allowlists
+anonymization
 anonymized
 Ansible
 Anthos
 approvers
 architected
 architecting
+archiver
 Arel
 Artifactory
 Asana
@@ -75,9 +79,11 @@ burndown
 burnup
 burstable
 cacheable
+Caddy
 callstack
 callstacks
 Camo
+canonicalized
 CentOS
 Certbot
 changeset
@@ -103,6 +109,7 @@ Conda
 Consul
 Contentful
 Corosync
+Coursier
 cron
 crons
 crontab
@@ -125,6 +132,10 @@ deduplicates
 deduplicating
 deduplication
 deliverables
+denormalize
+denormalized
+denormalizes
+denormalizing
 denylist
 denylisting
 denylists
@@ -138,6 +149,7 @@ dequarantine
 dequarantined
 dequarantining
 DevOps
+disambiguates
 discoverability
 dismissable
 Disqus
@@ -145,6 +157,7 @@ Divio
 Dockerfile
 Dockerfiles
 Dockerize
+Dockerized
 Dockerizing
 dogfood
 dogfooding
@@ -169,7 +182,9 @@ failover
 failovers
 failsafe
 Falco
+falsy
 fastlane
+Fastzip
 favicon
 favorited
 Figma
@@ -181,11 +196,14 @@ Flawfinder
 Flowdock
 Fluentd
 Forgerock
+formatters
 Fugit
 fuzzer
 Gantt
 Gemnasium
 Gemojione
+Getter
+Getters
 gettext
 Git
 Gitaly
@@ -206,6 +224,7 @@ goroutines
 Gosec
 Gradle
 Grafana
+Grafonnet
 gravatar
 Gzip
 Haml
@@ -253,6 +272,7 @@ Jira
 jq
 jQuery
 jsdom
+Jsonnet
 JupyterHub
 kanban
 kanbans
@@ -280,8 +300,10 @@ Leiningen
 libFuzzer
 Libravatar
 liveness
+Lodash
 Lograge
 logrotate
+Logrus
 Logstash
 lookahead
 lookaheads
@@ -343,6 +365,8 @@ Nanoc
 negatable
 Netlify
 Nokogiri
+noteable
+noteables
 npm
 nullability
 nullable
@@ -366,6 +390,7 @@ passwordless
 Patroni
 performant
 PgBouncer
+pgLoader
 Phabricator
 phaser
 phasers
@@ -379,6 +404,7 @@ Poedit
 polyfill
 polyfills
 pooler
+postgres.ai
 PostgreSQL
 precompile
 preconfigure
@@ -474,6 +500,7 @@ rsync
 rsynced
 rsyncing
 rsyncs
+Rubinius
 Rubix
 Rubocop
 Rubular
@@ -521,6 +548,7 @@ spidering
 Splunk
 SpotBugs
 Stackdriver
+Stackprof
 starrer
 starrers
 storable
@@ -553,6 +581,8 @@ substring
 substrings
 subtask
 subtasks
+subtest
+subtests
 subtree
 subtrees
 sudo
@@ -565,11 +595,14 @@ swimlane
 swimlanes
 syncable
 Sysbench
+syscall
+syscalls
 syslog
 tanuki
 tcpdump
 templated
 Thanos
+Thoughtbot
 throughputs
 Tiller
 timebox
@@ -583,15 +616,19 @@ Tokenizers
 tokenizing
 toolchain
 toolchains
+toolkit
+toolkits
 tooltip
 tooltips
 transpile
+transpiled
 transpiles
 transpiling
 Trello
 triaged
 triages
 triaging
+truthy
 Truststore
 Twilio
 Twitter
@@ -605,6 +642,7 @@ unarchive
 unarchived
 unarchives
 unarchiving
+unary
 unassign
 unassigning
 unassigns
@@ -615,6 +653,7 @@ unchecks
 uncomment
 uncommented
 uncommenting
+uncordon
 unencode
 unencoded
 unencoder
@@ -658,6 +697,7 @@ unreplicated
 unresolve
 unresolved
 unresolving
+unsanitized
 unschedule
 unscoped
 unshare
@@ -673,6 +713,7 @@ unstarted
 unstash
 unstashed
 unstashing
+unsynced
 untarred
 untracked
 untrusted
@@ -683,9 +724,11 @@ unverifying
 uploader
 uploaders
 upstreams
+upvote
 upvoted
 upvotes
 URIs
+Vagrantfile
 validator
 validators
 vendored
@@ -702,6 +745,7 @@ WebdriverIO
 Webex
 webpack
 webserver
+Webservice
 websocket
 websockets
 whitepaper
@@ -718,6 +762,7 @@ Worldline
 Xcode
 Xeon
 YouTrack
+Yubico
 Zeitwerk
 Zendesk
 zsh

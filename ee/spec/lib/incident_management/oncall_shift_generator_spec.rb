@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe IncidentManagement::OncallShiftGenerator do
   let_it_be(:rotation_start_time) { Time.parse('2020-12-08 00:00:00 UTC').utc }
-  let_it_be(:rotation) { create(:incident_management_oncall_rotation, starts_at: rotation_start_time, length: 5, length_unit: :days) }
+  let_it_be_with_reload(:rotation) { create(:incident_management_oncall_rotation, starts_at: rotation_start_time, length: 5, length_unit: :days) }
 
   let(:current_time) { Time.parse('2020-12-08 15:00:00 UTC').utc }
   let(:shift_length) { rotation.shift_duration }

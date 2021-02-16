@@ -102,7 +102,7 @@ class LabelsFinder < UnionFinder
 
       # Because we are sure that all groups are in the same hierarchy tree
       # we can preset root group for all of them to optimize permission checks
-      Group.preset_root_ancestor_for(groups) if Feature.enabled?(:preset_root_ancestor_for_labels, group)
+      Group.preset_root_ancestor_for(groups)
 
       groups_user_can_read_labels(groups).map(&:id)
     end
@@ -177,7 +177,7 @@ class LabelsFinder < UnionFinder
                 end
 
     if group?
-      @projects = if params[:include_subgroups]
+      @projects = if params[:include_descendant_groups]
                     @projects.in_namespace(group.self_and_descendants.select(:id))
                   else
                     @projects.in_namespace(group.id)

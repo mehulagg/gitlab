@@ -1,5 +1,5 @@
-import Vue from 'vue';
 import { GlToast } from '@gitlab/ui';
+import Vue from 'vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import NotificationsDropdown from './components/notifications_dropdown.vue';
 
@@ -17,6 +17,7 @@ export default () => {
       disabled,
       dropdownItems,
       notificationLevel,
+      helpPagePath,
       projectId,
       groupId,
       showLabel,
@@ -30,6 +31,7 @@ export default () => {
         disabled: parseBoolean(disabled),
         dropdownItems: JSON.parse(dropdownItems),
         initialNotificationLevel: notificationLevel,
+        helpPagePath,
         projectId,
         groupId,
         showLabel: parseBoolean(showLabel),

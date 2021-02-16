@@ -28,14 +28,16 @@ module Gitlab
         sha_attribute :verification_checksum
 
         # rubocop:disable CodeReuse/ActiveRecord
-        scope :verification_pending, -> { with_verification_state(:verification_pending) }
-        scope :verification_started, -> { with_verification_state(:verification_started) }
-        scope :verification_succeeded, -> { with_verification_state(:verification_succeeded) }
-        scope :verification_failed, -> { with_verification_state(:verification_failed) }
+        scope :verification_pending, -> { available_verifiables.with_verification_state(:verification_pending) }
+        scope :verification_started, -> { available_verifiables.with_verification_state(:verification_started) }
+        scope :verification_succeeded, -> { available_verifiables.with_verification_state(:verification_succeeded) }
+        scope :verification_failed, -> { available_verifiables.with_verification_state(:verification_failed) }
         scope :checksummed, -> { where.not(verification_checksum: nil) }
         scope :not_checksummed, -> { where(verification_checksum: nil) }
         scope :verification_timed_out, -> { verification_started.where("verification_started_at < ?", VERIFICATION_TIMEOUT.ago) }
-        scope :needs_verification, -> { with_verification_state(:verification_pending, :verification_failed) }
+        scope :retry_due, -> { where(arel_table[:verification_retry_at].eq(nil).or(arel_table[:verification_retry_at].lt(Time.current))) }
+        scope :needs_verification, -> { available_verifiables.merge(with_verification_state(:verification_pending).or(with_verification_state(:verification_failed).retry_due)) }
+        scope :needs_reverification, -> { verification_succeeded.where("verified_at < ?", ::Gitlab::Geo.current_node.minimum_reverification_interval.days.ago) }
         # rubocop:enable CodeReuse/ActiveRecord
 
         state_machine :verification_state, initial: :verification_pending do
@@ -83,9 +85,13 @@ module Gitlab
           end
 
           event :verification_pending do
-            transition [:verification_started, :verification_succeeded, :verification_failed] => :verification_pending
+            transition [:verification_pending, :verification_started, :verification_succeeded, :verification_failed] => :verification_pending
           end
         end
+
+        private_class_method :start_verification_batch
+        private_class_method :start_verification_batch_query
+        private_class_method :start_verification_batch_subselect
       end
 
       class_methods do
@@ -124,7 +130,7 @@ module Gitlab
 
         # Overridden by Geo::VerifiableRegistry
         def verification_failed_batch_relation(batch_size:)
-          verification_failed.order(Gitlab::Database.nulls_first_order(:verification_retry_at)).limit(batch_size) # rubocop:disable CodeReuse/ActiveRecord
+          verification_failed.retry_due.order(Gitlab::Database.nulls_first_order(:verification_retry_at)).limit(batch_size) # rubocop:disable CodeReuse/ActiveRecord
         end
 
         # @return [Integer] number of records that need verification
@@ -135,6 +141,11 @@ module Gitlab
         # Overridden by Geo::VerifiableRegistry
         def needs_verification_relation
           needs_verification
+        end
+
+        # @return [Integer] number of records that need reverification
+        def needs_reverification_count(limit:)
+          needs_reverification.limit(limit).count # rubocop:disable CodeReuse/ActiveRecord
         end
 
         # Atomically marks the records as verification_started, with a
@@ -169,9 +180,23 @@ module Gitlab
             UPDATE #{table_name}
             SET "verification_state" = #{started_enum_value},
               "verification_started_at" = NOW()
-            WHERE #{self.verification_state_model_key} IN (#{relation.select(self.verification_state_model_key).to_sql})
+            WHERE #{self.verification_state_model_key} IN (#{start_verification_batch_subselect(relation).to_sql})
+
             RETURNING #{self.verification_state_model_key}
           SQL
+        end
+
+        # This query locks the rows during the transaction, and skips locked
+        # rows so that this query can be run concurrently, safely and reasonably
+        # efficiently.
+        # See https://gitlab.com/gitlab-org/gitlab/-/issues/300051#note_496889565
+        #
+        # @param [ActiveRecord::Relation] relation with appropriate where, order, and limit defined
+        # @return [String] SQL statement which selects the primary keys to update
+        def start_verification_batch_subselect(relation)
+          relation
+            .select(self.verification_state_model_key)
+            .lock('FOR UPDATE SKIP LOCKED') # rubocop:disable CodeReuse/ActiveRecord
         end
 
         # Overridden in ReplicableRegistry
@@ -193,6 +218,55 @@ module Gitlab
           verification_timed_out.each_batch do |relation|
             relation.update_all(attrs)
           end
+        end
+
+        # Reverifies batch and returns the number of records.
+        #
+        # Atomically marks those records "verification_pending" in the same DB
+        # query.
+        #
+        def reverify_batch(batch_size:)
+          relation = reverification_batch_relation(batch_size: batch_size)
+
+          mark_as_verification_pending(relation)
+        end
+
+        # Returns IDs of records that need re-verification.
+        #
+        # Atomically marks those records "verification_pending" in the same DB
+        # query.
+        #
+        # rubocop:disable CodeReuse/ActiveRecord
+        def reverification_batch_relation(batch_size:)
+          needs_reverification.order(:verified_at).limit(batch_size)
+        end
+        # rubocop:enable CodeReuse/ActiveRecord
+
+        # Atomically marks the records as verification_pending.
+        # Returns the number of records set to be referified.
+        #
+        # @param [ActiveRecord::Relation] relation with appropriate where, order, and limit defined
+        # @return [Integer] number of records
+        def mark_as_verification_pending(relation)
+          query = mark_as_verification_pending_query(relation)
+
+          self.connection.execute(query).cmd_tuples
+        end
+
+        # Returns a SQL statement which would update all the rows in the
+        # relation as verification_pending
+        # and returns the number of updated rows.
+        #
+        # @param [ActiveRecord::Relation] relation with appropriate where, order, and limit defined
+        # @return [String] SQL statement which would update all and return the number of rows
+        def mark_as_verification_pending_query(relation)
+          pending_enum_value = VERIFICATION_STATE_VALUES[:verification_pending]
+
+          <<~SQL.squish
+            UPDATE #{table_name}
+            SET "verification_state" = #{pending_enum_value}
+            WHERE #{self.verification_state_model_key} IN (#{relation.select(self.verification_state_model_key).to_sql})
+          SQL
         end
       end
 
@@ -219,6 +293,10 @@ module Gitlab
 
         track_checksum_result!(checksum, calculation_started_at)
       rescue => e
+        # Reset any potential changes from track_checksum_result, i.e.
+        # verification_retry_count may have been cleared.
+        reset
+
         verification_failed_with_message!('Error during verification', e)
       end
 
@@ -235,6 +313,8 @@ module Gitlab
         if resource_updated_during_checksum?(calculation_started_at)
           # just let backfill pick it up
           self.verification_pending!
+        elsif Gitlab::Geo.primary?
+          self.replicator.handle_after_checksum_succeeded
         end
       end
 

@@ -6,7 +6,7 @@ type: index, reference
 description: "Getting started with Merge Requests."
 ---
 
-# Getting started with Merge Requests
+# Getting started with Merge Requests **(FREE)**
 
 A Merge Request (**MR**) is the basis of GitLab as a code
 collaboration and version control.
@@ -115,16 +115,9 @@ It is also possible to manage multiple assignees:
 ### Reviewer
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216054) in GitLab 13.5.
-> - It was [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49787) on GitLab 13.7.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - It can be enabled or disabled for a single project.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-merge-request-reviewers). **(FREE SELF)**
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/245190) in GitLab 13.9.
 
 WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
-
 Requesting a code review is an important part of contributing code. However, deciding who should review
 your code and asking for a review are no easy tasks. Using the "assignee" field for both authors and
 reviewers makes it hard for others to determine who's doing what on a merge request.
@@ -137,44 +130,10 @@ This makes it easy to determine the relevant roles for the users involved in the
 
 To request it, open the **Reviewers** drop-down box to search for the user you wish to get a review from.
 
-#### Enable or disable Merge Request Reviewers **(FREE SELF)**
-
-Merge Request Reviewers is under development but ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-# For the instance
-Feature.enable(:merge_request_reviewers)
-# For a single project
-Feature.enable(:merge_request_reviewers, Project.find(<project id>))
-```
-
-To disable it:
-
-```ruby
-# For the instance
-Feature.disable(:merge_request_reviewers)
-# For a single project
-Feature.disable(:merge_request_reviewers, Project.find(<project id>))
-```
-
 #### Approval Rule information for Reviewers **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233736) in GitLab 13.8.
-> - Moved to GitLab Premium in 13.9.
-> - It was [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51183) in GitLab 13.8.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - It can be enabled or disabled for a single project.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-approval-rule-information-for-reviewers). **(PREMIUM SELF)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233736) in GitLab 13.8. For this version only, GitLab administrators can opt to [enable it](#enable-or-disable-approval-rule-information).
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/293742) in GitLab 13.9.
 
 When editing the **Reviewers** field in a new or existing merge request, GitLab
 displays the name of the matching [approval rule](merge_request_approvals.md#approval-rules)
@@ -188,30 +147,20 @@ This example shows reviewers and approval rules in a merge request sidebar:
 
 ![Reviewer approval rules in sidebar](img/reviewer_approval_rules_sidebar_v13_8.png)
 
-##### Enable or disable Approval Rule information for Reviewers **(PREMIUM SELF)**
+#### Requesting a new review
 
-Merge Request Reviewers is under development and ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/293933) in GitLab 13.9.
 
-To enable it:
+After a reviewer completes their [merge request reviews](../../discussions/index.md),
+the author of the merge request can request a new review from the reviewer:
 
-```ruby
-# For the instance
-Feature.enable(:reviewer_approval_rules)
-# For a single project
-Feature.enable(:reviewer_approval_rules, Project.find(<project id>))
-```
+1. If the right sidebar in the merge request is collapsed, click the
+   **{chevron-double-lg-left}** **Expand Sidebar** icon to expand it.
+1. In the **Reviewers** section, click the **Re-request a review** icon (**{redo}**)
+   next to the reviewer's name.
 
-To disable it:
-
-```ruby
-# For the instance
-Feature.disable(:reviewer_approval_rules)
-# For a single project
-Feature.disable(:reviewer_approval_rules, Project.find(<project id>))
-```
+GitLab creates a new [to-do item](../../todos.md) for the reviewer, and sends
+them a notification email.
 
 ### Merge requests to close issues
 
@@ -254,3 +203,30 @@ is set for deletion, the merge request widget displays the
 - Take one thing at a time and ship the smallest changes possible. By doing so,
   reviews are faster and your changes are less prone to errors.
 - Do not use capital letters nor special chars in branch names.
+
+## Enable or disable Approval Rule information **(PREMIUM SELF)**
+
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/293742) in GitLab 13.9.
+
+Merge Request Reviewers is under development and ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+# For the instance
+Feature.enable(:reviewer_approval_rules)
+# For a single project
+Feature.enable(:reviewer_approval_rules, Project.find(<project id>))
+```
+
+To disable it:
+
+```ruby
+# For the instance
+Feature.disable(:reviewer_approval_rules)
+# For a single project
+Feature.disable(:reviewer_approval_rules, Project.find(<project id>))
+```

@@ -17,6 +17,15 @@ RSpec.describe Projects::Security::DastSiteProfilesController, type: :request do
   end
 
   shared_examples 'a GET request' do
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { get path }
+
+      before_request do
+        with_feature_available
+        with_user_authorized
+      end
+    end
+
     context 'feature available' do
       before do
         with_feature_available

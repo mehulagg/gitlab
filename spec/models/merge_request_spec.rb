@@ -365,7 +365,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
   describe '.by_commit_sha' do
     subject(:by_commit_sha) { described_class.by_commit_sha(sha) }
 
-    let!(:merge_request) { create(:merge_request, :with_diffs) }
+    let!(:merge_request) { create(:merge_request) }
 
     context 'with sha contained in latest merge request diff' do
       let(:sha) { 'b83d6e391c22777fca1ed3012fce84f633d7fed0' }
@@ -431,7 +431,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when commit is a part of the merge request' do
-      let!(:merge_request) { create(:merge_request, :with_diffs) }
+      let!(:merge_request) { create(:merge_request) }
       let(:sha) { 'b83d6e391c22777fca1ed3012fce84f633d7fed0' }
 
       it { is_expected.to eq([merge_request]) }
@@ -451,7 +451,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when commit is part of the merge request and a squash commit at the same time' do
-      let!(:merge_request) { create(:merge_request, :with_diffs) }
+      let!(:merge_request) { create(:merge_request) }
       let(:sha) { merge_request.commits.first.id }
 
       before do
@@ -715,6 +715,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when external issue tracker is enabled' do
+      let(:project) { create(:project, :repository) }
+
+      subject { create(:merge_request, source_project: project) }
+
       before do
         subject.project.has_external_issue_tracker = true
         subject.project.save!
@@ -788,6 +792,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when only external issue tracker enabled' do
+      let(:project) { create(:project, :repository) }
+
+      subject { create(:merge_request, source_project: project) }
+
       before do
         subject.project.has_external_issue_tracker = true
         subject.project.issues_enabled = false
@@ -817,7 +825,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     let(:last_branch_commit) { subject.source_project.repository.commit(Gitlab::Git::BRANCH_REF_PREFIX + subject.source_branch) }
 
     context 'with diffs' do
-      subject { create(:merge_request, :with_diffs) }
+      subject { create(:merge_request) }
 
       it 'returns the sha of the source branch last commit' do
         expect(subject.source_branch_sha).to eq(last_branch_commit.sha)
@@ -884,7 +892,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     let(:options) { { paths: ['a/b', 'b/a', 'c/*'] } }
 
     context 'when there are MR diffs' do
-      let(:merge_request) { create(:merge_request, :with_diffs) }
+      let(:merge_request) { create(:merge_request) }
 
       it 'delegates to the MR diffs' do
         expect(merge_request.merge_request_diff).to receive(:raw_diffs).with(options)
@@ -933,7 +941,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
   describe '#note_positions_for_paths' do
     let(:user) { create(:user) }
-    let(:merge_request) { create(:merge_request, :with_diffs) }
+    let(:merge_request) { create(:merge_request) }
     let(:project) { merge_request.project }
     let!(:diff_note) do
       create(:diff_note_on_merge_request, project: project, noteable: merge_request)
@@ -1274,8 +1282,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
     let(:mentioned_issue) { create :issue, project: subject.project }
     let(:commit) { double('commit', safe_message: "Fixes #{closing_issue.to_reference}") }
 
-    subject { create(:merge_request, source_project: create(:project)) }
-
     it 'detects issues mentioned in description but not closed' do
       subject.project.add_developer(subject.author)
       subject.description = "Is related to #{mentioned_issue.to_reference} and #{closing_issue.to_reference}"
@@ -1478,8 +1484,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
   end
 
   describe '#default_merge_commit_message' do
-    subject { create(:merge_request, source_project: create(:project)) }
-
     it 'includes merge information as the title' do
       request = build(:merge_request, source_branch: 'source', target_branch: 'target')
 
@@ -1982,6 +1986,30 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
+  describe '#has_codequality_mr_diff_report?' do
+    subject { merge_request.has_codequality_mr_diff_report? }
+
+    context 'when head pipeline has codequality mr diff report' do
+      let(:merge_request) { create(:merge_request, :with_codequality_mr_diff_reports) }
+
+      it { is_expected.to be_truthy }
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(codequality_mr_diff: false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when head pipeline does not have codeqquality mr diff report' do
+      let(:merge_request) { create(:merge_request) }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
   describe '#has_codequality_reports?' do
     subject { merge_request.has_codequality_reports? }
 
@@ -1994,7 +2022,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
       context 'when feature flag is disabled' do
         before do
-          stub_feature_flags(codequality_mr_diff: false)
+          stub_feature_flags(codequality_backend_comparison: false)
         end
 
         it { is_expected.to be_falsey }
@@ -2023,6 +2051,50 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
         expect(merge_request.has_terraform_reports?).to be_falsey
       end
+    end
+  end
+
+  describe '#has_sast_reports?' do
+    subject { merge_request.has_sast_reports? }
+
+    let(:project) { create(:project, :repository) }
+
+    before do
+      stub_licensed_features(sast: true)
+    end
+
+    context 'when head pipeline has sast reports' do
+      let(:merge_request) { create(:merge_request, :with_sast_reports, source_project: project) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when head pipeline does not have sast reports' do
+      let(:merge_request) { create(:merge_request, source_project: project) }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#has_secret_detection_reports?' do
+    subject { merge_request.has_secret_detection_reports? }
+
+    let(:project) { create(:project, :repository) }
+
+    before do
+      stub_licensed_features(secret_detection: true)
+    end
+
+    context 'when head pipeline has secret detection reports' do
+      let(:merge_request) { create(:merge_request, :with_secret_detection_reports, source_project: project) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when head pipeline does not have secrets detection reports' do
+      let(:merge_request) { create(:merge_request, source_project: project) }
+
+      it { is_expected.to be_falsey }
     end
   end
 
@@ -2149,6 +2221,54 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
           it 'raises and InvalidateReactiveCache error' do
             expect { subject }.to raise_error(ReactiveCaching::InvalidateReactiveCache)
+          end
+        end
+      end
+    end
+  end
+
+  describe '#find_codequality_mr_diff_reports' do
+    let(:project) { create(:project, :repository) }
+    let(:merge_request) { create(:merge_request, :with_codequality_mr_diff_reports, source_project: project) }
+    let(:pipeline) { merge_request.head_pipeline }
+
+    subject(:mr_diff_report) { merge_request.find_codequality_mr_diff_reports }
+
+    context 'when head pipeline has coverage reports' do
+      context 'when reactive cache worker is parsing results asynchronously' do
+        it 'returns status' do
+          expect(mr_diff_report[:status]).to eq(:parsing)
+        end
+      end
+
+      context 'when reactive cache worker is inline' do
+        before do
+          synchronous_reactive_cache(merge_request)
+        end
+
+        it 'returns status and data' do
+          expect(mr_diff_report[:status]).to eq(:parsed)
+        end
+
+        context 'when an error occurrs' do
+          before do
+            merge_request.update!(head_pipeline: nil)
+          end
+
+          it 'returns an error message' do
+            expect(mr_diff_report[:status]).to eq(:error)
+          end
+        end
+
+        context 'when cached results is not latest' do
+          before do
+            allow_next_instance_of(Ci::GenerateCodequalityMrDiffReportService) do |service|
+              allow(service).to receive(:latest?).and_return(false)
+            end
+          end
+
+          it 'raises and InvalidateReactiveCache error' do
+            expect { mr_diff_report }.to raise_error(ReactiveCaching::InvalidateReactiveCache)
           end
         end
       end
@@ -3352,6 +3472,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when resolve_outdated_diff_discussions is set' do
+      let(:project) { create(:project, :repository) }
+
+      subject { create(:merge_request, source_project: project) }
+
       before do
         discussion
 
@@ -3372,7 +3496,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
   describe '#branch_merge_base_commit' do
     let(:project) { create(:project, :repository) }
 
-    subject { create(:merge_request, :with_diffs, source_project: project) }
+    subject { create(:merge_request, source_project: project) }
 
     context 'source and target branch exist' do
       it { expect(subject.branch_merge_base_commit.sha).to eq('ae73cb07c9eeaf35924a10f713b364d32b2dd34f') }
@@ -3395,7 +3519,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
     context "with diffs" do
       let(:project) { create(:project, :repository) }
 
-      subject { create(:merge_request, :with_diffs, source_project: project) }
+      subject { create(:merge_request, source_project: project) }
 
       let(:expected_diff_refs) do
         Gitlab::Diff::DiffRefs.new(
@@ -3799,7 +3923,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
   describe '#fetch_ref!' do
     let(:project) { create(:project, :repository) }
 
-    subject { create(:merge_request, :with_diffs, source_project: project) }
+    subject { create(:merge_request, source_project: project) }
 
     it 'fetches the ref correctly' do
       expect { subject.target_project.repository.delete_refs(subject.ref_path) }.not_to raise_error
@@ -4487,17 +4611,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
   end
 
   describe '#allows_reviewers?' do
-    it 'returns false without merge_request_reviewers feature' do
-      stub_feature_flags(merge_request_reviewers: false)
-
-      merge_request = build_stubbed(:merge_request)
-
-      expect(merge_request.allows_reviewers?).to be(false)
-    end
-
-    it 'returns true with merge_request_reviewers feature' do
-      stub_feature_flags(merge_request_reviewers: true)
-
+    it 'returns true' do
       merge_request = build_stubbed(:merge_request)
 
       expect(merge_request.allows_reviewers?).to be(true)
@@ -4515,6 +4629,36 @@ RSpec.describe MergeRequest, factory_default: :keep do
       expect { subject.update_and_mark_in_progress_merge_commit_sha(ref) }
         .to change { subject.in_progress_merge_commit_sha }
         .from(nil).to(ref)
+    end
+  end
+
+  describe '#enabled_reports' do
+    let(:project) { create(:project, :repository) }
+
+    where(:report_type, :with_reports, :feature) do
+      :sast                | :with_sast_reports                | :sast
+      :secret_detection    | :with_secret_detection_reports    | :secret_detection
+    end
+
+    with_them do
+      subject { merge_request.enabled_reports[report_type] }
+
+      before do
+        stub_feature_flags(drop_license_management_artifact: false)
+        stub_licensed_features({ feature => true })
+      end
+
+      context "when head pipeline has reports" do
+        let(:merge_request) { create(:merge_request, with_reports, source_project: project) }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context "when head pipeline does not have reports" do
+        let(:merge_request) { create(:merge_request, source_project: project) }
+
+        it { is_expected.to be_falsy }
+      end
     end
   end
 end

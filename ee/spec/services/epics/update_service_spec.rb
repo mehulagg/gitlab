@@ -308,12 +308,40 @@ RSpec.describe Epics::UpdateService do
     end
 
     context 'with quick actions in the description' do
-      let(:label) { create(:group_label, group: group) }
+      context 'for /label' do
+        let(:label) { create(:group_label, group: group) }
 
-      it 'adds labels to the epic' do
-        update_epic(description: "/label ~#{label.name}")
+        it 'adds labels to the epic' do
+          update_epic(description: "/label ~#{label.name}")
 
-        expect(epic.label_ids).to contain_exactly(label.id)
+          expect(epic.label_ids).to contain_exactly(label.id)
+        end
+      end
+
+      context 'for /parent_epic' do
+        before do
+          stub_licensed_features(epics: true, subepics: true)
+          group.add_developer(user)
+        end
+
+        it 'assigns parent epic' do
+          parent_epic = create(:epic, group: epic.group)
+
+          update_epic(description: "/parent_epic #{parent_epic.to_reference}")
+
+          expect(epic.parent).to eq(parent_epic)
+        end
+
+        context 'when parent epic cannot be assigned' do
+          it 'does not update parent epic' do
+            other_group = create(:group, :private)
+            parent_epic = create(:epic, group: other_group)
+
+            update_epic(description: "/parent_epic #{parent_epic.to_reference(group)}")
+
+            expect(epic.parent).to eq(nil)
+          end
+        end
       end
     end
   end

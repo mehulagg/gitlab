@@ -16,6 +16,7 @@ module Ci
     include ShaAttribute
     include FromUnion
     include UpdatedAtFilterable
+    include EachBatch
 
     MAX_OPEN_MERGE_REQUESTS_REFS = 4
 
@@ -996,15 +997,15 @@ module Ci
     end
 
     def has_coverage_reports?
-      pipeline_artifacts&.has_report?(:code_coverage)
+      pipeline_artifacts&.report_exists?(:code_coverage)
     end
 
     def can_generate_coverage_reports?
       has_reports?(Ci::JobArtifact.coverage_reports)
     end
 
-    def has_codequality_reports?
-      pipeline_artifacts&.has_report?(:code_quality)
+    def has_codequality_mr_diff_report?
+      pipeline_artifacts&.report_exists?(:code_quality_mr_diff)
     end
 
     def can_generate_codequality_reports?
@@ -1217,6 +1218,16 @@ module Ci
     # EE-only
     def merge_train_pipeline?
       false
+    end
+
+    def security_reports(report_types: [])
+      reports_scope = report_types.empty? ? ::Ci::JobArtifact.security_reports : ::Ci::JobArtifact.security_reports(file_types: report_types)
+
+      ::Gitlab::Ci::Reports::Security::Reports.new(self).tap do |security_reports|
+        latest_report_builds(reports_scope).each do |build|
+          build.collect_security_reports!(security_reports)
+        end
+      end
     end
 
     private

@@ -2,6 +2,8 @@
 
 module Projects
   class LicensesController < Projects::ApplicationController
+    include SecurityAndCompliancePermissions
+
     before_action :authorize_read_licenses!, only: [:index]
     before_action :authorize_admin_software_license_policy!, only: [:create, :update]
 

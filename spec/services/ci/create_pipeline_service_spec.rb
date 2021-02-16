@@ -102,7 +102,6 @@ RSpec.describe Ci::CreatePipelineService do
       describe 'recording a conversion event' do
         it 'schedules a record conversion event worker' do
           expect(Experiments::RecordConversionEventWorker).to receive(:perform_async).with(:ci_syntax_templates, user.id)
-          expect(Experiments::RecordConversionEventWorker).to receive(:perform_async).with(:pipelines_empty_state, user.id)
 
           pipeline
         end
@@ -538,7 +537,7 @@ RSpec.describe Ci::CreatePipelineService do
         it 'pull it from Auto-DevOps' do
           pipeline = execute_service
           expect(pipeline).to be_auto_devops_source
-          expect(pipeline.builds.map(&:name)).to match_array(%w[build code_quality eslint-sast secret_detection_default_branch test])
+          expect(pipeline.builds.map(&:name)).to match_array(%w[brakeman-sast build code_quality eslint-sast secret_detection_default_branch test])
         end
       end
 

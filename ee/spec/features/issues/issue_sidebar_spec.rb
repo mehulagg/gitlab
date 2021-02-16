@@ -145,7 +145,7 @@ RSpec.describe 'Issue Sidebar' do
 
         select_iteration('No iteration')
 
-        expect(page.find('[data-testid="select-iteration"]')).to have_content('No iteration')
+        expect(page.find('[data-testid="select-iteration"]')).to have_content('None')
       end
 
       it 'does not show closed iterations' do

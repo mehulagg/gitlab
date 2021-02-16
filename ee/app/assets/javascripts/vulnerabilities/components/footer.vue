@@ -1,20 +1,20 @@
 <script>
-import Visibility from 'visibilityjs';
 import { GlIcon } from '@gitlab/ui';
-import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
-import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
+import Visibility from 'visibilityjs';
 import Api from 'ee/api';
+import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
+import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Poll from '~/lib/utils/poll';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import HistoryEntry from './history_entry.vue';
 import RelatedIssues from './related_issues.vue';
 import RelatedJiraIssues from './related_jira_issues.vue';
-import HistoryEntry from './history_entry.vue';
 import StatusDescription from './status_description.vue';
 
 export default {
@@ -112,6 +112,8 @@ export default {
       return Date.parse(date) / 1000;
     },
     fetchDiscussions() {
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios
         .get(this.vulnerability.discussionsUrl)
         .then(({ data, headers: { date } }) => {
@@ -146,6 +148,8 @@ export default {
         });
     },
     createNotesPoll() {
+      // note: this polling call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       this.poll = new Poll({
         resource: {
           fetchNotes: () =>

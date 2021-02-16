@@ -28,7 +28,7 @@ module EE
       end
 
       def enforce_ssh_key_expiration_feature_available?
-        License.feature_available?(:enforce_ssh_key_expiration) && ::Feature.enabled?(:ff_enforce_ssh_key_expiration)
+        License.feature_available?(:enforce_ssh_key_expiration)
       end
     end
   end

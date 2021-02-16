@@ -1,13 +1,14 @@
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
 import {
   GlModalDirective,
   GlTooltipDirective,
   GlFriendlyWrap,
   GlIcon,
+  GlLink,
   GlButton,
   GlPagination,
 } from '@gitlab/ui';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { __ } from '~/locale';
 import TestCaseDetails from './test_case_details.vue';
 
@@ -16,6 +17,7 @@ export default {
   components: {
     GlIcon,
     GlFriendlyWrap,
+    GlLink,
     GlButton,
     GlPagination,
     TestCaseDetails,
@@ -97,8 +99,11 @@ export default {
         <div class="table-section section-10 section-wrap">
           <div role="rowheader" class="table-mobile-header">{{ __('Filename') }}</div>
           <div class="table-mobile-content gl-md-pr-2 gl-overflow-wrap-break">
-            <gl-friendly-wrap :symbols="$options.wrapSymbols" :text="testCase.file" />
+            <gl-link v-if="testCase.file" :href="testCase.filePath" target="_blank">
+              <gl-friendly-wrap :symbols="$options.wrapSymbols" :text="testCase.file" />
+            </gl-link>
             <gl-button
+              v-if="testCase.file"
               v-gl-tooltip
               size="small"
               category="tertiary"

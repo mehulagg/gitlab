@@ -1,29 +1,28 @@
+import { GlSkeletonLoader, GlSprintf, GlAlert } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import { GlSkeletonLoader, GlSprintf, GlAlert, GlSearchBoxByClick } from '@gitlab/ui';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import getContainerRepositoriesQuery from 'shared_queries/container_registry/get_container_repositories.query.graphql';
-import Tracking from '~/tracking';
-import component from '~/registry/explorer/pages/list.vue';
+import DeleteImage from '~/registry/explorer/components/delete_image.vue';
 import CliCommands from '~/registry/explorer/components/list_page/cli_commands.vue';
 import GroupEmptyState from '~/registry/explorer/components/list_page/group_empty_state.vue';
+import ImageList from '~/registry/explorer/components/list_page/image_list.vue';
 import ProjectEmptyState from '~/registry/explorer/components/list_page/project_empty_state.vue';
 import RegistryHeader from '~/registry/explorer/components/list_page/registry_header.vue';
-import ImageList from '~/registry/explorer/components/list_page/image_list.vue';
-import DeleteImage from '~/registry/explorer/components/delete_image.vue';
-import TitleArea from '~/vue_shared/components/registry/title_area.vue';
-
 import {
   DELETE_IMAGE_SUCCESS_MESSAGE,
   DELETE_IMAGE_ERROR_MESSAGE,
-  IMAGE_REPOSITORY_LIST_LABEL,
-  SEARCH_PLACEHOLDER_TEXT,
+  SORT_FIELDS,
 } from '~/registry/explorer/constants';
-
-import getContainerRepositoriesDetails from '~/registry/explorer/graphql/queries/get_container_repositories_details.query.graphql';
 import deleteContainerRepositoryMutation from '~/registry/explorer/graphql/mutations/delete_container_repository.mutation.graphql';
+import getContainerRepositoriesDetails from '~/registry/explorer/graphql/queries/get_container_repositories_details.query.graphql';
+import component from '~/registry/explorer/pages/list.vue';
+import Tracking from '~/tracking';
+import RegistrySearch from '~/vue_shared/components/registry/registry_search.vue';
+import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 
+import { $toast } from '../../shared/mocks';
 import {
   graphQLImageListMock,
   graphQLImageDeleteMock,
@@ -35,7 +34,6 @@ import {
   dockerCommands,
 } from '../mock_data';
 import { GlModal, GlEmptyState } from '../stubs';
-import { $toast } from '../../shared/mocks';
 
 const localVue = createLocalVue();
 
@@ -55,8 +53,7 @@ describe('List Page', () => {
 
   const findDeleteAlert = () => wrapper.find(GlAlert);
   const findImageList = () => wrapper.find(ImageList);
-  const findListHeader = () => wrapper.find('[data-testid="listHeader"]');
-  const findSearchBox = () => wrapper.find(GlSearchBoxByClick);
+  const findRegistrySearch = () => wrapper.find(RegistrySearch);
   const findEmptySearchMessage = () => wrapper.find('[data-testid="emptySearch"]');
   const findDeleteImage = () => wrapper.find(DeleteImage);
 
@@ -229,14 +226,6 @@ describe('List Page', () => {
 
         expect(findCliCommands().exists()).toBe(false);
       });
-
-      it('list header is not visible', async () => {
-        mountComponent({ resolver, config });
-
-        await waitForApolloRequestRender();
-
-        expect(findListHeader().exists()).toBe(false);
-      });
     });
   });
 
@@ -256,16 +245,6 @@ describe('List Page', () => {
         await waitForApolloRequestRender();
 
         expect(findImageList().exists()).toBe(true);
-      });
-
-      it('list header is  visible', async () => {
-        mountComponent();
-
-        await waitForApolloRequestRender();
-
-        const header = findListHeader();
-        expect(header.exists()).toBe(true);
-        expect(header.text()).toBe(IMAGE_REPOSITORY_LIST_LABEL);
       });
 
       describe('additional metadata', () => {
@@ -360,10 +339,15 @@ describe('List Page', () => {
       });
     });
 
-    describe('search', () => {
+    describe('search and sorting', () => {
       const doSearch = async () => {
         await waitForApolloRequestRender();
-        findSearchBox().vm.$emit('submit', 'centos6');
+        findRegistrySearch().vm.$emit('filter:changed', [
+          { type: 'filtered-search-term', value: { data: 'centos6' } },
+        ]);
+
+        findRegistrySearch().vm.$emit('filter:submit');
+
         await wrapper.vm.$nextTick();
       };
 
@@ -372,9 +356,26 @@ describe('List Page', () => {
 
         await waitForApolloRequestRender();
 
-        const searchBox = findSearchBox();
-        expect(searchBox.exists()).toBe(true);
-        expect(searchBox.attributes('placeholder')).toBe(SEARCH_PLACEHOLDER_TEXT);
+        const registrySearch = findRegistrySearch();
+        expect(registrySearch.exists()).toBe(true);
+        expect(registrySearch.props()).toMatchObject({
+          filter: [],
+          sorting: { orderBy: 'UPDATED', sort: 'desc' },
+          sortableFields: SORT_FIELDS,
+          tokens: [],
+        });
+      });
+
+      it('performs sorting', async () => {
+        const resolver = jest.fn().mockResolvedValue(graphQLImageListMock);
+        mountComponent({ resolver });
+
+        await waitForApolloRequestRender();
+
+        findRegistrySearch().vm.$emit('sorting:changed', { sort: 'asc' });
+        await wrapper.vm.$nextTick();
+
+        expect(resolver).toHaveBeenCalledWith(expect.objectContaining({ sort: 'UPDATED_DESC' }));
       });
 
       it('performs a search', async () => {

@@ -742,8 +742,6 @@ Items nested in lists should always align with the first character of the list
 item. In unordered lists (using `-`), this means two spaces for each level of
 indentation:
 
-<!-- vale off -->
-
 ````markdown
 - Unordered list item 1
 
@@ -765,11 +763,7 @@ indentation:
   ![an image that will nest inside list item 4](image.png)
 ````
 
-<!-- vale on -->
-
 For ordered lists, use three spaces for each level of indentation:
-
-<!-- vale off -->
 
 ````markdown
 1. Ordered list item 1
@@ -791,8 +785,6 @@ For ordered lists, use three spaces for each level of indentation:
 
    ![an image that will nest inside list item 4](image.png)
 ````
-
-<!-- vale on -->
 
 You can nest full lists inside other lists using the same rules as above. If you
 want to mix types, that's also possible, if you don't mix items at the same
@@ -997,7 +989,8 @@ To link to internal documentation:
 - Use relative links to Markdown files in the same repository.
 - Do not use absolute URLs or URLs from `docs.gitlab.com`.
 - Use `../` to navigate to higher-level directories.
-- Don't prepend `./` to links to files or directories.
+- Don't prepend `./` to links to files or directories. To link to a file in the
+  same directory or one of its sub-directories, use the syntax `path/to/file.md`.
 - Don't link relative to root. For example, `/ee/user/gitlab_com/index.md`.
 
   Don't:
@@ -1022,6 +1015,7 @@ To link to internal documentation:
   - `../../merge_requests/index.md`
   - `../../issues/tags.md`
   - `../../issues/tags.md#stages`
+  - `issues/tags.md`
 
 NOTE:
 Using the Markdown extension is necessary for the [`/help`](../index.md#gitlab-help)
@@ -1322,8 +1316,6 @@ hidden on the documentation site, but is displayed by `/help`.
 - For regular fenced code blocks, always use a highlighting class corresponding to
   the language for better readability. Examples:
 
-  <!-- vale off -->
-
   ````markdown
   ```ruby
   Ruby code
@@ -1341,8 +1333,6 @@ hidden on the documentation site, but is displayed by `/help`.
   Code or text for which no specific highlighting class is available.
   ```
   ````
-
-  <!-- vale on -->
 
 Syntax highlighting is required for fenced code blocks added to the GitLab
 documentation. Refer to this table for the most common language classes,
@@ -1832,8 +1822,6 @@ Configuration procedures can require users to edit configuration files, reconfig
 GitLab, or restart GitLab. Use these styles to document these steps, replacing
 `PATH/TO` with the appropriate path:
 
-<!-- vale off -->
-
 ````markdown
 **For Omnibus installations**
 
@@ -1860,8 +1848,6 @@ GitLab, or restart GitLab. Use these styles to document these steps, replacing
 1. Save the file and [restart](PATH/TO/administration/restart_gitlab.md#installations-from-source)
    GitLab for the changes to take effect.
 ````
-
-<!-- vale on -->
 
 In this case:
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MigrateCiJobArtifactsToSeparateRegistry < ActiveRecord::Migration[4.2]
   def up
     tracking_db.create_table :job_artifact_registry, force: :cascade do |t|

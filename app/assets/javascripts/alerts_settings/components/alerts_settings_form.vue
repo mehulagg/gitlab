@@ -12,16 +12,16 @@ import {
   GlModalDirective,
   GlToggle,
 } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   integrationTypes,
   JSON_VALIDATE_DELAY,
   targetPrometheusUrlPlaceholder,
   typeSet,
 } from '../constants';
+import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
 import MappingBuilder from './alert_mapping_builder.vue';
 import AlertSettingsFormHelpBlock from './alert_settings_form_help_block.vue';
 // Mocks will be removed when integrating with BE is ready
@@ -125,6 +125,9 @@ export default {
     prometheus: {
       default: {},
     },
+    multiIntegrations: {
+      default: false,
+    },
   },
   props: {
     loading: {
@@ -134,6 +137,11 @@ export default {
     canAddIntegration: {
       type: Boolean,
       required: true,
+    },
+    alertFields: {
+      type: Array,
+      required: false,
+      default: null,
     },
   },
   apollo: {
@@ -196,8 +204,10 @@ export default {
     },
     showMappingBuilder() {
       return (
+        this.multiIntegrations &&
         this.glFeatures.multipleHttpIntegrationsCustomMapping &&
-        this.selectedIntegration === typeSet.http
+        this.selectedIntegration === typeSet.http &&
+        this.alertFields?.length
       );
     },
     parsedSamplePayload() {
@@ -558,6 +568,7 @@ export default {
           <mapping-builder
             :parsed-payload="parsedSamplePayload"
             :saved-mapping="savedMapping"
+            :alert-fields="alertFields"
             @onMappingUpdate="updateMapping"
           />
         </gl-form-group>

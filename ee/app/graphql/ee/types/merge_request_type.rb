@@ -9,11 +9,16 @@ module EE
         field :approved, GraphQL::BOOLEAN_TYPE, method: :approved?, null: false, calls_gitaly: true,
               description: 'Indicates if the merge request has all the required approvals. Returns true if no required approvals are configured.'
         field :approvals_left, GraphQL::INT_TYPE, null: true, calls_gitaly: true,
-              description: 'Number of approvals left'
+              description: 'Number of approvals left.'
         field :approvals_required, GraphQL::INT_TYPE, null: true,
-              description: 'Number of approvals required'
+              description: 'Number of approvals required.'
         field :merge_trains_count, GraphQL::INT_TYPE, null: true,
-              description: ''
+              description: 'Number of merge requests in the merge train.'
+
+        field :has_security_reports, GraphQL::BOOLEAN_TYPE,
+              null: false, calls_gitaly: true,
+              method: :has_security_reports?,
+              description: 'Indicates if the source branch has any security reports.'
       end
 
       def merge_trains_count

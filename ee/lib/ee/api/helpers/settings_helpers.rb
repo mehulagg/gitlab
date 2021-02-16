@@ -51,6 +51,7 @@ module EE
             optional :group_owners_can_manage_default_branch_protection, type: Grape::API::Boolean, desc: 'Allow owners to manage default branch protection in groups'
             optional :maintenance_mode, type: Grape::API::Boolean, desc: 'When instance is in maintenance mode, non-admin users can sign in with read-only access and make read-only API requests'
             optional :maintenance_mode_message, type: String, desc: 'Message displayed when instance is in maintenance mode'
+            optional :git_two_factor_session_expiry, type: Integer, desc: 'Maximum duration (in minutes) of a session for Git operations when 2FA is enabled'
           end
         end
 

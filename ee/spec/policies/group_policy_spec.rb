@@ -7,7 +7,8 @@ RSpec.describe GroupPolicy do
 
   let(:epic_rules) do
     %i(read_epic create_epic admin_epic destroy_epic read_confidential_epic
-       destroy_epic_link read_epic_board read_epic_list admin_epic_board)
+       destroy_epic_link read_epic_board read_epic_board_list admin_epic_board
+       admin_epic_board_list)
   end
 
   context 'when epics feature is disabled' do
@@ -58,7 +59,7 @@ RSpec.describe GroupPolicy do
       let(:current_user) { guest }
 
       it { is_expected.to be_allowed(:read_epic, :read_epic_board) }
-      it { is_expected.to be_disallowed(*(epic_rules - [:read_epic, :read_epic_board, :read_epic_list])) }
+      it { is_expected.to be_disallowed(*(epic_rules - [:read_epic, :read_epic_board, :read_epic_board_list])) }
     end
 
     context 'when user is not member' do
@@ -181,6 +182,26 @@ RSpec.describe GroupPolicy do
     end
 
     it { is_expected.not_to be_allowed(:read_group_contribution_analytics) }
+  end
+
+  context 'when dora4 analytics is available' do
+    let(:current_user) { developer }
+
+    before do
+      stub_licensed_features(dora4_analytics: true)
+    end
+
+    it { is_expected.to be_allowed(:read_dora4_analytics) }
+  end
+
+  context 'when dora4 analytics is not available' do
+    let(:current_user) { developer }
+
+    before do
+      stub_licensed_features(dora4_analytics: false)
+    end
+
+    it { is_expected.not_to be_allowed(:read_dora4_analytics) }
   end
 
   context 'when group activity analytics is available' do

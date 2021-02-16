@@ -25,11 +25,13 @@ RSpec.describe Project do
 
     it { is_expected.to have_one(:import_state).class_name('ProjectImportState') }
     it { is_expected.to have_one(:repository_state).class_name('ProjectRepositoryState').inverse_of(:project) }
+    it { is_expected.to have_one(:push_rule).inverse_of(:project) }
     it { is_expected.to have_one(:status_page_setting).class_name('StatusPage::ProjectSetting') }
     it { is_expected.to have_one(:compliance_framework_setting).class_name('ComplianceManagement::ComplianceFramework::ProjectSettings') }
     it { is_expected.to have_one(:compliance_management_framework).class_name('ComplianceManagement::Framework') }
     it { is_expected.to have_one(:security_setting).class_name('ProjectSecuritySetting') }
     it { is_expected.to have_one(:vulnerability_statistic).class_name('Vulnerabilities::Statistic') }
+    it { is_expected.to have_one(:security_orchestration_policy_configuration).class_name('Security::OrchestrationPolicyConfiguration').inverse_of(:project) }
 
     it { is_expected.to have_many(:path_locks) }
     it { is_expected.to have_many(:vulnerability_feedback) }
@@ -55,6 +57,29 @@ RSpec.describe Project do
     it { is_expected.to have_many(:approval_rules) }
 
     it { is_expected.to have_many(:incident_management_oncall_schedules).class_name('IncidentManagement::OncallSchedule') }
+    it { is_expected.to have_many(:incident_management_oncall_rotations).through(:incident_management_oncall_schedules).source(:rotations) }
+
+    describe '#jira_issue_association_required_to_merge_enabled?' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:licensed, :feature_flag, :result) do
+        true  | true  | true
+        true  | false | false
+        false | false | false
+        false | true  | false
+      end
+
+      before do
+        stub_licensed_features(jira_issue_association_enforcement: licensed)
+        stub_feature_flags(jira_issue_association_on_merge_request: feature_flag)
+      end
+
+      with_them do
+        it 'returns the correct value' do
+          expect(project.jira_issue_association_required_to_merge_enabled?).to eq(result)
+        end
+      end
+    end
 
     describe 'approval_rules association' do
       let_it_be(:rule, reload: true) { create(:approval_project_rule) }
@@ -2638,8 +2663,8 @@ RSpec.describe Project do
       let!(:issue) { create(:issue, project: project) }
 
       context 'when updating the visibility_level' do
-        it 'triggers ElasticAssociationIndexerWorker to update issues' do
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+        it 'triggers ElasticAssociationIndexerWorker to update issues and notes' do
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues notes])
 
           project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
         end

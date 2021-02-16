@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :elastic do
     namespace :test do

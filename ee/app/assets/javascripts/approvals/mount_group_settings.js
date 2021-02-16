@@ -1,8 +1,8 @@
 import Vue from 'vue';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import GroupSettingsApp from './components/group_settings/app.vue';
 import createStore from './stores';
 import groupSettingsModule from './stores/modules/group_settings';
-import { parseBoolean } from '~/lib/utils/common_utils';
 
 const mountGroupApprovalSettings = (el) => {
   if (!el) {

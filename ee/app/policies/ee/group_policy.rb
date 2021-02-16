@@ -37,6 +37,10 @@ module EE
         @subject.feature_available?(:group_activity_analytics)
       end
 
+      condition(:dora4_analytics_available) do
+        @subject.feature_available?(:dora4_analytics)
+      end
+
       condition(:can_owners_manage_ldap, scope: :global) do
         ::Gitlab::CurrentSettings.allow_group_owners_to_manage_ldap?
       end
@@ -160,6 +164,9 @@ module EE
       rule { has_access & group_activity_analytics_available }
         .enable :read_group_activity_analytics
 
+      rule { reporter & dora4_analytics_available }
+        .enable :read_dora4_analytics
+
       rule { reporter & group_repository_analytics_available }
         .enable :read_group_repository_analytics
 
@@ -181,7 +188,7 @@ module EE
       rule { can?(:read_group) & epics_available }.policy do
         enable :read_epic
         enable :read_epic_board
-        enable :read_epic_list
+        enable :read_epic_board_list
       end
 
       rule { can?(:read_group) & iterations_available }.enable :read_iteration
@@ -198,6 +205,7 @@ module EE
         enable :read_confidential_epic
         enable :destroy_epic_link
         enable :admin_epic_board
+        enable :admin_epic_board_list
       end
 
       rule { reporter & subepics_available }.policy do
@@ -214,6 +222,7 @@ module EE
         prevent :admin_epic
         prevent :update_epic
         prevent :destroy_epic
+        prevent :admin_epic_board_list
       end
 
       rule { auditor }.policy do
