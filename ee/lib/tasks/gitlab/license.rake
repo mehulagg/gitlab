@@ -27,7 +27,7 @@ namespace :gitlab do
           puts "License Invalid:\n\nFilePath: #{license_file}".color(:red)
           raise "License Invalid"
         end
-      elsif !ENV[flag].blank?
+      elsif ENV[flag].present?
         puts "License File Missing:\n\nFilePath: #{license_file}".color(:red)
         raise "License File Missing"
       else
