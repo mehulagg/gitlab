@@ -25,8 +25,6 @@ RSpec.describe Projects::Ci::DailyBuildGroupReportResultsController do
       allow(Ability).to receive(:allowed?).and_call_original
       allow(Ability).to receive(:allowed?).with(user, :read_build_report_results, project).and_return(allowed_to_read)
 
-      stub_feature_flags(coverage_data_new_finder: feature_enabled?)
-
       get :index, params: {
         namespace_id: project.namespace,
         project_id: project,
@@ -140,33 +138,13 @@ RSpec.describe Projects::Ci::DailyBuildGroupReportResultsController do
     context 'when format is JSON' do
       let(:format) { :json }
 
-      context 'when coverage_data_new_finder flag is enabled' do
-        let(:feature_enabled?) { true }
-
-        it_behaves_like 'JSON results'
-      end
-
-      context 'when coverage_data_new_finder flag is disabled' do
-        let(:feature_enabled?) { false }
-
-        it_behaves_like 'JSON results'
-      end
+      it_behaves_like 'JSON results'
     end
 
     context 'when format is CSV' do
       let(:format) { :csv }
 
-      context 'when coverage_data_new_finder flag is enabled' do
-        let(:feature_enabled?) { true }
-
-        it_behaves_like 'CSV results'
-      end
-
-      context 'when coverage_data_new_finder flag is disabled' do
-        let(:feature_enabled?) { false }
-
-        it_behaves_like 'CSV results'
-      end
+      it_behaves_like 'CSV results'
     end
   end
 

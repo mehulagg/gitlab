@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::Testing::DailyBuildGroupReportResultsFinder do
+RSpec.describe Ci::DailyBuildGroupReportResultsFinder do
   describe '#execute' do
     let_it_be(:current_user) { create(:user) }
     let_it_be(:group) { create(:group, :private) }
@@ -56,13 +56,13 @@ RSpec.describe Ci::Testing::DailyBuildGroupReportResultsFinder do
         let(:limit) { 1001 }
 
         it 'returns MAX_ITEMS as a limit' do
-          expect(coverages.limit_value).to eq(Ci::Testing::DailyBuildGroupReportResultsFinder::MAX_ITEMS)
+          expect(coverages.limit_value).to eq(Ci::DailyBuildGroupReportResultsFinder::MAX_ITEMS)
         end
       end
 
       context 'without a limit' do
         it 'returns MAX_ITEMS as a limit' do
-          expect(coverages.limit_value).to eq(Ci::Testing::DailyBuildGroupReportResultsFinder::MAX_ITEMS)
+          expect(coverages.limit_value).to eq(Ci::DailyBuildGroupReportResultsFinder::MAX_ITEMS)
         end
       end
     end

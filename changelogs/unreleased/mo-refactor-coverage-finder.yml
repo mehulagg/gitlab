@@ -1,0 +1,5 @@
+---
+title: Remove coverage_data_new_finder feature flag
+merge_request: 45580
+author:
+type: performance
