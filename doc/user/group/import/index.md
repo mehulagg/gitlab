@@ -24,6 +24,12 @@ The following resources are migrated to the target instance:
   - description
   - attributes
   - subgroups
+- Labels
+- Members
+  Group members are associated with the imported group if:
+  - the user already exists in the target GitLab instance and
+  - the user has a public email in the source GitLab instance that matches a
+    confirmed email in the target GitLab instance
 - Epics
   - title
   - description
@@ -32,6 +38,9 @@ The following resources are migrated to the target instance:
   - due date
   - epic order on boards
   - confidentiality
+  - labels
+  - author
+  - parent epic
 
 Any other items are **not** migrated.
 
