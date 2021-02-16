@@ -11,19 +11,6 @@ module Ci
       full_scan_enabled: 'DAST_FULL_SCAN_ENABLED'
     }.freeze
 
-    def self.ci_template
-      @ci_template ||= YAML.safe_load(ci_template_raw)
-    end
-
-    def self.ci_template_raw
-      <<~YAML
-        stages:
-          - dast
-        include:
-          - template: DAST-On-Demand-Scan.gitlab-ci.yml
-      YAML
-    end
-
     def execute(args)
       variables = args.each_with_object({}) do |(key, val), hash|
         next if val.nil? || !ENV_MAPPING[key]
@@ -32,9 +19,24 @@ module Ci
         hash
       end
 
-      self.class.ci_template.deep_merge(
+      ci_template.deep_merge(
         'variables' => variables
       ).to_yaml
+    end
+
+    private
+
+    def ci_template
+      @ci_template ||= YAML.safe_load(ci_template_raw)
+    end
+
+    def ci_template_raw
+      <<~YAML
+        stages:
+          - dast
+        include:
+          - template: DAST-On-Demand-Scan.gitlab-ci.yml
+      YAML
     end
   end
 end

@@ -3,16 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Ci::DastScanCiConfigurationService do
-  describe '.ci_template' do
-    it 'builds a hash' do
-      expect(described_class.ci_template).to be_a(Hash)
-    end
-
-    it 'has only one stage' do
-      expect(described_class.ci_template['stages']).to eq(['dast'])
-    end
-  end
-
   describe '#execute' do
     let(:params) do
       {
