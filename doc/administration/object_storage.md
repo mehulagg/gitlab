@@ -573,7 +573,7 @@ See the following additional guides:
 ### Use separate buckets
 
 Using separate buckets for each data type is the recommended approach for GitLab.
-This ensures there's no collisions across the various types of
+This ensures there are no collisions across the various types of
 data GitLab stores.
 
 Helm-based installs require separate buckets to
