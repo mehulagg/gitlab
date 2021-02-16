@@ -48,7 +48,7 @@ found in
 ## Development environment
 
 See the [Simple way to develop/test Kubernetes workflows with a local cluster](https://gitlab.com/gitlab-org/gitlab-development-kit/-/issues/1064)
-issue for discussion around setting up an Auto DevOps development environments.
+issue for discussion around setting up Auto DevOps development environments.
 
 ## Monitoring on GitLab.com
 
