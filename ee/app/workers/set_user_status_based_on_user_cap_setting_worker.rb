@@ -14,8 +14,10 @@ class SetUserStatusBasedOnUserCapSettingWorker
     return unless user.blocked_pending_approval?
     return if user_cap_max.nil?
 
-    send_user_cap_reached_email if user_cap_reached?
-    return if user_cap_reached? || user_cap_exceeded?
+    if user_cap_reached?
+      send_user_cap_reached_email
+      return
+    end
 
     if user.activate
       # Resends confirmation email if the user isn't confirmed yet.
@@ -37,17 +39,11 @@ class SetUserStatusBasedOnUserCapSettingWorker
   end
 
   def current_billable_users_count
-    strong_memoize(:current_billable_users_count) do
-      User.billable.count
-    end
+    User.billable.count
   end
 
   def user_cap_reached?
-    current_billable_users_count == user_cap_max
-  end
-
-  def user_cap_exceeded?
-    current_billable_users_count > user_cap_max
+    current_billable_users_count >= user_cap_max
   end
 
   def send_user_cap_reached_email
