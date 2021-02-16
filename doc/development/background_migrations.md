@@ -142,6 +142,17 @@ migration performing the scheduling. Otherwise the background migration would be
 scheduled multiple times on systems that are upgrading multiple patch releases at
 once.
 
+If the original migration still has queued jobs, you should delete them at
+the beginning of the second post-deployment migration using code like this:
+
+```ruby
+::GitLab::BackgroundMigration.steal('BackgroundMigrationClassName') do |job|
+  job.delete
+
+  false
+end
+```
+
 ## Cleaning Up
 
 NOTE:
