@@ -27,9 +27,18 @@ module Gitlab
       end
 
       def redis_shared_state_key(key)
-        raise 'Invalid key' if !Rails.env.production? && !Gitlab::EtagCaching::Router.match(key)
+        raise 'Invalid key' unless valid_key?(key)
 
         "#{SHARED_STATE_NAMESPACE}#{key}"
+      end
+
+      def valid_key?(key)
+        return true if Rails.env.production?
+
+        path, header = key.split(':')
+        fake_request = OpenStruct.new(path_info: path, headers: { EtagCaching::Router::Graphql::GRAPHQL_ETAG_RESOURCE_HEADER => header }.compact)
+
+        !!Gitlab::EtagCaching::Router.match(fake_request)
       end
     end
   end
