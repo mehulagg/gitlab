@@ -265,9 +265,9 @@ Pressing the "Dismiss Selected" button dismisses all the selected vulnerabilitie
 
 ![Multiple vulnerability dismissal](img/multi_select_v12_9.png)
 
-### Creating an issue for a vulnerability
+### Creating a GitLab issue for a vulnerability
 
-You can create an issue for a vulnerability by visiting the vulnerability's page and clicking
+You can create a GitLab issue for a vulnerability by visiting the vulnerability's page and clicking
 **Create issue**, which you can find in the **Related issues** section.
 
 ![Create issue from vulnerability](img/create_issue_from_vulnerability_v13_3.png)
@@ -282,12 +282,25 @@ to the name.
 
 ![Linked issue in the group security dashboard](img/issue.png)
 
+### Creating a Jira issue for a vulnerability
+
+You can create a Jira issue for a vulnerability by visiting the vulnerability's page and clicking
+**Create issue**, which you can find in the **Related issues** section.
+
+This creates an issue in the linked Jira project, with the **Summary** and **Description** fields
+prepopulated. After the issue is created, you are redirected to it so you can edit, assign, or
+comment on it.
+
+Upon returning to the group security dashboard, the vulnerability now has an associated issue next
+to the name.
+
 ### Automatic remediation for vulnerabilities
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5656) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.7.
 
-Some vulnerabilities can be fixed by applying the solution that GitLab
-automatically generates. Although the feature name is Automatic Remediation, this feature is also commonly called Auto-Remediation, Auto Remediation, or Suggested Solutions. The following scanners are supported:
+Some vulnerabilities can be fixed by applying the solution that GitLab automatically generates.
+Although the feature name is Automatic Remediation, this feature is also commonly called
+Auto-Remediation, Auto Remediation, or Suggested Solutions. The following scanners are supported:
 
 - [Dependency Scanning](dependency_scanning/index.md):
   Automatic Patch creation is only available for Node.js projects managed with

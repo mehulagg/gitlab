@@ -19,44 +19,81 @@ Each security vulnerability in a project's [Security Dashboard](../security_dash
 On the vulnerability page, you can interact with the vulnerability in
 several different ways:
 
-- [Change the Vulnerability Status](#changing-vulnerability-status) - You can change the
-  status of a vulnerability to **Detected**, **Confirmed**, **Dismissed**, or **Resolved**.
-- [Create issue](#creating-an-issue-for-a-vulnerability) - Create a new issue with the
-  title and description pre-populated with information from the vulnerability report.
-  By default, such issues are [confidential](../../project/issues/confidential_issues.md).
-- [Link issues](#link-issues-to-the-vulnerability) - Link existing issues to vulnerability.
-- [Automatic remediation](#automatic-remediation-for-vulnerabilities) - For some vulnerabilities,
-  a solution is provided for how to fix the vulnerability automatically.
+- [Change the Vulnerability Status](#changing-vulnerability-status)
+
+  You can change the status of a vulnerability to **Detected**, **Confirmed**, **Dismissed**, or
+  **Resolved**.
+
+- [Create a GitLab issue](#creating-a-gitlab-issue-for-a-vulnerability)
+
+  Create a new issue with the title and description pre-populated with information from the
+  vulnerability report. By default, such issues are
+  [confidential](../../project/issues/confidential_issues.md).
+  Note: If Jira issue support is enabled, you can **only** create a Jira issue for a vulnerability.
+
+- [Create a Jira issue](#creating-a-jira-issue-for-a-vulnerability)
+
+  Create a new Jira issue with the title and description pre-populated with information from the
+  vulnerability report. Note: If Jira issue support is enabled, you can **only** create a Jira issue
+  for a vulnerability.
+
+- [Link issues](#link-issues-to-the-vulnerability)
+
+  Link existing issues to vulnerability.
+
+- [Automatic remediation](#automatic-remediation-for-vulnerabilities)
+
+  For some vulnerabilities, a solution is provided for how to fix the vulnerability automatically.
 
 ## Changing vulnerability status
 
 You can switch the status of a vulnerability using the **Status** dropdown to one of
 the following values:
 
-| Status    | Description                                                                                                      |
-|-----------|------------------------------------------------------------------------------------------------------------------|
-| Detected  | The default state for a newly discovered vulnerability                                                           |
-| Confirmed | A user has seen this vulnerability and confirmed it to be accurate                                               |
+| Status    | Description                                                                                                    |
+|-----------|----------------------------------------------------------------------------------------------------------------|
+| Detected  | The default state for a newly discovered vulnerability                                                         |
+| Confirmed | A user has seen this vulnerability and confirmed it to be accurate                                             |
 | Dismissed | A user has seen this vulnerability and dismissed it because it is not accurate or otherwise not to be resolved |
-| Resolved  | The vulnerability has been fixed and is no longer valid                                                          |
+| Resolved  | The vulnerability has been fixed and is no longer valid                                                        |
 
 A timeline shows you when the vulnerability status has changed
 and allows you to comment on a change.
 
-## Creating an issue for a vulnerability
+## Creating a GitLab issue for a vulnerability
 
-You can create an issue for a vulnerability by selecting the **Create issue** button.
+Note: If Jira issue support is enabled, you can **only** create a Jira issue for a vulnerability.
+
+You can create a GitLab issue for a vulnerability by selecting the **Create issue** button.
 
 This allows the user to create a [confidential issue](../../project/issues/confidential_issues.md)
 in the project the vulnerability came from. Fields are pre-populated with pertinent information
 from the vulnerability report. After the issue is created, GitLab redirects you to the
 issue page so you can edit, assign, or comment on the issue.
 
-## Link issues to the vulnerability
+## Creating a Jira issue for a vulnerability
 
-You can link one or more existing issues to the vulnerability. This allows you to
+Prerequisites:
+
+- [Enable Jira integration for vulnerabilities](../../project/integrations/jira.md).
+
+You can create a Jira issue for a vulnerability by selecting the **Create Jira issue** button.
+
+This creates an issue in the linked Jira project, with the **Summary** and **Description** fields
+prepopulated with pertinent information from the vulnerability report. After the issue is created,
+GitLab redirects you to the issue page so you can edit, assign, or comment on the issue.
+
+Linked issues are shown in the Vulnerability Report and the vulnerability's page.
+
+## Link GitLab issues to the vulnerability
+
+Note: If Jira issue support is enabled, this feature is not available.
+
+You can link one or more existing GitLab issues to the vulnerability. This allows you to
 indicate that this vulnerability affects multiple issues. It also allows you to indicate
 that the resolution of one issue would resolve multiple vulnerabilities.
+
+Linked issues are shown in the Vulnerability Report and the vulnerability's page.
 
 ## Automatic remediation for vulnerabilities
 
