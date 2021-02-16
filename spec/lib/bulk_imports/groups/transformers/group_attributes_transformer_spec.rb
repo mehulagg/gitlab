@@ -96,6 +96,23 @@ RSpec.describe BulkImports::Groups::Transformers::GroupAttributesTransformer do
           expect(transformed_data).not_to have_key('parent_id')
         end
       end
+
+      context 'when destination namespace is empty' do
+        it 'sets parent id to nil' do
+          entity = create(
+            :bulk_import_entity,
+            bulk_import: bulk_import,
+            source_full_path: 'source/full/path',
+            destination_name: group.name,
+            destination_namespace: ''
+          )
+          context = BulkImports::Pipeline::Context.new(entity)
+
+          transformed_data = subject.transform(context, data)
+
+          expect(transformed_data['parent_id']).to eq(nil)
+        end
+      end
     end
   end
 end

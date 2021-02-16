@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import Translate from '~/vue_shared/translate';
 import ImportTable from './components/import_table.vue';
 import { createApolloClient } from './graphql/client_factory';
@@ -15,6 +16,7 @@ export function mountImportGroupsApp(mountElement) {
     availableNamespacesPath,
     createBulkImportPath,
     sourceUrl,
+    canCreateGroup,
   } = mountElement.dataset;
   const apolloProvider = new VueApollo({
     defaultClient: createApolloClient({
@@ -33,6 +35,7 @@ export function mountImportGroupsApp(mountElement) {
       return createElement(ImportTable, {
         props: {
           sourceUrl,
+          canCreateGroup: parseBoolean(canCreateGroup),
         },
       });
     },

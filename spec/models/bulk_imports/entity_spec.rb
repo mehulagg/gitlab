@@ -14,7 +14,7 @@ RSpec.describe BulkImports::Entity, type: :model do
     it { is_expected.to validate_presence_of(:source_type) }
     it { is_expected.to validate_presence_of(:source_full_path) }
     it { is_expected.to validate_presence_of(:destination_name) }
-    it { is_expected.to validate_presence_of(:destination_namespace) }
+    it { is_expected.not_to allow_values(nil).for(:destination_namespace) }
 
     it { is_expected.to define_enum_for(:source_type).with_values(%i[group_entity project_entity]) }
 
