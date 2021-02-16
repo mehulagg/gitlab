@@ -78,15 +78,18 @@ module GDK
         # Start Sitespeed through docker
         docker_command = 'docker run --cap-add=NET_ADMIN --shm-size 2g --rm -v "$(pwd):/sitespeed.io" sitespeedio/sitespeed.io:16.8.0 -b chrome '
         # 4 repetitions
-        docker_command += '-n 1 '
+        docker_command += '-n 4 '
         # Limit Cable Connection
         docker_command += '-c cable '
         # Deactivate the performance bar as it slows the measurements down
         docker_command += '--cookie perf_bar_enabled=false '
-
+        
         docker_command += '--multi --spa ' if has_spa_script?
       
         docker_command += "--outputFolder sitespeed-result/#{report_folder_name} "
+
+        docker_command += '--cpu '
+
         docker_command += local_urls.join(' ')
 
         Shellout.new(docker_command).stream
