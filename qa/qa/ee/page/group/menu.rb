@@ -33,6 +33,7 @@ module QA
 
               view 'ee/app/views/groups/ee/_settings_nav.html.haml' do
                 element :ldap_synchronization_link
+                element :billing_link
               end
               view 'ee/app/views/layouts/nav/ee/_epic_link.html.haml' do
                 element :group_epics_link
@@ -143,6 +144,14 @@ module QA
           def click_group_wiki_link
             within_sidebar do
               click_element(:wiki_link)
+            end
+          end
+
+          def go_to_billing
+            hover_element(:group_settings_item) do
+              within_submenu(:group_sidebar_submenu) do
+                click_element(:billing_link)
+              end
             end
           end
         end

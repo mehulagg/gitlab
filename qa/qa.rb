@@ -511,6 +511,11 @@ module QA
       end
     end
 
+    module Trials
+      autoload :New, 'qa/page/trials/new'
+      autoload :Select, 'qa/page/trials/select'
+    end
+
     module Modal
       autoload :DeleteWiki, 'qa/page/modal/delete_wiki'
     end

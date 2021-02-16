@@ -11,7 +11,7 @@ module QA
           element :group_issues_item
           element :group_members_item
           element :group_milestones_link
-          element :group_settings_item
+          element :group_settings
         end
 
         view 'app/views/layouts/nav/sidebar/_analytics_links.html.haml' do
@@ -27,7 +27,7 @@ module QA
 
         def click_settings
           within_sidebar do
-            click_element(:group_settings_item)
+            click_element(:group_settings)
           end
         end
 
@@ -40,7 +40,7 @@ module QA
         end
 
         def click_group_general_settings_item
-          hover_element(:group_settings_item) do
+          hover_element(:group_settings) do
             within_submenu(:group_sidebar_submenu) do
               click_element(:general_settings_link)
             end

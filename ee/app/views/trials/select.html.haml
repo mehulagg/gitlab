@@ -15,7 +15,7 @@
   - if show_trial_namespace_select?
     .form-group.gl-select2-html5-required-fix
       = label_tag :namespace_id, _('This subscription is for'), for: :namespace_id, class: 'col-form-label'
-      = select_tag :namespace_id, namespace_options_for_select(params[:namespace_id]), class: 'select2', required: true
+      = select_tag :namespace_id, namespace_options_for_select(params[:namespace_id]), class: 'select2', required: true, data: { qa_selector: 'subscription_for' }
   #group_name.form-group{ class: ("hidden" if show_trial_namespace_select?) }
     = label_tag :new_group_name, _('New Group Name'), for: :new_group_name, class: 'col-form-label'
     = text_field_tag :new_group_name, nil, class: 'form-control', required: !show_trial_namespace_select?
@@ -29,6 +29,6 @@
         .gl-form-checkbox.form-check.form-check-inline
           = radio_button_tag :trial_entity, :individual, params[:trial_entity]=='individual', required: true, class: 'form-check-input'
           = label_tag :trial_entity_individual, _('No'), class: 'form-check-label'
-  = submit_tag _('Start your free trial'), class: 'btn btn-success btn-block'
+  = submit_tag _('Start your free trial'), class: 'btn btn-success btn-block', data: { qa_selector: 'start_your_free_trial' }
 
 = render 'skip_trial'

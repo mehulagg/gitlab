@@ -20,6 +20,9 @@ gem 'timecop', '~> 0.9.1'
 gem 'parallel', '~> 1.19'
 gem 'rspec-parameterized', '~> 0.4.2'
 
+gem 'chemlab', path: '/Users/ddavison/workspace/org/quality/chemlab'
+gem 'chemlab-library-www-gitlab-com', path: '/Users/ddavison/workspace/org/quality/chemlab-library-www-gitlab-com'
+
 group :development do
   gem 'pry-byebug', '~> 3.5.1', platform: :mri
   gem "ruby-debug-ide", "~> 0.7.0"
