@@ -1,4 +1,3 @@
-import { nextTick } from 'vue';
 import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import IssuesLaneList from 'ee/boards/components/issues_lane_list.vue';

@@ -3,8 +3,8 @@ import { mount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import defaultState from '~/boards/stores/state';
 import BoardAddNewColumn from '~/boards/components/board_add_new_column.vue';
+import defaultState from '~/boards/stores/state';
 import { mockLabelList } from '../mock_data';
 
 Vue.use(Vuex);

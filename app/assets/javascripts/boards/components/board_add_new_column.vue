@@ -10,9 +10,9 @@ import {
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
 import { mapActions, mapGetters } from 'vuex';
-import { __ } from '~/locale';
-import { isScopedLabel } from '~/lib/utils/common_utils';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { isScopedLabel } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
 import boardsStore from '../stores/boards_store';
 
 export default {
