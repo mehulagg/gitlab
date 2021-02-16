@@ -13,7 +13,7 @@ RSpec.describe 'get list of epic boards' do
 
   def pagination_query(params = {})
     graphql_query_for(:group, { full_path: group.full_path },
-      query_nodes(:epicBoards, all_graphql_fields_for('epic_boards'.classify), include_pagination_info: true, args: params)
+      query_nodes(:epic_boards, all_graphql_fields_for('epic_boards'.classify), include_pagination_info: true, args: params)
     )
   end
 

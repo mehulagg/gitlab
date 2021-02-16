@@ -2,8 +2,10 @@
 
 module Types
   class BoardType < BaseObject
+    implements ::Types::Boards::CommonFields
+
     graphql_name 'Board'
-    description 'Represents a project or group board'
+    description 'Represents a project or group issue board.'
     accepts ::Board
     authorize :read_board
 
@@ -11,8 +13,6 @@ module Types
 
     field :id, type: GraphQL::ID_TYPE, null: false,
           description: 'ID (global ID) of the board.'
-    field :name, type: GraphQL::STRING_TYPE, null: true,
-          description: 'Name of the board.'
 
     field :hide_backlog_list, type: GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Whether or not backlog list is hidden.'
@@ -26,12 +26,6 @@ module Types
           description: 'Lists of the board.',
           resolver: Resolvers::BoardListsResolver,
           extras: [:lookahead]
-
-    field :web_path, GraphQL::STRING_TYPE, null: false,
-          description: 'Web path of the board.'
-
-    field :web_url, GraphQL::STRING_TYPE, null: false,
-          description: 'Web URL of the board.'
   end
 end
 
