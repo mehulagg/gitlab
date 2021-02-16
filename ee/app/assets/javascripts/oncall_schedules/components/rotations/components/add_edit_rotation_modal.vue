@@ -1,6 +1,6 @@
 <script>
 import { GlModal, GlAlert } from '@gitlab/ui';
-import { set } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
@@ -255,7 +255,37 @@ export default {
       }
     },
     beforeShowModal() {
-      // console.log(this.rotation);
+      if (this.rotation?.activePeriod?.from) {
+        const { activePeriod } = this.rotation;
+        this.form.isRestrictedToTime = true;
+        this.form.restrictedTo.from = parseInt(activePeriod.from.slice(0, 2), 10);
+        this.form.restrictedTo.to = parseInt(activePeriod.to.slice(0, 2), 10);
+      }
+    },
+    afterCloseModal() {
+      // TODO: Break this out
+      const defaultState = {
+        name: '',
+        participants: [],
+        rotationLength: {
+          length: 1,
+          unit: this.$options.LENGTH_ENUM.hours,
+        },
+        startsAt: {
+          date: null,
+          time: 0,
+        },
+        endsOn: {
+          date: null,
+          time: 0,
+        },
+        isRestrictedToTime: false,
+        restrictedTo: {
+          from: 0,
+          to: 0,
+        },
+      };
+      this.form = cloneDeep(defaultState);
     },
   },
 };
@@ -271,6 +301,7 @@ export default {
     modal-class="rotations-modal"
     @primary.prevent="isEditMode ? editRotation() : createRotation()"
     @show="beforeShowModal"
+    @hide="afterCloseModal"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error || $options.i18n.errorMsg }}

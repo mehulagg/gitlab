@@ -95,7 +95,6 @@ export default {
     return {
       participantsArr: [],
       endDateEnabled: false,
-      restrictToTimeEnabled: false,
     };
   },
   methods: {
@@ -272,7 +271,7 @@ export default {
       </gl-card>
 
       <gl-toggle
-        v-model="restrictToTimeEnabled"
+        :value="form.isRestrictedToTime"
         data-testid="restricted-to-toggle"
         :label="$options.i18n.fields.restrictToTime.enableToggle"
         label-position="left"
@@ -280,13 +279,13 @@ export default {
         @change="
           $emit('update-rotation-form', {
             type: 'isRestrictedToTime',
-            value: restrictToTimeEnabled,
+            value: !form.isRestrictedToTime,
           })
         "
       />
 
       <gl-card
-        v-if="restrictToTimeEnabled"
+        v-if="form.isRestrictedToTime"
         data-testid="restricted-to-time"
         class="gl-mt-5 gl-border-gray-400 gl-bg-gray-10"
       >
