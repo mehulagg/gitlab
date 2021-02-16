@@ -37,6 +37,14 @@ sudo -u git -H bundle exec rails console -e production
 
 The console is in the task-runner pod. Refer to our [Kubernetes cheat sheet](../troubleshooting/kubernetes_cheat_sheet.md#gitlab-specific-kubernetes-information) for details.
 
+**For local development with [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit)**
+
+In the `gitlab` directory, run:
+
+```sh
+rails console
+```
+
 To exit the console, type: `quit`.
 
 ## Output Rails console session history
