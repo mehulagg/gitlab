@@ -111,7 +111,7 @@ export default {
     selectedValueStreamId() {
       return this.selectedValueStream?.id || null;
     },
-    canDeleteSelectedStage() {
+    isCustomValueStream() {
       return this.selectedValueStream?.isCustom || false;
     },
     deleteSelectedText() {
@@ -168,8 +168,9 @@ export default {
 <template>
   <div>
     <gl-button
-      v-if="hasExtendedFormFields"
+      v-if="isCustomValueStream"
       v-gl-modal-directive="'value-stream-form-modal'"
+      data-testid="edit-value-stream"
       @click="onEdit"
       >{{ $options.I18N.EDIT_VALUE_STREAM }}</gl-button
     >
@@ -188,20 +189,27 @@ export default {
         >{{ streamName }}</gl-dropdown-item
       >
       <gl-dropdown-divider />
-      <gl-dropdown-item v-gl-modal-directive="'value-stream-form-modal'" @click="onCreate">{{
-        $options.I18N.CREATE_VALUE_STREAM
-      }}</gl-dropdown-item>
       <gl-dropdown-item
-        v-if="canDeleteSelectedStage"
+        v-gl-modal-directive="'value-stream-form-modal'"
+        data-testid="create-value-stream"
+        @click="onCreate"
+        >{{ $options.I18N.CREATE_VALUE_STREAM }}</gl-dropdown-item
+      >
+      <gl-dropdown-item
+        v-if="isCustomValueStream"
         v-gl-modal-directive="'delete-value-stream-modal'"
         variant="danger"
         data-testid="delete-value-stream"
         >{{ deleteSelectedText }}</gl-dropdown-item
       >
     </gl-dropdown>
-    <gl-button v-else v-gl-modal-directive="'value-stream-form-modal'">{{
-      $options.I18N.CREATE_VALUE_STREAM
-    }}</gl-button>
+    <gl-button
+      v-else
+      v-gl-modal-directive="'value-stream-form-modal'"
+      data-testid="create-value-stream-button"
+      @click="onCreate"
+      >{{ $options.I18N.CREATE_VALUE_STREAM }}</gl-button
+    >
     <value-stream-form
       v-if="showModal"
       :initial-data="initialData"
