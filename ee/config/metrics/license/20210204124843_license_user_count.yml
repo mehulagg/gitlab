@@ -1,0 +1,17 @@
+---
+key_path: license_user_count
+description: The number of users included in the license
+product_section: growth
+product_stage: growth
+product_group: group::product intelligence
+product_category: collection
+value_type: string
+status: data_available
+time_frame: none
+data_source: database
+distribution:
+- ee
+tier:
+- premium
+- ultimate
+skip_validation: true

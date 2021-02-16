@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Elastic::Helper do
+RSpec.describe Gitlab::Elastic::Helper, :request_store do
   subject(:helper) { described_class.default }
 
   shared_context 'with a legacy index' do

@@ -13,6 +13,7 @@ describe('EE - DastScannerProfileList', () => {
     fields: [{ key: 'profileName' }, { key: 'scanType' }],
     profilesPerPage: 10,
     errorMessage: '',
+    noProfilesMessage: 'no scanner profiles created yet',
     errorDetails: [],
     fullPath: '/namespace/project',
     hasMoreProfilesToLoad: false,

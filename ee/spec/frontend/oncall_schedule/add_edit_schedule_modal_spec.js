@@ -7,7 +7,7 @@ import AddEditScheduleModal, {
 import { editScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedule';
 import { addScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedules_wrapper';
 import updateOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule.mutation.graphql';
-import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
@@ -71,14 +71,17 @@ describe('AddScheduleModal', () => {
     updateScheduleHandler = updateHandler;
 
     const requestHandlers = [
-      [getOncallSchedulesQuery, jest.fn().mockResolvedValue(getOncallSchedulesQueryResponse)],
+      [
+        getOncallSchedulesWithRotationsQuery,
+        jest.fn().mockResolvedValue(getOncallSchedulesQueryResponse),
+      ],
       [updateOncallScheduleMutation, updateScheduleHandler],
     ];
 
     fakeApollo = createMockApollo(requestHandlers);
 
     fakeApollo.clients.defaultClient.cache.writeQuery({
-      query: getOncallSchedulesQuery,
+      query: getOncallSchedulesWithRotationsQuery,
       variables: {
         projectPath: 'group/project',
       },

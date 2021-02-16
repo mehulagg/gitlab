@@ -109,6 +109,7 @@ describe('DeleteRotationModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   it('renders delete rotation modal layout', () => {
@@ -161,9 +162,7 @@ describe('DeleteRotationModal', () => {
       expect(findModal().attributes('data-testid')).toBe(`delete-rotation-modal-${rotation.id}`);
     });
 
-    // Fix is coming in: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52773/
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('calls a mutation with correct parameters and destroys a rotation', async () => {
+    it('calls a mutation with correct parameters and destroys a rotation', async () => {
       createComponentWithApollo();
 
       await destroyRotation(wrapper);
@@ -171,9 +170,7 @@ describe('DeleteRotationModal', () => {
       expect(destroyRotationHandler).toHaveBeenCalled();
     });
 
-    // Fix is coming in: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52773/
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('displays alert if mutation had a recoverable error', async () => {
+    it('displays alert if mutation had a recoverable error', async () => {
       createComponentWithApollo({
         destroyHandler: jest.fn().mockResolvedValue(destroyRotationResponseWithErrors),
       });

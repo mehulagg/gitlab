@@ -10,7 +10,7 @@ RSpec.describe Profiles::PreferencesController do
   end
 
   describe 'PATCH update' do
-    subject { patch :update, params: { user: { group_view: group_view } }, format: :js }
+    subject { patch :update, params: { user: { group_view: group_view } }, format: :json }
 
     let(:group_view) { 'security_dashboard' }
 
@@ -27,9 +27,12 @@ RSpec.describe Profiles::PreferencesController do
         context 'and an invalid group view choice is submitted' do
           let(:group_view) { 'foo' }
 
-          it 'sets the flash' do
+          it 'responds with an error message' do
             subject
-            expect(flash[:alert]).to match(/Failed to save preferences/)
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+            expect(response.parsed_body['message']).to match(/Failed to save preferences/)
+            expect(response.parsed_body['type']).to eq('alert')
           end
         end
       end

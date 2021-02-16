@@ -34,7 +34,7 @@ export default {
 </script>
 
 <template>
-  <settings-block :default-expanded="defaultExpanded">
+  <settings-block :default-expanded="defaultExpanded" data-testid="merge-request-approval-settings">
     <template #title> {{ $options.i18n.groupSettingsHeader }}</template>
     <template #description>
       <gl-sprintf :message="$options.i18n.groupSettingsDescription">

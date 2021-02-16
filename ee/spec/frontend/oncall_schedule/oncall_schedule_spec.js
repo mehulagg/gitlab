@@ -71,12 +71,14 @@ describe('On-call schedule', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   const findScheduleHeader = () => wrapper.findByTestId('scheduleHeader');
   const findRotationsHeader = () => wrapper.findByTestId('rotationsHeader');
   const findSchedule = () => wrapper.findByTestId('scheduleBody');
   const findRotations = () => wrapper.findByTestId('rotationsBody');
+  const findRotationsShiftPreset = () => wrapper.findByTestId('shift-preset-change');
   const findAddRotationsBtn = () => findRotationsHeader().find(GlButton);
   const findScheduleTimeline = () => findRotations().find(ScheduleTimelineSection);
   const findRotationsList = () => findRotations().find(RotationsListSection);
@@ -117,6 +119,25 @@ describe('On-call schedule', () => {
       timeframe: mockWeeksTimeFrame,
       rotations: expect.any(Array),
       scheduleIid: mockSchedule.iid,
+    });
+  });
+
+  describe('Timeframe shift preset type', () => {
+    it('renders rotation shift preset type buttons', () => {
+      expect(findRotationsShiftPreset().exists()).toBe(true);
+    });
+
+    it('sets shift preset type with a default type', () => {
+      const presetBtns = findRotationsShiftPreset().findAllComponents(GlButton);
+      expect(presetBtns.at(0).attributes('selected')).toBe(undefined);
+      expect(presetBtns.at(1).attributes('selected')).toBe('true');
+    });
+
+    it('updates the rotation preset type on click', async () => {
+      const presetBtns = findRotationsShiftPreset().findAllComponents(GlButton);
+      await presetBtns.at(0).vm.$emit('click');
+      expect(presetBtns.at(0).attributes('selected')).toBe('true');
+      expect(presetBtns.at(1).attributes('selected')).toBe(undefined);
     });
   });
 

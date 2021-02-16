@@ -50,6 +50,11 @@ export default {
       required: false,
       default: () => [],
     },
+    noProfilesMessage: {
+      type: String,
+      required: false,
+      default: '',
+    },
     isLoading: {
       type: Boolean,
       required: false,
@@ -171,11 +176,13 @@ export default {
             <slot name="actions" :profile="item"></slot>
 
             <gl-dropdown
+              v-gl-tooltip
               class="gl-display-none gl-md-display-inline-flex!"
               toggle-class="gl-border-0! gl-shadow-none!"
               no-caret
               right
               category="tertiary"
+              :title="__('More actions')"
             >
               <template #button-content>
                 <gl-icon name="ellipsis_v" />
@@ -242,7 +249,7 @@ export default {
     </div>
 
     <p v-else class="gl-my-4">
-      {{ s__('DastProfiles|No profiles created yet') }}
+      {{ noProfilesMessage }}
     </p>
 
     <gl-modal

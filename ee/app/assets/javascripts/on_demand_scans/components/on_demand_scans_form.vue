@@ -310,6 +310,10 @@ export default {
           this.loading = false;
         });
     },
+    onCancelClicked() {
+      this.clearStorage = true;
+      redirectTo(this.profilesLibraryPath);
+    },
     showErrors(errorType, errors = []) {
       this.errorType = errorType;
       this.errors = errors;
@@ -568,6 +572,13 @@ export default {
           @click="onSubmit({ runAfter: false, button: $options.saveScanBtnId })"
         >
           {{ s__('OnDemandScans|Save scan') }}
+        </gl-button>
+        <gl-button
+          data-testid="on-demand-scan-cancel-button"
+          :disabled="Boolean(loading)"
+          @click="onCancelClicked"
+        >
+          {{ __('Cancel') }}
         </gl-button>
       </div>
     </template>

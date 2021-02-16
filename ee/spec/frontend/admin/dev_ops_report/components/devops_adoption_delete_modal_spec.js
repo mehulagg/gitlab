@@ -72,7 +72,7 @@ describe('DevopsAdoptionDeleteModal', () => {
     });
 
     it('displays the confirmation message', () => {
-      const text = `Are you sure that you would like to delete ${devopsAdoptionSegmentsData.nodes[0].name}?`;
+      const text = `Are you sure that you would like to remove ${devopsAdoptionSegmentsData.nodes[0].namespace.fullName} from the table?`;
 
       expect(findModal().text()).toBe(text);
     });

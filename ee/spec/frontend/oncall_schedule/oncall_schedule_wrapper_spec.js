@@ -6,7 +6,7 @@ import OnCallSchedule from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import OnCallScheduleWrapper, {
   i18n,
 } from 'ee/oncall_schedules/components/oncall_schedules_wrapper.vue';
-import getOncallSchedulesWithRotations from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { preExistingSchedule, newlyCreatedSchedule } from './mocks/apollo_mock';
 
@@ -44,7 +44,7 @@ describe('On-call schedule wrapper', () => {
 
   function mountComponentWithApollo() {
     const fakeApollo = createMockApollo([
-      [getOncallSchedulesWithRotations, getOncallSchedulesQuerySpy],
+      [getOncallSchedulesWithRotationsQuery, getOncallSchedulesQuerySpy],
     ]);
     localVue.use(VueApollo);
 
@@ -66,6 +66,7 @@ describe('On-call schedule wrapper', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
+      wrapper = null;
     }
   });
 

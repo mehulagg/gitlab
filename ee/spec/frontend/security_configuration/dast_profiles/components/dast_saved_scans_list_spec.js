@@ -26,6 +26,7 @@ describe('EE - DastSavedScansList', () => {
     profilesPerPage: 10,
     errorMessage: '',
     errorDetails: [],
+    noProfilesMessage: 'No scans saved yet',
     fullPath: '/namespace/project',
     hasMoreProfilesToLoad: false,
     isLoading: false,

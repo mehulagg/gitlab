@@ -147,7 +147,7 @@ export default {
         </template>
       </template>
     </rules>
-    <!-- TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114 -->
-    <unconfigured-security-rules v-if="glFeatures.approvalSuggestions" />
+
+    <unconfigured-security-rules />
   </div>
 </template>

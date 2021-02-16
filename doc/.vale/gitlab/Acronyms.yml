@@ -43,6 +43,7 @@ exceptions:
   - DSA
   - DVCS
   - ECDSA
+  - EFS
   - EKS
   - EOL
   - EXIF
@@ -132,6 +133,7 @@ exceptions:
   - SMTP
   - SOC
   - SOX
+  - SPDX
   - SPF
   - SQL
   - SSD
@@ -164,4 +166,5 @@ exceptions:
   - XML
   - XSS
   - YAML
+  - ZAP
   - ZIP

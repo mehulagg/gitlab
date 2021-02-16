@@ -6,7 +6,7 @@ import AddEditRotationModal, {
 } from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_modal.vue';
 import { addRotationModalId } from 'ee/oncall_schedules/constants';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
-import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import createFlash, { FLASH_TYPES } from '~/flash';
@@ -80,13 +80,16 @@ describe('AddEditRotationModal', () => {
     localVue.use(VueApollo);
 
     fakeApollo = createMockApollo([
-      [getOncallSchedulesQuery, jest.fn().mockResolvedValue(getOncallSchedulesQueryResponse)],
+      [
+        getOncallSchedulesWithRotationsQuery,
+        jest.fn().mockResolvedValue(getOncallSchedulesQueryResponse),
+      ],
       [usersSearchQuery, userSearchQueryHandler],
       [createOncallScheduleRotationMutation, createRotationHandler],
     ]);
 
     fakeApollo.clients.defaultClient.cache.writeQuery({
-      query: getOncallSchedulesQuery,
+      query: getOncallSchedulesWithRotationsQuery,
       variables: {
         projectPath: 'group/project',
       },
@@ -123,6 +126,7 @@ describe('AddEditRotationModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   const findModal = () => wrapper.find(GlModal);
@@ -139,7 +143,7 @@ describe('AddEditRotationModal', () => {
       expect(mutate).toHaveBeenCalledWith({
         mutation: expect.any(Object),
         update: expect.anything(),
-        variables: { OncallRotationCreateInput: expect.objectContaining({ projectPath }) },
+        variables: { input: expect.objectContaining({ projectPath }) },
       });
     });
 
@@ -155,7 +159,7 @@ describe('AddEditRotationModal', () => {
   });
 
   describe('with mocked Apollo client', () => {
-    it('it calls searchUsers query with the search paramter', async () => {
+    it('it calls searchUsers query with the search parameter', async () => {
       userSearchQueryHandler = jest.fn().mockResolvedValue({
         data: {
           users: {
@@ -168,9 +172,7 @@ describe('AddEditRotationModal', () => {
       expect(userSearchQueryHandler).toHaveBeenCalledWith({ search: 'root' });
     });
 
-    // Fix is coming in: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52773/
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('calls a mutation with correct parameters and creates a rotation', async () => {
+    it('calls a mutation with correct parameters and creates a rotation', async () => {
       createComponentWithApollo();
 
       await createRotation(wrapper);
@@ -184,9 +186,7 @@ describe('AddEditRotationModal', () => {
       });
     });
 
-    // Fix is coming in: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52773/
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('displays alert if mutation had a recoverable error', async () => {
+    it('displays alert if mutation had a recoverable error', async () => {
       createComponentWithApollo({
         createHandler: jest.fn().mockResolvedValue(createRotationResponseWithErrors),
       });

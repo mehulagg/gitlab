@@ -41,7 +41,7 @@ module Projects
         {
           container_scanning: _('Container Scanning'),
           dast: _('Dynamic Application Security Testing (DAST)'),
-          dast_profiles: _('DAST Profiles'),
+          dast_profiles: _('DAST Scans'),
           dependency_scanning: _('Dependency Scanning'),
           license_management: 'License Management',
           license_scanning: _('License Compliance'),

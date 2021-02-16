@@ -53,6 +53,7 @@ export const getProfileSettings = ({ createNewProfilePaths, isDastSavedScansEnab
               ),
               deletionBackendError: s__('DastProfiles|Could not delete saved scans:'),
             },
+            noProfilesMessage: s__('DastProfiles|No scans saved yet'),
           },
         },
       }
@@ -88,6 +89,7 @@ export const getProfileSettings = ({ createNewProfilePaths, isDastSavedScansEnab
         ),
         deletionBackendError: s__('DastProfiles|Could not delete site profiles:'),
       },
+      noProfilesMessage: s__('DastProfiles|No site profiles created yet'),
     },
   },
   scannerProfiles: {
@@ -120,6 +122,7 @@ export const getProfileSettings = ({ createNewProfilePaths, isDastSavedScansEnab
         ),
         deletionBackendError: s__('DastProfiles|Could not delete scanner profiles:'),
       },
+      noProfilesMessage: s__('DastProfiles|No scanner profiles created yet'),
     },
   },
 });

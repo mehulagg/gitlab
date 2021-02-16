@@ -49,7 +49,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['activeId', 'filterParams', 'canAdminEpic', 'listsFlags']),
+    ...mapState(['activeId', 'filterParams', 'canAdminEpic', 'listsFlags', 'highlightedLists']),
     treeRootWrapper() {
       return this.canAdminList && this.canAdminEpic ? Draggable : 'ul';
     },
@@ -70,6 +70,9 @@ export default {
     isLoadingMore() {
       return this.listsFlags[this.list.id]?.isLoadingMore;
     },
+    highlighted() {
+      return this.highlightedLists.includes(this.list.id);
+    },
   },
   watch: {
     filterParams: {
@@ -79,6 +82,16 @@ export default {
         }
       },
       deep: true,
+      immediate: true,
+    },
+    highlighted: {
+      handler(highlighted) {
+        if (highlighted) {
+          this.$nextTick(() => {
+            this.$el.scrollIntoView(false);
+          });
+        }
+      },
       immediate: true,
     },
   },
@@ -163,6 +176,7 @@ export default {
         v-if="!list.collapsed"
         v-bind="treeRootOptions"
         class="board-cell gl-p-2 gl-m-0 gl-h-full"
+        :class="{ 'board-column-highlighted': highlighted }"
         data-testid="tree-root-wrapper"
         @start="handleDragOnStart"
         @end="handleDragOnEnd"

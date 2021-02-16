@@ -1388,24 +1388,24 @@ RSpec.describe ProjectPolicy do
     it { is_expected.to be_disallowed(:read_group_timelogs) }
   end
 
-  context 'when project activity analytics is available' do
+  context 'when dora4 analytics is available' do
     let(:current_user) { developer }
 
     before do
-      stub_licensed_features(project_activity_analytics: true)
+      stub_licensed_features(dora4_analytics: true)
     end
 
-    it { is_expected.to be_allowed(:read_project_activity_analytics) }
+    it { is_expected.to be_allowed(:read_dora4_analytics) }
   end
 
-  context 'when project activity analytics is not available' do
+  context 'when dora4 analytics is not available' do
     let(:current_user) { developer }
 
     before do
-      stub_licensed_features(project_activity_analytics: false)
+      stub_licensed_features(dora4_analytics: false)
     end
 
-    it { is_expected.not_to be_allowed(:read_project_activity_analytics) }
+    it { is_expected.not_to be_allowed(:read_dora4_analytics) }
   end
 
   describe ':read_code_review_analytics' do
@@ -1537,27 +1537,29 @@ RSpec.describe ProjectPolicy do
 
     let(:policy) { :admin_compliance_framework }
 
-    where(:role, :feature_enabled, :admin_mode, :allowed) do
-      :guest      | false | nil   | false
-      :guest      | true  | nil   | false
-      :reporter   | false | nil   | false
-      :reporter   | true  | nil   | false
-      :developer  | false | nil   | false
-      :developer  | true  | nil   | false
-      :maintainer | false | nil   | false
-      :maintainer | true  | nil   | false
-      :owner      | false | nil   | false
-      :owner      | true  | nil   | true
-      :admin      | false | false | false
-      :admin      | false | true  | false
-      :admin      | true  | false | false
-      :admin      | true  | true  | true
+    where(:role, :feature_enabled, :admin_mode, :custom_framework_flag, :allowed) do
+      :guest      | false | nil   | false | false
+      :guest      | true  | nil   | false | false
+      :reporter   | false | nil   | false | false
+      :reporter   | true  | nil   | false | false
+      :developer  | false | nil   | false | false
+      :developer  | true  | nil   | false | false
+      :maintainer | false | nil   | false | false
+      :maintainer | true  | nil   | false | true
+      :maintainer | true  | nil   | true  | false
+      :owner      | false | nil   | false | false
+      :owner      | true  | nil   | false | true
+      :admin      | false | false | false | false
+      :admin      | false | true  | false | false
+      :admin      | true  | false | false | false
+      :admin      | true  | true  | false | true
     end
 
     with_them do
       let(:current_user) { public_send(role) }
 
       before do
+        stub_feature_flags(ff_custom_compliance_frameworks: custom_framework_flag)
         stub_licensed_features(compliance_framework: feature_enabled)
         enable_admin_mode!(current_user) if admin_mode
       end

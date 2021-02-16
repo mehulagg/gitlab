@@ -27,12 +27,12 @@ module Analytics
       private
 
       def snapshot_groups
-        @snapshot_groups ||= Gitlab::ObjectHierarchy.new(segment.groups).base_and_descendants
+        @snapshot_groups ||= segment.namespace.self_and_descendants
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
       def snapshot_project_ids
-        @snapshot_project_ids ||= (segment.projects.pluck(:id) + Project.in_namespace(snapshot_groups).pluck(:id)).uniq
+        @snapshot_project_ids ||= Project.in_namespace(snapshot_groups).pluck(:id)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

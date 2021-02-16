@@ -1,0 +1,5 @@
+---
+title: Fix security dashboard for Safari (< 14.0)
+merge_request: 54042
+author:
+type: fixed

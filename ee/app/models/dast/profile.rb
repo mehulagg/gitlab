@@ -9,10 +9,11 @@ module Dast
     belongs_to :dast_scanner_profile
 
     validates :description, length: { maximum: 255 }
-    validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }
+    validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }, presence: true
     validates :project_id, :dast_site_profile_id, :dast_scanner_profile_id, presence: true
 
     validate :project_ids_match
+    validate :description_not_nil
 
     scope :by_project_id, -> (project_id) do
       where(project_id: project_id)
@@ -23,6 +24,10 @@ module Dast
     def project_ids_match
       association_project_id_matches(dast_site_profile)
       association_project_id_matches(dast_scanner_profile)
+    end
+
+    def description_not_nil
+      errors.add(:description, 'can\'t be nil') if description.nil?
     end
 
     def association_project_id_matches(association)

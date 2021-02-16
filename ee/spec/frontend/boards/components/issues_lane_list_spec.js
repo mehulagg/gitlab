@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import IssuesLaneList from 'ee/boards/components/issues_lane_list.vue';
 import { mockList } from 'jest/boards/mock_data';
 import BoardCard from '~/boards/components/board_card_layout.vue';
@@ -114,6 +115,25 @@ describe('IssuesLaneList', () => {
         });
 
         expect(document.body.classList.contains('is-dragging')).toBe(false);
+      });
+    });
+
+    describe('highlighting', () => {
+      it('scrolls to column when highlighted', async () => {
+        const defaultStore = createStore();
+        store = {
+          ...defaultStore,
+          state: {
+            ...defaultStore.state,
+            highlightedLists: [mockList.id],
+          },
+        };
+
+        createComponent();
+
+        await nextTick();
+
+        expect(wrapper.element.scrollIntoView).toHaveBeenCalled();
       });
     });
   });

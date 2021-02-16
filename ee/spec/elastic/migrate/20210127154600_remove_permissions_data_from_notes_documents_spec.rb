@@ -11,6 +11,13 @@ RSpec.describe RemovePermissionsDataFromNotesDocuments, :elastic, :sidekiq_inlin
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
     allow(migration).to receive(:helper).and_return(helper)
+
+    allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
+    # migrations are completed by default in test environments
+    # required to prevent the `as_indexed_json` method from populating the permissions fields
+    allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+                                              .with(:remove_permissions_data_from_notes_documents)
+                                              .and_return(false)
   end
 
   describe 'migration_options' do

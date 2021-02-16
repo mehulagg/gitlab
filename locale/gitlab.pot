@@ -653,6 +653,12 @@ msgstr ""
 msgid "%{name_with_link} has run out of Shared Runner Pipeline minutes so no new jobs or pipelines in its projects will run."
 msgstr ""
 
+msgid "%{name} %{status}"
+msgstr ""
+
+msgid "%{name} (Busy)"
+msgstr ""
+
 msgid "%{name} contained %{resultsString}"
 msgstr ""
 
@@ -736,9 +742,6 @@ msgid "%{reportType} detected %{totalStart}%{total}%{totalEnd} potential %{vulnM
 msgstr ""
 
 msgid "%{reportType} detected %{totalStart}no%{totalEnd} vulnerabilities."
-msgstr ""
-
-msgid "%{requirementCount} requirements have been selected for export. These will be sent to %{email} as an attachment once finished."
 msgstr ""
 
 msgid "%{retryButtonStart}Try again%{retryButtonEnd} or %{newFileButtonStart}attach a new file%{newFileButtonEnd}."
@@ -1120,6 +1123,11 @@ msgstr[1] ""
 
 msgid "1 deploy key"
 msgid_plural "%d deploy keys"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "1 follower"
+msgid_plural "%{count} followers"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -2545,6 +2553,9 @@ msgid "Advanced Search with Elasticsearch"
 msgstr ""
 
 msgid "Advanced Settings"
+msgstr ""
+
+msgid "Advanced export options"
 msgstr ""
 
 msgid "Advanced permissions, Large File Storage and Two-Factor authentication settings."
@@ -5070,6 +5081,9 @@ msgstr ""
 msgid "Business metrics (Custom)"
 msgstr ""
 
+msgid "Busy"
+msgstr ""
+
 msgid "Buy License"
 msgstr ""
 
@@ -7525,7 +7539,19 @@ msgstr ""
 msgid "ComplianceFrameworks|All"
 msgstr ""
 
+msgid "ComplianceFrameworks|Combines with the CI configuration at runtime."
+msgstr ""
+
+msgid "ComplianceFrameworks|Compliance pipeline configuration location (optional)"
+msgstr ""
+
+msgid "ComplianceFrameworks|Could not find this configuration location, please try a different location"
+msgstr ""
+
 msgid "ComplianceFrameworks|Error fetching compliance frameworks data. Please refresh the page"
+msgstr ""
+
+msgid "ComplianceFrameworks|Invalid format: it should follow the format [PATH].y(a)ml@[GROUP]/[PROJECT]"
 msgstr ""
 
 msgid "ComplianceFrameworks|Once you have created a compliance framework it will appear here."
@@ -7541,6 +7567,9 @@ msgid "ComplianceFrameworks|Unable to save this compliance framework. Please try
 msgstr ""
 
 msgid "ComplianceFrameworks|Use %{codeStart}::%{codeEnd} to create a %{linkStart}scoped set%{linkEnd} (eg. %{codeStart}SOX::AWS%{codeEnd})"
+msgstr ""
+
+msgid "ComplianceFrameworks|e.g. include-gitlab.ci.yml@group-name/project-name"
 msgstr ""
 
 msgid "ComplianceFramework|GDPR"
@@ -9059,7 +9088,7 @@ msgstr ""
 msgid "DAG visualization requires at least 3 dependent jobs."
 msgstr ""
 
-msgid "DAST Profiles"
+msgid "DAST Scans"
 msgstr ""
 
 msgid "DNS"
@@ -9215,7 +9244,13 @@ msgstr ""
 msgid "DastProfiles|New site profile"
 msgstr ""
 
-msgid "DastProfiles|No profiles created yet"
+msgid "DastProfiles|No scanner profiles created yet"
+msgstr ""
+
+msgid "DastProfiles|No scans saved yet"
+msgstr ""
+
+msgid "DastProfiles|No site profiles created yet"
 msgstr ""
 
 msgid "DastProfiles|Not Validated"
@@ -9407,6 +9442,9 @@ msgid "Date range"
 msgstr ""
 
 msgid "Date range cannot exceed %{maxDateRange} days."
+msgstr ""
+
+msgid "Date range is greater than %{quarter_days} days"
 msgstr ""
 
 msgid "Day of month"
@@ -10234,18 +10272,6 @@ msgstr ""
 msgid "DevOps Report"
 msgstr ""
 
-msgid "DevopsAdoptionSegmentSelection|The maximum number of selections has been reached"
-msgstr ""
-
-msgid "DevopsAdoptionSegmentSelection|The selection cannot be configured for a project and for a group at the same time"
-msgstr ""
-
-msgid "DevopsAdoptionSegment|The maximum number of segments has been reached"
-msgstr ""
-
-msgid "DevopsAdoptionSegment|The maximum number of selections has been reached"
-msgstr ""
-
 msgid "DevopsAdoption|%{selectedCount} group selected"
 msgstr ""
 
@@ -10261,7 +10287,7 @@ msgstr ""
 msgid "DevopsAdoption|Adopted"
 msgstr ""
 
-msgid "DevopsAdoption|An error occured while deleting the group. Please try again."
+msgid "DevopsAdoption|An error occured while removing the group. Please try again."
 msgstr ""
 
 msgid "DevopsAdoption|An error occured while saving the group. Please try again."
@@ -10270,7 +10296,7 @@ msgstr ""
 msgid "DevopsAdoption|Approvals"
 msgstr ""
 
-msgid "DevopsAdoption|Are you sure that you would like to delete %{name}?"
+msgid "DevopsAdoption|Are you sure that you would like to remove %{name} from the table?"
 msgstr ""
 
 msgid "DevopsAdoption|At least 1 MR opened"
@@ -10291,19 +10317,13 @@ msgstr ""
 msgid "DevopsAdoption|At least 1 security scan of any type run in pipeline"
 msgstr ""
 
-msgid "DevopsAdoption|Confirm delete Group"
-msgstr ""
-
-msgid "DevopsAdoption|Delete Group"
+msgid "DevopsAdoption|Confirm remove Group"
 msgstr ""
 
 msgid "DevopsAdoption|Deploys"
 msgstr ""
 
 msgid "DevopsAdoption|DevOps adoption tracks the use of key features across your favorite groups. Add a group to the table to begin."
-msgstr ""
-
-msgid "DevopsAdoption|Edit Group"
 msgstr ""
 
 msgid "DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}."
@@ -10324,9 +10344,6 @@ msgstr ""
 msgid "DevopsAdoption|My group"
 msgstr ""
 
-msgid "DevopsAdoption|Name"
-msgstr ""
-
 msgid "DevopsAdoption|No filter results."
 msgstr ""
 
@@ -10334,6 +10351,12 @@ msgid "DevopsAdoption|Not adopted"
 msgstr ""
 
 msgid "DevopsAdoption|Pipelines"
+msgstr ""
+
+msgid "DevopsAdoption|Remove Group"
+msgstr ""
+
+msgid "DevopsAdoption|Remove Group from the table"
 msgstr ""
 
 msgid "DevopsAdoption|Runner configured for project/group"
@@ -12114,6 +12137,9 @@ msgstr ""
 msgid "Export"
 msgstr ""
 
+msgid "Export %{requirementsCount} requirements?"
+msgstr ""
+
 msgid "Export as CSV"
 msgstr ""
 
@@ -12307,9 +12333,6 @@ msgid "Failed to load errors from Sentry."
 msgstr ""
 
 msgid "Failed to load group activity metrics. Please try again."
-msgstr ""
-
-msgid "Failed to load groups & users."
 msgstr ""
 
 msgid "Failed to load groups, users and deploy keys."
@@ -12963,6 +12986,12 @@ msgid "FogBugz import"
 msgstr ""
 
 msgid "Folder/%{name}"
+msgstr ""
+
+msgid "Follow"
+msgstr ""
+
+msgid "Followed users"
 msgstr ""
 
 msgid "Font Color"
@@ -14025,6 +14054,9 @@ msgid "Group SAML must be enabled to test"
 msgstr ""
 
 msgid "Group URL"
+msgstr ""
+
+msgid "Group Wikis"
 msgstr ""
 
 msgid "Group avatar"
@@ -17135,9 +17167,6 @@ msgstr ""
 msgid "Kubernetes error: %{error_code}"
 msgstr ""
 
-msgid "Kubernetes popover"
-msgstr ""
-
 msgid "LDAP"
 msgstr ""
 
@@ -17429,6 +17458,30 @@ msgid "Learn more in the|pipeline schedules documentation"
 msgstr ""
 
 msgid "Learn more."
+msgstr ""
+
+msgid "LearnGitLab|Add code owners"
+msgstr ""
+
+msgid "LearnGitLab|Create a repository"
+msgstr ""
+
+msgid "LearnGitLab|Enable require merge approvals"
+msgstr ""
+
+msgid "LearnGitLab|Invite your colleagues"
+msgstr ""
+
+msgid "LearnGitLab|Run a Security scan using CI/CD"
+msgstr ""
+
+msgid "LearnGitLab|Set-up CI/CD"
+msgstr ""
+
+msgid "LearnGitLab|Start a free trial of GitLab Gold"
+msgstr ""
+
+msgid "LearnGitLab|Submit a merge request (MR)"
 msgstr ""
 
 msgid "Leave"
@@ -20862,10 +20915,10 @@ msgstr ""
 msgid "Open errors"
 msgstr ""
 
-msgid "Open in Xcode"
+msgid "Open in file view"
 msgstr ""
 
-msgid "Open in file view"
+msgid "Open in your IDE"
 msgstr ""
 
 msgid "Open issues"
@@ -21376,6 +21429,15 @@ msgid "Parameter"
 msgstr ""
 
 msgid "Parameter \"job_id\" cannot exceed length of %{job_id_max_size}"
+msgstr ""
+
+msgid "Parameter `from` must be specified"
+msgstr ""
+
+msgid "Parameter `interval` must be one of (\"%{valid_intervals}\")"
+msgstr ""
+
+msgid "Parameter `to` is before the `from` date"
 msgstr ""
 
 msgid "Parent"
@@ -22152,6 +22214,9 @@ msgstr ""
 msgid "Please select at least one filter to see results"
 msgstr ""
 
+msgid "Please select what should be included in each exported requirement."
+msgstr ""
+
 msgid "Please set a new password before proceeding."
 msgstr ""
 
@@ -22221,19 +22286,37 @@ msgstr ""
 msgid "Preferences|Choose what content you want to see on your homepage."
 msgstr ""
 
+msgid "Preferences|Customize integrations with third party services."
+msgstr ""
+
 msgid "Preferences|Customize the appearance of the application header and navigation sidebar."
 msgstr ""
 
 msgid "Preferences|Display time in 24-hour format"
 msgstr ""
 
+msgid "Preferences|Enable Gitpod integration"
+msgstr ""
+
+msgid "Preferences|Enable integrated code intelligence on code views"
+msgstr ""
+
+msgid "Preferences|Failed to save preferences."
+msgstr ""
+
 msgid "Preferences|For example: 30 mins ago."
+msgstr ""
+
+msgid "Preferences|Gitpod"
 msgstr ""
 
 msgid "Preferences|Homepage content"
 msgstr ""
 
 msgid "Preferences|Instead of all the files changed, show only one file at a time. To switch between files, use the file browser."
+msgstr ""
+
+msgid "Preferences|Integrations"
 msgstr ""
 
 msgid "Preferences|Layout width"
@@ -22255,6 +22338,9 @@ msgid "Preferences|Show one file at a time on merge request's Changes tab"
 msgstr ""
 
 msgid "Preferences|Show whitespace changes in diffs"
+msgstr ""
+
+msgid "Preferences|Sourcegraph"
 msgstr ""
 
 msgid "Preferences|Syntax highlighting theme"
@@ -22447,24 +22533,6 @@ msgid "Profile"
 msgstr ""
 
 msgid "Profile Settings"
-msgstr ""
-
-msgid "ProfilePreferences|Customize integrations with third party services."
-msgstr ""
-
-msgid "ProfilePreferences|Enable Gitpod integration"
-msgstr ""
-
-msgid "ProfilePreferences|Enable integrated code intelligence on code views"
-msgstr ""
-
-msgid "ProfilePreferences|Gitpod"
-msgstr ""
-
-msgid "ProfilePreferences|Integrations"
-msgstr ""
-
-msgid "ProfilePreferences|Sourcegraph"
 msgstr ""
 
 msgid "ProfileSession|on"
@@ -23979,9 +24047,6 @@ msgstr ""
 msgid "ProtectedEnvironment|Your environment has been unprotected"
 msgstr ""
 
-msgid "Protip:"
-msgstr ""
-
 msgid "Protip: %{linkStart}Auto DevOps%{linkEnd} uses Kubernetes clusters to deploy your code!"
 msgstr ""
 
@@ -24250,6 +24315,9 @@ msgid "Receive alerts from manually configured Prometheus servers."
 msgstr ""
 
 msgid "Receive notifications about your own activity"
+msgstr ""
+
+msgid "Receive product marketing emails"
 msgstr ""
 
 msgid "Recent"
@@ -28377,67 +28445,67 @@ msgstr ""
 msgid "Suggested solutions help link"
 msgstr ""
 
-msgid "SuggestedColors|Bright green"
+msgid "SuggestedColors|Aztec Gold"
 msgstr ""
 
-msgid "SuggestedColors|Dark grayish cyan"
+msgid "SuggestedColors|Blue"
 msgstr ""
 
-msgid "SuggestedColors|Dark moderate blue"
+msgid "SuggestedColors|Blue-gray"
 msgstr ""
 
-msgid "SuggestedColors|Dark moderate orange"
+msgid "SuggestedColors|Carrot orange"
 msgstr ""
 
-msgid "SuggestedColors|Dark moderate pink"
+msgid "SuggestedColors|Champagne"
 msgstr ""
 
-msgid "SuggestedColors|Dark moderate violet"
+msgid "SuggestedColors|Charcoal grey"
 msgstr ""
 
-msgid "SuggestedColors|Feijoa"
+msgid "SuggestedColors|Crimson"
 msgstr ""
 
-msgid "SuggestedColors|Lime green"
+msgid "SuggestedColors|Dark coral"
 msgstr ""
 
-msgid "SuggestedColors|Moderate blue"
+msgid "SuggestedColors|Dark green"
 msgstr ""
 
-msgid "SuggestedColors|Pure red"
+msgid "SuggestedColors|Dark sea green"
 msgstr ""
 
-msgid "SuggestedColors|Slightly desaturated blue"
+msgid "SuggestedColors|Dark violet"
 msgstr ""
 
-msgid "SuggestedColors|Slightly desaturated green"
+msgid "SuggestedColors|Deep violet"
 msgstr ""
 
-msgid "SuggestedColors|Soft orange"
+msgid "SuggestedColors|Gray"
 msgstr ""
 
-msgid "SuggestedColors|Soft red"
+msgid "SuggestedColors|Green screen"
 msgstr ""
 
-msgid "SuggestedColors|Strong pink"
+msgid "SuggestedColors|Green-cyan"
 msgstr ""
 
-msgid "SuggestedColors|Strong red"
+msgid "SuggestedColors|Lavendar"
 msgstr ""
 
-msgid "SuggestedColors|Strong yellow"
+msgid "SuggestedColors|Magenta-pink"
 msgstr ""
 
-msgid "SuggestedColors|UA blue"
+msgid "SuggestedColors|Medium sea green"
 msgstr ""
 
-msgid "SuggestedColors|Very dark desaturated blue"
+msgid "SuggestedColors|Red"
 msgstr ""
 
-msgid "SuggestedColors|Very dark lime green"
+msgid "SuggestedColors|Rose red"
 msgstr ""
 
-msgid "SuggestedColors|Very pale orange"
+msgid "SuggestedColors|Titanium yellow"
 msgstr ""
 
 msgid "Suggestion is not applicable as the suggestion was not found."
@@ -28734,6 +28802,9 @@ msgstr ""
 msgid "Terraform"
 msgstr ""
 
+msgid "Terraform|%{name} successfully removed"
+msgstr ""
+
 msgid "Terraform|%{number} Terraform report failed to generate"
 msgid_plural "Terraform|%{number} Terraform reports failed to generate"
 msgstr[0] ""
@@ -28808,6 +28879,9 @@ msgid "Terraform|Remove"
 msgstr ""
 
 msgid "Terraform|Remove state file and versions"
+msgstr ""
+
+msgid "Terraform|Removing"
 msgstr ""
 
 msgid "Terraform|Reported Resource Changes: %{addNum} to add, %{changeNum} to change, %{deleteNum} to delete"
@@ -29695,6 +29769,9 @@ msgstr ""
 msgid "There was an error trying to validate your query"
 msgstr ""
 
+msgid "There was an error updating merge request approval settings."
+msgstr ""
+
 msgid "There was an error updating the Geo Settings"
 msgstr ""
 
@@ -29756,6 +29833,9 @@ msgid "These runners are specific to this project."
 msgstr ""
 
 msgid "These variables are inherited from the parent group."
+msgstr ""
+
+msgid "These will be sent to %{email} in an attachment once finished."
 msgstr ""
 
 msgid "Third Party Advisory Link"
@@ -30863,12 +30943,6 @@ msgstr ""
 msgid "Toggle thread"
 msgstr ""
 
-msgid "ToggleButton|Toggle Status: OFF"
-msgstr ""
-
-msgid "ToggleButton|Toggle Status: ON"
-msgstr ""
-
 msgid "Toggled :%{name}: emoji award."
 msgstr ""
 
@@ -31373,6 +31447,9 @@ msgid "Undo ignore"
 msgstr ""
 
 msgid "Unexpected error"
+msgstr ""
+
+msgid "Unfollow"
 msgstr ""
 
 msgid "Unfortunately, your email message to GitLab could not be processed."
@@ -32032,6 +32109,12 @@ msgstr ""
 msgid "UserProfile|Explore public groups to find projects to contribute to."
 msgstr ""
 
+msgid "UserProfile|Followers"
+msgstr ""
+
+msgid "UserProfile|Following"
+msgstr ""
+
 msgid "UserProfile|Groups"
 msgstr ""
 
@@ -32074,6 +32157,9 @@ msgstr ""
 msgid "UserProfile|Subscribe"
 msgstr ""
 
+msgid "UserProfile|This user doesn't have any followers."
+msgstr ""
+
 msgid "UserProfile|This user doesn't have any personal projects"
 msgstr ""
 
@@ -32089,6 +32175,9 @@ msgstr ""
 msgid "UserProfile|This user is blocked"
 msgstr ""
 
+msgid "UserProfile|This user isn't following other users."
+msgstr ""
+
 msgid "UserProfile|Unconfirmed user"
 msgstr ""
 
@@ -32098,7 +32187,13 @@ msgstr ""
 msgid "UserProfile|View user in admin area"
 msgstr ""
 
+msgid "UserProfile|You are not following other users."
+msgstr ""
+
 msgid "UserProfile|You can create a group for several dependent projects."
+msgstr ""
+
+msgid "UserProfile|You do not have any followers."
 msgstr ""
 
 msgid "UserProfile|You haven't created any personal projects."
@@ -32451,6 +32546,9 @@ msgid "VisibilityLevel|Unknown"
 msgstr ""
 
 msgid "Visit settings page"
+msgstr ""
+
+msgid "Visual Studio Code"
 msgstr ""
 
 msgid "VisualReviewApp|%{stepStart}Step 1%{stepEnd}. Copy the following script:"
@@ -33286,6 +33384,9 @@ msgstr ""
 msgid "Wrong extern UID provided. Make sure Auth0 is configured correctly."
 msgstr ""
 
+msgid "Xcode"
+msgstr ""
+
 msgid "YYYY-MM-DD"
 msgstr ""
 
@@ -33563,6 +33664,9 @@ msgid "You do not have an active license"
 msgstr ""
 
 msgid "You do not have any subscriptions yet"
+msgstr ""
+
+msgid "You do not have permission to access deployment frequencies"
 msgstr ""
 
 msgid "You do not have permission to leave this %{namespaceType}."
@@ -34666,6 +34770,9 @@ msgstr[1] ""
 msgid "finding is not found or is already attached to a vulnerability"
 msgstr ""
 
+msgid "following"
+msgstr ""
+
 msgid "for %{link_to_merge_request} with %{link_to_merge_request_source_branch}"
 msgstr ""
 
@@ -35643,9 +35750,6 @@ msgid "user preferences"
 msgstr ""
 
 msgid "username"
-msgstr ""
-
-msgid "uses Kubernetes clusters to deploy your code!"
 msgstr ""
 
 msgid "v%{version} published %{timeAgo}"

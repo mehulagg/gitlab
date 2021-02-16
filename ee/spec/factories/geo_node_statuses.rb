@@ -35,13 +35,17 @@ FactoryBot.define do
       wikis_failed_count { 1 }
       repositories_checksummed_count { 600 }
       repositories_checksum_failed_count { 120 }
+      repositories_checksum_total_count { 120 }
       wikis_checksummed_count { 585 }
       wikis_checksum_failed_count { 55 }
+      wikis_checksum_total_count { 55 }
       repositories_verified_count { 501 }
       repositories_verification_failed_count { 100 }
+      repositories_verification_total_count { 100 }
       repositories_checksum_mismatch_count { 15 }
       wikis_verified_count { 499 }
       wikis_verification_failed_count { 99 }
+      wikis_verification_total_count { 99 }
       wikis_checksum_mismatch_count { 10 }
       repositories_retrying_verification_count { 25 }
       wikis_retrying_verification_count { 3 }
@@ -80,11 +84,15 @@ FactoryBot.define do
 
       repositories_synced_count { 10 }
       repositories_checksummed_count { 10 }
+      repositories_checksum_total_count { 10 }
       repositories_verified_count { 10 }
+      repositories_verification_total_count { 10 }
       repositories_checked_count { 10 }
       wikis_synced_count { 10 }
       wikis_checksummed_count { 10 }
+      wikis_checksum_total_count { 10 }
       wikis_verified_count { 10 }
+      wikis_verification_total_count { 10 }
       lfs_objects_synced_count { 10 }
       job_artifacts_synced_count { 10 }
       attachments_synced_count { 10 }

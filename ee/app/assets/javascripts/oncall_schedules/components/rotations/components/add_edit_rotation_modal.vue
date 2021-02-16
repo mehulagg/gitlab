@@ -4,7 +4,7 @@ import { set } from 'lodash';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
-import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import {
   updateStoreAfterRotationAdd,
   updateStoreAfterRotationEdit,
@@ -152,11 +152,16 @@ export default {
       this.$apollo
         .mutate({
           mutation: createOncallScheduleRotationMutation,
-          variables: { OncallRotationCreateInput: this.rotationVariables },
+          variables: { input: this.rotationVariables },
           update(store, { data }) {
-            updateStoreAfterRotationAdd(store, getOncallSchedulesQuery, data, schedule.iid, {
-              projectPath,
-            });
+            updateStoreAfterRotationAdd(
+              store,
+              getOncallSchedulesWithRotationsQuery,
+              { ...data, scheduleIid: schedule.iid },
+              {
+                projectPath,
+              },
+            );
           },
         })
         .then(
@@ -192,11 +197,16 @@ export default {
       this.$apollo
         .mutate({
           mutation: updateOncallScheduleRotationMutation,
-          variables: { OncallRotationUpdateInput: this.rotationVariables },
+          variables: { input: this.rotationVariables },
           update(store, { data }) {
-            updateStoreAfterRotationEdit(store, getOncallSchedulesQuery, data, schedule.iid, {
-              projectPath,
-            });
+            updateStoreAfterRotationEdit(
+              store,
+              getOncallSchedulesWithRotationsQuery,
+              { ...data, scheduleIid: schedule.iid },
+              {
+                projectPath,
+              },
+            );
           },
         })
         .then(
