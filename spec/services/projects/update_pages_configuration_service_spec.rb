@@ -33,6 +33,14 @@ RSpec.describe Projects::UpdatePagesConfigurationService do
 
           expect(subject).to include(status: :success)
         end
+
+        it "doesn't update configuration files if updates on legacy storage are disabled" do
+          stub_feature_flags(pages_update_legacy_storage: false)
+
+          expect(service).not_to receive(:update_file)
+
+          expect(subject).to include(status: :success)
+        end
       end
 
       context 'when configuration does not change' do
