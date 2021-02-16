@@ -11,6 +11,8 @@ class Import::GithubishProviderRepoEntity < Import::BaseProviderRepoEntity
     provider_project_link_url(options[:provider_url], provider_repo[:full_name])
   end
 
+  expose :size
+
   private
 
   def owner_name(provider_repo, provider)

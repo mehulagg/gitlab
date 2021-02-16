@@ -14,6 +14,10 @@ module Import
         return error(_('This namespace has already been taken! Please choose another one.'), :unprocessable_entity)
       end
 
+      if oversized?
+        return error(_('Repository larger than namespace limit'), :unprocessable_entity)
+      end
+
       project = create_project(access_params, provider)
 
       if project.persisted?
@@ -32,7 +36,8 @@ module Import
         target_namespace,
         current_user,
         type: provider,
-        **access_params).execute(extra_project_attrs)
+        **access_params
+      ).execute(extra_project_attrs)
     end
 
     def repo
@@ -53,6 +58,14 @@ module Import
 
     def extra_project_attrs
       {}
+    end
+
+    def oversized?
+      limit = target_namespace.repository_size_limit.to_i
+
+      return if limit.zero?
+
+      params[:size].to_i > limit
     end
 
     def authorized?

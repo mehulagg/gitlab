@@ -46,6 +46,16 @@ class Import::GithubController < Import::BaseController
   end
 
   def create
+    puts '*' * 80
+    puts '*' * 80
+    puts '*' * 80
+    puts '*' * 80
+    p params
+    puts '*' * 80
+    puts '*' * 80
+    puts '*' * 80
+    puts '*' * 80
+    puts '*' * 80
     result = Import::GithubService.new(client, current_user, import_params).execute(access_params, provider_name)
 
     if result[:status] == :success
