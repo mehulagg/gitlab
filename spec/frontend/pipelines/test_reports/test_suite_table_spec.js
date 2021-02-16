@@ -114,4 +114,32 @@ describe('Test reports suite table', () => {
       expect(wrapper.find(GlPagination).exists()).toBe(true);
     });
   });
+
+  describe('when a test case classname property is null', () => {
+    it('still renders all test cases', () => {
+      createComponent({
+        ...testSuite,
+        test_cases: testSuite.test_cases.map((testCase) => ({
+          ...testCase,
+          classname: null,
+        })),
+      });
+
+      expect(allCaseRows().length).toBe(testCases.length);
+    });
+  });
+
+  describe('when a test case name property is null', () => {
+    it('still renders all test cases', () => {
+      createComponent({
+        ...testSuite,
+        test_cases: testSuite.test_cases.map((testCase) => ({
+          ...testCase,
+          name: null,
+        })),
+      });
+
+      expect(allCaseRows().length).toBe(testCases.length);
+    });
+  });
 });

@@ -1,0 +1,5 @@
+---
+title: Fix pipeline test report not rendering when missing properties
+merge_request:
+author:
+type: fixed
