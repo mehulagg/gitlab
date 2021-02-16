@@ -5,12 +5,18 @@ require 'spec_helper'
 RSpec.describe Ci::VariableInitializationVector do
   subject { create(:ci_variable_initialization_vector) }
 
-  it { is_expected.to validate_presence_of(:variable_id) }
-  it { is_expected.to validate_presence_of(:variable_secret_key_id) }
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:initialization_vector) }
+    it { is_expected.to validate_presence_of(:variable_id) }
+    it { is_expected.to validate_presence_of(:variable_secret_key_id) }
+    it { is_expected.to validate_length_of(:initialization_vector).is_at_most(255) }
+    it { is_expected.to validate_uniqueness_of(:initialization_vector) }
+  end
 
-  it { is_expected.to validate_length_of(:initialization_vector).is_at_most(255) }
-  it { is_expected.to validate_presence_of(:initialization_vector) }
-  it { is_expected.to validate_uniqueness_of(:initialization_vector) }
+  describe 'relationships' do
+    it { is_expected.to belong_to(:variable).class_name('Ci::Variable') }
+    it { is_expected.to belong_to(:variable_secret_key).class_name('Ci::VariableSecretKey') }
+  end
 
   describe 'class methods' do
     describe '.generate_initialization_vector' do

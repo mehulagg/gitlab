@@ -11,7 +11,7 @@ module Ci
     validates :encrypted_secret_key_salt, length: { maximum: 255 }, presence: true
 
     has_many :variable_initialization_vectors, class_name: 'Ci::VariableInitializationVector'
-    has_many :variables, through: :variable_initialization_vectors, class_name: 'Ci::VariableInitializationVector'
+    has_many :variables, through: :variable_initialization_vectors, class_name: 'Ci::Variable'
 
     attr_encrypted :secret_key,
                    mode: :per_attribute_iv_and_salt,
