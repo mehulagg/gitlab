@@ -16665,6 +16665,23 @@ CREATE SEQUENCE remote_mirrors_id_seq
 
 ALTER SEQUENCE remote_mirrors_id_seq OWNED BY remote_mirrors.id;
 
+CREATE TABLE renamed_tables (
+    id bigint NOT NULL,
+    old_name text NOT NULL,
+    new_name text NOT NULL,
+    CONSTRAINT check_743b806c30 CHECK ((char_length(new_name) <= 255)),
+    CONSTRAINT check_90e64b5693 CHECK ((char_length(old_name) <= 255))
+);
+
+CREATE SEQUENCE renamed_tables_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE renamed_tables_id_seq OWNED BY renamed_tables.id;
+
 CREATE TABLE repository_languages (
     project_id integer NOT NULL,
     programming_language_id integer NOT NULL,
@@ -19285,6 +19302,8 @@ ALTER TABLE ONLY releases ALTER COLUMN id SET DEFAULT nextval('releases_id_seq':
 
 ALTER TABLE ONLY remote_mirrors ALTER COLUMN id SET DEFAULT nextval('remote_mirrors_id_seq'::regclass);
 
+ALTER TABLE ONLY renamed_tables ALTER COLUMN id SET DEFAULT nextval('renamed_tables_id_seq'::regclass);
+
 ALTER TABLE ONLY required_code_owners_sections ALTER COLUMN id SET DEFAULT nextval('required_code_owners_sections_id_seq'::regclass);
 
 ALTER TABLE ONLY requirements ALTER COLUMN id SET DEFAULT nextval('requirements_id_seq'::regclass);
@@ -20770,6 +20789,9 @@ ALTER TABLE ONLY releases
 
 ALTER TABLE ONLY remote_mirrors
     ADD CONSTRAINT remote_mirrors_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY renamed_tables
+    ADD CONSTRAINT renamed_tables_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY repository_languages
     ADD CONSTRAINT repository_languages_pkey PRIMARY KEY (project_id, programming_language_id);
@@ -23192,6 +23214,8 @@ CREATE INDEX index_releases_on_released_at ON releases USING btree (released_at)
 CREATE INDEX index_remote_mirrors_on_last_successful_update_at ON remote_mirrors USING btree (last_successful_update_at);
 
 CREATE INDEX index_remote_mirrors_on_project_id ON remote_mirrors USING btree (project_id);
+
+CREATE UNIQUE INDEX index_renamed_tables_on_old_name_and_new_name ON renamed_tables USING btree (old_name, new_name);
 
 CREATE INDEX index_required_code_owners_sections_on_protected_branch_id ON required_code_owners_sections USING btree (protected_branch_id);
 

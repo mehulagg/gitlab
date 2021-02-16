@@ -4,6 +4,7 @@ module Gitlab
   module Database
     module MigrationHelpers
       include Migrations::BackgroundMigrationHelpers
+      include Migrations::RenameTableHelpers
 
       # https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
       MAX_IDENTIFIER_NAME_LENGTH = 63
