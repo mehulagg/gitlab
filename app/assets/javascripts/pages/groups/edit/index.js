@@ -8,6 +8,7 @@ import mountBadgeSettings from '~/pages/shared/mount_badge_settings';
 import projectSelect from '~/project_select';
 import initSettingsPanels from '~/settings_panels';
 import setupTransferEdit from '~/transfer_edit';
+import initSearchSettings from '~/search_settings';
 
 document.addEventListener('DOMContentLoaded', () => {
   initFilePickers();
@@ -23,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
   groupsSelect();
 
   projectSelect();
+
+  initSearchSettings();
 
   return new TransferDropdown();
 });

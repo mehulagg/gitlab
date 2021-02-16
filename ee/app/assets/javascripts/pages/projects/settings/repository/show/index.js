@@ -15,6 +15,8 @@ import UserCallout from '~/user_callout';
 import UsersSelect from '~/users_select';
 import EEMirrorRepos from './ee_mirror_repos';
 
+import initSearchSettings from '~/search_settings';
+
 new UsersSelect();
 new UserCallout();
 
@@ -41,3 +43,5 @@ if (pushPullContainer) new EEMirrorRepos(pushPullContainer).init();
 new DueDateSelectors();
 
 fileUpload('.js-choose-file', '.js-object-map-input');
+
+document.addEventListener('DOMContentLoaded', initSearchSettings);

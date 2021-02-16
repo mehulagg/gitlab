@@ -5,6 +5,7 @@ import { FILTERED_SEARCH } from '~/pages/constants';
 import initFilteredSearch from '~/pages/search/init_filtered_search';
 import { initInstallRunner } from '~/pages/shared/mount_runner_instructions';
 import initSettingsPanels from '~/settings_panels';
+import initSearchSettings from '~/search_settings';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize expandable settings panels
@@ -21,4 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initVariableList();
 
   initInstallRunner();
+
+  initSearchSettings();
 });

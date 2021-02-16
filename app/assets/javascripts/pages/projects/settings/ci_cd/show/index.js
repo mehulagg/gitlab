@@ -7,6 +7,7 @@ import { initInstallRunner } from '~/pages/shared/mount_runner_instructions';
 import initSharedRunnersToggle from '~/projects/settings/mount_shared_runners_toggle';
 import registrySettingsApp from '~/registry/settings/registry_settings_bundle';
 import initSettingsPanels from '~/settings_panels';
+import initSearchSettings from '~/search_settings';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize expandable settings panels
@@ -42,4 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   initInstallRunner();
+
+  initSearchSettings();
 });
