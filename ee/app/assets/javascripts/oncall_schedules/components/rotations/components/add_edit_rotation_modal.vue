@@ -84,6 +84,7 @@ export default {
           date: null,
           time: 0,
         },
+        isRestricted: false,
         restrictedTo: {
           from: 0,
           to: 0,
@@ -114,7 +115,7 @@ export default {
       };
     },
     rotationVariables() {
-      return {
+      const variables = {
         projectPath: this.projectPath,
         scheduleIid: this.schedule.iid,
         name: this.form.name,
@@ -133,6 +134,13 @@ export default {
           colorPalette: 'BLUE',
         })),
       };
+      if (this.form.isRestricted) {
+        variables.activePeriod = {
+          from: format24HourTimeStringFromInt(this.form.restrictedTo.from),
+          to: format24HourTimeStringFromInt(this.form.restrictedTo.to),
+        };
+      }
+      return variables;
     },
     isFormValid() {
       return Object.values(this.validationState).every(Boolean);
