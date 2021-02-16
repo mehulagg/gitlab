@@ -22,6 +22,7 @@ const URL_HOST = 'https://localhost/';
 const helpPagePath = '/application_security/dast/index#on-demand-scans';
 const projectPath = 'group/project';
 const defaultBranch = 'master';
+const profilesLibraryPath = '/security/configuration/dast_profiles';
 const scannerProfilesLibraryPath = '/security/configuration/dast_profiles#scanner-profiles';
 const siteProfilesLibraryPath = '/security/configuration/dast_profiles#site-profiles';
 const newScannerProfilePath = '/security/configuration/dast_profiles/dast_scanner_profile/new';
@@ -74,6 +75,7 @@ describe('OnDemandScansForm', () => {
   const findProfilesConflictAlert = () => findByTestId('on-demand-scans-profiles-conflict-alert');
   const findSubmitButton = () => findByTestId('on-demand-scan-submit-button');
   const findSaveButton = () => findByTestId('on-demand-scan-save-button');
+  const findCancelButton = () => findByTestId('on-demand-scan-cancel-button');
 
   const setValidFormData = () => {
     findNameInput().vm.$emit('input', 'My daily scan');
@@ -137,6 +139,7 @@ describe('OnDemandScansForm', () => {
           propsData: defaultProps,
           mocks: defaultMocks,
           provide: {
+            profilesLibraryPath,
             scannerProfilesLibraryPath,
             siteProfilesLibraryPath,
             newScannerProfilePath,
@@ -166,6 +169,12 @@ describe('OnDemandScansForm', () => {
   };
   const mountSubject = subjectMounterFactory(mount);
   const mountShallowSubject = subjectMounterFactory();
+
+  const itClearsLocalStorage = () => {
+    it('clears local storage', () => {
+      expect(localStorage.removeItem.mock.calls).toEqual([[LOCAL_STORAGE_KEY]]);
+    });
+  };
 
   afterEach(() => {
     subject.destroy();
@@ -296,13 +305,18 @@ describe('OnDemandScansForm', () => {
             actionFunction();
           });
 
-          it('sets loading state on correct button', async () => {
-            const [submitButton, saveButton] = [findSubmitButton(), findSaveButton()];
+          it('sets correct button states', async () => {
+            const [submitButton, saveButton, cancelButton] = [
+              findSubmitButton(),
+              findSaveButton(),
+              findCancelButton(),
+            ];
 
             expect(submitButton.props('loading')).toBe(submitButtonLoading);
             expect(submitButton.props('disabled')).toBe(!submitButtonLoading);
             expect(saveButton.props('loading')).toBe(saveButtonLoading);
             expect(saveButton.props('disabled')).toBe(!saveButtonLoading);
+            expect(cancelButton.props('disabled')).toBe(true);
           });
 
           it(`triggers dastProfileCreateMutation mutation with runAfterCreate set to ${runAfter}`, () => {
@@ -328,9 +342,7 @@ describe('OnDemandScansForm', () => {
             expect(findAlert().exists()).toBe(false);
           });
 
-          it('clears local storage', () => {
-            expect(localStorage.removeItem.mock.calls).toEqual([[LOCAL_STORAGE_KEY]]);
-          });
+          itClearsLocalStorage();
         });
 
         describe('when editing an existing scan', () => {
@@ -416,6 +428,19 @@ describe('OnDemandScansForm', () => {
           expect(alert.text()).toContain(error);
         });
       });
+    });
+  });
+
+  describe('cancellation', () => {
+    beforeEach(() => {
+      mountShallowSubject();
+      findCancelButton().vm.$emit('click');
+    });
+
+    itClearsLocalStorage();
+
+    it('redirects to profiles library', () => {
+      expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
     });
   });
 

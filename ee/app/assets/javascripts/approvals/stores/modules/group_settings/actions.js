@@ -23,6 +23,26 @@ export const fetchSettings = ({ commit }, endpoint) => {
     });
 };
 
-export const updatePreventAuthorApproval = ({ commit }, preventAuthorApproval) => {
-  commit(types.UPDATE_PREVENT_AUTHOR_APPROVAL, preventAuthorApproval);
+export const updateSettings = ({ commit, state }, endpoint) => {
+  const payload = {
+    allow_author_approval: !state.settings.preventAuthorApproval,
+  };
+
+  commit(types.REQUEST_UPDATE_SETTINGS);
+
+  return axios
+    .put(endpoint, payload)
+    .then(({ data }) => {
+      commit(types.UPDATE_SETTINGS_SUCCESS, data);
+    })
+    .catch(({ response }) => {
+      const error = response?.data?.message;
+
+      commit(types.UPDATE_SETTINGS_ERROR, error);
+      createFlash({
+        message: __('There was an error updating merge request approval settings.'),
+        captureError: true,
+        error,
+      });
+    });
 };

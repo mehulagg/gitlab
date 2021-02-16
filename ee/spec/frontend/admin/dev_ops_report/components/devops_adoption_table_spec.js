@@ -93,7 +93,7 @@ describe('DevopsAdoptionTable', () => {
   describe('table fields', () => {
     describe('segment name', () => {
       it('displays the correct segment name', () => {
-        expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Segment 1');
+        expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Group 1');
       });
 
       describe('pending state (no snapshot data available)', () => {
@@ -137,7 +137,7 @@ describe('DevopsAdoptionTable', () => {
       const button = findColSubComponent(TEST_IDS.ACTIONS, GlButton);
 
       expect(button.exists()).toBe(true);
-      expect(button.props('icon')).toBe('ellipsis_h');
+      expect(button.props('icon')).toBe('remove');
       expect(button.props('category')).toBe('tertiary');
     });
   });
@@ -150,13 +150,13 @@ describe('DevopsAdoptionTable', () => {
     });
 
     it('sorts the segments by name', async () => {
-      expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Segment 1');
+      expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Group 1');
 
       headers.at(0).trigger('click');
 
       await nextTick();
 
-      expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Segment 2');
+      expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Group 2');
     });
 
     it('should update local storage when the sort column changes', async () => {

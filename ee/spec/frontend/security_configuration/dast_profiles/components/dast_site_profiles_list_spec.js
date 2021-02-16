@@ -30,6 +30,7 @@ describe('EE - DastSiteProfileList', () => {
     tableLabel: 'Site profiles',
     fields: [{ key: 'profileName' }, { key: 'targetUrl' }, { key: 'validationStatus' }],
     profilesPerPage: 10,
+    noProfilesMessage: 'no site profiles created yet',
     errorMessage: '',
     errorDetails: [],
     fullPath: '/namespace/project',

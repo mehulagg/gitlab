@@ -11,6 +11,7 @@ describe('createComplianceFrameworksFormApp', () => {
 
   const groupEditPath = 'group-1/edit';
   const groupPath = 'group-1';
+  const pipelineConfigurationFullPathEnabled = true;
   const graphqlFieldName = 'field';
   const testId = '1';
 
@@ -20,6 +21,7 @@ describe('createComplianceFrameworksFormApp', () => {
     el = document.createElement('div');
     el.setAttribute('data-group-edit-path', groupEditPath);
     el.setAttribute('data-group-path', groupPath);
+    el.setAttribute('data-pipeline-configuration-full-path-enabled', 'true');
 
     if (id) {
       el.setAttribute('data-graphql-field-name', graphqlFieldName);
@@ -51,6 +53,7 @@ describe('createComplianceFrameworksFormApp', () => {
       expect(findFormApp(CreateForm).props()).toStrictEqual({
         groupEditPath,
         groupPath,
+        pipelineConfigurationFullPathEnabled,
       });
     });
   });
@@ -66,6 +69,7 @@ describe('createComplianceFrameworksFormApp', () => {
         groupEditPath,
         groupPath,
         id: testId,
+        pipelineConfigurationFullPathEnabled,
       });
     });
   });

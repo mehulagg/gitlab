@@ -12,7 +12,7 @@ RSpec.describe UserRecentEventsFinder do
     let_it_be(:public_event) { create(:event, :commented, target: note, author: user, project: nil) }
     let_it_be(:private_event) { create(:event, :closed, target: private_epic, author: user, project: nil) }
 
-    subject { described_class.new(current_user, user, {}).execute }
+    subject { described_class.new(current_user, user, nil, {}).execute }
 
     context 'epic related activities' do
       context 'when profile is public' do

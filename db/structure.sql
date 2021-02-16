@@ -8990,10 +8990,11 @@ ALTER SEQUENCE analytics_devops_adoption_segment_selections_id_seq OWNED BY anal
 
 CREATE TABLE analytics_devops_adoption_segments (
     id bigint NOT NULL,
-    name text NOT NULL,
+    name text,
     last_recorded_at timestamp with time zone,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
+    namespace_id integer,
     CONSTRAINT check_4be7a006fd CHECK ((char_length(name) <= 255))
 );
 
@@ -17750,6 +17751,11 @@ CREATE SEQUENCE user_details_user_id_seq
 
 ALTER SEQUENCE user_details_user_id_seq OWNED BY user_details.user_id;
 
+CREATE TABLE user_follow_users (
+    follower_id integer NOT NULL,
+    followee_id integer NOT NULL
+);
+
 CREATE TABLE user_highest_roles (
     user_id bigint NOT NULL,
     updated_at timestamp with time zone NOT NULL,
@@ -20916,6 +20922,9 @@ ALTER TABLE ONLY user_custom_attributes
 ALTER TABLE ONLY user_details
     ADD CONSTRAINT user_details_pkey PRIMARY KEY (user_id);
 
+ALTER TABLE ONLY user_follow_users
+    ADD CONSTRAINT user_follow_users_pkey PRIMARY KEY (follower_id, followee_id);
+
 ALTER TABLE ONLY user_highest_roles
     ADD CONSTRAINT user_highest_roles_pkey PRIMARY KEY (user_id);
 
@@ -21257,6 +21266,8 @@ CREATE INDEX idx_mr_cc_diff_files_on_mr_cc_id_and_sha ON merge_request_context_c
 
 CREATE UNIQUE INDEX idx_on_compliance_management_frameworks_namespace_id_name ON compliance_management_frameworks USING btree (namespace_id, name);
 
+CREATE INDEX idx_on_issues_where_service_desk_reply_to_is_not_null ON issues USING btree (id) WHERE (service_desk_reply_to IS NOT NULL);
+
 CREATE INDEX idx_packages_build_infos_on_package_id ON packages_build_infos USING btree (package_id);
 
 CREATE INDEX idx_packages_debian_group_component_files_on_architecture_id ON packages_debian_group_component_files USING btree (architecture_id);
@@ -21363,7 +21374,7 @@ CREATE INDEX index_analytics_ca_project_stages_on_start_event_label_id ON analyt
 
 CREATE INDEX index_analytics_cycle_analytics_group_stages_custom_only ON analytics_cycle_analytics_group_stages USING btree (id) WHERE (custom = true);
 
-CREATE UNIQUE INDEX index_analytics_devops_adoption_segments_on_name ON analytics_devops_adoption_segments USING btree (name);
+CREATE UNIQUE INDEX index_analytics_devops_adoption_segments_on_namespace_id ON analytics_devops_adoption_segments USING btree (namespace_id);
 
 CREATE INDEX index_application_settings_on_custom_project_templates_group_id ON application_settings USING btree (custom_project_templates_group_id);
 
@@ -23771,6 +23782,8 @@ CREATE UNIQUE INDEX uniq_pkgs_debian_project_distributions_project_id_and_suite 
 
 CREATE UNIQUE INDEX unique_merge_request_metrics_by_merge_request_id ON merge_request_metrics USING btree (merge_request_id);
 
+CREATE INDEX user_follow_users_followee_id_idx ON user_follow_users USING btree (followee_id);
+
 CREATE UNIQUE INDEX vulnerability_feedback_unique_idx ON vulnerability_feedback USING btree (project_id, category, feedback_type, project_fingerprint);
 
 CREATE UNIQUE INDEX vulnerability_occurrence_pipelines_on_unique_keys ON vulnerability_occurrence_pipelines USING btree (occurrence_id, pipeline_id);
@@ -24701,6 +24714,9 @@ ALTER TABLE ONLY ci_pipeline_variables
 
 ALTER TABLE ONLY design_management_designs_versions
     ADD CONSTRAINT fk_f4d25ba00c FOREIGN KEY (version_id) REFERENCES design_management_versions(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY analytics_devops_adoption_segments
+    ADD CONSTRAINT fk_f5aa768998 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY protected_tag_create_access_levels
     ADD CONSTRAINT fk_f7dfda8c51 FOREIGN KEY (protected_tag_id) REFERENCES protected_tags(id) ON DELETE CASCADE;
@@ -26188,6 +26204,12 @@ ALTER TABLE ONLY u2f_registrations
     ADD CONSTRAINT fk_u2f_registrations_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE product_analytics_events_experimental
-    ADD CONSTRAINT product_analytics_events_experimental_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;-- schema_migrations.version information is no longer stored in this file,
+    ADD CONSTRAINT product_analytics_events_experimental_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY user_follow_users
+    ADD CONSTRAINT user_follow_users_followee_id_fkey FOREIGN KEY (followee_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY user_follow_users
+    ADD CONSTRAINT user_follow_users_follower_id_fkey FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE;-- schema_migrations.version information is no longer stored in this file,
 -- but instead tracked in the db/schema_migrations directory
 -- see https://gitlab.com/gitlab-org/gitlab/-/issues/218590 for details

@@ -7,15 +7,23 @@ module Mutations
         module Segments
           class Create < BaseMutation
             include Mixins::CommonMethods
-            include Mixins::CommonArguments
 
             graphql_name 'CreateDevopsAdoptionSegment'
 
-            def resolve(name:, group_ids: [], **)
-              groups = GlobalID::Locator.locate_many(group_ids)
+            argument :namespace_id, ::Types::GlobalIDType[::Namespace],
+                     required: true,
+                     description: 'Namespace ID to set for the segment.'
+
+            field :segment,
+                  Types::Admin::Analytics::DevopsAdoption::SegmentType,
+                  null: true,
+                  description: 'The segment after mutation.'
+
+            def resolve(namespace_id:, **)
+              namespace = namespace_id.find
 
               response = ::Analytics::DevopsAdoption::Segments::CreateService
-                .new(current_user: current_user, params: { name: name, groups: groups })
+                .new(current_user: current_user, params: { namespace: namespace })
                 .execute
 
               resolve_segment(response)

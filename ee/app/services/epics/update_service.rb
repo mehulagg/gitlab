@@ -21,6 +21,8 @@ module Epics
         epic.reset
       end
 
+      assign_parent_epic_for(epic)
+
       epic
     end
 

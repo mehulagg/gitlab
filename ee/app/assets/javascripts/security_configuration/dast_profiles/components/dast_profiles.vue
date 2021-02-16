@@ -260,6 +260,7 @@ export default {
           :data-testid="`${profileType}List`"
           :error-message="profileTypes[profileType].errorMessage"
           :error-details="profileTypes[profileType].errorDetails"
+          :no-profiles-message="settings.i18n.noProfilesMessage"
           :has-more-profiles-to-load="hasMoreProfiles(profileType)"
           :is-loading="isLoadingProfiles(profileType)"
           :profiles-per-page="$options.profilesPerPage"

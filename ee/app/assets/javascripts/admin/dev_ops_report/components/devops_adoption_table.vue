@@ -1,12 +1,5 @@
 <script>
-import {
-  GlTable,
-  GlButton,
-  GlPopover,
-  GlModalDirective,
-  GlTooltipDirective,
-  GlIcon,
-} from '@gitlab/ui';
+import { GlTable, GlButton, GlModalDirective, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import {
   DEVOPS_ADOPTION_TABLE_TEST_IDS,
@@ -23,7 +16,7 @@ const NAME_HEADER = 'name';
 
 const formatter = (value, key, item) => {
   if (key === NAME_HEADER) {
-    return value;
+    return item.namespace?.fullName;
   }
 
   if (item.latestSnapshot && item.latestSnapshot[key] === false) {
@@ -62,7 +55,6 @@ export default {
     GlTable,
     DevopsAdoptionTableCellFlag,
     GlButton,
-    GlPopover,
     LocalStorageSync,
     DevopsAdoptionDeleteModal,
     GlIcon,
@@ -104,12 +96,6 @@ export default {
     };
   },
   methods: {
-    popoverContainerId(name) {
-      return `popover_container_id_for_${name}`;
-    },
-    popoverId(name) {
-      return `popover_id_for_${name}`;
-    },
     setSelectedSegment(segment) {
       this.$emit('set-selected-segment', segment);
     },
@@ -154,11 +140,18 @@ export default {
         </div>
       </template>
 
-      <template #cell(name)="{ item }">
+      <template
+        #cell(name)="{
+          item: {
+            namespace: { fullName },
+            latestSnapshot,
+          },
+        }"
+      >
         <div :data-testid="$options.testids.SEGMENT">
-          <strong v-if="item.latestSnapshot">{{ item.name }}</strong>
+          <strong v-if="latestSnapshot">{{ fullName }}</strong>
           <template v-else>
-            <span class="gl-text-gray-400">{{ item.name }}</span>
+            <span class="gl-text-gray-400">{{ fullName }}</span>
             <gl-icon name="hourglass" class="gl-text-gray-400" />
           </template>
         </div>
@@ -222,32 +215,13 @@ export default {
 
       <template #cell(actions)="{ item }">
         <div :data-testid="$options.testids.ACTIONS">
-          <gl-button :id="popoverId(item.name)" category="tertiary" icon="ellipsis_h" />
-          <div :id="popoverContainerId(item.name)">
-            <gl-popover
-              :target="popoverId(item.name)"
-              :container="popoverContainerId(item.name)"
-              triggers="hover focus"
-              placement="left"
-            >
-              <div class="gl-display-inline-flex gl-flex-direction-column">
-                <gl-button
-                  v-gl-modal="$options.devopsSegmentModalId"
-                  category="tertiary"
-                  class="gl-w-max-content"
-                  @click="setSelectedSegment(item)"
-                  >{{ $options.i18n.editButton }}</gl-button
-                >
-                <gl-button
-                  v-gl-modal="$options.devopsSegmentDeleteModalId"
-                  category="tertiary"
-                  variant="danger"
-                  @click="setSelectedSegment(item)"
-                  >{{ $options.i18n.deleteButton }}</gl-button
-                >
-              </div>
-            </gl-popover>
-          </div>
+          <gl-button
+            v-gl-modal="$options.devopsSegmentDeleteModalId"
+            v-gl-tooltip.hover="$options.i18n.removeButton"
+            category="tertiary"
+            icon="remove"
+            @click="setSelectedSegment(item)"
+          />
         </div>
       </template>
     </gl-table>

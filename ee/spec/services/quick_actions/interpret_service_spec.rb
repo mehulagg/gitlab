@@ -1112,7 +1112,17 @@ RSpec.describe QuickActions::InterpretService do
         group.add_developer(current_user)
       end
 
-      shared_examples 'adds epic relation' do |relation|
+      shared_examples 'quick action parameters' do |parameter, quick_action|
+        let(:content) { "/#{quick_action} #{epic2&.to_reference(epic)}" }
+
+        it 'adds parameter to updates array' do
+          _, updates = service.execute(content, epic)
+
+          expect(updates[:quick_action_assign_to_parent_epic]).to eq(epic2)
+        end
+      end
+
+      shared_examples 'returning execution messages' do |relation|
         context 'when correct epic reference' do
           let(:content) { "/#{relation}_epic #{epic2&.to_reference(epic)}" }
           let(:explain_action) { relation == :child ? 'Adds' : 'Sets'}
@@ -1171,7 +1181,7 @@ RSpec.describe QuickActions::InterpretService do
       end
 
       context 'child_epic command' do
-        it_behaves_like 'adds epic relation', :child
+        it_behaves_like 'returning execution messages', :child
 
         context 'when epic is already a child epic' do
           let(:content) { "/child_epic #{epic2&.to_reference(epic)}" }
@@ -1260,7 +1270,8 @@ RSpec.describe QuickActions::InterpretService do
       end
 
       context 'parent_epic command' do
-        it_behaves_like 'adds epic relation', :parent
+        it_behaves_like 'quick action parameters', :quick_action_assign_to_parent_epic, :parent_epic
+        it_behaves_like 'returning execution messages', :parent
 
         context 'when epic is already a parent epic' do
           let(:content) { "/parent_epic #{epic2&.to_reference(epic)}" }
@@ -1289,9 +1300,9 @@ RSpec.describe QuickActions::InterpretService do
         end
 
         context 'when target epic is not persisted yet' do
-          let(:target) { build(:epic, group: group) }
+          let(:epic) { build(:epic, group: group) }
 
-          it_behaves_like 'quick action is unavailable', :parent_epic
+          it_behaves_like 'quick action parameters', :quick_action_assign_to_parent_epic, :parent_epic
         end
 
         context 'when user has no permission to read epic' do

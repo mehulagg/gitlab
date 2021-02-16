@@ -43,6 +43,9 @@ export default {
     displayError() {
       return this.errors[0];
     },
+    displayName() {
+      return this.segment.namespace?.fullName;
+    },
   },
   methods: {
     async deleteSegment() {
@@ -100,7 +103,7 @@ export default {
     </gl-alert>
     <gl-sprintf :message="$options.i18n.confirmationMessage">
       <template #name
-        ><strong>{{ segment.name }}</strong></template
+        ><strong>{{ displayName }}</strong></template
       >
     </gl-sprintf>
   </gl-modal>
