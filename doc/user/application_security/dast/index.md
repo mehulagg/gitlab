@@ -42,7 +42,7 @@ To enable DAST, either:
 
 - Enable [Auto DAST](../../../topics/autodevops/stages.md#auto-dast), provided by
   [Auto DevOps](../../../topics/autodevops/index.md).
-- [Include a GitLab DAST template](#dast-ci-template) in your existing `.gitlab-ci.yml` file.
+- [Include the DAST template](#dast-ci-template) in your existing `.gitlab-ci.yml` file.
 
 ### DAST CI template
 
@@ -63,9 +63,9 @@ on template versioning for more information.
 
 Use the stable template unless you need a feature provided only in the latest template.
 
-#### Include the GitLab DAST template
+#### Include the DAST template
 
-The method of including the GitLab DAST job as part of your pipeline depends on the GitLab version:
+The method of including the DAST template depends on the GitLab version:
 
 - In GitLab 11.9 and later, [include](../../../ci/yaml/README.md#includetemplate) the
   `DAST.gitlab-ci.yml` template.
@@ -84,7 +84,7 @@ The method of including the GitLab DAST job as part of your pipeline depends on 
 
 #### Template options
 
-There are two ways to define the URL to be scanned by DAST:
+Running a DAST scan requires a URL. There are two ways to define the URL to be scanned by DAST:
 
 1. Set the `DAST_WEBSITE` [variable](../../../ci/yaml/README.md#variables).
 
