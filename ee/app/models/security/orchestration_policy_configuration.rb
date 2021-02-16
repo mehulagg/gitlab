@@ -41,7 +41,7 @@ module Security
 
     def applicable_for_branch?(policy, ref)
       policy[:rules].any? do |rule|
-        rule[:type] == 'pipeline' && rule[:branches].any? { |branch| RefMatcher.new(branch).matches?(ref)  }
+        rule[:type] == 'pipeline' && rule[:branches].any? { |branch| RefMatcher.new(branch).matches?(ref) }
       end
     end
   end
