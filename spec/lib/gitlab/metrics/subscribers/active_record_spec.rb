@@ -17,6 +17,11 @@ RSpec.describe Gitlab::Metrics::Subscribers::ActiveRecord do
     )
   end
 
+  # Emulate Marginalia pre-pending comments
+  def sql(query)
+    "/*application:web,controller:badges,action:pipeline,correlation_id:01EYN39K9VMJC56Z7808N7RSRH*/ #{query}"
+  end
+
   describe '#sql' do
     shared_examples 'track query in metrics' do
       before do
@@ -114,7 +119,7 @@ RSpec.describe Gitlab::Metrics::Subscribers::ActiveRecord do
         it_behaves_like 'track query in RequestStore'
 
         context 'with only select' do
-          let(:payload) { { sql: 'WITH active_milestones AS (SELECT COUNT(*), state FROM milestones GROUP BY state) SELECT * FROM active_milestones' } }
+          let(:payload) { { sql: sql('WITH active_milestones AS (SELECT COUNT(*), state FROM milestones GROUP BY state) SELECT * FROM active_milestones') } }
 
           it_behaves_like 'track query in metrics'
           it_behaves_like 'track query in RequestStore'
@@ -131,7 +136,7 @@ RSpec.describe Gitlab::Metrics::Subscribers::ActiveRecord do
         end
 
         context 'with select for update sql event' do
-          let(:payload) { { sql: 'SELECT * FROM users WHERE id = 10 FOR UPDATE' } }
+          let(:payload) { { sql: sql('SELECT * FROM users WHERE id = 10 FOR UPDATE') } }
 
           it_behaves_like 'track query in metrics'
           it_behaves_like 'track query in RequestStore'
@@ -139,7 +144,7 @@ RSpec.describe Gitlab::Metrics::Subscribers::ActiveRecord do
 
         context 'with common table expression' do
           context 'with insert' do
-            let(:payload) { { sql: 'WITH archived_rows AS (SELECT * FROM users WHERE archived = true) INSERT INTO products_log SELECT * FROM archived_rows' } }
+            let(:payload) { { sql: sql('WITH archived_rows AS (SELECT * FROM users WHERE archived = true) INSERT INTO products_log SELECT * FROM archived_rows') } }
 
             it_behaves_like 'track query in metrics'
             it_behaves_like 'track query in RequestStore'
@@ -147,21 +152,21 @@ RSpec.describe Gitlab::Metrics::Subscribers::ActiveRecord do
         end
 
         context 'with delete sql event' do
-          let(:payload) { { sql: 'DELETE FROM users where id = 10' } }
+          let(:payload) { { sql: sql('DELETE FROM users where id = 10') } }
 
           it_behaves_like 'track query in metrics'
           it_behaves_like 'track query in RequestStore'
         end
 
         context 'with insert sql event' do
-          let(:payload) { { sql: 'INSERT INTO project_ci_cd_settings (project_id) SELECT id FROM projects' } }
+          let(:payload) { { sql: sql('INSERT INTO project_ci_cd_settings (project_id) SELECT id FROM projects') } }
 
           it_behaves_like 'track query in metrics'
           it_behaves_like 'track query in RequestStore'
         end
 
         context 'with update sql event' do
-          let(:payload) { { sql: 'UPDATE users SET admin = true WHERE id = 10' } }
+          let(:payload) { { sql: sql('UPDATE users SET admin = true WHERE id = 10') } }
 
           it_behaves_like 'track query in metrics'
           it_behaves_like 'track query in RequestStore'
@@ -180,7 +185,7 @@ RSpec.describe Gitlab::Metrics::Subscribers::ActiveRecord do
         context 'with cached payload ' do
           let(:payload) do
             {
-              sql: 'SELECT * FROM users WHERE id = 10',
+              sql: sql('SELECT * FROM users WHERE id = 10'),
               cached: true
             }
           end
@@ -192,7 +197,7 @@ RSpec.describe Gitlab::Metrics::Subscribers::ActiveRecord do
         context 'with cached payload name' do
           let(:payload) do
             {
-              sql: 'SELECT * FROM users WHERE id = 10',
+              sql: sql('SELECT * FROM users WHERE id = 10'),
               name: 'CACHE'
             }
           end
@@ -208,7 +213,7 @@ RSpec.describe Gitlab::Metrics::Subscribers::ActiveRecord do
             :event,
             name: 'sql.active_record',
             payload: {
-              sql: "SELECT attr.attname FROM pg_attribute attr INNER JOIN pg_constraint cons ON attr.attrelid = cons.conrelid AND attr.attnum = any(cons.conkey) WHERE cons.contype = 'p' AND cons.conrelid = '\"projects\"'::regclass",
+              sql: sql("SELECT attr.attname FROM pg_attribute attr INNER JOIN pg_constraint cons ON attr.attrelid = cons.conrelid AND attr.attnum = any(cons.conkey) WHERE cons.contype = 'p' AND cons.conrelid = '\"projects\"'::regclass"),
               name: 'SCHEMA',
               connection_id: 135,
               statement_name: nil,
