@@ -162,6 +162,17 @@ RSpec.describe Issues::ExportCsvService do
         expect(csv[0]['Issue ID']).to eq issue.iid.to_s
       end
     end
+
+    context 'performance' do
+      let(:extra_queries) { 3 } # SELECT "projects", SELECT "namespaces", SELECT "routes"
+
+      it 'does not run a query for each label link' do
+        control_count = ActiveRecord::QueryRecorder.new { csv }.count
+        create(:labeled_issue, project: project, author: user, labels: [feature_label, idea_label])
+
+        expect { csv }.not_to exceed_query_limit(control_count).with_threshold(extra_queries)
+      end
+    end
   end
 
   context 'with minimal details' do
