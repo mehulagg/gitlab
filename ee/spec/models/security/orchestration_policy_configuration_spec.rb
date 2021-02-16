@@ -88,53 +88,6 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
     end
   end
 
-  describe '#policy_at' do
-    let(:enforce_dast_yaml) do
-      <<-EOS
-      type: scan_execution_policy
-      name: Run DAST in every pipeline
-      description: This policy enforces to run DAST for every pipeline within the project
-      enabled: true
-      rules:
-      - type: pipeline
-        branches:
-        - "production"
-      actions:
-      - scan: dast
-        site_profile: Site Profile
-        scanner_profile: Scanner Profile
-      EOS
-    end
-
-    let(:expected_policy) do
-      {
-        type: 'scan_execution_policy',
-        name: 'Run DAST in every pipeline',
-        description: 'This policy enforces to run DAST for every pipeline within the project',
-        enabled: true,
-        rules: [{ type: 'pipeline', branches: ['production'] }],
-        actions: [{ scan: 'dast', site_profile: 'Site Profile', scanner_profile: 'Scanner Profile' }]
-      }
-    end
-
-    subject(:policy_at) { security_orchestration_policy_configuration.policy_at('.gitlab/security-policies/enforce-dast.yml') }
-
-    before do
-      allow(security_policy_management_project).to receive(:repository).and_return(repository)
-      allow(repository).to receive(:blob_data_at).and_return(enforce_dast_yaml)
-    end
-
-    it 'reads yml file from repository' do
-      expect(repository).to receive(:blob_data_at).with(default_branch, '.gitlab/security-policies/enforce-dast.yml')
-
-      policy_at
-    end
-
-    it 'returns only enabled policies' do
-      expect(policy_at).to eq(expected_policy)
-    end
-  end
-
   describe '#on_demand_scan_actions' do
     let(:policy_1_yaml) do
       <<-EOS

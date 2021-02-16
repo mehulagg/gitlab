@@ -23,13 +23,6 @@ module Security
         .select { |config| config[:enabled] }
     end
 
-    def policy_at(path)
-      security_policy_management_project
-        .repository
-        .blob_data_at(security_policy_management_project.default_branch_or_master, path)
-        .then { |config| Gitlab::Config::Loader::Yaml.new(config).load! }
-    end
-
     def on_demand_scan_actions(branch)
       active_policies
         .select { |policy| applicable_for_branch?(policy, branch) }
@@ -39,17 +32,17 @@ module Security
 
     private
 
-    def applicable_for_branch?(policy, ref)
-      policy[:rules].any? do |rule|
-        rule[:type] == 'pipeline' && rule[:branches].any? { |branch| wildcard_regex(branch).match?(ref) }
-      end
+    def policy_at(path)
+      security_policy_management_project
+        .repository
+        .blob_data_at(security_policy_management_project.default_branch_or_master, path)
+        .then { |config| Gitlab::Config::Loader::Yaml.new(config).load! }
     end
 
-    def wildcard_regex(branch)
-      name = branch.gsub('*', 'STAR_DONT_ESCAPE')
-      quoted_name = Regexp.quote(name)
-      regex_string = quoted_name.gsub('STAR_DONT_ESCAPE', '.*?')
-      /\A#{regex_string}\z/
+    def applicable_for_branch?(policy, ref)
+      policy[:rules].any? do |rule|
+        rule[:type] == 'pipeline' && rule[:branches].any? { |branch| RefMatcher.new(branch).matches?(ref)  }
+      end
     end
   end
 end
