@@ -1,7 +1,28 @@
 # frozen_string_literal: true
 
-RSpec::Matchers.define :be_scheduled_delayed_migration do |delay, *expected|
+RSpec::Matchers.define :be_background_migration_with_arity do |arguments|
   match do |migration|
+    arity = migration_arity(migration)
+    arity == -1 || arity == arguments.size
+  end
+
+  failure_message do |migration|
+    "Migration `#{migration}` with args `#{arguments.inspect}` " \
+      "does not match arity on #perform: expected #{migration_arity(migration)} arguments, got #{arguments.size}"
+  end
+
+  def migration_arity(migration)
+    @migration_arity ||= begin
+      migration_class = Gitlab::BackgroundMigration.const_get(migration, false)
+      migration_class.instance_method(:perform).arity
+    end
+  end
+end
+
+RSpec::Matchers.define :be_scheduled_delayed_migration do |delay, *expected|
+  define_method :matches? do |migration|
+    expect(migration).to be_background_migration_with_arity(expected)
+
     BackgroundMigrationWorker.jobs.any? do |job|
       job['args'] == [migration, expected] &&
         job['at'].to_i == (delay.to_i + Time.now.to_i)
@@ -16,7 +37,9 @@ RSpec::Matchers.define :be_scheduled_delayed_migration do |delay, *expected|
 end
 
 RSpec::Matchers.define :be_scheduled_migration do |*expected|
-  match do |migration|
+  define_method :matches? do |migration|
+    expect(migration).to be_background_migration_with_arity(expected)
+
     BackgroundMigrationWorker.jobs.any? do |job|
       args = job['args'].size == 1 ? [BackgroundMigrationWorker.jobs[0]['args'][0], []] : job['args']
       args == [migration, expected]
@@ -29,7 +52,9 @@ RSpec::Matchers.define :be_scheduled_migration do |*expected|
 end
 
 RSpec::Matchers.define :be_scheduled_migration_with_multiple_args do |*expected|
-  match do |migration|
+  define_method :matches? do |migration|
+    expect(migration).to be_background_migration_with_arity(expected)
+
     BackgroundMigrationWorker.jobs.any? do |job|
       args = job['args'].size == 1 ? [BackgroundMigrationWorker.jobs[0]['args'][0], []] : job['args']
       args[0] == migration && compare_args(args, expected)
