@@ -6,7 +6,7 @@ const placeholderText = 'Test Button Text';
 describe('ReplyPlaceholder', () => {
   let wrapper;
 
-  const findButton = () => wrapper.find({ ref: 'button' });
+  const findTextarea = () => wrapper.find('.js-vue-discussion-reply');
 
   beforeEach(() => {
     wrapper = shallowMount(ReplyPlaceholder, {
@@ -21,7 +21,7 @@ describe('ReplyPlaceholder', () => {
   });
 
   it('emits focus event on button click', () => {
-    findButton().trigger('click');
+    findTextarea().trigger('focus');
 
     return wrapper.vm.$nextTick().then(() => {
       expect(wrapper.emitted()).toEqual({
@@ -31,6 +31,6 @@ describe('ReplyPlaceholder', () => {
   });
 
   it('should render reply button', () => {
-    expect(findButton().text()).toEqual(placeholderText);
+    expect(findTextarea().element.placeholder).toEqual(placeholderText);
   });
 });

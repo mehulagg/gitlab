@@ -83,7 +83,7 @@ RSpec.describe 'User comments on a diff', :js do
 
       wait_for_requests
 
-      click_button 'Reply...'
+      find('.js-vue-discussion-reply').click
 
       find('.js-suggestion-btn').click
 

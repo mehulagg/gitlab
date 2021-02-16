@@ -60,7 +60,7 @@ RSpec.describe 'Merge request > User sees threads', :js do
 
       it 'can be replied to' do
         within(".discussion[data-discussion-id='#{discussion_id}']") do
-          click_button 'Reply...'
+          find('.js-vue-discussion-reply').click
           fill_in 'note[note]', with: 'Test!'
           click_button 'Comment'
 
