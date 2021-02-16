@@ -15,7 +15,7 @@ class GitlabSubscription < ApplicationRecord
   belongs_to :hosted_plan, class_name: 'Plan'
 
   validates :seats, :start_date, presence: true
-  validates :namespace_id, uniqueness: true, allow_blank: true
+  validates :namespace_id, uniqueness: true, presence: true
 
   delegate :name, :title, to: :hosted_plan, prefix: :plan, allow_nil: true
 
