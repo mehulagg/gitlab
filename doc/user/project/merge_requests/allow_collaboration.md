@@ -80,11 +80,20 @@ Here's how the process would look like:
 
 ## Troubleshooting
 
-### Pipeline Status Unavailable from MR Page of Forked Project 
+### Pipeline status unavailable from MR page of forked project
 
-Whenever a user forks a project, the permissions on the forked copy are not automatically copied over from the original project. The user doing the fork has to grant permissions to the forked copy before members in the upstream project will have access to view and/or merge the changes in the MR. 
+When a user forks a project, the permissions on the forked copy are not copied over
+from the original project. The creator of the fork must grant permissions to the
+forked copy before members in the upstream project can view or merge the changes
+in the merge request.
 
-To see the pipeline status,from the MR page of a forked project going back to the original project, you will need to create a group containing all the upstream members. Then simply go to the `Members` tab in the forked project and invite the newly created group to the forked project.
+To see the pipeline status from the merge request page of a forked project
+going back to the original project:
+
+1. Create a group containing all the upstream members.
+1. Go to the **Members** tab in the forked project and invite the newly-created
+   group to the forked project.
+
 <!-- ## Troubleshooting
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
 one might have when setting this up, or when something is changed, or on upgrading, it's
