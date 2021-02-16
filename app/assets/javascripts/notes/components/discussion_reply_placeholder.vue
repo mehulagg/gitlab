@@ -2,7 +2,7 @@
 export default {
   name: 'ReplyPlaceholder',
   props: {
-    buttonText: {
+    placeholderText: {
       type: String,
       required: true,
     },
@@ -11,13 +11,11 @@ export default {
 </script>
 
 <template>
-  <button
-    ref="button"
-    type="button"
-    class="js-vue-discussion-reply btn btn-text-field"
+  <textarea
+    rows="1"
+    class="reply-placeholder-text-field js-vue-discussion-reply"
+    :placeholder="placeholderText"
     :title="s__('MergeRequests|Add a reply')"
-    @click="$emit('onClick')"
-  >
-    {{ buttonText }}
-  </button>
+    @focus="$emit('focus')"
+  ></textarea>
 </template>

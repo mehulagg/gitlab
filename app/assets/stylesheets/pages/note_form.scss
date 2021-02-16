@@ -303,7 +303,15 @@ table {
     }
   }
 
-  .btn-text-field {
+  .reply-placeholder-text-field {
+    border-radius: $gl-border-radius-base;
+    width: 100%;
+    resize: none;
+    padding: $gl-padding-4 $gl-padding;
+    border-color: $border-color;
+    color: $gray-darkest;
+    background-color: $white;
+
     @include media-breakpoint-down(xs) {
       margin-bottom: $gl-padding-8;
     }
