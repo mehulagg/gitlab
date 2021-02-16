@@ -119,7 +119,7 @@ There are two ways to define the URL to be scanned by DAST:
      paths: [environment_url.txt]
      when: always
    ```
-  
+
    You can see an example of this in our [Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml) file.
 
 If both values are set, the `DAST_WEBSITE` value takes precedence.
@@ -790,7 +790,7 @@ follows:
 - _Header validation_ requires the header `Gitlab-On-Demand-DAST` be added to the target site,
   with a value unique to the project. The validation process checks that the header is present, and
   checks its value.
-  
+
 Both methods are equivalent in functionality. Use whichever is feasible.
 
 ### Create a site profile
@@ -912,6 +912,12 @@ app.get('/dast-website-target', function(req, res) {
 })
 ```
 
+### Important notes
+
+Note the following:
+
+- You will not be able to modify or delete Site Profile when it is associated with active [Security Orchestration Policy](../security_policies/index.md). If you want to modify them, you need to first disable the policy by setting the `active` flag to `false`.
+
 ## Scanner profile
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222767) in GitLab 13.4.
@@ -961,6 +967,12 @@ To delete a scanner profile:
 1. Select **Delete**.
 
 The scanner profile is deleted.
+
+### Important notes
+
+Note the following:
+
+- You will not be able to modify or delete Scanner Profile when it is associated with active [Security Orchestration Policy](../security_policies/index.md). If you want to modify them, you need to first disable the policy by setting the `active` flag to `false`.
 
 ## Reports
 
