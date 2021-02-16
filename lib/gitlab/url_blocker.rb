@@ -125,7 +125,7 @@ module Gitlab
         # don't exist. In order to avoid modifying a ton of tests and factories
         # we allow invalid urls unless the environment variable RSPEC_ALLOW_INVALID_URLS
         # is not true
-        return if Rails.env.test? && ENV['RSPEC_ALLOW_INVALID_URLS'] == 'true'
+        return if Rails.env.test? && allow_invalid_urls?
 
         # If the addr can't be resolved or the url is invalid (i.e http://1.1.1.1.1)
         # we block the url
@@ -135,6 +135,10 @@ module Gitlab
         raise unless error.message.include?('hostname too long')
 
         raise BlockedUrlError, "Host is too long (maximum is 1024 characters)"
+      end
+
+      def allow_invalid_urls?
+        ENV['RSPEC_ALLOW_INVALID_URLS'] == 'true'
       end
 
       def validate_local_request(

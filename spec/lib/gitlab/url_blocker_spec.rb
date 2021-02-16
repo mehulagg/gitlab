@@ -57,7 +57,7 @@ RSpec.describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
         let(:import_url) { 'http://foobar.x' }
 
         it 'raises an error' do
-          stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+          allow(described_class).to receive(:allow_invalid_urls?).and_return(false))
 
           expect { subject }.to raise_error(described_class::BlockedUrlError)
         end
@@ -84,7 +84,7 @@ RSpec.describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
         let(:import_url) { 'http://1.1.1.1.1' }
 
         it 'raises an error' do
-          stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+          allow(described_class).to receive(:allow_invalid_urls?).and_return(false)
 
           expect { subject }.to raise_error(described_class::BlockedUrlError)
         end
@@ -122,7 +122,7 @@ RSpec.describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
         let(:import_url) { 'https://example.org' }
 
         before do
-          stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+          allow(described_class).to receive(:allow_invalid_urls?).and_return(false)
         end
 
         context 'when domain can be resolved' do
@@ -169,7 +169,7 @@ RSpec.describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
       before do
         skip 'timeout is not available' unless timeout_available?
 
-        stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+        allow(described_class).to receive(:allow_invalid_urls?).and_return(false))
         stub_const("#{described_class}::GETADDRINFO_TIMEOUT_SECONDS", 0)
       end
 
@@ -519,7 +519,7 @@ RSpec.describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
                 let(:url) { "http://#{domain}" }
 
                 before do
-                  stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+                  allow(described_class).to receive(:allow_invalid_urls?).and_return(false))
                 end
 
                 it do
@@ -642,13 +642,13 @@ RSpec.describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
     end
 
     it 'blocks urls with invalid ip address' do
-      stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+      allow(described_class).to receive(:allow_invalid_urls?).and_return(false))
 
       expect(described_class).to be_blocked_url('http://8.8.8.8.8')
     end
 
     it 'blocks urls whose hostname cannot be resolved' do
-      stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+      allow(described_class).to receive(:allow_invalid_urls?).and_return(false))
 
       expect(described_class).to be_blocked_url('http://foobar.x')
     end
