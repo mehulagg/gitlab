@@ -76,6 +76,7 @@ export default {
   methods: {
     setRotationToUpdate(rotation) {
       this.rotationToUpdate = rotation;
+      this.$emit('set-rotation-to-update', rotation);
     },
     cellShouldHideOverflow(index) {
       return index + 1 === this.timeframe.length || this.presetIsDay;
@@ -103,6 +104,7 @@ export default {
             :title="$options.i18n.editRotationLabel"
             icon="pencil"
             :aria-label="$options.i18n.editRotationLabel"
+            @click="setRotationToUpdate(rotation)"
           />
           <gl-button
             v-gl-modal="$options.deleteRotationModalId"
