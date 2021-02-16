@@ -24,7 +24,7 @@ Only the items visible on the current page are selected for bulk editing (up to 
 > - Editing health status [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218395) in GitLab 13.2.
 > - Editing iteration [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196806) in GitLab 13.9.
 
-Users with permission permission level of [Reporter or higher](../permissions.md) can manage issues.
+Users with permission level of [Reporter or higher](../permissions.md) can manage issues.
 
 When bulk editing issues in a project, you can edit the following attributes:
 
