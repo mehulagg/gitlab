@@ -8,6 +8,9 @@ description: "Autocomplete chars in Markdown fields."
 
 # Autocomplete characters **(FREE)**
 
+> - Introduced in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/36705):
+> you can search across full name in user autocomplete
+
 The autocomplete characters provide a quick way of entering field values into
 Markdown fields. When you start typing a word in a Markdown field with one of
 the following characters, GitLab progressively autocompletes against a set of
@@ -58,3 +61,6 @@ popup now only includes users where `le` appears in their username, or a word in
 their name.
 
 ![Popup list which includes users whose username or name contains the string](img/autocomplete_characters_example2_v12_0.png)
+
+You can also search across the full name to find a user.
+To find `Rosy Grant`, you can type their full name without spaces like `@rosygrant`.
