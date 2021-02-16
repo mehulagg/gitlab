@@ -25,7 +25,7 @@ SAML SSO is not supported at the subgroup level.
 1. Navigate to the group and select **Settings > SAML SSO**.
 1. Configure your SAML server using the **Assertion consumer service URL**, **Identifier**, and **GitLab single sign-on URL**. Alternatively GitLab provides [metadata XML configuration](#metadata-configuration). See [specific identity provider documentation](#providers) for more details.
 1. Configure the SAML response to include a NameID that uniquely identifies each user.
-1. Configure [required assertions](group_managed_accounts.md#assertions) if using [Group Managed Accounts](group_managed_accounts.md).
+1. Configure [required assertions](#assertions) if using [Group Managed Accounts](group_managed_accounts.md), or expecting new user accounts to be created.
 1. While the default is enabled for most SAML providers, please ensure the app is set to have [Service Provider](#glossary) initiated calls in order to link existing GitLab accounts.
 1. Once the identity provider is set up, move on to [configuring GitLab](#configuring-gitlab).
 
