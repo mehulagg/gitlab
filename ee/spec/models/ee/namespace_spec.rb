@@ -207,11 +207,13 @@ RSpec.describe Namespace do
       subject { described_class.in_default_plan.ids }
 
       where(:plan_name, :expect_in_default_plan) do
-        ::Plan::FREE | true
-        ::Plan::DEFAULT | true
-        ::Plan::BRONZE | false
-        ::Plan::SILVER | false
-        ::Plan::GOLD | false
+        ::Plan::FREE     | true
+        ::Plan::DEFAULT  | true
+        ::Plan::BRONZE   | false
+        ::Plan::SILVER   | false
+        ::Plan::PREMIUM  | false
+        ::Plan::GOLD     | false
+        ::Plan::ULTIMATE | false
       end
 
       with_them do
@@ -274,12 +276,23 @@ RSpec.describe Namespace do
         end
 
         context 'in active trial gold plan' do
-          before do
-            create :gitlab_subscription, ::Plan::GOLD, :active_trial, namespace: namespace
-            create :gitlab_subscription, ::Plan::GOLD, :active_trial, namespace: sub_namespace
+          using RSpec::Parameterized::TableSyntax
+
+          where(:plan_name) do
+            [
+              [::Plan::GOLD],
+              [::Plan::ULTIMATE]
+            ]
           end
 
-          it { is_expected.to eq([namespace.id]) }
+          with_them do
+            before do
+              create :gitlab_subscription, plan_name, :active_trial, namespace: namespace
+              create :gitlab_subscription, plan_name, :active_trial, namespace: sub_namespace
+            end
+
+            it { is_expected.to eq([namespace.id]) }
+          end
         end
 
         context 'with a paid plan and not in trial' do

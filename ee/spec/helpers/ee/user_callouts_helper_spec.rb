@@ -377,13 +377,15 @@ RSpec.describe EE::UserCalloutsHelper do
 
     shared_examples 'shows and hides the banner depending on circumstances' do
       where(:show_billing_eoa_banner, :actual_plan_name, :dismissed_callout, :travel_to_date, :result) do
-        true  | ::Plan::BRONZE | false | eoa_bronze_plan_end_date - 1.day | true
-        true  | ::Plan::BRONZE | false | eoa_bronze_plan_end_date         | false
-        true  | ::Plan::BRONZE | false | eoa_bronze_plan_end_date + 1.day | false
-        true  | ::Plan::BRONZE | true  | eoa_bronze_plan_end_date - 1.day | false
-        true  | ::Plan::SILVER | false | eoa_bronze_plan_end_date - 1.day | false
-        true  | ::Plan::GOLD   | false | eoa_bronze_plan_end_date - 1.day | false
-        false | ::Plan::BRONZE | false | eoa_bronze_plan_end_date - 1.day | false
+        true  | ::Plan::BRONZE     | false | eoa_bronze_plan_end_date - 1.day | true
+        true  | ::Plan::BRONZE     | false | eoa_bronze_plan_end_date         | false
+        true  | ::Plan::BRONZE     | false | eoa_bronze_plan_end_date + 1.day | false
+        true  | ::Plan::BRONZE     | true  | eoa_bronze_plan_end_date - 1.day | false
+        true  | ::Plan::SILVER     | false | eoa_bronze_plan_end_date - 1.day | false
+        true  | ::Plan::PREMIUM    | false | eoa_bronze_plan_end_date - 1.day | false
+        true  | ::Plan::GOLD       | false | eoa_bronze_plan_end_date - 1.day | false
+        true  | ::Plan::ULTIMATE   | false | eoa_bronze_plan_end_date - 1.day | false
+        false | ::Plan::BRONZE     | false | eoa_bronze_plan_end_date - 1.day | false
       end
 
       with_them do
