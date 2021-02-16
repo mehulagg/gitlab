@@ -37,7 +37,6 @@ export default () => {
       const table = new CommitPipelinesTable({
         propsData: {
           endpoint: pipelineTableViewEl.dataset.endpoint,
-          helpPagePath: pipelineTableViewEl.dataset.helpPagePath,
           emptyStateSvgPath: pipelineTableViewEl.dataset.emptyStateSvgPath,
           errorStateSvgPath: pipelineTableViewEl.dataset.errorStateSvgPath,
         },
