@@ -8,22 +8,18 @@ type: index
 
 # Docker integration
 
-Use GitLab CI/CD with [Docker](https://www.docker.com).
+There are two primary ways to incorporate [Docker](https://www.docker.com) in your CI/CD workflow.
 
-- [Run your CI/CD jobs in a Docker container](using_docker_images.md).
+**Use Docker or Kubernetes to [run your CI/CD jobs](using_docker_images.md).**
 
-  With GitLab CI/CD, you can create jobs to do things like testing, building, or publishing
-  an application. These jobs can run in Docker containers. For example, you can tell 
-  GitLab CI/CD to use a Node image that's hosted on Docker Hub or in the GitLab Container Registry.
-  When your job runs, it runs in a container that was generated from the image.
-  The container has all the Node dependencies you need to build your app.
+You can create CI/CD jobs to do things like test, build, or publish
+an application. These jobs can run in Docker containers or Kubernetes pods.
 
-- [Use GitLab CI/CD to build Docker images](using_docker_build.md).
+For example, you can tell GitLab CI/CD to use a Node image that's hosted on Docker Hub
+or in the GitLab Container Registry. Your job then runs in a container that's based on the image.
+The container has all the Node dependencies you need to build your app.
 
-  You can use GitLab CI/CD to do things like creating Docker images and publishing
-  them to a container registry. There are a few different ways to do this.
+**Use [Docker](using_docker_build.md) or [kaniko](using_kaniko.md) to build Docker images.**
 
-- [Use GitLab CI/CD to build Docker images with kaniko](using_kaniko.md).
-
-  You can use GitLab CI/CD to do things like creating Docker images and publishing
-  them to a container registry. One option for doing this is to use kaniko.
+You can create CI/CD jobs to build Docker images and publish
+them to a container registry.

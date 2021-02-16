@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: concepts, howto
 ---
 
-# Using Docker images
+# Use Docker or Kubernetes to run your CI/CD jobs
 
 GitLab CI/CD in conjunction with [GitLab Runner](../runners/README.md) can use
 [Docker Engine](https://www.docker.com/) to test and build any application.
