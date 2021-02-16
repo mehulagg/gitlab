@@ -15,6 +15,7 @@ export function mountImportGroupsApp(mountElement) {
     statusPath,
     availableNamespacesPath,
     createBulkImportPath,
+    jobsPath,
     sourceUrl,
     canCreateGroup,
   } = mountElement.dataset;
@@ -24,6 +25,7 @@ export function mountImportGroupsApp(mountElement) {
         status: statusPath,
         availableNamespaces: availableNamespacesPath,
         createBulkImport: createBulkImportPath,
+        jobs: jobsPath,
       },
     }),
   });
