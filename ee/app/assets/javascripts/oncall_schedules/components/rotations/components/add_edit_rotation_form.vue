@@ -278,7 +278,10 @@ export default {
         label-position="left"
         class="gl-mt-5"
         @change="
-          $emit('update-rotation-form', { type: 'isRestricted', value: restrictToTimeEnabled })
+          $emit('update-rotation-form', {
+            type: 'isRestrictedToTime',
+            value: restrictToTimeEnabled,
+          })
         "
       />
 
