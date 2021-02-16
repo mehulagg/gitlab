@@ -1,7 +1,9 @@
 import { GlButton, GlDropdown } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
+import ValueStreamSelect, {
+  generateInitialStageData,
+} from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
 import { findDropdownItemText } from '../helpers';
 import { valueStreams, defaultStageConfig } from '../mock_data';
 
@@ -198,5 +200,23 @@ describe('ValueStreamSelect', () => {
         expect(mockToastShow).not.toHaveBeenCalled();
       });
     });
+  });
+
+  describe('generateInitialStageData', () => {
+    const defaultConfig = [
+      { name: 'issue', startEventIdentifer: 'issue_opened', endEventIdentifier: 'issue_closed' },
+      {
+        name: 'plan',
+        startEventIdentifer: 'plan_stage_start',
+        endEventIdentifier: 'plan_stage_end',
+      },
+    ];
+
+    const defaultStages = [
+      { id: 0, title: 'issue', custom: false },
+      { id: 1, title: 'plan', custom: false },
+    ];
+
+    it('sets the startEventIdentifer for default stages', () => {});
   });
 });
