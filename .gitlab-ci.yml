@@ -113,4 +113,3 @@ include:
   - local: .gitlab/ci/graphql.gitlab-ci.yml
   - project: 'gitlab-org/frontend/untamper-my-lockfile'
     file: '.gitlab-ci-template.yml'
-
