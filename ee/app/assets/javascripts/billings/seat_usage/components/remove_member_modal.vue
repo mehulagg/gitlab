@@ -1,26 +1,22 @@
 <script>
 import {
   GlBadge,
-  GlForm,
   GlFormInput,
   GlModal,
   GlSprintf,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
-import csrf from '~/lib/utils/csrf';
-import { __, s__, sprintf } from '~/locale';
-import Api from 'ee/api';
 import {
   REMOVE_MEMBER_MODAL_ID,
   REMOVE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE,
 } from 'ee/billings/seat_usage/constants';
-  
+import csrf from '~/lib/utils/csrf';
+import { __, s__, sprintf } from '~/locale';
 
 export default {
   name: 'RemoveMemberModal',
   csrf,
   components: {
-    GlForm,
     GlFormInput,
     GlModal,
     GlSprintf,
@@ -39,7 +35,7 @@ export default {
       required: true,
     },
     namespaceId: {
-      type: Number | String,
+      type: String,
       required: true,
     },
   },
@@ -49,11 +45,6 @@ export default {
     };
   },
   computed: {
-    removeMemberPath() {
-      return Api.buildUrl(Api.billableGroupMemberPath)
-      .replace(':namespace_id', encodeURIComponent(this.namespaceId))
-      .replace(':id', encodeURIComponent(this.member.id));
-    },
     modalTitle() {
       return sprintf(s__('Billing|Remove user %{username} from your subscription'), {
         username: this.member.username,
@@ -74,20 +65,21 @@ export default {
         attributes: {
           variant: 'danger',
           disabled: !this.canSubmit,
+          class: 'gl-xs-w-full',
+        },
+      };
+    },
+    actionCancelProps() {
+      return {
+        text: __('Cancel'),
+        attributes: {
+          class: 'gl-xs-w-full',
         },
       };
     },
   },
-  methods: {
-    handlePrimary() {
-      this.$refs.form.$el.submit();
-    },
-  },
   modalId: REMOVE_MEMBER_MODAL_ID,
   i18n: {
-    actionCancel: {
-      text: __('Cancel'),
-    },
     inputLabel: s__('Billing|Type %{username} to confirm'),
   },
 };
@@ -98,33 +90,30 @@ export default {
     v-bind="$attrs"
     :modal-id="$options.modalId"
     :action-primary="actionPrimaryProps"
-    :action-cancel="$options.i18n.actionCancel"
+    :action-cancel="actionCancelProps"
     :title="modalTitle"
     data-qa-selector="remove_member_modal"
     :ok-disabled="!canSubmit"
-    @primary="handlePrimary"
+    @primary="$emit('primary')"
+    @secondary="$emit('canceled')"
+    @canceled="$emit('canceled')"
   >
-    <gl-form ref="form" :action="removeMemberPath" method="post">
-      <input type="hidden" name="_method" value="delete" />
-      <input :value="$options.csrf.token" type="hidden" name="authenticity_token" />
+    <p>
+      <gl-sprintf :message="modalText">
+        <template #username
+          ><strong>{{ member.username }}</strong></template
+        >
+        <template #namespace>{{ namespace }}</template>
+      </gl-sprintf>
+    </p>
 
-      <p>
-        <gl-sprintf :message="modalText">
-          <template #username
-            ><strong>{{ member.username }}</strong></template
-          >
-          <template #namespace>{{ namespace }}</template>
-        </gl-sprintf>
-      </p>
-
-      <label id="input-label">
-        <gl-sprintf :message="this.$options.i18n.inputLabel">
-          <template #username>
-            <gl-badge variant="danger">{{ usernameWithoutAt }}</gl-badge>
-          </template>
-        </gl-sprintf>
-      </label>
-      <gl-form-input v-model.trim="enteredMemberUsername" aria-labelledby="input-label" />
-    </gl-form>
+    <label id="input-label">
+      <gl-sprintf :message="this.$options.i18n.inputLabel">
+        <template #username>
+          <gl-badge variant="danger">{{ usernameWithoutAt }}</gl-badge>
+        </template>
+      </gl-sprintf>
+    </label>
+    <gl-form-input v-model.trim="enteredMemberUsername" aria-labelledby="input-label" />
   </gl-modal>
 </template>

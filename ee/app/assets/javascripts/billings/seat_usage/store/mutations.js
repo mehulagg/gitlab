@@ -40,4 +40,9 @@ export default {
 
     state.isLoading = false;
   },
+
+  [types.REMOVE_MEMBER](state) {
+    state.isLoading = true;
+    state.hasError = false;
+  },
 };

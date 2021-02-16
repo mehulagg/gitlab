@@ -26,3 +26,18 @@ export const receiveBillableMembersListError = ({ commit }) => {
 export const resetMembers = ({ commit }) => {
   commit(types.RESET_MEMBERS);
 };
+
+export const removeMember = ({ dispatch, state }, member) => {
+  return Api.removeBillableGroupMember(state.namespaceId, member.id)
+    .then(() => dispatch('requestBillableMembersList'))
+    .catch(() => dispatch('removeMemberError'));
+};
+
+export const removeMemberSuccess = ({ commit }) => commit(types.REMOVE_MEMBER_SUCCESS);
+
+export const removeMemberError = ({ commit }) => {
+  createFlash({
+    message: s__('Billing|An error occurred while removing billable members list'),
+  });
+  commit(types.REMOVE_MEMBER_ERROR);
+};

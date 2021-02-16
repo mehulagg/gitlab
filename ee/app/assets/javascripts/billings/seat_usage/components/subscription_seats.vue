@@ -13,13 +13,13 @@ import {
 } from '@gitlab/ui';
 import { parseInt, debounce } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { s__ } from '~/locale';
 import {
   FIELDS,
   AVATAR_SIZE,
   SEARCH_DEBOUNCE_MS,
   REMOVE_MEMBER_MODAL_ID,
 } from 'ee/billings/seat_usage/constants';
+import { s__ } from '~/locale';
 import RemoveMemberModal from './remove_member_modal.vue';
 
 export default {
@@ -201,6 +201,8 @@ export default {
       :namespace="namespaceName"
       :namespace-id="namespaceId"
       :modal-id="$options.removeMemberModalId"
+      @primary="removeMember"
+      @canceled="setMemberToRemove(null)"
     />
   </section>
 </template>

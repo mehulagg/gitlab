@@ -1,6 +1,6 @@
-import { nextTick } from 'vue';
-import { shallowMount } from '@vue/test-utils';
 import { GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import RemoveMemberModal from 'ee/billings/seat_usage/components/remove_member_modal.vue';
 
 describe('RemoveMemberModal', () => {
