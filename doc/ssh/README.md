@@ -308,9 +308,8 @@ git remote set-url origin git@<user_1.gitlab.com>:gitlab-org/gitlab.git
 ```
 
 NOTE:
-Private and public keys should be readable by the user only. On Linux and macOS,
-set permissions by running: `chmod 0400 ~/.ssh/<example_ssh_key>` and
-`chmod 0400 ~/.ssh/<example_sh_key.pub>`.
+Private and public keys contain sensitive data. Ensure the permissions
+on the files make them readable to you but not accessible to others.
 
 ## Configure two-factor authentication (2FA)
 
