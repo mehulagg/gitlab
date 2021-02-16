@@ -41,18 +41,18 @@ export default {
   },
   computed: {
     filteredBranches() {
-      return this.branches.filter((branch) =>
+      return this.branches?.filter((branch) =>
         branch.toLowerCase().includes(this.searchTerm.toLowerCase()),
       );
     },
     hasFilteredBranches() {
-      return this.filteredBranches.length;
+      return this.filteredBranches?.length;
     },
     filteredTags() {
-      return this.tags.filter((tag) => tag.toLowerCase().includes(this.searchTerm.toLowerCase()));
+      return this.tags?.filter((tag) => tag.toLowerCase().includes(this.searchTerm.toLowerCase()));
     },
     hasFilteredTags() {
-      return this.filteredTags.length;
+      return this.filteredTags?.length;
     },
   },
   mounted() {
