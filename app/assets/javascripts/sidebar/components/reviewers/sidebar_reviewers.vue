@@ -44,6 +44,7 @@ export default {
     return {
       store: new Store(),
       loading: false,
+      approvedBy: {},
     };
   },
   computed: {
@@ -101,6 +102,7 @@ export default {
       v-if="!store.isFetching.reviewers"
       :root-path="relativeUrlRoot"
       :users="store.reviewers"
+      :approved-by="store.approvals"
       :editable="store.editable"
       :issuable-type="issuableType"
       class="value"

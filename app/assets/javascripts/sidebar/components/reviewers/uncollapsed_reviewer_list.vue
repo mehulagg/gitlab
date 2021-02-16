@@ -19,6 +19,10 @@ export default {
       type: Array,
       required: true,
     },
+    approvedBy: {
+      type: Object,
+      required: true,
+    },
     rootPath: {
       type: String,
       required: true,
@@ -85,6 +89,13 @@ export default {
       <reviewer-avatar-link :user="user" :root-path="rootPath" :issuable-type="issuableType">
         <div class="gl-ml-3">@{{ user.username }}</div>
       </reviewer-avatar-link>
+      <gl-icon
+        v-if="approvedBy[user.id]"
+        :size="24"
+        name="approval-solid"
+        class="float-right gl-text-green-500"
+        data-testid="re-approved"
+      />
       <gl-icon
         v-if="loadingStates[user.id] === $options.SUCCESS_STATE"
         :size="24"

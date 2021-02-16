@@ -1,0 +1,12 @@
+query($fullPath: ID!, $iid: String!) {
+  project(fullPath: $fullPath) {
+    mergeRequest(iid: $iid) {
+      approvedBy {
+        nodes {
+          id
+          username
+        }
+      }
+    }
+  }
+}

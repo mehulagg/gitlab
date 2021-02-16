@@ -1,4 +1,5 @@
-import sidebarDetailsQuery from 'ee_else_ce/sidebar/queries/sidebarDetails.query.graphql';
+import sidebarDetailsQueryIssue from 'ee_else_ce/sidebar/queries/sidebarDetails.query.graphql';
+import sidebarDetailsQueryMR from '../queries/sidebarDetailsMR.query.graphql';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import axios from '~/lib/utils/axios_utils';
@@ -20,6 +21,7 @@ export default class SidebarService {
       this.projectsAutocompleteEndpoint = endpointMap.projectsAutocompleteEndpoint;
       this.fullPath = endpointMap.fullPath;
       this.iid = endpointMap.iid;
+      this.issuableType = endpointMap.issuableType;
 
       SidebarService.singleton = this;
     }
@@ -31,13 +33,21 @@ export default class SidebarService {
     return Promise.all([
       axios.get(this.endpoint),
       gqClient.query({
-        query: sidebarDetailsQuery,
+        query: this.sidebarDetailsQuery(),
         variables: {
           fullPath: this.fullPath,
           iid: this.iid.toString(),
         },
       }),
     ]);
+  }
+
+  sidebarDetailsQuery() {
+    if (this.issuableType === 'merge_request') {
+      return sidebarDetailsQueryMR;
+    } else {
+      return sidebarDetailsQueryIssue;
+    }
   }
 
   update(key, data) {

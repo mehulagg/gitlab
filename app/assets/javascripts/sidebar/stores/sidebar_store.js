@@ -1,3 +1,5 @@
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+
 export default class SidebarStore {
   constructor(options) {
     if (!SidebarStore.singleton) {
@@ -19,11 +21,14 @@ export default class SidebarStore {
     this.timeTrackingLimitToHours = timeTrackingLimitToHours;
     this.assignees = [];
     this.reviewers = [];
+    this.approvedBy = [];
+    this.approvals = {};
     this.isFetching = {
       assignees: true,
       reviewers: true,
       participants: true,
       subscriptions: true,
+      approvedBy: true,
     };
     this.isLoading = {};
     this.autocompleteProjects = [];
@@ -50,6 +55,15 @@ export default class SidebarStore {
     if (reviewers) {
       this.reviewers = reviewers;
     }
+    this.approvals = this.approvalMapping();
+  }
+
+  setApprovedBy(users) {
+    this.isFetching.approvedBy = false;
+    if (users) {
+      this.approvedBy = users;
+    }
+    this.approvals = this.approvalMapping();
   }
 
   resetChanging() {
@@ -110,6 +124,20 @@ export default class SidebarStore {
 
   findReviewer(findReviewer) {
     return this.reviewers.find(({ id }) => id === findReviewer.id);
+  }
+
+  isApprovedBy(user) {
+    return this.approvedBy.some((approver) => getIdFromGraphQLId(approver.id) === user.id);
+  }
+
+  approvalMapping() {
+    return this.reviewers.reduce(
+      (acc, user) => ({
+        ...acc,
+        [user.id]: this.isApprovedBy(user),
+      }),
+      {},
+    );
   }
 
   removeAssignee(assignee) {

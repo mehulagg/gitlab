@@ -21,6 +21,10 @@ export default {
       type: Array,
       required: true,
     },
+    approvedBy: {
+      type: Object,
+      required: true,
+    },
     editable: {
       type: Boolean,
       required: true,
@@ -67,6 +71,7 @@ export default {
       <uncollapsed-reviewer-list
         v-else
         :users="sortedReviewers"
+        :approved-by="approvedBy"
         :root-path="rootPath"
         :issuable-type="issuableType"
         @request-review="requestReview"

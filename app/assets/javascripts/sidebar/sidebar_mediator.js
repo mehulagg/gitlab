@@ -22,6 +22,7 @@ export default class SidebarMediator {
       projectsAutocompleteEndpoint: options.projectsAutocompleteEndpoint,
       fullPath: options.fullPath,
       iid: options.iid,
+      issuableType: options.issuableType,
     });
     SidebarMediator.singleton = this;
   }
@@ -76,12 +77,13 @@ export default class SidebarMediator {
       .catch(() => new Flash(__('Error occurred when fetching sidebar data')));
   }
 
-  processFetchedData(data) {
+  processFetchedData(data, graphqlData) {
     this.store.setAssigneeData(data);
     this.store.setReviewerData(data);
     this.store.setTimeTrackingData(data);
     this.store.setParticipantsData(data);
     this.store.setSubscriptionsData(data);
+    this.store.setApprovedBy(graphqlData?.project?.mergeRequest?.approvedBy?.nodes);
   }
 
   toggleSubscription() {
