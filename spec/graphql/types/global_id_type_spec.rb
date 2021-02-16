@@ -5,7 +5,6 @@ require 'spec_helper'
 RSpec.describe Types::GlobalIDType do
   let_it_be(:project) { create(:project) }
   let(:gid) { project.to_global_id }
-  let(:foreign_gid) { GlobalID.new(::URI::GID.build(app: 'otherapp', model_name: 'Project', model_id: project.id, params: nil)) }
 
   it 'is has the correct name' do
     expect(described_class.to_graphql.name).to eq('GlobalID')
@@ -39,18 +38,27 @@ RSpec.describe Types::GlobalIDType do
         .not_to raise_error
     end
 
-    it 'rejects invalid input' do
+    it 'rejects invalid GIDs' do
       expect { described_class.coerce_isolated_input('not valid') }
-        .to raise_error(GraphQL::CoercionError)
+        .to raise_error(GraphQL::CoercionError, /not a valid Global ID/)
+    end
+
+    it 'rejects GIDs for invalid resource names' do
+      invalid_gid =  GlobalID.new(::URI::GID.build(app: GlobalID.app, model_name: 'invalid', model_id: 1, params: nil))
+
+      expect { described_class.coerce_isolated_input(invalid_gid) }
+        .to raise_error(GraphQL::CoercionError, /not a Global ID for a known resource name/)
     end
 
     it 'rejects nil' do
       expect(described_class.coerce_isolated_input(nil)).to be_nil
     end
 
-    it 'rejects gids from different apps' do
-      expect { described_class.coerce_isolated_input(foreign_gid) }
-        .to raise_error(GraphQL::CoercionError)
+    it 'rejects GIDs from different apps' do
+      invalid_gid = GlobalID.new(::URI::GID.build(app: 'otherapp', model_name: 'Project', model_id: project.id, params: nil))
+
+      expect { described_class.coerce_isolated_input(invalid_gid) }
+        .to raise_error(GraphQL::CoercionError, /is not a Gitlab Global ID/)
     end
   end
 

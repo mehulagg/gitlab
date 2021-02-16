@@ -35,6 +35,7 @@ module Types
       gid = GlobalID.parse(value)
       raise GraphQL::CoercionError, "#{value.inspect} is not a valid Global ID" if gid.nil?
       raise GraphQL::CoercionError, "#{value.inspect} is not a Gitlab Global ID" unless gid.app == GlobalID.app
+      raise GraphQL::CoercionError, "#{value.inspect} is not a Global ID for a known resource name" if gid.model_name.safe_constantize.nil?
 
       gid
     end
