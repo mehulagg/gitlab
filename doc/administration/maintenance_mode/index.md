@@ -129,7 +129,7 @@ For most JSON requests, POST, PUT, PATCH, and DELETE are blocked, and the API re
 
 - No new jobs or pipelines start, scheduled or otherwise.
 - Jobs that were already running continue to have a `running` status in the GitLab UI,
-  even if they finish running on the GitLab runner.
+  even if they finish running on the GitLab Runner.
 - Jobs in the `running` state for longer than the project's time limit do not time out.
 - Pipelines cannot be started, retried or canceled. No new jobs can be created either.
 
