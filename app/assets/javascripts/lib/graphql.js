@@ -3,6 +3,7 @@ import { ApolloClient } from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { BatchHttpLink } from 'apollo-link-batch-http';
 import { createUploadLink } from 'apollo-upload-client';
+import { createHttpLink } from 'apollo-link-http';
 import { StartupJSLink } from '~/lib/utils/apollo_startup_js_link';
 import csrf from '~/lib/utils/csrf';
 import PerformanceBarService from '~/performance_bar/services/performance_bar_service';
@@ -48,7 +49,7 @@ export default (resolvers = {}, config = {}) => {
   const uploadsLink = ApolloLink.split(
     (operation) => operation.getContext().hasUpload || operation.getContext().isSingleRequest,
     createUploadLink(httpOptions),
-    new BatchHttpLink(httpOptions),
+    config.useGet ? createHttpLink(httpOptions) : new BatchHttpLink(httpOptions),
   );
 
   const performanceBarLink = new ApolloLink((operation, forward) => {

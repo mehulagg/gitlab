@@ -34,6 +34,18 @@ export default {
   },
   apollo: {
     pipeline: {
+      context() {
+        return {
+          fetchOptions: {
+            method: 'GET',
+          },
+          headers: {
+            'X-GITLAB-GRAPHQL-FEATURE-CORRELATION': 'verify/ci/pipeline-graph',
+            'X-GITLAB-GRAPHQL-RESOURCE-ETAG': `pipelines/id/${this.pipelineIid}`,
+            'X-REQUESTED_WITH': 'XMLHttpRequest',
+          },
+        }
+      },
       query: getPipelineDetails,
       pollInterval: 10000,
       variables() {
@@ -45,7 +57,8 @@ export default {
       update(data) {
         return unwrapPipelineData(this.pipelineProjectPath, data);
       },
-      error() {
+      error(err) {
+        console.log(err);
         this.reportFailure(LOAD_FAILURE);
       },
     },

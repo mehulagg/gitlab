@@ -72,6 +72,15 @@ export default {
       this.$apollo.addSmartQuery('currentPipeline', {
         query: getPipelineDetails,
         pollInterval: 10000,
+        context: {
+          fetchOptions: {
+            method: 'GET',
+          },
+          headers: {
+            'X-GITLAB-GRAPHQL-FEATURE-CORRELATION': 'verify/ci/pipeline-graph',
+            'X-GITLAB-GRAPHQL-RESOURCE-ETAG': 'pipelines/id/123',
+          },
+        },
         variables() {
           return {
             projectPath,
