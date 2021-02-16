@@ -283,6 +283,9 @@ export default {
         :label="$options.i18n.fields.restrictToTime.enableToggle"
         label-position="left"
         class="gl-mt-5"
+        @change="
+          $emit('update-rotation-form', { type: 'isRestricted', value: restrictToTimeEnabled })
+        "
       />
 
       <gl-card
