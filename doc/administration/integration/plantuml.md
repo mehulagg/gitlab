@@ -158,7 +158,7 @@ to distinguish different encoding types.
 ## Creating Diagrams
 
 With PlantUML integration enabled and configured, we can start adding diagrams to
-our AsciiDoc snippets, wikis, and repositories using delimited blocks:
+our snippets, wikis, and repositories using delimited blocks:
 
 - **Markdown**
 
@@ -213,7 +213,7 @@ Inside the block you can add any of the diagrams PlantUML supports, such as:
 - [Object](https://plantuml.com/object-diagram)
 
 You do not need to use the PlantUML
-diagram delimiters `@startuml`/`@enduml`, as these are replaced by the AsciiDoc `plantuml` block.
+diagram delimiters `@startuml`/`@enduml`, as these are replaced by the `plantuml` block.
 
 Some parameters can be added to the AsciiDoc block definition:
 
