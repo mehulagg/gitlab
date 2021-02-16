@@ -233,7 +233,7 @@ gem 'connection_pool', '~> 2.0'
 gem 'redis-rails', '~> 5.0.2'
 
 # Discord integration
-gem 'discordrb-webhooks-blackst0ne', '~> 3.3', require: false
+gem 'discordrb-webhooks', '~> 3.4', require: false
 
 # HipChat integration
 gem 'hipchat', '~> 1.5.0'
