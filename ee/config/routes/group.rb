@@ -11,6 +11,8 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       patch :override, on: :member
     end
 
+    resources :compliance_frameworks, only: [:new]
+
     get '/analytics', to: redirect('groups/%{group_id}/-/analytics/value_stream_analytics')
     resource :contribution_analytics, only: [:show]
 

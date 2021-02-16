@@ -7584,6 +7584,9 @@ msgstr ""
 msgid "ComplianceFramework|HIPAA - Health Insurance Portability and Accountability Act"
 msgstr ""
 
+msgid "ComplianceFramework|New Compliance Framework"
+msgstr ""
+
 msgid "ComplianceFramework|PCI-DSS"
 msgstr ""
 

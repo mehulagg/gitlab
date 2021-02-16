@@ -1,4 +1,4 @@
-import { GlAlert, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlButton, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 
@@ -29,6 +29,7 @@ describe('List', () => {
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findEmptyState = () => wrapper.find(EmptyState);
   const findTabs = () => wrapper.findAll(GlTab);
+  const findAddBtn = () => wrapper.findAll(GlButton);
   const findTabsContainer = () => wrapper.find(GlTabs);
   const findListItems = () => wrapper.findAll(ListItem);
 
@@ -45,6 +46,7 @@ describe('List', () => {
       localVue,
       apolloProvider: createMockApolloProvider(resolverMock),
       propsData: {
+        addFrameworkPath: 'group/framework/new',
         emptyStateSvgPath: 'dir/image.svg',
         groupPath: 'group-1',
       },
@@ -114,6 +116,7 @@ describe('List', () => {
     it('shows the empty state', () => {
       expect(findEmptyState().exists()).toBe(true);
       expect(findEmptyState().props('imagePath')).toBe('dir/image.svg');
+      expect(findEmptyState().props('addFrameworkPath')).toBe('group/framework/new');
     });
 
     it('does not show the other parts of the app', () => {
@@ -148,6 +151,10 @@ describe('List', () => {
 
       expect(tab.attributes('title')).toBe('Regulated');
       expect(tab.attributes('disabled')).toBe('true');
+    });
+
+    it('shows the add framework button', () => {
+      expect(findAddBtn().exists()).toBe(true);
     });
 
     it('shows the list items with expect props', () => {
