@@ -8,6 +8,8 @@ module Elastic
 
         query_hash = basic_query_hash(options[:in], query, count_only: options[:count_only])
 
+        raise "test" if options[:count_only]
+
         filters = [{ terms: { _name: context.name(:doc, :is_a, es_type), type: [es_type] } }]
 
         context.name(:project) do
