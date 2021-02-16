@@ -17,7 +17,7 @@ This section describes yarn scripts that are available to validate and apply aut
 To check all staged files (based on `git diff`) with ESLint, run the following script:
 
 ```shell
-yarn eslint-staged
+yarn run lint:eslint:staged
 ```
 
 A list of problems found are logged to the console.
@@ -25,7 +25,7 @@ A list of problems found are logged to the console.
 To apply automatic ESLint fixes to all staged files (based on `git diff`), run the following script:
 
 ```shell
-yarn eslint-staged-fix
+yarn run lint:eslint:staged:fix
 ```
 
 If manual changes are required, a list of changes are sent to the console.
@@ -33,7 +33,7 @@ If manual changes are required, a list of changes are sent to the console.
 To check **all** files in the repository with ESLint, run the following script:
 
 ```shell
-yarn eslint
+yarn run lint:eslint
 ```
 
 A list of problems found are logged to the console.
@@ -41,7 +41,7 @@ A list of problems found are logged to the console.
 To apply automatic ESLint fixes to **all** files in the repository, run the following script:
 
 ```shell
-yarn eslint-fix
+yarn run lint:eslint:fix
 ```
 
 If manual changes are required, a list of changes are sent to the console.
