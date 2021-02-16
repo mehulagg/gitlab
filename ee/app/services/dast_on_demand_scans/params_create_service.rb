@@ -9,9 +9,6 @@ module DastOnDemandScans
       ServiceResponse.success(
         payload: default_config.merge(scanner_profile_config)
       )
-    rescue KeyError => err
-      ServiceResponse.error(message: err.message.capitalize)
-    end
 
     private
 
