@@ -78,8 +78,16 @@ Here's how the process would look like:
    local branch `thedude-awesome-project-update-docs` to the
    `update-docs` branch of the `git@gitlab.com:thedude/awesome-project.git` repository.
 
-<!-- ## Troubleshooting
+## Troubleshooting
 
+### Pipeline Status Unavailable from MR Page of Forked Project 
+
+Whenever a user forks a project, the permissions on the forked copy are not automatically copied over from the original project. The user doing the fork has to grant permissions to the forked copy before members in the upstream project will have access to view and/or merge the changes in the MR. 
+
+To see the pipeline status,from the MR page of a forked project going back to the original project, you will need to create a group containing all the upstream members. Then simply go to the `Members` tab in the forked project and invite the newly created group to the forked project.
+
+
+<!-- ## Troubleshooting
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
 one might have when setting this up, or when something is changed, or on upgrading, it's
 important to describe those, too. Think of things that may go wrong and include them here.
