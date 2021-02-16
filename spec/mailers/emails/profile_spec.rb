@@ -126,14 +126,8 @@ RSpec.describe Emails::Profile do
   describe 'user personal access token is about to expire' do
     let_it_be(:user) { create(:user) }
     let_it_be(:expiring_token) { create(:personal_access_token, user: user, expires_at: 5.days.from_now) }
-    let_it_be(:notified_token) { create(:personal_access_token, user: user, expires_at: 5.days.from_now, expire_notification_delivered: true) }
-    let_it_be(:not_expiring_token) { create(:personal_access_token, user: user, expires_at: 1.month.from_now) }
-    let_it_be(:impersonation_token) { create(:personal_access_token, user: user, expires_at: 5.days.from_now, impersonation: true) }
 
-    let(:expiring_user_tokens) { user.personal_access_tokens.without_impersonation.expiring_and_not_notified(1.week.from_now) }
-    let(:token_names) { expiring_user_tokens.pluck(:name) }
-
-    subject { Notify.access_token_about_to_expire_email(user, token_names) }
+    subject { Notify.access_token_about_to_expire_email(user, [expiring_token.name]) }
 
     it_behaves_like 'an email sent from GitLab'
     it_behaves_like 'it should not have Gmail Actions links'
@@ -153,18 +147,6 @@ RSpec.describe Emails::Profile do
 
     it 'provides the names of expiring tokens' do
       is_expected.to have_body_text /#{expiring_token.name}/
-    end
-
-    it 'does not include already notified tokens' do
-      is_expected.not_to have_body_text /#{notified_token.name}/
-    end
-
-    it 'does not include not expiring tokens' do
-      is_expected.not_to have_body_text /#{not_expiring_token.name}/
-    end
-
-    it 'does not include impersonation tokens' do
-      is_expected.not_to have_body_text /#{impersonation_token.name}/
     end
 
     it 'includes a link to personal access tokens page' do

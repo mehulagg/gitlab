@@ -7,7 +7,6 @@ module PersonalAccessTokens
 
     feature_category :authentication_and_authorization
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def perform(*args)
       notification_service = NotificationService.new
       limit_date = PersonalAccessToken::DAYS_TO_EXPIRE.days.from_now.to_date
@@ -15,7 +14,11 @@ module PersonalAccessTokens
       User.with_expiring_and_not_notified_personal_access_tokens(limit_date).find_each do |user|
         with_context(user: user) do
           expiring_user_tokens = user.personal_access_tokens.without_impersonation.expiring_and_not_notified(limit_date)
+          # rubocop: disable CodeReuse/ActiveRecord
+          # We never materialise the token instances. We need the names to mention them in the
+          # email. Later we trigger an update query on the entire relation, not on individual instances.
           token_names = expiring_user_tokens.pluck(:name)
+          # rubocop: enable CodeReuse/ActiveRecord
 
           notification_service.access_token_about_to_expire(user, token_names)
 
@@ -25,6 +28,5 @@ module PersonalAccessTokens
         end
       end
     end
-    # rubocop: enable CodeReuse/ActiveRecord
   end
 end
