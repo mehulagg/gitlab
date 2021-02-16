@@ -28,7 +28,17 @@
                 name = "gems-for-gitlab";
                 gemdir = ./.;
                 ruby = ruby_2_7;
-                ignoreCollisions = true;
+                groups = [
+                  "default"
+                  "test"
+                  "development"
+                  "metrics"
+                  "coverage"
+                  "unicorn"
+                  "puma"
+                  "ed25519"
+                  "kerberos"
+                ];
                 gemConfig = defaultGemConfig // {
                   openssl = attrs: {
                     buildFlags = [ "--with-openssl-dir=${openssl.dev}" ];
@@ -76,29 +86,13 @@
                         --replace '-Wno-invalid-source-encoding' ""
                     '';
                   };
-
+                  countries = attrs: pkgs.lib.lowPrio attrs;
+                  omniauth-oauth2-generic = attrs: pkgs.lib.lowPrio attrs;
                 };
               };
 
             in [
-              binutils
-              icu
-              cmake
-              gcc
-              re2
-              krb5
-              sqlite
-              readline
-              zlib
-              pkg-config
-              graphicsmagick
-              exiftool
-              openssl
-              pcre2
-              curl
-              tzdata
               gems
-
               (ruby_2_7.withPackages (ps: with ps; [ bundler ]))
               yarn
               nodejs-14_x
