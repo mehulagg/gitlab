@@ -8,7 +8,7 @@ module EE
     ACTIVE_USER_COUNT_THRESHOLD    = 'active_user_count_threshold'
     GEO_ENABLE_HASHED_STORAGE      = 'geo_enable_hashed_storage'
     GEO_MIGRATE_HASHED_STORAGE     = 'geo_migrate_hashed_storage'
-    GOLD_TRIAL                     = 'gold_trial'
+    ULTIMATE_TRIAL                 = 'ultimate_trial'
     GOLD_TRIAL_BILLINGS            = 'gold_trial_billings'
     NEW_USER_SIGNUPS_CAP_REACHED   = 'new_user_signups_cap_reached'
     PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
@@ -44,14 +44,14 @@ module EE
       any_project_not_in_hashed_storage?
     end
 
-    override :render_dashboard_gold_trial
-    def render_dashboard_gold_trial(user)
-      return unless show_gold_trial?(user, GOLD_TRIAL) &&
+    override :render_dashboard_ultimate_trial
+    def render_dashboard_ultimate_trial(user)
+      return unless show_ultimate_trial?(user, ULTIMATE_TRIAL) &&
           user_default_dashboard?(user) &&
           !user.owns_paid_namespace? &&
           user.any_namespace_without_trial?
 
-      render 'shared/gold_trial_callout_content'
+      render 'shared/ultimate_trial_callout_content'
     end
 
     def render_account_recovery_regular_check

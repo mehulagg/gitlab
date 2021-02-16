@@ -11,7 +11,7 @@ RSpec.describe 'Billing plan pages', :feature do
   let(:free_plan) { create(:free_plan) }
   let(:bronze_plan) { create(:bronze_plan) }
   let(:silver_plan) { create(:silver_plan) }
-  let(:gold_plan) { create(:gold_plan) }
+  let(:ultimate_plan) { create(:ultimate_plan) }
   let(:plans_data) do
     Gitlab::Json.parse(File.read(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json'))).map do |data|
       data.deep_symbolize_keys

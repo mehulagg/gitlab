@@ -22,7 +22,7 @@ RSpec.describe GroupsWithTemplatesFinder do
     create(:project, namespace: subgroup_1)
     create(:project, namespace: subgroup_2)
     create(:project, namespace: subgroup_3)
-    create(:gitlab_subscription, :gold, namespace: group_1)
+    create(:gitlab_subscription, :ultimate, namespace: group_1)
     create(:gitlab_subscription, :silver, namespace: group_2)
   end
 

@@ -26,7 +26,7 @@ RSpec.describe 'shared/billings/_trial_status.html.haml' do
     let(:trial) { true }
 
     context 'with a ultimate trial' do
-      let(:plan) { create(:gold_plan, title: 'Ultimate') }
+      let(:plan) { create(:ultimate_plan, title: 'Ultimate') }
 
       it 'displays expiry date and Ultimate' do
         render 'shared/billings/trial_status', namespace: group

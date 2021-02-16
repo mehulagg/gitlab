@@ -819,7 +819,7 @@ RSpec.describe Project do
 
               context 'allowed by Plan License AND Global License' do
                 let(:allowed_on_global_license) { true }
-                let(:plan_license) { build(:gold_plan) }
+                let(:plan_license) { build(:ultimate_plan) }
 
                 before do
                   allow(namespace).to receive(:plans) { [plan_license] }
@@ -863,7 +863,7 @@ RSpec.describe Project do
 
               context 'not allowed by Global License' do
                 let(:allowed_on_global_license) { false }
-                let(:plan_license) { build(:gold_plan) }
+                let(:plan_license) { build(:ultimate_plan) }
 
                 it 'returns false' do
                   is_expected.to eq(false)
@@ -1482,10 +1482,10 @@ RSpec.describe Project do
         end
       end
 
-      context 'when gold' do
-        let(:plan_license) { :gold }
+      context 'when ultimate' do
+        let(:plan_license) { :ultimate }
 
-        it 'filters for gold features' do
+        it 'filters for ultimate features' do
           is_expected.to contain_exactly(:epics, :push_rules, :audit_events, :geo, :subepics)
         end
       end

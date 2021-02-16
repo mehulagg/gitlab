@@ -13,10 +13,10 @@ RSpec.describe EE::SystemHooksService do
     end
 
     context 'with a Gold plan' do
-      let(:group) { create(:group_with_plan, plan: :gold_plan) }
+      let(:group) { create(:group_with_plan, plan: :ultimate_plan) }
 
       it 'returns correct group_plan' do
-        expect(event_data(group_member, :create)[:group_plan]).to eq('gold')
+        expect(event_data(group_member, :create)[:group_plan]).to eq('ultimate')
       end
     end
   end

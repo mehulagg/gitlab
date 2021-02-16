@@ -59,7 +59,7 @@ RSpec.describe 'Groups > Push Rules', :js do
 
           context 'when enabled' do
             it 'renders the setting checkbox' do
-              create(:gitlab_subscription, :gold, namespace: group)
+              create(:gitlab_subscription, :ultimate, namespace: group)
 
               visit edit_group_push_rules_path(group)
 

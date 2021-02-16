@@ -509,11 +509,11 @@ RSpec.describe User do
         context 'when namespace plan is checked' do
           before do
             create(:gitlab_subscription, namespace: group_1, hosted_plan: create(:bronze_plan))
-            create(:gitlab_subscription, namespace: group_2, hosted_plan: create(:gold_plan))
+            create(:gitlab_subscription, namespace: group_2, hosted_plan: create(:ultimate_plan))
             allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
           end
 
-          it 'returns groups on gold or silver plans' do
+          it 'returns groups on ultimate or silver plans' do
             groups = user.available_subgroups_with_custom_project_templates
 
             expect(groups.size).to eq(1)
@@ -876,9 +876,9 @@ RSpec.describe User do
         it { is_expected.to be_falsey }
       end
 
-      context 'when namespace is on a gold plan' do
+      context 'when namespace is on a ultimate plan' do
         before do
-          create(:gitlab_subscription, namespace: namespace.root_ancestor, hosted_plan: create(:gold_plan))
+          create(:gitlab_subscription, namespace: namespace.root_ancestor, hosted_plan: create(:ultimate_plan))
         end
 
         context 'user is a guest' do
@@ -920,7 +920,7 @@ RSpec.describe User do
         end
       end
 
-      context 'when namespace is on a plan that is not free or gold' do
+      context 'when namespace is on a plan that is not free or ultimate' do
         before do
           create(:gitlab_subscription, namespace: namespace, hosted_plan: create(:silver_plan))
         end
@@ -1007,7 +1007,7 @@ RSpec.describe User do
     let_it_be(:free_group_z) { create(:group, name: 'AZ', gitlab_subscription: create(:gitlab_subscription, :free)) }
     let_it_be(:free_group_a) { create(:group, name: 'AA', gitlab_subscription: create(:gitlab_subscription, :free)) }
     let_it_be(:sub_group) { create(:group, name: 'SubGroup', parent: free_group_a) }
-    let_it_be(:trial_group) { create(:group, name: 'AB', gitlab_subscription: create(:gitlab_subscription, :active_trial, :gold)) }
+    let_it_be(:trial_group) { create(:group, name: 'AB', gitlab_subscription: create(:gitlab_subscription, :active_trial, :ultimate)) }
 
     subject { user.manageable_groups_eligible_for_subscription }
 
@@ -1187,7 +1187,7 @@ RSpec.describe User do
           allow(Gitlab::CurrentSettings)
             .to receive(:should_check_namespace_plan?)
             .and_return(true)
-          create(:gitlab_subscription, :gold, namespace: minimal_access_group)
+          create(:gitlab_subscription, :ultimate, namespace: minimal_access_group)
           create(:group_member, :minimal_access, user: user, source: create(:group))
         end
 
@@ -1221,7 +1221,7 @@ RSpec.describe User do
 
   context 'paid namespaces' do
     let_it_be(:user) { create(:user) }
-    let_it_be(:gold_group) { create(:group_with_plan, plan: :gold_plan) }
+    let_it_be(:ultimate_group) { create(:group_with_plan, plan: :ultimate_plan) }
     let_it_be(:bronze_group) { create(:group_with_plan, plan: :bronze_plan) }
     let_it_be(:free_group) { create(:group_with_plan, plan: :free_plan) }
     let_it_be(:group_without_plan) { create(:group) }
@@ -1229,7 +1229,7 @@ RSpec.describe User do
     describe '#has_paid_namespace?' do
       context 'when the user has Reporter or higher on at least one paid group' do
         it 'returns true' do
-          gold_group.add_reporter(user)
+          ultimate_group.add_reporter(user)
           bronze_group.add_guest(user)
 
           expect(user.has_paid_namespace?).to eq(true)
@@ -1238,7 +1238,7 @@ RSpec.describe User do
 
       context 'when the user is only a Guest on paid groups' do
         it 'returns false' do
-          gold_group.add_guest(user)
+          ultimate_group.add_guest(user)
           bronze_group.add_guest(user)
           free_group.add_owner(user)
 
@@ -1258,7 +1258,7 @@ RSpec.describe User do
     describe '#owns_paid_namespace?' do
       context 'when the user is an owner of at least one paid group' do
         it 'returns true' do
-          gold_group.add_owner(user)
+          ultimate_group.add_owner(user)
           bronze_group.add_owner(user)
 
           expect(user.owns_paid_namespace?).to eq(true)
@@ -1267,7 +1267,7 @@ RSpec.describe User do
 
       context 'when the user is only a Maintainer on paid groups' do
         it 'returns false' do
-          gold_group.add_maintainer(user)
+          ultimate_group.add_maintainer(user)
           bronze_group.add_maintainer(user)
           free_group.add_owner(user)
 
@@ -1503,7 +1503,7 @@ RSpec.describe User do
     where(:hosted_plan, :result) do
       :bronze_plan    | true
       :silver_plan    | true
-      :gold_plan      | false
+      :ultimate_plan  | false
       :free_plan      | false
       :default_plan   | false
     end
@@ -1527,10 +1527,10 @@ RSpec.describe User do
       expect(subject).to be false
     end
 
-    it 'returns false when the user has multiple groups and any group has gold' do
+    it 'returns false when the user has multiple groups and any group has ultimate' do
       create(:group_with_plan, plan: :bronze_plan).add_owner(user)
       create(:group_with_plan, plan: :silver_plan).add_owner(user)
-      create(:group_with_plan, plan: :gold_plan).add_owner(user)
+      create(:group_with_plan, plan: :ultimate_plan).add_owner(user)
 
       user.namespace.plans.reload
 

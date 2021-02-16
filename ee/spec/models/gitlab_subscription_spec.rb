@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe GitlabSubscription do
   using RSpec::Parameterized::TableSyntax
 
-  %i[free_plan bronze_plan silver_plan gold_plan].each do |plan|
+  %i[free_plan bronze_plan silver_plan ultimate_plan].each do |plan|
     let_it_be(plan) { create(plan) }
   end
 
@@ -34,13 +34,13 @@ RSpec.describe GitlabSubscription do
 
   describe 'scopes' do
     describe '.with_hosted_plan' do
-      let!(:gold_subscription) { create(:gitlab_subscription, hosted_plan: gold_plan) }
+      let!(:ultimate_subscription) { create(:gitlab_subscription, hosted_plan: ultimate_plan) }
       let!(:silver_subscription) { create(:gitlab_subscription, hosted_plan: silver_plan) }
 
-      let!(:trial_subscription) { create(:gitlab_subscription, hosted_plan: gold_plan, trial: true) }
+      let!(:trial_subscription) { create(:gitlab_subscription, hosted_plan: ultimate_plan, trial: true) }
 
       it 'scopes to the plan' do
-        expect(described_class.with_hosted_plan('gold')).to contain_exactly(gold_subscription)
+        expect(described_class.with_hosted_plan('ultimate')).to contain_exactly(ultimate_subscription)
         expect(described_class.with_hosted_plan('silver')).to contain_exactly(silver_subscription)
         expect(described_class.with_hosted_plan('bronze')).to be_empty
       end
@@ -93,9 +93,9 @@ RSpec.describe GitlabSubscription do
         group.add_guest(user_1)
       end
 
-      context 'with a gold plan' do
+      context 'with a ultimate plan' do
         it 'excludes these members' do
-          gitlab_subscription.update!(plan_code: 'gold')
+          gitlab_subscription.update!(plan_code: 'ultimate')
 
           expect(gitlab_subscription.calculate_seats_in_use).to eq(0)
         end
@@ -121,7 +121,7 @@ RSpec.describe GitlabSubscription do
       end
 
       it 'always returns 1 seat' do
-        [bronze_plan, silver_plan, gold_plan].each do |plan|
+        [bronze_plan, silver_plan, ultimate_plan].each do |plan|
           gitlab_subscription.update!(hosted_plan: plan)
 
           expect(gitlab_subscription.calculate_seats_in_use).to eq(1)
@@ -222,7 +222,7 @@ RSpec.describe GitlabSubscription do
     subject { gitlab_subscription.seats_in_use }
 
     context 'with a paid hosted plan' do
-      let(:hosted_plan) { gold_plan }
+      let(:hosted_plan) { ultimate_plan }
 
       it 'returns the previously calculated seats in use' do
         expect(subject).to eq(5)
@@ -238,7 +238,7 @@ RSpec.describe GitlabSubscription do
     end
 
     context 'with a trial plan' do
-      let(:hosted_plan) { gold_plan }
+      let(:hosted_plan) { ultimate_plan }
       let(:trial) { true }
 
       it 'returns the current seats in use' do
@@ -324,10 +324,10 @@ RSpec.describe GitlabSubscription do
     let(:subscription) { build(:gitlab_subscription) }
 
     where(:plan_name, :paid_hosted_plan, :expired, :result) do
-      'bronze' | true | false  | true
-      'bronze' | true | true   | false
-      'silver' | true | false  | true
-      'gold'   | true | false  | false
+      'bronze'   | true | false  | true
+      'bronze'   | true | true   | false
+      'silver'   | true | false  | true
+      'ultimate' | true | false  | false
     end
 
     with_them do

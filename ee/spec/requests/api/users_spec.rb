@@ -176,7 +176,7 @@ RSpec.describe API::Users do
     context 'when authenticated' do
       context 'as an admin' do
         context 'and user has a plan' do
-          let!(:subscription) { create(:gitlab_subscription, :gold, namespace: user.namespace) }
+          let!(:subscription) { create(:gitlab_subscription, :ultimate, namespace: user.namespace) }
 
           context 'and user is not a trial user' do
             it 'contains plan and trial' do

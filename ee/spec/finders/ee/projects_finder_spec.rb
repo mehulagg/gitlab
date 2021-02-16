@@ -13,8 +13,8 @@ RSpec.describe ProjectsFinder do
       let(:params) { { plans: plans } }
       let(:project_ids_relation) { nil }
 
-      let_it_be(:gold_project) { create_project(:gold_plan) }
-      let_it_be(:gold_project2) { create_project(:gold_plan) }
+      let_it_be(:ultimate_project) { create_project(:ultimate_plan) }
+      let_it_be(:ultimate_project2) { create_project(:ultimate_plan) }
       let_it_be(:silver_project) { create_project(:silver_plan) }
       let_it_be(:no_plan_project) { create_project(nil) }
 

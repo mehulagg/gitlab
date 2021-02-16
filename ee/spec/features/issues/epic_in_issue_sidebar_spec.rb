@@ -96,7 +96,7 @@ RSpec.describe 'Epic in issue sidebar', :js do
 
       context 'group has license' do
         before do
-          create(:gitlab_subscription, :gold, namespace: group)
+          create(:gitlab_subscription, :ultimate, namespace: group)
         end
 
         it_behaves_like 'epic in issue sidebar'

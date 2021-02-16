@@ -305,7 +305,7 @@ RSpec.describe PushRule do
         end
 
         context 'with a Gold plan' do
-          let(:plan) { :gold }
+          let(:plan) { :ultimate }
 
           it_behaves_like 'an available push_rule'
         end

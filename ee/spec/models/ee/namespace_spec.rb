@@ -12,7 +12,7 @@ RSpec.describe Namespace do
   let(:free_plan) { create(:free_plan) }
   let!(:bronze_plan) { create(:bronze_plan) }
   let!(:silver_plan) { create(:silver_plan) }
-  let!(:gold_plan) { create(:gold_plan) }
+  let!(:ultimate_plan) { create(:ultimate_plan) }
 
   it { is_expected.to have_one(:namespace_statistics) }
   it { is_expected.to have_one(:namespace_limit) }
@@ -166,10 +166,10 @@ RSpec.describe Namespace do
       end
 
       context 'when there is a subscription' do
-        let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan_id: gold_plan.id) }
+        let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan_id: ultimate_plan.id) }
 
         it 'returns namespace with subscription set' do
-          is_expected.to eq(gold_plan.id)
+          is_expected.to eq(ultimate_plan.id)
         end
       end
     end
@@ -479,7 +479,7 @@ RSpec.describe Namespace do
       end
 
       context 'when feature available on the plan' do
-        let(:hosted_plan) { create(:gold_plan) }
+        let(:hosted_plan) { create(:ultimate_plan) }
 
         context 'when feature available for current group' do
           it 'returns true' do
@@ -608,7 +608,7 @@ RSpec.describe Namespace do
         end
 
         context 'when subscription plan is defined in the system' do
-          let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan) }
+          let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan) }
 
           context 'when limits are not set for the plan' do
             it_behaves_like 'uses an implied configuration'
@@ -617,7 +617,7 @@ RSpec.describe Namespace do
           context 'when limits are set for the plan' do
             let!(:subscription_limits) do
               create(:plan_limits,
-                plan: gold_plan,
+                plan: ultimate_plan,
                 ci_active_pipelines: 5,
                 ci_pipeline_size: 6,
                 ci_active_jobs: 7)
@@ -715,14 +715,14 @@ RSpec.describe Namespace do
 
       context 'when namespace has a subscription associated' do
         before do
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan, start_date: start_date)
+          create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan, start_date: start_date)
         end
 
         context 'when this subscription was purchased before EoA rollout (legacy)' do
           let(:start_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date - 3.days }
 
           it 'returns the legacy plan from the subscription' do
-            expect(namespace.actual_plan).to eq(gold_plan)
+            expect(namespace.actual_plan).to eq(ultimate_plan)
             expect(namespace.gitlab_subscription).to be_present
           end
         end
@@ -770,11 +770,11 @@ RSpec.describe Namespace do
 
           context 'when namespace has a subscription associated' do
             before do
-              create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+              create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan)
             end
 
             it 'returns the plan from the subscription' do
-              expect(subgroup.actual_plan).to eq(gold_plan)
+              expect(subgroup.actual_plan).to eq(ultimate_plan)
               expect(subgroup.gitlab_subscription).not_to be_present
             end
           end
@@ -797,11 +797,11 @@ RSpec.describe Namespace do
 
       context 'when namespace has a subscription associated' do
         before do
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+          create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan)
         end
 
         it 'returns an associated plan name' do
-          expect(namespace.actual_plan_name).to eq 'gold'
+          expect(namespace.actual_plan_name).to eq 'ultimate'
         end
       end
 
@@ -816,11 +816,11 @@ RSpec.describe Namespace do
 
         context 'when namespace has a subscription associated' do
           before do
-            create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+            create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan)
           end
 
           it 'returns an associated plan name' do
-            expect(subgroup.actual_plan_name).to eq 'gold'
+            expect(subgroup.actual_plan_name).to eq 'ultimate'
           end
         end
 
@@ -861,9 +861,9 @@ RSpec.describe Namespace do
         group.add_guest(guest)
       end
 
-      context 'with a gold plan' do
+      context 'with a ultimate plan' do
         before do
-          create(:gitlab_subscription, namespace: group, hosted_plan: gold_plan)
+          create(:gitlab_subscription, namespace: group, hosted_plan: ultimate_plan)
         end
 
         it 'does not include guest users and only active users' do
@@ -1079,9 +1079,9 @@ RSpec.describe Namespace do
         group.add_guest(create(:user))
       end
 
-      context 'with a gold plan' do
+      context 'with a ultimate plan' do
         before do
-          create(:gitlab_subscription, namespace: group, hosted_plan: gold_plan)
+          create(:gitlab_subscription, namespace: group, hosted_plan: ultimate_plan)
         end
 
         it 'does not count guest users and counts only active users' do
