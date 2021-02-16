@@ -3,8 +3,8 @@ import * as valueStreamAnalyticsConstants from 'ee/analytics/cycle_analytics/con
 import Api from 'ee/api';
 import * as analyticsMockData from 'ee_jest/analytics/cycle_analytics/mock_data';
 import axios from '~/lib/utils/axios_utils';
-import httpStatus from '~/lib/utils/http_status';
 import { ContentTypeMultipartFormData } from '~/lib/utils/headers';
+import httpStatus from '~/lib/utils/http_status';
 
 describe('Api', () => {
   const dummyApiVersion = 'v3000';

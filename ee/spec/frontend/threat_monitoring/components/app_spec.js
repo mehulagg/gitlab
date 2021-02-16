@@ -1,14 +1,14 @@
 import { GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import ThreatMonitoringAlerts from 'ee/threat_monitoring/components/alerts/alerts.vue';
 import ThreatMonitoringApp from 'ee/threat_monitoring/components/app.vue';
-import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_monitoring_filters.vue';
 import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_list.vue';
 import NoEnvironmentEmptyState from 'ee/threat_monitoring/components/no_environment_empty_state.vue';
+import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_monitoring_filters.vue';
 import createStore from 'ee/threat_monitoring/store';
 import { TEST_HOST } from 'helpers/test_constants';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import axios from '~/lib/utils/axios_utils';
 
 const defaultEnvironmentId = 3;

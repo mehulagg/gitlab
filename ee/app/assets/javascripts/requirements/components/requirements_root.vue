@@ -1,35 +1,35 @@
 <script>
 import { GlPagination } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
-import axios from '~/lib/utils/axios_utils';
 import Api from '~/api';
 import createFlash, { FLASH_TYPES } from '~/flash';
-import Tracking from '~/tracking';
+import axios from '~/lib/utils/axios_utils';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
+import { __, sprintf } from '~/locale';
+import Tracking from '~/tracking';
 
+import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
-import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
 
-import projectRequirements from '../queries/projectRequirements.query.graphql';
-import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
-import createRequirement from '../queries/createRequirement.mutation.graphql';
-import updateRequirement from '../queries/updateRequirement.mutation.graphql';
-import exportRequirement from '../queries/exportRequirements.mutation.graphql';
 import {
   FilterState,
   AvailableSortOptions,
   TestReportStatus,
   DEFAULT_PAGE_SIZE,
 } from '../constants';
-import RequirementsTabs from './requirements_tabs.vue';
-import RequirementsLoading from './requirements_loading.vue';
-import RequirementsEmptyState from './requirements_empty_state.vue';
-import RequirementItem from './requirement_item.vue';
-import RequirementForm from './requirement_form.vue';
-import ImportRequirementsModal from './import_requirements_modal.vue';
+import createRequirement from '../queries/createRequirement.mutation.graphql';
+import exportRequirement from '../queries/exportRequirements.mutation.graphql';
+import projectRequirements from '../queries/projectRequirements.query.graphql';
+import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
+import updateRequirement from '../queries/updateRequirement.mutation.graphql';
 import ExportRequirementsModal from './export_requirements_modal.vue';
+import ImportRequirementsModal from './import_requirements_modal.vue';
+import RequirementForm from './requirement_form.vue';
+import RequirementItem from './requirement_item.vue';
+import RequirementsEmptyState from './requirements_empty_state.vue';
+import RequirementsLoading from './requirements_loading.vue';
+import RequirementsTabs from './requirements_tabs.vue';
 
 export default {
   DEFAULT_PAGE_SIZE,
@@ -408,7 +408,7 @@ export default {
           createFlash({ message });
         });
     },
-    exportCsv() {
+    exportCsv(selectedFields) {
       return this.$apollo
         .mutate({
           mutation: exportRequirement,
@@ -418,6 +418,7 @@ export default {
             authorUsername: this.authorUsernames,
             search: this.textSearch,
             sortBy: this.sortBy,
+            selectedFields,
           },
         })
         .catch((e) => {

@@ -18,8 +18,8 @@ import {
   CHEVRON_SKIPPING_SHADE_ENUM,
   CHEVRON_SKIPPING_PALETTE_ENUM,
 } from 'ee/oncall_schedules/constants';
-import { s__, __ } from '~/locale';
 import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
 
 export const i18n = {
   selectParticipant: s__('OnCallSchedules|Select participant'),

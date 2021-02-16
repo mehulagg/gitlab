@@ -1,6 +1,6 @@
 <script>
-import { s__, __ } from '~/locale';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
+import { s__, __ } from '~/locale';
 
 import { VALUE_TYPE } from '../../constants';
 

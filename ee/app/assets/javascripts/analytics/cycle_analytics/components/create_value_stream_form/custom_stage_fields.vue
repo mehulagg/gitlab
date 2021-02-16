@@ -1,9 +1,9 @@
 <script>
 import { GlFormGroup, GlFormInput, GlDropdown, GlDropdownItem } from '@gitlab/ui';
-import LabelsSelector from '../labels_selector.vue';
 import { isLabelEvent, getLabelEventsIdentifiers } from '../../utils';
-import StageFieldActions from './stage_field_actions.vue';
+import LabelsSelector from '../labels_selector.vue';
 import { I18N } from './constants';
+import StageFieldActions from './stage_field_actions.vue';
 import { startEventOptions, endEventOptions } from './utils';
 
 export default {

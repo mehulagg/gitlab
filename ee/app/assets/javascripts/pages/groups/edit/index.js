@@ -1,6 +1,6 @@
 import '~/pages/groups/edit';
-import validateRestrictedIpAddress from 'ee/groups/settings/access_restriction_field/validate_ip_address';
 import initAccessRestrictionField from 'ee/groups/settings/access_restriction_field';
+import validateRestrictedIpAddress from 'ee/groups/settings/access_restriction_field/validate_ip_address';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 

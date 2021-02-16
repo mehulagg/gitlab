@@ -1,5 +1,5 @@
-import { __ } from '~/locale';
 import { AvailableSortOptions } from '~/issuable_list/constants';
+import { __ } from '~/locale';
 
 export const EpicsSortOptions = [
   {

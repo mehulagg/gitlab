@@ -1,10 +1,10 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlSprintf, GlDropdownItem } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
-import CustomStageForm from 'ee/analytics/cycle_analytics/components/custom_stage_form.vue';
 import CustomStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/custom_stage_fields.vue';
+import CustomStageForm from 'ee/analytics/cycle_analytics/components/custom_stage_form.vue';
 import { STAGE_ACTIONS } from 'ee/analytics/cycle_analytics/constants';
 import customStagesStore from 'ee/analytics/cycle_analytics/store/modules/custom_stages';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';

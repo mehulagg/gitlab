@@ -5,10 +5,10 @@ import IterationForm from 'ee/iterations/components/iteration_form.vue';
 import IterationReport from 'ee/iterations/components/iteration_report.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';
-import createMockApollo from 'helpers/mock_apollo_helper';
 import query from 'ee/iterations/queries/iteration.query.graphql';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { mockIterationNode, mockGroupIterations, mockProjectIterations } from '../mock_data';
 
 const localVue = createLocalVue();

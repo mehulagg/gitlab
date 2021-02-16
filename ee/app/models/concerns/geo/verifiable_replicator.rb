@@ -9,6 +9,10 @@ module Geo
     DEFAULT_VERIFICATION_BATCH_SIZE = 10
     DEFAULT_REVERIFICATION_BATCH_SIZE = 1000
 
+    included do
+      event :checksum_succeeded
+    end
+
     class_methods do
       extend Gitlab::Utils::Override
 
@@ -124,7 +128,7 @@ module Geo
         # Bonus: This causes the progress bar to be hidden.
         return unless verification_enabled?
 
-        model.available_replicables.verification_succeeded.count
+        model.verification_succeeded.count
       end
 
       def checksum_failed_count
@@ -132,7 +136,15 @@ module Geo
         # Bonus: This causes the progress bar to be hidden.
         return unless verification_enabled?
 
-        model.available_replicables.verification_failed.count
+        model.verification_failed.count
+      end
+
+      def checksum_total_count
+        # When verification is disabled, this returns nil.
+        # Bonus: This causes the progress bar to be hidden.
+        return unless verification_enabled?
+
+        model.available_verifiables.count
       end
 
       def verified_count
@@ -150,6 +162,28 @@ module Geo
 
         registry_class.synced.verification_failed.count
       end
+
+      def verification_total_count
+        # When verification is disabled, this returns nil.
+        # Bonus: This causes the progress bar to be hidden.
+        return unless verification_enabled?
+
+        registry_class.synced.available_verifiables.count
+      end
+    end
+
+    def handle_after_checksum_succeeded
+      return false unless Gitlab::Geo.primary?
+      return unless self.class.verification_enabled?
+
+      publish(:checksum_succeeded, **event_params)
+    end
+
+    # Called by Gitlab::Geo::Replicator#consume
+    def consume_event_checksum_succeeded(**params)
+      return unless Gitlab::Geo.secondary?
+
+      registry.verification_pending!
     end
 
     # Schedules a verification job after a model record is created/updated

@@ -5,13 +5,16 @@ require 'spec_helper'
 RSpec.describe 'Edit group settings' do
   include Select2Helper
 
-  let(:user) { create(:user) }
-  let(:developer) { create(:user) }
-  let(:group) { create(:group, path: 'foo') }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:developer) { create(:user) }
+  let_it_be(:group) { create(:group, path: 'foo') }
 
-  before do
+  before_all do
     group.add_owner(user)
     group.add_developer(developer)
+  end
+
+  before do
     sign_in(user)
   end
 
@@ -275,16 +278,38 @@ RSpec.describe 'Edit group settings' do
   end
 
   describe 'merge request approval settings', :js do
+    let_it_be(:approval_settings) do
+      create(:group_merge_request_approval_setting, group: group, allow_author_approval: false)
+    end
+
     context 'when feature flag is enabled and group is licensed' do
       before do
         stub_feature_flags(group_merge_request_approval_settings_feature_flag: true)
         stub_licensed_features(group_merge_request_approval_settings: true)
       end
 
-      it 'is visible' do
+      it 'allows to save settings' do
         visit edit_group_path(group)
+        wait_for_all_requests
 
         expect(page).to have_content('Merge request approvals')
+
+        within('[data-testid="merge-request-approval-settings"]') do
+          click_button 'Expand'
+          expect(find('[data-testid="prevent-author-approval"]')).to be_checked
+
+          find('[data-testid="prevent-author-approval"]').set(false)
+          click_button 'Save changes'
+          wait_for_all_requests
+        end
+
+        visit edit_group_path(group)
+        wait_for_all_requests
+
+        within('[data-testid="merge-request-approval-settings"]') do
+          click_button 'Expand'
+          expect(find('[data-testid="prevent-author-approval"]')).not_to be_checked
+        end
       end
     end
 

@@ -1,13 +1,13 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { parseBoolean } from '~/lib/utils/common_utils';
-import * as CEMountSidebar from '~/sidebar/mount_sidebar';
 import createDefaultClient from '~/lib/graphql';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import { store } from '~/notes/stores';
+import * as CEMountSidebar from '~/sidebar/mount_sidebar';
+import IterationSelect from './components/iteration_select.vue';
 import SidebarItemEpicsSelect from './components/sidebar_item_epics_select.vue';
 import SidebarStatus from './components/status/sidebar_status.vue';
 import SidebarWeight from './components/weight/sidebar_weight.vue';
-import IterationSelect from './components/iteration_select.vue';
 import SidebarStore from './stores/sidebar_store';
 
 Vue.use(VueApollo);

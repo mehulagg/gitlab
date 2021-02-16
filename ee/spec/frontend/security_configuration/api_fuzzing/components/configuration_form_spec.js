@@ -1,18 +1,18 @@
+import { GlAlert } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { merge } from 'lodash';
-import { GlAlert } from '@gitlab/ui';
-import { stripTypenames } from 'helpers/graphql_helpers';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import waitForPromises from 'helpers/wait_for_promises';
+import ConfigurationForm from 'ee/security_configuration/api_fuzzing/components/configuration_form.vue';
+import ConfigurationSnippetModal from 'ee/security_configuration/api_fuzzing/components/configuration_snippet_modal.vue';
 import {
   SCAN_MODES,
   CONFIGURATION_SNIPPET_MODAL_ID,
 } from 'ee/security_configuration/api_fuzzing/constants';
-import ConfigurationForm from 'ee/security_configuration/api_fuzzing/components/configuration_form.vue';
-import ConfigurationSnippetModal from 'ee/security_configuration/api_fuzzing/components/configuration_snippet_modal.vue';
+import DropdownInput from 'ee/security_configuration/components/dropdown_input.vue';
 import DynamicFields from 'ee/security_configuration/components/dynamic_fields.vue';
 import FormInput from 'ee/security_configuration/components/form_input.vue';
-import DropdownInput from 'ee/security_configuration/components/dropdown_input.vue';
+import { stripTypenames } from 'helpers/graphql_helpers';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import {
   apiFuzzingConfigurationQueryResponse,
   createApiFuzzingConfigurationMutationResponse,

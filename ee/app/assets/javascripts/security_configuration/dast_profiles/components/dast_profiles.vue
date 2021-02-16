@@ -1,9 +1,9 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
 import { camelCase, kebabCase } from 'lodash';
-import * as Sentry from '~/sentry/wrapper';
-import { __, s__ } from '~/locale';
 import { getLocationHash } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';
@@ -260,6 +260,7 @@ export default {
           :data-testid="`${profileType}List`"
           :error-message="profileTypes[profileType].errorMessage"
           :error-details="profileTypes[profileType].errorDetails"
+          :no-profiles-message="settings.i18n.noProfilesMessage"
           :has-more-profiles-to-load="hasMoreProfiles(profileType)"
           :is-loading="isLoadingProfiles(profileType)"
           :profiles-per-page="$options.profilesPerPage"

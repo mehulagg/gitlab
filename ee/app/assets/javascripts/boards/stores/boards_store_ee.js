@@ -4,11 +4,11 @@
   modify the passed parameter in conformity with non-ee BoardsStore.
 */
 
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import { __, sprintf } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { parseBoolean } from '~/lib/utils/common_utils';
-import axios from '~/lib/utils/axios_utils';
 
 const NO_ITERATION_TITLE = 'No+Iteration';
 const NO_MILESTONE_TITLE = 'No+Milestone';

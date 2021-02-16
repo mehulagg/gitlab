@@ -34,25 +34,6 @@ module Mutations
                 }
               end
             end
-
-            module CommonArguments
-              extend ActiveSupport::Concern
-
-              included do
-                argument :name, GraphQL::STRING_TYPE,
-                  required: true,
-                  description: 'Name of the segment.'
-
-                argument :group_ids, [::Types::GlobalIDType[::Group]],
-                  required: false,
-                  description: 'The array of group IDs to set for the segment.'
-
-                field :segment,
-                  Types::Admin::Analytics::DevopsAdoption::SegmentType,
-                  null: true,
-                  description: 'The segment after mutation.'
-              end
-            end
           end
         end
       end

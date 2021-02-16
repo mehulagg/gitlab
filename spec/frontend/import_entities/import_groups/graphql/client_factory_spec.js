@@ -1,20 +1,20 @@
-import MockAdapter from 'axios-mock-adapter';
 import { InMemoryCache } from 'apollo-cache-inmemory';
+import MockAdapter from 'axios-mock-adapter';
 import { createMockClient } from 'mock-apollo-client';
 import waitForPromises from 'helpers/wait_for_promises';
-import axios from '~/lib/utils/axios_utils';
+import { STATUSES } from '~/import_entities/constants';
 import {
   clientTypenames,
   createResolvers,
 } from '~/import_entities/import_groups/graphql/client_factory';
-import { StatusPoller } from '~/import_entities/import_groups/graphql/services/status_poller';
-import { STATUSES } from '~/import_entities/constants';
-
-import bulkImportSourceGroupsQuery from '~/import_entities/import_groups/graphql/queries/bulk_import_source_groups.query.graphql';
-import availableNamespacesQuery from '~/import_entities/import_groups/graphql/queries/available_namespaces.query.graphql';
-import setTargetNamespaceMutation from '~/import_entities/import_groups/graphql/mutations/set_target_namespace.mutation.graphql';
-import setNewNameMutation from '~/import_entities/import_groups/graphql/mutations/set_new_name.mutation.graphql';
 import importGroupMutation from '~/import_entities/import_groups/graphql/mutations/import_group.mutation.graphql';
+import setNewNameMutation from '~/import_entities/import_groups/graphql/mutations/set_new_name.mutation.graphql';
+import setTargetNamespaceMutation from '~/import_entities/import_groups/graphql/mutations/set_target_namespace.mutation.graphql';
+import availableNamespacesQuery from '~/import_entities/import_groups/graphql/queries/available_namespaces.query.graphql';
+import bulkImportSourceGroupsQuery from '~/import_entities/import_groups/graphql/queries/bulk_import_source_groups.query.graphql';
+import { StatusPoller } from '~/import_entities/import_groups/graphql/services/status_poller';
+
+import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
 import { statusEndpointFixture, availableNamespacesFixture } from './fixtures';
 
@@ -28,6 +28,7 @@ const FAKE_ENDPOINTS = {
   status: '/fake_status_url',
   availableNamespaces: '/fake_available_namespaces',
   createBulkImport: '/fake_create_bulk_import',
+  jobs: '/fake_jobs',
 };
 
 describe('Bulk import resolvers', () => {
@@ -108,6 +109,11 @@ describe('Bulk import resolvers', () => {
               (r) => r.import_target.target_namespace === availableNamespacesFixture[0].full_path,
             ),
           ).toBe(true);
+        });
+
+        it('starts polling when request completes', async () => {
+          const [statusPoller] = StatusPoller.mock.instances;
+          expect(statusPoller.startPolling).toHaveBeenCalled();
         });
       });
 
@@ -215,23 +221,13 @@ describe('Bulk import resolvers', () => {
       });
 
       it('sets group status to STARTED when request completes', async () => {
-        axiosMockAdapter.onPost(FAKE_ENDPOINTS.createBulkImport).reply(httpStatus.OK);
+        axiosMockAdapter.onPost(FAKE_ENDPOINTS.createBulkImport).reply(httpStatus.OK, { id: 1 });
         await client.mutate({
           mutation: importGroupMutation,
           variables: { sourceGroupId: GROUP_ID },
         });
 
         expect(results[0].status).toBe(STATUSES.STARTED);
-      });
-
-      it('starts polling when request completes', async () => {
-        axiosMockAdapter.onPost(FAKE_ENDPOINTS.createBulkImport).reply(httpStatus.OK);
-        await client.mutate({
-          mutation: importGroupMutation,
-          variables: { sourceGroupId: GROUP_ID },
-        });
-        const [statusPoller] = StatusPoller.mock.instances;
-        expect(statusPoller.startPolling).toHaveBeenCalled();
       });
 
       it('resets status to NONE if request fails', async () => {

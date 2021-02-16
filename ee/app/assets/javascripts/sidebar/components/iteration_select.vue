@@ -12,12 +12,12 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import createFlash from '~/flash';
-import * as Sentry from '~/sentry/wrapper';
 import { __ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
+import { iterationSelectTextMap, iterationDisplayState, noIteration } from '../constants';
 import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import currentIterationQuery from '../queries/issue_iteration.query.graphql';
 import setIssueIterationMutation from '../queries/set_iteration_on_issue.mutation.graphql';
-import { iterationSelectTextMap, iterationDisplayState, noIteration } from '../constants';
 
 export default {
   noIteration,

@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import { GlButton, GlForm, GlFormGroup, GlFormCheckbox, GlIcon, GlLink } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { __ } from '~/locale';
 
@@ -21,7 +21,7 @@ export default {
   },
   computed: {
     ...mapState({
-      preventAuthorApproval: (state) => state.approvals.preventAuthorApproval,
+      settings: (state) => state.approvals.settings,
       isLoading: (state) => state.approvals.isLoading,
     }),
   },
@@ -29,7 +29,10 @@ export default {
     this.fetchSettings(this.approvalSettingsPath);
   },
   methods: {
-    ...mapActions(['fetchSettings', 'updatePreventAuthorApproval']),
+    ...mapActions(['fetchSettings', 'updateSettings']),
+    onSubmit() {
+      this.updateSettings(this.approvalSettingsPath);
+    },
   },
   links: {
     preventAuthorApprovalDocsPath: helpPagePath(
@@ -48,12 +51,11 @@ export default {
 </script>
 
 <template>
-  <gl-form>
+  <gl-form @submit.prevent="onSubmit">
     <gl-form-group>
       <gl-form-checkbox
-        :checked="preventAuthorApproval"
+        v-model="settings.preventAuthorApproval"
         data-testid="prevent-author-approval"
-        @input="updatePreventAuthorApproval"
       >
         {{ $options.i18n.authorApprovalLabel }}
         <gl-link :href="$options.links.preventAuthorApprovalDocsPath" target="_blank">

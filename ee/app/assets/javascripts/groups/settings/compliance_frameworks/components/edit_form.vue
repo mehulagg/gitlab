@@ -1,14 +1,14 @@
 <script>
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { visitUrl } from '~/lib/utils/url_utility';
 import * as Sentry from '~/sentry/wrapper';
-import { convertToGraphQLId } from '~/graphql_shared/utils';
 
+import { FETCH_ERROR, SAVE_ERROR } from '../constants';
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
 import updateComplianceFrameworkMutation from '../graphql/queries/update_compliance_framework.mutation.graphql';
-import { FETCH_ERROR, SAVE_ERROR } from '../constants';
 import { initialiseFormData } from '../utils';
-import SharedForm from './shared_form.vue';
 import FormStatus from './form_status.vue';
+import SharedForm from './shared_form.vue';
 
 export default {
   components: {
@@ -32,6 +32,11 @@ export default {
       type: String,
       required: false,
       default: null,
+    },
+    pipelineConfigurationFullPathEnabled: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -85,11 +90,12 @@ export default {
         return initialiseFormData();
       }
 
-      const { name, description, color } = complianceFrameworks[0];
+      const { name, description, pipelineConfigurationFullPath, color } = complianceFrameworks[0];
 
       return {
         name,
         description,
+        pipelineConfigurationFullPath,
         color,
       };
     },
@@ -106,7 +112,7 @@ export default {
       this.saveErrorMessage = '';
 
       try {
-        const { name, description, color } = this.formData;
+        const { name, description, pipelineConfigurationFullPath, color } = this.formData;
         const { data } = await this.$apollo.mutate({
           mutation: updateComplianceFrameworkMutation,
           variables: {
@@ -115,6 +121,7 @@ export default {
               params: {
                 name,
                 description,
+                pipelineConfigurationFullPath,
                 color,
               },
             },
@@ -143,8 +150,10 @@ export default {
     <shared-form
       v-if="showForm"
       :group-edit-path="groupEditPath"
+      :pipeline-configuration-full-path-enabled="pipelineConfigurationFullPathEnabled"
       :name.sync="formData.name"
       :description.sync="formData.description"
+      :pipeline-configuration-full-path.sync="formData.pipelineConfigurationFullPath"
       :color.sync="formData.color"
       @submit="onSubmit"
     />

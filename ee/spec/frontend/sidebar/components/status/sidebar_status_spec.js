@@ -1,6 +1,6 @@
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { shallowMount } from '@vue/test-utils';
 import SidebarStatus from 'ee/sidebar/components/status/sidebar_status.vue';
 import Status from 'ee/sidebar/components/status/status.vue';
 

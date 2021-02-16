@@ -534,7 +534,7 @@ describe('EE Approvals RuleForm', () => {
       });
     });
 
-    describe('with approvalSuggestions enabled', () => {
+    describe('with approval suggestions', () => {
       describe.each`
         defaultRuleName          | expectedDisabledAttribute
         ${'Vulnerability-Check'} | ${'disabled'}
@@ -544,17 +544,10 @@ describe('EE Approvals RuleForm', () => {
         'with defaultRuleName set to $defaultRuleName',
         ({ defaultRuleName, expectedDisabledAttribute }) => {
           beforeEach(() => {
-            createComponent(
-              {
-                initRule: null,
-                defaultRuleName,
-              },
-              {
-                provide: {
-                  glFeatures: { approvalSuggestions: true },
-                },
-              },
-            );
+            createComponent({
+              initRule: null,
+              defaultRuleName,
+            });
           });
 
           it(`it ${

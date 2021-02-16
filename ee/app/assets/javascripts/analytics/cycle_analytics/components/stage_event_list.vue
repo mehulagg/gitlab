@@ -1,7 +1,7 @@
 <script>
-import StageEventItem from './stage_event_item.vue';
-import StageBuildItem from './stage_build_item.vue';
 import LimitWarning from './limit_warning_component.vue';
+import StageBuildItem from './stage_build_item.vue';
+import StageEventItem from './stage_event_item.vue';
 
 export default {
   name: 'StageEventList',

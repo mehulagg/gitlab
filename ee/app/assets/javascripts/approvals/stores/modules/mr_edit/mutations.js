@@ -1,5 +1,5 @@
-import base from '../base/mutations';
 import { RULE_TYPE_ANY_APPROVER } from '../../../constants';
+import base from '../base/mutations';
 import * as types from './mutation_types';
 
 export default {

@@ -1,5 +1,5 @@
-import { s__ } from '~/locale';
 import createFlash from '~/flash';
+import { s__ } from '~/locale';
 import { deleteMetricImage, getMetricImages, uploadMetricImage } from '../service';
 import * as types from './mutation_types';
 

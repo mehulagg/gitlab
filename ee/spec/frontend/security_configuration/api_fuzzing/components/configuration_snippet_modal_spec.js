@@ -1,10 +1,10 @@
-import { shallowMount } from '@vue/test-utils';
-import { merge } from 'lodash';
-import Clipboard from 'clipboard';
 import { GlModal } from '@gitlab/ui';
-import { redirectTo } from '~/lib/utils/url_utility';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { shallowMount } from '@vue/test-utils';
+import Clipboard from 'clipboard';
+import { merge } from 'lodash';
 import ConfigurationSnippetModal from 'ee/security_configuration/api_fuzzing/components/configuration_snippet_modal.vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { redirectTo } from '~/lib/utils/url_utility';
 import { createApiFuzzingConfigurationMutationResponse } from '../mock_data';
 
 jest.mock('clipboard', () =>

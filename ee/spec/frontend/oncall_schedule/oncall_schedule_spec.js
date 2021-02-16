@@ -1,11 +1,11 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlCard, GlSprintf, GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import OnCallSchedule, { i18n } from 'ee/oncall_schedules/components/oncall_schedule.vue';
-import ScheduleTimelineSection from 'ee/oncall_schedules/components/schedule/components/schedule_timeline_section.vue';
 import RotationsListSection from 'ee/oncall_schedules/components/schedule/components/rotations_list_section.vue';
+import ScheduleTimelineSection from 'ee/oncall_schedules/components/schedule/components/schedule_timeline_section.vue';
 import * as utils from 'ee/oncall_schedules/components/schedule/utils';
-import * as commonUtils from 'ee/oncall_schedules/utils/common_utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
+import * as commonUtils from 'ee/oncall_schedules/utils/common_utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import * as dateTimeUtility from '~/lib/utils/datetime_utility';
 import mockTimezones from './mocks/mockTimezones.json';

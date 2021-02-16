@@ -4,10 +4,10 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
 
+import ApprovalSettings from 'ee/approvals/components/approval_settings.vue';
 import GroupSettingsApp from 'ee/approvals/components/group_settings/app.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
 import groupSettingsModule from 'ee/approvals/stores/modules/group_settings';
-import ApprovalSettings from 'ee/approvals/components/approval_settings.vue';
 import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
 
 const localVue = createLocalVue();

@@ -1,7 +1,6 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { groupBy, isNumber } from 'lodash';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { mapState, mapActions } from 'vuex';
 import { sprintf, __ } from '~/locale';
 import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from '../constants';
 import ApproversList from './approvers_list.vue';
@@ -23,8 +22,6 @@ export default {
     ApproversSelect,
     BranchesSelect,
   },
-  // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
-  mixins: [glFeatureFlagsMixin()],
   props: {
     initRule: {
       type: Object,
@@ -44,7 +41,7 @@ export default {
   },
   data() {
     const defaults = {
-      name: '',
+      name: this.defaultRuleName,
       approvalsRequired: 1,
       minApprovalsRequired: 0,
       approvers: [],
@@ -57,10 +54,6 @@ export default {
       serverValidationErrors: [],
       ...this.getInitialData(),
     };
-    // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
-    if (this.glFeatures.approvalSuggestions) {
-      return { ...defaults, name: this.defaultRuleName || defaults.name };
-    }
 
     return defaults;
   },
@@ -162,13 +155,9 @@ export default {
       return !this.settings.lockedApprovalsRuleName;
     },
     isNameDisabled() {
-      // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
-      if (this.glFeatures.approvalSuggestions) {
-        return (
-          Boolean(this.isPersisted || this.defaultRuleName) && READONLY_NAMES.includes(this.name)
-        );
-      }
-      return this.isPersisted && READONLY_NAMES.includes(this.name);
+      return (
+        Boolean(this.isPersisted || this.defaultRuleName) && READONLY_NAMES.includes(this.name)
+      );
     },
     removeHiddenGroups() {
       return this.containsHiddenGroups && !this.approversByType[TYPE_HIDDEN_GROUPS];

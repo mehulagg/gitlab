@@ -1,7 +1,7 @@
 import Api from 'ee/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __, sprintf } from '~/locale';
 import httpStatusCodes from '~/lib/utils/http_status';
+import { __, sprintf } from '~/locale';
 import { removeFlash, isStageNameExistsError } from '../../../utils';
 import * as types from './mutation_types';
 

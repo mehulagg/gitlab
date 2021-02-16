@@ -20,12 +20,12 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
 
   let(:context) { BulkImports::Pipeline::Context.new(entity) }
 
-  subject { described_class.new(context) }
-
   before do
     stub_licensed_features(epics: true)
     group.add_owner(user)
   end
+
+  subject { described_class.new(context) }
 
   describe '#run' do
     it 'imports group epics into destination group' do

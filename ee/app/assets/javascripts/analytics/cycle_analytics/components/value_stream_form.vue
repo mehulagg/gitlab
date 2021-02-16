@@ -1,10 +1,10 @@
 <script>
-import Vue from 'vue';
 import { GlButton, GlForm, GlFormInput, GlFormGroup, GlFormRadioGroup, GlModal } from '@gitlab/ui';
+import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
-import { sprintf } from '~/locale';
-import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { swapArrayItems } from '~/lib/utils/array_utility';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
+import { sprintf } from '~/locale';
 import {
   STAGE_SORT_DIRECTION,
   I18N,
@@ -12,9 +12,9 @@ import {
   PRESET_OPTIONS,
   PRESET_OPTIONS_DEFAULT,
 } from './create_value_stream_form/constants';
-import { validateValueStreamName, validateStage } from './create_value_stream_form/utils';
-import DefaultStageFields from './create_value_stream_form/default_stage_fields.vue';
 import CustomStageFields from './create_value_stream_form/custom_stage_fields.vue';
+import DefaultStageFields from './create_value_stream_form/default_stage_fields.vue';
+import { validateValueStreamName, validateStage } from './create_value_stream_form/utils';
 
 const initializeStageErrors = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DEFAULT) =>
   selectedPreset === PRESET_OPTIONS_DEFAULT ? defaultStageConfig.map(() => ({})) : [{}];

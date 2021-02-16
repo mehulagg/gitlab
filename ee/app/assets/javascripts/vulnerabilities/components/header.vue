@@ -1,25 +1,25 @@
 <script>
 import { GlLoadingIcon, GlButton, GlBadge } from '@gitlab/ui';
-import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
 import fetchHeaderVulnerabilityQuery from 'ee/security_dashboard/graphql/header_vulnerability.graphql';
 import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
-import axios from '~/lib/utils/axios_utils';
-import download from '~/lib/utils/downloader';
-import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
-import { redirectTo } from '~/lib/utils/url_utility';
+import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { s__ } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
+import download from '~/lib/utils/downloader';
+import { redirectTo } from '~/lib/utils/url_utility';
 import UsersCache from '~/lib/utils/users_cache';
-import { normalizeGraphQLVulnerability } from '../helpers';
+import { s__ } from '~/locale';
 import {
   VULNERABILITY_STATE_OBJECTS,
   FEEDBACK_TYPES,
   HEADER_ACTION_BUTTONS,
   gidPrefix,
 } from '../constants';
+import { normalizeGraphQLVulnerability } from '../helpers';
 import ResolutionAlert from './resolution_alert.vue';
-import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
 import StatusDescription from './status_description.vue';
+import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
 
 export default {
   name: 'VulnerabilityHeader',

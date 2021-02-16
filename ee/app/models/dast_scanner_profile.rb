@@ -4,7 +4,7 @@ class DastScannerProfile < ApplicationRecord
   belongs_to :project
 
   validates :project_id, presence: true
-  validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }
+  validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }, presence: true
 
   scope :project_id_in, -> (project_ids) { where(project_id: project_ids) }
 

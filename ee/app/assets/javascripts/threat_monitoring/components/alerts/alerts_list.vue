@@ -10,13 +10,13 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import produce from 'immer';
-import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
+import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { joinPaths } from '~/lib/utils/url_utility';
-import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
-import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES, DOMAIN } from './constants';
+import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
+import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES, DOMAIN } from './constants';
 
 export default {
   PAGE_SIZE,

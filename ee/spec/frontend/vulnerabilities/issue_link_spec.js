@@ -1,8 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon, GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import IssueLink from 'ee/vulnerabilities/components/issue_link.vue';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { getBinding, createMockDirective } from 'helpers/vue_mock_directive';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('IssueLink component', () => {
   let wrapper;

@@ -1,12 +1,12 @@
 <script>
 import chartEmptyStateIllustration from '@gitlab/svgs/dist/illustrations/chart-empty-state.svg';
-import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import { GlCard, GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
+import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import MetricCard from '~/analytics/shared/components/metric_card.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
-import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
+import { __, s__ } from '~/locale';
+import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import getGroupTestCoverage from '../graphql/queries/get_group_test_coverage.query.graphql';
 
 const formatPercent = getFormatter(SUPPORTED_FORMATS.percentHundred);

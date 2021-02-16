@@ -274,7 +274,9 @@ Parameters:
   "twitter": "",
   "website_url": "",
   "organization": "",
-  "job_title": "Operations Specialist"
+  "job_title": "Operations Specialist",
+  "followers": 1,
+  "following": 1
 }
 ```
 
@@ -626,7 +628,8 @@ Example response:
 {
   "emoji":"coffee",
   "message":"I crave coffee :coffee:",
-  "message_html": "I crave coffee <gl-emoji title=\"hot beverage\" data-name=\"coffee\" data-unicode-version=\"4.0\">☕</gl-emoji>"
+  "message_html": "I crave coffee <gl-emoji title=\"hot beverage\" data-name=\"coffee\" data-unicode-version=\"4.0\">☕</gl-emoji>",
+  "clear_status_at": null
 }
 ```
 
@@ -652,7 +655,8 @@ Example response:
 {
   "emoji":"coffee",
   "message":"I crave coffee :coffee:",
-  "message_html": "I crave coffee <gl-emoji title=\"hot beverage\" data-name=\"coffee\" data-unicode-version=\"4.0\">☕</gl-emoji>"
+  "message_html": "I crave coffee <gl-emoji title=\"hot beverage\" data-name=\"coffee\" data-unicode-version=\"4.0\">☕</gl-emoji>",
+  "clear_status_at": null
 }
 ```
 
@@ -664,15 +668,16 @@ Set the status of the current user.
 PUT /user/status
 ```
 
-| Attribute | Type   | Required | Description                                                                                                                                                                                                             |
-| --------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `emoji`   | string | no       | The name of the emoji to use as status. If omitted `speech_balloon` is used. Emoji name can be one of the specified names in the [Gemojione index](https://github.com/bonusly/gemojione/blob/master/config/index.json). |
-| `message` | string | no       | The message to set as a status. It can also contain emoji codes.                                                                                                                                                        |
+| Attribute            | Type   | Required | Description                                                                                                                                                                                                             |
+| -------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `emoji`              | string | no       | The name of the emoji to use as status. If omitted `speech_balloon` is used. Emoji name can be one of the specified names in the [Gemojione index](https://github.com/bonusly/gemojione/blob/master/config/index.json). |
+| `message`            | string | no       | The message to set as a status. It can also contain emoji codes.                                                                                                                                                        |
+| `clear_status_after` | string | no       | Automatically clean up the status after a given time interval, allowed values: `30_minutes`, `3_hours`, `8_hours`, `1_day`, `3_days`, `7_days`, `30_days`
 
-When both parameters `emoji` and `message` are empty, the status is cleared.
+When both parameters `emoji` and `message` are empty, the status is cleared. When the `clear_status_after` parameter is missing from the request, the previously set value for `"clear_status_after` is cleared.
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --data "emoji=coffee" --data "message=I crave coffee" "https://gitlab.example.com/api/v4/user/status"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --data "clear_status_after=1_day" --data "emoji=coffee" --data "message=I crave coffee" "https://gitlab.example.com/api/v4/user/status"
 ```
 
 Example responses
@@ -681,8 +686,91 @@ Example responses
 {
   "emoji":"coffee",
   "message":"I crave coffee",
-  "message_html": "I crave coffee"
+  "message_html": "I crave coffee",
+  "clear_status_at":"2021-02-15T10:49:01.311Z"
 }
+```
+
+## User Follow
+
+### Follow and unfollow users
+
+Follow a user.
+
+```plaintext
+POST /users/:id/follow
+```
+
+Unfollow a user.
+
+```plaintext
+POST /users/:id/unfollow
+```
+
+| Attribute | Type    | Required | Description                  |
+| --------- | ------- | -------- | ---------------------------- |
+| `id`      | integer | yes      | The ID of the user to follow |
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/users/3/follow"
+```
+
+Example response:
+
+```json
+{
+  "id": 1,
+  "username": "john_smith",
+  "name": "John Smith",
+  "state": "active",
+  "avatar_url": "http://localhost:3000/uploads/user/avatar/1/cd8.jpeg",
+  "web_url": "http://localhost:3000/john_smith"
+}
+```
+
+### Followers and following
+
+Get the followers of a user.
+
+```plaintext
+GET /users/:id/followers
+```
+
+Get the list of users being followed.
+
+```plaintext
+GET /users/:id/following
+```
+
+| Attribute | Type    | Required | Description                  |
+| --------- | ------- | -------- | ---------------------------- |
+| `id`      | integer | yes      | The ID of the user to follow |
+
+```shell
+curl --request GET --header "PRIVATE-TOKEN: <your_access_token>"  "https://gitlab.example.com/users/3/followers"
+```
+
+Example response:
+
+```json
+[
+  {
+    "id": 2,
+    "name": "Lennie Donnelly",
+    "username": "evette.kilback",
+    "state": "active",
+    "avatar_url": "https://www.gravatar.com/avatar/7955171a55ac4997ed81e5976287890a?s=80&d=identicon",
+    "web_url": "http://127.0.0.1:3000/evette.kilback"
+  },
+  {
+    "id": 4,
+    "name": "Serena Bradtke",
+    "username": "cammy",
+    "state": "active",
+    "avatar_url": "https://www.gravatar.com/avatar/a2daad869a7b60d3090b7b9bef4baf57?s=80&d=identicon",
+    "web_url": "http://127.0.0.1:3000/cammy"
+  }
+]
 ```
 
 ## User counts

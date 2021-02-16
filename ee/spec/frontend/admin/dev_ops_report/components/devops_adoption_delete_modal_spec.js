@@ -1,9 +1,9 @@
-import { ApolloMutation } from 'vue-apollo';
-import { shallowMount } from '@vue/test-utils';
 import { GlModal, GlSprintf, GlAlert } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
+import { shallowMount } from '@vue/test-utils';
+import { ApolloMutation } from 'vue-apollo';
 import DevopsAdoptionDeleteModal from 'ee/admin/dev_ops_report/components/devops_adoption_delete_modal.vue';
 import { DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID } from 'ee/admin/dev_ops_report/constants';
+import waitForPromises from 'helpers/wait_for_promises';
 import * as Sentry from '~/sentry/wrapper';
 import {
   genericDeleteErrorMessage,
@@ -72,7 +72,7 @@ describe('DevopsAdoptionDeleteModal', () => {
     });
 
     it('displays the confirmation message', () => {
-      const text = `Are you sure that you would like to delete ${devopsAdoptionSegmentsData.nodes[0].name}?`;
+      const text = `Are you sure that you would like to remove ${devopsAdoptionSegmentsData.nodes[0].namespace.fullName} from the table?`;
 
       expect(findModal().text()).toBe(text);
     });

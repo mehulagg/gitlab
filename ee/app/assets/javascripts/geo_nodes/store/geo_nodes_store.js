@@ -76,9 +76,12 @@ export default class GeoNodesStore {
           totalCount: rawNodeDetails[`${replicable.namePlural}_count`],
           successCount: rawNodeDetails[`${replicable.namePlural}_synced_count`],
           failureCount: rawNodeDetails[`${replicable.namePlural}_failed_count`],
+          verificationTotalCount:
+            rawNodeDetails[`${replicable.namePlural}_verification_total_count`],
           verificationSuccessCount: rawNodeDetails[`${replicable.namePlural}_verified_count`],
           verificationFailureCount:
             rawNodeDetails[`${replicable.namePlural}_verification_failed_count`],
+          checksumTotalCount: rawNodeDetails[`${replicable.namePlural}_checksum_total_count`],
           checksumSuccessCount: rawNodeDetails[`${replicable.namePlural}_checksummed_count`],
           checksumFailureCount: rawNodeDetails[`${replicable.namePlural}_checksum_failed_count`],
         },

@@ -1,8 +1,8 @@
 <script>
 import { GlButton, GlModalDirective, GlTooltipDirective } from '@gitlab/ui';
-import { s__, __ } from '~/locale';
-import eventHub from '~/boards/eventhub';
 import { formType } from '~/boards/constants';
+import eventHub from '~/boards/eventhub';
+import { s__, __ } from '~/locale';
 
 export default {
   components: {

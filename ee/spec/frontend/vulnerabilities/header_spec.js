@@ -1,22 +1,22 @@
 import { GlButton, GlBadge } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import VueApollo from 'vue-apollo';
 import MockAdapter from 'axios-mock-adapter';
+import VueApollo from 'vue-apollo';
 import Api from 'ee/api';
+import fetchHeaderVulnerabilityQuery from 'ee/security_dashboard/graphql/header_vulnerability.graphql';
+import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
 import Header from 'ee/vulnerabilities/components/header.vue';
 import ResolutionAlert from 'ee/vulnerabilities/components/resolution_alert.vue';
 import StatusDescription from 'ee/vulnerabilities/components/status_description.vue';
 import VulnerabilityStateDropdown from 'ee/vulnerabilities/components/vulnerability_state_dropdown.vue';
-import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
-import fetchHeaderVulnerabilityQuery from 'ee/security_dashboard/graphql/header_vulnerability.graphql';
 import { FEEDBACK_TYPES, VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import UsersMockHelper from 'helpers/user_mock_data_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import createMockApollo from 'helpers/mock_apollo_helper';
-import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import download from '~/lib/utils/downloader';
 import * as urlUtility from '~/lib/utils/url_utility';
 
