@@ -573,10 +573,10 @@ See the following additional guides:
 ### Use separate buckets
 
 Using separate buckets for each data type is the recommended approach for GitLab.
-This is recommended to ensure there's no collisions across the various types of
+This ensures there's no collisions across the various types of
 data GitLab stores.
 
-For Helm based installs this is additionally required to
+Helm-based installs require separate buckets to
 [handle backup restorations](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer)
 
 ### S3 API compatibility issues
