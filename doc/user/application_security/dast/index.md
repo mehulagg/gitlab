@@ -42,7 +42,7 @@ To enable DAST, either:
 
 - Enable [Auto DAST](../../../topics/autodevops/stages.md#auto-dast), provided by
   [Auto DevOps](../../../topics/autodevops/index.md).
-- [Include a GitLab DAST template](#gitlab-dast-ci-template) in your existing `.gitlab-ci.yml` file.
+- [Include a GitLab DAST template](#dast-ci-template) in your existing `.gitlab-ci.yml` file.
 
 ### DAST CI template
 
