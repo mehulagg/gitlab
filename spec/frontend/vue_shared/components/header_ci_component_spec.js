@@ -1,9 +1,9 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton, GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import CiIconBadge from '~/vue_shared/components/ci_badge_link.vue';
 import HeaderCi from '~/vue_shared/components/header_ci_component.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('Header CI Component', () => {
   let wrapper;
