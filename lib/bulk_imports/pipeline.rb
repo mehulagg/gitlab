@@ -16,17 +16,15 @@ module BulkImports
       attr_reader :context
 
       def extractor
-        @extractor ||= self.respond_to?(:extract) ? self : instantiate(self.class.get_extractor)
+        @extractor ||= instantiate(self.class.get_extractor)
       end
 
       def transformers
         @transformers ||= self.class.transformers.map(&method(:instantiate))
-        @transformers << self if self.respond_to?(:transform) && @transformers.exclude?(self)
-        @transformers
       end
 
       def loader
-        @loader ||= self.respond_to?(:load) ? self : instantiate(self.class.get_loader)
+        @loaders ||= instantiate(self.class.get_loader)
       end
 
       def pipeline
@@ -34,13 +32,7 @@ module BulkImports
       end
 
       def instantiate(class_config)
-        options = class_config[:options]
-
-        if options
-          class_config[:klass].new(class_config[:options])
-        else
-          class_config[:klass].new
-        end
+        class_config[:klass].new(class_config[:options])
       end
 
       def abort_on_failure?

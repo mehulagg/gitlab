@@ -12,11 +12,7 @@ module BulkImports
         transformer Common::Transformers::ProhibitedAttributesTransformer
         transformer BulkImports::Groups::Transformers::MemberAttributesTransformer
 
-        def load(context, data)
-          return unless data
-
-          context.group.members.create!(data)
-        end
+        loader BulkImports::Groups::Loaders::MembersLoader
 
         def after_run(extracted_data)
           context.entity.update_tracker_for(

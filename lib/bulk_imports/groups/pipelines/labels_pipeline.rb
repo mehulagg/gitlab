@@ -11,9 +11,7 @@ module BulkImports
 
         transformer Common::Transformers::ProhibitedAttributesTransformer
 
-        def load(context, data)
-          Labels::CreateService.new(data).execute(group: context.group)
-        end
+        loader BulkImports::Groups::Loaders::LabelsLoader
 
         def after_run(extracted_data)
           context.entity.update_tracker_for(
