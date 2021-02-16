@@ -24,7 +24,17 @@ class JiraConnect::SubscriptionsController < JiraConnect::ApplicationController
   end
 
   def index
+    @installation = current_jira_installation
     @subscriptions = current_jira_installation.subscriptions.preload_namespace_route
+  end
+
+  def edit
+    @installation = current_jira_installation
+  end
+
+  def update
+    # Make sure instance_url uses HTTPS
+    # current_jira_installation.update
   end
 
   def create

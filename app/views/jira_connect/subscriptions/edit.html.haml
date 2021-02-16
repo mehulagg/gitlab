@@ -1,0 +1,6 @@
+%header.jira-connect-header
+  = brand_header_logo
+
+= form_for @installation do |f|
+  = f.text_field :instance_url
+  = f.submit 'Save'

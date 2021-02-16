@@ -8,6 +8,9 @@
   - elsif @subscriptions.present?
     = link_to _('Sign in to GitLab'), jira_connect_users_path, target: '_blank', rel: 'noopener noreferrer', class: 'js-jira-connect-sign-in'
 
+-# unless @installation.subscriptions.any?
+= link_to 'Set up proxy', jira_connect_installations_edit_path
+
 .jira-connect-app
   - if current_user.blank? && @subscriptions.empty?
     %h2= s_('JiraService|GitLab for Jira Configuration')
