@@ -10,16 +10,16 @@ type: index
 
 There are two primary ways to incorporate [Docker](https://www.docker.com) in your CI/CD workflow.
 
-**Use Docker or Kubernetes to [run your CI/CD jobs](using_docker_images.md).**
+- **Use Docker or Kubernetes to [run your CI/CD jobs](using_docker_images.md).**
 
-You can create CI/CD jobs to do things like test, build, or publish
-an application. These jobs can run in Docker containers or Kubernetes pods.
+  You can create CI/CD jobs to do things like test, build, or publish
+  an application. These jobs can run in Docker containers or Kubernetes pods.
 
-For example, you can tell GitLab CI/CD to use a Node image that's hosted on Docker Hub
-or in the GitLab Container Registry. Your job then runs in a container that's based on the image.
-The container has all the Node dependencies you need to build your app.
+  For example, you can tell GitLab CI/CD to use a Node image that's hosted on Docker Hub
+  or in the GitLab Container Registry. Your job then runs in a container that's based on the image.
+  The container has all the Node dependencies you need to build your app.
 
-**Use [Docker](using_docker_build.md) or [kaniko](using_kaniko.md) to build Docker images.**
+- **Use [Docker](using_docker_build.md) or [kaniko](using_kaniko.md) to build Docker images.**
 
-You can create CI/CD jobs to build Docker images and publish
-them to a container registry.
+  You can create CI/CD jobs to build Docker images and publish
+  them to a container registry.
