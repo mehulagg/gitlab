@@ -244,7 +244,7 @@ module Backup
         progress.puts " * #{display_repo_path} ... "
 
         if repository.empty?
-          progress.puts " * #{display_repo_path} ... " + "[SKIPPED]".color(:cyan)
+          progress.puts " * #{display_repo_path} ... " + "[EMPTY] [SKIPPED]".color(:cyan)
           return
         end
 
