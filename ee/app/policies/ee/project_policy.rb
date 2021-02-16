@@ -405,7 +405,7 @@ module EE
 
       rule { requirements_available & owner }.enable :destroy_requirement
 
-      rule { compliance_framework_available & can?(:owner_access)}.enable :admin_compliance_framework
+      rule { compliance_framework_available & can?(:owner_access) }.enable :admin_compliance_framework
       rule { compliance_framework_available & can?(:maintainer_access) & ~custom_compliance_framework_available }.enable :admin_compliance_framework
 
       rule { status_page_available & can?(:owner_access) }.enable :mark_issue_for_publication
