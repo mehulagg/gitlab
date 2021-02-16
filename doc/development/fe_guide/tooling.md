@@ -125,44 +125,28 @@ Please take care that you only let Prettier format the same file types as the gl
 The following yarn scripts are available to do global formatting:
 
 ```shell
-yarn prettier-staged-save
+yarn run lint:prettier:staged:fix
 ```
 
 Updates all staged files (based on `git diff`) with Prettier and saves the needed changes.
 
 ```shell
-yarn prettier-staged
+yarn run lint:prettier:staged
 ```
 
 Checks all staged files (based on `git diff`) with Prettier and log which files would need manual updating to the console.
 
 ```shell
-yarn prettier-all
+yarn run lint:prettier
 ```
 
 Checks all files with Prettier and logs which files need manual updating to the console.
 
 ```shell
-yarn prettier-all-save
+yarn run lint:prettier:fix
 ```
 
-Formats all files in the repository with Prettier. (This should only be used to test global rule updates otherwise you would end up with huge MR's).
-
-The source of these Yarn scripts can be found in `/scripts/frontend/prettier.js`.
-
-#### Scripts during Conversion period
-
-```shell
-node ./scripts/frontend/prettier.js check-all ./vendor/
-```
-
-This iterates over all files in a specific folder, and checks them.
-
-```shell
-node ./scripts/frontend/prettier.js save-all ./vendor/
-```
-
-This iterates over all files in a specific folder and saves them.
+Formats all files in the repository with Prettier.
 
 ### VSCode Settings
 
