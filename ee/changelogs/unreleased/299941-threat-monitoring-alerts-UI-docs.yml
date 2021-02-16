@@ -1,0 +1,5 @@
+---
+title: Enable threat_monitoring_alerts feature flag by default
+merge_request: 53776
+author:
+type: added

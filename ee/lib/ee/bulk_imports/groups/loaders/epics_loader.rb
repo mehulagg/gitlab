@@ -7,10 +7,6 @@ module EE
         class EpicsLoader
           NotAllowedError = Class.new(StandardError)
 
-          def initialize(options = {})
-            @options = options
-          end
-
           def load(context, data)
             raise NotAllowedError unless authorized?(context)
 
