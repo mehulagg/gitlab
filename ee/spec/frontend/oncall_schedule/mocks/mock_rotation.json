@@ -4,6 +4,10 @@
     "startsAt": "2021-01-13T10:04:56.333Z",
     "length": 1,
     "lengthUnit": "WEEKS",
+    "activePeriod": {
+      "startTime": "02:00",
+      "endTime": "10:00"
+    },
     "participants": {
       "nodes": [
         {
@@ -56,6 +60,10 @@
     "startsAt": "2021-01-13T10:04:56.333Z",
     "length": 1,
     "lengthUnit": "WEEKS",
+    "activePeriod": {
+      "startTime": "02:00",
+      "endTime": "10:00"
+    },
     "participants": {
       "nodes": [
         {
@@ -104,6 +112,10 @@
     "startsAt": "2021-01-06T10:04:56.333Z",
     "length": 1,
     "lengthUnit": "WEEKS",
+    "activePeriod": {
+      "startTime": "02:00",
+      "endTime": "10:00"
+    },
     "participants": {
       "nodes": [
         {
@@ -152,6 +164,10 @@
   "startsAt": "2021-01-06T10:04:56.333Z",
   "length": 1,
   "lengthUnit": "WEEKS",
+  "activePeriod": {
+    "startTime": "02:00",
+    "endTime": "10:00"
+  },
   "participants": {
     "nodes": [
       {

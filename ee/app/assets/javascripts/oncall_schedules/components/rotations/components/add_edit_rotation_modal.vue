@@ -1,6 +1,6 @@
 <script>
 import { GlModal, GlAlert } from '@gitlab/ui';
-import { set } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
@@ -39,6 +39,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    rotation: {
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
     schedule: {
       type: Object,
@@ -82,9 +87,10 @@ export default {
           date: null,
           time: 0,
         },
+        isRestrictedToTime: false,
         restrictedTo: {
-          from: 0,
-          to: 0,
+          startTime: 0,
+          endTime: 0,
         },
       },
       error: '',
@@ -132,7 +138,7 @@ export default {
         startsAt: { date, time },
       } = this.form;
 
-      return {
+      const variables = {
         projectPath: this.projectPath,
         scheduleIid: this.schedule.iid,
         name,
@@ -146,6 +152,13 @@ export default {
         },
         participants: getParticipantsForSave(participants),
       };
+      if (this.form.isRestrictedToTime) {
+        variables.activePeriod = {
+          startTime: format24HourTimeStringFromInt(this.form.restrictedTo.startTime),
+          endTime: format24HourTimeStringFromInt(this.form.restrictedTo.endTime),
+        };
+      }
+      return variables;
     },
     title() {
       return this.isEditMode ? this.$options.i18n.editRotation : this.$options.i18n.addRotation;
@@ -248,6 +261,39 @@ export default {
         this.validationState.startsAt = Boolean(this.form.startsAt.date);
       }
     },
+    beforeShowModal() {
+      if (this.rotation?.activePeriod?.startTime) {
+        const { activePeriod } = this.rotation;
+        this.form.isRestrictedToTime = true;
+        this.form.restrictedTo.startTime = parseInt(activePeriod.startTime.slice(0, 2), 10);
+        this.form.restrictedTo.endTime = parseInt(activePeriod.endTime.slice(0, 2), 10);
+      }
+    },
+    afterCloseModal() {
+      // TODO: Break this out
+      const defaultState = {
+        name: '',
+        participants: [],
+        rotationLength: {
+          length: 1,
+          unit: this.$options.LENGTH_ENUM.hours,
+        },
+        startsAt: {
+          date: null,
+          time: 0,
+        },
+        endsOn: {
+          date: null,
+          time: 0,
+        },
+        isRestrictedToTime: false,
+        restrictedTo: {
+          startTime: 0,
+          endTime: 0,
+        },
+      };
+      this.form = cloneDeep(defaultState);
+    },
   },
 };
 </script>
@@ -261,6 +307,8 @@ export default {
     :action-cancel="actionsProps.cancel"
     modal-class="rotations-modal"
     @primary.prevent="isEditMode ? editRotation() : createRotation()"
+    @show="beforeShowModal"
+    @hide="afterCloseModal"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error || $options.i18n.errorMsg }}
