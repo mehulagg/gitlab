@@ -81,7 +81,7 @@ export default {
           date: null,
           time: 0,
         },
-        isRestricted: false,
+        isRestrictedToTime: false,
         restrictedTo: {
           from: 0,
           to: 0,
@@ -133,7 +133,7 @@ export default {
         },
         participants: getParticipantsForSave(participants),
       };
-      if (this.form.isRestricted) {
+      if (this.form.isRestrictedToTime) {
         variables.activePeriod = {
           from: format24HourTimeStringFromInt(this.form.restrictedTo.from),
           to: format24HourTimeStringFromInt(this.form.restrictedTo.to),
