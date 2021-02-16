@@ -10959,6 +10959,25 @@ CREATE SEQUENCE ci_triggers_id_seq
 
 ALTER SEQUENCE ci_triggers_id_seq OWNED BY ci_triggers.id;
 
+CREATE TABLE ci_variable_initialization_vectors (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    variable_id bigint NOT NULL,
+    variable_secret_key_id bigint NOT NULL,
+    initialization_vector text NOT NULL,
+    CONSTRAINT check_8202e2bb36 CHECK ((char_length(initialization_vector) <= 255))
+);
+
+CREATE SEQUENCE ci_variable_initialization_vectors_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_variable_initialization_vectors_id_seq OWNED BY ci_variable_initialization_vectors.id;
+
 CREATE TABLE ci_variable_secret_keys (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -18808,6 +18827,8 @@ ALTER TABLE ONLY ci_trigger_requests ALTER COLUMN id SET DEFAULT nextval('ci_tri
 
 ALTER TABLE ONLY ci_triggers ALTER COLUMN id SET DEFAULT nextval('ci_triggers_id_seq'::regclass);
 
+ALTER TABLE ONLY ci_variable_initialization_vectors ALTER COLUMN id SET DEFAULT nextval('ci_variable_initialization_vectors_id_seq'::regclass);
+
 ALTER TABLE ONLY ci_variable_secret_keys ALTER COLUMN id SET DEFAULT nextval('ci_variable_secret_keys_id_seq'::regclass);
 
 ALTER TABLE ONLY ci_variables ALTER COLUMN id SET DEFAULT nextval('ci_variables_id_seq'::regclass);
@@ -19945,6 +19966,9 @@ ALTER TABLE ONLY ci_trigger_requests
 
 ALTER TABLE ONLY ci_triggers
     ADD CONSTRAINT ci_triggers_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_variable_initialization_vectors
+    ADD CONSTRAINT ci_variable_initialization_vectors_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY ci_variable_secret_keys
     ADD CONSTRAINT ci_variable_secret_keys_pkey PRIMARY KEY (id);
@@ -21800,6 +21824,10 @@ CREATE INDEX index_ci_trigger_requests_on_trigger_id_and_id ON ci_trigger_reques
 CREATE INDEX index_ci_triggers_on_owner_id ON ci_triggers USING btree (owner_id);
 
 CREATE INDEX index_ci_triggers_on_project_id ON ci_triggers USING btree (project_id);
+
+CREATE INDEX index_ci_variable_initialization_vectors_on_variable_id ON ci_variable_initialization_vectors USING btree (variable_id);
+
+CREATE INDEX index_ci_variable_ivs_on_variable_secret_key_id ON ci_variable_initialization_vectors USING btree (variable_secret_key_id);
 
 CREATE INDEX index_ci_variables_on_key ON ci_variables USING btree (key);
 
@@ -24824,6 +24852,9 @@ ALTER TABLE ONLY packages_debian_group_distributions
 ALTER TABLE ONLY packages_conan_file_metadata
     ADD CONSTRAINT fk_rails_0afabd9328 FOREIGN KEY (package_file_id) REFERENCES packages_package_files(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_variable_initialization_vectors
+    ADD CONSTRAINT fk_rails_0b1cc9b655 FOREIGN KEY (variable_id) REFERENCES ci_variables(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY ci_build_pending_states
     ADD CONSTRAINT fk_rails_0bbbfeaf9d FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
@@ -25594,6 +25625,9 @@ ALTER TABLE ONLY alert_management_alert_user_mentions
 
 ALTER TABLE ONLY project_daily_statistics
     ADD CONSTRAINT fk_rails_8e549b272d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_variable_initialization_vectors
+    ADD CONSTRAINT fk_rails_8f5da81c4f FOREIGN KEY (variable_secret_key_id) REFERENCES ci_variable_secret_keys(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_pipelines_config
     ADD CONSTRAINT fk_rails_906c9a2533 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
