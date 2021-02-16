@@ -40,6 +40,11 @@ export default {
       required: false,
       default: false,
     },
+    rotation: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
     schedule: {
       type: Object,
       required: true,
@@ -248,6 +253,9 @@ export default {
         this.validationState.startsAt = Boolean(this.form.startsAt.date);
       }
     },
+    beforeShowModal() {
+      // console.log(this.rotation);
+    },
   },
 };
 </script>
@@ -261,6 +269,7 @@ export default {
     :action-cancel="actionsProps.cancel"
     modal-class="rotations-modal"
     @primary.prevent="isEditMode ? editRotation() : createRotation()"
+    @show="beforeShowModal"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error || $options.i18n.errorMsg }}

@@ -89,6 +89,7 @@ export default {
   methods: {
     setRotationToUpdate(rotation) {
       this.rotationToUpdate = rotation;
+      this.$emit('set-rotation-to-update', rotation);
     },
     cellShouldHideOverflow(index) {
       return index + 1 === this.timeframe.length || this.presetIsDay;
@@ -108,6 +109,28 @@ export default {
         class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
       >
         <span class="gl-text-truncated">{{ $options.i18n.addRotationLabel }}</span>
+        <!-- <span class="gl-str-truncated">{{ rotation.name }}</span> -->
+        <!-- <gl-button-group class="gl-px-2">
+          <gl-button
+            v-gl-modal="$options.editRotationModalId"
+            v-gl-tooltip
+            category="tertiary"
+            :title="$options.i18n.editRotationLabel"
+            icon="pencil"
+            :aria-label="$options.i18n.editRotationLabel"
+            :disabled="true"
+            @click="setRotationToUpdate(rotation)"
+          />
+          <gl-button
+            v-gl-modal="$options.deleteRotationModalId"
+            v-gl-tooltip
+            category="tertiary"
+            :title="$options.i18n.deleteRotationLabel"
+            icon="remove"
+            :aria-label="$options.i18n.deleteRotationLabel"
+            @click="setRotationToUpdate(rotation)"
+          />
+        </gl-button-group> -->
       </span>
       <span
         v-for="(timeframeItem, index) in timeframeToDraw"
