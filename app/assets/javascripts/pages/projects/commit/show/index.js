@@ -15,9 +15,7 @@ import syntaxHighlight from '~/syntax_highlight';
 import ZenMode from '~/zen_mode';
 import '~/sourcegraph/load';
 
-const hasPerfBar = document.querySelector('.with-performance-bar');
-const performanceHeight = hasPerfBar ? 35 : 0;
-initChangesDropdown(document.querySelector('.navbar-gitlab').offsetHeight + performanceHeight);
+initChangesDropdown();
 new ZenMode();
 new ShortcutsNavigation();
 

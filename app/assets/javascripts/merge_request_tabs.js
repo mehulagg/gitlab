@@ -397,7 +397,7 @@ export default class MergeRequestTabs {
         const $container = $('#diffs');
         $container.html(data.html);
 
-        initChangesDropdown(this.stickyTop);
+        initChangesDropdown();
 
         localTimeAgo($('.js-timeago', 'div#diffs'));
         syntaxHighlight($('#diffs .js-syntax-highlight'));
