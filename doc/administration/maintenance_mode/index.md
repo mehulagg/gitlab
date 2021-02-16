@@ -127,13 +127,19 @@ For most JSON requests, POST, PUT, PATCH, and DELETE are blocked, and the API re
 
 ### Continuous Integration
 
-- No new jobs or pipelines, scheduled or otherwise, will start
-- Those jobs that were already running, will continue to show status as 'running' in the Web UI, even if they finish running on GitLab Runner.
-**Note** It is recommended that you restart already running pipelines after Maintenance Mode is turned off.
-- If the job has been in 'running' state for longer than the project's time limit, it will **not** time out.
+- No new jobs or pipelines start, scheduled or otherwise.
+- Jobs that were already running continue to have a `running` status in the GitLab UI,
+  even if they finish running on the GitLab runner.
+- Jobs in the `running` state for longer than the project's time limit do not time out.
 - Pipelines cannot be started, retried or canceled. No new jobs can be created either.
 
-Once Maintenance Mode is disabled, new jobs are picked up again. The jobs that were in the running state before enabling Maintenance Mode, will resume, and their logs will start getting updated again.
+After Maintenance Mode is disabled, new jobs are picked up again. Jobs that were
+in the `running` state before enabling Maintenance Mode resume and their logs start
+updating again.
+
+NOTE:
+It is recommended that you restart previously `running` pipelines after Maintenance Mode
+is turned off.
 
 ### Deployments
 
