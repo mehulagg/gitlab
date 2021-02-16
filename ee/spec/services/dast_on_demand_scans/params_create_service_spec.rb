@@ -26,7 +26,7 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
         let(:params) { { dast_site_profile: dast_site_profile, dast_scanner_profile: nil } }
 
         it 'returns prepared scanner params in the payload' do
-          expect(subject.payload[:params]).to eq(
+          expect(subject.payload).to eq(
             branch: 'master',
             target_url: dast_site_profile.dast_site.url
           )
@@ -37,7 +37,7 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
         let(:params) { { dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile } }
 
         it 'returns prepared scanner params in the payload' do
-          expect(subject.payload[:params]).to eq(
+          expect(subject.payload).to eq(
             branch: 'master',
             full_scan_enabled: false,
             show_debug_messages: false,

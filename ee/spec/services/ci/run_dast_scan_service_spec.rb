@@ -130,7 +130,7 @@ RSpec.describe Ci::RunDastScanService do
             'public' => true
           }
         ]
-        expect(build.yaml_variables).to eq(expected_variables)
+        expect(build.yaml_variables).to contain_exactly(*expected_variables)
       end
 
       it 'enqueues a build' do

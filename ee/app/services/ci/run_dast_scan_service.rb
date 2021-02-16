@@ -22,7 +22,7 @@ module Ci
     end
 
     def ci_yaml(args)
-      Ci::DastScanCiConfigurationService.new(project).execute(args)
+      Ci::DastScanCiConfigurationService.execute(args)
     end
   end
 end

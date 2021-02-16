@@ -7,9 +7,7 @@ module DastOnDemandScans
       return ServiceResponse.error(message: 'Cannot run active scan against unvalidated target') unless active_scan_allowed?
 
       ServiceResponse.success(
-        payload: {
-          params: default_config.merge(scanner_profile_config)
-        }
+        payload: default_config.merge(scanner_profile_config)
       )
     rescue KeyError => err
       ServiceResponse.error(message: err.message.capitalize)
@@ -20,17 +18,15 @@ module DastOnDemandScans
     def active_scan_allowed?
       return true unless dast_scanner_profile&.full_scan_enabled?
 
-      dast_site_validation = DastSiteValidationsFinder.new(
+      DastSiteValidationsFinder.new(
         project_id: container.id,
         state: :passed,
         url_base: url_base
-      ).execute.first
-
-      dast_site_validation.present?
+      ).execute.present?
     end
 
     def dast_site
-      @dast_site ||= params.fetch(:dast_site_profile)&.dast_site
+      @dast_site ||= params[:dast_site_profile]&.dast_site
     end
 
     def dast_scanner_profile
@@ -38,7 +34,7 @@ module DastOnDemandScans
     end
 
     def url_base
-      @url_base ||= DastSiteValidation.get_normalized_url_base(dast_site.url)
+      @url_base ||= DastSiteValidation.get_normalized_url_base(dast_site&.url)
     end
 
     def default_config

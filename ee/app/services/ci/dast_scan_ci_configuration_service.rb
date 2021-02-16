@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class DastScanCiConfigurationService < BaseService
+  module DastScanCiConfigurationService
     ENV_MAPPING = {
       spider_timeout: 'DAST_SPIDER_MINS',
       target_timeout: 'DAST_TARGET_AVAILABILITY_TIMEOUT',
@@ -11,32 +11,26 @@ module Ci
       full_scan_enabled: 'DAST_FULL_SCAN_ENABLED'
     }.freeze
 
-    def execute(args)
-      variables = args.each_with_object({}) do |(key, val), hash|
-        next if val.nil? || !ENV_MAPPING[key]
-
-        hash[ENV_MAPPING[key]] = !!val == val ? val.to_s : val
-        hash
+    def self.execute(args)
+      variables = args.slice(*ENV_MAPPING.keys).compact.to_h do |key, val|
+        [ENV_MAPPING[key], to_env_value(val)]
       end
 
-      ci_template.deep_merge(
+      {
+        'stages' => ['dast'],
+        'include' => [{ 'template' => 'DAST-On-Demand-Scan.gitlab-ci.yml' }],
         'variables' => variables
-      ).to_yaml
+      }.to_yaml
     end
 
-    private
-
-    def ci_template
-      @ci_template ||= YAML.safe_load(ci_template_raw)
+    def self.bool?(value)
+      !!value == value
     end
+    private_class_method :bool?
 
-    def ci_template_raw
-      <<~YAML
-        stages:
-          - dast
-        include:
-          - template: DAST-On-Demand-Scan.gitlab-ci.yml
-      YAML
+    def self.to_env_value(value)
+      bool?(value) ? value.to_s : value
     end
+    private_class_method :to_env_value
   end
 end

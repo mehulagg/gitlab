@@ -35,7 +35,7 @@ module DastOnDemandScans
 
       return params_result unless params_result.success?
 
-      result = ::Ci::RunDastScanService.new(container, current_user).execute(**params_result.payload[:params])
+      result = ::Ci::RunDastScanService.new(container, current_user).execute(**params_result.payload)
 
       return success_response(result.payload) if result.success?
 
