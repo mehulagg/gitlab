@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import { activityFilter, activityOptions } from 'ee/security_dashboard/helpers';
 import ActivityFilter from 'ee/security_dashboard/components/filters/activity_filter.vue';
+import { activityFilter, activityOptions } from 'ee/security_dashboard/helpers';
 
 const { NO_ACTIVITY, WITH_ISSUES, NO_LONGER_DETECTED } = activityOptions;
 

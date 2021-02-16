@@ -18,9 +18,10 @@ class HistoricalData < ApplicationRecord
 
     def max_historical_user_count(license: nil, from: nil, to: nil)
       license ||= License.current
+      starts_at = license&.starts_at || Time.current - 1.year
       expires_at = license&.expires_at || Time.current
-      from ||= (expires_at - 1.year).beginning_of_day
-      to   ||= expires_at.end_of_day
+      from ||= starts_at.beginning_of_day
+      to ||= expires_at.end_of_day
 
       HistoricalData.during(from..to).maximum(:active_user_count) || 0
     end

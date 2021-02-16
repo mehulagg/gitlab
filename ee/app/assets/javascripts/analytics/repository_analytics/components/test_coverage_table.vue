@@ -1,12 +1,12 @@
 <script>
-import Vue from 'vue';
 import { GlCard, GlEmptyState, GlLink, GlSkeletonLoader, GlTable } from '@gitlab/ui';
+import Vue from 'vue';
 import api from '~/api';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { __, s__ } from '~/locale';
-import { joinPaths } from '~/lib/utils/url_utility';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
+import { joinPaths } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getProjectsTestCoverage from '../graphql/queries/get_projects_test_coverage.query.graphql';
 import SelectProjectsDropdown from './select_projects_dropdown.vue';
 

@@ -2,14 +2,13 @@ import { mount } from '@vue/test-utils';
 
 import { delay } from 'lodash';
 
+import CurrentDayIndicator from 'ee/roadmap/components/current_day_indicator.vue';
 import EpicItemComponent from 'ee/roadmap/components/epic_item.vue';
 import EpicItemContainer from 'ee/roadmap/components/epic_item_container.vue';
 
 import { PRESET_TYPES } from 'ee/roadmap/constants';
 import createStore from 'ee/roadmap/store';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
-
-import CurrentDayIndicator from 'ee/roadmap/components/current_day_indicator.vue';
 
 import {
   mockTimeframeInitialDate,

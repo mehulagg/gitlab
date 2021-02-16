@@ -1,6 +1,6 @@
 <script>
-import { GlIcon, GlLink, GlTooltipDirective, GlSafeHtmlDirective } from '@gitlab/ui';
 import jiraLogo from '@gitlab/svgs/dist/illustrations/logos/jira.svg';
+import { GlIcon, GlLink, GlTooltipDirective, GlSafeHtmlDirective } from '@gitlab/ui';
 
 export default {
   components: {

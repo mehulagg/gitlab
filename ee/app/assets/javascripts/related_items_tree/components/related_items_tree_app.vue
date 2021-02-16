@@ -1,6 +1,6 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
 import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { mapState, mapActions, mapGetters } from 'vuex';
 
 import { __, sprintf } from '~/locale';
 import AddItemForm from '~/related_issues/components/add_issuable_form.vue';
@@ -8,10 +8,9 @@ import SlotSwitch from '~/vue_shared/components/slot_switch.vue';
 import { OVERFLOW_AFTER } from '../constants';
 import CreateEpicForm from './create_epic_form.vue';
 import CreateIssueForm from './create_issue_form.vue';
-import TreeItemRemoveModal from './tree_item_remove_modal.vue';
-
-import RelatedItemsTreeHeader from './related_items_tree_header.vue';
 import RelatedItemsTreeBody from './related_items_tree_body.vue';
+import RelatedItemsTreeHeader from './related_items_tree_header.vue';
+import TreeItemRemoveModal from './tree_item_remove_modal.vue';
 
 const FORM_SLOTS = {
   addItem: 'addItem',

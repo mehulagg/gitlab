@@ -6,8 +6,8 @@ import { s__ } from '~/locale';
 import * as Sentry from '~/sentry/wrapper';
 
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
-import ListItem from './list_item.vue';
 import EmptyState from './list_empty_state.vue';
+import ListItem from './list_item.vue';
 
 export default {
   components: {

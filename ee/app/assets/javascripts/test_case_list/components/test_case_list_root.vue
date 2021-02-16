@@ -2,19 +2,18 @@
 import { GlButton } from '@gitlab/ui';
 
 import Api from '~/api';
-import { s__, __ } from '~/locale';
 import createFlash from '~/flash';
+import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import axios from '~/lib/utils/axios_utils';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 
-import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
+import { s__, __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 
-import projectTestCases from '../queries/project_test_cases.query.graphql';
-
 import { TestCaseTabs, AvailableSortOptions, DEFAULT_PAGE_SIZE } from '../constants';
+import projectTestCases from '../queries/project_test_cases.query.graphql';
 import TestCaseListEmptyState from './test_case_list_empty_state.vue';
 
 export default {

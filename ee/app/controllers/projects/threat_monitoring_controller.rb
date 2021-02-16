@@ -7,13 +7,13 @@ module Projects
     before_action :authorize_read_threat_monitoring!
 
     before_action do
-      push_frontend_feature_flag(:threat_monitoring_alerts, project)
+      push_frontend_feature_flag(:threat_monitoring_alerts, project, default_enabled: :yaml)
     end
 
     feature_category :web_firewall
 
     def alert_details
-      render_404 unless Feature.enabled?(:threat_monitoring_alerts, project)
+      render_404 unless Feature.enabled?(:threat_monitoring_alerts, project, default_enabled: :yaml)
       @alert_id = params[:id]
     end
 

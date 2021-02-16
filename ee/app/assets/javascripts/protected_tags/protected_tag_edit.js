@@ -1,7 +1,7 @@
 import { find } from 'lodash';
-import AccessDropdown from '~/projects/settings/access_dropdown';
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import AccessDropdown from '~/projects/settings/access_dropdown';
 import { FAILED_TO_UPDATE_TAG_MESSAGE } from '~/protected_tags/constants';
 import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 

@@ -1,11 +1,11 @@
 <script>
-import { toNumber, omit } from 'lodash';
 import {
   GlEmptyState,
   GlPagination,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
+import { toNumber, omit } from 'lodash';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import {
@@ -14,10 +14,10 @@ import {
   historyPushState,
   getParameterByName,
 } from '~/lib/utils/common_utils';
+import { setUrlParams } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import initManualOrdering from '~/manual_ordering';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import { setUrlParams } from '~/lib/utils/url_utility';
 import {
   sortOrderMap,
   availableSortOptionsJira,
@@ -333,15 +333,19 @@ export default {
       this.fetchIssuables();
     },
     handleFilter(filters) {
-      let search = null;
+      const searchTokens = [];
 
       filters.forEach((filter) => {
-        if (typeof filter === 'string') {
-          search = filter;
+        if (filter.type === 'filtered-search-term') {
+          if (filter.value.data) {
+            searchTokens.push(filter.value.data);
+          }
         }
       });
 
-      this.filters.search = search;
+      if (searchTokens.length) {
+        this.filters.search = searchTokens.join(' ');
+      }
       this.page = 1;
 
       this.refetchIssuables();

@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import List from '~/boards/models/list';
 import ListAssignee from '~/boards/models/assignee';
+import List from '~/boards/models/list';
 import ListMilestone from '~/boards/models/milestone';
 
 class ListEE extends List {

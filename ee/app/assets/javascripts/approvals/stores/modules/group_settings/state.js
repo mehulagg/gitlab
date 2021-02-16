@@ -1,4 +1,4 @@
 export default () => ({
-  preventAuthorApproval: true,
+  settings: {},
   isLoading: false,
 });

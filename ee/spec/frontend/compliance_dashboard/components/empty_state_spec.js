@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlEmptyState } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import EmptyState from 'ee/compliance_dashboard/components/empty_state.vue';
 

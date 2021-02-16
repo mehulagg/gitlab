@@ -1,7 +1,7 @@
 <script>
 import { GlFormGroup } from '@gitlab/ui';
-import FormInput from './form_input.vue';
 import DropdownInput from './dropdown_input.vue';
+import FormInput from './form_input.vue';
 import { isValidConfigurationEntity } from './utils';
 
 export default {

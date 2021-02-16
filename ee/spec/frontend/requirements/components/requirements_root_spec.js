@@ -8,8 +8,8 @@ import RequirementsRoot from 'ee/requirements/components/requirements_root.vue';
 import RequirementsTabs from 'ee/requirements/components/requirements_tabs.vue';
 
 import createRequirement from 'ee/requirements/queries/createRequirement.mutation.graphql';
-import updateRequirement from 'ee/requirements/queries/updateRequirement.mutation.graphql';
 import exportRequirement from 'ee/requirements/queries/exportRequirements.mutation.graphql';
+import updateRequirement from 'ee/requirements/queries/updateRequirement.mutation.graphql';
 
 import { TEST_HOST } from 'helpers/test_constants';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';

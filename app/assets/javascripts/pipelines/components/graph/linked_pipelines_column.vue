@@ -1,8 +1,8 @@
 <script>
 import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.query.graphql';
 import { LOAD_FAILURE } from '../../constants';
-import LinkedPipeline from './linked_pipeline.vue';
 import { ONE_COL_WIDTH, UPSTREAM } from './constants';
+import LinkedPipeline from './linked_pipeline.vue';
 import { unwrapPipelineData, toggleQueryPollingByVisibility, reportToSentry } from './utils';
 
 export default {
@@ -60,6 +60,9 @@ export default {
     },
     isUpstream() {
       return this.type === UPSTREAM;
+    },
+    minWidth() {
+      return this.isUpstream ? 0 : this.$options.minWidth;
     },
   },
   methods: {
@@ -132,8 +135,8 @@ export default {
 
       this.$emit('pipelineExpandToggle', jobName, expanded);
     },
-    showDownstreamContainer(id) {
-      return !this.isUpstream && (this.isExpanded(id) || this.isLoadingPipeline(id));
+    showContainer(id) {
+      return this.isExpanded(id) || this.isLoadingPipeline(id);
     },
   },
 };
@@ -164,8 +167,8 @@ export default {
             @pipelineExpandToggle="onPipelineExpandToggle"
           />
           <div
-            v-if="showDownstreamContainer(pipeline.id)"
-            :style="{ minWidth: $options.minWidth }"
+            v-if="showContainer(pipeline.id)"
+            :style="{ minWidth }"
             class="gl-display-inline-block"
           >
             <pipeline-graph

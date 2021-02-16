@@ -5,8 +5,8 @@ import getGroupProjects from 'ee/analytics/repository_analytics/graphql/queries/
 import getProjectsTestCoverage from 'ee/analytics/repository_analytics/graphql/queries/get_projects_test_coverage.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { getTimeago } from '~/lib/utils/datetime_utility';
 import Api from '~/api';
+import { getTimeago } from '~/lib/utils/datetime_utility';
 import { defaultTestCoverageTable, projects } from '../mock_data';
 
 jest.mock('~/api.js');

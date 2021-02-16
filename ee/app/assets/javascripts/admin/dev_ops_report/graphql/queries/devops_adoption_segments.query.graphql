@@ -2,10 +2,6 @@ query devopsAdoptionSegments {
   devopsAdoptionSegments {
     nodes {
       id
-      name
-      groups {
-        id
-      }
       latestSnapshot {
         issueOpened
         mergeRequestOpened
@@ -15,6 +11,10 @@ query devopsAdoptionSegments {
         deploySucceeded
         securityScanSucceeded
         recordedAt
+      }
+      namespace {
+        fullName
+        id
       }
     }
   }

@@ -1,4 +1,5 @@
 <script>
+import jiraLogo from '@gitlab/svgs/dist/illustrations/logos/jira.svg';
 import {
   GlAlert,
   GlButton,
@@ -9,7 +10,6 @@ import {
   GlSafeHtmlDirective as SafeHtml,
   GlSprintf,
 } from '@gitlab/ui';
-import jiraLogo from '@gitlab/svgs/dist/illustrations/logos/jira.svg';
 import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';
 

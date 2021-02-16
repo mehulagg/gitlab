@@ -1,7 +1,7 @@
 import Api from 'ee/api';
-import { sprintf, s__ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
+import { sprintf, s__ } from '~/locale';
 import { STEPS, PAYMENT_FORM_ID } from '../constants';
 import * as types from './mutation_types';
 

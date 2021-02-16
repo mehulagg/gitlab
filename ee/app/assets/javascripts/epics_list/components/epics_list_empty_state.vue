@@ -1,8 +1,7 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
-import { __ } from '~/locale';
-
 import { IssuableStates } from '~/issuable_list/constants';
+import { __ } from '~/locale';
 
 import { FilterStateEmptyMessage } from '../constants';
 

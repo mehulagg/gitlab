@@ -7,11 +7,11 @@ import {
   GlFormGroup,
   GlFormInput,
 } from '@gitlab/ui';
-import { visitUrl } from '~/lib/utils/url_utility';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { visitUrl } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import createEpic from '../queries/createEpic.mutation.graphql';
 
 export default {

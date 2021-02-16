@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
+import { DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 import { useFakeDate } from 'helpers/fake_date';
-import { DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
 import * as dateTimeUtility from '~/lib/utils/datetime_utility';
 
 describe('Schedule Common Mixins', () => {

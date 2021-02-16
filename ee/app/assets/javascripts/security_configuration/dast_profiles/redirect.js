@@ -1,10 +1,10 @@
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import {
   redirectTo,
   setUrlParams,
   relativePathToAbsolute,
   getBaseURL,
 } from '~/lib/utils/url_utility';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 
 export const returnToPreviousPageFactory = ({
   onDemandScansPath,

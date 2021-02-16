@@ -359,6 +359,26 @@ RSpec.describe Gitlab::Geo::VerificationState do
         expect(subject.verified_at).not_to be_nil
       end
     end
+
+    context 'primary node' do
+      it 'calls replicator.handle_after_checksum_succeeded' do
+        stub_current_geo_node(primary_node)
+
+        expect(subject.replicator).to receive(:handle_after_checksum_succeeded)
+
+        subject.verification_succeeded_with_checksum!('abc123', Time.current)
+      end
+    end
+
+    context 'secondary node' do
+      it 'does not call replicator.handle_after_checksum_succeeded' do
+        stub_current_geo_node(secondary_node)
+
+        expect(subject.replicator).not_to receive(:handle_after_checksum_succeeded)
+
+        subject.verification_succeeded_with_checksum!('abc123', Time.current)
+      end
+    end
   end
 
   describe '#verification_failed_with_message!' do

@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import CurrentDayIndicator from 'ee/oncall_schedules/components/schedule/components/current_day_indicator.vue';
-import { useFakeDate } from 'helpers/fake_date';
 import { PRESET_TYPES, DAYS_IN_WEEK, HOURS_IN_DAY } from 'ee/oncall_schedules/constants';
+import { useFakeDate } from 'helpers/fake_date';
 
 describe('CurrentDayIndicator', () => {
   let wrapper;

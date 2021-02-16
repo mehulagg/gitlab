@@ -10,12 +10,12 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
-import { formatDate } from '~/lib/utils/datetime_utility';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { __ } from '~/locale';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
-import query from '../queries/iteration.query.graphql';
+import { formatDate } from '~/lib/utils/datetime_utility';
+import { __ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { Namespace } from '../constants';
+import query from '../queries/iteration.query.graphql';
 import IterationForm from './iteration_form.vue';
 import IterationReportTabs from './iteration_report_tabs.vue';
 

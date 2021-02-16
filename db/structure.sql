@@ -8990,10 +8990,11 @@ ALTER SEQUENCE analytics_devops_adoption_segment_selections_id_seq OWNED BY anal
 
 CREATE TABLE analytics_devops_adoption_segments (
     id bigint NOT NULL,
-    name text NOT NULL,
+    name text,
     last_recorded_at timestamp with time zone,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
+    namespace_id integer,
     CONSTRAINT check_4be7a006fd CHECK ((char_length(name) <= 255))
 );
 
@@ -10505,6 +10506,24 @@ CREATE SEQUENCE ci_job_variables_id_seq
 
 ALTER SEQUENCE ci_job_variables_id_seq OWNED BY ci_job_variables.id;
 
+CREATE TABLE ci_namespace_monthly_usages (
+    id bigint NOT NULL,
+    namespace_id bigint NOT NULL,
+    date date NOT NULL,
+    additional_amount_available integer DEFAULT 0 NOT NULL,
+    amount_used numeric(18,2) DEFAULT 0.0 NOT NULL,
+    CONSTRAINT ci_namespace_monthly_usages_year_month_constraint CHECK ((date = date_trunc('month'::text, (date)::timestamp with time zone)))
+);
+
+CREATE SEQUENCE ci_namespace_monthly_usages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_namespace_monthly_usages_id_seq OWNED BY ci_namespace_monthly_usages.id;
+
 CREATE TABLE ci_pipeline_artifacts (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -10701,6 +10720,23 @@ CREATE SEQUENCE ci_platform_metrics_id_seq
     CACHE 1;
 
 ALTER SEQUENCE ci_platform_metrics_id_seq OWNED BY ci_platform_metrics.id;
+
+CREATE TABLE ci_project_monthly_usages (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    date date NOT NULL,
+    amount_used numeric(18,2) DEFAULT 0.0 NOT NULL,
+    CONSTRAINT ci_project_monthly_usages_year_month_constraint CHECK ((date = date_trunc('month'::text, (date)::timestamp with time zone)))
+);
+
+CREATE SEQUENCE ci_project_monthly_usages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_project_monthly_usages_id_seq OWNED BY ci_project_monthly_usages.id;
 
 CREATE TABLE ci_refs (
     id bigint NOT NULL,
@@ -10988,6 +11024,7 @@ CREATE TABLE cluster_agent_tokens (
     updated_at timestamp with time zone NOT NULL,
     agent_id bigint NOT NULL,
     token_encrypted text NOT NULL,
+    created_by_user_id bigint,
     CONSTRAINT check_c60daed227 CHECK ((char_length(token_encrypted) <= 255))
 );
 
@@ -17750,6 +17787,11 @@ CREATE SEQUENCE user_details_user_id_seq
 
 ALTER SEQUENCE user_details_user_id_seq OWNED BY user_details.user_id;
 
+CREATE TABLE user_follow_users (
+    follower_id integer NOT NULL,
+    followee_id integer NOT NULL
+);
+
 CREATE TABLE user_highest_roles (
     user_id bigint NOT NULL,
     updated_at timestamp with time zone NOT NULL,
@@ -18741,6 +18783,8 @@ ALTER TABLE ONLY ci_job_artifacts ALTER COLUMN id SET DEFAULT nextval('ci_job_ar
 
 ALTER TABLE ONLY ci_job_variables ALTER COLUMN id SET DEFAULT nextval('ci_job_variables_id_seq'::regclass);
 
+ALTER TABLE ONLY ci_namespace_monthly_usages ALTER COLUMN id SET DEFAULT nextval('ci_namespace_monthly_usages_id_seq'::regclass);
+
 ALTER TABLE ONLY ci_pipeline_artifacts ALTER COLUMN id SET DEFAULT nextval('ci_pipeline_artifacts_id_seq'::regclass);
 
 ALTER TABLE ONLY ci_pipeline_chat_data ALTER COLUMN id SET DEFAULT nextval('ci_pipeline_chat_data_id_seq'::regclass);
@@ -18758,6 +18802,8 @@ ALTER TABLE ONLY ci_pipelines ALTER COLUMN id SET DEFAULT nextval('ci_pipelines_
 ALTER TABLE ONLY ci_pipelines_config ALTER COLUMN pipeline_id SET DEFAULT nextval('ci_pipelines_config_pipeline_id_seq'::regclass);
 
 ALTER TABLE ONLY ci_platform_metrics ALTER COLUMN id SET DEFAULT nextval('ci_platform_metrics_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_project_monthly_usages ALTER COLUMN id SET DEFAULT nextval('ci_project_monthly_usages_id_seq'::regclass);
 
 ALTER TABLE ONLY ci_refs ALTER COLUMN id SET DEFAULT nextval('ci_refs_id_seq'::regclass);
 
@@ -19854,6 +19900,9 @@ ALTER TABLE ONLY ci_job_artifacts
 ALTER TABLE ONLY ci_job_variables
     ADD CONSTRAINT ci_job_variables_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY ci_namespace_monthly_usages
+    ADD CONSTRAINT ci_namespace_monthly_usages_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY ci_pipeline_artifacts
     ADD CONSTRAINT ci_pipeline_artifacts_pkey PRIMARY KEY (id);
 
@@ -19880,6 +19929,9 @@ ALTER TABLE ONLY ci_pipelines
 
 ALTER TABLE ONLY ci_platform_metrics
     ADD CONSTRAINT ci_platform_metrics_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_project_monthly_usages
+    ADD CONSTRAINT ci_project_monthly_usages_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY ci_refs
     ADD CONSTRAINT ci_refs_pkey PRIMARY KEY (id);
@@ -20916,6 +20968,9 @@ ALTER TABLE ONLY user_custom_attributes
 ALTER TABLE ONLY user_details
     ADD CONSTRAINT user_details_pkey PRIMARY KEY (user_id);
 
+ALTER TABLE ONLY user_follow_users
+    ADD CONSTRAINT user_follow_users_pkey PRIMARY KEY (follower_id, followee_id);
+
 ALTER TABLE ONLY user_highest_roles
     ADD CONSTRAINT user_highest_roles_pkey PRIMARY KEY (user_id);
 
@@ -21193,6 +21248,8 @@ CREATE INDEX code_owner_approval_required ON protected_branches USING btree (pro
 
 CREATE INDEX commit_id_and_note_id_index ON commit_user_mentions USING btree (commit_id, note_id);
 
+CREATE INDEX composer_cache_files_index_on_deleted_at ON packages_composer_cache_files USING btree (delete_at, id);
+
 CREATE UNIQUE INDEX design_management_designs_versions_uniqueness ON design_management_designs_versions USING btree (design_id, version_id);
 
 CREATE INDEX design_user_mentions_on_design_id_and_note_id_index ON design_user_mentions USING btree (design_id, note_id);
@@ -21256,6 +21313,8 @@ CREATE UNIQUE INDEX idx_metrics_users_starred_dashboard_on_user_project_dashboar
 CREATE INDEX idx_mr_cc_diff_files_on_mr_cc_id_and_sha ON merge_request_context_commit_diff_files USING btree (merge_request_context_commit_id, sha);
 
 CREATE UNIQUE INDEX idx_on_compliance_management_frameworks_namespace_id_name ON compliance_management_frameworks USING btree (namespace_id, name);
+
+CREATE INDEX idx_on_issues_where_service_desk_reply_to_is_not_null ON issues USING btree (id) WHERE (service_desk_reply_to IS NOT NULL);
 
 CREATE INDEX idx_packages_build_infos_on_package_id ON packages_build_infos USING btree (package_id);
 
@@ -21363,7 +21422,7 @@ CREATE INDEX index_analytics_ca_project_stages_on_start_event_label_id ON analyt
 
 CREATE INDEX index_analytics_cycle_analytics_group_stages_custom_only ON analytics_cycle_analytics_group_stages USING btree (id) WHERE (custom = true);
 
-CREATE UNIQUE INDEX index_analytics_devops_adoption_segments_on_name ON analytics_devops_adoption_segments USING btree (name);
+CREATE UNIQUE INDEX index_analytics_devops_adoption_segments_on_namespace_id ON analytics_devops_adoption_segments USING btree (namespace_id);
 
 CREATE INDEX index_application_settings_on_custom_project_templates_group_id ON application_settings USING btree (custom_project_templates_group_id);
 
@@ -21645,6 +21704,8 @@ CREATE INDEX index_ci_job_variables_on_job_id ON ci_job_variables USING btree (j
 
 CREATE UNIQUE INDEX index_ci_job_variables_on_key_and_job_id ON ci_job_variables USING btree (key, job_id);
 
+CREATE UNIQUE INDEX index_ci_namespace_monthly_usages_on_namespace_id_and_date ON ci_namespace_monthly_usages USING btree (namespace_id, date);
+
 CREATE INDEX index_ci_pipeline_artifacts_on_expire_at ON ci_pipeline_artifacts USING btree (expire_at);
 
 CREATE INDEX index_ci_pipeline_artifacts_on_pipeline_id ON ci_pipeline_artifacts USING btree (pipeline_id);
@@ -21708,6 +21769,8 @@ CREATE INDEX index_ci_pipelines_on_status_and_id ON ci_pipelines USING btree (st
 CREATE INDEX index_ci_pipelines_on_user_id_and_created_at_and_config_source ON ci_pipelines USING btree (user_id, created_at, config_source);
 
 CREATE INDEX index_ci_pipelines_on_user_id_and_created_at_and_source ON ci_pipelines USING btree (user_id, created_at, source);
+
+CREATE UNIQUE INDEX index_ci_project_monthly_usages_on_project_id_and_date ON ci_project_monthly_usages USING btree (project_id, date);
 
 CREATE UNIQUE INDEX index_ci_refs_on_project_id_and_ref_path ON ci_refs USING btree (project_id, ref_path);
 
@@ -21781,6 +21844,8 @@ CREATE UNIQUE INDEX index_ci_variables_on_project_id_and_key_and_environment_sco
 
 CREATE INDEX index_cluster_agent_tokens_on_agent_id ON cluster_agent_tokens USING btree (agent_id);
 
+CREATE INDEX index_cluster_agent_tokens_on_created_by_user_id ON cluster_agent_tokens USING btree (created_by_user_id);
+
 CREATE UNIQUE INDEX index_cluster_agent_tokens_on_token_encrypted ON cluster_agent_tokens USING btree (token_encrypted);
 
 CREATE UNIQUE INDEX index_cluster_agents_on_project_id_and_name ON cluster_agents USING btree (project_id, name);
@@ -21848,6 +21913,8 @@ CREATE INDEX index_clusters_on_management_project_id ON clusters USING btree (ma
 CREATE INDEX index_clusters_on_user_id ON clusters USING btree (user_id);
 
 CREATE UNIQUE INDEX index_commit_user_mentions_on_note_id ON commit_user_mentions USING btree (note_id);
+
+CREATE INDEX index_composer_cache_files_where_namespace_id_is_null ON packages_composer_cache_files USING btree (id) WHERE (namespace_id IS NULL);
 
 CREATE INDEX index_container_expiration_policies_on_next_run_at_and_enabled ON container_expiration_policies USING btree (next_run_at, enabled);
 
@@ -23771,6 +23838,8 @@ CREATE UNIQUE INDEX uniq_pkgs_debian_project_distributions_project_id_and_suite 
 
 CREATE UNIQUE INDEX unique_merge_request_metrics_by_merge_request_id ON merge_request_metrics USING btree (merge_request_id);
 
+CREATE INDEX user_follow_users_followee_id_idx ON user_follow_users USING btree (followee_id);
+
 CREATE UNIQUE INDEX vulnerability_feedback_unique_idx ON vulnerability_feedback USING btree (project_id, category, feedback_type, project_fingerprint);
 
 CREATE UNIQUE INDEX vulnerability_occurrence_pipelines_on_unique_keys ON vulnerability_occurrence_pipelines USING btree (occurrence_id, pipeline_id);
@@ -24303,6 +24372,9 @@ ALTER TABLE ONLY vulnerabilities
 ALTER TABLE ONLY index_statuses
     ADD CONSTRAINT fk_74b2492545 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY cluster_agent_tokens
+    ADD CONSTRAINT fk_75008f3553 FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY vulnerabilities
     ADD CONSTRAINT fk_76bc5f5455 FOREIGN KEY (resolved_by_id) REFERENCES users(id) ON DELETE SET NULL;
 
@@ -24701,6 +24773,9 @@ ALTER TABLE ONLY ci_pipeline_variables
 
 ALTER TABLE ONLY design_management_designs_versions
     ADD CONSTRAINT fk_f4d25ba00c FOREIGN KEY (version_id) REFERENCES design_management_versions(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY analytics_devops_adoption_segments
+    ADD CONSTRAINT fk_f5aa768998 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY protected_tag_create_access_levels
     ADD CONSTRAINT fk_f7dfda8c51 FOREIGN KEY (protected_tag_id) REFERENCES protected_tags(id) ON DELETE CASCADE;
@@ -25220,6 +25295,9 @@ ALTER TABLE ONLY resource_iteration_events
 
 ALTER TABLE ONLY status_page_settings
     ADD CONSTRAINT fk_rails_506e5ba391 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_project_monthly_usages
+    ADD CONSTRAINT fk_rails_508bcd4aa6 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY project_repository_storage_moves
     ADD CONSTRAINT fk_rails_5106dbd44a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26188,6 +26266,12 @@ ALTER TABLE ONLY u2f_registrations
     ADD CONSTRAINT fk_u2f_registrations_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE product_analytics_events_experimental
-    ADD CONSTRAINT product_analytics_events_experimental_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;-- schema_migrations.version information is no longer stored in this file,
+    ADD CONSTRAINT product_analytics_events_experimental_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY user_follow_users
+    ADD CONSTRAINT user_follow_users_followee_id_fkey FOREIGN KEY (followee_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY user_follow_users
+    ADD CONSTRAINT user_follow_users_follower_id_fkey FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE;-- schema_migrations.version information is no longer stored in this file,
 -- but instead tracked in the db/schema_migrations directory
 -- see https://gitlab.com/gitlab-org/gitlab/-/issues/218590 for details

@@ -18,7 +18,10 @@ module Gitlab
         # all models. https://gitlab.com/gitlab-org/gitlab/-/issues/280768
         scope :verification_succeeded, -> { none }
         scope :verification_failed, -> { none }
+
+        # These scopes are intended to be overridden as needed
         scope :available_replicables, -> { all }
+        scope :available_verifiables, -> { self.respond_to?(:with_files_stored_locally) ? available_replicables.with_files_stored_locally : available_replicables }
       end
 
       class_methods do

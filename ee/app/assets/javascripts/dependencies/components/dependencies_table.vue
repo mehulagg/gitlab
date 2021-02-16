@@ -1,5 +1,4 @@
 <script>
-import { cloneDeep } from 'lodash';
 import {
   GlBadge,
   GlIcon,
@@ -9,10 +8,11 @@ import {
   GlPopover,
   GlLink,
 } from '@gitlab/ui';
+import { cloneDeep } from 'lodash';
 import { s__ } from '~/locale';
 import DependencyLicenseLinks from './dependency_license_links.vue';
-import DependencyVulnerabilities from './dependency_vulnerabilities.vue';
 import DependencyLocation from './dependency_location.vue';
+import DependencyVulnerabilities from './dependency_vulnerabilities.vue';
 
 const tdClass = (value, key, item) => {
   const classes = [];

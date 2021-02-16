@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
 import { pick } from 'lodash';
 
-import { stubComponent } from 'helpers/stub_component';
 import EpicsListRoot from 'ee/epics_list/components/epics_list_root.vue';
 import { EpicsSortOptions } from 'ee/epics_list/constants';
 import { mockFormattedEpic } from 'ee_jest/roadmap/mock_data';
+import { stubComponent } from 'helpers/stub_component';
 import { mockAuthor, mockLabels } from 'jest/issuable_list/mock_data';
 
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';

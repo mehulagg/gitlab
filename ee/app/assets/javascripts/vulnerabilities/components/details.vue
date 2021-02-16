@@ -1,10 +1,10 @@
 <script>
 import { GlLink, GlSprintf, GlTooltipDirective, GlIcon } from '@gitlab/ui';
-import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
-import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import { bodyWithFallBack } from 'ee/vue_shared/security_reports/components/helpers';
-import CodeBlock from '~/vue_shared/components/code_block.vue';
+import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
+import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
 import { __ } from '~/locale';
+import CodeBlock from '~/vue_shared/components/code_block.vue';
 import DetailItem from './detail_item.vue';
 
 export default {

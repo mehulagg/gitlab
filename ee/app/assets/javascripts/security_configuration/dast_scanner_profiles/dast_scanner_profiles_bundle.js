@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import apolloProvider from './graphql/provider';
 import DastScannerProfileForm from './components/dast_scanner_profile_form.vue';
+import apolloProvider from './graphql/provider';
 
 export default () => {
   const el = document.querySelector('.js-dast-scanner-profile-form');

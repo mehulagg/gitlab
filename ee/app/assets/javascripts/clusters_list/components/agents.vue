@@ -1,7 +1,7 @@
 <script>
 import { GlAlert, GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
-import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
 import { MAX_LIST_COUNT } from '../constants';
+import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
 import AgentEmptyState from './agent_empty_state.vue';
 import AgentTable from './agent_table.vue';
 

@@ -1,5 +1,5 @@
-import { mount, shallowMount } from '@vue/test-utils';
 import { GlModal } from '@gitlab/ui';
+import { mount, shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import IssueNote from 'ee/vue_shared/security_reports/components/issue_note.vue';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';

@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import DevopsAdoptionTableCellFlag from 'ee/admin/dev_ops_report/components/devops_adoption_table_cell_flag.vue';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 describe('DevopsAdoptionTableCellFlag', () => {
   let wrapper;

@@ -1,7 +1,7 @@
-import Vue from 'vue';
 import { pull, union } from 'lodash';
-import { s__ } from '~/locale';
+import Vue from 'vue';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { s__ } from '~/locale';
 import { formatIssue, moveIssueListHelper } from '../boards_util';
 import * as mutationTypes from './mutation_types';
 
@@ -273,5 +273,13 @@ export default {
 
   [mutationTypes.SET_ADD_COLUMN_FORM_VISIBLE]: (state, visible) => {
     state.addColumnFormVisible = visible;
+  },
+
+  [mutationTypes.ADD_LIST_TO_HIGHLIGHTED_LISTS]: (state, listId) => {
+    state.highlightedLists.push(listId);
+  },
+
+  [mutationTypes.REMOVE_LIST_FROM_HIGHLIGHTED_LISTS]: (state, listId) => {
+    state.highlightedLists = state.highlightedLists.filter((id) => id !== listId);
   },
 };

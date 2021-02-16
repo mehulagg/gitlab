@@ -19,7 +19,6 @@ describe('EE ProtectedBranchEdit', () => {
     </div>`);
 
     jest.spyOn(ProtectedBranchEdit.prototype, 'buildDropdowns').mockImplementation();
-    gon.features = { deployKeysOnProtectedBranches: false };
 
     mock = new MockAdapter(axios);
   });

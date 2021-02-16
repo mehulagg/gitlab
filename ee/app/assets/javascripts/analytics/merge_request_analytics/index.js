@@ -1,11 +1,11 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
-import { urlQueryToFilter } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import { getParameterValues } from '~/lib/utils/url_utility';
 import { ITEM_TYPE } from '~/groups/constants';
-import createStore from './store';
+import createDefaultClient from '~/lib/graphql';
+import { getParameterValues } from '~/lib/utils/url_utility';
+import { urlQueryToFilter } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import MergeRequestAnalyticsApp from './components/app.vue';
+import createStore from './store';
 import { parseAndValidateDates } from './utils';
 
 Vue.use(VueApollo);

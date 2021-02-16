@@ -9,8 +9,8 @@ import {
   GlTable,
   GlTooltip,
 } from '@gitlab/ui';
-import { s__ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { s__ } from '~/locale';
 import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
@@ -80,6 +80,7 @@ export default {
     lockingState: s__('Terraform|Locking state'),
     name: s__('Terraform|Name'),
     pipeline: s__('Terraform|Pipeline'),
+    removing: s__('Terraform|Removing'),
     unknownUser: s__('Terraform|Unknown User'),
     unlockingState: s__('Terraform|Unlocking state'),
     updatedUser: s__('Terraform|%{user} updated %{timeAgo}'),
@@ -138,6 +139,15 @@ export default {
           <p class="gl-display-flex gl-justify-content-start gl-align-items-baseline gl-m-0">
             <gl-loading-icon class="gl-pr-1" />
             {{ loadingLockText(item) }}
+          </p>
+        </div>
+
+        <div v-else-if="item.loadingRemove" class="gl-mx-3">
+          <p
+            class="gl-display-flex gl-justify-content-start gl-align-items-baseline gl-m-0 gl-text-red-500"
+          >
+            <gl-loading-icon class="gl-pr-1" />
+            {{ $options.i18n.removing }}
           </p>
         </div>
 

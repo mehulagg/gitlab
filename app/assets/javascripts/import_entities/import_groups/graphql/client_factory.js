@@ -1,8 +1,8 @@
+import createFlash from '~/flash';
+import createDefaultClient from '~/lib/graphql';
 import axios from '~/lib/utils/axios_utils';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
-import createDefaultClient from '~/lib/graphql';
 import { s__ } from '~/locale';
-import createFlash from '~/flash';
 import { STATUSES } from '../../constants';
 import availableNamespacesQuery from './queries/available_namespaces.query.graphql';
 import { SourceGroupsManager } from './services/source_groups_manager';
@@ -24,6 +24,14 @@ export function createResolvers({ endpoints }) {
         const {
           data: { availableNamespaces },
         } = await client.query({ query: availableNamespacesQuery });
+
+        if (!statusPoller) {
+          statusPoller = new StatusPoller({
+            client,
+            pollPath: endpoints.jobs,
+          });
+          statusPoller.startPolling();
+        }
 
         return axios
           .get(endpoints.status, {
@@ -83,7 +91,7 @@ export function createResolvers({ endpoints }) {
         const group = groupManager.findById(sourceGroupId);
         groupManager.setImportStatus(group, STATUSES.SCHEDULING);
         try {
-          await axios.post(endpoints.createBulkImport, {
+          const response = await axios.post(endpoints.createBulkImport, {
             bulk_import: [
               {
                 source_type: 'group_entity',
@@ -94,10 +102,7 @@ export function createResolvers({ endpoints }) {
             ],
           });
           groupManager.setImportStatus(group, STATUSES.STARTED);
-          if (!statusPoller) {
-            statusPoller = new StatusPoller({ client, interval: 3000 });
-            statusPoller.startPolling();
-          }
+          SourceGroupsManager.attachImportId(group, response.data.id);
         } catch (e) {
           createFlash({
             message: s__('BulkImport|Importing the group failed'),
