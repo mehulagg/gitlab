@@ -9,21 +9,20 @@ type: reference, howto
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4348) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
 
-Your application is exposed to a new category of attacks when it is running. For example,
-cross-site scripting attacks and authentication flaws only occur at runtime. Dynamic Application
-Security Testing (DAST) checks an application for known vulnerabilities in a deployed environment.
+Your application is exposed to a new category of attacks once deployed into a new environment. For
+example, application server misconfigurations or incorrect assumptions about security controls may
+not be visible from source code alone. Dynamic Application Security Testing (DAST) checks an
+application for these types of vulnerabilities in a deployed environment.
 
 NOTE:
 The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
 explains how 4 of the top 6 attacks were application based. Download it to learn how to protect your
 organization.
 
-## GitLab DAST
-
-GitLab DAST is initiated by a merge request and runs as a job in the CI/CD pipeline. Your running
-web application is analyzed for known vulnerabilities. GitLab checks the DAST report, compares the
-vulnerabilities found between the source and target branches, and shows the information on the merge
-request.
+In GitLab, DAST is commonly initiated by a merge request and runs as a job in the CI/CD pipeline.
+You can also run a DAST scan on demand, outside the CI/CD pipeline. Your running web application is
+analyzed for known vulnerabilities. GitLab checks the DAST report, compares the vulnerabilities
+found between the source and target branches, and shows any relevant findings on the merge request.
 
 ![DAST Widget](img/dast_v13_4.png)
 
@@ -37,17 +36,20 @@ to analyze your running web application.
 
 - GitLab Runner with the [`docker` executor](https://docs.gitlab.com/runner/executors/docker.html).
 
-## Enable GitLab DAST
+## Enable DAST
 
-To enable GitLab DAST, either:
+To enable DAST, either:
 
 - Enable [Auto DAST](../../../topics/autodevops/stages.md#auto-dast), provided by
   [Auto DevOps](../../../topics/autodevops/index.md).
 - [Include a GitLab DAST template](#gitlab-dast-ci-template) in your existing `.gitlab-ci.yml` file.
 
-### GitLab DAST CI template
+### DAST CI template
 
-The GitLab DAST job is defined in a CI/CD template. The following templates are available:
+The DAST job is defined in a CI/CD template file you reference in your CI/CD configuration file. The
+template is included with GitLab. You benefit from any improvements and additions.
+
+The following templates are available:
 
 - [`DAST.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST.gitlab-ci.yml):
   Stable version of the DAST CI/CD template.
@@ -125,9 +127,9 @@ image. Using the `DAST_VERSION` variable, you can choose how DAST updates:
 
 Find the latest DAST versions on the [Releases](https://gitlab.com/gitlab-org/security-products/dast/-/releases) page.
 
-### GitLab DAST application analysis
+### DAST application analysis
 
-By default, DAST executes [ZAP Baseline Scan](https://www.zaproxy.org/docs/docker/baseline-scan/)
+By default, DAST executes [ZAP's Baseline Scan](https://www.zaproxy.org/docs/docker/baseline-scan/)
 and performs passive scanning only. It doesn't actively attack your application.
 However, DAST can be [configured](#full-scan)
 to also perform an *active scan*: attack your application and produce a more extensive security report.
@@ -139,9 +141,9 @@ example, if the DAST job finishes but the SAST job fails, the security dashboard
 results. On failure, the analyzer outputs an
 [exit code](../../../development/integrations/secure.md#exit-code).
 
-### When DAST scans run
+#### DAST job order
 
-When using `DAST.gitlab-ci.yml` template, the `dast` job is run last as shown in
+When using the `DAST.gitlab-ci.yml` template, the `dast` job is run last as shown in
 the example below. To ensure DAST is scanning the latest code, your CI pipeline
 should deploy changes to the web server in one of the jobs preceding the `dast` job.
 
