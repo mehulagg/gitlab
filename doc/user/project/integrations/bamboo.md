@@ -58,10 +58,16 @@ service in GitLab.
 1. Save or optionally click 'Test Settings'. Please note that 'Test Settings'
    actually triggers a build in Bamboo.
 
-## Troubleshooting
+### Troubleshooting
+
+## Builds Not Triggered
 
 If builds are not triggered, ensure you entered the right GitLab IP address in
 Bamboo under 'Trigger IP addresses'. Also check [service hook logs](overview.md#troubleshooting-integrations) for request failures.
 
 NOTE:
 Starting with GitLab 8.14.0, builds are triggered on push events.
+
+## Advanced Atlassian Bamboo features not available in GitLab UI
+
+Advanced Atlassian Bamboo features are not compatible with GitLab. This includes such things like the inability to watch the build logs from the GitLab UI. 
