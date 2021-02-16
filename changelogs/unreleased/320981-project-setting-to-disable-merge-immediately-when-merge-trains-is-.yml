@@ -1,0 +1,6 @@
+---
+title: Add project setting to disable manual merge for projects where merge trains
+  are enabled
+merge_request:
+author:
+type: added

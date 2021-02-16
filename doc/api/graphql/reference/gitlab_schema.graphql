@@ -2696,6 +2696,11 @@ input CiCdSettingsUpdateInput {
   Indicates if the latest artifact should be kept for this project.
   """
   keepLatestArtifact: Boolean
+
+  """
+  Indicates if manual merges(api, button, quick action) are disabled for this project when merge trains are enabled.
+  """
+  mergeTrainsManualMergeDisabled: Boolean
 }
 
 """
@@ -20843,6 +20848,11 @@ type ProjectCiCdSetting {
   Whether merge trains are enabled.
   """
   mergeTrainsEnabled: Boolean
+
+  """
+  Whether manual merges(api, button, quick action) are disabled for projects where merge trains are enabled.
+  """
+  mergeTrainsManualMergeDisabled: Boolean!
 
   """
   Project the CI/CD settings belong to.

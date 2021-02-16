@@ -15845,7 +15845,8 @@ CREATE TABLE project_ci_cd_settings (
     merge_trains_enabled boolean DEFAULT false,
     auto_rollback_enabled boolean DEFAULT false NOT NULL,
     keep_latest_artifact boolean DEFAULT true NOT NULL,
-    restrict_user_defined_variables boolean DEFAULT false NOT NULL
+    restrict_user_defined_variables boolean DEFAULT false NOT NULL,
+    merge_trains_manual_merge_disabled boolean DEFAULT false
 );
 
 CREATE SEQUENCE project_ci_cd_settings_id_seq

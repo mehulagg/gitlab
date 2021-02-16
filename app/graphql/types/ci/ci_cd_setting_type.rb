@@ -21,3 +21,5 @@ module Types
     end
   end
 end
+
+Types::Ci::CiCdSettingType.prepend_if_ee('EE::Types::Ci::CiCdSettingType')
