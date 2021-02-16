@@ -843,7 +843,7 @@ RSpec.shared_examples 'Pipeline Processing Service' do
       create(:ci_build_need, build: deploy, name: 'linux:build')
     end
 
-    it 'makes deploy DAG to be skipeed' do
+    it 'makes deploy DAG to be skipped' do
       expect(process_pipeline).to be_truthy
 
       expect(stages).to eq(%w(skipped skipped))
