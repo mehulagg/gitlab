@@ -9,6 +9,7 @@ module DastOnDemandScans
       ServiceResponse.success(
         payload: default_config.merge(scanner_profile_config)
       )
+    end
 
     private
 
