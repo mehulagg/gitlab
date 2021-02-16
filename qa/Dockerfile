@@ -38,6 +38,16 @@ RUN unzip chromedriver_linux64.zip -d /usr/local/bin
 RUN rm -f chromedriver_linux64.zip
 
 ##
+# Install root certificate
+#
+
+COPY ./qa/tls_certificates/authority/root-ca.crt /tmp/CA-certs/
+RUN mkdir -p /usr/share/ca-certificates/extra \
+    && cp /tmp/CA-certs/*.crt /usr/share/ca-certificates/extra \
+    && update-ca-certificates
+RUN rm -r /tmp/CA-certs/
+
+##
 # Install gcloud and kubectl CLI used in Auto DevOps test to create K8s
 # clusters
 #

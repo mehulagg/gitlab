@@ -73,10 +73,6 @@ module QA
               server: "ALL"
             })
 
-          if QA::Runtime::Env.accept_insecure_certs?
-            capabilities['acceptInsecureCerts'] = true
-          end
-
           # QA::Runtime::Env.browser.capitalize will work for every driver type except PhantomJS.
           # We will have no use to use PhantomJS so this shouldn't be a problem.
           options = Selenium::WebDriver.const_get(QA::Runtime::Env.browser.capitalize, false)::Options.new
