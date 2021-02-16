@@ -3189,6 +3189,16 @@ type CiJob {
   detailedStatus: DetailedStatus
 
   """
+  Duration of the job in seconds.
+  """
+  duration: Int
+
+  """
+  When a job has finished running
+  """
+  finishedAt: Time
+
+  """
   Name of the job.
   """
   name: String
