@@ -53,6 +53,19 @@ Once users have signed into GitLab using the SSO SAML setup, changing the `NameI
 
 We recommend setting the NameID format to `Persistent` unless using a field (such as email) that requires a different format.
 
+### Assertions
+
+For users to be created with the right information with the improved [user access and management](#user-access-and-management),
+the following user details need to be passed to GitLab as SAML assertions.
+
+| Field           | Supported keys |
+|-----------------|----------------|
+| Email (required)| `email`, `mail` |
+| Username        | `username` |
+| Full Name       | `name` |
+| First Name      | `first_name`, `firstname`, `firstName` |
+| Last Name       | `last_name`, `lastname`, `lastName` |
+
 ### Metadata configuration
 
 GitLab provides metadata XML that can be used to configure your Identity Provider.
