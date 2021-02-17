@@ -27,7 +27,8 @@ export const REMOVE_MEMBER_MODAL_ID = 'member-remove-modal';
 export const REMOVE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE = s__(
   `Billing|You are about to remove user %{username} from your subscription.
 If you continue, the user will be removed from the %{namespace}
-group and all its subgroups and projects.
+group and all its subgroups and projects. If %{username} owns any
+groups, projects, or subscriptions, you may lose access to them.
 This action can't be undone.`,
 );
 export const AVATAR_SIZE = 32;
