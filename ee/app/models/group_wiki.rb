@@ -45,12 +45,8 @@ class GroupWiki < Wiki
 
   override :after_post_receive
   def after_post_receive
-    # Update group wiki storage statistics directly. At the moment, since groups
-    # can only have one type of repository, and it's not a very demanding one
-    # we can update the statistics in the same thread. Projects do this
-    # in the ProjectCacheWorker because it can be a more stressing environment
-    # because several updates can trigger the same statistics update.
-    Groups::UpdateStatisticsService.new(group).execute # rubocop:disable CodeReuse/ServiceClass
+    # Update group wiki storage statistics
+    Groups::UpdateStatisticsWorker.perform_async(group.id, [:wiki_size])
   end
 
   override :git_garbage_collect_worker_klass
