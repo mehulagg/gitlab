@@ -71,8 +71,8 @@ export default {
       this.currentCategory = category;
     },
     scrollToCategory(category) {
-      const categoryIndex = Object.keys(this.categories).indexOf(category);
-      const scrollTop = Object.keys(this.categories).reduce((acc, key, index) => {
+      const categoryIndex = this.categoryNames.indexOf(category);
+      const scrollTop = this.categoryNames.reduce((acc, key, index) => {
         if (index < categoryIndex) {
           return acc + this.categories[key].height;
         }
