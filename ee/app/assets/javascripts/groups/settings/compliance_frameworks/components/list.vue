@@ -1,9 +1,9 @@
 <script>
 import { GlAlert, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { s__ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
 import EmptyState from './list_empty_state.vue';

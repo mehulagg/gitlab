@@ -1,4 +1,5 @@
 import { GlAlert, GlLink } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import DynamicFields from 'ee/security_configuration/components/dynamic_fields.vue';
@@ -7,7 +8,6 @@ import AnalyzerConfiguration from 'ee/security_configuration/sast/components/ana
 import ConfigurationForm from 'ee/security_configuration/sast/components/configuration_form.vue';
 import { redirectTo } from '~/lib/utils/url_utility';
 import configureSastMutation from '~/security_configuration/graphql/configure_sast.mutation.graphql';
-import * as Sentry from '~/sentry/wrapper';
 import { makeEntities, makeSastCiConfiguration } from '../../helpers';
 
 jest.mock('~/lib/utils/url_utility', () => ({

@@ -1,10 +1,10 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import Api from 'ee/api';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
-import * as Sentry from '~/sentry/wrapper';
 import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 import {
   allChartDefinitions,

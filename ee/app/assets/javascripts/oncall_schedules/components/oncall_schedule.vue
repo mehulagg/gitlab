@@ -7,6 +7,7 @@ import {
   GlModalDirective,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { capitalize } from 'lodash';
 import { fetchPolicies } from '~/lib/graphql';
 import {
@@ -17,7 +18,6 @@ import {
   nDaysAfter,
 } from '~/lib/utils/datetime_utility';
 import { s__, __ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
 import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
