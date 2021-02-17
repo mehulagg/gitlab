@@ -14,13 +14,13 @@ with their GitHub account.
 
 To enable the GitHub OmniAuth provider, you need an OAuth 2 Client ID and Client Secret from GitHub. To get these credentials, sign into GitHub and follow their procedure for [Creating an OAuth App](https://docs.github.com/apps/building-oauth-apps/creating-an-oauth-app/).
 
+WARNING:
+To help prevent an [OAuth 2 covert redirect](https://oauth.net/advisories/2014-1-covert-redirect/) vulnerability, append `/users/auth` to the end of the GitHub authorization callback URL. Note that GitHub doesn't validate that subdomain part of the `redirect_uri` matches the authorization callback URL before redirecting the user during the OAuth flow, this means that an XSS or an open redirect on any subdomain of your website could enable the covert redirect attack.
+
 When you create an OAuth 2 app in GitHub, you need the following information:
 
 - The URL of your GitLab instance, such as `https://gitlab.example.com`.
 - The authorization callback URL; in this case, `https://gitlab.example.com/users/auth`. Include the port number if your GitLab instance uses a non-default port.
-
-NOTE:
-To prevent an [OAuth2 covert redirect](https://oauth.net/advisories/2014-1-covert-redirect/) vulnerability, append `/users/auth` to the end of the GitHub authorization callback URL.
 
 See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration) for initial settings.
 
