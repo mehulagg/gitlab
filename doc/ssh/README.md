@@ -236,10 +236,10 @@ Verify that your SSH key was added correctly.
    authenticity of the GitLab host. If you see a message like:
 
    ```plaintext
-   The authenticity of host 'gitlab.com (35.231.145.151)' can't be established.
+   The authenticity of host 'gitlab.example.com (35.231.145.151)' can't be established.
    ECDSA key fingerprint is SHA256:HbW3g8zUjNSksFbqTiUWPWg2Bq1x8xdGUrliXFzSnUw.
    Are you sure you want to continue connecting (yes/no)? yes
-   Warning: Permanently added 'gitlab.com' (ECDSA) to the list of known hosts.
+   Warning: Permanently added 'gitlab.example.com' (ECDSA) to the list of known hosts.
    ```
 
    Type `yes` and press Enter.
