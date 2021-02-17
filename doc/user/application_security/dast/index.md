@@ -767,7 +767,7 @@ To run an on-demand scan, either:
 - [Create and run an on-demand scan](#create-and-run-an-on-demand-scan).
 - [Run a previously saved on-demand scan](#run-a-saved-on-demand-scan).
 
-### Create and run an on-demand scan
+#### Create and run an on-demand scan
 
 1. From your project's home page, go to **Security & Compliance > On-demand Scans** in the left
    sidebar.
