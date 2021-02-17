@@ -1,7 +1,9 @@
 import { omitBy, isUndefined } from 'lodash';
 
+const standardContext = { ...window.gl?.snowplowStandardContext };
+
 export const STANDARD_CONTEXT = {
-  schema: 'iglu:com.gitlab/gitlab_standard/jsonschema/1-0-3',
+  schema: standardContext.url,
   data: {
     environment: process.env.NODE_ENV,
     source: 'gitlab-javascript',

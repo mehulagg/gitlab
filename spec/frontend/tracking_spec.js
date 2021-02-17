@@ -1,6 +1,8 @@
 import { setHTMLFixture } from 'helpers/fixtures';
 import Tracking, { initUserTracking, initDefaultTrackers, STANDARD_CONTEXT } from '~/tracking';
 
+const TEST_STANDARD_CONTEXT_URL = 'iglu:com.gitlab/gitlab_standard/jsonschema/1-0-0';
+
 describe('Tracking', () => {
   let snowplowSpy;
   let bindDocumentSpy;
@@ -76,6 +78,25 @@ describe('Tracking', () => {
       window.doNotTrack = undefined;
       navigator.doNotTrack = undefined;
       navigator.msDoNotTrack = undefined;
+    });
+
+    describe('builds the standard context with the required data', () => {
+      let standardContext;
+
+      beforeAll(async () => {
+        window.gl = window.gl || {};
+        window.gl.snowplowStandardContext = {
+          url: TEST_STANDARD_CONTEXT_URL,
+        };
+
+        jest.resetModules();
+
+        ({ STANDARD_CONTEXT: standardContext } = await import('~/tracking'));
+      });
+
+      it('uses proper schema url', () => {
+        expect(standardContext.schema).toBe(TEST_STANDARD_CONTEXT_URL);
+      });
     });
 
     it('tracks to snowplow (our current tracking system)', () => {
