@@ -573,8 +573,9 @@ See the following additional guides:
 ### Use separate buckets
 
 Using separate buckets for each data type is the recommended approach for GitLab.
-This ensures there are no collisions across the various types of
-data GitLab stores.
+This ensures there are no collisions across the various types of data GitLab stores.
+There are plans to [enable the use of a single bucket](https://gitlab.com/gitlab-org/gitlab/-/issues/292958)
+in the future.
 
 Helm-based installs require separate buckets to
 [handle backup restorations](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer)
