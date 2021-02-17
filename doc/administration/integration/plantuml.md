@@ -121,7 +121,7 @@ services:
 
 ### Debian/Ubuntu
 
-You can also install and configure a PlantUML server in Debian/Ubuntu distributions
+You can install and configure a PlantUML server in Debian/Ubuntu distributions
 using Tomcat:
 
 1. Run these commands to create a `plantuml.war` file from the source code:
