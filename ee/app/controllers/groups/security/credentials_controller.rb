@@ -7,7 +7,8 @@ class Groups::Security::CredentialsController < Groups::ApplicationController
   include CredentialsInventoryActions
   include Groups::SecurityFeaturesHelper
 
-  helper_method :credentials_inventory_path, :user_detail_path, :personal_access_token_revoke_path, :revoke_button_available?, :ssh_key_delete_path
+  helper_method :credentials_inventory_path, :user_detail_path, :personal_access_token_revoke_path,
+                :revoke_button_available?, :ssh_key_delete_path, :gpg_keys_available?
 
   before_action :validate_group_level_credentials_inventory_available!, only: [:index, :revoke, :destroy]
 

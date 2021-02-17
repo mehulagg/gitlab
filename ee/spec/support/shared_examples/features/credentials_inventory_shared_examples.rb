@@ -138,3 +138,41 @@ RSpec.shared_examples_for 'credentials inventory SSH keys' do
     end
   end
 end
+
+RSpec.shared_examples_for 'credentials inventory GPG keys' do
+  context 'when a GPG key is verified' do
+    let_it_be(:user) { create(:user, name: 'abc', email: GpgHelpers::User1.emails.first) }
+
+    before_all do
+      create(:gpg_key, user: user, key: GpgHelpers::User1.public_key)
+    end
+
+    before do
+      visit credentials_path
+    end
+
+    it 'shows the details', :aggregate_failures do
+      expect(first_row.text).to include('abc')
+      expect(first_row.text).to include(GpgHelpers::User1.primary_keyid)
+      expect(first_row.text).to include('Verified')
+    end
+  end
+
+  context 'when a GPG key is unverified' do
+    let_it_be(:user) { create(:user, name: 'abc', email: 'random@example.com') }
+
+    before_all do
+      create(:another_gpg_key, user: user)
+    end
+
+    before do
+      visit credentials_path
+    end
+
+    it 'shows the details', :aggregate_failures do
+      expect(first_row.text).to include('abc')
+      expect(first_row.text).to include(GpgHelpers::User1.primary_keyid2)
+      expect(first_row.text).to include('Unverified')
+    end
+  end
+end
