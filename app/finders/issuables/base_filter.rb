@@ -1,17 +1,11 @@
 module Issuables
   class BaseFilter
-    # This is used as a common filter for None / Any
-    FILTER_NONE = 'none'
-    FILTER_ANY = 'any'
-
-    # This is used in unassigning users
-    NONE = '0'
-
     attr_reader :issuables, :params
 
-    def initialize(issuables, params:, not_filters_enabled: false)
+    def initialize(issuables, params:, or_filters_enabled: false, not_filters_enabled: false)
       @issuables = issuables
       @params = params
+      @or_filters_enabled = or_filters_enabled
       @not_filters_enabled = not_filters_enabled
     end
 
@@ -21,8 +15,16 @@ module Issuables
 
     private
 
+    def or_params
+      params[:or]
+    end
+
     def not_params
       params[:not]
+    end
+
+    def or_filters_enabled?
+      @or_filters_enabled
     end
 
     def not_filters_enabled?

@@ -110,7 +110,7 @@ class EpicsFinder < IssuableFinder
   def filter_items(items)
     items = by_created_at(items)
     items = by_updated_at(items)
-    items = Issuables::AuthorFilter.new(items, params: original_params, not_filters_enabled: not_filters_enabled?).filter
+    items = Issuables::AuthorFilter.new(items, params: original_params, or_filters_enabled: or_filters_enabled?, not_filters_enabled: not_filters_enabled?).filter
     items = by_timeframe(items)
     items = by_state(items)
     items = by_label(items)
@@ -241,6 +241,13 @@ class EpicsFinder < IssuableFinder
 
   def group_projects
     Project.in_namespace(permissioned_related_groups).with_issues_available_for_user(current_user)
+  end
+
+  override :not_filters_enabled?
+  def or_filters_enabled?
+    strong_memoize(:or_filters_enabled) do
+      Feature.enabled?(:or_issuable_queries, group, default_enabled: :yaml)
+    end
   end
 
   override :not_filters_enabled?
