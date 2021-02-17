@@ -1,4 +1,6 @@
-import { isArray } from 'lodash';
+import { isArray, upperFirst } from 'lodash';
+import * as testingLibrary from '@testing-library/dom';
+import { createWrapper, WrapperArray } from '@vue/test-utils';
 
 const vNodeContainsText = (vnode, text) =>
   (vnode.text && vnode.text.includes(text)) ||
@@ -37,6 +39,18 @@ export const waitForMutation = (store, expectedMutationType) =>
   });
 
 export const extendedWrapper = (wrapper) => {
+  // https://testing-library.com/docs/queries/about
+  const AVAILABLE_QUERIES = [
+    'byRole',
+    'byLabelText',
+    'byPlaceholderText',
+    'byText',
+    'byDisplayValue',
+    'byAltText',
+    'byTitle',
+    'byTestId',
+  ];
+
   if (isArray(wrapper) || !wrapper?.find) {
     // eslint-disable-next-line no-console
     console.warn(
@@ -45,9 +59,62 @@ export const extendedWrapper = (wrapper) => {
     return wrapper;
   }
 
-  return Object.defineProperty(wrapper, 'findByTestId', {
-    value(id) {
-      return this.find(`[data-testid="${id}"]`);
-    },
+  return Object.defineProperties(wrapper, {
+    // `findBy`
+    ...AVAILABLE_QUERIES.reduce((accumulator, query) => {
+      return {
+        ...accumulator,
+        [`find${upperFirst(query)}`]: {
+          value(text, options = {}) {
+            const element = testingLibrary[`query${upperFirst(query)}`](
+              wrapper.element,
+              text,
+              options,
+            );
+
+            // Return VTU `ErrorWrapper` if element is not found
+            // https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/src/error-wrapper.js
+            // VTU does not expose `ErrorWrapper` so, as of now, this is the best way to
+            // create an `ErrorWrapper`
+            if (element === null) {
+              const emptyElement = document.createElement('div');
+
+              return createWrapper(emptyElement).find('element-that-does-not-exist');
+            }
+
+            return createWrapper(element, this.options || {});
+          },
+        },
+      };
+    }, {}),
+    // `findAllBy`
+    ...AVAILABLE_QUERIES.reduce((accumulator, query) => {
+      return {
+        ...accumulator,
+        [`findAll${upperFirst(query)}`]: {
+          value(text, options = {}) {
+            const elements = testingLibrary[`queryAll${upperFirst(query)}`](
+              wrapper.element,
+              text,
+              options,
+            );
+
+            const wrappers = elements.map((element) => {
+              // Using CSS Selector, returns a VueWrapper instance if the root element
+              // binds a Vue instance.
+              const elementWrapper = createWrapper(element, this.options || {});
+              elementWrapper.selector = text;
+
+              return elementWrapper;
+            });
+
+            const wrapperArray = new WrapperArray(wrappers);
+            wrapperArray.selector = text;
+
+            return wrapperArray;
+          },
+        },
+      };
+    }, {}),
   });
 };
