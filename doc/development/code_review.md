@@ -324,7 +324,7 @@ It is responsibility of the author of a merge request that the merge request is 
 
 #### List of merge requests ready for review
 
-Developers who have capacity can regularly check the list of [merge requests to review](https://gitlab.com/groups/gitlab-org/-/merge_requests?state=opened&label_name%5B%5D=workflow%3A%3Aready%20for%20review) and add yourself as a reviewer of any merge request they want to review.
+Developers who have capacity can regularly check the list of [merge requests to review](https://gitlab.com/groups/gitlab-org/-/merge_requests?state=opened&label_name%5B%5D=workflow%3A%3Aready%20for%20review) and add themselves as a reviewer of any merge request they want to review.
 
 ### Reviewing a merge request
 
