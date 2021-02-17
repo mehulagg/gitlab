@@ -6,7 +6,7 @@ module Types
     description 'Time represented in ISO 8601'
 
     def self.coerce_input(value, ctx)
-      Time.zone.parse(value)
+      Time.parse(value) # rubocop: disable Rails/TimeZone
     rescue ArgumentError, TypeError => e
       raise GraphQL::CoercionError, e.message
     end
