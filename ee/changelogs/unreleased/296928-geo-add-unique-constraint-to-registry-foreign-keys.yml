@@ -1,0 +1,5 @@
+---
+title: 'Geo: Add unique constraint to registry foreign keys'
+merge_request:
+author:
+type: fixed

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_12_08_031224) do
+ActiveRecord::Schema.define(version: 2021_02_17_020156) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,7 +23,7 @@ ActiveRecord::Schema.define(version: 2020_12_08_031224) do
     t.datetime "retry_at"
     t.datetime "last_synced_at"
     t.datetime "created_at", null: false
-    t.index ["container_repository_id"], name: "index_container_repository_registry_on_repository_id"
+    t.index ["container_repository_id"], name: "unique_index_container_repository_registry_on_repository_id", unique: true
     t.index ["retry_at"], name: "index_container_repository_registry_on_retry_at"
     t.index ["state"], name: "index_container_repository_registry_on_state"
   end
@@ -72,7 +72,7 @@ ActiveRecord::Schema.define(version: 2020_12_08_031224) do
     t.boolean "success"
     t.string "sha256"
     t.boolean "missing_on_primary", default: false, null: false
-    t.index ["artifact_id"], name: "index_job_artifact_registry_on_artifact_id"
+    t.index ["artifact_id"], name: "unique_index_job_artifact_registry_on_artifact_id", unique: true
     t.index ["retry_at"], name: "index_job_artifact_registry_on_retry_at"
     t.index ["success"], name: "index_job_artifact_registry_on_success"
   end
@@ -99,7 +99,7 @@ ActiveRecord::Schema.define(version: 2020_12_08_031224) do
     t.integer "state", limit: 2, default: 0, null: false
     t.integer "retry_count", limit: 2, default: 0
     t.text "last_sync_failure"
-    t.index ["merge_request_diff_id"], name: "index_merge_request_diff_registry_on_mr_diff_id"
+    t.index ["merge_request_diff_id"], name: "unique_index_merge_request_diff_registry_on_mr_diff_id", unique: true
     t.index ["retry_at"], name: "index_merge_request_diff_registry_on_retry_at"
     t.index ["state"], name: "index_merge_request_diff_registry_on_state"
   end
@@ -121,7 +121,7 @@ ActiveRecord::Schema.define(version: 2020_12_08_031224) do
     t.datetime_with_timezone "verification_retry_at"
     t.integer "verification_state", limit: 2, default: 0, null: false
     t.datetime_with_timezone "verification_started_at"
-    t.index ["package_file_id"], name: "index_package_file_registry_on_repository_id"
+    t.index ["package_file_id"], name: "unique_index_package_file_registry_on_package_file_id", unique: true
     t.index ["retry_at"], name: "index_package_file_registry_on_retry_at"
     t.index ["state"], name: "index_package_file_registry_on_state"
     t.index ["verification_retry_at"], name: "package_file_registry_failed_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 3))"
@@ -197,7 +197,7 @@ ActiveRecord::Schema.define(version: 2020_12_08_031224) do
     t.boolean "force_to_redownload"
     t.boolean "missing_on_primary"
     t.index ["retry_at"], name: "index_snippet_repository_registry_on_retry_at"
-    t.index ["snippet_repository_id"], name: "index_snippet_repository_registry_on_snippet_repository_id", unique: true
+    t.index ["snippet_repository_id"], name: "index_snippet_repository_registry_on_snippet_repository_id"
     t.index ["state"], name: "index_snippet_repository_registry_on_state"
   end
 
@@ -211,7 +211,7 @@ ActiveRecord::Schema.define(version: 2020_12_08_031224) do
     t.text "last_sync_failure"
     t.index ["retry_at"], name: "index_terraform_state_version_registry_on_retry_at"
     t.index ["state"], name: "index_terraform_state_version_registry_on_state"
-    t.index ["terraform_state_version_id"], name: "index_tf_state_versions_registry_on_tf_state_versions_id"
+    t.index ["terraform_state_version_id"], name: "unique_index_tf_state_versions_registry_on_tf_state_versions_id", unique: true
   end
 
 end
