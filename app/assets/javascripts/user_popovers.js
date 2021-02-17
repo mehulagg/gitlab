@@ -59,10 +59,13 @@ const populateUserInfo = (user) => {
 };
 
 const initializedPopovers = new Map();
+let initializedOnce = false;
 
-export default (elements = document.querySelectorAll('.js-user-link')) => {
+const addPopovers = (elements = document.querySelectorAll('.js-user-link')) => {
   const userLinks = Array.from(elements);
   const UserPopoverComponent = Vue.extend(UserPopover);
+
+  initializedOnce = true;
 
   return userLinks
     .filter(({ dataset }) => dataset.user || dataset.userId)
@@ -106,3 +109,18 @@ export default (elements = document.querySelectorAll('.js-user-link')) => {
       return renderedPopover;
     });
 };
+
+const addPopoversToModifiedTree = new MutationObserver(() => {
+  const userLinks = document.querySelectorAll('.js-user-link');
+
+  if (initializedOnce) {
+    addPopovers(userLinks);
+  }
+});
+
+addPopoversToModifiedTree.observe(document.body, {
+  subtree: true,
+  childList: true,
+});
+
+export default addPopovers;
