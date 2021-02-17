@@ -12,8 +12,8 @@ import './merge_conflict_store';
 import syntaxHighlight from '../syntax_highlight';
 import DiffFileEditor from './components/diff_file_editor.vue';
 import InlineConflictLines from './components/inline_conflict_lines.vue';
+import ParallelConflictLines from './components/parallel_conflict_lines.vue';
 import MergeConflictsService from './merge_conflict_service';
-import './components/parallel_conflict_lines';
 
 export default function initMergeConflicts() {
   const INTERACTIVE_RESOLVE_MODE = 'interactive';
@@ -30,9 +30,9 @@ export default function initMergeConflicts() {
     el: '#conflicts',
     components: {
       FileIcon,
-      'parallel-conflict-lines': gl.mergeConflicts.parallelConflictLines,
       DiffFileEditor,
       InlineConflictLines,
+      ParallelConflictLines,
     },
     data: mergeConflictsStore.state,
     computed: {
