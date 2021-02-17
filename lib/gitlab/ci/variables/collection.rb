@@ -63,10 +63,21 @@ module Gitlab
           Collection.new(@variables.reject(&block))
         end
 
+        def ==(other)
+          return @variables == other if other.is_a?(Array)
+          return false unless other.class == self.class
+
+          @variables == other.variables
+        end
+
         # Returns a sorted Collection object, and sets errors property in case of an error
         def sorted_collection(project)
           Sort.new(self, project).collection
         end
+
+        protected
+
+        attr_reader :variables
       end
     end
   end

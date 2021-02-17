@@ -113,6 +113,67 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
     end
   end
 
+  describe '#==' do
+    variable = { key: 'VAR', value: 'value', public: true, masked: false }
+
+    context 'on empty collection' do
+      collection = described_class.new([])
+
+      it 'returns false for an array containing variable hash' do
+        expect(collection == [variable]).to eq(false)
+      end
+
+      it 'returns false for an unexpected type' do
+        expect(collection == variable).to eq(false)
+      end
+
+      it 'returns true for an empty array' do
+        expect(collection == []).to eq(true)
+      end
+
+      it 'returns true for the same object' do
+        expect(collection).to eq(collection)
+      end
+
+      it 'returns true for a similar object' do
+        expect(collection ==  described_class.new([])).to eq(true)
+      end
+    end
+
+    context 'on collection with a variable' do
+      collection = described_class.new([variable])
+
+      it 'returns false for an array containing other variable' do
+        expect(collection == [{ key: 'VAR', value: 'different value' }]).to eq(false)
+      end
+
+      it 'returns false for an empty array' do
+        expect(collection == []).to eq(false)
+      end
+
+      it 'returns false for an unexpected type' do
+        expect(collection == variable).to eq(false)
+      end
+
+      it 'returns false for a Collection with a variable with different attribute value' do
+        other = described_class.new([{ key: 'VAR', value: 'value', public: false, masked: false }])
+        expect(collection == other).to eq(false)
+      end
+
+      it 'returns true for an array containing variable hash' do
+        expect(collection == [variable]).to eq(true)
+      end
+
+      it 'returns true for the same object' do
+        expect(collection).to eq(collection)
+      end
+
+      it 'returns true for a similar object' do
+        expect(collection ==  described_class.new([variable])).to eq(true)
+      end
+    end
+  end
+
   describe '#size' do
     it 'returns zero for empty collection' do
       collection = described_class.new([])

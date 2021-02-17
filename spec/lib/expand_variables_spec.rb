@@ -268,4 +268,220 @@ RSpec.describe ExpandVariables do
       end
     end
   end
+
+  describe '#expand_variables_collection' do
+    context 'when FF :variable_inside_variable is disabled' do
+      let_it_be(:project_with_flag_disabled) { create(:project) }
+      let_it_be(:project_with_flag_enabled) { create(:project) }
+
+      before do
+        stub_feature_flags(variable_inside_variable: [project_with_flag_enabled])
+      end
+
+      context 'table tests' do
+        using RSpec::Parameterized::TableSyntax
+
+        where do
+          {
+            "empty array": {
+              variables: []
+            },
+            "simple expansions": {
+              variables: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'result' },
+                { key: 'variable3', value: 'key$variable$variable2' }
+              ]
+            },
+            "complex expansion": {
+              variables: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'key${variable}' }
+              ]
+            },
+            "out-of-order variable reference": {
+              variables: [
+                { key: 'variable2', value: 'key${variable}' },
+                { key: 'variable', value: 'value' }
+              ]
+            },
+            "complex expansions with raw variable": {
+              variables: [
+                { key: 'variable3', value: 'key_${variable}_${variable2}' },
+                { key: 'variable', value: '$variable2', raw: true },
+                { key: 'variable2', value: 'value2' }
+              ]
+            },
+            "array with cyclic dependency": {
+              variables: [
+                { key: 'variable', value: '$variable2' },
+                { key: 'variable2', value: '$variable3' },
+                { key: 'variable3', value: 'key$variable$variable2' }
+              ]
+            }
+          }
+        end
+
+        with_them do
+          subject { ExpandVariables.expand_variables_collection(variables, project_with_flag_disabled) }
+
+          it 'does not expand variables' do
+            is_expected.to eq(variables)
+          end
+        end
+      end
+    end
+
+    context 'when FF :variable_inside_variable is enabled' do
+      let_it_be(:project_with_flag_disabled) { create(:project) }
+      let_it_be(:project_with_flag_enabled) { create(:project) }
+
+      before do
+        stub_feature_flags(variable_inside_variable: [project_with_flag_enabled])
+      end
+
+      context 'table tests' do
+        using RSpec::Parameterized::TableSyntax
+
+        where do
+          {
+            "empty array": {
+              variables: [],
+              result: []
+            },
+            "simple expansions": {
+              variables: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'result' },
+                { key: 'variable3', value: 'key$variable$variable2' },
+                { key: 'variable4', value: 'key$variable$variable3' }
+              ],
+              result: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'result' },
+                { key: 'variable3', value: 'keyvalueresult' },
+                { key: 'variable4', value: 'keyvaluekeyvalueresult' }
+              ]
+            },
+            "complex expansion": {
+              variables: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'key${variable}' }
+              ],
+              result: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'keyvalue' }
+              ]
+            },
+            "unused variables": {
+              variables: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'result2' },
+                { key: 'variable3', value: 'result3' },
+                { key: 'variable4', value: 'key$variable$variable3' }
+              ],
+              result: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'result2' },
+                { key: 'variable3', value: 'result3' },
+                { key: 'variable4', value: 'keyvalueresult3' }
+              ]
+            },
+            "complex expansions": {
+              variables: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'result' },
+                { key: 'variable3', value: 'key${variable}${variable2}' }
+              ],
+              result: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'result' },
+                { key: 'variable3', value: 'keyvalueresult' }
+              ]
+            },
+            "out-of-order expansion": {
+              variables: [
+                { key: 'variable3', value: 'key$variable2$variable' },
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'result' }
+              ],
+              result: [
+                { key: 'variable2', value: 'result' },
+                { key: 'variable', value: 'value' },
+                { key: 'variable3', value: 'keyresultvalue' }
+              ]
+            },
+            "out-of-order complex expansion": {
+              variables: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'result' },
+                { key: 'variable3', value: 'key${variable2}${variable}' }
+              ],
+              result: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable2', value: 'result' },
+                { key: 'variable3', value: 'keyresultvalue' }
+              ]
+            },
+            "missing variable": {
+              variables: [
+                { key: 'variable2', value: 'key$variable' }
+              ],
+              result: [
+                { key: 'variable2', value: 'key$variable' }
+              ]
+            },
+            "complex expansions with missing variable": {
+              variables: [
+                { key: 'variable4', value: 'key${variable}${variable2}${variable3}' },
+                { key: 'variable', value: 'value' },
+                { key: 'variable3', value: 'value3' }
+              ],
+              result: [
+                { key: 'variable', value: 'value' },
+                { key: 'variable3', value: 'value3' },
+                { key: 'variable4', value: 'keyvalue${variable2}value3' }
+              ]
+            },
+            "complex expansions with raw variable": {
+              variables: [
+                { key: 'variable3', value: 'key_${variable}_${variable2}' },
+                { key: 'variable', value: '$variable2', raw: true },
+                { key: 'variable2', value: 'value2' }
+              ],
+              result: [
+                { key: 'variable', value: '$variable2', raw: true },
+                { key: 'variable2', value: 'value2' },
+                { key: 'variable3', value: 'key_$variable2_value2' }
+              ]
+            },
+            "cyclic dependency causes original array to be returned": {
+              variables: [
+                { key: 'variable', value: '$variable2' },
+                { key: 'variable2', value: '$variable3' },
+                { key: 'variable3', value: 'key$variable$variable2' }
+              ],
+              result: [
+                { key: 'variable', value: '$variable2' },
+                { key: 'variable2', value: '$variable3' },
+                { key: 'variable3', value: 'key$variable$variable2' }
+              ]
+            }
+          }
+        end
+
+        with_them do
+          subject do
+            coll = Gitlab::Ci::Variables::Collection.new(variables)
+
+            ExpandVariables.expand_variables_collection(coll, project_with_flag_enabled)
+          end
+
+          it 'expands variables' do
+            is_expected.to eq(result)
+          end
+        end
+      end
+    end
+  end
 end

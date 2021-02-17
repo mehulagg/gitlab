@@ -180,6 +180,16 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
     end
   end
 
+  describe '#merge' do
+    it 'behaves like hash merge' do
+      item = described_class.new(**variable)
+      subject = item.merge(value: 'another thing')
+
+      expect(subject).not_to eq item
+      expect(subject[:value]).to eq 'another thing'
+    end
+  end
+
   describe '#to_runner_variable' do
     context 'when variable is not a file-related' do
       it 'returns a runner-compatible hash representation' do

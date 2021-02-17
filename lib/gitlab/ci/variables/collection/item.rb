@@ -25,6 +25,10 @@ module Gitlab
             @variable.fetch(key)
           end
 
+          def merge(*other_hashes)
+            self.class.fabricate(@variable.merge(*other_hashes))
+          end
+
           def ==(other)
             to_runner_variable == self.class.fabricate(other).to_runner_variable
           end
