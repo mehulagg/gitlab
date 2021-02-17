@@ -86,6 +86,10 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
               variable: { key: 'VAR', value: 'something_${VAR2}_$VAR3' },
               expected_depends_on: %w(VAR2 VAR3)
             },
+            "complex expansion in raw variable": {
+              variable: { key: 'VAR', value: 'something_${VAR2}_$VAR3', raw: true },
+              expected_depends_on: nil
+            },
             "complex expansions for Windows": {
               variable: { key: 'variable3', value: 'key%variable%%variable2%' },
               expected_depends_on: %w(variable variable2)
@@ -172,6 +176,33 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
 
         expect(runner_variable)
           .to eq(key: 'VAR', value: 'value', public: true, file: true, masked: false)
+      end
+    end
+
+    context 'when assigned the raw attribute' do
+      it 'retains a true raw attribute' do
+        runner_variable = described_class.new(key: 'CI_VAR', value: '123', raw: true)
+
+        expect(runner_variable).to eq(key: 'CI_VAR', value: '123', public: true, masked: false, raw: true)
+      end
+
+      it 'does not retain a false raw attribute' do
+        runner_variable = described_class.new(key: 'CI_VAR', value: '123', raw: false)
+
+        expect(runner_variable).to eq(key: 'CI_VAR', value: '123', public: true, masked: false)
+      end
+    end
+
+    context 'when referencing a variable' do
+      it 'contains a :depends_on attribute' do
+        runner_variable = described_class.new(key: 'CI_VAR', value: '${CI_VAR_2}-123')
+
+        expect(runner_variable).to eq(
+          key: 'CI_VAR',
+          value: '${CI_VAR_2}-123',
+          public: true,
+          masked: false,
+          depends_on: %w(CI_VAR_2))
       end
     end
   end
