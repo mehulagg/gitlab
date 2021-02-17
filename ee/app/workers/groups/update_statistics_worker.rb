@@ -7,6 +7,7 @@ module Groups
 
     feature_category :source_code_management
     idempotent!
+    loggable_arguments 0, 1
 
     # group_id - The ID of the group for which to flush the cache.
     # statistics - An Array containing columns from NamespaceStatistics to

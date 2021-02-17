@@ -14,7 +14,7 @@ module Groups
         return ServiceResponse.error(message: 'Invalid group', http_status: 400)
       end
 
-      namespace_statistics.refresh!(only: statistics)
+      namespace_statistics.refresh!(only: statistics.map(&:to_sym))
 
       ServiceResponse.success(message: 'Group statistics successfully updated.')
     end
