@@ -15,7 +15,7 @@ GitLab, you can create diagrams in snippets, wikis, and repositories. To set it 
 1. [Configure your PlantUML server](#configure-your-plantuml-server).
 1. [Configure local PlantUML access](#configure-local-plantuml-access).
 1. [Configure PlantUML security](#configure-plantuml-security).
-1. [Enable the integration](#enable-plantuml-iintegration).
+1. [Enable the integration](#enable-plantuml-integration).
 
 After completing the integration, PlantUML converts `plantuml`
 blocks to a HTML image tag, with the source pointing to the PlantUML instance. The PlantUML
