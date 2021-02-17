@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::ApplicationContext do
   describe '#to_lazy_hash' do
     let(:user) { build(:user) }
-    let(:project) { build(:project) }
+    let(:project) { create(:project) }
     let(:namespace) { create(:group) }
     let(:subgroup) { create(:group, parent: namespace) }
 
@@ -28,11 +28,6 @@ RSpec.describe Gitlab::ApplicationContext do
     end
 
     it 'falls back to a projects namespace plan when a project is passed but no namespace' do
-      # TODO: I don't know why. But seems calling `project.to_json` will
-      # lead to the `project` and `project.namespace` serialized in database.
-      # And then project.namespace.id will have value
-      project.to_json
-
       create(:gitlab_subscription, :silver, namespace: project.namespace)
       project.actual_plan_name
       context = described_class.new(project: project)
