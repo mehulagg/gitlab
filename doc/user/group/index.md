@@ -642,7 +642,7 @@ request to add a new user to a project through API will not be possible.
 
 NOTE:
 IP Access Restrictions are currently not functioning as expected on GitLab.com. If enabled,
-users will not be able to perform git operations through SSH, or access projects via the UI. Please
+users will not be able to perform Git operations through SSH, or access projects via the UI. Please
 review the [following bug report](https://gitlab.com/gitlab-org/gitlab/-/issues/271673) for
 more information.
 
