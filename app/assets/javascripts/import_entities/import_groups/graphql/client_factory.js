@@ -52,7 +52,7 @@ export function createResolvers({ endpoints }) {
                 status: STATUSES.NONE,
                 import_target: {
                   new_name: group.full_path,
-                  target_namespace: availableNamespaces[0].full_path,
+                  target_namespace: availableNamespaces[0]?.full_path ?? '',
                 },
               })),
               pageInfo: {

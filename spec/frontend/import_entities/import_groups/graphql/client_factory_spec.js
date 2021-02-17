@@ -82,6 +82,15 @@ describe('Bulk import resolvers', () => {
           .reply(httpStatus.OK, availableNamespacesFixture);
       });
 
+      it('populates each result instance with empty import_target when there are no available namespaces', async () => {
+        axiosMockAdapter.onGet(FAKE_ENDPOINTS.availableNamespaces).reply(httpStatus.OK, []);
+
+        const response = await client.query({ query: bulkImportSourceGroupsQuery });
+        results = response.data.bulkImportSourceGroups.nodes;
+
+        expect(results.every((r) => r.import_target.target_namespace === '')).toBe(true);
+      });
+
       describe('when called', () => {
         beforeEach(async () => {
           const response = await client.query({ query: bulkImportSourceGroupsQuery });
