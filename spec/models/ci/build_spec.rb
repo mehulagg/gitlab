@@ -3063,6 +3063,12 @@ RSpec.describe Ci::Build do
     end
   end
 
+  describe '#variables_collection' do
+    subject { build.variables_collection }
+
+    it { is_expected.to be_an_instance_of(Gitlab::Ci::Variables::Collection) }
+  end
+
   describe '#scoped_variables' do
     context 'when build has not been persisted yet' do
       let(:build) do
