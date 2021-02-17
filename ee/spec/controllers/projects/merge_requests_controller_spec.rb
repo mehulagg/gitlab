@@ -632,7 +632,7 @@ RSpec.describe Projects::MergeRequestsController do
   end
 
   describe 'GET #api_fuzzing_reports' do
-    let(:merge_request) { create(:ee_merge_request, :with_api_fuzzing_reports, source_project: project, author: create(:user)) }
+    let(:merge_request) { create(:ee_merge_request, :with_api_fuzzing_reports, source_project: project, author: author) }
 
     let(:params) do
       {
@@ -945,7 +945,7 @@ RSpec.describe Projects::MergeRequestsController do
 
     context "when a user is NOT authorized to read licenses on a project" do
       let(:project) { create(:project, :repository, :private) }
-      let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, author: create(:user)) }
+      let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, author: author) }
       let(:viewer) { create(:user) }
 
       it 'returns a report' do
@@ -957,7 +957,7 @@ RSpec.describe Projects::MergeRequestsController do
 
     context "when a user is authorized to read the licenses" do
       let(:project) { create(:project, :repository, :private) }
-      let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, author: create(:user)) }
+      let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, author: author) }
       let(:viewer) { create(:user) }
 
       before do
