@@ -38,7 +38,7 @@ production complies with the code standards you established for
 your app.
 
 GitLab can also automatically detect, build, test, deploy, and
-monitor your applications by using [Auto DevOps](../../topics/autodevops/index.md).
+monitor your applications by using [Auto DevOps](../topics/autodevops/index.md).
 
 For a complete overview of these methodologies and GitLab CI/CD,
 read the [Introduction to CI/CD with GitLab](introduction/index.md).
