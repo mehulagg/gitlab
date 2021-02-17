@@ -779,14 +779,14 @@ To run an on-demand scan, either:
 
 The on-demand DAST scan runs and the project's dashboard shows the results.
 
-#### List saved on-demand scans
+### List saved on-demand scans
 
 To list saved on-demand scans:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
 1. Select the **Saved Scans** tab.
 
-#### View details of an on-demand scan
+### View details of an on-demand scan
 
 To view details of an on-demand scan:
 
@@ -796,7 +796,7 @@ To view details of an on-demand scan:
 1. Select the **Saved Scans** tab.
 1. In the saved scan's row select **More actions** (**{ellipsis_v}**), then select **Edit**.
 
-#### Run a saved on-demand scan
+### Run a saved on-demand scan
 
 To run a saved on-demand scan:
 
@@ -808,7 +808,7 @@ To run a saved on-demand scan:
 
 The on-demand DAST scan runs and the project's dashboard shows the results.
 
-#### Edit an on-demand scan
+### Edit an on-demand scan
 
 To edit an on-demand scan:
 
@@ -820,7 +820,7 @@ To edit an on-demand scan:
 1. Edit the form.
 1. Select **Save scan**.
 
-#### Delete an on-demand scan
+### Delete an on-demand scan
 
 To delete an on-demand scan:
 
