@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe BulkImports::Common::Transformers::AwardEmojiTransformer do
+RSpec.describe BulkImports::Common::Transformers::UserReferenceTransformer do
   describe '#transform' do
     let_it_be(:user) { create(:user) }
     let_it_be(:group) { create(:group) }
