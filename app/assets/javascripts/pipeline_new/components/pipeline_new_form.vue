@@ -25,7 +25,13 @@ import httpStatusCodes from '~/lib/utils/http_status';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { s__, __, n__ } from '~/locale';
 import * as Sentry from '~/sentry/wrapper';
-import { VARIABLE_TYPE, FILE_TYPE, CONFIG_VARIABLES_TIMEOUT } from '../constants';
+import {
+  CONFIG_VARIABLES_TIMEOUT,
+  FILE_TYPE,
+  FILTERED_BRANCHES_MAX_COUNT,
+  FILTERED_TAGS_MAX_COUNT,
+  VARIABLE_TYPE,
+} from '../constants';
 
 export default {
   typeOptions: [
@@ -129,14 +135,14 @@ export default {
       return this.searchTerm.toLowerCase();
     },
     filteredBranches() {
-      return this.branches.filter((branch) =>
-        branch.shortName.toLowerCase().includes(this.lowerCasedSearchTerm),
-      );
+      return this.branches
+        .filter((branch) => branch.shortName.toLowerCase().includes(this.lowerCasedSearchTerm))
+        .slice(0, FILTERED_BRANCHES_MAX_COUNT);
     },
     filteredTags() {
-      return this.tags.filter((tag) =>
-        tag.shortName.toLowerCase().includes(this.lowerCasedSearchTerm),
-      );
+      return this.tags
+        .filter((tag) => tag.shortName.toLowerCase().includes(this.lowerCasedSearchTerm))
+        .slice(0, FILTERED_TAGS_MAX_COUNT);
     },
     hasTags() {
       return this.tags.length > 0;

@@ -6,6 +6,7 @@ import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { redirectTo } from '~/lib/utils/url_utility';
 import PipelineNewForm from '~/pipeline_new/components/pipeline_new_form.vue';
+import { FILTERED_BRANCHES_MAX_COUNT, FILTERED_TAGS_MAX_COUNT } from '~/pipeline_new/constants';
 import {
   mockBranches,
   mockTags,
@@ -98,6 +99,38 @@ describe('Pipeline New Form', () => {
 
       expect(findDropdownItems()).toHaveLength(1);
       expect(findDropdownItems().at(0).text()).toBe('master');
+    });
+
+    describe('when there is a large amount of data', () => {
+      const manyBranches = Array.from(Array(100), (_, i) => ({
+        shortName: `branch-${i}`,
+        fullName: `refs/heads/branch-${i}`,
+      }));
+
+      const manyTags = Array.from(Array(100), (_, i) => ({
+        shortName: `v1.${i}`,
+        fullName: `refs/heads/v1.${i}`,
+      }));
+
+      it('filtered branches are capped', () => {
+        createComponent('branch', { branches: manyBranches });
+
+        expect(findDropdownItems()).toHaveLength(FILTERED_BRANCHES_MAX_COUNT);
+      });
+
+      it('filtered tags are capped', () => {
+        createComponent('v1', { tags: manyTags });
+
+        expect(findDropdownItems()).toHaveLength(FILTERED_TAGS_MAX_COUNT);
+      });
+
+      it('without filters, all refs are capped', () => {
+        createComponent('', { tags: manyTags, branches: manyBranches });
+
+        expect(findDropdownItems()).toHaveLength(
+          FILTERED_BRANCHES_MAX_COUNT + FILTERED_TAGS_MAX_COUNT,
+        );
+      });
     });
   });
 
