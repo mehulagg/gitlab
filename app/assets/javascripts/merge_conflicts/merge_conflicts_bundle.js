@@ -1,7 +1,3 @@
-// This is a true violation of @gitlab/no-runtime-template-compiler, as it
-// relies on app/views/projects/merge_requests/conflicts/show.html.haml for its
-// template.
-/* eslint-disable @gitlab/no-runtime-template-compiler */
 import $ from 'jquery';
 import Vue from 'vue';
 import { __ } from '~/locale';
@@ -21,15 +17,20 @@ export default function initMergeConflicts() {
     resolveConflictsPath: conflictsEl.dataset.resolveConflictsPath,
   });
 
+  const { sourceBranchPath, mergeRequestPath } = conflictsEl.dataset;
+
   initIssuableSidebar();
 
-  gl.MergeConflictsResolverApp = new Vue({
-    el: '#conflicts',
-    components: {
-      MergeConflictsResolverApp,
-    },
+  return new Vue({
+    el: conflictsEl,
     data: mergeConflictsStore.state,
     computed: {
+      mergeRequestPath() {
+        return mergeRequestPath;
+      },
+      sourceBranchPath() {
+        return sourceBranchPath;
+      },
       conflictsCountText() {
         return mergeConflictsStore.getConflictsCountText();
       },
@@ -96,6 +97,9 @@ export default function initMergeConflicts() {
             createFlash(__('Failed to save merge conflicts resolutions. Please try again!'));
           });
       },
+    },
+    render(createElement) {
+      return createElement(MergeConflictsResolverApp);
     },
   });
 }

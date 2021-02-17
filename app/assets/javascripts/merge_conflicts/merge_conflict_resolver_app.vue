@@ -16,11 +16,14 @@ export default {
   },
   i18n: {
     commitStatSummary: __('Showing %{conflict} between %{sourceBranch} and %{targetBranch}'),
+    resolveInfo: __(
+      'You can resolve the merge conflict using either the Interactive mode, by choosing %{use_ours} or %{use_theirs} buttons, or by editing the files directly. Commit these changes into %{branch_name}',
+    ),
   },
 };
 </script>
 <template>
-  <div>
+  <div id="conflicts">
     <div v-if="$root.isLoading" class="loading">
       <div class="spinner spinner-md"></div>
     </div>
@@ -132,6 +135,66 @@ export default {
                   :on-accept-discard-confirmation="$root.acceptDiscardConfirmation"
                   :on-cancel-discard-confirmation="$root.cancelDiscardConfirmation"
                 />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr />
+      <div class="resolve-conflicts-form">
+        <div class="form-group row">
+          <div class="col-md-4">
+            <h4>
+              {{ __('Resolve conflicts on source branch') }}
+            </h4>
+            <div class="resolve-info">
+              <gl-sprintf :message="$options.i18n.resolveInfo">
+                <template #use_ours>
+                  <code>{{ s__('MergeConflict|Use ours') }}</code>
+                </template>
+                <template #use_theirs>
+                  <code>{{ s__('MergeConflict|Use theirs') }}</code>
+                </template>
+                <template #branch_name
+                  ><a class="ref-name" :href="$root.sourceBranchPath">{{
+                    $root.conflictsData.sourceBranch
+                  }}</a></template
+                >
+              </gl-sprintf>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <label class="label-bold" for="commit-message">
+              {{ __('Commit message') }}
+            </label>
+            <div class="commit-message-container">
+              <div class="max-width-marker"></div>
+              <textarea
+                id="commit-message"
+                v-model="$root.conflictsData.commitMessage"
+                class="form-control js-commit-message"
+                rows="5"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="offset-md-4 col-md-8">
+            <div class="row">
+              <div class="col-6">
+                <button
+                  :disabled="!$root.readyToCommit"
+                  class="btn gl-button btn-success js-submit-button"
+                  type="button"
+                  @click="$root.commit()"
+                >
+                  <span>{{ $root.commitButtonText }}</span>
+                </button>
+              </div>
+              <div class="col-6 text-right">
+                <a :href="$root.mergeRequestPath" class="gl-button btn btn-default">
+                  {{ __('Cancel') }}
+                </a>
               </div>
             </div>
           </div>

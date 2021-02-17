@@ -1,7 +1,5 @@
 - page_title _("Merge Conflicts"), "#{@merge_request.title} (#{@merge_request.to_reference}", _("Merge Requests")
 - add_page_specific_style 'page_bundles/merge_conflicts'
-- branch_name = link_to @merge_request.source_branch, project_tree_path(@merge_request.project, @merge_request.source_branch), class: "ref-name"
-- translation =_('You can resolve the merge conflict using either the Interactive mode, by choosing %{use_ours} or %{use_theirs} buttons, or by editing the files directly. Commit these changes into %{branch_name}') % { use_ours: '<code>Use Ours</code>', use_theirs: '<code>Use Theirs</code>', branch_name: branch_name }
 
 = render "projects/merge_requests/mr_title"
 
@@ -10,28 +8,7 @@
 
 = render 'shared/issuable/sidebar', issuable_sidebar: @issuable_sidebar, assignees: @merge_request.assignees, source_branch: @merge_request.source_branch
 
-#conflicts{ "v-cloak" => "true", data: { conflicts_path: conflicts_project_merge_request_path(@merge_request.project, @merge_request, format: :json),
-    resolve_conflicts_path: resolve_conflicts_project_merge_request_path(@merge_request.project, @merge_request) } }
-  %merge-conflicts-resolver-app
-
-  %hr
-  .resolve-conflicts-form
-    .form-group.row
-      .col-md-4
-        %h4= _('Resolve conflicts on source branch')
-        .resolve-info{ "v-pre": true }
-          = translation.html_safe
-      .col-md-8
-        %label.label-bold{ "for" => "commit-message" }
-          #{ _('Commit message') }
-        .commit-message-container
-          .max-width-marker
-          %textarea.form-control.js-commit-message#commit-message{ "v-model" => "conflictsData.commitMessage", "rows" => "5" }
-    .form-group.row
-      .offset-md-4.col-md-8
-        .row
-          .col-6
-            %button.btn.gl-button.btn-success.js-submit-button{ type: "button", "@click" => "commit()", ":disabled" => "!readyToCommit" }
-              %span {{commitButtonText}}
-          .col-6.text-right
-            = link_to "Cancel", project_merge_request_path(@merge_request.project, @merge_request), class: "gl-button btn btn-default"
+#conflicts{ data: { conflicts_path: conflicts_project_merge_request_path(@merge_request.project, @merge_request, format: :json),
+    resolve_conflicts_path: resolve_conflicts_project_merge_request_path(@merge_request.project, @merge_request),
+    source_branch_path: project_tree_path(@merge_request.project, @merge_request.source_branch),
+    merge_request_path: project_merge_request_path(@merge_request.project, @merge_request) } }
