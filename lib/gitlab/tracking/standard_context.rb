@@ -19,6 +19,8 @@ module Gitlab
 
         return 'production' if Gitlab.com?
 
+        return 'org' if Gitlab.org?
+
         return 'self-managed' if Rails.env.production?
 
         'development'

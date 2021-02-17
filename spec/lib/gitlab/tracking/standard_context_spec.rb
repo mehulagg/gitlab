@@ -36,6 +36,14 @@ RSpec.describe Gitlab::Tracking::StandardContext do
         include_examples 'contains environment', 'production'
       end
 
+      context 'org' do
+        before do
+          stub_config_setting(url: 'https://dev.gitlab.org')
+        end
+
+        include_examples 'contains environment', 'org'
+      end
+
       context 'other self-managed instance' do
         before do
           stub_rails_env('production')
