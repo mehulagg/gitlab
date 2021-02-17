@@ -18,40 +18,27 @@ module Gitlab
 
     class << self
       def configure
-        Raven.configure do |config|
+        Sentry.init do |config|
           config.dsn = sentry_dsn
           config.release = Gitlab.revision
-          config.current_environment = Gitlab.config.sentry.environment
-
-          # Sanitize fields based on those sanitized from Rails.
-          config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
-          config.processors << ::Gitlab::ErrorTracking::Processor::SidekiqProcessor
-          config.processors << ::Gitlab::ErrorTracking::Processor::GrpcErrorProcessor
-
-          # Sanitize authentication headers
-          config.sanitize_http_headers = %w[Authorization Private-Token]
-          config.tags = extra_tags_from_env.merge(program: Gitlab.process_name)
-          config.before_send = method(:before_send)
+          config.environment = Gitlab.config.sentry.environment
+          config.send_default_pii = true
 
           yield config if block_given?
         end
       end
 
       def with_context(current_user = nil)
-        last_user_context = Raven.context.user
-
         user_context = {
           id: current_user&.id,
           email: current_user&.email,
           username: current_user&.username
         }.compact
 
-        Raven.tags_context(default_tags)
-        Raven.user_context(user_context)
+        Sentry.with_scope(default_tags)
+        Sentry.set_user(user_context)
 
         yield
-      ensure
-        Raven.user_context(last_user_context)
       end
 
       # This should be used when you want to passthrough exception handling:
@@ -111,6 +98,9 @@ module Gitlab
       private
 
       def before_send(event, hint)
+        filter = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
+        event.request.data = filter.filter(event.request.data)
+
         inject_context_for_exception(event, hint[:exception])
         custom_fingerprinting(event, hint[:exception])
 
@@ -124,8 +114,8 @@ module Gitlab
 
         extra = sanitize_request_parameters(extra)
 
-        if sentry && Raven.configuration.server
-          Raven.capture_exception(exception, tags: default_tags, extra: extra)
+        if sentry && Sentry.configuration.server_name
+          Sentry.capture_exception(exception, tags: default_tags, extra: extra)
         end
 
         if logging
@@ -134,9 +124,11 @@ module Gitlab
           # (e.g. if `extra` includes hash of hashes).
           # In the current implementation, we don't flatten multi-level folded hashes.
           log_hash = {}
-          Raven.context.tags.each { |name, value| log_hash["tags.#{name}"] = value }
-          Raven.context.user.each { |name, value| log_hash["user.#{name}"] = value }
-          Raven.context.extra.merge(extra).each { |name, value| log_hash["extra.#{name}"] = value }
+
+          # Sentry.set_tags(foo: "bar")
+          # Sentry.context.tags.each { |name, value| log_hash["tags.#{name}"] = value }
+          # Sentry.context.user.each { |name, value| log_hash["user.#{name}"] = value }
+          # Sentry.context.extra.merge(extra).each { |name, value| log_hash["extra.#{name}"] = value }
 
           Gitlab::ExceptionLogFormatter.format!(exception, log_hash)
 
