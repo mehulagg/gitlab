@@ -20,44 +20,62 @@ RSpec.describe Gitlab::SidekiqMiddleware::SizeLimiter::Validator do
   end
 
   describe '#initialize' do
-    it 'validates input mode' do
-      expect do
+    context 'when the input mode is valid' do
+      it 'does not log a warning message' do
+        expect(Gitlab::AppLogger).not_to receive(:warn)
+
         described_class.new(TestSizeLimiterWorker, {}, mode: 'track')
-      end.not_to raise_error
-
-      expect do
         described_class.new(TestSizeLimiterWorker, {}, mode: 'raise')
-      end.not_to raise_error
-
-      expect do
-        described_class.new(TestSizeLimiterWorker, {}, mode: 'invalid')
-      end.to raise_error /invalid Sidekiq size limiter mode/i
+      end
     end
 
-    it 'defaults to track mode' do
-      validator = described_class.new(TestSizeLimiterWorker, {})
+    context 'when the input mode is invalid' do
+      it 'defaults to track mode and logs a warning message' do
+        expect(Gitlab::AppLogger).to receive(:warn).with('Invalid Sidekiq size limiter mode: invalid')
 
-      expect(validator.mode).to eql('track')
+        validator = described_class.new(TestSizeLimiterWorker, {}, mode: 'invalid')
+
+        expect(validator.mode).to eql('track')
+      end
     end
 
-    it 'validates input limit' do
-      expect do
+    context 'when the input mode is empty' do
+      it 'defaults to track mode' do
+        expect(Gitlab::AppLogger).not_to receive(:warn)
+
+        validator = described_class.new(TestSizeLimiterWorker, {})
+
+        expect(validator.mode).to eql('track')
+      end
+    end
+
+    context 'when the size input is valid' do
+      it 'does not log a warning message' do
+        expect(Gitlab::AppLogger).not_to receive(:warn)
+
         described_class.new(TestSizeLimiterWorker, {}, size_limit: 300)
-      end.not_to raise_error
-
-      expect do
         described_class.new(TestSizeLimiterWorker, {}, size_limit: 0)
-      end.not_to raise_error
-
-      expect do
-        described_class.new(TestSizeLimiterWorker, {}, size_limit: -1)
-      end.to raise_error /invalid Sidekiq size limiter limit/i
+      end
     end
 
-    it 'defaults to 0' do
-      validator = described_class.new(TestSizeLimiterWorker, {})
+    context 'when the size input is invalid' do
+      it 'defaults to 0 and logs a warning message' do
+        expect(Gitlab::AppLogger).to receive(:warn).with('Invalid Sidekiq size limiter limit: -1')
 
-      expect(validator.size_limit).to be(0)
+        validator = described_class.new(TestSizeLimiterWorker, {}, size_limit: -1)
+
+        expect(validator.size_limit).to be(0)
+      end
+    end
+
+    context 'when the size input is empty' do
+      it 'defaults to 0' do
+        expect(Gitlab::AppLogger).not_to receive(:warn)
+
+        validator = described_class.new(TestSizeLimiterWorker, {})
+
+        expect(validator.size_limit).to be(0)
+      end
     end
   end
 

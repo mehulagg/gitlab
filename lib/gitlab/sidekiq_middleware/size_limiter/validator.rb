@@ -34,10 +34,16 @@ module Gitlab
           @job = job
 
           @mode = (mode || TRACK_MODE).to_s.strip
-          raise "Invalid Sidekiq size limiter mode: #{@mode}" unless MODES.include?(@mode)
+          unless MODES.include?(@mode)
+            Gitlab::AppLogger.warn "Invalid Sidekiq size limiter mode: #{@mode}"
+            @mode = TRACK_MODE
+          end
 
           @size_limit = (size_limit || 0).to_i
-          raise "Invalid Sidekiq size limiter limit: #{@size_limit}" if @size_limit < 0
+          if @size_limit < 0
+            Gitlab::AppLogger.warn "Invalid Sidekiq size limiter limit: #{@size_limit}"
+            @size_limit = 0
+          end
         end
 
         def validate!
