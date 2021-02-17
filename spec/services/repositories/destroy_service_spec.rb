@@ -26,8 +26,8 @@ RSpec.describe Repositories::DestroyService do
 
     expect(Repositories::ShellDestroyService).to receive(:new).with(repository).and_call_original
 
-    expect(GitlabShellWorker).to receive(:perform_in)
-      .with(Repositories::ShellDestroyService::REPO_REMOVAL_DELAY, :remove_repository, project.repository_storage, remove_path)
+    expect(GitlabShellWorker).to receive(:perform_async)
+      .with(:remove_repository, project.repository_storage, remove_path)
 
     # Because GitlabShellWorker is inside a run_after_commit callback we need to
     # trigger the callback
@@ -42,8 +42,8 @@ RSpec.describe Repositories::DestroyService do
     it 'schedules the repository deletion' do
       expect(Repositories::ShellDestroyService).to receive(:new).with(repository).and_call_original
 
-      expect(GitlabShellWorker).to receive(:perform_in)
-        .with(Repositories::ShellDestroyService::REPO_REMOVAL_DELAY, :remove_repository, project.repository_storage, remove_path)
+      expect(GitlabShellWorker).to receive(:perform_async)
+        .with(:remove_repository, project.repository_storage, remove_path)
 
       subject
     end
@@ -102,8 +102,8 @@ RSpec.describe Repositories::DestroyService do
 
       expect(Repositories::ShellDestroyService).to receive(:new).with(repository).and_call_original
 
-      expect(GitlabShellWorker).to receive(:perform_in)
-        .with(Repositories::ShellDestroyService::REPO_REMOVAL_DELAY, :remove_repository, project.repository_storage, remove_path)
+      expect(GitlabShellWorker).to receive(:perform_async)
+        .with(:remove_repository, project.repository_storage, remove_path)
 
       # Because GitlabShellWorker is inside a run_after_commit callback we need to
       # trigger the callback

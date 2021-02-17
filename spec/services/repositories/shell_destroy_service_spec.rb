@@ -9,7 +9,7 @@ RSpec.describe Repositories::ShellDestroyService do
   let(:remove_path) { "#{path}+#{project.id}#{described_class::DELETED_FLAG}" }
 
   it 'returns success if the repository is nil' do
-    expect(GitlabShellWorker).not_to receive(:perform_in)
+    expect(GitlabShellWorker).not_to receive(:perform_async)
 
     result = described_class.new(nil).execute
 
@@ -17,8 +17,8 @@ RSpec.describe Repositories::ShellDestroyService do
   end
 
   it 'schedules the repository deletion' do
-    expect(GitlabShellWorker).to receive(:perform_in)
-      .with(described_class::REPO_REMOVAL_DELAY, :remove_repository, project.repository_storage, remove_path)
+    expect(GitlabShellWorker).to receive(:perform_async)
+      .with(:remove_repository, project.repository_storage, remove_path)
 
     described_class.new(project.repository).execute
   end

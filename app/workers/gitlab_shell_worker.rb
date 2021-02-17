@@ -20,8 +20,12 @@ class GitlabShellWorker # rubocop:disable Scalability/IdempotentWorker
       return
     end
 
-    Gitlab::GitalyClient::NamespaceService.allow do
-      gitlab_shell.__send__(action, *arg) # rubocop:disable GitlabSecurity/PublicSend
+    if action == :remove_repository
+      Gitlab::Git::Repository.new(*arg).remove
+    else
+      Gitlab::GitalyClient::NamespaceService.allow do
+        gitlab_shell.__send__(action, *arg) # rubocop:disable GitlabSecurity/PublicSend
+      end
     end
   end
 end

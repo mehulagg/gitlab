@@ -86,7 +86,7 @@ module Projects
       repos.each do |repository|
         next unless repository
 
-        Repositories::ShellDestroyService.new(repository).execute(Repositories::ShellDestroyService::STALE_REMOVAL_DELAY)
+        Repositories::ShellDestroyService.new(repository).execute
       end
     end
 

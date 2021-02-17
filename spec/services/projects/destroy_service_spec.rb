@@ -319,8 +319,8 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
           allow(service).to receive(:schedule_stale_repos_removal)
 
           expect(Repositories::ShellDestroyService).to receive(:new).and_call_original
-          expect(GitlabShellWorker).to receive(:perform_in)
-            .with(5.minutes, :remove_repository, project.repository_storage, removal_path(project.disk_path))
+          expect(GitlabShellWorker).to receive(:perform_async)
+            .with(:remove_repository, project.repository_storage, removal_path(project.disk_path))
 
           service.execute
         end
@@ -333,12 +333,12 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
           allow(ProjectDestroyWorker).to receive(:perform_async)
 
           expect(Repositories::ShellDestroyService).to receive(:new).with(project.repository).and_call_original
-          expect(GitlabShellWorker).to receive(:perform_in)
-            .with(10.minutes, :remove_repository, project.repository_storage, removal_path(project.disk_path))
+          expect(GitlabShellWorker).to receive(:perform_async)
+            .with(:remove_repository, project.repository_storage, removal_path(project.disk_path))
 
           expect(Repositories::ShellDestroyService).to receive(:new).with(project.wiki.repository).and_call_original
-          expect(GitlabShellWorker).to receive(:perform_in)
-            .with(10.minutes, :remove_repository, project.repository_storage, removal_path(project.wiki.disk_path))
+          expect(GitlabShellWorker).to receive(:perform_async)
+            .with(:remove_repository, project.repository_storage, removal_path(project.wiki.disk_path))
 
           destroy_project(project, user, {})
         end
