@@ -92,7 +92,12 @@ describe('EE approvals group settings module actions', () => {
             { type: types.UPDATE_SETTINGS_SUCCESS, payload: data },
           ],
           [],
-        );
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'Merge request approval settings have been updated.',
+            type: 'notice',
+          });
+        });
       });
     });
 

@@ -34,6 +34,10 @@ export const updateSettings = ({ commit, state }, endpoint) => {
     .put(endpoint, payload)
     .then(({ data }) => {
       commit(types.UPDATE_SETTINGS_SUCCESS, data);
+      createFlash({
+        message: __('Merge request approval settings have been updated.'),
+        type: 'notice',
+      });
     })
     .catch(({ response }) => {
       const error = response?.data?.message;
