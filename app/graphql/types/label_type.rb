@@ -19,5 +19,9 @@ module Types
           description: 'Background color of the label.'
     field :text_color, GraphQL::STRING_TYPE, null: false,
           description: 'Text color of the label.'
+    field :created_at, Types::TimeType, null: false,
+          description: 'Timestamp of when the label was created.'
+    field :updated_at, Types::TimeType, null: false,
+          description: 'Timestamp of when the label was last updated.'
   end
 end
