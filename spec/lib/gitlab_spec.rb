@@ -366,7 +366,8 @@ RSpec.describe Gitlab do
     it 'returns false when maintenance mode column is not present' do
       stub_maintenance_mode_setting(true)
 
-      allow(::Gitlab::CurrentSettings).to receive(:respond_to?)
+      allow(::Gitlab::CurrentSettings.current_application_settings)
+        .to receive(:respond_to?)
         .with(:maintenance_mode)
         .and_return(false)
 
