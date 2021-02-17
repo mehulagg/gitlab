@@ -5,14 +5,10 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import { __ } from '~/locale';
-import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { deprecatedCreateFlash as createFlash } from '../flash';
 import initIssuableSidebar from '../init_issuable_sidebar';
 import './merge_conflict_store';
 import syntaxHighlight from '../syntax_highlight';
-import DiffFileEditor from './components/diff_file_editor.vue';
-import InlineConflictLines from './components/inline_conflict_lines.vue';
-import ParallelConflictLines from './components/parallel_conflict_lines.vue';
 import MergeConflictsResolverApp from './merge_conflict_resolver_app.vue';
 import MergeConflictsService from './merge_conflict_service';
 
@@ -30,10 +26,6 @@ export default function initMergeConflicts() {
   gl.MergeConflictsResolverApp = new Vue({
     el: '#conflicts',
     components: {
-      FileIcon,
-      DiffFileEditor,
-      InlineConflictLines,
-      ParallelConflictLines,
       MergeConflictsResolverApp,
     },
     data: mergeConflictsStore.state,
