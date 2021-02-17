@@ -226,10 +226,9 @@ Verify that your SSH key was added correctly.
 
 1. For GitLab.com, to ensure you're connecting to the correct server, confirm the
    [SSH host keys fingerprints](../user/gitlab_com/index.md#ssh-host-keys-fingerprints).
-1. Open a terminal and run this command, replacing `gitlab.com` with your GitLab instance URL:
+1. Open a terminal and run this command, replacing `gitlab.example.com` with your GitLab instance URL:
 
-   ```shell
-   ssh -T git@gitlab.com
+   ssh -T git@gitlab.example.com
    ```
 
 1. If this is the first time you connect, you should verify the
