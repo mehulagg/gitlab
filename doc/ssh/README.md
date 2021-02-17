@@ -228,7 +228,7 @@ Verify that your SSH key was added correctly.
    [SSH host keys fingerprints](../user/gitlab_com/index.md#ssh-host-keys-fingerprints).
 1. Open a terminal and run this command, replacing `gitlab.example.com` with your GitLab instance URL:
 
-   ```
+   ```shell
    ssh -T git@gitlab.example.com
    ```
 
