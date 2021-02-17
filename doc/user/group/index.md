@@ -7,90 +7,43 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Groups
 
-With GitLab Groups, you can:
+In GitLab, you can put related projects together in a group.
 
-- Assemble related projects together.
-- Grant members access to several projects at once.
+For example, you might create a group for your company members and a subgroup for each individual team.
+You can name the group `company-team`, and the subgroups `backend-team`, `frontend-team`, and `production-team`.
 
-For a video introduction to GitLab Groups, see [GitLab University: Repositories, Projects and Groups](https://www.youtube.com/watch?v=4TWfh1aKHHw).
+Then you can:
 
-Groups can also be nested in [subgroups](subgroups/index.md).
+- Grant members access to multiple projects at once.
+- Add to-do items for all of the group members at once.
+- View the [issues](../project/issues/index.md#issues-list) and
+  [merge requests](../project/merge_requests/reviewing_and_managing_merge_requests.md#view-merge-requests-for-all-projects-in-a-group)
+  for all projects in the group, together in a single list view.
 
-Find your groups by clicking **Groups > Your Groups** in the top navigation.
+You can also create [subgroups](subgroups/index.md).
 
-![GitLab Groups](img/groups.png)
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+View a [video introduction to groups](https://www.youtube.com/watch?v=4TWfh1aKHHw).
 
-> The **Groups** dropdown in the top navigation was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/36234) in [GitLab 11.1](https://about.gitlab.com/releases/2018/07/22/gitlab-11-1-released/#groups-dropdown-in-navigation).
+## View groups
 
-The **Groups** page displays:
+To view groups, in the top menu, select **Groups > Your Groups**.
 
-- All groups you are a member of, when **Your groups** is selected.
-- A list of public groups, when **Explore public groups** is selected.
+- When you select **Your groups**, all groups you are a member of are displayed.
+- When you select **Explore public groups**, a list of public groups are displayed.
 
-Each group on the **Groups** page is listed with:
+You can also view groups by namespace. For example, to view:
 
-- How many subgroups it has.
-- How many projects it contains.
-- How many members the group has, not including members inherited from parent group(s).
-- The group's visibility.
-- A link to the group's settings, if you have sufficient permissions.
-- A link to leave the group, if you are a member.
+- A user's namespace: `http://gitlab.example.com/username`
+- A group's namespace: `http://gitlab.example.com/groupname`
+- A subgroups's namespace: `http://gitlab.example.com/groupname/subgroup_name`
 
-## Use cases
-
-You can create groups for numerous reasons. To name a couple:
-
-- Grant access to multiple projects and multiple team members in fewer steps by organizing related projects under the same [namespace](#namespaces) and adding members to the top-level group.
-- Make it easier to `@mention` all of your team at once in issues and merge requests by creating a group and including the appropriate members.
-
-For example, you could create a group for your company members, and create a [subgroup](subgroups/index.md) for each individual team. Let's say you create a group called `company-team`, and you create subgroups in this group for the individual teams `backend-team`, `frontend-team`, and `production-team`.
-
-- When you start a new implementation from an issue, you add a comment:
-  _"`@company-team`, let's do it! `@company-team/backend-team` you're good to go!"_
-- When your backend team needs help from frontend, they add a comment:
-  _"`@company-team/frontend-team` could you help us here please?"_
-- When the frontend team completes their implementation, they comment:
-  _"`@company-team/backend-team`, it's done! Let's ship it `@company-team/production-team`!"_
-
-## Namespaces
-
-In GitLab, a namespace is a unique name to be used as a user name, a group name, or a subgroup name.
-
-- `http://gitlab.example.com/username`
-- `http://gitlab.example.com/groupname`
-- `http://gitlab.example.com/groupname/subgroup_name`
-
-For example, consider a user named Alex:
-
-1. Alex creates an account on GitLab.com with the username `alex`;
-   their profile will be accessed under `https://gitlab.example.com/alex`
-1. Alex creates a group for their team with the group name `alex-team`;
-   the group and its projects will be accessed under `https://gitlab.example.com/alex-team`
-1. Alex creates a subgroup of `alex-team` with the subgroup name `marketing`;
-   this subgroup and its projects will be accessed under `https://gitlab.example.com/alex-team/marketing`
-
-By doing so:
-
-- Any team member mentions Alex with `@alex`
-- Alex mentions everyone from their team with `@alex-team`
-- Alex mentions only the marketing team with `@alex-team/marketing`
-
-## Issues and merge requests within a group
-
-Issues and merge requests are part of projects. For a given group, you can view all of the
-[issues](../project/issues/index.md#issues-list) and [merge requests](../project/merge_requests/reviewing_and_managing_merge_requests.md#view-merge-requests-for-all-projects-in-a-group) across all projects in that group,
-together in a single list view.
-
-### Bulk editing issues and merge requests
-
-For details, see [bulk editing issues and merge requests](../group/bulk_editing/index.md).
-
-## Create a new group
+## Create a group
 
 > For a list of words that are not allowed to be used as group names see the
 > [reserved names](../reserved_names.md).
 
-To create a new Group, either:
+To create a new group, either:
 
 - In the top menu, click **Groups** and then **Your Groups**, and click the green button **New group**.
 
@@ -166,7 +119,7 @@ If you change your mind before your request is approved, just click the
 
 ![Withdraw access request button](img/withdraw_access_request_button.png)
 
-## Changing the owner of a group
+## Change the owner of a group
 
 Ownership of a group means at least one of its members has
 [Owner permission](../permissions.md#group-members-permissions). Groups must have at
@@ -266,7 +219,18 @@ You can sort members by **Account**, **Access granted**, **Max role**, or **Last
 
 ![Group members sort](img/group_members_sort_13_7.png)
 
-## Changing the default branch protection of a group
+## Mention a group in an issue or merge request
+
+When you mention a group in a comment, every member of the group gets a to-do item
+added to their To-do list.
+
+1. Open the MR or issue.
+1. In a comment, type `@` followed by the group or subgroup namespace.
+1. Select **Comment**.
+
+A to-do item is created for all the group and subgroup members.
+
+## Change the default branch protection of a group
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7583) in GitLab 12.9.
 
