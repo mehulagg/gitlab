@@ -782,4 +782,10 @@ RSpec.describe ApplicationSetting do
       it { is_expected.to be true }
     end
   end
+
+  describe 'maintenance mode setting' do
+    it 'defaults to false' do
+      expect(subject.maintenance_mode).to be false
+    end
+  end
 end
