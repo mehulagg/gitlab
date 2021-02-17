@@ -368,7 +368,7 @@ are **explicitly not supported** and may stop working at any time.
 
 ## Troubleshooting SSH connections
 
-When you run `git clone`, you may be prompted for a password, like `git@gitlab.com's password:`.
+When you run `git clone`, you may be prompted for a password, like `git@gitlab.example.com's password:`.
 This indicates that something is wrong with your SSH setup.
 
 - Ensure that you generated your SSH key pair correctly and added the public SSH
