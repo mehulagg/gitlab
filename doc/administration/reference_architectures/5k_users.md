@@ -1694,8 +1694,9 @@ on what features you intend to use:
 | [Terraform state files](../terraform_state.md#using-object-storage) | Yes |
 
 Using separate buckets for each data type is the recommended approach for GitLab.
-This is recommended to ensure there's no collisions across the various types of
-data GitLab stores.
+This ensures there are no collisions across the various types of data GitLab stores.
+There are plans to [enable the use of a single bucket](https://gitlab.com/gitlab-org/gitlab/-/issues/292958)
+in the future.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">
