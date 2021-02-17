@@ -84,6 +84,7 @@ RSpec.describe 'Update Epic', :js do
       it 'creates a todo only for mentioned users' do
         mentioned = create(:user)
 
+        # Add a trailing space to close mention auto-complete dialog, which might block the save button
         fill_in 'issue-description', with: "FYI #{mentioned.to_reference} "
 
         click_button 'Save changes'
