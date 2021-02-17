@@ -3,10 +3,12 @@ import { GlTooltipDirective, GlIcon, GlButton, GlDropdownItem } from '@gitlab/ui
 import { mapGetters } from 'vuex';
 import Api from '~/api';
 import resolvedStatusMixin from '~/batch_comments/mixins/resolved_status';
+import EmojiPicker from '~/emoji/components/picker.vue';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { __, sprintf } from '~/locale';
 import eventHub from '~/sidebar/event_hub';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { splitCamelCase } from '../../lib/utils/text_utility';
 import ReplyButton from './note_actions/reply_button.vue';
 
@@ -17,11 +19,12 @@ export default {
     ReplyButton,
     GlButton,
     GlDropdownItem,
+    EmojiPicker,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [resolvedStatusMixin],
+  mixins: [resolvedStatusMixin, glFeatureFlagsMixin()],
   props: {
     author: {
       type: Object,
@@ -259,19 +262,31 @@ export default {
       class="line-resolve-btn note-action-button"
       @click="onResolve"
     />
-    <a
-      v-if="canAwardEmoji"
-      v-gl-tooltip
-      :class="{ 'js-user-authored': isAuthoredByCurrentUser }"
-      class="note-action-button note-emoji-button js-add-award js-note-emoji gl-text-gray-600 gl-m-2"
-      href="#"
-      title="Add reaction"
-      data-position="right"
-    >
-      <gl-icon class="link-highlight award-control-icon-neutral" name="slight-smile" />
-      <gl-icon class="link-highlight award-control-icon-positive" name="smiley" />
-      <gl-icon class="link-highlight award-control-icon-super-positive" name="smile" />
-    </a>
+    <template v-if="canAwardEmoji">
+      <emoji-picker
+        v-if="glFeatures.improvedEmojiPicker"
+        toggle-class="note-action-button note-emoji-button gl-text-gray-600 gl-m-2 gl-p-0! gl-shadow-none! gl-bg-transparent!"
+      >
+        <template #button-content>
+          <gl-icon class="link-highlight award-control-icon-neutral gl-m-0!" name="slight-smile" />
+          <gl-icon class="link-highlight award-control-icon-positive gl-m-0!" name="smiley" />
+          <gl-icon class="link-highlight award-control-icon-super-positive gl-m-0!" name="smile" />
+        </template>
+      </emoji-picker>
+      <a
+        v-else
+        v-gl-tooltip
+        :class="{ 'js-user-authored': isAuthoredByCurrentUser }"
+        class="note-action-button note-emoji-button js-add-award js-note-emoji gl-text-gray-600 gl-m-2"
+        href="#"
+        title="Add reaction"
+        data-position="right"
+      >
+        <gl-icon class="link-highlight award-control-icon-neutral" name="slight-smile" />
+        <gl-icon class="link-highlight award-control-icon-positive" name="smiley" />
+        <gl-icon class="link-highlight award-control-icon-super-positive" name="smile" />
+      </a>
+    </template>
     <reply-button
       v-if="showReply"
       ref="replyButton"
