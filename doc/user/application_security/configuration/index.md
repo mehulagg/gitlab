@@ -5,7 +5,7 @@ group: Static Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Security Configuration **(ULTIMATE)**
+# Security Configuration **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20711) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
 > - SAST configuration was [enabled](https://gitlab.com/groups/gitlab-org/-/epics/3659) in 13.3 and [improved](https://gitlab.com/gitlab-org/gitlab/-/issues/232862) in 13.4.
@@ -23,7 +23,7 @@ For each security control the page displays:
 - **Status:** The security control's status (enabled, not enabled, or available).
 - **Manage:** A management option or a documentation link.
 
-## Status
+## Status **(ULTIMATE)**
 
 The status of each security control is determined by the project's latest default branch
 [CI pipeline](../../../ci/pipelines/index.md).
@@ -35,13 +35,13 @@ all security features are configured by default.
 
 For SAST, click **View history** to see the `.gitlab-ci.yml` file's history.
 
-## Manage
+## Manage **(ULTIMATE)**
 
 You can configure the following security controls:
 
 - Auto DevOps
   - Click **Enable Auto DevOps** to enable it for the current project. For more details, see [Auto DevOps](../../../topics/autodevops/index.md).
-- SAST
+- SAST **(FREE)**
   - Click either **Enable** or **Configure** to use SAST for the current project. For more details, see [Configure SAST in the UI](../sast/index.md#configure-sast-in-the-ui).
 - DAST Profiles
   - Click **Manage** to manage the available DAST profiles used for on-demand scans. For more details, see [DAST on-demand scans](../dast/index.md#on-demand-scans).
