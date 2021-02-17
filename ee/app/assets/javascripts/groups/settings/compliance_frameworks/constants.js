@@ -1,4 +1,7 @@
+import { uniqueId } from 'lodash';
 import { s__ } from '~/locale';
+
+export const DELETE_MODAL_ID = uniqueId('delete-framework-modal-');
 
 export const FETCH_ERROR = s__(
   'ComplianceFrameworks|Error fetching compliance frameworks data. Please refresh the page',
