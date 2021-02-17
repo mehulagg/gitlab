@@ -7,12 +7,6 @@ module Types
 
       authorize :admin_project
 
-      field :merge_pipelines_enabled, GraphQL::BOOLEAN_TYPE, null: true,
-        description: 'Whether merge pipelines are enabled.',
-        method: :merge_pipelines_enabled?
-      field :merge_trains_enabled, GraphQL::BOOLEAN_TYPE, null: true,
-        description: 'Whether merge trains are enabled.',
-        method: :merge_trains_enabled?
       field :keep_latest_artifact, GraphQL::BOOLEAN_TYPE, null: true,
         description: 'Whether to keep the latest builds artifacts.',
         method: :keep_latest_artifacts_available?
@@ -21,3 +15,5 @@ module Types
     end
   end
 end
+
+Types::Ci::CiCdSettingType.prepend_if_ee('EE::Types::Ci::CiCdSettingType')
