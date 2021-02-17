@@ -1,0 +1,15 @@
+usage-data-dictionary:
+  variables:
+    SETUP_DB: "false"
+  extends:
+    - .default-retry
+    - .rails-cache
+    - .default-before_script
+  stage: test
+  needs: []
+  artifacts:
+    paths:
+      - doc/development/usage_ping/dictionary.md
+  script:
+    - bundle exec rake gitlab:usage_data:generate_metrics_dictionary
+

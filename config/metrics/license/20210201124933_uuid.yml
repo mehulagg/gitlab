@@ -1,6 +1,6 @@
 ---
 key_path: uuid
-description: GitLab instance unique identifier
+description: GitLab Instance unique identifier
 product_section: growth
 product_stage: growth
 product_group: group::product intelligence
