@@ -15,9 +15,9 @@ module Gitlab
       end
 
       def environment
-        return 'production' if Gitlab.com_and_canary?
-
         return 'staging' if Gitlab.staging?
+
+        return 'production' if Gitlab.com?
 
         'development'
       end
