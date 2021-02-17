@@ -41,6 +41,15 @@ RSpec.shared_examples 'a Geo framework registry' do
         expect(result).to include(failed_item2)
         expect(result).not_to include(failed_item1)
       end
+
+      it 'orders records according to retry_at' do
+        failed_item1.update!(retry_at: 2.days.ago)
+        failed_item2.update!(retry_at: 4.days.ago)
+
+        result = described_class.find_registries_needs_sync_again(batch_size: 10)
+
+        expect(result.first).to eq failed_item2
+      end
     end
   end
 end
