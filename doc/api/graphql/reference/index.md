@@ -2951,6 +2951,7 @@ Information about pagination in a connection.
 | `active` | Boolean! | Indicates if the pipeline is active. |
 | `beforeSha` | String | Base SHA of the source branch. |
 | `cancelable` | Boolean! | Specifies if a pipeline can be canceled. |
+| `commitPath` | String | Relative path to the |
 | `committedAt` | Time | Timestamp of the pipeline's commit. |
 | `configSource` | PipelineConfigSourceEnum | Configuration source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE, COMPLIANCE_SOURCE) |
 | `coverage` | Float | Coverage percentage. |

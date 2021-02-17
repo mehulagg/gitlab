@@ -1,0 +1,5 @@
+---
+title: Updates ProjectPipelineResolver to use sha or iid
+merge_request: 54471
+author:
+type: changed
