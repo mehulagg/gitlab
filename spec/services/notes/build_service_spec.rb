@@ -157,18 +157,38 @@ RSpec.describe Notes::BuildService do
       context 'when replying to a confidential comment' do
         let(:note) { create(:note_on_issue, confidential: true) }
 
-        subject do
-          described_class.new(
-            project,
-            author,
-            note: 'Test',
-            in_reply_to_discussion_id: note.discussion_id,
-            confidential: false
-          ).execute
+        context 'when the user can read confidential comments' do
+          subject do
+            described_class.new(
+              project,
+              author,
+              note: 'Test',
+              in_reply_to_discussion_id: note.discussion_id,
+              confidential: false
+            ).execute
+          end
+
+          it '`confidential` param is ignored and set to `true`' do
+            expect(subject.confidential).to be_truthy
+          end
         end
 
-        it '`confidential` param is ignored and set to `true`' do
-          expect(subject.confidential).to be_truthy
+        context 'when the user cannot read confidential comments' do
+          let(:another_user) { create(:user) }
+
+          subject do
+            described_class.new(
+              project,
+              another_user,
+              note: 'Test',
+              in_reply_to_discussion_id: note.discussion_id,
+              confidential: false
+            ).execute
+          end
+
+          it 'returns `Discussion to reply to cannot be found` error' do
+            expect(subject.errors.first).to include("Discussion to reply to cannot be found")
+          end
         end
       end
 
