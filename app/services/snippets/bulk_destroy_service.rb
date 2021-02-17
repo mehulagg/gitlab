@@ -55,14 +55,6 @@ module Snippets
       end
     end
 
-    def attempt_rollback_repositories
-      snippets.each do |snippet|
-        result = Repositories::DestroyRollbackService.new(snippet.repository).execute
-
-        log_rollback_error(snippet) if result[:status] == :error
-      end
-    end
-
     def log_rollback_error(snippet)
       Gitlab::AppLogger.error("Repository #{snippet.full_path} in path #{snippet.disk_path} could not be rolled back")
     end

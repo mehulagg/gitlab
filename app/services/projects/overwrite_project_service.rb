@@ -18,8 +18,6 @@ module Projects
     # to pass that kind of exception to the caller. Instead, we change it
     # for a StandardError exception
     rescue Exception => e # rubocop:disable Lint/RescueException
-      attempt_restore_repositories(source_project)
-
       if e.class == Exception
         raise StandardError, e.message
       else
@@ -52,10 +50,6 @@ module Projects
                                     @current_user,
                                     { name: name, path: path })
                                .execute
-    end
-
-    def attempt_restore_repositories(project)
-      ::Projects::DestroyRollbackService.new(project, @current_user).execute
     end
 
     def add_source_project_to_fork_network(source_project)

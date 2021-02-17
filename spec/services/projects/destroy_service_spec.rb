@@ -8,7 +8,6 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
   let_it_be(:user) { create(:user) }
   let!(:project) { create(:project, :repository, namespace: user.namespace) }
   let(:path) { project.repository.disk_path }
-  let(:remove_path) { removal_path(path) }
   let(:async) { false } # execute or async_execute
 
   before do
@@ -26,7 +25,6 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
       expect(Project.unscoped.all).not_to include(project)
 
       expect(project.gitlab_shell.repository_exists?(project.repository_storage, path + '.git')).to be_falsey
-      expect(project.gitlab_shell.repository_exists?(project.repository_storage, remove_path + '.git')).to be_falsey
     end
   end
 
@@ -119,10 +117,6 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
 
       it do
         expect(project.gitlab_shell.repository_exists?(project.repository_storage, path + '.git')).to be_falsey
-      end
-
-      it do
-        expect(project.gitlab_shell.repository_exists?(project.repository_storage, remove_path + '.git')).to be_truthy
       end
     end
 
@@ -394,7 +388,6 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
 
         expect(Project.unscoped.all).not_to include(project)
         expect(project.gitlab_shell.repository_exists?(project.repository_storage, path + '.git')).to be_falsey
-        expect(project.gitlab_shell.repository_exists?(project.repository_storage, remove_path + '.git')).to be_falsey
         expect(project.all_pipelines).to be_empty
         expect(project.builds).to be_empty
       end
@@ -415,9 +408,5 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
 
   def destroy_project(project, user, params = {})
     described_class.new(project, user, params).public_send(async ? :async_execute : :execute)
-  end
-
-  def removal_path(path)
-    "#{path}+#{project.id}#{Repositories::DestroyService::DELETED_FLAG}"
   end
 end
