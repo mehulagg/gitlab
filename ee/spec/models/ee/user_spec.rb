@@ -1003,11 +1003,32 @@ RSpec.describe User do
 
   describe '#manageable_groups_eligible_for_subscription' do
     let_it_be(:user) { create(:user) }
-    let_it_be(:licensed_group) { create(:group, gitlab_subscription: create(:gitlab_subscription, :bronze)) }
-    let_it_be(:free_group_z) { create(:group, name: 'AZ', gitlab_subscription: create(:gitlab_subscription, :free)) }
-    let_it_be(:free_group_a) { create(:group, name: 'AA', gitlab_subscription: create(:gitlab_subscription, :free)) }
+
+    let_it_be(:licensed_group) do
+      a_group = create(:group)
+      create(:gitlab_subscription, :bronze, namespace: a_group)
+      a_group
+    end
+
+    let_it_be(:free_group_z) do
+      a_group = create(:group, name: 'AZ')
+      create(:gitlab_subscription, :free, namespace: a_group)
+      a_group
+    end
+
+    let_it_be(:free_group_a) do
+      a_group = create(:group, name: 'AA')
+      create(:gitlab_subscription, :free, namespace: a_group)
+      a_group
+    end
+
     let_it_be(:sub_group) { create(:group, name: 'SubGroup', parent: free_group_a) }
-    let_it_be(:trial_group) { create(:group, name: 'AB', gitlab_subscription: create(:gitlab_subscription, :active_trial, :gold)) }
+
+    let_it_be(:trial_group) do
+      a_group = create(:group, name: 'AB')
+      create(:gitlab_subscription, :active_trial, :gold, namespace: a_group)
+      a_group
+    end
 
     subject { user.manageable_groups_eligible_for_subscription }
 
@@ -1085,12 +1106,19 @@ RSpec.describe User do
 
   describe '#manageable_groups_eligible_for_trial' do
     let_it_be(:user) { create :user }
-    let_it_be(:non_trialed_group_z) { create :group, name: 'Zeta', gitlab_subscription: create(:gitlab_subscription, :free) }
-    let_it_be(:non_trialed_group_a) { create :group, name: 'Alpha', gitlab_subscription: create(:gitlab_subscription, :free) }
-    let_it_be(:trialed_group) { create :group, name: 'Omitted', gitlab_subscription: create(:gitlab_subscription, :free, trial: true) }
-    let_it_be(:non_trialed_subgroup) { create :group, name: 'Sub-group', gitlab_subscription: create(:gitlab_subscription, :free), parent: non_trialed_group_a }
+    let_it_be(:non_trialed_group_z) { create :group, name: 'Zeta' }
+    let_it_be(:non_trialed_group_a) { create :group, name: 'Alpha' }
+    let_it_be(:trialed_group) { create :group, name: 'Omitted' }
+    let_it_be(:non_trialed_subgroup) { create :group, name: 'Sub-group', parent: non_trialed_group_a }
 
     subject { user.manageable_groups_eligible_for_trial }
+
+    before(:all) do
+      create(:gitlab_subscription, :free, namespace: non_trialed_group_z)
+      create(:gitlab_subscription, :free, namespace: non_trialed_group_a)
+      create(:gitlab_subscription, :free, trial: true, namespace: trialed_group)
+      create(:gitlab_subscription, :free, namespace: non_trialed_subgroup)
+    end
 
     context 'user with no groups' do
       it { is_expected.to eq [] }
