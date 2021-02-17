@@ -223,7 +223,7 @@ end
 
 def write_reply_to_discussion(button_text: 'Start a review', text: 'Line is wrong', resolve: false, unresolve: false)
   page.within(first('.diff-files-holder .discussion-reply-holder')) do
-    click_button('Reply...')
+    first('.js-vue-discussion-reply').click
 
     fill_in('note_note', with: text)
 

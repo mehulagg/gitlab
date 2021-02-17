@@ -132,7 +132,7 @@ RSpec.describe 'Merge request > User sees avatars on diff notes', :js do
       end
 
       it 'adds avatar when commenting' do
-        find('.js-vue-discussion-reply').click
+        first('.js-vue-discussion-reply').click
 
         page.within '.js-discussion-note-form' do
           find('.js-note-text').native.send_keys('Test')
@@ -151,7 +151,7 @@ RSpec.describe 'Merge request > User sees avatars on diff notes', :js do
 
       it 'adds multiple comments' do
         3.times do
-          find('.js-vue-discussion-reply').click
+          first('.js-vue-discussion-reply').click
 
           page.within '.js-discussion-note-form' do
             find('.js-note-text').native.send_keys('Test')
