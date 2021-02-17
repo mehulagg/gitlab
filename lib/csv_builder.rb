@@ -115,11 +115,8 @@ class CsvBuilder
 
   def excel_sanitize(line)
     return if line.nil?
+    return line unless line.is_a?(String) && line.match?(PREFIX_REGEX)
 
-    if line.is_a?(String) && line.match?(PREFIX_REGEX)
-      line = ["'", line].join
-    end
-
-    line
+    ["'", line].join
   end
 end
