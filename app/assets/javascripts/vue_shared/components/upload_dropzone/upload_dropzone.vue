@@ -36,6 +36,11 @@ export default {
       required: false,
       default: () => [VALID_IMAGE_FILE_MIMETYPE.mimetype],
     },
+    singleFileSelection: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -92,7 +97,7 @@ export default {
       this.$refs.fileUpload.click();
     },
     onFileInputChange(e) {
-      this.$emit('change', e.target.files);
+      this.$emit('change', this.singleFileSelection ? e.target.files[0] : e.target.files);
     },
   },
 };
@@ -121,7 +126,13 @@ export default {
           <gl-icon name="upload" :size="iconStyles.size" :class="iconStyles.class" />
           <p class="gl-mb-0">
             <slot name="upload-text" :openFileUpload="openFileUpload">
-              <gl-sprintf :message="__('Drop or %{linkStart}upload%{linkEnd} files to attach')">
+              <gl-sprintf
+                :message="
+                  singleFileSelection
+                    ? __('Drop or %{linkStart}upload%{linkEnd} file to attach')
+                    : __('Drop or %{linkStart}upload%{linkEnd} files to attach')
+                "
+              >
                 <template #link="{ content }">
                   <gl-link @click.stop="openFileUpload">
                     {{ content }}
@@ -139,7 +150,7 @@ export default {
         name="upload_file"
         :accept="validFileMimetypes"
         class="hide"
-        multiple
+        :multiple="!singleFileSelection"
         @change="onFileInputChange"
       />
     </slot>

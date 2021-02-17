@@ -30,6 +30,7 @@ describe('Upload dropzone component', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   describe('when slot provided', () => {
@@ -140,6 +141,21 @@ describe('Upload dropzone component', () => {
 
         wrapper.vm.ondrop(mockEvent);
         expect(wrapper.emitted()).not.toHaveProperty('error');
+      });
+
+      describe('singleFileSelection = true', () => {
+        it('emits a single file on drop', () => {
+          createComponent({
+            data: mockData,
+            props: { singleFileSelection: true },
+          });
+
+          const mockFile = { type: 'image/jpg' };
+          const mockEvent = mockDragEvent({ files: mockFile });
+
+          wrapper.vm.ondrop(mockEvent);
+          expect(wrapper.emitted().change[0]).toEqual([mockFile]);
+        });
       });
     });
   });
