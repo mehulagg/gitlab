@@ -720,7 +720,11 @@ preferred source is `gitlab`, which uses [API-based configuration](#gitlab-api-b
 
 For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/how-gitlab-pages-uses-the-gitlab-api-to-serve-content/).
 
+<!-- vale gitlab.Spelling = NO -->
+
 ### Deprecated domain_config_source
+
+<!-- vale gitlab.Spelling = YES -->
 
 WARNING:
 The flag `gitlab_pages['domain_config_source']` is deprecated for use in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913),
