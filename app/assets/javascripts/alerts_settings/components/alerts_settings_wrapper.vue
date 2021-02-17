@@ -13,11 +13,13 @@ import updateCurrentPrometheusIntegrationMutation from '../graphql/mutations/upd
 import updateHttpIntegrationMutation from '../graphql/mutations/update_http_integration.mutation.graphql';
 import updatePrometheusIntegrationMutation from '../graphql/mutations/update_prometheus_integration.mutation.graphql';
 import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
+import getHttpIntegrationsQuery from '../graphql/queries/get_http_integrations.query.graphql';
 import getIntegrationsQuery from '../graphql/queries/get_integrations.query.graphql';
 import service from '../services';
 import {
   updateStoreAfterIntegrationDelete,
   updateStoreAfterIntegrationAdd,
+  updateStoreAfterHttpIntegrationAdd,
 } from '../utils/cache_updates';
 import {
   DELETE_INTEGRATION_ERROR,
@@ -85,6 +87,28 @@ export default {
         createFlash({ message: err });
       },
     },
+    // TODO: we'll need to update the logic to request specific http integration by its id on edit
+    // when BE adds support for it https://gitlab.com/gitlab-org/gitlab/-/issues/321674
+    // currently the request for ALL http integrations is made and on specific integration edit we search it in the list
+    httpIntegrations: {
+      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
+      query: getHttpIntegrationsQuery,
+      variables() {
+        return {
+          projectPath: this.projectPath,
+        };
+      },
+      update(data) {
+        const { alertManagementHttpIntegrations: { nodes: list = [] } = {} } = data.project || {};
+
+        return {
+          list,
+        };
+      },
+      error(err) {
+        createFlash({ message: err });
+      },
+    },
     currentIntegration: {
       query: getCurrentIntegrationQuery,
     },
@@ -94,6 +118,7 @@ export default {
       isUpdating: false,
       testAlertPayload: null,
       integrations: {},
+      httpIntegrations: {},
       currentIntegration: null,
     };
   },
@@ -113,7 +138,7 @@ export default {
       this.$apollo
         .mutate({
           mutation:
-            type === this.$options.typeSet.http
+            type === typeSet.http
               ? createHttpIntegrationMutation
               : createPrometheusIntegrationMutation,
           variables: {
@@ -122,6 +147,11 @@ export default {
           },
           update(store, { data }) {
             updateStoreAfterIntegrationAdd(store, getIntegrationsQuery, data, { projectPath });
+            if (type === typeSet.http) {
+              updateStoreAfterHttpIntegrationAdd(store, getHttpIntegrationsQuery, data, {
+                projectPath,
+              });
+            }
           },
         })
         .then(({ data: { httpIntegrationCreate, prometheusIntegrationCreate } = {} } = {}) => {
@@ -238,24 +268,20 @@ export default {
         });
     },
     editIntegration({ id, type }) {
-      const currentIntegration = this.integrations.list.find(
-        (integration) => integration.id === id,
-      );
+      let currentIntegration = this.integrations.list.find((integration) => integration.id === id);
+      if (currentIntegration.type === typeSet.http) {
+        const httpIntegrationMappingData = this.httpIntegrations.list.find(
+          (integration) => integration.id === id,
+        );
+        currentIntegration = { ...currentIntegration, ...httpIntegrationMappingData };
+      }
       this.$apollo.mutate({
         mutation:
           type === this.$options.typeSet.http
             ? updateCurrentHttpIntegrationMutation
             : updateCurrentPrometheusIntegrationMutation,
         variables: {
-          ...currentIntegration, // TODO: Is it fine to pass through integration? Variables will depend on type
-          // id: currentIntegration.id,
-          // name: currentIntegration.name,
-          // active: currentIntegration.active,
-          // token: currentIntegration.token,
-          // type: currentIntegration.type,
-          // url: currentIntegration.url,
-          // apiUrl: currentIntegration.apiUrl,
-          // samplePayload: currentIntegration.samplePayload,
+          ...currentIntegration,
         },
       });
     },
@@ -266,9 +292,7 @@ export default {
       this.$apollo
         .mutate({
           mutation: destroyHttpIntegrationMutation,
-          variables: {
-            id,
-          },
+          variables: { id },
           update(store, { data }) {
             updateStoreAfterIntegrationDelete(store, getIntegrationsQuery, data, { projectPath });
           },

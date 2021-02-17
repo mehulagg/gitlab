@@ -8,6 +8,7 @@ mutation updateCurrentIntegration(
   $apiUrl: String
   $payloadExample: JsonString
   $payloadAttributeMappings: [AlertManagementPayloadAlertFieldInput!]
+  $payloadAlertFields: [AlertManagementPayloadAlertField!]
 ) {
   updateCurrentIntegration(
     id: $id
@@ -19,5 +20,6 @@ mutation updateCurrentIntegration(
     apiUrl: $apiUrl
     payloadExample: $payloadExample
     payloadAttributeMappings: $payloadAttributeMappings
+    payloadAlertFields: $payloadAlertFields
   ) @client
 }

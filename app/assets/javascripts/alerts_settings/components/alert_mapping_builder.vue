@@ -7,15 +7,11 @@ import {
   GlSearchBoxByType,
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import Vue from 'vue';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { s__, __ } from '~/locale';
-import {
-  getMappingData,
-  getPayloadFields,
-  transformForSave,
-} from '../utils/mapping_transformations';
+import { getMappingData, transformForSave } from '../utils/mapping_transformations';
 
 export const i18n = {
   columns: {
@@ -73,11 +69,8 @@ export default {
     };
   },
   computed: {
-    payloadFields() {
-      return getPayloadFields(this.parsedPayload);
-    },
     mappingData() {
-      return getMappingData(this.gitlabFields, this.payloadFields, this.savedMapping);
+      return getMappingData(this.gitlabFields, this.parsedPayload, this.savedMapping);
     },
     hasFallbackColumn() {
       return this.gitlabFields.some(({ numberOfFallbacks }) => Boolean(numberOfFallbacks));
@@ -100,19 +93,11 @@ export default {
       return fields.filter((field) => field.label.toLowerCase().includes(search));
     },
     isSelected(fieldValue, mapping) {
-      return fieldValue === mapping;
+      return isEqual(fieldValue, mapping);
     },
-    selectedValue({ mapping, name }) {
+    selectedValue(mapping) {
       return (
-        this.payloadFields.find((item) => item.name === mapping)?.label ||
-        // TODO: Below - why do we have to uppercase here? Can we save gitlab field name as uppercase to match the DB?
-        this.savedMapping.find((item) => item.fieldName === name?.toUpperCase())?.label ||
-        this.$options.i18n.makeSelection
-      );
-    },
-    selectedFallbackValue() {
-      return (
-        this.payloadFields.find((item) => item.name === name)?.label ||
+        this.parsedPayload.find((item) => isEqual(item.path, mapping))?.label ||
         this.$options.i18n.makeSelection
       );
     },
@@ -158,7 +143,7 @@ export default {
       :key="gitlabField.name"
       class="gl-display-table-row"
     >
-      <div class="gl-display-table-cell gl-py-3 gl-pr-3 w-30p gl-vertical-align-middle">
+      <div class="gl-display-table-cell gl-py-3 gl-pr-3 gl-w-30p gl-vertical-align-middle">
         <gl-form-input
           aria-labelledby="gitlabFieldsHeader"
           disabled
@@ -172,21 +157,21 @@ export default {
         </div>
       </div>
 
-      <div class="gl-display-table-cell gl-py-3 gl-pr-3 w-30p gl-vertical-align-middle">
+      <div class="gl-display-table-cell gl-py-3 gl-pr-3 gl-w-30p gl-vertical-align-middle">
         <gl-dropdown
           :disabled="!gitlabField.mappingFields.length"
           aria-labelledby="parsedFieldsHeader"
-          :text="selectedValue(gitlabField)"
+          :text="selectedValue(gitlabField.mapping)"
           class="gl-w-full"
           :header-text="$options.i18n.selectMappingKey"
         >
           <gl-search-box-by-type @input="setSearchTerm($event, 'searchTerm', gitlabField.name)" />
           <gl-dropdown-item
             v-for="mappingField in filterFields(gitlabField.searchTerm, gitlabField.mappingFields)"
-            :key="`${mappingField.name}__mapping`"
-            :is-checked="isSelected(gitlabField.mapping, mappingField.name)"
+            :key="`${mappingField.path}__mapping`"
+            :is-checked="isSelected(gitlabField.mapping, mappingField.path)"
             is-check-item
-            @click="setMapping(gitlabField.name, mappingField.name, 'mapping')"
+            @click="setMapping(gitlabField.name, mappingField.path, 'mapping')"
           >
             {{ mappingField.label }}
           </gl-dropdown-item>
@@ -196,12 +181,12 @@ export default {
         </gl-dropdown>
       </div>
 
-      <div class="gl-display-table-cell gl-py-3 w-30p">
+      <div class="gl-display-table-cell gl-py-3 gl-w-30p">
         <gl-dropdown
           v-if="Boolean(gitlabField.numberOfFallbacks)"
           :disabled="!gitlabField.mappingFields.length"
           aria-labelledby="fallbackFieldsHeader"
-          :text="selectedFallbackValue(gitlabField.fallback)"
+          :text="selectedValue(gitlabField.fallback)"
           class="gl-w-full"
           :header-text="$options.i18n.selectMappingKey"
         >
@@ -213,10 +198,10 @@ export default {
               gitlabField.fallbackSearchTerm,
               gitlabField.mappingFields,
             )"
-            :key="`${mappingField.name}__fallback`"
-            :is-checked="isSelected(gitlabField.fallback, mappingField.name)"
+            :key="`${mappingField.path}__fallback`"
+            :is-checked="isSelected(gitlabField.fallback, mappingField.path)"
             is-check-item
-            @click="setMapping(gitlabField.name, mappingField.name, 'fallback')"
+            @click="setMapping(gitlabField.name, mappingField.path, 'fallback')"
           >
             {{ mappingField.label }}
           </gl-dropdown-item>

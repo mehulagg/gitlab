@@ -11,7 +11,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import MappingBuilder from '~/alerts_settings/components/alert_mapping_builder.vue';
 import AlertsSettingsForm from '~/alerts_settings/components/alerts_settings_form.vue';
 import { typeSet } from '~/alerts_settings/constants';
-import alertFields from '../mocks/alertFields.json';
+import alertFields from '../mocks/alert_fields.json';
 import { defaultAlertSettingsConfig } from './util';
 
 describe('AlertsSettingsForm', () => {
@@ -160,7 +160,7 @@ describe('AlertsSettingsForm', () => {
               name: integrationName,
               active: true,
               payloadAttributeMappings: sampleMapping,
-              payloadExample: null,
+              payloadExample: '{}',
             },
           },
         ]);
@@ -279,7 +279,7 @@ describe('AlertsSettingsForm', () => {
 
   describe('Test payload section for HTTP integration', () => {
     const validSamplePayload = JSON.stringify(alertFields);
-    const emptySamplePayload = '';
+    const emptySamplePayload = '{}';
 
     beforeEach(() => {
       createComponent({
@@ -310,7 +310,8 @@ describe('AlertsSettingsForm', () => {
           currentIntegration: {
             active,
             type: typeSet.http,
-            samplePayload: validSamplePayload,
+            payloadExample: validSamplePayload,
+            payloadAttributeMappings: [],
           },
           resetSamplePayloadConfirmed,
         });
@@ -321,19 +322,24 @@ describe('AlertsSettingsForm', () => {
 
     describe('action buttons for sample payload', () => {
       describe.each`
-        resetSamplePayloadConfirmed | samplePayload         | caption
+        resetSamplePayloadConfirmed | payloadExample        | caption
         ${false}                    | ${validSamplePayload} | ${'Edit payload'}
         ${true}                     | ${emptySamplePayload} | ${'Submit payload'}
         ${true}                     | ${validSamplePayload} | ${'Submit payload'}
         ${false}                    | ${emptySamplePayload} | ${'Submit payload'}
-      `('', ({ resetSamplePayloadConfirmed, samplePayload, caption }) => {
-        const samplePayloadMsg = samplePayload ? 'was provided' : 'was not provided';
+      `('', ({ resetSamplePayloadConfirmed, payloadExample, caption }) => {
+        const samplePayloadMsg = payloadExample ? 'was provided' : 'was not provided';
         const payloadResetMsg = resetSamplePayloadConfirmed ? 'was confirmed' : 'was not confirmed';
 
         it(`shows ${caption} button when sample payload ${samplePayloadMsg} and payload reset ${payloadResetMsg}`, async () => {
           wrapper.setData({
             selectedIntegration: typeSet.http,
-            currentIntegration: { samplePayload, type: typeSet.http, active: true },
+            currentIntegration: {
+              payloadExample,
+              type: typeSet.http,
+              active: true,
+              payloadAttributeMappings: [],
+            },
             resetSamplePayloadConfirmed,
           });
           await wrapper.vm.$nextTick();

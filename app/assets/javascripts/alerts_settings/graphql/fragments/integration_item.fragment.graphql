@@ -6,11 +6,4 @@ fragment IntegrationItem on AlertManagementIntegration {
   url
   token
   apiUrl
-  payloadExample
-  payloadAttributeMappings {
-    fieldName
-    path
-    type
-    label
-  }
 }

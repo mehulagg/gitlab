@@ -1,10 +1,10 @@
 import { GlIcon, GlFormInput, GlDropdown, GlSearchBoxByType, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import AlertMappingBuilder, { i18n } from '~/alerts_settings/components/alert_mapping_builder.vue';
-import parsedMapping from '~/alerts_settings/mocks/parsedMapping.json';
 import * as transformationUtils from '~/alerts_settings/utils/mapping_transformations';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
-import alertFields from '../mocks/alertFields.json';
+import alertFields from '../mocks/alert_fields.json';
+import parsedMapping from '../mocks/parsed_mapping.json';
 
 describe('AlertMappingBuilder', () => {
   let wrapper;
@@ -12,8 +12,8 @@ describe('AlertMappingBuilder', () => {
   function mountComponent() {
     wrapper = shallowMount(AlertMappingBuilder, {
       propsData: {
-        parsedPayload: parsedMapping.samplePayload.payloadAlerFields.nodes,
-        savedMapping: parsedMapping.storedMapping.nodes,
+        parsedPayload: parsedMapping.payloadAlerFields,
+        savedMapping: parsedMapping.payloadAttributeMappings,
         alertFields,
       },
     });
@@ -65,8 +65,9 @@ describe('AlertMappingBuilder', () => {
       const dropdown = findColumnInRow(index + 1, 2).find(GlDropdown);
       const searchBox = dropdown.findComponent(GlSearchBoxByType);
       const dropdownItems = dropdown.findAllComponents(GlDropdownItem);
-      const { nodes } = parsedMapping.samplePayload.payloadAlerFields;
-      const mappingOptions = nodes.filter(({ type }) => types.includes(type));
+      const mappingOptions = parsedMapping.payloadAlerFields.filter(({ type }) =>
+        types.includes(type),
+      );
 
       expect(dropdown.exists()).toBe(true);
       expect(searchBox.exists()).toBe(true);
@@ -82,8 +83,9 @@ describe('AlertMappingBuilder', () => {
       if (numberOfFallbacks) {
         const searchBox = dropdown.findComponent(GlSearchBoxByType);
         const dropdownItems = dropdown.findAllComponents(GlDropdownItem);
-        const { nodes } = parsedMapping.samplePayload.payloadAlerFields;
-        const mappingOptions = nodes.filter(({ type }) => types.includes(type));
+        const mappingOptions = parsedMapping.payloadAlerFields.filter(({ type }) =>
+          types.includes(type),
+        );
 
         expect(searchBox.exists()).toBe(Boolean(numberOfFallbacks));
         expect(dropdownItems).toHaveLength(mappingOptions.length);

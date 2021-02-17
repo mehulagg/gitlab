@@ -20,7 +20,7 @@ const resolvers = {
         apiUrl,
         payloadExample,
         payloadAttributeMappings,
-        ...rest
+        payloadAlertFields,
       },
       { cache },
     ) => {
@@ -41,6 +41,7 @@ const resolvers = {
             apiUrl,
             payloadExample,
             payloadAttributeMappings,
+            payloadAlertFields,
           };
         }
       });

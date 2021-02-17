@@ -12,10 +12,10 @@ import {
   GlModalDirective,
   GlToggle,
 } from '@gitlab/ui';
+import { isEmpty, omit } from 'lodash';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import parseSamplePayload from '../graphql/queries/parse_sample_payload.query.graphql';
 import {
   integrationTypes,
   JSON_VALIDATE_DELAY,
@@ -23,6 +23,7 @@ import {
   typeSet,
 } from '../constants';
 import getCurrentIntegrationQuery from '../graphql/queries/get_current_integration.query.graphql';
+import parseSamplePayload from '../graphql/queries/parse_sample_payload.query.graphql';
 import MappingBuilder from './alert_mapping_builder.vue';
 import AlertSettingsFormHelpBlock from './alert_settings_form_help_block.vue';
 
@@ -158,8 +159,7 @@ export default {
         json: null,
         error: null,
       },
-      resetSamplePayloadConfirmed: false,
-      customMapping: null, // TODO: Can remove? This isn't referenced
+      resetPayloadAndMappingConfirmed: false,
       mapping: [],
       parsingPayload: false,
       currentIntegration: null,
@@ -212,10 +212,11 @@ export default {
       );
     },
     hasSamplePayload() {
-      return Boolean(this.currentIntegration?.samplePayload);
+      const { payloadExample } = this.currentIntegration;
+      return payloadExample && !isEmpty(JSON.parse(payloadExample));
     },
     canEditPayload() {
-      return this.hasSamplePayload && !this.resetSamplePayloadConfirmed;
+      return this.hasSamplePayload && !this.resetPayloadAndMappingConfirmed;
     },
     isResetAuthKeyDisabled() {
       return !this.active && !this.integrationForm.token !== '';
@@ -244,19 +245,26 @@ export default {
       if (val === null) {
         return this.reset();
       }
-      this.selectedIntegration = val.type;
-      this.active = val.active;
-      if (val.type === typeSet.http && this.showMappingBuilder) {
-        this.integrationTestPayload.json = val.payloadExample;
-        // TODO: Should we do a deep clone here?
-        // TODO: Handle case that payloadAttributeMappings is empty?
-        this.updateMapping([...val.payloadAttributeMappings]);
+      const { type, active, payloadExample, payloadAlertFields, payloadAttributeMappings } = val;
+      this.selectedIntegration = type;
+      this.active = active;
+
+      if (type === typeSet.prometheus) {
+        this.integrationTestPayload.json = null;
       }
-      return this.integrationTypeSelect();
+
+      if (type === typeSet.http && this.showMappingBuilder) {
+        this.parsedPayload = payloadAlertFields;
+        this.integrationTestPayload.json =
+          payloadExample && !isEmpty(JSON.parse(payloadExample)) ? payloadExample : null;
+        const mapping = payloadAttributeMappings.map((m) => omit(m, '__typename'));
+        this.updateMapping(mapping);
+      }
+      return this.toggleFormVisibility();
     },
   },
   methods: {
-    integrationTypeSelect() {
+    toggleFormVisibility() {
       if (this.selectedIntegration === integrationTypes[0].value) {
         this.formVisible = false;
       } else {
@@ -272,20 +280,15 @@ export default {
       const customMappingVariables = this.glFeatures.multipleHttpIntegrationsCustomMapping
         ? {
             payloadAttributeMappings: this.mapping,
-            payloadExample: this.integrationTestPayload.json,
+            payloadExample: this.integrationTestPayload.json || '{}',
           }
         : {};
 
       const variables =
         this.selectedIntegration === typeSet.http
-          ? {
-              name,
-              active: this.active,
-              ...customMappingVariables,
-            }
+          ? { name, active: this.active, ...customMappingVariables }
           : { apiUrl, active: this.active };
       const integrationPayload = { type: this.selectedIntegration, variables };
-
       if (this.currentIntegration) {
         return this.$emit('update-integration', integrationPayload);
       }
@@ -295,8 +298,8 @@ export default {
     },
     reset() {
       this.selectedIntegration = integrationTypes[0].value;
-      this.integrationTypeSelect();
-      this.parsedPayload = [];
+      this.toggleFormVisibility();
+      this.resetPayloadAndMapping();
 
       if (this.currentIntegration) {
         return this.$emit('clear-current-integration', { type: this.currentIntegration.type });
@@ -350,7 +353,7 @@ export default {
             },
           }) => {
             this.parsedPayload = alertManagementPayloadFields;
-            this.resetSamplePayloadConfirmed = false;
+            this.resetPayloadAndMappingConfirmed = false;
 
             this.$toast.show(this.$options.i18n.integrationFormSteps.step4.payloadParsedSucessMsg);
           },
@@ -363,7 +366,12 @@ export default {
         });
     },
     updateMapping(mapping) {
-      this.mapping = mapping; // TODO: Not used, should this be `savedMapping`?
+      this.mapping = mapping;
+    },
+    resetPayloadAndMapping() {
+      this.resetPayloadAndMappingConfirmed = true;
+      this.parsedPayload = [];
+      this.updateMapping([]);
     },
   },
 };
@@ -382,7 +390,7 @@ export default {
         :disabled="isSelectDisabled"
         class="mw-100"
         :options="$options.integrationTypes"
-        @change="integrationTypeSelect"
+        @change="toggleFormVisibility"
       />
 
       <div v-if="!canAddIntegration" class="gl-my-4" data-testid="multi-integrations-not-supported">
@@ -555,7 +563,7 @@ export default {
             :title="$options.i18n.integrationFormSteps.step4.resetHeader"
             :ok-title="$options.i18n.integrationFormSteps.step4.resetOk"
             ok-variant="danger"
-            @ok="resetSamplePayloadConfirmed = true"
+            @ok="resetPayloadAndMapping"
           >
             {{ $options.i18n.integrationFormSteps.step4.resetBody }}
           </gl-modal>
