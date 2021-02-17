@@ -5,13 +5,18 @@ module Gitlab
     module Variables
       class Collection
         class Item
-          def initialize(key:, value:, public: true, file: false, masked: false)
+          include Gitlab::Utils::StrongMemoize
+
+          def initialize(key:, value:, public: true, file: false, masked: false, depends_on: nil)
             raise ArgumentError, "`#{key}` must be of type String or nil value, while it was: #{value.class}" unless
               value.is_a?(String) || value.nil?
 
             @variable = {
               key: key, value: value, public: public, file: file, masked: masked
             }
+
+            depends_on ||= variable_references
+            @variable[:depends_on] = depends_on if depends_on
           end
 
           def value
@@ -19,6 +24,8 @@ module Gitlab
           end
 
           def [](key)
+            return if key == :depends_on && !@variable.has_key?(:depends_on)
+
             @variable.fetch(key)
           end
 
@@ -47,6 +54,17 @@ module Gitlab
               resource.dup
             else
               raise ArgumentError, "Unknown `#{resource.class}` variable resource!"
+            end
+          end
+
+          private
+
+          def variable_references
+            value = @variable.fetch(:value)
+            return unless ExpandVariables.possible_var_reference?(value)
+
+            value.scan(ExpandVariables::VARIABLES_REGEXP).map do |var_ref|
+              var_ref.first
             end
           end
         end
