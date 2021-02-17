@@ -46,7 +46,7 @@ RSpec.describe PagesUpdateConfigurationWorker do
   describe '#perform_async' do
     it "calls the correct service", :sidekiq_inline do
       expect_next_instance_of(Projects::UpdatePagesConfigurationService, project) do |service|
-        expect(service).to receive(:execute).and_return({})
+        expect(service).to receive(:execute).and_return(status: :success)
       end
 
       described_class.perform_async(project.id)
