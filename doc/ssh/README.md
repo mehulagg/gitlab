@@ -250,7 +250,7 @@ If the welcome message doesn't appear, you can troubleshoot by running `ssh`
 in verbose mode:
 
 ```shell
-ssh -Tvvv git@gitlab.com
+ssh -Tvvv git@gitlab.example.com
 ```
 
 ## Use different keys for different repositories
