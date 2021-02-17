@@ -47,14 +47,14 @@ more than one approval, the last maintainer to review and approve merges it.
 
 Domain experts are team members who have substantial experience with a specific technology, product feature or area of the codebase. Team members are encouraged to self-identify as domain experts and add it to their [team profile](https://gitlab.com/gitlab-com/www-gitlab-com/-/blob/master/data/team.yml)
 
-When self-identifying as a domain expert, it is recommended to assign the MR changing the `team.yml` to be merged by an already established Domain Expert or a corresponding Engineering Manager.
+When self-identifying as a domain expert, it is recommended the MR changing the `team.yml` to be reviewed and merged by an already established Domain Expert or a corresponding Engineering Manager.
 
 We make the following assumption with regards to automatically being considered a domain expert:
 
 - Team members working in a specific stage/group (e.g. create: source code) are considered domain experts for that area of the app they work on
 - Team members working on a specific feature (e.g. search) are considered domain experts for that feature
 
-We default to assigning reviews to team members with domain expertise.
+We default to requesting reviews from team members with domain expertise.
 When a suitable [domain expert](#domain-experts) isn't available, you can choose any team member to review the MR, or simply follow the [Reviewer roulette](#reviewer-roulette) recommendation.
 
 Team members' domain expertise can be viewed on the [engineering projects](https://about.gitlab.com/handbook/engineering/projects/) page or on the [GitLab team page](https://about.gitlab.com/company/team/).
@@ -139,7 +139,7 @@ View the updated documentation regarding [internal application security reviews]
 The responsibility to find the best solution and implement it lies with the
 merge request author.
 
-Before assigning a merge request to a maintainer for approval and merge, they
+Before requesting a review from a maintainer for approval and merge, they
 should be confident that:
 
 - It actually solves the problem it was meant to solve.
@@ -184,9 +184,9 @@ Avoid:
   [include a link to the relevant issue](code_comments.md).
 - Adding comments which only explain what the code is doing. If non-TODO comments are added, they should
   [_explain why, not what_](https://blog.codinghorror.com/code-tells-you-how-comments-tell-you-why/).
-- Assigning merge requests with failed tests to maintainers. If the tests are failing and you have to assign, ensure you leave a comment with an explanation.
+- Requesting maintainer reviews of merge requests with failed tests. If the tests are failing and you have to request a review, ensure you leave a comment with an explanation.
 - Excessively mentioning maintainers through email or Slack (if the maintainer is reachable
-through Slack). If you can't assign a merge request, `@` mentioning a maintainer in a comment is acceptable and in all other cases assigning the merge request is sufficient.
+through Slack). If you can't add a reviewer for a merge request, `@` mentioning a maintainer in a comment is acceptable and in all other cases adding a reviewer is sufficient.
 
 This
 [saves reviewers time and helps authors catch mistakes earlier](https://www.ibm.com/developerworks/rational/library/11-proven-practices-for-peer-review/index.html#__RefHeading__97_174136755).
@@ -197,8 +197,8 @@ This
 that it meets all requirements, you should:
 
 - Click the Approve button.
-- Advise the author their merge request has been reviewed and approved.
-- Assign the merge request to a maintainer. Default to assigning it to a maintainer with [domain expertise](#domain-experts),
+- Advise the author their merge request has been reviewed, approved, and remove yourself from reviewers list.
+- Request a review from a maintainer. Default to requesting a review from a maintainer with [domain expertise](#domain-experts),
 however, if one isn't available or you think the merge request doesn't need a review by a [domain expert](#domain-experts), feel free to follow the [Reviewer roulette](#reviewer-roulette) suggestion.
 
 ### The responsibility of the maintainer
@@ -302,17 +302,17 @@ first time.
 - Push commits based on earlier rounds of feedback as isolated commits to the
   branch. Do not squash until the branch is ready to merge. Reviewers should be
   able to read individual updates based on their earlier feedback.
-- Assign the merge request back to the reviewer once you are ready for another round of
-  review. If you do not have the ability to assign merge requests, `@`
+- Add the previous reviewer again as a reviewer once you are ready for another round of
+  review. If you do not have the ability to add reviewers, `@`
   mention the reviewer instead.
 
-### Assigning a merge request for a review
+### Requesting a review
 
 When you are ready to have your merge request reviewed,
-you should request an initial review by assigning it to a reviewer from your group or team.
-However, you can also assign it to any reviewer. The list of reviewers can be found on [Engineering projects](https://about.gitlab.com/handbook/engineering/projects/) page.
+you should request an initial review by adding a reviewer from your group or team.
+However, you can also request review from any reviewer. The list of reviewers can be found on [Engineering projects](https://about.gitlab.com/handbook/engineering/projects/) page.
 
-You can also use `workflow::ready for review` label. That means that your merge request is ready to be reviewed and any reviewer can pick it. It is recommended to use that label only if there isn't time pressure and make sure the merge request is assigned to a reviewer.
+You can also use `workflow::ready for review` label. That means that your merge request is ready to be reviewed and any reviewer can pick it. It is recommended to use that label only if there isn't time pressure and make sure adding a specific review to the merge request.
 
 When your merge request receives an approval from the first reviewer it can be passed to a maintainer. You should default to choosing a maintainer with [domain expertise](#domain-experts), and otherwise follow the Reviewer Roulette recommendation or use the label `ready for merge`.
 
@@ -320,11 +320,11 @@ Sometimes, a maintainer may not be available for review. They could be out of th
 You can and should check the maintainer’s availability in their profile. If the maintainer recommended by
 the roulette is not available, choose someone else from that list.
 
-It is responsibility of the author of a merge request that the merge request is reviewed. If it stays in `ready for review` state too long it is recommended to assign it to a specific reviewer.
+It is responsibility of the author of a merge request that the merge request is reviewed. If it stays in `ready for review` state too long it is recommended to add a specific reviewer.
 
 #### List of merge requests ready for review
 
-Developers who have capacity can regularly check the list of [merge requests to review](https://gitlab.com/groups/gitlab-org/-/merge_requests?state=opened&label_name%5B%5D=workflow%3A%3Aready%20for%20review) and assign any merge request they want to review.
+Developers who have capacity can regularly check the list of [merge requests to review](https://gitlab.com/groups/gitlab-org/-/merge_requests?state=opened&label_name%5B%5D=workflow%3A%3Aready%20for%20review) and add yourself as a reviewer of any merge request they want to review.
 
 ### Reviewing a merge request
 
@@ -347,8 +347,8 @@ experience, refactors the existing code). Then:
   - There's a [Chrome/Firefox add-on](https://gitlab.com/conventionalcomments/conventional-comments-button) which you can use to apply [Conventional Comment](https://conventionalcomments.org/) prefixes.
 - After a round of line notes, it can be helpful to post a summary note such as
   "Looks good to me", or "Just a couple things to address."
-- Assign the merge request to the author if changes are required following your
-  review.
+- Remove yourself from reviewers and ask for a change from the author if changes are required following your review.
+- Click approve button once you're satisfied with the changes.
 
 ### Merging a merge request
 
@@ -403,6 +403,7 @@ When ready to merge:
     red "Merge" button.
 - When you set the MR to "Merge When Pipeline Succeeds", you should take over
   subsequent revisions for anything that would be spotted after that.
+- You may choose to stay on as a reviewer if you are merging it just to handle any merge issues.
 
 Thanks to **Pipeline for Merged Results**, authors no longer have to rebase their
 branch as frequently anymore (only when there are conflicts) because the Merge
