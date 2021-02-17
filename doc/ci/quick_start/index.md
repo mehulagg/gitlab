@@ -125,7 +125,9 @@ The pipeline starts when the commit is committed.
     image: ruby:2.7.2
   ```
 
-  This command tells the runner to use a Ruby image from Docker Hub.
+  This command tells the runner to use a Ruby image from Docker Hub. You do not need
+  to design your application to work with Docker to have CI/CD jobs run in Docker
+  containers.
 
 - To validate your `.gitlab-ci.yml` file, use the
   [CI Lint tool](../lint.md), which is available in every project.
