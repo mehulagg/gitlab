@@ -141,10 +141,9 @@ using Tomcat:
    sudo service tomcat8 restart
    ```
 
-   The Tomcat service should restart.
-
-1. After the restart is complete, the PlantUML service is ready and
-   listening for requests on port 8080: `http://localhost:8080/plantuml`
+The Tomcat service should restart. After the restart is complete, the
+PlantUML service is ready and listening for requests on port 8080:
+`http://localhost:8080/plantuml`
 
 To change these defaults, edit the `/etc/tomcat8/server.xml` file.
 
@@ -158,10 +157,13 @@ the configuration below accordingly.
 The PlantUML server runs locally on your server, so it can't be accessed
 externally by default. Your server must catch external PlantUML
 calls to `https://gitlab.example.com/-/plantuml/` and redirect them to the
-local PlantUML server. This URL is either `http://plantuml:8080/` or `http://localhost:8080/plantuml/`,
-depending on your setup.
+local PlantUML server. Depending on your setup, the URL is either of the
+following:
 
-If you are running [GitLab with TLS](https://docs.gitlab.com/omnibus/settings/ssl.html)
+- `http://plantuml:8080/`
+- `http://localhost:8080/plantuml/`
+
+If you're running [GitLab with TLS](https://docs.gitlab.com/omnibus/settings/ssl.html)
 you must configure this redirection, because PlantUML uses the insecure HTTP protocol.
 Newer browsers such as [Google Chrome 86+](https://www.chromestatus.com/feature/4926989725073408)
 don't load insecure HTTP resources on pages served over HTTPS.
@@ -200,7 +202,7 @@ stop;
 
 ## Enable PlantUML integration
 
-After configuring your local PlantUML server, you're ready to enable the PlantUML integration:You need to enable PlantUML integration from Settings under Admin Area:
+After configuring your local PlantUML server, you're ready to enable the PlantUML integration:
 
 1. Sign in to GitLab as an [Administrator](../../user/permissions.md) user.
 1. In the top menu, click **{admin}** **Admin Area**.
