@@ -14,7 +14,7 @@ Review Apps is a collaboration tool that takes the hard work out of providing an
 
 NOTE:
 If you have a Kubernetes cluster, you can automate this feature in your applications
-by using [Auto DevOps](../topics/autodevops/index.md).
+by using [Auto DevOps](../../topics/autodevops/index.md).
 
 ## Introduction
 
