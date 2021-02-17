@@ -129,7 +129,7 @@ module Gitlab
     # `Gitlab::CurrentSettings#uncached_application_settings` in
     # lib/gitlab/current_settings.rb is expected to handle such cases, and use
     # the default value for the setting instead, but in this case, it doesn't,
-    # see
+    # see https://gitlab.com/gitlab-org/gitlab/-/issues/321836
     # As a work around, we check if the setting method is available
     return false unless ::Gitlab::CurrentSettings.respond_to?(:maintenance_mode)
 
