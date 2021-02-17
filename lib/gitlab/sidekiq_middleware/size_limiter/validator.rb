@@ -50,13 +50,15 @@ module Gitlab
           return if size <= @size_limit
 
           exception = ExceedLimitError.new(@worker_class, size, @size_limit)
-          # This should belong to Gitlab::ErrorTracking
+          # This should belong to Gitlab::ErrorTracking. We'll remove this
+          # after this epic is done:
+          # https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/396
           exception.set_backtrace(backtrace)
 
-          if track_mode?
-            track(exception)
-          else
+          if raise_mode?
             raise exception
+          else
+            track(exception)
           end
         end
 
@@ -78,8 +80,8 @@ module Gitlab
           worker_class.big_payload?
         end
 
-        def track_mode?
-          @mode == TRACK_MODE
+        def raise_mode?
+          @mode == RAISE_MODE
         end
 
         def track(exception)
