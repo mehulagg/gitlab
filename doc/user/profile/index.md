@@ -233,9 +233,9 @@ To set the busy status indicator, either:
   1. Select **Edit profile**.
   1. Select the **Busy** checkbox.
 
-  Once selected, the busy status will be reflected in various locations in the user interface
+  Once selected, you can see the busy status in various locations in the user interface.
 
-  With a username:
+  Username:
 
   | Profile page | Settings menu | User popovers |
   | --- | --- | --- |
