@@ -25,6 +25,7 @@ module EE
         mount_mutation ::Mutations::GitlabSubscriptions::Activate
         mount_mutation ::Mutations::Iterations::Create
         mount_mutation ::Mutations::Iterations::Update
+        mount_mutation ::Mutations::Iterations::Cadences::Create
         mount_mutation ::Mutations::RequirementsManagement::CreateRequirement
         mount_mutation ::Mutations::RequirementsManagement::ExportRequirements
         mount_mutation ::Mutations::RequirementsManagement::UpdateRequirement
