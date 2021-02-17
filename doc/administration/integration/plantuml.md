@@ -7,8 +7,6 @@ type: reference, howto
 
 # PlantUML and GitLab **(FREE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/8537) in GitLab 8.16.
-
 When [PlantUML](https://plantuml.com) integration is enabled and configured in
 GitLab, you can create diagrams in snippets, wikis, and repositories. To set it the integration, you must:
 
