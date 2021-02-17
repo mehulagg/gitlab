@@ -141,7 +141,7 @@ configure your SSH client to point to the directory where the private key is sto
      IdentityFile ~/.ssh/example_com_rsa
    ```
 
-   For more information on these settings, see the `man` page for `ssh_config`.
+   For more information on these settings, see the [`man ssh_config` (SSH config manual)](https://man.openbsd.org/ssh_config) page.
 
 Public SSH keys must be unique to GitLab because they bind to your account.
 Your SSH key is the only identifier you have when you push code with SSH.
