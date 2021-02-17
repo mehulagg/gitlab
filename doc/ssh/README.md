@@ -244,7 +244,7 @@ Verify that your SSH key was added correctly.
 
    Type `yes` and press Enter.
 
-1. Run the `ssh -T git@gitlab.com` command again. You should receive a _Welcome to GitLab, `@username`!_ message.
+1. Run the `ssh -T git@gitlab.example.com` command again. You should receive a _Welcome to GitLab, `@username`!_ message.
 
 If the welcome message doesn't appear, you can troubleshoot by running `ssh`
 in verbose mode:
