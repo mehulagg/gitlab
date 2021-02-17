@@ -368,7 +368,7 @@ RSpec.describe Gitlab do
 
       allow(::Gitlab::CurrentSettings.current_application_settings)
         .to receive(:respond_to?)
-        .with(:maintenance_mode)
+        .with(:maintenance_mode, false)
         .and_return(false)
 
       expect(described_class.maintenance_mode?).to eq(false)
