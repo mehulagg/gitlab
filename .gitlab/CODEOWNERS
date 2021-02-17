@@ -171,9 +171,9 @@ Dangerfile @gl-quality/eng-prod
 .editorconfig @gl-quality/eng-prod
 
 [Backend Static Code Analysis]
-.rubocop*.yml @dstull @splattael
-/rubocop/ @dstull @splattael
-/spec/rubocop/ @dstull @splattael
+.rubocop*.yml @dstull @splattael @gl-quality/eng-prod 
+/rubocop/ @dstull @splattael @gl-quality/eng-prod 
+/spec/rubocop/ @dstull @splattael @gl-quality/eng-prod 
 
 [End-to-end]
 /qa/ @gl-quality
