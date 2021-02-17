@@ -25,6 +25,7 @@
 class EpicsFinder < IssuableFinder
   include TimeFrameFilter
   include Gitlab::Utils::StrongMemoize
+  extend ::Gitlab::Utils::Override
 
   IID_STARTS_WITH_PATTERN = %r{\A(\d)+\z}.freeze
 
@@ -109,7 +110,7 @@ class EpicsFinder < IssuableFinder
   def filter_items(items)
     items = by_created_at(items)
     items = by_updated_at(items)
-    items = by_author(items)
+    items = Issuables::AuthorFilter.new(items, params: original_params, not_filters_enabled: not_filters_enabled?).filter
     items = by_timeframe(items)
     items = by_state(items)
     items = by_label(items)
@@ -123,13 +124,12 @@ class EpicsFinder < IssuableFinder
   end
 
   def filter_negated_items(items)
-    return items unless Feature.enabled?(:not_issuable_queries, group, default_enabled: true)
+    return items unless not_filters_enabled?
 
     # API endpoints send in `nil` values so we test if there are any non-nil
     return items unless not_params&.values&.any?
 
-    items = by_negated_label(items)
-    by_negated_author(items)
+    by_negated_label(items)
   end
 
   def group
@@ -241,5 +241,12 @@ class EpicsFinder < IssuableFinder
 
   def group_projects
     Project.in_namespace(permissioned_related_groups).with_issues_available_for_user(current_user)
+  end
+
+  override :not_filters_enabled?
+  def not_filters_enabled?
+    strong_memoize(:not_filters_enabled) do
+      Feature.enabled?(:not_issuable_queries, group, default_enabled: true)
+    end
   end
 end
