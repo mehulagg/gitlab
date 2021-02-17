@@ -556,13 +556,11 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         draw :pipelines
         draw :repository
 
-        # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/29572
-        resources :snippets, concerns: :awardable, constraints: { id: /\d+/ } do # rubocop: disable Cop/PutProjectRoutesUnderScope
-          member do
-            get :raw # rubocop:todo Cop/PutProjectRoutesUnderScope
-            post :mark_as_spam # rubocop:todo Cop/PutProjectRoutesUnderScope
-          end
-        end
+        # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/28848
+        get '/snippets/:snippet_id/raw',
+          to: 'projects/snippets#raw',
+          format: false,
+          constraints: { snippet_id: /\d+/ }
       end
 
       # All new routes should go under /-/ scope.
@@ -576,7 +574,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
                                             :environments, :protected_environments, :error_tracking, :alert_management,
                                             :tracing,
                                             :serverless, :clusters, :audit_events, :wikis, :merge_requests,
-                                            :vulnerability_feedback, :security, :dependencies, :issues)
+                                            :vulnerability_feedback, :security, :dependencies, :issues, :snippets)
     end
 
     # rubocop: disable Cop/PutProjectRoutesUnderScope
