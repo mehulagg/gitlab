@@ -32,6 +32,11 @@ module Ci
       end.to_i
     end
 
+    def variables
+      ExpandVariables.expand_variables_collection(variables_collection, project)
+        .map(&:to_runner_variable)
+    end
+
     def refspecs
       specs = []
       specs << refspec_for_persistent_ref if persistent_ref_exist?
