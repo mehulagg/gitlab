@@ -1,6 +1,6 @@
 <script>
 import { GlLink, GlPopover, GlSprintf, GlTooltipDirective, GlBadge } from '@gitlab/ui';
-import { SCHEDULE_ORIGIN } from '../../constants';
+import { SCHEDULE_ORIGIN } from '~/pipelines/constants';
 
 export default {
   components: {
@@ -48,7 +48,7 @@ export default {
 };
 </script>
 <template>
-  <div class="table-section section-10 d-none d-md-block pipeline-tags">
+  <div class="pipeline-tags">
     <gl-link
       :href="pipeline.path"
       data-testid="pipeline-url-link"

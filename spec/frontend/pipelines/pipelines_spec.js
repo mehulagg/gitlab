@@ -1,4 +1,4 @@
-import { GlFilteredSearch, GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlFilteredSearch, GlLoadingIcon, GlTable } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { nextTick } from 'vue';
@@ -61,11 +61,13 @@ describe('Pipelines', () => {
   const findNavigationTabs = () => wrapper.find(NavigationTabs);
   const findNavigationControls = () => wrapper.find(NavigationControls);
   const findTab = (tab) => findByTestId(`pipelines-tab-${tab}`);
+  const findTable = () => wrapper.find(GlTable);
 
   const findRunPipelineButton = () => findByTestId('run-pipeline-button');
   const findCiLintButton = () => findByTestId('ci-lint-button');
   const findCleanCacheButton = () => findByTestId('clear-cache-button');
   const findStagesDropdown = () => findByTestId('mini-pipeline-graph-dropdown-toggle');
+  const findAllTableRows = () => wrapper.findAll('[data-testid="pipeline-table-row"]');
 
   const findEmptyState = () => wrapper.find(EmptyState);
   const findBlankState = () => wrapper.find(BlankState);
@@ -125,10 +127,9 @@ describe('Pipelines', () => {
         expect(findCleanCacheButton().text()).toBe('Clear Runner Caches');
       });
 
-      it('renders pipelines table', () => {
-        expect(wrapper.findAll('.gl-responsive-table-row')).toHaveLength(
-          pipelines.pipelines.length + 1,
-        );
+      it('renders pipelines table with correct number of rows', () => {
+        expect(findTable().exists()).toBe(true);
+        expect(findAllTableRows()).toHaveLength(pipelines.pipelines.length);
       });
     });
 
@@ -254,9 +255,7 @@ describe('Pipelines', () => {
       });
 
       it('renders pipelines table', () => {
-        expect(wrapper.findAll('.gl-responsive-table-row')).toHaveLength(
-          pipelines.pipelines.length + 1,
-        );
+        expect(findAllTableRows()).toHaveLength(pipelines.pipelines.length);
       });
     });
 
@@ -362,9 +361,7 @@ describe('Pipelines', () => {
       });
 
       it('should render table', () => {
-        expect(wrapper.findAll('.gl-responsive-table-row')).toHaveLength(
-          pipelines.pipelines.length + 1,
-        );
+        expect(findAllTableRows()).toHaveLength(pipelines.pipelines.length);
       });
 
       it('should set up navigation tabs', () => {

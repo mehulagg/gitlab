@@ -46,7 +46,7 @@ describe('Pipeline Url Component', () => {
   it('should render a table cell', () => {
     createComponent();
 
-    expect(wrapper.attributes('class')).toContain('table-section');
+    expect(wrapper.exists()).toBe(true);
   });
 
   it('should render a link the provided path and id', () => {

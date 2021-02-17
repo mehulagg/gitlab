@@ -187,7 +187,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
             expect(page.find('[data-testid="pipeline-url-link"]')[:href]).to include(expected_project.full_path)
             expect(page).to have_content('detached')
           end
-          page.within('.pipeline-triggerer') do
+          page.within('[data-testid="pipeline-triggerer"]') do
             expect(page).to have_link(href: user_path(actor))
           end
         end

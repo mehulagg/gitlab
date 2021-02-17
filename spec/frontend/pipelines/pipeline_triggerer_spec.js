@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import pipelineTriggerer from '~/pipelines/components/pipelines_list/pipeline_triggerer.vue';
+import PipelineTriggerer from '~/pipelines/components/pipelines_list/pipeline_triggerer.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
 describe('Pipelines Triggerer', () => {
@@ -22,7 +22,7 @@ describe('Pipelines Triggerer', () => {
   };
 
   const createComponent = () => {
-    wrapper = shallowMount(pipelineTriggerer, {
+    wrapper = shallowMount(PipelineTriggerer, {
       propsData: mockData,
     });
   };
@@ -36,7 +36,7 @@ describe('Pipelines Triggerer', () => {
   });
 
   it('should render a table cell', () => {
-    expect(wrapper.find('.table-section').exists()).toBe(true);
+    expect(wrapper.exists()).toBe(true);
   });
 
   it('should pass triggerer information when triggerer is provided', () => {
