@@ -350,12 +350,17 @@ export default {
       class="row-content-block gl-border-t-0 gl-py-3 gl-display-flex"
       data-testid="design-toolbar-wrapper"
     >
-      <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-w-full gl-flex-wrap">
+      <div
+        class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-w-full gl-flex-wrap"
+      >
         <div class="gl-display-flex gl-align-items-center gl-my-2">
           <span class="gl-font-weight-bold gl-mr-3">{{ s__('DesignManagement|Designs') }}</span>
           <design-version-dropdown />
         </div>
-        <div v-show="hasDesigns" class="qa-selector-toolbar gl-display-flex gl-align-items-center gl-my-2">
+        <div
+          v-show="hasDesigns"
+          class="qa-selector-toolbar gl-display-flex gl-align-items-center gl-my-2"
+        >
           <gl-button
             v-if="isLatestVersion"
             variant="link"
