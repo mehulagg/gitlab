@@ -23,6 +23,34 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
     ))
   end
 
+  # Temporary hotfix method -- do not change.
+  def variant(value = nil)
+    if value.blank? && @variant_name || @resolving_variant
+      return Variant.new(name: (@variant_name || :unresolved).to_s)
+    end
+
+    @variant_name = value unless value.blank?
+
+    if enabled?
+      @variant_name ||= :control if excluded?
+
+      @resolving_variant = true
+      if (result = cache_variant(@variant_name) { resolve_variant_name }).present?
+        @variant_name = result.to_sym
+      end
+    end
+
+    # Hotfix is to assign @variant_name here.
+    #
+    # The old line:
+    # Variant.new(name: (@variant_name || :control).to_s)
+    #
+    # The new line assigns to @variant_name.
+    Variant.new(name: (@variant_name ||= :control).to_s)
+  ensure
+    @resolving_variant = false
+  end
+
   def rollout_strategy
     # no-op override in inherited class as desired
   end
