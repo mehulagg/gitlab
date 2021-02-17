@@ -1,5 +1,6 @@
 <script>
 import { GlCard, GlSkeletonLoader } from '@gitlab/ui';
+import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import createFlash from '~/flash';
 import { sprintf, n__, s__ } from '~/locale';
 import { STAT_ERROR_PLACEHOLDER } from '../constants';
@@ -10,6 +11,7 @@ export default {
   components: {
     GlCard,
     GlSkeletonLoader,
+    GlSingleStat,
   },
   inject: {
     fullPath: {
@@ -114,10 +116,7 @@ export default {
           <rect x="0" y="21" rx="3" ry="3" width="400" height="48" />
           <rect x="50" y="94" rx="3" ry="3" width="300" height="31" />
         </gl-skeleton-loader>
-        <template v-else>
-          <span class="gl-font-size-h-display">{{ stat.stat }}</span>
-          {{ stat.title }}
-        </template>
+        <gl-single-stat v-else class="gl-mt-4" :title="stat.title" :value="stat.stat" />
       </div>
     </div>
   </gl-card>
