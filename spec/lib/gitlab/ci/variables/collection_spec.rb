@@ -113,6 +113,29 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
     end
   end
 
+  describe '#==' do
+    variable = { key: 'VAR', value: 'value', public: true, masked: false }
+
+    collection = described_class.new([variable])
+
+    it 'returns false for a different type' do
+      expect(collection ==  [variable]).to eq(false)
+    end
+
+    it 'returns false for a Collection with a variable with different attribute value' do
+      other = described_class.new([{ key: 'VAR', value: 'value', public: false, masked: false }])
+      expect(collection == other).to eq(false)
+    end
+
+    it 'returns true for the same object' do
+      expect(collection).to eq(collection)
+    end
+
+    it 'returns true for a similar object' do
+      expect(collection ==  described_class.new([variable])).to eq(true)
+    end
+  end
+
   describe '#size' do
     it 'returns zero for empty collection' do
       collection = described_class.new([])
