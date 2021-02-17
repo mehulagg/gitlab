@@ -273,7 +273,7 @@ RSpec.describe Security::MergeReportsService, '#execute' do
 
       subject(:merged_report) { described_class.new(pre_merged_report, retirejs_report).execute }
 
-      it 'keeps the finding from `retirejs` as it has higher priority' do
+      it 'keeps the finding from `retirejs` as it has higher priority', pending: 'https://gitlab.com/gitlab-org/gitlab/-/issues/296520' do
         expect(merged_report.findings).to include(finding_id_5)
       end
     end
