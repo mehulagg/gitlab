@@ -146,7 +146,8 @@ averaged.
 | `mix test --cover` (Elixir)                    | `\d+.\d+\%\s+\|\s+Total`                      |
 | JaCoCo (Java/Kotlin)                           | `Total.*?([0-9]{1,3})%`                       |
 | `go test -cover` (Go)                          | `coverage: \d+.\d+% of statements`            |
-| .Net                                           | `(Visited Points).*\((.*)\)`                  |
+| .Net (OpenCover)                               | `(Visited Points).*\((.*)\)`                  |
+| .Net (`dotnet test` line coverage)             | `Total\s*\|\s*(\d+\.?\d+)`                    |
 
 <!-- vale gitlab.Spelling = YES -->
 
