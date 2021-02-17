@@ -24,22 +24,41 @@ module Gitlab
           http_get("api/payment_methods/#{id}", admin_headers)
         end
 
-        def activate(activation_code)
+        def activate(activation_code, seat_link_data)
           uuid = Gitlab::CurrentSettings.uuid
 
+          seat_link_data = seat_link_data.to_hash
+          seat_link_data.delete(:license_key) # unneeded
+
+          variables = {
+            activationCode: activation_code,
+            instanceIdentifier: uuid,
+            seatLinkData: seat_link_data
+          }
+
           query = <<~GQL
-            mutation {
-              cloudActivationActivate(input: { activationCode: "#{activation_code}", instanceIdentifier: "#{uuid}" }) {
-                authenticationToken
+            mutation($activationCode: String!, $instanceIdentifier: String!, $seatLinkData: SeatLinkInput!) {
+              cloudActivationActivate(
+                input: {
+                  activationCode: $activationCode,
+                  instanceIdentifier: $instanceIdentifier,
+                  seatLinkData: $seatLinkData
+                }
+              ) {
+                licenseKey
                 errors
               }
             }
           GQL
 
-          response = http_post("graphql", admin_headers, { query: query }).dig(:data, 'data', 'cloudActivationActivate')
+          response = http_post(
+            "graphql",
+            admin_headers,
+            { query: query, variables: variables }
+          ).dig(:data, 'data', 'cloudActivationActivate')
 
           if response['errors'].blank?
-            { success: true, authentication_token: response['authenticationToken'] }
+            { success: true, license_key: response['licenseKey'] }
           else
             { success: false, errors: response['errors'] }
           end

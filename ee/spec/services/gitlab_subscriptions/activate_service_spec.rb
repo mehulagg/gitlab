@@ -14,7 +14,7 @@ RSpec.describe GitlabSubscriptions::ActivateService do
 
   def stub_client_activate
     expect(Gitlab::SubscriptionPortal::Client).to receive(:activate)
-      .with(activation_code)
+      .with(activation_code, an_instance_of(Gitlab::SeatLinkData))
       .and_return(response)
   end
 

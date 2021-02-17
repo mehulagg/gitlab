@@ -95,7 +95,8 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
   end
 
   describe '#activate' do
-    let(:authentication_token) { 'authentication_token' }
+    let(:license_key) { 'license_key' }
+    let(:seat_link_data) { Gitlab::SeatLinkData.new }
 
     it 'returns success' do
       expect(described_class).to receive(:http_post).and_return(
@@ -104,7 +105,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
           data: {
             "data" => {
               "cloudActivationActivate" => {
-                "authenticationToken" => authentication_token,
+                "licenseKey" => license_key,
                 "errors" => []
               }
             }
@@ -112,9 +113,9 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
         }
       )
 
-      result = described_class.activate('activation_code_abc')
+      result = described_class.activate('activation_code_abc', seat_link_data)
 
-      expect(result).to eq({ authentication_token: authentication_token, success: true })
+      expect(result).to eq({ license_key: license_key, success: true })
     end
 
     it 'returns failure' do
@@ -124,7 +125,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
           data: {
             "data" => {
               "cloudActivationActivate" => {
-                "authenticationToken" => nil,
+                "licenseKey" => nil,
                 "errors" => ["invalid activation code"]
               }
             }
@@ -132,7 +133,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
         }
       )
 
-      result = described_class.activate('activation_code_abc')
+      result = described_class.activate('activation_code_abc', seat_link_data)
 
       expect(result).to eq({ errors: ["invalid activation code"], success: false })
     end

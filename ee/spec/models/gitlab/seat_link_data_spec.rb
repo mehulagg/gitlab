@@ -75,19 +75,25 @@ RSpec.describe Gitlab::SeatLinkData do
     end
   end
 
-  describe '.to_json' do
-    it { is_expected.to delegate_method(:to_json).to(:data) }
-
-    it 'returns payload data as a JSON string' do
-      expect(subject.to_json).to eq(
+  describe '.to_hash' do
+    it 'returns a hash' do
+      expect(subject.to_hash).to eq(
         {
           timestamp: timestamp.iso8601,
           date: timestamp.to_date.iso8601,
           license_key: key,
           max_historical_user_count: max_users,
           active_users: active_users
-        }.to_json
+        }
       )
+    end
+  end
+
+  describe '.to_json' do
+    it { is_expected.to delegate_method(:to_json).to(:to_hash) }
+
+    it 'returns payload data as a JSON string' do
+      expect(subject.to_json).to eq(subject.to_hash.to_json)
     end
   end
 

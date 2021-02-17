@@ -6,7 +6,7 @@ module Gitlab
 
     attr_reader :timestamp, :key, :max_users, :active_users
 
-    delegate :to_json, to: :data
+    delegate :to_json, to: :to_hash
 
     # All fields can be passed to initializer to override defaults. In some cases, the defaults
     # are preferable, like for SyncSeatLinkWorker, to determine seat link data, and in others,
@@ -24,9 +24,7 @@ module Gitlab
       historical_data.present?
     end
 
-    private
-
-    def data
+    def to_hash
       {
         timestamp: timestamp&.iso8601,
         date: timestamp&.to_date&.to_s,
@@ -35,6 +33,8 @@ module Gitlab
         active_users: active_users
       }
     end
+
+    private
 
     def default_key
       ::License.current.data

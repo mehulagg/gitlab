@@ -13,7 +13,9 @@ module GitlabSubscriptions
       return error(ERROR_MESSAGES[:not_self_managed]) if Gitlab.com?
       return error(ERROR_MESSAGES[:disabled]) unless application_settings.cloud_license_enabled?
 
-      response = client.activate(activation_code)
+      seat_link_data = Gitlab::SeatLinkData.new(key: nil)
+
+      response = client.activate(activation_code, seat_link_data)
 
       return response unless response[:success]
 
