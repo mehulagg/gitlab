@@ -466,6 +466,10 @@ module EE
       group_wiki_repository&.shard_name || ::Repository.pick_storage_shard
     end
 
+    def iterations_cadences_enabled?
+      ::Feature.enabled?(:iterations_cadences, self, default_enabled: :yaml)
+    end
+
     private
 
     override :post_create_hook

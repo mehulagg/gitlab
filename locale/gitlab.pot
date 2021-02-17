@@ -11857,6 +11857,9 @@ msgstr ""
 msgid "Error creating new iteration"
 msgstr ""
 
+msgid "Error creating new iterations cadence"
+msgstr ""
+
 msgid "Error creating repository for snippet with id %{snippet_id}"
 msgstr ""
 
@@ -20163,6 +20166,9 @@ msgid "New iteration"
 msgstr ""
 
 msgid "New iteration created"
+msgstr ""
+
+msgid "New iterations cadence created"
 msgstr ""
 
 msgid "New label"
