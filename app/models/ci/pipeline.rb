@@ -786,8 +786,6 @@ module Ci
         variables.append(key: 'CI_PIPELINE_IID', value: iid.to_s)
         variables.append(key: 'CI_PIPELINE_SOURCE', value: source.to_s)
 
-        variables.append(key: 'CI_CONFIG_PATH', value: config_path)
-
         variables.concat(predefined_commit_variables)
 
         if merge_request?
