@@ -21,9 +21,14 @@ export default {
 <template>
   <div class="gl-display-flex gl-flex-wrap">
     <template v-if="renderGroup">
-      <span v-for="emoji in emojis" :key="emoji" class="gl-text-center emoji-picker-emoji">
+      <button
+        v-for="emoji in emojis"
+        :key="emoji"
+        type="button"
+        class="gl-border-0 gl-bg-transparent gl-p-0 gl-text-center emoji-picker-emoji"
+      >
         <gl-emoji :data-name="emoji" />
-      </span>
+      </button>
     </template>
   </div>
 </template>

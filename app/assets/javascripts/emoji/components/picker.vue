@@ -2,8 +2,12 @@
 import { GlIcon, GlDropdown, GlSearchBoxByType } from '@gitlab/ui';
 import { chunk } from 'lodash';
 import VirtualList from 'vue-virtual-scroll-list';
-import { initEmojiMap, getEmojiCategoryMap } from '~/emoji';
+import { initEmojiMap, getEmojiCategoryMap, searchEmoji } from '~/emoji';
 import Category from './category.vue';
+
+function generateCategoryHeight(emojisLength) {
+  return emojisLength * 25 + 29;
+}
 
 export default {
   components: {
@@ -31,6 +35,20 @@ export default {
     categoryNames() {
       return Object.keys(this.categories);
     },
+    filteredCategories() {
+      if (this.searchValue !== '') {
+        const emojis = chunk(
+          searchEmoji(this.searchValue).map(({ emoji }) => emoji.name),
+          9,
+        );
+
+        return {
+          search: { emojis, height: generateCategoryHeight(emojis.length) },
+        };
+      }
+
+      return this.categories;
+    },
   },
   async mounted() {
     await initEmojiMap();
@@ -39,11 +57,11 @@ export default {
 
     this.categories = Object.freeze(
       Object.keys(categories).reduce((acc, category) => {
-        const emojis = categories[category];
+        const emojis = chunk(categories[category], 9);
 
         return {
           ...acc,
-          [category]: { emojis: chunk(emojis, 9), height: Math.ceil(emojis.length / 9) * 25 + 29 },
+          [category]: { emojis, height: generateCategoryHeight(emojis.length) },
         };
       }, {}),
     );
@@ -87,10 +105,10 @@ export default {
         </button>
       </div>
       <div>
-        <gl-search-box-by-type v-model="searchValue" class="gl-mb-0!" />
+        <gl-search-box-by-type v-model="searchValue" autofocus class="gl-mb-0!" />
         <virtual-list ref="virtualScoller" :size="228" :remain="1" :bench="2" variable>
           <div
-            v-for="(category, categoryKey) in categories"
+            v-for="(category, categoryKey) in filteredCategories"
             :key="categoryKey"
             :style="{ height: category.height + 'px' }"
           >
