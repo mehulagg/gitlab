@@ -14,6 +14,10 @@ module Security
     validates :project, presence: true, uniqueness: true
     validates :security_policy_management_project, presence: true, uniqueness: true
 
+    def enabled?
+      ::Feature.enabled?(:security_orchestration_policies_configuration, project, default_enabled: :yaml)
+    end
+
     def active_policies
       security_policy_management_project
         .repository

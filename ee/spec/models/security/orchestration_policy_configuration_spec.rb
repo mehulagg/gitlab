@@ -24,6 +24,26 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
     it { is_expected.to validate_uniqueness_of(:security_policy_management_project) }
   end
 
+  describe '#enabled?' do
+    subject { security_orchestration_policy_configuration.enabled? }
+
+    context 'when feature is enabled' do
+      before do
+        stub_feature_flags(security_orchestration_policies_configuration: true)
+      end
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(security_orchestration_policies_configuration: false)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
   describe '#active_policies' do
     let(:enforce_dast_yaml) do
       <<-EOS
