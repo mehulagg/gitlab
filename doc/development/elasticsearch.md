@@ -230,6 +230,9 @@ enough time to finish. Additionally, the time should be less than 30 minutes sin
 [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
 cron worker runs. Default value is 5 minutes.
 
+- `pause_indexing!` - Pause indexing while the migration runs. This setting will record the indexing setting before 
+the migration runs and set it back to that value when the migration is completed.
+
 ```ruby
 # frozen_string_literal: true
 
@@ -241,6 +244,22 @@ class BatchedMigrationName < Elastic::Migration
   # ...
 end
 ```
+
+### Best practices for Elasticsearch migrations
+
+- When working in batches, keep the batch size under 9,000 documents 
+  and `throttle_delay` over 3 minutes. The bulk indexer is set to run 
+  every 1 minute and process a batch of 10,000 documents. These limits 
+  allow the bulk indexer time to process records before another migration
+  batch is attempted.
+- It can be helpful to refresh the index before checking if a migration 
+  is `completed?`. helper.refresh_index(index_name: issues_index_name)
+- Add logging statements to each migration to denote when the migration starts,
+  when a completion check occurs, and when the migration is completed. The logs 
+  are helpful when debugging issues with halted migrations.
+- Pause indexing if using any Elasticsearch Reindex API operations.
+- Consider adding a retry limit if there is potential for the migration to fail.
+  This will ensure that migrations can be failed and halted.
 
 ## Performance Monitoring
 
