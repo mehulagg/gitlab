@@ -58570,13 +58570,19 @@
                   "name": "iid",
                   "description": "IID of the Pipeline, e.g., \"1\".",
                   "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "ID",
-                      "ofType": null
-                    }
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "sha",
+                  "description": "Sha of the Pipeline, e.g., \"\"dyd0f15ay83993f5ab66k927w28673882x99100b\".",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
                   },
                   "defaultValue": null
                 }

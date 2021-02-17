@@ -20183,7 +20183,12 @@ type Project {
     """
     IID of the Pipeline, e.g., "1".
     """
-    iid: ID!
+    iid: ID
+
+    """
+    Sha of the Pipeline, e.g., ""dyd0f15ay83993f5ab66k927w28673882x99100b".
+    """
+    sha: String
   ): Pipeline
 
   """
