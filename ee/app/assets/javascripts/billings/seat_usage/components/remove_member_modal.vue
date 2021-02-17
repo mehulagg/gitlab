@@ -5,7 +5,8 @@ import {
   GlModal,
   GlSprintf,
   GlSafeHtmlDirective as SafeHtml,
-} from '@gitlab/ui';
+  } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
 import {
   REMOVE_MEMBER_MODAL_ID,
   REMOVE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE,
@@ -25,39 +26,23 @@ export default {
   directives: {
     SafeHtml,
   },
-  props: {
-    member: {
-      type: Object,
-      required: true,
-    },
-    namespace: {
-      type: String,
-      required: true,
-    },
-    namespaceId: {
-      type: String,
-      required: true,
-    },
-  },
   data() {
     return {
       enteredMemberUsername: null,
     };
   },
   computed: {
+    ...mapState(['namespaceName', 'namespaceId', 'memberToRemove']),
     modalTitle() {
       return sprintf(s__('Billing|Remove user %{username} from your subscription'), {
-        username: this.member.username,
+        username: this.usernameWithAtPrepended,
       });
     },
     canSubmit() {
-      return this.enteredMemberUsername === this.usernameWithoutAt;
+      return this.enteredMemberUsername === this.memberToRemove.username;
     },
     modalText() {
       return REMOVE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE;
-    },
-    usernameWithoutAt() {
-      return this.member.username.substring(1);
     },
     actionPrimaryProps() {
       return {
@@ -77,6 +62,12 @@ export default {
         },
       };
     },
+    usernameWithAtPrepended() {
+      return `@${this.memberToRemove.username}`;
+    }
+  },
+  methods: {
+    ...mapActions(['removeMember']),
   },
   modalId: REMOVE_MEMBER_MODAL_ID,
   i18n: {
@@ -88,29 +79,28 @@ export default {
 <template>
   <gl-modal
     v-bind="$attrs"
+    v-if="memberToRemove"
     :modal-id="$options.modalId"
     :action-primary="actionPrimaryProps"
     :action-cancel="actionCancelProps"
     :title="modalTitle"
     data-qa-selector="remove_member_modal"
     :ok-disabled="!canSubmit"
-    @primary="$emit('primary')"
-    @secondary="$emit('canceled')"
-    @canceled="$emit('canceled')"
+    @primary="removeMember"
   >
     <p>
       <gl-sprintf :message="modalText">
         <template #username
-          ><strong>{{ member.username }}</strong></template
+          ><strong>{{ usernameWithAtPrepended }}</strong></template
         >
-        <template #namespace>{{ namespace }}</template>
+        <template #namespace>{{ namespaceName }}</template>
       </gl-sprintf>
     </p>
 
     <label id="input-label">
       <gl-sprintf :message="this.$options.i18n.inputLabel">
         <template #username>
-          <gl-badge variant="danger">{{ usernameWithoutAt }}</gl-badge>
+          <gl-badge variant="danger">{{ memberToRemove.username }}</gl-badge>
         </template>
       </gl-sprintf>
     </label>

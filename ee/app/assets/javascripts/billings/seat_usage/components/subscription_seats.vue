@@ -41,7 +41,6 @@ export default {
   data() {
     return {
       searchQuery: '',
-      memberToRemove: null,
     };
   },
   computed: {
@@ -86,7 +85,7 @@ export default {
     this.fetchBillableMembersList();
   },
   methods: {
-    ...mapActions(['fetchBillableMembersList', 'resetMembers']),
+    ...mapActions(['fetchBillableMembersList', 'resetMembers', 'setMemberToRemove']),
     onSearchEnter() {
       this.debouncedSearch.cancel();
       this.executeQuery();
@@ -101,18 +100,15 @@ export default {
         this.resetMembers();
       }
     },
-    setMemberToRemove(member) {
-      this.memberToRemove = member;
-    },
   },
   i18n: {
     emailNotVisibleTooltipText: s__(
       'Billing|An email address is only visible for users with public emails.',
     ),
   },
-  removeMemberModalId: REMOVE_MEMBER_MODAL_ID,
   avatarSize: AVATAR_SIZE,
   fields: FIELDS,
+  removeMemberModalId: REMOVE_MEMBER_MODAL_ID,
 };
 </script>
 
@@ -176,7 +172,7 @@ export default {
       </template>
 
       <template #cell(actions)="data">
-        <gl-dropdown icon="ellipsis_h" :right="true">
+        <gl-dropdown icon="ellipsis_h" :right="true" data-testid="user-actions">
           <gl-dropdown-item
             v-gl-modal="$options.removeMemberModalId"
             @click="setMemberToRemove(data.item.user)"
@@ -195,14 +191,6 @@ export default {
       class="gl-mt-5"
     />
 
-    <remove-member-modal
-      v-if="memberToRemove"
-      :member="memberToRemove"
-      :namespace="namespaceName"
-      :namespace-id="namespaceId"
-      :modal-id="$options.removeMemberModalId"
-      @primary="removeMember"
-      @canceled="setMemberToRemove(null)"
-    />
+    <remove-member-modal :modal-id="$options.removeMemberModalId"/>
   </section>
 </template>

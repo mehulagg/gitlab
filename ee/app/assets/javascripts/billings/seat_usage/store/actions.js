@@ -1,4 +1,5 @@
 import Api from 'ee/api';
+import * as GroupsApi from '~/api/groups_api';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import * as types from './mutation_types';
@@ -27,17 +28,29 @@ export const resetMembers = ({ commit }) => {
   commit(types.RESET_MEMBERS);
 };
 
-export const removeMember = ({ dispatch, state }, member) => {
-  return Api.removeBillableGroupMember(state.namespaceId, member.id)
-    .then(() => dispatch('requestBillableMembersList'))
+export const setMemberToRemove = ({ commit }, member) => {
+  commit(types.SET_MEMBER_TO_REMOVE, member);
+};
+
+export const removeMember = ({ dispatch, state }) => {
+  return GroupsApi.removeMemberFromGroup(state.namespaceId, state.memberToRemove.id)
+    .then(() => dispatch('removeMemberSuccess'))
     .catch(() => dispatch('removeMemberError'));
 };
 
-export const removeMemberSuccess = ({ commit }) => commit(types.REMOVE_MEMBER_SUCCESS);
+export const removeMemberSuccess = ({ dispatch, commit }) => {
+  dispatch('fetchBillableMembersList');
+
+  createFlash({
+    message: s__('Billing|User was successfully removed'),
+  });
+
+  commit(types.REMOVE_MEMBER_SUCCESS);
+};
 
 export const removeMemberError = ({ commit }) => {
   createFlash({
-    message: s__('Billing|An error occurred while removing billable members list'),
+    message: s__('Billing|An error occurred while removing a billable member'),
   });
   commit(types.REMOVE_MEMBER_ERROR);
 };
