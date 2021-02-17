@@ -50,7 +50,7 @@ class GroupWiki < Wiki
     # we can update the statistics in the same thread. Projects do this
     # in the ProjectCacheWorker because it can be a more stressing environment
     # because several updates can trigger the same statistics update.
-    Groups::UpdateStatisticsService.new(group).execute
+    Groups::UpdateStatisticsService.new(group).execute # rubocop:disable CodeReuse/ServiceClass
   end
 
   override :git_garbage_collect_worker_klass
