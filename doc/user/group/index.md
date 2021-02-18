@@ -22,7 +22,6 @@ Then you can:
 
 You can also create [subgroups](subgroups/index.md).
 
-
 ## View groups
 
 To view groups:
