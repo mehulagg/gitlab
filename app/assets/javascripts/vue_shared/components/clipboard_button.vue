@@ -75,8 +75,7 @@ export default {
 
 <template>
   <gl-button
-    v-gl-tooltip="{ placement: tooltipPlacement, container: tooltipContainer }"
-    v-gl-tooltip.hover.blur
+    v-gl-tooltip.hover.blur="{ placement: tooltipPlacement, container: tooltipContainer }"
     :class="cssClass"
     :title="title"
     :data-clipboard-text="clipboardText"
