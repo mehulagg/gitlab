@@ -23,6 +23,25 @@ jest.mock('~/lib/utils/url_utility');
 describe('PolicyEditorApp component', () => {
   let store;
   let wrapper;
+  const l7manifest = `apiVersion: cilium.io/v2
+  kind: CiliumNetworkPolicy
+metadata:
+  name: limit-inbound-ip
+spec:
+  endpointSelector: {}
+  ingress:
+  - toPorts:
+    - ports:
+      - port: '80'
+        protocol: TCP
+      - port: '443'
+        protocol: TCP
+      rules:
+        http:
+        - headers:
+          - 'X-Forwarded-For: 192.168.1.1'
+    fromEntities:
+    - cluster`;
 
   const factory = ({ propsData, provide = {}, state, data } = {}) => {
     store = createStore();
@@ -152,6 +171,23 @@ spec:
         ],
         labels: { 'app.gitlab.com/proj': '21' },
       });
+    });
+
+    it('saves L7 policies', async () => {
+      factory({
+        data: () => ({
+          editorMode: EditorModeYAML,
+          yamlEditorValue: l7manifest,
+        }),
+      });
+      findSavePolicy().vm.$emit('click');
+
+      await wrapper.vm.$nextTick();
+      expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/createPolicy', {
+        environmentId: -1,
+        policy: { manifest: l7manifest },
+      });
+      expect(redirectTo).toHaveBeenCalledWith('/threat-monitoring');
     });
   });
 

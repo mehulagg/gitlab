@@ -1,11 +1,11 @@
 import { GlModal, GlFormInput, GlSprintf, GlAlert, GlIcon } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { ApolloMutation } from 'vue-apollo';
 import DevopsAdoptionSegmentModal from 'ee/admin/dev_ops_report/components/devops_adoption_segment_modal.vue';
 import { DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from 'ee/admin/dev_ops_report/constants';
 import waitForPromises from 'helpers/wait_for_promises';
-import * as Sentry from '~/sentry/wrapper';
 import {
   groupNodes,
   groupIds,
@@ -271,7 +271,7 @@ describe('DevopsAdoptionSegmentModal', () => {
         );
 
         it('calls sentry on top level error', async () => {
-          jest.spyOn(Sentry, 'captureException');
+          const captureException = jest.spyOn(Sentry, 'captureException');
 
           createComponent({ mutationMock: mutateWithErrors });
 
@@ -281,7 +281,7 @@ describe('DevopsAdoptionSegmentModal', () => {
 
           await waitForPromises();
 
-          expect(Sentry.captureException.mock.calls[0][0]).toBe(genericErrorMessage);
+          expect(captureException).toHaveBeenCalledWith(genericErrorMessage);
         });
       });
     });

@@ -11,6 +11,7 @@ import { contentTop } from '~/lib/utils/common_utils';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
+import BoardSidebarIterationSelect from './sidebar/board_sidebar_iteration_select.vue';
 import BoardSidebarTimeTracker from './sidebar/board_sidebar_time_tracker.vue';
 import BoardSidebarWeightInput from './sidebar/board_sidebar_weight_input.vue';
 
@@ -27,6 +28,7 @@ export default {
     BoardSidebarDueDate,
     BoardSidebarSubscription,
     BoardSidebarMilestoneSelect,
+    BoardSidebarIterationSelect,
   },
   mixins: [glFeatureFlagsMixin()],
   computed: {
@@ -54,7 +56,6 @@ export default {
     @close="unsetActiveId"
   >
     <template #header>{{ __('Issue details') }}</template>
-
     <template #default>
       <board-sidebar-issue-title />
       <sidebar-assignees-widget
@@ -64,7 +65,10 @@ export default {
         @assignees-updated="updateAssignees"
       />
       <board-sidebar-epic-select />
-      <board-sidebar-milestone-select />
+      <div>
+        <board-sidebar-milestone-select />
+        <board-sidebar-iteration-select class="gl-mt-5" />
+      </div>
       <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
       <board-sidebar-due-date />
       <board-sidebar-labels-select />

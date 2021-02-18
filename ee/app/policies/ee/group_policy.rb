@@ -123,6 +123,11 @@ module EE
 
       condition(:eligible_for_trial, scope: :subject) { @subject.eligible_for_trial? }
 
+      condition(:compliance_framework_available) do
+        @subject.feature_available?(:custom_compliance_frameworks) &&
+          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject)
+      end
+
       rule { public_group | logged_in_viewable }.policy do
         enable :read_wiki
         enable :download_wiki_code
@@ -342,6 +347,8 @@ module EE
         prevent :create_deploy_token
         prevent :create_subgroup
       end
+
+      rule { can?(:owner_access) & compliance_framework_available }.enable :admin_compliance_framework
     end
 
     override :lookup_access_level!

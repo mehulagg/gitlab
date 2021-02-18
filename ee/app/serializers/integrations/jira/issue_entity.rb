@@ -5,8 +5,8 @@ module Integrations
     class IssueEntity < Grape::Entity
       include RequestAwareEntity
 
-      expose :project_id do |_jira_issue, options|
-        options[:project].id
+      expose :project_id do |_jira_issue|
+        project.id
       end
 
       expose :title do |jira_issue|
@@ -55,12 +55,12 @@ module Integrations
       end
 
       expose :web_url do |jira_issue|
-        "#{base_web_url(jira_issue)}/browse/#{jira_issue.key}"
+        "#{base_web_url}/browse/#{jira_issue.key}"
       end
 
       expose :gitlab_web_url do |jira_issue|
-        if ::Feature.enabled?(:jira_issues_show_integration, options[:project], default_enabled: :yaml)
-          project_integrations_jira_issue_path(options[:project], jira_issue.key)
+        if ::Feature.enabled?(:jira_issues_show_integration, project, default_enabled: :yaml)
+          project_integrations_jira_issue_path(project, jira_issue.key)
         else
           nil
         end
@@ -92,20 +92,19 @@ module Integrations
         # accountId is only available on Jira Cloud.
         # https://community.atlassian.com/t5/Jira-Questions/How-to-find-account-id-on-jira-on-premise/qaq-p/1168652
         if jira_issue.public_send(user_type).try(:accountId)
-          "#{base_web_url(jira_issue)}/people/#{jira_issue.public_send(user_type).accountId}"
+          "#{base_web_url}/people/#{jira_issue.public_send(user_type).accountId}"
         else
-          "#{base_web_url(jira_issue)}/secure/ViewProfile.jspa?name=#{jira_issue.public_send(user_type).name}"
+          "#{base_web_url}/secure/ViewProfile.jspa?name=#{jira_issue.public_send(user_type).name}"
         end
       end
       # rubocop:enable GitlabSecurity/PublicSend
 
-      def base_web_url(jira_issue)
-        site_url = jira_issue.client.options[:site].delete_suffix('/')
-        context_path = jira_issue.client.options[:context_path].to_s.delete_prefix('/')
+      def base_web_url
+        @base_web_url ||= project.jira_service.url
+      end
 
-        return site_url if context_path.empty?
-
-        [site_url, context_path].join('/')
+      def project
+        @project ||= options[:project]
       end
     end
   end

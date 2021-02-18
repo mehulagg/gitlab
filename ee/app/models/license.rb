@@ -12,7 +12,6 @@ class License < ApplicationRecord
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
 
   EES_FEATURES = %i[
-    security_and_compliance
     audit_events
     blocked_issues
     board_iteration_lists
@@ -464,7 +463,7 @@ class License < ApplicationRecord
 
   def daily_billable_users_count
     strong_memoize(:daily_billable_users_count) do
-      ::Analytics::InstanceStatistics::Measurement.find_latest_or_fallback(:billable_users).count
+      ::Analytics::UsageTrends::Measurement.find_latest_or_fallback(:billable_users).count
     end
   end
 

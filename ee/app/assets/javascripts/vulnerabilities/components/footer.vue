@@ -220,7 +220,10 @@ export default {
       />
     </div>
 
-    <related-jira-issues v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl" />
+    <related-jira-issues
+      v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl"
+      class="gl-mt-6"
+    />
     <related-issues
       v-else
       :endpoint="issueLinksEndpoint"

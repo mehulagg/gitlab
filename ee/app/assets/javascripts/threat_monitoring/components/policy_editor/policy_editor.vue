@@ -176,7 +176,9 @@ export default {
     },
     savePolicy() {
       const saveFn = this.isEditing ? this.updatePolicy : this.createPolicy;
-      const policy = { manifest: toYaml(this.policy) };
+      const policy = {
+        manifest: this.editorMode === EditorModeYAML ? this.yamlEditorValue : toYaml(this.policy),
+      };
       if (this.isEditing) {
         policy.name = this.existingPolicy.name;
       }

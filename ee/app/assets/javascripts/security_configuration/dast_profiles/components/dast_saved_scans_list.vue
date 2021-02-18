@@ -1,8 +1,8 @@
 <script>
 import { GlButton } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { ERROR_RUN_SCAN, ERROR_MESSAGES } from 'ee/on_demand_scans/settings';
 import { redirectTo } from '~/lib/utils/url_utility';
-import * as Sentry from '~/sentry/wrapper';
 import dastProfileRunMutation from '../graphql/dast_profile_run.mutation.graphql';
 import ProfilesList from './dast_profiles_list.vue';
 import ScanTypeBadge from './dast_scan_type_badge.vue';

@@ -11,10 +11,10 @@ import {
   GlSkeletonLoader,
   GlTruncate,
 } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import download from '~/lib/utils/downloader';
 import { cleanLeadingSeparator, joinPaths, stripPathTail } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
 import {
   DAST_SITE_VALIDATION_MODAL_ID,

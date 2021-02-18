@@ -1,6 +1,7 @@
 import { GlDrawer } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
+import BoardSidebarIterationSelect from 'ee_component/boards/components/sidebar/board_sidebar_iteration_select.vue';
 import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
@@ -81,6 +82,10 @@ describe('ee/BoardContentSidebar', () => {
 
   it('renders BoardSidebarMilestoneSelect', () => {
     expect(wrapper.find(BoardSidebarMilestoneSelect).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarIterationSelect', () => {
+    expect(wrapper.find(BoardSidebarIterationSelect).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {

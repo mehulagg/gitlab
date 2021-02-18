@@ -1122,28 +1122,28 @@ RSpec.describe License do
     end
 
     it 'returns the billable users count' do
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 2)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 2)
 
       expect(license.maximum_user_count).to eq(2)
     end
 
     it 'returns the daily billable users count when it is higher than historical data' do
       create(:historical_data, active_user_count: 50)
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 100)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 100)
 
       expect(license.maximum_user_count).to eq(100)
     end
 
     it 'returns historical data when it is higher than the billable users count' do
       create(:historical_data, active_user_count: 100)
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 50)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 50)
 
       expect(license.maximum_user_count).to eq(100)
     end
 
     it 'returns the correct value when historical data and billable users are equal' do
       create(:historical_data, active_user_count: 100)
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 100)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 100)
 
       expect(license.maximum_user_count).to eq(100)
     end
@@ -1157,9 +1157,9 @@ RSpec.describe License do
     end
 
     it 'uses only the most recent billable users entry' do
-      create(:instance_statistics_measurement, recorded_at: license.expires_at - 3.months, identifier: :billable_users, count: 150)
+      create(:usage_trends_measurement, recorded_at: license.expires_at - 3.months, identifier: :billable_users, count: 150)
       create(:historical_data, recorded_at: license.expires_at - 3.months, active_user_count: 140)
-      create(:instance_statistics_measurement, recorded_at: license.expires_at - 2.months, identifier: :billable_users, count: 100)
+      create(:usage_trends_measurement, recorded_at: license.expires_at - 2.months, identifier: :billable_users, count: 100)
 
       expect(license.maximum_user_count).to eq(140)
     end

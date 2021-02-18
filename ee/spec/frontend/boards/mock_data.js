@@ -3,6 +3,14 @@
 import Vue from 'vue';
 import '~/boards/models/list';
 
+export const mockLabel = {
+  id: 'gid://gitlab/GroupLabel/121',
+  title: 'To Do',
+  color: '#F0AD4E',
+  textColor: '#FFFFFF',
+  description: null,
+};
+
 export const mockLists = [
   {
     id: 'gid://gitlab/List/1',
@@ -22,13 +30,7 @@ export const mockLists = [
     position: 0,
     listType: 'label',
     collapsed: false,
-    label: {
-      id: 'gid://gitlab/GroupLabel/121',
-      title: 'To Do',
-      color: '#F0AD4E',
-      textColor: '#FFFFFF',
-      description: null,
-    },
+    label: mockLabel,
     maxIssueCount: 0,
     assignee: null,
     milestone: null,

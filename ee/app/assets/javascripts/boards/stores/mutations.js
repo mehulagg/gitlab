@@ -63,7 +63,7 @@ export default {
     state.error = s__('Boards|An error occurred while updating the list. Please try again.');
   },
 
-  [mutationTypes.RECEIVE_ISSUES_FOR_LIST_SUCCESS]: (
+  [mutationTypes.RECEIVE_ITEMS_FOR_LIST_SUCCESS]: (
     state,
     { listIssues, listPageInfo, listId, noEpicIssues },
   ) => {

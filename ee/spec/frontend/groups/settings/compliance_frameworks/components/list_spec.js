@@ -1,4 +1,5 @@
 import { GlAlert, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 
@@ -10,7 +11,6 @@ import getComplianceFrameworkQuery from 'ee/groups/settings/compliance_framework
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 
-import * as Sentry from '~/sentry/wrapper';
 import { validFetchResponse, emptyFetchResponse } from '../mock_data';
 
 const localVue = createLocalVue();

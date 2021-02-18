@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe API::Search, factory_default: :keep do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let_it_be(:namespace) { create_default(:namespace) }
+  let_it_be(:namespace) { create_default(:namespace).freeze }
 
   let(:project) { create(:project, :public, :repository, :wiki_repo, name: 'awesome project', group: group) }
 

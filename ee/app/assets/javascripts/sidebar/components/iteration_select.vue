@@ -11,9 +11,9 @@ import {
   GlIcon,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 import { iterationSelectTextMap, iterationDisplayState, noIteration } from '../constants';
 import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import currentIterationQuery from '../queries/issue_iteration.query.graphql';

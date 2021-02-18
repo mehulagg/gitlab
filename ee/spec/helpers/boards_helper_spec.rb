@@ -33,6 +33,19 @@ RSpec.describe BoardsHelper do
     end
   end
 
+  describe '#board_base_url' do
+    context 'when epic board' do
+      let_it_be(:epic_board) { create(:epic_board, group: group) }
+
+      it 'generates the correct url' do
+        @board = epic_board
+        @group = group
+
+        expect(board_base_url).to eq "http://test.host/groups/#{group.full_path}/-/epic_boards"
+      end
+    end
+  end
+
   describe '#board_data' do
     let_it_be(:user) { create(:user) }
     let_it_be(:board) { create(:board, project: project) }

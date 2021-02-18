@@ -1,4 +1,5 @@
 import { GlAlert, GlButton, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { getByText } from '@testing-library/dom';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
@@ -17,7 +18,6 @@ import getGroupsQuery from 'ee/admin/dev_ops_report/graphql/queries/get_groups.q
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import waitForPromises from 'helpers/wait_for_promises';
-import * as Sentry from '~/sentry/wrapper';
 import {
   groupNodes,
   nextGroupNode,

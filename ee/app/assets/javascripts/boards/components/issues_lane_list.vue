@@ -78,7 +78,7 @@ export default {
     filterParams: {
       handler() {
         if (this.isUnassignedIssuesLane) {
-          this.fetchIssuesForList({ listId: this.list.id, noEpicIssues: true });
+          this.fetchItemsForList({ listId: this.list.id, noEpicIssues: true });
         }
       },
       deep: true,
@@ -102,7 +102,7 @@ export default {
     eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
   },
   methods: {
-    ...mapActions(['moveIssue', 'moveIssueEpic', 'fetchIssuesForList']),
+    ...mapActions(['moveIssue', 'moveIssueEpic', 'fetchItemsForList']),
     toggleForm() {
       this.showIssueForm = !this.showIssueForm;
       if (this.showIssueForm && this.isUnassignedIssuesLane) {

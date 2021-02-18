@@ -179,57 +179,6 @@ RSpec.describe EE::UserCalloutsHelper do
     end
   end
 
-  describe '#render_billings_gold_trial' do
-    let(:namespace) { create(:namespace) }
-    let_it_be(:free_plan) { create(:free_plan) }
-    let_it_be(:silver_plan) { create(:silver_plan) }
-    let_it_be(:gold_plan) { create(:gold_plan) }
-    let(:user) { namespace.owner }
-
-    where(:never_had_trial?, :show_gold_trial?, :gold_plan?, :free_plan?, :should_render?) do
-      true  | true  | false | false | true
-      true  | true  | false | true  | true
-      true  | true  | true  | true  | false
-      true  | true  | true  | false | false
-      true  | false | true  | true  | false
-      true  | false | false | true  | false
-      true  | false | true  | false | false
-      true  | false | false | false | false
-      false | true  | false | false | false
-      false | true  | false | true  | false
-      false | true  | true  | true  | false
-      false | true  | true  | false | false
-      false | false | true  | true  | false
-      false | false | false | true  | false
-      false | false | true  | false | false
-      false | false | false | false | false
-    end
-
-    with_them do
-      before do
-        allow(helper).to receive(:show_gold_trial?) { show_gold_trial? }
-
-        if !never_had_trial?
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: free_plan, trial_ends_on: Date.yesterday)
-        elsif gold_plan?
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
-        elsif !free_plan?
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: silver_plan)
-        end
-      end
-
-      it do
-        if should_render?
-          expect(helper).to receive(:render).with('shared/gold_trial_callout_content', is_dismissable: !free_plan?, callout: UserCalloutsHelper::GOLD_TRIAL_BILLINGS)
-        else
-          expect(helper).not_to receive(:render)
-        end
-
-        helper.render_billings_gold_trial(user, namespace)
-      end
-    end
-  end
-
   describe '#render_account_recovery_regular_check' do
     let(:new_user) { create(:user) }
     let(:old_user) { create(:user, created_at: 4.months.ago )}

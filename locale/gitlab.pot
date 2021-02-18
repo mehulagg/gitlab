@@ -2297,6 +2297,9 @@ msgstr ""
 msgid "AdminUsers|Active"
 msgstr ""
 
+msgid "AdminUsers|Adjust the user cap setting on your instance"
+msgstr ""
+
 msgid "AdminUsers|Admin"
 msgstr ""
 
@@ -2390,6 +2393,15 @@ msgstr ""
 msgid "AdminUsers|For more information, please refer to the %{link_start}user account deletion documentation.%{link_end}"
 msgstr ""
 
+msgid "AdminUsers|Here are some helpful links to help you manage your instance:"
+msgstr ""
+
+msgid "AdminUsers|If you have any questions about this process please consult our %{doc_link} or %{support_link}."
+msgstr ""
+
+msgid "AdminUsers|Important information about usage on your GitLab instance"
+msgstr ""
+
 msgid "AdminUsers|Is using seat"
 msgstr ""
 
@@ -2397,6 +2409,9 @@ msgid "AdminUsers|It's you!"
 msgstr ""
 
 msgid "AdminUsers|Log in"
+msgstr ""
+
+msgid "AdminUsers|Manage (accept/reject) pending user sign ups"
 msgstr ""
 
 msgid "AdminUsers|New user"
@@ -2498,6 +2513,18 @@ msgstr ""
 msgid "AdminUsers|Users"
 msgstr ""
 
+msgid "AdminUsers|Users can still be invited to your instance and/or add themselves if permitted based on your settings. They will not have access to your instance, nor count towards your subscribed seat count until you %{approve_link}."
+msgstr ""
+
+msgid "AdminUsers|View pending member requests"
+msgstr ""
+
+msgid "AdminUsers|What can I do?"
+msgstr ""
+
+msgid "AdminUsers|What does this mean?"
+msgstr ""
+
 msgid "AdminUsers|When the user logs back in, their account will reactivate as a fully active account"
 msgstr ""
 
@@ -2529,6 +2556,21 @@ msgid "AdminUsers|You cannot remove your own admin rights."
 msgstr ""
 
 msgid "AdminUsers|You must transfer ownership or delete the groups owned by this user before you can delete their account"
+msgstr ""
+
+msgid "AdminUsers|Your GitLab instance has reached the maximum allowed %{user_doc_link} set by an instance admin."
+msgstr ""
+
+msgid "AdminUsers|approve them"
+msgstr ""
+
+msgid "AdminUsers|contact our support team"
+msgstr ""
+
+msgid "AdminUsers|docs"
+msgstr ""
+
+msgid "AdminUsers|user cap"
 msgstr ""
 
 msgid "Administration"
@@ -3002,9 +3044,6 @@ msgid "All projects"
 msgstr ""
 
 msgid "All projects selected"
-msgstr ""
-
-msgid "All security scans are enabled because %{linkStart}Auto DevOps%{linkEnd} is enabled on this project"
 msgstr ""
 
 msgid "All threads resolved"
@@ -3883,9 +3922,6 @@ msgid "Are you sure you want to cancel editing this comment?"
 msgstr ""
 
 msgid "Are you sure you want to close this blocked issue?"
-msgstr ""
-
-msgid "Are you sure you want to delete \"%{name}\" Value Stream?"
 msgstr ""
 
 msgid "Are you sure you want to delete %{name}?"
@@ -5036,9 +5072,6 @@ msgstr ""
 msgid "BulkImport|Importing the group failed"
 msgstr ""
 
-msgid "BulkImport|No groups available for import"
-msgstr ""
-
 msgid "BulkImport|Showing %{start}-%{end} of %{total} from %{link}"
 msgstr ""
 
@@ -5049,6 +5082,9 @@ msgid "BulkImport|To new group"
 msgstr ""
 
 msgid "BulkImport|Update of import statuses with realtime changes failed"
+msgstr ""
+
+msgid "BulkImport|You have no groups to import"
 msgstr ""
 
 msgid "BulkImport|destination group cannot be part of the source group tree"
@@ -5609,6 +5645,9 @@ msgid "Check the elasticsearch.log file to debug why the migration was halted an
 msgstr ""
 
 msgid "Check your Docker images for known vulnerabilities."
+msgstr ""
+
+msgid "Check your source instance permissions."
 msgstr ""
 
 msgid "Checking %{text} availability…"
@@ -8352,10 +8391,10 @@ msgstr ""
 msgid "Could not find iteration"
 msgstr ""
 
-msgid "Could not load instance counts. Please refresh the page to try again."
+msgid "Could not load the user chart. Please refresh the page to try again."
 msgstr ""
 
-msgid "Could not load the user chart. Please refresh the page to try again."
+msgid "Could not load usage counts. Please refresh the page to try again."
 msgstr ""
 
 msgid "Could not remove the trigger."
@@ -8597,6 +8636,9 @@ msgstr ""
 msgid "CreateValueStreamForm|'%{name}' Value Stream created"
 msgstr ""
 
+msgid "CreateValueStreamForm|'%{name}' Value Stream edited"
+msgstr ""
+
 msgid "CreateValueStreamForm|Add another stage"
 msgstr ""
 
@@ -8609,13 +8651,22 @@ msgstr ""
 msgid "CreateValueStreamForm|Code stage start"
 msgstr ""
 
+msgid "CreateValueStreamForm|Create Value Stream"
+msgstr ""
+
 msgid "CreateValueStreamForm|Create from default template"
 msgstr ""
 
 msgid "CreateValueStreamForm|Create from no template"
 msgstr ""
 
+msgid "CreateValueStreamForm|Create new Value Stream"
+msgstr ""
+
 msgid "CreateValueStreamForm|Default stages"
+msgstr ""
+
+msgid "CreateValueStreamForm|Edit Value Stream"
 msgstr ""
 
 msgid "CreateValueStreamForm|Editing stage"
@@ -8664,6 +8715,9 @@ msgid "CreateValueStreamForm|Restore defaults"
 msgstr ""
 
 msgid "CreateValueStreamForm|Restore stage"
+msgstr ""
+
+msgid "CreateValueStreamForm|Save Value Stream"
 msgstr ""
 
 msgid "CreateValueStreamForm|Select end event"
@@ -9667,6 +9721,15 @@ msgid "DeleteProject|Failed to restore project repository. Please contact the ad
 msgstr ""
 
 msgid "DeleteProject|Failed to restore wiki repository. Please contact the administrator."
+msgstr ""
+
+msgid "DeleteValueStream|'%{name}' Value Stream deleted"
+msgstr ""
+
+msgid "DeleteValueStream|Are you sure you want to delete \"%{name}\" Value Stream?"
+msgstr ""
+
+msgid "DeleteValueStream|Delete %{name}"
 msgstr ""
 
 msgid "Deleted"
@@ -10707,6 +10770,9 @@ msgid "Draft merge requests can't be merged."
 msgstr ""
 
 msgid "Drop or %{linkStart}upload%{linkEnd} designs to attach"
+msgstr ""
+
+msgid "Drop or %{linkStart}upload%{linkEnd} file to attach"
 msgstr ""
 
 msgid "Drop or %{linkStart}upload%{linkEnd} files to attach"
@@ -13192,6 +13258,9 @@ msgstr ""
 msgid "Geo nodes are paused using a command run on the node"
 msgstr ""
 
+msgid "Geo sites"
+msgstr ""
+
 msgid "GeoNodeStatusEvent|%{timeAgoStr} (%{pendingEvents} events)"
 msgstr ""
 
@@ -13568,6 +13637,9 @@ msgid "Get started!"
 msgstr ""
 
 msgid "Getting started with releases"
+msgstr ""
+
+msgid "Git"
 msgstr ""
 
 msgid "Git LFS is not enabled on this GitLab server, contact your admin."
@@ -15949,96 +16021,6 @@ msgstr ""
 msgid "Instance overview"
 msgstr ""
 
-msgid "InstanceStatistics|Could not load the issues and merge requests chart. Please refresh the page to try again."
-msgstr ""
-
-msgid "InstanceStatistics|Could not load the pipelines chart. Please refresh the page to try again."
-msgstr ""
-
-msgid "InstanceStatistics|Could not load the projects and groups chart. Please refresh the page to try again."
-msgstr ""
-
-msgid "InstanceStatistics|Groups"
-msgstr ""
-
-msgid "InstanceStatistics|Issues"
-msgstr ""
-
-msgid "InstanceStatistics|Issues & Merge Requests"
-msgstr ""
-
-msgid "InstanceStatistics|Items"
-msgstr ""
-
-msgid "InstanceStatistics|Merge Requests"
-msgstr ""
-
-msgid "InstanceStatistics|Month"
-msgstr ""
-
-msgid "InstanceStatistics|No data available."
-msgstr ""
-
-msgid "InstanceStatistics|Pipelines"
-msgstr ""
-
-msgid "InstanceStatistics|Pipelines canceled"
-msgstr ""
-
-msgid "InstanceStatistics|Pipelines failed"
-msgstr ""
-
-msgid "InstanceStatistics|Pipelines skipped"
-msgstr ""
-
-msgid "InstanceStatistics|Pipelines succeeded"
-msgstr ""
-
-msgid "InstanceStatistics|Pipelines total"
-msgstr ""
-
-msgid "InstanceStatistics|Projects"
-msgstr ""
-
-msgid "InstanceStatistics|There was an error fetching the cancelled pipelines"
-msgstr ""
-
-msgid "InstanceStatistics|There was an error fetching the failed pipelines"
-msgstr ""
-
-msgid "InstanceStatistics|There was an error fetching the issues"
-msgstr ""
-
-msgid "InstanceStatistics|There was an error fetching the merge requests"
-msgstr ""
-
-msgid "InstanceStatistics|There was an error fetching the skipped pipelines"
-msgstr ""
-
-msgid "InstanceStatistics|There was an error fetching the successful pipelines"
-msgstr ""
-
-msgid "InstanceStatistics|There was an error fetching the total pipelines"
-msgstr ""
-
-msgid "InstanceStatistics|There was an error while loading the groups"
-msgstr ""
-
-msgid "InstanceStatistics|There was an error while loading the projects"
-msgstr ""
-
-msgid "InstanceStatistics|Total groups"
-msgstr ""
-
-msgid "InstanceStatistics|Total projects"
-msgstr ""
-
-msgid "InstanceStatistics|Total projects & groups"
-msgstr ""
-
-msgid "InstanceStatistics|Users"
-msgstr ""
-
 msgid "Integration"
 msgstr ""
 
@@ -16805,6 +16787,9 @@ msgid "Jira project: %{importProject}"
 msgstr ""
 
 msgid "Jira service not configured."
+msgstr ""
+
+msgid "Jira user"
 msgstr ""
 
 msgid "Jira users have been imported from the configured Jira instance. They can be mapped by selecting a GitLab user from the dropdown in the \"GitLab username\" column. When the form appears, the dropdown defaults to the user conducting the import."
@@ -18644,9 +18629,6 @@ msgstr ""
 msgid "MergeRequestDiffs|Select comment starting line"
 msgstr ""
 
-msgid "MergeRequests|Add a reply"
-msgstr ""
-
 msgid "MergeRequests|An error occurred while checking whether another squash is in progress."
 msgstr ""
 
@@ -18654,9 +18636,6 @@ msgid "MergeRequests|An error occurred while saving the draft comment."
 msgstr ""
 
 msgid "MergeRequests|Failed to squash. Should be done manually."
-msgstr ""
-
-msgid "MergeRequests|Reply..."
 msgstr ""
 
 msgid "MergeRequests|Resolve this thread in a new issue"
@@ -19935,6 +19914,9 @@ msgstr ""
 msgid "New directory"
 msgstr ""
 
+msgid "New discussion"
+msgstr ""
+
 msgid "New environment"
 msgstr ""
 
@@ -20080,6 +20062,9 @@ msgid "No activities found"
 msgstr ""
 
 msgid "No application_settings found"
+msgstr ""
+
+msgid "No assignee"
 msgstr ""
 
 msgid "No authentication methods configured."
@@ -21629,6 +21614,9 @@ msgstr ""
 msgid "PerformanceBar|SQL queries"
 msgstr ""
 
+msgid "PerformanceBar|Stats"
+msgstr ""
+
 msgid "PerformanceBar|trace"
 msgstr ""
 
@@ -21947,6 +21935,9 @@ msgstr ""
 msgid "Pipeline|Canceled"
 msgstr ""
 
+msgid "Pipeline|Checking pipeline status"
+msgstr ""
+
 msgid "Pipeline|Checking pipeline status."
 msgstr ""
 
@@ -21996,6 +21987,9 @@ msgid "Pipeline|Pending"
 msgstr ""
 
 msgid "Pipeline|Pipeline"
+msgstr ""
+
+msgid "Pipeline|Pipeline %{idStart}#%{idEnd} %{statusStart}%{statusEnd} for %{commitStart}%{commitEnd}"
 msgstr ""
 
 msgid "Pipeline|Pipelines"
@@ -22053,6 +22047,9 @@ msgid "Pipeline|Value"
 msgstr ""
 
 msgid "Pipeline|Variables"
+msgstr ""
+
+msgid "Pipeline|We are currently unable to fetch pipeline data"
 msgstr ""
 
 msgid "Pipeline|You’re about to stop pipeline %{pipelineId}."
@@ -22962,6 +22959,9 @@ msgid "Project Files"
 msgstr ""
 
 msgid "Project ID"
+msgstr ""
+
+msgid "Project Templates"
 msgstr ""
 
 msgid "Project URL"
@@ -24867,7 +24867,7 @@ msgstr ""
 msgid "Reply to this email directly or %{view_it_on_gitlab}."
 msgstr ""
 
-msgid "Reply..."
+msgid "Reply…"
 msgstr ""
 
 msgid "Repo by URL"
@@ -27028,6 +27028,9 @@ msgstr ""
 msgid "Setup"
 msgstr ""
 
+msgid "Several security scans are enabled because %{linkStart}Auto DevOps%{linkEnd} is enabled on this project"
+msgstr ""
+
 msgid "Severity"
 msgstr ""
 
@@ -27974,7 +27977,7 @@ msgstr ""
 msgid "Start a Free Ultimate Trial"
 msgstr ""
 
-msgid "Start a new discussion..."
+msgid "Start a new discussion…"
 msgstr ""
 
 msgid "Start a new merge request"
@@ -29733,6 +29736,9 @@ msgstr ""
 msgid "There was an error fetching the %{replicableType}"
 msgstr ""
 
+msgid "There was an error fetching the Geo Nodes"
+msgstr ""
+
 msgid "There was an error fetching the Geo Settings"
 msgstr ""
 
@@ -30907,6 +30913,9 @@ msgstr ""
 msgid "To widen your search, change or remove filters above"
 msgstr ""
 
+msgid "To widen your search, change or remove filters above."
+msgstr ""
+
 msgid "To widen your search, change or remove filters."
 msgstr ""
 
@@ -31948,6 +31957,96 @@ msgid "UsageQuota|Your purchased storage is running low. To avoid locked project
 msgstr ""
 
 msgid "UsageQuota|out of %{formattedLimit} of your namespace storage"
+msgstr ""
+
+msgid "UsageTrends|Could not load the issues and merge requests chart. Please refresh the page to try again."
+msgstr ""
+
+msgid "UsageTrends|Could not load the pipelines chart. Please refresh the page to try again."
+msgstr ""
+
+msgid "UsageTrends|Could not load the projects and groups chart. Please refresh the page to try again."
+msgstr ""
+
+msgid "UsageTrends|Groups"
+msgstr ""
+
+msgid "UsageTrends|Issues"
+msgstr ""
+
+msgid "UsageTrends|Issues & Merge Requests"
+msgstr ""
+
+msgid "UsageTrends|Items"
+msgstr ""
+
+msgid "UsageTrends|Merge Requests"
+msgstr ""
+
+msgid "UsageTrends|Month"
+msgstr ""
+
+msgid "UsageTrends|No data available."
+msgstr ""
+
+msgid "UsageTrends|Pipelines"
+msgstr ""
+
+msgid "UsageTrends|Pipelines canceled"
+msgstr ""
+
+msgid "UsageTrends|Pipelines failed"
+msgstr ""
+
+msgid "UsageTrends|Pipelines skipped"
+msgstr ""
+
+msgid "UsageTrends|Pipelines succeeded"
+msgstr ""
+
+msgid "UsageTrends|Pipelines total"
+msgstr ""
+
+msgid "UsageTrends|Projects"
+msgstr ""
+
+msgid "UsageTrends|There was an error fetching the cancelled pipelines"
+msgstr ""
+
+msgid "UsageTrends|There was an error fetching the failed pipelines"
+msgstr ""
+
+msgid "UsageTrends|There was an error fetching the issues"
+msgstr ""
+
+msgid "UsageTrends|There was an error fetching the merge requests"
+msgstr ""
+
+msgid "UsageTrends|There was an error fetching the skipped pipelines"
+msgstr ""
+
+msgid "UsageTrends|There was an error fetching the successful pipelines"
+msgstr ""
+
+msgid "UsageTrends|There was an error fetching the total pipelines"
+msgstr ""
+
+msgid "UsageTrends|There was an error while loading the groups"
+msgstr ""
+
+msgid "UsageTrends|There was an error while loading the projects"
+msgstr ""
+
+msgid "UsageTrends|Total groups"
+msgstr ""
+
+msgid "UsageTrends|Total projects"
+msgstr ""
+
+msgid "UsageTrends|Total projects & groups"
+msgstr ""
+
+msgid "UsageTrends|Users"
 msgstr ""
 
 msgid "Use %{code_start}::%{code_end} to create a %{link_start}scoped label set%{link_end} (eg. %{code_start}priority::1%{code_end})"

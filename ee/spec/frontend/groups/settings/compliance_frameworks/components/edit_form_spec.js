@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 
@@ -11,7 +12,6 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { visitUrl } from '~/lib/utils/url_utility';
 
-import * as Sentry from '~/sentry/wrapper';
 import {
   validFetchOneResponse,
   emptyFetchResponse,

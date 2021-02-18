@@ -635,6 +635,21 @@ type AlertManagementHttpIntegration implements AlertManagementIntegration {
   name: String
 
   """
+  Extract alert fields from payload example for custom mapping.
+  """
+  payloadAlertFields: [AlertManagementPayloadAlertField!]
+
+  """
+  The custom mapping of GitLab alert attributes to fields from the payload_example.
+  """
+  payloadAttributeMappings: [AlertManagementPayloadAlertMappingField!]
+
+  """
+  The example of an alert payload.
+  """
+  payloadExample: JsonString
+
+  """
   Token used to authenticate alert notification requests.
   """
   token: String
@@ -648,6 +663,41 @@ type AlertManagementHttpIntegration implements AlertManagementIntegration {
   Endpoint which accepts alert notifications.
   """
   url: String
+}
+
+"""
+The connection type for AlertManagementHttpIntegration.
+"""
+type AlertManagementHttpIntegrationConnection {
+  """
+  A list of edges.
+  """
+  edges: [AlertManagementHttpIntegrationEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [AlertManagementHttpIntegration]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type AlertManagementHttpIntegrationEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: AlertManagementHttpIntegration
 }
 
 """
@@ -860,6 +910,31 @@ enum AlertManagementPayloadAlertFieldType {
   String field type
   """
   STRING
+}
+
+"""
+Parsed field (with its name) from an alert used for custom mappings
+"""
+type AlertManagementPayloadAlertMappingField {
+  """
+  A GitLab alert field name.
+  """
+  fieldName: AlertManagementPayloadAlertFieldName
+
+  """
+  Human-readable label of the payload path.
+  """
+  label: String
+
+  """
+  Path to value inside payload JSON.
+  """
+  path: [String!]
+
+  """
+  Type of the parsed value.
+  """
+  type: AlertManagementPayloadAlertFieldType
 }
 
 """
@@ -1528,7 +1603,7 @@ enum BlobViewersType {
 }
 
 """
-Represents a project or group board
+Represents a project or group issue board
 """
 type Board {
   """
@@ -9405,7 +9480,17 @@ Represents an epic board
 """
 type EpicBoard {
   """
-  Global ID of the board.
+  Whether or not backlog list is hidden.
+  """
+  hideBacklogList: Boolean
+
+  """
+  Whether or not closed list is hidden.
+  """
+  hideClosedList: Boolean
+
+  """
+  Global ID of the epic board.
   """
   id: BoardsEpicBoardID!
 
@@ -9440,9 +9525,19 @@ type EpicBoard {
   ): EpicListConnection
 
   """
-  Name of the board.
+  Name of the epic board.
   """
   name: String
+
+  """
+  Web path of the epic board.
+  """
+  webPath: String!
+
+  """
+  Web URL of the epic board.
+  """
+  webUrl: String!
 }
 
 """
@@ -12974,61 +13069,6 @@ type InstanceSecurityDashboard {
     """
     state: [VulnerabilityState!]
   ): VulnerabilitySeveritiesCount
-}
-
-"""
-Represents a recorded measurement (object count) for the Admins
-"""
-type InstanceStatisticsMeasurement {
-  """
-  Object count.
-  """
-  count: Int!
-
-  """
-  The type of objects being measured.
-  """
-  identifier: MeasurementIdentifier!
-
-  """
-  The time the measurement was recorded.
-  """
-  recordedAt: Time
-}
-
-"""
-The connection type for InstanceStatisticsMeasurement.
-"""
-type InstanceStatisticsMeasurementConnection {
-  """
-  A list of edges.
-  """
-  edges: [InstanceStatisticsMeasurementEdge]
-
-  """
-  A list of nodes.
-  """
-  nodes: [InstanceStatisticsMeasurement]
-
-  """
-  Information to aid in pagination.
-  """
-  pageInfo: PageInfo!
-}
-
-"""
-An edge in a connection.
-"""
-type InstanceStatisticsMeasurementEdge {
-  """
-  A cursor for use in pagination.
-  """
-  cursor: String!
-
-  """
-  The item at the end of the edge.
-  """
-  node: InstanceStatisticsMeasurement
 }
 
 """
@@ -19022,6 +19062,31 @@ type Project {
   ): AlertManagementAlertConnection
 
   """
+  HTTP Integrations which can receive alerts for the project.
+  """
+  alertManagementHttpIntegrations(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): AlertManagementHttpIntegrationConnection
+
+  """
   Integrations which can receive alerts for the project.
   """
   alertManagementIntegrations(
@@ -21571,7 +21636,8 @@ type Query {
   instanceSecurityDashboard: InstanceSecurityDashboard
 
   """
-  Get statistics on the instance.
+  Get statistics on the instance. Deprecated in 13.10: This field was renamed.
+  Use the `usageTrendsMeasurements` field instead..
   """
   instanceStatisticsMeasurements(
     """
@@ -21608,7 +21674,7 @@ type Query {
     Measurement recorded before this date.
     """
     recordedBefore: Time
-  ): InstanceStatisticsMeasurementConnection
+  ): UsageTrendsMeasurementConnection @deprecated(reason: "This field was renamed. Use the `usageTrendsMeasurements` field instead.. Deprecated in 13.10.")
 
   """
   Find an Issue.
@@ -21829,6 +21895,46 @@ type Query {
     """
     visibility: VisibilityScopesEnum
   ): SnippetConnection
+
+  """
+  Get statistics on the instance.
+  """
+  usageTrendsMeasurements(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    The type of measurement/statistics to retrieve.
+    """
+    identifier: MeasurementIdentifier!
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    Measurement recorded after this date.
+    """
+    recordedAfter: Time
+
+    """
+    Measurement recorded before this date.
+    """
+    recordedBefore: Time
+  ): UsageTrendsMeasurementConnection
 
   """
   Find a user.
@@ -23759,8 +23865,19 @@ type SastCiConfigurationOptionsEntityEdge {
 Size of UI component in SAST configuration page
 """
 enum SastUiComponentSize {
+  """
+  The size of UI component in SAST configuration page is large.
+  """
   LARGE
+
+  """
+  The size of UI component in SAST configuration page is medium.
+  """
   MEDIUM
+
+  """
+  The size of UI component in SAST configuration page is small.
+  """
   SMALL
 }
 
@@ -27239,6 +27356,61 @@ type UpdateSnippetPayload {
 
 scalar Upload
 
+"""
+Represents a recorded measurement (object count) for the Admins
+"""
+type UsageTrendsMeasurement {
+  """
+  Object count.
+  """
+  count: Int!
+
+  """
+  The type of objects being measured.
+  """
+  identifier: MeasurementIdentifier!
+
+  """
+  The time the measurement was recorded.
+  """
+  recordedAt: Time
+}
+
+"""
+The connection type for UsageTrendsMeasurement.
+"""
+type UsageTrendsMeasurementConnection {
+  """
+  A list of edges.
+  """
+  edges: [UsageTrendsMeasurementEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [UsageTrendsMeasurement]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type UsageTrendsMeasurementEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: UsageTrendsMeasurement
+}
+
 type User {
   """
   Merge Requests assigned to the user.
@@ -28301,7 +28473,7 @@ type VulnerabilityDetailBase {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28311,7 +28483,7 @@ type VulnerabilityDetailBase {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 }
 
 """
@@ -28321,7 +28493,7 @@ type VulnerabilityDetailBoolean {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28331,7 +28503,7 @@ type VulnerabilityDetailBoolean {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 
   """
   Value of the field.
@@ -28346,7 +28518,7 @@ type VulnerabilityDetailCode {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28361,7 +28533,7 @@ type VulnerabilityDetailCode {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 
   """
   Source code.
@@ -28376,7 +28548,7 @@ type VulnerabilityDetailCommit {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28386,7 +28558,7 @@ type VulnerabilityDetailCommit {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 
   """
   The commit SHA value.
@@ -28411,7 +28583,7 @@ type VulnerabilityDetailDiff {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28421,7 +28593,7 @@ type VulnerabilityDetailDiff {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 }
 
 """
@@ -28431,7 +28603,7 @@ type VulnerabilityDetailFileLocation {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28456,7 +28628,7 @@ type VulnerabilityDetailFileLocation {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 }
 
 """
@@ -28466,7 +28638,7 @@ type VulnerabilityDetailInt {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28476,7 +28648,7 @@ type VulnerabilityDetailInt {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 
   """
   Value of the field.
@@ -28491,7 +28663,7 @@ type VulnerabilityDetailList {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28506,7 +28678,7 @@ type VulnerabilityDetailList {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 }
 
 """
@@ -28516,7 +28688,7 @@ type VulnerabilityDetailMarkdown {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28526,7 +28698,7 @@ type VulnerabilityDetailMarkdown {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 
   """
   Value of the Markdown field.
@@ -28541,7 +28713,7 @@ type VulnerabilityDetailModuleLocation {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28556,7 +28728,7 @@ type VulnerabilityDetailModuleLocation {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 
   """
   Offset of the module location.
@@ -28571,7 +28743,7 @@ type VulnerabilityDetailTable {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28586,7 +28758,7 @@ type VulnerabilityDetailTable {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 
   """
   Table rows.
@@ -28601,7 +28773,7 @@ type VulnerabilityDetailText {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28611,7 +28783,7 @@ type VulnerabilityDetailText {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 
   """
   Value of the text field.
@@ -28626,7 +28798,7 @@ type VulnerabilityDetailUrl {
   """
   Description of the field.
   """
-  description: String!
+  description: String
 
   """
   Name of the field.
@@ -28641,7 +28813,7 @@ type VulnerabilityDetailUrl {
   """
   Name of the field.
   """
-  name: String!
+  name: String
 
   """
   Text of the URL.

@@ -1,10 +1,9 @@
 <script>
 import { GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
 import { fetchIssue } from 'ee/integrations/jira/issues_show/api';
-import Sidebar from 'ee/integrations/jira/issues_show/components/sidebar.vue';
+import JiraIssueSidebar from 'ee/integrations/jira/issues_show/components/sidebar/jira_issues_sidebar_root.vue';
 import { issueStates, issueStateLabels } from 'ee/integrations/jira/issues_show/constants';
 import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
-
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 export default {
@@ -14,7 +13,7 @@ export default {
     GlSprintf,
     GlLink,
     IssuableShow,
-    Sidebar,
+    JiraIssueSidebar,
   },
   inject: {
     issuesShowPath: {
@@ -81,7 +80,7 @@ export default {
       <template #status-badge>{{ statusBadgeText }}</template>
 
       <template #right-sidebar-items="{ sidebarExpanded }">
-        <sidebar :sidebar-expanded="sidebarExpanded" :selected-labels="issue.labels" />
+        <jira-issue-sidebar :sidebar-expanded="sidebarExpanded" :issue="issue" />
       </template>
     </issuable-show>
   </div>
