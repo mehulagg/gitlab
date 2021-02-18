@@ -28018,8 +28018,19 @@ type UserStatus {
 }
 
 enum VisibilityLevelsEnum {
+  """
+  Internal visibility level
+  """
   internal
+
+  """
+  Private visibility level
+  """
   private
+
+  """
+  Public visibility level
+  """
   public
 }
 

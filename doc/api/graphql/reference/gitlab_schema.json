@@ -80331,19 +80331,19 @@
           "enumValues": [
             {
               "name": "private",
-              "description": null,
+              "description": "Private visibility level",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "internal",
-              "description": null,
+              "description": "Internal visibility level",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
               "name": "public",
-              "description": null,
+              "description": "Public visibility level",
               "isDeprecated": false,
               "deprecationReason": null
             }
