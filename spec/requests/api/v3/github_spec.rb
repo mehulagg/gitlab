@@ -174,6 +174,16 @@ RSpec.describe API::V3::Github do
         end
       end
 
+      it 'avoids N+1 queries' do
+        create(:merge_request, source_project: project, target_project: project, author: user)
+
+        control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { jira_get v3_api(events_path, user) }.count
+
+        create_list(:merge_request, 2, :unique_branches, source_project: project, author: user)
+
+        expect { jira_get v3_api(events_path, user) }.not_to exceed_all_query_limit(control_count)
+      end
+
       context 'if there are more merge requests' do
         let!(:merge_request) { create(:merge_request, id: 10000, source_project: project, target_project: project, author: user) }
         let!(:merge_request2) { create(:merge_request, id: 10001, source_project: project, source_branch: generate(:branch), target_project: project, author: user) }
