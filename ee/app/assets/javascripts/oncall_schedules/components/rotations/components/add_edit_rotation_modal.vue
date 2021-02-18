@@ -21,9 +21,30 @@ export const i18n = {
   cancel: __('Cancel'),
 };
 
+const formEmptyState = {
+  name: '',
+  participants: [],
+  rotationLength: {
+    length: 1,
+    unit: LENGTH_ENUM.days,
+  },
+  startsAt: {
+    date: null,
+    time: 0,
+  },
+  endsOn: {
+    date: null,
+    time: 0,
+  },
+  isRestrictedToTime: false,
+  restrictedTo: {
+    startTime: 0,
+    endTime: 0,
+  },
+};
+
 export default {
   i18n,
-  LENGTH_ENUM,
   components: {
     GlModal,
     GlAlert,
@@ -72,27 +93,7 @@ export default {
       participants: [],
       loading: false,
       ptSearchTerm: '',
-      form: {
-        name: '',
-        participants: [],
-        rotationLength: {
-          length: 1,
-          unit: this.$options.LENGTH_ENUM.days,
-        },
-        startsAt: {
-          date: null,
-          time: 0,
-        },
-        endsOn: {
-          date: null,
-          time: 0,
-        },
-        isRestrictedToTime: false,
-        restrictedTo: {
-          startTime: 0,
-          endTime: 0,
-        },
-      },
+      form: cloneDeep(formEmptyState),
       error: '',
       validationState: {
         name: true,
@@ -264,35 +265,15 @@ export default {
     beforeShowModal() {
       if (this.rotation?.activePeriod?.startTime) {
         const { activePeriod } = this.rotation;
+        // If a startTime exists, rotation restriction must be set to true.
         this.form.isRestrictedToTime = true;
+        // Parse startTimes
         this.form.restrictedTo.startTime = parseInt(activePeriod.startTime.slice(0, 2), 10);
         this.form.restrictedTo.endTime = parseInt(activePeriod.endTime.slice(0, 2), 10);
       }
     },
     afterCloseModal() {
-      // TODO: Break this out
-      const defaultState = {
-        name: '',
-        participants: [],
-        rotationLength: {
-          length: 1,
-          unit: this.$options.LENGTH_ENUM.hours,
-        },
-        startsAt: {
-          date: null,
-          time: 0,
-        },
-        endsOn: {
-          date: null,
-          time: 0,
-        },
-        isRestrictedToTime: false,
-        restrictedTo: {
-          startTime: 0,
-          endTime: 0,
-        },
-      };
-      this.form = cloneDeep(defaultState);
+      this.form = cloneDeep(formEmptyState);
     },
   },
 };
