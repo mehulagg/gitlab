@@ -725,6 +725,8 @@ RSpec.describe JiraService do
               body: /"id":"#{transition_id}"/
             ).once
           end
+
+          expect(WebMock).to have_requested(:post, comment_url)
         end
 
         it 'calls the api with transition ids separated by semicolon' do
@@ -737,6 +739,29 @@ RSpec.describe JiraService do
               body: /"id":"#{transition_id}"/
             ).once
           end
+
+          expect(WebMock).to have_requested(:post, comment_url)
+        end
+
+        it 'stops the sequence if a transition fails' do
+          allow(@jira_service).to receive_messages(jira_issue_transition_id: '1,2,3')
+          WebMock.stub_request(:post, transitions_url).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return do |request|
+            { status: request.body.include?('"id":"2"') ? 500 : 200 }
+          end
+
+          close_issue
+
+          1.upto(2) do |transition_id|
+            expect(WebMock).to have_requested(:post, transitions_url).with(
+              body: /"id":"#{transition_id}"/
+            )
+          end
+
+          expect(WebMock).not_to have_requested(:post, transitions_url).with(
+            body: /"id":"3"/
+          )
+
+          expect(WebMock).not_to have_requested(:post, comment_url)
         end
       end
     end
