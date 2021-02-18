@@ -66,7 +66,7 @@ Examples of both configurations can be found here:
 
 WARNING:
 GitLab 14.0 will require that you place API fuzzing configuration files (for example,
-`gitlab-api-fuzzing-config.yml`) in your repository's `.gitlab` directory instead of your
+`.gitlab-api-fuzzing.yml`) in your repository's `.gitlab` directory instead of your
 repository's root. You can continue using your existing configuration files as they are, but
 starting in GitLab 14.0, GitLab will not check your repository's root for configuration files.
 
