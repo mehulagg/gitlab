@@ -687,7 +687,7 @@ Similarly, if you really need to use the real `Date` class, then you can import 
 ```javascript
 import { useRealDate } from 'helpers/fake_date';
 
-// NOTE: `useRealDate` cannot be called during test execution (i.e. inside `it`, `beforeEach`, `beforeAll`, etc.). 
+// NOTE: `useRealDate` cannot be called during test execution (i.e. inside `it`, `beforeEach`, `beforeAll`, etc.).
 describe('with real date', () => {
   useRealDate();
 });
@@ -1034,7 +1034,7 @@ describe "Admin::AbuseReports", :js do
 end
 ```
 
-### Jest test timeout due to async imports
+### Jest test timeout due to asynchronous imports
 
 If a module asynchronously imports some other modules at runtime, these modules must be
 transpiled by the Jest loaders at runtime. It's possible that this can cause [Jest to timeout](https://gitlab.com/gitlab-org/gitlab/-/issues/280809).

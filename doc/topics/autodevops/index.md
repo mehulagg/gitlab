@@ -46,7 +46,11 @@ From [AlexJonesax](https://twitter.com/AlexJonesax) and [KaiPMDH](https://twitte
 
 ![Alex on Twitter: Auto DevOps in GitLab doesn't just lower the bar to entry, it removes the bar and holds your hand.](img/alexj_autodevops_min_v13_8.png)
 
+<!-- vale gitlab.Spelling = NO -->
+
 ![Kai on Twitter: When I saw this on the Auto DevOps stuff, my mind was blown...](img/kai_autodevops_min_v13_8.png)
+
+<!-- vale gitlab.Spelling = YES -->
 
 We welcome everyone to [share your experience by tagging GitLab on Twitter](https://twitter.com/gitlab).
 
