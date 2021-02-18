@@ -115,13 +115,13 @@ gitops:
   manifest_projects:
   - id: project1    
     paths:
-    - glob: '/crd/**.yaml' 
+    - glob: '/crd/*.yaml' 
   - id: project1
     paths:
-    - glob: '/manifests/**.yaml'
+    - glob: '/manifests/*.yaml'
 ```
 
-`id` and `paths` are used as the uniqueness "key" for manifest projects. That means the following configurations are both invalid because the "key" is duplicated:
+`id` and `paths` are used as the uniqueness "key" for manifest projects. That means the following configurations are invalid because the "key" is duplicated:
 
 ```yaml
 # INVALID!
