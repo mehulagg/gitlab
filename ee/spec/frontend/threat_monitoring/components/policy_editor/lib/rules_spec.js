@@ -77,8 +77,14 @@ describe('ruleSpec', () => {
       rule = buildRule(RuleTypeEndpoint);
     });
 
-    it('returns empty spec', () => {
-      expect(ruleSpec(rule)).toEqual({});
+    it('returns empty matchLabels', () => {
+      expect(ruleSpec(rule)).toEqual({
+        fromEndpoints: [
+          {
+            matchLabels: {},
+          },
+        ],
+      });
     });
 
     testPortMatchers();

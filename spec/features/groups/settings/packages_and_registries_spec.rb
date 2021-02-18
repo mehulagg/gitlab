@@ -7,15 +7,17 @@ RSpec.describe 'Group Packages & Registries settings' do
 
   let(:user) { create(:user) }
   let(:group) { create(:group) }
+  let(:sub_group) { create(:group, parent: group) }
 
   before do
     group.add_owner(user)
+    sub_group.add_owner(user)
     sign_in(user)
   end
 
-  context 'when the feature flag is off' do
+  context 'when packges feature is disabled on the group' do
     before do
-      stub_feature_flags(packages_and_registries_group_settings: false)
+      stub_packages_setting(enabled: false)
     end
 
     it 'the menu item is not visible' do
@@ -25,9 +27,15 @@ RSpec.describe 'Group Packages & Registries settings' do
 
       expect(settings_menu).not_to have_content 'Packages & Registries'
     end
+
+    it 'renders 404 when navigating to page' do
+      visit_settings_page
+
+      expect(page).to have_content('Not Found')
+    end
   end
 
-  context 'when the feature flag is on' do
+  context 'when packages feature is enabled on the group' do
     it 'the menu item is visible' do
       visit group_path(group)
 
@@ -85,6 +93,18 @@ RSpec.describe 'Group Packages & Registries settings' do
 
       expect(page).to have_content('is an invalid regexp')
     end
+
+    context 'in a sub group' do
+      it 'works correctly', :js do
+        visit_sub_group_settings_page
+
+        expect(page).to have_content('Allow duplicates')
+
+        find('.gl-toggle').click
+
+        expect(page).to have_content('Do not allow duplicates')
+      end
+    end
   end
 
   def find_settings_menu
@@ -93,5 +113,9 @@ RSpec.describe 'Group Packages & Registries settings' do
 
   def visit_settings_page
     visit group_settings_packages_and_registries_path(group)
+  end
+
+  def visit_sub_group_settings_page
+    visit group_settings_packages_and_registries_path(sub_group)
   end
 end

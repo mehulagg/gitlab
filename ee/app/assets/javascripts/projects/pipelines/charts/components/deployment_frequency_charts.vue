@@ -1,10 +1,11 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
 import Api from 'ee/api';
-import { s__ } from '~/locale';
 import createFlash from '~/flash';
+import { s__ } from '~/locale';
+import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
 import * as Sentry from '~/sentry/wrapper';
-import CiCdAnalyticsAreaChart from '~/projects/pipelines/charts/components/ci_cd_analytics_area_chart.vue';
+import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 import {
   allChartDefinitions,
   areaChartOptions,
@@ -12,14 +13,13 @@ import {
   chartDocumentationHref,
 } from './static_data';
 import { apiDataToChartSeries } from './util';
-import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 
 export default {
   name: 'DeploymentFrequencyCharts',
   components: {
     GlLink,
     GlSprintf,
-    CiCdAnalyticsAreaChart,
+    CiCdAnalyticsCharts,
   },
   inject: {
     projectPath: {
@@ -35,6 +35,14 @@ export default {
         [LAST_90_DAYS]: [],
       },
     };
+  },
+  computed: {
+    charts() {
+      return allChartDefinitions.map((chart) => ({
+        ...chart,
+        data: this.chartData[chart.id],
+      }));
+    },
   },
   async mounted() {
     const results = await Promise.allSettled(
@@ -81,13 +89,6 @@ export default {
         {{ __('Learn more.') }}
       </gl-link>
     </p>
-    <ci-cd-analytics-area-chart
-      v-for="chart of $options.allChartDefinitions"
-      :key="chart.id"
-      :chart-data="chartData[chart.id]"
-      :area-chart-options="$options.areaChartOptions"
-    >
-      {{ chart.title }}
-    </ci-cd-analytics-area-chart>
+    <ci-cd-analytics-charts :charts="charts" :chart-options="$options.areaChartOptions" />
   </div>
 </template>

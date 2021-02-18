@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: concepts, howto
 ---
 
-# Building Docker images with GitLab CI/CD
+# Use Docker to build Docker images
 
 You can use GitLab CI/CD with Docker Engine to build and test Docker-based projects.
 
@@ -830,7 +830,7 @@ which can be avoided if a different driver is used, for example `overlay2`.
 ### Use the OverlayFS driver per project
 
 You can enable the driver for each project individually by using the `DOCKER_DRIVER`
-environment [variable](../yaml/README.md#variables) in `.gitlab-ci.yml`:
+[CI/CD variable](../yaml/README.md#variables) in `.gitlab-ci.yml`:
 
 ```yaml
 variables:

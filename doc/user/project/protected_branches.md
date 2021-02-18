@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, howto
 ---
 
-# Protected branches
+# Protected branches **(FREE)**
 
 [Permissions](../permissions.md) in GitLab are fundamentally defined around the
 idea of having read or write permission to the repository and branches. To impose
@@ -80,6 +80,7 @@ they are set to Maintainers by default.
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30769) in GitLab 13.7.
 > - This feature is being selectively deployed in GitLab.com 13.7, and may not be available for all users.
+> - This feature is available for all users in GitLab 13.9.
 
 You can allow specific machines to access protected branches in your repository with
 [deploy keys](deploy_keys/index.md). This can be useful for your CI/CD workflow,

@@ -51,6 +51,11 @@ export default {
       required: false,
       default: false,
     },
+    placeholder: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     showCustomValueMessage() {
@@ -83,6 +88,7 @@ export default {
       :size="inputSize"
       :value="value"
       :disabled="disabled"
+      :placeholder="placeholder"
       @input="$emit('input', $event)"
     />
 

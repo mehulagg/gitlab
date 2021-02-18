@@ -180,7 +180,7 @@ module API
           regexp: Gitlab::Regex.unbounded_semver_regex,
           desc: 'The version of the release, using the semantic versioning format'
 
-        requires :from,
+        optional :from,
           type: String,
           desc: 'The first commit in the range of commits to use for the changelog'
 
@@ -211,8 +211,6 @@ module API
           desc: 'The commit message to use when committing the changelog'
       end
       post ':id/repository/changelog' do
-        not_found! unless Feature.enabled?(:changelog_api, user_project)
-
         branch = params[:branch] || user_project.default_branch_or_master
         access = Gitlab::UserAccess.new(current_user, container: user_project)
 
@@ -228,8 +226,8 @@ module API
 
         service.execute
         status(200)
-      rescue => ex
-        render_api_error!("Failed to generate the changelog: #{ex.message}", 500)
+      rescue Gitlab::Changelog::Error => ex
+        render_api_error!("Failed to generate the changelog: #{ex.message}", 422)
       end
     end
   end

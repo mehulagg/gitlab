@@ -1,14 +1,14 @@
 <script>
-import { mapActions } from 'vuex';
 import { GlAlert, GlIcon, GlLink, GlPopover, GlTabs, GlTab } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { mapActions } from 'vuex';
 import axios from '~/lib/utils/axios_utils';
+import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Alerts from './alerts/alerts.vue';
-import ThreatMonitoringFilters from './threat_monitoring_filters.vue';
-import ThreatMonitoringSection from './threat_monitoring_section.vue';
 import NetworkPolicyList from './network_policy_list.vue';
 import NoEnvironmentEmptyState from './no_environment_empty_state.vue';
+import ThreatMonitoringFilters from './threat_monitoring_filters.vue';
+import ThreatMonitoringSection from './threat_monitoring_section.vue';
 
 export default {
   name: 'ThreatMonitoring',

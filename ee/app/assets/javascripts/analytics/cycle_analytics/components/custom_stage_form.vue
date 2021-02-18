@@ -1,7 +1,4 @@
 <script>
-import Vue from 'vue';
-import { mapGetters, mapState } from 'vuex';
-import { isEqual } from 'lodash';
 import {
   GlLoadingIcon,
   GlDropdown,
@@ -10,12 +7,15 @@ import {
   GlSprintf,
   GlButton,
 } from '@gitlab/ui';
+import { isEqual } from 'lodash';
+import Vue from 'vue';
+import { mapGetters, mapState } from 'vuex';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { STAGE_ACTIONS } from '../constants';
 import { getAllowedEndEvents, getLabelEventsIdentifiers, isLabelEvent } from '../utils';
+import { defaultFields, ERRORS, I18N } from './create_value_stream_form/constants';
 import CustomStageFormFields from './create_value_stream_form/custom_stage_fields.vue';
 import { validateStage, initializeFormData } from './create_value_stream_form/utils';
-import { defaultFields, ERRORS, I18N } from './create_value_stream_form/constants';
 
 export default {
   components: {

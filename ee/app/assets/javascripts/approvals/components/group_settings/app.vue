@@ -1,8 +1,8 @@
 <script>
 import { GlSprintf, GlLink } from '@gitlab/ui';
-import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { __ } from '~/locale';
+import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
 import ApprovalSettings from '../approval_settings.vue';
 
 export default {
@@ -34,7 +34,7 @@ export default {
 </script>
 
 <template>
-  <settings-block :default-expanded="defaultExpanded">
+  <settings-block :default-expanded="defaultExpanded" data-testid="merge-request-approval-settings">
     <template #title> {{ $options.i18n.groupSettingsHeader }}</template>
     <template #description>
       <gl-sprintf :message="$options.i18n.groupSettingsDescription">

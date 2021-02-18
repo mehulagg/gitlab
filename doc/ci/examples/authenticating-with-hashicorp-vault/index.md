@@ -7,6 +7,8 @@ type: tutorial
 
 # Authenticating and Reading Secrets With HashiCorp Vault
 
+> HashiCorp Vault JWT token support [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/294440) in GitLab 13.9.
+
 This tutorial demonstrates how to authenticate, configure, and read secrets with HashiCorp's Vault from GitLab CI/CD.
 
 NOTE:
@@ -30,7 +32,7 @@ You must replace the `vault.example.com` URL below with the URL of your Vault se
 
 ## How it works
 
-Each job has JSON Web Token (JWT) provided as environment variable named `CI_JOB_JWT`. This JWT can be used to authenticate with Vault using the [JWT Auth](https://www.vaultproject.io/docs/auth/jwt#jwt-authentication) method.
+Each job has JSON Web Token (JWT) provided as CI/CD variable named `CI_JOB_JWT`. This JWT can be used to authenticate with Vault using the [JWT Auth](https://www.vaultproject.io/docs/auth/jwt#jwt-authentication) method.
 
 The JWT's payload looks like this:
 
@@ -53,7 +55,9 @@ The JWT's payload looks like this:
   "job_id": "1212",                              #
   "ref": "auto-deploy-2020-04-01",               # Git ref for this job
   "ref_type": "branch",                          # Git ref type, branch or tag
-  "ref_protected": "true"                        # true if this git ref is protected, false otherwise
+  "ref_protected": "true",                       # true if this git ref is protected, false otherwise
+  "environment": "production",                   # Environment this job deploys to, if present
+  "environment_protected": "true"                # true if deployed environment is protected, false otherwise
 }
 ```
 
@@ -187,7 +191,7 @@ read_secrets:
     - echo $CI_COMMIT_REF_NAME
     # and is this ref protected
     - echo $CI_COMMIT_REF_PROTECTED
-    # Vault's address can be provided here or as CI variable
+    # Vault's address can be provided here or as CI/CD variable
     - export VAULT_ADDR=http://vault.example.com:8200
     # Authenticate and get token. Token expiry time and other properties can be configured
     # when configuring JWT Auth - https://www.vaultproject.io/api/auth/jwt#parameters-1
@@ -211,7 +215,7 @@ read_secrets:
     - echo $CI_COMMIT_REF_NAME
     # and is this ref protected
     - echo $CI_COMMIT_REF_PROTECTED
-    # Vault's address can be provided here or as CI variable
+    # Vault's address can be provided here or as CI/CD variable
     - export VAULT_ADDR=http://vault.example.com:8200
     # Authenticate and get token. Token expiry time and other properties can be configured
     # when configuring JWT Auth - https://www.vaultproject.io/api/auth/jwt#parameters-1

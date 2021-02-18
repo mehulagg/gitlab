@@ -16,7 +16,7 @@ module EE
       condition(:iterations_available) { @subject.feature_available?(:iterations) }
 
       with_scope :subject
-      condition(:requirements_available) { @subject.feature_available?(:requirements) & feature_available?(:requirements) }
+      condition(:requirements_available) { @subject.feature_available?(:requirements) & access_allowed_to?(:requirements) }
 
       condition(:compliance_framework_available) { @subject.feature_available?(:compliance_framework, @user) }
 
@@ -52,12 +52,16 @@ module EE
       end
 
       with_scope :subject
-      condition(:project_activity_analytics_available) do
-        @subject.feature_available?(:project_activity_analytics)
+      condition(:dora4_analytics_available) do
+        @subject.feature_available?(:dora4_analytics)
       end
 
       condition(:project_merge_request_analytics_available) do
         @subject.feature_available?(:project_merge_request_analytics)
+      end
+
+      condition(:custom_compliance_framework_available) do
+        ::Feature.enabled?(:ff_custom_compliance_frameworks)
       end
 
       with_scope :subject
@@ -113,7 +117,7 @@ module EE
 
       with_scope :subject
       condition(:security_and_compliance_enabled) do
-        @subject.feature_available?(:security_and_compliance) && feature_available?(:security_and_compliance)
+        @subject.feature_available?(:security_and_compliance) && access_allowed_to?(:security_and_compliance)
       end
 
       with_scope :subject
@@ -151,6 +155,11 @@ module EE
         @subject.feature_available?(:code_review_analytics, @user)
       end
 
+      with_scope :subject
+      condition(:issue_analytics_enabled) do
+        @subject.feature_available?(:issues_analytics, @user)
+      end
+
       condition(:status_page_available) do
         @subject.feature_available?(:status_page, @user)
       end
@@ -183,6 +192,12 @@ module EE
         prevent :create_merge_request_in
         prevent :create_merge_request_from
         prevent :push_code
+      end
+
+      rule { analytics_disabled }.policy do
+        prevent(:read_project_merge_request_analytics)
+        prevent(:read_code_review_analytics)
+        prevent(:read_issue_analytics)
       end
 
       rule { feature_flags_related_issues_disabled | repository_disabled }.policy do
@@ -367,10 +382,12 @@ module EE
         prevent :modify_merge_request_committer_setting
       end
 
+      rule { issue_analytics_enabled }.enable :read_issue_analytics
+
       rule { can?(:read_merge_request) & code_review_analytics_enabled }.enable :read_code_review_analytics
 
-      rule { reporter & project_activity_analytics_available }
-        .enable :read_project_activity_analytics
+      rule { reporter & dora4_analytics_available }
+        .enable :read_dora4_analytics
 
       rule { reporter & project_merge_request_analytics_available }
         .enable :read_project_merge_request_analytics
@@ -388,7 +405,8 @@ module EE
 
       rule { requirements_available & owner }.enable :destroy_requirement
 
-      rule { compliance_framework_available & can?(:admin_project) }.enable :admin_compliance_framework
+      rule { compliance_framework_available & can?(:owner_access) }.enable :admin_compliance_framework
+      rule { compliance_framework_available & can?(:maintainer_access) & ~custom_compliance_framework_available }.enable :admin_compliance_framework
 
       rule { status_page_available & can?(:owner_access) }.enable :mark_issue_for_publication
       rule { status_page_available & can?(:developer_access) }.enable :publish_status_page

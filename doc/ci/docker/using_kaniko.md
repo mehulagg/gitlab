@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Building images with kaniko and GitLab CI/CD
+# Use kaniko to build Docker images
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/45512) in GitLab 11.2. Requires GitLab Runner 11.2 and above.
 
@@ -49,7 +49,7 @@ In the following example, kaniko is used to:
 
 The job runs only when a tag is pushed. A `config.json` file is created under
 `/kaniko/.docker` with the needed GitLab Container Registry credentials taken from the
-[environment variables](../variables/README.md#predefined-environment-variables)
+[predefined CI/CD variables](../variables/README.md#predefined-cicd-variables)
 GitLab CI/CD provides.
 
 In the last step, kaniko uses the `Dockerfile` under the

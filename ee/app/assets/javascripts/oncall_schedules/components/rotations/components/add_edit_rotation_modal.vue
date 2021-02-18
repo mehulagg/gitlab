@@ -1,19 +1,19 @@
 <script>
 import { GlModal, GlAlert } from '@gitlab/ui';
 import { set } from 'lodash';
-import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
-import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
+import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import {
   updateStoreAfterRotationAdd,
   updateStoreAfterRotationEdit,
 } from 'ee/oncall_schedules/utils/cache_updates';
-import { isNameFieldValid } from 'ee/oncall_schedules/utils/common_utils';
-import { s__, __ } from '~/locale';
+import { isNameFieldValid, getParticipantsForSave } from 'ee/oncall_schedules/utils/common_utils';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
-import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
+import { format24HourTimeStringFromInt, formatDate } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
 import AddEditRotationForm from './add_edit_rotation_form.vue';
 
 export const i18n = {
@@ -114,24 +114,26 @@ export default {
       };
     },
     rotationVariables() {
+      const {
+        name,
+        rotationLength,
+        participants,
+        startsAt: { date, time },
+      } = this.form;
+
       return {
         projectPath: this.projectPath,
         scheduleIid: this.schedule.iid,
-        name: this.form.name,
+        name,
         startsAt: {
-          ...this.form.startsAt,
-          time: format24HourTimeStringFromInt(this.form.startsAt.time),
+          date: formatDate(date, 'yyyy-mm-dd'),
+          time: format24HourTimeStringFromInt(time),
         },
         rotationLength: {
-          ...this.form.rotationLength,
-          length: parseInt(this.form.rotationLength.length, 10),
+          ...rotationLength,
+          length: parseInt(rotationLength.length, 10),
         },
-        participants: this.form.participants.map(({ username }) => ({
-          username,
-          // eslint-disable-next-line @gitlab/require-i18n-strings
-          colorWeight: 'WEIGHT_500',
-          colorPalette: 'BLUE',
-        })),
+        participants: getParticipantsForSave(participants),
       };
     },
     isFormValid() {
@@ -152,11 +154,16 @@ export default {
       this.$apollo
         .mutate({
           mutation: createOncallScheduleRotationMutation,
-          variables: { OncallRotationCreateInput: this.rotationVariables },
+          variables: { input: this.rotationVariables },
           update(store, { data }) {
-            updateStoreAfterRotationAdd(store, getOncallSchedulesQuery, data, schedule.iid, {
-              projectPath,
-            });
+            updateStoreAfterRotationAdd(
+              store,
+              getOncallSchedulesWithRotationsQuery,
+              { ...data, scheduleIid: schedule.iid },
+              {
+                projectPath,
+              },
+            );
           },
         })
         .then(
@@ -192,11 +199,16 @@ export default {
       this.$apollo
         .mutate({
           mutation: updateOncallScheduleRotationMutation,
-          variables: { OncallRotationUpdateInput: this.rotationVariables },
+          variables: { input: this.rotationVariables },
           update(store, { data }) {
-            updateStoreAfterRotationEdit(store, getOncallSchedulesQuery, data, schedule.iid, {
-              projectPath,
-            });
+            updateStoreAfterRotationEdit(
+              store,
+              getOncallSchedulesWithRotationsQuery,
+              { ...data, scheduleIid: schedule.iid },
+              {
+                projectPath,
+              },
+            );
           },
         })
         .then(

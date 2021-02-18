@@ -6,8 +6,8 @@ module Registrations
 
     layout 'checkout'
 
+    before_action :check_signup_onboarding_enabled
     before_action :authorize_create_group!, only: :new
-    before_action :check_experiment_enabled
 
     feature_category :navigation
 
@@ -30,6 +30,11 @@ module Registrations
         record_experiment_user(:remove_known_trial_form_fields, namespace_id: @group.id)
         record_experiment_user(:trimmed_skip_trial_copy, namespace_id: @group.id)
         record_experiment_user(:trial_registration_with_social_signin, namespace_id: @group.id)
+        record_experiment_user(:trial_onboarding_issues, namespace_id: @group.id)
+        record_experiment_conversion_event(:remove_known_trial_form_fields)
+        record_experiment_conversion_event(:trimmed_skip_trial_copy)
+        record_experiment_conversion_event(:trial_registration_with_social_signin)
+        record_experiment_conversion_event(:trial_onboarding_issues)
 
         url_params[:trial_onboarding_flow] = true
       else
@@ -57,12 +62,12 @@ module Registrations
 
     private
 
-    def authorize_create_group!
-      access_denied! unless can?(current_user, :create_group)
+    def check_signup_onboarding_enabled
+      access_denied! unless helpers.signup_onboarding_enabled?
     end
 
-    def check_experiment_enabled
-      access_denied! unless experiment_enabled?(:onboarding_issues)
+    def authorize_create_group!
+      access_denied! unless can?(current_user, :create_group)
     end
 
     def group_params

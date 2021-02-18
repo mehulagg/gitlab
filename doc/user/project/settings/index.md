@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, index, howto
 ---
 
-# Project settings
+# Project settings **(FREE)**
 
 NOTE:
 Only project maintainers and administrators have the [permissions](../../permissions.md#project-members-permissions)
@@ -46,17 +46,17 @@ Compliance framework labels do not affect your project settings.
 > - It's [deployed behind a feature flag](../../feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-custom-compliance-frameworks). **(PREMIUM ONLY)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-custom-compliance-frameworks). **(PREMIUM)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
-GitLab 13.8 introduces custom compliance frameworks at the group-level. A group owner can create a compliance framework label
-and assign it to any number of projects within that group or sub-groups. When this feature is enabled, projects can only
+GitLab 13.9 introduces custom compliance frameworks at the group-level. A group owner can create a compliance framework label
+and assign it to any number of projects within that group or subgroups. When this feature is enabled, projects can only
 be assigned compliance framework labels that already exist within that group.
 
-If existing [Compliance frameworks](#compliance-framework) are not sufficient, you can now create
-your own.
+If existing [Compliance frameworks](#compliance-framework) are not sufficient, project and group owners
+can now create their own.
 
 New compliance framework labels can be created and updated using GraphQL.
 
@@ -79,7 +79,7 @@ Use the switches to enable or disable the following features:
 | **Issues**                        | ✓                         | Activates the GitLab issues tracker                                                                                                                                                            |
 | **Repository**                    | ✓                         | Enables [repository](../repository/) functionality                                                                                                                                             |
 | **Merge Requests**                | ✓                         | Enables [merge request](../merge_requests/) functionality; also see [Merge request settings](#merge-request-settings)                                                                          |
-| **Forks**                         | ✓                         | Enables [forking](../index.md#fork-a-project) functionality                                                                                                                                    |
+| **Forks**                         | ✓                         | Enables [forking](../working_with_projects.md#fork-a-project) functionality                                                                                                                                    |
 | **Pipelines**                     | ✓                         | Enables [CI/CD](../../../ci/README.md) functionality                                                                                                                                           |
 | **Container Registry**            |                           | Activates a [registry](../../packages/container_registry/) for your Docker images                                                                                                              |
 | **Git Large File Storage**        |                           | Enables the use of [large files](../../../topics/git/lfs/index.md#git-large-file-storage-lfs)                                                                                    |
@@ -221,7 +221,7 @@ To rename a repository:
 
 Remember that this can have unintended side effects since everyone with the
 old URL won't be able to push or pull. Read more about what happens with the
-[redirects when renaming repositories](../index.md#redirects-when-changing-repository-paths).
+[redirects when renaming repositories](../repository/index.md#redirects-when-changing-repository-paths).
 
 #### Transferring an existing project into another namespace
 
@@ -245,7 +245,7 @@ To transfer a project:
 
 Once done, you will be taken to the new project's namespace. At this point,
 read what happens with the
-[redirects from the old project to the new one](../index.md#redirects-when-changing-repository-paths).
+[redirects from the old project to the new one](../repository/index.md#redirects-when-changing-repository-paths).
 
 NOTE:
 GitLab administrators can use the administration interface to move any project to any
@@ -320,7 +320,7 @@ Add the URL of a Jaeger server to allow your users to [easily access the Jaeger 
 [Add Storage credentials](../../../operations/incident_management/status_page.md#sync-incidents-to-the-status-page)
 to enable the syncing of public Issues to a [deployed status page](../../../operations/incident_management/status_page.md#create-a-status-page-project).
 
-### Enable or disable custom compliance frameworks **(PREMIUM ONLY)**
+### Enable or disable custom compliance frameworks **(PREMIUM)**
 
 Enabling or disabling custom compliance frameworks is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default**.

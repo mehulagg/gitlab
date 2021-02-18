@@ -10,11 +10,12 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
-import query from '../queries/iteration.query.graphql';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { Namespace } from '../constants';
+import query from '../queries/iteration.query.graphql';
 import IterationForm from './iteration_form.vue';
 import IterationReportTabs from './iteration_report_tabs.vue';
 
@@ -45,17 +46,17 @@ export default {
   apollo: {
     iteration: {
       query,
+      /* eslint-disable @gitlab/require-i18n-strings */
       variables() {
         return {
           fullPath: this.fullPath,
-          id: `gid://gitlab/Iteration/${this.iterationId}`,
-          iid: this.iterationIid,
-          hasId: Boolean(this.iterationId),
-          hasIid: Boolean(this.iterationIid),
+          id: convertToGraphQLId('Iteration', this.iterationId),
+          isGroup: this.namespaceType === Namespace.Group,
         };
       },
+      /* eslint-enable @gitlab/require-i18n-strings */
       update(data) {
-        return data.group?.iterations?.nodes[0] || data.iteration || {};
+        return data[this.namespaceType]?.iterations?.nodes[0] || {};
       },
       error(err) {
         this.error = err.message;
@@ -68,12 +69,12 @@ export default {
       type: String,
       required: true,
     },
-    iterationId: {
-      type: String,
+    hasScopedLabelsFeature: {
+      type: Boolean,
       required: false,
-      default: undefined,
+      default: false,
     },
-    iterationIid: {
+    iterationId: {
       type: String,
       required: false,
       default: undefined,
@@ -100,6 +101,11 @@ export default {
       validator: (value) => Object.values(Namespace).includes(value),
     },
     previewMarkdownPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    svgPath: {
       type: String,
       required: false,
       default: '',
@@ -230,9 +236,11 @@ export default {
       />
       <iteration-report-tabs
         :full-path="fullPath"
+        :has-scoped-labels-feature="hasScopedLabelsFeature"
         :iteration-id="iteration.id"
         :labels-fetch-path="labelsFetchPath"
         :namespace-type="namespaceType"
+        :svg-path="svgPath"
       />
     </template>
   </div>

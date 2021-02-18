@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference
 ---
 
-# Code Intelligence
+# Code Intelligence **(FREE)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/1576) in GitLab 13.1.
 
@@ -18,6 +18,9 @@ development environments (IDE), including:
 Code Intelligence is built into GitLab and powered by [LSIF](https://lsif.dev/)
 (Language Server Index Format), a file format for precomputed code
 intelligence data.
+
+NOTE:
+You can automate this feature in your applications by using [Auto DevOps](../../topics/autodevops/index.md).
 
 ## Configuration
 

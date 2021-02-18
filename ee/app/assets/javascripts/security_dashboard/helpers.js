@@ -1,9 +1,11 @@
 import isPlainObject from 'lodash/isPlainObject';
-import { BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
 import { REPORT_TYPES, SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
+import { BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
+import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { s__, __ } from '~/locale';
+import { DEFAULT_SCANNER } from './constants';
 
 const parseOptions = (obj) =>
   Object.entries(obj).map(([id, name]) => ({ id: id.toUpperCase(), name }));
@@ -30,10 +32,21 @@ export const severityFilter = {
   defaultOptions: [],
 };
 
+export const createScannerOption = (vendor, reportType) => {
+  const type = reportType.toUpperCase();
+
+  return {
+    id: gon.features?.customSecurityScanners ? `${vendor}.${type}` : type,
+    reportType: reportType.toUpperCase(),
+    name: convertReportType(reportType),
+    externalIds: [],
+  };
+};
+
 export const scannerFilter = {
   name: s__('SecurityReports|Scanner'),
   id: 'reportType',
-  options: parseOptions(REPORT_TYPES),
+  options: Object.keys(REPORT_TYPES).map((x) => createScannerOption(DEFAULT_SCANNER, x)),
   allOption: BASE_FILTERS.report_type,
   defaultOptions: [],
 };

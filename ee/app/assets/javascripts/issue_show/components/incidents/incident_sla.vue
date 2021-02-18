@@ -1,10 +1,10 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
-import ServiceLevelAgreement from 'ee_component/vue_shared/components/incidents/service_level_agreement.vue';
 import { isValidSlaDueAt } from 'ee/vue_shared/components/incidents/utils';
+import ServiceLevelAgreement from 'ee_component/vue_shared/components/incidents/service_level_agreement.vue';
 import createFlash from '~/flash';
-import { s__ } from '~/locale';
 import { formatTime, calculateRemainingMilliseconds } from '~/lib/utils/datetime_utility';
+import { s__ } from '~/locale';
 import getSlaDueAt from './graphql/queries/get_sla_due_at.graphql';
 
 export default {

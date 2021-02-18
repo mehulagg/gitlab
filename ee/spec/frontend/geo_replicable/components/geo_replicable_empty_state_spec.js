@@ -1,5 +1,5 @@
-import { createLocalVue, mount } from '@vue/test-utils';
 import { getByRole } from '@testing-library/dom';
+import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import GeoReplicableEmptyState from 'ee/geo_replicable/components/geo_replicable_empty_state.vue';
 import createStore from 'ee/geo_replicable/store';

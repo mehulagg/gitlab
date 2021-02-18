@@ -32,23 +32,6 @@ RSpec.describe 'Merge request > User edits MR with multiple reviewers' do
         expect(page).to have_content(rule_name)
       end
     end
-
-    context 'when reviewer_approval_rules feature flag off' do
-      before do
-        stub_feature_flags(reviewer_approval_rules: false)
-
-        visit edit_project_merge_request_path(target_project, merge_request)
-      end
-
-      it 'is not shown in reviewer dropdown' do
-        find('.js-reviewer-search').click
-        wait_for_requests
-
-        page.within '.dropdown-menu-reviewer' do
-          expect(page).not_to have_content(rule_name)
-        end
-      end
-    end
   end
 
   context 'code owner approval rules', :js do

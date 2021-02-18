@@ -6,8 +6,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Alert integrations **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13203) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.4.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/42640) to [GitLab Core](https://about.gitlab.com/pricing/) in 12.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13203) in GitLab Ultimate 12.4.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/42640) to GitLab Free in 12.8.
 
 GitLab can accept alerts from any source via a webhook receiver. This can be configured
 generically or, in GitLab versions 13.1 and greater, you can configure
@@ -16,7 +16,7 @@ to use this endpoint.
 
 ## Integrations list
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/245331) in [GitLab Core](https://about.gitlab.com/pricing/) 13.5.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/245331) in GitLab Free 13.5.
 
 With Maintainer or higher [permissions](../../user/permissions.md), you can view
 the list of configured alerts integrations by navigating to
@@ -43,9 +43,9 @@ receive alert payloads in JSON format. You can always
 1. Toggle the **Active** alert setting to display the **URL** and **Authorization Key**
    for the webhook configuration.
 
-### HTTP Endpoints **PREMIUM**
+### HTTP Endpoints **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4442) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.6.
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4442) in GitLab Premium 13.6.
 
 In [GitLab Premium](https://about.gitlab.com/pricing/), you can create multiple
 unique HTTP endpoints to receive alerts from any external source in JSON format,
@@ -72,7 +72,7 @@ side of the integrations list.
 
 ### External Prometheus integration
 
-For GitLab versions 13.1 and greater, please read
+For GitLab versions 13.1 and greater, read
 [External Prometheus Instances](../metrics/alerts.md#external-prometheus-instances)
 to configure alerts for this integration.
 
@@ -90,7 +90,7 @@ parameters. All fields are optional. If the incoming alert does not contain a va
 | `service`                 | String          | The affected service. |
 | `monitoring_tool`         | String          |  The name of the associated monitoring tool. |
 | `hosts`                   | String or Array | One or more hosts, as to where this incident occurred. |
-| `severity`                | String          | The severity of the alert. Must be one of `critical`, `high`, `medium`, `low`, `info`, `unknown`. Default is `critical`. |
+| `severity`                | String          | The severity of the alert. Case-insensitive. Can be one of: `critical`, `high`, `medium`, `low`, `info`, `unknown`. Defaults to `critical` if missing or value is not in this list. |
 | `fingerprint`             | String or Array | The unique identifier of the alert. This can be used to group occurrences of the same alert. |
 | `gitlab_environment_name` | String          | The name of the associated GitLab [environment](../../ci/environments/index.md). Required to [display alerts on a dashboard](../../user/operations_dashboard/index.md#adding-a-project-to-the-dashboard). |
 
@@ -140,7 +140,7 @@ Example payload:
 
 ## Triggering test alerts
 
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab Core in 13.2.
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab Free in 13.2.
 
 After a [project maintainer or owner](../../user/permissions.md)
 configures an integration, you can trigger a test
@@ -156,7 +156,7 @@ GitLab displays an error or success message, depending on the outcome of your te
 
 ## Automatic grouping of identical alerts **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214557) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214557) in GitLab Premium 13.2.
 
 In GitLab versions 13.2 and greater, GitLab groups alerts based on their
 payload. When an incoming alert contains the same payload as another alert
@@ -170,7 +170,7 @@ If the existing alert is already `resolved`, GitLab creates a new alert instead.
 
 ## Link to your Opsgenie Alerts
 
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab Premium 13.2.
 
 WARNING:
 We are building deeper integration with Opsgenie and other alerting tools through

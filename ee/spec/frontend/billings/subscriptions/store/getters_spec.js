@@ -1,5 +1,5 @@
-import State from 'ee/billings/subscriptions/store/state';
 import * as getters from 'ee/billings/subscriptions/store/getters';
+import State from 'ee/billings/subscriptions/store/state';
 
 describe('EE billings subscription module getters', () => {
   let state;

@@ -1,11 +1,12 @@
 /* eslint-disable func-names */
 
-import $ from 'jquery';
 import Dropzone from 'dropzone';
+import $ from 'jquery';
 import { sprintf, __ } from '~/locale';
-import { visitUrl } from '../lib/utils/url_utility';
+import { trackUploadFileFormSubmitted } from '~/projects/upload_file_experiment';
 import { HIDDEN_CLASS } from '../lib/utils/constants';
 import csrf from '../lib/utils/csrf';
+import { visitUrl } from '../lib/utils/url_utility';
 
 Dropzone.autoDiscover = false;
 
@@ -83,6 +84,9 @@ export default class BlobFileDropzone {
     submitButton.on('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
+
+      trackUploadFileFormSubmitted();
+
       if (dropzone[0].dropzone.getQueuedFiles().length === 0) {
         // eslint-disable-next-line no-alert
         alert(__('Please select a file'));

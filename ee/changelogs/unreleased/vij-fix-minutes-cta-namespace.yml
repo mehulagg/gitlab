@@ -1,0 +1,5 @@
+---
+title: Fix buy more minutes link to wrong destination
+merge_request: 54080
+author:
+type: fixed

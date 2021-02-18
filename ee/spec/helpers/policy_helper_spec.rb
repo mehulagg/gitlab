@@ -22,6 +22,7 @@ RSpec.describe PolicyHelper do
       create_agent_help_path: kind_of(String),
       environments_endpoint: kind_of(String),
       project_path: project.full_path,
+      project_id: project.id,
       threat_monitoring_path: kind_of(String)
     }
   end
@@ -53,6 +54,24 @@ RSpec.describe PolicyHelper do
 
       it 'returns expected policy data' do
         expect(subject).to match(base_data)
+      end
+    end
+  end
+
+  describe '#policy_alert_details' do
+    let(:alert) { build(:alert_management_alert, project: project) }
+
+    context 'when a new alert is created' do
+      subject { helper.threat_monitoring_alert_details_data(project, alert.id) }
+
+      it 'returns expected policy data' do
+        expect(subject).to match({
+          'alert-id' => alert.id,
+          'project-path' => project.full_path,
+          'project-id' => project.id,
+          'project-issues-path' => project_issues_path(project),
+          'page' => 'THREAT_MONITORING'
+        })
       end
     end
   end

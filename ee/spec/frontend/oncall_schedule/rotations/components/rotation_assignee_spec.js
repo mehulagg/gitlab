@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlToken, GlAvatarLabeled, GlPopover } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { formatDate } from '~/lib/utils/datetime_utility';
@@ -53,7 +53,9 @@ describe('RotationAssignee', () => {
     });
 
     it('should render an assignee schedule and rotation information in a popover', () => {
-      expect(findPopOver().attributes('target')).toBe(assignee.id);
+      // eslint-disable-next-line no-underscore-dangle
+      const UID = wrapper.vm._uid;
+      expect(findPopOver().attributes('target')).toBe(`${assignee.participant.user.id}-${UID}`);
       expect(findStartsAt().text()).toContain(formattedDate(assignee.startsAt));
       expect(findEndsAt().text()).toContain(formattedDate(assignee.endsAt));
     });

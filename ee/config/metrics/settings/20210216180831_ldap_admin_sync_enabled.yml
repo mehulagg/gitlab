@@ -1,0 +1,15 @@
+---
+key_path: usage_activity_by_stage_monthly.manage.ldap_admin_sync_enabled
+description:
+product_section: dev
+product_stage:
+product_group: group::manage
+product_category:
+value_type: boolean
+status: data_available
+time_frame: none
+data_source:
+distribution:
+- ee
+tier: []
+skip_validation: true

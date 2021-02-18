@@ -11,7 +11,7 @@ module EE
 
     override :export_service
     def export_service(type, user, project, params)
-      return super unless type == :requirement
+      return super unless type.to_sym == :requirement
 
       fields = params.with_indifferent_access.delete(:selected_fields) || []
       issuable_classes = issuable_classes_for(type.to_sym)
@@ -21,7 +21,7 @@ module EE
 
     override :issuable_classes_for
     def issuable_classes_for(type)
-      return super unless type == :requirement
+      return super unless type.to_sym == :requirement
 
       { finder: ::RequirementsManagement::RequirementsFinder, service: ::RequirementsManagement::ExportCsvService }
     end

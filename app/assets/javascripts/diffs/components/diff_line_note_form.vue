@@ -1,16 +1,16 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
+import { s__ } from '~/locale';
 import diffLineNoteFormMixin from '~/notes/mixins/diff_line_note_form';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { s__ } from '~/locale';
-import noteForm from '../../notes/components/note_form.vue';
 import MultilineCommentForm from '../../notes/components/multiline_comment_form.vue';
-import autosave from '../../notes/mixins/autosave';
-import { DIFF_NOTE_TYPE, INLINE_DIFF_LINES_KEY, PARALLEL_DIFF_VIEW_TYPE } from '../constants';
 import {
   commentLineOptions,
   formatLineRange,
 } from '../../notes/components/multiline_comment_utils';
+import noteForm from '../../notes/components/note_form.vue';
+import autosave from '../../notes/mixins/autosave';
+import { DIFF_NOTE_TYPE, INLINE_DIFF_LINES_KEY, PARALLEL_DIFF_VIEW_TYPE } from '../constants';
 
 export default {
   components: {
@@ -165,7 +165,7 @@ export default {
 
 <template>
   <div class="content discussion-form discussion-form-container discussion-notes">
-    <div v-if="glFeatures.multilineComments" class="gl-mb-3 gl-text-gray-500 gl-pb-3">
+    <div class="gl-mb-3 gl-text-gray-500 gl-pb-3">
       <multiline-comment-form
         v-model="commentLineStart"
         :line="line"

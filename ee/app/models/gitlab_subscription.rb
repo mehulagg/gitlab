@@ -4,6 +4,8 @@ class GitlabSubscription < ApplicationRecord
   include EachBatch
   include Gitlab::Utils::StrongMemoize
 
+  EOA_ROLLOUT_DATE = '2021-01-26'
+
   default_value_for(:start_date) { Date.today }
   before_update :log_previous_state_for_update
   after_commit :index_namespace, on: [:create, :update]
@@ -43,6 +45,10 @@ class GitlabSubscription < ApplicationRecord
         blk.call indexed_namespace
       end
     end
+  end
+
+  def legacy?
+    start_date < EOA_ROLLOUT_DATE.to_date
   end
 
   def calculate_seats_in_use

@@ -1,10 +1,10 @@
 import { GlTable, GlButton, GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import DevopsAdoptionTable from 'ee/admin/dev_ops_report/components/devops_adoption_table.vue';
 import DevopsAdoptionTableCellFlag from 'ee/admin/dev_ops_report/components/devops_adoption_table_cell_flag.vue';
 import { DEVOPS_ADOPTION_TABLE_TEST_IDS as TEST_IDS } from 'ee/admin/dev_ops_report/constants';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { devopsAdoptionSegmentsData, devopsAdoptionTableHeaders } from '../mock_data';
 
@@ -93,7 +93,7 @@ describe('DevopsAdoptionTable', () => {
   describe('table fields', () => {
     describe('segment name', () => {
       it('displays the correct segment name', () => {
-        expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Segment 1');
+        expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Group 1');
       });
 
       describe('pending state (no snapshot data available)', () => {
@@ -137,7 +137,7 @@ describe('DevopsAdoptionTable', () => {
       const button = findColSubComponent(TEST_IDS.ACTIONS, GlButton);
 
       expect(button.exists()).toBe(true);
-      expect(button.props('icon')).toBe('ellipsis_h');
+      expect(button.props('icon')).toBe('remove');
       expect(button.props('category')).toBe('tertiary');
     });
   });
@@ -150,13 +150,13 @@ describe('DevopsAdoptionTable', () => {
     });
 
     it('sorts the segments by name', async () => {
-      expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Segment 1');
+      expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Group 1');
 
       headers.at(0).trigger('click');
 
       await nextTick();
 
-      expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Segment 2');
+      expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Group 2');
     });
 
     it('should update local storage when the sort column changes', async () => {

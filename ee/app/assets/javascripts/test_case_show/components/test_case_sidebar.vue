@@ -3,8 +3,8 @@ import { GlTooltipDirective as GlTooltip, GlButton, GlIcon, GlLoadingIcon } from
 import Mousetrap from 'mousetrap';
 
 import { s__, __ } from '~/locale';
-import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import ProjectSelect from '~/vue_shared/components/sidebar/issuable_move_dropdown.vue';
+import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
 import TestCaseGraphQL from '../mixins/test_case_graphql';
 

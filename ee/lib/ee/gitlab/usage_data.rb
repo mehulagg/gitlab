@@ -93,7 +93,7 @@ module EE
             usage_data[:license_md5] = license.md5
             usage_data[:license_id] = license.license_id
             # rubocop: disable UsageData/LargeTable
-            usage_data[:historical_max_users] = ::HistoricalData.max_historical_user_count
+            usage_data[:historical_max_users] = license.historical_max
             # rubocop: enable UsageData/LargeTable
             usage_data[:licensee] = license.licensee
             usage_data[:license_user_count] = license.restricted_user_count
@@ -289,7 +289,25 @@ module EE
                               application_id: GeoNode.secondary_nodes.select(:oauth_application_id)
                             ),
                         :resource_owner_id
-                      )
+                      ),
+                      # rubocop: disable UsageData/LargeTable
+                      # These fields are pre-calculated on the secondary for transmission and storage on the primary.
+                      # This will end up as an array of hashes with the data from GeoNodeStatus, see
+                      # https://docs.gitlab.com/ee/api/geo_nodes.html#retrieve-status-about-a-specific-geo-node for what
+                      # that inner hash may contain
+                      # For Example:
+                      # geo_node_usage: [
+                      #   {
+                      #     repositories_count: 10,
+                      #     repositories_synced_count: 5,
+                      #     repositories_failed_count: 0,
+                      #     ... other geo node status fields
+                      #   }
+                      # ]
+                      geo_node_usage: GeoNodeStatus.for_active_secondaries.map do |node|
+                        GeoNodeStatus::RESOURCE_STATUS_FIELDS.map { |field| [field, node[field]] }.to_h
+                      end
+                    # rubocop: enable UsageData/LargeTable
                   })
         end
 
@@ -451,10 +469,12 @@ module EE
               pipelines_with_secure_jobs[metric_name.to_sym] =
                 if start_id && finish_id
                   estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start_id, finish: finish_id) do |result|
-                    save_aggregated_metrics(**aggregated_metrics_params.merge({ data: result }))
+                    ::Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll
+                      .save_aggregated_metrics(**aggregated_metrics_params.merge({ data: result }))
                   end
                 else
-                  save_aggregated_metrics(**aggregated_metrics_params.merge({ data: ::Gitlab::Database::PostgresHll::Buckets.new }))
+                  ::Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll
+                    .save_aggregated_metrics(**aggregated_metrics_params.merge({ data: ::Gitlab::Database::PostgresHll::Buckets.new }))
                   0
                 end
             end

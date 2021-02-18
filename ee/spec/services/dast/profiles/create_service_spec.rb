@@ -16,10 +16,6 @@ RSpec.describe Dast::Profiles::CreateService do
   subject { described_class.new(container: project, current_user: developer, params: params).execute }
 
   describe 'execute' do
-    before do
-      project.clear_memoization(:licensed_feature_available)
-    end
-
     context 'when on demand scan feature is disabled' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: true)

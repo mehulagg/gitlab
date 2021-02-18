@@ -13,7 +13,7 @@ type: reference
 
 This document lists the configuration options for your GitLab `.gitlab-ci.yml` file.
 
-- For a quick introduction to GitLab CI/CD, follow the [quick start guide](../quick_start/README.md).
+- For a quick introduction to GitLab CI/CD, follow the [quick start guide](../quick_start/index.md).
 - For a collection of examples, see [GitLab CI/CD Examples](../examples/README.md).
 - To view a large `.gitlab-ci.yml` file used in an enterprise, see the [`.gitlab-ci.yml` file for `gitlab`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
 
@@ -267,14 +267,14 @@ Some example `if` clauses for `workflow: rules`:
 See the [common `if` clauses for `rules`](#common-if-clauses-for-rules) for more examples.
 
 For example, in the following configuration, pipelines run for all `push` events (changes to
-branches and new tags). Pipelines for push events with `-wip` in the commit message
+branches and new tags). Pipelines for push events with `-draft` in the commit message
 don't run, because they are set to `when: never`. Pipelines for schedules or merge requests
 don't run either, because no rules evaluate to true for them:
 
 ```yaml
 workflow:
   rules:
-    - if: $CI_COMMIT_MESSAGE =~ /-wip$/
+    - if: $CI_COMMIT_MESSAGE =~ /-draft$/
       when: never
     - if: '$CI_PIPELINE_SOURCE == "push"'
 ```
@@ -396,7 +396,7 @@ include:
 ```
 
 For an example of how you can include these predefined variables, and their impact on CI jobs,
-see the following [CI variable demo](https://youtu.be/4XR8gw3Pkos).
+see the following [CI/CD variable demo](https://youtu.be/4XR8gw3Pkos).
 
 #### `include:local`
 
@@ -543,7 +543,7 @@ Used to specify [a Docker image](../docker/using_docker_images.md#what-is-an-ima
 For:
 
 - Usage examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
-- Detailed usage information, refer to [Docker integration](../docker/README.md) documentation.
+- Detailed usage information, refer to [Docker integration](../docker/index.md) documentation.
 
 #### `image:name`
 
@@ -564,8 +564,8 @@ Used to specify a [service Docker image](../docker/using_docker_images.md#what-i
 For:
 
 - Usage examples, see [Define `image` and `services` from `.gitlab-ci.yml`](../docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml).
-- Detailed usage information, refer to [Docker integration](../docker/README.md) documentation.
-- For example services, see [GitLab CI/CD Services](../services/README.md).
+- Detailed usage information, refer to [Docker integration](../docker/index.md) documentation.
+- For example services, see [GitLab CI/CD Services](../services/index.md).
 
 ##### `services:name`
 
@@ -1212,13 +1212,13 @@ or excluded from a pipeline. In plain English, `if` rules can be interpreted as 
 `rules:if` differs slightly from `only:variables` by accepting only a single
 expression string per rule, rather than an array of them. Any set of expressions to be
 evaluated can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
-by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-environment-variable-expressions).
+by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-cicd-variable-expressions).
 
-Unlike variables in [`script`](../variables/README.md#syntax-of-environment-variables-in-job-scripts)
+Unlike variables in [`script`](../variables/README.md#syntax-of-cicd-variables-in-job-scripts)
 sections, variables in rules expressions are always formatted as `$VARIABLE`.
 
-`if:` clauses are evaluated based on the values of [predefined environment variables](../variables/predefined_variables.md)
-or [custom environment variables](../variables/README.md#custom-environment-variables).
+`if:` clauses are evaluated based on the values of [predefined CI/CD variables](../variables/predefined_variables.md)
+or [custom CI/CD variables](../variables/README.md#custom-cicd-variables).
 
 For example:
 
@@ -1253,7 +1253,7 @@ check the value of the `$CI_PIPELINE_SOURCE` variable:
 | Value                         | Description                                                                                                                                                                                                                      |
 |-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `api`                         | For pipelines triggered by the [pipelines API](../../api/pipelines.md#create-a-new-pipeline).                                                                                                                                    |
-| `chat`                        | For pipelines created by using a [GitLab ChatOps](../chatops/README.md) command.                                                                                                                                                 |
+| `chat`                        | For pipelines created by using a [GitLab ChatOps](../chatops/index.md) command.                                                                                                                                                 |
 | `external`                    | When you use CI services other than GitLab.                                                                                                                                                                                        |
 | `external_pull_request_event` | When an external pull request on GitHub is created or updated. See [Pipelines for external pull requests](../ci_cd_for_external_repos/index.md#pipelines-for-external-pull-requests).                                            |
 | `merge_request_event`         | For pipelines created when a merge request is created or updated. Required to enable [merge request pipelines](../merge_request_pipelines/index.md), [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md), and [merge trains](../merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md). |
@@ -1303,7 +1303,7 @@ Other commonly used variables for `if` clauses:
   branch (usually `master`). Use when you want to have the same configuration in multiple
   projects with different default branches.
 - `if: '$CI_COMMIT_BRANCH =~ /regex-expression/'`: If the commit branch matches a regular expression.
-- `if: '$CUSTOM_VARIABLE !~ /regex-expression/'`: If the [custom variable](../variables/README.md#custom-environment-variables)
+- `if: '$CUSTOM_VARIABLE !~ /regex-expression/'`: If the [custom variable](../variables/README.md#custom-cicd-variables)
   `CUSTOM_VARIABLE` does **not** match a regular expression.
 - `if: '$CUSTOM_VARIABLE == "value1"'`: If the custom variable `CUSTOM_VARIABLE` is
   exactly `value1`.
@@ -1359,7 +1359,7 @@ if there is no `if:` statement that limits the job to branch or merge request pi
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34272) in GitLab 13.6.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/267192) in GitLab 13.7.
 
-Environment variables can be used in `rules:changes` expressions to determine when
+CI/CD variables can be used in `rules:changes` expressions to determine when
 to add jobs to a pipeline:
 
 ```yaml
@@ -1553,7 +1553,7 @@ In addition, `only` and `except` can use special keywords:
 |--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `api`                    | For pipelines triggered by the [pipelines API](../../api/pipelines.md#create-a-new-pipeline).                                                                                                                                    |
 | `branches`               | When the Git reference for a pipeline is a branch.                                                                                                                                                                               |
-| `chat`                   | For pipelines created by using a [GitLab ChatOps](../chatops/README.md) command.                                                                                                                                                 |
+| `chat`                   | For pipelines created by using a [GitLab ChatOps](../chatops/index.md) command.                                                                                                                                                 |
 | `external`               | When you use CI services other than GitLab.                                                                                                                                                                                        |
 | `external_pull_requests` | When an external pull request on GitHub is created or updated (See [Pipelines for external pull requests](../ci_cd_for_external_repos/index.md#pipelines-for-external-pull-requests)).                                           |
 | `merge_requests`         | For pipelines created when a merge request is created or updated. Enables [merge request pipelines](../merge_request_pipelines/index.md), [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md), and [merge trains](../merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md). |
@@ -2024,8 +2024,10 @@ This example creates four paths of execution:
   - For GitLab.com, the limit is 50. For more information, see our
     [infrastructure issue](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/7541).
   - For self-managed instances, the limit is: 50. This limit [can be changed](#changing-the-needs-job-limit).
-- If `needs:` refers to a job that is marked as `parallel:`.
-  the current job depends on all parallel jobs being created.
+- If `needs:` refers to a job that uses the [`parallel`](#parallel) keyword,
+  it depends on all jobs created in parallel, not just one job. It also downloads
+  artifacts from all the parallel jobs by default. If the artifacts have the same
+  name, they overwrite each other and only the last one downloaded is saved.
 - `needs:` is similar to `dependencies:` in that it must use jobs from prior stages,
   meaning it's impossible to create circular dependencies. Depending on jobs in the
   current stage is not possible either, but support [is planned](https://gitlab.com/gitlab-org/gitlab/-/issues/30632).
@@ -2141,7 +2143,7 @@ build_job:
       artifacts: true
 ```
 
-Environment variables support for `project:`, `job:`, and `ref` was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202093)
+CI/CD variable support for `project:`, `job:`, and `ref` was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202093)
 in GitLab 13.3. [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/235761) in GitLab 13.4.
 
 For example:
@@ -2709,7 +2711,7 @@ deploy as review app:
 
 The `deploy as review app` job is marked as a deployment to dynamically
 create the `review/$CI_COMMIT_REF_NAME` environment. `$CI_COMMIT_REF_NAME`
-is an [environment variable](../variables/README.md) set by the runner. The
+is a [CI/CD variable](../variables/README.md) set by the runner. The
 `$CI_ENVIRONMENT_SLUG` variable is based on the environment name, but suitable
 for inclusion in URLs. If the `deploy as review app` job runs in a branch named
 `pow`, this environment would be accessible with a URL like `https://review-pow.example.com/`.
@@ -2810,7 +2812,7 @@ URI-encoded `%2F`. A value made only of dots (`.`, `%2E`) is also forbidden.
 
 You can specify a [fallback cache key](#fallback-cache-key) to use if the specified `cache:key` is not found.
 
-#### Fallback cache key
+##### Fallback cache key
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/1534) in GitLab Runner 13.4.
 
@@ -3331,7 +3333,9 @@ job:
 The latest artifacts for refs are locked against deletion, and kept regardless of
 the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
 GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
-in GitLab 13.4. In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026), you can [disable this behavior in the CI/CD settings](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs).
+in GitLab 13.4.
+
+In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026), you can [disable this behavior at the project level in the CI/CD settings](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs). In [GitLab 13.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/276583), you can [disable this behavior instance-wide](../../user/admin_area/settings/continuous_integration.md#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines).
 
 #### `artifacts:reports`
 
@@ -3344,7 +3348,7 @@ These are the available report types:
 | Keyword                                                                                                                     | Description                                                                      |
 |-----------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
 | [`artifacts:reports:cobertura`](../pipelines/job_artifacts.md#artifactsreportscobertura)                                    | The `cobertura` report collects Cobertura coverage XML files.                    |
-| [`artifacts:reports:codequality`](../pipelines/job_artifacts.md#artifactsreportscodequality)                                | The `codequality` report collects CodeQuality issues.                            |
+| [`artifacts:reports:codequality`](../pipelines/job_artifacts.md#artifactsreportscodequality)                                | The `codequality` report collects Code Quality issues.                            |
 | [`artifacts:reports:container_scanning`](../pipelines/job_artifacts.md#artifactsreportscontainer_scanning) **(ULTIMATE)**   | The `container_scanning` report collects Container Scanning vulnerabilities.     |
 | [`artifacts:reports:dast`](../pipelines/job_artifacts.md#artifactsreportsdast) **(ULTIMATE)**                               | The `dast` report collects Dynamic Application Security Testing vulnerabilities. |
 | [`artifacts:reports:dependency_scanning`](../pipelines/job_artifacts.md#artifactsreportsdependency_scanning) **(ULTIMATE)** | The `dependency_scanning` report collects Dependency Scanning vulnerabilities.   |
@@ -3573,7 +3577,7 @@ test:
 ```
 
 Every parallel job has a `CI_NODE_INDEX` and `CI_NODE_TOTAL`
-[environment variable](../variables/README.md#predefined-environment-variables) set.
+[predefined CI/CD variable](../variables/README.md#predefined-cicd-variables) set.
 
 Different languages and test suites have different methods to enable parallelization.
 For example, use [Semaphore Test Boosters](https://github.com/renderedtext/test-boosters)
@@ -3612,7 +3616,7 @@ There can be from 2 to 50 jobs.
 Jobs can only run in parallel if there are multiple runners, or a single runner is
 [configured to run multiple jobs concurrently](#use-your-own-runners).
 
-Every job gets the same `CI_NODE_TOTAL` [environment variable](../variables/README.md#predefined-environment-variables) value, and a unique `CI_NODE_INDEX` value.
+Every job gets the same `CI_NODE_TOTAL` [CI/CD variable](../variables/README.md#predefined-cicd-variables) value, and a unique `CI_NODE_INDEX` value.
 
 ```yaml
 deploystacks:
@@ -4203,10 +4207,10 @@ release-cli create --name "Release $CI_COMMIT_SHA" --description "Created using 
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/33014) in GitLab 13.4.
 
-`secrets` indicates the [CI Secrets](../secrets/index.md) this job needs. It should be a hash,
-and the keys should be the names of the environment variables that are made available to the job.
+`secrets` indicates the [CI/CD Secrets](../secrets/index.md) this job needs. It should be a hash,
+and the keys should be the names of the variables that are made available to the job.
 The value of each secret is saved in a temporary file. This file's path is stored in these
-environment variables.
+variables.
 
 #### `secrets:vault` **(PREMIUM)**
 
@@ -4286,7 +4290,7 @@ They can be set globally and per-job.
 
 There are two types of variables.
 
-- [Custom variables](../variables/README.md#custom-environment-variables):
+- [Custom variables](../variables/README.md#custom-cicd-variables):
   You can define their values in the `.gitlab-ci.yml` file, in the GitLab UI,
   or by using the API. You can also input variables in the GitLab UI when
   [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually).
@@ -4322,7 +4326,7 @@ meaning it applies to all jobs. If you define a variable in a job, it's availabl
 to that job only.
 
 If a variable of the same name is defined globally and for a specific job, the
-[job-specific variable overrides the global variable](../variables/README.md#priority-of-environment-variables).
+[job-specific variable overrides the global variable](../variables/README.md#priority-of-cicd-variables).
 
 All YAML-defined variables are also set to any linked
 [Docker service containers](../docker/using_docker_images.md#what-is-a-service).
@@ -4354,6 +4358,9 @@ You can use [CI/CD variables](../variables/README.md) to configure runner Git be
 - [`GIT_FETCH_EXTRA_FLAGS`](../runners/README.md#git-fetch-extra-flags)
 - [`GIT_DEPTH`](../runners/README.md#shallow-cloning) (shallow cloning)
 - [`GIT_CLONE_PATH`](../runners/README.md#custom-build-directories) (custom build directories)
+- [`TRANSFER_METER_FREQUENCY`](../runners/README.md#artifact-and-cache-settings) (artifact/cache meter update frequency)
+- [`ARTIFACT_COMPRESSION_LEVEL`](../runners/README.md#artifact-and-cache-settings) (artifact archiver compression level)
+- [`CACHE_COMPRESSION_LEVEL`](../runners/README.md#artifact-and-cache-settings) (cache archiver compression level)
 
 You can also use variables to configure how many times a runner
 [attempts certain stages of job execution](../runners/README.md#job-stages-attempts).
@@ -4589,6 +4596,68 @@ GitLab CI/CD. In the following example, `.hidden_job` is ignored:
 Use this feature to ignore jobs, or use the
 [special YAML features](#special-yaml-features) and transform the hidden jobs
 into templates.
+
+### `!reference` tags
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/266173) in GitLab 13.9.
+
+Use the `!reference` custom YAML tag to select keyword configuration from other job
+sections and reuse it in the current section. Unlike [YAML anchors](#anchors), you can
+use `!reference` tags to reuse configuration from [included](#include) configuration
+files as well.
+
+In this example, a `script` and an `after_script` from two different locations are
+reused in the `test` job:
+
+- `setup.yml`:
+
+  ```yaml
+  .setup:
+    script:
+      - echo creating environment
+  ```
+
+- `.gitlab-ci.yml`:
+
+  ```yaml
+  include:
+    - local: setup.yml
+
+  .teardown:
+    after_script:
+      - echo deleting environment
+
+  test:
+    script:
+      - !reference [.setup, script]
+      - echo running my own command
+    after_script:
+      - !reference [.teardown, after_script]
+  ```
+
+In this example, `test-vars-1` reuses the all the variables in `.vars`, while `test-vars-2`
+selects a specific variable and reuses it as a new `MY_VAR` variable.
+
+```yaml
+.vars:
+  variables:
+    URL: "http://my-url.internal"
+    IMPORTANT_VAR: "the details"
+
+test-vars-1:
+  variables: !reference [.vars, variables]
+  script:
+    - printenv
+
+test-vars-2:
+  variables:
+    MY_VAR: !reference [.vars, variables, IMPORTANT_VAR]
+  script:
+    - printenv
+```
+
+You can't reuse a section that already includes a `!reference` tag. Only one level
+of nesting is supported.
 
 ## Skip Pipeline
 

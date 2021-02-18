@@ -1,7 +1,5 @@
 <script>
-import { GlSprintf, GlLink } from '@gitlab/ui';
-import createFlash from '~/flash';
-import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
+import { GlSprintf, GlLink, GlAlert } from '@gitlab/ui';
 import MavenSettings from '~/packages_and_registries/settings/group/components/maven_settings.vue';
 
 import {
@@ -11,10 +9,11 @@ import {
   ERROR_UPDATING_SETTINGS,
   SUCCESS_UPDATING_SETTINGS,
 } from '~/packages_and_registries/settings/group/constants';
+import updateNamespacePackageSettings from '~/packages_and_registries/settings/group/graphql/mutations/update_group_packages_settings.mutation.graphql';
+import getGroupPackagesSettingsQuery from '~/packages_and_registries/settings/group/graphql/queries/get_group_packages_settings.query.graphql';
 import { updateGroupPackageSettings } from '~/packages_and_registries/settings/group/graphql/utils/cache_update';
 import { updateGroupPackagesSettingsOptimisticResponse } from '~/packages_and_registries/settings/group/graphql/utils/optimistic_responses';
-import getGroupPackagesSettingsQuery from '~/packages_and_registries/settings/group/graphql/queries/get_group_packages_settings.query.graphql';
-import updateNamespacePackageSettings from '~/packages_and_registries/settings/group/graphql/mutations/update_group_packages_settings.mutation.graphql';
+import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
 
 export default {
   name: 'GroupSettingsApp',
@@ -26,6 +25,7 @@ export default {
     PACKAGES_DOCS_PATH,
   },
   components: {
+    GlAlert,
     GlSprintf,
     GlLink,
     SettingsBlock,
@@ -49,6 +49,7 @@ export default {
     return {
       packageSettings: {},
       errors: {},
+      alertMessage: null,
     };
   },
   computed: {
@@ -57,6 +58,9 @@ export default {
     },
   },
   methods: {
+    dismissAlert() {
+      this.alertMessage = null;
+    },
     updateSettings(payload) {
       this.errors = {};
       return this.$apollo
@@ -76,9 +80,10 @@ export default {
         })
         .then(({ data }) => {
           if (data.updateNamespacePackageSettings?.errors?.length > 0) {
-            createFlash({ message: ERROR_UPDATING_SETTINGS, type: 'warning' });
+            this.alertMessage = ERROR_UPDATING_SETTINGS;
           } else {
-            createFlash({ message: SUCCESS_UPDATING_SETTINGS, type: 'success' });
+            this.dismissAlert();
+            this.$toast.show(SUCCESS_UPDATING_SETTINGS, { type: 'success' });
           }
         })
         .catch((e) => {
@@ -93,7 +98,7 @@ export default {
               this.errors = { ...this.errors, [key]: message };
             });
           }
-          createFlash({ message: ERROR_UPDATING_SETTINGS, type: 'warning' });
+          this.alertMessage = ERROR_UPDATING_SETTINGS;
         });
     },
   },
@@ -102,6 +107,10 @@ export default {
 
 <template>
   <div>
+    <gl-alert v-if="alertMessage" variant="warning" class="gl-mt-4" @dismiss="dismissAlert">
+      {{ alertMessage }}
+    </gl-alert>
+
     <settings-block :default-expanded="defaultExpanded">
       <template #title> {{ $options.i18n.PACKAGE_SETTINGS_HEADER }}</template>
       <template #description>

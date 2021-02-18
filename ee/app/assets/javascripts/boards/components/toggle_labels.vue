@@ -1,6 +1,6 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlToggle } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 

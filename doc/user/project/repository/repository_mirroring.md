@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/repository_mirroring.html'
 ---
 
-# Repository mirroring
+# Repository mirroring **(FREE)**
 
 Repository mirroring allows for mirroring of repositories to and from external sources. It can be
 used to mirror branches, tags, and commits between repositories. It is useful when you want to use
@@ -340,7 +340,7 @@ If you're mirroring over SSH (that is, using an `ssh://` URL), you can authentic
 
 - Password-based authentication, just as over HTTPS.
 - Public key authentication. This is often more secure than password authentication,
-  especially when the other repository supports [deploy keys](../../../ssh/README.md#deploy-keys).
+  especially when the other repository supports [deploy keys](../deploy_keys/index.md).
 
 To get started:
 
@@ -401,7 +401,7 @@ GitLab generates a 4096-bit RSA key that can be copied by clicking the **Copy SS
 You then need to add the public SSH key to the other repository's configuration:
 
 - If the other repository is hosted on GitLab, you should add the public SSH key
-  as a [deploy key](../../../ssh/README.md#deploy-keys).
+  as a [deploy key](../../project/deploy_keys/index.md).
 - If the other repository is hosted elsewhere, you may need to add the key to
   your user's  `authorized_keys` file. Paste the entire public SSH key into the
   file on its own line and save it.

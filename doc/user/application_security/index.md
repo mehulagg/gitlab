@@ -57,7 +57,7 @@ see [configure SAST in the UI](sast/index.md#configure-sast-in-the-ui).
 ### Override the default registry base address
 
 By default, GitLab security scanners use `registry.gitlab.com/gitlab-org/security-products/analyzers` as the
-base address for Docker images. You can override this globally by setting the variable
+base address for Docker images. You can override this globally by setting the CI/CD variable
 `SECURE_ANALYZERS_PREFIX` to another location. Note that this affects all scanners at once.
 
 ## Security scanning tools
@@ -110,7 +110,7 @@ The scanning tools and vulnerabilities database are updated regularly.
 | Secure scanning tool                                         | Vulnerabilities database updates          |
 |:-------------------------------------------------------------|-------------------------------------------|
 | [Container Scanning](container_scanning/index.md)            | Uses `clair`. The latest `clair-db` version is used for each job by running the [`latest` Docker image tag](https://gitlab.com/gitlab-org/gitlab/blob/438a0a56dc0882f22bdd82e700554525f552d91b/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml#L37). The `clair-db` database [is updated daily according to the author](https://github.com/arminc/clair-local-scan#clair-server-or-local). |
-| [Dependency Scanning](dependency_scanning/index.md)          | Relies on `bundler-audit` (for Ruby gems), `retire.js` (for NPM packages), and `gemnasium` (the GitLab tool for all libraries). Both `bundler-audit` and `retire.js` fetch their vulnerabilities data from GitHub repositories, so vulnerabilities added to `ruby-advisory-db` and `retire.js` are immediately available. The tools themselves are updated once per month if there's a new version. The [Gemnasium DB](https://gitlab.com/gitlab-org/security-products/gemnasium-db) is updated at least once a week. See our [current measurement of time from CVE being issued to our product being updated](https://about.gitlab.com/handbook/engineering/development/performance-indicators/#cve-issue-to-update). |
+| [Dependency Scanning](dependency_scanning/index.md)          | Relies on `bundler-audit` (for Ruby gems), `retire.js` (for npm packages), and `gemnasium` (the GitLab tool for all libraries). Both `bundler-audit` and `retire.js` fetch their vulnerabilities data from GitHub repositories, so vulnerabilities added to `ruby-advisory-db` and `retire.js` are immediately available. The tools themselves are updated once per month if there's a new version. The [Gemnasium DB](https://gitlab.com/gitlab-org/security-products/gemnasium-db) is updated at least once a week. See our [current measurement of time from CVE being issued to our product being updated](https://about.gitlab.com/handbook/engineering/development/performance-indicators/#cve-issue-to-update). |
 | [Dynamic Application Security Testing (DAST)](dast/index.md) | The scanning engine is updated on a periodic basis. See the [version of the underlying tool `zaproxy`](https://gitlab.com/gitlab-org/security-products/dast/blob/master/Dockerfile#L1). The scanning rules are downloaded at scan runtime. |
 | [Static Application Security Testing (SAST)](sast/index.md)  | Relies exclusively on [the tools GitLab wraps](sast/index.md#supported-languages-and-frameworks). The underlying analyzers are updated at least once per month if a relevant update is available. The vulnerabilities database is updated by the upstream tools. |
 
@@ -141,12 +141,12 @@ reports are available to download. To download a report, click on the
 > Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.8.
 
 Each security vulnerability in the merge request report or the
-[Security Dashboard](security_dashboard/index.md) is actionable. Click an entry to view detailed
+[Vulnerability Report](vulnerability_report/index.md) is actionable. Click an entry to view detailed
 information with several options:
 
 - [Dismiss vulnerability](#dismissing-a-vulnerability): Dismissing a vulnerability styles it in
   strikethrough.
-- [Create issue](#creating-an-issue-for-a-vulnerability): Create a new issue with the title and
+- [Create issue](vulnerabilities/index.md#create-a-gitlab-issue-for-a-vulnerability): Create a new issue with the title and
   description pre-populated with information from the vulnerability report. By default, such issues
   are [confidential](../project/issues/confidential_issues.md).
 - [Automatic Remediation](#automatic-remediation-for-vulnerabilities): For some vulnerabilities,
@@ -265,29 +265,18 @@ Pressing the "Dismiss Selected" button dismisses all the selected vulnerabilitie
 
 ![Multiple vulnerability dismissal](img/multi_select_v12_9.png)
 
-### Creating an issue for a vulnerability
+### Create an issue for a vulnerability
 
-You can create an issue for a vulnerability by visiting the vulnerability's page and clicking
-**Create issue**, which you can find in the **Related issues** section.
-
-![Create issue from vulnerability](img/create_issue_from_vulnerability_v13_3.png)
-
-This creates a [confidential issue](../project/issues/confidential_issues.md) in the project the
-vulnerability came from, and pre-populates it with some useful information taken from the vulnerability
-report. After the issue is created, you are redirected to it so you can edit, assign, or comment on
-it.
-
-Upon returning to the group security dashboard, the vulnerability now has an associated issue next
-to the name.
-
-![Linked issue in the group security dashboard](img/issue.png)
+You can create a GitLab issue, or a Jira issue (if it's enabled) for a vulnerability. For more
+details, see [Vulnerability Pages](vulnerabilities/index.md).
 
 ### Automatic remediation for vulnerabilities
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5656) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.7.
 
-Some vulnerabilities can be fixed by applying the solution that GitLab
-automatically generates. Although the feature name is Automatic Remediation, this feature is also commonly called Auto-Remediation, Auto Remediation, or Suggested Solutions. The following scanners are supported:
+Some vulnerabilities can be fixed by applying the solution that GitLab automatically generates.
+Although the feature name is Automatic Remediation, this feature is also commonly called
+Auto-Remediation, Auto Remediation, or Suggested Solutions. The following scanners are supported:
 
 - [Dependency Scanning](dependency_scanning/index.md):
   Automatic Patch creation is only available for Node.js projects managed with
@@ -442,7 +431,7 @@ Read how to [operate the Secure scanners in an offline environment](offline_depl
 ## Using private Maven repositories
 
 If you have a private Apache Maven repository that requires login credentials,
-you can use the `MAVEN_CLI_OPTS` environment variable
+you can use the `MAVEN_CLI_OPTS` CI/CD variable
 to pass a username and password. You can set it under your project's settings
 so that your credentials aren't exposed in `.gitlab-ci.yml`.
 
@@ -450,8 +439,8 @@ If the username is `myuser` and the password is `verysecret` then you would
 [set the following variable](../../ci/variables/README.md#create-a-custom-variable-in-the-ui)
 under your project's settings:
 
-| Type | Key | Value |
-| ---- | --- | ----- |
+| Type     | Key              | Value |
+| -------- | ---------------- | ----- |
 | Variable | `MAVEN_CLI_OPTS` | `--settings mysettings.xml -Drepository.password=verysecret -Drepository.user=myuser` |
 
 ```xml
@@ -549,7 +538,7 @@ This is often followed by the [error `No files to upload`](../../ci/pipelines/jo
 and preceded by other errors or warnings that indicate why the JSON report wasn't generated. Please
 check the entire job log for such messages. If you don't find these messages, retry the failed job
 after setting `SECURE_LOG_LEVEL: "debug"` as a
-[custom environment variable](../../ci/variables/README.md#custom-environment-variables).
+[custom CI/CD variable](../../ci/variables/README.md#custom-cicd-variables).
 This provides useful information to investigate further.
 
 ### Getting error message `sast job: config key may not be used with 'rules': only/except`

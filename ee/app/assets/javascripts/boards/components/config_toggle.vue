@@ -1,5 +1,7 @@
 <script>
 import { GlButton, GlModalDirective, GlTooltipDirective } from '@gitlab/ui';
+import { formType } from '~/boards/constants';
+import eventHub from '~/boards/eventhub';
 import { s__, __ } from '~/locale';
 
 export default {
@@ -38,25 +40,25 @@ export default {
     },
   },
   methods: {
-    showPage(page) {
-      return this.boardsStore.showPage(page);
+    showPage() {
+      eventHub.$emit('showBoardModal', formType.edit);
+      return this.boardsStore.showPage(formType.edit);
     },
   },
 };
 </script>
 
 <template>
-  <div class="gl-ml-3">
+  <div class="gl-ml-3 gl-display-flex gl-align-items-center">
     <gl-button
       v-gl-modal-directive="'board-config-modal'"
       v-gl-tooltip
       :title="tooltipTitle"
       :class="{ 'dot-highlight': hasScope }"
       data-qa-selector="boards_config_button"
-      @click.prevent="showPage('edit')"
+      @click.prevent="showPage"
     >
       {{ buttonText }}
     </gl-button>
   </div>
 </template>
-};

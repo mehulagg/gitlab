@@ -1,6 +1,6 @@
 <script>
-import { isEmpty } from 'lodash';
 import { GlSprintf, GlModal, GlAlert } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
 import destroyOncallRotationMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_rotation.mutation.graphql';
 import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import { updateStoreAfterRotationDelete } from 'ee/oncall_schedules/utils/cache_updates';

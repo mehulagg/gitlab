@@ -1,7 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
-import NoteSignedOutWidget from '~/notes/components/note_signed_out_widget.vue';
 import ReplyPlaceholder from '~/notes/components/discussion_reply_placeholder.vue';
+import NoteSignedOutWidget from '~/notes/components/note_signed_out_widget.vue';
 
 export default {
   name: 'DiffDiscussionReply',
@@ -35,8 +35,9 @@ export default {
       <slot v-if="hasForm" name="form"></slot>
       <template v-else-if="renderReplyPlaceholder">
         <reply-placeholder
-          :button-text="__('Start a new discussion...')"
-          @onClick="$emit('showNewDiscussionForm')"
+          :placeholder-text="__('Start a new discussion…')"
+          :label-text="__('New discussion')"
+          @focus="$emit('showNewDiscussionForm')"
         />
       </template>
     </template>

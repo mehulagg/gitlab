@@ -1,14 +1,14 @@
 import { createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import testAction from 'helpers/vuex_action_helper';
-import createStore from 'ee/issue_show/components/incidents/store';
-import * as actions from 'ee/issue_show/components/incidents/store/actions';
-import * as types from 'ee/issue_show/components/incidents/store/mutation_types';
 import {
   getMetricImages,
   uploadMetricImage,
   deleteMetricImage,
 } from 'ee/issue_show/components/incidents/service';
+import createStore from 'ee/issue_show/components/incidents/store';
+import * as actions from 'ee/issue_show/components/incidents/store/actions';
+import * as types from 'ee/issue_show/components/incidents/store/mutation_types';
+import testAction from 'helpers/vuex_action_helper';
 import createFlash from '~/flash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { fileList, initialData } from '../mock_data';

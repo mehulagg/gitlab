@@ -33,6 +33,7 @@ Docker image with the fuzz engine to run your app.
 | Java     | [JQF](https://github.com/rohanpadhye/JQF) (not preferred) | [jqf-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/java-fuzzing-example) |
 | JavaScript | [`jsfuzz`](https://gitlab.com/gitlab-org/security-products/analyzers/fuzzers/jsfuzz)| [jsfuzz-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/jsfuzz-fuzzing-example) |
 | Python | [`pythonfuzz`](https://gitlab.com/gitlab-org/security-products/analyzers/fuzzers/pythonfuzz)| [pythonfuzz-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/pythonfuzz-fuzzing-example) |
+| AFL (any language that works on top of AFL)      | [AFL](https://lcamtuf.coredump.cx/afl/)| [afl-fuzzing-example](https://gitlab.com/gitlab-org/security-products/demos/coverage-fuzzing/afl-fuzzing-example) |
 
 ## Configuration
 
@@ -118,13 +119,13 @@ You can configure this by passing `--regression=false/true` to `gitlab-cov-fuzz`
 shows. Also note that `gitlab-cov-fuzz` is a wrapper, so you can pass those arguments to configure
 any option available in the underlying fuzzing engine.
 
-### Available variables
+### Available CI/CD variables
 
-| Environment variable      | Description                                                        |
-|---------------------------|--------------------------------------------------------------------|
-| `COVFUZZ_BRANCH`          | The branch for long-running fuzzing jobs. The default is `master`. |
-| `COVFUZZ_SEED_CORPUS`     | Path to a seed corpus directory. The default is empty.             |
-| `COVFUZZ_URL_PREFIX`      | Path to the `gitlab-cov-fuzz` repository cloned for use with an offline environment. You should only change this when using an offline environment. The default value is `https://gitlab.com/gitlab-org/security-products/analyzers/gitlab-cov-fuzz/-/raw`.  |
+| CI/CD variable        | Description                                                        |
+|-----------------------|--------------------------------------------------------------------|
+| `COVFUZZ_BRANCH`      | The branch for long-running fuzzing jobs. The default is `master`. |
+| `COVFUZZ_SEED_CORPUS` | Path to a seed corpus directory. The default is empty.             |
+| `COVFUZZ_URL_PREFIX`  | Path to the `gitlab-cov-fuzz` repository cloned for use with an offline environment. You should only change this when using an offline environment. The default value is `https://gitlab.com/gitlab-org/security-products/analyzers/gitlab-cov-fuzz/-/raw`. |
 
 The files in the seed corpus (`COVFUZZ_SEED_CORPUS`), if provided, aren't updated unless you commit new
 files to your Git repository. There's usually no need to frequently update the seed corpus. As part

@@ -1,13 +1,14 @@
 <script>
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { visitUrl } from '~/lib/utils/url_utility';
 import * as Sentry from '~/sentry/wrapper';
-import { convertToGraphQLId } from '~/graphql_shared/utils';
 
+import { FETCH_ERROR, SAVE_ERROR } from '../constants';
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
 import updateComplianceFrameworkMutation from '../graphql/queries/update_compliance_framework.mutation.graphql';
-import { initialiseFormData, FETCH_ERROR, SAVE_ERROR } from '../constants';
-import SharedForm from './shared_form.vue';
+import { initialiseFormData } from '../utils';
 import FormStatus from './form_status.vue';
+import SharedForm from './shared_form.vue';
 
 export default {
   components: {
@@ -32,10 +33,16 @@ export default {
       required: false,
       default: null,
     },
+    pipelineConfigurationFullPathEnabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
-      errorMessage: '',
+      initErrorMessage: '',
+      saveErrorMessage: '',
       formData: initialiseFormData(),
       saving: false,
     };
@@ -53,7 +60,7 @@ export default {
         this.formData = this.extractComplianceFramework(data);
       },
       error(error) {
-        this.setError(error, FETCH_ERROR);
+        this.setInitError(error, FETCH_ERROR);
       },
     },
   },
@@ -64,8 +71,13 @@ export default {
     isLoading() {
       return this.$apollo.loading || this.saving;
     },
-    hasFormData() {
-      return Boolean(this.formData?.name);
+    showForm() {
+      return (
+        Object.values(this.formData).filter((d) => d !== null).length > 0 && !this.initErrorMessage
+      );
+    },
+    errorMessage() {
+      return this.initErrorMessage || this.saveErrorMessage;
     },
   },
   methods: {
@@ -73,29 +85,34 @@ export default {
       const complianceFrameworks = data.namespace?.complianceFrameworks?.nodes || [];
 
       if (!complianceFrameworks.length) {
-        this.setError(new Error(FETCH_ERROR), FETCH_ERROR);
+        this.setInitError(new Error(FETCH_ERROR), FETCH_ERROR);
 
         return initialiseFormData();
       }
 
-      const { name, description, color } = complianceFrameworks[0];
+      const { name, description, pipelineConfigurationFullPath, color } = complianceFrameworks[0];
 
       return {
         name,
         description,
+        pipelineConfigurationFullPath,
         color,
       };
     },
-    setError(error, userFriendlyText) {
-      this.errorMessage = userFriendlyText;
+    setInitError(error, userFriendlyText) {
+      this.initErrorMessage = userFriendlyText;
+      Sentry.captureException(error);
+    },
+    setSavingError(error, userFriendlyText) {
+      this.saveErrorMessage = userFriendlyText;
       Sentry.captureException(error);
     },
     async onSubmit() {
       this.saving = true;
-      this.errorMessage = '';
+      this.saveErrorMessage = '';
 
       try {
-        const { name, description, color } = this.formData;
+        const { name, description, pipelineConfigurationFullPath, color } = this.formData;
         const { data } = await this.$apollo.mutate({
           mutation: updateComplianceFrameworkMutation,
           variables: {
@@ -104,6 +121,7 @@ export default {
               params: {
                 name,
                 description,
+                pipelineConfigurationFullPath,
                 color,
               },
             },
@@ -113,13 +131,13 @@ export default {
         const [error] = data?.updateComplianceFramework?.errors || [];
 
         if (error) {
-          this.setError(new Error(error), error);
+          this.setSavingError(new Error(error), error);
         } else {
           this.saving = false;
           visitUrl(this.groupEditPath);
         }
       } catch (e) {
-        this.setError(e, SAVE_ERROR);
+        this.setSavingError(e, SAVE_ERROR);
       }
 
       this.saving = false;
@@ -130,10 +148,12 @@ export default {
 <template>
   <form-status :loading="isLoading" :error="errorMessage">
     <shared-form
-      v-if="hasFormData"
+      v-if="showForm"
       :group-edit-path="groupEditPath"
+      :pipeline-configuration-full-path-enabled="pipelineConfigurationFullPathEnabled"
       :name.sync="formData.name"
       :description.sync="formData.description"
+      :pipeline-configuration-full-path.sync="formData.pipelineConfigurationFullPath"
       :color.sync="formData.color"
       @submit="onSubmit"
     />

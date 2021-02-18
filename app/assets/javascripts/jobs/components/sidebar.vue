@@ -1,17 +1,17 @@
 <script>
+import { GlButton, GlIcon, GlLink } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlButton, GlIcon, GlLink } from '@gitlab/ui';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import { JOB_SIDEBAR } from '../constants';
 import ArtifactsBlock from './artifacts_block.vue';
-import JobSidebarRetryButton from './job_sidebar_retry_button.vue';
-import JobRetryForwardDeploymentModal from './job_retry_forward_deployment_modal.vue';
-import TriggerBlock from './trigger_block.vue';
 import CommitBlock from './commit_block.vue';
-import StagesDropdown from './stages_dropdown.vue';
+import JobRetryForwardDeploymentModal from './job_retry_forward_deployment_modal.vue';
+import JobSidebarRetryButton from './job_sidebar_retry_button.vue';
 import JobsContainer from './jobs_container.vue';
 import JobSidebarDetailsContainer from './sidebar_job_details_container.vue';
+import StagesDropdown from './stages_dropdown.vue';
+import TriggerBlock from './trigger_block.vue';
 
 export const forwardDeploymentFailureModalId = 'forward-deployment-failure';
 
@@ -46,9 +46,9 @@ export default {
     ...mapGetters(['hasForwardDeploymentFailure']),
     ...mapState(['job', 'stages', 'jobs', 'selectedStage']),
     retryButtonClass() {
-      let className = 'btn btn-retry';
+      let className = 'btn gl-button gl-text-decoration-none!';
       className +=
-        this.job.status && this.job.recoverable ? ' btn-primary' : ' btn-inverted-secondary';
+        this.job.status && this.job.recoverable ? ' btn-confirm' : ' btn-confirm-secondary';
       return className;
     },
     hasArtifact() {
@@ -94,7 +94,7 @@ export default {
             <gl-link
               v-if="job.cancel_path"
               :href="job.cancel_path"
-              class="btn btn-default"
+              class="btn gl-button btn-default gl-text-decoration-none!"
               data-method="post"
               data-testid="cancel-button"
               rel="nofollow"
@@ -115,7 +115,7 @@ export default {
           <gl-link
             v-if="job.new_issue_path"
             :href="job.new_issue_path"
-            class="btn btn-success btn-inverted float-left mr-2"
+            class="btn gl-button btn-success-secondary float-left mr-2 gl-text-decoration-none!"
             data-testid="job-new-issue"
             >{{ $options.i18n.newIssue }}
           </gl-link>

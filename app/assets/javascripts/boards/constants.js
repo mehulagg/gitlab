@@ -21,12 +21,20 @@ export const ListTypeTitles = {
   label: __('Label'),
 };
 
+export const formType = {
+  new: 'new',
+  delete: 'delete',
+  edit: 'edit',
+};
+
 export const inactiveId = 0;
 
 export const ISSUABLE = 'issuable';
 export const LIST = 'list';
 
 export const NOT_FILTER = 'not[';
+
+export const flashAnimationDuration = 2000;
 
 export default {
   BoardType,

@@ -18,11 +18,11 @@ If you follow our guidance to automate user provisioning using [SCIM](scim_setup
 User synchronization of SAML SSO groups is supported through [SCIM](scim_setup.md). SCIM supports adding and removing users from the GitLab group.
 For example, if you remove a user from the SCIM app, SCIM removes that same user from the GitLab group.
 
-SAML SSO is not supported at the subgroup level.
+SAML SSO is only configurable at the top-level group.
 
 ## Configuring your Identity Provider
 
-1. Navigate to the group and click **Settings > SAML SSO**.
+1. Navigate to the group and select **Settings > SAML SSO**.
 1. Configure your SAML server using the **Assertion consumer service URL**, **Identifier**, and **GitLab single sign-on URL**. Alternatively GitLab provides [metadata XML configuration](#metadata-configuration). See [specific identity provider documentation](#providers) for more details.
 1. Configure the SAML response to include a NameID that uniquely identifies each user.
 1. Configure [required assertions](group_managed_accounts.md#assertions) if using [Group Managed Accounts](group_managed_accounts.md).
@@ -57,7 +57,7 @@ We recommend setting the NameID format to `Persistent` unless using a field (suc
 
 GitLab provides metadata XML that can be used to configure your Identity Provider.
 
-1. Navigate to the group and click **Settings > SAML SSO**.
+1. Navigate to the group and select **Settings > SAML SSO**.
 1. Copy the provided **GitLab metadata URL**.
 1. Follow your Identity Provider's documentation and paste the metadata URL when it's requested.
 
@@ -69,8 +69,8 @@ After you set up your identity provider to work with GitLab, you must configure 
 1. Find the SSO URL from your Identity Provider and enter it the **Identity provider single sign-on URL** field.
 1. Find and enter the fingerprint for the SAML token signing certificate in the **Certificate** field.
 1. Select the access level to be applied to newly added users in the **Default membership role** field. The default access level is 'Guest'.
-1. Click the **Enable SAML authentication for this group** toggle switch.
-1. Click the **Save changes** button.
+1. Select the **Enable SAML authentication for this group** toggle switch.
+1. Select the **Save changes** button.
 
 ![Group SAML Settings for GitLab.com](img/group_saml_settings_v13_3.png)
 
@@ -87,7 +87,7 @@ Please note that the certificate [fingerprint algorithm](#additional-providers-a
 With this option enabled, users must go through your group's GitLab single sign-on URL. They may also be added via SCIM, if configured. Users can't be added manually, and may only access project/group resources via the UI by signing in through the SSO URL.
 
 However, users are not prompted to sign in through SSO on each visit. GitLab checks whether a user
-has authenticated through SSO. If it's been more than 7 days since the last sign-in, GitLab
+has authenticated through SSO. If it's been more than 1 day since the last sign-in, GitLab
 prompts the user to sign in again through SSO.
 You can see more information about how long a session is valid in our [user profile documentation](../../profile/#why-do-i-keep-getting-signed-out).
 
@@ -216,7 +216,7 @@ To link SAML to your existing GitLab.com account:
 
 1. Sign in to your GitLab.com account.
 1. Locate and visit the **GitLab single sign-on URL** for the group you're signing in to. A group owner can find this on the group's **Settings > SAML SSO** page. If the sign-in URL is configured, users can connect to the GitLab app from the Identity Provider.
-1. Click **Authorize**.
+1. Select **Authorize**.
 1. Enter your credentials on the Identity Provider if prompted.
 1. You are then redirected back to GitLab.com and should now have access to the group. In the future, you can use SAML to sign in to GitLab.com.
 
@@ -225,7 +225,7 @@ On subsequent visits, you should be able to go [sign in to GitLab.com with SAML]
 ### Signing in to GitLab.com with SAML
 
 1. Sign in to your identity provider.
-1. From the list of apps, click on the "GitLab.com" app (The name is set by the administrator of the identity provider).
+1. From the list of apps, select the "GitLab.com" app. (The name is set by the administrator of the identity provider.)
 1. You are then signed in to GitLab.com and redirected to the group.
 
 ### Configure user settings from SAML response
@@ -293,10 +293,19 @@ Users can unlink SAML for a group from their profile page. This can be helpful i
 - Your SAML NameID has changed and so GitLab can no longer find your user.
 
 WARNING:
-Unlinking an account removes all roles assigned to that user within the group.
+Unlinking an account removes all roles assigned to that user in the group.
 If a user re-links their account, roles need to be reassigned.
 
-For example, to unlink the `MyOrg` account, the following **Disconnect** button is available under **Profile > Accounts**:
+Groups require at least one owner. If your account is the only owner in the
+group, you are not allowed to unlink the account. In that case, set up another user as a
+group owner, and then you can unlink the account.
+
+For example, to unlink the `MyOrg` account:
+
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **Account**.
+1. In the **Social sign-in** section, select **Disconnect** next to the connected account.
 
 ![Unlink Group SAML](img/unlink_group_saml.png)
 

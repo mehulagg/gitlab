@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import {
   GlFormGroup,
   GlSegmentedControl,
@@ -7,14 +6,14 @@ import {
   GlDropdownItem,
   GlDropdownDivider,
 } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 
-import { __ } from '~/locale';
 import { visitUrl, mergeUrlParams, updateHistory, setUrlParams } from '~/lib/utils/url_utility';
+import { __ } from '~/locale';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 
-import EpicsFilteredSearchMixin from '../mixins/filtered_search_mixin';
-
 import { EPICS_STATES, PRESET_TYPES } from '../constants';
+import EpicsFilteredSearchMixin from '../mixins/filtered_search_mixin';
 
 export default {
   epicStates: EPICS_STATES,

@@ -43,6 +43,7 @@ exceptions:
   - DSA
   - DVCS
   - ECDSA
+  - EFS
   - EKS
   - EOL
   - EXIF
@@ -93,7 +94,6 @@ exceptions:
   - NFS
   - NGINX
   - NOTE
-  - NPM
   - NTP
   - ONLY
   - OWASP
@@ -133,6 +133,7 @@ exceptions:
   - SMTP
   - SOC
   - SOX
+  - SPDX
   - SPF
   - SQL
   - SSD
@@ -143,6 +144,7 @@ exceptions:
   - SVG
   - SVN
   - TCP
+  - TIFF
   - TIP
   - TLD
   - TLS
@@ -164,4 +166,5 @@ exceptions:
   - XML
   - XSS
   - YAML
+  - ZAP
   - ZIP

@@ -4,9 +4,9 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Maven packages in the Package Repository
+# Maven packages in the Package Repository **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5811) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5811) in GitLab Premium 11.3.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
 Publish [Maven](https://maven.apache.org) artifacts in your project’s Package Registry.
@@ -611,6 +611,21 @@ Now navigate to your project's **Packages & Registries** page and view the publi
 When you publish a package with the same name or version as an existing package,
 the existing package is overwritten.
 
+#### Do not allow duplicate Maven packages
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/296895) in GitLab Free 13.9.
+
+To prevent users from publishing duplicate Maven packages, you can use the [GraphQl API](../../../api/graphql/reference/index.md#packagesettings) or the UI.
+
+In the UI:
+
+1. For your group, go to **Settings > Packages & Registries**.
+1. Expand the **Package Registry** section.
+1. Turn on the **Reject duplicates** toggle.
+1. Optional. To allow some duplicate packages, in the **Exceptions** box, enter a regex pattern that matches the names of packages you want to allow.
+
+Your changes are automatically saved.
+
 ## Install a package
 
 To install a package from the GitLab Package Registry, you must configure
@@ -717,7 +732,7 @@ You can create a new package each time the `master` branch is updated.
    ```
 
 1. Make sure your `pom.xml` file includes the following.
-   You can either let Maven use the CI environment variables, as shown in this example,
+   You can either let Maven use the [predefined CI/CD variables](../../../ci/variables/predefined_variables.md), as shown in this example,
    or you can hard code your server's hostname and project's ID.
 
    ```xml
@@ -756,7 +771,7 @@ The next time the `deploy` job runs, it copies `ci_settings.xml` to the
 user's home location. In this example:
 
 - The user is `root`, because the job runs in a Docker container.
-- Maven uses the configured CI [environment variables](../../../ci/variables/README.md#predefined-environment-variables).
+- Maven uses the configured CI/CD variables.
 
 ### Create Maven packages with GitLab CI/CD by using Gradle
 

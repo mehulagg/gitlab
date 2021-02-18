@@ -1,17 +1,20 @@
 <script>
+import { GlAlert } from '@gitlab/ui';
+import { sortBy } from 'lodash';
 import Draggable from 'vuedraggable';
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { sortBy } from 'lodash';
-import { GlAlert } from '@gitlab/ui';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import defaultSortableConfig from '~/sortable/sortable_config';
 import { sortableEnd, sortableStart } from '~/boards/mixins/sortable_default_options';
+import defaultSortableConfig from '~/sortable/sortable_config';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import BoardColumn from './board_column.vue';
 import BoardColumnDeprecated from './board_column_deprecated.vue';
 
 export default {
   components: {
-    BoardColumn: gon.features?.graphqlBoardLists ? BoardColumn : BoardColumnDeprecated,
+    BoardColumn:
+      gon.features?.graphqlBoardLists || gon.features?.epicBoards
+        ? BoardColumn
+        : BoardColumnDeprecated,
     BoardContentSidebar: () => import('ee_component/boards/components/board_content_sidebar.vue'),
     EpicsSwimlanes: () => import('ee_component/boards/components/epics_swimlanes.vue'),
     GlAlert,
@@ -33,10 +36,10 @@ export default {
     },
   },
   computed: {
-    ...mapState(['boardLists', 'error']),
+    ...mapState(['boardLists', 'error', 'isEpicBoard']),
     ...mapGetters(['isSwimlanesOn']),
     boardListsToUse() {
-      return this.glFeatures.graphqlBoardLists || this.isSwimlanesOn
+      return this.glFeatures.graphqlBoardLists || this.isSwimlanesOn || this.isEpicBoard
         ? sortBy([...Object.values(this.boardLists)], 'position')
         : this.lists;
     },

@@ -2,6 +2,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Value stream analytics charts', :js do
+  include CycleAnalyticsHelpers
+
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, name: 'CA-test-group') }
   let_it_be(:group2) { create(:group, name: 'CA-bad-test-group') }
@@ -12,16 +14,6 @@ RSpec.describe 'Value stream analytics charts', :js do
 
   3.times do |i|
     let_it_be("issue_#{i}".to_sym) { create(:issue, title: "New Issue #{i}", project: project, created_at: 2.days.ago) }
-  end
-
-  def wait_for_stages_to_load
-    expect(page).to have_selector '.js-stage-table'
-  end
-
-  def select_group(target_group = group)
-    visit group_analytics_cycle_analytics_path(target_group)
-
-    wait_for_stages_to_load
   end
 
   def toggle_more_options(stage)
@@ -62,7 +54,7 @@ RSpec.describe 'Value stream analytics charts', :js do
     end
 
     before do
-      select_group
+      select_group(group)
     end
 
     it 'has all the default stages' do
@@ -107,7 +99,7 @@ RSpec.describe 'Value stream analytics charts', :js do
             create(:labeled_issue, created_at: i.days.ago, project: create(:project, group: group), labels: [group_label2])
           end
 
-          select_group
+          select_group(group)
         end
 
         it 'displays the chart' do
@@ -127,7 +119,7 @@ RSpec.describe 'Value stream analytics charts', :js do
 
       context 'no data available' do
         before do
-          select_group
+          select_group(group)
         end
 
         it 'shows the no data available message' do

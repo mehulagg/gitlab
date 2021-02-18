@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Integrations
+# Integrations **(FREE)**
 
 Integrations allow you to integrate GitLab with other applications. They
 are a bit like plugins in that they allow a lot of freedom in adding
@@ -13,7 +13,7 @@ functionality to GitLab.
 ## Accessing integrations
 
 You can find the available integrations under your project's
-**Settings ➔ Integrations** page.
+**Settings > Integrations** page.
 
 There are more than 20 integrations to integrate with. Click on the one that you
 want to configure.

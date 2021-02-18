@@ -96,7 +96,7 @@ RSpec.describe API::Triggers do
               expect(response).to have_gitlab_http_status(:created)
               expect(Ci::Pipeline.last.source).to eq('pipeline')
               expect(Ci::Pipeline.last.triggered_by_pipeline).not_to be_nil
-              expect(Ci::Pipeline.last.variables.map { |v| { v.key => v.value } }.last).to eq(params[:variables])
+              expect(Ci::Pipeline.last.variables.find { |v| v.key == 'KEY' }.value).to eq('VALUE')
             end
           end
         end

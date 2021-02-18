@@ -1,3 +1,4 @@
+import { generateBadges, canOverride, parseDataAttributes } from 'ee/members/utils';
 import {
   member as memberMock,
   directMember,
@@ -5,7 +6,6 @@ import {
   membersJsonString,
   members,
 } from 'jest/members/mock_data';
-import { generateBadges, canOverride, parseDataAttributes } from 'ee/members/utils';
 
 describe('Members Utils', () => {
   describe('generateBadges', () => {

@@ -1,7 +1,7 @@
-import Vue from 'vue';
 import { union, unionBy } from 'lodash';
-import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
+import Vue from 'vue';
 import { moveIssueListHelper } from '~/boards/boards_util';
+import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
 import { s__ } from '~/locale';
 import * as mutationTypes from './mutation_types';
 
@@ -63,7 +63,7 @@ export default {
     state.error = s__('Boards|An error occurred while updating the list. Please try again.');
   },
 
-  [mutationTypes.RECEIVE_ISSUES_FOR_LIST_SUCCESS]: (
+  [mutationTypes.RECEIVE_ITEMS_FOR_LIST_SUCCESS]: (
     state,
     { listIssues, listPageInfo, listId, noEpicIssues },
   ) => {

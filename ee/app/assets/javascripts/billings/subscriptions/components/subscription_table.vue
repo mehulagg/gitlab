@@ -1,7 +1,7 @@
 <script>
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';

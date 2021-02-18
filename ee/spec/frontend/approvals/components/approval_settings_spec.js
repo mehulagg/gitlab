@@ -1,10 +1,10 @@
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlForm } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 
+import ApprovalSettings from 'ee/approvals/components/approval_settings.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
 import groupSettingsModule from 'ee/approvals/stores/modules/group_settings';
-import ApprovalSettings from 'ee/approvals/components/approval_settings.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -24,6 +24,7 @@ describe('ApprovalSettings', () => {
     });
   };
 
+  const findForm = () => wrapper.findComponent(GlForm);
   const findPreventAuthorApproval = () => wrapper.find('[data-testid="prevent-author-approval"]');
   const findSaveButton = () => wrapper.findComponent(GlButton);
 
@@ -31,6 +32,7 @@ describe('ApprovalSettings', () => {
     store = createStoreOptions(groupSettingsModule());
 
     jest.spyOn(store.modules.approvals.actions, 'fetchSettings').mockImplementation();
+    jest.spyOn(store.modules.approvals.actions, 'updateSettings').mockImplementation();
     ({ actions } = store.modules.approvals);
   });
 
@@ -52,8 +54,7 @@ describe('ApprovalSettings', () => {
       const input = findPreventAuthorApproval();
       await input.vm.$emit('input', false);
 
-      expect(input.vm.$attrs.checked).toBe(false);
-      expect(store.modules.approvals.state.preventAuthorApproval).toBe(false);
+      expect(store.modules.approvals.state.settings.preventAuthorApproval).toBe(false);
     });
   });
 
@@ -72,6 +73,16 @@ describe('ApprovalSettings', () => {
       createWrapper();
 
       expect(findSaveButton().props('disabled')).toBe(true);
+    });
+  });
+
+  describe('form submission', () => {
+    it('update settings via API', async () => {
+      createWrapper();
+
+      await findForm().vm.$emit('submit', { preventDefault: () => {} });
+
+      expect(actions.updateSettings).toHaveBeenCalledWith(expect.any(Object), approvalSettingsPath);
     });
   });
 });

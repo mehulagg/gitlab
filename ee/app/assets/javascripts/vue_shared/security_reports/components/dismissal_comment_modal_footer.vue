@@ -1,7 +1,7 @@
 <script>
 import { GlButton } from '@gitlab/ui';
-import Tracking from '~/tracking';
 import { s__ } from '~/locale';
+import Tracking from '~/tracking';
 
 export default {
   name: 'DismissalCommentModalFooter',

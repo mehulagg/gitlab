@@ -1,0 +1,17 @@
+---
+key_path: license_trial
+description: Whether this is a trial license or not
+product_section: growth
+product_stage: growth
+product_group: group::product intelligence
+product_category: collection
+value_type: boolean
+status: data_available
+time_frame: none
+data_source:
+distribution:
+- ee
+tier:
+- premium
+- ultimate
+skip_validation: true

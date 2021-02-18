@@ -1,9 +1,9 @@
 <script>
 import { mapState } from 'vuex';
+import { helpPagePath } from '~/helpers/help_page_helper';
+import { timeIntervalInWords } from '~/lib/utils/datetime_utility';
 import { __, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
-import { timeIntervalInWords } from '~/lib/utils/datetime_utility';
-import { helpPagePath } from '~/helpers/help_page_helper';
 import DetailRow from './sidebar_detail_row.vue';
 
 export default {
@@ -95,7 +95,12 @@ export default {
 
     <p v-if="hasTags" class="build-detail-row" data-testid="job-tags">
       <span class="font-weight-bold">{{ __('Tags:') }}</span>
-      <span v-for="(tag, i) in job.tags" :key="i" class="badge badge-primary mr-1">{{ tag }}</span>
+      <span
+        v-for="(tag, i) in job.tags"
+        :key="i"
+        class="badge badge-pill badge-primary gl-badge sm"
+        >{{ tag }}</span
+      >
     </p>
   </div>
 </template>

@@ -46,14 +46,6 @@ module EE
         reports_response(merge_request.compare_dependency_scanning_reports(current_user), head_pipeline)
       end
 
-      def sast_reports
-        reports_response(merge_request.compare_sast_reports(current_user), head_pipeline)
-      end
-
-      def secret_detection_reports
-        reports_response(merge_request.compare_secret_detection_reports(current_user), head_pipeline)
-      end
-
       def dast_reports
         reports_response(merge_request.compare_dast_reports(current_user), head_pipeline)
       end

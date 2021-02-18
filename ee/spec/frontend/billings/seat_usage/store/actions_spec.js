@@ -1,12 +1,12 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
-import State from 'ee/billings/seat_usage/store/state';
-import * as types from 'ee/billings/seat_usage/store/mutation_types';
+import Api from 'ee/api';
 import * as actions from 'ee/billings/seat_usage/store/actions';
+import * as types from 'ee/billings/seat_usage/store/mutation_types';
+import State from 'ee/billings/seat_usage/store/state';
 import { mockDataSeats } from 'ee_jest/billings/mock_data';
-import axios from '~/lib/utils/axios_utils';
+import testAction from 'helpers/vuex_action_helper';
 import createFlash from '~/flash';
-import Api from '~/api';
+import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');
 
@@ -43,8 +43,6 @@ describe('seats actions', () => {
       });
 
       expect(spy).toBeCalledWith(state.namespaceId, expect.objectContaining(payload));
-
-      spy.mockRestore();
     });
 
     describe('on success', () => {

@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Webhooks
+# Webhooks **(FREE)**
 
 Project webhooks allow you to trigger a percent-encoded URL if, for example, new code is pushed or
 a new issue is created. You can configure webhooks to listen for specific events
@@ -1028,6 +1028,9 @@ X-Gitlab-Event: Wiki Page Hook
 ```
 
 ### Pipeline events
+
+In [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/53159)
+and later, the pipeline webhook returns only the latest jobs.
 
 Triggered on status change of Pipeline.
 

@@ -9,12 +9,14 @@ allowlist
 allowlisted
 allowlisting
 allowlists
+anonymization
 anonymized
 Ansible
 Anthos
 approvers
 architected
 architecting
+archiver
 Arel
 Artifactory
 Asana
@@ -81,6 +83,7 @@ Caddy
 callstack
 callstacks
 Camo
+canonicalized
 CentOS
 Certbot
 changeset
@@ -181,6 +184,7 @@ failsafe
 Falco
 falsy
 fastlane
+Fastzip
 favicon
 favorited
 Figma
@@ -198,6 +202,8 @@ fuzzer
 Gantt
 Gemnasium
 Gemojione
+Getter
+Getters
 gettext
 Git
 Gitaly
@@ -359,12 +365,15 @@ Nanoc
 negatable
 Netlify
 Nokogiri
+noteable
+noteables
 npm
 nullability
 nullable
 Nurtch
 nyc
 OAuth
+Octokit
 offboarded
 offboarding
 offboards
@@ -396,6 +405,7 @@ Poedit
 polyfill
 polyfills
 pooler
+postgres.ai
 PostgreSQL
 precompile
 preconfigure
@@ -412,6 +422,7 @@ prepend
 prepended
 prepending
 prepends
+prepopulated
 Prettifier
 Pritaly
 Priyanka
@@ -479,6 +490,10 @@ resync
 resynced
 resyncing
 resyncs
+retarget
+retargeted
+retargeting
+retargets
 reusability
 reverified
 reverifies
@@ -510,6 +525,7 @@ scatterplot
 scatterplots
 Schemastore
 scrollable
+Semgrep
 Sendmail
 Sentry
 serializer
@@ -552,6 +568,8 @@ subfolder
 subfolders
 subgraph
 subgraphs
+subgroup
+subgroups
 subkey
 subkeys
 sublicense
@@ -650,6 +668,9 @@ unencoded
 unencoder
 unencodes
 unencrypted
+unfollow
+unfollowed
+unfollows
 Unicorn
 unindexed
 unlink
@@ -688,6 +709,8 @@ unreplicated
 unresolve
 unresolved
 unresolving
+unreviewed
+unsanitized
 unschedule
 unscoped
 unshare
@@ -735,6 +758,7 @@ WebdriverIO
 Webex
 webpack
 webserver
+Webservice
 websocket
 websockets
 whitepaper
@@ -755,3 +779,4 @@ Yubico
 Zeitwerk
 Zendesk
 zsh
+Zstandard

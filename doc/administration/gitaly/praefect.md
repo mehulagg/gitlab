@@ -199,12 +199,12 @@ You need the IP/host address for each node.
 1. `LOAD_BALANCER_SERVER_ADDRESS`: the IP/host address of the load balancer
 1. `POSTGRESQL_SERVER_ADDRESS`: the IP/host address of the PostgreSQL server
 1. `PRAEFECT_HOST`: the IP/host address of the Praefect server
-1. `GITALY_HOST`: the IP/host address of each Gitaly server
+1. `GITALY_HOST_*`: the IP or host address of each Gitaly server
 1. `GITLAB_HOST`: the IP/host address of the GitLab server
 
 If you are using a cloud provider, you can look up the addresses for each server through your cloud provider's management console.
 
-If you are using Google Cloud Platform, SoftLayer, or any other vendor that provides a virtual private cloud (VPC) you can use the private addresses for each cloud instance (corresponds to “internal address” for Google Cloud Platform) for `PRAEFECT_HOST`, `GITALY_HOST`, and `GITLAB_HOST`.
+If you are using Google Cloud Platform, SoftLayer, or any other vendor that provides a virtual private cloud (VPC) you can use the private addresses for each cloud instance (corresponds to “internal address” for Google Cloud Platform) for `PRAEFECT_HOST`, `GITALY_HOST_*`, and `GITLAB_HOST`.
 
 #### Secrets
 
@@ -465,31 +465,42 @@ application server, or a Gitaly node.
    Praefect when communicating with Gitaly nodes in the cluster. This token is
    distinct from the `PRAEFECT_EXTERNAL_TOKEN`.
 
-   Replace `GITALY_HOST` with the IP/host address of the each Gitaly node.
+   Replace `GITALY_HOST_*` with the IP or host address of the each Gitaly node.
 
    More Gitaly nodes can be added to the cluster to increase the number of
    replicas. More clusters can also be added for very large GitLab instances.
 
+   NOTE:
+   When adding additional Gitaly nodes to a virtual storage, all storage names
+   within that virtual storage must be unique. Additionally, all Gitaly node
+   addresses referenced in the Praefect configuration must be unique.
+
    ```ruby
    # Name of storage hash must match storage name in git_data_dirs on GitLab
-   # server ('praefect') and in git_data_dirs on Gitaly nodes ('gitaly-1')
+   # server ('default') and in git_data_dirs on Gitaly nodes ('gitaly-1')
    praefect['virtual_storages'] = {
      'default' => {
-       'gitaly-1' => {
-         'address' => 'tcp://GITALY_HOST:8075',
-         'token'   => 'PRAEFECT_INTERNAL_TOKEN',
-       },
-       'gitaly-2' => {
-         'address' => 'tcp://GITALY_HOST:8075',
-         'token'   => 'PRAEFECT_INTERNAL_TOKEN'
-       },
-       'gitaly-3' => {
-         'address' => 'tcp://GITALY_HOST:8075',
-         'token'   => 'PRAEFECT_INTERNAL_TOKEN'
+       'nodes' => {
+         'gitaly-1' => {
+           'address' => 'tcp://GITALY_HOST_1:8075',
+           'token'   => 'PRAEFECT_INTERNAL_TOKEN',
+         },
+         'gitaly-2' => {
+           'address' => 'tcp://GITALY_HOST_2:8075',
+           'token'   => 'PRAEFECT_INTERNAL_TOKEN'
+         },
+         'gitaly-3' => {
+           'address' => 'tcp://GITALY_HOST_3:8075',
+           'token'   => 'PRAEFECT_INTERNAL_TOKEN'
+         }
        }
      }
    }
    ```
+
+   NOTE:
+   In [GitLab 13.8 and earlier](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/4988),
+   Gitaly nodes were configured directly under the virtual storage, and not under the `nodes` key.
 
 1. [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2013) in GitLab 13.1 and later, enable [distribution of reads](#distributed-reads).
 
@@ -681,7 +692,7 @@ because we rely on Praefect to route operations correctly.
 Particular attention should be shown to:
 
 - The `gitaly['auth_token']` configured in this section must match the `token`
-  value under `praefect['virtual_storages']` on the Praefect node. This was set
+  value under `praefect['virtual_storages']['nodes']` on the Praefect node. This was set
   in the [previous section](#praefect). This document uses the placeholder
   `PRAEFECT_INTERNAL_TOKEN` throughout.
 - The storage names in `git_data_dirs` configured in this section must match the
@@ -919,7 +930,7 @@ Particular attention should be shown to:
    You need to replace:
 
    - `PRAEFECT_HOST` with the IP address or hostname of the Praefect node
-   - `GITALY_HOST` with the IP address or hostname of each Gitaly node
+   - `GITALY_HOST_*` with the IP address or hostname of each Gitaly node
 
    ```ruby
    prometheus['scrape_configs'] = [
@@ -937,9 +948,9 @@ Particular attention should be shown to:
        'job_name' => 'praefect-gitaly',
        'static_configs' => [
          'targets' => [
-           'GITALY_HOST:9236', # gitaly-1
-           'GITALY_HOST:9236', # gitaly-2
-           'GITALY_HOST:9236', # gitaly-3
+           'GITALY_HOST_1:9236', # gitaly-1
+           'GITALY_HOST_2:9236', # gitaly-2
+           'GITALY_HOST_3:9236', # gitaly-3
          ]
        ]
      }
@@ -1111,7 +1122,7 @@ replication factor offers better redundancy and distribution of read workload, b
 in a higher storage cost. By default, Praefect replicates repositories to every storage in a
 virtual storage.
 
-### Variable replication factor
+### Configure replication factors
 
 WARNING:
 The feature is not production ready yet. After you set a replication factor, you can't unset it
@@ -1122,36 +1133,46 @@ strategy is not production ready yet.
 Praefect supports configuring a replication factor on a per-repository basis, by assigning
 specific storage nodes to host a repository.
 
-[In an upcoming release](https://gitlab.com/gitlab-org/gitaly/-/issues/3362), we intend to
-support configuring a default replication factor for a virtual storage. The default replication factor
-is applied to every newly-created repository.
-
 Praefect does not store the actual replication factor, but assigns enough storages to host the repository
 so the desired replication factor is met. If a storage node is later removed from the virtual storage,
 the replication factor of repositories assigned to the storage is decreased accordingly.
 
-The only way to configure a repository's replication factor is the `set-replication-factor`
-sub-command. `set-replication-factor` automatically assigns or unassigns random storage nodes as necessary to
-reach the desired replication factor. The repository's primary node is always assigned
-first and is never unassigned.
+You can configure:
 
-```shell
-sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml set-replication-factor -virtual-storage <virtual-storage> -repository <relative-path> -replication-factor <replication-factor>
-```
+- A default replication factor for each virtual storage that is applied to newly-created repositories.
+  The configuration is added to the `/etc/gitlab/gitlab.rb` file:
 
-- `-virtual-storage` is the virtual storage the repository is located in.
-- `-repository` is the repository's relative path in the storage.
-- `-replication-factor` is the desired replication factor of the repository. The minimum value is
-  `1`, as the primary needs a copy of the repository. The maximum replication factor is the number of
-  storages in the virtual storage.
+  ```ruby
+  praefect['virtual_storages'] = {
+    'default' => {
+      'default_replication_factor' => 1,
+      # ...
+    }
+  }
+  ```
 
-On success, the assigned host storages are printed. For example:
+- A replication factor for an existing repository using the `set-replication-factor` sub-command.
+  `set-replication-factor` automatically assigns or unassigns random storage nodes as
+  necessary to reach the desired replication factor. The repository's primary node is
+  always assigned first and is never unassigned.
 
-```shell
-$ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml set-replication-factor -virtual-storage default -repository @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git -replication-factor 2
+  ```shell
+  sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml set-replication-factor -virtual-storage <virtual-storage> -repository <relative-path> -replication-factor <replication-factor>
+  ```
 
-current assignments: gitaly-1, gitaly-2
-```
+  - `-virtual-storage` is the virtual storage the repository is located in.
+  - `-repository` is the repository's relative path in the storage.
+  - `-replication-factor` is the desired replication factor of the repository. The minimum value is
+    `1`, as the primary needs a copy of the repository. The maximum replication factor is the number of
+    storages in the virtual storage.
+
+  On success, the assigned host storages are printed. For example:
+
+  ```shell
+  $ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml set-replication-factor -virtual-storage default -repository @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git -replication-factor 2
+
+  current assignments: gitaly-1, gitaly-2
+  ```
 
 ## Automatic failover and leader election
 
@@ -1397,10 +1418,10 @@ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.t
 If your GitLab instance already has repositories on single Gitaly nodes, these aren't migrated to
 Gitaly Cluster automatically.
 
-Project repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md):
+Project repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md). Note that this API cannot move all repository types. For moving other repositories types, see:
 
-NOTE:
-The Project repository storage moves API [cannot move all repository types](../../api/project_repository_storage_moves.md#limitations).
+- [Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md).
+- [Group repository storage moves API](../../api/group_repository_storage_moves.md).
 
 To move repositories to Gitaly Cluster:
 
@@ -1421,7 +1442,9 @@ To move repositories to Gitaly Cluster:
    using the API to confirm that all projects have moved. No projects should be returned
    with `repository_storage` field set to the old storage.
 
-In a similar way, you can move Snippet repositories using the [Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md):
+In a similar way, you can move other repository types by using the
+[Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md) **(FREE SELF)**
+or the [Groups repository storage moves API](../../api/group_repository_storage_moves.md) **(PREMIUM SELF)**.
 
 ## Debugging Praefect
 

@@ -1,16 +1,16 @@
 <script>
 /* eslint-disable vue/no-v-html */
+import { GlToast, GlModal, GlTooltipDirective, GlIcon, GlFormCheckbox } from '@gitlab/ui';
 import $ from 'jquery';
 import Vue from 'vue';
-import { GlToast, GlModal, GlTooltipDirective, GlIcon, GlFormCheckbox } from '@gitlab/ui';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
+import * as Emoji from '~/emoji';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
 import { __, s__ } from '~/locale';
 import { updateUserStatus } from '~/rest_api';
-import * as Emoji from '~/emoji';
-import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
 import EmojiMenuInModal from './emoji_menu_in_modal';
-import { isUserBusy, isValidAvailibility } from './utils';
+import { isUserBusy } from './utils';
 
 const emojiMenuClass = 'js-modal-status-emoji-menu';
 export const AVAILABILITY_STATUS = {
@@ -46,7 +46,6 @@ export default {
     currentAvailability: {
       type: String,
       required: false,
-      validator: isValidAvailibility,
       default: '',
     },
     canSetUserAvailability: {

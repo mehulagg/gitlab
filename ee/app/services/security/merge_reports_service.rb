@@ -8,13 +8,16 @@ module Security
       "gemnasium" => 3,
       "gemnasium-maven" => 3,
       "gemnasium-python" => 3,
+      "bandit" => 1,
+      "semgrep" =>  2,
       "unknown" => 999
     }.freeze
 
     def initialize(*source_reports)
       @source_reports = source_reports
-      # temporary sort https://gitlab.com/gitlab-org/gitlab/-/issues/213839
-      sort_by_ds_analyzers!
+
+      sort_by_analyzer_order!
+
       @target_report = ::Gitlab::Ci::Reports::Security::Report.new(
         @source_reports.first.type,
         @source_reports.first.pipeline,
@@ -85,13 +88,19 @@ module Security
       @findings.each { |finding| @target_report.add_finding(finding) }
     end
 
-    def sort_by_ds_analyzers!
-      return if @source_reports.any? { |x| x.type != :dependency_scanning }
+    def reports_sortable?
+      return true if @source_reports.all? { |x| x.type == :dependency_scanning }
+      return true if @source_reports.all? { |x| x.type == :sast }
+
+      false
+    end
+
+    def sort_by_analyzer_order!
+      return unless reports_sortable?
 
       @source_reports.sort! do |a, b|
         a_scanner_id, b_scanner_id = a.scanners.values[0].external_id, b.scanners.values[0].external_id
 
-        # for custom analyzers
         a_scanner_id = "unknown" if ANALYZER_ORDER[a_scanner_id].nil?
         b_scanner_id = "unknown" if ANALYZER_ORDER[b_scanner_id].nil?
 

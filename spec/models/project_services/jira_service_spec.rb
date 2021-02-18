@@ -6,6 +6,8 @@ RSpec.describe JiraService do
   include AssetsHelpers
 
   let_it_be(:project) { create(:project, :repository) }
+
+  let(:current_user) { build_stubbed(:user) }
   let(:url) { 'http://jira.example.com' }
   let(:api_url) { 'http://api-jira.example.com' }
   let(:username) { 'jira-username' }
@@ -80,11 +82,8 @@ RSpec.describe JiraService do
 
     subject(:fields) { service.fields }
 
-    it 'includes transition help link' do
-      transition_id_field = fields.find { |field| field[:name] == 'jira_issue_transition_id' }
-
-      expect(transition_id_field[:title]).to eq('Jira workflow transition IDs')
-      expect(transition_id_field[:help]).to include('/help/user/project/integrations/jira')
+    it 'returns custom fields' do
+      expect(fields.pluck(:name)).to eq(%w[url api_url username password])
     end
   end
 
@@ -456,12 +455,41 @@ RSpec.describe JiraService do
 
       expect(WebMock).to have_requested(:get, issue_url)
     end
+
+    context 'with options' do
+      let(:issue_url) { "#{url}/rest/api/2/issue/#{issue_key}?expand=renderedFields,transitions" }
+
+      it 'calls the Jira API with the options to get the issue' do
+        jira_service.find_issue(issue_key, rendered_fields: true, transitions: true)
+
+        expect(WebMock).to have_requested(:get, issue_url)
+      end
+    end
   end
 
   describe '#close_issue' do
     let(:custom_base_url) { 'http://custom_url' }
 
     shared_examples 'close_issue' do
+      let(:issue_key)       { 'JIRA-123' }
+      let(:issue_url)       { "http://jira.example.com/rest/api/2/issue/#{issue_key}" }
+      let(:transitions_url) { "#{issue_url}/transitions" }
+      let(:comment_url)     { "#{issue_url}/comment" }
+      let(:remote_link_url) { "#{issue_url}/remotelink" }
+      let(:transitions)     { nil }
+
+      let(:issue_fields) do
+        {
+          id: issue_key,
+          self: issue_url,
+          transitions: transitions
+        }
+      end
+
+      subject(:close_issue) do
+        @jira_service.close_issue(resource, ExternalIssue.new(issue_key, project))
+      end
+
       before do
         @jira_service = described_class.new
         allow(@jira_service).to receive_messages(
@@ -476,54 +504,62 @@ RSpec.describe JiraService do
         # These stubs are needed to test JiraService#close_issue.
         # We close the issue then do another request to API to check if it got closed.
         # Here is stubbed the API return with a closed and an opened issues.
-        open_issue   = JIRA::Resource::Issue.new(@jira_service.client, attrs: { 'id' => 'JIRA-123' })
+        open_issue   = JIRA::Resource::Issue.new(@jira_service.client, attrs: issue_fields.deep_stringify_keys)
         closed_issue = open_issue.dup
         allow(open_issue).to receive(:resolution).and_return(false)
         allow(closed_issue).to receive(:resolution).and_return(true)
         allow(JIRA::Resource::Issue).to receive(:find).and_return(open_issue, closed_issue)
 
-        allow_any_instance_of(JIRA::Resource::Issue).to receive(:key).and_return('JIRA-123')
+        allow_any_instance_of(JIRA::Resource::Issue).to receive(:key).and_return(issue_key)
         allow(JIRA::Resource::Remotelink).to receive(:all).and_return([])
 
         @jira_service.save!
 
-        project_issues_url = 'http://jira.example.com/rest/api/2/issue/JIRA-123'
-        @transitions_url   = 'http://jira.example.com/rest/api/2/issue/JIRA-123/transitions'
-        @comment_url       = 'http://jira.example.com/rest/api/2/issue/JIRA-123/comment'
-        @remote_link_url   = 'http://jira.example.com/rest/api/2/issue/JIRA-123/remotelink'
+        WebMock.stub_request(:get, issue_url).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password))
+        WebMock.stub_request(:post, transitions_url).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password))
+        WebMock.stub_request(:post, comment_url).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password))
+        WebMock.stub_request(:post, remote_link_url).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password))
+      end
 
-        WebMock.stub_request(:get, project_issues_url).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password))
-        WebMock.stub_request(:post, @transitions_url).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password))
-        WebMock.stub_request(:post, @comment_url).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password))
-        WebMock.stub_request(:post, @remote_link_url).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password))
+      let(:external_issue) { ExternalIssue.new('JIRA-123', project) }
+
+      def close_issue
+        @jira_service.close_issue(resource, external_issue, current_user)
       end
 
       it 'calls Jira API' do
-        @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+        close_issue
 
-        expect(WebMock).to have_requested(:post, @comment_url).with(
+        expect(WebMock).to have_requested(:post, comment_url).with(
           body: /Issue solved with/
         ).once
+      end
+
+      it 'tracks usage' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+          .to receive(:track_event)
+          .with('i_ecosystem_jira_service_close_issue', values: current_user.id)
+
+        close_issue
       end
 
       it 'does not fail if remote_link.all on issue returns nil' do
         allow(JIRA::Resource::Remotelink).to receive(:all).and_return(nil)
 
-        expect { @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project)) }
-            .not_to raise_error
+        expect { close_issue }.not_to raise_error
       end
 
       # Check https://developer.atlassian.com/jiradev/jira-platform/guides/other/guide-jira-remote-issue-links/fields-in-remote-issue-links
       # for more information
       it 'creates Remote Link reference in Jira for comment' do
-        @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+        close_issue
 
         favicon_path = "http://localhost/assets/#{find_asset('favicon.png').digest_path}"
 
         # Creates comment
-        expect(WebMock).to have_requested(:post, @comment_url)
+        expect(WebMock).to have_requested(:post, comment_url)
         # Creates Remote Link in Jira issue fields
-        expect(WebMock).to have_requested(:post, @remote_link_url).with(
+        expect(WebMock).to have_requested(:post, remote_link_url).with(
           body: hash_including(
             GlobalID: 'GitLab',
             relationship: 'mentioned on',
@@ -540,10 +576,10 @@ RSpec.describe JiraService do
       context 'when "comment_on_event_enabled" is set to false' do
         it 'creates Remote Link reference but does not create comment' do
           allow(@jira_service).to receive_messages(comment_on_event_enabled: false)
-          @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+          close_issue
 
-          expect(WebMock).not_to have_requested(:post, @comment_url)
-          expect(WebMock).to have_requested(:post, @remote_link_url)
+          expect(WebMock).not_to have_requested(:post, comment_url)
+          expect(WebMock).to have_requested(:post, remote_link_url)
         end
       end
 
@@ -562,36 +598,36 @@ RSpec.describe JiraService do
 
           expect(remote_link).to receive(:save!)
 
-          @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+          close_issue
 
-          expect(WebMock).not_to have_requested(:post, @comment_url)
+          expect(WebMock).not_to have_requested(:post, comment_url)
         end
       end
 
       it 'does not send comment or remote links to issues already closed' do
         allow_any_instance_of(JIRA::Resource::Issue).to receive(:resolution).and_return(true)
 
-        @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+        close_issue
 
-        expect(WebMock).not_to have_requested(:post, @comment_url)
-        expect(WebMock).not_to have_requested(:post, @remote_link_url)
+        expect(WebMock).not_to have_requested(:post, comment_url)
+        expect(WebMock).not_to have_requested(:post, remote_link_url)
       end
 
       it 'does not send comment or remote links to issues with unknown resolution' do
         allow_any_instance_of(JIRA::Resource::Issue).to receive(:respond_to?).with(:resolution).and_return(false)
 
-        @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+        close_issue
 
-        expect(WebMock).not_to have_requested(:post, @comment_url)
-        expect(WebMock).not_to have_requested(:post, @remote_link_url)
+        expect(WebMock).not_to have_requested(:post, comment_url)
+        expect(WebMock).not_to have_requested(:post, remote_link_url)
       end
 
       it 'references the GitLab commit' do
         stub_config_setting(base_url: custom_base_url)
 
-        @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+        close_issue
 
-        expect(WebMock).to have_requested(:post, @comment_url).with(
+        expect(WebMock).to have_requested(:post, comment_url).with(
           body: %r{#{custom_base_url}/#{project.full_path}/-/commit/#{commit_id}}
         ).once
       end
@@ -604,18 +640,18 @@ RSpec.describe JiraService do
           { script_name: '/gitlab' }
         end
 
-        @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+        close_issue
 
-        expect(WebMock).to have_requested(:post, @comment_url).with(
+        expect(WebMock).to have_requested(:post, comment_url).with(
           body: %r{#{Gitlab.config.gitlab.url}/#{project.full_path}/-/commit/#{commit_id}}
         ).once
       end
 
       it 'logs exception when transition id is not valid' do
         allow(@jira_service).to receive(:log_error)
-        WebMock.stub_request(:post, @transitions_url).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).and_raise("Bad Request")
+        WebMock.stub_request(:post, transitions_url).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).and_raise("Bad Request")
 
-        @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+        close_issue
 
         expect(@jira_service).to have_received(:log_error).with(
           "Issue transition failed",
@@ -628,22 +664,65 @@ RSpec.describe JiraService do
       end
 
       it 'calls the api with jira_issue_transition_id' do
-        @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+        close_issue
 
-        expect(WebMock).to have_requested(:post, @transitions_url).with(
-          body: /999/
+        expect(WebMock).to have_requested(:post, transitions_url).with(
+          body: /"id":"999"/
         ).once
       end
 
-      context 'when have multiple transition ids' do
+      context 'when using automatic issue transitions' do
+        let(:transitions) do
+          [
+            { id: '1' },
+            { id: '2', to: { statusCategory: { key: 'new' } } },
+            { id: '3', to: { statusCategory: { key: 'done' } } },
+            { id: '4', to: { statusCategory: { key: 'done' } } }
+          ]
+        end
+
+        before do
+          allow(@jira_service).to receive_messages(jira_issue_transition_id: '')
+
+          close_issue
+        end
+
+        it 'uses the next transition with a status category of done' do
+          expect(WebMock).to have_requested(:post, transitions_url).with(
+            body: /"id":"3"/
+          ).once
+        end
+
+        context 'when no done transition is available' do
+          let(:transitions) do
+            [
+              { id: '1', to: { statusCategory: { key: 'new' } } }
+            ]
+          end
+
+          it 'does not attempt to transition' do
+            expect(WebMock).not_to have_requested(:post, transitions_url)
+          end
+        end
+
+        context 'when no valid transitions are returned' do
+          let(:transitions) { 'foo' }
+
+          it 'does not attempt to transition' do
+            expect(WebMock).not_to have_requested(:post, transitions_url)
+          end
+        end
+      end
+
+      context 'when using multiple transition ids' do
         it 'calls the api with transition ids separated by comma' do
           allow(@jira_service).to receive_messages(jira_issue_transition_id: '1,2,3')
 
-          @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+          close_issue
 
           1.upto(3) do |transition_id|
-            expect(WebMock).to have_requested(:post, @transitions_url).with(
-              body: /#{transition_id}/
+            expect(WebMock).to have_requested(:post, transitions_url).with(
+              body: /"id":"#{transition_id}"/
             ).once
           end
         end
@@ -651,11 +730,11 @@ RSpec.describe JiraService do
         it 'calls the api with transition ids separated by semicolon' do
           allow(@jira_service).to receive_messages(jira_issue_transition_id: '1;2;3')
 
-          @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+          close_issue
 
           1.upto(3) do |transition_id|
-            expect(WebMock).to have_requested(:post, @transitions_url).with(
-              body: /#{transition_id}/
+            expect(WebMock).to have_requested(:post, transitions_url).with(
+              body: /"id":"#{transition_id}"/
             ).once
           end
         end
@@ -701,6 +780,14 @@ RSpec.describe JiraService do
         expect(WebMock).to have_requested(:post, comment_url).with(
           body: /mentioned this issue in/
         ).once
+      end
+
+      it 'tracks usage' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+          .to receive(:track_event)
+          .with('i_ecosystem_jira_service_cross_reference', values: user.id)
+
+        subject
       end
     end
 

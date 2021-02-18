@@ -3,6 +3,8 @@
 module Projects
   module Security
     class CorpusManagementController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
+
       before_action do
         render_404 unless Feature.enabled?(:corpus_management, @project, default_enabled: :yaml)
         authorize_read_coverage_fuzzing!

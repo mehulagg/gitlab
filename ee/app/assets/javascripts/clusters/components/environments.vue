@@ -1,8 +1,8 @@
 <script>
 import { GlTable, GlEmptyState, GlLoadingIcon, GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
 import { __ } from '~/locale';
-import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import deploymentInstance from '~/vue_shared/components/deployment_instance.vue';
+import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 
 export default {
   components: {

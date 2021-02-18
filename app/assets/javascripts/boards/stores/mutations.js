@@ -1,7 +1,7 @@
-import Vue from 'vue';
 import { pull, union } from 'lodash';
-import { s__ } from '~/locale';
+import Vue from 'vue';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { s__ } from '~/locale';
 import { formatIssue, moveIssueListHelper } from '../boards_util';
 import * as mutationTypes from './mutation_types';
 
@@ -32,12 +32,13 @@ export const addIssueToList = ({ state, listId, issueId, moveBeforeId, moveAfter
 
 export default {
   [mutationTypes.SET_INITIAL_BOARD_DATA](state, data) {
-    const { boardType, disabled, boardId, fullPath, boardConfig } = data;
+    const { boardType, disabled, boardId, fullPath, boardConfig, isEpicBoard } = data;
     state.boardId = boardId;
     state.fullPath = fullPath;
     state.boardType = boardType;
     state.disabled = disabled;
     state.boardConfig = boardConfig;
+    state.isEpicBoard = isEpicBoard;
   },
 
   [mutationTypes.RECEIVE_BOARD_LISTS_SUCCESS]: (state, lists) => {
@@ -103,14 +104,11 @@ export default {
     state.boardLists = listsBackup;
   },
 
-  [mutationTypes.REQUEST_ISSUES_FOR_LIST]: (state, { listId, fetchNext }) => {
+  [mutationTypes.REQUEST_ITEMS_FOR_LIST]: (state, { listId, fetchNext }) => {
     Vue.set(state.listsFlags, listId, { [fetchNext ? 'isLoadingMore' : 'isLoading']: true });
   },
 
-  [mutationTypes.RECEIVE_ISSUES_FOR_LIST_SUCCESS]: (
-    state,
-    { listIssues, listPageInfo, listId },
-  ) => {
+  [mutationTypes.RECEIVE_ITEMS_FOR_LIST_SUCCESS]: (state, { listIssues, listPageInfo, listId }) => {
     const { listData, issues } = listIssues;
     Vue.set(state, 'issues', { ...state.issues, ...issues });
     Vue.set(
@@ -122,7 +120,7 @@ export default {
     Vue.set(state.listsFlags, listId, { isLoading: false, isLoadingMore: false });
   },
 
-  [mutationTypes.RECEIVE_ISSUES_FOR_LIST_FAILURE]: (state, listId) => {
+  [mutationTypes.RECEIVE_ITEMS_FOR_LIST_FAILURE]: (state, listId) => {
     state.error = s__(
       'Boards|An error occurred while fetching the board issues. Please reload the page.',
     );
@@ -273,5 +271,13 @@ export default {
 
   [mutationTypes.SET_ADD_COLUMN_FORM_VISIBLE]: (state, visible) => {
     state.addColumnFormVisible = visible;
+  },
+
+  [mutationTypes.ADD_LIST_TO_HIGHLIGHTED_LISTS]: (state, listId) => {
+    state.highlightedLists.push(listId);
+  },
+
+  [mutationTypes.REMOVE_LIST_FROM_HIGHLIGHTED_LISTS]: (state, listId) => {
+    state.highlightedLists = state.highlightedLists.filter((id) => id !== listId);
   },
 };

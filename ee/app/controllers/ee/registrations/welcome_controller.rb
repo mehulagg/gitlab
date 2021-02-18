@@ -29,6 +29,15 @@ module EE
         clean_params
       end
 
+      override :show_signup_onboarding?
+      def show_signup_onboarding?
+        !helpers.in_subscription_flow? &&
+          !helpers.in_invitation_flow? &&
+          !helpers.in_oauth_flow? &&
+          !helpers.in_trial_flow? &&
+          helpers.signup_onboarding_enabled?
+      end
+
       def learn_gitlab_project
         ::Project.find(params[:learn_gitlab_project_id])
       end

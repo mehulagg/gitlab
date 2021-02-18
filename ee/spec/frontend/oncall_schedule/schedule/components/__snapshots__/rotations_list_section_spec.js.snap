@@ -22,7 +22,8 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
       >
         <button
           aria-label="Edit rotation"
-          class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
+          class="btn btn-default btn-md disabled gl-button btn-default-tertiary btn-icon"
+          disabled="disabled"
           title="Edit rotation"
           type="button"
         >
@@ -81,6 +82,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         >
           <span
             class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-blue-500"
+            id="1-12"
           >
             <span
               class="gl-token-content"
@@ -151,6 +153,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         >
           <span
             class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-orange-500"
+            id="2-18"
           >
             <span
               class="gl-token-content"

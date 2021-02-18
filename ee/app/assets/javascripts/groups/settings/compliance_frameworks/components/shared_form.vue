@@ -5,6 +5,7 @@ import { helpPagePath } from '~/helpers/help_page_helper';
 import { validateHexColor } from '~/lib/utils/color_utils';
 import { __, s__ } from '~/locale';
 import ColorPicker from '~/vue_shared/components/color_picker/color_picker.vue';
+import { fetchPipelineConfigurationFileExists, validatePipelineConfirmationFormat } from '../utils';
 
 export default {
   components: {
@@ -36,6 +37,21 @@ export default {
       required: false,
       default: null,
     },
+    pipelineConfigurationFullPathEnabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    pipelineConfigurationFullPath: {
+      type: String,
+      required: false,
+      default: null,
+    },
+  },
+  data() {
+    return {
+      pipelineConfigurationFileExists: true,
+    };
   },
   computed: {
     isValidColor() {
@@ -55,18 +71,50 @@ export default {
 
       return Boolean(this.description);
     },
+    isValidPipelineConfiguration() {
+      if (!this.pipelineConfigurationFullPath) {
+        return null;
+      }
+
+      return this.isValidPipelineConfigurationFormat && this.pipelineConfigurationFileExists;
+    },
+    isValidPipelineConfigurationFormat() {
+      return validatePipelineConfirmationFormat(this.pipelineConfigurationFullPath);
+    },
     disableSubmitBtn() {
-      return !this.isValidName || !this.isValidDescription || !this.isValidColor;
+      return (
+        !this.isValidName ||
+        !this.isValidDescription ||
+        !this.isValidColor ||
+        this.isValidPipelineConfiguration === false
+      );
+    },
+    pipelineConfigurationFeedbackMessage() {
+      if (!this.isValidPipelineConfigurationFormat) {
+        return this.$options.i18n.pipelineConfigurationInputInvalidFormat;
+      }
+
+      return this.$options.i18n.pipelineConfigurationInputUnknownFile;
     },
     scopedLabelsHelpPath() {
       return helpPagePath('user/project/labels.md', { anchor: 'scoped-labels' });
     },
   },
+  async created() {
+    if (this.pipelineConfigurationFullPath) {
+      this.pipelineConfigurationFileExists = await fetchPipelineConfigurationFileExists(
+        this.pipelineConfigurationFullPath,
+      );
+    }
+  },
   methods: {
     onSubmit() {
-      const { name, description, color } = this;
+      this.$emit('submit');
+    },
+    async updatePipelineConfiguration(path) {
+      this.pipelineConfigurationFileExists = await fetchPipelineConfigurationFileExists(path);
 
-      this.$emit('submit', { name, description, color });
+      this.$emit('update:pipelineConfigurationFullPath', path);
     },
   },
   i18n: {
@@ -77,6 +125,21 @@ export default {
     titleInputInvalid: __('A title is required'),
     descriptionInputLabel: __('Description'),
     descriptionInputInvalid: __('A description is required'),
+    pipelineConfigurationInputLabel: s__(
+      'ComplianceFrameworks|Compliance pipeline configuration location (optional)',
+    ),
+    pipelineConfigurationInputSubLabel: s__(
+      'ComplianceFrameworks|Combines with the CI configuration at runtime.',
+    ),
+    pipelineConfigurationInputDescription: s__(
+      'ComplianceFrameworks|e.g. include-gitlab.ci.yml@group-name/project-name',
+    ),
+    pipelineConfigurationInputInvalidFormat: s__(
+      'ComplianceFrameworks|Invalid format: it should follow the format [PATH].y(a)ml@[GROUP]/[PROJECT]',
+    ),
+    pipelineConfigurationInputUnknownFile: s__(
+      'ComplianceFrameworks|Could not find this configuration location, please try a different location',
+    ),
     colorInputLabel: __('Background color'),
     submitBtnText: __('Save changes'),
     cancelBtnText: __('Cancel'),
@@ -103,7 +166,12 @@ export default {
         </gl-sprintf>
       </template>
 
-      <gl-form-input :value="name" data-testid="name-input" @input="$emit('update:name', $event)" />
+      <gl-form-input
+        :value="name"
+        :state="isValidName"
+        data-testid="name-input"
+        @input="$emit('update:name', $event)"
+      />
     </gl-form-group>
 
     <gl-form-group
@@ -114,8 +182,28 @@ export default {
     >
       <gl-form-input
         :value="description"
+        :state="isValidDescription"
         data-testid="description-input"
         @input="$emit('update:description', $event)"
+      />
+    </gl-form-group>
+
+    <gl-form-group
+      v-if="pipelineConfigurationFullPathEnabled"
+      :label="$options.i18n.pipelineConfigurationInputLabel"
+      :description="$options.i18n.pipelineConfigurationInputDescription"
+      :invalid-feedback="pipelineConfigurationFeedbackMessage"
+      :state="isValidPipelineConfiguration"
+      data-testid="pipeline-configuration-input-group"
+    >
+      <p class="col-form-label gl-font-weight-normal!">
+        {{ $options.i18n.pipelineConfigurationInputSubLabel }}
+      </p>
+      <gl-form-input
+        :value="pipelineConfigurationFullPath"
+        :state="isValidPipelineConfiguration"
+        data-testid="pipeline-configuration-input"
+        @input="updatePipelineConfiguration"
       />
     </gl-form-group>
 

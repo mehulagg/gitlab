@@ -36,7 +36,6 @@ class ProjectsController < Projects::ApplicationController
   end
 
   before_action only: [:edit] do
-    push_frontend_feature_flag(:approval_suggestions, @project, default_enabled: true)
     push_frontend_feature_flag(:allow_editing_commit_messages, @project)
   end
 
@@ -75,6 +74,7 @@ class ProjectsController < Projects::ApplicationController
     @project = ::Projects::CreateService.new(current_user, project_params(attributes: project_params_create_attributes)).execute
 
     if @project.saved?
+      experiment(:new_project_readme, actor: current_user).track(:created, property: active_new_project_tab)
       redirect_to(
         project_path(@project, custom_import_params),
         notice: _("Project '%{project_name}' was successfully created.") % { project_name: @project.name }
@@ -329,6 +329,8 @@ class ProjectsController < Projects::ApplicationController
     if can?(current_user, :download_code, @project)
       return render 'projects/no_repo' unless @project.repository_exists?
 
+      experiment(:empty_repo_upload, project: @project).track(:view_project_show) if @project.can_current_user_push_to_default_branch?
+
       if @project.empty_repo?
         record_experiment_user(:invite_members_empty_project_version_a)
 
@@ -396,6 +398,14 @@ class ProjectsController < Projects::ApplicationController
     ]
   end
 
+  def project_setting_attributes
+    %i[
+      show_default_award_emojis
+      squash_option
+      allow_editing_commit_messages
+    ]
+  end
+
   def project_params_attributes
     [
       :allow_merge_on_skipped_pipeline,
@@ -433,11 +443,7 @@ class ProjectsController < Projects::ApplicationController
       :suggestion_commit_message,
       :packages_enabled,
       :service_desk_enabled,
-      project_setting_attributes: %i[
-        show_default_award_emojis
-        squash_option
-        allow_editing_commit_messages
-      ]
+      project_setting_attributes: project_setting_attributes
     ] + [project_feature_attributes: project_feature_attributes]
   end
 
@@ -497,13 +503,15 @@ class ProjectsController < Projects::ApplicationController
     render_404 unless Gitlab::CurrentSettings.project_export_enabled?
   end
 
+  # Redirect from localhost/group/project.git to localhost/group/project
   def redirect_git_extension
-    # Redirect from
-    #   localhost/group/project.git
-    # to
-    #   localhost/group/project
-    #
-    redirect_to request.original_url.sub(%r{\.git/?\Z}, '') if params[:format] == 'git'
+    return unless params[:format] == 'git'
+
+    # `project` calls `find_routable!`, so this will trigger the usual not-found
+    # behaviour when the user isn't authorized to see the project
+    return unless project
+
+    redirect_to(request.original_url.sub(%r{\.git/?\Z}, ''))
   end
 
   def whitelist_query_limiting

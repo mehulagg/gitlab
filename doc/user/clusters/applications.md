@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Managed Apps **(CORE)**
+# GitLab Managed Apps **(FREE)**
 
 GitLab provides **GitLab Managed Apps** for various
 applications which can be added directly to your configured cluster. These
@@ -416,6 +416,8 @@ You can check the recommended variables for each cluster type in the official do
 
 - [Google GKE](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-gke/#deploy-cilium)
 - [AWS EKS](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-eks/#deploy-cilium)
+
+Do not use `clusterType` for sandbox environments like [Minikube](https://minikube.sigs.k8s.io/docs/).
 
 You can customize Cilium's Helm variables by defining the
 `.gitlab/managed-apps/cilium/values.yaml` file in your cluster
@@ -1653,3 +1655,17 @@ Error: Could not get apiVersions from Kubernetes: unable to retrieve the complet
 
 This is a bug that was introduced in Helm `2.15` and fixed in `3.0.2`. As a workaround,
 ensure [`cert-manager`](#cert-manager) is installed successfully prior to installing Prometheus.
+
+### Unable to create a Persistent Volume Claim with DigitalOcean
+
+Trying to create additional block storage volumes might lead to the following error when using DigitalOcean:
+
+```plaintext
+Server requested
+[Warning] pod has unbound immediate PersistentVolumeClaims (repeated 2 times)
+[Normal] pod didn't trigger scale-up (it wouldn't fit if a new node is added):
+Spawn failed: Timeout
+```
+
+This is due to DigitalOcean imposing a few limits with regards to creating additional block storage volumes.
+[Learn more about DigitalOcean Block Storage Volumes limits.](https://www.digitalocean.com/docs/volumes/#limits)

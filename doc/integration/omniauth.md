@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# OmniAuth
+# OmniAuth **(FREE)**
 
 GitLab leverages OmniAuth to allow users to sign in using Twitter, GitHub, and
 other popular services. [OmniAuth](https://rubygems.org/gems/omniauth/) is
@@ -138,9 +138,10 @@ provider such as Twitter can be enabled. Follow the steps below to enable an
 OmniAuth provider for an existing user.
 
 1. Sign in normally - whether standard sign in, LDAP, or another OmniAuth provider.
-1. Go to profile settings (the silhouette icon in the top right corner).
-1. Select the "Account" tab.
-1. Under "Connected Accounts" select the desired OmniAuth provider, such as Twitter.
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **Account**.
+1. In the **Connected Accounts** section, select the desired OmniAuth provider, such as Twitter.
 1. The user is redirected to the provider. After the user authorizes GitLab,
    they are redirected back to GitLab.
 

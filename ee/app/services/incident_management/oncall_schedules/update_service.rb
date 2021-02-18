@@ -2,7 +2,7 @@
 
 module IncidentManagement
   module OncallSchedules
-    class UpdateService
+    class UpdateService < OncallSchedules::BaseService
       # @param oncall_schedule [IncidentManagement::OncallSchedule]
       # @param user [User]
       # @param params [Hash]
@@ -28,28 +28,8 @@ module IncidentManagement
 
       attr_reader :oncall_schedule, :user, :params, :project
 
-      def allowed?
-        user&.can?(:admin_incident_management_oncall_schedule, project)
-      end
-
-      def available?
-        ::Gitlab::IncidentManagement.oncall_schedules_available?(project)
-      end
-
-      def error(message)
-        ServiceResponse.error(message: message)
-      end
-
-      def success(oncall_schedule)
-        ServiceResponse.success(payload: { oncall_schedule: oncall_schedule })
-      end
-
       def error_no_permissions
         error(_('You have insufficient permissions to update an on-call schedule for this project'))
-      end
-
-      def error_no_license
-        error(_('Your license does not support on-call schedules'))
       end
     end
   end

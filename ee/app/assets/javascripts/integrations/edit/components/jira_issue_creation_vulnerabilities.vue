@@ -1,5 +1,4 @@
 <script>
-import { mapState } from 'vuex';
 import {
   GlAlert,
   GlButton,
@@ -11,6 +10,7 @@ import {
   GlIcon,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { mapState } from 'vuex';
 import { s__ } from '~/locale';
 import { defaultJiraIssueTypeId } from '../constants';
 

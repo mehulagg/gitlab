@@ -37,11 +37,15 @@ module EE
         mount_mutation ::Mutations::Boards::Update
         mount_mutation ::Mutations::Boards::UpdateEpicUserPreferences
         mount_mutation ::Mutations::Boards::EpicBoards::Create
+        mount_mutation ::Mutations::Boards::EpicLists::Create
         mount_mutation ::Mutations::Boards::Lists::UpdateLimitMetrics
         mount_mutation ::Mutations::InstanceSecurityDashboard::AddProject
         mount_mutation ::Mutations::InstanceSecurityDashboard::RemoveProject
         mount_mutation ::Mutations::DastOnDemandScans::Create
         mount_mutation ::Mutations::Dast::Profiles::Create
+        mount_mutation ::Mutations::Dast::Profiles::Update
+        mount_mutation ::Mutations::Dast::Profiles::Delete
+        mount_mutation ::Mutations::Dast::Profiles::Run
         mount_mutation ::Mutations::DastSiteProfiles::Create
         mount_mutation ::Mutations::DastSiteProfiles::Update
         mount_mutation ::Mutations::DastSiteProfiles::Delete
@@ -54,13 +58,13 @@ module EE
         mount_mutation ::Mutations::Namespaces::IncreaseStorageTemporarily
         mount_mutation ::Mutations::QualityManagement::TestCases::Create
         mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Create
-        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Update
         mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Delete
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Create
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Update
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Destroy
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Create
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Destroy
+        mount_mutation ::Mutations::Security::CiConfiguration::ApiFuzzing::Create
 
         prepend(Types::DeprecatedMutations)
       end

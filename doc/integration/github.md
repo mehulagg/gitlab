@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Integrate your GitLab instance with GitHub
+# Integrate your GitLab instance with GitHub **(FREE)**
 
 You can integrate your GitLab instance with GitHub.com and GitHub Enterprise. This integration
 enables users to import projects from GitHub, or sign in to your GitLab instance
@@ -179,7 +179,9 @@ If you're getting the message `Signing in using your GitHub account without a pr
 GitLab account is not allowed. Create a GitLab account first, and then connect it to your
 GitHub account` when signing in, in GitLab:
 
-1. Go to your **Profile > Account**.
-1. Under the "Social sign-in" section, click **Connect** near the GitHub icon.
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **Account**.
+1. In the **Social sign-in** section, select **Connect to GitHub**.
 
 After that, you should be able to sign in via GitHub successfully.

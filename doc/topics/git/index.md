@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: index
 ---
 
-# Git
+# Git **(FREE)**
 
 Git is a [free and open source](https://git-scm.com/about/free-and-open-source)
 distributed version control system designed to handle everything from small to
@@ -42,7 +42,7 @@ The following resources will help you get started with Git:
 - [Git stash](../../university/training/topics/stash.md)
 - [Git file blame](../../user/project/repository/git_blame.md)
 - [Git file history](../../user/project/repository/git_history.md)
-- [Git tags](../../university/training/user_training.md#tags)
+- [Git tags](tags.md)
 
 ### Concepts
 

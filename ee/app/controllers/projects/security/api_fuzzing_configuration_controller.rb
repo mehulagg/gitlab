@@ -3,6 +3,7 @@
 module Projects
   module Security
     class ApiFuzzingConfigurationController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
       include SecurityDashboardsPermissions
 
       alias_method :vulnerable, :project

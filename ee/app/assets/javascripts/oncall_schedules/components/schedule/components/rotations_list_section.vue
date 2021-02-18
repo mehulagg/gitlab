@@ -103,6 +103,7 @@ export default {
             :title="$options.i18n.editRotationLabel"
             icon="pencil"
             :aria-label="$options.i18n.editRotationLabel"
+            :disabled="true"
           />
           <gl-button
             v-gl-modal="$options.deleteRotationModalId"

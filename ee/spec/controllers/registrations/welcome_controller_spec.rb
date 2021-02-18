@@ -108,11 +108,17 @@ RSpec.describe Registrations::WelcomeController do
       end
 
       describe 'redirection' do
-        it { is_expected.to redirect_to dashboard_projects_path }
-
-        context 'when part of the onboarding issues experiment' do
+        context 'when signup_onboarding is not enabled' do
           before do
-            stub_experiment_for_subject(onboarding_issues: true)
+            allow(controller.helpers).to receive(:signup_onboarding_enabled?).and_return(false)
+          end
+
+          it { is_expected.to redirect_to dashboard_projects_path }
+        end
+
+        context 'when signup_onboarding is enabled' do
+          before do
+            allow(controller.helpers).to receive(:signup_onboarding_enabled?).and_return(true)
           end
 
           it { is_expected.to redirect_to new_users_sign_up_group_path }

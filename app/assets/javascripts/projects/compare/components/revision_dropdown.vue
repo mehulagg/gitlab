@@ -1,7 +1,7 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlSearchBoxByType, GlDropdownSectionHeader } from '@gitlab/ui';
-import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';
 
 export default {
@@ -65,8 +65,8 @@ export default {
       return axios
         .get(endpoint)
         .then(({ data }) => {
-          this.branches = data.Branches;
-          this.tags = data.Tags;
+          this.branches = data.Branches || [];
+          this.tags = data.Tags || [];
         })
         .catch(() => {
           createFlash({

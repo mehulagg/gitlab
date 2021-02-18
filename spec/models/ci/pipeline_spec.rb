@@ -8,8 +8,8 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
   include Ci::SourcePipelineHelpers
 
   let_it_be(:user) { create(:user) }
-  let_it_be(:namespace) { create_default(:namespace) }
-  let_it_be(:project) { create_default(:project, :repository) }
+  let_it_be(:namespace) { create_default(:namespace).freeze }
+  let_it_be(:project) { create_default(:project, :repository).freeze }
 
   let(:pipeline) do
     create(:ci_empty_pipeline, status: :created, project: project)
@@ -34,6 +34,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
   it { is_expected.to have_many(:auto_canceled_jobs) }
   it { is_expected.to have_many(:sourced_pipelines) }
   it { is_expected.to have_many(:triggered_pipelines) }
+  it { is_expected.to have_many(:pipeline_artifacts) }
 
   it { is_expected.to have_one(:chat_data) }
   it { is_expected.to have_one(:source_pipeline) }
@@ -41,14 +42,15 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
   it { is_expected.to have_one(:source_job) }
   it { is_expected.to have_one(:pipeline_config) }
 
-  it { is_expected.to validate_presence_of(:sha) }
-  it { is_expected.to validate_presence_of(:status) }
-
   it { is_expected.to respond_to :git_author_name }
   it { is_expected.to respond_to :git_author_email }
   it { is_expected.to respond_to :short_sha }
   it { is_expected.to delegate_method(:full_path).to(:project).with_prefix }
-  it { is_expected.to have_many(:pipeline_artifacts) }
+
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:sha) }
+    it { is_expected.to validate_presence_of(:status) }
+  end
 
   describe 'associations' do
     it 'has a bidirectional relationship with projects' do
@@ -3783,17 +3785,11 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
   end
 
   describe '#default_branch?' do
-    let(:default_branch) { 'master'}
-
     subject { pipeline.default_branch? }
-
-    before do
-      allow(project).to receive(:default_branch).and_return(default_branch)
-    end
 
     context 'when pipeline ref is the default branch of the project' do
       let(:pipeline) do
-        build(:ci_empty_pipeline, status: :created, project: project, ref: default_branch)
+        build(:ci_empty_pipeline, status: :created, project: project, ref: project.default_branch)
       end
 
       it "returns true" do

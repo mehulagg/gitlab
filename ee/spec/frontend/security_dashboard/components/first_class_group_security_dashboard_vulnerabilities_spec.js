@@ -6,6 +6,9 @@ import { generateVulnerabilities } from './mock_data';
 
 describe('First Class Group Dashboard Vulnerabilities Component', () => {
   let wrapper;
+  const apolloMock = {
+    queries: { vulnerabilities: { loading: true } },
+  };
 
   const groupFullPath = 'group-full-path';
 
@@ -14,7 +17,12 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
   const findAlert = () => wrapper.find(GlAlert);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
-  const createWrapper = ({ $apollo, stubs }) => {
+  const expectLoadingState = ({ initial = false, nextPage = false }) => {
+    expect(findVulnerabilities().props('isLoading')).toBe(initial);
+    expect(findLoadingIcon().exists()).toBe(nextPage);
+  };
+
+  const createWrapper = ({ $apollo = apolloMock, stubs } = {}) => {
     return shallowMount(FirstClassGroupVulnerabilities, {
       propsData: {
         groupFullPath,
@@ -24,7 +32,10 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
         $apollo,
         fetchNextPage: () => {},
       },
-      provide: { hasVulnerabilities: true },
+      provide: {
+        hasVulnerabilities: true,
+        hasJiraVulnerabilitiesIntegrationEnabled: false,
+      },
     });
   };
 
@@ -41,12 +52,8 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
       });
     });
 
-    it('passes down isLoading correctly', () => {
-      expect(findVulnerabilities().props()).toMatchObject({ isLoading: true });
-    });
-
-    it('does not show the loading spinner', () => {
-      expect(findLoadingIcon().exists()).toBe(false);
+    it('shows the initial loading state', () => {
+      expectLoadingState({ initial: true });
     });
   });
 
@@ -132,6 +139,10 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
       expect(wrapper.vm.sortBy).toBe('description');
       expect(wrapper.vm.sortDirection).toBe('asc');
     });
+
+    it('does not show loading any state', () => {
+      expectLoadingState({ initial: false, nextPage: false });
+    });
   });
 
   describe('when there is more than a page of vulnerabilities', () => {
@@ -157,7 +168,7 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
     });
   });
 
-  describe('when the query is loading and there is another page', () => {
+  describe('when the query is loading the next page', () => {
     beforeEach(() => {
       wrapper = createWrapper({
         $apollo: {
@@ -166,6 +177,7 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
       });
 
       wrapper.setData({
+        vulnerabilities: generateVulnerabilities(),
         pageInfo: {
           hasNextPage: true,
         },
@@ -173,7 +185,28 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
     });
 
     it('should render the loading spinner', () => {
-      expect(findLoadingIcon().exists()).toBe(true);
+      expectLoadingState({ nextPage: true });
+    });
+  });
+
+  describe('when filter or sort is changed', () => {
+    beforeEach(() => {
+      wrapper = createWrapper();
+    });
+
+    it('should show the initial loading state when the filter is changed', () => {
+      wrapper.setProps({ filter: {} });
+
+      expectLoadingState({ initial: true });
+    });
+
+    it('should show the initial loading state when the sort is changed', () => {
+      findVulnerabilities().vm.$emit('sort-changed', {
+        sortBy: 'description',
+        sortDesc: false,
+      });
+
+      expectLoadingState({ initial: true });
     });
   });
 });

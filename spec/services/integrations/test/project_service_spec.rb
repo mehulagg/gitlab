@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Integrations::Test::ProjectService do
+  include AfterNextHelpers
+
   describe '#execute' do
     let_it_be(:project) { create(:project) }
     let(:integration) { create(:slack_service, project: project) }
@@ -72,27 +74,10 @@ RSpec.describe Integrations::Test::ProjectService do
           create(:note, project: project)
 
           allow(Gitlab::DataBuilder::Note).to receive(:build).and_return(sample_data)
-          allow_next_instance_of(NotesFinder) do |finder|
-            allow(finder).to receive(:execute).and_return(Note.all)
-          end
+          allow_next(NotesFinder).to receive(:execute).and_return(Note.all)
 
           expect(integration).to receive(:test).with(sample_data).and_return(success_result)
           expect(subject).to eq(success_result)
-        end
-
-        context 'when the query optimization feature flag is disabled' do
-          before do
-            stub_feature_flags(integrations_test_webhook_optimizations: false)
-          end
-
-          it 'executes the old query' do
-            allow(Gitlab::DataBuilder::Note).to receive(:build).and_return(sample_data)
-
-            expect(NotesFinder).not_to receive(:new)
-            expect(project).to receive(:notes).and_return([Note.new])
-            expect(integration).to receive(:test).with(sample_data).and_return(success_result)
-            expect(subject).to eq(success_result)
-          end
         end
       end
 
@@ -107,27 +92,10 @@ RSpec.describe Integrations::Test::ProjectService do
         it 'executes integration' do
           allow(project).to receive(:issues).and_return([issue])
           allow(issue).to receive(:to_hook_data).and_return(sample_data)
-          allow_next_instance_of(IssuesFinder) do |finder|
-            allow(finder).to receive(:execute).and_return([issue])
-          end
+          allow_next(IssuesFinder).to receive(:execute).and_return([issue])
 
           expect(integration).to receive(:test).with(sample_data).and_return(success_result)
           expect(subject).to eq(success_result)
-        end
-
-        context 'when the query optimization feature flag is disabled' do
-          before do
-            stub_feature_flags(integrations_test_webhook_optimizations: false)
-          end
-
-          it 'executes the old query' do
-            allow(issue).to receive(:to_hook_data).and_return(sample_data)
-
-            expect(IssuesFinder).not_to receive(:new)
-            expect(project).to receive(:issues).and_return([issue])
-            expect(integration).to receive(:test).with(sample_data).and_return(success_result)
-            expect(subject).to eq(success_result)
-          end
         end
       end
 
@@ -154,33 +122,16 @@ RSpec.describe Integrations::Test::ProjectService do
 
         it 'executes integration' do
           allow(merge_request).to receive(:to_hook_data).and_return(sample_data)
-          allow_next_instance_of(MergeRequestsFinder) do |finder|
-            allow(finder).to receive(:execute).and_return([merge_request])
-          end
+          allow_next(MergeRequestsFinder).to receive(:execute).and_return([merge_request])
 
           expect(integration).to receive(:test).with(sample_data).and_return(success_result)
           expect(subject).to include(success_result)
-        end
-
-        context 'when the query optimization feature flag is disabled' do
-          before do
-            stub_feature_flags(integrations_test_webhook_optimizations: false)
-          end
-
-          it 'executes the old query' do
-            expect(MergeRequestsFinder).not_to receive(:new)
-            expect(project).to receive(:merge_requests).and_return([merge_request])
-
-            allow(merge_request).to receive(:to_hook_data).and_return(sample_data)
-
-            expect(integration).to receive(:test).with(sample_data).and_return(success_result)
-            expect(subject).to eq(success_result)
-          end
         end
       end
 
       context 'deployment' do
         let_it_be(:project) { create(:project, :test_repo) }
+        let(:deployment) { build(:deployment) }
         let(:event) { 'deployment' }
 
         it 'returns error message if not enough data' do
@@ -189,8 +140,8 @@ RSpec.describe Integrations::Test::ProjectService do
         end
 
         it 'executes integration' do
-          create(:deployment, project: project)
           allow(Gitlab::DataBuilder::Deployment).to receive(:build).and_return(sample_data)
+          allow_next(DeploymentsFinder).to receive(:execute).and_return([deployment])
 
           expect(integration).to receive(:test).with(sample_data).and_return(success_result)
           expect(subject).to eq(success_result)
@@ -199,6 +150,7 @@ RSpec.describe Integrations::Test::ProjectService do
 
       context 'pipeline' do
         let(:event) { 'pipeline' }
+        let(:pipeline) { build(:ci_pipeline) }
 
         it 'returns error message if not enough data' do
           expect(integration).not_to receive(:test)
@@ -206,8 +158,8 @@ RSpec.describe Integrations::Test::ProjectService do
         end
 
         it 'executes integration' do
-          create(:ci_empty_pipeline, project: project)
           allow(Gitlab::DataBuilder::Pipeline).to receive(:build).and_return(sample_data)
+          allow_next(Ci::PipelinesFinder).to receive(:execute).and_return([pipeline])
 
           expect(integration).to receive(:test).with(sample_data).and_return(success_result)
           expect(subject).to eq(success_result)

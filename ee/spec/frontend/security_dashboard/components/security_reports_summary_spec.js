@@ -28,6 +28,7 @@ describe('Security reports summary component', () => {
 
   const findToggleButton = () => wrapper.find('[data-testid="collapse-button"]');
   const findModalButton = () => wrapper.find('[data-testid="modal-button"]');
+  const findDownloadLink = () => wrapper.find('[data-testid="download-link"]');
 
   beforeEach(() => {
     jest.spyOn(AccessorUtilities, 'isLocalStorageAccessSafe').mockReturnValue(true);
@@ -206,6 +207,25 @@ describe('Security reports summary component', () => {
 
     it('should link it to the given modal', () => {
       expect(glModalDirective).toHaveBeenCalledWith({ dastUrl: true });
+    });
+  });
+
+  describe('with scanned resources download path', () => {
+    const dastProps = {
+      vulnerabilitiesCount: 10,
+      scannedResourcesCsvPath: '/download/path',
+    };
+
+    beforeEach(() => {
+      createWrapper({
+        propsData: {
+          summary: { dast: dastProps },
+        },
+      });
+    });
+
+    it('should contain a download link', () => {
+      expect(findDownloadLink().attributes('href')).toBe('/download/path');
     });
   });
 });

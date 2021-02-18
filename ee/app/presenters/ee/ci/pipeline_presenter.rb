@@ -5,19 +5,6 @@ module EE
     module PipelinePresenter
       extend ActiveSupport::Concern
 
-      class_methods do
-        extend ::Gitlab::Utils::Override
-
-        override :failure_reasons
-        def failure_reasons
-          super.merge(
-            activity_limit_exceeded: 'Pipeline activity limit exceeded!',
-            size_limit_exceeded: 'Pipeline size limit exceeded!',
-            job_activity_limit_exceeded: 'Pipeline job activity limit exceeded!'
-          )
-        end
-      end
-
       def expose_security_dashboard?
         return false unless can?(current_user, :read_vulnerability, pipeline.project)
 

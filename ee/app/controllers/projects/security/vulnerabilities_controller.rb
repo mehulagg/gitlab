@@ -3,6 +3,7 @@
 module Projects
   module Security
     class VulnerabilitiesController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
       include SecurityDashboardsPermissions
       include IssuableActions
       include RendersNotes

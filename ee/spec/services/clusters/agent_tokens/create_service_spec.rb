@@ -55,7 +55,14 @@ RSpec.describe Clusters::AgentTokens::CreateService do
             result = service.execute(cluster_agent)
 
             expect(result.status).to eq(:success)
+            expect(result.message).to be_nil
+          end
+
+          it 'returns token information', :aggregate_failures do
+            result = service.execute(cluster_agent)
+
             expect(result.payload[:secret]).not_to be_nil
+            expect(result.payload[:token].created_by_user).to eq(user)
           end
         end
       end

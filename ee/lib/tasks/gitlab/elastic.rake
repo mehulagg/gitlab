@@ -60,14 +60,11 @@ namespace :gitlab do
     end
 
     desc "GitLab | Elasticsearch | Create empty indexes and assigns an alias for each"
-    task :create_empty_index, [:target_name] => [:environment] do |t, args|
+    task create_empty_index: [:environment] do |t, args|
       with_alias = ENV["SKIP_ALIAS"].nil?
       options = {}
 
-      # only create an index at the specified name
-      options[:index_name] = args[:target_name] unless with_alias
-
-      helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
+      helper = Gitlab::Elastic::Helper.default
       index_name = helper.create_empty_index(with_alias: with_alias, options: options)
 
       # with_alias is used to support interacting with a specific index (such as when reclaiming the production index
@@ -89,8 +86,8 @@ namespace :gitlab do
     end
 
     desc "GitLab | Elasticsearch | Delete all indexes"
-    task :delete_index, [:target_name] => [:environment] do |t, args|
-      helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
+    task delete_index: [:environment] do |t, args|
+      helper = Gitlab::Elastic::Helper.default
 
       if helper.delete_index
         puts "Index/alias '#{helper.target_name}' has been deleted".color(:green)
@@ -115,7 +112,7 @@ namespace :gitlab do
     end
 
     desc "GitLab | Elasticsearch | Recreate indexes"
-    task :recreate_index, [:target_name] => [:environment] do |t, args|
+    task recreate_index: [:environment] do |t, args|
       Rake::Task["gitlab:elastic:delete_index"].invoke(*args)
       Rake::Task["gitlab:elastic:create_empty_index"].invoke(*args)
     end

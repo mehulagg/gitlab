@@ -1,15 +1,15 @@
 import { GlDropdown, GlDropdownItem, GlDropdownText, GlLink, GlSearchBoxByType } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import createMockApollo from 'helpers/mock_apollo_helper';
-import waitForPromises from 'helpers/wait_for_promises';
 
 import IterationSelect from 'ee/sidebar/components/iteration_select.vue';
 import { iterationSelectTextMap, iterationDisplayState } from 'ee/sidebar/constants';
 import groupIterationsQuery from 'ee/sidebar/queries/group_iterations.query.graphql';
 import currentIterationQuery from 'ee/sidebar/queries/issue_iteration.query.graphql';
 import setIssueIterationMutation from 'ee/sidebar/queries/set_iteration_on_issue.mutation.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import createFlash from '~/flash';
 import * as Sentry from '~/sentry/wrapper';
 

@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/gitlab_flow.html'
 ---
 
-# Introduction to GitLab Flow
+# Introduction to GitLab Flow **(FREE)**
 
 ![GitLab Flow](img/gitlab_flow.png)
 
@@ -310,6 +310,18 @@ An example of a good commit message is: "Combine templates to reduce duplicate c
 The words "change," "improve," "fix," and "refactor" don't add much information to a commit message.
 For example, "Improve XML generation" could be better written as "Properly escape special characters in XML generation."
 For more information about formatting commit messages, please see this excellent [blog post by Tim Pope](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
+
+To add more context to a commit message, consider adding information regarding the
+origin of the change. For example, the URL of a GitLab issue, or a Jira issue number,
+containing more information for users who need in-depth context about the change.
+
+For example:
+
+```plaintext
+Properly escape special characters in XML generation.
+
+Issue: gitlab.com/gitlab-org/gitlab/-/issues/1
+```
 
 ## Testing before merging
 

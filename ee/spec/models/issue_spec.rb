@@ -280,22 +280,70 @@ RSpec.describe Issue do
     end
 
     describe 'confidential' do
-      subject { build(:issue, :confidential) }
+      let_it_be(:epic) { create(:epic, :confidential) }
 
-      it 'is valid when changing to non-confidential and is associated with non-confidential epic' do
-        subject.epic = build(:epic)
+      context 'when assigning an epic to a new issue' do
+        let(:issue) { build(:issue, confidential: confidential) }
 
-        subject.confidential = false
+        context 'when an issue is not confidential' do
+          let(:confidential) { false }
 
-        expect(subject).to be_valid
+          it 'is not valid' do
+            issue.epic = epic
+
+            expect(issue).not_to be_valid
+            expect(issue.errors.messages[:issue]).to include(/this issue cannot be assigned to a confidential epic since it is public/)
+          end
+        end
+
+        context 'when an issue is confidential' do
+          let(:confidential) { true }
+
+          it 'is valid' do
+            issue.epic = epic
+
+            expect(issue).to be_valid
+          end
+        end
       end
 
-      it 'is not valid when changing to non-confidential and is associated with confidential epic' do
-        subject.epic = build(:epic, :confidential)
+      context 'when updating an existing issue' do
+        let(:confidential) { true }
+        let(:issue) { create(:issue, confidential: confidential) }
 
-        subject.confidential = false
+        context 'when an issue is assigned to the confidential epic' do
+          before do
+            issue.update!(epic: epic)
+          end
 
-        expect(subject).not_to be_valid
+          context 'when changing issue to public' do
+            it 'is not valid' do
+              issue.confidential = false
+
+              expect(issue).not_to be_valid
+              expect(issue.errors.messages[:issue]).to include(/this issue cannot be made public since it belongs to a confidential epic/)
+            end
+          end
+        end
+
+        context 'when assigining a confidential issue' do
+          it 'is valid' do
+            issue.epic = epic
+
+            expect(issue).to be_valid
+          end
+        end
+
+        context 'when assigining a public issue' do
+          let(:confidential) { false }
+
+          it 'is not valid' do
+            issue.epic = epic
+
+            expect(issue).not_to be_valid
+            expect(issue.errors.messages[:issue]).to include(/this issue cannot be assigned to a confidential epic since it is public/)
+          end
+        end
       end
     end
   end

@@ -14,8 +14,8 @@ RSpec.describe Resolvers::Admin::Analytics::DevopsAdoption::SegmentsResolver do
 
   describe '#resolve' do
     let_it_be(:user) { create(:user) }
-    let_it_be(:segment_1) { create(:devops_adoption_segment, name: 'bbb') }
-    let_it_be(:segment_2) { create(:devops_adoption_segment, name: 'aaa') }
+    let_it_be(:segment_1) { create(:devops_adoption_segment, namespace: create(:group, name: 'bbb')) }
+    let_it_be(:segment_2) { create(:devops_adoption_segment, namespace: create(:group, name: 'aaa')) }
 
     subject { resolve_segments({}, { current_user: current_user }) }
 

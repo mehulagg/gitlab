@@ -9,6 +9,15 @@ RSpec.describe Projects::OnDemandScansController, type: :request do
   let(:user) { create(:user) }
 
   shared_examples 'on-demand scans page' do
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { get path }
+
+      before_request do
+        project.add_developer(user)
+        login_as(user)
+      end
+    end
+
     context 'feature available' do
       before do
         stub_licensed_features(security_on_demand_scans: true)

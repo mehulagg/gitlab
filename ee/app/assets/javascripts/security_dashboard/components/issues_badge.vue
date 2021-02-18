@@ -15,6 +15,11 @@ export default {
       type: Array,
       required: true,
     },
+    isJira: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     numberOfIssues() {
@@ -40,9 +45,11 @@ export default {
       <template #title>
         {{ popoverTitle }}
       </template>
-      <div v-for="{ issue } in issues" :key="issue.iid">
-        <issue-link :issue="issue" />
-      </div>
+      <ul class="gl-list-style-none gl-p-0 gl-m-0">
+        <li v-for="{ issue } in issues" :key="issue.iid">
+          <issue-link :issue="issue" :is-jira="isJira" />
+        </li>
+      </ul>
     </gl-popover>
   </div>
 </template>

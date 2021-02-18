@@ -1,8 +1,8 @@
 <script>
 import { GlTooltipDirective } from '@gitlab/ui';
 import eventHub from '../../event_hub';
-import PipelinesTableRowComponent from './pipelines_table_row.vue';
 import PipelineStopModal from './pipeline_stop_modal.vue';
+import PipelinesTableRowComponent from './pipelines_table_row.vue';
 
 /**
  * Pipelines Table Component.
@@ -31,10 +31,6 @@ export default {
       type: Boolean,
       required: false,
       default: false,
-    },
-    autoDevopsHelpPath: {
-      type: String,
-      required: true,
     },
     viewType: {
       type: String,
@@ -102,7 +98,6 @@ export default {
       :pipeline="model"
       :pipeline-schedule-url="pipelineScheduleUrl"
       :update-graph-dropdown="updateGraphDropdown"
-      :auto-devops-help-path="autoDevopsHelpPath"
       :view-type="viewType"
       :canceling-pipeline="cancelingPipeline"
     />

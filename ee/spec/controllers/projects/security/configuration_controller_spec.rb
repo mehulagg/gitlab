@@ -3,8 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe Projects::Security::ConfigurationController do
-  let(:group) { create(:group) }
-  let(:project) { create(:project, :repository, namespace: group) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be_with_refind(:project) { create(:project, :repository, namespace: group) }
+
+  before do
+    stub_licensed_features(security_dashboard: true)
+    group.add_developer(user)
+  end
 
   describe 'GET #show' do
     using RSpec::Parameterized::TableSyntax
@@ -32,6 +38,10 @@ RSpec.describe Projects::Security::ConfigurationController do
         stub_feature_flags(secure_security_and_compliance_configuration_page_on_ce: ce_flag_enabled)
         group.send("add_#{user_role}", user)
         sign_in(user)
+      end
+
+      include_context '"Security & Compliance" permissions' do
+        let(:valid_request) { request }
       end
 
       it 'responds with the correct status' do
@@ -134,7 +144,6 @@ RSpec.describe Projects::Security::ConfigurationController do
     end
 
     before do
-      stub_licensed_features(security_dashboard: true)
       project.add_maintainer(maintainer)
       project.add_developer(developer)
       sign_in(user)

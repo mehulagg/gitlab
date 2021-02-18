@@ -1,8 +1,8 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import HiddenGroupsItem from 'ee/approvals/components/hidden_groups_item.vue';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const localVue = createLocalVue();
 

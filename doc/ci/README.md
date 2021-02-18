@@ -7,10 +7,10 @@ description: "Learn how to use GitLab CI/CD, the GitLab built-in Continuous Inte
 type: index
 ---
 
-# GitLab CI/CD
+# GitLab CI/CD **(FREE)**
 
 GitLab CI/CD is a tool built into GitLab for software development
-through the [continuous methodologies](introduction/index.md#introduction-to-cicd-methodologies):
+through the [continuous methodologies](introduction/index.md):
 
 - Continuous Integration (CI)
 - Continuous Delivery (CD)
@@ -37,6 +37,9 @@ the development cycle, ensuring that all the code deployed to
 production complies with the code standards you established for
 your app.
 
+GitLab can also automatically detect, build, test, deploy, and
+monitor your applications by using [Auto DevOps](../topics/autodevops/index.md).
+
 For a complete overview of these methodologies and GitLab CI/CD,
 read the [Introduction to CI/CD with GitLab](introduction/index.md).
 
@@ -55,9 +58,9 @@ at the repository's root. This file creates a [pipeline](pipelines/index.md), wh
 To get started with GitLab CI/CD, we recommend you read through
 the following documents:
 
-- [Get started with GitLab CI/CD](quick_start/README.md).
+- [Get started with GitLab CI/CD](quick_start/index.md).
 - [Fundamental pipeline architectures](pipelines/pipeline_architectures.md).
-- [GitLab CI/CD basic workflow](introduction/index.md#basic-cicd-workflow).
+- [GitLab CI/CD basic workflow](introduction/index.md#gitlab-cicd-workflow).
 - [Step-by-step guide for writing `.gitlab-ci.yml` for the first time](../user/project/pages/getting_started/pages_from_scratch.md).
 
 If you're migrating from another CI/CD tool, check out our handy references:
@@ -75,7 +78,7 @@ to your needs:
 
 While building your `.gitlab-ci.yml`, you can use the [CI/CD configuration visualization](pipeline_editor/index.md#visualize-ci-configuration) to facilitate your writing experience.
 
-For a broader overview, see the [CI/CD getting started](quick_start/README.md) guide.
+For a broader overview, see the [CI/CD getting started](quick_start/index.md) guide.
 
 After you're familiar with how GitLab CI/CD works, see the
 [`.gitlab-ci.yml` full reference](yaml/README.md)
@@ -90,7 +93,7 @@ GitLab CI/CD uses a number of concepts to describe and run your build and deploy
 | Concept                                                 | Description                                                                    |
 |:--------------------------------------------------------|:-------------------------------------------------------------------------------|
 | [Pipelines](pipelines/index.md)                         | Structure your CI/CD process through pipelines.                                |
-| [Environment variables](variables/README.md)            | Reuse values based on a variable/value key pair.                               |
+| [CI/CD variables](variables/README.md)                  | Reuse values based on a variable/value key pair.                               |
 | [Environments](environments/index.md)                   | Deploy your application to different environments (e.g., staging, production). |
 | [Job artifacts](pipelines/job_artifacts.md)             | Output, use, and reuse job artifacts.                                          |
 | [Cache dependencies](caching/index.md)                  | Cache your dependencies for a faster execution.                                |
@@ -107,7 +110,7 @@ GitLab CI/CD supports numerous configuration options:
 | [Schedule pipelines](pipelines/schedules.md)                                            | Schedule pipelines to run as often as you need.                                           |
 | [Custom path for `.gitlab-ci.yml`](pipelines/settings.md#custom-cicd-configuration-path) | Define a custom path for the CI/CD configuration file.                                   |
 | [Git submodules for CI/CD](git_submodules.md)                                           | Configure jobs for using Git submodules.                                                  |
-| [SSH keys for CI/CD](ssh_keys/README.md)                                                | Using SSH keys in your CI pipelines.                                                      |
+| [SSH keys for CI/CD](ssh_keys/index.md)                                                | Using SSH keys in your CI pipelines.                                                      |
 | [Pipeline triggers](triggers/README.md)                                                 | Trigger pipelines through the API.                                                        |
 | [Pipelines for Merge Requests](merge_request_pipelines/index.md)                        | Design a pipeline structure for running a pipeline in merge requests.                     |
 | [Integrate with Kubernetes clusters](../user/project/clusters/index.md)                 | Connect your project to Google Kubernetes Engine (GKE) or an existing Kubernetes cluster. |
@@ -126,12 +129,12 @@ Its feature set is listed on the table below according to DevOps stages.
 |:------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------|
 | **Configure**                                                                                   |                                                                                                                                |
 | [Auto DevOps](../topics/autodevops/index.md)                                                    | Set up your app's entire lifecycle.                                                                                            |
-| [ChatOps](chatops/README.md)                                                                    | Trigger CI jobs from chat, with results sent back to the channel.                                                              |
+| [ChatOps](chatops/index.md)                                                                    | Trigger CI jobs from chat, with results sent back to the channel.                                                              |
 |-------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------|
 | **Verify**                                                                                      |                                                                                                                                |
 | [Browser Performance Testing](../user/project/merge_requests/browser_performance_testing.md)    | Quickly determine the browser performance impact of pending code changes.                                                      |
 | [Load Performance Testing](../user/project/merge_requests/load_performance_testing.md)          | Quickly determine the server performance impact of pending code changes.                                                       |
-| [CI services](services/README.md)                                                               | Link Docker containers with your base image.                                                                                   |
+| [CI services](services/index.md)                                                               | Link Docker containers with your base image.                                                                                   |
 | [Code Quality](../user/project/merge_requests/code_quality.md)                                  | Analyze your source code quality.                                                                                              |
 | [GitLab CI/CD for external repositories](ci_cd_for_external_repos/index.md) **(PREMIUM)**       | Get the benefits of GitLab CI/CD combined with repositories in GitHub and Bitbucket Cloud.                                     |
 | [Interactive Web Terminals](interactive_web_terminal/index.md) **(FREE SELF)**                  | Open an interactive web terminal to debug the running jobs.                                                                    |

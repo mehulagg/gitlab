@@ -1,8 +1,8 @@
 <script>
 import Api from 'ee/api';
-import { __, s__ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import MetricCard from '~/analytics/shared/components/metric_card.vue';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { __, s__ } from '~/locale';
 
 export default {
   name: 'GroupActivityCard',

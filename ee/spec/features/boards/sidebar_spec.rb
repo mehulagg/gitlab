@@ -42,63 +42,68 @@ RSpec.describe 'Issue Boards', :js do
       click_card(card2)
 
       page.within('.assignee') do
-        click_link 'Edit'
-
+        click_button('Edit')
         wait_for_requests
 
-        page.within('.dropdown-menu-user') do
-          click_link user.name
+        assignee = first('.gl-avatar-labeled').find('.gl-avatar-labeled-label').text
 
-          wait_for_requests
+        page.within('.dropdown-menu-user') do
+          first('.gl-avatar-labeled').click
         end
 
-        expect(page).to have_content(user.name)
+        click_button('Edit')
+        wait_for_requests
+
+        expect(page).to have_content(assignee)
       end
 
       expect(card2).to have_selector('.avatar')
     end
 
     it 'adds multiple assignees' do
-      click_card(card2)
+      click_card(card1)
 
       page.within('.assignee') do
-        click_link 'Edit'
-
+        click_button('Edit')
         wait_for_requests
 
+        assignee = all('.gl-avatar-labeled')[1].find('.gl-avatar-labeled-label').text
+
         page.within('.dropdown-menu-user') do
-          click_link user.name
-          click_link user2.name
+          find('[data-testid="unassign"]').click
+
+          all('.gl-avatar-labeled')[0].click
+          all('.gl-avatar-labeled')[1].click
         end
 
-        expect(page).to have_content(user.name)
-        expect(page).to have_content(user2.name)
+        click_button('Edit')
+        wait_for_requests
+
+        expect(page).to have_link(nil, title: user.name)
+        expect(page).to have_link(nil, title: assignee)
       end
 
-      expect(card2.all('.avatar').length).to eq(2)
+      expect(card1.all('.avatar').length).to eq(2)
     end
 
     it 'removes the assignee' do
-      card_two = find('.board:nth-child(2)').find('.board-card:nth-child(2)')
-      click_card(card_two)
+      click_card(card1)
 
       page.within('.assignee') do
-        click_link 'Edit'
-
+        click_button('Edit')
         wait_for_requests
 
         page.within('.dropdown-menu-user') do
-          click_link 'Unassigned'
+          find('[data-testid="unassign"]').click
         end
 
-        find('.dropdown-menu-toggle').click
-
+        click_button('Edit')
         wait_for_requests
 
-        expect(find('.qa-assign-yourself')).to have_content('None')
+        expect(page).to have_content('None')
       end
 
-      expect(card_two).not_to have_selector('.avatar')
+      expect(card1).not_to have_selector('.avatar')
     end
 
     it 'assignees to current user' do
@@ -107,7 +112,7 @@ RSpec.describe 'Issue Boards', :js do
       wait_for_requests
 
       page.within(find('.assignee')) do
-        expect(find('.qa-assign-yourself')).to have_content('None')
+        expect(page).to have_content('None')
 
         click_button 'assign yourself'
 
@@ -123,17 +128,19 @@ RSpec.describe 'Issue Boards', :js do
       click_card(card2)
 
       page.within('.assignee') do
-        click_link 'Edit'
-
+        click_button('Edit')
         wait_for_requests
 
-        page.within('.dropdown-menu-user') do
-          click_link user.name
+        assignee = first('.gl-avatar-labeled').find('.gl-avatar-labeled-label').text
 
-          wait_for_requests
+        page.within('.dropdown-menu-user') do
+          first('.gl-avatar-labeled').click
         end
 
-        expect(page).to have_content(user.name)
+        click_button('Edit')
+        wait_for_requests
+
+        expect(page).to have_content(assignee)
       end
 
       page.within(find('.board:nth-child(2)')) do
@@ -141,9 +148,9 @@ RSpec.describe 'Issue Boards', :js do
       end
 
       page.within('.assignee') do
-        click_link 'Edit'
+        click_button('Edit')
 
-        expect(find('.dropdown-menu')).to have_selector('.is-active')
+        expect(find('.dropdown-menu')).to have_selector('.gl-new-dropdown-item-check-icon')
       end
     end
   end

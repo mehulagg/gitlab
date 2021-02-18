@@ -78,7 +78,7 @@ module Types
 
     field :issue, Types::IssueType,
           null: true,
-          description: 'Find an issue.' do
+          description: 'Find an Issue.' do
             argument :id, ::Types::GlobalIDType[::Issue], required: true, description: 'The global ID of the Issue.'
           end
 
@@ -86,6 +86,10 @@ module Types
           null: true,
           description: 'Get statistics on the instance.',
           resolver: Resolvers::Admin::Analytics::InstanceStatistics::MeasurementsResolver
+
+    field :ci_application_settings, Types::Ci::ApplicationSettingType,
+          null: true,
+          description: 'CI related settings that apply to the entire instance.'
 
     field :runner_platforms, Types::Ci::RunnerPlatformType.connection_type,
       null: true, description: 'Supported runner platforms.',
@@ -127,6 +131,14 @@ module Types
 
     def current_user
       context[:current_user]
+    end
+
+    def ci_application_settings
+      application_settings
+    end
+
+    def application_settings
+      Gitlab::CurrentSettings.current_application_settings
     end
   end
 end

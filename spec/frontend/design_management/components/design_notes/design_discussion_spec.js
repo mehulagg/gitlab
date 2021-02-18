@@ -1,14 +1,14 @@
-import { mount } from '@vue/test-utils';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import DesignDiscussion from '~/design_management/components/design_notes/design_discussion.vue';
 import DesignNote from '~/design_management/components/design_notes/design_note.vue';
 import DesignReplyForm from '~/design_management/components/design_notes/design_reply_form.vue';
+import ToggleRepliesWidget from '~/design_management/components/design_notes/toggle_replies_widget.vue';
 import createNoteMutation from '~/design_management/graphql/mutations/create_note.mutation.graphql';
 import toggleResolveDiscussionMutation from '~/design_management/graphql/mutations/toggle_resolve_discussion.mutation.graphql';
 import ReplyPlaceholder from '~/notes/components/discussion_reply_placeholder.vue';
-import ToggleRepliesWidget from '~/design_management/components/design_notes/toggle_replies_widget.vue';
-import notes from '../../mock_data/notes';
 import mockDiscussion from '../../mock_data/discussion';
+import notes from '../../mock_data/notes';
 
 const defaultMockDiscussion = {
   id: '0',
@@ -93,7 +93,7 @@ describe('Design discussions component', () => {
     });
 
     it('does not render a checkbox in reply form', () => {
-      findReplyPlaceholder().vm.$emit('onClick');
+      findReplyPlaceholder().vm.$emit('focus');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(findResolveCheckbox().exists()).toBe(false);
@@ -124,7 +124,7 @@ describe('Design discussions component', () => {
     });
 
     it('renders a checkbox with Resolve thread text in reply form', () => {
-      findReplyPlaceholder().vm.$emit('onClick');
+      findReplyPlaceholder().vm.$emit('focus');
       wrapper.setProps({ discussionWithOpenForm: defaultMockDiscussion.id });
 
       return wrapper.vm.$nextTick().then(() => {
@@ -193,7 +193,7 @@ describe('Design discussions component', () => {
       });
 
       it('renders a checkbox with Unresolve thread text in reply form', () => {
-        findReplyPlaceholder().vm.$emit('onClick');
+        findReplyPlaceholder().vm.$emit('focus');
         wrapper.setProps({ discussionWithOpenForm: defaultMockDiscussion.id });
 
         return wrapper.vm.$nextTick().then(() => {
@@ -205,7 +205,7 @@ describe('Design discussions component', () => {
 
   it('hides reply placeholder and opens form on placeholder click', () => {
     createComponent();
-    findReplyPlaceholder().vm.$emit('onClick');
+    findReplyPlaceholder().vm.$emit('focus');
     wrapper.setProps({ discussionWithOpenForm: defaultMockDiscussion.id });
 
     return wrapper.vm.$nextTick().then(() => {
@@ -307,7 +307,7 @@ describe('Design discussions component', () => {
 
   it('emits openForm event on opening the form', () => {
     createComponent();
-    findReplyPlaceholder().vm.$emit('onClick');
+    findReplyPlaceholder().vm.$emit('focus');
 
     expect(wrapper.emitted('open-form')).toBeTruthy();
   });

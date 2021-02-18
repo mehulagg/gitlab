@@ -1,28 +1,28 @@
-import dastSavedScansQuery from 'ee/security_configuration/dast_profiles/graphql/dast_saved_scans.query.graphql';
-import dastSavedScansDelete from 'ee/security_configuration/dast_profiles/graphql/dast_saved_scans_delete.mutation.graphql';
-import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
-import dastSiteProfilesDelete from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles_delete.mutation.graphql';
+import DastSavedScansList from 'ee/security_configuration/dast_profiles/components/dast_saved_scans_list.vue';
+import DastScannerProfileList from 'ee/security_configuration/dast_profiles/components/dast_scanner_profiles_list.vue';
+import DastSiteProfileList from 'ee/security_configuration/dast_profiles/components/dast_site_profiles_list.vue';
+import { dastProfilesDeleteResponse } from 'ee/security_configuration/dast_profiles/graphql/cache_utils';
+import dastProfileDelete from 'ee/security_configuration/dast_profiles/graphql/dast_profile_delete.mutation.graphql';
+import dastProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_profiles.query.graphql';
 import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
 import dastScannerProfilesDelete from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles_delete.mutation.graphql';
-import { dastProfilesDeleteResponse } from 'ee/security_configuration/dast_profiles/graphql/cache_utils';
-import DastSavedScansList from 'ee/security_configuration/dast_profiles/components/dast_saved_scans_list.vue';
-import DastSiteProfileList from 'ee/security_configuration/dast_profiles/components/dast_site_profiles_list.vue';
-import DastScannerProfileList from 'ee/security_configuration/dast_profiles/components/dast_scanner_profiles_list.vue';
+import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
+import dastSiteProfilesDelete from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles_delete.mutation.graphql';
 import { s__ } from '~/locale';
 
 export const getProfileSettings = ({ createNewProfilePaths, isDastSavedScansEnabled }) => ({
   ...(isDastSavedScansEnabled
     ? {
-        savedScans: {
-          profileType: 'savedScans',
+        dastProfiles: {
+          profileType: 'dastProfiles',
           createNewProfilePath: createNewProfilePaths.savedScan,
           graphQL: {
-            query: dastSavedScansQuery,
+            query: dastProfilesQuery,
             deletion: {
-              mutation: dastSavedScansDelete,
+              mutation: dastProfileDelete,
               optimisticResponse: dastProfilesDeleteResponse({
-                mutationName: 'savedScanDelete',
-                payloadTypeName: 'DastSavedScanDeletePayload',
+                mutationName: 'dastProfileDelete',
+                payloadTypeName: 'DastProfileDeletePayload',
               }),
             },
           },
@@ -53,6 +53,7 @@ export const getProfileSettings = ({ createNewProfilePaths, isDastSavedScansEnab
               ),
               deletionBackendError: s__('DastProfiles|Could not delete saved scans:'),
             },
+            noProfilesMessage: s__('DastProfiles|No scans saved yet'),
           },
         },
       }
@@ -88,6 +89,7 @@ export const getProfileSettings = ({ createNewProfilePaths, isDastSavedScansEnab
         ),
         deletionBackendError: s__('DastProfiles|Could not delete site profiles:'),
       },
+      noProfilesMessage: s__('DastProfiles|No site profiles created yet'),
     },
   },
   scannerProfiles: {
@@ -120,6 +122,7 @@ export const getProfileSettings = ({ createNewProfilePaths, isDastSavedScansEnab
         ),
         deletionBackendError: s__('DastProfiles|Could not delete scanner profiles:'),
       },
+      noProfilesMessage: s__('DastProfiles|No scanner profiles created yet'),
     },
   },
 });

@@ -3,6 +3,8 @@
 module Projects
   module Security
     class DastSiteProfilesController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
+
       before_action do
         authorize_read_on_demand_scans!
         push_frontend_feature_flag(:security_dast_site_profiles_additional_fields, @project, default_enabled: :yaml)

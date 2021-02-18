@@ -110,18 +110,6 @@ RSpec.describe Users::BuildService do
             expect(user).to be_active
           end
         end
-
-        context 'when feature is disabled' do
-          before do
-            stub_feature_flags(admin_new_user_signups_cap: false)
-          end
-
-          it 'does not set the user state to blocked_pending_approval' do
-            user = service.execute
-
-            expect(user).to be_active
-          end
-        end
       end
     end
   end

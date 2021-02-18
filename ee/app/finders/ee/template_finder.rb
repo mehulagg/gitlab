@@ -28,10 +28,19 @@ module EE
       return super if custom_templates.nil? || !custom_templates.enabled?
 
       if params[:name]
-        custom_templates.find(params[:name]) || super
+        custom_templates.find(params[:name], params[:source_template_project_id]) || super
       else
         custom_templates.all + super
       end
+    end
+
+    override :template_names
+    def template_names
+      return super if custom_templates.nil? || !custom_templates.enabled?
+
+      # on custom templates we do want to fetch all template names as this will iterate through inherited templates
+      # from ancestor group levels
+      custom_templates.all_template_names.merge(super)
     end
   end
 end

@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import createStore from './store';
 import Checkout from './components/checkout.vue';
 import OrderSummary from './components/order_summary.vue';
+import createStore from './store';
 
 export default () => {
   const checkoutEl = document.getElementById('checkout');

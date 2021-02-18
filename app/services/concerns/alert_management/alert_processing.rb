@@ -29,7 +29,7 @@ module AlertManagement
     # Creates or closes issue for alert and notifies stakeholders
     def complete_post_processing_tasks
       process_incident_issues if process_issues?
-      send_alert_email if send_email?
+      send_alert_email if send_email? && notifying_alert?
     end
 
     def process_existing_alert
@@ -92,7 +92,7 @@ module AlertManagement
 
     def incoming_payload
       strong_memoize(:incoming_payload) do
-        Gitlab::AlertManagement::Payload.parse(project, payload.to_h)
+        Gitlab::AlertManagement::Payload.parse(project, payload.to_h, integration: integration)
       end
     end
 
@@ -116,6 +116,10 @@ module AlertManagement
       incoming_payload.ends_at.present?
     end
 
+    def notifying_alert?
+      alert.triggered? || alert.resolved?
+    end
+
     def alert_source
       alert.monitoring_tool
     end
@@ -125,3 +129,5 @@ module AlertManagement
     end
   end
 end
+
+AlertManagement::AlertProcessing.prepend_ee_mod

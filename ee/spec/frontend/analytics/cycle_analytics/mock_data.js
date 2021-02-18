@@ -69,6 +69,30 @@ export const customizableStagesAndEvents = getJSONFixture(
 
 const dummyState = {};
 
+export const defaultStageConfig = [
+  {
+    name: 'issue',
+    custom: false,
+    relativePosition: 1,
+    startEventIdentifier: 'issue_created',
+    endEventIdentifier: 'issue_stage_end',
+  },
+  {
+    name: 'plan',
+    custom: false,
+    relativePosition: 2,
+    startEventIdentifier: 'plan_stage_start',
+    endEventIdentifier: 'issue_first_mentioned_in_commit',
+  },
+  {
+    name: 'code',
+    custom: false,
+    relativePosition: 3,
+    startEventIdentifier: 'code_stage_start',
+    endEventIdentifier: 'merge_request_created',
+  },
+];
+
 // prepare the raw stage data for our components
 mutations[types.RECEIVE_GROUP_STAGES_SUCCESS](dummyState, customizableStagesAndEvents.stages);
 

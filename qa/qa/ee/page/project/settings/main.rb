@@ -17,7 +17,7 @@ module QA
                 end
 
                 view 'ee/app/views/projects/_merge_request_approvals_settings.html.haml' do
-                  element :merge_request_approvals_settings
+                  element :merge_request_approvals_settings_content
                 end
               end
             end
@@ -29,7 +29,7 @@ module QA
             end
 
             def expand_merge_request_approvals_settings(&block)
-              expand_content(:merge_request_approvals_settings) do
+              expand_content(:merge_request_approvals_settings_content) do
                 MergeRequestApprovals.perform(&block)
               end
             end

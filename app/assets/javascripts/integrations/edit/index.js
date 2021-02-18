@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import { createStore } from './store';
 import IntegrationForm from './components/integration_form.vue';
+import { createStore } from './store';
 
 function parseBooleanInData(data) {
   const result = {};
@@ -28,6 +28,7 @@ function parseDatasetToProps(data) {
     testPath,
     resetPath,
     vulnerabilitiesIssuetype,
+    jiraIssueTransitionId,
     ...booleanAttributes
   } = data;
   const {
@@ -59,6 +60,7 @@ function parseDatasetToProps(data) {
       initialTriggerMergeRequest: mergeRequestEvents,
       initialEnableComments: enableComments,
       initialCommentDetail: commentDetail,
+      initialJiraIssueTransitionId: jiraIssueTransitionId,
     },
     jiraIssuesProps: {
       showJiraIssuesIntegration,

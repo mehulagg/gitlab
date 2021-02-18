@@ -16,7 +16,14 @@ export default {
     GlIntersectionObserver,
     VulnerabilityList,
   },
-  inject: ['projectFullPath'],
+  inject: {
+    projectFullPath: {
+      default: '',
+    },
+    hasJiraVulnerabilitiesIntegrationEnabled: {
+      default: false,
+    },
+  },
   props: {
     filters: {
       type: Object,
@@ -42,6 +49,7 @@ export default {
           fullPath: this.projectFullPath,
           first: VULNERABILITIES_PER_PAGE,
           sort: this.sort,
+          includeExternalIssueLinks: this.hasJiraVulnerabilitiesIntegrationEnabled,
           ...this.filters,
         };
       },
@@ -87,20 +95,29 @@ export default {
       return `${this.sortBy}_${this.sortDirection}`;
     },
   },
+  watch: {
+    filters() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
+    },
+    sort() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
+    },
+  },
   methods: {
     fetchNextPage() {
       if (this.pageInfo.hasNextPage) {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            const results = produce(fetchMoreResult, (draftData) => {
+            return produce(fetchMoreResult, (draftData) => {
               // eslint-disable-next-line no-param-reassign
               draftData.project.vulnerabilities.nodes = [
                 ...previousResult.project.vulnerabilities.nodes,
                 ...draftData.project.vulnerabilities.nodes,
               ];
             });
-            return results;
           },
         });
       }

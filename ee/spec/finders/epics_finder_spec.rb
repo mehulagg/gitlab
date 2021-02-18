@@ -7,9 +7,10 @@ RSpec.describe EpicsFinder do
   let_it_be(:search_user) { create(:user) }
   let_it_be(:group) { create(:group, :private) }
   let_it_be(:another_group) { create(:group) }
-  let_it_be(:epic1) { create(:epic, :opened, group: group, title: 'This is awesome epic', created_at: 1.week.ago, end_date: 10.days.ago) }
-  let_it_be(:epic2) { create(:epic, :opened, group: group, created_at: 4.days.ago, author: user, start_date: 2.days.ago, end_date: 3.days.from_now) }
-  let_it_be(:epic3) { create(:epic, :closed, group: group, description: 'not so awesome', start_date: 5.days.ago, end_date: 3.days.ago) }
+  let_it_be(:reference_time) { Time.parse('2020-09-15 01:00') } # Arbitrary time used for time/date range filters
+  let_it_be(:epic1) { create(:epic, :opened, group: group, title: 'This is awesome epic', created_at: 1.week.before(reference_time), end_date: 10.days.before(reference_time)) }
+  let_it_be(:epic2) { create(:epic, :opened, group: group, created_at: 4.days.before(reference_time), author: user, start_date: 2.days.before(reference_time), end_date: 3.days.since(reference_time)) }
+  let_it_be(:epic3) { create(:epic, :closed, group: group, description: 'not so awesome', start_date: 5.days.before(reference_time), end_date: 3.days.before(reference_time)) }
   let_it_be(:epic4) { create(:epic, :closed, group: another_group) }
 
   describe '#execute' do
@@ -73,15 +74,15 @@ RSpec.describe EpicsFinder do
 
         context 'by created_at' do
           it 'returns all epics created before the given date' do
-            expect(epics(created_before: 2.days.ago)).to contain_exactly(epic1, epic2)
+            expect(epics(created_before: 2.days.before(reference_time))).to contain_exactly(epic1, epic2)
           end
 
           it 'returns all epics created after the given date' do
-            expect(epics(created_after: 2.days.ago)).to contain_exactly(epic3)
+            expect(epics(created_after: 2.days.before(reference_time))).to contain_exactly(epic3)
           end
 
           it 'returns all epics created within the given interval' do
-            expect(epics(created_after: 5.days.ago, created_before: 1.day.ago)).to contain_exactly(epic2)
+            expect(epics(created_after: 5.days.before(reference_time), created_before: 1.day.before(reference_time))).to contain_exactly(epic2)
           end
         end
 
@@ -187,8 +188,8 @@ RSpec.describe EpicsFinder do
         context 'by timeframe' do
           it 'returns epics which start in the timeframe' do
             params = {
-              start_date: 2.days.ago.strftime('%Y-%m-%d'),
-              end_date: 1.day.ago.strftime('%Y-%m-%d')
+              start_date: 2.days.before(reference_time).strftime('%Y-%m-%d'),
+              end_date: 1.day.before(reference_time).strftime('%Y-%m-%d')
             }
 
             expect(epics(params)).to contain_exactly(epic2)
@@ -196,8 +197,8 @@ RSpec.describe EpicsFinder do
 
           it 'returns epics which end in the timeframe' do
             params = {
-              start_date: 4.days.ago.strftime('%Y-%m-%d'),
-              end_date: 3.days.ago.strftime('%Y-%m-%d')
+              start_date: 4.days.before(reference_time).strftime('%Y-%m-%d'),
+              end_date: 3.days.before(reference_time).strftime('%Y-%m-%d')
             }
 
             expect(epics(params)).to contain_exactly(epic3)
@@ -205,8 +206,8 @@ RSpec.describe EpicsFinder do
 
           it 'returns epics which start before and end after the timeframe' do
             params = {
-              start_date: 4.days.ago.strftime('%Y-%m-%d'),
-              end_date: 4.days.ago.strftime('%Y-%m-%d')
+              start_date: 4.days.before(reference_time).strftime('%Y-%m-%d'),
+              end_date: 4.days.before(reference_time).strftime('%Y-%m-%d')
             }
 
             expect(epics(params)).to contain_exactly(epic3)
@@ -214,13 +215,13 @@ RSpec.describe EpicsFinder do
 
           describe 'when one of the timeframe params are missing' do
             it 'does not filter by timeframe if start_date is missing' do
-              only_end_date = epics(end_date: 1.year.ago.strftime('%Y-%m-%d'))
+              only_end_date = epics(end_date: 1.year.before(reference_time).strftime('%Y-%m-%d'))
 
               expect(only_end_date).to eq(epics)
             end
 
             it 'does not filter by timeframe if end_date is missing' do
-              only_start_date = epics(start_date: 1.year.from_now.strftime('%Y-%m-%d'))
+              only_start_date = epics(start_date: 1.year.since(reference_time).strftime('%Y-%m-%d'))
 
               expect(only_start_date).to eq(epics)
             end

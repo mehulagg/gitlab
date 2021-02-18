@@ -80,7 +80,7 @@ Access the default page for admin area settings by navigating to **Admin Area > 
 | ------ | ----------- |
 | [Metrics - Prometheus](../../../administration/monitoring/prometheus/gitlab_metrics.md) | Enable and configure Prometheus metrics. |
 | [Metrics - Grafana](../../../administration/monitoring/performance/grafana_configuration.md#integration-with-gitlab-ui) | Enable and configure Grafana. |
-| [Profiling - Performance bar](../../../administration/monitoring/performance/performance_bar.md#enable-the-performance-bar-via-the-admin-panel) | Enable access to the Performance Bar for a given group. |
+| [Profiling - Performance bar](../../../administration/monitoring/performance/performance_bar.md#enable-the-performance-bar-via-the-admin-area) | Enable access to the Performance Bar for a given group. |
 | [Self monitoring](../../../administration/monitoring/gitlab_self_monitoring_project/index.md#creating-the-self-monitoring-project) | Enable or disable instance self monitoring. |
 | [Usage statistics](usage_statistics.md) | Enable or disable version check and usage ping. |
 | [Pseudonymizer data collection](../../../administration/pseudonymizer.md) **(ULTIMATE)** | Enable or disable the Pseudonymizer data collection. |
@@ -94,6 +94,7 @@ Access the default page for admin area settings by navigating to **Admin Area > 
 | [Outbound requests](../../../security/webhooks.md) | Allow requests to the local network from hooks and services. |
 | [Protected Paths](protected_paths.md) | Configure paths to be protected by Rack Attack. |
 | [Incident Management](../../../operations/incident_management/index.md) Limits | Configure limits on the number of inbound alerts able to be sent to a project. |
+| [Notes creation limit](rate_limit_on_notes_creation.md)| Set a rate limit on the note creation requests. |
 
 ## Geo
 

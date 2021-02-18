@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, howto
 ---
 
-# GitLab Markdown
+# GitLab Markdown **(FREE)**
 
 This Markdown guide is **valid only for the GitLab internal Markdown rendering system for entries and files**.
 It is **not** valid for the [GitLab documentation website](https://docs.gitlab.com)
@@ -444,6 +444,7 @@ GFM recognizes the following:
 | snippet                         | `$123`                     | `namespace/project$123`                 | `project$123`                  |
 | epic **(ULTIMATE)**             | `&123`                     | `group1/subgroup&123`                   |                                |
 | vulnerability **(ULTIMATE)** (1)| `[vulnerability:123]`      | `[vulnerability:namespace/project/123]` | `[vulnerability:project/123]`  |
+| feature flag                    | `[feature_flag:123]`       | `[feature_flag:namespace/project/123]`  | `[feature_flag:project/123]`   |
 | label by ID                     | `~123`                     | `namespace/project~123`                 | `project~123`                  |
 | one-word label by name          | `~bug`                     | `namespace/project~bug`                 | `project~bug`                  |
 | multi-word label by name        | `~"feature request"`       | `namespace/project~"feature request"`   | `project~"feature request"`    |

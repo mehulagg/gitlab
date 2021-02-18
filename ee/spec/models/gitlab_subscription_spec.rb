@@ -605,4 +605,29 @@ RSpec.describe GitlabSubscription do
       end
     end
   end
+
+  describe '#legacy?' do
+    let_it_be(:eoa_rollout_date) { GitlabSubscription::EOA_ROLLOUT_DATE.to_date }
+    let!(:gitlab_subscription) { create(:gitlab_subscription, start_date: start_date) }
+
+    subject { gitlab_subscription.legacy? }
+
+    context 'when a subscription was purchased before the EoA rollout date' do
+      let(:start_date) { eoa_rollout_date - 1.day }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when a subscription was purchased on the EoA rollout date' do
+      let(:start_date) { eoa_rollout_date }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when a subscription was purchased after the EoA rollout date' do
+      let(:start_date) { eoa_rollout_date + 1.day}
+
+      it { is_expected.to be_falsey }
+    end
+  end
 end

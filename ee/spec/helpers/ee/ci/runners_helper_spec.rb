@@ -147,5 +147,23 @@ RSpec.describe EE::Ci::RunnersHelper do
         it { is_expected.to be_truthy }
       end
     end
+
+    describe '.root_ancestor_namespace' do
+      subject(:root_ancestor) { helper.root_ancestor_namespace(project, namespace) }
+
+      context 'with a project' do
+        it 'returns the project root ancestor' do
+          expect(root_ancestor).to eq project.root_ancestor
+        end
+      end
+
+      context 'with only a namespace' do
+        let(:project) { nil }
+
+        it 'returns the namespace root ancestor' do
+          expect(root_ancestor).to eq namespace.root_ancestor
+        end
+      end
+    end
   end
 end

@@ -1,32 +1,31 @@
 <script>
 import { GlButton, GlLoadingIcon, GlModal, GlLink } from '@gitlab/ui';
+import { getParameterByName } from '~/lib/utils/common_utils';
+import SvgBlankState from '~/pipelines/components/pipelines_list/blank_state.vue';
+import PipelinesTableComponent from '~/pipelines/components/pipelines_list/pipelines_table.vue';
+import eventHub from '~/pipelines/event_hub';
+import PipelinesMixin from '~/pipelines/mixins/pipelines_mixin';
 import PipelinesService from '~/pipelines/services/pipelines_service';
 import PipelineStore from '~/pipelines/stores/pipelines_store';
-import pipelinesMixin from '~/pipelines/mixins/pipelines';
-import eventHub from '~/pipelines/event_hub';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
-import { getParameterByName } from '~/lib/utils/common_utils';
-import CIPaginationMixin from '~/vue_shared/mixins/ci_pagination_api_mixin';
 
 export default {
   components: {
-    TablePagination,
     GlButton,
+    GlLink,
     GlLoadingIcon,
     GlModal,
-    GlLink,
+    PipelinesTableComponent,
+    TablePagination,
+    SvgBlankState,
   },
-  mixins: [pipelinesMixin, CIPaginationMixin],
+  mixins: [PipelinesMixin],
   props: {
     endpoint: {
       type: String,
       required: true,
     },
     helpPagePath: {
-      type: String,
-      required: true,
-    },
-    autoDevopsHelpPath: {
       type: String,
       required: true,
     },
@@ -209,7 +208,6 @@ export default {
       <pipelines-table-component
         :pipelines="state.pipelines"
         :update-graph-dropdown="updateGraphDropdown"
-        :auto-devops-help-path="autoDevopsHelpPath"
         :view-type="viewType"
       >
         <template #table-header-actions>

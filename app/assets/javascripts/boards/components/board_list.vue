@@ -1,13 +1,13 @@
 <script>
+import { GlLoadingIcon } from '@gitlab/ui';
 import Draggable from 'vuedraggable';
 import { mapActions, mapState } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
-import defaultSortableConfig from '~/sortable/sortable_config';
 import { sortableStart, sortableEnd } from '~/boards/mixins/sortable_default_options';
 import { sprintf, __ } from '~/locale';
+import defaultSortableConfig from '~/sortable/sortable_config';
 import eventHub from '../eventhub';
-import BoardNewIssue from './board_new_issue.vue';
 import BoardCard from './board_card.vue';
+import BoardNewIssue from './board_new_issue.vue';
 
 export default {
   name: 'BoardList',
@@ -112,7 +112,7 @@ export default {
     this.listRef.removeEventListener('scroll', this.onScroll);
   },
   methods: {
-    ...mapActions(['fetchIssuesForList', 'moveIssue']),
+    ...mapActions(['fetchItemsForList', 'moveIssue']),
     listHeight() {
       return this.listRef.getBoundingClientRect().height;
     },
@@ -126,7 +126,7 @@ export default {
       this.listRef.scrollTop = 0;
     },
     loadNextPage() {
-      this.fetchIssuesForList({ listId: this.list.id, fetchNext: true });
+      this.fetchItemsForList({ listId: this.list.id, fetchNext: true });
     },
     toggleForm() {
       this.showIssueForm = !this.showIssueForm;

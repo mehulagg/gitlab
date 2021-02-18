@@ -55,7 +55,7 @@ RSpec.describe 'Iterations list', :js do
 
           wait_for_requests
 
-          expect(page).to have_current_path(group_iteration_path(group, started_iteration.iid))
+          expect(page).to have_current_path(group_iteration_path(group, started_iteration.id))
         end
       end
     end

@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Auto DevOps development guide **(CORE)**
+# Auto DevOps development guide **(FREE)**
 
 This document provides a development guide for contributors to
 [Auto DevOps](../topics/autodevops/index.md).
@@ -47,8 +47,8 @@ found in
 
 ## Development environment
 
-Configuring [GDK for Auto
-DevOps](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/auto_devops.md).
+See the [Simple way to develop/test Kubernetes workflows with a local cluster](https://gitlab.com/gitlab-org/gitlab-development-kit/-/issues/1064)
+issue for discussion around setting up Auto DevOps development environments.
 
 ## Monitoring on GitLab.com
 

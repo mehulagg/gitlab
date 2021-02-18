@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Group value stream analytics filters and data', :js do
+  include CycleAnalyticsHelpers
+
   let_it_be(:group) { create(:group) }
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository, namespace: group, group: group, name: 'Cool fun project') }
@@ -23,16 +25,6 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
 
   new_issues_count.times do |i|
     let_it_be("issue_#{i}".to_sym) { create(:issue, title: "New Issue #{i}", project: sub_group_project, created_at: 2.days.ago) }
-  end
-
-  def wait_for_stages_to_load
-    expect(page).to have_selector '.js-stage-table'
-  end
-
-  def select_group(target_group = group)
-    visit group_analytics_cycle_analytics_path(target_group)
-
-    wait_for_stages_to_load
   end
 
   def select_stage(name)
@@ -195,7 +187,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
     before do
       stub_feature_flags(value_stream_analytics_path_navigation: false)
 
-      select_group
+      select_group(group)
     end
 
     it 'shows the path navigation' do
@@ -256,7 +248,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
     let(:selected_group) { group }
 
     before do
-      select_group
+      select_group(group)
     end
 
     it_behaves_like 'group value stream analytics'
@@ -299,7 +291,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       deploy_master(user, project, environment: 'staging')
       deploy_master(user, project)
 
-      select_group
+      select_group(group)
     end
 
     stages_with_data = [

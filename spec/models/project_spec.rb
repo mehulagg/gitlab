@@ -8,7 +8,7 @@ RSpec.describe Project, factory_default: :keep do
   include ExternalAuthorizationServiceHelpers
   using RSpec::Parameterized::TableSyntax
 
-  let_it_be(:namespace) { create_default(:namespace) }
+  let_it_be(:namespace) { create_default(:namespace).freeze }
 
   it_behaves_like 'having unique enum values'
 
@@ -556,6 +556,25 @@ RSpec.describe Project, factory_default: :keep do
         expect(project.ci_pipelines).to all(have_attributes(source: 'external'))
         expect(project.ci_pipelines.size).to eq(1)
       end
+    end
+  end
+
+  describe '#default_pipeline_lock' do
+    let(:project) { build_stubbed(:project) }
+
+    subject { project.default_pipeline_lock }
+
+    where(:keep_latest_artifact_enabled, :result_pipeline_locked) do
+      false        | :unlocked
+      true         | :artifacts_locked
+    end
+
+    before do
+      allow(project).to receive(:keep_latest_artifacts_available?).and_return(keep_latest_artifact_enabled)
+    end
+
+    with_them do
+      it { expect(subject).to eq(result_pipeline_locked) }
     end
   end
 
@@ -1780,7 +1799,8 @@ RSpec.describe Project, factory_default: :keep do
   describe '#default_branch_protected?' do
     using RSpec::Parameterized::TableSyntax
 
-    let_it_be(:project) { create(:project) }
+    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:project) { create(:project, namespace: namespace) }
 
     subject { project.default_branch_protected? }
 
@@ -2783,7 +2803,8 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#emails_disabled?' do
-    let(:project) { build(:project, emails_disabled: false) }
+    let_it_be(:namespace) { create(:namespace) }
+    let(:project) { build(:project, namespace: namespace, emails_disabled: false) }
 
     context 'emails disabled in group' do
       it 'returns true' do
@@ -2811,7 +2832,8 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#lfs_enabled?' do
-    let(:project) { build(:project) }
+    let(:namespace) { create(:namespace) }
+    let(:project) { build(:project, namespace: namespace) }
 
     shared_examples 'project overrides group' do
       it 'returns true when enabled in project' do
@@ -4117,7 +4139,7 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#remove_pages' do
+  describe '#legacy_remove_pages' do
     let(:project) { create(:project).tap { |project| project.mark_pages_as_deployed } }
     let(:pages_metadatum) { project.pages_metadatum }
     let(:namespace) { project.namespace }
@@ -4136,34 +4158,22 @@ RSpec.describe Project, factory_default: :keep do
       expect_any_instance_of(Gitlab::PagesTransfer).to receive(:rename_project).and_return(true)
       expect(PagesWorker).to receive(:perform_in).with(5.minutes, :remove, namespace.full_path, anything)
 
-      expect { project.remove_pages }.to change { pages_metadatum.reload.deployed }.from(true).to(false)
+      expect { project.legacy_remove_pages }.to change { pages_metadatum.reload.deployed }.from(true).to(false)
+    end
+
+    it 'does nothing if updates on legacy storage are disabled' do
+      stub_feature_flags(pages_update_legacy_storage: false)
+
+      expect(Gitlab::PagesTransfer).not_to receive(:new)
+      expect(PagesWorker).not_to receive(:perform_in)
+
+      project.legacy_remove_pages
     end
 
     it 'is run when the project is destroyed' do
-      expect(project).to receive(:remove_pages).and_call_original
+      expect(project).to receive(:legacy_remove_pages).and_call_original
 
       expect { project.destroy }.not_to raise_error
-    end
-
-    context 'when there is an old pages deployment' do
-      let!(:old_deployment_from_another_project) { create(:pages_deployment) }
-      let!(:old_deployment) { create(:pages_deployment, project: project) }
-
-      it 'schedules a destruction of pages deployments' do
-        expect(DestroyPagesDeploymentsWorker).to(
-          receive(:perform_async).with(project.id)
-        )
-
-        project.remove_pages
-      end
-
-      it 'removes pages deployments', :sidekiq_inline do
-        expect do
-          project.remove_pages
-        end.to change { PagesDeployment.count }.by(-1)
-
-        expect(PagesDeployment.find_by_id(old_deployment.id)).to be_nil
-      end
     end
   end
 
@@ -4870,7 +4880,8 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     context 'branch protection' do
-      let(:project) { create(:project, :repository) }
+      let_it_be(:namespace) { create(:namespace) }
+      let(:project) { create(:project, :repository, namespace: namespace) }
 
       before do
         create(:import_state, :started, project: project)
@@ -6388,20 +6399,7 @@ RSpec.describe Project, factory_default: :keep do
   describe 'with Debian Distributions' do
     subject { create(:project) }
 
-    let!(:distributions) { create_list(:debian_project_distribution, 2, :with_file, container: subject) }
-
-    it 'removes distribution files on removal' do
-      distribution_file_paths = distributions.map do |distribution|
-        distribution.file.path
-      end
-
-      expect { subject.destroy }
-        .to change {
-          distribution_file_paths.select do |path|
-            File.exist? path
-          end.length
-        }.from(distribution_file_paths.length).to(0)
-    end
+    it_behaves_like 'model with Debian distributions'
   end
 
   describe '#environments_for_scope' do

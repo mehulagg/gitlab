@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlSprintf,
@@ -9,8 +8,10 @@ import {
   GlFormInput,
   GlFormCheckbox,
 } from '@gitlab/ui';
-import { mapComputed } from '~/vuex_shared/bindings';
+import { mapActions, mapState } from 'vuex';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { __, s__ } from '~/locale';
+import { mapComputed } from '~/vuex_shared/bindings';
 
 export default {
   components: {
@@ -65,6 +66,9 @@ export default {
       { key: 'awsAccessKey', updateFn: 'setStatusPageAccessKey' },
       { key: 'awsSecretKey', updateFn: 'setStatusPageSecretAccessKey' },
     ]),
+    statusPageHelpUrl() {
+      return helpPagePath('operations/incident_management/status_page');
+    },
   },
   methods: {
     ...mapActions(['updateStatusPageSettings']),
@@ -91,7 +95,7 @@ export default {
       <p>
         <gl-sprintf :message="$options.i18n.introText">
           <template #docsLink>
-            <gl-link href="/help/user/project/status_page/index.html">
+            <gl-link target="_blank" :href="statusPageHelpUrl">
               <span>{{ $options.i18n.introLinkText }}</span>
             </gl-link>
           </template>
@@ -112,7 +116,7 @@ export default {
         >
           <gl-form-input id="status-page-url" v-model="url" />
           <p class="form-text text-muted">
-            <gl-link href="/help/user/project/status_page/index.html">
+            <gl-link target="_blank" :href="statusPageHelpUrl">
               {{ $options.i18n.url.linkText }}
             </gl-link>
           </p>

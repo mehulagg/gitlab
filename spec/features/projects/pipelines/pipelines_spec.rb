@@ -14,11 +14,12 @@ RSpec.describe 'Pipelines', :js do
       sign_in(user)
       stub_feature_flags(graphql_pipeline_details: false)
       stub_feature_flags(graphql_pipeline_details_users: false)
+
       project.add_developer(user)
       project.update!(auto_devops_attributes: { enabled: false })
     end
 
-    describe 'GET /:project/pipelines' do
+    describe 'GET /:project/-/pipelines' do
       let(:project) { create(:project, :repository) }
 
       let!(:pipeline) do
@@ -617,7 +618,7 @@ RSpec.describe 'Pipelines', :js do
       end
     end
 
-    describe 'GET /:project/pipelines/show' do
+    describe 'GET /:project/-/pipelines/show' do
       let(:project) { create(:project, :repository) }
 
       let(:pipeline) do
@@ -669,7 +670,7 @@ RSpec.describe 'Pipelines', :js do
       end
     end
 
-    describe 'POST /:project/pipelines' do
+    describe 'POST /:project/-/pipelines' do
       let(:project) { create(:project, :repository) }
 
       before do

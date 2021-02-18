@@ -37,7 +37,7 @@ module VulnerabilitiesHelper
   end
 
   def create_jira_issue_url_for(vulnerability)
-    return unless vulnerability.project.jira_vulnerabilities_integration_enabled?
+    return unless vulnerability.project.configured_to_create_issues_from_vulnerabilities?
 
     decorated_vulnerability = vulnerability.present
     summary = _('Investigate vulnerability: %{title}') % { title: decorated_vulnerability.title }

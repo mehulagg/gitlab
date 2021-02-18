@@ -1,18 +1,18 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
 import { GlDrawer } from '@gitlab/ui';
+import { mapState, mapActions, mapGetters } from 'vuex';
+import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
+import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
+import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
+import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
+import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
+import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
-import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
-import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
-import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
-import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
-import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
-import BoardSidebarWeightInput from './sidebar/board_sidebar_weight_input.vue';
-import BoardSidebarTimeTracker from './sidebar/board_sidebar_time_tracker.vue';
 import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
+import BoardSidebarTimeTracker from './sidebar/board_sidebar_time_tracker.vue';
+import BoardSidebarWeightInput from './sidebar/board_sidebar_weight_input.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -20,7 +20,7 @@ export default {
     GlDrawer,
     BoardSidebarIssueTitle,
     BoardSidebarEpicSelect,
-    BoardAssigneeDropdown,
+    SidebarAssigneesWidget,
     BoardSidebarTimeTracker,
     BoardSidebarWeightInput,
     BoardSidebarLabelsSelect,
@@ -37,7 +37,11 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['unsetActiveId']),
+    ...mapActions(['unsetActiveId', 'setAssignees']),
+    updateAssignees(data) {
+      const assignees = data.issueSetAssignees?.issue?.assignees?.nodes || [];
+      this.setAssignees(assignees);
+    },
   },
 };
 </script>
@@ -51,14 +55,21 @@ export default {
   >
     <template #header>{{ __('Issue details') }}</template>
 
-    <board-sidebar-issue-title />
-    <board-assignee-dropdown />
-    <board-sidebar-epic-select />
-    <board-sidebar-milestone-select />
-    <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
-    <board-sidebar-due-date />
-    <board-sidebar-labels-select />
-    <board-sidebar-weight-input v-if="glFeatures.issueWeights" />
-    <board-sidebar-subscription />
+    <template #default>
+      <board-sidebar-issue-title />
+      <sidebar-assignees-widget
+        :iid="activeIssue.iid"
+        :full-path="activeIssue.referencePath.split('#')[0]"
+        :initial-assignees="activeIssue.assignees"
+        @assignees-updated="updateAssignees"
+      />
+      <board-sidebar-epic-select />
+      <board-sidebar-milestone-select />
+      <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
+      <board-sidebar-due-date />
+      <board-sidebar-labels-select />
+      <board-sidebar-weight-input v-if="glFeatures.issueWeights" />
+      <board-sidebar-subscription />
+    </template>
   </gl-drawer>
 </template>
