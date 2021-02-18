@@ -1550,7 +1550,7 @@ class MergeRequest < ApplicationRecord
   def compare_reports(service_class, current_user = nil, report_type = nil )
     with_reactive_cache(service_class.name, current_user&.id, report_type) do |data|
       unless service_class.new(project, current_user, id: id, report_type: report_type)
-        .latest?(base_pipeline, actual_head_pipeline, data)
+        .latest?(comparison_base(service_class.name), actual_head_pipeline, data)
         raise InvalidateReactiveCache
       end
 
@@ -1586,7 +1586,7 @@ class MergeRequest < ApplicationRecord
     raise NameError, service_class unless service_class < Ci::CompareReportsBaseService
 
     current_user = User.find_by(id: current_user_id)
-    service_class.new(project, current_user, id: id, report_type: report_type).execute(base_pipeline, actual_head_pipeline)
+    service_class.new(project, current_user, id: id, report_type: report_type).execute(comparison_base(identifier), actual_head_pipeline)
   end
 
   def all_commits
@@ -1707,6 +1707,22 @@ class MergeRequest < ApplicationRecord
   def pipeline_coverage_delta
     if base_pipeline&.coverage && head_pipeline&.coverage
       '%.2f' % (head_pipeline.coverage.to_f - base_pipeline.coverage.to_f)
+    end
+  end
+
+  def use_merge_base_pipeline?
+    return true if ::Gitlab::Ci::Features.display_codequality_backend_comparison?(project)
+
+    false
+  end
+
+  def comparison_base(service_class)
+    return base_pipeline unless service_class == "Ci::CompareCodequalityReportsService"
+
+    if actual_head_pipeline&.merged_result_base_pipeline? && use_merge_base_pipeline?
+      merge_base_pipeline
+    else
+      base_pipeline
     end
   end
 
