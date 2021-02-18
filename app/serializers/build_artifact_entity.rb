@@ -20,12 +20,4 @@ class BuildArtifactEntity < Grape::Entity
       file_type: artifact.file_type
     )
   end
-
-  expose :keep_path, if: -> (*) { artifact.expiring? } do |artifact|
-    fast_keep_project_job_artifacts_path(artifact.project, artifact.job)
-  end
-
-  expose :browse_path do |artifact|
-    fast_browse_project_job_artifacts_path(artifact.project, artifact.job)
-  end
 end
