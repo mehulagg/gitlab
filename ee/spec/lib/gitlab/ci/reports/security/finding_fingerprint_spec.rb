@@ -4,10 +4,11 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Reports::Security::FindingFingerprint do
   subject { described_class.new(params.with_indifferent_access) }
-  let (:params) do
+
+  let(:params) do
     {
       algorithm_type: 'hash',
-      fingerprint_value: 'FINGERPRINT',
+      fingerprint_value: 'FINGERPRINT'
     }
   end
 
@@ -20,10 +21,10 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingFingerprint do
     end
 
     context 'when an unsupported algorithm type is given' do
-      let (:params) do
+      let(:params) do
         {
           algorithm_type: 'INVALID',
-          fingerprint_value: 'FINGERPRINT',
+          fingerprint_value: 'FINGERPRINT'
         }
       end
 
@@ -37,7 +38,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingFingerprint do
     it 'returns a hash representation of the fingerprint' do
       expect(subject.to_h).to eq(
         algorithm_type: params[:algorithm_type],
-        fingerprint_sha256: Digest::SHA256.digest(params[:fingerprint_value]),
+        fingerprint_sha256: Digest::SHA256.digest(params[:fingerprint_value])
       )
     end
   end

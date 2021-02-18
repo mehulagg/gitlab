@@ -8,12 +8,6 @@ module Vulnerabilities
 
     enum algorithm_type: { hash: 1, location: 2, scope_offset: 3 }, _prefix: :algorithm
 
-    enum priority: {
-        hash: 0,
-        location: 1,
-        scope_offset: 3,
-    }, _prefix: true
-
     validates :finding, presence: true
   end
 end

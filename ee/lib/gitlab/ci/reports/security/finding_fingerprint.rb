@@ -21,7 +21,7 @@ module Gitlab
           end
 
           def to_h
-            return {
+            {
               algorithm_type: algorithm_type,
               fingerprint_sha256: fingerprint_sha256
             }
