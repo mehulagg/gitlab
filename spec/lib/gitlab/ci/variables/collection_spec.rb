@@ -129,26 +129,16 @@ RSpec.describe Gitlab::Ci::Variables::Collection do
 
       expect(collection.size).to eq(2)
     end
-  end
 
-  describe '#include?' do
-    it 'returns false for unknown variable' do
-      collection = described_class.new([])
+    it 'returns 3 for collection with 2 duplicate variables' do
+      collection = described_class.new(
+        [
+          { key: 'VAR1', value: 'value', public: true, masked: false },
+          { key: 'VAR2', value: 'value', public: true, masked: false },
+          { key: 'VAR1', value: 'value', public: true, masked: false }
+        ])
 
-      expect(collection.include?({ key: 'VAR', value: 'value', public: true, masked: false })).to eq(false)
-    end
-
-    it 'returns false for unsupported scenario of variable name argument' do
-      collection = described_class.new([{ key: 'VAR', value: 'value', public: true, masked: false }])
-
-      expect(collection.include?('VAR')).to eq(false)
-    end
-
-    it 'returns true for known variable' do
-      variable = { key: 'VAR', value: 'value', public: true, masked: false }
-      collection = described_class.new([variable])
-
-      expect(collection.include?(variable)).to eq(true)
+      expect(collection.size).to eq(3)
     end
   end
 

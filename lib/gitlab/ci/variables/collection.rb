@@ -10,18 +10,18 @@ module Gitlab
 
         def initialize(variables = [], errors = nil)
           @variables = []
-          @var_hash = {}
+          @variables_by_key = {}
           @errors = errors
 
           variables.each { |variable| self.append(variable) }
         end
 
         def append(resource)
-          tap do
-            item = Collection::Item.fabricate(resource)
-            @variables.append(item)
-            @var_hash[item[:key]] = item
-          end
+          item = Collection::Item.fabricate(resource)
+          @variables.append(item)
+          @variables_by_key[item[:key]] = item
+
+          self
         end
 
         def concat(resources)
@@ -42,7 +42,7 @@ module Gitlab
         end
 
         def [](key)
-          @var_hash[key]
+          @variables_by_key[key]
         end
 
         def size
@@ -51,14 +51,6 @@ module Gitlab
 
         def to_runner_variables
           self.map(&:to_runner_variable)
-        end
-
-        def include?(obj)
-          return false unless obj.is_a?(Hash) && obj.has_key?(:key)
-
-          key = obj.fetch(:key)
-          found_var = @var_hash[key]
-          !found_var.nil? && found_var.to_runner_variable == Collection::Item.fabricate(obj).to_runner_variable
         end
 
         def to_hash
