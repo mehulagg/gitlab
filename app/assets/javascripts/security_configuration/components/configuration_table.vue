@@ -81,7 +81,7 @@ export default {
           {{ item.description }}
           <gl-link
             target="_blank"
-            :data-testid="`${item.type}-link`"
+            data-testid="help-link"
             :href="item.helpPath"
             :aria-label="getFeatureDocumentationLinkLabel(item)"
           >
