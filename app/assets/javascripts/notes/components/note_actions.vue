@@ -1,6 +1,6 @@
 <script>
 import { GlTooltipDirective, GlIcon, GlButton, GlDropdownItem } from '@gitlab/ui';
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import Api from '~/api';
 import resolvedStatusMixin from '~/batch_comments/mixins/resolved_status';
 import EmojiPicker from '~/emoji/components/picker.vue';
@@ -118,6 +118,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    awardPath: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     ...mapGetters(['getUserDataByProp', 'getNoteableData']),
@@ -186,6 +190,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(['toggleAwardRequest']),
     onEdit() {
       this.$emit('handleEdit');
     },
@@ -222,6 +227,13 @@ export default {
           .then(() => this.handleAssigneeUpdate(assignees))
           .catch(() => flash(__('Something went wrong while updating assignees')));
       }
+    },
+    setAwardEmoji(awardName) {
+      this.toggleAwardRequest({
+        endpoint: this.awardPath,
+        noteId: this.noteId,
+        awardName,
+      });
     },
   },
 };
@@ -266,6 +278,7 @@ export default {
       <emoji-picker
         v-if="glFeatures.improvedEmojiPicker"
         toggle-class="note-action-button note-emoji-button gl-text-gray-600 gl-m-2 gl-p-0! gl-shadow-none! gl-bg-transparent!"
+        @click="setAwardEmoji"
       >
         <template #button-content>
           <gl-icon class="link-highlight award-control-icon-neutral gl-m-0!" name="slight-smile" />

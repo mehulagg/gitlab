@@ -82,13 +82,17 @@ export default {
 
       this.$refs.virtualScoller.setScrollTop(scrollTop);
     },
+    selectEmoji(name) {
+      this.$emit('click', name);
+      this.$refs.dropdown.hide();
+    },
   },
 };
 </script>
 
 <template>
   <div class="emoji-picker">
-    <gl-dropdown :toggle-class="toggleClass" no-flip right lazy>
+    <gl-dropdown ref="dropdown" :toggle-class="toggleClass" no-flip right lazy>
       <template #button-content><slot name="button-content"></slot></template>
       <div class="gl-display-flex gl-px-2 gl-border-b-solid gl-border-gray-100 gl-border-b-1">
         <button
@@ -116,6 +120,7 @@ export default {
               :category="categoryKey"
               :emojis="category.emojis"
               @appear="categoryAppeared"
+              @click="selectEmoji"
             />
           </div>
         </virtual-list>

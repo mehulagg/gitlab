@@ -50,6 +50,7 @@ export default {
       :key="index"
       :emojis="emojiGroup"
       :render-group="renderGroup"
+      @click="(emoji) => $emit('click', emoji)"
     />
   </gl-intersection-observer>
 </template>

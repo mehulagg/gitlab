@@ -1,10 +1,5 @@
 <script>
-import { GlIntersectionObserver } from '@gitlab/ui';
-
 export default {
-  components: {
-    GlIntersectionObserver,
-  },
   props: {
     emojis: {
       type: Array,
@@ -26,6 +21,7 @@ export default {
         :key="emoji"
         type="button"
         class="gl-border-0 gl-bg-transparent gl-p-0 gl-text-center emoji-picker-emoji"
+        @click="$emit('click', emoji)"
       >
         <gl-emoji :data-name="emoji" />
       </button>
