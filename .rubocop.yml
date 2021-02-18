@@ -16,6 +16,7 @@ inherit_from:
 inherit_mode:
   merge:
     - Include
+    - Exclude
 
 AllCops:
   TargetRubyVersion: 2.7
@@ -595,3 +596,13 @@ FactoryBot/InlineAssociation:
   Include:
     - 'spec/factories/**/*.rb'
     - 'ee/spec/factories/**/*.rb'
+
+Gitlab/NamespacedClass:
+  Exclude:
+    - 'config/**/*.rb'
+    - 'db/**/*.rb'
+    - 'ee/bin/**/*'
+    - 'ee/db/**/*.rb'
+    - 'ee/elastic/**/*.rb'
+    - 'scripts/**/*'
+    - 'spec/migrations/**/*.rb'

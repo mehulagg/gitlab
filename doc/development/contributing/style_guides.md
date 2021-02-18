@@ -154,6 +154,9 @@ resolved and place it in the `.rubocop_manual_todo.yml`. In this scenario, do no
 changes to the `.rubocop_todo.yml` as an `exclude limit` that is higher than 15 will make the
 `.rubocop_todo.yml` hard to parse.
 
+NOTE:
+Permanent `Exclude`s should be defined in `.rubocop.yml`.
+
 ## Database migrations
 
 See the dedicated [Database Migrations Style Guide](../migration_style_guide.md).
