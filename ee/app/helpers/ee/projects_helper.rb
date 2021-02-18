@@ -70,7 +70,7 @@ module EE
 
     override :show_security_and_compliance_toggle?
     def show_security_and_compliance_toggle?
-      super || show_audit_events?(project)
+      super || show_audit_events?(@project)
     end
 
     override :default_url_to_repo
