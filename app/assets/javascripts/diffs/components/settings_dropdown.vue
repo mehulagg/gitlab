@@ -90,7 +90,7 @@ export default {
           :checked="showWhitespace"
           @change="setShowWhitespace({ showWhitespace: $event.target.checked, pushState: true })"
         />
-        {{ __('Show whitespace changes') }}
+        {{ $options.i18n.whitespace }}
       </label>
     </div>
     <div class="gl-mt-3 gl-px-3">
