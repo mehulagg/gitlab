@@ -52,8 +52,9 @@ For example, consider a user named Alex:
 
 ## Create a group
 
-> For a list of words that are not allowed to be used as group names see the
-> [reserved names](../reserved_names.md).
+NOTE:
+For a list of words that can not be used as group names, see
+[reserved names](../reserved_names.md).
 
 To create a new group, either:
 
