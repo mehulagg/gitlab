@@ -19,5 +19,8 @@ export const mockJiraIssue = {
       text_color: '#283856',
     },
   ],
+  references: {
+    relative: 'FE-2',
+  },
   state: 'opened',
 };

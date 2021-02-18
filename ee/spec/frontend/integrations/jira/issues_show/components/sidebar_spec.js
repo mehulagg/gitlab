@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
+import IssueReference from 'ee/integrations/jira/issues_show/components/issue_reference.vue';
 import Sidebar from 'ee/integrations/jira/issues_show/components/sidebar.vue';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
@@ -11,6 +12,7 @@ describe('Sidebar', () => {
   const defaultProps = {
     sidebarExpanded: false,
     selectedLabels: mockJiraIssue.labels,
+    reference: mockJiraIssue.references.relative,
   };
 
   const createComponent = () => {
@@ -27,12 +29,17 @@ describe('Sidebar', () => {
   });
 
   const findLabelsSelect = () => wrapper.findComponent(LabelsSelect);
+  const findIssueReference = () => wrapper.findComponent(IssueReference);
 
-  it('renders LabelsSelect', async () => {
+  it('renders LabelsSelect', () => {
     createComponent();
 
-    await wrapper.vm.$nextTick();
-
     expect(findLabelsSelect().exists()).toBe(true);
+  });
+
+  it('renders IssueReference', () => {
+    createComponent();
+
+    expect(findIssueReference().exists()).toBe(true);
   });
 });
