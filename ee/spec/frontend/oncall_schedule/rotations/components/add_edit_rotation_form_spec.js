@@ -195,7 +195,7 @@ describe('AddEditRotationForm', () => {
     });
   });
 
-  describe.only('Rotation restricted to time', () => {
+  describe('Rotation restricted to time', () => {
     it('toggle state depends on isRestrictedToTime', async () => {
       expect(findRestrictedToToggle().props('value')).toBe(false);
       wrapper.setProps({ form: { ...defaultForm, isRestrictedToTime: true } });
@@ -220,16 +220,6 @@ describe('AddEditRotationForm', () => {
       const emittedEvent = wrapper.emitted('update-rotation-form');
       expect(emittedEvent).toHaveLength(1);
       expect(emittedEvent[0][0]).toEqual({ type: 'isRestrictedToTime', value: false });
-    });
-
-    it('toggles restricted to time visibility', async () => {
-      const toggle = findRestrictedToToggle().vm;
-      toggle.$emit('change', false);
-      await wrapper.vm.$nextTick();
-      expect(findRestrictedToTime().exists()).toBe(false);
-      toggle.$emit('change', true);
-      await wrapper.vm.$nextTick();
-      expect(findRestrictedToTime().exists()).toBe(true);
     });
 
     it('should emit an event with selected value on restricted FROM time selection', async () => {
