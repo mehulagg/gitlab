@@ -9,6 +9,7 @@ module Gitlab
 
         IGNORABLE_SQL = %w{BEGIN COMMIT}.freeze
         DB_COUNTERS = %i{db_count db_write_count db_cached_count}.freeze
+        DB_LOAD_BALANCING_COUNTERS = %i{db_replica_count db_replica_cached_count db_primary_count db_primary_cached_count}.freeze
         SQL_COMMANDS_WITH_COMMENTS_REGEX = /\A(\/\*.*\*\/\s)?((?!(.*[^\w'"](DELETE|UPDATE|INSERT INTO)[^\w'"])))(WITH.*)?(SELECT)((?!(FOR UPDATE|FOR SHARE)).)*$/i.freeze
 
         def sql(event)
@@ -20,17 +21,22 @@ module Gitlab
           payload = event.payload
           return if payload[:name] == 'SCHEMA' || IGNORABLE_SQL.include?(payload[:sql])
 
-          increment_db_counters(payload)
+          increment_db_counters(event)
+          observe_db_duration(event)
 
-          current_transaction&.observe(:gitlab_sql_duration_seconds, event.duration / 1000.0) do
-            buckets [0.05, 0.1, 0.25]
+          if Gitlab::Database::LoadBalancing.enable?
+            host_type = Gitlab::Database::LoadBalancing.host_type(event.payload[:connection])
+            increment_db_host_type_counters(host_type, event)
+            observe_db_host_type_duration(host_type, event)
           end
         end
 
         def self.db_counter_payload
           return {} unless Gitlab::SafeRequestStore.active?
 
-          DB_COUNTERS.map do |counter|
+          counters = DB_COUNTERS
+          counters += DB_LOAD_BALANCING_COUNTERS if Gitlab::Database::LoadBalancing.enable?
+          counters.map do |counter|
             [counter, Gitlab::SafeRequestStore[counter].to_i]
           end.to_h
         end
@@ -41,7 +47,9 @@ module Gitlab
           payload[:sql].match(SQL_COMMANDS_WITH_COMMENTS_REGEX)
         end
 
-        def increment_db_counters(payload)
+        def increment_db_counters(event)
+          payload = event.payload
+
           increment(:db_count)
 
           if payload.fetch(:cached, payload[:name] == 'CACHE')
@@ -49,6 +57,28 @@ module Gitlab
           end
 
           increment(:db_write_count) unless select_sql_command?(payload)
+        end
+
+        def increment_db_host_type_counters(host_type, event)
+          payload = event.payload
+
+          increment("db_#{host_type}_count".to_sym)
+
+          if payload.fetch(:cached, payload[:name] == 'CACHE')
+            increment("db_#{host_type}_cached_count".to_sym)
+          end
+        end
+
+        def observe_db_duration(event)
+          current_transaction&.observe(:gitlab_sql_duration_seconds, event.duration / 1000.0) do
+            buckets [0.05, 0.1, 0.25]
+          end
+        end
+
+        def observe_db_host_type_duration(host_type, event)
+          current_transaction&.observe("gitlab_sql_#{host_type}_duration_seconds".to_sym, event.duration / 1000.0) do
+            buckets [0.05, 0.1, 0.25]
+          end
         end
 
         def increment(counter)
