@@ -102,7 +102,7 @@ module Gitlab
       end
 
       def self.feature_available?
-        @feature_available ||= ::License.feature_available?(:db_load_balancing)
+        @feature_available ||= Gitlab::Database.cached_table_exists?('licenses') && ::License.feature_available?(:db_load_balancing)
       end
 
       def self.program_name
