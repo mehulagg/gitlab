@@ -96,9 +96,13 @@ module Gitlab
       # posting the write location of the database if load balancing is
       # configured.
       def self.configured?
-        return false unless ::License.feature_available?(:db_load_balancing)
+        return false unless feature_available?
 
         hosts.any? || service_discovery_enabled?
+      end
+
+      def self.feature_available?
+        @feature_available ||= ::License.feature_available?(:db_load_balancing)
       end
 
       def self.program_name
