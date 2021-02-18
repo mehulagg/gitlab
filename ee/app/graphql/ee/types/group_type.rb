@@ -91,6 +91,20 @@ module EE
               null: true,
               description: 'Group statistics.',
               method: :itself
+
+        field :namespace_statistics, Types::NamespaceStatisticsType,
+              as: :storage_statistics,
+              null: true,
+              description: 'Storage statistics of the namespace.'
+
+        field :group_wikis_enabled,
+              GraphQL::BOOLEAN_TYPE,
+              null: false,
+              description: 'Indicated whether the feature groups wikis is enabled for the group.'
+
+        def group_wikis_enabled
+          object.feature_available?(:group_wikis)
+        end
       end
     end
   end
