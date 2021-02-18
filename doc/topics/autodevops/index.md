@@ -37,7 +37,6 @@ For requirements, read [Requirements for Auto DevOps](requirements.md) for more 
 
 For a developer's guide, read [Auto DevOps development guide](../../development/auto_devops.md).
 
-
 ## Enabled by default
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41729) in GitLab 11.3.
