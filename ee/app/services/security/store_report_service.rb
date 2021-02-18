@@ -57,6 +57,7 @@ module Security
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
       reset_remediations_for(vulnerability_finding, finding)
+      update_finding_fingerprints(finding, vulnerability_finding)
 
       # The maximum number of identifiers is not used in validation
       # we just want to ignore the rest if a finding has more than that.
@@ -152,6 +153,51 @@ module Security
     rescue ActiveRecord::RecordNotUnique
     end
     # rubocop: enable CodeReuse/ActiveRecord
+
+    def update_finding_fingerprints(finding, vulnerability_finding)
+      to_delete = []
+      to_update = {}
+      to_create = []
+
+      poro_fingerprints = finding.fingerprints.index_by(&:algorithm_type)
+
+      vulnerability_finding.fingerprints.each do |fingerprint|
+        poro_fingerprint = poro_fingerprints[fingerprint.algorithm_type]
+
+        # we're no longer generating these types of fingerprints. Since
+        # we're updating the persisted vulnerability, no need carry these
+        # fingerprints forward
+        if poro_fingerprint.nil?
+          to_delete << fingerprint.id
+          next
+        end
+
+        poro_fingerprints.delete(fingerprint.algorithm_type)
+        to_update[fingerprint.id] = poro_fingerprint.to_h
+      end
+
+      # any remaining poro fingerprints left are new
+      poro_fingerprints.values.each do |poro_fingerprint|
+        to_create << {
+          finding_id: vulnerability_finding.id,
+          **poro_fingerprint.to_h
+        }
+      end
+
+      ::Vulnerabilities::FindingFingerprint.transaction do
+        if to_update.count > 0
+          ::Vulnerabilities::FindingFingerprint.update(to_update.keys, to_update.values)
+        end
+
+        if to_delete.count > 0
+          ::Vulnerabilities::FindingFingerprint.delete(to_delete)
+        end
+
+        if to_create.count > 0
+          ::Vulnerabilities::FindingFingerprint.create(to_create)
+        end
+      end
+    end
 
     def create_vulnerability(vulnerability_finding, pipeline)
       if vulnerability_finding.vulnerability_id
