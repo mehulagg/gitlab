@@ -113,6 +113,7 @@ describe('Pipeline Editor | Commit section', () => {
 
   describe('when the user commits changes to the current branch', () => {
     beforeEach(async () => {
+      window.scrollTo = jest.fn();
       await submitCommit();
     });
 
@@ -131,6 +132,10 @@ describe('Pipeline Editor | Commit section', () => {
     it('emits an event to communicate the commit was successful', () => {
       expect(wrapper.emitted('commit')).toHaveLength(1);
       expect(wrapper.emitted('commit')[0]).toEqual([{ type: COMMIT_SUCCESS }]);
+    });
+
+    it('scrolls to the top of the page to bring attention to the alert', () => {
+      expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
     });
 
     it('shows no saving state', () => {

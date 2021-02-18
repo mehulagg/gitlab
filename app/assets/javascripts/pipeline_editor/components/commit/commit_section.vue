@@ -88,6 +88,7 @@ export default {
         } else if (openMergeRequest) {
           this.redirectToNewMergeRequest(branch);
         } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           this.$emit('commit', { type: COMMIT_SUCCESS });
         }
       } catch (error) {
