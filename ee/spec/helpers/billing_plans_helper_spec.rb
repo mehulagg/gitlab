@@ -100,8 +100,9 @@ RSpec.describe BillingPlansHelper do
     with_them do
       let_it_be(:user) { create(:user) }
       let(:namespace) do
-        create :namespace, type: type,
-          gitlab_subscription: create(:gitlab_subscription, hosted_plan: create("#{plan}_plan".to_sym))
+        a_namespace = create(:namespace, type: type)
+        create(:gitlab_subscription, hosted_plan: create("#{plan}_plan".to_sym), namespace: a_namespace)
+        a_namespace
       end
 
       before do
@@ -120,11 +121,9 @@ RSpec.describe BillingPlansHelper do
 
     context 'when the group is on a plan eligible for the new purchase flow' do
       let(:namespace) do
-        create(
-          :namespace,
-          type: Group,
-          gitlab_subscription: create(:gitlab_subscription, hosted_plan: create(:free_plan))
-        )
+        a_namespace = create(:namespace, type: Group)
+        create(:gitlab_subscription, hosted_plan: create(:free_plan), namespace: a_namespace)
+        a_namespace
       end
 
       before do
