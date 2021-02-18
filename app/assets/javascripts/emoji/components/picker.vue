@@ -54,15 +54,19 @@ export default {
     await initEmojiMap();
 
     const categories = await getEmojiCategoryMap();
+    let top = 0;
 
     this.categories = Object.freeze(
       Object.keys(categories).reduce((acc, category) => {
         const emojis = chunk(categories[category], 9);
-
-        return {
+        const height = generateCategoryHeight(emojis.length);
+        const newAcc = {
           ...acc,
-          [category]: { emojis, height: generateCategoryHeight(emojis.length) },
+          [category]: { emojis, height, top },
         };
+        top += height;
+
+        return newAcc;
       }, {}),
     );
   },
@@ -70,17 +74,10 @@ export default {
     categoryAppeared(category) {
       this.currentCategory = category;
     },
-    scrollToCategory(category) {
-      const categoryIndex = this.categoryNames.indexOf(category);
-      const scrollTop = this.categoryNames.reduce((acc, key, index) => {
-        if (index < categoryIndex) {
-          return acc + this.categories[key].height;
-        }
+    scrollToCategory(categoryName) {
+      const { top } = this.categories[categoryName];
 
-        return acc;
-      }, 0);
-
-      this.$refs.virtualScoller.setScrollTop(scrollTop);
+      this.$refs.virtualScoller.setScrollTop(top);
     },
     selectEmoji(name) {
       this.$emit('click', name);
