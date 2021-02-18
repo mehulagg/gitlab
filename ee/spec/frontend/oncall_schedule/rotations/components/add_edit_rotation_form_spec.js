@@ -223,7 +223,7 @@ describe('AddEditRotationForm', () => {
     });
 
     it('should emit an event with selected value on restricted FROM time selection', async () => {
-      findRestrictedToToggle().vm.$emit('change', true);
+      wrapper.setProps({ form: { ...defaultForm, isRestrictedToTime: true } });
       await wrapper.vm.$nextTick();
       const timeFrom = 5;
       const timeTo = 22;
