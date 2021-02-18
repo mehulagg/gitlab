@@ -272,8 +272,8 @@ RSpec.describe Ci::BuildRunnerPresenter do
     end
   end
 
-  describe '#variables subset' do
-    subject { presenter.variables.select { |v| %w[A B C].include?(v.fetch(:key)) } }
+  describe '#runner_variables subset' do
+    subject { presenter.runner_variables.select { |v| %w[A B C].include?(v.fetch(:key)) } }
 
     let(:build) { create(:ci_build) }
 
