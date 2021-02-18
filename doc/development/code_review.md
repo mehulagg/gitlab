@@ -47,7 +47,7 @@ more than one approval, the last maintainer to review and approve merges it.
 
 Domain experts are team members who have substantial experience with a specific technology, product feature or area of the codebase. Team members are encouraged to self-identify as domain experts and add it to their [team profile](https://gitlab.com/gitlab-com/www-gitlab-com/-/blob/master/data/team.yml)
 
-When self-identifying as a domain expert, it is recommended the MR changing the `team.yml` to be reviewed and merged by an already established Domain Expert or a corresponding Engineering Manager.
+When self-identifying as a domain expert, it is recommended that the MR changing the `team.yml` is reviewed and merged by an already established Domain Expert or a corresponding Engineering Manager.
 
 We make the following assumption with regards to automatically being considered a domain expert:
 
