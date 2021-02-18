@@ -43,6 +43,9 @@ module Ci
         builds = builds.queued_before(params[:job_age].seconds.ago)
       end
 
+      # prepare builds queue for iteration in the loop below
+      builds = prepare_builds_queue(builds)
+
       builds.each do |build|
         result = process_build(build, params)
         next unless result
@@ -116,6 +119,15 @@ module Ci
       end
 
       !failure_reason
+    end
+
+    def prepare_builds_queue(builds)
+      ## TODO, ensure that we can toggle the FF using a runner object
+      return builds if Feature.enabled?(:gitlab_ci_prepare_builds_queue, runner, default_enabled: false)
+
+      builds.limit(50).tap do |builds|
+        # devise a better locking mechanism here
+      end
     end
 
     def scheduler_failure!(build)
