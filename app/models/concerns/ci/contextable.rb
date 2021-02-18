@@ -20,7 +20,7 @@ module Ci
         variables.concat(user_variables)
         variables.concat(dependency_variables) if dependencies
         variables.concat(secret_instance_variables)
-        variables.concat(secret_group_variables)
+        variables.concat(secret_group_variables(environment: environment))
         variables.concat(secret_project_variables(environment: environment))
         variables.concat(trigger_request.user_variables) if trigger_request
         variables.concat(pipeline.variables)
@@ -93,10 +93,10 @@ module Ci
       project.ci_instance_variables_for(ref: git_ref)
     end
 
-    def secret_group_variables
+    def secret_group_variables(environment: persisted_environment)
       return [] unless project.group
 
-      project.group.ci_variables_for(git_ref, project)
+      project.group.ci_variables_for(git_ref, project, environment: environment)
     end
 
     def secret_project_variables(environment: persisted_environment)
