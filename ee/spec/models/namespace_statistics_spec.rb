@@ -174,8 +174,8 @@ RSpec.describe NamespaceStatistics do
       end
     end
 
-    context 'when namespace does not belong to a group' do
+    # context 'when namespace does not belong to a group' do
 
-    end
+    # end
   end
 end
