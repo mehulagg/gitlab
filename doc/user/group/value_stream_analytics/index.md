@@ -351,6 +351,12 @@ toggled to show data for merge requests and further refined for specific group-l
 By default the top group-level labels (max. 10) are pre-selected, with the ability to
 select up to a total of 15 labels.
 
+## Deploys and Deploy Frequency
+
+The **Deploys** and **Deployment Frequency** metrics in Value Stream Analytics show how often you are delivering value to end users. A higher deployment frequency means you are getting improvements and features out faster, and able to get feedback and iterate more quickly. Both metrics show deployments for all projects in the group, unless you have selected specific projects in the **Select projects** dropdown. For the selected time period, the **Deploys** metric shows the total number of deployments to production. The **Deploy Frequency** metric shows the average number of deployments to production per day during the selected time period. Deployments must have a `finished_at` timestamp to be counted in these metrics. 
+
+*To give a more accurate representation of deployments that actually completed successfully, the calculation for these two metrics changed in GitLab 13.9 from using the time a deployment was created to the time a deployment finished. If you were referencing this metric prior to 13.9, please keep this slight change in mind.*
+
 ## Permissions
 
 To access Group-level Value Stream Analytics, users must have Reporter access or above.
