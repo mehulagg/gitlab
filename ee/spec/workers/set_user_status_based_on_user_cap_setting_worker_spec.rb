@@ -34,6 +34,16 @@ RSpec.describe SetUserStatusBasedOnUserCapSettingWorker, type: :worker do
       end
     end
 
+    shared_examples 'does not send email to active admins' do
+      let_it_be(:active_admin) { create(:user, :admin, state: 'active') }
+
+      it 'does not send an email to active admins' do
+        expect(::Notify).not_to receive(:user_cap_reached).and_call_original
+
+        subject
+      end
+    end
+
     context 'when user is not blocked_pending_approval' do
       let(:user) { active_user }
 
@@ -52,6 +62,8 @@ RSpec.describe SetUserStatusBasedOnUserCapSettingWorker, type: :worker do
 
         expect(user.reload).to be_blocked_pending_approval
       end
+
+      include_examples 'does not send email to active admins'
     end
 
     context 'when current billable user count is less than user cap' do
@@ -65,6 +77,8 @@ RSpec.describe SetUserStatusBasedOnUserCapSettingWorker, type: :worker do
         expect(DeviseMailer).to receive(:user_admin_approval).with(user).and_call_original
         expect { subject }.to have_enqueued_mail(DeviseMailer, :user_admin_approval)
       end
+
+      include_examples 'does not send email to active admins'
 
       context 'when user has not confirmed their email yet' do
         let(:user) { create(:user, :blocked_pending_approval, :unconfirmed) }
