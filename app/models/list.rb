@@ -38,18 +38,6 @@ class List < ApplicationRecord
     end
   end
 
-  def update_preferences_for(user, preferences = {})
-    return unless user
-
-    preferences_for(user).update(preferences)
-  end
-
-  def collapsed?(user)
-    preferences = preferences_for(user)
-
-    preferences.collapsed?
-  end
-
   def as_json(options = {})
     super(options).tap do |json|
       json[:collapsed] = false

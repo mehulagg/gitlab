@@ -33,6 +33,18 @@ module Boards
       self.class.movable_types.include?(list_type&.to_sym)
     end
 
+    def collapsed?(user)
+      preferences = preferences_for(user)
+
+      preferences.collapsed?
+    end
+
+    def update_preferences_for(user, preferences = {})
+      return unless user
+
+      preferences_for(user).update(preferences)
+    end
+
     def title
       if label?
         label.name

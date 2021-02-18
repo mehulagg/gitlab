@@ -53,4 +53,12 @@ RSpec.describe 'get list of epics for an epic  board list' do
       let(:first_param) { 2 }
     end
   end
+
+  describe 'field values' do
+    it 'returns the correct values for collapsed' do
+      post_graphql(pagination_query, current_user: current_user)
+
+      expect(graphql_dig_at('group', 'epicBoard', 'lists', 'nodes', 0, 'collapsed')).to eq list.collapsed?
+    end
+  end
 end

@@ -24,9 +24,16 @@ module Types
       field :label, Types::LabelType, null: true,
             description: 'Label of the list.'
 
+      field :collapsed, GraphQL::BOOLEAN_TYPE, null: true,
+            description: 'Indicates if list is collapsed for this user.'
+
       field :epics, Types::EpicType.connection_type, null: true,
             resolver: Resolvers::Boards::BoardListEpicsResolver,
             description: 'List epics.'
+
+      def collapsed
+        object.collapsed?(current_user)
+      end
     end
     # rubocop: enable Graphql/AuthorizeTypes
   end
