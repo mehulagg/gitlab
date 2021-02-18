@@ -49,7 +49,7 @@ export default {
     tooltipBoundary: {
       type: String,
       required: false,
-      default: '',
+      default: null,
     },
     cssClass: {
       type: String,

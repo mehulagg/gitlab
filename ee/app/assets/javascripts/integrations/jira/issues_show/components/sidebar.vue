@@ -18,7 +18,8 @@ export default {
     },
     reference: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
   },
 };
@@ -32,6 +33,6 @@ export default {
       class="block labels js-labels-block"
       >{{ __('None') }}</labels-select
     >
-    <issue-reference :reference="reference" />
+    <issue-reference v-if="reference" :reference="reference" />
   </div>
 </template>
