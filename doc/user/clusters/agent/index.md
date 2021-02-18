@@ -531,3 +531,10 @@ issue is in progress, directly edit the deployment with the
 
 This error is shown if the version of the agent is newer that the version of KAS.
 To fix it, make sure that both `agentk` and KAS use the same versions.
+
+### GitOps - Not synchronizing all manifests
+
+When your cluster is low on resources, it may not synchronize all the manifests.
+A common symptom in clusters that are low on resources are messages about
+"unschedulable pods". You can resolve the problem by removing workloads from the
+cluster, or by adding more nodes to the cluster.
