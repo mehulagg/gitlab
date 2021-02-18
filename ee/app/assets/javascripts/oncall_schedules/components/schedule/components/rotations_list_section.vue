@@ -118,7 +118,6 @@ export default {
             :title="$options.i18n.editRotationLabel"
             icon="pencil"
             :aria-label="$options.i18n.editRotationLabel"
-            :disabled="true"
             @click="setRotationToUpdate(rotation)"
           />
           <gl-button
