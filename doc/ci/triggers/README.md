@@ -208,16 +208,16 @@ It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
 can opt to disable it.
 
-To enable it:
-
-```ruby
-Feature.enable(:ci_trigger_payload_into_pipeline)
-```
-
 To disable it:
 
 ```ruby
 Feature.disable(:ci_trigger_payload_into_pipeline)
+```
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_trigger_payload_into_pipeline)
 ```
 
 ## Making use of trigger variables
