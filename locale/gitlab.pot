@@ -12437,9 +12437,6 @@ msgstr ""
 msgid "Failed to load related branches"
 msgstr ""
 
-msgid "Failed to load sidebar confidential toggle"
-msgstr ""
-
 msgid "Failed to load sidebar lock status"
 msgstr ""
 
@@ -27623,6 +27620,9 @@ msgstr ""
 msgid "Something went wrong while fetching group member contributions"
 msgstr ""
 
+msgid "Something went wrong while fetching issue confidentiality status"
+msgstr ""
+
 msgid "Something went wrong while fetching latest comments."
 msgstr ""
 
@@ -27681,6 +27681,9 @@ msgid "Something went wrong while reopening the merge request. Please try again 
 msgstr ""
 
 msgid "Something went wrong while resolving this discussion. Please try again."
+msgstr ""
+
+msgid "Something went wrong while setting issue confidentiality."
 msgstr ""
 
 msgid "Something went wrong while stopping this environment. Please try again."
