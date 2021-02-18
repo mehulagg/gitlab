@@ -99,7 +99,7 @@ export default {
           v-for="(name, index) in categoryNames"
           :key="index"
           :class="{
-            'gl-text-black-normal! gl-border-blue-600': name === currentCategory,
+            'gl-text-black-normal! emoji-picker-category-active': name === currentCategory,
           }"
           type="button"
           class="gl-border-0 gl-border-b-2 gl-border-b-solid gl-flex-fill-1 gl-text-gray-300 gl-pt-2 gl-pb-3 gl-bg-transparent emoji-picker-category-tab"
