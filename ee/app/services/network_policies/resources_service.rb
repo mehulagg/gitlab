@@ -48,7 +48,7 @@ module NetworkPolicies
         if environment_id
           Clusters::KubernetesNamespace.where(environment: project.environments.id_in(environment_id))
         else
-          Clusters::KubernetesNamespace.where(environment: project.environments.available.at_most(LIMIT))
+          Clusters::KubernetesNamespace.where(environment: project.environments.available.limit(LIMIT))
         end
 
       kubernetes_namespaces
