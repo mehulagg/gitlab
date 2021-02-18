@@ -248,11 +248,9 @@ These Elasticsearch migrations, like any other GitLab changes, need to support t
 [multiple versions of the application are running at the same time](multi_version_compatibility.md).
 
 Depending on the order of deployment, it's possible that the migration
-has started or finished and there's still a server that running the application code from before the
-migration existed. This needs to always be handled.
-
-We need to take this into consideration until we can [ensure all Elasticsearch migrations start
-after the deployment has finished](https://gitlab.com/gitlab-org/gitlab/-/issues/321619).
+has started or finished and there's still a server running the application code from before the
+migration. We need to take this into consideration until we can [ensure all Elasticsearch migrations
+start after the deployment has finished](https://gitlab.com/gitlab-org/gitlab/-/issues/321619).
 
 ### Reverting a migration
 
