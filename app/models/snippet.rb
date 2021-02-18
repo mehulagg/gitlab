@@ -217,7 +217,7 @@ class Snippet < ApplicationRecord
     return [] unless repository_exists?
 
     branch = default_branch
-    list_files(branch).map { |file| Blob.lazy(repository, branch, file) }
+    list_files(branch).map { |file| Blob.lazy(repository, branch, file) }.reject { |a| a.is_a?(NilClass) }
   end
 
   def hook_attrs
