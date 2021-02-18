@@ -28,11 +28,23 @@ module Peek
       private
 
       def detailed_calls
-        "#{calls} (#{cached_calls} cached)"
+        if Gitlab::Database::LoadBalancing.enable?
+          "#{calls} (#{primary_calls} primary, #{replica_calls} replica, #{cached_calls} cached)"
+        else
+          "#{calls} (#{cached_calls} cached)"
+        end
       end
 
       def cached_calls
         detail_store.count { |item| item[:cached] == 'cached' }
+      end
+
+      def primary_calls
+        detail_store.count { |item| item[:host_type] == Gitlab::Database::LoadBalancing::HOST_PRIMARY }
+      end
+
+      def replica_calls
+        detail_store.count { |item| item[:host_type] == Gitlab::Database::LoadBalancing::HOST_REPLICA }
       end
 
       def setup_subscribers
@@ -44,7 +56,8 @@ module Peek
               duration: finish - start,
               sql: data[:sql].strip,
               backtrace: Gitlab::BacktraceCleaner.clean_backtrace(caller),
-              cached: data[:cached] ? 'cached' : ''
+              cached: data[:cached] ? 'cached' : '',
+              host_type: Gitlab::Database::LoadBalancing.host_type(data[:connection])
             }
           end
         end

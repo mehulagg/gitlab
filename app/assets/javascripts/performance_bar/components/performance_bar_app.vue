@@ -36,7 +36,7 @@ export default {
       metric: 'active-record',
       title: 'pg',
       header: s__('PerformanceBar|SQL queries'),
-      keys: ['sql', 'cached'],
+      keys: ['sql', 'cached', 'host_type'],
     },
     {
       metric: 'bullet',
