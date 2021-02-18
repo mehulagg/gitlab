@@ -27,8 +27,8 @@ RSpec.describe Issue do
       let_it_be(:project) { create(:project) }
       let(:author) { User.alert_bot }
 
-      context 'when issue title is "New: Incident"' do
-        let(:issue) { build(:issue, project: project, author: author, title: 'New: Incident', iid: 503503) }
+      context 'when issue title is "New: Alert"' do
+        let(:issue) { build(:issue, project: project, author: author, title: 'New: Alert', iid: 503503) }
 
         context 'when the author is Alert Bot' do
           it 'updates issue title with the IID' do
@@ -45,8 +45,8 @@ RSpec.describe Issue do
         end
       end
 
-      context 'when issue title is not "New: Incident"' do
-        let(:issue) { build(:issue, project: project, title: 'Not New: Incident') }
+      context 'when issue title is not "New: Alert"' do
+        let(:issue) { build(:issue, project: project, title: 'Not New: Alert') }
 
         it 'does not change issue title' do
           expect { issue.save }.not_to change { issue.title }

@@ -264,7 +264,7 @@ module EE
     end
 
     def update_generic_alert_title
-      update(title: "#{title} #{iid}")
+      update(title: _('New: Incident %{iid}' % { iid: iid }))
     end
 
     def generic_alert_with_default_title?

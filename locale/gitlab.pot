@@ -20013,6 +20013,9 @@ msgstr ""
 msgid "New..."
 msgstr ""
 
+msgid "New: Incident %{iid}"
+msgstr ""
+
 msgid "Newest first"
 msgstr ""
 
