@@ -232,7 +232,7 @@ Next, install the in-cluster component of the Agent.
 Replace the value of `agent-token` and `kas-address` with the token received from the previous step and the configured accress of the Kubernetes Agent Server, respectively.
 
 ```shell
-docker run --rm -it registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/cli:latest generate --agent-token=your-agent-token --kas-address=wss://kas.gitlab.example.com | kubectl apply -f -
+docker run --rm registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/cli:latest generate --agent-token=your-agent-token --kas-address=wss://kas.gitlab.example.com | kubectl apply -f -
 ```
 
 To find out the various options the above Docker container supports, run
@@ -243,7 +243,9 @@ docker run --rm -it registry.gitlab.com/gitlab-org/cluster-integration/gitlab-ag
 
 #### Advanced installation
 
-For more advanced configurations, we recommend to use [the `kpt` based installation method](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/tree/master/build/deployment/gitlab-agent). Read on for a fully manual, detailed installation steps.
+For more advanced configurations, we recommend to use [the `kpt` based installation method](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/tree/master/build/deployment/gitlab-agent).
+
+Otherwise, you can follow below for fully manual, detailed installation steps.
 
 ##### Create the Kubernetes secret
 
