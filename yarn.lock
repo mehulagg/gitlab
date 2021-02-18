@@ -892,16 +892,16 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1025079950/artifacts/raw/gitlab-ui.1073-success-warning-input-variants.tgz":
-  version "27.4.3"
-  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1025079950/artifacts/raw/gitlab-ui.1073-success-warning-input-variants.tgz#8588c633ed9a96c6afd4ddab35778b9828b1701c"
+"@gitlab/ui@ https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1038295828/artifacts/raw/gitlab-ui.1073-success-warning-input-variants.tgz":
+  version "27.7.1"
+  resolved " https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1038295828/artifacts/raw/gitlab-ui.1073-success-warning-input-variants.tgz#c540002b45e12cd998680f67f26561f4ea91f5ff"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
     bootstrap-vue "2.13.1"
     copy-to-clipboard "^3.0.8"
     dompurify "^2.2.6"
-    echarts "^4.2.1"
+    echarts "^4.9.0"
     highlight.js "^9.13.1"
     js-beautify "^1.8.8"
     lodash "^4.17.20"
