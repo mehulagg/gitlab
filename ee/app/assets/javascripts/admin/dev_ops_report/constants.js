@@ -49,7 +49,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
     filterPlaceholder: s__('DevopsAdoption|Filter by name'),
     selectedGroupsTextSingular: s__('DevopsAdoption|%{selectedCount} group selected'),
     selectedGroupsTextPlural: s__('DevopsAdoption|%{selectedCount} groups selected'),
-    error: s__('DevopsAdoption|An error occured while saving the group. Please try again.'),
+    error: s__('DevopsAdoption|An error occurred while saving the group. Please try again.'),
     noResults: s__('DevopsAdoption|No filter results.'),
   },
   table: {
@@ -95,7 +95,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
     ),
     cancel: __('Cancel'),
     confirm: s__('DevopsAdoption|Remove Group'),
-    error: s__('DevopsAdoption|An error occured while removing the group. Please try again.'),
+    error: s__('DevopsAdoption|An error occurred while removing the group. Please try again.'),
   },
   tableCell: {
     trueText: s__('DevopsAdoption|Adopted'),

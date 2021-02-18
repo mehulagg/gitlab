@@ -3175,13 +3175,13 @@ msgstr ""
 msgid "An error has occurred"
 msgstr ""
 
-msgid "An error occured while loading the notification settings. Please try again."
+msgid "An error occurred while loading the notification settings. Please try again."
 msgstr ""
 
-msgid "An error occured while saving changes: %{error}"
+msgid "An error occurred while saving changes: %{error}"
 msgstr ""
 
-msgid "An error occured while updating the notification settings. Please try again."
+msgid "An error occurred while updating the notification settings. Please try again."
 msgstr ""
 
 msgid "An error occurred adding a draft to the thread."
@@ -3517,10 +3517,10 @@ msgstr ""
 msgid "An error occurred. Please try again."
 msgstr ""
 
-msgid "An error ocurred while drawing job relationship links."
+msgid "An error occurred while drawing job relationship links."
 msgstr ""
 
-msgid "An error ocurred while loading your content. Please try again."
+msgid "An error occurred while loading your content. Please try again."
 msgstr ""
 
 msgid "An example project for managing Kubernetes clusters integrated with GitLab"
@@ -10296,10 +10296,10 @@ msgstr ""
 msgid "DevopsAdoption|Adopted"
 msgstr ""
 
-msgid "DevopsAdoption|An error occured while removing the group. Please try again."
+msgid "DevopsAdoption|An error occurred while removing the group. Please try again."
 msgstr ""
 
-msgid "DevopsAdoption|An error occured while saving the group. Please try again."
+msgid "DevopsAdoption|An error occurred while saving the group. Please try again."
 msgstr ""
 
 msgid "DevopsAdoption|Approvals"
@@ -16822,7 +16822,7 @@ msgstr ""
 msgid "JiraService|%{user_link} mentioned this issue in %{entity_link} of %{project_link}%{branch}:{quote}%{entity_message}{quote}"
 msgstr ""
 
-msgid "JiraService|An error occured while fetching issue list"
+msgid "JiraService|An error occurred while fetching issue list"
 msgstr ""
 
 msgid "JiraService|Automatically transitions Jira issues to the \"Done\" category. %{linkStart}Learn more%{linkEnd}"
@@ -21704,10 +21704,10 @@ msgstr ""
 msgid "Pipeline: %{status}"
 msgstr ""
 
-msgid "PipelineCharts|An error has ocurred when retrieving the analytics data"
+msgid "PipelineCharts|An error has occurred when retrieving the analytics data"
 msgstr ""
 
-msgid "PipelineCharts|An error has ocurred when retrieving the pipelines data"
+msgid "PipelineCharts|An error has occurred when retrieving the pipelines data"
 msgstr ""
 
 msgid "PipelineCharts|An unknown error occurred while processing CI/CD analytics."
@@ -24922,7 +24922,7 @@ msgstr ""
 msgid "Reports|Activity"
 msgstr ""
 
-msgid "Reports|An error occured while loading report"
+msgid "Reports|An error occurred while loading report"
 msgstr ""
 
 msgid "Reports|An error occurred while loading %{name} results"

@@ -128,9 +128,9 @@ export const devopsAdoptionTableHeaders = [
 
 export const segmentName = 'Foooo';
 
-export const genericErrorMessage = 'An error occured while saving the group. Please try again.';
+export const genericErrorMessage = 'An error occurred while saving the group. Please try again.';
 
 export const dataErrorMessage = 'Name already taken.';
 
 export const genericDeleteErrorMessage =
-  'An error occured while removing the group. Please try again.';
+  'An error occurred while removing the group. Please try again.';
