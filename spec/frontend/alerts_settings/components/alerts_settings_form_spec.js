@@ -12,6 +12,7 @@ import MappingBuilder from '~/alerts_settings/components/alert_mapping_builder.v
 import AlertsSettingsForm from '~/alerts_settings/components/alerts_settings_form.vue';
 import { typeSet } from '~/alerts_settings/constants';
 import alertFields from '../mocks/alert_fields.json';
+import parsedMapping from '../mocks/parsed_mapping.json';
 import { defaultAlertSettingsConfig } from './util';
 
 describe('AlertsSettingsForm', () => {
@@ -149,7 +150,7 @@ describe('AlertsSettingsForm', () => {
 
         enableIntegration(0, integrationName);
 
-        const sampleMapping = { field: 'test' };
+        const sampleMapping = parsedMapping.payloadAttributeMappings;
         findMappingBuilder().vm.$emit('onMappingUpdate', sampleMapping);
         findForm().trigger('submit');
 
@@ -287,33 +288,38 @@ describe('AlertsSettingsForm', () => {
         data: {
           currentIntegration: {
             type: typeSet.http,
-            samplePayload: validSamplePayload,
+            payloadExample: validSamplePayload,
+            payloadAttributeMappings: [],
           },
+          active: false,
+          resetPayloadAndMappingConfirmed: false,
         },
         props: { alertFields },
       });
     });
 
     describe.each`
-      active   | resetSamplePayloadConfirmed | disabled
-      ${true}  | ${true}                     | ${undefined}
-      ${false} | ${true}                     | ${'disabled'}
-      ${true}  | ${false}                    | ${'disabled'}
-      ${false} | ${false}                    | ${'disabled'}
-    `('', ({ active, resetSamplePayloadConfirmed, disabled }) => {
-      const payloadResetMsg = resetSamplePayloadConfirmed ? 'was confirmed' : 'was not confirmed';
+      active   | resetPayloadAndMappingConfirmed | disabled
+      ${true}  | ${true}                         | ${undefined}
+      ${false} | ${true}                         | ${'disabled'}
+      ${true}  | ${false}                        | ${'disabled'}
+      ${false} | ${false}                        | ${'disabled'}
+    `('', ({ active, resetPayloadAndMappingConfirmed, disabled }) => {
+      const payloadResetMsg = resetPayloadAndMappingConfirmed
+        ? 'was confirmed'
+        : 'was not confirmed';
       const enabledState = disabled === 'disabled' ? 'disabled' : 'enabled';
       const activeState = active ? 'active' : 'not active';
 
       it(`textarea should be ${enabledState} when payload reset ${payloadResetMsg} and current integration is ${activeState}`, async () => {
         wrapper.setData({
           currentIntegration: {
-            active,
             type: typeSet.http,
             payloadExample: validSamplePayload,
             payloadAttributeMappings: [],
           },
-          resetSamplePayloadConfirmed,
+          active,
+          resetPayloadAndMappingConfirmed,
         });
         await wrapper.vm.$nextTick();
         expect(findTestPayloadSection().find(GlFormTextarea).attributes('disabled')).toBe(disabled);
@@ -322,14 +328,16 @@ describe('AlertsSettingsForm', () => {
 
     describe('action buttons for sample payload', () => {
       describe.each`
-        resetSamplePayloadConfirmed | payloadExample        | caption
-        ${false}                    | ${validSamplePayload} | ${'Edit payload'}
-        ${true}                     | ${emptySamplePayload} | ${'Submit payload'}
-        ${true}                     | ${validSamplePayload} | ${'Submit payload'}
-        ${false}                    | ${emptySamplePayload} | ${'Submit payload'}
-      `('', ({ resetSamplePayloadConfirmed, payloadExample, caption }) => {
+        resetPayloadAndMappingConfirmed | payloadExample        | caption
+        ${false}                        | ${validSamplePayload} | ${'Edit payload'}
+        ${true}                         | ${emptySamplePayload} | ${'Submit payload'}
+        ${true}                         | ${validSamplePayload} | ${'Submit payload'}
+        ${false}                        | ${emptySamplePayload} | ${'Submit payload'}
+      `('', ({ resetPayloadAndMappingConfirmed, payloadExample, caption }) => {
         const samplePayloadMsg = payloadExample ? 'was provided' : 'was not provided';
-        const payloadResetMsg = resetSamplePayloadConfirmed ? 'was confirmed' : 'was not confirmed';
+        const payloadResetMsg = resetPayloadAndMappingConfirmed
+          ? 'was confirmed'
+          : 'was not confirmed';
 
         it(`shows ${caption} button when sample payload ${samplePayloadMsg} and payload reset ${payloadResetMsg}`, async () => {
           wrapper.setData({
@@ -340,7 +348,7 @@ describe('AlertsSettingsForm', () => {
               active: true,
               payloadAttributeMappings: [],
             },
-            resetSamplePayloadConfirmed,
+            resetPayloadAndMappingConfirmed,
           });
           await wrapper.vm.$nextTick();
           expect(findActionBtn().text()).toBe(caption);
@@ -352,7 +360,7 @@ describe('AlertsSettingsForm', () => {
       beforeEach(() => {
         wrapper.setData({
           selectedIntegration: typeSet.http,
-          resetSamplePayloadConfirmed: true,
+          resetPayloadAndMappingConfirmed: true,
         });
       });
 

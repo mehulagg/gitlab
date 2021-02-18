@@ -212,7 +212,7 @@ export default {
       );
     },
     hasSamplePayload() {
-      const { payloadExample } = this.currentIntegration;
+      const { payloadExample } = this.currentIntegration || {};
       return payloadExample && !isEmpty(JSON.parse(payloadExample));
     },
     canEditPayload() {
