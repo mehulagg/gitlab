@@ -16,6 +16,8 @@ module Gitlab
 
       class Group < ApplicationRecord
         self.table_name = 'namespaces'
+
+        self.inheritance_column = :_type_disabled
       end
 
       def perform(*group_ids)
