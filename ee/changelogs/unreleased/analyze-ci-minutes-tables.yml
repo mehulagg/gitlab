@@ -1,0 +1,5 @@
+---
+title: Force ANALYZE tables involved in CI minutes reset
+merge_request: 54561
+author:
+type: performance

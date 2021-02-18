@@ -85,6 +85,28 @@ RSpec.describe Ci::Minutes::BatchResetService do
             expect(namespace.last_ci_minutes_usage_notification_level).to be_nil
           end
         end
+
+        it 'updates the statistics of affected tables' do
+          record = ActiveRecord::QueryRecorder.new { subject }
+
+          [/ANALYZE project_statistics/, /ANALYZE namespace_statistics/, /ANALYZE namespaces/].each do |query|
+            expect(record.log).to include(query)
+          end
+        end
+
+        context 'when analyze_ci_minutes_tables feature flag is disabled' do
+          before do
+            stub_feature_flags(analyze_ci_minutes_tables: false)
+          end
+
+          it 'does not update the statistics of affected tables' do
+            record = ActiveRecord::QueryRecorder.new { subject }
+
+            [/ANALYZE project_statistics/, /ANALYZE namespace_statistics/, /ANALYZE namespaces/].each do |query|
+              expect(record.log).not_to include(query)
+            end
+          end
+        end
       end
 
       context 'when ID range is not provided' do

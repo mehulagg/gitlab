@@ -46,6 +46,14 @@ module Ci
           reset_shared_runners_seconds!(namespaces)
           reset_ci_minutes_notifications!(namespaces)
         end
+
+        if Feature.enabled?(:analyze_ci_minutes_tables, default_enabled: true)
+          # Update stats for the affected tables since we update many records.
+          Namespace.connection.execute('ANALYZE namespaces')
+          Namespace.connection.execute('ANALYZE namespace_statistics')
+          Namespace.connection.execute('ANALYZE project_statistics')
+        end
+
       rescue ActiveRecord::ActiveRecordError => e
         # We cleanup the backtrace for intermediate errors so they remain compact and
         # relevant due to the possibility of having many failed batches.
