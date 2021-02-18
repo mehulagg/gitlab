@@ -14,7 +14,7 @@ query project(
   $hasResolution: Boolean
   $includeExternalIssueLinks: Boolean = false
 ) {
-  project(fullPath: $fullPath) {
+  project(fullPath: $fullPath) @connection(key: "project") {
     vulnerabilities(
       after: $after
       first: $first
@@ -25,7 +25,7 @@ query project(
       sort: $sort
       hasIssues: $hasIssues
       hasResolution: $hasResolution
-    ) {
+    ) @connection(key: "vulnerabilities") {
       nodes {
         ...Vulnerability
         externalIssueLinks @include(if: $includeExternalIssueLinks) {
