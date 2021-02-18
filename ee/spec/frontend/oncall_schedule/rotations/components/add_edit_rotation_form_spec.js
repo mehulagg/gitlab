@@ -222,54 +222,42 @@ describe('AddEditRotationForm', () => {
       expect(emittedEvent[0][0]).toEqual({ type: 'isRestrictedToTime', value: false });
     });
 
-    it('should emit an event with selected value on restricted FROM time selection', async () => {
-      wrapper.setProps({ form: { ...defaultForm, isRestrictedToTime: true } });
-      await wrapper.vm.$nextTick();
-      const timeFrom = 5;
-      const timeTo = 22;
-      findRestrictedFromOptions().at(timeFrom).vm.$emit('click');
-      findRestrictedToOptions().at(timeTo).vm.$emit('click');
-      await wrapper.vm.$nextTick();
-      const emittedEvent = wrapper.emitted('update-rotation-form');
-      expect(emittedEvent).toHaveLength(2);
-      expect(emittedEvent[0][0]).toEqual({ type: 'restrictedTo.startTime', value: timeFrom + 1 });
-      expect(emittedEvent[1][0]).toEqual({ type: 'restrictedTo.endTime', value: timeTo + 1 });
-    });
-
-    it('should add a checkmark to a selected  restricted FROM time', async () => {
-      findRestrictedToToggle().vm.$emit('change', true);
+    describe('when a rotation restriction is selected', () => {
       const timeFrom = 5;
       const timeTo = 22;
 
-      wrapper.setProps({
-        form: {
-          endsOn: {
-            time: 0,
-          },
-          startsAt: {
-            time: 0,
-          },
-          restrictedTo: {
-            startTime: timeFrom,
-            endTime: timeTo,
-          },
-          rotationLength: {
-            length: 1,
-            unit: LENGTH_ENUM.hours,
-          },
-        },
+      beforeEach(() => {
+        wrapper.setProps({ form: { ...defaultForm, isRestrictedToTime: true } });
       });
-      await wrapper.vm.$nextTick();
-      expect(
-        findRestrictedFromOptions()
-          .at(timeFrom - 1)
-          .props('isChecked'),
-      ).toBe(true);
-      expect(
-        findRestrictedToOptions()
-          .at(timeTo - 1)
-          .props('isChecked'),
-      ).toBe(true);
+
+      it('should emit an event with selected value on restricted FROM time selection', async () => {
+        findRestrictedFromOptions().at(timeFrom).vm.$emit('click');
+        findRestrictedToOptions().at(timeTo).vm.$emit('click');
+        await wrapper.vm.$nextTick();
+        const emittedEvent = wrapper.emitted('update-rotation-form');
+        expect(emittedEvent).toHaveLength(2);
+        expect(emittedEvent[0][0]).toEqual({ type: 'restrictedTo.startTime', value: timeFrom + 1 });
+        expect(emittedEvent[1][0]).toEqual({ type: 'restrictedTo.endTime', value: timeTo + 1 });
+      });
+
+      it('should add a checkmark to a selected restricted FROM time', async () => {
+        wrapper.setProps(
+          merge({}, wrapper.props(), {
+            form: { restrictedTo: { startTime: timeFrom, endTime: timeTo } },
+          }),
+        );
+        await wrapper.vm.$nextTick();
+        expect(
+          findRestrictedFromOptions()
+            .at(timeFrom - 1)
+            .props('isChecked'),
+        ).toBe(true);
+        expect(
+          findRestrictedToOptions()
+            .at(timeTo - 1)
+            .props('isChecked'),
+        ).toBe(true);
+      });
     });
   });
 
