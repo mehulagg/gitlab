@@ -1,4 +1,4 @@
-import { GlDropdownItem, GlIcon } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlIcon } from '@gitlab/ui';
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import CiEnvironmentsDropdown from '~/ci_variable_list/components/ci_environments_dropdown.vue';
@@ -89,6 +89,12 @@ describe('Ci environments dropdown', () => {
 
     it('should display active checkmark if active', () => {
       expect(findActiveIconByIndex(0).classes('gl-visibility-hidden')).toBe(false);
+    });
+
+    it('should clear the search term when showing the dropdown', () => {
+      wrapper.findComponent(GlDropdown).vm.$emit('show');
+
+      expect(wrapper.find('[data-testid="ci-environment-search"]').text()).toBe('');
     });
 
     describe('Custom events', () => {
