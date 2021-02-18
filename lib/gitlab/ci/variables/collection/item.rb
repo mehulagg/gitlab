@@ -11,12 +11,16 @@ module Gitlab
             raise ArgumentError, "`#{key}` must be of type String or nil value, while it was: #{value.class}" unless
               value.is_a?(String) || value.nil?
 
-            @variable = {
-              key: key, value: value, public: public, file: file, masked: masked
-            }
+            depends_on ||= variable_references(value)
 
-            depends_on ||= variable_references
-            @variable[:depends_on] = depends_on if depends_on
+            @variable = {
+              key: key,
+              value: value,
+              public: public,
+              file: file,
+              masked: masked,
+              depends_on: depends_on
+            }
           end
 
           def value
@@ -24,13 +28,15 @@ module Gitlab
           end
 
           def [](key)
-            return if key == :depends_on && !@variable.has_key?(:depends_on)
-
             @variable.fetch(key)
           end
 
           def ==(other)
             to_runner_variable == self.class.fabricate(other).to_runner_variable
+          end
+
+          def depends_on
+            self[:depends_on]
           end
 
           ##
@@ -59,8 +65,7 @@ module Gitlab
 
           private
 
-          def variable_references
-            value = @variable.fetch(:value)
+          def variable_references(value)
             return unless ExpandVariables.possible_var_reference?(value)
 
             value.scan(ExpandVariables::VARIABLES_REGEXP).map do |var_ref|

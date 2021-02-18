@@ -52,7 +52,7 @@ module Gitlab
           end
 
           def tsort_each_child(var_item, &block)
-            depends_on = var_item[:depends_on]
+            depends_on = var_item.depends_on
             return unless depends_on
 
             depends_on.filter_map { |var_ref_name| @coll[var_ref_name] }.each(&block)
