@@ -49,6 +49,7 @@ Sidekiq.configure_server do |config|
   config.death_handlers << Gitlab::SidekiqDeathHandler.method(:handler)
 
   config.on :startup do
+    # Add here 
     # Clear any connections that might have been obtained before starting
     # Sidekiq (e.g. in an initializer).
     ActiveRecord::Base.clear_all_connections!
