@@ -177,5 +177,13 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
           .to eq(key: 'VAR', value: 'value', public: true, file: true, masked: false)
       end
     end
+
+    context 'when referencing a variable' do
+      it '#depends_on contains names of dependencies' do
+        runner_variable = described_class.new(key: 'CI_VAR', value: '${CI_VAR_2}-123-$CI_VAR_3')
+
+        expect(runner_variable.depends_on).to eq(%w(CI_VAR_2 CI_VAR_3))
+      end
+    end
   end
 end

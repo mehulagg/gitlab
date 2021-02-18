@@ -14,7 +14,7 @@ module Gitlab
               value.is_a?(String) || value.nil?
 
             @variable = { key: key, value: value, public: public, file: file, masked: masked }
-            @depends_on = self.class.variable_references(value)
+            @depends_on = variable_references
           end
 
           def value
@@ -53,7 +53,9 @@ module Gitlab
             end
           end
 
-          def self.variable_references(value)
+          protected
+
+          def variable_references
             return unless ExpandVariables.possible_var_reference?(value)
 
             value.scan(ExpandVariables::VARIABLES_REGEXP).map do |var_ref|
