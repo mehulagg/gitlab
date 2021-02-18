@@ -208,7 +208,7 @@ Then, you can run `npm publish` either locally or by using GitLab CI/CD.
 
 When you use the [instance-level endpoint](#use-the-gitlab-endpoint-for-npm-packages), only the packages with names in the format of `@scope/package-name` are available.
 
-- The `@scope` is the root namespace of the GitLab project. It must match exactly, including the case.
+- The `@scope` is the root namespace of the GitLab project. To follow NPM convention, it should be lowercase, however GitLab's package registry does allow for uppercase
 - The `package-name` can be whatever you want.
 
 For example, if your project is `https://gitlab.example.com/my-org/engineering-group/team-amazing/analytics`,
@@ -218,7 +218,8 @@ the root namespace is `my-org`. When you publish a package, it must have `my-org
 | ---------------------- | ----------------------- | --------- |
 | `my-org/bar`           | `@my-org/bar`           | Yes       |
 | `my-org/bar/baz`       | `@my-org/baz`           | Yes       |
-| `My-org/Bar/baz`       | `@My-org/Baz`           | Yes       |
+| `My-Org/Bar/baz`       | `@my-org/Baz`           | Yes       |
+| `My-Org/Bar/baz`       | `@My-Org/Baz`           | Yes       |
 | `my-org/bar/buz`       | `@my-org/anything`      | Yes       |
 | `gitlab-org/gitlab`    | `@gitlab-org/gitlab`    | Yes       |
 | `gitlab-org/gitlab`    | `@foo/bar`              | No        |
@@ -231,8 +232,7 @@ In GitLab, this regex validates all package names from all package managers:
 
 This regex allows almost all of the characters that npm allows, with a few exceptions (for example, `~` is not allowed).
 
-The regex also allows for capital letters, while npm does not. Capital letters are needed because the scope must be
-identical to the root namespace of the project.
+The regex also allows for capital letters, while npm does not.
 
 WARNING:
 When you update the path of a user or group, or transfer a subgroup or project,
