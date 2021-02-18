@@ -27,16 +27,28 @@ View a [video introduction to groups](https://www.youtube.com/watch?v=4TWfh1aKHH
 
 ## View groups
 
-To view groups, in the top menu, select **Groups > Your Groups**.
+To view groups:
 
-- When you select **Your groups**, all groups you are a member of are displayed.
-- When you select **Explore public groups**, a list of public groups are displayed.
+1. In the top menu, select **Groups > Your Groups**. All groups you are a member of are displayed.
+1. To view a list of public groups, select **Explore public groups**.
 
-You can also view groups by namespace. For example, to view:
+You can also view groups by namespace.
 
-- A user's namespace: `http://gitlab.example.com/username`
-- A group's namespace: `http://gitlab.example.com/groupname`
-- A subgroups's namespace: `http://gitlab.example.com/groupname/subgroup_name`
+### Namespaces
+
+In GitLab, a namespace is a unique name and URL for a user, a group, or subgroup.
+
+- `http://gitlab.example.com/username`
+- `http://gitlab.example.com/groupname`
+- `http://gitlab.example.com/groupname/subgroup_name`
+
+For example, consider a user named Alex:
+
+1. Alex creates an account with the username `alex`: `https://gitlab.example.com/alex`
+1. Alex creates a group for their team with the group name `alex-team`.
+   The group and its projects are available at: `https://gitlab.example.com/alex-team`
+1. Alex creates a subgroup of `alex-team` with the subgroup name `marketing`.
+   The subgroup and its projects are available at: `https://gitlab.example.com/alex-team/marketing`
 
 ## Create a group
 
@@ -225,7 +237,8 @@ When you mention a group in a comment, every member of the group gets a to-do it
 added to their To-do list.
 
 1. Open the MR or issue.
-1. In a comment, type `@` followed by the group or subgroup namespace.
+1. In a comment, type `@` followed by the user, group, or subgroup namespace.
+   For example, `@alex`, `@alex-team`, or `@alex-team/marketing`.
 1. Select **Comment**.
 
 A to-do item is created for all the group and subgroup members.
@@ -484,7 +497,7 @@ the group's dashboard, and clicking **Settings**.
 ### General settings
 
 In addition to editing any settings you previously
-set when [creating the group](#create-a-new-group), you can also
+set when [creating the group](#create-a-group), you can also
 access further configurations for your group.
 
 #### Changing a group's path
