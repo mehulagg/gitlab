@@ -10,6 +10,7 @@ export const participants = [
     name: 'test',
     avatar: '',
     avatarUrl: '',
+    webUrl: '',
   },
   {
     id: '2',
@@ -17,6 +18,7 @@ export const participants = [
     name: 'hello',
     avatar: '',
     avatarUrl: '',
+    webUrl: '',
   },
 ];
 
