@@ -22,8 +22,6 @@ Then you can:
 
 You can also create [subgroups](subgroups/index.md).
 
-<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-View a [video introduction to groups](https://www.youtube.com/watch?v=4TWfh1aKHHw).
 
 ## View groups
 
