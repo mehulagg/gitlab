@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe ComplianceManagement::Frameworks::CreateService do
-  let_it_be(:namespace) { create(:namespace) }
+  let_it_be_with_refind(:namespace) { create(:namespace) }
   let(:params) do
     {
       name: 'GDPR',
@@ -35,7 +35,7 @@ RSpec.describe ComplianceManagement::Frameworks::CreateService do
     end
 
     context 'namespace has a parent' do
-      let_it_be(:namespace) { create(:namespace, :with_hierarchy) }
+      let_it_be_with_reload(:namespace) { create(:namespace, :with_hierarchy) }
       let(:descendant) { namespace.descendants.first }
 
       subject { described_class.new(namespace: descendant, params: params, current_user: namespace.owner) }

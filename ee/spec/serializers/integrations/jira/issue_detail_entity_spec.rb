@@ -3,8 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe Integrations::Jira::IssueDetailEntity do
-  let(:project) { build(:project) }
-  let(:jira_client) { double(options: { site: 'http://jira.com/' }) }
+  include JiraServiceHelper
+
+  let_it_be(:project) { create(:project) }
+  let_it_be(:jira_service) { create(:jira_service, project: project, url: 'http://jira.com', api_url: 'http://api.jira.com') }
+
   let(:reporter) do
     double(
       'displayName' => 'reporter',
@@ -34,7 +37,6 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       assignee: assignee,
       project: double(key: 'GL'),
       key: 'GL-5',
-      client: jira_client,
       status: double(name: 'To Do')
     )
   end
@@ -87,12 +89,15 @@ RSpec.describe Integrations::Jira::IssueDetailEntity do
       expect(subject[:assignees].first).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=assignee@assignee.com')
     end
 
-    context 'and context_path' do
-      let(:jira_client) { double(options: { site: 'http://jira.com/', context_path: '/jira-sub-path' }) }
+    context 'with only url' do
+      before do
+        stub_jira_service_test
+        jira_service.update!(api_url: nil)
+      end
 
-      it 'returns URLs including context path' do
-        expect(subject[:author]).to include(web_url: 'http://jira.com/jira-sub-path/secure/ViewProfile.jspa?name=reporter@reporter.com')
-        expect(subject[:web_url]).to eq('http://jira.com/jira-sub-path/browse/GL-5')
+      it 'returns URLs with the web url' do
+        expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter@reporter.com')
+        expect(subject[:web_url]).to eq('http://jira.com/browse/GL-5')
       end
     end
   end

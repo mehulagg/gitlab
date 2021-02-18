@@ -2,7 +2,7 @@
 
 module IncidentManagement
   module OncallRotations
-    class CreateService < BaseService
+    class CreateService < OncallRotations::BaseService
       MAXIMUM_PARTICIPANTS = 100
 
       # @param schedule [IncidentManagement::OncallSchedule]

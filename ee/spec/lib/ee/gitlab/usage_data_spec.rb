@@ -183,7 +183,7 @@ RSpec.describe Gitlab::UsageData do
 
       expect(subject[:license_md5]).to eq(Digest::MD5.hexdigest(license.data))
       expect(subject[:license_id]).to eq(license.license_id)
-      expect(subject[:historical_max_users]).to eq(::HistoricalData.max_historical_user_count)
+      expect(subject[:historical_max_users]).to eq(license.historical_max)
       expect(subject[:licensee]).to eq(license.licensee)
       expect(subject[:license_user_count]).to eq(license.restricted_user_count)
       expect(subject[:license_starts_at]).to eq(license.starts_at)
@@ -379,14 +379,39 @@ RSpec.describe Gitlab::UsageData do
       expect(described_class.usage_activity_by_stage_enablement({})).to eq({})
     end
 
-    it 'excludes data outside of the date range' do
-      create_list(:geo_node, 2).each do |node|
-        for_defined_days_back do
-          create(:oauth_access_grant, application: node.oauth_application)
+    context 'geo enabled' do
+      before do
+        create_list(:geo_node, 2, :secondary).each do |node|
+          for_defined_days_back do
+            create(:oauth_access_grant, application: node.oauth_application)
+          end
+        end
+
+        create(:geo_node, :secondary, enabled: false)
+        create(:geo_node, :primary)
+
+        GeoNode.all.each do |node|
+          create(:geo_node_status, geo_node: node)
         end
       end
 
-      expect(described_class.usage_activity_by_stage_enablement(described_class.last_28_days_time_period)).to eq(geo_secondary_web_oauth_users: 2)
+      subject do
+        described_class.usage_activity_by_stage_enablement(described_class.last_28_days_time_period)
+      end
+
+      it 'excludes data outside of the date range' do
+        expect(subject).to include(geo_secondary_web_oauth_users: 2)
+      end
+
+      context 'node status fields' do
+        it 'only includes active secondary nodes' do
+          expect(subject[:geo_node_usage].size).to eq(2)
+        end
+
+        it 'includes all resource status fields' do
+          expect(subject[:geo_node_usage].first.keys).to eq(GeoNodeStatus::RESOURCE_STATUS_FIELDS)
+        end
+      end
     end
   end
 

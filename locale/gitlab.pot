@@ -2297,6 +2297,9 @@ msgstr ""
 msgid "AdminUsers|Active"
 msgstr ""
 
+msgid "AdminUsers|Adjust the user cap setting on your instance"
+msgstr ""
+
 msgid "AdminUsers|Admin"
 msgstr ""
 
@@ -2390,6 +2393,15 @@ msgstr ""
 msgid "AdminUsers|For more information, please refer to the %{link_start}user account deletion documentation.%{link_end}"
 msgstr ""
 
+msgid "AdminUsers|Here are some helpful links to help you manage your instance:"
+msgstr ""
+
+msgid "AdminUsers|If you have any questions about this process please consult our %{doc_link} or %{support_link}."
+msgstr ""
+
+msgid "AdminUsers|Important information about usage on your GitLab instance"
+msgstr ""
+
 msgid "AdminUsers|Is using seat"
 msgstr ""
 
@@ -2397,6 +2409,9 @@ msgid "AdminUsers|It's you!"
 msgstr ""
 
 msgid "AdminUsers|Log in"
+msgstr ""
+
+msgid "AdminUsers|Manage (accept/reject) pending user sign ups"
 msgstr ""
 
 msgid "AdminUsers|New user"
@@ -2498,6 +2513,18 @@ msgstr ""
 msgid "AdminUsers|Users"
 msgstr ""
 
+msgid "AdminUsers|Users can still be invited to your instance and/or add themselves if permitted based on your settings. They will not have access to your instance, nor count towards your subscribed seat count until you %{approve_link}."
+msgstr ""
+
+msgid "AdminUsers|View pending member requests"
+msgstr ""
+
+msgid "AdminUsers|What can I do?"
+msgstr ""
+
+msgid "AdminUsers|What does this mean?"
+msgstr ""
+
 msgid "AdminUsers|When the user logs back in, their account will reactivate as a fully active account"
 msgstr ""
 
@@ -2529,6 +2556,21 @@ msgid "AdminUsers|You cannot remove your own admin rights."
 msgstr ""
 
 msgid "AdminUsers|You must transfer ownership or delete the groups owned by this user before you can delete their account"
+msgstr ""
+
+msgid "AdminUsers|Your GitLab instance has reached the maximum allowed %{user_doc_link} set by an instance admin."
+msgstr ""
+
+msgid "AdminUsers|approve them"
+msgstr ""
+
+msgid "AdminUsers|contact our support team"
+msgstr ""
+
+msgid "AdminUsers|docs"
+msgstr ""
+
+msgid "AdminUsers|user cap"
 msgstr ""
 
 msgid "Administration"
@@ -3517,6 +3559,9 @@ msgstr ""
 msgid "An error occurred. Please try again."
 msgstr ""
 
+msgid "An error ocurred while drawing job relationship links."
+msgstr ""
+
 msgid "An error ocurred while loading your content. Please try again."
 msgstr ""
 
@@ -3880,9 +3925,6 @@ msgid "Are you sure you want to cancel editing this comment?"
 msgstr ""
 
 msgid "Are you sure you want to close this blocked issue?"
-msgstr ""
-
-msgid "Are you sure you want to delete \"%{name}\" Value Stream?"
 msgstr ""
 
 msgid "Are you sure you want to delete %{name}?"
@@ -7291,6 +7333,9 @@ msgstr ""
 msgid "Collapse approvers"
 msgstr ""
 
+msgid "Collapse issues"
+msgstr ""
+
 msgid "Collapse milestones"
 msgstr ""
 
@@ -8591,6 +8636,9 @@ msgstr ""
 msgid "CreateValueStreamForm|'%{name}' Value Stream created"
 msgstr ""
 
+msgid "CreateValueStreamForm|'%{name}' Value Stream edited"
+msgstr ""
+
 msgid "CreateValueStreamForm|Add another stage"
 msgstr ""
 
@@ -8603,13 +8651,22 @@ msgstr ""
 msgid "CreateValueStreamForm|Code stage start"
 msgstr ""
 
+msgid "CreateValueStreamForm|Create Value Stream"
+msgstr ""
+
 msgid "CreateValueStreamForm|Create from default template"
 msgstr ""
 
 msgid "CreateValueStreamForm|Create from no template"
 msgstr ""
 
+msgid "CreateValueStreamForm|Create new Value Stream"
+msgstr ""
+
 msgid "CreateValueStreamForm|Default stages"
+msgstr ""
+
+msgid "CreateValueStreamForm|Edit Value Stream"
 msgstr ""
 
 msgid "CreateValueStreamForm|Editing stage"
@@ -8658,6 +8715,9 @@ msgid "CreateValueStreamForm|Restore defaults"
 msgstr ""
 
 msgid "CreateValueStreamForm|Restore stage"
+msgstr ""
+
+msgid "CreateValueStreamForm|Save Value Stream"
 msgstr ""
 
 msgid "CreateValueStreamForm|Select end event"
@@ -9661,6 +9721,15 @@ msgid "DeleteProject|Failed to restore project repository. Please contact the ad
 msgstr ""
 
 msgid "DeleteProject|Failed to restore wiki repository. Please contact the administrator."
+msgstr ""
+
+msgid "DeleteValueStream|'%{name}' Value Stream deleted"
+msgstr ""
+
+msgid "DeleteValueStream|Are you sure you want to delete \"%{name}\" Value Stream?"
+msgstr ""
+
+msgid "DeleteValueStream|Delete %{name}"
 msgstr ""
 
 msgid "Deleted"
@@ -12068,6 +12137,9 @@ msgstr ""
 msgid "Expand file"
 msgstr ""
 
+msgid "Expand issues"
+msgstr ""
+
 msgid "Expand milestones"
 msgstr ""
 
@@ -13183,6 +13255,9 @@ msgstr ""
 msgid "Geo nodes are paused using a command run on the node"
 msgstr ""
 
+msgid "Geo sites"
+msgstr ""
+
 msgid "GeoNodeStatusEvent|%{timeAgoStr} (%{pendingEvents} events)"
 msgstr ""
 
@@ -13559,6 +13634,9 @@ msgid "Get started!"
 msgstr ""
 
 msgid "Getting started with releases"
+msgstr ""
+
+msgid "Git"
 msgstr ""
 
 msgid "Git LFS is not enabled on this GitLab server, contact your admin."
@@ -16669,6 +16747,9 @@ msgstr ""
 msgid "Issues with comments, merge requests with diffs and comments, labels, milestones, snippets, and other project entities"
 msgstr ""
 
+msgid "Issues with label %{label}"
+msgstr ""
+
 msgid "Issues with no epic assigned"
 msgstr ""
 
@@ -16795,6 +16876,9 @@ msgstr ""
 msgid "Jira service not configured."
 msgstr ""
 
+msgid "Jira user"
+msgstr ""
+
 msgid "Jira users have been imported from the configured Jira instance. They can be mapped by selecting a GitLab user from the dropdown in the \"GitLab username\" column. When the form appears, the dropdown defaults to the user conducting the import."
 msgstr ""
 
@@ -16811,6 +16895,9 @@ msgid "JiraService|%{user_link} mentioned this issue in %{entity_link} of %{proj
 msgstr ""
 
 msgid "JiraService|An error occured while fetching issue list"
+msgstr ""
+
+msgid "JiraService|Automatically transitions Jira issues to the \"Done\" category. %{linkStart}Learn more%{linkEnd}"
 msgstr ""
 
 msgid "JiraService|Define the type of Jira issue to create from a vulnerability."
@@ -16867,7 +16954,7 @@ msgstr ""
 msgid "JiraService|Jira project key"
 msgstr ""
 
-msgid "JiraService|Jira workflow transition IDs"
+msgid "JiraService|Move to Done"
 msgstr ""
 
 msgid "JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}."
@@ -16888,7 +16975,7 @@ msgstr ""
 msgid "JiraService|Select issue type"
 msgstr ""
 
-msgid "JiraService|Set transition IDs for Jira workflow transitions. %{link_start}Learn more%{link_end}"
+msgid "JiraService|Set a custom final state by using transition IDs. %{linkStart}Learn about transition IDs%{linkEnd}"
 msgstr ""
 
 msgid "JiraService|Sign in to GitLab.com to get started."
@@ -16900,10 +16987,16 @@ msgstr ""
 msgid "JiraService|This issue is synchronized with Jira"
 msgstr ""
 
+msgid "JiraService|Transition Jira issues to their final state:"
+msgstr ""
+
 msgid "JiraService|Use a password for server version and an API token for cloud version"
 msgstr ""
 
 msgid "JiraService|Use a username for server version and an email for cloud version"
+msgstr ""
+
+msgid "JiraService|Use custom transitions"
 msgstr ""
 
 msgid "JiraService|Username or Email"
@@ -17246,6 +17339,9 @@ msgid "Labels can be applied to issues and merge requests to categorize them."
 msgstr ""
 
 msgid "Labels can be applied to issues and merge requests."
+msgstr ""
+
+msgid "Labels with no issues in this iteration:"
 msgstr ""
 
 msgid "Labels|%{spanStart}Promote label%{spanEnd} %{labelTitle} %{spanStart}to Group Label?%{spanEnd}"
@@ -18536,6 +18632,9 @@ msgstr ""
 msgid "Merge request (MR) approvals"
 msgstr ""
 
+msgid "Merge request approval settings have been updated."
+msgstr ""
+
 msgid "Merge request approvals"
 msgstr ""
 
@@ -18617,9 +18716,6 @@ msgstr ""
 msgid "MergeRequestDiffs|Select comment starting line"
 msgstr ""
 
-msgid "MergeRequests|Add a reply"
-msgstr ""
-
 msgid "MergeRequests|An error occurred while checking whether another squash is in progress."
 msgstr ""
 
@@ -18627,9 +18723,6 @@ msgid "MergeRequests|An error occurred while saving the draft comment."
 msgstr ""
 
 msgid "MergeRequests|Failed to squash. Should be done manually."
-msgstr ""
-
-msgid "MergeRequests|Reply..."
 msgstr ""
 
 msgid "MergeRequests|Resolve this thread in a new issue"
@@ -19908,6 +20001,9 @@ msgstr ""
 msgid "New directory"
 msgstr ""
 
+msgid "New discussion"
+msgstr ""
+
 msgid "New environment"
 msgstr ""
 
@@ -20055,6 +20151,9 @@ msgstr ""
 msgid "No application_settings found"
 msgstr ""
 
+msgid "No assignee"
+msgstr ""
+
 msgid "No authentication methods configured."
 msgstr ""
 
@@ -20140,6 +20239,9 @@ msgid "No grouping"
 msgstr ""
 
 msgid "No issues found"
+msgstr ""
+
+msgid "No issues found for the selected labels"
 msgstr ""
 
 msgid "No iteration"
@@ -21599,6 +21701,9 @@ msgstr ""
 msgid "PerformanceBar|SQL queries"
 msgstr ""
 
+msgid "PerformanceBar|Stats"
+msgstr ""
+
 msgid "PerformanceBar|trace"
 msgstr ""
 
@@ -21917,6 +22022,9 @@ msgstr ""
 msgid "Pipeline|Canceled"
 msgstr ""
 
+msgid "Pipeline|Checking pipeline status"
+msgstr ""
+
 msgid "Pipeline|Checking pipeline status."
 msgstr ""
 
@@ -21966,6 +22074,9 @@ msgid "Pipeline|Pending"
 msgstr ""
 
 msgid "Pipeline|Pipeline"
+msgstr ""
+
+msgid "Pipeline|Pipeline %{idStart}#%{idEnd} %{statusStart}%{statusEnd} for %{commitStart}%{commitEnd}"
 msgstr ""
 
 msgid "Pipeline|Pipelines"
@@ -22023,6 +22134,9 @@ msgid "Pipeline|Value"
 msgstr ""
 
 msgid "Pipeline|Variables"
+msgstr ""
+
+msgid "Pipeline|We are currently unable to fetch pipeline data"
 msgstr ""
 
 msgid "Pipeline|You’re about to stop pipeline %{pipelineId}."
@@ -22932,6 +23046,9 @@ msgid "Project Files"
 msgstr ""
 
 msgid "Project ID"
+msgstr ""
+
+msgid "Project Templates"
 msgstr ""
 
 msgid "Project URL"
@@ -24837,7 +24954,7 @@ msgstr ""
 msgid "Reply to this email directly or %{view_it_on_gitlab}."
 msgstr ""
 
-msgid "Reply..."
+msgid "Reply…"
 msgstr ""
 
 msgid "Repo by URL"
@@ -27944,7 +28061,7 @@ msgstr ""
 msgid "Start a Free Ultimate Trial"
 msgstr ""
 
-msgid "Start a new discussion..."
+msgid "Start a new discussion…"
 msgstr ""
 
 msgid "Start a new merge request"
@@ -29701,6 +29818,9 @@ msgid "There was an error fetching projects"
 msgstr ""
 
 msgid "There was an error fetching the %{replicableType}"
+msgstr ""
+
+msgid "There was an error fetching the Geo Nodes"
 msgstr ""
 
 msgid "There was an error fetching the Geo Settings"
@@ -34928,6 +35048,9 @@ msgid "is not an email you own"
 msgstr ""
 
 msgid "is not in the group enforcing Group Managed Account"
+msgstr ""
+
+msgid "is not valid. The iteration group has to match the iteration cadence group."
 msgstr ""
 
 msgid "is read only"

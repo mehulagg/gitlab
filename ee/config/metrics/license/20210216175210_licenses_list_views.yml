@@ -1,0 +1,16 @@
+---
+key_path: counts.licenses_list_views
+description: Count to License List page views
+product_section: sec
+product_stage: secure
+product_group: group::composition analysis
+product_category: license_compliance
+value_type: string
+status: data_available
+time_frame: none
+data_source: database
+distribution:
+- ee
+tier:
+- ultimate
+skip_validation: true

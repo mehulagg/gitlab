@@ -200,7 +200,6 @@ module EE
 
       delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
-      delegate :jira_vulnerabilities_integration_enabled?, :configured_to_create_issues_from_vulnerabilities?, to: :jira_service, allow_nil: true
 
       delegate :requirements_access_level, :security_and_compliance_access_level, to: :project_feature, allow_nil: true
       delegate :pipeline_configuration_full_path, to: :compliance_management_framework, allow_nil: true
@@ -238,6 +237,18 @@ module EE
       def jira_issue_association_required_to_merge_enabled?
         ::Feature.enabled?(:jira_issue_association_on_merge_request, self) &&
           feature_available?(:jira_issue_association_enforcement)
+      end
+
+      def jira_vulnerabilities_integration_enabled?
+        return false unless jira_service
+
+        jira_service.jira_vulnerabilities_integration_enabled?
+      end
+
+      def configured_to_create_issues_from_vulnerabilities?
+        return false unless jira_service
+
+        jira_service.configured_to_create_issues_from_vulnerabilities?
       end
     end
 

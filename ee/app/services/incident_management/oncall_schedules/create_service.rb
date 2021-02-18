@@ -2,7 +2,7 @@
 
 module IncidentManagement
   module OncallSchedules
-    class CreateService < BaseService
+    class CreateService < OncallSchedules::BaseService
       # @param project [Project]
       # @param user [User]
       # @param params [Hash]

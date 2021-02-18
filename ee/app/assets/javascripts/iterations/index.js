@@ -59,10 +59,12 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
 
   const {
     fullPath,
+    hasScopedLabelsFeature,
     iterationId,
     labelsFetchPath,
     editIterationPath,
     previewMarkdownPath,
+    svgPath,
   } = el.dataset;
   const canEdit = parseBoolean(el.dataset.canEdit);
 
@@ -73,12 +75,14 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
       return createElement(IterationReport, {
         props: {
           fullPath,
+          hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
           iterationId,
           labelsFetchPath,
           canEdit,
           editIterationPath,
           namespaceType,
           previewMarkdownPath,
+          svgPath,
           initiallyEditing,
         },
       });

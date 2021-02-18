@@ -69,6 +69,11 @@ export default {
       type: String,
       required: true,
     },
+    hasScopedLabelsFeature: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     iterationId: {
       type: String,
       required: false,
@@ -96,6 +101,11 @@ export default {
       validator: (value) => Object.values(Namespace).includes(value),
     },
     previewMarkdownPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    svgPath: {
       type: String,
       required: false,
       default: '',
@@ -226,9 +236,11 @@ export default {
       />
       <iteration-report-tabs
         :full-path="fullPath"
+        :has-scoped-labels-feature="hasScopedLabelsFeature"
         :iteration-id="iteration.id"
         :labels-fetch-path="labelsFetchPath"
         :namespace-type="namespaceType"
+        :svg-path="svgPath"
       />
     </template>
   </div>

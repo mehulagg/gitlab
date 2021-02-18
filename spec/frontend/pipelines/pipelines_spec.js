@@ -34,8 +34,6 @@ describe('Pipelines', () => {
   let origWindowLocation;
 
   const paths = {
-    autoDevopsHelpPath: '/help/topics/autodevops/index.md',
-    helpPagePath: '/help/ci/quick_start/README',
     emptyStateSvgPath: '/assets/illustrations/pipelines_empty.svg',
     errorStateSvgPath: '/assets/illustrations/pipelines_failed.svg',
     noPipelinesSvgPath: '/assets/illustrations/pipelines_pending.svg',
@@ -45,8 +43,6 @@ describe('Pipelines', () => {
   };
 
   const noPermissions = {
-    autoDevopsHelpPath: '/help/topics/autodevops/index.md',
-    helpPagePath: '/help/ci/quick_start/README',
     emptyStateSvgPath: '/assets/illustrations/pipelines_empty.svg',
     errorStateSvgPath: '/assets/illustrations/pipelines_failed.svg',
     noPipelinesSvgPath: '/assets/illustrations/pipelines_pending.svg',
@@ -546,7 +542,9 @@ describe('Pipelines', () => {
           'GitLab CI/CD can automatically build, test, and deploy your code.',
         );
         expect(findEmptyState().find(GlButton).text()).toBe('Get started with CI/CD');
-        expect(findEmptyState().find(GlButton).attributes('href')).toBe(paths.helpPagePath);
+        expect(findEmptyState().find(GlButton).attributes('href')).toBe(
+          '/help/ci/quick_start/index.md',
+        );
       });
 
       it('does not render tabs nor buttons', () => {

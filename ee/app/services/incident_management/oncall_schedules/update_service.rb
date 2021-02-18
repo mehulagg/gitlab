@@ -2,7 +2,7 @@
 
 module IncidentManagement
   module OncallSchedules
-    class UpdateService < BaseService
+    class UpdateService < OncallSchedules::BaseService
       # @param oncall_schedule [IncidentManagement::OncallSchedule]
       # @param user [User]
       # @param params [Hash]

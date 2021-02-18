@@ -154,6 +154,8 @@ module EE
       # Hard Coded Legacy Types, we will want to remove these when they are added to SSF
       replicable_types = [
         {
+          data_type: 'repository',
+          data_type_title: _('Git'),
           title: _('Repository'),
           title_plural: _('Repositories'),
           name: 'repository',
@@ -161,18 +163,24 @@ module EE
           secondary_view: true
         },
         {
+          data_type: 'repository',
+          data_type_title: _('Git'),
           title: _('Wiki'),
           title_plural: _('Wikis'),
           name: 'wiki',
           name_plural: 'wikis'
         },
         {
+          data_type: 'blob',
+          data_type_title: _('File'),
           title: _('LFS object'),
           title_plural: _('LFS objects'),
           name: 'lfs_object',
           name_plural: 'lfs_objects'
         },
         {
+          data_type: 'blob',
+          data_type_title: _('File'),
           title: _('Attachment'),
           title_plural: _('Attachments'),
           name: 'attachment',
@@ -180,18 +188,24 @@ module EE
           secondary_view: true
         },
         {
+          data_type: 'blob',
+          data_type_title: _('File'),
           title: _('Job artifact'),
           title_plural: _('Job artifacts'),
           name: 'job_artifact',
           name_plural: 'job_artifacts'
         },
         {
+          data_type: 'blob',
+          data_type_title: _('File'),
           title: _('Container repository'),
           title_plural: _('Container repositories'),
           name: 'container_repository',
           name_plural: 'container_repositories'
         },
         {
+          data_type: 'repository',
+          data_type_title: _('Git'),
           title: _('Design repository'),
           title_plural: _('Design repositories'),
           name: 'design_repository',
@@ -204,6 +218,8 @@ module EE
       enabled_replicator_classes.each do |replicator_class|
         replicable_types.push(
           {
+            data_type: 'blob',
+            data_type_title: _('File'),
             title: replicator_class.replicable_title,
             title_plural: replicator_class.replicable_title_plural,
             name: replicator_class.replicable_name,

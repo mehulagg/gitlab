@@ -11,7 +11,7 @@ RSpec.shared_examples 'iteration report group by label' do
   end
 
   it 'groups by label', :aggregate_failures do
-    expect(page).to have_button('Collapse')
+    expect(page).to have_button('Collapse issues')
     expect(page).to have_css('.gl-label', text: label1.title)
     expect(page).to have_css('.gl-badge', text: 2)
 
@@ -24,7 +24,7 @@ RSpec.shared_examples 'iteration report group by label' do
   it 'shows ungrouped issues when `Group by: None` is selected again', :aggregate_failures do
     select 'None', from: 'Group by'
 
-    expect(page).to have_no_button('Collapse')
+    expect(page).to have_no_button('Collapse issues')
     expect(page).to have_no_css('.gl-label', text: label1.title)
     expect(page).to have_no_css('.gl-badge', text: 2)
 

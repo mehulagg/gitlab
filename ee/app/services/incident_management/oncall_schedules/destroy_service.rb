@@ -2,7 +2,7 @@
 
 module IncidentManagement
   module OncallSchedules
-    class DestroyService < BaseService
+    class DestroyService < OncallSchedules::BaseService
       # @param oncall_schedule [IncidentManagement::OncallSchedule]
       # @param user [User]
       def initialize(oncall_schedule, user)

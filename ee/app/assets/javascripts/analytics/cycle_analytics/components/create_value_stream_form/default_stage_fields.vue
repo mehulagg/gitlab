@@ -1,6 +1,6 @@
 <script>
 import { GlFormGroup, GlFormInput, GlFormText } from '@gitlab/ui';
-import { I18N, ADDITIONAL_DEFAULT_STAGE_EVENTS } from './constants';
+import { i18n, ADDITIONAL_DEFAULT_STAGE_EVENTS } from './constants';
 import StageFieldActions from './stage_field_actions.vue';
 
 const findStageEvent = (stageEvents = [], eid = null) => {
@@ -55,7 +55,7 @@ export default {
       return eventIdToName([...this.stageEvents, ...ADDITIONAL_DEFAULT_STAGE_EVENTS], eventId);
     },
   },
-  I18N,
+  i18n,
 };
 </script>
 <template>
@@ -71,7 +71,7 @@ export default {
         <gl-form-input
           v-model.trim="stage.name"
           :name="`create-value-stream-stage-${index}`"
-          :placeholder="$options.I18N.FORM_FIELD_STAGE_NAME_PLACEHOLDER"
+          :placeholder="$options.i18n.FORM_FIELD_STAGE_NAME_PLACEHOLDER"
           required
           @input="$emit('input', $event)"
         />
@@ -86,7 +86,7 @@ export default {
     </div>
     <div class="gl-display-flex gl-align-items-center" :data-testid="`stage-start-event-${index}`">
       <span class="gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold">{{
-        $options.I18N.DEFAULT_FIELD_START_EVENT_LABEL
+        $options.i18n.DEFAULT_FIELD_START_EVENT_LABEL
       }}</span>
       <gl-form-text class="gl-m-0">{{ eventName(stage.startEventIdentifier) }}</gl-form-text>
       <gl-form-text v-if="stage.startEventLabel" class="gl-m-0"
@@ -95,7 +95,7 @@ export default {
     </div>
     <div class="gl-display-flex gl-align-items-center" :data-testid="`stage-end-event-${index}`">
       <span class="gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold">{{
-        $options.I18N.DEFAULT_FIELD_END_EVENT_LABEL
+        $options.i18n.DEFAULT_FIELD_END_EVENT_LABEL
       }}</span>
       <gl-form-text class="gl-m-0">{{ eventName(stage.endEventIdentifier) }}</gl-form-text>
       <gl-form-text v-if="stage.endEventLabel" class="gl-m-0"

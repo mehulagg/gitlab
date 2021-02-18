@@ -26,6 +26,150 @@ in [Removed Items](../removed_items.md).
 
 <!-- vale gitlab.Spelling = NO -->
 
+## Queries
+
+Queries are used to get the resources, filter or query them.
+
+For more information, visit [Queries and Mutations](https://graphql.org/learn/queries/).
+
+### CiApplicationSettings
+
+CI related settings that apply to the entire instance.
+
+### CiConfig
+
+Get linted and processed contents of a CI config. Should not be requested more than once per request.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `content` | Contents of `.gitlab-ci.yml`. | String! |
+| `dryRun` | Run pipeline creation simulation, or only do static check. | Boolean |
+| `projectPath` | The project of the CI config. | ID! |
+
+### ContainerRepository
+
+Find a container repository.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The global ID of the container repository. | ContainerRepositoryID! |
+
+### CurrentUser
+
+Get information about current user.
+
+### DesignManagement
+
+Fields related to design management.
+
+### Echo
+
+Text to echo back.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `text` | Text to echo back. | String! |
+
+### GeoNode
+
+Find a Geo node.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `name` | The name of the Geo node. Defaults to the current Geo node name. | String |
+
+### Group
+
+Find a group.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+
+### InstanceSecurityDashboard
+
+Fields related to Instance Security Dashboard.
+
+### Issue
+
+Find an Issue.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The global ID of the Issue. | IssueID! |
+
+### Iteration
+
+Find an iteration.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | Find an iteration by its ID. | IterationID! |
+
+### Metadata
+
+Metadata about GitLab.
+
+### Milestone
+
+Find a milestone.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | Find a milestone by its ID. | MilestoneID! |
+
+### Namespace
+
+Find a namespace.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+
+### Package
+
+Find a package.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The global ID of the package. | PackagesPackageID! |
+
+### Project
+
+Find a project.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+
+### RunnerSetup
+
+Get runner setup instructions.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `architecture` | Architecture to generate the instructions for. | String! |
+| `groupId` | Group to register the runner for. | GroupID |
+| `platform` | Platform to generate the instructions for. | String! |
+| `projectId` | Project to register the runner for. | ProjectID |
+
+### User
+
+Find a user.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | ID of the User. | UserID |
+| `username` | Username of the User. | String |
+
+### Vulnerability
+
+Find a vulnerability.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The Global ID of the Vulnerability. | VulnerabilityID! |
+
 ## Object types
 
 Object types represent the resources that the GitLab GraphQL API can return.
@@ -130,6 +274,9 @@ An endpoint and credentials used to accept alerts for a project.
 | `apiUrl` | String | URL at which Prometheus metrics can be queried to populate the metrics dashboard. |
 | `id` | ID! | ID of the integration. |
 | `name` | String | Name of the integration. |
+| `payloadAlertFields` | AlertManagementPayloadAlertField! => Array | Extract alert fields from payload example for custom mapping. |
+| `payloadAttributeMappings` | AlertManagementPayloadAlertMappingField! => Array | The custom mapping of GitLab alert attributes to fields from the payload_example. |
+| `payloadExample` | JsonString | The example of an alert payload. |
 | `token` | String | Token used to authenticate alert notification requests. |
 | `type` | AlertManagementIntegrationType! | Type of integration. |
 | `url` | String | Endpoint which accepts alert notifications. |
@@ -140,6 +287,17 @@ Parsed field from an alert used for custom mappings.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `label` | String | Human-readable label of the payload path. |
+| `path` | String! => Array | Path to value inside payload JSON. |
+| `type` | AlertManagementPayloadAlertFieldType | Type of the parsed value. |
+
+### AlertManagementPayloadAlertMappingField
+
+Parsed field (with its name) from an alert used for custom mappings.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `fieldName` | AlertManagementPayloadAlertFieldName | A GitLab alert field name. |
 | `label` | String | Human-readable label of the payload path. |
 | `path` | String! => Array | Path to value inside payload JSON. |
 | `type` | AlertManagementPayloadAlertFieldType | Type of the parsed value. |
@@ -204,7 +362,7 @@ Autogenerated return type of ApiFuzzingCiConfigurationCreate.
 
 ### ApiFuzzingScanProfile
 
-An API Fuzzing scan profile..
+An API Fuzzing scan profile.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -1539,6 +1697,8 @@ Represents an epic board.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `hideBacklogList` | Boolean | Whether or not backlog list is hidden. |
+| `hideClosedList` | Boolean | Whether or not closed list is hidden. |
 | `id` | BoardsEpicBoardID! | Global ID of the board. |
 | `lists` | EpicListConnection | Epic board lists. |
 | `name` | String | Name of the board. |
@@ -1955,7 +2115,7 @@ Describes an incident management on-call schedule.
 
 ### IncidentManagementOncallShift
 
-A block of time for which a participant is on-call..
+A block of time for which a participant is on-call.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2780,7 +2940,7 @@ Represents a version of a package in the Package Registry.
 
 ### PageInfo
 
-Information about pagination in a connection..
+Information about pagination in a connection.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2882,6 +3042,7 @@ Autogenerated return type of PipelineRetry.
 | `alertManagementAlert` | AlertManagementAlert | A single Alert Management alert of the project. |
 | `alertManagementAlertStatusCounts` | AlertManagementAlertStatusCountsType | Counts of alerts by status for the project. |
 | `alertManagementAlerts` | AlertManagementAlertConnection | Alert Management alerts of the project. |
+| `alertManagementHttpIntegrations` | AlertManagementHttpIntegrationConnection | HTTP Integrations which can receive alerts for the project. |
 | `alertManagementIntegrations` | AlertManagementIntegrationConnection | Integrations which can receive alerts for the project. |
 | `alertManagementPayloadFields` | AlertManagementPayloadAlertField! => Array | Extract alert fields from payload for custom mapping. |
 | `allowMergeOnSkippedPipeline` | Boolean | If `only_allow_merge_if_pipeline_succeeds` is true, indicates if merge requests of the project can also be merged with skipped jobs. |
@@ -5116,7 +5277,7 @@ Possible identifier types for a measurement.
 
 ### MergeRequestNewState
 
-New state to apply to a merge request..
+New state to apply to a merge request.
 
 | Value | Description |
 | ----- | ----------- |
