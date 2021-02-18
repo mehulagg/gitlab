@@ -59,7 +59,7 @@
     "@rails/actioncable": "^6.0.3-4",
     "@rails/ujs": "^6.0.3-4",
     "@sentry/browser": "^5.22.3",
-    "@sourcegraph/code-host-integration": "0.0.52",
+    "@sourcegraph/code-host-integration": "0.0.53",
     "@toast-ui/editor": "^2.5.1",
     "@toast-ui/vue-editor": "^2.5.1",
     "apollo-cache-inmemory": "^1.6.6",
