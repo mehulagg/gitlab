@@ -5412,4 +5412,50 @@ RSpec.describe User do
     it_behaves_like 'bot user avatars', :support_bot, 'support-bot.png'
     it_behaves_like 'bot user avatars', :security_bot, 'security-bot.png'
   end
+
+  describe '#confirmation_required_on_sign_in?' do
+    let(:user) { create(:user, :unconfirmed) }
+
+    subject { user.confirmation_required_on_sign_in? }
+
+    context 'when user is confirmed' do
+      before do
+        user.confirm
+      end
+
+      it { expect(subject).to eq(false) }
+    end
+
+    context 'when user is not confirmed' do
+      context 'when soft_email_confirmation feature is disabled' do
+        before do
+          stub_feature_flags(soft_email_confirmation: false)
+        end
+
+        it { expect(subject).to eq(true) }
+      end
+
+      context 'when soft_email_confirmation feature is enabled' do
+        before do
+          stub_feature_flags(soft_email_confirmation: true)
+        end
+
+        context 'when confirmation period is valid' do
+          before do
+            allow(User).to receive(:allow_unconfirmed_access_for).and_return 2.days
+          end
+
+          it { expect(subject).to eq(false) }
+        end
+
+        context 'when confirmation period is expired' do
+          before do
+            allow(User).to receive(:allow_unconfirmed_access_for).and_return 0
+          end
+
+          it { expect(subject).to eq(true) }
+        end
+      end
+    end
+  end
 end
