@@ -81,7 +81,11 @@ export default {
       <template #status-badge>{{ statusBadgeText }}</template>
 
       <template #right-sidebar-items="{ sidebarExpanded }">
-        <sidebar :sidebar-expanded="sidebarExpanded" :selected-labels="issue.labels" />
+        <sidebar
+          :sidebar-expanded="sidebarExpanded"
+          :selected-labels="issue.labels"
+          :reference="issue.references.relative"
+        />
       </template>
     </issuable-show>
   </div>
