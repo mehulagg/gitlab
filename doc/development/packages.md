@@ -6,20 +6,18 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Packages
 
-This document guides you through adding another [package management system](../administration/packages/index.md) support to GitLab.
+This document guides you through adding support for a new a [package management system](../administration/packages/index.md) to GitLab.
 
-See already supported package types in [Packages documentation](../administration/packages/index.md)
+See the already supported formats in the [Packages & Registries documentation](../user/packages/index.md)
 
-Since GitLab packages' UI is pretty generic, it is possible to add basic new
-package system support with solely backend changes. This guide is superficial and does
-not cover the way the code should be written. However, you can find a good example
-by looking at the following merge requests:
+It is possible to add a new format with only backend changes.  
+This guide is superficial and does not cover the way the code should be written.
+However, you can find a good example by looking at the following merge requests:
 
-- [npm registry support](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/8673).
-- [Maven repository](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6607).
-- [Composer repository for PHP dependencies](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22415).
-- [Terraform modules registry](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18834).
-- [Instance-level endpoint for Maven repository](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/8757).
+- [npm registry support](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/8673)
+- [Maven repository](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6607)
+- [Instance-level API for Maven repository](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/8757)
+- [NuGet group-level API](https://gitlab.com/gitlab-org/gitlab/-/issues/36423)
 
 ## General information
 
@@ -60,29 +58,11 @@ project are visible. Alternatively, a group-level endpoint may be used to allow 
 within a given group. Lastly, an instance-level endpoint can be used to allow visibility to all packages within an
 entire GitLab instance.
 
-Using group and project level endpoints allows for more flexibility in package naming, however, more remotes
-have to be managed. Using instance level endpoints requires [stricter naming conventions](#naming-conventions).
+As an MVC, we recommend beginning with a project-level endpoint. A typical iteration plan for remote hierarchies is to go from:
 
-The current state of existing package registries availability is:
-
-| Repository Type  | Project Level | Group Level | Instance Level |
-|------------------|---------------|-------------|----------------|
-| Maven            | Yes           | Yes         | Yes            |
-| Conan            | Yes           | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/11679) | Yes |
-| npm              | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/36853) | Yes | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/36853) |
-| NuGet            | Yes           | Yes         | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/36425) |
-| PyPI             | Yes           | No          | No             |
-| Go               | Yes           | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/213900) | No - [open-issue](https://gitlab.com/gitlab-org/gitlab/-/issues/213902) |
-| Composer         | Yes           | Yes         | No             |
-| Generic | Yes           | No          | No             |
-
-NOTE:
-npm is currently a hybrid of the instance level and group level.
-It is using the top-level group or namespace as the defining portion of the name
-(for example, `@my-group-name/my-package-name`).
-
-NOTE:
-Composer package naming scope is Instance Level.
+- Publish and install in a project
+- Install from a group
+- Publish and install in an Instance (this is for Self-Managed customers)
 
 ### Naming conventions
 
@@ -116,8 +96,8 @@ Packages can be configured to use object storage, therefore your code must suppo
 
 The way new package systems are integrated in GitLab is using an [MVC](https://about.gitlab.com/handbook/values/#minimum-viable-change-mvc). Therefore, the first iteration should support the bare minimum user actions:
 
-- Authentication
-- Uploading a package
+- Authentication with a GitLab job, personal access, project access or deploy token
+- Uploading a package and displaying basic metadata in the user interface
 - Pulling a package
 - Required actions
 
@@ -241,6 +221,10 @@ create the package record. Workhorse provides a variety of file metadata such as
 
 For testing purposes, you may want to [enable object storage](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/object_storage.md)
 in your local development environment.
+
+#### File size limits
+
+Files uploaded to the GitLab Package Registry are [limited by format](../aadministration/instance_limits.html#file-size-limits). On GitLab.com, these are typically set to 5GB to help prevent timeout issues and abuse. 
 
 #### Rate Limits on GitLab.com
 
