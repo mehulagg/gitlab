@@ -9,7 +9,7 @@ product_category: web_performance
 value_type: number
 status: data_available
 time_frame: 28d
-data_source: redis
+data_source: redis_hll
 distribution:
 - ee
 tier:
