@@ -59476,7 +59476,7 @@
               "args": [
                 {
                   "name": "ids",
-                  "description": "Array of global snippet ids, e.g., \"gid://gitlab/ProjectSnippet/1\".",
+                  "description": "Array of global snippet ids, e.g., `gid://gitlab/ProjectSnippet/1`.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -62964,7 +62964,7 @@
               "args": [
                 {
                   "name": "ids",
-                  "description": "Array of global snippet ids, e.g., \"gid://gitlab/ProjectSnippet/1\".",
+                  "description": "Array of global snippet ids, e.g., `gid://gitlab/ProjectSnippet/1`.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -79190,7 +79190,7 @@
               "args": [
                 {
                   "name": "ids",
-                  "description": "Array of global snippet ids, e.g., \"gid://gitlab/ProjectSnippet/1\".",
+                  "description": "Array of global snippet ids, e.g., `gid://gitlab/ProjectSnippet/1`.",
                   "type": {
                     "kind": "LIST",
                     "name": null,

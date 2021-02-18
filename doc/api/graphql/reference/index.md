@@ -216,7 +216,7 @@ Find Snippets visible to the current user.
 | `before` | Returns the elements in the list that come before the specified cursor. | String |
 | `explore` | Explore personal snippets. | Boolean |
 | `first` | Returns the first _n_ elements from the list. | Int |
-| `ids` | Array of global snippet ids, e.g., "gid://gitlab/ProjectSnippet/1". | SnippetID! => Array |
+| `ids` | Array of global snippet ids, e.g., `gid://gitlab/ProjectSnippet/1`. | SnippetID! => Array |
 | `last` | Returns the last _n_ elements from the list. | Int |
 | `projectId` | The ID of a project. | ProjectID |
 | `type` | The type of snippet. | TypeEnum |
