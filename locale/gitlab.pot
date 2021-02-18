@@ -7545,10 +7545,22 @@ msgstr ""
 msgid "ComplianceFrameworks|Combines with the CI configuration at runtime."
 msgstr ""
 
+msgid "ComplianceFrameworks|Compliance framework deleted successfully"
+msgstr ""
+
 msgid "ComplianceFrameworks|Compliance pipeline configuration location (optional)"
 msgstr ""
 
 msgid "ComplianceFrameworks|Could not find this configuration location, please try a different location"
+msgstr ""
+
+msgid "ComplianceFrameworks|Delete compliance framework %{framework}"
+msgstr ""
+
+msgid "ComplianceFrameworks|Delete framework"
+msgstr ""
+
+msgid "ComplianceFrameworks|Error deleting the compliance framework. Please try again"
 msgstr ""
 
 msgid "ComplianceFrameworks|Error fetching compliance frameworks data. Please refresh the page"
@@ -7570,6 +7582,9 @@ msgid "ComplianceFrameworks|Unable to save this compliance framework. Please try
 msgstr ""
 
 msgid "ComplianceFrameworks|Use %{codeStart}::%{codeEnd} to create a %{linkStart}scoped set%{linkEnd} (eg. %{codeStart}SOX::AWS%{codeEnd})"
+msgstr ""
+
+msgid "ComplianceFrameworks|You are about to permanently delete the compliance framework %{framework} from all projects which currently have it applied, which may remove other functionality. This cannot be undone."
 msgstr ""
 
 msgid "ComplianceFrameworks|e.g. include-gitlab.ci.yml@group-name/project-name"
