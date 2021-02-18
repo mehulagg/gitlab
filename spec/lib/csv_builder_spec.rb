@@ -105,5 +105,15 @@ RSpec.describe CsvBuilder do
       expect(csv_data).not_to include "'*safe_desc"
       expect(csv_data).not_to include "'*safe_title"
     end
+
+    context 'with numbers' do
+      let(:fake_issue) { double(iid: 3, some_float: 10.35) }
+      let(:fake_relation) { FakeRelation.new([fake_issue]) }
+      let(:subject) { described_class.new(fake_relation, 'ID' => 'iid', 'Float' => 'some_float') }
+
+      it 'does not sanitize numbers' do
+        expect(csv_data).to eq("ID,Float\n3,10.35\n")
+      end
+    end
   end
 end
