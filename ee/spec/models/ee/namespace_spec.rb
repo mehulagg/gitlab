@@ -174,17 +174,6 @@ RSpec.describe Namespace do
       end
     end
 
-    describe '.top_most' do
-      let_it_be(:namespace) { create(:namespace) }
-      let_it_be(:sub_namespace) { create(:namespace, parent: namespace) }
-
-      subject { described_class.top_most.ids }
-
-      it 'only contains root namespace' do
-        is_expected.to eq([namespace.id])
-      end
-    end
-
     describe '.in_active_trial' do
       let_it_be(:namespaces) do
         [
