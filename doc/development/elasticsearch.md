@@ -242,31 +242,27 @@ class BatchedMigrationName < Elastic::Migration
 end
 ```
 
-### Multi version compatibility
+### Multi-version compatibility
 
-It's important to understand that these Elasticsearch migrations, like any
-other GitLab changes, will need to support the case where [multiple versions of
-the application are running at the same time](./multi_version_compatibility.md).
+These Elasticsearch migrations, like any other GitLab changes, need to support the case where
+[multiple versions of the application are running at the same time](multi_version_compatibility.md).
 
-Depending on the order of deployment we can have situations where the migration
-has started or finished and there may still be some server that is running the
-previous application code before the migration existed. This needs to always be
-handled.
+Depending on the order of deployment, it's possible that the migration
+has started or finished and there's still a server that running the application code from before the
+migration existed. This needs to always be handled.
 
-In future [we will likely ensure all Elasticsearch migrations start after the
-deployment has finished](https://gitlab.com/gitlab-org/gitlab/-/issues/321619)
-but until we have implemented that we will need to take this into
-consideration.
+We need to take this into consideration until we can [ensure all Elasticsearch migrations start
+after the deployment has finished](https://gitlab.com/gitlab-org/gitlab/-/issues/321619).
 
 ### Reverting a migration
 
-Since Elasticsearch does not support transactions we always need to design our
-migrations in such a way that we accomodate a situation where the application
-code may be reverted after the migration has started or after it is finished.
+Because Elasticsearch does not support transactions, we always need to design our
+migrations to accommodate a situation where the application
+code is reverted after the migration has started or after it is finished.
 
-For this reason we generally defer destructive actions (eg. deletes after
+For this reason we generally defer destructive actions (for example, deletions after
 some data is moved) to a later merge request after the migrations have
-completed successfully. To be safe for self-managed customers we should also
+completed successfully. To be safe, for self-managed customers we should also
 defer it to another release if there is risk of important data loss.
 
 ## Performance Monitoring
