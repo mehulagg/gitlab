@@ -3046,9 +3046,6 @@ msgstr ""
 msgid "All projects selected"
 msgstr ""
 
-msgid "All security scans are enabled because %{linkStart}Auto DevOps%{linkEnd} is enabled on this project"
-msgstr ""
-
 msgid "All threads resolved"
 msgstr ""
 
@@ -27092,6 +27089,9 @@ msgid "Settings related to the use and experience of using GitLab's Package Regi
 msgstr ""
 
 msgid "Setup"
+msgstr ""
+
+msgid "Several security scans are enabled because %{linkStart}Auto DevOps%{linkEnd} is enabled on this project"
 msgstr ""
 
 msgid "Severity"

@@ -80,7 +80,7 @@ export default {
     devopsMessage() {
       return this.autoDevopsEnabled
         ? __(
-            'All security scans are enabled because %{linkStart}Auto DevOps%{linkEnd} is enabled on this project',
+            'Several security scans are enabled because %{linkStart}Auto DevOps%{linkEnd} is enabled on this project',
           )
         : __(
             `The status of the table below only applies to the default branch and is based on the %{linkStart}latest pipeline%{linkEnd}. Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan.`,
