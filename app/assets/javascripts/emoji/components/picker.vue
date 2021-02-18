@@ -83,13 +83,23 @@ export default {
       this.$emit('click', name);
       this.$refs.dropdown.hide();
     },
+    getBoundaryElement() {
+      return document.querySelector('.content-wrapper') || 'scrollParent';
+    },
   },
 };
 </script>
 
 <template>
   <div class="emoji-picker">
-    <gl-dropdown ref="dropdown" :toggle-class="toggleClass" no-flip right lazy>
+    <gl-dropdown
+      ref="dropdown"
+      :toggle-class="toggleClass"
+      :boundary="getBoundaryElement()"
+      no-flip
+      right
+      lazy
+    >
       <template #button-content><slot name="button-content"></slot></template>
       <div class="gl-display-flex gl-px-2 gl-border-b-solid gl-border-gray-100 gl-border-b-1">
         <button
