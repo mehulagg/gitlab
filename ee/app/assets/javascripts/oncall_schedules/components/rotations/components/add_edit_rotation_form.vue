@@ -305,15 +305,17 @@ export default {
             <span> {{ __('From') }} </span>
             <gl-dropdown
               data-testid="restricted-from"
-              :text="format24HourTimeStringFromInt(form.restrictedTo.from)"
+              :text="format24HourTimeStringFromInt(form.restrictedTo.startTime)"
               class="gl-px-3"
             >
               <gl-dropdown-item
                 v-for="time in $options.HOURS_IN_DAY"
                 :key="time"
-                :is-checked="form.restrictedTo.from === time"
+                :is-checked="form.restrictedTo.startTime === time"
                 is-check-item
-                @click="$emit('update-rotation-form', { type: 'restrictedTo.from', value: time })"
+                @click="
+                  $emit('update-rotation-form', { type: 'restrictedTo.startTime', value: time })
+                "
               >
                 <span class="gl-white-space-nowrap">
                   {{ format24HourTimeStringFromInt(time) }}</span
@@ -323,15 +325,17 @@ export default {
             <span> {{ __('To') }} </span>
             <gl-dropdown
               data-testid="restricted-to"
-              :text="format24HourTimeStringFromInt(form.restrictedTo.to)"
+              :text="format24HourTimeStringFromInt(form.restrictedTo.endTime)"
               class="gl-px-3"
             >
               <gl-dropdown-item
                 v-for="time in $options.HOURS_IN_DAY"
                 :key="time"
-                :is-checked="form.restrictedTo.to === time"
+                :is-checked="form.restrictedTo.endTime === time"
                 is-check-item
-                @click="$emit('update-rotation-form', { type: 'restrictedTo.to', value: time })"
+                @click="
+                  $emit('update-rotation-form', { type: 'restrictedTo.endTime', value: time })
+                "
               >
                 <span class="gl-white-space-nowrap">
                   {{ format24HourTimeStringFromInt(time) }}</span

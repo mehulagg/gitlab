@@ -88,8 +88,8 @@ export default {
         },
         isRestrictedToTime: false,
         restrictedTo: {
-          from: 0,
-          to: 0,
+          startTime: 0,
+          endTime: 0,
         },
       },
       error: '',
@@ -140,8 +140,8 @@ export default {
       };
       if (this.form.isRestrictedToTime) {
         variables.activePeriod = {
-          from: format24HourTimeStringFromInt(this.form.restrictedTo.from),
-          to: format24HourTimeStringFromInt(this.form.restrictedTo.to),
+          startTime: format24HourTimeStringFromInt(this.form.restrictedTo.startTime),
+          endTime: format24HourTimeStringFromInt(this.form.restrictedTo.endTime),
         };
       }
       return variables;
@@ -254,11 +254,11 @@ export default {
       }
     },
     beforeShowModal() {
-      if (this.rotation?.activePeriod?.from) {
+      if (this.rotation?.activePeriod?.startTime) {
         const { activePeriod } = this.rotation;
         this.form.isRestrictedToTime = true;
-        this.form.restrictedTo.from = parseInt(activePeriod.from.slice(0, 2), 10);
-        this.form.restrictedTo.to = parseInt(activePeriod.to.slice(0, 2), 10);
+        this.form.restrictedTo.startTime = parseInt(activePeriod.startTime.slice(0, 2), 10);
+        this.form.restrictedTo.endTime = parseInt(activePeriod.endTime.slice(0, 2), 10);
       }
     },
     afterCloseModal() {
@@ -280,8 +280,8 @@ export default {
         },
         isRestrictedToTime: false,
         restrictedTo: {
-          from: 0,
-          to: 0,
+          startTime: 0,
+          endTime: 0,
         },
       };
       this.form = cloneDeep(defaultState);
