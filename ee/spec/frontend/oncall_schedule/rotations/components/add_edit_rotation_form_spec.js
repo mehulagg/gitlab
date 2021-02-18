@@ -1,5 +1,6 @@
 import { GlDropdownItem, GlTokenSelector, GlFormGroup, GlToggle } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { cloneDeep, merge } from 'lodash';
 import AddEditRotationForm from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_form.vue';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -8,6 +9,28 @@ import { participants, getOncallSchedulesQueryResponse } from '../../mocks/apoll
 const projectPath = 'group/project';
 const schedule =
   getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
+
+const defaultForm = {
+  name: '',
+  participants: [],
+  rotationLength: {
+    length: 1,
+    unit: LENGTH_ENUM.hours,
+  },
+  startsAt: {
+    date: null,
+    time: 0,
+  },
+  endsOn: {
+    date: null,
+    time: 0,
+  },
+  isRestrictedToTime: false,
+  restrictedTo: {
+    startTime: 0,
+    endTime: 0,
+  },
+};
 
 describe('AddEditRotationForm', () => {
   let wrapper;
@@ -19,37 +42,20 @@ describe('AddEditRotationForm', () => {
           ...data,
         };
       },
-      propsData: {
-        ...props,
-        schedule,
-        isLoading: false,
-        validationState: {
-          name: true,
-          participants: false,
-          startsAt: false,
+      propsData: merge(
+        {
+          schedule,
+          isLoading: false,
+          validationState: {
+            name: true,
+            participants: false,
+            startsAt: false,
+          },
+          participants,
+          form: cloneDeep(defaultForm),
         },
-        participants,
-        form: {
-          name: '',
-          participants: [],
-          rotationLength: {
-            length: 1,
-            unit: LENGTH_ENUM.hours,
-          },
-          startsAt: {
-            date: null,
-            time: 0,
-          },
-          endsOn: {
-            date: null,
-            time: 0,
-          },
-          restrictedTo: {
-            from: 0,
-            to: 0,
-          },
-        },
-      },
+        props,
+      ),
       provide: {
         projectPath,
       },
@@ -189,7 +195,33 @@ describe('AddEditRotationForm', () => {
     });
   });
 
-  describe('Rotation restricted to time', () => {
+  describe.only('Rotation restricted to time', () => {
+    it('toggle state depends on isRestrictedToTime', async () => {
+      expect(findRestrictedToToggle().props('value')).toBe(false);
+      wrapper.setProps({ form: { ...defaultForm, isRestrictedToTime: true } });
+      await wrapper.vm.$nextTick();
+      expect(findRestrictedToToggle().props('value')).toBe(true);
+    });
+
+    it('toggles end time visibility on', async () => {
+      const toggle = findRestrictedToToggle().vm;
+      toggle.$emit('change', true);
+      await wrapper.vm.$nextTick();
+      const emittedEvent = wrapper.emitted('update-rotation-form');
+      expect(emittedEvent).toHaveLength(1);
+      expect(emittedEvent[0][0]).toEqual({ type: 'isRestrictedToTime', value: true });
+    });
+
+    it('toggles end time visibility off', async () => {
+      wrapper.setProps({ form: { ...defaultForm, isRestrictedToTime: true } });
+      const toggle = findRestrictedToToggle().vm;
+      toggle.$emit('change', false);
+      await wrapper.vm.$nextTick();
+      const emittedEvent = wrapper.emitted('update-rotation-form');
+      expect(emittedEvent).toHaveLength(1);
+      expect(emittedEvent[0][0]).toEqual({ type: 'isRestrictedToTime', value: false });
+    });
+
     it('toggles restricted to time visibility', async () => {
       const toggle = findRestrictedToToggle().vm;
       toggle.$emit('change', false);
@@ -210,8 +242,8 @@ describe('AddEditRotationForm', () => {
       await wrapper.vm.$nextTick();
       const emittedEvent = wrapper.emitted('update-rotation-form');
       expect(emittedEvent).toHaveLength(2);
-      expect(emittedEvent[0][0]).toEqual({ type: 'restrictedTo.from', value: timeFrom + 1 });
-      expect(emittedEvent[1][0]).toEqual({ type: 'restrictedTo.to', value: timeTo + 1 });
+      expect(emittedEvent[0][0]).toEqual({ type: 'restrictedTo.startTime', value: timeFrom + 1 });
+      expect(emittedEvent[1][0]).toEqual({ type: 'restrictedTo.endTime', value: timeTo + 1 });
     });
 
     it('should add a checkmark to a selected  restricted FROM time', async () => {
@@ -228,8 +260,8 @@ describe('AddEditRotationForm', () => {
             time: 0,
           },
           restrictedTo: {
-            from: timeFrom,
-            to: timeTo,
+            startTime: timeFrom,
+            endTime: timeTo,
           },
           rotationLength: {
             length: 1,
