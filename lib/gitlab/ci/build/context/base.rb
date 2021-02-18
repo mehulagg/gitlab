@@ -15,10 +15,6 @@ module Gitlab
             raise NotImplementedError
           end
 
-          def variables_collection
-            raise NotImplementedError
-          end
-
           protected
 
           def pipeline_attributes

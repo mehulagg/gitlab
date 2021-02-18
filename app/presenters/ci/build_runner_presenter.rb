@@ -33,7 +33,7 @@ module Ci
     end
 
     def variables
-      ExpandVariables.expand_variables_collection(variables_collection, project)
+      ExpandVariables.expand_variables_collection(super, project)
         .map(&:to_runner_variable)
     end
 

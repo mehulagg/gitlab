@@ -9,7 +9,7 @@ RSpec.describe Gitlab::Ci::Build::Context::Build do
   let(:context) { described_class.new(pipeline, seed_attributes) }
 
   describe '#variables' do
-    subject { context.variables }
+    subject { context.variables.to_hash }
 
     it { is_expected.to include('CI_COMMIT_REF_NAME' => 'master') }
     it { is_expected.to include('CI_PIPELINE_IID'    => pipeline.iid.to_s) }
@@ -26,10 +26,10 @@ RSpec.describe Gitlab::Ci::Build::Context::Build do
     end
   end
 
-  describe '#variables_collection' do
-    subject { context.variables_collection.map(&:to_runner_variable) }
+  describe '#variables' do
+    subject { context.variables.map(&:to_runner_variable) }
 
-    it { expect(context.variables_collection).to be_instance_of(Gitlab::Ci::Variables::Collection) }
+    it { expect(context.variables).to be_instance_of(Gitlab::Ci::Variables::Collection) }
     it { is_expected.to include(include(key: 'CI_COMMIT_REF_NAME', value: 'master')) }
     it { is_expected.to include(include(key: 'CI_PIPELINE_IID', value: pipeline.iid.to_s)) }
     it { is_expected.to include(include(key: 'CI_PROJECT_PATH', value: pipeline.project.full_path)) }

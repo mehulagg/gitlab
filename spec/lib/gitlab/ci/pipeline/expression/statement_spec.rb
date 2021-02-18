@@ -4,7 +4,8 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Pipeline::Expression::Statement do
   subject do
-    described_class.new(text, variables)
+    h = variables.map { |k, v| { key: k, value: v } }
+    described_class.new(text, Gitlab::Ci::Variables::Collection.new(h))
   end
 
   let(:variables) do

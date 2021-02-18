@@ -498,17 +498,11 @@ module Ci
       options&.dig(:environment, :on_stop)
     end
 
-    def variables
-      strong_memoize(:variables) do
-        variables_collection.to_runner_variables
-      end
-    end
-
     ##
     # All variables, including persisted environment variables.
     #
-    def variables_collection
-      strong_memoize(:variables_collection) do
+    def variables
+      strong_memoize(:variables) do
         Gitlab::Ci::Variables::Collection.new
           .concat(persisted_variables)
           .concat(dependency_proxy_variables)
@@ -988,7 +982,7 @@ module Ci
       # TODO: Have `debug_mode?` check against data on sent back from runner
       # to capture all the ways that variables can be set.
       # See (https://gitlab.com/gitlab-org/gitlab/-/issues/290955)
-      variable = variables_collection['CI_DEBUG_TRACE']
+      variable = variables['CI_DEBUG_TRACE']
       !variable.nil? && variable[:value].casecmp('true') == 0
     end
 
