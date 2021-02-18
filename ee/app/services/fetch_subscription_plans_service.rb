@@ -9,7 +9,7 @@ class FetchSubscriptionPlansService
   end
 
   def execute
-    cached { send_request }
+    send_request
   end
 
   private
@@ -22,7 +22,9 @@ class FetchSubscriptionPlansService
       headers: { 'Accept' => 'application/json' }
     )
 
-    Gitlab::Json.parse(response.body).map { |plan| Hashie::Mash.new(plan) }
+    plans, addons = Gitlab::Json.parse(response.body).values_at("plans", "addons")
+
+    (plans + addons).map { |plan| Hashie::Mash.new(plan) }
   rescue => e
     Gitlab::AppLogger.info "Unable to connect to GitLab Customers App #{e}"
 

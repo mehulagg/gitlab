@@ -45,6 +45,7 @@ export default ({
   fullName,
   newUser,
   groupData = '[]',
+  isAddonPurchase = 'false',
 }) => {
   const availablePlans = parsePlanData(plansData);
   const isNewUser = parseBoolean(newUser);
@@ -77,5 +78,7 @@ export default ({
     isConfirmingOrder: false,
     taxRate: TAX_RATE,
     startDate: new Date(Date.now()),
+    isAddonPurchase: parseBoolean(isAddonPurchase),
+    numberOfPacks: 1,
   };
 };

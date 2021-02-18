@@ -7,13 +7,21 @@ import BillingAddress from './checkout/billing_address.vue';
 import ConfirmOrder from './checkout/confirm_order.vue';
 import PaymentMethod from './checkout/payment_method.vue';
 import SubscriptionDetails from './checkout/subscription_details.vue';
+import AddonDetails from './checkout/addon_details.vue';
 
 export default {
-  components: { ProgressBar, SubscriptionDetails, BillingAddress, PaymentMethod, ConfirmOrder },
+  components: {
+    AddonDetails,
+    BillingAddress,
+    ConfirmOrder,
+    PaymentMethod,
+    ProgressBar,
+    SubscriptionDetails,
+  },
   currentStep: STEPS.checkout,
   steps: SUBSCRIPTON_FLOW_STEPS,
   computed: {
-    ...mapState(['isNewUser']),
+    ...mapState(['isNewUser', 'isAddonPurchase']),
   },
   i18n: {
     checkout: s__('Checkout|Checkout'),
@@ -26,7 +34,8 @@ export default {
       <progress-bar v-if="isNewUser" :steps="$options.steps" :current-step="$options.currentStep" />
       <div class="flash-container"></div>
       <h2 class="mt-4 mb-3 mb-lg-5">{{ $options.i18n.checkout }}</h2>
-      <subscription-details />
+      <addon-details v-if="isAddonPurchase" />
+      <subscription-details v-else />
       <billing-address />
       <payment-method />
     </div>

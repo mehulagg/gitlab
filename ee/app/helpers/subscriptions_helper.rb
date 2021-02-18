@@ -11,7 +11,9 @@ module SubscriptionsHelper
       plan_id: params[:plan_id],
       namespace_id: params[:namespace_id],
       new_user: new_user?.to_s,
-      group_data: group_data.to_json
+      group_data: group_data.to_json,
+      available_addons: available_addons,
+      is_addon_purchase: addon_purchase?.to_s
     }
   end
 
@@ -34,13 +36,13 @@ module SubscriptionsHelper
     FetchSubscriptionPlansService.new(plan: :free).execute
       .map(&:symbolize_keys)
       .reject { |plan_data| plan_data[:free] }
-      .map { |plan_data| plan_data.slice(:id, :code, :price_per_year, :deprecated, :name) }
+      .map { |plan_data| plan_data.slice(:id, :code, :price_per_year, :deprecated, :name, :addon) }
   end
 
   def subscription_available_plans
     return plans_data unless ::Feature.enabled?(:hide_deprecated_billing_plans)
 
-    plans_data.reject { |plan_data| plan_data[:deprecated] }
+    plans_data.reject { |plan_data| plan_data[:deprecated] || plan_data[:addon] }
   end
 
   def group_data
@@ -51,5 +53,13 @@ module SubscriptionsHelper
         users: namespace.member_count
       }
     end
+  end
+
+  def available_addons
+    plans_data.select { |plan_data| !plan_data[:deprecated] && plan_data[:addon] }
+  end
+
+  def addon_purchase?
+    available_addons.any? { |plan_data| plan_data[:id] == params[:plan_id] }
   end
 end
