@@ -545,7 +545,7 @@ The normal behavior of Auto DevOps is to use continuous deployment, pushing
 automatically to the `production` environment every time a new pipeline is run
 on the default branch. However, there are cases where you might want to use a
 staging environment, and deploy to production manually. For this scenario, the
-`STAGING_ENABLED` Ci/CD variable was introduced.
+`STAGING_ENABLED` CI/CD variable was introduced.
 
 If you define `STAGING_ENABLED` with a non-empty value, then GitLab automatically deploys the application
 to a `staging` environment, and creates a `production_manual` job for
