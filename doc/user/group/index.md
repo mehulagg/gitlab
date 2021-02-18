@@ -243,7 +243,7 @@ added to their To-do list.
 
 A to-do item is created for all the group and subgroup members.
 
-## Change the default branch protection of a group
+## Changing the default branch protection of a group
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7583) in GitLab 12.9.
 
