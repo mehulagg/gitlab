@@ -128,6 +128,16 @@ module Gitlab
       def self.active_record_models
         ActiveRecord::Base.descendants
       end
+
+      HOST_TYPES = [
+        HOST_PRIMARY = :primary,
+        HOST_REPLICA = :replica
+      ].freeze
+      def self.host_type(connection)
+        return unless enable?
+
+        proxy.load_balancer.recognize_connection_host_type(connection) || HOST_PRIMARY
+      end
     end
   end
 end

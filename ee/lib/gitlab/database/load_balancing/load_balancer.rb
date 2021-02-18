@@ -18,6 +18,7 @@ module Gitlab
         # hosts - The hostnames/addresses of the additional databases.
         def initialize(hosts = [])
           @host_list = HostList.new(hosts.map { |addr| Host.new(addr, self) })
+          @connection_host_types = {}
         end
 
         # Yields a connection that can be used for reads.
@@ -25,13 +26,17 @@ module Gitlab
         # If no secondaries were available this method will use the primary
         # instead.
         def read(&block)
+          connection = nil
           conflict_retried = 0
 
           while host
             ensure_caching!
 
             begin
-              return yield host.connection
+              connection = host.connection
+              @connection_host_types[connection.object_id] = HOST_REPLICA
+
+              return yield connection
             rescue => error
               if serialization_failure?(error)
                 # This error can occur when a query conflicts. See
@@ -75,16 +80,28 @@ module Gitlab
           )
 
           read_write(&block)
+        ensure
+          @connection_host_types.delete(connection.object_id) if connection.present?
         end
 
         # Yields a connection that can be used for both reads and writes.
         def read_write
+          connection = nil
           # In the event of a failover the primary may be briefly unavailable.
           # Instead of immediately grinding to a halt we'll retry the operation
           # a few times.
           retry_with_backoff do
-            yield ActiveRecord::Base.retrieve_connection
+            connection = ActiveRecord::Base.retrieve_connection
+            @connection_host_types[connection.object_id] = HOST_PRIMARY
+
+            yield connection
           end
+        ensure
+          @connection_host_types.delete(connection.object_id) if connection.present?
+        end
+
+        def recognize_connection_host_type(connection)
+          @connection_host_types[connection.object_id]
         end
 
         # Returns a host to use for queries.
