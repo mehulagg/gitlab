@@ -1,5 +1,5 @@
 ---
 title: Restore missing scrollbar on boards
-merge_request:
+merge_request: 54634
 author:
 type: fixed
