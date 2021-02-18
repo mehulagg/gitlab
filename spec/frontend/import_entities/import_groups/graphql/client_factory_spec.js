@@ -35,15 +35,19 @@ describe('Bulk import resolvers', () => {
   let axiosMockAdapter;
   let client;
 
-  beforeEach(() => {
-    axiosMockAdapter = new MockAdapter(axios);
-    client = createMockClient({
+  const createClient = (extraResolverArgs) => {
+    return createMockClient({
       cache: new InMemoryCache({
         fragmentMatcher: { match: () => true },
         addTypename: false,
       }),
-      resolvers: createResolvers({ endpoints: FAKE_ENDPOINTS }),
+      resolvers: createResolvers({ endpoints: FAKE_ENDPOINTS, ...extraResolverArgs }),
     });
+  };
+
+  beforeEach(() => {
+    axiosMockAdapter = new MockAdapter(axios);
+    client = createClient();
   });
 
   afterEach(() => {
@@ -80,6 +84,35 @@ describe('Bulk import resolvers', () => {
         axiosMockAdapter
           .onGet(FAKE_ENDPOINTS.availableNamespaces)
           .reply(httpStatus.OK, availableNamespacesFixture);
+      });
+
+      it('respects cached import state when provided by group manager', async () => {
+        const FAKE_STATUS = 'DEMO_STATUS';
+        const FAKE_IMPORT_TARGET = {};
+        const TARGET_INDEX = 0;
+
+        const clientWithMockedManager = createClient({
+          GroupsManager: jest.fn().mockImplementation(() => ({
+            getImportStateFromStorageByGroupId(groupId) {
+              if (groupId === statusEndpointFixture.importable_data[TARGET_INDEX].id) {
+                return {
+                  status: FAKE_STATUS,
+                  importTarget: FAKE_IMPORT_TARGET,
+                };
+              }
+
+              return null;
+            },
+          })),
+        });
+
+        const clientResponse = await clientWithMockedManager.query({
+          query: bulkImportSourceGroupsQuery,
+        });
+        const clientResults = clientResponse.data.bulkImportSourceGroups.nodes;
+
+        expect(clientResults[TARGET_INDEX].import_target).toBe(FAKE_IMPORT_TARGET);
+        expect(clientResults[TARGET_INDEX].status).toBe(FAKE_STATUS);
       });
 
       it('populates each result instance with empty import_target when there are no available namespaces', async () => {
