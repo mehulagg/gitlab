@@ -11,13 +11,14 @@ class NamespaceStatistics < ApplicationRecord
   scope :with_any_ci_minutes_used, -> { where.not(shared_runners_seconds: 0) }
 
   before_save :update_storage_size
-  after_save :update_root_storage_statistics, if: :saved_change_to_storage_size?
-  after_destroy :update_root_storage_statistics, if: :group?
+  after_save :update_root_storage_statistics
+  after_destroy :update_root_storage_statistics
 
   COLUMNS_TO_REFRESH = [:wiki_size].freeze
 
   def refresh!(only: [])
     return if Gitlab::Database.read_only?
+    return unless group?
 
     COLUMNS_TO_REFRESH.each do |column|
       if only.empty? || only.include?(column)
@@ -49,6 +50,8 @@ class NamespaceStatistics < ApplicationRecord
   end
 
   def update_root_storage_statistics
+    return unless group?
+
     run_after_commit do
       Namespaces::ScheduleAggregationWorker.perform_async(namespace.id)
     end

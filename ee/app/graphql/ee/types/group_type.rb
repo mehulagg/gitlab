@@ -92,10 +92,10 @@ module EE
               description: 'Group statistics.',
               method: :itself
 
-        field :namespace_statistics, Types::NamespaceStatisticsType,
-              as: :storage_statistics,
-              null: true,
-              description: 'Storage statistics of the namespace.'
+        # field :namespace_statistics, ::Types::NamespaceStatisticsType,
+        #       as: :storage_statistics,
+        #       null: true,
+        #       description: 'Storage statistics of the namespace.'
 
         field :group_wikis_enabled,
               GraphQL::BOOLEAN_TYPE,
