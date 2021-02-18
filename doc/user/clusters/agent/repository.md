@@ -94,3 +94,92 @@ gitops:
       # If 'paths' is not specified or is an empty list, the configuration below is used
     - glob: '/**/*.{yaml,yml,json}'
 ```
+
+### Using multiple manifest projects
+
+To use multiple repositories as the source of Kubernetes manifests, specify all of them in the list like so:
+
+```yaml
+gitops:
+  manifest_projects:
+  - id: project1
+  - id: project2
+```
+
+Please note that repositories are synchronized **concurrently** and **independently** from each other.
+
+It is possible to use a single repository as a source for multiple concurrent synchronization operations by specifying the same repository `id` more than once and also using a distinct `paths` configuration:
+
+```yaml
+gitops:
+  manifest_projects:
+  - id: project1    
+    paths:
+    - glob: '/crd/**.yaml' 
+  - id: project1
+    paths:
+    - glob: '/manifests/**.yaml'
+```
+
+`id` and `paths` are used as the uniqueness "key" for manifest projects. That means the following configurations are both invalid because the "key" is duplicated:
+
+```yaml
+# INVALID!
+gitops:
+  manifest_projects:
+  - id: project1    
+  - id: project1
+```
+
+```yaml
+# INVALID!
+gitops:
+  manifest_projects:
+  - id: project1    
+    paths:
+    - glob: '/**/*.{yaml,yml,json}' #  same as default value that is implicitly used below
+  - id: project1
+```
+
+```yaml
+# INVALID!
+gitops:
+  manifest_projects:
+  - id: project1    
+    paths:
+    - glob: '/*.yaml'
+  - id: project1
+    paths:
+    - glob: '/*.yaml'
+```
+
+Please make sure globs do not "overlap" to avoid trying to synchronize the same files more than once. This is not detected automatically:
+
+```yaml
+# VALID BUT INCORRECT - both globs match *.yaml files in the root directory
+gitops:
+  manifest_projects:
+  - id: project1    
+    paths:
+    - glob: '/**/*.yaml'
+  - id: project1
+    paths:
+    - glob: '/*.yaml'
+```
+
+A possible use case for overlapping globs is synchronizing the same manifests into different namespaces:
+
+```yaml
+# Valid but potentially risky
+gitops:
+  manifest_projects:
+  - id: project1
+    default_namespace: copy1
+    paths:
+    - glob: '/app1/*.yaml'
+    - glob: 'ithinkiknowwhatimdoing' # add a fake glob to trick the silly program
+  - id: project1
+    default_namespace: copy2
+    paths:
+    - glob: '/app1/*.yaml'
+```
