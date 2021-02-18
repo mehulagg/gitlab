@@ -53,7 +53,9 @@ export default {
           ...this.filters,
         };
       },
-      update: ({ project }) => project?.vulnerabilities.nodes || [],
+      update({ project }) {
+        return project?.vulnerabilities.nodes || [];
+      },
       result({ data }) {
         this.pageInfo = preparePageInfo(data?.project?.vulnerabilities?.pageInfo);
       },

@@ -28,7 +28,10 @@ query project(
     ) {
       nodes {
         ...Vulnerability
-        externalIssueLinks @include(if: $includeExternalIssueLinks) {
+        project {
+          webUrl
+        }
+        externalIssueLinks(includeExternalIssueLinks: $includeExternalIssueLinks) @client {
           nodes {
             issue: externalIssue {
               externalTracker
