@@ -422,6 +422,9 @@ msgid_plural "%{count} issues selected"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "%{count} items per page"
+msgstr ""
+
 msgid "%{count} merge request selected"
 msgid_plural "%{count} merge requests selected"
 msgstr[0] ""
@@ -5070,6 +5073,9 @@ msgid "BulkImport|Import groups from GitLab"
 msgstr ""
 
 msgid "BulkImport|Importing the group failed"
+msgstr ""
+
+msgid "BulkImport|Showing %{start}-%{end} of %{total}"
 msgstr ""
 
 msgid "BulkImport|Showing %{start}-%{end} of %{total} from %{link}"

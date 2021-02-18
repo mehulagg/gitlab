@@ -1,13 +1,15 @@
 <script>
 import {
   GlEmptyState,
+  GlDropdown,
+  GlDropdownItem,
   GlIcon,
   GlLink,
   GlLoadingIcon,
   GlSearchBoxByClick,
   GlSprintf,
 } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { s__, sprintf, __ } from '~/locale';
 import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
 import importGroupMutation from '../graphql/mutations/import_group.mutation.graphql';
 import setNewNameMutation from '../graphql/mutations/set_new_name.mutation.graphql';
@@ -19,6 +21,8 @@ import ImportTableRow from './import_table_row.vue';
 export default {
   components: {
     GlEmptyState,
+    GlDropdown,
+    GlDropdownItem,
     GlIcon,
     GlLink,
     GlLoadingIcon,
@@ -39,6 +43,7 @@ export default {
     return {
       filter: '',
       page: 1,
+      perPage: 20,
     };
   },
 
@@ -46,13 +51,28 @@ export default {
     bulkImportSourceGroups: {
       query: bulkImportSourceGroupsQuery,
       variables() {
-        return { page: this.page, filter: this.filter };
+        return { page: this.page, filter: this.filter, perPage: this.perPage };
       },
     },
     availableNamespaces: availableNamespacesQuery,
   },
 
   computed: {
+    humanizedTotal() {
+      return this.paginationInfo.total >= 1000 ? '1000+' : this.paginationInfo.total;
+    },
+
+    pageSizeOptions() {
+      return [20, 50, 100].map((count) => ({
+        value: count,
+        text: sprintf(__('%{count} items per page'), { count }),
+      }));
+    },
+
+    activePageSizeOptionText() {
+      return this.pageSizeOptions.find((item) => item.value === this.perPage).text;
+    },
+
     hasGroups() {
       return this.bulkImportSourceGroups?.nodes?.length > 0;
     },
@@ -120,7 +140,7 @@ export default {
 <template>
   <div>
     <div
-      class="gl-py-5 gl-border-solid gl-border-gray-200 gl-border-0 gl-border-b-1 gl-display-flex gl-align-items-center"
+      class="gl-py-5 gl-border-solid gl-border-gray-200 gl-border-0 gl-border-b-1 gl-display-flex"
     >
       <span>
         <gl-sprintf v-if="!$apollo.loading && hasGroups" :message="statusMessage">
@@ -157,7 +177,7 @@ export default {
         :title="s__('BulkImport|You have no groups to import')"
         :description="s__('Check your source instance permissions.')"
       />
-      <div v-else class="gl-display-flex gl-flex-direction-column gl-align-items-center">
+      <template v-else>
         <table class="gl-w-full">
           <thead class="gl-border-solid gl-border-gray-200 gl-border-0 gl-border-b-1">
             <th class="gl-py-4 import-jobs-from-col">{{ s__('BulkImport|From source group') }}</th>
@@ -178,12 +198,40 @@ export default {
             </template>
           </tbody>
         </table>
-        <pagination-links
-          :change="setPage"
-          :page-info="bulkImportSourceGroups.pageInfo"
-          class="gl-mt-3"
-        />
-      </div>
+        <div v-if="hasGroups" class="gl-display-flex gl-mt-3 gl-align-items-center">
+          <pagination-links
+            :change="setPage"
+            :page-info="bulkImportSourceGroups.pageInfo"
+            class="gl-m-0"
+          />
+          <gl-dropdown category="tertiary" class="gl-ml-auto">
+            <template #button-content>
+              <span class="font-weight-bold">{{ activePageSizeOptionText }}</span>
+              <gl-icon class="gl-button-icon dropdown-chevron" name="chevron-down" />
+            </template>
+            <gl-dropdown-item
+              v-for="item in pageSizeOptions"
+              :key="item.value"
+              @click="perPage = item.value"
+            >
+              {{ item.text }}
+            </gl-dropdown-item>
+          </gl-dropdown>
+          <div class="gl-ml-2">
+            <gl-sprintf :message="s__('BulkImport|Showing %{start}-%{end} of %{total}')">
+              <template #start>
+                {{ paginationInfo.start }}
+              </template>
+              <template #end>
+                {{ paginationInfo.end }}
+              </template>
+              <template #total>
+                {{ humanizedTotal }}
+              </template>
+            </gl-sprintf>
+          </div>
+        </div>
+      </template>
     </template>
   </div>
 </template>
