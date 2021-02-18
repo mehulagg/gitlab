@@ -201,7 +201,7 @@ module API
           merge_requests = authorized_merge_requests_for_project(user_project)
 
           if Feature.enabled?(:api_v3_repos_events_optimization, user_project)
-            merge_requests = merge_requests.includes(:author, :assignees, :metrics, source_project: :namespace, target_project: :namespace)
+            merge_requests = merge_requests.preload(:author, :assignees, :metrics, source_project: :namespace, target_project: :namespace)
           end
 
           present paginate(merge_requests), with: ::API::Github::Entities::PullRequestEvent
