@@ -30,18 +30,18 @@ describe('AlertsList component', () => {
   };
   const defaultProps = { filters: DEFAULT_FILTERS };
 
-  const findAlertFilters = () => wrapper.find(AlertFilters);
+  const findAlertFilters = () => wrapper.findComponent(AlertFilters);
   const findUnconfiguredAlert = () => wrapper.findByTestId('threat-alerts-unconfigured');
   const findErrorAlert = () => wrapper.findByTestId('threat-alerts-error');
   const findStartedAtColumn = () => wrapper.findByTestId('threat-alerts-started-at');
   const findStartedAtColumnHeader = () => wrapper.findByTestId('threat-alerts-started-at-header');
   const findIdColumn = () => wrapper.findByTestId('threat-alerts-id');
   const findEventCountColumn = () => wrapper.findByTestId('threat-alerts-event-count');
-  const findStatusColumn = () => wrapper.find(AlertStatus);
+  const findStatusColumn = () => wrapper.findComponent(AlertStatus);
   const findStatusColumnHeader = () => wrapper.findByTestId('threat-alerts-status-header');
   const findEmptyState = () => wrapper.findByTestId('threat-alerts-empty-state');
-  const findGlIntersectionObserver = () => wrapper.find(GlIntersectionObserver);
-  const findGlSkeletonLoading = () => wrapper.find(GlSkeletonLoading);
+  const findGlIntersectionObserver = () => wrapper.findComponent(GlIntersectionObserver);
+  const findGlSkeletonLoading = () => wrapper.findComponent(GlSkeletonLoading);
 
   const createWrapper = ({ $apollo = apolloMock, data = {}, stubs = {} } = {}) => {
     wrapper = extendedWrapper(
