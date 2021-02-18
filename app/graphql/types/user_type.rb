@@ -50,6 +50,11 @@ module Types
     field :starred_projects, Types::ProjectType.connection_type, null: true,
           description: 'Projects starred by the user.',
           resolver: Resolvers::UserStarredProjectsResolver
+    field :merge_request_interaction, ::Types::UserMergeRequestInteractionType, null: true,
+          description: "Details of this user's interactions with a merge request." do
+            argument :id, ::Types::GlobalIDType[::MergeRequest], required: true,
+                     description: 'ID of the merge request.'
+          end
 
     # Merge request field: MRs can be authored, assigned, or assigned-for-review:
     field :authored_merge_requests,
@@ -67,5 +72,12 @@ module Types
           null: true,
           description: 'Snippets authored by the user.',
           resolver: Resolvers::Users::SnippetsResolver
+
+    def merge_request_interaction(id:)
+      # TODO: remove this line when the compatibility layer is removed
+      # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+      id = ::Types::GlobalIDType[::MergeRequest].coerce_isolated_input(id)
+      GitlabSchema.find_by_gid(id)
+    end
   end
 end
