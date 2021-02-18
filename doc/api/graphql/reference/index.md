@@ -4115,7 +4115,7 @@ Represents the Geo sync and verification state of a snippet repository.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `issueUpdated` | Issue! | Triggered when an issue is updated. |
+| `issuableAssigneesUpdated` | User! => Array | Triggered when the assignees of an issuable are updated. |
 
 ### `TaskCompletionStatus`
 

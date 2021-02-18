@@ -152,6 +152,14 @@ RSpec.describe Gitlab::Graphql::Authorize::AuthorizeFieldService do
 
           it_behaves_like 'checking permissions on the presented object'
         end
+
+        context 'when it resolves to GraphQL::Execution::Execute::SKIP' do
+          let(:type_class) { type_with_field(GraphQL::STRING_TYPE, :read_field, GraphQL::Execution::Execute::SKIP) }
+
+          it 'does not fail when authorizing' do
+            expect(resolved).to be_nil
+          end
+        end
       end
 
       context 'when the field is a connection' do

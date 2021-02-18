@@ -57,7 +57,7 @@ function mountAssigneesComponent(mediator) {
 
   if (!el) return;
 
-  const { iid, fullPath } = getSidebarOptions();
+  const { id } = getSidebarOptions();
   const assigneeAvailabilityStatus = getSidebarAssigneeAvailabilityData();
   // eslint-disable-next-line no-new
   new Vue({
@@ -70,8 +70,7 @@ function mountAssigneesComponent(mediator) {
       createElement('sidebar-assignees', {
         props: {
           mediator,
-          issuableIid: String(iid),
-          projectPath: fullPath,
+          issuableId: id,
           field: el.dataset.field,
           signedIn: el.hasAttribute('data-signed-in'),
           issuableType:

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module GraphqlTriggers
-  def self.issue_updated(issue)
-    GitlabSchema.subscriptions.trigger('issueUpdated', { project_path: issue.project.full_path, iid: issue.iid }, issue)
+  def self.issuable_assignees_updated(issuable)
+    GitlabSchema.subscriptions.trigger('issuableAssigneesUpdated', { issuable_id: issuable.to_gid }, issuable.assignees.to_a)
   end
 end

@@ -16,10 +16,9 @@ describe('sidebar assignees', () => {
   const createComponent = (realTimeIssueSidebar = false, props) => {
     wrapper = shallowMount(SidebarAssignees, {
       propsData: {
-        issuableIid: '1',
+        issuableId: 1,
         mediator,
         field: '',
-        projectPath: 'projectPath',
         changing: false,
         ...props,
       },

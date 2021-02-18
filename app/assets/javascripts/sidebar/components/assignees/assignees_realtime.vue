@@ -1,6 +1,7 @@
 <script>
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import query from '~/issuable_sidebar/subscriptions/issue_sidebar.subscription.graphql';
+import { convertToGraphQLId, getIdFromGraphQLId } from '~/graphql_shared/utils';
+import query from '~/issuable_sidebar/subscriptions/assignees.subscription.graphql';
+import { capitalizeFirstCharacter, convertToCamelCase } from '~/lib/utils/text_utility';
 
 export default {
   name: 'AssigneesRealtime',
@@ -9,23 +10,27 @@ export default {
       type: Object,
       required: true,
     },
-    issuableIid: {
+    issuableType: {
       type: String,
       required: true,
     },
-    projectPath: {
-      type: String,
+    issuableId: {
+      type: Number,
       required: true,
+    },
+  },
+  computed: {
+    issuableClass() {
+      return capitalizeFirstCharacter(convertToCamelCase(this.issuableType));
     },
   },
   apollo: {
     $subscribe: {
-      issue: {
+      assignees: {
         query,
         variables() {
           return {
-            projectPath: this.projectPath,
-            iid: this.issuableIid,
+            issuableId: convertToGraphQLId(this.issuableClass, this.issuableId),
           };
         },
         result(data) {
@@ -36,15 +41,15 @@ export default {
   },
   methods: {
     handleFetchResult({ data }) {
-      const { nodes } = data.issueUpdated.assignees;
+      if (data.issuableAssigneesUpdated !== null) {
+        const assignees = data.issuableAssigneesUpdated.map((n) => ({
+          ...n,
+          avatar_url: n.avatarUrl,
+          id: getIdFromGraphQLId(n.id),
+        }));
 
-      const assignees = nodes.map((n) => ({
-        ...n,
-        avatar_url: n.avatarUrl,
-        id: getIdFromGraphQLId(n.id),
-      }));
-
-      this.mediator.store.setAssigneesFromRealtime(assignees);
+        this.mediator.store.setAssigneesFromRealtime(assignees);
+      }
     },
   },
   render() {

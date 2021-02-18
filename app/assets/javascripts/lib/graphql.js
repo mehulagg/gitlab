@@ -4,7 +4,7 @@ import { ApolloLink } from 'apollo-link';
 import { BatchHttpLink } from 'apollo-link-batch-http';
 import { createHttpLink } from 'apollo-link-http';
 import { createUploadLink } from 'apollo-upload-client';
-import { ActionCableLink } from 'graphql-ruby-client';
+import ActionCableLink from 'graphql-ruby-client/dist/subscriptions/ActionCableLink';
 import cable from '~/actioncable_consumer';
 import { StartupJSLink } from '~/lib/utils/apollo_startup_js_link';
 import csrf from '~/lib/utils/csrf';

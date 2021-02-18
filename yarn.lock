@@ -1765,11 +1765,12 @@ abbrev@1:
   integrity sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==
 
 ably@*:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/ably/-/ably-1.2.2.tgz#74629c3ab863bd236dd5d209bc829866f8910950"
-  integrity sha512-eiX2EljHnFf5k0NmucoP3SP3vw3cQN1UuoNvIsi5XoNVCwSAJvVinJ9vuXbgcT+SriYrwQBWHkL7k7bkpCOyog==
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/ably/-/ably-1.2.5.tgz#031ea28446eb1139f1486102568b5480128969dc"
+  integrity sha512-WlPvNUY6c9ZrpguJJdfMT7rL4owueuq4YeSiVOgsrKm95URx4ksRxo0OU+5vvSqrUPHdrzYWRNzTZkrJDHLPWw==
   dependencies:
     "@ably/msgpack-js" "^0.3.3"
+    null-loader "^4.0.1"
     request "^2.87.0"
     ws "^5.1"
 
@@ -5800,7 +5801,7 @@ graphlib@^2.1.7, graphlib@^2.1.8:
   dependencies:
     lodash "^4.17.15"
 
-graphql-ruby-client@^1.8.2:
+graphql-ruby-client@1.8.2:
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/graphql-ruby-client/-/graphql-ruby-client-1.8.2.tgz#35e5522f4d47bca84d255fbfb8a4402e6f20be95"
   integrity sha512-P0OPA4Kyxc5H6ylK657eq1UbImilpqtsra+m8laZmKXK7eWw0aAyVa2EhFMzgSmV4RBAuzyr0l0BTRL6NJvAag==
@@ -8934,6 +8935,14 @@ npm-run-path@^4.0.0:
     console-control-strings "~1.1.0"
     gauge "~2.7.3"
     set-blocking "~2.0.0"
+
+null-loader@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/null-loader/-/null-loader-4.0.1.tgz#8e63bd3a2dd3c64236a4679428632edd0a6dbc6a"
+  integrity sha512-pxqVbi4U6N26lq+LmgIbB5XATP0VdZKOG25DhHi8btMmJJefGArFyDg1yc4U3hWCJbMqSrw0qyrz1UQX+qYXqg==
+  dependencies:
+    loader-utils "^2.0.0"
+    schema-utils "^3.0.0"
 
 num2fraction@^1.2.2:
   version "1.2.2"

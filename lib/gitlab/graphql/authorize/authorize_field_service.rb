@@ -72,7 +72,7 @@ module Gitlab
         end
 
         def filter_allowed(current_user, resolved_type, authorizing_object)
-          if resolved_type.nil?
+          if resolved_type.nil? || resolved_type == GraphQL::Execution::Execute::SKIP
             # We're not rendering anything, for example when a record was not found
             # no need to do anything
           elsif authorizing_object

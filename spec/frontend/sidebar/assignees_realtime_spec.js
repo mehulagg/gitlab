@@ -10,9 +10,9 @@ describe('Assignees Realtime', () => {
   const createComponent = () => {
     wrapper = shallowMount(AssigneesRealtime, {
       propsData: {
-        issuableIid: '1',
+        issuableType: 'issue',
+        issuableId: 1,
         mediator,
-        projectPath: 'path/to/project',
       },
     });
   };
@@ -27,14 +27,20 @@ describe('Assignees Realtime', () => {
     SidebarMediator.singleton = null;
   });
 
+  describe('computed', () => {
+    describe('issuableClass', () => {
+      it('returns the correct issuable class', () => {
+        createComponent();
+
+        expect(wrapper.vm.issuableClass).toBe('Issue');
+      });
+    });
+  });
+
   describe('when handleFetchResult is called from smart subscription', () => {
     it('sets assignees to the store', () => {
       const data = {
-        issueUpdated: {
-          assignees: {
-            nodes: [{ id: 'gid://gitlab/User/123', avatarUrl: 'url' }],
-          },
-        },
+        issuableAssigneesUpdated: [{ id: 'gid://gitlab/User/123', avatarUrl: 'url' }],
       };
       const expected = [{ id: 123, avatar_url: 'url', avatarUrl: 'url' }];
       createComponent();

@@ -4,7 +4,7 @@ module Types
   class SubscriptionType < ::Types::BaseObject
     graphql_name 'Subscription'
 
-    field :issue_updated, subscription: Subscriptions::IssueUpdated,
-          description: 'Triggered when an issue is updated.'
+    field :issuable_assignees_updated, subscription: Subscriptions::Issuables::AssigneesUpdated, null: true,
+          description: 'Triggered when the assignees of an issuable are updated.'
   end
 end

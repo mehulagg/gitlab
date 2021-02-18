@@ -1,0 +1,9 @@
+#import "~/graphql_shared/fragments/author.fragment.graphql"
+
+subscription issuableAssigneesUpdated($issuableId: IssuableID!) {
+  issuableAssigneesUpdated(issuableId: $issuableId) {
+    ...Author
+    id
+    state
+  }
+}

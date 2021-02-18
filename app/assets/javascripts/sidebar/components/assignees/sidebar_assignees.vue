@@ -36,12 +36,8 @@ export default {
       required: false,
       default: 'issue',
     },
-    issuableIid: {
-      type: String,
-      required: true,
-    },
-    projectPath: {
-      type: String,
+    issuableId: {
+      type: Number,
       required: true,
     },
     assigneeAvailabilityStatus: {
@@ -121,8 +117,8 @@ export default {
   <div>
     <assignees-realtime
       v-if="shouldEnableRealtime"
-      :issuable-iid="issuableIid"
-      :project-path="projectPath"
+      :issuable-type="issuableType"
+      :issuable-id="issuableId"
       :mediator="mediator"
     />
     <assignee-title

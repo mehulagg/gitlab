@@ -3,13 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe GraphqlTriggers do
-  describe '.issue_updated' do
-    it 'triggers the issueUpdated subscription' do
-      issue = create(:issue)
+  describe '.issuable_assignees_updated' do
+    it 'triggers the issuableAssigneesUpdated subscription' do
+      assignees = create_list(:user, 2)
+      issue = create(:issue, assignees: assignees)
 
-      expect(GitlabSchema.subscriptions).to receive(:trigger).with('issueUpdated', { project_path: issue.project.full_path, iid: issue.iid }, issue)
+      expect(GitlabSchema.subscriptions).to receive(:trigger).with('issuableAssigneesUpdated', { issuable_id: issue.to_gid }, assignees)
 
-      GraphqlTriggers.issue_updated(issue)
+      GraphqlTriggers.issuable_assignees_updated(issue)
     end
   end
 end
