@@ -1,0 +1,5 @@
+---
+title: Resolve Refactor Confidentiality sidebar component to use Vue +Apollo
+merge_request: 53858
+author:
+type: changed
