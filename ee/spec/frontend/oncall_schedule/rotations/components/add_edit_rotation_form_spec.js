@@ -81,7 +81,6 @@ describe('AddEditRotationForm', () => {
   const findRotationFormGroups = () => wrapper.findAllComponents(GlFormGroup);
   const findStartsOnTimeOptions = () => findRotationStartTime().findAllComponents(GlDropdownItem);
   const findEndsOnTimeOptions = () => findRotationEndTime().findAllComponents(GlDropdownItem);
-  const findRestrictedToTime = () => wrapper.find('[data-testid="restricted-to-time"]');
   const findRestrictedToToggle = () => wrapper.find('[data-testid="restricted-to-toggle"]');
   const findRestrictedFromOptions = () =>
     wrapper.find('[data-testid="restricted-from"]').findAllComponents(GlDropdownItem);
