@@ -2585,8 +2585,7 @@ RSpec.describe Ci::Build do
 
       shared_examples 'containing environment variables' do
         it do
-          stripped_subject = subject.map { |v| v.reject { |k, _| k == :depends_on } }
-          environment_variables.each { |v| expect(stripped_subject).to include(v) }
+          environment_variables.each { |v| is_expected.to include(v) }
         end
       end
 
@@ -2621,7 +2620,7 @@ RSpec.describe Ci::Build do
             it_behaves_like 'containing environment variables'
 
             it 'puts $CI_ENVIRONMENT_URL in the last so all other variables are available to be used when runners are trying to expand it' do
-              expect(subject.last.reject { |k, _| k == :depends_on }).to eq(environment_variables.last)
+              expect(subject.last).to eq(environment_variables.last)
             end
           end
         end

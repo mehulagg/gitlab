@@ -95,14 +95,12 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Item do
         end
 
         with_them do
-          subject { Gitlab::Ci::Variables::Collection::Item.new(**variable) }
+          describe '#depends_on' do
+            subject { Gitlab::Ci::Variables::Collection::Item.new(**variable).depends_on }
 
-          it 'contains :depends_on item with referenced variable names' do
-            expect(subject[:depends_on]).to eq expected_depends_on
-          end
-
-          it '#depends_on matches :depends_on' do
-            expect(subject.depends_on).to eq subject[:depends_on]
+            it 'contains referenced variable names' do
+              is_expected.to eq(expected_depends_on)
+            end
           end
         end
       end

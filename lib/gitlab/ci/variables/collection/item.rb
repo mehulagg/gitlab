@@ -7,20 +7,14 @@ module Gitlab
         class Item
           include Gitlab::Utils::StrongMemoize
 
-          def initialize(key:, value:, public: true, file: false, masked: false, depends_on: nil)
+          attr_reader :depends_on
+
+          def initialize(key:, value:, public: true, file: false, masked: false)
             raise ArgumentError, "`#{key}` must be of type String or nil value, while it was: #{value.class}" unless
               value.is_a?(String) || value.nil?
 
-            depends_on ||= variable_references(value)
-
-            @variable = {
-              key: key,
-              value: value,
-              public: public,
-              file: file,
-              masked: masked,
-              depends_on: depends_on
-            }
+            @variable = { key: key, value: value, public: public, file: file, masked: masked }
+            @depends_on = self.class.variable_references(value)
           end
 
           def value
@@ -33,10 +27,6 @@ module Gitlab
 
           def ==(other)
             to_runner_variable == self.class.fabricate(other).to_runner_variable
-          end
-
-          def depends_on
-            self[:depends_on]
           end
 
           ##
@@ -63,9 +53,7 @@ module Gitlab
             end
           end
 
-          private
-
-          def variable_references(value)
+          def self.variable_references(value)
             return unless ExpandVariables.possible_var_reference?(value)
 
             value.scan(ExpandVariables::VARIABLES_REGEXP).map do |var_ref|
