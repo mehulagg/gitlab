@@ -43,9 +43,26 @@ module Gitlab
         @stages = @ci_config.stages
         @jobs = @ci_config.normalized_jobs
 
+        check_circular_dependency!
+
         @jobs.each do |name, job|
           validate_job!(name, job)
         end
+      end
+
+      def check_circular_dependency!
+        nodes = @jobs.values.to_h do |job|
+          name = job[:name].to_s
+          needs = job.dig(:needs, :job).to_a
+
+          [name, needs.map { |need| need[:name].to_s }]
+        end
+
+        Dag.new(nodes).tsort
+      rescue TSort::Cyclic
+        error!('The pipeline has circular dependencies.')
+      rescue Dag::MissingNodeError
+        # This is handled in validate_job_dependency!
       end
 
       def validate_job!(name, job)

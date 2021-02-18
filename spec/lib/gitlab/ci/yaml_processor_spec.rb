@@ -2943,6 +2943,29 @@ module Gitlab
 
           it_behaves_like 'returns errors', 'jobs:rspec:parallel should be an integer or a hash'
         end
+
+        context 'when the pipeline has a circular dependency' do
+          let(:config) do
+            <<~YAML
+            build:
+              stage: test
+              script: build
+              needs: [deploy]
+
+            test:
+              stage: test
+              script: test
+              needs: [build]
+
+            deploy:
+              stage: test
+              script: deploy
+              needs: [test]
+            YAML
+          end
+
+          it_behaves_like 'returns errors', 'The pipeline has circular dependencies.'
+        end
       end
 
       describe '#execute' do
