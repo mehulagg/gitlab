@@ -42,13 +42,25 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
         expect(resolve_requirements(iids: [requirement1.iid, requirement3.iid])).to contain_exactly(requirement1, requirement3)
       end
 
-      it 'filters by last test report state' do
-        create(:test_report, state: :failed)
-        create(:test_report, requirement: requirement1, state: :passed)
-        create(:test_report, requirement: requirement1, state: :failed)
-        create(:test_report, requirement: requirement3, state: :failed)
+      context 'when filtering by last test report state' do
+        before do
+          create(:test_report, state: :failed)
+          create(:test_report, requirement: requirement1, state: :passed)
+          create(:test_report, requirement: requirement1, state: :failed)
+          create(:test_report, requirement: requirement3, state: :passed)
+        end
 
-        expect(resolve_requirements(last_test_report_state: 'failed')).to contain_exactly(requirement1, requirement3)
+        it 'filters by failed requirements' do
+          expect(resolve_requirements(last_test_report_state: 'failed')).to contain_exactly(requirement1)
+        end
+
+        it 'filters by passed requirements' do
+          expect(resolve_requirements(last_test_report_state: 'passed')).to contain_exactly(requirement3)
+        end
+
+        it 'filters requirements without test reports' do
+          expect(resolve_requirements(last_test_report_state: 'missing')).to contain_exactly(requirement2)
+        end
       end
 
       describe 'sorting' do

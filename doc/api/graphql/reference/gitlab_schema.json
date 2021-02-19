@@ -59330,7 +59330,7 @@
                   "description": "The state of latest requirement test report.",
                   "type": {
                     "kind": "ENUM",
-                    "name": "TestReportState",
+                    "name": "RequirementStatusFilter",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -59443,7 +59443,7 @@
                   "description": "The state of latest requirement test report.",
                   "type": {
                     "kind": "ENUM",
-                    "name": "TestReportState",
+                    "name": "RequirementStatusFilter",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -66789,6 +66789,35 @@
 
           ],
           "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "RequirementStatusFilter",
+          "description": "Status of a requirement based on last test report",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "PASSED",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "FAILED",
+              "description": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "MISSING",
+              "description": "Requirements without any test report",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
           "possibleTypes": null
         },
         {

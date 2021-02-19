@@ -20471,7 +20471,7 @@ type Project {
     """
     The state of latest requirement test report.
     """
-    lastTestReportState: TestReportState
+    lastTestReportState: RequirementStatusFilter
 
     """
     Search query for requirement title.
@@ -20536,7 +20536,7 @@ type Project {
     """
     The state of latest requirement test report.
     """
-    lastTestReportState: TestReportState
+    lastTestReportState: RequirementStatusFilter
 
     """
     Search query for requirement title.
@@ -23211,6 +23211,19 @@ type RequirementStatesCount {
   Number of opened requirements.
   """
   opened: Int
+}
+
+"""
+Status of a requirement based on last test report
+"""
+enum RequirementStatusFilter {
+  FAILED
+
+  """
+  Requirements without any test report
+  """
+  MISSING
+  PASSED
 }
 
 interface ResolvableInterface {

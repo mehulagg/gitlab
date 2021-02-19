@@ -53,6 +53,10 @@ module RequirementsManagement
       include_last_test_report_with_state.where( test_reports: { state: state } )
     end
 
+    scope :without_test_reports, -> do
+      left_joins(:test_reports).where(requirements_management_test_reports: { requirement_id: nil })
+    end
+
     class << self
       # Searches for records with a matching title.
       #

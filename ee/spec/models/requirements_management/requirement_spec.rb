@@ -81,6 +81,7 @@ RSpec.describe RequirementsManagement::Requirement do
       let_it_be(:requirement1) { create(:requirement) }
       let_it_be(:requirement2) { create(:requirement) }
       let_it_be(:requirement3) { create(:requirement) }
+      let_it_be(:requirement4) { create(:requirement) }
 
       before do
         create(:test_report, requirement: requirement1, state: :passed)
@@ -103,6 +104,19 @@ RSpec.describe RequirementsManagement::Requirement do
 
         it { is_expected.to contain_exactly(requirement1) }
       end
+    end
+  end
+
+  describe '.without_test_reports' do
+    let_it_be(:requirement1) { create(:requirement) }
+    let_it_be(:requirement2) { create(:requirement) }
+
+    before do
+      create(:test_report, requirement: requirement2, state: :passed)
+    end
+
+    it 'returns requirements without test reports' do
+      expect(described_class.without_test_reports).to contain_exactly(requirement1)
     end
   end
 
