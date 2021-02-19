@@ -33,7 +33,6 @@ describe('Release block footer', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const commitInfoSection = () => wrapper.find('.js-commit-info');

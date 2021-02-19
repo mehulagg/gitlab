@@ -30,7 +30,6 @@ describe('graph component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('while is loading', () => {

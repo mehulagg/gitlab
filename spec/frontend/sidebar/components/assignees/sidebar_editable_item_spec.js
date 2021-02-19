@@ -22,7 +22,6 @@ describe('boards sidebar remove issue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('template', () => {

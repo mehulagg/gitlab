@@ -17,7 +17,6 @@ describe('Shared Runner Limit Block', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('quota information', () => {

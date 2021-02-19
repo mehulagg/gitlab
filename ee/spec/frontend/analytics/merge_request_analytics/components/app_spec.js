@@ -24,7 +24,6 @@ describe('MergeRequestAnalyticsApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('displays the page title', () => {

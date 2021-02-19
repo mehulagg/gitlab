@@ -20,7 +20,6 @@ describe('SidebarDatePicker', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should emit toggleCollapse when collapsed toggle sidebar is clicked', () => {

@@ -15,7 +15,6 @@ describe('StatisticsList', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('displays the counts data with labels', () => {

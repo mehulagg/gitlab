@@ -10,7 +10,6 @@ describe('GeoNodesBetaApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGeoNodesBetaContainer = () => wrapper.find('section');

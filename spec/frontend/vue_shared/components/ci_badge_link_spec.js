@@ -79,7 +79,6 @@ describe('CI Badge Link Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it.each(Object.keys(statuses))('should render badge for status: %s', (status) => {

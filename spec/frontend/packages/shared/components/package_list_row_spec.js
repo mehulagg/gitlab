@@ -37,7 +37,6 @@ describe('packages_list_row', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders', () => {

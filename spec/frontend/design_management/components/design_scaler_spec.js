@@ -22,7 +22,6 @@ describe('Design management design scaler component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when `scale` value is greater than 1', () => {

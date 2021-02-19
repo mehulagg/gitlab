@@ -15,7 +15,6 @@ describe('Activity Chart Bundle', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findChart = () => wrapper.find(GlColumnChart);

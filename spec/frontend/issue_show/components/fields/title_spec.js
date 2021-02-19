@@ -21,7 +21,6 @@ describe('Title field component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders form control with formState title', () => {

@@ -13,7 +13,6 @@ describe('Legacy container component', () => {
   afterEach(() => {
     wrapper.destroy();
     resetHTMLFixture();
-    wrapper = null;
   });
 
   describe('when selector targets real node', () => {

@@ -30,7 +30,6 @@ describe('Pipelines Table', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('table', () => {

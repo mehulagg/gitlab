@@ -61,7 +61,6 @@ describe('LdapOverrideConfirmationModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when modal is open', () => {

@@ -33,7 +33,6 @@ describe('initMembersApp', () => {
     el = null;
 
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders `MembersApp`', () => {

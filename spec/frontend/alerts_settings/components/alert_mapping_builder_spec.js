@@ -22,7 +22,6 @@ describe('AlertMappingBuilder', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

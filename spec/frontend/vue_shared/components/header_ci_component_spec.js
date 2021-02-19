@@ -50,7 +50,6 @@ describe('Header CI Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('render', () => {

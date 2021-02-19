@@ -31,7 +31,6 @@ describe('DevopsAdoptionEmptyState', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('contains the correct svg', () => {

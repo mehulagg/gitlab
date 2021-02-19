@@ -75,7 +75,6 @@ describe('Pipeline Status', () => {
     mockPipelineQuery.mockReset();
 
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('while querying', () => {

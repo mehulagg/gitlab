@@ -40,7 +40,6 @@ describe('DiscussionCounter component', () => {
 
   afterEach(() => {
     wrapper.vm.$destroy();
-    wrapper = null;
   });
 
   describe('has no discussions', () => {

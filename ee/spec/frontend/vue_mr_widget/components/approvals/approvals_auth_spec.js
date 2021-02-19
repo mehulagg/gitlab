@@ -22,7 +22,6 @@ describe('Approval auth component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findInput = () => wrapper.find('input[type=password]');

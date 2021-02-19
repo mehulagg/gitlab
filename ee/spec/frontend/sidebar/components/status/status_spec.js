@@ -45,7 +45,6 @@ describe('Status', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('shows the text "Status"', () => {

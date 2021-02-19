@@ -57,7 +57,6 @@ describe('ide/components/ide_status_list', () => {
     wrapper.destroy();
 
     store = null;
-    wrapper = null;
   });
 
   describe('with regular file', () => {

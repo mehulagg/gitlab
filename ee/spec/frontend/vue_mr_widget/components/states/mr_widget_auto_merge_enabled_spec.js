@@ -41,7 +41,6 @@ describe('MRWidgetAutoMergeEnabled', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('computed', () => {

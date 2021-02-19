@@ -57,7 +57,6 @@ describe('Artifacts block', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with expired artifacts that are not locked', () => {

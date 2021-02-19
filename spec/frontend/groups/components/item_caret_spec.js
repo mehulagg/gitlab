@@ -18,7 +18,6 @@ describe('ItemCaret', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

@@ -30,7 +30,6 @@ describe('WeeksPresetMixin', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('methods', () => {

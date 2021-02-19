@@ -35,7 +35,6 @@ describe('IDE error message component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findDismissButton = () => wrapper.find('button[aria-label=Dismiss]');

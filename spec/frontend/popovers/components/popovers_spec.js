@@ -34,7 +34,6 @@ describe('popovers/components/popovers.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('addPopovers', () => {

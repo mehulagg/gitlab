@@ -34,7 +34,6 @@ describe('MembersTokenSelect', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findTokenSelector = () => wrapper.find(GlTokenSelector);

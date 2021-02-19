@@ -25,7 +25,6 @@ describe('Alert integration settings form', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

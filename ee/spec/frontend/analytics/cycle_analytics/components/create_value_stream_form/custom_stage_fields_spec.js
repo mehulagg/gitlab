@@ -54,7 +54,6 @@ describe('CustomStageFields', () => {
     );
   }
 
-  let wrapper = null;
 
   const getDropdown = (dropdownEl) => dropdownEl.find(GlDropdown);
   const getLabelSelect = (dropdownEl) => dropdownEl.find(LabelsSelector);
@@ -79,7 +78,6 @@ describe('CustomStageFields', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each([

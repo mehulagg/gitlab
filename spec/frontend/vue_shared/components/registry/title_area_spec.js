@@ -31,7 +31,6 @@ describe('title area', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('title', () => {

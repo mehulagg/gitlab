@@ -17,7 +17,6 @@ describe('clipboard button', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('without gfm', () => {

@@ -23,7 +23,6 @@ describe('Recent Searches Dropdown Content', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when local storage is not available', () => {

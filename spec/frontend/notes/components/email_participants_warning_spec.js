@@ -6,7 +6,6 @@ describe('Email Participants Warning Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findMoreButton = () => wrapper.find('button');

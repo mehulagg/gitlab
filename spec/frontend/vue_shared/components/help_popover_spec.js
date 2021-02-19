@@ -27,7 +27,6 @@ describe('HelpPopover', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders a link button with an icon question', () => {

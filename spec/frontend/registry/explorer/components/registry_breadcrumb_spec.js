@@ -30,7 +30,6 @@ describe('Registry Breadcrumb', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when is rootRoute', () => {

@@ -38,7 +38,6 @@ describe('MilestoneItemComponent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('computed', () => {

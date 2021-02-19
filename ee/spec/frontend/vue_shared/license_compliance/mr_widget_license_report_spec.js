@@ -92,7 +92,6 @@ describe('License Report MR Widget', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('computed', () => {

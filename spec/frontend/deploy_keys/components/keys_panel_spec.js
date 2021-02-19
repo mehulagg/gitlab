@@ -25,7 +25,6 @@ describe('Deploy keys panel', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders list of keys', () => {

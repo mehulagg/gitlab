@@ -40,7 +40,6 @@ describe('AlertDetails', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findTableComponent = () => wrapper.find(GlTable);

@@ -51,7 +51,6 @@ describe('IDE merge requests list', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('calls fetch on mounted', () => {

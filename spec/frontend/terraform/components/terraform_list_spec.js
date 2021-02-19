@@ -58,7 +58,6 @@ describe('TerraformList', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when the terraform query has succeeded', () => {

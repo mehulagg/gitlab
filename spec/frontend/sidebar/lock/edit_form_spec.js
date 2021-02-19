@@ -26,7 +26,6 @@ describe('Edit Form Dropdown', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each`

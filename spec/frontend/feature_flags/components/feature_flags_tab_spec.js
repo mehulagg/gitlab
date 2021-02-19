@@ -53,7 +53,6 @@ describe('feature_flags/components/feature_flags_tab.vue', () => {
       wrapper.destroy();
     }
 
-    wrapper = null;
   });
 
   describe('alerts', () => {

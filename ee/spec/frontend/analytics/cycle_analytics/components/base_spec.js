@@ -209,7 +209,6 @@ describe('Value Stream Analytics component', () => {
     afterEach(() => {
       wrapper.destroy();
       mock.restore();
-      wrapper = null;
     });
 
     it('displays an empty state', () => {
@@ -350,7 +349,6 @@ describe('Value Stream Analytics component', () => {
     afterEach(() => {
       wrapper.destroy();
       mock.restore();
-      wrapper = null;
     });
 
     it('hides the empty state', () => {
@@ -522,7 +520,6 @@ describe('Value Stream Analytics component', () => {
     afterEach(() => {
       wrapper.destroy();
       mock.restore();
-      wrapper = null;
     });
 
     const findFlashError = () => document.querySelector('.flash-container .flash-text');
@@ -611,7 +608,6 @@ describe('Value Stream Analytics component', () => {
     afterEach(() => {
       wrapper.destroy();
       mock.restore();
-      wrapper = null;
     });
 
     describe('with minimal parameters set set', () => {

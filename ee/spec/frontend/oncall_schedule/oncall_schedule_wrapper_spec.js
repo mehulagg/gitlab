@@ -66,7 +66,6 @@ describe('On-call schedule wrapper', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

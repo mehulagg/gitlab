@@ -10,7 +10,6 @@ describe('Timezone Dropdown', () => {
 
   let $inputEl = null;
   let $dropdownEl = null;
-  let $wrapper = null;
   const tzListSel = '.dropdown-content ul li a.is-active';
   const tzDropdownToggleText = '.dropdown-toggle-text';
 

@@ -22,7 +22,6 @@ describe('publish_method', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders', () => {

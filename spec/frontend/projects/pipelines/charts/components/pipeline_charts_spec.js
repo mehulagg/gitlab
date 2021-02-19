@@ -37,7 +37,6 @@ describe('~/projects/pipelines/charts/components/pipeline_charts.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('overall statistics', () => {

@@ -46,7 +46,6 @@ describe('ProjectFilter', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findSearchableDropdown = () => wrapper.find(SearchableDropdown);

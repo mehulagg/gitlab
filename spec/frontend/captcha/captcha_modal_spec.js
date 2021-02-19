@@ -36,7 +36,6 @@ describe('Captcha Modal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGlModal = () => {

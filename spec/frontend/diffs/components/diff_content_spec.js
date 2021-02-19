@@ -97,7 +97,6 @@ describe('DiffContent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with text based files', () => {

@@ -31,7 +31,6 @@ describe('IDE pipeline stage', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('emits fetch event when mounted', () => {

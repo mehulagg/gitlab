@@ -44,7 +44,6 @@ describe('ide/components/ide_sidebar_nav', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findButtons = () => wrapper.findAll('li button');

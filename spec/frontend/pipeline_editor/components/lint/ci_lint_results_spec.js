@@ -42,7 +42,6 @@ describe('CI Lint Results', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('Empty results', () => {

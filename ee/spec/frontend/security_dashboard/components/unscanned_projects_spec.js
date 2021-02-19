@@ -57,7 +57,6 @@ describe('UnscannedProjects component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('lifecycle hooks', () => {

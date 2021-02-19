@@ -25,7 +25,6 @@ describe('ExpirationToggle', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('structure', () => {

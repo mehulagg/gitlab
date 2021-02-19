@@ -54,7 +54,6 @@ describe('IssuableByEmail', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     mockAxios.restore();
   });
 

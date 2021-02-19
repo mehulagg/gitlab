@@ -26,7 +26,6 @@ describe('NoEnvironmentEmptyState component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default state', () => {

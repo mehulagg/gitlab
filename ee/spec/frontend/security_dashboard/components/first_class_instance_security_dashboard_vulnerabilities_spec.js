@@ -36,7 +36,6 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when the query is loading', () => {

@@ -55,7 +55,6 @@ describe('Project Security Charts component', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

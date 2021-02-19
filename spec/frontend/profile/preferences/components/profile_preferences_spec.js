@@ -55,7 +55,6 @@ describe('ProfilePreferences component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should not render Integrations section', () => {

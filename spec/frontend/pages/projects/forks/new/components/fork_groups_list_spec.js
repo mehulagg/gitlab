@@ -43,7 +43,6 @@ describe('Fork groups list component', () => {
 
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

@@ -61,7 +61,6 @@ function createComponent({ props = {}, mountFn = shallowMount } = {}) {
 }
 
 describe('TasksByTypeFilters', () => {
-  let wrapper = null;
   let mock = null;
   const selectedFilterText = (count = 1) => `Showing Issues and ${count} labels`;
 

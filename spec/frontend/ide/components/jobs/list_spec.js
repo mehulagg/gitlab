@@ -53,7 +53,6 @@ describe('IDE stages list', () => {
 
   afterAll(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders loading icon when no stages & loading', () => {

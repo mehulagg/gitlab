@@ -37,7 +37,6 @@ describe('IDE commit editor header', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it.each`

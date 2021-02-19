@@ -36,7 +36,6 @@ describe('registry_header', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('header', () => {

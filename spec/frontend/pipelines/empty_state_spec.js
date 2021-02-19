@@ -22,7 +22,6 @@ describe('Pipelines Empty State', () => {
 
     afterEach(() => {
       wrapper.destroy();
-      wrapper = null;
     });
 
     it('should render empty state SVG', () => {

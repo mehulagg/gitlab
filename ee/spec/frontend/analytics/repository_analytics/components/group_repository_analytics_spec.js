@@ -17,7 +17,6 @@ describe('Group repository analytics app', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('test coverage', () => {

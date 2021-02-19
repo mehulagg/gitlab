@@ -18,7 +18,6 @@ describe('SidebarSubscriptionComponent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('template', () => {

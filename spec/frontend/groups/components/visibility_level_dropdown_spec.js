@@ -26,7 +26,6 @@ describe('Visibility Level Dropdown', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const hiddenInputValue = () =>

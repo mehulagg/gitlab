@@ -22,7 +22,6 @@ describe('Board List Header Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
 
     localStorage.clear();
   });

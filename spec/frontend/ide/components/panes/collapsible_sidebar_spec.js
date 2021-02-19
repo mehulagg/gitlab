@@ -38,7 +38,6 @@ describe('ide/components/panes/collapsible_sidebar.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with a tab', () => {

@@ -54,7 +54,6 @@ describe('DropdownContentsLabelsView', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findDropdownContent = () => wrapper.find('[data-testid="dropdown-content"]');

@@ -28,7 +28,6 @@ describe('Participants', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('collapsed sidebar state', () => {

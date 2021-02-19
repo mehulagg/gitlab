@@ -72,7 +72,6 @@ describe('Ref selector component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   //

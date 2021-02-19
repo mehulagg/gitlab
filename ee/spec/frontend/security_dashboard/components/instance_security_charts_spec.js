@@ -49,7 +49,6 @@ describe('Instance Security Charts component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders the loading page', () => {

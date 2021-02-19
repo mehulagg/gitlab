@@ -20,7 +20,6 @@ describe('ItemActions', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findEditGroupBtn = () => wrapper.find('[data-testid="edit-group-btn"]');

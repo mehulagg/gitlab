@@ -8,7 +8,6 @@ describe('TotalTimeComponent', () => {
     });
   }
 
-  let wrapper = null;
 
   afterEach(() => {
     wrapper.destroy();

@@ -137,7 +137,6 @@ describe('RepoEditor', () => {
     // eslint-disable-next-line no-undef
     monaco.editor.getModels().forEach((model) => model.dispose());
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default', () => {

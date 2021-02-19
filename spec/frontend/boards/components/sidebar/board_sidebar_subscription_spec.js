@@ -33,7 +33,6 @@ describe('~/boards/components/sidebar/board_sidebar_subscription_spec.vue', () =
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     store = null;
     jest.clearAllMocks();
   });

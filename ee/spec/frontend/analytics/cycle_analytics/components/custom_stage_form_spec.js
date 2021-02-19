@@ -68,7 +68,6 @@ describe('CustomStageForm', () => {
     });
   }
 
-  let wrapper = null;
   let mock;
 
   const findEvent = (ev) => wrapper.emitted()[ev];
@@ -103,7 +102,6 @@ describe('CustomStageForm', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     mock.restore();
   });
 

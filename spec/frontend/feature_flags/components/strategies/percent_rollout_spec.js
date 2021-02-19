@@ -22,7 +22,6 @@ describe('~/feature_flags/components/strategies/percent_rollout.vue', () => {
       wrapper.destroy();
     }
 
-    wrapper = null;
   });
 
   describe('with valid percentage', () => {

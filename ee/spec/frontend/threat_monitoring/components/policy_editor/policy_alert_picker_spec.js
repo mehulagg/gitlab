@@ -49,7 +49,6 @@ describe('PolicyAlertPicker component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('loading', () => {

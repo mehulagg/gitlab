@@ -32,7 +32,6 @@ describe('WeeksHeaderItemComponent', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

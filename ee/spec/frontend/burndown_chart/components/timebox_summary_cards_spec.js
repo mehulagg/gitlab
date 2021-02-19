@@ -31,7 +31,6 @@ describe('Iterations report summary cards', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findCompleteCard = () => wrapper.findAll(GlCard).at(0).text();

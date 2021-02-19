@@ -26,7 +26,6 @@ describe('Contribution Analytics Column Chart', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('matches the snapshot', () => {

@@ -24,7 +24,6 @@ describe('AncestorsTreeContainer', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

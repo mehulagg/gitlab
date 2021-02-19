@@ -14,7 +14,6 @@ describe('Placeholder system note component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('matches snapshot', () => {

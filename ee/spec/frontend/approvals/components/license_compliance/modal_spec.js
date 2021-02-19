@@ -69,7 +69,6 @@ describe('EE Approvals LicenseCompliance Modal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findByHref = (href) => wrapper.find(`[href="${href}"`);

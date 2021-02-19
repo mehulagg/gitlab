@@ -107,7 +107,6 @@ describe('JiraImportForm', () => {
     mutateSpy.mockRestore();
     querySpy.mockRestore();
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('select dropdown project selection', () => {

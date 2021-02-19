@@ -109,7 +109,6 @@ describe('BoardsSelector', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('loading', () => {

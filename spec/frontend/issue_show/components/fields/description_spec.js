@@ -29,7 +29,6 @@ describe('Description field component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders markdown field with description', () => {

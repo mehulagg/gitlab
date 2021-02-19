@@ -62,7 +62,6 @@ describe('Interval Pattern Input Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     window.gl = oldWindowGl;
   });
 

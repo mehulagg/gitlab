@@ -53,7 +53,6 @@ describe('NoteHeader component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('does not render discussion actions when includeToggle is false', () => {

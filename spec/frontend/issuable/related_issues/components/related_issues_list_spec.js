@@ -16,7 +16,6 @@ describe('RelatedIssuesList', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

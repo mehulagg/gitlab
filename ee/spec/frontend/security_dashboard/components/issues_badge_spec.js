@@ -19,7 +19,6 @@ describe('Remediated badge component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when there are multiple issues', () => {

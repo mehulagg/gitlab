@@ -16,7 +16,6 @@ describe('Empty Rule', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('multiple rules', () => {

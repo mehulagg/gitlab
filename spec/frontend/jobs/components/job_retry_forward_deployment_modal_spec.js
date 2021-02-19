@@ -30,7 +30,6 @@ describe('Job Retry Forward Deployment Modal', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

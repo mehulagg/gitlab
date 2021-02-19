@@ -151,7 +151,6 @@ describe('BoardSidebarIterationSelect', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when not editing', () => {

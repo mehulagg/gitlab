@@ -43,7 +43,6 @@ describe('RunnerInstructions component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should show the "Show Runner installation instructions" button', () => {

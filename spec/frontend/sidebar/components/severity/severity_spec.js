@@ -17,7 +17,6 @@ describe('SeverityToken', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

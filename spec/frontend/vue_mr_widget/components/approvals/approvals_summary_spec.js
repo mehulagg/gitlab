@@ -27,7 +27,6 @@ describe('MRWidget approvals summary', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when approved', () => {

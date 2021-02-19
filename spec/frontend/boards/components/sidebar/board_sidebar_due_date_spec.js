@@ -19,7 +19,6 @@ describe('~/boards/components/sidebar/board_sidebar_due_date.vue', () => {
   afterEach(() => {
     wrapper.destroy();
     store = null;
-    wrapper = null;
   });
 
   const createWrapper = ({ dueDate = null } = {}) => {

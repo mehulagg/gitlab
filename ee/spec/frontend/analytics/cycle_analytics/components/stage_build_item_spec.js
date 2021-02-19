@@ -30,7 +30,6 @@ const $sel = {
 };
 
 describe('StageBuildItem', () => {
-  let wrapper = null;
 
   beforeEach(() => {
     wrapper = createComponent({}, false);

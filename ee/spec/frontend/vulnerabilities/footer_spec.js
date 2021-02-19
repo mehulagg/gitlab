@@ -43,7 +43,6 @@ describe('Vulnerability Footer', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     mockAxios.reset();
   });
 

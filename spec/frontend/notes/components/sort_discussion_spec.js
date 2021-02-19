@@ -31,7 +31,6 @@ describe('Sort Discussion component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default', () => {

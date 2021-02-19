@@ -20,7 +20,6 @@ describe('StageTableNav', () => {
     });
   }
 
-  let wrapper = null;
 
   afterEach(() => {
     wrapper.destroy();

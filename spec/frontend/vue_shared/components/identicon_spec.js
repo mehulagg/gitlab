@@ -21,7 +21,6 @@ describe('Identicon', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('entity id is a number', () => {

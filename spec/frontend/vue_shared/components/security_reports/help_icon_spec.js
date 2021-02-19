@@ -23,7 +23,6 @@ describe('HelpIcon component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('given a help path only', () => {

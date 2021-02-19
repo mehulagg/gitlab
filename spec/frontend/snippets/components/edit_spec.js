@@ -121,7 +121,6 @@ describe('Snippet Edit app', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     gon.relative_url_root = originalRelativeUrlRoot;
   });
 

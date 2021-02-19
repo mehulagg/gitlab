@@ -28,7 +28,6 @@ describe('NoteHeader component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   test.each`

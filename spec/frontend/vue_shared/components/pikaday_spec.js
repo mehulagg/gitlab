@@ -13,7 +13,6 @@ describe('datePicker', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
   it('should emit newDateSelected when GlDatePicker emits the input event', () => {
     const minDate = new Date();

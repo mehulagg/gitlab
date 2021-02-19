@@ -57,7 +57,6 @@ describe('Issue card component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('labels', () => {

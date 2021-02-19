@@ -30,7 +30,6 @@ describe('CiCdAnalyticsAreaChart', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('matches the snapshot', () => {

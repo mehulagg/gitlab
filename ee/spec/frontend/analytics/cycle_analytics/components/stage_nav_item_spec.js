@@ -24,7 +24,6 @@ describe('StageNavItem', () => {
     });
   }
 
-  let wrapper = null;
   const findStageTitle = () => wrapper.find('[data-testid="stage-title"]');
   const findStageTooltip = () => getBinding(findStageTitle().element, 'gl-tooltip');
   const findStageMedian = () => wrapper.find({ ref: 'median' });

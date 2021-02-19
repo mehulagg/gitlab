@@ -67,7 +67,6 @@ describe('~/static_site_editor/components/edit_area.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders edit header', () => {

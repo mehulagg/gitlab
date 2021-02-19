@@ -51,7 +51,6 @@ describe('diffs/components/commit_item', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default state', () => {

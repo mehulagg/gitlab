@@ -85,7 +85,6 @@ describe('Links Inner component', () => {
   afterEach(() => {
     jest.restoreAllMocks();
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('basic SVG creation', () => {

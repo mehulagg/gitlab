@@ -69,7 +69,6 @@ describe('subscription table row', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findHeaderCell = () => wrapper.find('[data-testid="header-cell"]');

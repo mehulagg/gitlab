@@ -63,7 +63,6 @@ describe('EE RelatedJiraIssues Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     mockAxios.reset();
   });
 

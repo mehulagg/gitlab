@@ -4,7 +4,6 @@ import Component from 'ee/analytics/cycle_analytics/components/path_navigation.v
 import { transformedStagePathData, issueStage } from '../mock_data';
 
 describe('PathNavigation', () => {
-  let wrapper = null;
 
   const createComponent = (props) => {
     return mount(Component, {
@@ -31,7 +30,6 @@ describe('PathNavigation', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('displays correctly', () => {

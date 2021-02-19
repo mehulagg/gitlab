@@ -43,7 +43,6 @@ describe('links layer component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with data under max stages', () => {

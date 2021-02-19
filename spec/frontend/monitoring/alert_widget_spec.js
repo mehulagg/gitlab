@@ -102,7 +102,6 @@ describe('AlertWidget', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('displays a loading spinner and disables form when fetching alerts', () => {

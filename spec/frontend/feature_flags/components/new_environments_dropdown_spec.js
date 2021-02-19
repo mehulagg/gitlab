@@ -23,7 +23,6 @@ describe('New Environments Dropdown', () => {
     axiosMock.restore();
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

@@ -30,7 +30,6 @@ describe('StageDropdownFilter component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   beforeEach(() => {

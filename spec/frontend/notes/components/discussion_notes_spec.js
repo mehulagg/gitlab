@@ -49,7 +49,6 @@ describe('DiscussionNotes', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('rendering', () => {

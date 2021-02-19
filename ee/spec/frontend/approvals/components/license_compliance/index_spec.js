@@ -52,7 +52,6 @@ describe('EE Approvals LicenseCompliance', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findByHrefAttribute = (href) => wrapper.find(`[href="${href}"]`);

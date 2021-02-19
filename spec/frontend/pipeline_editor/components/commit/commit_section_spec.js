@@ -108,7 +108,6 @@ describe('Pipeline Editor | Commit section', () => {
     mockMutate.mockReset();
 
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when the user commits changes to the current branch', () => {

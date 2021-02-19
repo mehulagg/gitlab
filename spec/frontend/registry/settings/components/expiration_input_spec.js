@@ -40,7 +40,6 @@ describe('ExpirationInput', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('structure', () => {

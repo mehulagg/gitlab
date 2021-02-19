@@ -40,7 +40,6 @@ describe('CompareDropdownLayout', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with versions', () => {

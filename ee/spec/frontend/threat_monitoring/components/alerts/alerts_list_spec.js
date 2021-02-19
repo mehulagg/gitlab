@@ -68,7 +68,6 @@ describe('AlertsList component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default state', () => {

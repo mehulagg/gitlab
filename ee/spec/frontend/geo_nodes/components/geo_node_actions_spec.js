@@ -29,7 +29,6 @@ describe('GeoNodeActionsComponent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGeoNodeActionsComponent = () => wrapper.find('[data-testid="nodeActions"]');

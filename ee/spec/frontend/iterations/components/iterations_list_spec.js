@@ -16,7 +16,6 @@ describe('Iterations list', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     timezoneMock.unregister();
   });
 

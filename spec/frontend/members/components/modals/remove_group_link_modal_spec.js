@@ -48,7 +48,6 @@ describe('RemoveGroupLinkModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when modal is open', () => {

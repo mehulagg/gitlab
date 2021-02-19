@@ -33,7 +33,6 @@ describe('Security Issue Body', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each([

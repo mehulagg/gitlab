@@ -75,7 +75,6 @@ describe('BoardCard', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     list = null;
     mock.restore();
   });

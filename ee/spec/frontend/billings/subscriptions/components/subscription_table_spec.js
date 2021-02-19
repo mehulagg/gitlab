@@ -59,7 +59,6 @@ describe('SubscriptionTable component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when created', () => {

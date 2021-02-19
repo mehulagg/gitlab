@@ -44,7 +44,6 @@ describe('Value Stream Analytics LabelsSelector', () => {
     });
   }
 
-  let wrapper = null;
   let mock = null;
   const labelNames = groupLabels.map(({ name }) => name);
 
@@ -59,7 +58,6 @@ describe('Value Stream Analytics LabelsSelector', () => {
     afterEach(() => {
       mock.restore();
       wrapper.destroy();
-      wrapper = null;
     });
 
     it('will render the label selector', () => {

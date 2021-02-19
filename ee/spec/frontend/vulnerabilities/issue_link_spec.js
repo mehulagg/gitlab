@@ -30,7 +30,6 @@ describe('IssueLink component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each([true, false])('internal and Jira issues with "isJira" set to "%s"', (isJira) => {

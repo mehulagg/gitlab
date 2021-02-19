@@ -37,7 +37,6 @@ describe('CustomMetricsForm', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('Displays the issue message', () => {

@@ -27,7 +27,6 @@ describe('delete_button', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('tooltip', () => {

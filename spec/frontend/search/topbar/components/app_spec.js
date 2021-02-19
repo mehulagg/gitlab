@@ -34,7 +34,6 @@ describe('GlobalSearchTopbar', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findTopbarForm = () => wrapper.find(GlForm);

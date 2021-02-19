@@ -33,7 +33,6 @@ describe('Markdown field header component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('markdown header buttons', () => {

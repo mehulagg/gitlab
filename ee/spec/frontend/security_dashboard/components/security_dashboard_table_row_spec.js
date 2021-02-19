@@ -34,7 +34,6 @@ describe('Security Dashboard Table Row', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findLoader = () => wrapper.find('.js-skeleton-loader');

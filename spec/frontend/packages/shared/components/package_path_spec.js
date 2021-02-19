@@ -26,7 +26,6 @@ describe('PackagePath', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each`

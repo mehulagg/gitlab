@@ -17,7 +17,6 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
   afterEach(() => {
     wrapper.destroy();
     store = null;
-    wrapper = null;
   });
 
   const createWrapper = ({ weight = 0 } = {}) => {

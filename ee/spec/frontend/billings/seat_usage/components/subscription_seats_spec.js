@@ -106,7 +106,6 @@ describe('Subscription Seats', () => {
 
     afterEach(() => {
       wrapper.destroy();
-      wrapper = null;
     });
 
     it('correct actions are called on create', () => {
@@ -126,7 +125,6 @@ describe('Subscription Seats', () => {
 
     afterEach(() => {
       wrapper.destroy();
-      wrapper = null;
     });
 
     describe('heading text', () => {
@@ -163,7 +161,6 @@ describe('Subscription Seats', () => {
         expect(findPagination().exists()).toBe(false);
 
         wrapper.destroy();
-        wrapper = null;
       },
     );
   });
@@ -175,7 +172,6 @@ describe('Subscription Seats', () => {
 
     afterEach(() => {
       wrapper.destroy();
-      wrapper = null;
     });
 
     it('displays table in loading state', () => {

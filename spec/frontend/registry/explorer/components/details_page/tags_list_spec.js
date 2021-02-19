@@ -22,7 +22,6 @@ describe('Tags List', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('List title', () => {

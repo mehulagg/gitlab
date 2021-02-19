@@ -22,7 +22,6 @@ describe('TagsLoader component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('produces the correct amount of loaders ', () => {

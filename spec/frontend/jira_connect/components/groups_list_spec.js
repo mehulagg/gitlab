@@ -25,7 +25,6 @@ describe('GroupsList', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGlAlert = () => wrapper.find(GlAlert);

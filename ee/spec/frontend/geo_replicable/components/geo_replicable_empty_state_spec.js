@@ -30,7 +30,6 @@ describe('GeoReplicableEmptyState', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('template', () => {

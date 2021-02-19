@@ -42,7 +42,6 @@ describe('RemoveGroupLinkButton', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('displays a tooltip', () => {

@@ -39,7 +39,6 @@ describe('Text editor component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when status is invalid', () => {

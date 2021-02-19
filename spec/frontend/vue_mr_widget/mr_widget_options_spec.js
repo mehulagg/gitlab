@@ -40,7 +40,6 @@ describe('MrWidgetOptions', () => {
   afterEach(() => {
     mock.restore();
     wrapper.destroy();
-    wrapper = null;
 
     gl.mrWidgetData = {};
     gon.features = {};

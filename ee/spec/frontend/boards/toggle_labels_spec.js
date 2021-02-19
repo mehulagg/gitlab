@@ -32,7 +32,6 @@ describe('ToggleLabels component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('onStorageUpdate parses empty value as false', async () => {

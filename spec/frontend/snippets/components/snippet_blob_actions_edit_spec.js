@@ -55,7 +55,6 @@ describe('snippets/components/snippet_blob_actions_edit', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('multi-file snippets rendering', () => {

@@ -55,7 +55,6 @@ describe('Select projects dropdown component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when selecting all project', () => {

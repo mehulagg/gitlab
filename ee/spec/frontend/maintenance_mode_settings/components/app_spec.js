@@ -33,7 +33,6 @@ describe('MaintenanceModeSettingsApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findMaintenanceModeSettingsForm = () => wrapper.find(GlForm);

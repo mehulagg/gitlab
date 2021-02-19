@@ -60,7 +60,6 @@ describe('Grouped test reports app', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with success result', () => {

@@ -36,7 +36,6 @@ describe('Merge request widget rebase component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   [true, false].forEach((mergeRequestWidgetGraphql) => {

@@ -75,7 +75,6 @@ describe('Pipeline New Form', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
 
     mock.restore();
   });

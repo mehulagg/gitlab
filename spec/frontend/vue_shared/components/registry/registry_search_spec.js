@@ -27,7 +27,6 @@ describe('Registry Search', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('searching', () => {

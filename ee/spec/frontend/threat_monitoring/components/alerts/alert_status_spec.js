@@ -40,7 +40,6 @@ describe('AlertStatus', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('a successful request', () => {

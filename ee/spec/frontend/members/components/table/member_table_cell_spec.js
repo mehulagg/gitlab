@@ -66,7 +66,6 @@ describe('MemberTableCell', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   // Implementation of props are tested in `spec/frontend/vue_shared/components/members/table/members_table_spec.js`

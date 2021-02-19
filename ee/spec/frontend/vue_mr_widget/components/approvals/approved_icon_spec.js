@@ -18,7 +18,6 @@ describe('EE MRWidget approved icon', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when approved', () => {

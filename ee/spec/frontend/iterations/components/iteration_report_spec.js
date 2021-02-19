@@ -124,7 +124,6 @@ describe('Iterations report', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('shows spinner while loading', () => {

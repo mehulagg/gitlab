@@ -28,7 +28,6 @@ describe('Environment Alert', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('has alert', () => {

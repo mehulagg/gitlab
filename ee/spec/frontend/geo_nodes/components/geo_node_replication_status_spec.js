@@ -26,7 +26,6 @@ describe('GeoNodeReplicationStatusComponent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findStatusPill = () => wrapper.find('.rounded-pill');

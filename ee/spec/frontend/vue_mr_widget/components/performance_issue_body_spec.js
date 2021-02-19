@@ -21,7 +21,6 @@ describe('performance issue body', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders issue name', () => {

@@ -52,7 +52,6 @@ describe('IDE file templates dropdown component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('calls clickItem on click', () => {

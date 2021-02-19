@@ -23,7 +23,6 @@ describe('Clone Dropdown Button', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('rendering', () => {

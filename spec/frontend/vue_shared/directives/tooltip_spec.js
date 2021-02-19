@@ -39,7 +39,6 @@ describe('Tooltip directive', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with a single tooltip', () => {

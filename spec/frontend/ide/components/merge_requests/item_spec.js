@@ -42,7 +42,6 @@ describe('IDE merge request item', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default', () => {

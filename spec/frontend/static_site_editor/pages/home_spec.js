@@ -111,7 +111,6 @@ describe('static_site_editor/pages/home', () => {
   afterEach(() => {
     wrapper.destroy();
     unmockTracking();
-    wrapper = null;
     $apollo = null;
   });
 

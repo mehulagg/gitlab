@@ -61,7 +61,6 @@ describe('ProjectsAndGroupChart', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     queryResponses = {
       projects: null,
       groups: null,

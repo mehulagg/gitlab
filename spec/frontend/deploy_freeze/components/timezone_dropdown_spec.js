@@ -34,7 +34,6 @@ describe('Deploy freeze timezone dropdown', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('No time zones found', () => {

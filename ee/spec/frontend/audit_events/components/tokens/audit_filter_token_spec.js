@@ -51,7 +51,6 @@ describe('AuditFilterToken', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when initialized', () => {

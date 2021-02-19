@@ -31,7 +31,6 @@ describe('list item', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each`

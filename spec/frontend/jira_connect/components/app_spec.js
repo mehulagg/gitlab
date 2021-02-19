@@ -34,7 +34,6 @@ describe('JiraConnectApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('template', () => {

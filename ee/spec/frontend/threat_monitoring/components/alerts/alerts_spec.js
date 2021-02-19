@@ -13,7 +13,6 @@ describe('Alerts component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default state', () => {

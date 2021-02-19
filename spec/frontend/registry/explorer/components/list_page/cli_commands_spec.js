@@ -49,7 +49,6 @@ describe('cli_commands', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('shows the correct text on the button', () => {

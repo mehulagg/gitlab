@@ -107,7 +107,6 @@ describe('BoardsSelector', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     mock.restore();
   });
 

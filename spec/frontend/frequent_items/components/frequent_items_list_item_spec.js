@@ -43,7 +43,6 @@ describe('FrequentItemsListItemComponent', () => {
   afterEach(() => {
     unmockTracking();
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('computed', () => {

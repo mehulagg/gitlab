@@ -27,7 +27,6 @@ describe('Deploy freeze settings', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('Deploy freeze table contains components', () => {

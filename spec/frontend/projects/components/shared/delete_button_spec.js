@@ -37,7 +37,6 @@ describe('Project remove modal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('intialized', () => {

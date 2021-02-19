@@ -40,7 +40,6 @@ const testCases = [
 describe('Merge request status box component', () => {
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   testCases.forEach((testCase) => {

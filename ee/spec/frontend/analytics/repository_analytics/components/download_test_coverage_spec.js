@@ -48,7 +48,6 @@ describe('Download test coverage component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders button to open download code coverage modal', () => {

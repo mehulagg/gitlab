@@ -26,7 +26,6 @@ describe('Temporary storage increase modal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('shows modal message', async () => {

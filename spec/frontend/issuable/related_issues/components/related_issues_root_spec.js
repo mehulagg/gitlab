@@ -27,7 +27,6 @@ describe('RelatedIssuesRoot', () => {
     mock.restore();
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

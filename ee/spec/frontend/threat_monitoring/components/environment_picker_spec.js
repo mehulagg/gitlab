@@ -30,7 +30,6 @@ describe('EnvironmentPicker component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('the environments dropdown', () => {

@@ -49,7 +49,6 @@ describe('AlertManagementStatus', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

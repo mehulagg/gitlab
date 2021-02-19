@@ -24,7 +24,6 @@ describe('First Class Instance Dashboard Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when there is no error', () => {

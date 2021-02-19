@@ -44,7 +44,6 @@ describe('~/releases/components/releases_pagination_graphql.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findPrevButton = () => wrapper.find('[data-testid="prevButton"]');

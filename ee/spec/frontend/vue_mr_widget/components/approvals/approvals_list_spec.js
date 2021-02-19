@@ -78,7 +78,6 @@ describe('EE MRWidget approvals list', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when multiple rules', () => {

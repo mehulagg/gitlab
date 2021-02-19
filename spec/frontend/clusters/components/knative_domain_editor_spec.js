@@ -25,7 +25,6 @@ describe('KnativeDomainEditor', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('knative has an assigned IP address', () => {

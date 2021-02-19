@@ -85,7 +85,6 @@ describe('Issuables list component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     mockAxios.restore();
     window.location = oldLocation;
   });

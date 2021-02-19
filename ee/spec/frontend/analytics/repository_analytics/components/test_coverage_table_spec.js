@@ -63,7 +63,6 @@ describe('Test coverage table component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when code coverage is empty', () => {

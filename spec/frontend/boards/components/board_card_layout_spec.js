@@ -48,7 +48,6 @@ describe('Board card layout', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('mouse events', () => {

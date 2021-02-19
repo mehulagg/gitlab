@@ -18,7 +18,6 @@ describe('Remove cluster confirmation modal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders splitbutton with modal included', () => {

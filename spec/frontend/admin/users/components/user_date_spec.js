@@ -18,7 +18,6 @@ describe('FormatDate component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it.each`

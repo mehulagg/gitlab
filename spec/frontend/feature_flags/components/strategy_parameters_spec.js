@@ -33,7 +33,6 @@ describe('~/feature_flags/components/strategy_parameters.vue', () => {
       wrapper.destroy();
     }
 
-    wrapper = null;
   });
 
   describe.each`

@@ -103,7 +103,6 @@ describe('Pipeline editor app component', () => {
     mockCiConfigData.mockReset();
 
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('displays a loading icon if the blob query is loading', () => {

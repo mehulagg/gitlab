@@ -34,7 +34,6 @@ describe('GroupsListItem', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGlAvatar = () => wrapper.find(GlAvatar);

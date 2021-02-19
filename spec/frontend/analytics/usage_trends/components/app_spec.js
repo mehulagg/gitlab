@@ -18,7 +18,6 @@ describe('UsageTrendsApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('displays the usage counts component', () => {

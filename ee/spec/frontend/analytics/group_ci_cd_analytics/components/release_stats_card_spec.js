@@ -25,7 +25,6 @@ describe('Release stats card', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findLoadingIndicators = () => wrapper.findAll(GlSkeletonLoader);

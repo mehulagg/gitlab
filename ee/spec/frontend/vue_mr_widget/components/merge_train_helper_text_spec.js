@@ -31,7 +31,6 @@ describe('MergeTrainHelperText', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should return the "start" version of the message if there is no existing merge train', () => {

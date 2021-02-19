@@ -24,7 +24,6 @@ describe('RuleName component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each`

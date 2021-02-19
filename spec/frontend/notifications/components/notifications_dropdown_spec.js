@@ -71,7 +71,6 @@ describe('NotificationsDropdown', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     mockAxios.restore();
   });
 

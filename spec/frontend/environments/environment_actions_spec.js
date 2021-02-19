@@ -45,7 +45,6 @@ describe('EnvironmentActions Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render a dropdown button with 2 icons', () => {

@@ -61,7 +61,6 @@ describe('First class Project Security Dashboard component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('on render when there are vulnerabilities', () => {

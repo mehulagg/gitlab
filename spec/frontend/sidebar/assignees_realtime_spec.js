@@ -44,7 +44,6 @@ describe('Assignees Realtime', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     SidebarMediator.singleton = null;
   });
 

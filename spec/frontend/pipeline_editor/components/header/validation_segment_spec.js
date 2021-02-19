@@ -33,7 +33,6 @@ describe('~/pipeline_editor/components/info/validation_segment.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('shows the loading state', () => {

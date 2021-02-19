@@ -29,7 +29,6 @@ describe('Pipeline Editor | Commit Form', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when the form is displayed', () => {

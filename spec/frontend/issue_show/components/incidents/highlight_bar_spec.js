@@ -37,7 +37,6 @@ describe('Highlight Bar', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

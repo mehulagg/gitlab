@@ -49,7 +49,6 @@ describe('Test coverage table component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when group code coverage is empty', () => {

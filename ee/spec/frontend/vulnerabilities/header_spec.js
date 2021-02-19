@@ -103,7 +103,6 @@ describe('Vulnerability Header', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     mockAxios.reset();
     createFlash.mockReset();
   });

@@ -39,7 +39,6 @@ describe('import table row', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('events', () => {

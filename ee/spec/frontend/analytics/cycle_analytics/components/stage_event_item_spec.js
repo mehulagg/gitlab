@@ -25,7 +25,6 @@ const $sel = {
 };
 
 describe('StageEventItem', () => {
-  let wrapper = null;
 
   beforeEach(() => {
     wrapper = createComponent({}, false);

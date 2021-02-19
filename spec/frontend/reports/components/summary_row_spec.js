@@ -27,7 +27,6 @@ describe('Summary row', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders provided summary', () => {

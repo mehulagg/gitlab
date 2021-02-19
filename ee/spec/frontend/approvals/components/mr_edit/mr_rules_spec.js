@@ -58,7 +58,6 @@ describe('EE Approvals MRRules', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     store = null;
     approvalRules = null;
     global.MutationObserver = OriginalMutationObserver;

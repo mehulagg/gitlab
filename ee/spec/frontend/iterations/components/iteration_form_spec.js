@@ -49,7 +49,6 @@ describe('Iteration Form', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findPageTitle = () => wrapper.find({ ref: 'pageTitle' });

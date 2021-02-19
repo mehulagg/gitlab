@@ -35,7 +35,6 @@ describe('User Avatar Link Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should have user-avatar-image registered as child component', () => {

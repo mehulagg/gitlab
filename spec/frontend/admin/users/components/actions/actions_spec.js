@@ -24,7 +24,6 @@ describe('Action components', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('CONFIRMATION_ACTIONS', () => {

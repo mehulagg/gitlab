@@ -38,7 +38,6 @@ describe('IDE branches search list', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('calls fetch on mounted', () => {

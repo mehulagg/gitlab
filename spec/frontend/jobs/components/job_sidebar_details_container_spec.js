@@ -29,7 +29,6 @@ describe('Job Sidebar Details Container', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

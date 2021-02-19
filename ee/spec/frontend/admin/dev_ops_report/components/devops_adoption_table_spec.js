@@ -29,7 +29,6 @@ describe('DevopsAdoptionTable', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findTable = () => wrapper.find(GlTable);

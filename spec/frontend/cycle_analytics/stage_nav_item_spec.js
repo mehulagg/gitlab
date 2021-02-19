@@ -2,7 +2,6 @@ import { mount, shallowMount } from '@vue/test-utils';
 import StageNavItem from '~/cycle_analytics/components/stage_nav_item.vue';
 
 describe('StageNavItem', () => {
-  let wrapper = null;
   const title = 'Cool stage';
   const value = '1 day';
 

@@ -23,7 +23,6 @@ describe('Package Additional Metadata', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findTitle = () => wrapper.find('[data-testid="title"]');

@@ -19,7 +19,6 @@ describe('InviteMembersTrigger', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('displayText', () => {

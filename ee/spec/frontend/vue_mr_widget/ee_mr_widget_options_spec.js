@@ -88,7 +88,6 @@ describe('ee merge request widget options', () => {
     // https://gitlab.com/gitlab-org/gitlab/-/issues/214032
     return waitForPromises().then(() => {
       wrapper.destroy();
-      wrapper = null;
       mock.restore();
       gon.features = {};
     });

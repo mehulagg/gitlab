@@ -49,7 +49,6 @@ describe('TypeOfWorkCharts', () => {
     });
   }
 
-  let wrapper = null;
 
   const findSubjectFilters = (_wrapper) => _wrapper.find(TasksByTypeFilters);
   const findTasksByTypeChart = (_wrapper) => _wrapper.find(TasksByTypeChart);

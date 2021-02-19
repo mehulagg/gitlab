@@ -39,7 +39,6 @@ describe('~/releases/components/releases_pagination_rest.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when a page number is clicked', () => {

@@ -38,7 +38,6 @@ describe('ProjectsPipelinesChartsApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGlTabs = () => wrapper.find(GlTabs);

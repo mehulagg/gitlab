@@ -41,7 +41,6 @@ describe('RadioFilter', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGlRadioButtonGroup = () => wrapper.find(GlFormRadioGroup);

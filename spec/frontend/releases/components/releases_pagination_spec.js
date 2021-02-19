@@ -22,7 +22,6 @@ describe('~/releases/components/releases_pagination.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findRestPagination = () => wrapper.find(ReleasesPaginationRest);

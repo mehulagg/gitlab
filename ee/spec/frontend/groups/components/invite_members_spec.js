@@ -17,7 +17,6 @@ describe('User invites', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const inputs = () => wrapper.findAll(GlFormInput);

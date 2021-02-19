@@ -43,7 +43,6 @@ describe('RelatedIssuableItem', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders weight component with correct weight', () => {

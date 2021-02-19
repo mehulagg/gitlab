@@ -16,7 +16,6 @@ describe('Vulnerability list component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     Cookies.remove(COOKIE_NAME);
   });
 

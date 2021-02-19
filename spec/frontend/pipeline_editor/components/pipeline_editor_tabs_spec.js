@@ -49,7 +49,6 @@ describe('Pipeline editor tabs component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('editor tab', () => {

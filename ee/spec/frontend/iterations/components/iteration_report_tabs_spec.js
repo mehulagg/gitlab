@@ -48,7 +48,6 @@ describe('Iterations report tabs', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('IterationReportIssues component', () => {

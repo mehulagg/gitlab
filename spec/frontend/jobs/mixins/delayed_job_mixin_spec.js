@@ -17,7 +17,6 @@ describe('DelayedJobMixin', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('if job is empty object', () => {

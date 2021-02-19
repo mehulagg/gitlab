@@ -23,7 +23,6 @@ describe('Severity Badge', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findIcon = () => wrapper.find(GlIcon);

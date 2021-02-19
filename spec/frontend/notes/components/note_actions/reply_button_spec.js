@@ -11,7 +11,6 @@ describe('ReplyButton', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('emits startReplying on click', () => {

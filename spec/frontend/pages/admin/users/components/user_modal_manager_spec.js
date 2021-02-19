@@ -34,7 +34,6 @@ describe('Users admin page Modal Manager', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('render behavior', () => {

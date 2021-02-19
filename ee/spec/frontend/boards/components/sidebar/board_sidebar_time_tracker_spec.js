@@ -37,7 +37,6 @@ describe('BoardSidebarTimeTracker', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it.each([[true], [false]])(

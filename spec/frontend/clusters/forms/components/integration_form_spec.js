@@ -31,7 +31,6 @@ describe('ClusterIntegrationForm', () => {
 
   const destroyWrapper = () => {
     wrapper.destroy();
-    wrapper = null;
   };
 
   const findSubmitButton = () => wrapper.find(GlButton);

@@ -20,7 +20,6 @@ describe('ActiveCheckbox', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

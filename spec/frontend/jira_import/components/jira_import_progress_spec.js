@@ -27,7 +27,6 @@ describe('JiraImportProgress', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('empty state', () => {

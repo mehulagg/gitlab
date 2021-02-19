@@ -60,7 +60,6 @@ describe('Feature flag table', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with an active scope and a standard rollout strategy', () => {

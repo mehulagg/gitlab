@@ -20,7 +20,6 @@ describe('DiscussionFilterNote component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('timelineContent renders a string containing instruction for switching feed type', () => {

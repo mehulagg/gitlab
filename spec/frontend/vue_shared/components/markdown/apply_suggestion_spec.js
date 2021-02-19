@@ -18,7 +18,6 @@ describe('Apply Suggestion component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('initial template', () => {

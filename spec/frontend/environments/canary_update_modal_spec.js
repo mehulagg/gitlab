@@ -34,7 +34,6 @@ describe('/environments/components/canary_update_modal.vue', () => {
       wrapper.destroy();
     }
 
-    wrapper = null;
   });
 
   beforeEach(() => {

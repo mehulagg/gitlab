@@ -48,7 +48,6 @@ describe('vue_shared/components/awards_list', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const createComponent = (props = {}) => {

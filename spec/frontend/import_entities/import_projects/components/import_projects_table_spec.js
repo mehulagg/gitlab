@@ -82,7 +82,6 @@ describe('ImportProjectsTable', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

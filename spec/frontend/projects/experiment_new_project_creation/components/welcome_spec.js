@@ -18,7 +18,6 @@ describe('Welcome page', () => {
   afterEach(() => {
     wrapper.destroy();
     window.location.hash = '';
-    wrapper = null;
   });
 
   it('tracks link clicks', () => {

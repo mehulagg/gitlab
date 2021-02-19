@@ -19,7 +19,6 @@ describe('AssigneeTitle component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('assignee title', () => {

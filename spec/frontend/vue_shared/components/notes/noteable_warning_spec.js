@@ -20,7 +20,6 @@ describe('Issue Warning Component', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

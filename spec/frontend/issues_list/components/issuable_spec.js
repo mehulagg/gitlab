@@ -58,7 +58,6 @@ describe('Issuable component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const checkExists = (findFn) => () => findFn().exists();

@@ -68,7 +68,6 @@ describe('MilestonesListSectionComponent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('data', () => {

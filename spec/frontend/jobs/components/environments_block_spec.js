@@ -53,7 +53,6 @@ describe('Environments block', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with last deployment', () => {

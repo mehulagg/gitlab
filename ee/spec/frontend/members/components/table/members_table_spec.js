@@ -52,7 +52,6 @@ describe('MemberList', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('fields', () => {

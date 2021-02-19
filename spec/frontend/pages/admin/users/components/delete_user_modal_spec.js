@@ -57,7 +57,6 @@ describe('User Operation confirmation modal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders modal with form included', () => {

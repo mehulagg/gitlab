@@ -18,7 +18,6 @@ describe('UnscannedProjectTabContent Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const defaultSlot = () => wrapper.find('.default-slot');

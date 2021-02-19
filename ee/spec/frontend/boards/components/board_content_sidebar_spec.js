@@ -53,7 +53,6 @@ describe('ee/BoardContentSidebar', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('confirms we render GlDrawer', () => {
