@@ -1,5 +1,8 @@
 <!-- Title suggestion: Experiment: [description] -->
 
+# Experiment Summary
+<!-- Quick rundown of what is being done -->
+
 # Design
 <!-- This should include the contexts that determine the reproducibility (stickiness) of an experiment. This means that if you want the same behavior for a user, the context would be user, or if you want all users when viewing a specific project, the context would be the project being viewed, etc. -->
 
