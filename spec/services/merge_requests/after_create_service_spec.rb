@@ -32,6 +32,10 @@ RSpec.describe MergeRequests::AfterCreateService do
         .to receive(:track_create_mr_action)
         .with(user: merge_request.author)
 
+      expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+        .to receive(:track_mr_including_ci_config)
+        .with(user: merge_request.author, merge_request: merge_request)
+
       execute_service
     end
 
@@ -45,6 +49,9 @@ RSpec.describe MergeRequests::AfterCreateService do
     it 'writes diffs to the cache' do
       expect(merge_request)
         .to receive_message_chain(:diffs, :write_cache)
+
+      expect(merge_request)
+        .to receive(:new_paths).and_return([])
 
       execute_service
     end

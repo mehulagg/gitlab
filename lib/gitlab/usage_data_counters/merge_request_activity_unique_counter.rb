@@ -35,6 +35,7 @@ module Gitlab
       MR_EDIT_MR_TITLE_ACTION = 'i_code_review_edit_mr_title'
       MR_EDIT_MR_DESC_ACTION = 'i_code_review_edit_mr_desc'
       MR_CREATE_FROM_ISSUE_ACTION = 'i_code_review_user_create_mr_from_issue'
+      MR_INCLUDING_CI_CONFIG_ACTION = 'o_pipeline_authoring_unique_users_pushing_mr_ciconfigfile'
 
       class << self
         def track_mr_diffs_action(merge_request:)
@@ -153,6 +154,14 @@ module Gitlab
           track_unique_action_by_user(MR_CREATE_FROM_ISSUE_ACTION, user)
         end
 
+        def track_mr_including_ci_config(user:, merge_request:)
+          return unless Gitlab::CurrentSettings.usage_ping_enabled?
+          return unless Feature.enabled?(:usage_data_o_pipeline_authoring_unique_users_pushing_mr_ciconfigfile, user, default_enabled: :yaml)
+          return unless including_ci_config?(merge_request)
+
+          track_unique_action_by_user(MR_INCLUDING_CI_CONFIG_ACTION, user)
+        end
+
         private
 
         def track_unique_action_by_merge_request(action, merge_request)
@@ -179,6 +188,10 @@ module Gitlab
           return unless note.is_a?(DiffNote) && note.multiline?
 
           track_unique_action_by_user(action, note.author)
+        end
+
+        def including_ci_config?(merge_request)
+          merge_request.new_paths.include?(merge_request.project.ci_config_path_or_default)
         end
       end
     end
