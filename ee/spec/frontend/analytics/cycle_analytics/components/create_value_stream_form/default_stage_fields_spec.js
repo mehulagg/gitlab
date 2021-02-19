@@ -56,6 +56,10 @@ describe('DefaultStageFields', () => {
     expect(findStageFieldName().html()).toContain(defaultStage.name);
   });
 
+  it('disables input for the stage field name', () => {
+    expect(findStageFieldName().attributes('disabled')).toBe('disabled');
+  });
+
   it('renders the field start event', () => {
     expect(findStartEvent().exists()).toBe(true);
     expect(findStartEvent().html()).toContain(ISSUE_CREATED.name);
@@ -72,12 +76,12 @@ describe('DefaultStageFields', () => {
     expect(content).toContain(defaultStage.endEventLabel);
   });
 
-  it('on field input emits an input event', () => {
+  it('does not emits any input', () => {
     expect(wrapper.emitted('input')).toBeUndefined();
 
     const newInput = 'coooool';
     findStageFieldName().vm.$emit('input', newInput);
-    expect(wrapper.emitted('input')[0]).toEqual([newInput]);
+    expect(wrapper.emitted('input')).toBeUndefined();
   });
 
   describe('StageFieldActions', () => {
