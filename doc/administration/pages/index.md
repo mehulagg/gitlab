@@ -181,7 +181,7 @@ outside world.
    ```
 
 1. If you haven’t named your certificate and key `example.io.crt` and `example.io.key`
-then you'll need to also add the full paths as shown below.
+then you'll need to also add the full paths as shown below:
 
    ```ruby
    pages_nginx['ssl_certificate'] = "/etc/gitlab/ssl/pages-nginx.crt"
