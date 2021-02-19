@@ -148,11 +148,35 @@ class Wiki
   #
   # Returns an initialized WikiPage instance or nil
   def find_page(title, version = nil)
-    page_title, page_dir = page_title_and_dir(title)
+    name_with_extension = title + '.md'
 
-    if page = wiki.page(title: page_title, version: version, dir: page_dir)
-      WikiPage.new(self, page)
-    end
+    blob = repository.blob_at('HEAD', name_with_extension)
+    return unless blob
+    name = File.basename(blob.name, File.extname(blob.name))
+
+    hash = {
+      format: "markdown",
+      title: name.gsub('-', ' '),
+      url_path: name,
+      path: blob.path,
+      name: name,
+      historical: false,
+      raw_data: blob.data
+    }
+
+    gitaly_page = Gitlab::GitalyClient::WikiPage.new(hash)
+
+    commit = repository.raw_repository.last_commit_for_path('HEAD', name_with_extension)
+    version = Gitlab::Git::WikiPageVersion.new(commit, 'markdown')
+    git_wiki_page = Gitlab::Git::WikiPage.new(gitaly_page, version)
+
+    WikiPage.new(self, git_wiki_page)
+
+    # page_title, page_dir = page_title_and_dir(title)
+
+    # if page = wiki.page(title: page_title, version: version, dir: page_dir)
+    #   WikiPage.new(self, page)
+    # end
   end
 
   def find_sidebar(version = nil)
@@ -164,14 +188,29 @@ class Wiki
   end
 
   def create_page(title, content, format = :markdown, message = nil)
-    commit = commit_details(:created, message, title)
+    commit_message = message.presence || default_message(:deleted, page.title)
+    extension = (format.to_sym == :markdown ? 'md' : format.to_s)
+    sanitized_name = title.tr(' ', '-') + '.' + extension
 
-    wiki.write_page(title, format.to_sym, content, commit)
+    repository.create_file(
+      user,
+      sanitized_name,
+      content,
+      branch_name: repository.root_ref,
+      message: commit_message,
+      author_email: user.email,
+      author_name: user.name
+    )
+
+    # wiki.write_page(title, format.to_sym, content, commit)
     after_wiki_activity
 
     true
   rescue Gitlab::Git::Wiki::DuplicatePageError => e
     @error_message = "Duplicate page: #{e.message}"
+    false
+  rescue => e
+    @error_message = "#{e.message}"
     false
   end
 
@@ -187,10 +226,25 @@ class Wiki
   def delete_page(page, message = nil)
     return unless page
 
-    wiki.delete_page(page.path, commit_details(:deleted, message, page.title))
+    # wiki.delete_page(page.path, commit_details(:deleted, message, page.title))
+    commit_message = message.presence || default_message(:deleted, page.title)
+
+    repository.delete_file(
+      user,
+      page.path,
+      branch_name: repository.root_ref,
+      message: commit_message,
+      author_email: user.email,
+      author_name: user.name)
     after_wiki_activity
 
     true
+  rescue Gitlab::Git::Index::IndexError,
+    Gitlab::Git::CommitError,
+    Gitlab::Git::PreReceiveError,
+    Gitlab::Git::CommandError,
+    ArgumentError => error
+    false
   end
 
   def page_title_and_dir(title)

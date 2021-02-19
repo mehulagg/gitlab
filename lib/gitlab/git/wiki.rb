@@ -138,6 +138,14 @@ module Gitlab
         @gitaly_wiki_client ||= Gitlab::GitalyClient::WikiService.new(@repository)
       end
 
+      def gitaly_commit_client
+        @gitaly_commit_client ||= Gitlab::GitalyClient::CommitService.new(@repository)
+      end
+
+      def gitaly_blob_client
+        @gitaly_blob_client ||= Gitlab::GitalyClient::BlobService.new(@repository)
+      end
+
       def gitaly_write_page(name, format, content, commit_details)
         gitaly_wiki_client.write_page(name, format, content, commit_details)
       end
@@ -154,6 +162,7 @@ module Gitlab
         return unless title.present?
 
         wiki_page, version = gitaly_wiki_client.find_page(title: title, version: version, dir: dir)
+
         return unless wiki_page
 
         Gitlab::Git::WikiPage.new(wiki_page, version)
