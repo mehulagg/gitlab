@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-RSpec.describe Sentry::Client do
+RSpec.describe GitlabSentry::Client do
   let(:sentry_url) { 'https://sentrytest.gitlab.com/api/0/projects/sentry-org/sentry-project' }
   let(:token) { 'test-token' }
 
-  subject { Sentry::Client.new(sentry_url, token) }
+  subject { GitlabSentry::Client.new(sentry_url, token) }
 
   it { is_expected.to respond_to :projects }
   it { is_expected.to respond_to :list_issues }

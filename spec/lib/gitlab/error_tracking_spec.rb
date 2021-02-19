@@ -150,136 +150,138 @@ RSpec.describe Gitlab::ErrorTracking do
     end
   end
 
-  # xdescribe '.track_and_raise_exception' do
-  #   it 'always raises the exception' do
-  #     expect(Raven).to receive(:capture_exception)
+  describe '.track_and_raise_exception' do
+    it 'always raises the exception' do
+      expect(Sentry).to receive(:capture_exception)
 
-  #     expect { described_class.track_and_raise_exception(exception) }
-  #       .to raise_error(RuntimeError)
-  #   end
+      expect { described_class.track_and_raise_exception(exception) }
+        .to raise_error(RuntimeError)
+    end
 
-  #   it 'calls Gitlab::ErrorTracking::Logger.error with formatted payload' do
-  #     expect(Gitlab::ErrorTracking::Logger).to receive(:error)
-  #       .with(a_hash_including(*expected_payload_includes))
+    it 'calls Gitlab::ErrorTracking::Logger.error with formatted payload' do
+      expect(Gitlab::ErrorTracking::Logger).to receive(:error)
+        .with(a_hash_including(*expected_payload_includes))
 
-  #     expect do
-  #       described_class.track_and_raise_exception(
-  #         exception,
-  #         issue_url: issue_url,
-  #         some_other_info: 'info'
-  #       )
-  #     end.to raise_error(RuntimeError)
-  #   end
-  # end
+      expect do
+        described_class.track_and_raise_exception(
+          exception,
+          issue_url: issue_url,
+          some_other_info: 'info'
+        )
+      end.to raise_error(RuntimeError)
+    end
+  end
 
-  # xdescribe '.track_exception' do
-  #   let(:extra) { { issue_url: issue_url, some_other_info: 'info' } }
+  describe '.track_exception' do
+    let(:extra) { { issue_url: issue_url, some_other_info: 'info' } }
 
-  #   subject(:track_exception) { described_class.track_exception(exception, extra) }
+    subject(:track_exception) { described_class.track_exception(exception, extra) }
 
-  #   before do
-  #     allow(Raven).to receive(:capture_exception).and_call_original
-  #     allow(Gitlab::ErrorTracking::Logger).to receive(:error)
-  #   end
+    before do
+      allow(Sentry).to receive(:capture_exception).and_call_original
+      allow(Gitlab::ErrorTracking::Logger).to receive(:error)
+    end
 
-  #   it 'calls Raven.capture_exception' do
-  #     track_exception
+    it 'calls Raven.capture_exception' do
+      track_exception
 
-  #     expect(Raven).to have_received(:capture_exception)
-  #                  .with(exception,
-  #                        tags: a_hash_including(correlation_id: 'cid'),
-  #                        extra: a_hash_including(some_other_info: 'info', issue_url: issue_url))
-  #   end
+      expect(Sentry).to have_received(:capture_exception)
+                   .with(exception,
+                         tags: a_hash_including(correlation_id: 'cid'),
+                         extra: a_hash_including(some_other_info: 'info', issue_url: issue_url))
+  end
 
-  #   it 'calls Gitlab::ErrorTracking::Logger.error with formatted payload' do
-  #     track_exception
+    it 'calls Gitlab::ErrorTracking::Logger.error with formatted payload' do
+      track_exception
 
-  #     expect(Gitlab::ErrorTracking::Logger).to have_received(:error)
-  #                                          .with(a_hash_including(*expected_payload_includes))
-  #   end
+      expect(Gitlab::ErrorTracking::Logger).to have_received(:error)
+                                           .with(a_hash_including(*expected_payload_includes))
+    end
 
-  #   context 'with filterable parameters' do
-  #     let(:extra) { { test: 1, my_token: 'test' } }
+    context 'with filterable parameters' do
+      let(:extra) { { test: 1, my_token: 'test' } }
 
-  #     it 'filters parameters' do
-  #       track_exception
+      it 'filters parameters' do
+        track_exception
 
-  #       expect(Gitlab::ErrorTracking::Logger).to have_received(:error)
-  #                                            .with(hash_including({ 'extra.test' => 1, 'extra.my_token' => '[FILTERED]' }))
-  #     end
-  #   end
+        expect(Gitlab::ErrorTracking::Logger).to have_received(:error)
+                                             .with(hash_including({ 'extra.test' => 1, 'extra.my_token' => '[FILTERED]' }))
+      end
+    end
 
-  #   context 'the exception implements :sentry_extra_data' do
-  #     let(:extra_info) { { event: 'explosion', size: :massive } }
-  #     let(:exception) { double(message: 'bang!', sentry_extra_data: extra_info, backtrace: caller, cause: nil) }
+    context 'the exception implements :sentry_extra_data' do
+      let(:extra_info) { { event: 'explosion', size: :massive } }
+      let(:exception) { StandardError.new('bang!') }
 
-  #     it 'includes the extra data from the exception in the tracking information' do
-  #       track_exception
+      it 'includes the extra data from the exception in the tracking information' do
+        allow(exception).to receive(:sentry_extra_data).and_return(extra_info)
 
-  #       expect(Raven).to have_received(:capture_exception)
-  #                    .with(exception, a_hash_including(extra: a_hash_including(extra_info)))
-  #     end
-  #   end
+        track_exception
 
-  #   context 'the exception implements :sentry_extra_data, which returns nil' do
-  #     let(:exception) { double(message: 'bang!', sentry_extra_data: nil, backtrace: caller, cause: nil) }
-  #     let(:extra) { { issue_url: issue_url } }
+        expect(Sentry).to have_received(:capture_exception)
+                     .with(exception, a_hash_including(extra: a_hash_including(extra_info)))
+      end
+    end
 
-  #     it 'just includes the other extra info' do
-  #       track_exception
+    context 'the exception implements :sentry_extra_data, which returns nil' do
+      let(:exception) { StandardError.new('bang!') }
+      let(:extra) { { issue_url: issue_url } }
 
-  #       expect(Raven).to have_received(:capture_exception)
-  #                    .with(exception, a_hash_including(extra: a_hash_including(extra)))
-  #     end
-  #   end
+      it 'just includes the other extra info' do
+        track_exception
 
-  #   context 'with sidekiq args' do
-  #     context 'when the args does not have anything sensitive' do
-  #       let(:extra) { { sidekiq: { 'class' => 'PostReceive', 'args' => [1, { 'id' => 2, 'name' => 'hello' }, 'some-value', 'another-value'] } } }
+        expect(Sentry).to have_received(:capture_exception)
+                     .with(exception, a_hash_including(extra: a_hash_including(extra)))
+      end
+    end
 
-  #       it 'ensures extra.sidekiq.args is a string' do
-  #         track_exception
+    context 'with sidekiq args' do
+      context 'when the args does not have anything sensitive' do
+        let(:extra) { { sidekiq: { 'class' => 'PostReceive', 'args' => [1, { 'id' => 2, 'name' => 'hello' }, 'some-value', 'another-value'] } } }
 
-  #         expect(Gitlab::ErrorTracking::Logger).to have_received(:error).with(
-  #           hash_including({ 'extra.sidekiq' => { 'class' => 'PostReceive', 'args' => ['1', '{"id"=>2, "name"=>"hello"}', 'some-value', 'another-value'] } }))
-  #       end
-  #     end
+        it 'ensures extra.sidekiq.args is a string' do
+          track_exception
 
-  #     context 'when the args has sensitive information' do
-  #       let(:extra) { { sidekiq: { 'class' => 'UnknownWorker', 'args' => ['sensitive string', 1, 2] } } }
+          expect(Gitlab::ErrorTracking::Logger).to have_received(:error).with(
+            hash_including({ 'extra.sidekiq' => { 'class' => 'PostReceive', 'args' => ['1', '{"id"=>2, "name"=>"hello"}', 'some-value', 'another-value'] } }))
+        end
+      end
 
-  #       it 'filters sensitive arguments before sending' do
-  #         track_exception
+      context 'when the args has sensitive information' do
+        let(:extra) { { sidekiq: { 'class' => 'UnknownWorker', 'args' => ['sensitive string', 1, 2] } } }
 
-  #         expect(sentry_event.dig('extra', 'sidekiq', 'args')).to eq(['[FILTERED]', 1, 2])
-  #         expect(Gitlab::ErrorTracking::Logger).to have_received(:error).with(
-  #           hash_including('extra.sidekiq' => { 'class' => 'UnknownWorker', 'args' => ['[FILTERED]', '1', '2'] }))
-  #       end
-  #     end
-  #   end
+        it 'filters sensitive arguments before sending' do
+          track_exception
 
-  #   context 'when the error is kind of an `ActiveRecord::StatementInvalid`' do
-  #     let(:exception) { ActiveRecord::StatementInvalid.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1') }
+          expect(sentry_event.dig('extra', 'sidekiq', 'args')).to eq(['[FILTERED]', "1", "2"])
+          expect(Gitlab::ErrorTracking::Logger).to have_received(:error).with(
+            hash_including('extra.sidekiq' => { 'class' => 'UnknownWorker', 'args' => ['[FILTERED]', '1', '2'] }))
+        end
+      end
+    end
 
-  #     it 'injects the normalized sql query into extra' do
-  #       allow(Raven.client.transport).to receive(:send_event) do |event|
-  #         expect(event.extra).to include(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
-  #       end
+    context 'when the error is kind of an `ActiveRecord::StatementInvalid`' do
+      let(:exception) { ActiveRecord::QueryCanceled.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1') }
+      xit 'injects the normalized sql query into extra' do
+        allow(Sentry.get_current_client.transport).to receive(:send_event) do |event|
+          expect(event.extra).to include(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
+        end
 
-  #       track_exception
-  #     end
-  #   end
+        track_exception
 
-  #   context 'when the `ActiveRecord::StatementInvalid` is wrapped in another exception' do
-  #     let(:exception) { RuntimeError.new(cause: ActiveRecord::StatementInvalid.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1')) }
+      end
+    end
 
-  #     it 'injects the normalized sql query into extra' do
-  #       allow(Raven.client.transport).to receive(:send_event) do |event|
-  #         expect(event.extra).to include(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
-  #       end
+    context 'when the `ActiveRecord::StatementInvalid` is wrapped in another exception' do
+      let(:exception) { RuntimeError.new(cause: ActiveRecord::StatementInvalid.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1')) }
 
-  #       track_exception
-  #     end
-  #   end
-  # end
+      xit 'injects the normalized sql query into extra' do
+        allow(Sentry.client.transport).to receive(:send_event) do |event|
+          expect(event.extra).to include(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
+        end
+
+        track_exception
+      end
+    end
+  end
 end

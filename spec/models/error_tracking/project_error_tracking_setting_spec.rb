@@ -111,7 +111,7 @@ RSpec.describe ErrorTracking::ProjectErrorTrackingSetting do
 
   describe '#sentry_client' do
     it 'returns sentry client' do
-      expect(subject.sentry_client).to be_a(Sentry::Client)
+      expect(subject.sentry_client).to be_a(GitlabSentry::Client)
     end
   end
 
@@ -152,7 +152,7 @@ RSpec.describe ErrorTracking::ProjectErrorTrackingSetting do
       end
     end
 
-    context 'when sentry client raises Sentry::Client::Error' do
+    context 'when sentry client raises GitlabSentry::Client::Error' do
       let(:sentry_client) { spy(:sentry_client) }
 
       before do
@@ -160,7 +160,7 @@ RSpec.describe ErrorTracking::ProjectErrorTrackingSetting do
 
         allow(subject).to receive(:sentry_client).and_return(sentry_client)
         allow(sentry_client).to receive(:list_issues).with(opts)
-          .and_raise(Sentry::Client::Error, 'error message')
+          .and_raise(GitlabSentry::Client::Error, 'error message')
       end
 
       it 'returns error' do
@@ -179,7 +179,7 @@ RSpec.describe ErrorTracking::ProjectErrorTrackingSetting do
 
         allow(subject).to receive(:sentry_client).and_return(sentry_client)
         allow(sentry_client).to receive(:list_issues).with(opts)
-          .and_raise(Sentry::Client::MissingKeysError, 'Sentry API response is missing keys. key not found: "id"')
+          .and_raise(GitlabSentry::Client::MissingKeysError, 'Sentry API response is missing keys. key not found: "id"')
       end
 
       it 'returns error' do
@@ -199,7 +199,7 @@ RSpec.describe ErrorTracking::ProjectErrorTrackingSetting do
 
         allow(subject).to receive(:sentry_client).and_return(sentry_client)
         allow(sentry_client).to receive(:list_issues).with(opts)
-          .and_raise(Sentry::Client::ResponseInvalidSizeError, error_msg)
+          .and_raise(GitlabSentry::Client::ResponseInvalidSizeError, error_msg)
       end
 
       it 'returns error' do

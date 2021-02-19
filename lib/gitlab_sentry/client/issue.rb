@@ -49,7 +49,7 @@ module GitlabSentry
 
         {
           issues: response[:body],
-          pagination: Sentry::PaginationParser.parse(response[:headers])
+          pagination: GitlabSentry::PaginationParser.parse(response[:headers])
         }
       end
 
