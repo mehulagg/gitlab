@@ -7,63 +7,79 @@ type: reference, concepts
 
 # Draft merge requests **(FREE)**
 
-If a merge request is not yet ready to be merged, perhaps due to continued development
-or open threads, you can prevent it from being accepted before it's ready by flagging
-it as a **Draft**. This disables the **Merge** button, preventing it from
-being merged. It stays disabled until the **Draft** flag has been removed.
+If a merge request isn't ready to merge, potentially because of continued development
+or open threads, you can prevent it from being accepted before you
+[mark it as ready](#mark-merge-requests-as-ready). Flag it as a draft to disable
+the **Merge** button until you remove the **Draft** flag:
 
-![Blocked Merge Button](img/draft_blocked_merge_button_v13_2.png)
+![Blocked Merge Button](img/draft_blocked_merge_button_v13_10.png)
 
-When [pipelines for merged results](../../../ci/merge_request_pipelines/pipelines_for_merged_results/index.md)
-is enabled, draft merge requests run [merge request pipelines](../../../ci/merge_request_pipelines/index.md)
-only.
-
-To run pipelines for merged results, you must [remove the draft status](#removing-the-draft-flag-from-a-merge-request).
-
-## Adding the "Draft" flag to a merge request
+## Mark merge requests as drafts
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32692) in GitLab 13.2, Work-In-Progress (WIP) merge requests were renamed to **Draft**. Support for using **WIP** is scheduled for removal in GitLab 14.0.
 > - **Mark as draft** and **Mark as ready** buttons [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/227421) in GitLab 13.5.
 
-There are several ways to flag a merge request as a Draft:
+There are several ways to flag a merge request as a draft:
 
-- Click the **Mark as draft** button on the top-right corner of the merge request's page.
-- Add `[Draft]`, `Draft:` or `(Draft)` to the start of the merge request's title. Clicking on
-  **Start the title with Draft:**, under the title box, when editing the merge request's
-  description has the same effect.
-- **Deprecated** Add `[WIP]` or `WIP:` to the start of the merge request's title.
-  **WIP** still works but was deprecated in favor of **Draft**. It is scheduled for removal in the next major version (GitLab 14.0).
-- Add the `/draft` (or `/wip`) [quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics)
-  in a comment in the merge request. This is a toggle, and can be repeated
-  to change the status back. Note that any other text in the comment is discarded.
-- Add `draft:`, `Draft:`, `fixup!`, or `Fixup!` to the beginning of a commit message targeting the
-  merge request's source branch. This is not a toggle, and doing it again in another
-  commit has no effect.
+- **Viewing a merge request**: In the top right corner of the merge request, click **Mark as draft**.
+- **Creating or editing a merge request**: Add `[Draft]`, `Draft:` or `(Draft)` to
+  the beginning of the merge request's title, or click **Start the title with Draft:**
+  below the **Title** field.
+- **Commenting in an existing merge request**: Add the `/draft`
+  [quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics)
+  in a comment. This quick action is a toggle, and can be repeated to change the status
+  again. This quick action discards any other text in the comment.
+- **Creating a commit**: Add `draft:`, `Draft:`, `fixup!`, or `Fixup!` to the
+  beginning of a commit message targeting the merge request's source branch. This
+  is not a toggle, and adding this text again in a later commit doesn't mark the
+  merge request as ready.
 
-## Removing the "Draft" flag from a merge request
+WARNING:
+Adding `WIP:` to the start of the merge request's title still marks a merge request
+as a draft. This feature is scheduled for removal in GitLab 14.0. Use `Draft:` instead.
 
-Similar to above, when a Merge Request is ready to be merged, you can remove the
-`Draft` flag in several ways:
+## Mark merge requests as ready
 
-- Click the **Mark as ready** button on the top-right corner of the merge request's page.
-- Remove `[Draft]`, `Draft:` or `(Draft)` from the start of the merge request's title. Clicking on
-  **Remove the Draft: prefix from the title**, under the title box, when editing the merge
-  request's description, has the same effect.
-- Add the `/draft` (or `/wip`) [quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics)
-  in a comment in the merge request. This is a toggle, and can be repeated
-  to change the status back. Note that any other text in the comment is discarded.
-- Click on the **Resolve Draft status** button near the bottom of the merge request description,
-  next to the **Merge** button (see [image above](#draft-merge-requests)).
-  Must have at least Developer level permissions on the project for the button to
-  be visible.
+When a merge request is ready to be merged, you can remove the `Draft` flag in several ways:
 
-## Including/excluding WIP merge requests when searching
+- **Viewing a merge request**: In the top right corner of the merge request, click **Mark as ready**.
+  Users with [Developer or greater permissions](../../permissions.md)
+  can also scroll to the bottom of the merge request description and click **Mark as ready**:
 
-When viewing/searching the merge requests list, you can choose to include or exclude
-WIP merge requests. Add a **WIP** filter in the search box, and choose **Yes**
-to include, or **No** to exclude.
+  ![Mark as ready](img/draft_blocked_merge_button_v13_10.png)
 
-![Filter WIP MRs](img/filter_wip_merge_requests.png)
+- **Editing an existing merge request**: Remove `[Draft]`, `Draft:` or `(Draft)`
+  from the beginning of the title, or click **Remove the Draft: prefix from the title**
+  below the **Title** field.
+- **Commenting in an existing merge request**: Add the `/draft`
+  [quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics)
+  in a comment in the merge request. This quick action is a toggle, and can be repeated
+  to change the status back. This quick action discards any other text in the comment.
+
+## Include or exclude drafts when searching
+
+When viewing or searching in your project's merge requests list, you can include or exclude
+draft merge requests:
+
+1. In your project, select **Merge Requests** from the left sidebar.
+1. In the navigation bar, click **Open**, **Merged**, **Closed**, or **All** to
+   filter by merge request status.
+1. Click the search box to display a list of filters and select **Draft**, or
+   enter the word `draft`.
+1. Select `=`.
+1. Select **Yes** to include drafts, or **No** to exclude, and press **Return**
+   to update the list of merge requests:
+
+   ![Filter draft merge requests](img/filter_draft_merge_requests_v13_10.png)
+
+## Pipelines for drafts
+
+When the [pipelines for merged results](../../../ci/merge_request_pipelines/pipelines_for_merged_results/index.md)
+feature is enabled, draft merge requests run
+[merge request pipelines](../../../ci/merge_request_pipelines/index.md) only.
+
+To run pipelines for merged results, you must
+[mark the merge request as ready](#mark-merge-requests-as-ready).
 
 <!-- ## Troubleshooting
 
