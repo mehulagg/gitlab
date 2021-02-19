@@ -6,6 +6,7 @@ module PersonalAccessTokens
     include CronjobQueue
 
     feature_category :authentication_and_authorization
+    BATCH_SIZE = 10
 
     def perform(*args)
       notification_service = NotificationService.new
@@ -14,17 +15,19 @@ module PersonalAccessTokens
       User.with_expiring_and_not_notified_personal_access_tokens(limit_date).find_each do |user|
         with_context(user: user) do
           expiring_user_tokens = user.personal_access_tokens.without_impersonation.expiring_and_not_notified(limit_date)
-          # rubocop: disable CodeReuse/ActiveRecord
-          # We never materialise the token instances. We need the names to mention them in the
-          # email. Later we trigger an update query on the entire relation, not on individual instances.
-          token_names = expiring_user_tokens.pluck(:name)
-          # rubocop: enable CodeReuse/ActiveRecord
+          expiring_user_tokens.each_batch(of: BATCH_SIZE) do |expiring_tokens|
+            # rubocop: disable CodeReuse/ActiveRecord
+            # We never materialise the token instances. We need the names to mention them in the
+            # email. Later we trigger an update query on the entire relation, not on individual instances.
+            token_names = expiring_tokens.pluck(:name)
+            # rubocop: enable CodeReuse/ActiveRecord
 
-          notification_service.access_token_about_to_expire(user, token_names)
+            notification_service.access_token_about_to_expire(user, token_names)
 
-          Gitlab::AppLogger.info "#{self.class}: Notifying User #{user.id} about expiring tokens"
+            Gitlab::AppLogger.info "#{self.class}: Notifying User #{user.id} about expiring tokens"
 
-          expiring_user_tokens.update_all(expire_notification_delivered: true)
+            expiring_tokens.update_all(expire_notification_delivered: true)
+          end
         end
       end
     end
