@@ -49,7 +49,7 @@ no further changes are needed.
 
 **Multi-node GitLab installations**
 
-Follow the steps for **Omnibus GitLab installation** for each, Web and Sidekiq node.
+Follow the steps for **Omnibus GitLab installation** for each, Web and Sidekiq nodes.
 
 ## Changing the storage path
 
