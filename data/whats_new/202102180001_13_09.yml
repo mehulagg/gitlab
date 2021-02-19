@@ -6,7 +6,7 @@
   stage: Verify
   self-managed: true
   gitlab-com: true
-  packages: [core, premium, ultimate]
+  packages: [Free, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/ci/yaml/README.html#reference-tags
   image_url: https://about.gitlab.com/images/13_9/reference.png
   published_at: 2021-02-22
@@ -19,7 +19,7 @@
   stage: Verify
   self-managed: true
   gitlab-com: true
-  packages: [core, premium, ultimate]
+  packages: [Free, Premium, Ultimate]
   url: https://docs.gitlab.com/runner/executors/docker_machine.html#using-gpus-on-google-compute-engine
   image_url: https://about.gitlabcom/images/ci/gitlab-ci-cd-logo_2x.png
   published_at: 2021-02-22
@@ -32,7 +32,7 @@
   stage: Configure
   self-managed: true
   gitlab-com: true
-  packages: [core, premium, ultimate]
+  packages: [Free, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/ci/examples/authenticating-with-hashicorp-vault/index.html
   image_url: https://about.gitlab.com/images/icons/get-a-license.svg
   published_at: 2021-02-22
@@ -43,7 +43,7 @@
   stage: Secure
   self-managed: true
   gitlab-com: true
-  packages: [core, premium, ultimate]
+  packages: [Free, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/user/application_security/sast/analyzers.html#analyzers-data
   image_url: https://about.gitlab.com/images/solutions/icon_sheild-check.svg
   published_at: 2021-02-22
@@ -56,7 +56,7 @@
   stage: Secure
   self-managed: true
   gitlab-com: true
-  packages: [ultimate]
+  packages: [Ultimate]
   url: https://docs.gitlab.com/ee/user/application_security/vulnerabilities/#create-a-gitlab-issue-for-a-vulnerability
   image_url: https://about.gitlab.com/images/13_9/jira-vulnerability-integration.png
   published_at: 2021-02-22
@@ -67,7 +67,7 @@
   stage: Secure
   self-managed: true
   gitlab-com: true
-  packages: [ultimate]
+  packages: [Ultimate]
   url: https://docs.gitlab.com/ee/user/application_security/threat_monitoring/#configuring-network-policy-alerts
   image_url: https://about.gitlab.com/images/13_9/security_alert_dashboard.png
   published_at: 2021-02-22
@@ -82,7 +82,7 @@
   stage: Enablement
   self-managed: true
   gitlab-com: false
-  packages: [premium, ultimate]
+  packages: [Premium, Ultimate]
   url: https://docs.gitlab.com/ee/administration/maintenance_mode/index.html
   image_url: https://about.gitlab.com/images/13_9/maintenance_mode.png
   published_at: 2021-02-22
@@ -93,7 +93,7 @@
   stage: Manage
   self-managed: true
   gitlab-com: true
-  packages: [premium, ultimate]
+  packages: [Premium, Ultimate]
   url: https://docs.gitlab.com/ee/user/analytics/merge_request_analytics.html#mean-time-to-merge
   image_url: https://about.gitlab.com/images/13_9/mttm.png
   published_at: 2021-02-22
@@ -104,7 +104,7 @@
   stage: Plan
   self-managed: true
   gitlab-com: true
-  packages: [premium, ultimate]
+  packages: [Premium, Ultimate]
   url: https://docs.gitlab.com/ee/user/group/roadmap/#sort-and-filter-the-roadmap
   image_url: https://about.gitlab.com/images/13_9/roadmap-filter-by-confidentiality.png
   published_at: 2021-02-22
@@ -115,7 +115,7 @@
   stage: Plan
   self-managed: true
   gitlab-com: true
-  packages: [core, premium, ultimate]
+  packages: [Core, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/user/project/protected_branches.html#allow-deploy-keys-to-push-to-a-protected-branch
   image_url: https://about.gitlab.com/images/13_9/deploy_keys.png
   published_at: 2021-02-22
