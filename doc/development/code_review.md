@@ -309,7 +309,7 @@ first time.
 ### Requesting a review
 
 When you are ready to have your merge request reviewed,
-you should request an initial review by adding a reviewer from your group or team.
+you should request an initial review by adding a reviewer from your group or team. Keep yourself assigned to the merge request.
 However, you can also request review from any reviewer. The list of reviewers can be found on [Engineering projects](https://about.gitlab.com/handbook/engineering/projects/) page.
 
 You can also use `workflow::ready for review` label. That means that your merge request is ready to be reviewed and any reviewer can pick it. It is recommended to use that label only if there isn't time pressure and make sure adding a specific review to the merge request.
@@ -347,7 +347,7 @@ experience, refactors the existing code). Then:
   - There's a [Chrome/Firefox add-on](https://gitlab.com/conventionalcomments/conventional-comments-button) which you can use to apply [Conventional Comment](https://conventionalcomments.org/) prefixes.
 - After a round of line notes, it can be helpful to post a summary note such as
   "Looks good to me", or "Just a couple things to address."
-- Remove yourself from reviewers and ask for a change from the author if changes are required following your review.
+- Ask for a change from the author if changes are required following your review. You may remove yourself from the list of reviewers.
 - Click approve button once you're satisfied with the changes.
 
 ### Merging a merge request
