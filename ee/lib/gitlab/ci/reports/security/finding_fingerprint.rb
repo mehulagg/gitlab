@@ -21,7 +21,7 @@ module Gitlab
           end
 
           def fingerprint_sha256
-            Digest::SHA256.digest(fingerprint_value)
+            Digest::SHA1.digest(fingerprint_value)
           end
 
           def to_h

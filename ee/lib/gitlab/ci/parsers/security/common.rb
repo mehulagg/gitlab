@@ -27,6 +27,11 @@ module Gitlab
           rescue JSON::ParserError
             raise SecurityReportParserError, 'JSON parsing failed'
           rescue => e
+            puts "SECURITY REPORT PARSING FAILED: #{e}"
+            puts "SECURITY REPORT PARSING FAILED: #{e}"
+            puts "SECURITY REPORT PARSING FAILED: #{e}"
+            puts "SECURITY REPORT PARSING FAILED: #{e}"
+            puts e.backtrace.map{|x|"    #{x}"}.join("\n")
             Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
             raise SecurityReportParserError, "#{report.type} security report parsing failed"
           end
@@ -80,17 +85,19 @@ module Gitlab
             links = create_links(data['links'])
             location = create_location(data['location'] || {})
             remediations = create_remediations(data['remediations'])
-            fingerprints = create_fingerprints(tracking_data(data))
+            fingerprints = create_fingerprints(location, tracking_data(data))
 
-            if ::Feature.enabled?(:vulnerability_finding_fingerprints)
-              compare_key = fingerprints.sort_by(&:priority).last.fingerprint_sha256
+            if ::Feature.enabled?(:vulnerability_finding_fingerprints) && !fingerprints.empty?
+              # NOT the fingerprint_sha256 - the compare key is hashed
+              # to create the project_fingerprint
+              compare_key = fingerprints.sort_by(&:priority).last.fingerprint_value
             else
               compare_key = data['cve'] || ''
             end
 
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
-                uuid: calculate_uuid_v5(identifiers.first, location),
+                uuid: calculate_uuid_v5(identifiers.first, location&.fingerprint),
                 report_type: report.type,
                 name: finding_name(data, identifiers, location),
                 compare_key: compare_key,
@@ -108,8 +115,11 @@ module Gitlab
                 fingerprints: fingerprints))
           end
 
-          def create_fingerprints(tracking)
+          def create_fingerprints(location, tracking)
             return [] if tracking.nil?
+
+            puts "Creating fingerprints for:"
+            puts JSON.pretty_generate(tracking).split("\n").map{|x|"    #{x}"}.join("\n")
 
             fingerprint_algorithms = {}
             tracking['items'].each do |item|
@@ -122,18 +132,31 @@ module Gitlab
               end
             end
 
-            fingerprint_algorithms.map do |algorithm, values|
+            if fingerprint_algorithms.empty?
+              puts "Using location as the fingerprint for now, location: #{location.inspect}"
+              fingerprint_algorithms['location'] = [location.fingerprint_path]
+            end
+
+            puts "Fingerprint algorithms: #{fingerprint_algorithms.inspect}"
+
+            res = fingerprint_algorithms.map do |algorithm, values|
               value = values.join('|')
+              puts ">> algorithm: #{algorithm.inspect} values: #{values.inspect}"
               begin
                 ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(
                   algorithm_type: algorithm,
                   fingerprint_value: value
                 )
-              rescue ArgumentError
-                # TODO log the invalid algorithm type
-                nil
+              rescue ArgumentError => e
+                Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
               end
             end.compact
+
+            puts "create_fingerprints result: #{res.inspect}"
+            res
+          rescue StandardError => e
+            puts "Error creating fingerprints: #{e}"
+            puts e.backtrace.map{|x| "    #{x}"}.join("\n")
           end
 
           def create_scan
@@ -207,11 +230,11 @@ module Gitlab
             "#{identifier.name} in #{location&.fingerprint_path}"
           end
 
-          def calculate_uuid_v5(primary_identifier, location)
+          def calculate_uuid_v5(primary_identifier, location_fingerprint)
             uuid_v5_name_components = {
               report_type: report.type,
               primary_identifier_fingerprint: primary_identifier&.fingerprint,
-              location_fingerprint: location&.fingerprint,
+              location_fingerprint: location_fingerprint,
               project_id: report.project_id
             }
 

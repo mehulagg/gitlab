@@ -407,6 +407,13 @@ module Vulnerabilities
       return false
     end
 
+    def fingerprint_uuids
+      fingerprints.map do |fingerprint|
+        hex_sha = fingerprint.fingerprint_sha256.unpack("H*")[0]
+        Gitlab::UUID.v5(uuid_v5_name(location_fingerprint_value: hex_sha))
+      end
+    end
+
     protected
 
     def first_fingerprint
@@ -423,11 +430,11 @@ module Vulnerabilities
       }
     end
 
-    def uuid_v5_name
+    def uuid_v5_name(location_fingerprint_value: nil)
       [
         report_type,
-        primary_identifier.fingerprint,
-        location_fingerprint,
+        (primary_identifier || identifiers.first).fingerprint,
+        location_fingerprint_value || location_fingerprint,
         project_id
       ].join('-')
     end
