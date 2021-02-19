@@ -31,6 +31,7 @@ module MergeRequests
       old_mentioned_users = old_associations.fetch(:mentioned_users, [])
       old_assignees = old_associations.fetch(:assignees, [])
       old_reviewers = old_associations.fetch(:reviewers, [])
+      changed_fields = merge_request.previous_changes.keys
 
       if has_changes?(merge_request, old_labels: old_labels, old_assignees: old_assignees, old_reviewers: old_reviewers)
         todo_service.resolve_todos_for_target(merge_request, current_user)
@@ -51,9 +52,11 @@ module MergeRequests
         abort_auto_merge(merge_request, 'target branch was changed')
       end
 
-      handle_assignees_change(merge_request, old_assignees) if merge_request.assignees != old_assignees
+      handle_assignees_change(merge_request, old_assignees)
+      handle_reviewers_change(merge_request, old_reviewers)
+      handle_draft_status_change(merge_request, changed_fields)
 
-      handle_reviewers_change(merge_request, old_reviewers) if merge_request.reviewers != old_reviewers
+      track_title_and_desc_edits(merge_request, changed_fields)
 
       if merge_request.previous_changes.include?('target_branch') ||
           merge_request.previous_changes.include?('source_branch')
@@ -95,50 +98,46 @@ module MergeRequests
       MergeRequests::CloseService
     end
 
-    def before_update(issuable, skip_spam_check: false)
-      return unless issuable.changed?
-
-      @issuable_changes = issuable.changes
-    end
-
     def after_update(issuable)
       issuable.cache_merge_request_closes_issues!(current_user)
-
-      return unless @issuable_changes
-
-      %w(title description).each do |action|
-        next unless @issuable_changes.key?(action)
-
-        # Track edits to title or description
-        #
-        merge_request_activity_counter
-          .public_send("track_#{action}_edit_action".to_sym, user: current_user) # rubocop:disable GitlabSecurity/PublicSend
-
-        # Track changes to Draft/WIP status
-        #
-        if action == "title"
-          old_title, new_title = @issuable_changes["title"]
-          old_title_wip = MergeRequest.work_in_progress?(old_title)
-          new_title_wip = MergeRequest.work_in_progress?(new_title)
-
-          if !old_title_wip && new_title_wip
-            # Marked as Draft/WIP
-            #
-            merge_request_activity_counter
-              .track_marked_as_draft_action(user: current_user)
-          elsif old_title_wip && !new_title_wip
-            # Unmarked as Draft/WIP
-            #
-            merge_request_activity_counter
-              .track_unmarked_as_draft_action(user: current_user)
-          end
-        end
-      end
     end
 
     private
 
     attr_reader :target_branch_was_deleted
+
+    def track_title_and_desc_edits(merge_request, changed_fields)
+      tracked_fields = %w(title description)
+
+      return unless changed_fields.any? { |i| tracked_fields.include? i }
+
+      tracked_fields.each do |action|
+        next unless changed_fields.include?(action)
+
+        merge_request_activity_counter
+          .public_send("track_#{action}_edit_action".to_sym, user: current_user) # rubocop:disable GitlabSecurity/PublicSend
+      end
+    end
+
+    def handle_draft_status_change(merge_request, changed_fields)
+      return unless changed_fields.include?("title")
+
+      old_title, new_title = merge_request.previous_changes["title"]
+      old_title_wip = MergeRequest.work_in_progress?(old_title)
+      new_title_wip = MergeRequest.work_in_progress?(new_title)
+
+      if !old_title_wip && new_title_wip
+        # Marked as Draft/WIP
+        #
+        merge_request_activity_counter
+          .track_marked_as_draft_action(user: current_user)
+      elsif old_title_wip && !new_title_wip
+        # Unmarked as Draft/WIP
+        #
+        merge_request_activity_counter
+          .track_unmarked_as_draft_action(user: current_user)
+      end
+    end
 
     def handle_milestone_change(merge_request)
       return if skip_milestone_email
@@ -153,6 +152,8 @@ module MergeRequests
     end
 
     def handle_assignees_change(merge_request, old_assignees)
+      return unless merge_request.assignees != old_assignees
+
       create_assignee_note(merge_request, old_assignees)
       notification_service.async.reassigned_merge_request(merge_request, current_user, old_assignees)
       todo_service.reassigned_assignable(merge_request, current_user, old_assignees)
@@ -162,6 +163,8 @@ module MergeRequests
     end
 
     def handle_reviewers_change(merge_request, old_reviewers)
+      return unless merge_request.reviewers != old_reviewers
+
       affected_reviewers = (old_reviewers + merge_request.reviewers) - (old_reviewers & merge_request.reviewers)
       create_reviewer_note(merge_request, old_reviewers)
       notification_service.async.changed_reviewer_of_merge_request(merge_request, current_user, old_reviewers)
