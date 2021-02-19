@@ -1,12 +1,12 @@
-import { mount } from '@vue/test-utils';
 import { GlTable } from '@gitlab/ui';
-import PipelinesTable from '~/pipelines/components/pipelines_list/pipelines_table.vue';
-import PipelinesCommit from '~/pipelines/components/pipelines_list/pipelines_commit.vue';
-import PipelineManualActions from '~/pipelines/components/pipelines_list/pipeline_manual_actions.vue';
-import PipelinesStatusBadge from '~/pipelines/components/pipelines_list/pipelines_status_badge.vue';
-import PipelinesTimeago from '~/pipelines/components/pipelines_list/time_ago.vue';
-import PipelineTriggerer from '~/pipelines/components/pipelines_list/pipeline_triggerer.vue';
+import { mount } from '@vue/test-utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import PipelineManualActions from '~/pipelines/components/pipelines_list/pipeline_manual_actions.vue';
+import PipelineTriggerer from '~/pipelines/components/pipelines_list/pipeline_triggerer.vue';
+import PipelinesCommit from '~/pipelines/components/pipelines_list/pipelines_commit.vue';
+import PipelinesStatusBadge from '~/pipelines/components/pipelines_list/pipelines_status_badge.vue';
+import PipelinesTable from '~/pipelines/components/pipelines_list/pipelines_table.vue';
+import PipelinesTimeago from '~/pipelines/components/pipelines_list/time_ago.vue';
 
 describe('Pipelines Table', () => {
   let pipeline;
@@ -32,7 +32,6 @@ describe('Pipelines Table', () => {
   const findStatusBadge = () => wrapper.find(PipelinesStatusBadge);
   const findTriggerer = () => wrapper.find(PipelineTriggerer);
   const findCommit = () => wrapper.find(PipelinesCommit);
-  const findStages = () => wrapper.find(PipelineStage);
   const findTimeAgo = () => wrapper.find(PipelinesTimeago);
   const findActions = () => wrapper.find(PipelineManualActions);
 

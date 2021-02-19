@@ -1,6 +1,6 @@
 <script>
-import CommitComponent from '~/vue_shared/components/commit.vue';
 import { CHILD_VIEW } from '~/pipelines/constants';
+import CommitComponent from '~/vue_shared/components/commit.vue';
 
 export default {
   components: {

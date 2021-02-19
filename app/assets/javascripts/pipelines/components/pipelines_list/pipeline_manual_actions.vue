@@ -1,9 +1,9 @@
 <script>
 import { GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
+import eventHub from '../../event_hub';
 import PipelinesActionsComponent from './pipelines_actions.vue';
 import PipelinesArtifactsComponent from './pipelines_artifacts.vue';
-import eventHub from '../../event_hub';
 
 export default {
   i18n: {
@@ -35,11 +35,6 @@ export default {
       isRetrying: false,
     };
   },
-  watch: {
-    pipeline() {
-      this.isRetrying = false;
-    },
-  },
   computed: {
     displayPipelineActions() {
       return (
@@ -58,6 +53,11 @@ export default {
     },
     isCancelling() {
       return this.cancelingPipeline === this.pipeline.id;
+    },
+  },
+  watch: {
+    pipeline() {
+      this.isRetrying = false;
     },
   },
   methods: {

@@ -1,6 +1,6 @@
 <script>
-import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
 import { CHILD_VIEW } from '~/pipelines/constants';
+import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
 
 export default {
   components: {

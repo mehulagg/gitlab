@@ -21923,9 +21923,6 @@ msgstr ""
 msgid "Pipeline|Detached merge request pipeline"
 msgstr ""
 
-msgid "Pipeline|Duration"
-msgstr ""
-
 msgid "Pipeline|Existing branch name or tag"
 msgstr ""
 

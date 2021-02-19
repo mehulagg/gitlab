@@ -1,16 +1,16 @@
 <script>
 import { GlTable, GlTooltipDirective } from '@gitlab/ui';
-import { s__, __ } from '~/locale';
-import eventHub from '../../event_hub';
+import { s__ } from '~/locale';
 import { PIPELINES_TABLE } from '../../constants';
-import PipelinesCommit from './pipelines_commit.vue';
+import eventHub from '../../event_hub';
 import PipelineManualActions from './pipeline_manual_actions.vue';
-import PipelineStage from './stage.vue';
-import PipelinesStatusBadge from './pipelines_status_badge.vue';
 import PipelineStopModal from './pipeline_stop_modal.vue';
-import PipelinesTimeago from './time_ago.vue';
 import PipelineTriggerer from './pipeline_triggerer.vue';
 import PipelineUrl from './pipeline_url.vue';
+import PipelinesCommit from './pipelines_commit.vue';
+import PipelinesStatusBadge from './pipelines_status_badge.vue';
+import PipelineStage from './stage.vue';
+import PipelinesTimeago from './time_ago.vue';
 
 const DEFAULT_TD_CLASS = 'gl-p-5!';
 const DEFAULT_TH_CLASSES =
@@ -149,18 +149,24 @@ export default {
 <template>
   <div>
     <gl-table
+      class="ci-table"
       :fields="$options.fields"
       :items="pipelines"
+      tbody-tr-class="commit"
       :tbody-tr-attr="{ 'data-testid': 'pipeline-table-row' }"
       stacked="lg"
       fixed
     >
+      <template #head(actions)>
+        <slot name="table-header-actions"></slot>
+      </template>
+
       <template #table-colgroup="{ fields }">
         <col v-for="field in fields" :key="field.key" :class="field.columnClass" />
       </template>
 
       <template #cell(status)="{ item }">
-        <pipelines-status-badge :pipeline="item" :viewType="viewType" />
+        <pipelines-status-badge :pipeline="item" :view-type="viewType" />
       </template>
 
       <template #cell(pipeline)="{ item }">
@@ -176,7 +182,7 @@ export default {
       </template>
 
       <template #cell(commit)="{ item }">
-        <pipelines-commit :pipeline="item" :viewType="viewType" />
+        <pipelines-commit :pipeline="item" :view-type="viewType" />
       </template>
 
       <template #cell(stages)="{ item }">
