@@ -39,6 +39,8 @@ class Import::BulkImportsController < ApplicationController
   def create
     result = BulkImportService.new(current_user, create_params, credentials).execute
     render json: result.to_json(only: [:id])
+  rescue ActiveRecord::RecordInvalid => error
+    render json: { error: error.message }, status: :unprocessable_entity
   end
 
   def realtime_changes
