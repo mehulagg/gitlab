@@ -151,8 +151,8 @@ RSpec.describe NamespaceStatistics do
     end
   end
 
-  context 'after saving statistics' do
-    let_it_be(:statistics, reload: true) { create(:namespace_statistics, namespace: group) }
+  context 'after saving statistics', :aggregate_failures do
+    let(:statistics) { create(:namespace_statistics, namespace: group) }
 
     context 'when storage_size is not updated' do
       it 'does not enqueue the job to update root storage statistics' do
@@ -163,19 +163,46 @@ RSpec.describe NamespaceStatistics do
       end
     end
 
-    context 'when storage_size is not updated' do
-      it 'enqueues the job to update root storage statistics' do
-        statistics.storage_size = 10
+    context 'when storage_size is updated' do
+      let(:statistics) { create(:namespace_statistics, namespace: namespace) }
+      let(:namespace) { group }
 
+      before do
+        # we have to update this value instead of `storage_size` because the before_save
+        # hook we have. If we don't do it, storage_size will be set to the wiki_size value
+        # which is 0.
+        statistics.wiki_size = 10
+      end
+
+      it 'enqueues the job to update root storage statistics' do
         expect(statistics).to receive(:update_root_storage_statistics).and_call_original
-        expect(Namespaces::ScheduleAggregationWorker).to receive(:perform_async)
+        expect(Namespaces::ScheduleAggregationWorker).to receive(:perform_async).with(group.id)
+
+        statistics.save!
+      end
+
+      context 'when namespace does not belong to a group' do
+        let(:namespace) { user.namespace }
+
+        it 'does not enqueue the job to update root storage statistics' do
+          expect(statistics).to receive(:update_root_storage_statistics).and_call_original
+          expect(Namespaces::ScheduleAggregationWorker).not_to receive(:perform_async)
+
+          statistics.save!
+        end
+      end
+    end
+
+    context 'when other columns are updated' do
+      it 'does not enqueue the job to update root storage statistics' do
+        columns_to_update = NamespaceStatistics.columns_hash.except('id', 'namespace_id', 'wiki_size', 'storage_size').keys
+        columns_to_update.each { |c| statistics[c] = 10 }
+
+        expect(statistics).not_to receive(:update_root_storage_statistics)
+        expect(Namespaces::ScheduleAggregationWorker).not_to receive(:perform_async)
 
         statistics.save!
       end
     end
-
-    # context 'when namespace does not belong to a group' do
-
-    # end
   end
 end

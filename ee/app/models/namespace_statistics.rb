@@ -11,7 +11,7 @@ class NamespaceStatistics < ApplicationRecord
   scope :with_any_ci_minutes_used, -> { where.not(shared_runners_seconds: 0) }
 
   before_save :update_storage_size
-  after_save :update_root_storage_statistics
+  after_save :update_root_storage_statistics, if: :saved_change_to_storage_size?
   after_destroy :update_root_storage_statistics
 
   COLUMNS_TO_REFRESH = [:wiki_size].freeze
