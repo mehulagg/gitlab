@@ -685,5 +685,52 @@ RSpec.describe Epic do
     end
   end
 
+  describe '.ids_for_base_and_decendants' do
+    it 'returns epic ids only for selected epics or its descendant epics' do
+      epic1 = create(:epic, group: group)
+      epic2 = create(:epic, group: group, parent: epic1)
+      epic3 = create(:epic, group: group, parent: epic2)
+      epic4 = create(:epic, group: group)
+      create(:epic, group: group)
+
+      expect(described_class.ids_for_base_and_decendants([epic1.id, epic4.id]))
+        .to match_array([epic1.id, epic2.id, epic3.id, epic4.id])
+    end
+  end
+
+  describe '.issue_metadata_for_epics' do
+    it 'returns hash containing epic issues count and weight and epic status' do
+      epic1 = create(:epic, group: group)
+      epic2 = create(:epic, group: group, parent: epic1)
+      epic3 = create(:epic, group: group, state: :closed)
+      issue1 = create(:issue, weight: 2)
+      issue2 = create(:issue, weight: 3)
+      issue3 = create(:issue, state: :closed)
+      create(:epic_issue, epic: epic2, issue: issue1)
+      create(:epic_issue, epic: epic2, issue: issue2)
+      create(:epic_issue, epic: epic3, issue: issue3)
+
+      expected = [{
+        "epic_state_id" => 1,
+        "id" => epic2.id,
+        "iid" => epic2.iid,
+        "issues_count" => 2,
+        "issues_state_id" => 1,
+        "issues_weight_sum" => 5,
+        "parent_id" => epic1.id
+      }, {
+        "epic_state_id" => 2,
+        "id" => epic3.id,
+        "iid" => epic3.iid,
+        "issues_count" => 1,
+        "issues_state_id" => 2,
+        "issues_weight_sum" => 0,
+        "parent_id" => nil
+      }]
+      result = described_class.issue_metadata_for_epics(epic_ids: [epic2.id, epic3.id], limit: 100)
+      expect(result).to match_array(expected)
+    end
+  end
+
   it_behaves_like 'versioned description'
 end
