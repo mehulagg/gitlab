@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Sentry
+module GitlabSentry
   module PaginationParser
     PATTERN = /rel=\"(?<direction>\w+)\";\sresults=\"(?<results>\w+)\";\scursor=\"(?<cursor>.+)\"/.freeze
 

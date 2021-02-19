@@ -5,7 +5,7 @@ require 'set'
 module Gitlab
   module ErrorTracking
     module Processor
-      class SidekiqProcessor < ::Raven::Processor
+      class SidekiqProcessor < ActiveSupport::ParameterFilter
         FILTERED_STRING = '[FILTERED]'
 
         def self.filter_arguments(args, klass)
@@ -40,7 +40,7 @@ module Gitlab
             .to_a
         end
 
-        def process(value, key = nil)
+        def filter(value)
           sidekiq = value.dig(:extra, :sidekiq)
 
           return value unless sidekiq

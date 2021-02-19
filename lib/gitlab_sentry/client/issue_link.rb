@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Sentry
+module GitlabSentry
   class Client
     module IssueLink
       # Creates a link in Sentry corresponding to the provided

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Sentry
+module GitlabSentry
   class ApiUrls
     def initialize(url_base)
       @uri = URI(url_base).freeze

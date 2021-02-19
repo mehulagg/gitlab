@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Sentry
+module GitlabSentry
   class Client
     module Issue
       BadRequestError = Class.new(StandardError)

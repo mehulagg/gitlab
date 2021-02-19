@@ -29,16 +29,23 @@ module Gitlab
       end
 
       def with_context(current_user = nil)
+        last_user_context = Sentry.get_current_scope.user
+
         user_context = {
           id: current_user&.id,
           email: current_user&.email,
           username: current_user&.username
         }.compact
 
-        Sentry.with_scope(default_tags)
+        Sentry.configure_scope do |scope|
+          scope.set_tags(default_tags)
+        end
+
         Sentry.set_user(user_context)
 
         yield
+      ensure
+        Sentry.set_user(last_user_context)
       end
 
       # This should be used when you want to passthrough exception handling:
@@ -111,10 +118,10 @@ module Gitlab
         exception.try(:sentry_extra_data)&.tap do |data|
           extra = extra.merge(data) if data.is_a?(Hash)
         end
-
+        require 'byebug' ; byebug
         extra = sanitize_request_parameters(extra)
 
-        if sentry && Sentry.configuration.server_name
+        if sentry && Sentry.initialized?
           Sentry.capture_exception(exception, tags: default_tags, extra: extra)
         end
 
@@ -125,10 +132,9 @@ module Gitlab
           # In the current implementation, we don't flatten multi-level folded hashes.
           log_hash = {}
 
-          # Sentry.set_tags(foo: "bar")
-          # Sentry.context.tags.each { |name, value| log_hash["tags.#{name}"] = value }
-          # Sentry.context.user.each { |name, value| log_hash["user.#{name}"] = value }
-          # Sentry.context.extra.merge(extra).each { |name, value| log_hash["extra.#{name}"] = value }
+          Sentry.get_current_scope.tags.each { |name, value| log_hash["tags.#{name}"] = value }
+          Sentry.get_current_scope.user.each { |name, value| log_hash["user.#{name}"] = value }
+          Sentry.get_current_scope.extra.merge(extra).each { |name, value| log_hash["extra.#{name}"] = value }
 
           Gitlab::ExceptionLogFormatter.format!(exception, log_hash)
 
@@ -156,12 +162,12 @@ module Gitlab
         {
           Labkit::Correlation::CorrelationId::LOG_KEY.to_sym => Labkit::Correlation::CorrelationId.current_id,
           locale: I18n.locale
-        }
+        }.merge(extra_tags_from_env)
       end
 
       # Static tags that are set on application start
       def extra_tags_from_env
-        Gitlab::Json.parse(ENV.fetch('GITLAB_SENTRY_EXTRA_TAGS', '{}')).to_hash
+        Gitlab::Json.parse(ENV.fetch('GITLAB_SENTRY_EXTRA_TAGS', '{}')).to_hash.merge(program: Gitlab.process_name)
       rescue => e
         Gitlab::AppLogger.debug("GITLAB_SENTRY_EXTRA_TAGS could not be parsed as JSON: #{e.class.name}: #{e.message}")
 

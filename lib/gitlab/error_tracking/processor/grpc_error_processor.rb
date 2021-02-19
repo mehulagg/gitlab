@@ -3,10 +3,10 @@
 module Gitlab
   module ErrorTracking
     module Processor
-      class GrpcErrorProcessor < ::Raven::Processor
+      class GrpcErrorProcessor < ActiveSupport::ParameterFilter
         DEBUG_ERROR_STRING_REGEX = RE2('(.*) debug_error_string:(.*)')
 
-        def process(value)
+        def filter(value)
           process_first_exception_value(value)
           process_custom_fingerprint(value)
 

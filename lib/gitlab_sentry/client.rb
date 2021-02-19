@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-module Sentry
+module GitlabSentry
   class Client
-    include Sentry::Client::Event
-    include Sentry::Client::Projects
-    include Sentry::Client::Issue
-    include Sentry::Client::Repo
-    include Sentry::Client::IssueLink
+    include GitlabSentry::Client::Event
+    include GitlabSentry::Client::Projects
+    include GitlabSentry::Client::Issue
+    include GitlabSentry::Client::Repo
+    include GitlabSentry::Client::IssueLink
 
     Error = Class.new(StandardError)
     MissingKeysError = Class.new(StandardError)

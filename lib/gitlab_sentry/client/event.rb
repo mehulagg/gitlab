@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Sentry
+module GitlabSentry
   class Client
     module Event
       def issue_latest_event(issue_id:)

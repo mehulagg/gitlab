@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Sentry
+module GitlabSentry
   class Client
     module Repo
       def repos(organization_slug)
