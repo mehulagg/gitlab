@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class ChangeFindingFingerprintEnum < ActiveRecord::Migration[6.0]
-  include Gitlab::Database::MigrationHelpers
-
   DOWNTIME = false
 
   def up

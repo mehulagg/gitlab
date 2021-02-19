@@ -19,19 +19,6 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingFingerprint do
         expect(subject.fingerprint_value).to eq(params[:fingerprint_value])
       end
     end
-
-    context 'when an unsupported algorithm type is given' do
-      let(:params) do
-        {
-          algorithm_type: 'INVALID',
-          fingerprint_value: 'FINGERPRINT'
-        }
-      end
-
-      it 'does not allow itself to be created' do
-        expect { subject }.to raise_error(/Unsupported algorithm/)
-      end
-    end
   end
 
   describe '#to_h' do
@@ -40,6 +27,27 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingFingerprint do
         algorithm_type: params[:algorithm_type],
         fingerprint_sha256: Digest::SHA256.digest(params[:fingerprint_value])
       )
+    end
+  end
+
+  describe '#valid?' do
+    context 'when supported algorithm_type is given' do
+      it 'is valid' do
+        expect(subject.valid?).to eq(true)
+      end
+    end
+
+    context 'when an unsupported algorithm_type is given' do
+      let(:params) do
+        {
+          algorithm_type: 'INVALID',
+          fingerprint_value: 'FINGERPRINT'
+        }
+      end
+
+      it 'is not valid' do
+        expect(subject.valid?).to eq(false)
+      end
     end
   end
 end

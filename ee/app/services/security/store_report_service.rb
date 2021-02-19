@@ -155,20 +155,20 @@ module Security
     # rubocop: enable CodeReuse/ActiveRecord
 
     def update_finding_fingerprints(finding, vulnerability_finding)
-      to_delete = []
       to_update = {}
       to_create = []
 
       poro_fingerprints = finding.fingerprints.index_by(&:algorithm_type)
 
       vulnerability_finding.fingerprints.each do |fingerprint|
+        # NOTE: index_by takes the last entry if there are duplicates of the same algorithm, which should never occur.
         poro_fingerprint = poro_fingerprints[fingerprint.algorithm_type]
 
-        # we're no longer generating these types of fingerprints. Since
-        # we're updating the persisted vulnerability, no need carry these
-        # fingerprints forward
+        # We're no longer generating these types of fingerprints. Since
+        # we're updating the persisted vulnerability, no need to do anything
+        # with these fingerprints now. We will track growth with
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/322186
         if poro_fingerprint.nil?
-          to_delete << fingerprint.id
           next
         end
 
@@ -178,19 +178,12 @@ module Security
 
       # any remaining poro fingerprints left are new
       poro_fingerprints.values.each do |poro_fingerprint|
-        to_create << {
-          finding_id: vulnerability_finding.id,
-          **poro_fingerprint.to_h
-        }
+        to_create << poro_fingerprint.to_h.merge(finding_id: vulnerability_finding.id)
       end
 
       ::Vulnerabilities::FindingFingerprint.transaction do
         if to_update.count > 0
           ::Vulnerabilities::FindingFingerprint.update(to_update.keys, to_update.values)
-        end
-
-        if to_delete.count > 0
-          ::Vulnerabilities::FindingFingerprint.delete(to_delete)
         end
 
         if to_create.count > 0
