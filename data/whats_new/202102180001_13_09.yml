@@ -1,15 +1,5 @@
-# This is a template for a "Whats New" release.
-# A release typically contains multiple entries of features that we'd like to highlight.
-#
-# Below is an example of what a single entry should look like, it's required attributes,
-# and what types we expect those attribute values to be. All attributes are required.
-#
-# For more information please refer to the handbook documentation here:
-# https://about.gitlab.com/handbook/marketing/blog/release-posts/index.html#create-mr-for-whats-new-entries
-#
-# Please delete this line and above before submitting your Merge Request.
 - title: "Select CI/CD configuration from any job and reuse it"
-  body: | 
+  body: |
     Previously, if you wanted to reuse the same configuration in multiple jobs, you had two options: add YAML anchors, which don't work across different configuration files, or use `extends` to reuse an entire section.
 
     In this release, we've added a new YAML function called `!reference`, which lets you target the exact configuration you want to reuse as part of your CI/CD pipeline, even if it's in another file.
