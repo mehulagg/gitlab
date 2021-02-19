@@ -337,7 +337,6 @@ RSpec.describe Gitlab::Utils::UsageData do
   describe '#track_usage_event' do
     let(:value) { '9f302fea-f828-4ca9-aef4-e10bd723c0b3' }
     let(:event_name) { 'incident_management_alert_status_changed' }
-    let(:unknown_event) { 'unknown' }
     let(:feature) { "usage_data_#{event_name}" }
 
     before do
@@ -354,10 +353,6 @@ RSpec.describe Gitlab::Utils::UsageData do
 
         described_class.track_usage_event(event_name, value)
       end
-
-      it 'raise an error for unknown event' do
-        expect { described_class.track_usage_event(unknown_event, value) }.to raise_error(Gitlab::UsageDataCounters::HLLRedisCounter::UnknownEvent)
-      end
     end
 
     context 'with feature disabled' do
@@ -369,6 +364,30 @@ RSpec.describe Gitlab::Utils::UsageData do
         expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
 
         described_class.track_usage_event(event_name, value)
+      end
+    end
+
+    context 'with unknown event' do
+      context 'when the feature flag exists' do
+        before do
+          allow(::Feature).to receive(:enabled?)
+                                .with(:usage_data_unknown, default_enabled: :yaml)
+                                .and_return(true)
+        end
+
+        it 'raise an error for unknown event' do
+          expect do
+            described_class.track_usage_event('unknown', value)
+          end.to raise_error(Gitlab::UsageDataCounters::HLLRedisCounter::UnknownEvent)
+        end
+      end
+
+      context 'when the feature flag does not exist' do
+        it 'raise an error for invalid FF' do
+          expect do
+            described_class.track_usage_event('unknown', value)
+          end.to raise_error(Feature::InvalidFeatureFlagError)
+        end
       end
     end
   end
