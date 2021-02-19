@@ -224,7 +224,9 @@ in your local development environment.
 
 #### File size limits
 
-Files uploaded to the GitLab Package Registry are [limited by format](../aadministration/instance_limits.html#file-size-limits). On GitLab.com, these are typically set to 5GB to help prevent timeout issues and abuse. 
+Files uploaded to the GitLab Package Registry are [limited by format](../administration/instance_limits.html#file-size-limits). On GitLab.com, these are typically set to 5GB to help prevent timeout issues and abuse. 
+
+When a new package type is added to the `Packages::Package` model, a size limit must be added similar to [this example](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52639/diffs#382f879fb09b0212e3cedd99e6c46e2083867216) or the [related test](https://gitlab.com/gitlab-org/gitlab/-/blob/fe4ba43766781371cebfacd78364a1de762917cd/spec/models/packages/package_spec.rb#L761) must be updated if file size limits will not apply. The only reason a size limit would not apply is if the package format does not upload and store package files.
 
 #### Rate Limits on GitLab.com
 
