@@ -61,7 +61,6 @@ describe('ListItem', () => {
     expect(button.props('disabled')).toBe(false);
     expect(button.props('loading')).toBe(false);
     expect(button.attributes('aria-label')).toBe('Delete framework');
-    expect(tooltip).toBeDefined();
     expect(tooltip.value).toBe('Delete framework');
   });
 
@@ -72,7 +71,7 @@ describe('ListItem', () => {
 
     await nextTick();
 
-    expect(wrapper.emitted('confirm-deletion')[0]).toEqual([framework]);
+    expect(wrapper.emitted('confirm-deletion')[0]).toStrictEqual([framework]);
   });
 
   describe('when loading', () => {

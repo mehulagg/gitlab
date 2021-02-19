@@ -8,7 +8,7 @@ import deleteComplianceFrameworkMutation from 'ee/groups/settings/compliance_fra
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import * as Sentry from '~/sentry/wrapper';
-import { validDeleteResponse, errorDeleteResponse } from '../mock_data';
+import { validDeleteResponse, errorDeleteResponse, frameworkFoundResponse } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
@@ -20,13 +20,6 @@ describe('DeleteModal', () => {
   const deleteSuccess = jest.fn().mockResolvedValue(validDeleteResponse);
   const deleteError = jest.fn().mockResolvedValue(errorDeleteResponse);
   const deleteNetworkError = jest.fn().mockRejectedValue(networkError);
-
-  const framework = {
-    id: 'gid://gitlab/ComplianceManagement::Framework/1',
-    name: 'gdpr',
-    description: 'a framework',
-    color: '#112233',
-  };
 
   const findModal = () => wrapper.findComponent(GlModal);
   const clickDeleteFramework = () => findModal().vm.$emit('primary');
@@ -44,7 +37,8 @@ describe('DeleteModal', () => {
       localVue,
       apolloProvider: createMockApolloProvider(resolverMock),
       propsData: {
-        framework,
+        name: frameworkFoundResponse.name,
+        id: frameworkFoundResponse.id,
       },
       stubs: {
         GlSprintf,
@@ -73,7 +67,7 @@ describe('DeleteModal', () => {
       const actionPrimary = findModal().props('actionPrimary');
 
       expect(actionPrimary.text).toBe('Delete framework');
-      // expect(actionPrimary.attributes[0].variant).toBe('danger');
+      expect(actionPrimary.attributes[1].variant).toBe('danger');
     });
 
     it('sets the modal cancel button attributes', () => {
@@ -86,7 +80,7 @@ describe('DeleteModal', () => {
       createComponent();
       clickDeleteFramework();
 
-      expect(wrapper.emitted('deleting').length).toBe(1);
+      expect(wrapper.emitted('deleting')).toHaveLength(1);
     });
 
     it('calls the delete mutation with the framework ID', async () => {
@@ -95,7 +89,7 @@ describe('DeleteModal', () => {
 
       await waitForPromises();
 
-      expect(deleteSuccess).toHaveBeenCalledWith({ input: { id: framework.id } });
+      expect(deleteSuccess).toHaveBeenCalledWith({ input: { id: frameworkFoundResponse.id } });
     });
 
     it('emits "delete" event when the framework is successfully deleted', async () => {
@@ -104,7 +98,7 @@ describe('DeleteModal', () => {
 
       await waitForPromises();
 
-      expect(wrapper.emitted('delete').length).toBe(1);
+      expect(wrapper.emitted('delete')).toHaveLength(1);
     });
 
     it('emits "error" event and reports to Sentry when there is a network error', async () => {
@@ -114,7 +108,7 @@ describe('DeleteModal', () => {
 
       await waitForPromises();
 
-      expect(wrapper.emitted('error').length).toBe(1);
+      expect(wrapper.emitted('error')).toHaveLength(1);
       expect(Sentry.captureException.mock.calls[0][0].networkError).toStrictEqual(networkError);
     });
 
@@ -125,7 +119,7 @@ describe('DeleteModal', () => {
 
       await waitForPromises();
 
-      expect(wrapper.emitted('error').length).toBe(1);
+      expect(wrapper.emitted('error')).toHaveLength(1);
       expect(Sentry.captureException.mock.calls[0][0]).toStrictEqual(new Error('graphql error'));
     });
   });

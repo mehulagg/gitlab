@@ -5,6 +5,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { s__ } from '~/locale';
 import * as Sentry from '~/sentry/wrapper';
 
+import { DANGER, INFO } from '../constants';
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
 import DeleteModal from './delete_modal.vue';
 import EmptyState from './list_empty_state.vue';
@@ -32,7 +33,7 @@ export default {
   },
   data() {
     return {
-      markedForDeletion: null,
+      markedForDeletion: {},
       deletingFramework: null,
       complianceFrameworks: [],
       error: '',
@@ -64,7 +65,7 @@ export default {
   },
   computed: {
     isLoading() {
-      return this.$apollo.loading;
+      return this.$apollo.loading && !this.deletingFramework;
     },
     hasLoaded() {
       return !this.isLoading && !this.error;
@@ -85,7 +86,7 @@ export default {
       return !this.error;
     },
     alertVariant() {
-      return this.error ? 'danger' : 'info';
+      return this.error ? DANGER : INFO;
     },
     alertMessage() {
       return this.error || this.message;
@@ -99,12 +100,10 @@ export default {
     onError() {
       this.error = this.$options.i18n.deleteError;
     },
-    onDelete() {
-      this.complianceFrameworks = this.complianceFrameworks.filter(
-        (x) => x !== this.deletingFramework,
-      );
-      this.deletingFramework = null;
+    async onDelete() {
+      await this.$apollo.queries.complianceFrameworks.refetch();
       this.message = this.$options.i18n.deleteMessage;
+      this.deletingFramework = null;
     },
     onDeleting() {
       this.deletingFramework = this.markedForDeletion;
@@ -153,8 +152,9 @@ export default {
     </gl-tabs>
     <delete-modal
       v-if="hasFrameworks"
+      :id="markedForDeletion.id"
       ref="modal"
-      :framework="markedForDeletion"
+      :name="markedForDeletion.name"
       @deleting="onDeleting"
       @delete="onDelete"
       @error="onError"

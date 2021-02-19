@@ -12,27 +12,18 @@ export default {
     GlSprintf,
   },
   props: {
-    framework: {
-      type: Object,
+    name: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    id: {
+      type: String,
       required: false,
       default: null,
     },
   },
-  data() {
-    return {
-      primaryProps: {
-        text: this.$options.i18n.primarryButton,
-        attributes: [{ category: 'primary' }, { variant: 'danger' }],
-      },
-      cancelProps: {
-        text: this.$options.i18n.cancelButton,
-      },
-    };
-  },
   computed: {
-    name() {
-      return this.framework?.name || '';
-    },
     title() {
       return sprintf(this.$options.i18n.title, { framework: this.name });
     },
@@ -48,7 +39,7 @@ export default {
           mutation: deleteComplianceFrameworkMutation,
           variables: {
             input: {
-              id: this.framework.id,
+              id: this.id,
             },
           },
         });
@@ -83,8 +74,15 @@ export default {
     message: s__(
       'ComplianceFrameworks|You are about to permanently delete the compliance framework %{framework} from all projects which currently have it applied, which may remove other functionality. This cannot be undone.',
     ),
-    primarryButton: s__('ComplianceFrameworks|Delete framework'),
-    cancelButton: __('Cancel'),
+  },
+  buttonProps: {
+    primary: {
+      text: s__('ComplianceFrameworks|Delete framework'),
+      attributes: [{ category: 'primary' }, { variant: 'danger' }],
+    },
+    cancel: {
+      text: __('Cancel'),
+    },
   },
   modalId: DELETE_MODAL_ID,
 };
@@ -94,8 +92,8 @@ export default {
     ref="modal"
     :title="title"
     :modal-id="$options.modalId"
-    :action-primary="primaryProps"
-    :action-cancel="cancelProps"
+    :action-primary="$options.buttonProps.primary"
+    :action-cancel="$options.buttonProps.cancel"
     @primary="deleteFramework"
   >
     <gl-sprintf :message="$options.i18n.message">

@@ -8,12 +8,12 @@ exports[`DeleteModal component layout matches the snapshot 1`] = `
   modalclass=""
   modalid="delete-framework-modal-2"
   size="md"
-  title="Delete compliance framework gdpr"
+  title="Delete compliance framework GDPR"
   titletag="h4"
 >
   You are about to permanently delete the compliance framework 
   <strong>
-    gdpr
+    GDPR
   </strong>
    from all projects which currently have it applied, which may remove other functionality. This cannot be undone.
 </gl-modal-stub>

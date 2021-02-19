@@ -198,7 +198,8 @@ describe('List', () => {
       });
 
       it('shows the modal when there is a "confirm-deletion" event', () => {
-        expect(findDeleteModal().props('framework')).toBe(framework);
+        expect(findDeleteModal().props('id')).toBe(framework.id);
+        expect(findDeleteModal().props('name')).toBe(framework.name);
         expect(findDeleteModal().vm.show).toHaveBeenCalled();
       });
 
@@ -226,15 +227,13 @@ describe('List', () => {
         });
 
         describe('and the item was successfully deleted', () => {
-          beforeEach(() => {
+          beforeEach(async () => {
             findDeleteModal().vm.$emit('delete');
+            await waitForPromises();
           });
 
-          it('removes the list item from the list', () => {
-            expect(findListItems()).toHaveLength(1);
-            findListItems().wrappers.forEach((item) => {
-              expect(item.props('framework')).not.toEqual(framework);
-            });
+          it('fetches a fresh list of items', () => {
+            expect(fetch).toHaveBeenCalledTimes(2);
           });
 
           it('shows the alert for the success message', () => {

@@ -1,6 +1,9 @@
 import { uniqueId } from 'lodash';
 import { s__ } from '~/locale';
 
+export const DANGER = 'danger';
+export const INFO = 'info';
+
 export const DELETE_MODAL_ID = uniqueId('delete-framework-modal-');
 
 export const FETCH_ERROR = s__(
