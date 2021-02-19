@@ -4,7 +4,7 @@ module Gitlab
   module Ci
     module Variables
       class Collection
-        class Sorted
+        class Sort
           include TSort
           include Gitlab::Utils::StrongMemoize
 
@@ -35,9 +35,9 @@ module Gitlab
             end
           end
 
-          # sort sorts a sorted collection of variables, ignoring unknown variable references.
+          # collection sorts a collection of variables, ignoring unknown variable references.
           # If a circular variable reference is found, a new collection with the original array and an error is returned
-          def sort
+          def collection
             return @coll if Feature.disabled?(:variable_inside_variable, @project)
 
             return Gitlab::Ci::Variables::Collection.new(@coll, errors) if errors

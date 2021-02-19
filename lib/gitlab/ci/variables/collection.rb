@@ -48,7 +48,7 @@ module Gitlab
 
         # Returns a sorted Collection object, and sets errors property in case of an error
         def sorted_collection(project)
-          Sorted.new(self, project).sort
+          Sort.new(self, project).collection
         end
       end
     end
