@@ -10,7 +10,6 @@ const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('ValueStreamSelect', () => {
-
   const deleteValueStreamMock = jest.fn(() => Promise.resolve());
   const mockEvent = { preventDefault: jest.fn() };
   const mockToastShow = jest.fn();

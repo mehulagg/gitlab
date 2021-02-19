@@ -4,7 +4,6 @@ import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_v
 import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
 import { customStageEvents as stageEvents } from '../../mock_data';
 
-
 const defaultStageIndex = 0;
 const totalStages = 5;
 const stageNameError = 'Name is required';

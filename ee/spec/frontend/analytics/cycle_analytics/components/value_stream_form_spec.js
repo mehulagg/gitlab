@@ -16,7 +16,6 @@ const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('ValueStreamForm', () => {
-
   const createValueStreamMock = jest.fn(() => Promise.resolve());
   const updateValueStreamMock = jest.fn(() => Promise.resolve());
   const mockEvent = { preventDefault: jest.fn() };

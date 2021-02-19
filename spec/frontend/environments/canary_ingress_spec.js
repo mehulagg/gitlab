@@ -34,7 +34,6 @@ describe('/environments/components/canary_ingress.vue', () => {
     if (wrapper) {
       wrapper.destroy();
     }
-
   });
 
   describe('stable weight', () => {

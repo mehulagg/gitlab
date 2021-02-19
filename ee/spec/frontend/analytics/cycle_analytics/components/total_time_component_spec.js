@@ -8,7 +8,6 @@ describe('TotalTimeComponent', () => {
     });
   }
 
-
   afterEach(() => {
     wrapper.destroy();
   });

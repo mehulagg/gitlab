@@ -28,7 +28,6 @@ describe('~/feature_flags/strategies/parameter_form_group.vue', () => {
     if (wrapper?.destroy) {
       wrapper.destroy();
     }
-
   });
 
   it('should display the default slot', () => {

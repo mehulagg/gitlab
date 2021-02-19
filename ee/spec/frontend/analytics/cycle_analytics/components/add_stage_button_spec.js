@@ -13,7 +13,6 @@ describe('AddStageButton', () => {
     });
   }
 
-
   afterEach(() => {
     wrapper.destroy();
   });

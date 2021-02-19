@@ -54,7 +54,6 @@ describe('CustomStageFields', () => {
     );
   }
 
-
   const getDropdown = (dropdownEl) => dropdownEl.find(GlDropdown);
   const getLabelSelect = (dropdownEl) => dropdownEl.find(LabelsSelector);
 

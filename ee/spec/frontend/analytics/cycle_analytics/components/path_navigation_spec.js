@@ -4,7 +4,6 @@ import Component from 'ee/analytics/cycle_analytics/components/path_navigation.v
 import { transformedStagePathData, issueStage } from '../mock_data';
 
 describe('PathNavigation', () => {
-
   const createComponent = (props) => {
     return mount(Component, {
       propsData: {
