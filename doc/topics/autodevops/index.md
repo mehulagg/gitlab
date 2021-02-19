@@ -9,9 +9,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - Generally available on GitLab 11.0.
 
 GitLab Auto DevOps helps to reduce the complexity of software delivery by
-setting up pipelines and integrations for you. Instead of requiring developers
-to manually configure their entire GitLab environment, Auto DevOps configures
-many of these areas for you, such as security auditing and vulnerability
+setting up pipelines and integrations for you. Instead of requiring you to
+manually configure your entire GitLab environment, Auto DevOps configures
+many of these areas for you, including security auditing and vulnerability
 testing.
 
 Using Auto DevOps, you can:
