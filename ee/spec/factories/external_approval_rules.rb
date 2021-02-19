@@ -3,7 +3,9 @@
 FactoryBot.define do
   factory :external_approval_rule, class: 'ApprovalRules::ExternalApprovalRule' do
     project
-    external_url { "https://testurl.example.test" }
+    sequence :external_url do |i|
+      "https://testurl.example.test#{i}"
+    end
 
     sequence :name do |i|
       "rule #{i}"
