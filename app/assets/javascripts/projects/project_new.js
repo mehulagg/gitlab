@@ -1,6 +1,7 @@
 import $ from 'jquery';
+import Vue from 'vue';
 import DEFAULT_PROJECT_TEMPLATES from 'ee_else_ce/projects/default_project_templates';
-import { addSelectOnFocusBehaviour } from '../lib/utils/common_utils';
+import NewProjectPushTipPopover from '~/projects/components/new_project_push_tip_popover.vue';
 import {
   convertToTitleCase,
   humanize,
@@ -81,7 +82,7 @@ const bindEvents = () => {
   const $selectedTemplateText = $('.selected-template');
   const $changeTemplateBtn = $('.change-template');
   const $selectedIcon = $('.selected-icon');
-  const $pushNewProjectTipTrigger = $('.push-new-project-tip');
+  const pushNewProjectTipTrigger = document.querySelector('.push-new-project-tip');
   const $projectTemplateButtons = $('.project-templates-buttons');
   const $projectName = $('.tab-pane.active #project_name');
 
@@ -108,37 +109,30 @@ const bindEvents = () => {
     );
   });
 
-  if ($pushNewProjectTipTrigger) {
-    $pushNewProjectTipTrigger
-      .removeAttr('rel')
-      .removeAttr('target')
-      .on('click', (e) => {
-        e.preventDefault();
-      })
-      .popover({
-        title: $pushNewProjectTipTrigger.data('title'),
-        placement: 'bottom',
-        html: true,
-        content: $('.push-new-project-tip-template').html(),
-      })
-      .on('shown.bs.popover', () => {
-        $(document).on('click.popover touchstart.popover', (event) => {
-          if ($(event.target).closest('.popover').length === 0) {
-            $pushNewProjectTipTrigger.trigger('click');
-          }
+  if (pushNewProjectTipTrigger) {
+    const {
+      pushToCreateProjectCommand,
+      workingWithProjectsHelpPath,
+    } = pushNewProjectTipTrigger.dataset;
+    const el = document.querySelector('.js-project-new-command-tip-popover');
+
+    pushNewProjectTipTrigger.addEventListener('click', (e) => e.preventDefault());
+
+    // eslint-disable-next-line no-new
+    new Vue({
+      el,
+      provide: {
+        pushToCreateProjectCommand,
+        workingWithProjectsHelpPath,
+      },
+      render(h) {
+        return h(NewProjectPushTipPopover, {
+          props: {
+            target: pushNewProjectTipTrigger,
+          },
         });
-
-        const target = $(`#${$pushNewProjectTipTrigger.attr('aria-describedby')}`).find(
-          '.js-select-on-focus',
-        );
-        addSelectOnFocusBehaviour(target);
-
-        target.focus();
-      })
-      .on('hide.bs.popover', () => {
-        // eslint-disable-next-line @gitlab/no-global-event-off
-        $(document).off('click.popover touchstart.popover');
-      });
+      },
+    });
   }
 
   function chooseTemplate() {
