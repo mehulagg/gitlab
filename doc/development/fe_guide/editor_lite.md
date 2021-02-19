@@ -8,13 +8,20 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 ## Background
 
-**Editor Lite** is a technological product driving features like [Web Editor](../../user/project/repository/web_editor.md), [Snippets](../../user/snippets.md), and [CI Linter](../../ci/lint.md). Editor Lite is the driving technology for any single-file editing experience across the product.
+**Editor Lite** is a technological product driving features like
+[Web Editor](../../user/project/repository/web_editor.md), [Snippets](../../user/snippets.md),
+and [CI Linter](../../ci/lint.md). Editor Lite is the driving technology for any
+single-file editing experience across the product.
 
-Editor Lite is a thin wrapper around [the Monaco editor](https://microsoft.github.io/monaco-editor/index.html) that provides the necessary helpers and abstractions and extends Monaco using extensions.
+Editor Lite is a thin wrapper around
+[the Monaco editor](https://microsoft.github.io/monaco-editor/index.html) that
+provides the necessary helpers and abstractions and extends Monaco using extensions.
 
 ## How to use Editor Lite
 
-Editor Lite is framework-agnostic and can be used in any application, whether it's Rails or Vue. For the convenience of integration, we have the dedicated `<editor-lite>` Vue component, but in general, the integration of Editor Lite is pretty straightforward:
+Editor Lite is framework-agnostic and can be used in any application, whether it's
+Rails or Vue. For the convenience of integration, we have the dedicated `<editor-lite>`
+Vue component, but in general, the integration of Editor Lite is pretty straightforward:
 
 1. Import Editor Lite:
 
@@ -53,7 +60,9 @@ An instance of Editor Lite accepts the following configuration options:
 
 ## API
 
-The editor follows the same public API as [provided by Monaco editor](https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandalonecodeeditor.html) with just a few additional functions on the instance level:
+The editor follows the same public API as
+[provided by Monaco editor](https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandalonecodeeditor.html)
+with just a few additional functions on the instance level:
 
 | Function | Arguments | Description
 | ----- | ----- | ----- |
@@ -65,7 +74,11 @@ The editor follows the same public API as [provided by Monaco editor](https://mi
 
 1. Editor's loading state.
 
-Editor Lite comes with the loading state built-in, making spinners and loaders rarely needed in HTML. To benefit the built-in loading state, set the `data-editor-loading` property on the HTML element that is supposed to contain the editor. Editor Lite shows the loader automatically while it's bootstrapping.
+Editor Lite comes with the loading state built-in, making spinners and loaders
+rarely needed in HTML. To benefit the built-in loading state, set the `data-editor-loading`
+property on the HTML element that is supposed to contain the editor. Editor Lite
+shows the loader automatically while it's bootstrapping.
+
 ![Editor Lite: loading state](img/editor_lite_loading.png)
 
 1. Update syntax highlighting if the filename changes.
@@ -79,7 +92,9 @@ fileNameEl.addEventListener('change', () => {
 
 1. Get the editor's content.
 
-We might set up listeners on the editor for every change but it rapidly can become an expensive operation. Instead , we can get editor's content when it's needed. For example on a form's submission:
+We might set up listeners on the editor for every change but it rapidly can become
+an expensive operation. Instead , we can get editor's content when it's needed.
+For example on a form's submission:
 
 ```javascript
 form.addEventListener('submit', () => {
@@ -89,7 +104,13 @@ form.addEventListener('submit', () => {
 
 1. Performance
 
-Even though Editor Lite itself is extremely slim, it still depends on Monaco editor. Monaco is not an easily tree-shakeable module. Hence, every time you add Editor Lite to a view, the JavaScript bundle's size significantly increases, affecting your view's loading performance. It is recommended to import the editor on demand on those views where it is not 100% certain that the editor is needed. Or if the editor is a secondary element of the view. Loading Editor Lite on demand is no different from loading any other module:
+Even though Editor Lite itself is extremely slim, it still depends on Monaco editor.
+Monaco is not an easily tree-shakeable module. Hence, every time you add Editor Lite
+to a view, the JavaScript bundle's size significantly increases, affecting your
+view's loading performance. It is recommended to import the editor on demand on
+those views where it is not 100% certain that the editor is needed. Or if the editor
+is a secondary element of the view. Loading Editor Lite on demand is no different
+from loading any other module:
 
 ```javascript
 someActionFunction() {
@@ -140,8 +161,11 @@ export default {
 
 Important things to note here:
 
-- We can depend on other modules in our extensions. This organization helps keep the size of Editor Lite's core at bay by importing dependencies only when needed.
-- `this` in extension's functions refers to the current Editor Lite instance. Using `this`, you get access to the complete instance's API, such as the `setPosition()` method in this particular case.
+- We can depend on other modules in our extensions. This organization helps keep
+  the size of Editor Lite's core at bay by importing dependencies only when needed.
+- `this` in extension's functions refers to the current Editor Lite instance.
+  Using `this`, you get access to the complete instance's API, such as the
+  `setPosition()` method in this particular case.
 
 ### Using an existing extension
 
@@ -159,7 +183,10 @@ editor.use(MyExtension);
 
 ### Creating an extension
 
-Let's create our first Editor Lite extension. Extensions are ES6 modules exporting a basic `Object` that is used to extend Editor Lite's functionality. As a test, let's create an extension that extends Editor Lite with a new function that, when called, outputs editor's content in `alert`.
+Let's create our first Editor Lite extension. Extensions are ES6 modules exporting a
+basic `Object` that is used to extend Editor Lite's functionality. As a test, let's
+create an extension that extends Editor Lite with a new function that, when called,
+outputs editor's content in `alert`.
 
 `~/my_folder/my_fancy_extension.js:`
 
@@ -171,7 +198,10 @@ export default {
 };
 ```
 
-And that's it with our extension! Note that we're using `this` as a reference to the instance. And through it, we get access to the complete underlying [Monaco editor API](https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandalonecodeeditor.html) like `getValue()` in this case.
+And that's it with our extension! Note that we're using `this` as a reference to
+the instance. And through it, we get access to the complete underlying
+[Monaco editor API](https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandalonecodeeditor.html)
+like `getValue()` in this case.
 
 Now let's use our extension:
 
@@ -191,7 +221,11 @@ someButton.addEventListener('click', () => {
 });
 ```
 
-First of all, we import Editor Lite and our new extension. Then we create the editor and its instance. By default Editor Lite has no `throwContentAtMe` method. But the `editor.use(MyFancyExtension)` line brings that method to our instance. After that, we can use it any time we need it. In this case, we call it when some theoretical button has been clicked.
+First of all, we import Editor Lite and our new extension. Then we create the
+editor and its instance. By default Editor Lite has no `throwContentAtMe` method.
+But the `editor.use(MyFancyExtension)` line brings that method to our instance.
+After that, we can use it any time we need it. In this case, we call it when some
+theoretical button has been clicked.
 
 This script would result in an alert containing the editor's content when `someButton` is clicked.
 
@@ -201,7 +235,8 @@ This script would result in an alert containing the editor's content when `someB
 
 1. Performance
 
-Just like Editor Lite itself, any extension can be loaded on demand to not harm loading performance of the views:
+Just like Editor Lite itself, any extension can be loaded on demand to not harm
+loading performance of the views:
 
 ```javascript
 const EditorPromise = import(
