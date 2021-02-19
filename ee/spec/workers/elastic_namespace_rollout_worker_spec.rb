@@ -56,18 +56,18 @@ RSpec.describe ElasticNamespaceRolloutWorker do
   it 'distinguishes different plans' do
     # Rollout
     subject.perform('gold', 50, ROLLOUT)
-    subject.perform('silver', 25, ROLLOUT)
+    subject.perform('premium', 25, ROLLOUT)
 
     expect(
       ElasticsearchIndexedNamespace.pluck(:namespace_id)
     ).to contain_exactly(
       *get_namespace_ids(:gold, 2),
-      *get_namespace_ids(:silver, 1)
+      *get_namespace_ids(:premium, 1)
     )
 
     # Rollback
     subject.perform('gold', 25, ROLLBACK)
-    subject.perform('silver', 0, ROLLBACK)
+    subject.perform('premium', 0, ROLLBACK)
 
     expect(
       ElasticsearchIndexedNamespace.pluck(:namespace_id)

@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Changes GL.com plan for group' do
   include WaitForRequests
 
-  let!(:silver_plan) { create(:silver_plan) }
+  let!(:premium_plan) { create(:premium_plan) }
   let(:admin) { create(:admin) }
 
   before do

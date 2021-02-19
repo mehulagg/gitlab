@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe GitlabSubscription do
   using RSpec::Parameterized::TableSyntax
 
-  %i[free_plan bronze_plan silver_plan gold_plan].each do |plan|
+  %i[free_plan bronze_plan premium_plan gold_plan].each do |plan|
     let_it_be(plan) { create(plan) }
   end
 
@@ -35,13 +35,13 @@ RSpec.describe GitlabSubscription do
   describe 'scopes' do
     describe '.with_hosted_plan' do
       let!(:gold_subscription) { create(:gitlab_subscription, hosted_plan: gold_plan) }
-      let!(:silver_subscription) { create(:gitlab_subscription, hosted_plan: silver_plan) }
+      let!(:premium_subscription) { create(:gitlab_subscription, hosted_plan: premium_plan) }
 
       let!(:trial_subscription) { create(:gitlab_subscription, hosted_plan: gold_plan, trial: true) }
 
       it 'scopes to the plan' do
         expect(described_class.with_hosted_plan('gold')).to contain_exactly(gold_subscription)
-        expect(described_class.with_hosted_plan('silver')).to contain_exactly(silver_subscription)
+        expect(described_class.with_hosted_plan('premium')).to contain_exactly(premium_subscription)
         expect(described_class.with_hosted_plan('bronze')).to be_empty
       end
     end
@@ -102,7 +102,7 @@ RSpec.describe GitlabSubscription do
       end
 
       context 'with other plans' do
-        %w[bronze silver].each do |plan|
+        %w[bronze premium].each do |plan|
           it 'excludes these members' do
             gitlab_subscription.update!(plan_code: plan)
 
@@ -121,7 +121,7 @@ RSpec.describe GitlabSubscription do
       end
 
       it 'always returns 1 seat' do
-        [bronze_plan, silver_plan, gold_plan].each do |plan|
+        [bronze_plan, premium_plan, gold_plan].each do |plan|
           gitlab_subscription.update!(hosted_plan: plan)
 
           expect(gitlab_subscription.calculate_seats_in_use).to eq(1)
@@ -302,7 +302,7 @@ RSpec.describe GitlabSubscription do
       'bronze'        | 0 | true  | false
       'bronze'        | 1 | true  | true
       'bronze'        | 1 | false | false
-      'silver'        | 1 | true  | true
+      'premium'        | 1 | true  | true
     end
 
     with_them do
@@ -326,7 +326,7 @@ RSpec.describe GitlabSubscription do
     where(:plan_name, :paid_hosted_plan, :expired, :result) do
       'bronze' | true | false  | true
       'bronze' | true | true   | false
-      'silver' | true | false  | true
+      'premium' | true | false  | true
       'gold'   | true | false  | false
     end
 

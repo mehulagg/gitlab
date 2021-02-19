@@ -1496,8 +1496,8 @@ RSpec.describe Project do
       allow(License).to receive(:current).and_return(global_license)
       allow(global_license).to receive(:features).and_return([
         :subepics, # Gold only
-        :epics, # Silver and up
-        :push_rules, # Silver and up
+        :epics, # Premium and up
+        :push_rules, # Premium and up
         :audit_events, # Bronze and up
         :geo # Global feature, should not be checked at namespace level
       ])
@@ -1518,10 +1518,10 @@ RSpec.describe Project do
         end
       end
 
-      context 'when silver' do
-        let(:plan_license) { :silver }
+      context 'when premium' do
+        let(:plan_license) { :premium }
 
-        it 'filters for silver features' do
+        it 'filters for premium features' do
           is_expected.to contain_exactly(:push_rules, :audit_events, :geo, :epics)
         end
       end

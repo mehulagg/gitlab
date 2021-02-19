@@ -513,7 +513,7 @@ RSpec.describe User do
             allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
           end
 
-          it 'returns groups on gold or silver plans' do
+          it 'returns groups on gold or premium plans' do
             groups = user.available_subgroups_with_custom_project_templates
 
             expect(groups.size).to eq(1)
@@ -922,7 +922,7 @@ RSpec.describe User do
 
       context 'when namespace is on a plan that is not free or gold' do
         before do
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: create(:silver_plan))
+          create(:gitlab_subscription, namespace: namespace, hosted_plan: create(:premium_plan))
         end
 
         context 'user is a guest' do
@@ -1502,7 +1502,7 @@ RSpec.describe User do
 
     where(:hosted_plan, :result) do
       :bronze_plan    | true
-      :silver_plan    | true
+      :premium_plan   | true
       :gold_plan      | false
       :free_plan      | false
       :default_plan   | false
@@ -1529,7 +1529,7 @@ RSpec.describe User do
 
     it 'returns false when the user has multiple groups and any group has gold' do
       create(:group_with_plan, plan: :bronze_plan).add_owner(user)
-      create(:group_with_plan, plan: :silver_plan).add_owner(user)
+      create(:group_with_plan, plan: :premium_plan).add_owner(user)
       create(:group_with_plan, plan: :gold_plan).add_owner(user)
 
       user.namespace.plans.reload

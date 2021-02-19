@@ -10,7 +10,7 @@ RSpec.describe 'Billing plan pages', :feature do
   let(:namespace) { user.namespace }
   let(:free_plan) { create(:free_plan) }
   let(:bronze_plan) { create(:bronze_plan) }
-  let(:silver_plan) { create(:silver_plan) }
+  let(:premium_plan) { create(:premium_plan) }
   let(:gold_plan) { create(:gold_plan) }
   let(:plans_data) do
     Gitlab::Json.parse(File.read(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json'))).map do |data|
@@ -56,7 +56,7 @@ RSpec.describe 'Billing plan pages', :feature do
       # see ApplicationHelper#contact_sales_url
       contact_sales_url = 'https://about.gitlab.com/sales'
       page.within('.content') do
-        expect(page).to have_link('Contact sales', href: %r{#{contact_sales_url}\?test=inappcontactsales(bronze|silver|gold)})
+        expect(page).to have_link('Contact sales', href: %r{#{contact_sales_url}\?test=inappcontactsales(bronze|premium|gold)})
       end
     end
   end
@@ -187,8 +187,8 @@ RSpec.describe 'Billing plan pages', :feature do
       it_behaves_like 'plan with subscription table'
     end
 
-    context 'on silver plan' do
-      let(:plan) { silver_plan }
+    context 'on premium plan' do
+      let(:plan) { premium_plan }
 
       let!(:subscription) do
         create(:gitlab_subscription, namespace: namespace, hosted_plan: plan, seats: 15)

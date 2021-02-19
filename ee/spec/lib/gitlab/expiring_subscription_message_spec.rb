@@ -190,10 +190,10 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                   expect(subject).to include('Your Gold subscription for No Limit Records will expire on 2020-03-09. After that, you will not be able to use merge approvals or epics as well as many security features.')
                 end
 
-                it 'has silver plan specific messaging' do
-                  allow(subscribable).to receive(:plan).and_return('silver')
+                it 'has premium plan specific messaging' do
+                  allow(subscribable).to receive(:plan).and_return('premium')
 
-                  expect(subject).to include('Your Silver subscription for No Limit Records will expire on 2020-03-09. After that, you will not be able to use merge approvals or epics as well as many other features.')
+                  expect(subject).to include('Your Premium subscription for No Limit Records will expire on 2020-03-09. After that, you will not be able to use merge approvals or epics as well as many other features.')
                 end
 
                 it 'has bronze plan specific messaging' do

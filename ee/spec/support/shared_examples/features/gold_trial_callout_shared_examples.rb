@@ -41,7 +41,7 @@ RSpec.shared_examples 'dashboard ultimate trial callout' do
     it 'hides promotion callout if a trial is active' do
       allow_any_instance_of(EE::DashboardHelper).to receive(:user_default_dashboard?).and_return(true)
 
-      group = create(:group_with_plan, name: 'trial group', plan: :silver_plan, trial_ends_on: 1.year.from_now)
+      group = create(:group_with_plan, name: 'trial group', plan: :premium_plan, trial_ends_on: 1.year.from_now)
       group.add_owner(user)
 
       visit page_path
@@ -81,9 +81,9 @@ RSpec.shared_examples 'billings ultimate trial callout' do
   end
 
   context "on a plan that isn't ultimate", :js do
-    let(:plans) { { bronze: create(:bronze_plan), silver: create(:silver_plan) } }
+    let(:plans) { { bronze: create(:bronze_plan), premium: create(:premium_plan) } }
 
-    where(case_names: ->(plan_type) {"like #{plan_type}"}, plan_type: [:bronze, :silver])
+    where(case_names: ->(plan_type) {"like #{plan_type}"}, plan_type: [:bronze, :premium])
 
     with_them do
       let(:plan) { plans[plan_type] }

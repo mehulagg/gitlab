@@ -94,9 +94,9 @@
         "deprecated": true
     },
     {
-        "id": "silver-external-id",
+        "id": "premium-external-id",
         "about_page_href": "https://about.gitlab.com/gitlab-com/",
-        "code": "silver",
+        "code": "premium",
         "features": [
             {
                 "highlight": false,
@@ -120,7 +120,7 @@
             }
         ],
         "free": false,
-        "name": "Silver Plan",
+        "name": "Premium Plan",
         "price_per_month": 19.0,
         "price_per_year": 228.0,
         "purchase_link": {
@@ -147,7 +147,7 @@
             },
             {
                 "highlight": true,
-                "title": "All Silver features"
+                "title": "All Premium features"
             },
             {
                 "highlight": false,

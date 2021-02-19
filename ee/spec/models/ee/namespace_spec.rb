@@ -11,7 +11,7 @@ RSpec.describe Namespace do
   let(:default_plan) { create(:default_plan) }
   let(:free_plan) { create(:free_plan) }
   let!(:bronze_plan) { create(:bronze_plan) }
-  let!(:silver_plan) { create(:silver_plan) }
+  let!(:premium_plan) { create(:premium_plan) }
   let!(:gold_plan) { create(:gold_plan) }
 
   it { is_expected.to have_one(:namespace_statistics) }
@@ -971,7 +971,7 @@ RSpec.describe Namespace do
       end
 
       context 'with other plans' do
-        %i[bronze_plan silver_plan].each do |plan|
+        %i[bronze_plan premium_plan].each do |plan|
           it 'includes active guest users' do
             create(:gitlab_subscription, namespace: group, hosted_plan: send(plan))
             expect(group.billed_user_ids).to match_array([guest.id, developer.id])
@@ -1133,7 +1133,7 @@ RSpec.describe Namespace do
       end
 
       context 'with other plans' do
-        %i[bronze_plan silver_plan].each do |plan|
+        %i[bronze_plan premium_plan].each do |plan|
           it 'counts active guest users' do
             create(:gitlab_subscription, namespace: group, hosted_plan: send(plan))
             expect(group.billable_members_count).to eq(2)

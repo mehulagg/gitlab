@@ -409,7 +409,7 @@ RSpec.describe GroupPolicy do
 
         before_all do
           create(:license, plan: License::ULTIMATE_PLAN)
-          create(:gitlab_subscription, :silver, namespace: group)
+          create(:gitlab_subscription, :premium, namespace: group)
         end
 
         context 'without an enabled SAML provider' do
@@ -1284,7 +1284,7 @@ RSpec.describe GroupPolicy do
   end
 
   it_behaves_like 'model with wiki policies' do
-    let_it_be_with_refind(:container) { create(:group_with_plan, plan: :silver_plan) }
+    let_it_be_with_refind(:container) { create(:group_with_plan, plan: :premium_plan) }
     let_it_be(:user) { owner }
 
     before_all do
