@@ -13,7 +13,10 @@ export default {
     state.isLoading = false;
 
     state.newMetrics = response.new_metrics || [];
-    state.existingMetrics = response.existing_metrics || [];
+    state.existingMetrics = [
+      ...(response.existing_metrics?.filter((metric) => metric.previous_value) || []),
+      ...(response.existing_metrics?.filter((metric) => !metric.previous_value) || []),
+    ];
     state.removedMetrics = response.removed_metrics || [];
 
     state.numberOfChanges =

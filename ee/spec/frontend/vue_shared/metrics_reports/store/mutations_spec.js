@@ -43,6 +43,23 @@ describe('metrics reports mutations', () => {
       expect(mockState.isLoading).toEqual(false);
     });
 
+    it('should set metrics with a new metric', () => {
+      const data = {
+        new_metrics: [
+          {
+            name: 'name',
+            value: 'value',
+          },
+        ],
+      };
+      mutations[types.RECEIVE_METRICS_SUCCESS](mockState, data);
+
+      expect(mockState.newMetrics[0].name).toEqual(data.new_metrics[0].name);
+      expect(mockState.newMetrics[0].value).toEqual(data.new_metrics[0].value);
+      expect(mockState.numberOfChanges).toEqual(1);
+      expect(mockState.isLoading).toEqual(false);
+    });
+
     it('should set metrics with one changes', () => {
       const data = {
         existing_metrics: [
@@ -63,6 +80,34 @@ describe('metrics reports mutations', () => {
 
       expect(mockState.numberOfChanges).toEqual(1);
       expect(mockState.isLoading).toEqual(false);
+    });
+
+    it('should put changed metrics before unchanged metrics', () => {
+      const unchangedMetrics = [
+        {
+          name: 'an unchanged metric',
+          value: 'one',
+        },
+        {
+          name: 'another unchanged metric metric',
+          value: 'four',
+        },
+      ];
+      const changedMetric = {
+        name: 'changed metric',
+        value: 'two',
+        previous_value: 'three',
+      };
+      const data = {
+        existing_metrics: [unchangedMetrics[0], changedMetric, unchangedMetrics[1]],
+      };
+      mutations[types.RECEIVE_METRICS_SUCCESS](mockState, data);
+
+      expect(mockState.existingMetrics).toEqual([
+        changedMetric,
+        unchangedMetrics[0],
+        unchangedMetrics[1],
+      ]);
     });
   });
 
