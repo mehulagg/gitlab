@@ -53,10 +53,7 @@ module AppearancesHelper
   def header_message
     return unless current_appearance&.show_header?
 
-    class_names = []
-    class_names << 'with-performance-bar' if performance_bar_enabled?
-
-    render_message(:header_message, class_names: class_names)
+    render_message(:header_message)
   end
 
   def footer_message

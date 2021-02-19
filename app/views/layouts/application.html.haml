@@ -7,7 +7,6 @@
   %body{ class: "#{user_application_theme} #{user_tab_width} #{@body_class} #{client_class_list}", data: body_data }
     = render "layouts/init_auto_complete" if @gfm_form
     = render "layouts/init_client_detection_flags"
-    = render 'peek/bar'
     = header_message
     = render partial: "layouts/header/default", locals: { project: @project, group: @group }
     = render 'layouts/page', sidebar: sidebar, nav: nav

@@ -2,9 +2,6 @@
 @import 'framework/variables_overrides';
 
 #js-peek {
-  position: fixed;
-  left: 0;
-  top: 0;
   width: 100%;
   z-index: #{$zindex-modal-backdrop - 1};
 
