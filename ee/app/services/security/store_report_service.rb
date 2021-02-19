@@ -163,9 +163,9 @@ module Security
 
     def scanners_objects
       strong_memoize(:scanners_objects) do
-        @report.scanners.map do |key, scanner|
+        @report.scanners.to_h do |key, scanner|
           [key, existing_scanner_objects[key] || project.vulnerability_scanners.build(scanner&.to_hash)]
-        end.to_h
+        end
       end
     end
 
@@ -175,17 +175,17 @@ module Security
 
     def existing_scanner_objects
       strong_memoize(:existing_scanner_objects) do
-        project.vulnerability_scanners.with_external_id(all_scanners_external_ids).map do |scanner|
+        project.vulnerability_scanners.with_external_id(all_scanners_external_ids).to_h do |scanner|
           [scanner.external_id, scanner]
-        end.to_h
+        end
       end
     end
 
     def identifiers_objects
       strong_memoize(:identifiers_objects) do
-        @report.identifiers.map do |key, identifier|
+        @report.identifiers.to_h do |key, identifier|
           [key, existing_identifiers_objects[key] || project.vulnerability_identifiers.build(identifier.to_hash)]
-        end.to_h
+        end
       end
     end
 
@@ -195,9 +195,9 @@ module Security
 
     def existing_identifiers_objects
       strong_memoize(:existing_identifiers_objects) do
-        project.vulnerability_identifiers.with_fingerprint(all_identifiers_fingerprints).map do |identifier|
+        project.vulnerability_identifiers.with_fingerprint(all_identifiers_fingerprints).to_h do |identifier|
           [identifier.fingerprint, identifier]
-        end.to_h
+        end
       end
     end
 

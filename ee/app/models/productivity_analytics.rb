@@ -28,17 +28,17 @@ class ProductivityAnalytics
   def histogram_data(type:)
     return unless column = METRIC_COLUMNS[type]
 
-    histogram_query(column).map do |data|
+    histogram_query(column).to_h do |data|
       [data[:metric]&.to_i, data[:mr_count]]
-    end.to_h
+    end
   end
 
   def scatterplot_data(type:)
     return unless column = METRIC_COLUMNS[type]
 
-    scatterplot_query(column).map do |data|
+    scatterplot_query(column).to_h do |data|
       [data.id, { metric: data[:metric], merged_at: data[:merged_at] }]
-    end.to_h
+    end
   end
 
   def merge_requests_extended

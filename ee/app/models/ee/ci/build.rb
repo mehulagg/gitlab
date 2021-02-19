@@ -153,9 +153,9 @@ module EE
       private
 
       def variables_hash
-        @variables_hash ||= variables.map do |variable|
+        @variables_hash ||= variables.to_h do |variable|
           [variable[:key], variable[:value]]
-        end.to_h
+        end
       end
 
       def parse_security_artifact_blob(security_report, blob)
