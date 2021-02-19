@@ -46,7 +46,7 @@ RSpec.describe SubmitUsagePingService do
   end
 
   let(:with_dev_ops_score_params) { { dev_ops_score: score_params[:score] } }
-  let(:with_conv_index_params) { { conv_index: score_params[:score] } }
+  let(:with_conv_index_params) { { conv_index: score_params[:score].merge(usage_data_id: 31643) } }
   let(:without_dev_ops_score_params) { { dev_ops_score: {} } }
 
   shared_examples 'does not run' do
@@ -124,6 +124,19 @@ RSpec.describe SubmitUsagePingService do
       end
 
       it_behaves_like 'saves DevOps report data from the response'
+
+      it 'saves usage_data_id to version_usage_data_id' do
+        recorded_at = Time.current
+        usage_data = { uuid: 'uuid', recorded_at: recorded_at }
+
+        expect(Gitlab::UsageData).to receive(:data).with(force_refresh: true).and_return(usage_data)
+
+        subject.execute
+
+        raw_usage_data = RawUsageData.find_by(recorded_at: recorded_at)
+
+        expect(raw_usage_data.version_usage_data_id).to eq(31643)
+      end
     end
 
     context 'when DevOps report data is passed' do

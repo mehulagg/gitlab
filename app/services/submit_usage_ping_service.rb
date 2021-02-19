@@ -35,7 +35,10 @@ class SubmitUsagePingService
 
     raise SubmissionError.new("Unsuccessful response code: #{response.code}") unless response.success?
 
-    raw_usage_data.update_sent_at! if raw_usage_data
+    if raw_usage_data
+      raw_usage_data.update_sent_at!
+      raw_usage_data.update!(version_usage_data_id: response.dig('conv_index', 'usage_data_id'))
+    end
 
     store_metrics(response)
   end
