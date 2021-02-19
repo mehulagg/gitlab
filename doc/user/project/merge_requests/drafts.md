@@ -3,6 +3,7 @@ stage: Create
 group: Source Code
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, concepts
+disqus_identifier: 'https://docs.gitlab.com/ee/user/project/merge_requests/work_in_progress_merge_requests.html'
 ---
 
 # Draft merge requests **(FREE)**
