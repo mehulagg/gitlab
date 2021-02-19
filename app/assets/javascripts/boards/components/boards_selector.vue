@@ -10,6 +10,8 @@ import {
 } from '@gitlab/ui';
 import { throttle } from 'lodash';
 
+import BoardForm from 'ee_else_ce/boards/components/board_form.vue';
+
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
@@ -17,8 +19,6 @@ import httpStatusCodes from '~/lib/utils/http_status';
 import eventHub from '../eventhub';
 import groupQuery from '../graphql/group_boards.query.graphql';
 import projectQuery from '../graphql/project_boards.query.graphql';
-
-import BoardForm from './board_form.vue';
 
 const MIN_BOARDS_TO_VIEW_RECENT = 10;
 
