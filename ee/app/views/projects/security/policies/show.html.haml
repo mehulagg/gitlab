@@ -1,1 +1,13 @@
 = s_('Security|Policies')
+
+%body
+  = form_with url:assign_project_security_policy_url(@project), as: :cluster, html: { class: 'cluster_management_form' } do |field|
+    %h4
+      = s_('CreatePolicy|Create a policy')
+    %p
+      = project_select_tag('orchestration[management_project_id]', class: 'hidden-filter-value', toggle_class: 'js-project-search js-project-filter js-filter-submit', dropdown_class: 'dropdown-menu-selectable dropdown-menu-project js-filter-submit',
+          placeholder: _('Select project'), idAttribute: 'id', data: { order_by: 'last_activity_at', idattribute: 'id', simple_filter: true, allow_clear: true, include_groups: false, include_projects_in_subgroups: true, user_id: current_user.id }, value: 123)
+      .text-muted
+        = html_escape(s_('SecurityOrchestration|A security policy project can be used enforce policies for a given project, group, or instance. It allows you to speficy security policies that are important to you  and enforce them with every commit.')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
+        = link_to _('More information'), help_page_path('user/clusters/management_project.md'), target: '_blank'
+    = field.submit _('Save changes'), class: 'btn gl-button btn-success'
