@@ -2,13 +2,10 @@
 
 require 'spec_helper'
 
-RSpec.describe DastSiteProfiles::UpdateService do
+RSpec.describe DastSiteProfiles::DestroyService do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:dast_profile, reload: true) { create(:dast_site_profile) }
   let(:project) { dast_profile.project }
-  let(:user) { create(:user) }
-  let(:dast_profile) { create(:dast_site_profile) }
-
-  let(:new_profile_name) { SecureRandom.hex }
-  let(:new_target_url) { generate(:url) }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -17,15 +14,13 @@ RSpec.describe DastSiteProfiles::UpdateService do
   describe '#execute' do
     subject do
       described_class.new(project, user).execute(
-        id: dast_profile.id,
-        profile_name: new_profile_name,
-        target_url: new_target_url
+        id: dast_site_profile_id
       )
     end
 
+    let(:dast_site_profile_id) { dast_profile.id }
     let(:status) { subject.status }
     let(:message) { subject.message }
-    let(:errors) { subject.errors }
     let(:payload) { subject.payload }
 
     context 'when a user does not have access to the project' do
@@ -34,11 +29,11 @@ RSpec.describe DastSiteProfiles::UpdateService do
       end
 
       it 'populates message' do
-        expect(message).to eq('Insufficient permissions')
+        expect(message).to eq('You are not authorized to update this site profile')
       end
     end
 
-    context 'when the user can run a dast scan' do
+    context 'when the user can run a DAST scan' do
       before do
         project.add_developer(user)
       end
@@ -47,34 +42,17 @@ RSpec.describe DastSiteProfiles::UpdateService do
         expect(status).to eq(:success)
       end
 
-      it 'updates the dast_site_profile' do
-        updated_dast_site_profile = payload.reload
-
-        aggregate_failures do
-          expect(updated_dast_site_profile.name).to eq(new_profile_name)
-          expect(updated_dast_site_profile.dast_site.url).to eq(new_target_url)
-        end
+      it 'deletes the dast_site_profile' do
+        expect { subject }.to change { DastSiteProfile.count }.by(-1)
       end
 
       it 'returns a dast_site_profile payload' do
         expect(payload).to be_a(DastSiteProfile)
       end
 
-      context 'when the target url is localhost' do
-        let(:new_target_url) { 'http://localhost:3000/hello-world' }
-
-        it 'returns an error status' do
-          expect(status).to eq(:error)
-        end
-
-        it 'populates errors' do
-          expect(errors).to include('Url is blocked: Requests to localhost are not allowed')
-        end
-      end
-
       context 'when the dast_site_profile doesn\'t exist' do
-        before do
-          dast_profile.destroy!
+        let(:dast_site_profile_id) do
+          Gitlab::GlobalId.build(nil, model_name: 'DastSiteProfile', id: 'does_not_exist')
         end
 
         it 'returns an error status' do
@@ -82,7 +60,7 @@ RSpec.describe DastSiteProfiles::UpdateService do
         end
 
         it 'populates message' do
-          expect(message).to eq('DastSiteProfile not found')
+          expect(message).to eq('Site profile not found for given parameters')
         end
       end
 
@@ -96,11 +74,11 @@ RSpec.describe DastSiteProfiles::UpdateService do
         end
 
         it 'populates message' do
-          expect(message).to eq('Insufficient permissions')
+          expect(message).to eq('You are not authorized to update this site profile')
         end
       end
 
-      include_examples 'restricts modification if referenced by policy', :modify
+      include_examples 'restricts modification if referenced by policy', :delete
     end
   end
 end
