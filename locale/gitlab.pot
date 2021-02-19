@@ -7921,9 +7921,6 @@ msgstr ""
 msgid "ContainerRegistry|Docker connection error"
 msgstr ""
 
-msgid "ContainerRegistry|Expiration policies help manage the storage space used by the Container Registry, but the expiration policies for this registry are disabled. Contact your administrator to enable. %{docLinkStart}More information%{docLinkEnd}"
-msgstr ""
-
 msgid "ContainerRegistry|Expiration policy is disabled"
 msgstr ""
 
