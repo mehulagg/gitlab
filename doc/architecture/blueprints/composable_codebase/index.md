@@ -12,6 +12,24 @@ The one of the major risks of a single codebase is an infinite growth of the who
 application. The more code being added results in a ever increasing resource requirements
 for running the application, but increased application coupling and explosion of the complexity.
 
+## Executive summary
+
+This blueprint discusses an impact of introducing **Application Layers** as a way to reduce and improve application
+codebase. This discusses the positive and negative outcomes of the proposed solution and tries to estimate the impact
+on GitLab.com and smaller installations.
+
+**Application Layers** tries to split GitLab Rails codebase horizontally following the pattern how we actually
+run GitLab instead of vertical split. This follows the idea that a single feature needs to run in a many ways
+(CI for example has Web interface, uses API, and performs background processing), and we are not able to easily
+run only a given feature separate to the rest application (like CI) due to coupling.
+
+The proposal itself does allow us to disconnect some aspects of the features. These aspects could be treated
+as components that are run separately to the rest of the stack, but still sharing a large portion of core.
+This model could be implemented to provide an API interface for external tooling (Runners API, Packages API, Feature Flags Unleash API)
+and allow us to have much better resillency and much easier way to scale application in the future.
+
+## Challenges
+
 This proves hard for various reasons:
 
 - Deep coupling makes application harder to develop in longer term, as it leads to a sphagetti implementation
@@ -37,7 +55,7 @@ We in general can think about two ways how codebase can be modeled:
 
 This blueprint explicitly talks about **horizontal** split and **Application Layers**.
 
-## Why not Bounded Contexts a **vertical** split
+## Current state of Bounded Contexts (**vertical** split)
 
 The Bounded Contexts is a topic that was discussed extensively number of times for a couple of years.
 Reflected in number of issues:
@@ -47,36 +65,35 @@ Reflected in number of issues:
 - [Use nested structure to organize CI classes](https://gitlab.com/gitlab-org/gitlab/-/issues/209745)
 - [WIP: Make it simple to build and use "Decoupled Services"](https://gitlab.com/gitlab-org/gitlab/-/issues/31121)
 
-The main idea in the past behind a **Bounded Contexts** was and was partially executed:
+We are partially executing a **Bounded Contexts** idea:
 
-- Make each team to own their own namespace, namespace which could be defined as a `module Namespace` or a separate Gem
+- Make each team to own their own namespace, namespace which is defined as a `module` in a codebase
 - Make each team to own their own tests, as namespaces would define a clear boundaries
 - Since we use namespaces, individual contributor or reviewer can know who to reach from domain exports about help with
   the given context
 
-The model of namespaces is actively being used today to model codebase around team boundaries, probably the most
-prominent namespaces being used today are `Ci::` and `Packages::`. They provide a good way to contain the given
-group code in a well-defined structure.
+The module namespaces are actively being used today to model codebase around team boundaries. Currently, the most
+prominent namespaces being used today are `Ci::` and `Packages::`. They provide a good way to contain the code owned
+by a group in a well-defined structure.
 
 However, the **Bounded Contexts** while it helps development, it does not help with the above stated goals. This is purely
-a logical split of the code when being developed. This does not prevent deep-coupling, like creating a circular dependency
+a logical split of the code. This does not prevent deep-coupling. It is still possible to create a circular dependency (and it often happens)
 between a `Sidekiq Worker` and `API interface` (API can call Sidekiq Worker, Sidekiq can use API to create an endpoint path).
 
 The **Bounded Contexts** do not make our codebase smarter to know what depends on what, as the whole codebase
 is treated as single package that needs to be loaded and executed.
 
-## The Application Layers a **horizontal* split
+## The Application Layers (**horizontal* split)
 
-While we continue using **Bounded Contexts** in form of namespace separation that aids development and review process
+While we continue leveraging **Bounded Contexts** in form of namespace separation that aids development and review process
 the **Application Layers** can provide a way to create a clean separation between different functional parts.
 
-Our main codebase usually named `GitLab Rails` (a GitLab running on Ruby on Rails) is in fact consisting
-from many **Application Layers** today. However, this distinction is not explicit, but rather implicit
-making our codebase to have a deep coupling.
+Our main codebase (`GitLab Rails` after a GitLab running on Ruby on Rails) consists many implicit **Application Layers**.
+This distinction today is implicit. There are no clear boundaries between them which results in a deep coupling.
 
-The **Application Layers** looks more at application not from the perspective of features (like CI or Packages),
-but more from perspective how we run the application. GitLab application today can be decomposed into the following
-application layers:
+The concept of **Application Layers** looks more at application from perspective how we run the application
+instead of perspective of individual features (like CI or Packages). GitLab application today can be decomposed into the following
+application layers. This list is not exhaustive, but shows a general different parts of a single monolithic codebase:
 
 - Web Controllers: we use that to process Web requests coming from users visiting web interface
 - Web API: we use that to process API calls coming from the automated tooling, in some cases also users visiting web interface
@@ -84,14 +101,14 @@ application layers:
 - Web GraphQL: we use that to provide a flexible API interface, allowing the Web frontend to fetch data only needed that allows to reduce amount of compute and data transfer
 - Web ActionCable: we use that to provide bi-directional connection to enable real-time features for Users visiting web interface
 - Web Feature Flags Unleash Backend: we use that to provide a Unleash-compatible Server that uses GitLab API
-- Web Packages API: we use that to provide a backend compatible with all packaging tools, like: Debian, Maven, Container Registry Proxy, etc.
-- Git nodes: we use API to authorize `git pull/push` over `SSH` or `HTTPS`
-- Sidekiq: we use it to process background jobs
+- Web Packages API: all code that provides REST API compatible with the packaging tools: Debian, Maven, Container Registry Proxy, etc.
+- Git nodes: all code required to authorize `git pull/push` over `SSH` or `HTTPS`
+- Sidekiq: all code requires to run background jobs
+- Services/Models/DB: all code required to maintain our database structure, data validation, business logic and policies models
 
 ### Application Layers for on-premise installations
 
-Since the on-premise installations are significantly smaller
-they do usually run two major components
+The on-premise installations are significantly smaller and they usually run GitLab Rails in two main flavors:
 
 ```mermaid
 graph TD
@@ -142,11 +159,10 @@ graph TD
 
 ### Application Layers on GitLab.com
 
-Today we don't run with so much granularity on GitLab.com.
-This is a simplistic view of GitLab.com application layers.
-It does not include all components, like Object Storage
-or Gitaly nodes, but shows the codebase dependencies of
-different components and they are run on GitLab.com today:
+GitLab.com due to its scale requires much more attention to run. This is needed in order to better manage resources
+and provide SLAs for different functional parts. This is a simplistic view of GitLab.com application layers.
+It does not include all components, like Object Storage nor Gitaly nodes, but shows the GitLab Rails dependencies between
+different components and how they are configured on GitLab.com today:
 
 ```mermaid
 graph TD
@@ -198,29 +214,30 @@ graph TD
     gitlab_rails_models --> redis_db
 ```
 
-### Context dependencies
+### Layer dependencies
 
-The presentation of application layers for on-premise and GitLab.com does show a main division line in GitLab Rails:
+The way how we run GitLab for the on-premise and GitLab.com does show a main division line in GitLab Rails:
 
 - Web: containing all API, all Controllers, all GraphQL and ActionCable functionality
 - Sidekiq: containing all background processing jobs
+- Core: containig all database, models and services that needs to be shared between Web and Sidekiq
 
-Each of these top-level application contexts do really only need a fraction of the codebase with all relevant dependencies:
+Each of these top-level application layers do depend only on a fraction of the codebase with all relevant dependencies:
 
 - In all cases we need underlaying database structure and application models
 - In some cases we need dependent services
 - We only need a part of the application common library
 - We need gems to support the requested functionality
-- Context should not use another context codebase directly, rather connect via API, Redis or DB to share data
+- Layer should not use another sibling layer, rather connect via API, Redis or DB to share data
 
 ## Proposal
 
-The Memory team group we conducted a Proof-of-Concept phase to understand the impact of introducing **Application Context**.
+The Memory team group conducted a Proof-of-Concept phase to understand the impact of introducing **Application Layers**.
 We did this to understand the complexity, impact, and needed iterations to execute this proposal.
 
-### Proof of Concept using Rails Engines
+### PoC using Rails Engines
 
-We decided to use Rails Engines by modeling a Web Application Context. The Web Engine did contain Controllers, API, GraphQL.
+We decided to use Rails Engines by modeling a Web Application Layer. The Web Engine did contain Controllers, API, GraphQL.
 This allowed us to run Web Nodes with all dependencies, but measure the impact on Sidekiq not having these components loaded.
 
 All work can be found in these merge requests:
@@ -268,10 +285,14 @@ Now, once we have this data:
 
 Estimating the results for the scale of running GitLab.com, today we use:
 
-- Currently individual GC cycle takes around [130ms for Web](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=avg(rate(ruby_gc_duration_seconds_sum%7Bstage%3D%22main%22%2Ctype%3D%22web%22%7D%5B5m%5D)%2Frate(ruby_gc_duration_seconds_count%5B5m%5D))&g0.tab=0) and [200ms for Sidekiq](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=avg(rate(ruby_gc_duration_seconds_sum%7Bstage%3D%22main%22%2Ctype%3D%22sidekiq%22%7D%5B5m%5D)%2Frate(ruby_gc_duration_seconds_count%5B5m%5D))&g0.tab=0) on GitLab.com
-- On average we do around [2 GC cycles per-second](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.end_input=2021-02-17%2017%3A56&g0.max_source_resolution=0s&g0.expr=avg(rate(ruby_gc_duration_seconds_count%7Bstage%3D%22main%22%2Ctype%3D%22web%22%7D%5B5m%5D))&g0.tab=0) or [0.12 cycles per second for Sidekiq](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.end_input=2021-02-17%2017%3A56&g0.max_source_resolution=0s&g0.expr=avg(rate(ruby_gc_duration_seconds_count%7Bstage%3D%22main%22%2Ctype%3D%22sidekiq%22%7D%5B5m%5D))&g0.tab=0)
-- This translates to using [around 9.5 vCPUs per-second for Web](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=sum(rate(ruby_gc_duration_seconds_sum%7Bstage%3D%22main%22%2Ctype%3D%22web%22%7D%5B5m%5D))&g0.tab=0) and [around 8 vCPUs per-second for Sidekiq](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=sum(rate(ruby_gc_duration_seconds_sum%7Bstage%3D%22main%22%2Ctype%3D%22sidekiq%22%7D%5B5m%5D))&g0.tab=0) of spend on GC alone
-- Sidekiq [uses 2.1GB on average](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=max(ruby_process_unique_memory_bytes%7Btype%3D%22sidekiq%22%7D)%2F1024%2F1024%2F1024&g0.tab=1) or [550GB in total](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=sum(ruby_process_unique_memory_bytes%7Btype%3D%22sidekiq%22%7D)%2F1024%2F1024%2F1024&g0.tab=0) of memory on GitLab.com
+- Currently individual GC cycle takes around [130ms for Web](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=avg(rate(ruby_gc_duration_seconds_sum%7Bstage%3D%22main%22%2Ctype%3D%22web%22%7D%5B5m%5D)%2Frate(ruby_gc_duration_seconds_count%5B5m%5D))&g0.tab=0)
+  and [200ms for Sidekiq](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=avg(rate(ruby_gc_duration_seconds_sum%7Bstage%3D%22main%22%2Ctype%3D%22sidekiq%22%7D%5B5m%5D)%2Frate(ruby_gc_duration_seconds_count%5B5m%5D))&g0.tab=0) on GitLab.com
+- On average we do around [2 GC cycles per-second](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.end_input=2021-02-17%2017%3A56&g0.max_source_resolution=0s&g0.expr=avg(rate(ruby_gc_duration_seconds_count%7Bstage%3D%22main%22%2Ctype%3D%22web%22%7D%5B5m%5D))&g0.tab=0)
+  or [0.12 cycles per second for Sidekiq](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.end_input=2021-02-17%2017%3A56&g0.max_source_resolution=0s&g0.expr=avg(rate(ruby_gc_duration_seconds_count%7Bstage%3D%22main%22%2Ctype%3D%22sidekiq%22%7D%5B5m%5D))&g0.tab=0)
+- This translates to using [around 9.5 vCPUs per-second for Web](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=sum(rate(ruby_gc_duration_seconds_sum%7Bstage%3D%22main%22%2Ctype%3D%22web%22%7D%5B5m%5D))&g0.tab=0)
+  and [around 8 vCPUs per-second for Sidekiq](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=sum(rate(ruby_gc_duration_seconds_sum%7Bstage%3D%22main%22%2Ctype%3D%22sidekiq%22%7D%5B5m%5D))&g0.tab=0) of spend on GC alone
+- Sidekiq [uses 2.1GB on average](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=max(ruby_process_unique_memory_bytes%7Btype%3D%22sidekiq%22%7D)%2F1024%2F1024%2F1024&g0.tab=1)
+  or [550GB in total](https://thanos-query.ops.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=sum(ruby_process_unique_memory_bytes%7Btype%3D%22sidekiq%22%7D)%2F1024%2F1024%2F1024&g0.tab=0) of memory on GitLab.com
 
 We estimate the possible maximum savings for introducing `web_engine`:
 
@@ -291,7 +312,8 @@ Pros:
 - Significantly lower memory usage
 - Significantly shorter application load time for Sidekiq
 - Significantly improved responsivness of Sidekiq service due to much shorter GC cycles
-- Significantly easier testing of a portion of application, ex. changing `web_engines/` does require re-running test only for this application context
+- Significantly easier testing of a portion of application, ex. changing `web_engines/` does require
+  re-running test only for this application layer
 - We retained a monolithic architecture of the codebase, but sharing database and application models
 - A significant saving from the infrastracture side
 - Ability to comfortably run on constrainted environments by reducing application footprint
@@ -306,7 +328,9 @@ TBD
 
 Today, loading GraphQL requires a bunch of [dependencies](https://gitlab.com/gitlab-org/gitlab/-/issues/288044):
 
-> We also discovered that we load/require 14480 files, [gitlab-org/memory-team/memory-team-2gb-week#9](https://gitlab.com/gitlab-org/memory-team/memory-team-2gb-week/-/issues/9#note_452530513) when we start GitLab. 1274 files belong to Graphql. This means that if we don't load 1274 application files and all related Graphql gems when we don't need them (Sidekiq), we could save a lot of memory.
+> We also discovered that we load/require 14480 files, [gitlab-org/memory-team/memory-team-2gb-week#9](https://gitlab.com/gitlab-org/memory-team/memory-team-2gb-week/-/issues/9#note_452530513)
+> when we start GitLab. 1274 files belong to Graphql. This means that if we don't load 1274 application files
+> and all related Graphql gems when we don't need them (Sidekiq), we could save a lot of memory.
 
 GraphQL only needs to run in a specific context. If we could limit when it is being loaded we could effectively improve application efficiency, by reducing application load time and required memory. This, for example, is applicable for every size installation.
 
@@ -321,6 +345,22 @@ TBD
 ### Example: Controllers
 
 TBD
+
+## Future impact
+
+**Application Layers** and this proposal currently defines only `web_engine`. Following the same pattern we could easily introduce
+additional engines dedicated for supporting that would allow us to maintain much better separation, lower memory usage
+and much better maintanability of GitLab Rails into the future.
+
+This would be a framework for introducing all new interfaces for features that do not need to be part of the core codebase,
+like support for additional Package services. Allowing us to better scale application in the future, but retaining a single codebase
+and monolithic architecture of GitLab.
+
+As of today, it seems reasonable to define three **application layers**:
+
+- `gitlab-core`: a core functionality: DB structure, models, services, common library
+- `gitlab-web`: a Controllers/API/GraphQL/ActionCable functionality needed to run in a web server context (depends on `gitlab-core`)
+- `gitlab-sidekiq`: a background jobs functionality needed to run Sidekiq Workers (depends on `gitlab-core`)
 
 ## Issues and Merge Requests
 
