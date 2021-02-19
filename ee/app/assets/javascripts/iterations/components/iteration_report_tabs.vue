@@ -99,6 +99,10 @@ export default {
         Vue.set(this.selectedLabels, index, label);
       }
     },
+    handleRemoveLabel(labelId) {
+      const index = this.selectedLabels.findIndex((l) => l.id === labelId);
+      this.selectedLabels.splice(index, 1);
+    },
     handleSelectChange() {
       if (this.groupBySelection === GroupBy.None) {
         this.selectedLabels = [];
@@ -177,8 +181,9 @@ export default {
 
       <gl-empty-state
         v-if="showEmptyState"
+        :description="__('Try grouping with different labels')"
         :svg-path="svgPath"
-        :title="__('No issues found for the selected labels')"
+        :title="__('There are no issues with the selected labels')"
       />
 
       <iteration-report-issues
@@ -190,6 +195,7 @@ export default {
         :iteration-id="iterationId"
         :label="label"
         :namespace-type="namespaceType"
+        @removeLabel="handleRemoveLabel"
         @issuesUpdate="handleIssuesUpdate"
       />
 
