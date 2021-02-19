@@ -25,27 +25,27 @@ Vue component, but in general, the integration of Editor Lite is pretty straight
 
 1. Import Editor Lite:
 
-```javascript
-import EditorLite from '~/editor/editor_lite';
-```
+   ```javascript
+   import EditorLite from '~/editor/editor_lite';
+   ```
 
 1. Initialize global editor for the view:
 
-```javascript
-const editor = new EditorLite({
-  // Editor Options.
-  // The list of all accepted options can be found at
-  // https://microsoft.github.io/monaco-editor/api/enums/monaco.editor.editoroption.html
-});
-```
+   ```javascript
+   const editor = new EditorLite({
+     // Editor Options.
+     // The list of all accepted options can be found at
+     // https://microsoft.github.io/monaco-editor/api/enums/monaco.editor.editoroption.html
+   });
+   ```
 
 1. Create an editor's instance:
 
-```javascript
-editor.createInstance({
-  // Editor Lite configuration options.
-})
-```
+   ```javascript
+   editor.createInstance({
+     // Editor Lite configuration options.
+   })
+   ```
 
 An instance of Editor Lite accepts the following configuration options:
 
@@ -74,54 +74,54 @@ with just a few additional functions on the instance level:
 
 1. Editor's loading state.
 
-Editor Lite comes with the loading state built-in, making spinners and loaders
-rarely needed in HTML. To benefit the built-in loading state, set the `data-editor-loading`
-property on the HTML element that is supposed to contain the editor. Editor Lite
-shows the loader automatically while it's bootstrapping.
+   Editor Lite comes with the loading state built-in, making spinners and loaders
+   rarely needed in HTML. To benefit the built-in loading state, set the `data-editor-loading`
+   property on the HTML element that is supposed to contain the editor. Editor Lite
+   shows the loader automatically while it's bootstrapping.
 
-![Editor Lite: loading state](img/editor_lite_loading.png)
+   ![Editor Lite: loading state](img/editor_lite_loading.png)
 
 1. Update syntax highlighting if the filename changes.
 
-```javascript
-// fileNameEl here is the HTML input element that contains the file name
-fileNameEl.addEventListener('change', () => {
-  this.editor.updateModelLanguage(fileNameEl.value);
-});
-```
+   ```javascript
+   // fileNameEl here is the HTML input element that contains the file name
+   fileNameEl.addEventListener('change', () => {
+     this.editor.updateModelLanguage(fileNameEl.value);
+   });
+   ```
 
 1. Get the editor's content.
 
-We might set up listeners on the editor for every change but it rapidly can become
-an expensive operation. Instead , we can get editor's content when it's needed.
-For example on a form's submission:
+   We might set up listeners on the editor for every change but it rapidly can become
+   an expensive operation. Instead , we can get editor's content when it's needed.
+   For example on a form's submission:
 
-```javascript
-form.addEventListener('submit', () => {
-  my_content_variable = this.editor.getValue();
-});
-```
+   ```javascript
+   form.addEventListener('submit', () => {
+     my_content_variable = this.editor.getValue();
+   });
+   ```
 
 1. Performance
 
-Even though Editor Lite itself is extremely slim, it still depends on Monaco editor.
-Monaco is not an easily tree-shakeable module. Hence, every time you add Editor Lite
-to a view, the JavaScript bundle's size significantly increases, affecting your
-view's loading performance. It is recommended to import the editor on demand on
-those views where it is not 100% certain that the editor is needed. Or if the editor
-is a secondary element of the view. Loading Editor Lite on demand is no different
-from loading any other module:
+   Even though Editor Lite itself is extremely slim, it still depends on Monaco editor.
+   Monaco is not an easily tree-shakeable module. Hence, every time you add Editor Lite
+   to a view, the JavaScript bundle's size significantly increases, affecting your
+   view's loading performance. It is recommended to import the editor on demand on
+   those views where it is not 100% certain that the editor is needed. Or if the editor
+   is a secondary element of the view. Loading Editor Lite on demand is no different
+   from loading any other module:
 
-```javascript
-someActionFunction() {
-  import(/* webpackChunkName: 'EditorLite' */ '~/editor/editor_lite').
-    then(({ default: EditorLite }) => {
-      const editor = new EditorLite();
-      ...
-    });
-  ...
-}
-```
+   ```javascript
+   someActionFunction() {
+     import(/* webpackChunkName: 'EditorLite' */ '~/editor/editor_lite').
+       then(({ default: EditorLite }) => {
+         const editor = new EditorLite();
+         ...
+       });
+     ...
+   }
+   ```
 
 ## Extensions
 
@@ -235,28 +235,28 @@ This script would result in an alert containing the editor's content when `someB
 
 1. Performance
 
-Just like Editor Lite itself, any extension can be loaded on demand to not harm
-loading performance of the views:
+   Just like Editor Lite itself, any extension can be loaded on demand to not harm
+   loading performance of the views:
 
-```javascript
-const EditorPromise = import(
-  /* webpackChunkName: 'EditorLite' */ '~/editor/editor_lite'
-);
-const MarkdownExtensionPromise = import('~/editor/editor_markdown_ext');
+   ```javascript
+   const EditorPromise = import(
+     /* webpackChunkName: 'EditorLite' */ '~/editor/editor_lite'
+   );
+   const MarkdownExtensionPromise = import('~/editor/editor_markdown_ext');
 
-Promise.all([EditorPromise, MarkdownExtensionPromise])
-  .then(([{ default: EditorLite }, { default: MarkdownExtension }]) => {
-    const editor = new EditorLite().createInstance({
-      ...
-    });
-    editor.use(MarkdownExtension);
-  });
-```
+   Promise.all([EditorPromise, MarkdownExtensionPromise])
+     .then(([{ default: EditorLite }, { default: MarkdownExtension }]) => {
+       const editor = new EditorLite().createInstance({
+         ...
+       });
+       editor.use(MarkdownExtension);
+     });
+   ```
 
 1. Using multiple extensions
 
-Just pass the array of extensions to your `use` method:
+   Just pass the array of extensions to your `use` method:
 
-```javascript
-editor.use([FileTemplateExtension, MyFancyExtension]);
-```
+   ```javascript
+   editor.use([FileTemplateExtension, MyFancyExtension]);
+   ```
