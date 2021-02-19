@@ -1,0 +1,5 @@
+query getBlobInfo($path: String!) {
+  blobInfo(path: $path) @client {
+    html
+  }
+}

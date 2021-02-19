@@ -9,11 +9,18 @@ import {
   GlIcon,
 } from '@gitlab/ui';
 import { escapeRegExp } from 'lodash';
+
+import filesQuery from 'shared_queries/repository/files.query.graphql';
+
 import { escapeFileUrl } from '~/lib/utils/url_utility';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import getRefMixin from '../../mixins/get_ref';
+
+import blobInfoQuery from '../../queries/blob_info.query.graphql';
+
 import commitQuery from '../../queries/commit.query.graphql';
+import InstantLoadDirective from '../instant_load_directive';
 
 export default {
   components: {
@@ -27,6 +34,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    InstantLoad: InstantLoadDirective,
   },
   apollo: {
     commit: {
@@ -105,8 +113,8 @@ export default {
   computed: {
     routerLinkTo() {
       return this.isFolder
-        ? { path: `/-/tree/${this.escapedRef}/${escapeFileUrl(this.path)}` }
-        : null;
+        ? { path: `/-/${this.type}/${this.escapedRef}/${escapeFileUrl(this.path)}` }
+        : { path: `/-/blob/${this.escapedRef}/${escapeFileUrl(this.path)}` };
     },
     isFolder() {
       return this.type === 'tree';
@@ -115,7 +123,8 @@ export default {
       return this.type === 'commit';
     },
     linkComponent() {
-      return this.isFolder ? 'router-link' : 'a';
+      return 'router-link';
+      // return this.isFolder ? 'router-link' : 'a';
     },
     fullPath() {
       return this.path.replace(new RegExp(`^${escapeRegExp(this.currentPath)}/`), '');
@@ -127,6 +136,33 @@ export default {
       return this.commit && this.commit.lockLabel;
     },
   },
+  methods: {
+    handlePreload() {
+      if (this.isFolder) {
+        console.log('PRELOAD FOLDER ', this.path);
+
+        this.$apollo.query({
+          query: filesQuery,
+          variables: {
+            projectPath: this.projectPath,
+            ref: this.ref,
+            path: this.path.replace(/^\//, ''),
+            nextPageCursor: '',
+            pageSize: 100,
+          },
+        });
+      } else {
+        console.log('PRELOAD BLOB ', this.path);
+
+        this.$apollo.query({
+          query: blobInfoQuery,
+          variables: {
+            path: `/${this.projectPath}/-/blob/${this.ref}/${this.path}?format=json&viewer=simple`,
+          },
+        });
+      }
+    },
+  },
 };
 </script>
 
@@ -136,8 +172,9 @@ export default {
       <component
         :is="linkComponent"
         ref="link"
+        v-instant-load="handlePreload"
         :to="routerLinkTo"
-        :href="url"
+        :hrefabc="url"
         :class="{
           'is-submodule': isSubmodule,
         }"
