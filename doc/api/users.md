@@ -67,8 +67,8 @@ GET /users?blocked=true
 
 GitLab supports bot users such as the [alert bot](../operations/incident_management/integrations.md)
 or the [support bot](../user/project/service_desk.md#support-bot-user).
-To exclude these users from the users' list, you can use the parameter `exclude_internal=true`
-([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241144) in GitLab 13.4).
+To exclude these [internal users](../development/internal_users.html#internal-users) from the users' list, you can use the parameter `exclude_internal=true`
+([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241144) in GitLab 13.4). This will not exclude [project bot users](../user/project/settings/project_access_tokens.html#project-bot-users).
 
 ```plaintext
 GET /users?exclude_internal=true
