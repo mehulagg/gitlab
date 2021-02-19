@@ -129,7 +129,7 @@ export default {
       <gl-icon name="chevron-down" />
     </template>
 
-    <div class="gl-display-flex gl-flex-direction-column ref-selector-dropdown-content">
+    <div class="gl-display-flex gl-flex-direction-column ref-selector-dropdown-content gl-h-full">
       <gl-dropdown-section-header>
         <span class="gl-text-center gl-display-block">{{ i18n.dropdownHeader }}</span>
       </gl-dropdown-section-header>
