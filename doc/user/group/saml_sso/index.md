@@ -61,7 +61,7 @@ the following user details need to be passed to GitLab as SAML assertions.
 | Field           | Supported keys |
 |-----------------|----------------|
 | Email (required)| `email`, `mail` |
-| Username        | `username` |
+| Username        | `username`, `nickname` |
 | Full Name       | `name` |
 | First Name      | `first_name`, `firstname`, `firstName` |
 | Last Name       | `last_name`, `lastname`, `lastName` |
