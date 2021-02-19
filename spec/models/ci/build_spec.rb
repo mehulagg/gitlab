@@ -3251,47 +3251,6 @@ RSpec.describe Ci::Build do
     end
   end
 
-  describe '#scoped_variables_hash' do
-    context 'when overriding CI variables' do
-      before do
-        project.variables.create!(key: 'MY_VAR', value: 'my value 1')
-        pipeline.variables.create!(key: 'MY_VAR', value: 'my value 2')
-      end
-
-      it 'returns a regular hash created using valid ordering' do
-        expect(build.scoped_variables_hash).to include('MY_VAR': 'my value 2')
-        expect(build.scoped_variables_hash).not_to include('MY_VAR': 'my value 1')
-      end
-    end
-
-    context 'when overriding user-provided variables' do
-      let(:build) do
-        create(:ci_build, pipeline: pipeline, yaml_variables: [{ key: 'MY_VAR', value: 'myvar', public: true }])
-      end
-
-      before do
-        pipeline.variables.build(key: 'MY_VAR', value: 'pipeline value')
-      end
-
-      it 'returns a hash including variable with higher precedence' do
-        expect(build.scoped_variables_hash).to include('MY_VAR': 'pipeline value')
-        expect(build.scoped_variables_hash).not_to include('MY_VAR': 'myvar')
-      end
-    end
-
-    context 'when overriding CI instance variables' do
-      before do
-        create(:ci_instance_variable, key: 'MY_VAR', value: 'my value 1')
-        group.variables.create!(key: 'MY_VAR', value: 'my value 2')
-      end
-
-      it 'returns a regular hash created using valid ordering' do
-        expect(build.scoped_variables_hash).to include('MY_VAR': 'my value 2')
-        expect(build.scoped_variables_hash).not_to include('MY_VAR': 'my value 1')
-      end
-    end
-  end
-
   describe '#any_unmet_prerequisites?' do
     let(:build) { create(:ci_build, :created) }
 
