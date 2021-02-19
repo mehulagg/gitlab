@@ -9,12 +9,12 @@ description: 'Making a GitLab codebase composable - allowing to run parts of the
 # Composable GitLab codebase
 
 The one of the major risks of a single codebase is an infinite growth of the whole
-application. The more code being added results in a ever increasing resource requirements
+application. The more code being added results in not only ever increasing resource requirements
 for running the application, but increased application coupling and explosion of the complexity.
 
 ## Executive summary
 
-This blueprint discusses an impact of introducing **Application Layers** as a way to reduce and improve application
+This blueprint discusses an impact of introducing **Application Layers** as a way to reduce and improve the application
 codebase. This discusses the positive and negative outcomes of the proposed solution and tries to estimate the impact
 on GitLab.com and smaller installations.
 
@@ -28,9 +28,13 @@ as components that are run separately to the rest of the stack, but still sharin
 This model could be implemented to provide an API interface for external tooling (Runners API, Packages API, Feature Flags Unleash API)
 and allow us to have much better resillency and much easier way to scale application in the future.
 
-## Challenges
+The blueprint aims on retain all key aspects of GitLab success: single and monolithic codebase (with a single database),
+but allows us to better model application and make our codebase more composable.
 
-This proves hard for various reasons:
+## Challenges of the Monolith (a current state)
+
+Today the usage of monolith proves to be challenging in many cases. A single big monolith
+codebase without clear boundaries results in a number of problems and inefficiencies, some of them being:
 
 - Deep coupling makes application harder to develop in longer term, as it leads to a sphagetti implementation
   instead of considering building more interface-based architecture
@@ -38,7 +42,7 @@ This proves hard for various reasons:
   we usually need to run a whole test suite as we cannot high confidence know which parts are affected. This to
   some extent can be improved by trying to build hearistic to aid this process, but it is prone to errors and hard
   to keep accurate at all times
-- All components needs to be loaded at all times in order to run only parts of the application
+- All components need to be loaded at all times in order to run only parts of the application
 - Increased resource usage, as we load parts of the application that are rarely used in a given context
 - The high memory usage results in slowing the whole application as it increases GC cycles duration
   creating significantly longer latency for processing requests or worse cache usage of CPUs
@@ -78,10 +82,17 @@ by a group in a well-defined structure.
 
 However, the **Bounded Contexts** while it helps development, it does not help with the above stated goals. This is purely
 a logical split of the code. This does not prevent deep-coupling. It is still possible to create a circular dependency (and it often happens)
-between a `Sidekiq Worker` and `API interface` (API can call Sidekiq Worker, Sidekiq can use API to create an endpoint path).
+between a background processing of CI pipeline and Runner API interface.
+API can call Sidekiq Worker, Sidekiq can use API to create an endpoint path.
 
 The **Bounded Contexts** do not make our codebase smarter to know what depends on what, as the whole codebase
 is treated as single package that needs to be loaded and executed.
+
+Possible additional considerations to the disadvantages of Bounded Context:
+
+- It can lead to tribal knowledge and duplicate code
+- The deep coupling can make it difficult to iterate and make minimal changes
+- Changes may have cascading effects that are difficult to isolate due to the vertical split
 
 ## The Application Layers (**horizontal* split)
 
@@ -89,22 +100,22 @@ While we continue leveraging **Bounded Contexts** in form of namespace separatio
 the **Application Layers** can provide a way to create a clean separation between different functional parts.
 
 Our main codebase (`GitLab Rails` after a GitLab running on Ruby on Rails) consists many implicit **Application Layers**.
-This distinction today is implicit. There are no clear boundaries between them which results in a deep coupling.
+There are no clear boundaries between each layer which results in a deep coupling.
 
 The concept of **Application Layers** looks more at application from perspective how we run the application
 instead of perspective of individual features (like CI or Packages). GitLab application today can be decomposed into the following
 application layers. This list is not exhaustive, but shows a general different parts of a single monolithic codebase:
 
-- Web Controllers: we use that to process Web requests coming from users visiting web interface
-- Web API: we use that to process API calls coming from the automated tooling, in some cases also users visiting web interface
-- Web Runners API: we use that to process API calls from the Runners, that allows Runner to fetch new jobs, or update trace log
-- Web GraphQL: we use that to provide a flexible API interface, allowing the Web frontend to fetch data only needed that allows to reduce amount of compute and data transfer
-- Web ActionCable: we use that to provide bi-directional connection to enable real-time features for Users visiting web interface
-- Web Feature Flags Unleash Backend: we use that to provide a Unleash-compatible Server that uses GitLab API
-- Web Packages API: all code that provides REST API compatible with the packaging tools: Debian, Maven, Container Registry Proxy, etc.
+- Web Controllers: process Web requests coming from users visiting web interface
+- Web API: API calls coming from the automated tooling, in some cases also users visiting web interface
+- Web Runners API: API calls from the Runners, that allows Runner to fetch new jobs, or update trace log
+- Web GraphQL: provide a flexible API interface, allowing the Web frontend to fetch data only needed that allows to reduce amount of compute and data transfer
+- Web ActionCable: provide bi-directional connection to enable real-time features for Users visiting web interface
+- Web Feature Flags Unleash Backend: provide an Unleash-compatible Server that uses GitLab API
+- Web Packages API: provide a REST API compatible with the packaging tools: Debian, Maven, Container Registry Proxy, etc.
 - Git nodes: all code required to authorize `git pull/push` over `SSH` or `HTTPS`
-- Sidekiq: all code requires to run background jobs
-- Services/Models/DB: all code required to maintain our database structure, data validation, business logic and policies models
+- Sidekiq: run background jobs
+- Services/Models/DB: all code required to maintain our database structure, data validation, business logic and policies models that needs to be shared with other components
 
 ### Application Layers for on-premise installations
 
@@ -235,6 +246,10 @@ Each of these top-level application layers do depend only on a fraction of the c
 The Memory team group conducted a Proof-of-Concept phase to understand the impact of introducing **Application Layers**.
 We did this to understand the complexity, impact, and needed iterations to execute this proposal.
 
+The proposals here should be treated as evaluation of the impact of this blueprint,
+but not a final solution to be implemented. PoC as defined is not something that should be merged,
+but serves as a basis for future work.
+
 ### PoC using Rails Engines
 
 We decided to use Rails Engines by modeling a Web Application Layer. The Web Engine did contain Controllers, API, GraphQL.
@@ -257,7 +272,7 @@ What was done?
 - We configured GitLab to load `gem web_engine` running Web nodes (Puma web server)
 - We disabled loading `web_engine` when running Background processing nodes (Sidekiq)
 
-### Results
+#### Results
 
 The effect on introducing these changes:
 
@@ -281,7 +296,7 @@ Now, once we have this data:
 - Compare application load time and impact on deployment of GitLab
 - Compare GC cycles and impact on responsiveness of the application in processing many concurrent requests
 
-### Impact on GitLab.com
+#### Impact on GitLab.com
 
 Estimating the results for the scale of running GitLab.com, today we use:
 
@@ -303,7 +318,7 @@ We estimate the possible maximum savings for introducing `web_engine`:
 This model could be extended to introduce `sidekiq_engine` giving a similar benefits (even more important due to visible impact on users)
 for Web nodes.
 
-### Outcome
+#### Outcome
 
 We achieved a number of benefits introducing these changes.
 
@@ -322,7 +337,7 @@ Cons:
 
 - It is harder to implement GraphQL subscriptions as in case of Sidekiq as we need another way to pass subscriptions
 
-### Example: GraphQL
+#### Example: GraphQL
 
 TBD
 
@@ -338,13 +353,17 @@ Potential challenge with GraphQL and Websockets is that at some point we might w
 
 Alternative way is to use a notification system that would make always `ActionCable` node (the one handling WebSockets) to generate a payload based on a send query instead of performing passthrough. This could be applicable since `ActionCable` is the one handling a given connection for a client. This could have a downside of having to recalculate the same payload if many clients would be wathching the same resource. However, this behavior of system might still be desired for security puroses, as generated payload might be dependent on permission of watching client (we would show different for anonymous, and different for the member of the project).
 
-### Example: API
+#### Example: API
 
 TBD
 
-### Example: Controllers
+#### Example: Controllers
 
 TBD
+
+### Packwerk
+
+TBD: https://github.com/Shopify/packwerk
 
 ## Future impact
 
@@ -373,6 +392,7 @@ As of today, it seems reasonable to define three **application layers**:
 - [Make teams to be maintainers of their code](https://gitlab.com/gitlab-org/gitlab/-/issues/25872)
 - [Use nested structure to organize CI classes](https://gitlab.com/gitlab-org/gitlab/-/issues/209745)
 - [WIP: Make it simple to build and use "Decoupled Services"](https://gitlab.com/gitlab-org/gitlab/-/issues/31121)
+- [Rails takes awhile to boot, let's see if we can improve this](https://gitlab.com/gitlab-org/gitlab/-/issues/213992)
 
 ## Who
 
