@@ -70,6 +70,24 @@ The following settings are:
 | `remote_directory` | The bucket name where Terraform state files are stored | |
 | `connection` | Various connection options described below | |
 
+### Migrating to Object storage
+
+Progress for a rake task that would perform this migration is [tracked here](https://gitlab.com/gitlab-org/gitlab/-/issues/247042).
+
+Until the rake task is available, there's a documented workaround for users running `13.6`:
+
+```Ruby
+gitlab-rails c
+
+Terraform::StateUploader.alias_method(:upload, :model)
+
+Terraform::StateVersion.where(file_store: ::ObjectStorage::Store::LOCAL).find_each(batch_size: 10) do |terraform_state_version|
+  puts "Migrating: #{terraform_state_version.inspect}"
+
+  terraform_state_version.file.migrate!(::ObjectStorage::Store::REMOTE)
+end
+```
+
 ### S3-compatible connection settings
 
 See [the available connection settings for different providers](object_storage.md#connection-settings).
