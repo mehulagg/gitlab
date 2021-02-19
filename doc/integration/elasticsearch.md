@@ -233,10 +233,10 @@ The following Elasticsearch settings are available:
 | `Client request timeout` | Elasticsearch HTTP client request timeout value in seconds. `0` means using the system default timeout value, which depends on the libraries that GitLab application is built upon. |
 
 WARNING:
-Increasing the values of `Maximum bulk request size (MiB)` and `Bulk request concurrency` negatively impact
+Increasing the values of `Maximum bulk request size (MiB)` and `Bulk request concurrency` can negatively impact
 Sidekiq performance. Return them to their default values if you see increased `scheduling_latency_s` durations
-in your Sidekiq logs. See [issue # 322147](https://gitlab.com/gitlab-org/gitlab/-/issues/322147) for more
-information.
+in your Sidekiq logs. For more information, see
+[issue 322147](https://gitlab.com/gitlab-org/gitlab/-/issues/322147).
 
 ### Limiting namespaces and projects
 
