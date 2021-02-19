@@ -45,4 +45,41 @@ RSpec.describe 'layouts/application' do
       expect(rendered).to include('data-namespace-id="3"')
     end
   end
+
+  describe 'layouts/_user_notification_dot' do
+    let(:track_selector) { '[data-track-event="render"][data-track-label="show_buy_ci_minutes_notification"]' }
+    let(:show_notification_dot) { false }
+
+    before do
+      allow(view).to receive(:show_pipeline_minutes_notification_dot?).and_return(show_notification_dot)
+    end
+
+    context 'when we show the notification dot' do
+      let(:show_notification_dot) { true }
+
+      before do
+        allow(Gitlab).to receive(:com?) { true }
+      end
+
+      it 'has the notification dot' do
+        render
+
+        expect(rendered).to have_css('li', class: 'header-user') do
+          expect(rendered).to have_css('span', class: 'notification-dot')
+          expect(rendered).to have_selector(track_selector)
+        end
+      end
+    end
+
+    context 'when we do not show the notification dot' do
+      it 'does not have the notification dot' do
+        render
+
+        expect(rendered).to have_css('li', class: 'header-user') do
+          expect(rendered).not_to have_css('span', class: 'notification-dot')
+          expect(rendered).not_to have_selector(track_selector)
+        end
+      end
+    end
+  end
 end

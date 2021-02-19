@@ -26,7 +26,7 @@
       = link_to s_("CurrentUser|Edit profile"), profile_path, data: { qa_selector: 'edit_profile_link' }
     %li
       = link_to s_("CurrentUser|Preferences"), profile_preferences_path
-  = render_if_exists 'layouts/header/buy_pipeline_minutes', project: @project, namespace: @group
+  = render 'layouts/header/buy_pipeline_minutes', project: @project, namespace: @group
   = render_if_exists 'layouts/header/upgrade'
 
   - if current_user_menu?(:help)
