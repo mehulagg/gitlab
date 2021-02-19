@@ -1,3 +1,15 @@
+GIT
+  remote: https://gitlab.com/gitlab-org/gitlab-styles.git
+  revision: 9b58e9646714e0084712ea50ca9a5d43cde5c6c0
+  branch: pl-cop-hash-transformation
+  specs:
+    gitlab-styles (6.0.0)
+      rubocop (~> 0.91.1)
+      rubocop-gitlab-security (~> 0.1.1)
+      rubocop-performance (~> 1.9.2)
+      rubocop-rails (~> 2.9)
+      rubocop-rspec (~> 1.44)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -453,12 +465,6 @@ GEM
       pry (~> 0.13.0)
     gitlab-sidekiq-fetcher (0.5.3)
       sidekiq (~> 5)
-    gitlab-styles (6.0.0)
-      rubocop (~> 0.91.1)
-      rubocop-gitlab-security (~> 0.1.1)
-      rubocop-performance (~> 1.9.2)
-      rubocop-rails (~> 2.9)
-      rubocop-rspec (~> 1.44)
     gitlab_chronic_duration (0.10.6.2)
       numerizer (~> 0.2)
     gitlab_omniauth-ldap (2.1.1)
@@ -1380,7 +1386,7 @@ DEPENDENCIES
   gitlab-net-dns (~> 0.9.1)
   gitlab-pry-byebug
   gitlab-sidekiq-fetcher (= 0.5.3)
-  gitlab-styles (~> 6.0.0)
+  gitlab-styles!
   gitlab_chronic_duration (~> 0.10.6.2)
   gitlab_omniauth-ldap (~> 2.1.1)
   gon (~> 6.2)
