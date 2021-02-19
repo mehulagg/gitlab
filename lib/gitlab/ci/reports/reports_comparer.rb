@@ -20,7 +20,7 @@ module Gitlab
         def status
           if success?
             STATUS_SUCCESS
-          elsif base_report.nil?
+          elsif base_report.nil? || head_report.nil?
             STATUS_NOT_FOUND
           else
             STATUS_FAILED
