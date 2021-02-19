@@ -3,17 +3,21 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Pipeline::Expression::Statement do
-  subject do
-    described_class.new(text, variables)
-  end
-
-  let(:variables) do
+  let(:variables_items) do
     {
       'PRESENT_VARIABLE'   => 'my variable',
       'PATH_VARIABLE'      => 'a/path/variable/value',
       'FULL_PATH_VARIABLE' => '/a/full/path/variable/value',
       'EMPTY_VARIABLE'     =>  ''
     }
+  end
+
+  let(:variables_collection) do
+    Gitlab::Ci::Variables::Collection.new(variables_items.map { |k, v| { key: k, value: v } })
+  end
+
+  subject do
+    described_class.new(text, variables_collection)
   end
 
   describe '.new' do

@@ -7,9 +7,12 @@ module Gitlab
         class Statement
           StatementError = Class.new(Expression::ExpressionError)
 
-          def initialize(statement, variables = {})
+          def initialize(statement, variables = nil)
+            raise ArgumentError, "A Gitlab::Ci::Variables::Collection object was expected" unless
+              variables.nil? || variables.is_a?(Gitlab::Ci::Variables::Collection)
+
             @lexer = Expression::Lexer.new(statement)
-            @variables = variables.with_indifferent_access
+            @variables = variables&.to_hash
           end
 
           def parse_tree

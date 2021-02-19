@@ -2440,7 +2440,8 @@ RSpec.describe Ci::Build do
         build.yaml_variables = []
       end
 
-      it { is_expected.to eq(predefined_variables) }
+      it { is_expected.to be_instance_of(Gitlab::Ci::Variables::Collection) }
+      it { expect(subject.to_runner_variables).to eq(predefined_variables) }
 
       context 'when ci_job_jwt feature flag is disabled' do
         before do
@@ -2495,7 +2496,7 @@ RSpec.describe Ci::Build do
           end
 
           it 'returns variables in order depending on resource hierarchy' do
-            is_expected.to eq(
+            expect(subject.to_runner_variables).to eq(
               [dependency_proxy_var,
                job_jwt_var,
                build_pre_var,
@@ -2525,7 +2526,7 @@ RSpec.describe Ci::Build do
           end
 
           it 'matches explicit variables ordering' do
-            received_variables = subject.map { |variable| variable.fetch(:key) }
+            received_variables = subject.map { |variable| variable[:key] }
 
             expect(received_variables).to eq expected_variables
           end
@@ -2953,7 +2954,7 @@ RSpec.describe Ci::Build do
       end
 
       it 'overrides YAML variable using a pipeline variable' do
-        variables = subject.reverse.uniq { |variable| variable[:key] }.reverse
+        variables = subject.to_runner_variables.reverse.uniq { |variable| variable[:key] }.reverse
 
         expect(variables)
           .not_to include(key: 'MYVAR', value: 'myvar', public: true, masked: false)
