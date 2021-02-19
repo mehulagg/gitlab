@@ -779,4 +779,17 @@ RSpec.describe SystemNoteService do
       described_class.change_incident_severity(incident, author)
     end
   end
+
+  describe '.auto_resolve_alert' do
+    let(:alert) { build(:alert_management_alert) }
+    let(:monitoring_tool) { 'Prometheus' }
+
+    it 'calls AlertManagementService' do
+      expect_next_instance_of(SystemNotes::AlertManagementService) do |service|
+        expect(service).to receive(:auto_resolve_alert).with(monitoring_tool)
+      end
+
+      described_class.auto_resolve_alert(alert, monitoring_tool)
+    end
+  end
 end

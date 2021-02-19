@@ -42,7 +42,12 @@ module AlertManagement
 
     def process_resolved_alert
       return unless auto_close_incident?
-      return close_issue(alert.issue) if alert.resolve(incoming_payload.ends_at)
+
+      if alert.resolve(incoming_payload.ends_at)
+        SystemNoteService.auto_resolve_alert(alert, alert_source)
+
+        close_issue(alert.issue)
+      end
 
       logger.warn(
         message: 'Unable to update AlertManagement::Alert status to resolved',

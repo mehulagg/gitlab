@@ -124,11 +124,13 @@ RSpec.describe Projects::Alerting::NotifyService do
                 let(:auto_close_enabled) { true }
 
                 it 'resolves the alert and sets the end time', :aggregate_failures do
-                  subject
+                  expect { subject }.to change(Note, :count).by(1)
+
                   alert.reload
 
                   expect(alert.resolved?).to eq(true)
                   expect(alert.ended_at).to eql(ended_at)
+                  expect(Note.last.note).to include(source)
                 end
 
                 context 'related issue exists' do

@@ -158,7 +158,7 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
 
       context 'when Prometheus alert status is resolved' do
         let(:status) { 'resolved' }
-        let!(:alert) { create(:alert_management_alert, project: project, fingerprint: fingerprint) }
+        let!(:alert) { create(:alert_management_alert, project: project, fingerprint: fingerprint, monitoring_tool: 'Prometheus') }
 
         context 'when auto_resolve_incident set to true' do
           context 'when status can be changed' do
@@ -167,6 +167,11 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
 
             it 'resolves an existing alert' do
               expect { execute }.to change { alert.reload.resolved? }.to(true)
+            end
+
+            it 'creates a system note on the alert' do
+              expect { subject }.to change(Note, :count).by(1)
+              expect(Note.last.note).to include('Prometheus')
             end
 
             context 'existing issue' do
