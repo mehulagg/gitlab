@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 def max_puma_workers
+  return 2 unless Puma.respond_to?(:cli_config)
+
   Puma.cli_config.options[:workers].to_i
 end
 
