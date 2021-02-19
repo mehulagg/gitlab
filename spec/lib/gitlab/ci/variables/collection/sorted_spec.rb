@@ -82,10 +82,10 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sorted do
 
         with_them do
           before do
-            @coll = Gitlab::Ci::Variables::Collection.new(variables)
+            @collection = Gitlab::Ci::Variables::Collection.new(variables)
           end
 
-          subject { Gitlab::Ci::Variables::Collection::Sorted.new(@coll, project_with_flag_disabled) }
+          subject { Gitlab::Ci::Variables::Collection::Sorted.new(@collection, project_with_flag_disabled) }
 
           it 'does not report error' do
             expect(subject.errors).to eq(nil)
@@ -136,10 +136,10 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sorted do
 
         with_them do
           before do
-            @coll = Gitlab::Ci::Variables::Collection.new(variables)
+            @collection = Gitlab::Ci::Variables::Collection.new(variables)
           end
 
-          subject { Gitlab::Ci::Variables::Collection::Sorted.new(@coll, project_with_flag_enabled) }
+          subject { Gitlab::Ci::Variables::Collection::Sorted.new(@collection, project_with_flag_enabled) }
 
           it 'errors matches expected validation result' do
             expect(subject.errors).to eq(validation_result)
@@ -206,13 +206,13 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sorted do
           let_it_be(:project) { create(:project) }
 
           before do
-            @coll = Gitlab::Ci::Variables::Collection.new(variables)
+            @collection = Gitlab::Ci::Variables::Collection.new(variables)
           end
 
-          subject { Gitlab::Ci::Variables::Collection::Sorted.new(@coll, project).sort }
+          subject { Gitlab::Ci::Variables::Collection::Sorted.new(@collection, project).sort }
 
           it 'does not expand variables' do
-            is_expected.to be(@coll)
+            is_expected.to be(@collection)
           end
         end
       end
@@ -287,10 +287,10 @@ RSpec.describe Gitlab::Ci::Variables::Collection::Sorted do
           let_it_be(:project) { create(:project) }
 
           before do
-            @coll = Gitlab::Ci::Variables::Collection.new(variables)
+            @collection = Gitlab::Ci::Variables::Collection.new(variables)
           end
 
-          subject { Gitlab::Ci::Variables::Collection::Sorted.new(@coll, project).sort }
+          subject { Gitlab::Ci::Variables::Collection::Sorted.new(@collection, project).sort }
 
           it 'sort returns correctly sorted variables' do
             expect(subject.map { |var| var[:key] }).to eq(result)

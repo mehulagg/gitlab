@@ -8,11 +8,11 @@ module Gitlab
           include TSort
           include Gitlab::Utils::StrongMemoize
 
-          def initialize(coll, project)
+          def initialize(collection, project)
             raise(ArgumentError, "A Gitlab::Ci::Variables::Collection object was expected") unless
-              coll.is_a?(Collection)
+              collection.is_a?(Collection)
 
-            @coll = coll
+            @collection = collection
             @project = project
           end
 
@@ -38,8 +38,8 @@ module Gitlab
           # sort sorts an array of variables, ignoring unknown variable references.
           # If a circular variable reference is found, the original array is returned
           def sort
-            return @coll if Feature.disabled?(:variable_inside_variable, @project)
-            return @coll if errors
+            return @collection if Feature.disabled?(:variable_inside_variable, @project)
+            return @collection if errors
 
             Gitlab::Ci::Variables::Collection.new(tsort)
           end
@@ -47,7 +47,7 @@ module Gitlab
           private
 
           def tsort_each_node(&block)
-            @coll.each(&block)
+            @collection.each(&block)
           end
 
           def tsort_each_child(variable, &block)
@@ -56,7 +56,7 @@ module Gitlab
 
           def input_vars
             strong_memoize(:input_vars) do
-              @coll.index_by { |env| env[:key] }
+              @collection.index_by { |env| env[:key] }
             end
           end
 
