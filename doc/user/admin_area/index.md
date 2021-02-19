@@ -188,7 +188,7 @@ GitLab billing is based on the number of [**Billable users**](../../subscription
 
 ### User cohorts
 
-The [Cohorts](./analytics/user_cohorts.md) tab displays the monthly cohorts of new users and their activities over time.
+The [Cohorts](analytics/user_cohorts.md) tab displays the monthly cohorts of new users and their activities over time.
 
 ### Administering Groups
 
