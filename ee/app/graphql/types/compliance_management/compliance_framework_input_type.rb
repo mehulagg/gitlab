@@ -2,7 +2,6 @@
 
 module Types
   module ComplianceManagement
-    # rubocop: disable Graphql/AuthorizeTypes
     class ComplianceFrameworkInputType < BaseInputObject
       graphql_name 'ComplianceFrameworkInput'
 

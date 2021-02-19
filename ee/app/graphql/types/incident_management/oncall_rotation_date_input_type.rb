@@ -2,7 +2,6 @@
 
 module Types
   module IncidentManagement
-    # rubocop: disable Graphql/AuthorizeTypes
     class OncallRotationDateInputType < BaseInputObject
       graphql_name 'OncallRotationDateInputType'
       description 'Date input type for on-call rotation'
@@ -27,6 +26,5 @@ module Types
         raise Gitlab::Graphql::Errors::ArgumentError, 'Date & time is invalid'
       end
     end
-    # rubocop: enable Graphql/AuthorizeTypes
   end
 end

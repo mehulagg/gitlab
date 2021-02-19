@@ -2,7 +2,6 @@
 
 module Types
   module EpicTree
-    # rubocop: disable Graphql/AuthorizeTypes
     class EpicTreeNodeInputType < BaseInputObject
       graphql_name 'EpicTreeNodeFieldsInputType'
       description 'A node of an epic tree.'
@@ -27,6 +26,5 @@ module Types
                required: false,
                description: 'ID of the new parent epic.'
     end
-    # rubocop: enable Graphql/AuthorizeTypes
   end
 end
