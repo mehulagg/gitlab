@@ -341,12 +341,24 @@ module Vulnerabilities
       end
     end
 
-    alias_method :==, :eql? # eql? is necessary in some cases like array intersection
+    alias_method :orig_eql?, :eql?
 
     def eql?(other)
-      other.report_type == report_type &&
-        other.location_fingerprint == location_fingerprint &&
-        other.first_fingerprint == first_fingerprint
+      return false unless other.report_type == report_type && other.first_fingerprint == first_fingerprint
+
+      if ::Feature.enabled?(:vulnerability_finding_fingerprints)
+        matches_fingerprints(other.fingerprints)
+      else
+        other.location_fingerprint == location_fingerprint
+      end
+    end
+
+    def ==(other)
+      if ::Feature.enabled?(:vulnerability_finding_fingerprints)
+        eql?(other)
+      else
+        orig_eql?(other)
+      end
     end
 
     # Array.difference (-) method uses hash and eql? methods to do comparison
@@ -376,6 +388,23 @@ module Vulnerabilities
 
     def pipeline_branch
       pipelines&.last&.sha || project.default_branch
+    end
+
+    # this should match the same code as in ee/lib/gitlab/ci/reports/security/finding.rb
+    def matches_fingerprints(other_fingerprints)
+      return false if other_fingerprints.empty? || fingerprints.empty?
+
+      other_fingerprint_types = other_fingerprints.index_by(&:algorithm_type)
+
+      # highest first
+      fingerprints.sort_by(&:priority).reverse.each do |fingerprint|
+        matching_other_fingerprint = other_fingerprint_types[fingerprint.algorithm_type]
+        next if matching_other_fingerprint.nil?
+
+        return matching_other_fingerprint == fingerprint
+      end
+
+      return false
     end
 
     protected

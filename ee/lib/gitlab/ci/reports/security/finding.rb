@@ -66,6 +66,7 @@ module Gitlab
               severity
               uuid
               details
+              fingerprints
             ].each_with_object({}) do |key, hash|
               hash[key] = public_send(key) # rubocop:disable GitlabSecurity/PublicSend
             end
@@ -85,9 +86,13 @@ module Gitlab
           end
 
           def eql?(other)
-            report_type == other.report_type &&
-              location.fingerprint == other.location.fingerprint &&
-              primary_fingerprint == other.primary_fingerprint
+            return false unless report_type == other.report_type && primary_fingerprint == other.primary_fingerprint
+
+            if ::Feature.enabled?(:vulnerability_finding_fingerprints)
+              matches_fingerprints(other.fingerprints)
+            else
+              location.fingerprint == other.location.fingerprint
+            end
           end
 
           def hash
@@ -106,6 +111,23 @@ module Gitlab
 
           def primary_fingerprint
             primary_identifier&.fingerprint
+          end
+
+          # this should match the same code as in ee/app/models/vulnerabilities/finding.rb
+          def matches_fingerprints(other_fingerprints)
+            return false if other_fingerprints.empty? || fingerprints.empty?
+
+            other_fingerprint_types = other_fingerprints.index_by(&:algorithm_type)
+
+            # highest first
+            fingerprints.sort_by(&:priority).reverse.each do |fingerprint|
+              matching_other_fingerprint = other_fingerprint_types[fingerprint.algorithm_type]
+              next if matching_other_fingerprint.nil?
+
+              return matching_other_fingerprint == fingerprint
+            end
+
+            return false
           end
 
           private

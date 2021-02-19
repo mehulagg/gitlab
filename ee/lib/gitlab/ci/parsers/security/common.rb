@@ -82,12 +82,18 @@ module Gitlab
             remediations = create_remediations(data['remediations'])
             fingerprints = create_fingerprints(tracking_data(data))
 
+            if ::Feature.enabled?(:vulnerability_finding_fingerprints)
+              compare_key = fingerprints.sort_by(&:priority).last.fingerprint_sha256
+            else
+              compare_key = data['cve'] || ''
+            end
+
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
                 uuid: calculate_uuid_v5(identifiers.first, location),
                 report_type: report.type,
                 name: finding_name(data, identifiers, location),
-                compare_key: data['cve'] || '',
+                compare_key: compare_key,
                 location: location,
                 severity: parse_severity_level(data['severity']),
                 confidence: parse_confidence_level(data['confidence']),

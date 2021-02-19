@@ -987,4 +987,127 @@ RSpec.describe Vulnerabilities::Finding do
       end
     end
   end
+
+  describe '#eql?' do
+    let(:project) { create(:project) }
+    let(:report_type) { :sast }
+    let(:identifier_fingerprint) { 'fooo' }
+    let(:identifier) { build(:vulnerabilities_identifier, fingerprint: identifier_fingerprint) }
+    let(:location_fingerprint1) { 'fingerprint1' }
+    let(:location_fingerprint2) { 'fingerprint2' }
+    let(:finding1) do
+      build(:vulnerabilities_finding, report_type,
+            project: project,
+            primary_identifier: identifier,
+            location_fingerprint: location_fingerprint1)
+    end
+    let(:finding2) do
+      build(:vulnerabilities_finding, report_type,
+            project: project,
+            primary_identifier: identifier,
+            location_fingerprint: location_fingerprint2)
+    end
+
+    context 'with the vulnerability_finding_fingerprints feature flag' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:feature_flag_enabled, :should_be_eql) do
+        true  | true
+        false | false
+      end
+      with_them do
+        before do
+          stub_feature_flags(vulnerability_finding_fingerprints: feature_flag_enabled)
+        end
+
+        it 'matches the finding based on enabled fingerprinting methods' do
+          fingerprint1 = create(
+            :vulnerabilities_finding_fingerprint,
+            finding: finding1
+          )
+
+          fingerprint2 = create(
+            :vulnerabilities_finding_fingerprint,
+            finding: finding2,
+            fingerprint_sha256: fingerprint1.fingerprint_sha256
+          )
+
+          # verify that the fingerprints do exist and that they match
+          expect(finding1.fingerprints.size).to eq(1)
+          expect(finding2.fingerprints.size).to eq(1)
+          expect(fingerprint1.eql?(fingerprint2)).to be(true)
+
+          # now verify that the correct matching method was used for eql?
+          expect(finding1.eql?(finding2)).to be(should_be_eql)
+        end
+      end
+    end
+
+    context 'short circuits on the highest priority fingerprint match' do
+      using RSpec::Parameterized::TableSyntax
+
+      let(:same_hash) { false }
+      let(:same_location) { false }
+      let(:create_scope_offset) { false }
+      let(:same_scope_offset) { false}
+
+      let(:create_fingerprints) do
+        fingerprint1_hash = create(
+          :vulnerabilities_finding_fingerprint,
+          algorithm_type: 'hash',
+          finding: finding1
+        )
+        sha = same_hash ? fingerprint1_hash.fingerprint_sha256 : ::Digest::SHA256.digest(SecureRandom.hex(50))
+        fingerprint2_hash = create(
+          :vulnerabilities_finding_fingerprint,
+          algorithm_type: 'hash',
+          finding: finding2,
+          fingerprint_sha256: sha
+        )
+
+        fingerprint1_location = create(
+          :vulnerabilities_finding_fingerprint,
+          algorithm_type: 'location',
+          finding: finding1
+        )
+        sha = same_location ? fingerprint1_location.fingerprint_sha256 : ::Digest::SHA256.digest(SecureRandom.hex(50))
+        fingerprint2_location = create(
+          :vulnerabilities_finding_fingerprint,
+          algorithm_type: 'location',
+          finding: finding2,
+          fingerprint_sha256: sha
+        )
+
+        fingerprint1_scope_offset = create(
+          :vulnerabilities_finding_fingerprint,
+          algorithm_type: 'scope_offset',
+          finding: finding1
+        )
+
+        if create_scope_offset
+          sha = same_scope_offset ? fingerprint1_scope_offset.fingerprint_sha256 : ::Digest::SHA256.digest(SecureRandom.hex(50))
+          fingerprint2_scope_offset = create(
+            :vulnerabilities_finding_fingerprint,
+            algorithm_type: 'scope_offset',
+            finding: finding2,
+            fingerprint_sha256: sha
+          )
+        end
+      end
+
+      where(:same_hash, :same_location, :create_scope_offset, :same_scope_offset, :should_match) do
+        true  | true  | true  | true  | true  # everything matches
+        false | false | true  | false | false # nothing matches
+        true  | true  | true  | false | false # highest priority matches alg/priority but not on value
+        false | false | true  | true  | true  # highest priority matches alg/priority and value
+        false | true  | false | false | true  # highest priority is location, matches alg/priority and value
+      end
+      with_them do
+        it 'matches correctly' do
+          create_fingerprints
+          expect(finding1.eql?(finding2)).to be(should_match)
+        end
+      end
+    end
+  end
 end

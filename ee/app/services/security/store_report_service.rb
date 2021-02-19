@@ -49,7 +49,7 @@ module Security
         return
       end
 
-      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
+      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links, :fingerprints)
       entity_params = Gitlab::Json.parse(vulnerability_params&.dig(:raw_metadata)).slice('description', 'message', 'solution', 'cve', 'location')
       vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
 
@@ -57,6 +57,10 @@ module Security
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
       reset_remediations_for(vulnerability_finding, finding)
+
+      if ::Feature.enabled?(:vulnerability_finding_fingerprints)
+        update_feedbacks(vulnerability_finding, vulnerability_params[:uuid])
+      end
       update_finding_fingerprints(finding, vulnerability_finding)
 
       # The maximum number of identifiers is not used in validation
@@ -90,6 +94,70 @@ module Security
         vulnerability_finding
       rescue ActiveRecord::RecordNotUnique
         project.vulnerability_findings.find_by!(find_params)
+      rescue ActiveRecord::RecordInvalid => e
+        Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
+      end
+    end
+
+    def create_or_find_vulnerability_finding(finding, create_params)
+      if ::Feature.enabled?(:vulnerability_finding_fingerprints)
+        create_or_find_vulnerability_finding_normal(finding, create_params)
+      else
+        create_or_find_vulnerability_finding_with_fingerprints(finding, create_params)
+      end
+    end
+
+    def create_or_find_vulnerability_finding_normal(finding, create_params)
+      find_params = {
+        scanner: scanners_objects[finding.scanner.key],
+        primary_identifier: identifiers_objects[finding.primary_identifier.key],
+        location_fingerprint: finding.location.fingerprint
+      }
+
+      begin
+        vulnerability_finding = project
+          .vulnerability_findings
+          .create_with(create_params)
+          .find_or_initialize_by(find_params)
+
+        vulnerability_finding.save!
+        vulnerability_finding
+      rescue ActiveRecord::RecordNotUnique
+        project.vulnerability_findings.find_by!(find_params)
+      rescue ActiveRecord::RecordInvalid => e
+        Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
+      end
+    end
+
+    def create_or_find_vulnerability_finding_with_fingerprints(finding, create_params)
+      find_params = {
+        scanner: scanners_objects[finding.scanner.key],
+        primary_identifier: identifiers_objects[finding.primary_identifier.key]
+      }
+
+      normalized_fingerprints = finding.fingerprints.map do |fingerprint|
+        ::Vulnerabilities::FindingFingerprint.new(fingerprint.to_h)
+      end
+
+      get_matched_findings = lambda {
+        project.where(**find_params).filter do |vf|
+          vf.matches_fingerprints(normalized_fingerprints)
+        end
+      }
+      matched_findings = get_matched_findings.call
+
+      begin
+        vulnerability_finding = nil
+        if matched_findings.count == 0
+          vulnerability_finding = project.vulnerability_findings.create_with(**create_params, **find_params).new
+          vulnerability_finding.save!
+        else
+          vulnerability_finding = matched_findings.first
+        end
+
+        vulnerability_finding
+      rescue ActiveRecord::RecordNotUnique
+        get_matched_findings.call.first
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
@@ -153,6 +221,13 @@ module Security
     rescue ActiveRecord::RecordNotUnique
     end
     # rubocop: enable CodeReuse/ActiveRecord
+
+    def update_feedbacks(vulnerability_finding, new_uuid)
+      vulnerability_finding.load_feedback.each do |feedback|
+        feedback.uuid = new_uuid
+        feedback.save!
+      end
+    end
 
     def update_finding_fingerprints(finding, vulnerability_finding)
       to_delete = []
