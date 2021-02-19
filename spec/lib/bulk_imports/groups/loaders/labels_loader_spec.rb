@@ -13,7 +13,9 @@ RSpec.describe BulkImports::Groups::Loaders::LabelsLoader do
       {
         'title' => 'label',
         'description' => 'description',
-        'color' => '#FFFFFF'
+        'color' => '#FFFFFF',
+        'created_at' => '2020-01-01T00:00:00Z',
+        'updated_at' => '2020-01-01T00:00:00Z'
       }
     end
 
@@ -25,6 +27,8 @@ RSpec.describe BulkImports::Groups::Loaders::LabelsLoader do
       expect(label.title).to eq(data['title'])
       expect(label.description).to eq(data['description'])
       expect(label.color).to eq(data['color'])
+      expect(label.created_at).to eq(data['created_at'])
+      expect(label.updated_at).to eq(data['updated_at'])
     end
   end
 end

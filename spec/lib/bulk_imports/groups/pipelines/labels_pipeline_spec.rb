@@ -6,6 +6,7 @@ RSpec.describe BulkImports::Groups::Pipelines::LabelsPipeline do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:cursor) { 'cursor' }
+  let(:timestamp) { Time.new(2020, 01, 01).utc }
   let(:entity) do
     create(
       :bulk_import_entity,
@@ -25,7 +26,9 @@ RSpec.describe BulkImports::Groups::Pipelines::LabelsPipeline do
       {
         'title' => title,
         'description' => 'desc',
-        'color' => '#428BCA'
+        'color' => '#428BCA',
+        'created_at' => timestamp.to_s,
+        'updated_at' => timestamp.to_s
       }
     ]
 
@@ -55,6 +58,8 @@ RSpec.describe BulkImports::Groups::Pipelines::LabelsPipeline do
       expect(label.title).to eq('label2')
       expect(label.description).to eq('desc')
       expect(label.color).to eq('#428BCA')
+      expect(label.created_at).to eq(timestamp)
+      expect(label.updated_at).to eq(timestamp)
     end
   end
 
