@@ -1,4 +1,4 @@
-import { omitBy, isUndefined } from 'lodash';
+import { omitBy, isUndefined, get } from 'lodash';
 
 export const STANDARD_CONTEXT = {
   schema: 'iglu:com.gitlab/gitlab_standard/jsonschema/1-0-3',
@@ -28,11 +28,17 @@ const createEventPayload = (el, { suffix = '' } = {}) => {
   let value = el.dataset.trackValue || el.value || undefined;
   if (el.type === 'checkbox' && !el.checked) value = false;
 
+  let context = el.dataset.trackContext;
+  if (el.dataset.trackExperiment) {
+    const data = get(window, ['gon', 'global', 'experiment', el.dataset.trackExperiment]);
+    if (data) context = { schema: 'iglu:com.gitlab/gitlab_experiment/jsonschema/1-0-0', data };
+  }
+
   const data = {
     label: el.dataset.trackLabel,
     property: el.dataset.trackProperty,
     value,
-    context: el.dataset.trackContext,
+    context,
   };
 
   return {
