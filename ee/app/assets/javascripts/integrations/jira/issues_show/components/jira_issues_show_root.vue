@@ -84,6 +84,7 @@ export default {
         <sidebar
           :sidebar-expanded="sidebarExpanded"
           :selected-labels="issue.labels"
+          :due-date="issue.dueDate"
           :reference="issue.references.relative"
         />
       </template>
