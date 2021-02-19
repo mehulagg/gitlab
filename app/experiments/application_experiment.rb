@@ -23,6 +23,11 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
     ))
   end
 
+  def exclude!
+    # this will get moved to the gem.
+    @excluded = true
+  end
+
   def rollout_strategy
     # no-op override in inherited class as desired
   end
