@@ -1,7 +1,7 @@
 const IS_EE = require('./config/helpers/is_ee_env');
 const isESLint = require('./config/helpers/is_eslint');
 
-module.exports = (path) => {
+module.exports = (path, includeTestEnvironment = true) => {
   const reporters = ['default'];
 
   // To have consistent date time parsing both in local and CI environments we set
@@ -71,7 +71,12 @@ module.exports = (path) => {
     return '<rootDir>/coverage-frontend/';
   };
 
+  const testEnvironment = includeTestEnvironment
+    ? { testEnvironment: '<rootDir>/spec/frontend/environment.js' }
+    : {};
+
   return {
+    ...testEnvironment,
     clearMocks: true,
     testMatch,
     moduleFileExtensions: ['js', 'json', 'vue'],
@@ -94,7 +99,7 @@ module.exports = (path) => {
       'node_modules/(?!(@gitlab/ui|@gitlab/favicon-overlay|bootstrap-vue|three|monaco-editor|monaco-yaml|fast-mersenne-twister)/)',
     ],
     timers: 'fake',
-    testEnvironment: '<rootDir>/spec/frontend/environment.js',
+    // testEnvironment: '<rootDir>/spec/frontend/environment.js',
     testEnvironmentOptions: {
       IS_EE,
     },
