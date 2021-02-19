@@ -1,4 +1,4 @@
-mutation updateCurrentIntegration(
+mutation updateCurrentHttpIntegration(
   $id: String
   $name: String
   $active: Boolean

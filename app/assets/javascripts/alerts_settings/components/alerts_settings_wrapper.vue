@@ -131,23 +131,24 @@ export default {
     },
   },
   methods: {
+    isHttp(type) {
+      return type === typeSet.http;
+    },
     createNewIntegration({ type, variables }) {
       const { projectPath } = this;
 
+      const isHttp = this.isHttp(type);
       this.isUpdating = true;
       this.$apollo
         .mutate({
-          mutation:
-            type === typeSet.http
-              ? createHttpIntegrationMutation
-              : createPrometheusIntegrationMutation,
+          mutation: isHttp ? createHttpIntegrationMutation : createPrometheusIntegrationMutation,
           variables: {
             ...variables,
             projectPath,
           },
           update(store, { data }) {
             updateStoreAfterIntegrationAdd(store, getIntegrationsQuery, data, { projectPath });
-            if (type === typeSet.http) {
+            if (isHttp) {
               updateStoreAfterHttpIntegrationAdd(store, getHttpIntegrationsQuery, data, {
                 projectPath,
               });
@@ -188,10 +189,9 @@ export default {
       this.isUpdating = true;
       this.$apollo
         .mutate({
-          mutation:
-            type === this.$options.typeSet.http
-              ? updateHttpIntegrationMutation
-              : updatePrometheusIntegrationMutation,
+          mutation: this.isHttp(type)
+            ? updateHttpIntegrationMutation
+            : updatePrometheusIntegrationMutation,
           variables: {
             ...variables,
             id: this.currentIntegration.id,
@@ -226,16 +226,13 @@ export default {
       this.isUpdating = true;
       this.$apollo
         .mutate({
-          mutation:
-            type === this.$options.typeSet.http
-              ? resetHttpTokenMutation
-              : resetPrometheusTokenMutation,
+          mutation: this.isHttp(type) ? resetHttpTokenMutation : resetPrometheusTokenMutation,
           variables,
         })
         .then(
           ({ data: { httpIntegrationResetToken, prometheusIntegrationResetToken } = {} } = {}) => {
-            const error =
-              httpIntegrationResetToken?.errors[0] || prometheusIntegrationResetToken?.errors[0];
+            const [error] =
+              httpIntegrationResetToken?.errors || prometheusIntegrationResetToken?.errors;
             if (error) {
               return createFlash({ message: error });
             }
@@ -245,13 +242,10 @@ export default {
               prometheusIntegrationResetToken?.integration;
 
             this.$apollo.mutate({
-              mutation:
-                type === this.$options.typeSet.http
-                  ? updateCurrentHttpIntegrationMutation
-                  : updateCurrentPrometheusIntegrationMutation,
-              variables: {
-                ...integration,
-              },
+              mutation: this.isHttp(type)
+                ? updateCurrentHttpIntegrationMutation
+                : updateCurrentPrometheusIntegrationMutation,
+              variables: integration,
             });
 
             return createFlash({
@@ -269,20 +263,18 @@ export default {
     },
     editIntegration({ id, type }) {
       let currentIntegration = this.integrations.list.find((integration) => integration.id === id);
-      if (currentIntegration.type === typeSet.http) {
+      if (this.isHttp(type)) {
         const httpIntegrationMappingData = this.httpIntegrations.list.find(
           (integration) => integration.id === id,
         );
         currentIntegration = { ...currentIntegration, ...httpIntegrationMappingData };
       }
+
       this.$apollo.mutate({
-        mutation:
-          type === this.$options.typeSet.http
-            ? updateCurrentHttpIntegrationMutation
-            : updateCurrentPrometheusIntegrationMutation,
-        variables: {
-          ...currentIntegration,
-        },
+        mutation: this.isHttp(type)
+          ? updateCurrentHttpIntegrationMutation
+          : updateCurrentPrometheusIntegrationMutation,
+        variables: currentIntegration,
       });
     },
     deleteIntegration({ id, type }) {
@@ -317,10 +309,9 @@ export default {
     },
     clearCurrentIntegration({ type }) {
       this.$apollo.mutate({
-        mutation:
-          type === this.$options.typeSet.http
-            ? updateCurrentHttpIntegrationMutation
-            : updateCurrentPrometheusIntegrationMutation,
+        mutation: this.isHttp(type)
+          ? updateCurrentHttpIntegrationMutation
+          : updateCurrentPrometheusIntegrationMutation,
         variables: {},
       });
     },

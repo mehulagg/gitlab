@@ -14,6 +14,7 @@ import {
 } from '@gitlab/ui';
 import { isEmpty, omit } from 'lodash';
 import { s__ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
@@ -90,7 +91,6 @@ export const i18n = {
 };
 
 export default {
-  integrationTypes,
   placeholders: {
     prometheus: targetPrometheusUrlPlaceholder,
   },
@@ -152,7 +152,8 @@ export default {
   },
   data() {
     return {
-      selectedIntegration: integrationTypes[0].value,
+      integrationTypesOptions: Object.values(integrationTypes),
+      selectedIntegration: integrationTypes.none.value,
       active: false,
       formVisible: false,
       integrationTestPayload: {
@@ -212,8 +213,7 @@ export default {
       );
     },
     hasSamplePayload() {
-      const { payloadExample } = this.currentIntegration || {};
-      return payloadExample && !isEmpty(JSON.parse(payloadExample));
+      return this.isValidNonEmptyJSON(this.currentIntegration?.payloadExample);
     },
     canEditPayload() {
       return this.hasSamplePayload && !this.resetPayloadAndMappingConfirmed;
@@ -243,7 +243,8 @@ export default {
   watch: {
     currentIntegration(val) {
       if (val === null) {
-        return this.reset();
+        this.reset();
+        return;
       }
       const { type, active, payloadExample, payloadAlertFields, payloadAttributeMappings } = val;
       this.selectedIntegration = type;
@@ -255,21 +256,30 @@ export default {
 
       if (type === typeSet.http && this.showMappingBuilder) {
         this.parsedPayload = payloadAlertFields;
-        this.integrationTestPayload.json =
-          payloadExample && !isEmpty(JSON.parse(payloadExample)) ? payloadExample : null;
+        this.integrationTestPayload.json = this.isValidNonEmptyJSON(payloadExample)
+          ? payloadExample
+          : null;
         const mapping = payloadAttributeMappings.map((m) => omit(m, '__typename'));
         this.updateMapping(mapping);
       }
-      return this.toggleFormVisibility();
+      this.toggleFormVisibility();
     },
   },
   methods: {
-    toggleFormVisibility() {
-      if (this.selectedIntegration === integrationTypes[0].value) {
-        this.formVisible = false;
-      } else {
-        this.formVisible = true;
+    isValidNonEmptyJSON(JSONString) {
+      if (JSONString) {
+        let parsed;
+        try {
+          parsed = JSON.parse(JSONString);
+        } catch (error) {
+          Sentry.captureException(error);
+        }
+        if (parsed) return !isEmpty(parsed);
       }
+      return false;
+    },
+    toggleFormVisibility() {
+      this.formVisible = this.selectedIntegration !== integrationTypes.none.value;
     },
     submitWithTestPayload() {
       this.$emit('set-test-alert-payload', this.testAlertPayload);
@@ -297,7 +307,7 @@ export default {
       return this.$emit('create-new-integration', integrationPayload);
     },
     reset() {
-      this.selectedIntegration = integrationTypes[0].value;
+      this.selectedIntegration = integrationTypes.none.value;
       this.toggleFormVisibility();
       this.resetPayloadAndMapping();
 
@@ -389,7 +399,7 @@ export default {
         v-model="selectedIntegration"
         :disabled="isSelectDisabled"
         class="mw-100"
-        :options="$options.integrationTypes"
+        :options="integrationTypesOptions"
         @change="toggleFormVisibility"
       />
 

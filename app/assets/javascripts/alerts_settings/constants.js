@@ -40,11 +40,11 @@ export const i18n = {
   integration: s__('AlertSettings|Integration'),
 };
 
-export const integrationTypes = [
-  { value: '', text: s__('AlertSettings|Select integration type') },
-  { value: 'HTTP', text: s__('AlertSettings|HTTP Endpoint') },
-  { value: 'PROMETHEUS', text: s__('AlertSettings|External Prometheus') },
-];
+export const integrationTypes = {
+  none: { value: '', text: s__('AlertSettings|Select integration type') },
+  http: { value: 'HTTP', text: s__('AlertSettings|HTTP Endpoint') },
+  prometheus: { value: 'PROMETHEUS', text: s__('AlertSettings|External Prometheus') },
+};
 
 export const typeSet = {
   http: 'HTTP',

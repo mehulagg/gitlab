@@ -1,29 +1,34 @@
 const projectPath = '';
-export const ID = 'gid://gitlab/AlertManagement::HttpIntegration/7';
+export const HTTP_ID = 'gid://gitlab/AlertManagement::HttpIntegration/7';
+export const PROMETHEUS_ID = 'gid://gitlab/PrometheusService/12';
 export const errorMsg = 'Something went wrong';
 
 export const createHttpVariables = {
   name: 'Test Pre',
   active: true,
   projectPath,
+  type: 'HTTP',
 };
 
 export const updateHttpVariables = {
   name: 'Test Pre',
   active: true,
-  id: ID,
+  id: HTTP_ID,
+  type: 'HTTP',
 };
 
 export const createPrometheusVariables = {
   apiUrl: 'https://test-pre.com',
   active: true,
   projectPath,
+  type: 'PROMETHEUS',
 };
 
 export const updatePrometheusVariables = {
   apiUrl: 'https://test-pre.com',
   active: true,
-  id: ID,
+  id: PROMETHEUS_ID,
+  type: 'PROMETHEUS',
 };
 
 export const getIntegrationsQueryResponse = {
