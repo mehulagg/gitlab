@@ -6,29 +6,28 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Auto DevOps **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/37115) in GitLab 10.0.
 > - Generally available on GitLab 11.0.
 
-Auto DevOps are default CI/CD templates that auto-discover the source code you have. They
-enable GitLab to automatically detect, build, test, deploy, and monitor your applications.
-Leveraging [CI/CD best practices](../../ci/pipelines/pipeline_efficiency.md) and tools,
-Auto DevOps aims to simplify the setup and execution of a mature and modern software
-development lifecycle.
+GitLab Auto DevOps helps to reduce the complexity of software delivery by
+setting up pipelines and integrations for you. Instead of requiring developers
+to manually configure their entire GitLab environment, Auto DevOps configures
+many of these areas for you, such as security auditing and vulnerability
+testing.
 
-## Overview
+Using Auto DevOps, you can:
 
-You can spend a lot of effort to set up the workflow and processes required to
-build, deploy, and monitor your project. It gets worse when your company has
-hundreds, if not thousands, of projects to maintain. With new projects
-constantly starting up, the entire software development process becomes
-impossibly complex to manage.
+- Detect the language of your code.
+- Automatically build, test, and measure code quality.
+- Scan for potential vulnerabilities, security flaws, and licensing issues.
+- Monitor in real-time.
+- Deploy your application.
 
-Auto DevOps provides you a seamless software development process by
-automatically detecting all dependencies and language technologies required to
-test, build, package, deploy, and monitor every project with minimal
-configuration. Automation enables consistency across your projects, seamless
-management of processes, and faster creation of new projects: push your code,
-and GitLab does the rest, improving your productivity and efficiency.
+The functionality of Auto DevOps is based on default CI/CD templates that
+auto-discover your source code. These templates enable GitLab to provide
+consistency across your projects, seamless management of processes, and faster
+creation of new projects. Leveraging [CI/CD best practices](../../ci/pipelines/pipeline_efficiency.md)
+and tools, Auto DevOps lets you push your code, with GitLab doing the rest,
+improving your productivity and efficiency.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an introduction to Auto DevOps, watch [AutoDevOps in GitLab 11.0](https://youtu.be/0Tc0YYBxqi4) or see this [overview](https://about.gitlab.com/stages-devops-lifecycle/auto-devops/).
