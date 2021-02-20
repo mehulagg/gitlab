@@ -634,6 +634,7 @@ Trello
 triaged
 triages
 triaging
+Trivy
 truthy
 Truststore
 Twilio
