@@ -209,7 +209,7 @@ module Security
 
     def update_feedbacks(vulnerability_finding, new_uuid)
       vulnerability_finding.load_feedback.each do |feedback|
-        feedback.uuid = new_uuid
+        feedback.finding_uuid = new_uuid
         feedback.save!
       end
     end

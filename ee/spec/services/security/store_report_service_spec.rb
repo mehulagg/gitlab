@@ -181,7 +181,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'updates fingerprints (if applicable) to match new values' do
-        return unless vulnerability_finding_fingerprints_enabled
+        next unless vulnerability_finding_fingerprints_enabled
 
         existing_fingerprint
         unsupported_fingerprint
