@@ -79,9 +79,11 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
       context 'when sast' do
         let(:params) { { report_type: %w[sast] } }
         let(:sast_report_fingerprints) {pipeline.security_reports.reports['sast'].findings.map(&:location).map(&:fingerprint) }
+        let(:sast_report_uuids) {pipeline.security_reports.reports['sast'].findings.map(&:uuid) }
 
         it 'includes only sast' do
           expect(subject.findings.map(&:location_fingerprint)).to match_array(sast_report_fingerprints)
+          expect(subject.findings.map(&:uuid)).to match_array(sast_report_uuids)
           expect(subject.findings.count).to eq(sast_count)
         end
       end

@@ -90,17 +90,18 @@ module Gitlab
             if ::Feature.enabled?(:vulnerability_finding_fingerprints) && !fingerprints.empty?
               # NOT the fingerprint_sha256 - the compare key is hashed
               # to create the project_fingerprint
-              compare_key = fingerprints.sort_by(&:priority).last.fingerprint_value
+              highest_priority_fingerprint = fingerprints.sort_by(&:priority).last
+              uuid = calculate_uuid_v5(identifiers.first, highest_priority_fingerprint.fingerprint_hex)
             else
-              compare_key = data['cve'] || ''
+              uuid = calculate_uuid_v5(identifiers.first, location&.fingerprint)
             end
 
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
-                uuid: calculate_uuid_v5(identifiers.first, location&.fingerprint),
+                uuid: uuid,
                 report_type: report.type,
                 name: finding_name(data, identifiers, location),
-                compare_key: compare_key,
+                compare_key: compare_key = data['cve'] || '',
                 location: location,
                 severity: parse_severity_level(data['severity']),
                 confidence: parse_confidence_level(data['confidence']),

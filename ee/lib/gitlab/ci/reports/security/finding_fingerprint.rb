@@ -24,7 +24,11 @@ module Gitlab
             Digest::SHA1.digest(fingerprint_value)
           end
 
-          def to_h
+          def fingerprint_hex
+            fingerprint_sha256.unpack("H*")[0]
+          end
+
+          def to_hash
             {
               algorithm_type: algorithm_type,
               fingerprint_sha256: fingerprint_sha256

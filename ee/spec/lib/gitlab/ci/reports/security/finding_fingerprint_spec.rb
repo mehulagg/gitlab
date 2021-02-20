@@ -34,9 +34,9 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingFingerprint do
     end
   end
 
-  describe '#to_h' do
+  describe '#to_hash' do
     it 'returns a hash representation of the fingerprint' do
-      expect(subject.to_h).to eq(
+      expect(subject.to_hash).to eq(
         algorithm_type: params[:algorithm_type],
         fingerprint_sha256: Digest::SHA1.digest(params[:fingerprint_value])
       )

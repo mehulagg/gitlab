@@ -84,6 +84,7 @@ module Security
         finding.project = pipeline.project
         finding.sha = pipeline.sha
         finding.build_scanner(report_finding.scanner&.to_hash)
+        #finding.location = report_finding.location_json
         finding.finding_links = report_finding.links.map do |link|
           Vulnerabilities::FindingLink.new(link.to_hash)
         end
@@ -91,7 +92,7 @@ module Security
           Vulnerabilities::Identifier.new(identifier.to_hash)
         end
         finding.fingerprints = report_finding.fingerprints.map do |fingerprint|
-          Vulnerabilities::FindingFingerprint.new(fingerprint.to_h)
+          Vulnerabilities::FindingFingerprint.new(fingerprint.to_hash)
         end
 
         finding
@@ -123,12 +124,13 @@ module Security
 
     def dismissal_feedback_by_finding_fingerprints(finding)
       potential_uuids = finding.fingerprint_uuids
-      strong_memoize(:dismissal_feedback_by_finding_fingerprints) do
+      matching_feedbacks = strong_memoize(:dismissal_feedback_by_finding_fingerprints) do
         pipeline.project
           .vulnerability_feedback
           .for_dismissal
           .where(finding_uuid: potential_uuids)
       end
+      !matching_feedbacks.empty?
     end
 
     def dismissal_feedback_by_project_fingerprint(finding)

@@ -76,37 +76,15 @@ module Security
       create_vulnerability(vulnerability_finding, pipeline)
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
-    def create_or_find_vulnerability_finding(finding, create_params)
-      find_params = {
-        scanner: scanners_objects[finding.scanner.key],
-        primary_identifier: identifiers_objects[finding.primary_identifier.key],
-        location_fingerprint: finding.location.fingerprint
-      }
-
-      begin
-        vulnerability_finding = project
-          .vulnerability_findings
-          .create_with(create_params)
-          .find_or_initialize_by(find_params)
-
-        vulnerability_finding.save!
-        vulnerability_finding
-      rescue ActiveRecord::RecordNotUnique
-        project.vulnerability_findings.find_by!(find_params)
-      rescue ActiveRecord::RecordInvalid => e
-        Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
-      end
-    end
-
     def create_or_find_vulnerability_finding(finding, create_params)
       if ::Feature.enabled?(:vulnerability_finding_fingerprints)
-        create_or_find_vulnerability_finding_normal(finding, create_params)
-      else
         create_or_find_vulnerability_finding_with_fingerprints(finding, create_params)
+      else
+        create_or_find_vulnerability_finding_normal(finding, create_params)
       end
     end
 
+    # rubocop: disable CodeReuse/ActiveRecord
     def create_or_find_vulnerability_finding_normal(finding, create_params)
       find_params = {
         scanner: scanners_objects[finding.scanner.key],
@@ -131,12 +109,13 @@ module Security
 
     def create_or_find_vulnerability_finding_with_fingerprints(finding, create_params)
       find_params = {
+        uuid: finding.uuid,
         scanner: scanners_objects[finding.scanner.key],
         primary_identifier: identifiers_objects[finding.primary_identifier.key]
       }
 
       normalized_fingerprints = finding.fingerprints.map do |fingerprint|
-        ::Vulnerabilities::FindingFingerprint.new(fingerprint.to_h)
+        ::Vulnerabilities::FindingFingerprint.new(fingerprint.to_hash)
       end
 
       puts "Normalized finding fingerprints:"
@@ -145,7 +124,7 @@ module Security
       end
 
       get_matched_findings = lambda {
-        project.where(**find_params).filter do |vf|
+        project.vulnerability_findings.where(**find_params).filter do |vf|
           vf.matches_fingerprints(normalized_fingerprints)
         end
       }
@@ -155,8 +134,10 @@ module Security
         vulnerability_finding = nil
         if matched_findings.count == 0
           puts "Could not match finding!"
-          vulnerability_finding = project.vulnerability_findings.create_with(**create_params, **find_params).new
-          vulnerability_finding.save!
+          vulnerability_finding = project
+            .vulnerability_findings
+            .create_with(create_params)
+            .find_or_initialize_by(find_params)
         else
           puts "Matched finding!"
           puts "  PORO: #{finding.inspect}"
@@ -165,6 +146,10 @@ module Security
 
           vulnerability_finding = matched_findings.first
         end
+
+        vulnerability_finding.location_fingerprint = finding.location.fingerprint
+        vulnerability_finding.location = create_params.dig(:location)
+        vulnerability_finding.save!
 
         vulnerability_finding
       rescue ActiveRecord::RecordNotUnique
@@ -259,14 +244,14 @@ module Security
         end
 
         poro_fingerprints.delete(fingerprint.algorithm_type)
-        to_update[fingerprint.id] = poro_fingerprint.to_h
+        to_update[fingerprint.id] = poro_fingerprint.to_hash
       end
 
       # any remaining poro fingerprints left are new
       poro_fingerprints.values.each do |poro_fingerprint|
         to_create << {
           finding_id: vulnerability_finding.id,
-          **poro_fingerprint.to_h
+          **poro_fingerprint.to_hash
         }
       end
 

@@ -52,7 +52,7 @@ module Security
         Vulnerabilities::Identifier.new(identifier.to_hash)
       end
       fingerprints = report_finding.fingerprints.map do |fingerprint|
-        Vulnerabilities::FindingFingerprint.new(fingerprint.to_h)
+        Vulnerabilities::FindingFingerprint.new(fingerprint.to_hash)
       end
 
       Vulnerabilities::Finding.new(finding_data).tap do |finding|

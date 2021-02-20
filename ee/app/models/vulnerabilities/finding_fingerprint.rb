@@ -22,6 +22,10 @@ module Vulnerabilities
       priorities[algorithm_type]
     end
 
+    def fingerprint_hex
+      fingerprint_sha256.unpack("H*")[0]
+    end
+
     def priority
       self.class.priority(algorithm_type)
     end
