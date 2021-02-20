@@ -118,11 +118,6 @@ module Security
         ::Vulnerabilities::FindingFingerprint.new(fingerprint.to_hash)
       end
 
-      puts "Normalized finding fingerprints:"
-      normalized_fingerprints.each do |nf|
-        puts "  #{nf.inspect}"
-      end
-
       get_matched_findings = lambda {
         project.vulnerability_findings.where(**find_params).filter do |vf|
           vf.matches_fingerprints(normalized_fingerprints)
@@ -133,17 +128,11 @@ module Security
       begin
         vulnerability_finding = nil
         if matched_findings.count == 0
-          puts "Could not match finding!"
           vulnerability_finding = project
             .vulnerability_findings
             .create_with(create_params)
             .find_or_initialize_by(find_params)
         else
-          puts "Matched finding!"
-          puts "  PORO: #{finding.inspect}"
-          puts " to"
-          puts "   NEW: #{matched_findings.first.inspect}"
-
           vulnerability_finding = matched_findings.first
         end
 

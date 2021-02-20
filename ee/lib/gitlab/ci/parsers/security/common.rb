@@ -27,11 +27,6 @@ module Gitlab
           rescue JSON::ParserError
             raise SecurityReportParserError, 'JSON parsing failed'
           rescue => e
-            puts "SECURITY REPORT PARSING FAILED: #{e}"
-            puts "SECURITY REPORT PARSING FAILED: #{e}"
-            puts "SECURITY REPORT PARSING FAILED: #{e}"
-            puts "SECURITY REPORT PARSING FAILED: #{e}"
-            puts e.backtrace.map{|x|"    #{x}"}.join("\n")
             Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
             raise SecurityReportParserError, "#{report.type} security report parsing failed"
           end
@@ -119,9 +114,6 @@ module Gitlab
           def create_fingerprints(location, tracking)
             return [] if tracking.nil?
 
-            puts "Creating fingerprints for:"
-            puts JSON.pretty_generate(tracking).split("\n").map{|x|"    #{x}"}.join("\n")
-
             fingerprint_algorithms = {}
             tracking['items'].each do |item|
               next unless item.key?('fingerprints')
@@ -133,16 +125,14 @@ module Gitlab
               end
             end
 
+            # use the location's fingerprint_data (aliased to fingerprint_path)
+            # in case no fingerprint values were calculated
             if fingerprint_algorithms.empty?
-              puts "Using location as the fingerprint for now, location: #{location.inspect}"
               fingerprint_algorithms['location'] = [location.fingerprint_path]
             end
 
-            puts "Fingerprint algorithms: #{fingerprint_algorithms.inspect}"
-
-            res = fingerprint_algorithms.map do |algorithm, values|
+            fingerprint_algorithms.map do |algorithm, values|
               value = values.join('|')
-              puts ">> algorithm: #{algorithm.inspect} values: #{values.inspect}"
               begin
                 ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(
                   algorithm_type: algorithm,
@@ -152,12 +142,6 @@ module Gitlab
                 Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
               end
             end.compact
-
-            puts "create_fingerprints result: #{res.inspect}"
-            res
-          rescue StandardError => e
-            puts "Error creating fingerprints: #{e}"
-            puts e.backtrace.map{|x| "    #{x}"}.join("\n")
           end
 
           def create_scan
