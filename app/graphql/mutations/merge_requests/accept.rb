@@ -2,7 +2,7 @@
 
 module Mutations
   module MergeRequests
-    class Merge < Base
+    class Accept < Base
       NOT_MERGEABLE = 'This branch cannot be merged'
       HOOKS_VALIDATION_ERROR = 'Pre-merge hooks failed'
       SHA_MISMATCH = 'The merge-head is not at the anticipated SHA'
@@ -37,9 +37,8 @@ module Mutations
 
       def resolve(project_path:, iid:, **args)
         merge_request = authorized_find!(project_path: project_path, iid: iid)
-        project = merge_request.project
+        project = merge_request.target_project
         merge_params = args.compact
-        auto_merge_requested = merge_params.key?(:auto_merge_strategy)
         merge_service = ::MergeRequests::MergeService.new(project, current_user, merge_params)
 
         if error = validate(merge_request, merge_service, merge_params)
@@ -48,7 +47,7 @@ module Mutations
 
         merge_request.update(merge_error: nil, squash: merge_params[:squash])
 
-        result = if auto_merge_requested
+        result = if merge_params.key?(:auto_merge_strategy)
                    service = AutoMergeService.new(project, current_user, merge_params)
                    if merge_request.auto_merge_enabled?
                      service.update(merge_request)
@@ -69,7 +68,7 @@ module Mutations
           merge_request: merge_request,
           errors: errors
         }
-      rescue MergeError => e
+      rescue ::MergeRequests::MergeBaseService::MergeError => e
         {
           merge_request: merge_request,
           errors: [e.message]

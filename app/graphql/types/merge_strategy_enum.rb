@@ -2,7 +2,7 @@
 
 module Types
   class MergeStrategyEnum < BaseEnum
-    AutoMergeService::STRATEGIES.each do |strat|
+    AutoMergeService.all_strategies_ordered_by_preference.each do |strat|
       value strat.upcase, value: strat
     end
   end
