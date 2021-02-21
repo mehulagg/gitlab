@@ -1,7 +1,8 @@
 <script>
 import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
-import gql from 'graphql-tag';
+import axios from 'axios';
 import produce from 'immer';
+import { last } from 'lodash';
 import { __ } from '~/locale';
 import securityScannersQuery from '../graphql/queries/project_security_scanners.query.graphql';
 import vulnerabilitiesQuery from '../graphql/queries/project_vulnerabilities.query.graphql';
@@ -57,31 +58,53 @@ export default {
       update({ project }) {
         return project?.vulnerabilities.nodes || [];
       },
-      result({ data }) {
-        const client = this.$apollo.getClient();
-        const newData = produce(data, (draftData) => {
-          // eslint-disable-next-line no-param-reassign
-          draftData.project.vulnerabilities.nodes[0].externalIssueLinks.nodes = [
-            {
-              __typename: 'VulnerabilityExternalIssueLink',
-              id: '1',
-              issue: {
-                __typename: 'ExternalIssue',
-                externalTracker: 'jira',
-                webUrl: 'https://mparuszewski-gitlab.atlassian.net/browse/GV-11',
-                title: 'jira',
-                iid: 'JIRA-1',
-              },
-            },
-          ];
-        });
-        client.writeQuery({
-          query: vulnerabilitiesQuery,
-          data: newData,
-          variables: {
-            includeExternalIssueLinks: true,
+      async result({ data }) {
+        const {
+          project: {
+            webUrl,
+            vulnerabilities: { nodes: vulnerabilities },
           },
+        } = data;
+        const getVulnerabilityId = (vulnerability) => last(vulnerability.id.split('/'));
+
+        const vulnerabilityIds = vulnerabilities.map(getVulnerabilityId);
+        const jiraIssuesEndpoint = `${webUrl}/-/integrations/jira/issues`;
+        const issuesQuery = vulnerabilityIds.map((id) => `vulnerability_ids[]=${id}`).join('&');
+        const url = `${jiraIssuesEndpoint}?${issuesQuery}`;
+
+        const res = await axios.get(url);
+
+        const client = this.$apollo.getClient();
+
+        res.data.forEach((jiraIssue) => {
+          const newData = produce(data, (draftData) => {
+            const vulnerability = draftData.project.vulnerabilities.nodes.find((v) => {
+              return getVulnerabilityId(v) === jiraIssue.vulnerability_ids;
+            });
+            // eslint-disable-next-line no-param-reassign
+            vulnerability.externalIssueLinks.nodes.push([
+              {
+                __typename: 'VulnerabilityExternalIssueLink',
+                id: '1',
+                issue: {
+                  __typename: 'ExternalIssue',
+                  externalTracker: 'jira',
+                  webUrl: 'https://mparuszewski-gitlab.atlassian.net/browse/GV-11',
+                  title: 'jira',
+                  iid: 'JIRA-1',
+                },
+              },
+            ]);
+          });
+          client.writeQuery({
+            query: vulnerabilitiesQuery,
+            data: newData,
+            variables: {
+              includeExternalIssueLinks: true,
+            },
+          });
         });
+
         this.pageInfo = preparePageInfo(data?.project?.vulnerabilities?.pageInfo);
       },
       error() {
@@ -133,6 +156,7 @@ export default {
     },
   },
   methods: {
+    fetchJiraIssuesForVulnerabilities() {},
     fetchNextPage() {
       if (this.pageInfo.hasNextPage) {
         this.$apollo.queries.vulnerabilities.fetchMore({

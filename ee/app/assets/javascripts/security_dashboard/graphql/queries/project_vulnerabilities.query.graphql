@@ -15,6 +15,7 @@ query project(
   $includeExternalIssueLinks: Boolean = false
 ) {
   project(fullPath: $fullPath) @connection(key: "project") {
+    webUrl
     vulnerabilities(
       after: $after
       first: $first

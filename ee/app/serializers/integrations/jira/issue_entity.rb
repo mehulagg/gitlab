@@ -76,6 +76,10 @@ module Integrations
         'jira'
       end
 
+      expose :vulnerability_ids do |jira_issue|
+        '416'
+      end
+
       private
 
       # rubocop:disable GitlabSecurity/PublicSend
