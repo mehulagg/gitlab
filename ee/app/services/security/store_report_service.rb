@@ -51,6 +51,7 @@ module Security
 
       vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links, :fingerprints)
       entity_params = Gitlab::Json.parse(vulnerability_params&.dig(:raw_metadata)).slice('description', 'message', 'solution', 'cve', 'location')
+
       vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
 
       update_vulnerability_scanner(finding)
@@ -126,14 +127,12 @@ module Security
       matched_findings = get_matched_findings.call
 
       begin
-        vulnerability_finding = nil
-        if matched_findings.count == 0
+        vulnerability_finding = matched_findings.first
+        if vulnerability_finding.nil?
           vulnerability_finding = project
             .vulnerability_findings
             .create_with(create_params)
             .find_or_initialize_by(find_params)
-        else
-          vulnerability_finding = matched_findings.first
         end
 
         vulnerability_finding.location_fingerprint = finding.location.fingerprint

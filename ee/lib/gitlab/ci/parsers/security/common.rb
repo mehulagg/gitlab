@@ -125,10 +125,10 @@ module Gitlab
               end
             end
 
-            # use the location's fingerprint_data (aliased to fingerprint_path)
+            # use the location's fingerprint_data
             # in case no fingerprint values were calculated
             if fingerprint_algorithms.empty?
-              fingerprint_algorithms['location'] = [location.fingerprint_path]
+              fingerprint_algorithms['location'] = [location.fingerprint_data]
             end
 
             fingerprint_algorithms.map do |algorithm, values|
@@ -205,6 +205,10 @@ module Gitlab
 
           def create_location(location_data)
             raise NotImplementedError
+          end
+
+          def create_tracking_location(tracking_data, fingerprint)
+            Reports::Security::Locations::Tracking.new(tracking_data, fingerprint)
           end
 
           def finding_name(data, identifiers, location)

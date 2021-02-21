@@ -18,8 +18,6 @@ module Gitlab
               @package_version = package_version
             end
 
-            private
-
             def fingerprint_data
               "#{file_path}:#{package_name}"
             end
