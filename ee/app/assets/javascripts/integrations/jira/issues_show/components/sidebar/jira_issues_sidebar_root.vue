@@ -1,4 +1,6 @@
 <script>
+import { labelsFilterParam } from 'ee/integrations/jira/issues_show/constants';
+
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import Assignee from './assignee.vue';
 
@@ -29,6 +31,7 @@ export default {
       return (this.issue?.assignees || [])[0];
     },
   },
+  labelsFilterParam,
 };
 </script>
 
@@ -39,6 +42,7 @@ export default {
     <labels-select
       :selected-labels="issue.labels"
       :labels-filter-base-path="issuesListPath"
+      :labels-filter-param="$options.labelsFilterParam"
       variant="sidebar"
       class="block labels js-labels-block"
     >
