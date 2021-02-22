@@ -1,4 +1,4 @@
-import { GlSearchBoxByType } from '@gitlab/ui';
+import { GlSearchBoxByType, GlDropdown } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
@@ -86,6 +86,7 @@ describe('BoardCardAssigneeDropdown', () => {
         SidebarEditableItem,
         MultiSelectDropdown,
         GlSearchBoxByType,
+        GlDropdown,
       },
     });
   };
