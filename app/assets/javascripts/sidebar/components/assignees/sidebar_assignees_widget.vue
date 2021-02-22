@@ -370,7 +370,7 @@ export default {
                     :label="currentUser.name"
                     :sub-label="currentUser.username"
                     :src="currentUser.avatarUrl"
-                    class="gl-align-items-center"
+                    class="gl-align-items-center gl-pl-6!"
                   />
                 </gl-avatar-link>
               </gl-dropdown-item>
