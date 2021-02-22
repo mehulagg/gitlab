@@ -20766,6 +20766,26 @@ Is encrypted LDAP secrets configured?
 | `tier` | free, premium, ultimate |
 | `skip_validation` | true |
 
+## `settings.operating_system`
+
+Information about the operating system running GitLab
+
+| field | value |
+| --- | --- |
+| `key_path` | **`settings.operating_system`** |
+| `product_section` | enablement |
+| `product_stage` | enablement |
+| `product_group` | `group::distribution` |
+| `product_category` | `collection` |
+| `value_type` | string |
+| `status` | implemented |
+| `milestone` | 13.10 |
+| `introduced_by_url` | [Introduced by](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54778) |
+| `time_frame` | none |
+| `data_source` | Ruby |
+| `distribution` | ce, ee |
+| `tier` | free, premium, ultimate |
+
 ## `signup_enabled`
 
 Whether public signup is enabled

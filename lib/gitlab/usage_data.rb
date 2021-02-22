@@ -242,7 +242,8 @@ module Gitlab
       def system_usage_data_settings
         {
           settings: {
-            ldap_encrypted_secrets_enabled: alt_usage_data(fallback: nil) { Gitlab::Auth::Ldap::Config.encrypted_secrets.active? }
+            ldap_encrypted_secrets_enabled: alt_usage_data(fallback: nil) { Gitlab::Auth::Ldap::Config.encrypted_secrets.active? },
+            operating_system: alt_usage_data { operating_system }
           }
         }
       end
@@ -503,6 +504,19 @@ module Gitlab
         else
           "gitlab-development-kit"
         end
+      end
+
+      def ohai
+        @ohai ||= Ohai::System.new.tap do |oh|
+          oh.all_plugins(['platform'])
+        end.data
+      end
+
+      def operating_system
+        platform = ohai['platform']
+        platform = 'raspbian' if ohai['platform'] == 'debian' && /armv/.match?(ohai['kernel']['machine'])
+
+        "#{platform}-#{ohai['platform_version']}"
       end
 
       def last_28_days_time_period(column: :created_at)
