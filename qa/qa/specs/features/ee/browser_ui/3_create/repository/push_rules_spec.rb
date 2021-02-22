@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Create' do
+  # TODO: Remove :requires_admin meta when `Runtime::Feature.enable` in prepare method is removed
+  RSpec.describe 'Create', :requires_admin do
     context 'Push Rules' do
+      
       describe 'using non signed commits' do
         before(:context) do
           prepare
@@ -197,6 +199,9 @@ module QA
       def prepare
         Flow::Login.sign_in
 
+        # TODO: Remove :requires_admin meta in describe blocks when `Runtime::Feature.enable` is removed
+        Runtime::Feature.enable(:invite_members_group_modal, project: @project)
+
         @creator = Resource::User.fabricate_via_api! do |user|
           user.username = Runtime::User.username
           user.password = Runtime::User.password
@@ -212,8 +217,6 @@ module QA
         @project = Resource::Project.fabricate_via_api! do |project|
           project.name = 'push_rules'
         end
-
-        Runtime::Feature.enable(:invite_members_group_modal, project: @project)
 
         Resource::Repository::ProjectPush.fabricate! do |push|
           push.project = @project

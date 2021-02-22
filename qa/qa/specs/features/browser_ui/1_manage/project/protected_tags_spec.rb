@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Manage' do
+  # TODO: Remove :requires_admin meta when `Runtime::Feature.enable` method in before block is removed
+  RSpec.describe 'Manage', :requires_admin do
     describe 'Repository tags' do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
@@ -11,6 +12,7 @@ module QA
       end
 
       before do
+        # TODO: Remove :requires_admin meta in describe block when `Runtime::Feature.enable` is removed
         Runtime::Feature.enable(:invite_members_group_modal, project: project)
       end
 
