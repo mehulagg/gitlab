@@ -18,7 +18,8 @@ RSpec.describe API::Ci::Runner do
                 engine: { name: 'kv-v2', path: 'kv-v2' },
                 path: 'production/db',
                 field: 'password'
-              }
+              },
+              file: true
             }
           }
         end
@@ -70,7 +71,8 @@ RSpec.describe API::Ci::Runner do
                         'engine' => { 'name' => 'kv-v2', 'path' => 'kv-v2' },
                         'path' => 'production/db',
                         'field' => 'password'
-                      }
+                      },
+                      'file' => true
                     }
                   }
                 )

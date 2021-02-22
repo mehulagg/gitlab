@@ -116,6 +116,18 @@ After GitLab fetches the secret from Vault, the value is saved in a temporary fi
 The path to this file is stored in a CI/CD variable named `DATABASE_PASSWORD`,
 similar to [variables of type `file`](../variables/README.md#custom-cicd-variables-of-type-file).
 
+You can set the `file` option explicitly to overwrite the default behavior. For example by defining:
+
+```yaml
+secrets:
+  DATABASE_PASSWORD:
+    vault: production/db/password@ops  # translates to secret `ops/data/production/db`, field `password`
+    file: false
+```
+
+the secret value will be put directly in `DATABASE_PASSWORD` variable instead of pointing to a file
+that holds it.
+
 For more information about the supported syntax, read the
 [`.gitlab-ci.yml` reference](../yaml/README.md#secretsvault).
 

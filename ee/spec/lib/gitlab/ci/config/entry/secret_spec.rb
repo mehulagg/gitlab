@@ -21,16 +21,35 @@ RSpec.describe Gitlab::Ci::Config::Entry::Secret do
         }
       end
 
-      describe '#value' do
-        it 'returns secret configuration' do
-          expect(entry.value).to eq(config)
+      shared_examples 'configures secrets' do
+        describe '#value' do
+          it 'returns secret configuration' do
+            expect(entry.value).to eq(config)
+          end
+        end
+
+        describe '#valid?' do
+          it 'is valid' do
+            expect(entry).to be_valid
+          end
         end
       end
 
-      describe '#valid?' do
-        it 'is valid' do
-          expect(entry).to be_valid
+      it_behaves_like 'configures secrets'
+
+      context 'when file setting is defined' do
+        let(:config) do
+          {
+            vault: {
+              engine: { name: 'kv-v2', path: 'kv-v2' },
+              path: 'production/db',
+              field: 'password'
+            },
+            file: true
+          }
         end
+
+        it_behaves_like 'configures secrets'
       end
     end
   end

@@ -4242,6 +4242,26 @@ job:
       vault: production/db/password@ops  # translates to secret `ops/data/production/db`, field `password`
 ```
 
+By default the secret will be passed to the job context as
+[a `file` type variable](../variables/README.md#custom-cicd-variables-of-type-file). In that case the value of the
+secret will be stored in a file and the variable `DATABASE_PASSWORD` will contain a path to this file.
+
+However, some software is unable to work with file variables and may require the secret value to be stored
+directly in the environment variable. For that a `file` setting may be defined:
+
+```yaml
+job:
+  secrets:
+    DATABASE_PASSWORD:
+      vault: production/db/password@ops  # translates to secret `ops/data/production/db`, field `password`
+      file: false
+```
+
+By setting it to `file: false` the default behavior can be changed.
+
+Please note that the `file` is a setting of the secret, not `vault` section. Therefore it should be added
+directly under the variable name level and not within `vault` configuration.
+
 In the detailed form of the syntax, you can specify all details explicitly:
 
 ```yaml
@@ -4254,6 +4274,7 @@ job:
           path: ops
         path: production/db
         field: password
+      file: true
 ```
 
 ### `pages`
