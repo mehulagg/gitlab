@@ -58,6 +58,7 @@ module EE
         mount_mutation ::Mutations::Namespaces::IncreaseStorageTemporarily
         mount_mutation ::Mutations::QualityManagement::TestCases::Create
         mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Create
+        mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::BulkFindOrCreate
         mount_mutation ::Mutations::Admin::Analytics::DevopsAdoption::Segments::Delete
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Create
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Update
