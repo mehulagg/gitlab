@@ -281,6 +281,9 @@ export default {
     collapseWidget() {
       this.$refs.toggle.collapse();
     },
+    showDivider(list) {
+      return list.length > 0 && this.isSearchEmpty;
+    },
   },
 };
 </script>
@@ -340,7 +343,7 @@ export default {
                 }}</span></gl-dropdown-item
               >
             </template>
-            <gl-dropdown-divider v-if="selectedFiltered.length > 0 && isSearchEmpty" />
+            <gl-dropdown-divider v-if="showDivider(selectedFiltered)" />
             <gl-dropdown-item
               v-for="item in selectedFiltered"
               :key="item.id"
@@ -376,7 +379,7 @@ export default {
                 </gl-avatar-link>
               </gl-dropdown-item>
             </template>
-            <gl-dropdown-divider v-if="unselectedFiltered.length > 0 && isSearchEmpty" />
+            <gl-dropdown-divider v-if="showDivider(unselectedFiltered)" />
             <gl-dropdown-item
               v-for="unselectedUser in unselectedFiltered"
               :key="unselectedUser.id"
