@@ -53,9 +53,11 @@ export const MISSING_OR_DELETED_IMAGE_TITLE = s__(
 export const MISSING_OR_DELETED_IMAGE_MESSAGE = s__(
   'ContainerRegistry|The requested image repository does not exist or has been deleted. If you think this is an error, try refreshing the page.',
 );
-export const MISSING_OR_DELETE_IMAGE_BREADCRUMB = s__(
+
+export const MISSING_OR_DELETED_IMAGE_BREADCRUMB = s__(
   'ContainerRegistry|Image repository not found',
 );
+export const IMAGE_WITH_MISSING_NAME_BREADCRUMB = s__('ContainerRegistry|Root image');
 
 export const ADMIN_GARBAGE_COLLECTION_TIP = s__(
   'ContainerRegistry|Remember to run %{docLinkStart}garbage collection%{docLinkEnd} to remove the stale data from storage.',
