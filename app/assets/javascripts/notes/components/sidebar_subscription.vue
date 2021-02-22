@@ -28,7 +28,7 @@ export default {
     },
   },
   created() {
-    if (this.noteableData.noteableType.toLowerCase() !== constants.ISSUE_NOTEABLE_TYPE) {
+    if (this.issuableType !== constants.ISSUE_NOTEABLE_TYPE) {
       return;
     }
 

@@ -49,6 +49,6 @@ export default {
       class="sidebar-item-icon inline hide-collapsed"
       :class="{ 'is-active': confidential }"
     />
-    <span class="hide-collapsed">{{ confidentialText }}</span>
+    <span class="hide-collapsed" data-testid="confidential-text">{{ confidentialText }}</span>
   </div>
 </template>

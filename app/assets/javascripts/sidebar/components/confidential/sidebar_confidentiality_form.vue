@@ -40,6 +40,11 @@ export default {
       }
       return this.confidential ? __('Turn Off') : __('Turn On');
     },
+    warningMessage() {
+      return this.confidential
+        ? this.$options.i18n.confidentialityOffWarning
+        : this.$options.i18n.confidentialityOnWarning;
+    },
   },
   methods: {
     submitForm() {
@@ -86,16 +91,8 @@ export default {
   <div class="dropdown show">
     <div class="dropdown-menu sidebar-item-warning-message">
       <div>
-        <p v-if="!confidential">
-          <gl-sprintf :message="$options.i18n.confidentialityOnWarning">
-            <template #strong="{ content }">
-              <strong>{{ content }}</strong>
-            </template>
-            <template #issuableType>{{ issuableType }}</template>
-          </gl-sprintf>
-        </p>
-        <p v-else>
-          <gl-sprintf :message="$options.i18n.confidentialityOffWarning">
+        <p data-testid="warning-message">
+          <gl-sprintf :message="warningMessage">
             <template #strong="{ content }">
               <strong>{{ content }}</strong>
             </template>
@@ -103,7 +100,7 @@ export default {
           </gl-sprintf>
         </p>
         <div class="sidebar-item-warning-message-actions">
-          <gl-button class="gl-mr-3" @click="$emit('closeForm')">
+          <gl-button class="gl-mr-3" data-testid="confidential-cancel" @click="$emit('closeForm')">
             {{ __('Cancel') }}
           </gl-button>
           <gl-button

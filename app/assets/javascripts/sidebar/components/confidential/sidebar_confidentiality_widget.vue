@@ -52,7 +52,7 @@ export default {
         };
       },
       update(data) {
-        return data.workspace?.issuable?.confidential;
+        return data.workspace?.issuable?.confidential || false;
       },
       error() {
         createFlash({
