@@ -208,12 +208,12 @@ Then, you can run `npm publish` either locally or by using GitLab CI/CD.
 
 When you use the [instance-level endpoint](#use-the-gitlab-endpoint-for-npm-packages), only the packages with names in the format of `@scope/package-name` are available.
 
-- The `@scope` is the root namespace of the GitLab project. To follow NPM convention, it should be
+- The `@scope` is the root namespace of the GitLab project. To follow npm's convention, it should be
   lowercase. However, the GitLab package registry allows for uppercase. Before GitLab 13.10, the
-  GitLab `@scope` had to be a case-sensitive match of the NPM package's scope. This was problematic
-  because the NPM public registry does not allow uppercase letters. GitLab 13.10 relaxes this
-  requirement and translates uppercase in the GitLab `@scope` to lowercase for NPM. For example, a
-  package `@MyScope/package-name` in GitLab becomes `@myscope/package-name` for NPM.
+  `@scope` had to be a case-sensitive match of your GitLab namespace or group. This was problematic
+  because the npm public registry does not allow uppercase letters. GitLab 13.10 relaxes this
+  requirement and translates uppercase in the GitLab `@scope` to lowercase for npm. For example, a
+  package `@MyScope/package-name` in GitLab becomes `@myscope/package-name` for npm.
 - The `package-name` can be whatever you want.
 
 For example, if your project is `https://gitlab.example.com/my-org/engineering-group/team-amazing/analytics`,
