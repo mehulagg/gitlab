@@ -22,6 +22,10 @@ module Banzai
         # Remove any `style` properties not required for table alignment
         allowlist[:transformers].push(self.class.remove_unsafe_table_style)
 
+        # Remove any `class` property not required for a
+        allowlist[:attributes]['a'].push('class')
+        allowlist[:transformers].push(self.class.remove_unsafe_a_class)
+
         # Allow `id` in a and li elements for footnotes
         # and remove any `id` properties not matching for footnotes
         allowlist[:attributes]['a'].push('id')
@@ -58,6 +62,19 @@ module Banzai
             return if node.name == 'li' && node['id'] =~ Banzai::Filter::FootnoteFilter::FOOTNOTE_LI_REFERENCE_PATTERN
 
             node.remove_attribute('id')
+          end
+        end
+
+        def remove_unsafe_a_class
+          lambda do |env|
+            node = env[:node]
+
+            return unless node.name == 'a'
+            return unless node.has_attribute?('class')
+
+            return if node['class'] == Banzai::Filter::JiraPrivateImageLinkFilter::CSS_WITH_ATTACHMENT_ICON
+
+            node.remove_attribute('class')
           end
         end
       end
