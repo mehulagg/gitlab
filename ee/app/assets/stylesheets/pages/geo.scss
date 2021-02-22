@@ -28,3 +28,9 @@
     }
   }
 }
+
+.gl-md-w-auto{
+  @include media-breakpoint-up(md) {
+    width: auto !important;
+  }
+}

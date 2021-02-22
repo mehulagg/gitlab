@@ -1889,6 +1889,9 @@ msgstr ""
 msgid "Add request manually"
 msgstr ""
 
+msgid "Add site"
+msgstr ""
+
 msgid "Add strikethrough text"
 msgstr ""
 
@@ -13288,9 +13291,6 @@ msgstr ""
 msgid "Geo Nodes"
 msgstr ""
 
-msgid "Geo Nodes Beta"
-msgstr ""
-
 msgid "Geo Nodes|Cannot remove a primary node if there is a secondary node"
 msgstr ""
 
@@ -22577,6 +22577,9 @@ msgstr ""
 msgid "Primary"
 msgstr ""
 
+msgid "Primary site"
+msgstr ""
+
 msgid "Print codes"
 msgstr ""
 
@@ -26172,6 +26175,9 @@ msgid "Seats usage data is updated every day at 12:00pm UTC"
 msgstr ""
 
 msgid "Secondary"
+msgstr ""
+
+msgid "Secondary site"
 msgstr ""
 
 msgid "Seconds"
@@ -33604,6 +33610,9 @@ msgid "Will be mapped to"
 msgstr ""
 
 msgid "Will deploy to"
+msgstr ""
+
+msgid "With GitLab Geo, you can install a special read-only and replicated instance anywhere."
 msgstr ""
 
 msgid "With requirements, you can set criteria to check your products against."
