@@ -3,7 +3,7 @@
 module Snippets
   class UpdateRepositoryStorageWorker # rubocop:disable Scalability/IdempotentWorker
     extend ::Gitlab::Utils::Override
-    include UpdateRepositoryStorageWorker
+    include ::UpdateRepositoryStorageWorker
 
     private
 
