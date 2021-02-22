@@ -611,31 +611,6 @@ Here's an example SAST report:
 }
 ```
 
-## Secret detection
-
-Learn more about [Secret Detection](../secret_detection).
-
-## Security Dashboard **(ULTIMATE)**
-
-The Security Dashboard is a good place to get an overview of all the security
-vulnerabilities in your groups, projects and pipelines. Read more about the
-[Security Dashboard](../security_dashboard/index.md).
-
-## Interacting with the vulnerabilities **(ULTIMATE)**
-
-Once a vulnerability is found, you can interact with it. Read more on how to
-[interact with the vulnerabilities](../index.md#interacting-with-the-vulnerabilities).
-
-## Vulnerabilities database
-
-Vulnerabilities contained in the vulnerability database can be searched
-and viewed at the [GitLab vulnerability advisory database](https://advisories.gitlab.com).
-
-### Vulnerabilities database update
-
-For more information about the vulnerabilities database update, check the
-[maintenance table](../index.md#maintenance-and-update-of-the-vulnerabilities-database).
-
 ## Running SAST in an offline environment
 
 For self-managed GitLab instances in an environment with limited, restricted, or intermittent access
