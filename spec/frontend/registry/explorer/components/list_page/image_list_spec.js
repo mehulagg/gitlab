@@ -49,7 +49,7 @@ describe('Image List', () => {
     it('does not pass "first" attribute -hiding the top border as a result- ', () => {
       mountComponent({ metadataLoading: true });
 
-      expect(findRow().at(0).attributes('first')).toBe(undefined);
+      expect(findRow().at(0).attributes('first')).toBeUndefined();
     });
   });
 
