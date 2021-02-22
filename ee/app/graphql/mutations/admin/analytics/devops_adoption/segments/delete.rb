@@ -8,18 +8,25 @@ module Mutations
           class Delete < BaseMutation
             include Mixins::CommonMethods
 
-            graphql_name 'DeleteDevopsAdoptionSegment'
+            graphql_name 'DeleteDevopsAdoptionSegments'
 
-            argument :id, ::Types::GlobalIDType[::Analytics::DevopsAdoption::Segment],
+            argument :ids, [::Types::GlobalIDType[::Analytics::DevopsAdoption::Segment]],
               required: true,
-              description: "ID of the segment."
+              description: "IDs of the segments to delete."
 
-            def resolve(id:, **)
-              response = ::Analytics::DevopsAdoption::Segments::DeleteService
-                .new(segment: id.find, current_user: current_user)
-                .execute
+            def resolve(ids:, **)
+              segments = GlobalID::Locator.locate_many(ids)
 
-              { errors: errors_on_object(response.payload[:segment]) }
+              with_authorization_handler do
+                service = ::Analytics::DevopsAdoption::Segments::BulkDeleteService
+                  .new(segments: segments, current_user: current_user)
+
+                response = service.execute
+
+                errors = response.payload[:segments].sum { |segment| errors_on_object(segment) }
+
+                { errors: errors }
+              end
             end
           end
         end

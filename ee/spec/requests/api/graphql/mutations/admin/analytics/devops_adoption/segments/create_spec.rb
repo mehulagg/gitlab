@@ -42,5 +42,6 @@ RSpec.describe Mutations::Admin::Analytics::DevopsAdoption::Segments::Create do
 
     segment = mutation_response['segment']
     expect(segment['namespace']['name']).to eq('bbbb')
+    expect(::Analytics::DevopsAdoption::Segment.joins(:namespace).where(namespaces: { name: 'bbbb' }).count).to eq(1)
   end
 end
