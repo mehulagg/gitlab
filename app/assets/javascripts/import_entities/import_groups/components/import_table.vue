@@ -206,7 +206,7 @@ export default {
           />
           <gl-dropdown category="tertiary" class="gl-ml-auto">
             <template #button-content>
-              <span class="font-weight-bold">{{ activePageSizeOptionText }}</span>
+              <span class="gl-font-weight-bold">{{ activePageSizeOptionText }}</span>
               <gl-icon class="gl-button-icon dropdown-chevron" name="chevron-down" />
             </template>
             <gl-dropdown-item
