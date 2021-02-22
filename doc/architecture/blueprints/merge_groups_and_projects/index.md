@@ -8,7 +8,7 @@ description: 'Merge groups and projects'
 
 # Merging Group and Project
 
-There is are numerous features that exist exclusively within groups or
+There are numerous features that exist exclusively within groups or
 projects. The boundary between group and project features used to be clear.
 However there is growing demand to have group features within projects, and
 project features within groups. For example, having issues in groups, and epics
