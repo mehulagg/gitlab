@@ -471,14 +471,22 @@ RSpec.describe ExpandVariables do
         end
 
         with_them do
-          subject do
-            coll = Gitlab::Ci::Variables::Collection.new(variables)
+          let!(:collection) { Gitlab::Ci::Variables::Collection.new(variables) }
 
-            ExpandVariables.expand_variables_collection(coll, project_with_flag_enabled)
+          subject! do
+            ExpandVariables.expand_variables_collection(collection, project_with_flag_enabled)
           end
 
           it 'expands variables' do
             is_expected.to eq(result)
+          end
+
+          it 'preserves raw attribute' do
+            collection.each do |v|
+              k = v[:key]
+              subject_item = subject.find { |sv| sv[:key] == k }
+              expect(subject_item.raw).to eq(v.raw)
+            end
           end
         end
       end
