@@ -1,3 +1,5 @@
+export const MOCK_NEW_NODE_URL = 'http://localhost:3000/admin/geo/nodes/new';
+
 export const MOCK_PRIMARY_VERSION = {
   version: '10.4.0-pre',
   revision: 'b93c51849b',
