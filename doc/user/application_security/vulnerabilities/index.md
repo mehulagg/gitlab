@@ -40,7 +40,15 @@ the following values:
 A timeline shows you when the vulnerability status has changed
 and allows you to comment on a change.
 
-## Create a GitLab issue for a vulnerability
+## Create an issue for a vulnerability
+
+To resolve a vulnerability may require source code changes or other work. To track
+the required work you can create an issue. The default is to create a GitLab issue. However, if
+[Jira integration](../../project/integrations/jira_integrations.md) is enabled on the project, the
+issue is created in Jira. Note that when Jira integration is enabled, GitLab issues are not
+available.
+
+### Create a GitLab issue for a vulnerability
 
 To create a GitLab issue for a vulnerability:
 
@@ -50,7 +58,7 @@ To create a GitLab issue for a vulnerability:
 An issue is created in the project, prepopulated with information from the vulnerability report.
 The issue is then opened so you can take further action.
 
-## Create a Jira issue for a vulnerability
+### Create a Jira issue for a vulnerability
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4677) in GitLab 13.9.
 > - It's [deployed behind a feature flag](../../../user/feature_flags.md), enabled by default.
