@@ -202,17 +202,14 @@ In the Merge Request Diff UI, you can:
 When commenting on a diff, you can select which lines of code your comment refers
 to by either:
 
+![Comment on any diff file line](img/comment-on-any-diff-line_v13_10.png)
+
 - Clicking and dragging the **{comment}** **comment** icon in the gutter to highlight
   lines in the diff. GitLab expands the diff lines and displays a comment box.
-
-  ![Comment on any diff file line](img/comment-on-any-diff-line.png)
-
 - After starting a comment by clicking the **{comment}** **comment** icon in the
   gutter, select the first line number your comment refers to in the **Commenting on lines**
   select box. New comments default to single-line comments, unless you select
   a different starting line.
-
-  ![Multiline comment selection highlighted](img/multiline-comment-highlighted.png)
 
 Multiline comments display the comment's line numbers above the body of the comment:
 
