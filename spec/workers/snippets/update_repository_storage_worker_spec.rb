@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe SnippetUpdateRepositoryStorageWorker do
+RSpec.describe Snippets::UpdateRepositoryStorageWorker do
   subject { described_class.new }
 
   it_behaves_like 'an update storage move worker' do

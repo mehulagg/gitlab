@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe SnippetScheduleBulkRepositoryShardMovesWorker do
+RSpec.describe Snippets::ScheduleBulkRepositoryShardMovesWorker do
   it_behaves_like 'schedules bulk repository shard moves' do
     let_it_be_with_reload(:container) { create(:snippet, :repository).tap { |snippet| snippet.create_repository } }
 
