@@ -197,6 +197,9 @@ RSpec.describe 'Promotions', :js do
       expect(page).to have_selector('.js-weight-sidebar-callout')
       within 'div.js-weight-sidebar-callout' do
         find('.btn-link.js-toggle-button.js-weight-sidebar-callout').click
+        wait_for('Popup to show up') do
+          page.has_content?('Don't show me this again', wait: 0)
+        end
         click_link "Don't show me this again"
       end
       wait_for_requests
