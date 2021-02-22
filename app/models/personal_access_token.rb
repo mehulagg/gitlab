@@ -4,7 +4,6 @@ class PersonalAccessToken < ApplicationRecord
   include Expirable
   include TokenAuthenticatable
   include Sortable
-  include EachBatch
   extend ::Gitlab::Utils::Override
 
   add_authentication_token_field :token, digest: true
