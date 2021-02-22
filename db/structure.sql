@@ -13195,7 +13195,8 @@ CREATE TABLE incident_management_oncall_participants (
     oncall_rotation_id bigint NOT NULL,
     user_id bigint NOT NULL,
     color_palette smallint NOT NULL,
-    color_weight smallint NOT NULL
+    color_weight smallint NOT NULL,
+    removed_at timestamp with time zone
 );
 
 CREATE SEQUENCE incident_management_oncall_participants_id_seq
@@ -22400,6 +22401,7 @@ CREATE UNIQUE INDEX index_inc_mgmnt_oncall_rotations_on_oncall_schedule_id_and_n
 CREATE INDEX index_incident_management_oncall_schedules_on_project_id ON incident_management_oncall_schedules USING btree (project_id);
 
 CREATE INDEX index_incident_management_oncall_shifts_on_participant_id ON incident_management_oncall_shifts USING btree (participant_id);
+CREATE INDEX index_incident_management_oncall_participants_on_removed_at ON incident_management_oncall_participants USING btree (removed_at);
 
 CREATE UNIQUE INDEX index_index_statuses_on_project_id ON index_statuses USING btree (project_id);
 

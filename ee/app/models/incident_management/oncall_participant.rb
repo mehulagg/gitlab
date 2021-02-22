@@ -20,5 +20,12 @@ module IncidentManagement
     validates :user, presence: true, uniqueness: { scope: :oncall_rotation_id }
 
     delegate :project, to: :rotation, allow_nil: true
+
+    scope :not_removed, -> { where(removed_at: nil) }
+    scope :removed, -> { where('removed_at is NOT NULL') }
+
+    def mark_as_removed
+      update_column(:removed_at, Time.current)
+    end
   end
 end
