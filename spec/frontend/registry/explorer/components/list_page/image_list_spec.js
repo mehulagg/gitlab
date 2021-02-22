@@ -42,14 +42,7 @@ describe('Image List', () => {
 
     it('passes down the metadataLoading prop', () => {
       mountComponent({ metadataLoading: true });
-
       expect(findRow().at(0).props('metadataLoading')).toBe(true);
-    });
-
-    it('does not pass "first" attribute -hiding the top border as a result- ', () => {
-      mountComponent({ metadataLoading: true });
-
-      expect(findRow().at(0).attributes('first')).toBeUndefined();
     });
   });
 
