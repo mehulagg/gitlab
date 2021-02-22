@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ProjectRepositoryStorageMove, type: :model do
+RSpec.describe Projects::RepositoryStorageMove, type: :model do
   let_it_be_with_refind(:project) { create(:project) }
 
   it_behaves_like 'handles repository moves' do
