@@ -31,7 +31,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-display-flex gl-flex-direction-column">
+  <div class="gl-display-flex gl-flex-direction-column issuable-assignees">
     <div v-if="emptyUsers" data-testid="none">
       <span> {{ __('None') }} -</span>
       <gl-button
