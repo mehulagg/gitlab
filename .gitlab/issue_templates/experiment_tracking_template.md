@@ -5,7 +5,8 @@
 Track the status of an experiment through to removal.
 
 1. Experiment key: `<experiment-key>`
-1. Feature flag name: `<experiment-key>_experiment_percentage`
+1. Framework: `experimentation.rb` | `gitlab_experiment`
+1. Feature flag name: <experiment-key>_experiment_percentage` | `<experiment-key>`
 
 This is an experiment tracking issue for: `<issue or epic link>` 
 using the scoped [experiment label](https://about.gitlab.com/handbook/engineering/development/growth/#experiment-tracking-issue).
@@ -26,17 +27,23 @@ As well as defining the experiment rollout and cleanup, this issue incorporates 
 ### What might happen if this goes wrong?
 
 ### What can we monitor to detect problems with this?
+<!-- Which dashboards from https://dashboards.gitlab.net are most relevant? Sentry errors reports can alse be useful to review -->
 
-## Staging Test
-To force this experiment on staging use `?force_experiment=<experiment-key>`
+### Tracked data
+<!-- brief description or link to issue or Sisense dashboard -->
 
+### Staging Test
+<!-- For experiments using `experimentation.rb`: To force this experiment on staging use `?force_experiment=<experiment-key>` -->
 <!-- list any steps required to setup this experiment, and link to a separate Staging environment test issue is applicable -->
 
 <!-- uncomment if testing with specific groups/projects on GitLab.com
 ## Beta groups/projects
 
-* ...
-* ...
+If applicable, any groups/projects that are happy to have this feature turned on early. Some organizations may wish to test big changes they are interested in with a small subset of users ahead of time for example.
+
+- `gitlab-org/gitlab` project
+- `gitlab-org`/`gitlab-com` groups
+- ...
 -->
 
 ### Experiment tracking log
@@ -52,13 +59,10 @@ To force this experiment on staging use `?force_experiment=<experiment-key>`
 
 * YYYY-MM-DD UTC - initial rollout to 20% of users
 * TBD - review - increase to 50% of users
---> 
-
-### Tracked data
-<!-- brief description or link to issue or Sisense dashboard -->
+-->
 
 ### Experiment Results
-<!-- update when experiment in/validated -->
+<!-- update when experiment in/validated, set the scoped `~experiment::` status accordingly -->
 
 ## Roll Out Steps
 
@@ -73,8 +77,16 @@ To force this experiment on staging use `?force_experiment=<experiment-key>`
 - [ ] Enable on GitLab.com by running chatops command in `#production` (`/chatops run feature set feature_name true`)
 - [ ] Cross post chatops Slack command to `#support_gitlab-com` ([more guidance when this is necessary in the dev docs](https://docs.gitlab.com/ee/development/feature_flags/controls.html#where-to-run-commands)) and in your team channel
 - [ ] Announce on the issue that the flag has been enabled
-* [ ] Remove experiment code and feature flag and add changelog entry - a separate [cleanup issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_template=Experiment%20Successful%20Cleanup) might be required
+- [ ] Remove experiment code and feature flag and add changelog entry - a separate [cleanup issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_template=Experiment%20Successful%20Cleanup) might be required
 - [ ] After the flag removal is deployed, [clean up the feature flag](https://docs.gitlab.com/ee/development/feature_flags/controls.html#cleaning-up) by running chatops command in `#production` channel
+
+## Rollback Steps
+
+- [ ] This feature can be disabled by running the following Chatops command:
+
+```
+/chatops run feature set feature_name false
+```
 
 /label ~"feature flag" ~"devops::growth" ~"growth experiment" ~"experiment tracking" ~Engineering ~"workflow::scheduling" ~"experiment::pending"
 
