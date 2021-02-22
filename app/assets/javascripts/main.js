@@ -29,6 +29,7 @@ import { getLocationHash, visitUrl } from './lib/utils/url_utility';
 
 // everything else
 import initFeatureHighlight from './feature_highlight';
+import initFormErrors from './form_errors';
 import LazyLoader from './lazy_loader';
 import { __ } from './locale';
 import initLogoAnimation from './logo';
@@ -116,6 +117,7 @@ function deferredInitialisation() {
   initPersistentUserCallouts();
   initDefaultTrackers();
   initFeatureHighlight();
+  initFormErrors();
 
   const search = document.querySelector('#search');
   if (search) {

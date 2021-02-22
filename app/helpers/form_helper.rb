@@ -4,6 +4,16 @@ module FormHelper
   def form_errors(model, type: 'form', truncate: [])
     return unless model.errors.any?
 
+    Feature.enabled?(:new_form_errors) ? new_form_errors(model, type, truncate) : form_errors_legacy(model, type, truncate)
+  end
+
+  def new_form_errors(model, type, truncate)
+    content_tag(:div, nil, class: 'js-form-errors-explanation', data: { errors: model.errors.full_messages, truncate: truncate, type: type })
+  end
+
+  def form_errors_legacy(model, type, truncate)
+    return unless model.errors.any?
+
     headline = n_('The %{type} contains the following error:', 'The %{type} contains the following errors:', model.errors.count) % { type: type }
     truncate = Array.wrap(truncate)
 
