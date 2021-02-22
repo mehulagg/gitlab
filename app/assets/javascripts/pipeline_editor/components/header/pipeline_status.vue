@@ -2,6 +2,7 @@
 import { GlIcon, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { s__ } from '~/locale';
+import { truncateSha } from '~/lib/utils/text_utility';
 import getCommitSha from '~/pipeline_editor/graphql/queries/client/commit_sha.graphql';
 import getPipelineQuery from '~/pipeline_editor/graphql/queries/client/pipeline.graphql';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
@@ -38,13 +39,11 @@ export default {
         };
       },
       update: (data) => {
-        const { id, commitPath = '', shortSha = '', detailedStatus = {} } =
-          data.project?.pipeline || {};
+        const { id, commitPath = '', detailedStatus = {} } = data.project?.pipeline || {};
 
         return {
           id,
           commitPath,
-          shortSha,
           detailedStatus,
         };
       },
@@ -61,10 +60,10 @@ export default {
   },
   computed: {
     hasPipelineData() {
-      return Boolean(this.$apollo.queries.pipeline?.id);
+      return Boolean(this.pipeline?.id);
     },
     isQueryLoading() {
-      return this.$apollo.queries.pipeline.loading && !this.hasPipelineData;
+      return this.$apollo.queries.pipeline.loading || !this.hasPipelineData;
     },
     status() {
       return this.pipeline.detailedStatus;
@@ -72,19 +71,22 @@ export default {
     pipelineId() {
       return getIdFromGraphQLId(this.pipeline.id);
     },
+    shortSha() {
+      return truncateSha(this.commitSha);
+    },
   },
 };
 </script>
 
 <template>
   <div class="gl-white-space-nowrap gl-max-w-full">
-    <template v-if="isQueryLoading">
-      <gl-loading-icon class="gl-mr-auto gl-display-inline-block" size="sm" />
-      <span data-testid="pipeline-loading-msg">{{ $options.i18n.fetchLoading }}</span>
-    </template>
-    <template v-else-if="hasError">
+    <template v-if="hasError">
       <gl-icon class="gl-mr-auto" name="warning-solid" />
       <span data-testid="pipeline-error-msg">{{ $options.i18n.fetchError }}</span>
+    </template>
+    <template v-else-if="isQueryLoading">
+      <gl-loading-icon class="gl-mr-auto gl-display-inline-block" size="sm" />
+      <span data-testid="pipeline-loading-msg">{{ $options.i18n.fetchLoading }}</span>
     </template>
     <template v-else>
       <a :href="status.detailsPath" class="gl-mr-auto">
@@ -110,7 +112,7 @@ export default {
               target="_blank"
               data-testid="pipeline-commit"
             >
-              {{ pipeline.shortSha }}
+              {{ shortSha }}
             </gl-link>
           </template>
         </gl-sprintf>
