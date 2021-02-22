@@ -539,7 +539,7 @@ When looking at this initially you'd suspect that the component is setup before 
 
 This is however not entirely true. The `destroy` method does not remove everything which has been mutated on the `wrapper` object. In its weak sense, for functional components, destroy only removes the rendered DOM elements from the document.
 
-Starting from `VTU v1.x`, trying to access a destroyed (in the weak sense) component [a warning will be emitted](https://github.com/vuejs/vue-test-utils/pull/1706) that the operation is discouraged.
+Starting from `VTU v1.x`, when trying to access a destroyed component [a warning will be emitted](https://github.com/vuejs/vue-test-utils/pull/1706).
 
 ### Jest best practices
 
