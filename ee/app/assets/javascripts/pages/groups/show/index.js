@@ -3,7 +3,9 @@ import leaveByUrl from '~/namespaces/leave_by_url';
 import initGroupDetails from '~/pages/groups/shared/group_details';
 import initVueAlerts from '~/vue_alerts';
 
-leaveByUrl('group');
-initGroupDetails();
-initGroupAnalytics();
-initVueAlerts();
+document.addEventListener('DOMContentLoaded', () => {
+  leaveByUrl('group');
+  initGroupDetails();
+  initGroupAnalytics();
+  initVueAlerts();
+});
