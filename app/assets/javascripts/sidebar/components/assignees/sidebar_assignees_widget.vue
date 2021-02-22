@@ -338,9 +338,11 @@ export default {
                 data-testid="unassign"
                 @click="selectAssignee()"
               >
-                <span :class="selectedIsEmpty ? 'gl-pl-0' : 'gl-pl-6'">{{
-                  $options.i18n.unassigned
-                }}</span></gl-dropdown-item
+                <span
+                  :class="selectedIsEmpty ? 'gl-pl-0' : 'gl-pl-6'"
+                  class="gl-font-weight-bold"
+                  >{{ $options.i18n.unassigned }}</span
+                ></gl-dropdown-item
               >
             </template>
             <gl-dropdown-divider v-if="showDivider(selectedFiltered)" />
