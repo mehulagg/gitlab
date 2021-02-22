@@ -51,7 +51,7 @@ class ProjectPolicy < BasePolicy
 
   desc "Container registry is disabled"
   condition(:container_registry_disabled, scope: :subject) do
-    !project.container_registry_enabled
+    !project.container_registry_enabled || !access_allowed_to?(:container_registry)
   end
 
   desc "Project has an external wiki"
@@ -416,6 +416,10 @@ class ProjectPolicy < BasePolicy
     enable :metrics_dashboard
   end
 
+  rule { (public_project | internal_access) & ~container_registry_disabled }.policy do
+    enable :read_container_image
+  end
+
   rule { (mirror_available & can?(:admin_project)) | admin }.enable :admin_remote_mirror
   rule { can?(:push_code) }.enable :admin_tag
 
@@ -521,7 +525,6 @@ class ProjectPolicy < BasePolicy
     enable :read_environment
     enable :read_deployment
     enable :read_commit_status
-    enable :read_container_image
     enable :download_code
     enable :read_release
     enable :download_wiki_code

@@ -3,12 +3,30 @@
 class ProjectFeature < ApplicationRecord
   include Featurable
 
-  FEATURES = %i(issues forking merge_requests wiki snippets builds repository pages metrics_dashboard analytics operations security_and_compliance).freeze
+  FEATURES = %i(
+    issues
+    forking
+    merge_requests
+    wiki
+    snippets
+    builds
+    repository
+    pages
+    metrics_dashboard
+    analytics
+    operations
+    security_and_compliance
+    container_registry
+  ).freeze
   EXPORTABLE_FEATURES = (FEATURES - [:security_and_compliance]).freeze
 
   set_available_features(FEATURES)
 
-  PRIVATE_FEATURES_MIN_ACCESS_LEVEL = { merge_requests: Gitlab::Access::REPORTER, metrics_dashboard: Gitlab::Access::REPORTER }.freeze
+  PRIVATE_FEATURES_MIN_ACCESS_LEVEL = {
+    merge_requests: Gitlab::Access::REPORTER,
+    metrics_dashboard: Gitlab::Access::REPORTER,
+    container_registry: Gitlab::Access::REPORTER
+  }.freeze
   PRIVATE_FEATURES_MIN_ACCESS_LEVEL_FOR_PRIVATE_PROJECT = { repository: Gitlab::Access::REPORTER }.freeze
 
   class << self
@@ -49,6 +67,7 @@ class ProjectFeature < ApplicationRecord
   default_value_for :metrics_dashboard_access_level, value: PRIVATE, allows_nil: false
   default_value_for :operations_access_level, value: ENABLED, allows_nil: false
   default_value_for :security_and_compliance_access_level, value: PRIVATE, allows_nil: false
+  default_value_for :container_registry_access_level, value: ENABLED, allows_nil: false
 
   default_value_for(:pages_access_level, allows_nil: false) do |feature|
     if ::Gitlab::Pages.access_control_is_forced?
