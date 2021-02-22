@@ -306,6 +306,7 @@ export default {
       <issuable-assignees
         :users="assignees"
         :issuable-type="issuableType"
+        class="gl-mt-2"
         @assign-self="assignSelf"
       />
     </template>

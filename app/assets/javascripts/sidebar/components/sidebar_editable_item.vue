@@ -71,7 +71,7 @@ export default {
 
 <template>
   <div>
-    <div class="gl-display-flex gl-align-items-center gl-mb-3" @click.self="collapse">
+    <div class="gl-display-flex gl-align-items-center" @click.self="collapse">
       <span data-testid="title">{{ title }}</span>
       <gl-loading-icon v-if="loading" inline class="gl-ml-2" />
       <gl-button
