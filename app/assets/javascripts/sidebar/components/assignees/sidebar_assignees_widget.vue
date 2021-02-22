@@ -338,8 +338,8 @@ export default {
                   $options.i18n.unassigned
                 }}</span></gl-dropdown-item
               >
-              <gl-dropdown-divider data-testid="unassign-divider" />
             </template>
+            <gl-dropdown-divider v-if="selectedFiltered.length > 0" />
             <gl-dropdown-item
               v-for="item in selectedFiltered"
               :key="item.id"
@@ -358,8 +358,8 @@ export default {
                 />
               </gl-avatar-link>
             </gl-dropdown-item>
-            <gl-dropdown-divider v-if="!selectedIsEmpty" data-testid="selected-user-divider" />
             <template v-if="showCurrentUser">
+              <gl-dropdown-divider />
               <gl-dropdown-item
                 data-testid="unselected-participant"
                 @click.stop="selectAssignee(currentUser)"
@@ -374,8 +374,8 @@ export default {
                   />
                 </gl-avatar-link>
               </gl-dropdown-item>
-              <gl-dropdown-divider />
             </template>
+            <gl-dropdown-divider v-if="unselectedFiltered.length > 0" />
             <gl-dropdown-item
               v-for="unselectedUser in unselectedFiltered"
               :key="unselectedUser.id"
