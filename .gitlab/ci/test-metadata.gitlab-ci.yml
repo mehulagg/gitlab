@@ -45,3 +45,4 @@ update-tests-metadata:
     - source ./scripts/rspec_helpers.sh
     - update_tests_metadata
     - update_tests_mapping
+# test
