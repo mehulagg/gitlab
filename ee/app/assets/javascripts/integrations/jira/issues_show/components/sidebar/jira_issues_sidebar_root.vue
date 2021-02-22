@@ -8,6 +8,11 @@ export default {
     Assignee,
     LabelsSelect,
   },
+  inject: {
+    issuesListPath: {
+      default: null,
+    },
+  },
   props: {
     sidebarExpanded: {
       type: Boolean,
@@ -33,6 +38,7 @@ export default {
 
     <labels-select
       :selected-labels="issue.labels"
+      :labels-filter-base-path="issuesListPath"
       variant="sidebar"
       class="block labels js-labels-block"
     >
