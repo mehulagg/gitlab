@@ -17,7 +17,7 @@ module IncidentManagement
       ends_at = apply_timezone(ends_at)
 
       return [] unless starts_at < ends_at
-      return [] unless rotation.participants.any?
+      return [] unless participants.any?
 
       # The first shift within the timeframe may begin before
       # the timeframe. We want to begin generating shifts
@@ -44,7 +44,7 @@ module IncidentManagement
       timestamp = apply_timezone(timestamp)
 
       return if timestamp < rotation_starts_at
-      return unless rotation.participants.any?
+      return unless participants.any?
 
       elapsed_shift_count = elapsed_whole_shifts(timestamp)
       shift_starts_at = shift_start_time(elapsed_shift_count)
@@ -124,7 +124,7 @@ module IncidentManagement
     end
 
     def participants
-      @participants ||= rotation.participants
+      @participants ||= rotation.participants.not_removed
     end
 
     def rotation_starts_at
