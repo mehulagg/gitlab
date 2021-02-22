@@ -191,9 +191,7 @@ In the Merge Request Diff UI, you can:
 
 - **Comment on a single line**: Click the **{comment}** **comment** icon in the
   gutter to expand the diff lines and display a comment box.
-- [**Comment on multiple lines**](#commenting-on-multiple-lines): .
-
-  ![Comment on any diff file line](img/comment-on-any-diff-line.png)
+- [**Comment on multiple lines**](#commenting-on-multiple-lines).
 
 ### Commenting on multiple lines
 
@@ -206,6 +204,9 @@ to by either:
 
 - Clicking and dragging the **{comment}** **comment** icon in the gutter to highlight
   lines in the diff. GitLab expands the diff lines and displays a comment box.
+
+  ![Comment on any diff file line](img/comment-on-any-diff-line.png)
+
 - After starting a comment by clicking the **{comment}** **comment** icon in the
   gutter, select the first line number your comment refers to in the **Commenting on lines**
   select box. New comments default to single-line comments, unless you select
