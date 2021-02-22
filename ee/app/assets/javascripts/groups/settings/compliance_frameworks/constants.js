@@ -1,5 +1,8 @@
 import { s__ } from '~/locale';
 
+export const DANGER = 'danger';
+export const INFO = 'info';
+
 export const FETCH_ERROR = s__(
   'ComplianceFrameworks|Error fetching compliance frameworks data. Please refresh the page',
 );

@@ -240,15 +240,11 @@ module EE
       end
 
       def jira_vulnerabilities_integration_enabled?
-        return false unless jira_service
-
-        jira_service.jira_vulnerabilities_integration_enabled?
+        !!jira_service&.jira_vulnerabilities_integration_enabled?
       end
 
       def configured_to_create_issues_from_vulnerabilities?
-        return false unless jira_service
-
-        jira_service.configured_to_create_issues_from_vulnerabilities?
+        !!jira_service&.configured_to_create_issues_from_vulnerabilities?
       end
     end
 

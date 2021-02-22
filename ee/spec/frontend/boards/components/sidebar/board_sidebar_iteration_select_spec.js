@@ -72,7 +72,7 @@ describe('BoardSidebarIterationSelect', () => {
   const createStore = ({
     initialState = {
       activeId: mockIssue.id,
-      issues: { [mockIssue.id]: { ...mockIssue } },
+      boardItems: { [mockIssue.id]: { ...mockIssue } },
     },
   } = {}) => {
     store = new Vuex.Store({

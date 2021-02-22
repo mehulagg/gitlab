@@ -1838,6 +1838,9 @@ msgstr ""
 msgid "Add email address"
 msgstr ""
 
+msgid "Add email participant(s)"
+msgstr ""
+
 msgid "Add environment"
 msgstr ""
 
@@ -1995,6 +1998,9 @@ msgid "Adds a to do."
 msgstr ""
 
 msgid "Adds an issue to an epic."
+msgstr ""
+
+msgid "Adds email participant(s)"
 msgstr ""
 
 msgid "Adjust your filters/search criteria above. If you believe this may be an error, please refer to the %{linkStart}Geo Troubleshooting%{linkEnd} documentation for more information."
@@ -3148,6 +3154,9 @@ msgstr ""
 msgid "Almost there"
 msgstr ""
 
+msgid "Almost there..."
+msgstr ""
+
 msgid "Already blocked"
 msgstr ""
 
@@ -3949,6 +3958,9 @@ msgid "Are you sure you want to deploy this environment?"
 msgstr ""
 
 msgid "Are you sure you want to discard this comment?"
+msgstr ""
+
+msgid "Are you sure you want to discard your changes?"
 msgstr ""
 
 msgid "Are you sure you want to erase this build?"
@@ -4805,6 +4817,9 @@ msgstr ""
 msgid "Boards|An error occurred while fetching issues. Please reload the page."
 msgstr ""
 
+msgid "Boards|An error occurred while fetching the board epics. Please reload the page."
+msgstr ""
+
 msgid "Boards|An error occurred while fetching the board issues. Please reload the page."
 msgstr ""
 
@@ -5063,6 +5078,9 @@ msgstr ""
 msgid "Bulk update"
 msgstr ""
 
+msgid "BulkImport|Existing groups"
+msgstr ""
+
 msgid "BulkImport|From source group"
 msgstr ""
 
@@ -5070,6 +5088,9 @@ msgid "BulkImport|Import groups from GitLab"
 msgstr ""
 
 msgid "BulkImport|Importing the group failed"
+msgstr ""
+
+msgid "BulkImport|No parent"
 msgstr ""
 
 msgid "BulkImport|Showing %{start}-%{end} of %{total} from %{link}"
@@ -5142,6 +5163,9 @@ msgid "By clicking Register, I agree that I have read and accepted the %{company
 msgstr ""
 
 msgid "By default GitLab sends emails in HTML and plain text formats so mail clients can choose what format to use. Disable this option if you only want to send emails in plain text format."
+msgstr ""
+
+msgid "By default, GitLab sends emails to help guide users through the onboarding process."
 msgstr ""
 
 msgid "By default, all projects and groups will use the global notifications setting."
@@ -7590,10 +7614,22 @@ msgstr ""
 msgid "ComplianceFrameworks|Combines with the CI configuration at runtime."
 msgstr ""
 
+msgid "ComplianceFrameworks|Compliance framework deleted successfully"
+msgstr ""
+
 msgid "ComplianceFrameworks|Compliance pipeline configuration location (optional)"
 msgstr ""
 
 msgid "ComplianceFrameworks|Could not find this configuration location, please try a different location"
+msgstr ""
+
+msgid "ComplianceFrameworks|Delete compliance framework %{framework}"
+msgstr ""
+
+msgid "ComplianceFrameworks|Delete framework"
+msgstr ""
+
+msgid "ComplianceFrameworks|Error deleting the compliance framework. Please try again"
 msgstr ""
 
 msgid "ComplianceFrameworks|Error fetching compliance frameworks data. Please refresh the page"
@@ -7615,6 +7651,9 @@ msgid "ComplianceFrameworks|Unable to save this compliance framework. Please try
 msgstr ""
 
 msgid "ComplianceFrameworks|Use %{codeStart}::%{codeEnd} to create a %{linkStart}scoped set%{linkEnd} (eg. %{codeStart}SOX::AWS%{codeEnd})"
+msgstr ""
+
+msgid "ComplianceFrameworks|You are about to permanently delete the compliance framework %{framework} from all projects which currently have it applied, which may remove other functionality. This cannot be undone."
 msgstr ""
 
 msgid "ComplianceFrameworks|e.g. include-gitlab.ci.yml@group-name/project-name"
@@ -11165,6 +11204,9 @@ msgstr ""
 msgid "Enable header and footer in emails"
 msgstr ""
 
+msgid "Enable in-product marketing emails"
+msgstr ""
+
 msgid "Enable integration"
 msgstr ""
 
@@ -12573,6 +12615,9 @@ msgid "Feature Flags"
 msgstr ""
 
 msgid "Feature flag is not enabled on the environment's project."
+msgstr ""
+
+msgid "Feature flag status"
 msgstr ""
 
 msgid "Feature flag was not removed."
@@ -17894,7 +17939,7 @@ msgstr ""
 msgid "Loading issues"
 msgstr ""
 
-msgid "Loading more issues"
+msgid "Loading more"
 msgstr ""
 
 msgid "Loading snippet"
@@ -20148,6 +20193,9 @@ msgstr ""
 msgid "No compliance frameworks are in use. Create one using the GraphQL API."
 msgstr ""
 
+msgid "No confirmation email received? Please check your spam folder or"
+msgstr ""
+
 msgid "No connection could be made to a Gitaly Server, please check your logs!"
 msgstr ""
 
@@ -20173,6 +20221,9 @@ msgid "No deployments found"
 msgstr ""
 
 msgid "No due date"
+msgstr ""
+
+msgid "No email participants were added. Either none were provided, or they already exist."
 msgstr ""
 
 msgid "No endpoint provided"
@@ -22179,6 +22230,9 @@ msgid "Please check the configuration file to ensure that it is available and th
 msgstr ""
 
 msgid "Please check your email (%{email}) to verify that you own this address and unlock the power of CI/CD. Didn't receive it? %{resend_link}. Wrong email address? %{update_link}."
+msgstr ""
+
+msgid "Please check your email to confirm your account"
 msgstr ""
 
 msgid "Please choose a file"
@@ -25194,6 +25248,9 @@ msgid "Request Access"
 msgstr ""
 
 msgid "Request details"
+msgstr ""
+
+msgid "Request new confirmation email"
 msgstr ""
 
 msgid "Request parameter %{param} is missing."
@@ -34479,6 +34536,9 @@ msgid "access:"
 msgstr ""
 
 msgid "added %{created_at_timeago}"
+msgstr ""
+
+msgid "added %{emails}"
 msgstr ""
 
 msgid "added a Zoom call to this issue"

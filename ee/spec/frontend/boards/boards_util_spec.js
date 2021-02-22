@@ -33,7 +33,7 @@ describe('formatListEpics', () => {
     const result = formatListEpics(rawEpicsInLists);
 
     expect(result).toEqual({
-      epics: {
+      boardItems: {
         1: {
           assignees: [],
           id: 1,
@@ -42,7 +42,7 @@ describe('formatListEpics', () => {
         },
       },
       listData: { [listId]: [1] },
-      listEpicsCount: 1,
+      listItemsCount: 1,
     });
   });
 });

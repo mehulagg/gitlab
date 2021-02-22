@@ -2,14 +2,14 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import Draggable from 'vuedraggable';
 import { mapState, mapActions } from 'vuex';
-import BoardCardLayout from '~/boards/components/board_card_layout.vue';
+import BoardCard from '~/boards/components/board_card.vue';
 import BoardNewIssue from '~/boards/components/board_new_issue.vue';
 import eventHub from '~/boards/eventhub';
 import defaultSortableConfig from '~/sortable/sortable_config';
 
 export default {
   components: {
-    BoardCardLayout,
+    BoardCard,
     BoardNewIssue,
     GlLoadingIcon,
   },
@@ -181,7 +181,7 @@ export default {
         @start="handleDragOnStart"
         @end="handleDragOnEnd"
       >
-        <board-card-layout
+        <board-card
           v-for="(issue, index) in issues"
           ref="issue"
           :key="issue.id"
@@ -189,7 +189,6 @@ export default {
           :list="list"
           :issue="issue"
           :disabled="disabled || !canAdminEpic"
-          :is-active="isActiveIssue(issue)"
         />
         <gl-loading-icon v-if="isLoadingMore && isUnassignedIssuesLane" size="sm" class="gl-py-3" />
       </component>

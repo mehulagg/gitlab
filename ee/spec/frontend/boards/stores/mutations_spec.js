@@ -15,8 +15,8 @@ const initialBoardListsState = {
 };
 
 let state = {
-  issuesByListId: {},
-  issues: {},
+  boardItemsByListId: {},
+  boardItems: {},
   boardLists: initialBoardListsState,
   epicsFlags: {
     [epicId]: { isLoading: true },
@@ -92,7 +92,7 @@ describe('REQUEST_ISSUES_FOR_EPIC', () => {
 });
 
 describe('RECEIVE_ISSUES_FOR_EPIC_SUCCESS', () => {
-  it('sets issuesByListId and issues state for epic issues and loading state to false', () => {
+  it('sets boardItemsByListId and issues state for epic issues and loading state to false', () => {
     const listIssues = {
       'gid://gitlab/List/1': [mockIssue.id],
       'gid://gitlab/List/2': [mockIssue2.id],
@@ -104,12 +104,12 @@ describe('RECEIVE_ISSUES_FOR_EPIC_SUCCESS', () => {
 
     mutations.RECEIVE_ISSUES_FOR_EPIC_SUCCESS(state, {
       listData: listIssues,
-      issues,
+      boardItems: issues,
       epicId,
     });
 
-    expect(state.issuesByListId).toEqual(listIssues);
-    expect(state.issues).toEqual(issues);
+    expect(state.boardItemsByListId).toEqual(listIssues);
+    expect(state.boardItems).toEqual(issues);
     expect(state.epicsFlags[epicId].isLoading).toBe(false);
   });
 });
@@ -257,7 +257,7 @@ describe('RECEIVE_EPICS_SUCCESS', () => {
 });
 
 describe('RESET_EPICS', () => {
-  it('should remove issues from issuesByListId state', () => {
+  it('should remove issues from boardItemsByListId state', () => {
     state = {
       ...state,
       epics: mockEpics,
@@ -283,13 +283,13 @@ describe('MOVE_ISSUE', () => {
 
     state = {
       ...state,
-      issuesByListId: listIssues,
-      issues,
+      boardItemsByListId: listIssues,
+      boardItems: issues,
     };
   });
 
-  it('updates issuesByListId, moving issue between lists and updating epic id on issue', () => {
-    expect(state.issues['437'].epic.id).toEqual('gid://gitlab/Epic/40');
+  it('updates boardItemsByListId, moving issue between lists and updating epic id on issue', () => {
+    expect(state.boardItems['437'].epic.id).toEqual('gid://gitlab/Epic/40');
 
     mutations.MOVE_ISSUE(state, {
       originalIssue: mockIssue2,
@@ -303,12 +303,12 @@ describe('MOVE_ISSUE', () => {
       'gid://gitlab/List/2': [mockIssue2.id],
     };
 
-    expect(state.issuesByListId).toEqual(updatedListIssues);
-    expect(state.issues['437'].epic.id).toEqual(epicId);
+    expect(state.boardItemsByListId).toEqual(updatedListIssues);
+    expect(state.boardItems['437'].epic.id).toEqual(epicId);
   });
 
   it('removes epic id from issue when epicId is null', () => {
-    expect(state.issues['437'].epic.id).toEqual('gid://gitlab/Epic/40');
+    expect(state.boardItems['437'].epic.id).toEqual('gid://gitlab/Epic/40');
 
     mutations.MOVE_ISSUE(state, {
       originalIssue: mockIssue2,
@@ -322,8 +322,8 @@ describe('MOVE_ISSUE', () => {
       'gid://gitlab/List/2': [mockIssue2.id],
     };
 
-    expect(state.issuesByListId).toEqual(updatedListIssues);
-    expect(state.issues['437'].epic).toEqual(null);
+    expect(state.boardItemsByListId).toEqual(updatedListIssues);
+    expect(state.boardItems['437'].epic).toEqual(null);
   });
 });
 

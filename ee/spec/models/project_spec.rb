@@ -62,7 +62,7 @@ RSpec.describe Project do
     describe '#jira_vulnerabilities_integration_enabled?' do
       context 'when project lacks a jira_service relation' do
         it 'returns false' do
-          expect(project.jira_vulnerabilities_integration_enabled?).to be_falsey
+          expect(project.jira_vulnerabilities_integration_enabled?).to be false
         end
       end
 
@@ -83,7 +83,7 @@ RSpec.describe Project do
     describe '#configured_to_create_issues_from_vulnerabilities?' do
       context 'when project lacks a jira_service relation' do
         it 'returns false' do
-          expect(project.configured_to_create_issues_from_vulnerabilities?).to be_falsey
+          expect(project.configured_to_create_issues_from_vulnerabilities?).to be false
         end
       end
 

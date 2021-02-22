@@ -34,15 +34,21 @@ export default {
   computed: {
     ...mapGetters(['isSidebarOpen', 'activeIssue']),
     ...mapState(['sidebarType']),
-    showSidebar() {
+    isIssuableSidebar() {
       return this.sidebarType === ISSUABLE;
+    },
+    showSidebar() {
+      return this.isIssuableSidebar && this.isSidebarOpen;
     },
   },
   methods: {
-    ...mapActions(['unsetActiveId', 'setAssignees']),
+    ...mapActions(['toggleBoardItem', 'setAssignees']),
     updateAssignees(data) {
       const assignees = data.issueSetAssignees?.issue?.assignees?.nodes || [];
       this.setAssignees(assignees);
+    },
+    handleClose() {
+      this.toggleBoardItem({ boardItem: this.activeIssue, sidebarType: this.sidebarType });
     },
   },
 };
@@ -51,9 +57,10 @@ export default {
 <template>
   <gl-drawer
     v-if="showSidebar"
+    data-testid="sidebar-drawer"
     :open="isSidebarOpen"
     :header-height="$options.headerHeight"
-    @close="unsetActiveId"
+    @close="handleClose"
   >
     <template #header>{{ __('Issue details') }}</template>
     <template #default>

@@ -182,6 +182,7 @@ module Geo
     # Called by Gitlab::Geo::Replicator#consume
     def consume_event_checksum_succeeded(**params)
       return unless Gitlab::Geo.secondary?
+      return unless registry.persisted?
 
       registry.verification_pending!
     end

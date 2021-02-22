@@ -355,8 +355,8 @@ You can also store template files in a central repository and `include` them in 
 otherwise the external file is not included.
 
 You can't use [YAML anchors](#anchors) across different YAML files sourced by `include`.
-You can only refer to anchors in the same file. Instead of YAML anchors, you can
-use the [`extends` keyword](#extends).
+You can only refer to anchors in the same file. To reuse configuration from different
+YAML files, use [`!reference` tags](#reference-tags) or the [`extends` keyword](#extends).
 
 `include` supports the following inclusion methods:
 
@@ -2627,14 +2627,18 @@ to change the job without overriding the global variables.
 
 The `stop_review_app` job is **required** to have the following keywords defined:
 
-- `when` - [reference](#when)
+- `when`, defined at either:
+  - [The job level](#when).
+  - [In a rules clause](#rules). If you use `rules:` and `when: manual`, you should
+    also set [`allow_failure: true`](#allow_failure) so the pipeline can complete
+    even if the job doesn't run.
 - `environment:name`
 - `environment:action`
 
 Additionally, both jobs should have matching [`rules`](../yaml/README.md#onlyexcept-basic)
 or [`only/except`](../yaml/README.md#onlyexcept-basic) configuration.
 
-In the example above, if the configuration is not identical:
+In the examples above, if the configuration is not identical:
 
 - The `stop_review_app` job might not be included in all pipelines that include the `review_app` job.
 - It is not possible to trigger the `action: stop` to stop the environment automatically.
@@ -4387,9 +4391,10 @@ Use anchors to duplicate or inherit properties. Use anchors with [hidden jobs](#
 to provide templates for your jobs. When there are duplicate keys, GitLab
 performs a reverse deep merge based on the keys.
 
-You can't use YAML anchors across multiple files when leveraging the [`include`](#include)
-feature. Anchors are only valid in the file they were defined in. Instead
-of using YAML anchors, you can use the [`extends` keyword](#extends).
+You can't use YAML anchors across multiple files when using the [`include`](#include)
+keyword. Anchors are only valid in the file they were defined in. To reuse configuration
+from different YAML files, use [`!reference` tags](#reference-tags) or the
+[`extends` keyword](#extends).
 
 The following example uses anchors and map merging. It creates two jobs,
 `test1` and `test2`, that inherit the `.job_template` configuration, each
