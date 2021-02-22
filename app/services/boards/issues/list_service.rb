@@ -35,10 +35,6 @@ module Boards
         @board ||= parent.boards.find(params[:board_id])
       end
 
-      def metadata_fields
-        { size: 'COUNT(*)' }
-      end
-
       def filter_params
         set_scope
         set_non_archived

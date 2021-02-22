@@ -4,6 +4,8 @@ module Types
   module Boards
     # rubocop: disable Graphql/AuthorizeTypes
     class EpicListType < BaseObject
+      include Gitlab::Utils::StrongMemoize
+
       graphql_name 'EpicList'
       description 'Represents an epic board list'
 
@@ -27,6 +29,24 @@ module Types
       field :epics, Types::EpicType.connection_type, null: true,
             resolver: Resolvers::Boards::BoardListEpicsResolver,
             description: 'List epics.'
+
+      field :epics_count, GraphQL::INT_TYPE, null: true,
+            description: 'Count of epics in the list.'
+
+      def epics_count
+        metadata[:size]
+      end
+
+      def metadata
+        strong_memoize(:metadata) do
+          list = self.object
+          params = (context[:issue_filters] || {}).merge(board_id: list.epic_board_id, id: list.id)
+
+          ::Boards::Epics::ListService
+              .new(list.epic_board.resource_parent, current_user, params)
+              .metadata
+        end
+      end
     end
     # rubocop: enable Graphql/AuthorizeTypes
   end

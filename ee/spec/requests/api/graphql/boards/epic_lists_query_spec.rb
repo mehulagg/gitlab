@@ -12,6 +12,8 @@ RSpec.describe 'get list of epic boards' do
   let_it_be(:list2) { create(:epic_list, epic_board: board, list_type: :closed) }
   let_it_be(:list3) { create(:epic_list, epic_board: board, list_type: :backlog) }
 
+  let_it_be(:some_epics) { create_list(:epic, 2, group: group) }
+
   def pagination_query(params = {})
     graphql_query_for(:group, { full_path: group.full_path },
       <<~BOARDS
@@ -54,5 +56,17 @@ RSpec.describe 'get list of epic boards' do
         let(:first_param) { 2 }
       end
     end
+
+    describe 'field values' do
+      it 'returns the correct values for count' do
+        post_graphql(pagination_query, current_user: current_user)
+
+        assert_field_value('epicsCount', [2, 0, 0])
+      end
+    end
+  end
+
+  def assert_field_value(field, expected_value)
+    expect(graphql_dig_at(graphql_data, 'group', 'epicBoard', 'lists', 'nodes', field)).to eq(expected_value)
   end
 end
