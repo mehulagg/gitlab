@@ -36,7 +36,7 @@ but allows us to better model application and make our codebase more composable.
 Today the usage of monolith proves to be challenging in many cases. A single big monolith
 codebase without clear boundaries results in a number of problems and inefficiencies, some of them being:
 
-- Deep coupling makes application harder to develop in longer term, as it leads to a sphagetti implementation
+- Deep coupling makes application harder to develop in longer term, as it leads to a spaghetti implementation
   instead of considering building more interface-based architecture
 - Deep coupling between parts of the codebase making it harder to test. To test only a small portion of application
   we usually need to run a whole test suite as we cannot high confidence know which parts are affected. This to
@@ -227,11 +227,11 @@ graph TD
 
 ### Layer dependencies
 
-The way how we run GitLab for the on-premise and GitLab.com does show a main division line in GitLab Rails:
+The differences in how GitLab is run for on-premise versus how we run GitLab.com does show a main division line in GitLab Rails:
 
 - Web: containing all API, all Controllers, all GraphQL and ActionCable functionality
 - Sidekiq: containing all background processing jobs
-- Core: containig all database, models and services that needs to be shared between Web and Sidekiq
+- Core: containing all database, models and services that needs to be shared between Web and Sidekiq
 
 Each of these top-level application layers do depend only on a fraction of the codebase with all relevant dependencies:
 
@@ -252,7 +252,7 @@ but serves as a basis for future work.
 
 ### PoC using Rails Engines
 
-We decided to use Rails Engines by modeling a Web Application Layer. The Web Engine did contain Controllers, API, GraphQL.
+We decided to use Rails Engines by modeling a Web Application Layer. The Web Engine contained Controllers, API, GraphQL.
 This allowed us to run Web Nodes with all dependencies, but measure the impact on Sidekiq not having these components loaded.
 
 All work can be found in these merge requests:
