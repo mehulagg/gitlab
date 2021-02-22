@@ -72,9 +72,9 @@ Add the following information:
    This is the name that displays in group views.
    The name can contain only:
    - Alphanumeric characters
+   - Emojis
    - Underscores
-   - Dashes and dots
-   - Spaces
+   - Dashes, dots, spaces and parenthesis (however, it cannot start any of these characters)
 1. The **Group URL** is the namespace under which your projects will be hosted.
    The URL can contain only:
    - Alphanumeric characters
