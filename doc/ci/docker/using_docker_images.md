@@ -7,27 +7,23 @@ type: concepts, howto
 
 # Run your CI/CD jobs in Docker containers
 
-GitLab CI/CD in conjunction with [GitLab Runner](../runners/README.md) can use
-[Docker Engine](https://www.docker.com/) to test and build any application.
+You can run your CI/CD jobs in separate, isolated Docker containers.
 
-Docker is an open-source project that has predefined images you can use to
-run applications in independent "containers." These containers run in a single Linux
-instance. [Docker Hub](https://hub.docker.com/) is a database of pre-built images you can
-use to test and build your applications.
+When you run a Docker container on your local machine, it acts as a reproducible build environment.
+When the container is running, you can test commands from your shell, rather than testing
+on a dedicated CI server.
 
-When you use Docker with GitLab CI/CD, Docker runs each job in a separate and isolated
-container. You specify the container image in the project's
-[`.gitlab-ci.yml`](../yaml/README.md) file.
+To run CI/CD jobs in a Docker container, you need to:
 
-Docker containers provide a reproducible build environment that
-can run on your workstation. When a Docker container is running, you can test
-commands from your shell, rather than having to
-test them on a dedicated CI server.
+- Register a runner that uses the Docker executor. This ensures that all jobs run in a Docker container.
+- Specify an image in your `.gitlab-ci.yml` file. This tells the runner which container to use.
+- Optional. Specify other "services" in your `.gitlab-ci.yml` file. This tells the runner to use a container
+  that is already running.
 
-## Register Docker Runner
+## Register a runner that uses the Docker executor
 
-To use GitLab Runner with Docker you need to [register a new runner](https://docs.gitlab.com/runner/register/)
-to use the `docker` executor.
+To use GitLab Runner with Docker you need to [register a runner](https://docs.gitlab.com/runner/register/)
+that uses the Docker executor.
 
 In this example, we first set up a temporary template to supply the services:
 
