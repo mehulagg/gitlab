@@ -353,14 +353,6 @@ module Vulnerabilities
       end
     end
 
-#    def ==(other)
-#      if ::Feature.enabled?(:vulnerability_finding_fingerprints)
-#        eql?(other)
-#      else
-#        orig_eql?(other)
-#      end
-#    end
-
     # Array.difference (-) method uses hash and eql? methods to do comparison
     def hash
       # This is causing N+1 queries whenever we are calling findings, ActiveRecord uses #hash method to make sure the
@@ -411,6 +403,13 @@ module Vulnerabilities
       fingerprints.map do |fingerprint|
         hex_sha = fingerprint.fingerprint_sha256.unpack("H*")[0]
         Gitlab::UUID.v5(uuid_v5_name(location_fingerprint_value: hex_sha))
+      end
+    end
+
+    def fingerprint_uuids_and_priorities
+      fingerprints.map do |fingerprint|
+        hex_sha = fingerprint.fingerprint_sha256.unpack("H*")[0]
+        [Gitlab::UUID.v5(uuid_v5_name(location_fingerprint_value: hex_sha)), fingerprint.priority]
       end
     end
 

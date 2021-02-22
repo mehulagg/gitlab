@@ -112,9 +112,10 @@ module Gitlab
           end
 
           def create_fingerprints(location, tracking)
-            return [] if tracking.nil?
+            tracking ||= {'items' => []}
 
             fingerprint_algorithms = {}
+
             tracking['items'].each do |item|
               next unless item.key?('fingerprints')
 
@@ -125,10 +126,10 @@ module Gitlab
               end
             end
 
-            # use the location's fingerprint_data
-            # in case no fingerprint values were calculated
             if fingerprint_algorithms.empty?
-              fingerprint_algorithms['location'] = [location.fingerprint_data]
+              is_location = [:file_path, :start_line].all? { |x| location.respond_to?(x) }
+              type = is_location ? 'location' : 'hash'
+              fingerprint_algorithms[type] = [location.fingerprint_data]
             end
 
             fingerprint_algorithms.map do |algorithm, values|
