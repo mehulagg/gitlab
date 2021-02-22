@@ -10,10 +10,10 @@ module Gitlab
           def initialize(params = {})
             @algorithm_type = params.dig(:algorithm_type)
             @fingerprint_value = params.dig(:fingerprint_value)
+          end
 
-            unless ::Vulnerabilities::FindingFingerprint.algorithm_types.key?(algorithm_type)
-              raise ArgumentError.new("Unsupported algorithm type: #{algorithm_type.inspect}")
-            end
+          def valid?
+            ::Vulnerabilities::FindingFingerprint.algorithm_types.key?(algorithm_type)
           end
 
           def priority

@@ -9,18 +9,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
     let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
     let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
     let(:location) { ::Gitlab::Ci::Reports::Security::Locations::DependencyScanning.new(file_path: 'yarn/yarn.lock', package_version: 'v2', package_name: 'saml2') }
-    let(:tracking_data) do
-      {
-        'type' => 'source',
-        'items' => [
-          'fingerprints' => [
-            { 'algorithm' => 'hash', 'value' => 'hash_value' },
-            { 'algorithm' => 'location', 'value' => 'location_value' },
-            { 'algorithm' => 'scope_offset', 'value' => 'scope_offset_value' }
-          ]
-        ]
-      }
-    end
+    let(:tracking_data) { nil }
 
     before do
       allow_next_instance_of(described_class) do |parser|
@@ -174,19 +163,39 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
     end
 
     describe 'setting the uuid' do
-      let(:finding_uuids) { report.findings.map(&:uuid) }
-      let(:uuid_1_components) { "dependency_scanning-4ff8184cd18485b6e85d5b101e341b12eacd1b3b-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
-      let(:uuid_2_components) { "dependency_scanning-d55f9e66e79882ae63af9fd55cc822ab75307e31-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
-      let(:uuid_1) { Gitlab::UUID.v5(uuid_1_components) }
-      let(:uuid_2) { Gitlab::UUID.v5(uuid_2_components) }
-      let(:expected_uuids) { [uuid_1, uuid_2, nil] }
+      where(vulnerability_finding_fingerprints_enabled: [true, false])
+      with_them do
+        before do
+          stub_feature_flags(vulnerability_finding_fingerprints: vulnerability_finding_fingerprints_enabled)
+        end
 
-      it 'sets the UUIDv5 for findings', :aggregate_failures do
-        expect(finding_uuids).to match_array(expected_uuids)
+        let(:finding_uuids) { report.findings.map(&:uuid) }
+        let(:uuid_1_components) { "dependency_scanning-4ff8184cd18485b6e85d5b101e341b12eacd1b3b-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
+        let(:uuid_2_components) { "dependency_scanning-d55f9e66e79882ae63af9fd55cc822ab75307e31-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
+        let(:uuid_1) { Gitlab::UUID.v5(uuid_1_components) }
+        let(:uuid_2) { Gitlab::UUID.v5(uuid_2_components) }
+        let(:expected_uuids) { [uuid_1, uuid_2, nil] }
+
+        it 'sets the UUIDv5 for findings', :aggregate_failures do
+          expect(finding_uuids).to match_array(expected_uuids)
+        end
       end
     end
 
     describe 'parsing tracking' do
+      let(:tracking_data) do
+        {
+          'type' => 'source',
+          'items' => [
+            'fingerprints' => [
+              { 'algorithm' => 'hash', 'value' => 'hash_value' },
+              { 'algorithm' => 'location', 'value' => 'location_value' },
+              { 'algorithm' => 'scope_offset', 'value' => 'scope_offset_value' }
+            ]
+          ]
+        }
+      end
+
       context 'with valid tracking information' do
         it 'creates fingerprints for each algorithm' do
           finding = report.findings.first
@@ -213,6 +222,28 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
           finding = report.findings.first
           expect(finding.fingerprints.size).to eq(2)
           expect(finding.fingerprints.map(&:algorithm_type).to_set).to eq(Set['hash', 'location'])
+        end
+      end
+
+      context 'with valid tracking information' do
+        it 'creates fingerprints for each fingerprint algorithm' do
+          finding = report.findings.first
+          expect(finding.fingerprints.size).to eq(3)
+          expect(finding.fingerprints.map(&:algorithm_type)).to eq(%w[hash location scope_offset])
+
+          fingerprints = finding.fingerprints.index_by(&:algorithm_type)
+          expected_values = tracking_data['items'][0]['fingerprints'].index_by { |x| x['algorithm'] }
+          expect(fingerprints['hash'].fingerprint_value).to eq(expected_values['hash']['value'])
+          expect(fingerprints['location'].fingerprint_value).to eq(expected_values['location']['value'])
+          expect(fingerprints['scope_offset'].fingerprint_value).to eq(expected_values['scope_offset']['value'])
+        end
+
+        it 'sets the uuid according to the higest priority fingerprint' do
+          finding = report.findings.first
+          highest_fingerprint = finding.fingerprints.sort_by(&:priority).last
+          expect(finding.uuid).to eq(Gitlab::UUID.v5(
+            "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{highest_fingerprint.fingerprint_hex}-#{report.project_id}"
+          ))
         end
       end
     end

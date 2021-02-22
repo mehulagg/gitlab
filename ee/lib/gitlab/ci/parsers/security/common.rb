@@ -133,14 +133,13 @@ module Gitlab
 
             fingerprint_algorithms.map do |algorithm, values|
               value = values.join('|')
-              begin
-                ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(
-                  algorithm_type: algorithm,
-                  fingerprint_value: value
-                )
-              rescue ArgumentError => e
-                Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
-              end
+              fingerprint = ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(
+                algorithm_type: algorithm,
+                fingerprint_value: value
+              )
+              next unless fingerprint.valid?
+
+              fingerprint
             end.compact
           end
 
