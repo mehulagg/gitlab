@@ -58,6 +58,13 @@
   }
 }
 
+// GlDropdown does its own height limiting,
+// so exempt any GlDropdowns from the `max-height`
+// limitations imposed above.
+.gl-new-dropdown.show.dropdown .dropdown-menu {
+    max-height: initial;
+}
+
 // Get search dropdown to line up with other nav dropdowns
 .search-input-container .dropdown-menu {
   margin-top: 11px;
