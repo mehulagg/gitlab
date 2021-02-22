@@ -12,7 +12,7 @@ RSpec.describe Repositories::PreviousTagFinder do
         tag1 = double(:tag1, name: 'v1.0.0')
         tag2 = double(:tag2, name: 'v1.1.0')
         tag3 = double(:tag3, name: 'v2.0.0')
-        tag4 = double(:tag4, name: '1.0.0')
+        tag4 = double(:tag4, name: '0.9.0')
 
         allow(project.repository)
           .to receive(:tags)
@@ -22,6 +22,7 @@ RSpec.describe Repositories::PreviousTagFinder do
         expect(finder.execute('2.0.0')).to eq(tag2)
         expect(finder.execute('1.5.0')).to eq(tag2)
         expect(finder.execute('1.0.1')).to eq(tag1)
+        expect(finder.execute('1.0.0')).to eq(tag4)
       end
     end
 
