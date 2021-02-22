@@ -340,7 +340,7 @@ export default {
                 }}</span></gl-dropdown-item
               >
             </template>
-            <gl-dropdown-divider v-if="selectedFiltered.length > 0" />
+            <gl-dropdown-divider v-if="selectedFiltered.length > 0 && isSearchEmpty" />
             <gl-dropdown-item
               v-for="item in selectedFiltered"
               :key="item.id"
@@ -376,7 +376,7 @@ export default {
                 </gl-avatar-link>
               </gl-dropdown-item>
             </template>
-            <gl-dropdown-divider v-if="unselectedFiltered.length > 0" />
+            <gl-dropdown-divider v-if="unselectedFiltered.length > 0 && isSearchEmpty" />
             <gl-dropdown-item
               v-for="unselectedUser in unselectedFiltered"
               :key="unselectedUser.id"
