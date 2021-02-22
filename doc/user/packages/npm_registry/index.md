@@ -210,10 +210,10 @@ When you use the [instance-level endpoint](#use-the-gitlab-endpoint-for-npm-pack
 
 - The `@scope` is the root namespace of the GitLab project. To follow npm's convention, it should be
   lowercase. However, the GitLab package registry allows for uppercase. Before GitLab 13.10, the
-  `@scope` had to be a case-sensitive match the root namespace of the GitLab project. This was problematic
-  because the npm public registry does not allow uppercase letters. GitLab 13.10 relaxes this
-  requirement and translates uppercase in the GitLab `@scope` to lowercase for npm. For example, a
-  package `@MyScope/package-name` in GitLab becomes `@myscope/package-name` for npm.
+  `@scope` had to be a case-sensitive match of the GitLab project's root namespace. This was
+  problematic because the npm public registry does not allow uppercase letters. GitLab 13.10 relaxes
+  this requirement and translates uppercase in the GitLab `@scope` to lowercase for npm. For
+  example, a package `@MyScope/package-name` in GitLab becomes `@myscope/package-name` for npm.
 - The `package-name` can be whatever you want.
 
 For example, if your project is `https://gitlab.example.com/my-org/engineering-group/team-amazing/analytics`,
