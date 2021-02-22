@@ -12,8 +12,8 @@ module Banzai
       def customize_allowlist(allowlist)
         # Allow table alignment; we allow specific text-align values in a
         # transformer below
-        allowlist[:attributes]['th'] = %w(style)
-        allowlist[:attributes]['td'] = %w(style)
+        allowlist[:attributes]['th'] = %w[style]
+        allowlist[:attributes]['td'] = %w[style]
         allowlist[:css] = { properties: ['text-align'] }
 
         # Allow the 'data-sourcepos' from CommonMark on all elements
@@ -25,7 +25,7 @@ module Banzai
         # Allow `id` in a and li elements for footnotes
         # and remove any `id` properties not matching for footnotes
         allowlist[:attributes]['a'].push('id')
-        allowlist[:attributes]['li'] = %w(id)
+        allowlist[:attributes]['li'] = %w[id]
         allowlist[:transformers].push(self.class.remove_non_footnote_ids)
 
         allowlist
@@ -40,7 +40,7 @@ module Banzai
             return unless node.has_attribute?('style')
 
             if node['style'] =~ TABLE_ALIGNMENT_PATTERN
-              node['style'] = "text-align: #{$~[:alignment]}"
+              node['style'] = "text-align: #{$LAST_MATCH_INFO[:alignment]}"
             else
               node.remove_attribute('style')
             end
