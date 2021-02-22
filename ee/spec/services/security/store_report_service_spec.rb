@@ -39,10 +39,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
       using RSpec::Parameterized::TableSyntax
 
       where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :fingerprints) do
-        'with SAST report'                | :sast                            | 3 | 17 | 33 | 39 | 33 | 0 | 2
-        'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0
-        'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0
-        'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0
+        'with SAST report'                | :sast                            | 3 | 17 | 33 | 39 | 33 | 0 | 34
+        'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 1
+        'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 2
+        'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 8
       end
 
       with_them do
