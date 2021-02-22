@@ -41,6 +41,29 @@ RSpec.describe 'Adding a DiffNote' do
 
     it_behaves_like 'a Note mutation that creates a Note'
 
+    context 'add comment to old line' do
+      let(:mutation) do
+        variables = {
+          noteable_id: GitlabSchema.id_from_object(noteable).to_s,
+          body: 'Body text',
+          position: {
+            paths: {
+              old_path: 'files/ruby/popen.rb',
+              new_path: 'files/ruby/popen.rb'
+            },
+            old_line: 14,
+            base_sha: diff_refs.base_sha,
+            head_sha: diff_refs.head_sha,
+            start_sha: diff_refs.start_sha
+          }
+        }
+    
+        graphql_mutation(:create_diff_note, variables)
+      end
+
+      it_behaves_like 'a Note mutation that creates a Note'
+    end
+
     it_behaves_like 'a Note mutation when there are active record validation errors', model: DiffNote
 
     it_behaves_like 'a Note mutation when there are rate limit validation errors'
