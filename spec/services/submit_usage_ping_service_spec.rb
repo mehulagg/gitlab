@@ -125,7 +125,7 @@ RSpec.describe SubmitUsagePingService do
 
       it_behaves_like 'saves DevOps report data from the response'
 
-      it 'saves usage_data_id to version_usage_data_id' do
+      it 'saves usage_data_id to version_usage_data_id_value' do
         recorded_at = Time.current
         usage_data = { uuid: 'uuid', recorded_at: recorded_at }
 
@@ -135,7 +135,7 @@ RSpec.describe SubmitUsagePingService do
 
         raw_usage_data = RawUsageData.find_by(recorded_at: recorded_at)
 
-        expect(raw_usage_data.version_usage_data_id).to eq(31643)
+        expect(raw_usage_data.version_usage_data_id_value).to eq(31643)
       end
     end
 

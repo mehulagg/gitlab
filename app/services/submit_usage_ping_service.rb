@@ -37,7 +37,7 @@ class SubmitUsagePingService
 
     if raw_usage_data
       raw_usage_data.update_sent_at!
-      raw_usage_data.update!(version_usage_data_id: response.dig('conv_index', 'usage_data_id'))
+      raw_usage_data.update!(version_usage_data_id_value: response.dig('conv_index', 'usage_data_id'))
     end
 
     store_metrics(response)
