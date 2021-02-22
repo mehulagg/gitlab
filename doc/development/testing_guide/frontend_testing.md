@@ -541,12 +541,6 @@ This is however not entirely true. The `destroy` method does not remove everythi
 
 Starting from `VTU v1.x`, trying to access a destroyed (in the weak sense) component [a warning will be emitted](https://github.com/vuejs/vue-test-utils/pull/1706) that the operation is discouraged.
 
-<!-- vale gitlab.Spelling = NO -->
-
-See also the [Vue Test Utils documentation on `destroy`](https://vue-test-utils.vuejs.org/api/wrapper/#destroy).
-
-<!-- vale gitlab.Spelling = YES -->
-
 ### Jest best practices
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34209) in GitLab 13.2.
