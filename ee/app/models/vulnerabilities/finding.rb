@@ -341,7 +341,7 @@ module Vulnerabilities
       end
     end
 
-    alias_method :orig_eql?, :eql?
+    alias_method :==, :eql?
 
     def eql?(other)
       return false unless other.report_type == report_type && other.first_fingerprint == first_fingerprint
@@ -353,13 +353,13 @@ module Vulnerabilities
       end
     end
 
-    def ==(other)
-      if ::Feature.enabled?(:vulnerability_finding_fingerprints)
-        eql?(other)
-      else
-        orig_eql?(other)
-      end
-    end
+#    def ==(other)
+#      if ::Feature.enabled?(:vulnerability_finding_fingerprints)
+#        eql?(other)
+#      else
+#        orig_eql?(other)
+#      end
+#    end
 
     # Array.difference (-) method uses hash and eql? methods to do comparison
     def hash
