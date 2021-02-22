@@ -18,6 +18,12 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingFingerprint do
         expect(subject.algorithm_type).to eq(params[:algorithm_type])
         expect(subject.fingerprint_value).to eq(params[:fingerprint_value])
       end
+
+      describe '#valid?' do
+        it 'returns true' do
+          expect { subject.valid? }.to eq(true)
+        end
+      end
     end
 
     context 'when an unsupported algorithm type is given' do
@@ -28,8 +34,10 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingFingerprint do
         }
       end
 
-      it 'does not allow itself to be created' do
-        expect { subject }.to raise_error(/Unsupported algorithm/)
+      describe '#valid?' do
+        it 'returns false' do
+          expect { subject.valid? }.to eq(false)
+        end
       end
     end
   end
