@@ -153,11 +153,12 @@ class Wiki
     revision = version.presence || 'HEAD'
     blob = repository.blob_at(revision, name_with_extension)
     return unless blob
+
     name = File.basename(blob.name, File.extname(blob.name))
 
     hash = {
       format: "markdown",
-      title: name.gsub('-', ' '),
+      title: name.tr('-', ' '),
       url_path: name,
       path: blob.path,
       name: name,
@@ -260,10 +261,10 @@ class Wiki
 
     true
   rescue Gitlab::Git::Index::IndexError,
-    Gitlab::Git::CommitError,
-    Gitlab::Git::PreReceiveError,
-    Gitlab::Git::CommandError,
-    ArgumentError => error
+         Gitlab::Git::CommitError,
+         Gitlab::Git::PreReceiveError,
+         Gitlab::Git::CommandError,
+         ArgumentError => error
 
     @error_message = "#{error.message}"
     false
@@ -293,10 +294,12 @@ class Wiki
 
     true
   rescue Gitlab::Git::Index::IndexError,
-    Gitlab::Git::CommitError,
-    Gitlab::Git::PreReceiveError,
-    Gitlab::Git::CommandError,
-    ArgumentError => error
+         Gitlab::Git::CommitError,
+         Gitlab::Git::PreReceiveError,
+         Gitlab::Git::CommandError,
+         ArgumentError => error
+
+    @error_message = "#{error.message}"
     false
   end
 
