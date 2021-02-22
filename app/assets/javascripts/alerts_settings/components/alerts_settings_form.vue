@@ -12,9 +12,9 @@ import {
   GlModalDirective,
   GlToggle,
 } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { isEmpty, omit } from 'lodash';
 import { s__ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
