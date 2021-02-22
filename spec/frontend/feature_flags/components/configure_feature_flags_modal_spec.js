@@ -32,7 +32,7 @@ describe('Configure Feature Flags Modal', () => {
     });
   };
 
-  const findGlModal = () => wrapper.find(GlModal);
+  const findGlModal = () => wrapper.findComponent(GlModal);
   const findPrimaryAction = () => findGlModal().props('actionPrimary');
   const findSecondaryAction = () => findGlModal().props('actionSecondary');
   const findProjectNameInput = () => wrapper.find('#project_name_verification');
@@ -48,7 +48,7 @@ describe('Configure Feature Flags Modal', () => {
       expect(findSecondaryAction().text).toBe('Regenerate instance ID');
     });
 
-    it('should default disable the primary action', async () => {
+    it('should default disable the primary action', () => {
       const [{ disabled }] = findSecondaryAction().attributes;
       expect(disabled).toBe(true);
     });
@@ -125,7 +125,7 @@ describe('Configure Feature Flags Modal', () => {
     afterEach(() => wrapper.destroy());
     beforeEach(factory.bind(null, { canUserRotateToken: false }));
 
-    it('should not display the primary action', async () => {
+    it('should not display the primary action', () => {
       expect(findSecondaryAction()).toBe(null);
     });
 
