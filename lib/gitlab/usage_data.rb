@@ -74,6 +74,7 @@ module Gitlab
           hostname: alt_usage_data { Gitlab.config.gitlab.host },
           version: alt_usage_data { Gitlab::VERSION },
           installation_type: alt_usage_data { installation_type },
+          operating_system: alt_usage_data { operating_system },
           active_user_count: count(User.active),
           edition: 'CE'
         }
@@ -503,6 +504,17 @@ module Gitlab
         else
           "gitlab-development-kit"
         end
+      end
+
+      def operating_system
+        ohai = Ohai::System.new.tap do |oh|
+          oh.all_plugins(['platform'])
+        end.data
+
+        platform = ohai['platform']
+        platform = 'raspbian' if ohai['platform'] == 'debian' && /armv/.match?(ohai['kernel']['machine'])
+
+        "#{platform}-#{ohai['platform_version']}"
       end
 
       def last_28_days_time_period(column: :created_at)
