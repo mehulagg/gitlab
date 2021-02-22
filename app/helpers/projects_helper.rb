@@ -438,7 +438,7 @@ module ProjectsHelper
 
     nav_tabs += package_nav_tabs(project, current_user)
 
-    nav_tabs << :learn_gitlab if learn_gitlab_experiment_enabled?(project)
+    nav_tabs << :learn_gitlab if Namespaces::LearnGitlabExperiment.new(current_user, project.namespace).enabled?
 
     nav_tabs
   end

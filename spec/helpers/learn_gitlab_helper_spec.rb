@@ -51,43 +51,4 @@ RSpec.describe LearnGitlabHelper do
       })
     end
   end
-
-  describe '.learn_gitlab_experiment_enabled?' do
-    using RSpec::Parameterized::TableSyntax
-
-    let_it_be(:user) { create(:user) }
-    let_it_be(:project) { create(:project, namespace: user.namespace) }
-
-    let(:params) { { namespace_id: project.namespace.to_param, project_id: project } }
-
-    subject { helper.learn_gitlab_experiment_enabled?(project) }
-
-    where(:experiment_a, :experiment_b, :onboarding, :learn_gitlab_available, :result) do
-      true        | false         | true        | true                  | true
-      false       | true          | true        | true                  | true
-      false       | false         | true        | true                  | false
-      true        | true          | true        | false                 | false
-      true        | true          | false       | true                  | false
-    end
-
-    with_them do
-      before do
-        stub_experiment_for_subject(learn_gitlab_a: experiment_a, learn_gitlab_b: experiment_b)
-        allow(OnboardingProgress).to receive(:onboarding?).with(project.namespace).and_return(onboarding)
-        allow_next(LearnGitlab, user).to receive(:available?).and_return(learn_gitlab_available)
-      end
-
-      context 'when signed in' do
-        before do
-          sign_in(user)
-        end
-
-        it { is_expected.to eq(result) }
-      end
-
-      context 'when not signed in' do
-        it { is_expected.to eq(false) }
-      end
-    end
-  end
 end

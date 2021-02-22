@@ -14,6 +14,6 @@ class Projects::LearnGitlabController < Projects::ApplicationController
   private
 
   def check_experiment_enabled?
-    return access_denied! unless helpers.learn_gitlab_experiment_enabled?(project)
+    return access_denied! unless Namespaces::LearnGitlabExperiment.new(current_user, project.namespace).enabled?
   end
 end

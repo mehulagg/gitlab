@@ -1,13 +1,6 @@
 # frozen_string_literal: true
 
 module LearnGitlabHelper
-  def learn_gitlab_experiment_enabled?(project)
-    return false unless current_user
-    return false unless experiment_enabled_for_user?
-
-    learn_gitlab_onboarding_available?(project)
-  end
-
   def onboarding_actions_data(project)
     attributes = onboarding_progress(project).attributes.symbolize_keys
 
@@ -47,15 +40,5 @@ module LearnGitlabHelper
 
   def onboarding_progress(project)
     OnboardingProgress.find_by(namespace: project.namespace) # rubocop: disable CodeReuse/ActiveRecord
-  end
-
-  def experiment_enabled_for_user?
-    Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_a, subject: current_user) ||
-      Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_b, subject: current_user)
-  end
-
-  def learn_gitlab_onboarding_available?(project)
-    OnboardingProgress.onboarding?(project.namespace) &&
-      LearnGitlab.new(current_user).available?
   end
 end

@@ -503,7 +503,7 @@ RSpec.describe ProjectsHelper do
     context 'learn gitlab experiment' do
       context 'when it is enabled' do
         before do
-          expect(helper).to receive(:learn_gitlab_experiment_enabled?).with(project).and_return(true)
+          allow_next(Namespaces::LearnGitlabExperiment, user, project.namespace).to receive(:enabled?).and_return(true)
         end
 
         it { is_expected.to include(:learn_gitlab) }
