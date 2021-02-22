@@ -130,13 +130,27 @@ class WikiPage
   def versions(options = {})
     return [] unless persisted?
 
-    wiki.wiki.page_versions(page.path, options)
+    hash = {
+      limit: options[:limit] || 20,
+      offset: options[:page],
+      path: path
+    }
+
+    commits = wiki.repository.commits('HEAD', hash)
+    commits.map do |commit|
+      Gitlab::Git::WikiPageVersion.new(commit.raw, 'markdown')
+    end
+
+    # wiki.wiki.page_versions(page.path, options)
   end
 
   def count_versions
     return [] unless persisted?
 
-    wiki.wiki.count_page_versions(page.path)
+    # This is directly called in wiki.wiki
+    wiki.repository.count_commits(ref: 'HEAD', path: page.path)
+
+    # wiki.wiki.count_page_versions(page.path)
   end
 
   def last_version

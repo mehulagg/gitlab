@@ -150,7 +150,8 @@ class Wiki
   def find_page(title, version = nil)
     name_with_extension = title + '.md'
 
-    blob = repository.blob_at('HEAD', name_with_extension)
+    revision = version.presence || 'HEAD'
+    blob = repository.blob_at(revision, name_with_extension)
     return unless blob
     name = File.basename(blob.name, File.extname(blob.name))
 
@@ -166,7 +167,7 @@ class Wiki
 
     gitaly_page = Gitlab::GitalyClient::WikiPage.new(hash)
 
-    commit = repository.raw_repository.last_commit_for_path('HEAD', name_with_extension)
+    commit = repository.raw_repository.last_commit_for_path(revision, name_with_extension)
     version = Gitlab::Git::WikiPageVersion.new(commit, 'markdown')
     git_wiki_page = Gitlab::Git::WikiPage.new(gitaly_page, version)
 
@@ -184,7 +185,36 @@ class Wiki
   end
 
   def find_file(name, version = nil)
-    wiki.file(name, version)
+    revision = version.presence || 'HEAD'
+    # Not loading any content
+    blob = Gitlab::Git::Blob.find(repository, revision, name, limit: 0)
+    # blob = repository.blob_at(name, name_with_extension)
+    return unless blob
+
+    extracted_name = File.basename(blob.name)
+
+    hash = {
+      name: extracted_name,
+      mime_type: guess_content_type(extracted_name),
+      path: blob.path,
+      raw_data: blob.data
+    }
+
+    gitaly_file = Gitlab::GitalyClient::WikiFile.new(hash)
+
+    Gitlab::Git::WikiFile.new(gitaly_file)
+
+    # wiki.file(name, version)
+  end
+
+  def guess_content_type(filename)
+    types = MIME::Types.type_for(filename)
+
+    if types.present?
+      types.first.content_type
+    else
+      "application/octet-stream"
+    end
   end
 
   def create_page(title, content, format = :markdown, message = nil)
@@ -215,12 +245,35 @@ class Wiki
   end
 
   def update_page(page, content:, title: nil, format: :markdown, message: nil)
-    commit = commit_details(:updated, message, page.title)
+    commit_message = message.presence || default_message(:deleted, page.title)
 
-    wiki.update_page(page.path, title || page.name, format.to_sym, content, commit)
+    # Move operations is not supported yet
+    repository.update_file(
+      user,
+      page.path,
+      content,
+      branch_name: repository.root_ref,
+      message: commit_message,
+      author_email: user.email,
+      author_name: user.name)
     after_wiki_activity
 
     true
+  rescue Gitlab::Git::Index::IndexError,
+    Gitlab::Git::CommitError,
+    Gitlab::Git::PreReceiveError,
+    Gitlab::Git::CommandError,
+    ArgumentError => error
+
+    @error_message = "#{error.message}"
+    false
+
+    # commit = commit_details(:updated, message, page.title)
+
+    # wiki.update_page(page.path, title || page.name, format.to_sym, content, commit)
+    # after_wiki_activity
+
+    # true
   end
 
   def delete_page(page, message = nil)
