@@ -750,6 +750,19 @@ alt_usage_data { Gitlab::CurrentSettings.uuid }
 alt_usage_data(999)
 ```
 
+### Adding counters to build new metrics
+
+When adding the results of two counters, use the `add` usage data method that 
+handles fallback values and exceptions and generates a valid SQL export.
+
+
+Example of usage:
+
+```ruby
+add(User.active, User.bot)
+```
+
+
 ### Prometheus Queries
 
 In those cases where operational metrics should be part of Usage Ping, a database or Redis query is unlikely
