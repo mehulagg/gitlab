@@ -537,16 +537,9 @@ Example
 
 When looking at this initially you'd suspect that the component is setup before each test and then broken down afterwards, providing isolation between tests.
 
-This is however not entirely true as the `destroy` method does not remove everything which has been mutated on the `wrapper` object. For functional components, destroy only removes the rendered DOM elements from the document.
+This is however not entirely true. The `destroy` method does not remove everything which has been mutated on the `wrapper` object. In its weak sense, for functional components, destroy only removes the rendered DOM elements from the document.
 
-In order to ensure that a clean wrapper object and DOM are being used in each test, the breakdown of the component should rather be performed as follows:
-
-```javascript
-  afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
-  });
-```
+Starting from `VTU v1.x`, trying to access a destroyed (in the weak sense) component [a warning will be emitted](https://github.com/vuejs/vue-test-utils/pull/1706) that the operation is discouraged.
 
 <!-- vale gitlab.Spelling = NO -->
 
