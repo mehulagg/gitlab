@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::ScheduleBulkRepositoryShardMovesService do
-  it_behaves_like 'moves repository shard in bulk' do
+RSpec.describe Projects::ScheduleBulkRepositoryShardMovesWorker do
+  it_behaves_like 'schedules bulk repository shard moves' do
     let_it_be_with_reload(:container) { create(:project, :repository).tap { |project| project.track_project_repository } }
 
     let(:move_service_klass) { Projects::RepositoryStorageMove }
-    let(:bulk_worker_klass) { ::Projects::ScheduleBulkRepositoryShardMovesWorker }
+    let(:worker_klass) { Projects::UpdateRepositoryStorageWorker }
   end
 end
