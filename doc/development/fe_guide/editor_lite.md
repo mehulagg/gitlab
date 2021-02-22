@@ -137,7 +137,7 @@ breaking or overriding them.
 You can depend on other modules in your extensions. This organization helps keep
 the size of Editor Lite's core at bay by importing dependencies only when needed.
 
-Structurally, the complete implementation of Editor Lite can presented as this diagram:
+Structurally, the complete implementation of Editor Lite can be presented as this diagram:
 
 ```mermaid
 graph TD;
