@@ -124,12 +124,10 @@ module Security
 
     def dismissal_feedback_by_finding_fingerprints(finding)
       potential_uuids = finding.fingerprint_uuids
-      matching_feedbacks = strong_memoize(:dismissal_feedback_by_finding_fingerprints) do
-        pipeline.project
-          .vulnerability_feedback
-          .for_dismissal
-          .where(finding_uuid: potential_uuids)
-      end
+      matching_feedbacks = pipeline.project
+        .vulnerability_feedback
+        .for_dismissal
+        .where(finding_uuid: potential_uuids)
       !matching_feedbacks.empty?
     end
 
