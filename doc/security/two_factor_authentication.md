@@ -135,7 +135,7 @@ with the associated SSH key.
 WARNING:
 This feature does not protect the case when user's SSH private key is compromised. 
 
-After having the OTP verified, anyone with user's valid associated SSH key could also use the Git over SSH operations for the next 15 minutes. 
+After having the OTP verified, anyone with user's valid associated SSH key could also use the Git over SSH operations for a period of time defined in the [admin settings](https://docs.gitlab.com/ee/user/admin_area/settings/account_and_limit_settings.html#customize-session-duration-for-git-operations-when-2fa-is-enabled).
 
 ### Enable or disable Two-factor Authentication (2FA) for Git operations
 
