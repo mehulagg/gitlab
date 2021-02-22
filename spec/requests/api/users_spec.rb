@@ -940,6 +940,18 @@ RSpec.describe API::Users do
       expect(new_user.private_profile?).to eq(true)
     end
 
+    it "creates user with view_diffs_file_by_file" do
+      post api('/users', admin), params: attributes_for(:user, view_diffs_file_by_file: true)
+
+      expect(response).to have_gitlab_http_status(:created)
+
+      user_id = json_response['id']
+      new_user = User.find(user_id)
+
+      expect(new_user).not_to eq(nil)
+      expect(new_user.user_preference.view_diffs_file_by_file?).to eq(true)
+    end
+
     it "does not create user with invalid email" do
       post api('/users', admin),
         params: {
