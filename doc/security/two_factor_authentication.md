@@ -132,6 +132,11 @@ ssh git@<hostname> 2fa_verify
 Once the OTP is verified, Git over SSH operations can be used for 15 minutes
 with the associated SSH key.
 
+WARNING:
+This feature does not protect the case when user's SSH private key is compromised. 
+
+After having the OTP verified, anyone with user's valid associated SSH key could also use the Git over SSH operations for the next 15 minutes. 
+
 ### Enable or disable Two-factor Authentication (2FA) for Git operations
 
 Two-factor Authentication (2FA) for Git operations is under development and not
