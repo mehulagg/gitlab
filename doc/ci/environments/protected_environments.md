@@ -132,7 +132,6 @@ appears in the dropdown menu for deployment-only access.
 To add a deployment-only access:
 
 1. Add a group with Reporter permissions.
-1. Assign Reporter Permission.
 1. Add user(s) to the group.
 1. Invite the group to be a project member.
 1. Follow the steps outlined in [Protected Environments](index.md#protecting-environments).
