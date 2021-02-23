@@ -61,11 +61,6 @@ export default {
       required: false,
       default: false,
     },
-    rotation: {
-      type: Object,
-      required: false,
-      default: () => ({}),
-    },
     schedule: {
       type: Object,
       required: true,
@@ -254,16 +249,6 @@ export default {
         this.validationState.startsAt = Boolean(this.form.startsAt.date);
       }
     },
-    beforeShowModal() {
-      if (this.rotation?.activePeriod?.startTime) {
-        const { activePeriod } = this.rotation;
-        // If a startTime exists, rotation restriction must be set to true.
-        this.form.isRestrictedToTime = true;
-        // Parse startTimes
-        this.form.restrictedTo.startTime = parseInt(activePeriod.startTime.slice(0, 2), 10);
-        this.form.restrictedTo.endTime = parseInt(activePeriod.endTime.slice(0, 2), 10);
-      }
-    },
     afterCloseModal() {
       this.form = cloneDeep(formEmptyState);
     },
@@ -280,7 +265,6 @@ export default {
     :action-cancel="actionsProps.cancel"
     modal-class="rotations-modal"
     @primary.prevent="isEditMode ? editRotation() : createRotation()"
-    @show="beforeShowModal"
     @hide="afterCloseModal"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">

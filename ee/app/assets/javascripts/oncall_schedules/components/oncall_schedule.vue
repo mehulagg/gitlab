@@ -98,7 +98,6 @@ export default {
       presetType: this.$options.PRESET_TYPES.WEEKS,
       timeframeStartDate: new Date(),
       rotations: this.schedule.rotations.nodes,
-      rotationToUpdate: {},
     };
   },
   computed: {
@@ -165,9 +164,6 @@ export default {
     },
     fetchRotationShifts() {
       this.$apollo.queries.rotations.refetch();
-    },
-    setRotationToUpdate(rotation) {
-      this.rotationToUpdate = rotation;
     },
   },
 };
@@ -258,7 +254,6 @@ export default {
             :timeframe="timeframe"
             :schedule-iid="schedule.iid"
             :loading="loading"
-            @set-rotation-to-update="setRotationToUpdate"
           />
         </div>
       </gl-card>
@@ -277,7 +272,6 @@ export default {
     <add-edit-rotation-modal
       :schedule="schedule"
       :modal-id="$options.editRotationModalId"
-      :rotation="rotationToUpdate"
       is-edit-mode
     />
   </div>
