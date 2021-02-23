@@ -186,14 +186,34 @@ module Gitlab
       # The `env` param is ignored because it's not needed in either our formatter or Grape's,
       # but it is passed through for consistency.
       #
+      # If explicitly supplied with a `PrecompiledJSON` instance it will skip conversion
+      # and return it directly. This is mostly used in caching.
+      #
       # @param object [Object]
       # @return [String]
       def self.call(object, env = nil)
+        return object.to_s if object.is_a?(PrecompiledJson)
+
         if Feature.enabled?(:grape_gitlab_json, default_enabled: true)
           Gitlab::Json.dump(object)
         else
           Grape::Formatter::Json.call(object, env)
         end
+      end
+    end
+
+    class PrecompiledJson
+      UnsupportFormatError = Class.new(StandardError)
+
+      def initialize(value)
+        @value = value
+      end
+
+      def to_s
+        return @value if @value.is_a?(String)
+        return "[#{@value.join(',')}]" if @value.is_a?(Array)
+
+        raise UnsupportedFormatError
       end
     end
 
