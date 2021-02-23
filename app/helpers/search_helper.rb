@@ -289,7 +289,7 @@ module SearchHelper
   # rubocop: enable CodeReuse/ActiveRecord
 
   def search_result_sanitize(str)
-    Sanitize.fragment(str)
+    Sanitize.clean(str)
   end
 
   def search_filter_link(scope, label, data: {}, search: {})
@@ -377,14 +377,7 @@ module SearchHelper
   end
 
   def simple_search_highlight_and_truncate(text, phrase, options = {})
-    text = Truncato.truncate(
-      text,
-      count_tags: false,
-      count_tail: false,
-      max_length: options.delete(:length) { 200 }
-    )
-
-    highlight(search_result_sanitize(text), phrase.split, options)
+    highlight(search_md_sanitize(text), phrase.split, options)
   end
 
   # _search_highlight is used in EE override
