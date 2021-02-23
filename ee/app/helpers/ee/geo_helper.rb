@@ -33,7 +33,8 @@ module EE
         node_edit_allowed: ::Gitlab::Geo.license_allows?.to_s,
         geo_troubleshooting_help_path: help_page_path('administration/geo/replication/troubleshooting.md'),
         replicable_types: replicable_types.to_json,
-        new_node_url: new_admin_geo_node_path
+        new_node_url: new_admin_geo_node_path,
+        geo_nodes_empty_state_svg: image_path("illustrations/empty-state/geo-empty.svg")
       }
     end
 
