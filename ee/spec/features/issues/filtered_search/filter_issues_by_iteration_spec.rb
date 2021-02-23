@@ -19,6 +19,7 @@ RSpec.describe 'Filter issues by iteration', :js do
     context 'when iterations are not available' do
       before do
         stub_licensed_features(iterations: false)
+        stub_feature_flags(boards_filtered_search: false)
 
         visit page_path
       end
@@ -33,6 +34,7 @@ RSpec.describe 'Filter issues by iteration', :js do
     context 'when iterations are available' do
       before do
         stub_licensed_features(iterations: true)
+        stub_feature_flags(boards_filtered_search: false)
 
         visit page_path
 
