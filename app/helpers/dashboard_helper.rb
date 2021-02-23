@@ -12,7 +12,7 @@ module DashboardHelper
   end
 
   def reviewer_mrs_dashboard_path
-    merge_requests_dashboard_path(reviewer_username: current_user.username)
+    merge_requests_dashboard_path(reviewer_username: current_user.username, reviewer_state: 'unreviewed')
   end
 
   def dashboard_nav_links
