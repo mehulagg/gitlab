@@ -5,6 +5,7 @@ import { __, s__, sprintf } from '~/locale';
 
 import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
 import ConfirmUnsavedChangesDialog from './components/ui/confirm_unsaved_changes_dialog.vue';
+import EditorEmptyState from './components/ui/editor_empty_state.vue';
 import {
   COMMIT_FAILURE,
   COMMIT_SUCCESS,
@@ -19,6 +20,7 @@ import PipelineEditorHome from './pipeline_editor_home.vue';
 export default {
   components: {
     ConfirmUnsavedChangesDialog,
+    EditorEmptyState,
     GlAlert,
     GlLoadingIcon,
     PipelineEditorHome,
@@ -40,6 +42,7 @@ export default {
       // Success and failure state
       failureType: null,
       failureReasons: [],
+      hasNoCiConfigFile: false,
       initialCiFileContent: '',
       lastCommittedContent: '',
       currentCiFileContent: '',
@@ -173,7 +176,7 @@ export default {
         response?.status === httpStatusCodes.NOT_FOUND ||
         response?.status === httpStatusCodes.BAD_REQUEST
       ) {
-        this.reportFailure(LOAD_FAILURE_NO_FILE);
+        this.hasNoCiConfigFile = true;
       } else {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
       }
@@ -216,28 +219,33 @@ export default {
 </script>
 
 <template>
-  <div class="gl-mt-4">
-    <gl-alert v-if="showSuccessAlert" :variant="success.variant" @dismiss="dismissSuccess">
-      {{ success.text }}
-    </gl-alert>
-    <gl-alert v-if="showFailureAlert" :variant="failure.variant" @dismiss="dismissFailure">
-      {{ failure.text }}
-      <ul v-if="failureReasons.length" class="gl-mb-0">
-        <li v-for="reason in failureReasons" :key="reason">{{ reason }}</li>
-      </ul>
-    </gl-alert>
-    <gl-loading-icon v-if="isBlobContentLoading" size="lg" class="gl-m-3" />
-    <div v-else-if="!isBlobContentError" class="gl-mt-4">
-      <pipeline-editor-home
-        :is-ci-config-data-loading="isCiConfigDataLoading"
-        :ci-config-data="ciConfigData"
-        :ci-file-content="currentCiFileContent"
-        @commit="updateOnCommit"
-        @resetContent="resetContent"
-        @showError="showErrorAlert"
-        @updateCiConfig="updateCiConfig"
-      />
+  <div class="gl-mt-4 gl-relative">
+    <div v-if="hasNoCiConfigFile">
+      <editor-empty-state />
     </div>
-    <confirm-unsaved-changes-dialog :has-unsaved-changes="hasUnsavedChanges" />
+    <div v-else>
+      <gl-alert v-if="showSuccessAlert" :variant="success.variant" @dismiss="dismissSuccess">
+        {{ success.text }}
+      </gl-alert>
+      <gl-alert v-if="showFailureAlert" :variant="failure.variant" @dismiss="dismissFailure">
+        {{ failure.text }}
+        <ul v-if="failureReasons.length" class="gl-mb-0">
+          <li v-for="reason in failureReasons" :key="reason">{{ reason }}</li>
+        </ul>
+      </gl-alert>
+      <gl-loading-icon v-if="isBlobContentLoading" size="lg" class="gl-m-3" />
+      <div v-else-if="!isBlobContentError" class="gl-mt-4">
+        <pipeline-editor-home
+          :is-ci-config-data-loading="isCiConfigDataLoading"
+          :ci-config-data="ciConfigData"
+          :ci-file-content="currentCiFileContent"
+          @commit="updateOnCommit"
+          @resetContent="resetContent"
+          @showError="showErrorAlert"
+          @updateCiConfig="updateCiConfig"
+        />
+      </div>
+      <confirm-unsaved-changes-dialog :has-unsaved-changes="hasUnsavedChanges" />
+    </div>
   </div>
 </template>
