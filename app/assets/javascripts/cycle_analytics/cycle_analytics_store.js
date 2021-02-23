@@ -49,8 +49,7 @@ export default {
     newData.stages.forEach((item) => {
       const stageSlug = dasherize(item.name.toLowerCase());
       item.active = false;
-      item.isUserAllowed = false;
-      // item.isUserAllowed = data.permissions[stageSlug];
+      item.isUserAllowed = data.permissions[stageSlug];
       item.emptyStageText = EMPTY_STAGE_TEXTS[stageSlug];
       item.component = `stage-${stageSlug}-component`;
       item.slug = stageSlug;

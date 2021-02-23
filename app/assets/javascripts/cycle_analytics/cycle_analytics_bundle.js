@@ -24,7 +24,7 @@ Vue.use(Translate);
 export default () => {
   const OVERVIEW_DIALOG_COOKIE = 'cycle_analytics_help_dismissed';
   const cycleAnalyticsEl = document.querySelector('#cycle-analytics');
-  const { noAccessSvgPath } = cycleAnalyticsEl.dataset;
+  const { noAccessSvgPath, noDataSvgPath } = cycleAnalyticsEl.dataset;
 
   // eslint-disable-next-line no-new
   new Vue({
@@ -55,6 +55,7 @@ export default () => {
         isOverviewDialogDismissed: Cookies.get(OVERVIEW_DIALOG_COOKIE),
         service: this.createCycleAnalyticsService(cycleAnalyticsEl.dataset.requestPath),
         noAccessSvgPath,
+        noDataSvgPath,
       };
     },
     computed: {
