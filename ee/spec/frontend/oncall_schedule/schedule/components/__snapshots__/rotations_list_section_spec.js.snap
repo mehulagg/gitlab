@@ -23,7 +23,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         >
           <button
             aria-label="Edit rotation"
-            class="btn gl-display-none btn-default btn-md gl-button btn-default-tertiary btn-icon"
+            class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
             title="Edit rotation"
             type="button"
           >
