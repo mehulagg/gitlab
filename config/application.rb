@@ -29,6 +29,7 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/middleware/same_site_cookies')
     require_dependency Rails.root.join('lib/gitlab/middleware/handle_ip_spoof_attack_error')
     require_dependency Rails.root.join('lib/gitlab/middleware/handle_malformed_strings')
+    require_dependency Rails.root.join('lib/gitlab/middleware/geo_proxy')
     require_dependency Rails.root.join('lib/gitlab/runtime')
 
     # Settings in config/environments/* take precedence over those specified here.
@@ -320,6 +321,9 @@ module Gitlab
 
     # GitLab Read-only middleware support
     config.middleware.insert_after ActionDispatch::Flash, ::Gitlab::Middleware::ReadOnly
+
+    # Geo proxy write actions to primary
+    config.middleware.insert_before ::Gitlab::Middleware::ReadOnly, ::Gitlab::Middleware::GeoProxy
 
     config.generators do |g|
       g.factory_bot false
