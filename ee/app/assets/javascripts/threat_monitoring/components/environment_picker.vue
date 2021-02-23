@@ -42,7 +42,6 @@ export default {
   >
     <gl-dropdown
       :id="$options.environmentFilterId"
-      ref="environmentsDropdown"
       class="gl-display-flex"
       toggle-class="gl-truncate"
       :text="environmentName"
@@ -51,16 +50,12 @@ export default {
       <gl-dropdown-item
         v-for="environment in environments"
         :key="environment.id"
-        ref="environmentsDropdownItem"
         @click="setCurrentEnvironmentId(environment.id)"
         >{{ environment.name }}</gl-dropdown-item
       >
-      <gl-dropdown-item
-        v-if="includeAll"
-        ref="environmentsDropdownItem"
-        @click="setAllEnvironments"
-        >{{ $options.ALL_ENVIRONMENT_NAME }}</gl-dropdown-item
-      >
+      <gl-dropdown-item v-if="includeAll" @click="setAllEnvironments">{{
+        $options.ALL_ENVIRONMENT_NAME
+      }}</gl-dropdown-item>
     </gl-dropdown>
   </gl-form-group>
 </template>
