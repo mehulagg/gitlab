@@ -13,6 +13,10 @@ export const confidentialWidget = Vue.observable({
   setConfidentiality: null,
 });
 
+const hideDropdownEvent = new CustomEvent('hiddenGlDropdown', {
+  bubbles: true,
+});
+
 export default {
   tracking: {
     event: 'click_edit_button',
@@ -75,11 +79,7 @@ export default {
   methods: {
     closeForm() {
       this.$refs.editable.collapse();
-      this.$el.dispatchEvent(
-        new CustomEvent('hiddenGlDropdown', {
-          bubbles: true,
-        }),
-      );
+      this.$el.dispatchEvent(hideDropdownEvent);
     },
     // synchronizing the quick action with the sidebar widget
     // this is a temporary solution until we have confidentiality real-time updates
