@@ -892,8 +892,36 @@ RSpec.describe NotificationService, :mailer do
   end
 
   describe '#send_new_release_notifications', :deliver_mails_inline do
+    let(:release) { create(:release, author: author) }
+
+    shared_examples 'does not send notifications for author that cannot trigger notifications' do
+      it 'does not send any notifications' do
+        user_1 = create(:user)
+        recipient_1 = NotificationRecipient.new(user_1, :custom, custom_action: :new_release)
+        allow(NotificationRecipients::BuildService).to receive(:build_new_release_recipients).and_return([recipient_1])
+
+        expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{author.id}' (release_id:#{release.id})")
+
+        notification.send_new_release_notifications(release)
+
+        should_not_email(user_1)
+      end
+    end
+
+    context 'when release author is blocked' do
+      let(:author) { create(:user, :blocked) }
+
+      include_examples 'does not send notifications for author that cannot trigger notifications'
+    end
+
+    context 'when release author is a ghost' do
+      let(:author) { create(:user, :ghost) }
+
+      include_examples 'does not send notifications for author that cannot trigger notifications'
+    end
+
     context 'when recipients for a new release exist' do
-      let(:release) { create(:release) }
+      let(:author) { create(:user) }
 
       it 'calls new_release_email for each relevant recipient' do
         user_1 = create(:user)

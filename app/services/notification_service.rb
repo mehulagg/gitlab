@@ -385,6 +385,11 @@ class NotificationService
 
   # Notify users when a new release is created
   def send_new_release_notifications(release)
+    unless release.author&.can_trigger_notifications?
+      Gitlab::AppLogger.warn("Skipping sending notification for user ID '#{release.author.id}' (release_id:#{release.id})")
+      return false
+    end
+
     recipients = NotificationRecipients::BuildService.build_new_release_recipients(release)
 
     recipients.each do |recipient|
