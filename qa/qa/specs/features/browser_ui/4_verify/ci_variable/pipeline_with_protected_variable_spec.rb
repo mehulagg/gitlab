@@ -10,8 +10,8 @@ module QA
 
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
-          project.name = 'project-with-ci-variables'
-          project.description = 'project with CI variables'
+          project.name = 'project-with-protected-variable'
+          project.description = 'project with protected variable'
         end
       end
 
@@ -56,7 +56,7 @@ module QA
         project.visit!
         project.add_member(developer)
         project.add_member(maintainer, Resource::Members::AccessLevel::MAINTAINER)
-        add_ci_variable
+        add_protected_variable
       end
 
       after do
@@ -89,12 +89,12 @@ module QA
 
       private
 
-      def add_ci_variable
+      def add_protected_variable
         Resource::CiVariable.fabricate_via_api! do |ci_variable|
-          ci_variable.project = project
-          ci_variable.key = 'PROTECTED_VARIABLE'
-          ci_variable.value = protected_value
-          ci_variable.protected = true
+          protected_variable.project = project
+          protected_variable.key = 'PROTECTED_VARIABLE'
+          protected_variable.value = protected_value
+          protected_variable.protected = true
         end
       end
 
