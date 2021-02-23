@@ -135,55 +135,64 @@ export default function fromYaml(manifest) {
   const primary_keys = ["description", "metadata", "spec"];
   const metadata_keys = ["name", "resourceVersion", "annotations", "labels"];
   const spec_keys = ["endpointSelector", "ingress", "egress"];
-  const rule_keys = ["fromEntities", "toEntities", "fromCIDR", "toCIDR", "toFQDNs", "fromEndpoints", "toEndpoints", "toPorts"];
+  const rule_keys = [
+    "fromEntities",
+    "toEntities",
+    "fromCIDR",
+    "toCIDR",
+    "toFQDNs",
+    "fromEndpoints",
+    "toEndpoints",
+    "toPorts",
+  ];
   const toPort_keys = ["ports"];
-  const port_keys = ["port","protocol"];
-  if(manifest_obj) {
-    Object.keys(manifest_obj).forEach(item => {
-      if(!primary_keys.includes(item)) throw "Unsupported attribute";
+  const port_keys = ["port", "protocol"];
+  if (manifest_obj) {
+    Object.keys(manifest_obj).forEach((item) => {
+      if (!primary_keys.includes(item)) throw "Unsupported attribute";
     });
-    if(manifest_obj.metadata){
-      Object.keys(manifest_obj.metadata).forEach(item => {
-        if(!metadata_keys.includes(item)) throw "Unsupported attribute";
+    if (manifest_obj.metadata) {
+      Object.keys(manifest_obj.metadata).forEach((item) => {
+        if (!metadata_keys.includes(item)) throw "Unsupported attribute";
       });
     }
-    if(manifest_obj.spec){
-      Object.keys(manifest_obj.spec).forEach(item => {
-        if(!spec_keys.includes(item)) throw "Unsupported attribute";
+    if (manifest_obj.spec) {
+      Object.keys(manifest_obj.spec).forEach((item) => {
+        if (!spec_keys.includes(item)) throw "Unsupported attribute";
       });
-      if(manifest_obj.spec.ingress){
-        Object.keys(manifest_obj.spec.ingress).forEach(item => {
-          if(!rule_keys.includes(item)) throw "Unsupported attribute";
+      if (manifest_obj.spec.ingress) {
+        Object.keys(manifest_obj.spec.ingress).forEach((item) => {
+          if (!rule_keys.includes(item)) throw "Unsupported attribute";
         });
-        if(manifest_obj.spec.ingress.toPorts){
-          manifest_obj.spec.ingress.toPorts.forEach(entry => {
-            Object.keys(entry).forEach(item => {
-              if(!toPort_keys.includes(item)) throw "Unsupported attribute";
+        if (manifest_obj.spec.ingress.toPorts) {
+          manifest_obj.spec.ingress.toPorts.forEach((entry) => {
+            Object.keys(entry).forEach((item) => {
+              if (!toPort_keys.includes(item)) throw "Unsupported attribute";
             });
-            if(entry.ports){
-              entry.ports.forEach(port_entry => {
-                Object.keys(port_entry).forEach(item => {
-                  if(!port_keys.includes(item)) throw "Unsupported attribute";
-                })
+            if (entry.ports) {
+              entry.ports.forEach((port_entry) => {
+                Object.keys(port_entry).forEach((item) => {
+                  if (!port_keys.includes(item)) throw "Unsupported attribute";
+                });
               });
             }
           });
         }
       }
-      if(manifest_obj.spec.egress){
-        Object.keys(manifest_obj.spec.egress).forEach(item => {
-          if(!rule_keys.includes(item)) throw "Unsupported attribute";
+      if (manifest_obj.spec.egress) {
+        Object.keys(manifest_obj.spec.egress).forEach((item) => {
+          if (!rule_keys.includes(item)) throw "Unsupported attribute";
         });
-        if(manifest_obj.spec.egress.toPorts){
-          manifest_obj.spec.egress.toPorts.forEach(entry => {
-            Object.keys(entry).forEach(item => {
-              if(!toPort_keys.includes(item)) throw "Unsupported attribute";
+        if (manifest_obj.spec.egress.toPorts) {
+          manifest_obj.spec.egress.toPorts.forEach((entry) => {
+            Object.keys(entry).forEach((item) => {
+              if (!toPort_keys.includes(item)) throw "Unsupported attribute";
             });
-            if(entry.ports){
-              entry.ports.forEach(port_entry => {
-                Object.keys(port_entry).forEach(item => {
-                  if(!port_keys.includes(item)) throw "Unsupported attribute";
-                })
+            if (entry.ports) {
+              entry.ports.forEach((port_entry) => {
+                Object.keys(port_entry).forEach((item) => {
+                  if (!port_keys.includes(item)) throw "Unsupported attribute";
+                });
               });
             }
           });
