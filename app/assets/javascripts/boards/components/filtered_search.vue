@@ -1,5 +1,5 @@
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions } from 'vuex';
 import { historyPushState } from '~/lib/utils/common_utils';
 import { setUrlParams } from '~/lib/utils/url_utility';
 import FilteredSearch from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
