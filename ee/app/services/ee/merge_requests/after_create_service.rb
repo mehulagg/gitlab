@@ -5,8 +5,8 @@ module EE
     module AfterCreateService
       extend ::Gitlab::Utils::Override
 
-      override :execute
-      def execute(merge_request)
+      override :prepare_merge_request
+      def prepare_merge_request(merge_request)
         super
 
         schedule_sync_for(merge_request.head_pipeline_id)
