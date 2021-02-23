@@ -185,13 +185,13 @@ RSpec.describe Security::StoreReportService, '#execute' do
       finding.reload
       existing_fingerprint.reload
 
-      #check that unsupported algorithm is not deleted
+      # check that unsupported algorithm is not deleted
       expect(finding.fingerprints.count).to eq(3)
       fingerprint_algs = finding.fingerprints.sort.map(&:algorithm_type)
       expect(fingerprint_algs).to eq(%w[hash location scope_offset])
 
       # check that the existing hash fingerprint was updated/reused
-      expect(existing_fingerprint.id).to eq(finding.fingerprints.sort.first.id)
+      expect(existing_fingerprint.id).to eq(finding.fingerprints.min.id)
 
       # check that the unsupported fingerprint was not deleted
       expect(::Vulnerabilities::FindingFingerprint.exists?(unsupported_fingerprint.id)).to eq(true)
