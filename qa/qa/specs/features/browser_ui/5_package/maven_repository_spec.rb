@@ -22,12 +22,19 @@ module QA
         end
       end
 
+      let(:another_project) do
+        Resource::Project.fabricate_via_api! do |another_project|
+          another_project.name = 'another-maven-package-project'
+          another_project.group = project.group
+        end
+      end
+
       let!(:runner) do
         Resource::Runner.fabricate! do |runner|
           runner.name = "qa-runner-#{Time.now.to_i}"
-          runner.tags = ["runner-for-#{project.name}"]
+          runner.tags = ["runner-for-#{project.group.name}"]
           runner.executor = :docker
-          runner.project = project
+          runner.token = project.group.sandbox.runners_token
         end
       end
 
@@ -90,6 +97,24 @@ module QA
         }
       end
 
+      let(:gitlab_ci_yaml) do
+        {
+          file_path: '.gitlab-ci.yml',
+          content:
+              <<~YAML
+                deploy:
+                  image: maven:3.6-jdk-11
+                  script:
+                    - 'mvn deploy -s settings.xml'
+                    - "mvn dependency:get -Dartifact=#{group_id}:#{artifact_id}:1.0"
+                  only:
+                    - "#{project.default_branch}"
+                  tags:
+                    - "runner-for-#{project.group.name}"
+              YAML
+        }
+      end
+
       it 'publishes a maven package and deletes it', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/943' do
         # Use a maven docker container to deploy the package
         with_fixtures([pom_xml, settings_xml]) do |dir|
@@ -122,23 +147,9 @@ module QA
           commit.project = project
           commit.commit_message = 'Add .gitlab-ci.yml'
           commit.add_files([
-            {
-              file_path: '.gitlab-ci.yml',
-              content:
-                <<~YAML
-                  deploy:
-                    image: maven:3.6-jdk-11
-                    script:
-                      - 'mvn deploy -s settings.xml'
-                      - "mvn dependency:get -Dartifact=#{group_id}:#{artifact_id}:1.0"
-                    only:
-                      - "#{project.default_branch}"
-                    tags:
-                      - "runner-for-#{project.name}"
-                YAML
-            },
-            settings_xml,
-            pom_xml
+                             gitlab_ci_yaml,
+                             settings_xml,
+                             pom_xml
           ])
         end
 
@@ -151,6 +162,44 @@ module QA
 
         Page::Project::Job::Show.perform do |job|
           expect(job).to be_successful(timeout: 800)
+        end
+      end
+
+      it 'prevent users from publishing duplicate Maven packages at the group level', testcase: '' do
+        with_fixtures([pom_xml, settings_xml]) do |dir|
+          Service::DockerRun::Maven.new(dir).publish!
+        end
+
+        project.visit!
+        Page::Project::Menu.perform(&:click_packages_link)
+
+        Page::Project::Packages::Index.perform do |index|
+          expect(index).to have_package(package_name)
+        end
+
+        project.group.visit!
+        Page::Group::Menu.perform(&:go_to_package_settings)
+        Page::Group::Settings::PackageRegistries.perform(&:set_allow_duplicates_disabled)
+
+        Resource::Repository::Commit.fabricate_via_api! do |commit|
+          commit.project = another_project
+          commit.commit_message = 'Add .gitlab-ci.yml'
+          commit.add_files([
+                            gitlab_ci_yaml,
+                            settings_xml,
+                            pom_xml
+                           ])
+        end
+
+        another_project.visit!
+        Flow::Pipeline.visit_latest_pipeline
+
+        Page::Project::Pipeline::Show.perform do |pipeline|
+          pipeline.click_job('deploy')
+        end
+
+        Page::Project::Job::Show.perform do |job|
+          expect(job).not_to be_successful(timeout: 800)
         end
       end
     end
