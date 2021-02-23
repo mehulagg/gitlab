@@ -642,7 +642,7 @@ RSpec.describe User do
 
     context 'without guests' do
       before do
-        license = double('License', exclude_guests_from_active_count?: true, trial?: false)
+        license = double('License', exclude_guests_from_active_count?: true)
         allow(License).to receive(:current) { license }
       end
 
