@@ -45,7 +45,7 @@ RSpec.describe NewEpicWorker do
         it 'does not create a notification for the mentioned user' do
           expect(Notify).not_to receive(:new_epic_email).with(user.id, epic.id, nil)
 
-          expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{user.id}' (target_class:#{epic.class}, target_id:#{epic.id})")
+          expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{user.id}' (class:#{epic.class}, id:#{epic.id})")
 
           worker.perform(epic.id, user.id)
         end

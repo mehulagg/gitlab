@@ -386,7 +386,7 @@ class NotificationService
   # Notify users when a new release is created
   def send_new_release_notifications(release)
     unless release.author&.can_trigger_notifications?
-      Gitlab::AppLogger.warn("Skipping sending notification for user ID '#{release.author.id}' (release_id:#{release.id})")
+      warn_skipping_notifications(release.author, release)
       return false
     end
 
@@ -704,7 +704,7 @@ class NotificationService
 
   def new_resource_email(target, current_user, method)
     unless current_user&.can_trigger_notifications?
-      Gitlab::AppLogger.warn("Skipping sending notification for user ID '#{current_user.id}' (target_class:#{target.class}, target_id:#{target.id})")
+      warn_skipping_notifications(current_user, target)
       return false
     end
 
@@ -717,7 +717,7 @@ class NotificationService
 
   def new_mentions_in_resource_email(target, new_mentioned_users, current_user, method)
     unless current_user&.can_trigger_notifications?
-      Gitlab::AppLogger.warn("Skipping sending notification for user ID '#{current_user.id}' (target_class:#{target.class}, target_id:#{target.id})")
+      warn_skipping_notifications(current_user, target)
       return false
     end
 
@@ -853,6 +853,10 @@ class NotificationService
     return false if recipients.present?
 
     source.respond_to?(:group) && source.group
+  end
+
+  def warn_skipping_notifications(user, object)
+    Gitlab::AppLogger.warn("Skipping sending notification for user ID '#{user.id}' (class:#{object.class}, id:#{object.id})")
   end
 end
 

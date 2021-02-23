@@ -101,7 +101,7 @@ RSpec.describe NotificationService, :mailer do
 
   shared_examples 'no notifications for new mentions' do
     it 'does not send any notification' do
-      expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{current_user.id}' (target_class:#{mentionable.class}, target_id:#{mentionable.id})")
+      expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{current_user.id}' (class:#{mentionable.class}, id:#{mentionable.id})")
 
       send_notifications(@u_mentioned, current_user: current_user)
 
@@ -900,7 +900,7 @@ RSpec.describe NotificationService, :mailer do
         recipient_1 = NotificationRecipient.new(user_1, :custom, custom_action: :new_release)
         allow(NotificationRecipients::BuildService).to receive(:build_new_release_recipients).and_return([recipient_1])
 
-        expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{author.id}' (release_id:#{release.id})")
+        expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{author.id}' (class:#{release.class}, id:#{release.id})")
 
         notification.send_new_release_notifications(release)
 
@@ -1172,7 +1172,7 @@ RSpec.describe NotificationService, :mailer do
 
         shared_examples 'a new issue with an author that cannot trigger notifications' do
           it 'does not send notifications' do
-            expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{author.id}' (target_class:#{issue.class}, target_id:#{issue.id})")
+            expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{author.id}' (class:#{issue.class}, id:#{issue.id})")
 
             notification.new_issue(issue, author)
 
@@ -1834,7 +1834,7 @@ RSpec.describe NotificationService, :mailer do
 
         shared_examples 'a new merge request with an author that cannot trigger notifications' do
           it 'does not send notifications' do
-            expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{author.id}' (target_class:#{merge_request.class}, target_id:#{merge_request.id})")
+            expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{author.id}' (class:#{merge_request.class}, id:#{merge_request.id})")
 
             notification.new_merge_request(merge_request, author)
 
