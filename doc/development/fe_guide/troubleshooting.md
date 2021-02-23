@@ -39,3 +39,21 @@ See [this video](https://youtu.be/-BkEhghP-kM) for an in-depth overview and inve
 ```
 
 Please note that `toMatchObject` actually changes the nature of the assertion and won't fail if some items are **missing** from the expectation.
+
+## Vue component mount issues
+
+### When rendering a component that uses GlFilteredSearch and the component or its parent uses Vue Apollo
+
+When trying to render our gitlab-ui component GlFilteredSearch, I was getting an error in the provide function:
+
+`cannot read suggestionsListClass of undefined`
+
+Apparently, vue-apollo will try to merge provide in the before create method, but when referencing props in the provide function, it doesnt seem to have access to either `this` or props.
+
+This closed MR provides more context https://gitlab.com/gitlab-org/gitlab-ui/-/merge_requests/2019
+
+#### Solution
+
+Currently, it seems the best solution would be to contribute upstream to VueApollo. But if you come across this issue, it can be solved by adding an `apolloProvider: {}` to the component mount function. (We understand this is ideal but resolves the error temporarily)
+
+
