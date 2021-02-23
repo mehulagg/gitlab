@@ -8,6 +8,9 @@
     .text-center.gl-mt-3
       = sprite_icon('spinner', size: 24, css_class: 'gl-spinner')
 
+.form-group
+  %h5
+    = _('Approval settings')
 - if project.code_owner_approval_required_available?
   .gl-alert.gl-alert-info.gl-mb-4.fade.in.show{ role: "alert" }
     %button.js-close.gl-alert-dismiss{ type: "button", 'data-dismiss': "alert", 'aria-label': "Close" }
