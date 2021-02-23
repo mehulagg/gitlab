@@ -186,7 +186,7 @@ module Gitlab
       # The `env` param is ignored because it's not needed in either our formatter or Grape's,
       # but it is passed through for consistency.
       #
-      # If explicitly supplied with a `PrecompiledJSON` instance it will skip conversion
+      # If explicitly supplied with a `PrecompiledJson` instance it will skip conversion
       # and return it directly. This is mostly used in caching.
       #
       # @param object [Object]
@@ -205,7 +205,7 @@ module Gitlab
     # Wrapper class used to skip JSON dumping on Grape endpoints.
 
     class PrecompiledJson
-      UnsupportFormatError = Class.new(StandardError)
+      UnsupportedFormatError = Class.new(StandardError)
 
       # @overload PrecompiledJson.new("foo")
       #   @param value [String]
