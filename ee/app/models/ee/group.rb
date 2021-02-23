@@ -227,8 +227,7 @@ module EE
     end
 
     def saml_group_sync_available?
-      ::Feature.enabled?(:saml_group_links, self, default_enabled: true) &&
-        feature_available?(:group_saml_group_sync) && root_ancestor.saml_enabled?
+      feature_available?(:group_saml_group_sync) && root_ancestor.saml_enabled?
     end
 
     override :multiple_issue_boards_available?
