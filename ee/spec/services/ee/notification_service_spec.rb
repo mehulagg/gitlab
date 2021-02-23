@@ -648,9 +648,32 @@ RSpec.describe EE::NotificationService, :mailer do
     end
 
     context 'new epic' do
-      let(:execute) { subject.new_epic(epic) }
+      let(:current_user) { epic.author }
+      let(:execute) { subject.new_epic(epic, current_user) }
 
       include_examples 'epic notifications'
+
+      shared_examples 'no epic notifications' do
+        it 'does not send notification' do
+          execute
+
+          should_not_email(watcher)
+          should_not_email(participating)
+          should_not_email(other_user)
+        end
+      end
+
+      context 'when author is blocked' do
+        let(:current_user) { create(:user, :blocked) }
+
+        include_examples 'no epic notifications'
+      end
+
+      context 'when author is a ghost' do
+        let(:current_user) { create(:user, :ghost) }
+
+        include_examples 'no epic notifications'
+      end
     end
   end
 

@@ -1166,6 +1166,32 @@ RSpec.describe NotificationService, :mailer do
           should_email(admin)
         end
       end
+
+      context 'when the author is not allowed to trigger notifications' do
+        let(:author) { nil }
+
+        shared_examples 'a new issue with an author that cannot trigger notifications' do
+          it 'does not send notifications' do
+            expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{author.id}' (target_class:#{issue.class}, target_id:#{issue.id})")
+
+            notification.new_issue(issue, author)
+
+            should_not_email(@u_guest_watcher)
+          end
+        end
+
+        context 'because they are blocked' do
+          let(:author) { create(:user, :blocked) }
+
+          it_behaves_like 'a new issue with an author that cannot trigger notifications'
+        end
+
+        context 'because they are a ghost' do
+          let(:author) { create(:user, :ghost) }
+
+          it_behaves_like 'a new issue with an author that cannot trigger notifications'
+        end
+      end
     end
 
     describe '#new_mentions_in_issue' do
@@ -1800,6 +1826,32 @@ RSpec.describe NotificationService, :mailer do
           end
 
           it { should_not_email(participant) }
+        end
+      end
+
+      context 'when the author is not allowed to trigger notifications' do
+        let(:author) { nil }
+
+        shared_examples 'a new merge request with an author that cannot trigger notifications' do
+          it 'does not send notifications' do
+            expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{author.id}' (target_class:#{merge_request.class}, target_id:#{merge_request.id})")
+
+            notification.new_merge_request(merge_request, author)
+
+            should_not_email(@u_watcher)
+          end
+        end
+
+        context 'because they are blocked' do
+          let(:author) { create(:user, :blocked) }
+
+          it_behaves_like 'a new merge request with an author that cannot trigger notifications'
+        end
+
+        context 'because they are a ghost' do
+          let(:author) { create(:user, :ghost) }
+
+          it_behaves_like 'a new merge request with an author that cannot trigger notifications'
         end
       end
     end

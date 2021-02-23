@@ -95,7 +95,7 @@ class NotificationService
   #  * users with custom level checked with "new issue"
   #
   def new_issue(issue, current_user)
-    new_resource_email(issue, :new_issue_email)
+    new_resource_email(issue, current_user, :new_issue_email)
   end
 
   # When issue text is updated, we should send an email to:
@@ -176,7 +176,7 @@ class NotificationService
   #
   # In EE, approvers of the merge request are also included
   def new_merge_request(merge_request, current_user)
-    new_resource_email(merge_request, :new_merge_request_email)
+    new_resource_email(merge_request, current_user, :new_merge_request_email)
   end
 
   def push_to_merge_request(merge_request, current_user, new_commits: [], existing_commits: [])
@@ -702,7 +702,12 @@ class NotificationService
 
   protected
 
-  def new_resource_email(target, method)
+  def new_resource_email(target, current_user, method)
+    unless current_user&.can_trigger_notifications?
+      Gitlab::AppLogger.warn("Skipping sending notification for user ID '#{current_user.id}' (target_class:#{target.class}, target_id:#{target.id})")
+      return false
+    end
+
     recipients = NotificationRecipients::BuildService.build_recipients(target, target.author, action: "new")
 
     recipients.each do |recipient|
