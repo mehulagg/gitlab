@@ -9,7 +9,7 @@ RSpec.shared_examples 'responds to Kubeclient::HttpError' do |kubeclient_method|
       allow(kubeclient).to receive(kubeclient_method).and_raise(Kubeclient::HttpError.new(500, 'system failure', response))
     end
 
-    it 'returns error response' do
+    it 'returns error response', :aggregate_failures do
       expect(subject).to be_error
       expect(subject.http_status).to eq(:bad_request)
       expect(subject.message).not_to be_nil
