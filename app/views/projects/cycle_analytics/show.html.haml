@@ -1,7 +1,8 @@
 - page_title _("Value Stream Analytics")
 - add_page_specific_style 'page_bundles/cycle_analytics'
+- initial_data = { request_path: project_cycle_analytics_path(@project), no_access_svg_path: image_path("illustrations/analytics/cycle-analytics-empty-chart.svg"), no_data_svg_path: image_path("illustrations/analytics/cycle-analytics-empty-chart.svg"), no_access_svg_path: image_path("illustrations/analytics/no-access.svg") }
 
-#cycle-analytics{ "v-cloak" => "true", data: { request_path: project_cycle_analytics_path(@project) } }
+#cycle-analytics{ "v-cloak" => "true", data: initial_data }
   %gl-loading-icon{ "v-show" => "isLoading", "size" => "lg" }
   .wrapper{ "v-show" => "!isLoading && !hasError" }
     .card
@@ -58,7 +59,7 @@
           .section.stage-events.overflow-auto
             %gl-loading-icon{ "v-show" => "isLoadingStage", "size" => "lg" }
             %template{ "v-if" => "currentStage && !currentStage.isUserAllowed" }
-              = render partial: "no_access"
+              %gl-empty-state.js-empty-state{ "title" => _('You need permission.'), ":svg-path" => "noAccessSvgPath", "description" => _("Want to see the data? Please ask an administrator for access.") }
             %template{ "v-else" => true }
               %template{ "v-if" => "isEmptyStage && !isLoadingStage" }
                 = render partial: "empty_stage"
