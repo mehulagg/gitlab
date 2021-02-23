@@ -21,11 +21,11 @@ module IncidentManagement
 
     delegate :project, to: :rotation, allow_nil: true
 
-    scope :not_removed, -> { where(removed_at: nil) }
-    scope :removed, -> { where('removed_at is NOT NULL') }
+    scope :not_removed, -> { where(is_removed: false) }
+    scope :removed, -> { where(is_removed: true) }
 
     def mark_as_removed
-      update_column(:removed_at, Time.current)
+      update_column(:is_removed, true)
     end
   end
 end

@@ -7,13 +7,11 @@ class AddRemovedAtToOncallParticipant < ActiveRecord::Migration[6.0]
 
   def up
     with_lock_retries do
-      add_column :incident_management_oncall_participants, :removed_at, :datetime_with_timezone
+      add_column :incident_management_oncall_participants, :is_removed, :boolean, default: false
     end
   end
 
   def down
-    remove_column :incident_management_oncall_participants, :removed_at
+    remove_column :incident_management_oncall_participants, :is_removed
   end
 end
-
-
