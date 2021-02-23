@@ -2875,7 +2875,7 @@ RSpec.describe NotificationService, :mailer do
     end
 
     it 'filters out guests when new merge request is created' do
-      notification.new_merge_request(merge_request1, @u_disabled)
+      notification.new_merge_request(merge_request1, developer)
 
       should_not_email(guest)
       should_email(assignee)
