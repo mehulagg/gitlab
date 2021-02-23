@@ -147,14 +147,33 @@ RSpec.describe PostReceive do
         described_class.new.perform(gl_repository, key_id, base64_changes)
       end
 
-      it 'calls replicator to update Geo' do
-        allow(Gitlab::Geo).to receive(:primary?) { true }
-
-        expect_next_instance_of(Geo::GroupWikiRepositoryReplicator) do |instance|
-          expect(instance).to receive(:handle_after_update)
+      context 'when Geo is enabled' do
+        before do
+          allow(Gitlab::Geo).to receive(:primary?) { true }
         end
 
-        described_class.new.perform(gl_repository, key_id, base64_changes)
+        context 'when group_wiki_repository does not exist' do
+          it 'calls replicator to update Geo' do
+            expect(group.group_wiki_repository).to be_nil
+
+            expect(Geo::GroupWikiRepositoryReplicator).not_to receive(:new)
+
+            described_class.new.perform(gl_repository, key_id, base64_changes)
+          end
+        end
+
+        context 'when group_wiki_repository exists' do
+          it 'calls replicator to update Geo' do
+            wiki.create_wiki_repository
+
+            expect(group.group_wiki_repository).to be_present
+            expect_next_instance_of(Geo::GroupWikiRepositoryReplicator) do |instance|
+              expect(instance).to receive(:handle_after_update)
+            end
+
+            described_class.new.perform(gl_repository, key_id, base64_changes)
+          end
+        end
       end
     end
   end
