@@ -10,10 +10,10 @@ disqus_identifier: 'https://docs.gitlab.com/ee/ci/environments.html'
 
 > Introduced in GitLab 8.9.
 
-Use environments to control the continuous deployment of your software.
+Environments describe where code is deployed.
 
-- Environments are like tags for your CI/CD jobs. Environments describe where code gets deployed.
-- Deployments are created when [GitLab CI/CD](../yaml/README.md) deploys versions of code to environments.
+Each time [GitLab CI/CD](../yaml/README.md) deploys a version of code to an environment,
+a deployment is created.
 
 GitLab:
 
