@@ -41,8 +41,7 @@ module API
       #   @return [Gitlab::Json::PrecompiledJson]
       def present_cached(obj_or_collection, with:, **presenter_args)
         json =
-          case
-          when obj_or_collection.is_a?(Enumerable)
+          if obj_or_collection.is_a?(Enumerable)
             cached_collection(obj_or_collection, presenter: with, presenter_args: presenter_args)
           else
             cached_object(obj_or_colletion, presenter: with, presenter_args: presenter_args)
@@ -87,23 +86,19 @@ module API
       # block.
       #
       # The result is that this is functionally identical to `#fetch`.
-      def fetch_multi(*objs, **kwargs, &block)
+      def fetch_multi(*objs, **kwargs)
         objs.flatten!
         map = multi_key_map(objs)
 
         cache.fetch_multi(*map.keys, **kwargs) do |key|
-          block.call(map[key])
+          yield map[key]
         end
       end
 
       # @param objects [Enumerable<Object>] objects which _must_ respond to `#cache_key`
       # @return [Hash]
       def multi_key_map(objects)
-        objects.reduce(Hash.new) do |hash, obj|
-          hash[obj.cache_key] = obj
-
-          hash
-        end
+        objects.index_with(&:cache_key)
       end
     end
   end
