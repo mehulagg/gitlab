@@ -46,13 +46,35 @@ RSpec.describe Groups::DestroyService do
     end
   end
 
-  it 'calls replicator to update Geo' do
-    allow(Gitlab::Geo).to receive(:primary?) { true }
-
-    expect_next_instance_of(Geo::GroupWikiRepositoryReplicator) do |instance|
-      expect(instance).to receive(:handle_after_destroy)
+  context 'when on a Geo primary node' do
+    before do
+      allow(Gitlab::Geo).to receive(:primary?) { true }
     end
 
-    subject.execute
+    context 'when group_wiki_repository does not exist' do
+      it 'does not call replicator to update Geo' do
+        expect_next_instance_of(Geo::GroupWikiRepositoryReplicator).never
+
+        subject.execute
+      end
+    end
+
+    it 'calls replicator to update Geo' do
+      group.wiki.create_wiki_repository
+
+      expect(group.group_wiki_repository.replicator).to receive(:handle_after_destroy)
+
+      subject.execute
+    end
+  end
+
+  context 'when not on a Geo primary node' do
+    it 'does not call replicator to update Geo' do
+      group.wiki.create_wiki_repository
+
+      expect(group.group_wiki_repository.replicator).not_to receive(:handle_after_destroy)
+
+      subject.execute
+    end
   end
 end

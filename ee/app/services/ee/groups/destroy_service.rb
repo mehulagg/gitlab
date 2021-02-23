@@ -12,7 +12,10 @@ module EE
 
           unless group&.persisted?
             log_audit_event
-            group.group_wiki_repository.replicator.handle_after_destroy if group.group_wiki_repository
+
+            if ::Gitlab::Geo.primary? && group.group_wiki_repository
+              group.group_wiki_repository.replicator.handle_after_destroy
+            end
           end
         end
       end
