@@ -67,6 +67,8 @@ Sidekiq.configure_server do |config|
 
   Gitlab.config.load_dynamic_cron_schedules!
 
+  Gitlab::Database::BackgroundMigration::MigrationService.load_migration_crons
+
   # Sidekiq-cron: load recurring jobs from gitlab.yml
   # UGLY Hack to get nested hash from settingslogic
   cron_jobs = Gitlab::Json.parse(Gitlab.config.cron_jobs.to_json)

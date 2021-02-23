@@ -4,25 +4,24 @@ module Gitlab
   module Database
     module BackgroundMigration
       class Scheduler
-        include Gitlab::Database::Migrations::BackgroundMigrationHelpers
+        def perform(batched_migration_id)
+          batched_migration = BatchedMigration.find(batched_migration_id)
 
-        BATCHED_MIGRATION_CLASS_NAME = "::#{module_parent_name}::BatchedMigrationWrapper"
+          return unless batched_migration.active?
 
-        def perform
-          BatchedMigration.active.each do |active_migration|
-            last_created_job = active_migration.last_created_job
+          last_created_job = batched_migration.last_created_job
 
-            next if last_created_job && last_created_job.created_at > (Time.current - active_migration.interval)
+          next_batched_job = create_next_batched_job!(batched_migration, last_created_job)
 
-            next_batched_job = create_next_batched_job!(active_migration, last_created_job)
-
-            if next_batched_job.nil?
-              finish_active_migration(active_migration)
-              next
-            end
-
-            migrate_async(BATCHED_MIGRATION_CLASS_NAME, next_batched_job.id)
+          if next_batched_job.nil?
+            finish_active_migration(batched_migration)
+            next
           end
+
+          # BackgroundMigrationWorker checks database replication lag and gets an ExclusiveLease based on
+          # the job class_name, which we avoid by calling the wrapper directly. We don't need the lease
+          # because sidekiq-cron already prevents multiple instances of the same job.
+          BatchedMigrationWrapper.new.perform(next_batched_job)
         end
 
         private
@@ -61,7 +60,7 @@ module Gitlab
         end
 
         def finish_active_migration(active_migration)
-          active_migration.finished!
+          MigrationService.new.finish_migration_execution(active_migration)
         end
       end
     end

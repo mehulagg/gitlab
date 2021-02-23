@@ -77,25 +77,22 @@ module Gitlab
 
           return if batch_max_value.nil?
 
-          Gitlab::Database::BackgroundMigration::BatchedMigration.create!(
-            job_class_name: job_class_name,
-            table_name: batch_table_name,
-            column_name: batch_column_name,
-            interval: job_interval,
-            min_value: batch_min_value,
-            max_value: batch_max_value,
-            batch_class_name: batch_class_name,
-            batch_size: batch_size,
-            sub_batch_size: sub_batch_size,
-            job_arguments: other_job_arguments,
-            status: :active)
+          Gitlab::Database::BackgroundMigration::MigrationService.new.create_active_migration!(
+            job_class_name,
+            batch_table_name,
+            batch_column_name,
+            job_interval,
+            batch_min_value,
+            batch_max_value,
+            batch_class_name,
+            batch_size,
+            sub_batch_size,
+            other_job_arguments)
         end
 
         def abort_batched_background_migrations(job_class_name, table_name, column_name)
-          Gitlab::Database::BackgroundMigration::BatchedMigration
-            .for_batch_configuration(job_class_name, table_name, column_name)
-            .not_finished
-            .update_all(status: :aborted, updated_at: Time.current)
+          Gitlab::Database::BackgroundMigration::MigrationService.new
+            .abort_migration_executions(job_class_name, table_name, column_name)
         end
 
         # Queues background migration jobs for an entire table in batches.

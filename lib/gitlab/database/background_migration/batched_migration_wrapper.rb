@@ -4,9 +4,7 @@ module Gitlab
   module Database
     module BackgroundMigration
       class BatchedMigrationWrapper
-        def perform(id_for_batch)
-          batch_tracking_record = BatchedJob.includes(:batched_migration).find(id_for_batch)
-
+        def perform(batch_tracking_record)
           return if batch_tracking_record.migration_aborted?
 
           begin
