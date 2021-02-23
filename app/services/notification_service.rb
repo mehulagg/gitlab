@@ -706,6 +706,11 @@ class NotificationService
   end
 
   def new_mentions_in_resource_email(target, new_mentioned_users, current_user, method)
+    unless current_user&.can_trigger_notifications?
+      Gitlab::AppLogger.warn("Skipping sending notification for user ID '#{current_user.id}' (target_class:#{target.class}, target_id:#{target.id})")
+      return false
+    end
+
     recipients = NotificationRecipients::BuildService.build_recipients(target, current_user, action: "new")
     recipients = recipients.select {|r| new_mentioned_users.include?(r.user) }
 

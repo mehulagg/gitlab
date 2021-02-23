@@ -99,6 +99,16 @@ RSpec.describe NotificationService, :mailer do
     end
   end
 
+  shared_examples 'no notifications for new mentions' do
+    it 'does not send any notification' do
+      expect(Gitlab::AppLogger).to receive(:warn).with("Skipping sending notification for user ID '#{current_user.id}' (target_class:#{mentionable.class}, target_id:#{mentionable.id})")
+
+      send_notifications(@u_mentioned, current_user: current_user)
+
+      should_not_email(@u_mentioned)
+    end
+  end
+
   # Next shared examples are intended to test notifications of "participants"
   #
   # they take the following parameters:
@@ -1140,6 +1150,18 @@ RSpec.describe NotificationService, :mailer do
         let(:notification_target)  { issue }
         let(:notification_trigger) { send_notifications(@u_watcher, @u_participant_mentioned, @u_custom_global, @u_mentioned) }
       end
+
+      context 'where current_user is blocked' do
+        let(:current_user) { create(:user, :blocked) }
+
+        include_examples 'no notifications for new mentions'
+      end
+
+      context 'where current_user is a ghost' do
+        let(:current_user) { create(:user, :ghost) }
+
+        include_examples 'no notifications for new mentions'
+      end
     end
 
     describe '#reassigned_issue' do
@@ -1763,6 +1785,18 @@ RSpec.describe NotificationService, :mailer do
       it_behaves_like 'project emails are disabled' do
         let(:notification_target)  { merge_request }
         let(:notification_trigger) { send_notifications(@u_watcher, @u_participant_mentioned, @u_custom_global, @u_mentioned) }
+      end
+
+      context 'where current_user is blocked' do
+        let(:current_user) { create(:user, :blocked) }
+
+        include_examples 'no notifications for new mentions'
+      end
+
+      context 'where current_user is a ghost' do
+        let(:current_user) { create(:user, :ghost) }
+
+        include_examples 'no notifications for new mentions'
       end
     end
 
