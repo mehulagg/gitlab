@@ -2,6 +2,7 @@ import { GlDropdownItem, GlTokenSelector, GlFormGroup, GlToggle } from '@gitlab/
 import { shallowMount } from '@vue/test-utils';
 import { cloneDeep, merge } from 'lodash';
 import AddEditRotationForm from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_form.vue';
+import { formEmptyState } from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_modal.vue';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import { participants, getOncallSchedulesQueryResponse } from '../../mocks/apollo_mock';
@@ -9,28 +10,6 @@ import { participants, getOncallSchedulesQueryResponse } from '../../mocks/apoll
 const projectPath = 'group/project';
 const schedule =
   getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
-
-const defaultForm = {
-  name: '',
-  participants: [],
-  rotationLength: {
-    length: 1,
-    unit: LENGTH_ENUM.hours,
-  },
-  startsAt: {
-    date: null,
-    time: 0,
-  },
-  endsOn: {
-    date: null,
-    time: 0,
-  },
-  isRestrictedToTime: false,
-  restrictedTo: {
-    startTime: 0,
-    endTime: 0,
-  },
-};
 
 describe('AddEditRotationForm', () => {
   let wrapper;
@@ -52,7 +31,7 @@ describe('AddEditRotationForm', () => {
             startsAt: false,
           },
           participants,
-          form: cloneDeep(defaultForm),
+          form: cloneDeep(formEmptyState),
         },
         props,
       ),
@@ -197,7 +176,7 @@ describe('AddEditRotationForm', () => {
   describe('Rotation restricted to time', () => {
     it('toggle state depends on isRestrictedToTime', async () => {
       expect(findRestrictedToToggle().props('value')).toBe(false);
-      wrapper.setProps({ form: { ...defaultForm, isRestrictedToTime: true } });
+      wrapper.setProps({ form: { ...formEmptyState, isRestrictedToTime: true } });
       await wrapper.vm.$nextTick();
       expect(findRestrictedToToggle().props('value')).toBe(true);
     });
@@ -212,7 +191,7 @@ describe('AddEditRotationForm', () => {
     });
 
     it('toggles end time visibility off', async () => {
-      wrapper.setProps({ form: { ...defaultForm, isRestrictedToTime: true } });
+      wrapper.setProps({ form: { ...formEmptyState, isRestrictedToTime: true } });
       const toggle = findRestrictedToToggle().vm;
       toggle.$emit('change', false);
       await wrapper.vm.$nextTick();
@@ -226,7 +205,7 @@ describe('AddEditRotationForm', () => {
       const timeTo = 22;
 
       beforeEach(() => {
-        wrapper.setProps({ form: { ...defaultForm, isRestrictedToTime: true } });
+        wrapper.setProps({ form: { ...formEmptyState, isRestrictedToTime: true } });
       });
 
       it('should emit an event with selected value on restricted FROM time selection', async () => {

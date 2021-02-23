@@ -21,7 +21,7 @@ export const i18n = {
   cancel: __('Cancel'),
 };
 
-const formEmptyState = {
+export const formEmptyState = {
   name: '',
   participants: [],
   rotationLength: {
