@@ -22,7 +22,6 @@ describe('LoadingError component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each([401, 403])('with error code %s', (errorCode) => {

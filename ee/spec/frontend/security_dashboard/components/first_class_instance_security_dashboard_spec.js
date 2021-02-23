@@ -41,7 +41,6 @@ describe('First Class Instance Dashboard Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when initialized', () => {

@@ -2,6 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import AddStageButton from 'ee/analytics/cycle_analytics/components/add_stage_button.vue';
 
 describe('AddStageButton', () => {
+  let wrapper;
   const active = false;
 
   function createComponent(props) {
@@ -12,8 +13,6 @@ describe('AddStageButton', () => {
       },
     });
   }
-
-  let wrapper = null;
 
   afterEach(() => {
     wrapper.destroy();

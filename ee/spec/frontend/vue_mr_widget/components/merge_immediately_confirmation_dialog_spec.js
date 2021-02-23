@@ -30,6 +30,5 @@ describe('MergeImmediatelyConfirmationDialog', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 });

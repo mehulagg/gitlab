@@ -39,7 +39,6 @@ describe('JiraIssuesShow', () => {
 
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

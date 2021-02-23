@@ -65,7 +65,6 @@ describe('DevopsAdoptionSegmentModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('contains the corrrect id', () => {

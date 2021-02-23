@@ -44,10 +44,6 @@ describe('subscription table row', () => {
     billableSeatsHref = BILLABLE_SEATS_URL,
     isGroup = true,
   } = {}) => {
-    if (wrapper) {
-      throw new Error('wrapper already exists!');
-    }
-
     wrapper = shallowMount(SubscriptionTableRow, {
       propsData: {
         ...defaultProps,
@@ -69,7 +65,6 @@ describe('subscription table row', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findHeaderCell = () => wrapper.find('[data-testid="header-cell"]');
@@ -201,6 +196,8 @@ describe('subscription table row', () => {
       if (exists) {
         expect(findUsageButton().attributes()).toMatchObject(attrs);
       }
+
+      wrapper.destroy();
     },
   );
 });

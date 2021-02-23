@@ -48,7 +48,6 @@ describe('Security Configuration App', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const getPipelinesLink = () => wrapper.find({ ref: 'pipelinesLink' });

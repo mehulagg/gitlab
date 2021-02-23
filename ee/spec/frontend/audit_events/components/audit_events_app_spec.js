@@ -51,7 +51,6 @@ describe('AuditEventsApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     store = null;
   });
 

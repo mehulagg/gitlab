@@ -50,7 +50,7 @@ const $sel = {
 };
 
 describe('Stage', () => {
-  let wrapper = null;
+  let wrapper;
 
   describe('With too many events', () => {
     beforeEach(() => {

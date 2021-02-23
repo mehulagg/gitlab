@@ -25,7 +25,6 @@ describe('Security Charts Layout component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render the default slot', () => {

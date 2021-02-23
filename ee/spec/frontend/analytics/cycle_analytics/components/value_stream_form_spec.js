@@ -16,7 +16,7 @@ const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('ValueStreamForm', () => {
-  let wrapper = null;
+  let wrapper;
 
   const createValueStreamMock = jest.fn(() => Promise.resolve());
   const updateValueStreamMock = jest.fn(() => Promise.resolve());
@@ -97,7 +97,6 @@ describe('ValueStreamForm', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default state', () => {

@@ -71,7 +71,6 @@ describe('On-call schedule', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findScheduleHeader = () => wrapper.findByTestId('scheduleHeader');

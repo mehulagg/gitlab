@@ -43,7 +43,6 @@ describe('Metrics upload item', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

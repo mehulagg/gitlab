@@ -20,7 +20,6 @@ describe('EpicItemDetails', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const createWrapper = (props = {}) => {

@@ -19,7 +19,6 @@ describe('ProjectsSkeletonLoader', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('desktop loader', () => {

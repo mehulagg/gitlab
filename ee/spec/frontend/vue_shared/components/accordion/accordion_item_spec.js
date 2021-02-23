@@ -44,7 +44,6 @@ describe('AccordionItem component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('rendering options', () => {

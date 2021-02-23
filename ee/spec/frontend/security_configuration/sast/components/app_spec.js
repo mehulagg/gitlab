@@ -53,7 +53,6 @@ describe('SAST Configuration App', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('feedback alert', () => {

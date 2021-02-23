@@ -88,7 +88,6 @@ const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 describe('Project Licenses', () => {
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when loading', () => {

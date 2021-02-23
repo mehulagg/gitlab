@@ -30,7 +30,6 @@ describe('QuartersPresetMixin', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('methods', () => {

@@ -36,7 +36,6 @@ describe('Rule Input', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     store = null;
   });
 

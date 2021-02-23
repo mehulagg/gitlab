@@ -21,7 +21,6 @@ describe('Pipeline status badge', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each`

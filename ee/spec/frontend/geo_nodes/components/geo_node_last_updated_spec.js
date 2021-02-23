@@ -30,7 +30,6 @@ describe('GeoNodeLastUpdated', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findMainText = () => wrapper.find('[data-testid="nodeLastUpdateMainText"]');

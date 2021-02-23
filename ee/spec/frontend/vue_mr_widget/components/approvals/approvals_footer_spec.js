@@ -35,7 +35,6 @@ describe('EE MRWidget approvals footer', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when expanded', () => {

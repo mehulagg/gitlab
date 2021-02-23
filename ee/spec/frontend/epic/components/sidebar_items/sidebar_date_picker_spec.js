@@ -46,7 +46,6 @@ describe('SidebarDatePicker', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('generates unique names for input if `fieldName` prop is not provided', () => {

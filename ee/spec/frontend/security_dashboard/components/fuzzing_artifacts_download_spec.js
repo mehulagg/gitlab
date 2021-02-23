@@ -34,7 +34,6 @@ describe('Filter component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with one fuzzing job with artifacts', () => {

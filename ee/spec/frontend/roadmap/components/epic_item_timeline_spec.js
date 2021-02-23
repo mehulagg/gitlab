@@ -34,7 +34,6 @@ describe('EpicItemTimelineComponent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('epic bar', () => {

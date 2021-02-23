@@ -129,7 +129,6 @@ describe('IterationSelect', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when not editing', () => {

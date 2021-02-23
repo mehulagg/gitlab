@@ -69,7 +69,6 @@ describe('RoadmapApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each`

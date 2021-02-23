@@ -16,7 +16,6 @@ describe('DateRangeButtons component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('shows the selected the option that matches the provided dateRange property', () => {

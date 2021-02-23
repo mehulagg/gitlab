@@ -26,7 +26,6 @@ describe('GeoNodeSyncProgress', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findStackedProgressBar = () => wrapper.find(StackedProgressBar);

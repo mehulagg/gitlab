@@ -29,7 +29,6 @@ describe('Reset pipeline minutes button', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findResetButton = () => wrapper.find(GlButton);

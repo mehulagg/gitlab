@@ -44,7 +44,6 @@ describe('OnDemandScansApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('form', () => {

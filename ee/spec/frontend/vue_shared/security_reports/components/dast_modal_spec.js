@@ -31,7 +31,6 @@ describe('DAST Modal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('has the download button with required attrs', () => {

@@ -45,7 +45,6 @@ describe('IssuesAnalyticsTable', () => {
   afterEach(() => {
     mock.restore();
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('while fetching data', () => {

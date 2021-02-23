@@ -22,6 +22,7 @@ const mockGroupLabelsRequest = (status = 200) =>
   new MockAdapter(axios).onGet().reply(status, groupLabels);
 
 describe('Value Stream Analytics LabelsSelector', () => {
+  let wrapper;
   let store = null;
   const localVue = createLocalVue();
   localVue.use(Vuex);
@@ -44,7 +45,6 @@ describe('Value Stream Analytics LabelsSelector', () => {
     });
   }
 
-  let wrapper = null;
   let mock = null;
   const labelNames = groupLabels.map(({ name }) => name);
 
@@ -59,7 +59,6 @@ describe('Value Stream Analytics LabelsSelector', () => {
     afterEach(() => {
       mock.restore();
       wrapper.destroy();
-      wrapper = null;
     });
 
     it('will render the label selector', () => {

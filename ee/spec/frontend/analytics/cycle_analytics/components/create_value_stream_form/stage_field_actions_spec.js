@@ -5,6 +5,8 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 const stageCount = 3;
 
 describe('StageFieldActions', () => {
+  let wrapper;
+
   function createComponent({ index = 0, canRemove = false }) {
     return extendedWrapper(
       shallowMount(StageFieldActions, {
@@ -17,7 +19,6 @@ describe('StageFieldActions', () => {
     );
   }
 
-  let wrapper = null;
   const findMoveDownBtn = (index = 0) => wrapper.findByTestId(`stage-action-move-down-${index}`);
   const findMoveUpBtn = (index = 0) => wrapper.findByTestId(`stage-action-move-up-${index}`);
   const findHideBtn = (index = 0) => wrapper.findByTestId(`stage-action-hide-${index}`);
@@ -29,7 +30,6 @@ describe('StageFieldActions', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('will render the move up action', () => {

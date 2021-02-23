@@ -2,13 +2,13 @@ import { mount } from '@vue/test-utils';
 import TotalTimeComponent from 'ee/analytics/cycle_analytics/components/total_time_component.vue';
 
 describe('TotalTimeComponent', () => {
+  let wrapper;
+
   function createComponent(propsData) {
     return mount(TotalTimeComponent, {
       propsData,
     });
   }
-
-  let wrapper = null;
 
   afterEach(() => {
     wrapper.destroy();

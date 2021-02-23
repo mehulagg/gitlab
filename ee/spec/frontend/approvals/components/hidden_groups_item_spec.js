@@ -30,7 +30,6 @@ describe('Approvals HiddenGroupsItem', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('contains the correct text', () => {

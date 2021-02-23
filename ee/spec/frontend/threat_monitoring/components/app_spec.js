@@ -75,7 +75,6 @@ describe('ThreatMonitoringApp component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each([-1, NaN, Math.PI])(

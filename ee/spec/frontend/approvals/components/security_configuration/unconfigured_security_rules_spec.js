@@ -38,7 +38,6 @@ describe('UnconfiguredSecurityRules component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when created ', () => {

@@ -74,7 +74,6 @@ describe('DurationChart', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders the duration chart', () => {

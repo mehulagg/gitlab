@@ -17,7 +17,6 @@ describe('Empty Rule Name', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('has a rule name "Any eligible user"', () => {

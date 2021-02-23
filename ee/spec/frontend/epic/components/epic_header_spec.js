@@ -25,7 +25,6 @@ describe('EpicHeaderComponent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findStatusBox = () => wrapper.find('[data-testid="status-box"]');

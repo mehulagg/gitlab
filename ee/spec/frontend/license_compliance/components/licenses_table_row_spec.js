@@ -31,7 +31,6 @@ describe('LicensesTableRow component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each`

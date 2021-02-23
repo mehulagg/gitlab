@@ -41,7 +41,6 @@ describe('TimeMetricsCard', () => {
 
     afterEach(() => {
       wrapper.destroy();
-      wrapper = null;
     });
 
     it(`renders the ${metric} metric`, () => {

@@ -16,7 +16,6 @@ describe('AgentEmptyStateComponent', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

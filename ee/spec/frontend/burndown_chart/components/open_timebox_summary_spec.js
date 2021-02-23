@@ -32,7 +32,6 @@ describe('Iterations report summary', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with valid totals', () => {

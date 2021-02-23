@@ -58,7 +58,6 @@ describe('Insights page component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('no chart config available', () => {

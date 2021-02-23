@@ -27,7 +27,6 @@ describe('DateRangeField component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default behaviour', () => {

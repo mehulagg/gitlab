@@ -109,7 +109,6 @@ describe('DeleteRotationModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders delete rotation modal layout', () => {

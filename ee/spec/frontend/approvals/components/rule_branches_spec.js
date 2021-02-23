@@ -19,7 +19,6 @@ describe('Rule Branches', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('displays "Any branch" if there are no protected branches', () => {

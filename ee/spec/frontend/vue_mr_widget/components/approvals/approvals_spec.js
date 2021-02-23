@@ -98,7 +98,6 @@ describe('EE MRWidget approvals', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when created', () => {

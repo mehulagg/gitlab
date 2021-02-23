@@ -29,7 +29,6 @@ describe('SidebarItemEpicsSelect', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('methods', () => {

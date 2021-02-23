@@ -30,7 +30,6 @@ describe('SidebarLabelsComponent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('data', () => {

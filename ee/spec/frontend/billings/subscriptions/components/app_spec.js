@@ -35,7 +35,6 @@ describe('SubscriptionApp component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('on creation', () => {

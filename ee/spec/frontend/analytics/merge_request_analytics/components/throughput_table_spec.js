@@ -84,7 +84,6 @@ describe('ThroughputTable', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default state', () => {

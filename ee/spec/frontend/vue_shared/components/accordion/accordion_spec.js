@@ -15,7 +15,6 @@ describe('Accordion component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('contains a default slot', () => {

@@ -51,7 +51,6 @@ describe('JiraIssuesFields', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('content', () => {

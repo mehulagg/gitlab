@@ -58,7 +58,6 @@ describe('DevopsAdoptionDeleteModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default display', () => {

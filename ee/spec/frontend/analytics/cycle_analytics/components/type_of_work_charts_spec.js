@@ -37,6 +37,8 @@ const fakeStore = ({ initialGetters, initialState }) =>
   });
 
 describe('TypeOfWorkCharts', () => {
+  let wrapper;
+
   function createComponent({ stubs = {}, initialGetters, initialState } = {}) {
     return shallowMount(TypeOfWorkCharts, {
       localVue,
@@ -48,8 +50,6 @@ describe('TypeOfWorkCharts', () => {
       },
     });
   }
-
-  let wrapper = null;
 
   const findSubjectFilters = (_wrapper) => _wrapper.find(TasksByTypeFilters);
   const findTasksByTypeChart = (_wrapper) => _wrapper.find(TasksByTypeChart);

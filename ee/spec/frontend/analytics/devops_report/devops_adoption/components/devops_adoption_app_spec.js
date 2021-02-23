@@ -81,7 +81,6 @@ describe('DevopsAdoptionApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when loading', () => {

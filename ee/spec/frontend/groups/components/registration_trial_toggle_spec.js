@@ -17,7 +17,6 @@ describe('Registration Trial Toggle', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('Default state', () => {

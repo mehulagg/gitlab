@@ -55,7 +55,6 @@ describe('Project Manager component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('it renders', () => {

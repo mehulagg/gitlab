@@ -45,7 +45,6 @@ describe('CreateMergeRequestButton component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     axiosMock.restore();
   });
 

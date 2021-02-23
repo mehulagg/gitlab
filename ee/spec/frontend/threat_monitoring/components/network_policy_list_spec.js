@@ -51,7 +51,6 @@ describe('NetworkPolicyList component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders EnvironmentPicker', () => {

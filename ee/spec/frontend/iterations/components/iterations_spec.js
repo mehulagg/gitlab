@@ -28,7 +28,6 @@ describe('Iterations', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('hides list while loading', () => {

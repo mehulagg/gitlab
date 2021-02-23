@@ -42,7 +42,6 @@ describe('Selection Summary component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with 1 vulnerability selected', () => {

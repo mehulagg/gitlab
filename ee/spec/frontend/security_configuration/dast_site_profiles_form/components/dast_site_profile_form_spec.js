@@ -116,7 +116,6 @@ describe('DastSiteProfileForm', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     apolloProvider = null;
   });
 

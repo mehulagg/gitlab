@@ -22,7 +22,7 @@ function createComponent({ props = {}, shallow = true, stubs = {} }) {
 }
 
 describe('TasksByTypeChart', () => {
-  let wrapper = null;
+  let wrapper;
 
   afterEach(() => {
     wrapper.destroy();

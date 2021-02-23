@@ -30,6 +30,8 @@ const startEventOptions = formatStartEventOpts(stageEvents);
 const endEventOptions = formatEndEventOpts(stageEvents);
 
 describe('CustomStageFields', () => {
+  let wrapper;
+
   function createComponent({
     stage = emptyState,
     errors = emptyErrorsState,
@@ -54,8 +56,6 @@ describe('CustomStageFields', () => {
     );
   }
 
-  let wrapper = null;
-
   const getDropdown = (dropdownEl) => dropdownEl.find(GlDropdown);
   const getLabelSelect = (dropdownEl) => dropdownEl.find(LabelsSelector);
 
@@ -79,7 +79,6 @@ describe('CustomStageFields', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each([

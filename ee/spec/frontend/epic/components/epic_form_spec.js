@@ -42,7 +42,6 @@ describe('ee/epic/components/epic_form.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findForm = () => wrapper.find(GlForm);

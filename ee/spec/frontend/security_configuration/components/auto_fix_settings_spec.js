@@ -48,7 +48,6 @@ describe('Auto-fix Settings', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     axiosMock.restore();
   });
 

@@ -5,6 +5,8 @@ import StageTableNav from 'ee/analytics/cycle_analytics/components/stage_table_n
 import { issueStage, allowedStages as stages, stageMedians as medians } from '../mock_data';
 
 describe('StageTableNav', () => {
+  let wrapper;
+
   function createComponent({ props = {}, mountFn = shallowMount } = {}) {
     return mountFn(StageTableNav, {
       propsData: {
@@ -19,8 +21,6 @@ describe('StageTableNav', () => {
       },
     });
   }
-
-  let wrapper = null;
 
   afterEach(() => {
     wrapper.destroy();

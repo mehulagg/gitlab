@@ -53,7 +53,6 @@ describe('Artifact Download', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('given the query is loading', () => {

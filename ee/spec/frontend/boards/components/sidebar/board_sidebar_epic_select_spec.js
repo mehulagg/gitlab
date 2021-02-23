@@ -24,7 +24,6 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
   afterEach(() => {
     wrapper.destroy();
     store = null;
-    wrapper = null;
   });
 
   const createStore = ({

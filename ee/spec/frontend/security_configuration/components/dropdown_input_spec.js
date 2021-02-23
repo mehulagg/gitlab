@@ -40,7 +40,6 @@ describe('DropdownInput component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('label', () => {

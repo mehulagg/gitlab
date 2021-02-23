@@ -66,7 +66,6 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     mock.restore();
   });
 

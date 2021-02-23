@@ -45,7 +45,6 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findHiddenInputs = () =>

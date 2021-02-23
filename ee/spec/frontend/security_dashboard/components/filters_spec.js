@@ -29,7 +29,6 @@ describe('Filter component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('severity', () => {

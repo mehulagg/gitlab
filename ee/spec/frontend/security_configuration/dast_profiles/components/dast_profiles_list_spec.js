@@ -63,7 +63,6 @@ describe('EE - DastProfilesList', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when loading', () => {

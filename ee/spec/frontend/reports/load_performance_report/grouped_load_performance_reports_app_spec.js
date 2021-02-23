@@ -32,7 +32,6 @@ describe('Grouped load performance reports app', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('usage ping events', () => {

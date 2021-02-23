@@ -96,7 +96,6 @@ spec:
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders the policy editor layout', () => {

@@ -110,7 +110,6 @@ describe('AddScheduleModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findModal = () => wrapper.find(GlModal);

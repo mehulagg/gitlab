@@ -23,7 +23,6 @@ describe('Incidents Published Cell', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

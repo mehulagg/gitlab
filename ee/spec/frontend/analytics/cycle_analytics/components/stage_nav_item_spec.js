@@ -5,6 +5,8 @@ import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { approximateDuration } from '~/lib/utils/datetime_utility';
 
 describe('StageNavItem', () => {
+  let wrapper;
+
   const title = 'Rad stage';
   const median = 50;
   const id = 1;
@@ -24,7 +26,6 @@ describe('StageNavItem', () => {
     });
   }
 
-  let wrapper = null;
   const findStageTitle = () => wrapper.find('[data-testid="stage-title"]');
   const findStageTooltip = () => getBinding(findStageTitle().element, 'gl-tooltip');
   const findStageMedian = () => wrapper.find({ ref: 'median' });
