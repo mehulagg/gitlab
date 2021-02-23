@@ -229,6 +229,7 @@ module Ci
         pipeline.run_after_commit do
           PipelineHooksWorker.perform_async(pipeline.id)
           ExpirePipelineCacheWorker.perform_async(pipeline.id) if pipeline.cacheable?
+          ExpirePipelineCacheWorker.perform_async(pipeline.triggered_by_pipeline.id) if pipeline.triggered_by_pipeline
         end
       end
 

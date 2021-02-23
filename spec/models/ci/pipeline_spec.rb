@@ -1424,6 +1424,21 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
           pipeline.cancel
         end
       end
+
+      context 'if pipeline is a triggered pipeline' do
+        let(:upstream_pipeline) { create(:ci_empty_pipeline, project: project) }
+
+        before do
+          pipeline.triggered_by_pipeline = upstream_pipeline
+        end
+
+        it 'performs ExpirePipelinesCacheWorker for the upstream pipeline' do
+          expect(ExpirePipelineCacheWorker).to receive(:perform_async).with(pipeline.id)
+          expect(ExpirePipelineCacheWorker).to receive(:perform_async).with(upstream_pipeline.id)
+
+          pipeline.cancel
+        end
+      end
     end
 
     describe '#dangling?' do
