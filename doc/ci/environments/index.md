@@ -522,8 +522,8 @@ So now, every branch:
 
 - Gets its own environment.
 - Is deployed to its own unique location, with the added benefit of:
-  - Having a [history of deployments](#viewing-deployment-history).
-  - Being able to [rollback changes](#retrying-and-rolling-back) if needed.
+  - Having a [history of deployments](#view-the-deployment-history).
+  - Being able to [rollback changes](#retry-or-roll-back-a-deployment) if needed.
 
 For more information, see [Using the environment URL](#using-the-environment-url).
 
@@ -619,7 +619,7 @@ from source files to public pages in the environment set for Review Apps.
 Stopping an environment:
 
 - Moves it from the list of **Available** environments to the list of **Stopped**
-  environments on the [**Environments** page](#viewing-environments-and-deployments).
+  environments on the [**Environments** page](#view-environments-and-deployments).
 - Executes an [`on_stop` action](../yaml/README.md#environmenton_stop), if defined.
 
 This is often used when multiple developers are working on a project at the same time,
@@ -776,7 +776,7 @@ Environments can also be deleted by using the [Environments API](../../api/envir
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208655) in GitLab 13.2.
 
-By default, GitLab creates a [deployment](#viewing-deployment-history) every time a
+By default, GitLab creates a [deployment](#view-the-deployment-history) every time a
 build with the specified environment runs. Newer deployments can also
 [cancel older ones](deployment_safety.md#skip-outdated-deployment-jobs).
 
@@ -854,7 +854,7 @@ severity is shown, so you can identify which environments need immediate attenti
 When the issue that triggered the alert is resolved, it is removed and is no
 longer visible on the environment page.
 
-If the alert requires a [rollback](#retrying-and-rolling-back), you can select the
+If the alert requires a [rollback](#retry-or-roll-back-a-deployment), you can select the
 deployment tab from the environment page and select which deployment to roll back to.
 
 #### Auto Rollback **(ULTIMATE)**
