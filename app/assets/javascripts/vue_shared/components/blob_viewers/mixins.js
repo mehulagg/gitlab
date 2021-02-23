@@ -11,6 +11,11 @@ export default {
       type: String,
       required: true,
     },
+    fileName: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   mounted() {
     eventHub.$emit(SNIPPET_MEASURE_BLOBS_CONTENT);

@@ -1,15 +1,30 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlIcon } from '@gitlab/ui';
 import { HIGHLIGHT_CLASS_NAME } from './constants';
 import ViewerMixin from './mixins';
+import { debounce } from 'lodash';
+import { initEditorLite } from '~/blob/utils';
+import { SNIPPET_MEASURE_BLOBS_CONTENT } from '~/performance/constants';
 
 export default {
-  components: {
-    GlIcon,
-  },
   mixins: [ViewerMixin],
-  inject: ['blobHash'],
+  props: {
+    value: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    fileName: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    editable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
   data() {
     return {
       highlightedLine: null,
@@ -20,7 +35,24 @@ export default {
       return this.content.split('\n').length;
     },
   },
+  watch: {
+    fileName(newVal) {
+      this.editor.updateModelLanguage(newVal);
+    },
+  },
   mounted() {
+    this.editor = initEditorLite({
+      el: this.$refs.editor,
+      blobPath: this.fileName,
+      blobContent: this.content,
+      blobGlobalId: 'DEF',
+      readOnly: !this.editable,
+    });
+
+    this.editor.onDidChangeModelContent(debounce(this.onFileChange.bind(this), 250));
+
+    // eventHub.$emit(SNIPPET_MEASURE_BLOBS_CONTENT);
+
     const { hash } = window.location;
     if (hash) this.scrollToLine(hash, true);
   },
@@ -40,32 +72,17 @@ export default {
         }
       }
     },
+    onFileChange() {
+      this.$emit('input', this.editor.getValue());
+    },
   },
   userColorScheme: window.gon.user_color_scheme,
 };
 </script>
 <template>
-  <div
-    class="file-content code js-syntax-highlight"
-    data-qa-selector="file_content"
-    :class="$options.userColorScheme"
-  >
-    <div class="line-numbers">
-      <a
-        v-for="line in lineNumbers"
-        :id="`L${line}`"
-        :key="line"
-        class="diff-line-num js-line-number"
-        :href="`#LC${line}`"
-        :data-line-number="line"
-        @click="scrollToLine(`#LC${line}`)"
-      >
-        <gl-icon :size="12" name="link" />
-        {{ line }}
-      </a>
-    </div>
-    <div class="blob-content">
-      <pre class="code highlight"><code :data-blob-hash="blobHash" v-html="content"></code></pre>
+  <div class="file-editor code">
+    <div id="editor" ref="editor" data-editor-loading>
+      <pre class="editor-loading-content">{{ content }}</pre>
     </div>
   </div>
 </template>

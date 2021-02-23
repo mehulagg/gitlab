@@ -34,13 +34,12 @@ const defaultClient = createDefaultClient(
           .then(({ data }) => ({ ...data, __typename: 'ReadmeFile' }));
       },
       blobInfo(_, { path }) {
-        console.log('LOOOOAD BLOB INFO THROUGH APOLLO');
-        const loadUrl = `/flightjs/flight/-/blob/master/${path}?format=json&viewer=simple`;
         return axios.get(path).then(({ data }) => ({ ...data, __typename: 'BlobInfo' }));
       },
-      blob(_, { path }) {
-        const loadUrl = `/flightjs/flight/-/raw/master/${path}`;
-        return axios.get(loadUrl).then(({ data }) => ({ ...data, __typename: 'Blob' }));
+      blobRaw(_, { path }) {
+        return axios
+          .get(path, { responseType: 'text' })
+          .then(({ data }) => ({ raw: data.toString(), __typename: 'BlobRaw' }));
       },
     },
   },

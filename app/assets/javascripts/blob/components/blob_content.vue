@@ -11,6 +11,11 @@ export default {
     BlobContentError,
   },
   props: {
+    path: {
+      type: String,
+      default: '',
+      required: false,
+    },
     blob: {
       type: Object,
       required: false,
@@ -66,6 +71,7 @@ export default {
         ref="contentViewer"
         :content="content"
         :type="activeViewer.fileType"
+        :file-name="path"
         data-qa-selector="file_content"
       />
     </template>

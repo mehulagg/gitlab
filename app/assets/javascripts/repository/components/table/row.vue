@@ -17,7 +17,7 @@ import FileIcon from '~/vue_shared/components/file_icon.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import getRefMixin from '../../mixins/get_ref';
 
-import blobInfoQuery from '../../queries/blob_info.query.graphql';
+import blobRawQuery from '../../queries/blob_raw.query.graphql';
 
 import commitQuery from '../../queries/commit.query.graphql';
 import InstantLoadDirective from '../instant_load_directive';
@@ -155,9 +155,9 @@ export default {
         console.log('PRELOAD BLOB ', this.path);
 
         this.$apollo.query({
-          query: blobInfoQuery,
+          query: blobRawQuery,
           variables: {
-            path: `/${this.projectPath}/-/blob/${this.ref}/${this.path}?format=json&viewer=simple`,
+            path: `/${this.projectPath}/-/raw/${this.ref}/${this.path}?inline=false`,
           },
         });
       }

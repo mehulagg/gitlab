@@ -1,0 +1,5 @@
+query getBlobRaw($path: String!) {
+  blobRaw(path: $path) @client {
+    raw
+  }
+}
