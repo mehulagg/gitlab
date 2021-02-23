@@ -91,14 +91,24 @@ export default {
 </script>
 
 <template>
-  <tr class="gl-border-gray-200 gl-border-0 gl-border-b-1">
+  <tr class="gl-border-gray-200 gl-border-0 gl-border-b-1 gl-border-solid">
     <td class="gl-p-4">
-      <gl-link :href="group.web_url" target="_blank">
+      <gl-link
+        :href="group.web_url"
+        target="_blank"
+        class="gl-display-flex gl-align-items-center gl-h-7"
+      >
         {{ group.full_path }} <gl-icon name="external-link" />
       </gl-link>
     </td>
     <td class="gl-p-4">
-      <gl-link v-if="isFinished" :href="absolutePath">{{ fullPath }}</gl-link>
+      <gl-link
+        v-if="isFinished"
+        class="gl-display-flex gl-align-items-center gl-h-7"
+        :href="absolutePath"
+      >
+        {{ fullPath }}
+      </gl-link>
 
       <div
         v-else
@@ -143,7 +153,7 @@ export default {
             :value="importTarget.new_name"
             @input="$emit('update-new-name', $event)"
           />
-          <p v-if="isInvalid" class="gl-text-red-500">
+          <p v-if="isInvalid" class="gl-text-red-500 gl-m-0 gl-mt-2">
             <template v-if="!isNameValid">
               {{ __('Please choose a group URL with no special characters.') }}
             </template>
