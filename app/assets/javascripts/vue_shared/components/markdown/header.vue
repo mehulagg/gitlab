@@ -215,6 +215,12 @@ export default {
         <div class="d-inline-block ml-md-2 ml-0">
           <toolbar-button
             :prepend="true"
+            tag="<details><summary>Click to expand!</summary></details>"
+            :button-title="__('Add a collapsible section')"
+            icon="chevron-right"
+          />
+          <toolbar-button
+            :prepend="true"
             tag="- "
             :button-title="__('Add a bullet list')"
             icon="list-bulleted"
