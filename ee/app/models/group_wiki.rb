@@ -38,9 +38,8 @@ class GroupWiki < Wiki
 
   override :after_wiki_activity
   def after_wiki_activity
-    # TODO: Check if we need to update any columns for Geo replication,
-    # like we do in ProjectWiki#after_wiki_activity
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/208147
+    # Update group wiki storage statistics
+    Groups::UpdateStatisticsWorker.perform_async(group.id, [:wiki_size])
   end
 
   override :after_post_receive

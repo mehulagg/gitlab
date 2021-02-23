@@ -91,6 +91,14 @@ RSpec.describe GroupWiki do
         expect(subject.disk_path).to eq("#{subject.storage.disk_path}.wiki")
       end
     end
+
+    describe '#after_post_receive' do
+      it 'updates group statistics' do
+        expect(Groups::UpdateStatisticsWorker).to receive(:perform_async).with(wiki.container.id, [:wiki_size])
+
+        subject.send(:after_post_receive)
+      end
+    end
   end
 
   it_behaves_like 'EE wiki model' do
