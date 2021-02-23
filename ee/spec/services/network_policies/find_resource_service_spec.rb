@@ -61,6 +61,6 @@ RSpec.describe NetworkPolicies::FindResourceService do
       end
     end
 
-    include_examples 'responds to Kubeclient::HttpError without leaking request url', :get_network_policy
+    include_examples 'responds to Kubeclient::HttpError', :get_network_policy
   end
 end

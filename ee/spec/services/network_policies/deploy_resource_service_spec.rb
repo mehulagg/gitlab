@@ -93,7 +93,7 @@ RSpec.describe NetworkPolicies::DeployResourceService do
       end
     end
 
-    include_examples 'responds to Kubeclient::HttpError without leaking request url', :create_network_policy
+    include_examples 'responds to Kubeclient::HttpError', :create_network_policy
 
     context 'with cilium network policy' do
       let(:manifest) do

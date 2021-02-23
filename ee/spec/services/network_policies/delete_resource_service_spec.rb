@@ -48,7 +48,7 @@ RSpec.describe NetworkPolicies::DeleteResourceService do
       end
     end
 
-    include_examples 'responds to Kubeclient::HttpError without leaking request url', :delete_network_policy
+    include_examples 'responds to Kubeclient::HttpError', :delete_network_policy
 
     context 'with CiliumNetworkPolicy' do
       let(:manifest) do

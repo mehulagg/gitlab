@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'responds to Kubeclient::HttpError without leaking request url' do |kubeclient_method|
+RSpec.shared_examples 'responds to Kubeclient::HttpError' do |kubeclient_method|
   context 'with Kubeclient::HttpError' do
     let(:request_url) { 'https://kubernetes.local' }
     let(:response) {  RestClient::Response.create('', {}, RestClient::Request.new(url: request_url, method: :get)) }
