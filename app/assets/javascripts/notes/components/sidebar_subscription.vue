@@ -28,7 +28,7 @@ export default {
     },
   },
   created() {
-    if (this.issuableType !== constants.ISSUE_NOTEABLE_TYPE) {
+    if (this.issuableType !== IssuableType.Issue) {
       return;
     }
 
