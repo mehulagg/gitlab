@@ -523,7 +523,7 @@ So now, every branch:
 - Gets its own environment.
 - Is deployed to its own unique location, with the added benefit of:
   - Having a [history of deployments](#view-the-deployment-history).
-  - Being able to [rollback changes](#retry-or-roll-back-a-deployment) if needed.
+  - Being able to [roll back changes](#retry-or-roll-back-a-deployment) if needed.
 
 For more information, see [Using the environment URL](#using-the-environment-url).
 
