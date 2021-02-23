@@ -1,9 +1,9 @@
 <script>
 import { mapActions } from 'vuex';
+import { IssuableType } from '~/issue_show/constants';
 import { fetchPolicies } from '~/lib/graphql';
 import { confidentialityQueries } from '~/sidebar/constants';
 import { defaultClient as gqlClient } from '~/sidebar/graphql';
-import * as constants from '../constants';
 
 export default {
   props: {
@@ -44,7 +44,7 @@ export default {
       .subscribe((res) => {
         const issuable = res.data?.workspace?.issuable;
         if (issuable) {
-          this.setConfidentiality(res.data.workspace.issuable.confidential);
+          this.setConfidentiality(issuable.confidential);
         }
       });
   },
