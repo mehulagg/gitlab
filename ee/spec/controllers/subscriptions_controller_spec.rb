@@ -31,6 +31,45 @@ RSpec.describe SubscriptionsController do
     end
   end
 
+  describe 'GET #buy_minutes' do
+    subject { get :buy_minutes, params: { plan_id: 'bronze_id' } }
+
+    before do
+      stub_feature_flags(new_route_ci_minutes_purchase: true)
+    end
+
+    context 'with unauthenticated user' do
+      it { is_expected.to have_gitlab_http_status(:redirect) }
+      it { is_expected.to redirect_to new_user_registration_path(redirect_from: 'buy_minutes') }
+
+      it 'stores subscription URL for later' do
+        subject
+
+        expected_subscription_path = buy_minutes_subscriptions_path(plan_id: 'bronze_id')
+
+        expect(controller.stored_location_for(:user)).to eq(expected_subscription_path)
+      end
+    end
+
+    context 'with authenticated user' do
+      before do
+        sign_in(user)
+      end
+
+      it { is_expected.to render_template 'layouts/checkout' }
+      it { is_expected.to render_template :buy_minutes }
+    end
+
+    context 'with :new_route_ci_minutes_purchase disabled' do
+      before do
+        sign_in(user)
+        stub_feature_flags(new_route_ci_minutes_purchase: false)
+      end
+
+      it { is_expected.to have_gitlab_http_status(:not_found) }
+    end
+  end
+
   describe 'GET #payment_form' do
     subject { get :payment_form, params: { id: 'cc' } }
 

@@ -2,7 +2,7 @@
 
 class SubscriptionsController < ApplicationController
   layout 'checkout'
-  skip_before_action :authenticate_user!, only: :new
+  skip_before_action :authenticate_user!, only: [:new, :buy_minutes]
 
   feature_category :purchase
 
@@ -28,6 +28,15 @@ class SubscriptionsController < ApplicationController
 
     store_location_for :user, request.fullpath
     redirect_to new_user_registration_path(redirect_from: 'checkout')
+  end
+
+  def buy_minutes
+    render_404 unless Feature.enabled?(:new_route_ci_minutes_purchase)
+
+    return if current_user
+
+    store_location_for :user, request.fullpath
+    redirect_to new_user_registration_path(redirect_from: 'buy_minutes')
   end
 
   def payment_form

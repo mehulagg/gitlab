@@ -43,6 +43,13 @@ module SubscriptionsHelper
     plans_data.reject { |plan_data| plan_data[:deprecated] }
   end
 
+  def ci_minutes_data
+    FetchSubscriptionPlansService.new(plan: :free).execute
+      .map(&:symbolize_keys)
+      .reject { |plan_data| plan_data[:free] }
+      .map { |plan_data| plan_data.slice(:id, :code, :price_per_year, :deprecated, :name) }
+  end
+
   def group_data
     current_user.manageable_groups_eligible_for_subscription.with_counts(archived: false).map do |namespace|
       {
