@@ -51,7 +51,7 @@ From a vulnerability you can create either:
 
 Creating a Jira issue requires that
 [Jira integration](../../project/integrations/jira_integrations.md) is enabled on the project. Note
-that when Jira integration is enabled, GitLab's issue feature is not available.
+that when Jira integration is enabled, the GitLab issue feature is not available.
 
 ### Create a GitLab issue for a vulnerability
 
