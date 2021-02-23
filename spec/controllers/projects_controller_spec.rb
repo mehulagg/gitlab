@@ -448,6 +448,18 @@ RSpec.describe ProjectsController do
 
       post :create, params: { project: project_params }
     end
+
+    it 'tracks a created event for the new_repo experiment', :snowplow do
+      allow_next_instance_of(ApplicationExperiment) do |e|
+        allow(e).to receive(:should_track?).and_return(true)
+        allow(e).to receive(:track).with(:project_created).and_call_original
+        allow(e).to receive(:track).with(:created, anything)
+      end
+
+      post :create, params: { project: project_params }
+
+      expect_snowplow_event(category: 'new_repo', action: 'project_created', context: [{ schema: 'iglu:com.gitlab/gitlab_experiment/jsonschema/0-3-0', data: anything }])
+    end
   end
 
   describe 'POST #archive' do

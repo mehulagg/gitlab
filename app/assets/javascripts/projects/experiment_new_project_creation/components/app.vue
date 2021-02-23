@@ -9,15 +9,26 @@ import createFromTemplateIllustration from '../illustrations/create-from-templat
 import importProjectIllustration from '../illustrations/import-project.svg';
 import LegacyContainer from './legacy_container.vue';
 import WelcomePage from './welcome.vue';
+import GitlabExperiment from '~/gitlab_experiment';
 
 const BLANK_PANEL = 'blank_project';
 const CI_CD_PANEL = 'cicd_for_external_repo';
 const LAST_ACTIVE_TAB_KEY = 'new_project_last_active_tab';
+
+const BLANK_PANEL_TITLE = GitlabExperiment.run('new_repo', {
+  use: () => s__('ProjectsNew|Create blank project'),
+  try: () => s__('ProjectsNew|Create blank project/repository'),
+})
+const IMPORT_PROJECT_TITLE = GitlabExperiment.run('new_repo', {
+  use: () => s__('ProjectsNew|Import project'),
+  try: () => s__('ProjectsNew|Import project/repository'),
+})
+
 const PANELS = [
   {
     name: BLANK_PANEL,
     selector: '#blank-project-pane',
-    title: s__('ProjectsNew|Create blank project'),
+    title: BLANK_PANEL_TITLE,
     description: s__(
       'ProjectsNew|Create a blank project to house your files, plan your work, and collaborate on code, among other things.',
     ),
@@ -35,7 +46,7 @@ const PANELS = [
   {
     name: 'import_project',
     selector: '#import-project-pane',
-    title: s__('ProjectsNew|Import project'),
+    title: IMPORT_PROJECT_TITLE,
     description: s__(
       'Migrate your data from an external source like GitHub, Bitbucket, or another instance of GitLab.',
     ),

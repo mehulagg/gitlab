@@ -1,0 +1,8 @@
+---
+name: new_repo
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.10'
+type: experiment
+group: group::adoption
+default_enabled: false
