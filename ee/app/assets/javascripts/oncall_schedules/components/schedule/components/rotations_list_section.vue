@@ -127,7 +127,6 @@ export default {
         >
           <span class="gl-text-truncated">{{ rotation.name }}</span>
           <gl-button-group class="gl-px-2">
-            <!-- TODO: Un-hide this button when: https://gitlab.com/gitlab-org/gitlab/-/issues/262862 is completed -->
             <gl-button
               v-gl-modal="$options.editRotationModalId"
               v-gl-tooltip
