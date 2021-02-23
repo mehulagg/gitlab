@@ -14,7 +14,7 @@ FactoryBot.define do
     end
 
     trait :removed do
-      removed_at { Time.current }
+      is_removed { true }
     end
   end
 end

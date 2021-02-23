@@ -62,8 +62,8 @@ RSpec.describe IncidentManagement::OncallParticipant do
 
     subject { participant.mark_as_removed }
 
-    it 'updates removed_at to the current time' do
-      expect { subject }.to change { participant.reload.removed_at }.to(Time.current)
+    it 'updates is_removed to the current time' do
+      expect { subject }.to change { participant.reload.is_removed }.to(true)
     end
   end
 
