@@ -8,6 +8,7 @@ module EE
     prepended do
       BACKOFF_PERIOD = 24.seconds
       JITTER = 6.seconds
+      SSL_CERTIFICATE_PROBLEM = /SSL certificate problem/.freeze
 
       delegate :mirror?, :mirror_with_content?, :archived, :pending_delete, to: :project
 
@@ -42,7 +43,13 @@ module EE
         before_transition started: :failed do |state, _|
           if state.mirror?
             state.last_update_at = Time.current
-            state.increment_retry_count
+
+            if state.unrecoverable_failure?
+              state.set_max_retry_count
+            else
+              state.increment_retry_count
+            end
+
             state.set_next_execution_timestamp
           end
         end
@@ -134,6 +141,16 @@ module EE
 
     def increment_retry_count
       self.retry_count += 1
+    end
+
+    def set_max_retry_count
+      self.retry_count = ::Gitlab::Mirror::MAX_RETRY + 1
+    end
+
+    def unrecoverable_failure?
+      return last_error.match?(SSL_CERTIFICATE_PROBLEM) if last_update_failed? && last_error.present?
+
+      false
     end
 
     # We schedule the next sync time based on the duration of the
