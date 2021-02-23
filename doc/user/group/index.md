@@ -311,7 +311,7 @@ Learn how to [transfer a project into a group](../project/settings/index.md#tran
 You can [share your projects with a group](../project/members/share_project_with_groups.md)
 and give all group members access to the project at once.
 
-Alternatively, you can [lock the sharing with group feature](#share-with-group-lock).
+Alternatively, you can [lock the sharing with group feature](#prevent-a-project-from-being-shared-with-groups).
 
 ## Sharing a group with another group
 
