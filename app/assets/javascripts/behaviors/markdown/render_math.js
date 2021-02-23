@@ -1,6 +1,7 @@
+import $ from 'jquery';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { differenceInMilliseconds } from '~/lib/utils/datetime_utility';
-import { s__, sprintf } from '~/locale';
+import { s__, __, sprintf } from '~/locale';
 
 // Renders math using KaTeX in any element with the
 // `js-render-math` class
@@ -36,7 +37,7 @@ const RENDER_FLASH_MSG = sprintf(
 // Wait for the browser to reflow the layout. Reflowing SVG takes time.
 // This has to wrap the inner function, otherwise IE/Edge throw "invalid calling object".
 const waitForReflow = (fn) => {
-  window.requestAnimationFrame(fn);
+  window.requestIdleCallback(fn);
 };
 
 /**
