@@ -1,0 +1,6 @@
+---
+title: Bump auto-deploy-image version as part of Deploy.latest.gitlab-ci.yml. Changes
+  are related to ciliumnetworkpolicies.
+merge_request: 54983
+author:
+type: added
