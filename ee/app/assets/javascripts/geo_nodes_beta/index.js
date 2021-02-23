@@ -13,7 +13,7 @@ export const initGeoNodesBeta = () => {
     return false;
   }
 
-  const { primaryVersion, primaryRevision, newNodeUrl } = el.dataset;
+  const { primaryVersion, primaryRevision, newNodeUrl, geoNodesEmptyStateSvg } = el.dataset;
   let { replicableTypes } = el.dataset;
 
   replicableTypes = convertObjectPropsToCamelCase(JSON.parse(replicableTypes), { deep: true });
@@ -25,6 +25,7 @@ export const initGeoNodesBeta = () => {
       return createElement(GeoNodesBetaApp, {
         props: {
           newNodeUrl,
+          geoNodesEmptyStateSvg,
         },
       });
     },

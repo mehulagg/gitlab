@@ -1,24 +1,34 @@
 <script>
-import { GlLink, GlButton } from '@gitlab/ui';
+import { GlLink, GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import { GEO_INFO_URL } from '../constants';
 import GeoNodes from './geo_nodes.vue';
+import GeoNodesEmptyState from './geo_nodes_empty_state.vue';
 
 export default {
   name: 'GeoNodesBetaApp',
   components: {
     GlLink,
     GlButton,
+    GlLoadingIcon,
     GeoNodes,
+    GeoNodesEmptyState,
   },
   props: {
     newNodeUrl: {
       type: String,
       required: true,
     },
+    geoNodesEmptyStateSvg: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
-    ...mapState(['nodes']),
+    ...mapState(['nodes', 'isLoading']),
+    noNodes() {
+      return !this.nodes || this.nodes.length === 0;
+    },
   },
   created() {
     this.fetchNodes();
@@ -47,6 +57,7 @@ export default {
         }}</gl-link>
       </div>
       <gl-button
+        v-if="!noNodes"
         class="gl-w-full gl-md-w-auto gl-ml-auto gl-mr-5 gl-mt-5 gl-md-mt-0"
         variant="confirm"
         :href="newNodeUrl"
@@ -54,6 +65,10 @@ export default {
         >{{ s__('Geo|Add site') }}
       </gl-button>
     </div>
-    <geo-nodes v-for="node in nodes" :key="node.id" :node="node" />
+    <gl-loading-icon v-if="isLoading" size="xl" class="gl-mt-5" />
+    <div v-if="!isLoading">
+      <geo-nodes v-for="node in nodes" :key="node.id" :node="node" />
+      <geo-nodes-empty-state v-if="noNodes" :svg-path="geoNodesEmptyStateSvg" />
+    </div>
   </section>
 </template>
