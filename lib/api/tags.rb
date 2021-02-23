@@ -30,7 +30,7 @@ module API
 
         paginated_tags = paginate(::Kaminari.paginate_array(tags))
 
-        present_cached paginated_tags, with: Entities::Tag, project: user_project
+        present_cached paginated_tags, with: Entities::Tag, project: user_project, cache_context: -> (tag) { user_project.cache_key }
       end
 
       desc 'Get a single repository tag' do

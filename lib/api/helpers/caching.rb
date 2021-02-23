@@ -31,20 +31,22 @@ module API
       # @overload present_cached(tag, with: Entities::Tag, project: tag.project)
       #   @param obj_or_collection [Object] the object to render
       #   @param with [Grape::Entity] the entity to use for rendering
+      #   @param cache_context [Proc] a proc to call for the object to provide more context to the cache key
       #   @param presenter_args [Hash] keyword arguments to be passed to the entity
       #   @return [Gitlab::Json::PrecompiledJson]
       #
       # @overload present_cached(tags, with: Entities::Tag, project: tag.project)
       #   @param obj_or_collection [Enumerable<Object>] the objects to render
       #   @param with [Grape::Entity] the entity to use for rendering
+      #   @param cache_context [Proc] a proc to call for each object to provide more context to the cache key
       #   @param presenter_args [Hash] keyword arguments to be passed to the entity
       #   @return [Gitlab::Json::PrecompiledJson]
-      def present_cached(obj_or_collection, with:, **presenter_args)
+      def present_cached(obj_or_collection, with:, cache_context: nil, **presenter_args)
         json =
           if obj_or_collection.is_a?(Enumerable)
-            cached_collection(obj_or_collection, presenter: with, presenter_args: presenter_args)
+            cached_collection(obj_or_collection, presenter: with, presenter_args: presenter_args, context: cache_context)
           else
-            cached_object(obj_or_colletion, presenter: with, presenter_args: presenter_args)
+            cached_object(obj_or_colletion, presenter: with, presenter_args: presenter_args, context: cache_context)
           end
 
         body Gitlab::Json::PrecompiledJson.new(json)
@@ -52,14 +54,21 @@ module API
 
       private
 
+      def contextual_cache_key(object, context)
+        return object.cache_key if context.nil?
+
+        [object.cache_key, context.call(object)].join(":")
+      end
+
       # Used for fetching or rendering a single object
       #
       # @param object [Object] the object to render
       # @param presenter [Grape::Entity]
       # @param presenter_args [Hash] keyword arguments to be passed to the entity
+      # @param context [Proc]
       # @return [String]
-      def cached_object(object, presenter:, presenter_args:)
-        cache.fetch(object) do
+      def cached_object(object, presenter:, presenter_args:, context:)
+        cache.fetch(contextual_cache_key(object, context)) do
           Gitlab::Json.dump(presenter.represent(object, **presenter_args).as_json)
         end
       end
@@ -69,9 +78,10 @@ module API
       # @param objects [Enumerable<Object>] the objects to render
       # @param presenter [Grape::Entity]
       # @param presenter_args [Hash] keyword arguments to be passed to the entity
+      # @param context [Proc]
       # @return [Array<String>]
-      def cached_collection(collection, presenter:, presenter_args:)
-        json = fetch_multi(collection) do |obj|
+      def cached_collection(collection, presenter:, presenter_args:, context:)
+        json = fetch_multi(collection, context: context) do |obj|
           Gitlab::Json.dump(presenter.represent(obj, **presenter_args).as_json)
         end
 
@@ -86,9 +96,9 @@ module API
       # block.
       #
       # The result is that this is functionally identical to `#fetch`.
-      def fetch_multi(*objs, **kwargs)
+      def fetch_multi(*objs, context:, **kwargs)
         objs.flatten!
-        map = multi_key_map(objs)
+        map = multi_key_map(objs, context: context)
 
         cache.fetch_multi(*map.keys, **kwargs) do |key|
           yield map[key]
@@ -96,9 +106,12 @@ module API
       end
 
       # @param objects [Enumerable<Object>] objects which _must_ respond to `#cache_key`
+      # @param context [Proc] a proc that can be called to help generate each cache key
       # @return [Hash]
-      def multi_key_map(objects)
-        objects.index_with(&:cache_key)
+      def multi_key_map(objects, context:)
+        objects.index_by do |object|
+          contextual_cache_key(object, context)
+        end
       end
     end
   end
