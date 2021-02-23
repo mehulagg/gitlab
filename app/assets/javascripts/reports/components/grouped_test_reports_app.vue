@@ -168,7 +168,7 @@ export default {
             :new-issues="newIssues(report)"
             :resolved-issues="resolvedIssues(report)"
             :component="$options.componentNames.TestIssueBody"
-            class="report-block-group-list"
+            class="report-block-group-list gl-pl-8"
           />
         </template>
         <modal
