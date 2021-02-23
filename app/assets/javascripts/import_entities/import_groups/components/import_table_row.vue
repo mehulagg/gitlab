@@ -53,18 +53,22 @@ export default {
         };
       },
       skip() {
-        return !this.isNameValid || this.group.status !== STATUSES.NONE;
+        return !this.isNameValid || this.isAlreadyImported;
       },
     },
   },
 
   computed: {
+    importTarget() {
+      return this.group.import_target;
+    },
+
     isInvalid() {
       return Boolean(!this.isNameValid || this.existingGroup);
     },
 
     isNameValid() {
-      return this.groupPathRegex.test(this.group.import_target.new_name);
+      return this.groupPathRegex.test(this.importTarget.new_name);
     },
 
     isAlreadyImported() {
@@ -76,7 +80,7 @@ export default {
     },
 
     fullPath() {
-      return `${this.group.import_target.target_namespace}/${this.group.import_target.new_name}`;
+      return `${this.importTarget.target_namespace}/${this.importTarget.new_name}`;
     },
 
     absolutePath() {
@@ -104,7 +108,7 @@ export default {
         }"
       >
         <gl-dropdown
-          :text="group.import_target.target_namespace"
+          :text="importTarget.target_namespace"
           :disabled="isAlreadyImported"
           toggle-class="gl-rounded-top-right-none! gl-rounded-bottom-right-none!"
           class="import-entities-namespace-dropdown gl-h-7 gl-flex-fill-1"
@@ -136,14 +140,14 @@ export default {
             class="gl-rounded-top-left-none gl-rounded-bottom-left-none"
             :class="{ 'is-invalid': isInvalid && !isAlreadyImported }"
             :disabled="isAlreadyImported"
-            :value="group.import_target.new_name"
+            :value="importTarget.new_name"
             @input="$emit('update-new-name', $event)"
           />
           <p v-if="isInvalid" class="gl-text-red-500">
             <template v-if="!isNameValid">
               {{ __('Please choose a group URL with no special characters.') }}
             </template>
-            <template v-if="existingGroup">
+            <template v-else-if="existingGroup">
               {{ s__('BulkImport|Name already exists.') }}
             </template>
           </p>
