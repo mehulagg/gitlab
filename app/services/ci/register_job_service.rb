@@ -6,15 +6,13 @@ module Ci
   class RegisterJobService
     attr_reader :runner
 
-    JOB_QUEUE_DURATION_SECONDS_BUCKETS = [1, 3, 10, 30, 60, 300, 900, 1800, 3600].freeze
     JOBS_RUNNING_FOR_PROJECT_MAX_BUCKET = 5.freeze
-    METRICS_SHARD_TAG_PREFIX = 'metrics_shard::'
-    DEFAULT_METRICS_SHARD = 'default'
 
     Result = Struct.new(:build, :build_json, :valid?)
 
     def initialize(runner)
       @runner = runner
+      @metrics = ::Gitlab::Ci::Queue::Metrics.new(runner)
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -48,7 +46,7 @@ module Ci
         next unless result
 
         if result.valid?
-          register_success(result.build)
+          @metrics.register_success(result.build)
 
           return result
         else
@@ -58,7 +56,7 @@ module Ci
         end
       end
 
-      register_failure
+      @metrics.register_failure
       Result.new(nil, nil, valid)
     end
     # rubocop: enable CodeReuse/ActiveRecord
@@ -189,24 +187,6 @@ module Ci
       builds
     end
 
-    def register_failure
-      failed_attempt_counter.increment
-      attempt_counter.increment
-    end
-
-    def register_success(job)
-      labels = { shared_runner: runner.instance_type?,
-                 jobs_running_for_project: jobs_running_for_project(job),
-                 shard: DEFAULT_METRICS_SHARD }
-
-      if runner.instance_type?
-        shard = runner.tag_list.sort.find { |name| name.starts_with?(METRICS_SHARD_TAG_PREFIX) }
-        labels[:shard] = shard.gsub(METRICS_SHARD_TAG_PREFIX, '') if shard
-      end
-
-      job_queue_duration_seconds.observe(labels, Time.current - job.queued_at) unless job.queued_at.nil?
-      attempt_counter.increment
-    end
 
     # rubocop: disable CodeReuse/ActiveRecord
     def jobs_running_for_project(job)
@@ -218,18 +198,6 @@ module Ci
       running_jobs_count < JOBS_RUNNING_FOR_PROJECT_MAX_BUCKET ? running_jobs_count : "#{JOBS_RUNNING_FOR_PROJECT_MAX_BUCKET}+"
     end
     # rubocop: enable CodeReuse/ActiveRecord
-
-    def failed_attempt_counter
-      @failed_attempt_counter ||= Gitlab::Metrics.counter(:job_register_attempts_failed_total, "Counts the times a runner tries to register a job")
-    end
-
-    def attempt_counter
-      @attempt_counter ||= Gitlab::Metrics.counter(:job_register_attempts_total, "Counts the times a runner tries to register a job")
-    end
-
-    def job_queue_duration_seconds
-      @job_queue_duration_seconds ||= Gitlab::Metrics.histogram(:job_queue_duration_seconds, 'Request handling execution time', {}, JOB_QUEUE_DURATION_SECONDS_BUCKETS)
-    end
 
     def pre_assign_runner_checks
       {
