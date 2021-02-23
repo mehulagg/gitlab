@@ -57,7 +57,7 @@ module API
       def contextual_cache_key(object, context)
         return object.cache_key if context.nil?
 
-        [object.cache_key, context.call(object)].join(":")
+        [object.cache_key, context.call(object)].flatten.join(":")
       end
 
       # Used for fetching or rendering a single object
