@@ -477,7 +477,7 @@ for details.
 
 ## Release Metrics **(ULTIMATE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259703) in GitLab Premium 13.9.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259703) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.9.
 
 Group-level release metrics are available by navigating to **Group > Analytics > CI/CD**.
 These metrics include:
