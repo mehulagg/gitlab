@@ -35,6 +35,10 @@ class BulkImports::Entity < ApplicationRecord
     inverse_of: :entity,
     foreign_key: :bulk_import_entity_id
 
+  has_many :pipeline_statuses,
+    class_name: 'BulkImports::EntityPipelineStatus',
+    foreign_key: :bulk_import_entity_id
+
   validates :project, absence: true, if: :group
   validates :group, absence: true, if: :project
   validates :source_type, :source_full_path, :destination_name, presence: true

@@ -9398,8 +9398,8 @@ CREATE TABLE application_settings (
     keep_latest_artifact boolean DEFAULT true NOT NULL,
     notes_create_limit integer DEFAULT 300 NOT NULL,
     notes_create_limit_allowlist text[] DEFAULT '{}'::text[] NOT NULL,
-    kroki_formats jsonb DEFAULT '{}'::jsonb NOT NULL,
     in_product_marketing_emails_enabled boolean DEFAULT true NOT NULL,
+    kroki_formats jsonb DEFAULT '{}'::jsonb NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
@@ -10055,6 +10055,29 @@ CREATE SEQUENCE bulk_import_entities_id_seq
     CACHE 1;
 
 ALTER SEQUENCE bulk_import_entities_id_seq OWNED BY bulk_import_entities.id;
+
+CREATE TABLE bulk_import_entity_pipeline_statuses (
+    id bigint NOT NULL,
+    bulk_import_entity_id bigint NOT NULL,
+    stage_name text,
+    pipeline_name text,
+    status smallint NOT NULL,
+    jid text,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT check_aa7dc757dd CHECK ((char_length(pipeline_name) <= 255)),
+    CONSTRAINT check_b4b4f38792 CHECK ((char_length(stage_name) <= 255)),
+    CONSTRAINT check_b6f308cfff CHECK ((char_length(jid) <= 255))
+);
+
+CREATE SEQUENCE bulk_import_entity_pipeline_statuses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE bulk_import_entity_pipeline_statuses_id_seq OWNED BY bulk_import_entity_pipeline_statuses.id;
 
 CREATE TABLE bulk_import_failures (
     id bigint NOT NULL,
@@ -18779,6 +18802,8 @@ ALTER TABLE ONLY bulk_import_configurations ALTER COLUMN id SET DEFAULT nextval(
 
 ALTER TABLE ONLY bulk_import_entities ALTER COLUMN id SET DEFAULT nextval('bulk_import_entities_id_seq'::regclass);
 
+ALTER TABLE ONLY bulk_import_entity_pipeline_statuses ALTER COLUMN id SET DEFAULT nextval('bulk_import_entity_pipeline_statuses_id_seq'::regclass);
+
 ALTER TABLE ONLY bulk_import_failures ALTER COLUMN id SET DEFAULT nextval('bulk_import_failures_id_seq'::regclass);
 
 ALTER TABLE ONLY bulk_import_trackers ALTER COLUMN id SET DEFAULT nextval('bulk_import_trackers_id_seq'::regclass);
@@ -19868,6 +19893,9 @@ ALTER TABLE ONLY bulk_import_configurations
 
 ALTER TABLE ONLY bulk_import_entities
     ADD CONSTRAINT bulk_import_entities_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY bulk_import_entity_pipeline_statuses
+    ADD CONSTRAINT bulk_import_entity_pipeline_statuses_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY bulk_import_failures
     ADD CONSTRAINT bulk_import_failures_pkey PRIMARY KEY (id);
@@ -25846,6 +25874,9 @@ ALTER TABLE ONLY repository_languages
 
 ALTER TABLE ONLY dependency_proxy_manifests
     ADD CONSTRAINT fk_rails_a758021fb0 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY bulk_import_entity_pipeline_statuses
+    ADD CONSTRAINT fk_rails_a778dd94b5 FOREIGN KEY (bulk_import_entity_id) REFERENCES bulk_import_entities(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY resource_milestone_events
     ADD CONSTRAINT fk_rails_a788026e85 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;

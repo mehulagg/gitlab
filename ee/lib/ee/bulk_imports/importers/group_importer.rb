@@ -10,11 +10,19 @@ module EE
 
         override :pipelines
         def pipelines
-          super + [
-            EE::BulkImports::Groups::Pipelines::EpicsPipeline,
-            EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline,
-            EE::BulkImports::Groups::Pipelines::EpicEventsPipeline
-          ]
+          {
+            stage_1: ::BulkImports::Groups::Pipelines::GroupPipeline,
+            stage_2: [
+              ::BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline,
+              ::BulkImports::Groups::Pipelines::MembersPipeline,
+              ::BulkImports::Groups::Pipelines::LabelsPipeline
+            ],
+            stage_3: [
+              EE::BulkImports::Groups::Pipelines::EpicsPipeline,
+              EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline,
+              EE::BulkImports::Groups::Pipelines::EpicEventsPipeline
+            ]
+          }
         end
       end
     end

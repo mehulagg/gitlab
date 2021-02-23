@@ -3,16 +3,37 @@
 module BulkImports
   module Importers
     class GroupImporter
+
+      class Finisher
+        def initialize(context)
+          @context = context
+        end
+
+        def run
+          @context.entity.finish!
+        end
+      end
+
       def initialize(entity)
         @entity = entity
       end
 
       def execute
-        context = BulkImports::Pipeline::Context.new(entity)
+        pipelines.each do |stage_name, pipelines|
+          Array.wrap(pipelines).each do |pipeline|
+            entity.pipeline_statuses.create!(
+              pipeline_name: pipeline.name,
+              stage_name: stage_name
+            )
+          end
+        end
 
-        pipelines.each { |pipeline| pipeline.new(context).run }
+        entity.pipeline_statuses.create!(
+          pipeline_name: 'BulkImports::Importers::GroupImporter',
+          stage_name: :zz_last
+        )
 
-        entity.finish!
+        BulkImports::PipelineWorker.perform_async(entity.id)
       end
 
       private
@@ -20,12 +41,14 @@ module BulkImports
       attr_reader :entity
 
       def pipelines
-        [
-          BulkImports::Groups::Pipelines::GroupPipeline,
-          BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline,
-          BulkImports::Groups::Pipelines::MembersPipeline,
-          BulkImports::Groups::Pipelines::LabelsPipeline
-        ]
+        {
+          stage_1: BulkImports::Groups::Pipelines::GroupPipeline,
+          stage_2: [
+            BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline,
+            BulkImports::Groups::Pipelines::MembersPipeline,
+            BulkImports::Groups::Pipelines::LabelsPipeline
+          ]
+        }
       end
     end
   end
