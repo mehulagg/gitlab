@@ -99,6 +99,105 @@ return new Vue({
 > When adding an `id` attribute to mount a Vue application, please make sure this `id` is unique
 across the codebase.
 
+#### Passing data to the child components
+
+The official Vue documentation suggests two ways of passing the data to the child components:
+
+- [using `props`](https://v3.vuejs.org/guide/component-props.html#props) as shown above,
+- [using `provide` and `inject` pair](https://v3.vuejs.org/guide/component-provide-inject.html#provide-inject)
+
+Both approaches have their specific use cases explained in the official Vue
+documentation. This section aims to give the basic guidelines on when to use it
+in the GitLab codebase and why.
+
+##### Props
+
+```javascript
+// index.js
+return new Vue({
+  el,
+  render(createElement) {
+    return createElement('my-component', {
+      props: {
+        myProp
+      },
+    });
+  },
+});
+```
+
+When one bootstraps an application passing data as `props`, this initializes the internal
+reactivity mechanisms in Vue. It means that for every property one sends, a watcher should be set up on
+the child component to reactively update the prop based on its state in the parent component.
+
+Because of this, it is advised to use `props` when passing **dynamically updated/changed** properties.
+Examples of `props` as an appropriate tool to send data to child components:
+
+- a property fetched from API after initially bootstrapping components
+- a property depending on state changes
+- a property that is passed just one level down
+
+> Keep in mind that [the documentation](https://docs.gitlab.com/ee/development/fe_guide/vue.html#child-components)
+explicitly asks to cover properties passed down to the child components using `props` with tests.
+
+##### `provide/inject` bindings
+
+```javascript
+// index.js
+return new Vue({
+  el,
+  render(createElement) {
+    return createElement('my-component', {
+      props: {
+        myProp
+      },
+      provide: {
+        myProvidedProp: 'foo-bar',
+      }
+    });
+  },
+});
+
+// my-vue-component.vue
+export default {
+  // ...
+  inject: ['myProvidedProp'],
+  created() {
+    // this.myProvidedProp is available already here
+  }
+};
+```
+
+Where simple `props` are propagating one level at a time, `provide` and `inject` couple works as
+the "long-range props". `Provide/inject` allow a parent component to send the properties to the child
+components located anywhere deep in the child components tree without the need of "proxying" the same
+property through several levels of components.
+
+Even though `provide` and `inject` look similar to `props`, there is a substantial difference between
+these: `provide/inject` bindings **are not reactive**.
+
+The good thing about this behavior: every reactive property requires an internal watcher to be set up
+for the components. Because the `provide/inject` bindings are not reactive, using these could help
+reduce the application's memory consumption.
+
+However, this also means that a component injecting a provided property won't be updated if the
+property is changed elsewhere.
+
+Knowing about this difference between `props` and `provide/inject`, it is recommended to limit the
+latter in the following cases:
+
+- passing static properties that are not changed over time. For example, paths, constant objects, etc.
+- passing properties that are used purely to set up a component initially but should not change the
+component if the property is altered elsewhere
+- etc.
+
+> Do not use `provide/inject` bindings for the reactive properties.
+
+To help reduce the unknowns of [the dependency injection](https://docs.gitlab.com/ee/development/fe_guide/design_anti_patterns.html#dependency-injection)
+in the case of `provide/inject`, it is strongly advised to `provide` properties only at the
+moment of bootstrapping the Vue application using `new Vue()` constructor.
+
+
 #### Accessing the `gl` object
 
 We query the `gl` object for data that doesn't change during the application's life
