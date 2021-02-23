@@ -64,6 +64,8 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
     user = identify_user(post_received)
     return false unless user
 
+    replicate_wiki_changes(wiki)
+
     # We only need to expire certain caches once per push
     expire_caches(post_received, wiki.repository)
     wiki.repository.expire_statistics_caches
@@ -83,6 +85,10 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
   end
 
   def replicate_snippet_changes(snippet)
+    # Used by Gitlab Geo
+  end
+
+  def replicate_wiki_changes(wiki)
     # Used by Gitlab Geo
   end
 

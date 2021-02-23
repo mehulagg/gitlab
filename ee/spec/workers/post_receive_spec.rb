@@ -146,6 +146,16 @@ RSpec.describe PostReceive do
 
         described_class.new.perform(gl_repository, key_id, base64_changes)
       end
+
+      it 'calls replicator to update Geo' do
+        allow(Gitlab::Geo).to receive(:primary?) { true }
+
+        expect_next_instance_of(Geo::GroupWikiRepositoryReplicator) do |instance|
+          expect(instance).to receive(:handle_after_update)
+        end
+
+        described_class.new.perform(gl_repository, key_id, base64_changes)
+      end
     end
   end
 end

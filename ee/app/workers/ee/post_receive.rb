@@ -44,6 +44,17 @@ module EE
       end
     end
 
+    override :replicate_wiki_changes
+    def replicate_wiki_changes(wiki)
+      return if wiki.is_a?(ProjectWiki)
+
+      group_wiki_repository = wiki.group.group_wiki_repository
+
+      if ::Gitlab::Geo.primary? && group_wiki_repository
+        group_wiki_repository.replicator.handle_after_update
+      end
+    end
+
     def audit_push?(project)
       project.push_audit_events_enabled? && !::Gitlab::Database.read_only?
     end

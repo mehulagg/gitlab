@@ -45,4 +45,14 @@ RSpec.describe Groups::DestroyService do
       expect { subject.execute }.to change { DependencyProxy::Blob.count }.by(-1)
     end
   end
+
+  it 'calls replicator to update Geo' do
+    allow(Gitlab::Geo).to receive(:primary?) { true }
+
+    expect_next_instance_of(Geo::GroupWikiRepositoryReplicator) do |instance|
+      expect(instance).to receive(:handle_after_destroy)
+    end
+
+    subject.execute
+  end
 end

@@ -10,7 +10,10 @@ module EE
         super.tap do |group|
           delete_dependency_proxy_blobs(group)
 
-          log_audit_event unless group&.persisted?
+          unless group&.persisted?
+            log_audit_event
+            group.group_wiki_repository.replicator.handle_after_destroy if group.group_wiki_repository
+          end
         end
       end
 
