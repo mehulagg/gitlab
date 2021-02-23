@@ -5421,6 +5421,9 @@ msgstr ""
 msgid "Canceled deployment to"
 msgstr ""
 
+msgid "Cancelled"
+msgstr ""
+
 msgid "Cancelling Preview"
 msgstr ""
 
@@ -15420,6 +15423,9 @@ msgid "Importing %d repository"
 msgid_plural "Importing %d repositories"
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "Importing..."
+msgstr ""
 
 msgid "Improve Merge Requests and customer support with GitLab Enterprise Edition."
 msgstr ""
@@ -25881,9 +25887,6 @@ msgstr ""
 msgid "Running"
 msgstr ""
 
-msgid "Running…"
-msgstr ""
-
 msgid "Runs a number of housekeeping tasks within the current repository, such as compressing file revisions and removing unreachable objects."
 msgstr ""
 
@@ -26020,9 +26023,6 @@ msgid "Schedules"
 msgstr ""
 
 msgid "Schedules to merge this merge request (%{strategy})."
-msgstr ""
-
-msgid "Scheduling"
 msgstr ""
 
 msgid "Scheduling Pipelines"

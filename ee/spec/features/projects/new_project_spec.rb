@@ -136,7 +136,7 @@ RSpec.describe 'New project', :js do
         click_button 'Connect'
         wait_for_requests
 
-        expect(page).to have_text('Done')
+        expect(page).to have_text('Complete')
 
         created_project = Project.last
         expect(created_project.name).to eq('some-github-repo')
