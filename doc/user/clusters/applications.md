@@ -401,10 +401,14 @@ resources. For more information, see [Network Policies](../../topics/autodevops/
 For an overview, see the
 [Container Network Security Demo for GitLab 12.8](https://www.youtube.com/watch?v=pgUEdhdhoUI).
 
+For self-managed clusters, the cluster must first be setup to allow GitLab to change the Container Network Interface (CNI) to use Cilium.  This step is not required for Google GKE or AWS EKS hosted clusters.
+ - For minikube clusters, you must run `minikube start --network-plugin=cni --cni=bridge`
+ - For Kubernetes clusters, you must install Cilium by running `kubectl create -f https://raw.githubusercontent.com/cilium/cilium/v1.9/install/kubernetes/quick-install.yaml`
+
 Enable Cilium in the `.gitlab/managed-apps/config.yaml` file to install it:
 
 ```yaml
-# possible values are gke or eks
+# Possible values are gke or eks.  This line is not required for self-managed Kubernetes instances.
 clusterType: gke
 
 cilium:
@@ -414,6 +418,7 @@ cilium:
 The `clusterType` variable enables the recommended Helm variables for a corresponding cluster type.
 You can check the recommended variables for each cluster type in the official documentation:
 
+- Self-managed Kubernetes clusters should omit the `clusterType` variable
 - [Google GKE](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-gke/#deploy-cilium)
 - [AWS EKS](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-eks/#deploy-cilium)
 

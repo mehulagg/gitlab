@@ -39,12 +39,14 @@ orchestrators aren't supported.
 
 ## Supported Kubernetes providers
 
-The following cloud providers are supported:
+The following providers are supported:
 
+- Self-managed minikube instances
+- Self-managed Kubernetes instances
 - Amazon EKS
 - Google GKE
 
-Although Container Network Security may function on Azure or self-managed Kubernetes instances, it
+Although Container Network Security may function on Azure or other cloud providers, it
 isn't officially tested and supported on those providers.
 
 ## Supported NetworkPolicies
