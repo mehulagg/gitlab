@@ -34,6 +34,11 @@ export default {
       type: Boolean,
       required: true,
     },
+    labelFilterParam: {
+      type: String,
+      required: false,
+      default: 'label_name',
+    },
     showCheckbox: {
       type: Boolean,
       required: true,
@@ -105,7 +110,7 @@ export default {
     },
     labelTarget(label) {
       if (this.enableLabelPermalinks) {
-        const key = encodeURIComponent('label_name[]');
+        const key = encodeURIComponent(`${this.labelFilterParam}[]`);
         const value = encodeURIComponent(this.labelTitle(label));
         return `?${key}=${value}`;
       }
