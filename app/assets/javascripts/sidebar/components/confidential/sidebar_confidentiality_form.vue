@@ -7,7 +7,7 @@ import { confidentialityQueries } from '~/sidebar/constants';
 export default {
   i18n: {
     confidentialityOnWarning: __(
-      'You are going to turn on the confidentiality. This means that only team members with %{strongStart}at least Reporter access%{strongEnd} are able to see and leave comments on the %{issuableType}.',
+      'You are going to turn on the confidentiality. This means that only team members with %{strongStart}at least Reporter access%{strongEnd} will be able to see and leave comments on the %{issuableType}.',
     ),
     confidentialityOffWarning: __(
       'You are going to turn off the confidentiality. This means %{strongStart}everyone%{strongEnd} will be able to see and leave a comment on this %{issuableType}.',
