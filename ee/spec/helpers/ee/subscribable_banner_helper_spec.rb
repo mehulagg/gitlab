@@ -122,7 +122,7 @@ RSpec.describe EE::SubscribableBannerHelper do
             it 'calls Gitlab::ExpiringSubscriptionMessage and SubscriptionPresenter if is Gitlab.com?' do
               allow(helper).to receive(:signed_in?).and_return(true)
               allow(helper).to receive(:current_user).and_return(user)
-              allow(helper).to receive(:can?).with(user, :owner_access, entity).and_return(true)
+              allow(helper).to receive(:can?).with(user, :owner_access, root_namespace).and_return(true)
 
               expect(SubscriptionPresenter).to receive(:new).with(gitlab_subscription).and_return(decorated_mock)
               expect(::Gitlab::ExpiringSubscriptionMessage).to receive(:new).with(
@@ -138,8 +138,9 @@ RSpec.describe EE::SubscribableBannerHelper do
           end
 
           context 'when a project is present' do
+            let(:root_namespace) { create(:namespace_with_plan) }
+            let(:namespace) { root_namespace }
             let(:entity) { create(:project, namespace: namespace) }
-            let(:namespace) { create(:namespace_with_plan) }
 
             before do
               assign(:project, entity)
@@ -149,8 +150,9 @@ RSpec.describe EE::SubscribableBannerHelper do
           end
 
           context 'when a group is present' do
-            let(:entity) { create(:group_with_plan) }
-            let(:namespace) { entity }
+            let(:root_namespace) { create(:group_with_plan) }
+            let(:namespace) { create(:group, :nested, parent: root_namespace) }
+            let(:entity) { namespace }
 
             before do
               assign(:project, nil)
