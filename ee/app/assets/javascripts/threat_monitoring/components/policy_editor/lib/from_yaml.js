@@ -129,6 +129,77 @@ export default function fromYaml(manifest) {
       egress.map((item) => parseRule(item, RuleDirectionOutbound)),
     )
     .filter((rule) => Boolean(rule));
+  
+  // Check for unsupported parameters
+  const manifestObj = JSON.parse(manifest);
+  const primaryKeys = ['description', 'metadata', 'spec'];
+  const metadataKeys = ['name', 'resourceVersion', 'annotations', 'labels'];
+  const specKeys = ['endpointSelector', 'ingress', 'egress'];
+  const ruleKeys = [
+    'fromEntities',
+    'toEntities',
+    'fromCIDR',
+    'toCIDR',
+    'toFQDNs',
+    'fromEndpoints',
+    'toEndpoints',
+    'toPorts',
+  ];
+  const toPortKeys = ['ports'];
+  const portKeys = ['port', 'protocol'];
+  if (manifestObj) {
+    Object.keys(manifestObj).forEach((item) => {
+      if (!primaryKeys.includes(item)) throw new Error('Unsupported attribute');
+    });
+    if (manifestObj.metadata) {
+      Object.keys(manifestObj.metadata).forEach((item) => {
+        if (!metadataKeys.includes(item)) throw new Error('Unsupported attribute');
+      });
+    }
+    if (manifestObj.spec) {
+      Object.keys(manifestObj.spec).forEach((item) => {
+        if (!specKeys.includes(item)) throw new Error('Unsupported attribute');
+      });
+      if (manifestObj.spec.ingress) {
+        Object.keys(manifestObj.spec.ingress).forEach((item) => {
+          if (!ruleKeys.includes(item)) throw new Error('Unsupported attribute');
+        });
+        if (manifestObj.spec.ingress.toPorts) {
+          manifestObj.spec.ingress.toPorts.forEach((entry) => {
+            Object.keys(entry).forEach((item) => {
+              if (!toPortKeys.includes(item)) throw new Error('Unsupported attribute');
+            });
+            if (entry.ports) {
+              entry.ports.forEach((portEntry) => {
+                Object.keys(portEntry).forEach((item) => {
+                  if (!portKeys.includes(item)) throw new Error('Unsupported attribute');
+                });
+              });
+            }
+          });
+        }
+      }
+      if (manifestObj.spec.egress) {
+        Object.keys(manifestObj.spec.egress).forEach((item) => {
+          if (!ruleKeys.includes(item)) throw new Error('Unsupported attribute');
+        });
+        if (manifestObj.spec.egress.toPorts) {
+          manifestObj.spec.egress.toPorts.forEach((entry) => {
+            Object.keys(entry).forEach((item) => {
+              if (!toPortKeys.includes(item)) throw new Error('Unsupported attribute');
+            });
+            if (entry.ports) {
+              entry.ports.forEach((portEntry) => {
+                Object.keys(portEntry).forEach((item) => {
+                  if (!portKeys.includes(item)) throw new Error('Unsupported attribute');
+                });
+              });
+            }
+          });
+        }
+      }
+    }
+  }
 
   return {
     name,
