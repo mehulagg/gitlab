@@ -298,8 +298,7 @@
   rules:
     - <<: *if-not-canonical-namespace
       when: never
-    - changes: *ci-build-images-patterns
-    - changes: *code-qa-patterns
+    - <<: *if-default-refs
 
 ####################
 # Cache repo rules #
