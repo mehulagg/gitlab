@@ -5087,6 +5087,9 @@ msgstr ""
 msgid "BulkImport|Importing the group failed"
 msgstr ""
 
+msgid "BulkImport|Name already exists."
+msgstr ""
+
 msgid "BulkImport|No parent"
 msgstr ""
 
