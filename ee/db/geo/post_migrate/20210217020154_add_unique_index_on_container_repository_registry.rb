@@ -5,7 +5,7 @@ class AddUniqueIndexOnContainerRepositoryRegistry < ActiveRecord::Migration[6.0]
 
   DOWNTIME = false
   OLD_INDEX_NAME = 'index_container_repository_registry_on_repository_id'
-  NEW_INDEX_NAME = 'unique_index_container_repository_registry_on_repository_id'
+  NEW_INDEX_NAME = 'index_container_repository_registry_repository_id_unique'
 
   disable_ddl_transaction!
 

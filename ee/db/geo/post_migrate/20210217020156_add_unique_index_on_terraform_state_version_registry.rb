@@ -5,7 +5,7 @@ class AddUniqueIndexOnTerraformStateVersionRegistry < ActiveRecord::Migration[6.
 
   DOWNTIME = false
   OLD_INDEX_NAME = 'index_tf_state_versions_registry_on_tf_state_versions_id'
-  NEW_INDEX_NAME = 'unique_index_tf_state_versions_registry_on_tf_state_versions_id'
+  NEW_INDEX_NAME = 'index_tf_state_versions_registry_tf_state_versions_id_unique'
 
   disable_ddl_transaction!
 

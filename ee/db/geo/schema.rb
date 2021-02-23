@@ -23,7 +23,7 @@ ActiveRecord::Schema.define(version: 2021_02_17_020156) do
     t.datetime "retry_at"
     t.datetime "last_synced_at"
     t.datetime "created_at", null: false
-    t.index ["container_repository_id"], name: "unique_index_container_repository_registry_on_repository_id", unique: true
+    t.index ["container_repository_id"], name: "index_container_repository_registry_repository_id_unique", unique: true
     t.index ["retry_at"], name: "index_container_repository_registry_on_retry_at"
     t.index ["state"], name: "index_container_repository_registry_on_state"
   end
@@ -211,7 +211,7 @@ ActiveRecord::Schema.define(version: 2021_02_17_020156) do
     t.text "last_sync_failure"
     t.index ["retry_at"], name: "index_terraform_state_version_registry_on_retry_at"
     t.index ["state"], name: "index_terraform_state_version_registry_on_state"
-    t.index ["terraform_state_version_id"], name: "unique_index_tf_state_versions_registry_on_tf_state_versions_id", unique: true
+    t.index ["terraform_state_version_id"], name: "index_tf_state_versions_registry_tf_state_versions_id_unique", unique: true
   end
 
 end
