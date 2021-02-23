@@ -1,6 +1,7 @@
 import { GlAlert, GlModal } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
+import AddEditRotationForm from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_form.vue';
 import AddEditRotationModal, {
   i18n,
 } from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_modal.vue';
@@ -133,6 +134,7 @@ describe('AddEditRotationModal', () => {
 
   const findModal = () => wrapper.find(GlModal);
   const findAlert = () => wrapper.find(GlAlert);
+  const findForm = () => wrapper.find(AddEditRotationForm);
 
   it('renders rotation modal layout', () => {
     expect(wrapper.element).toMatchSnapshot();
@@ -200,6 +202,20 @@ describe('AddEditRotationModal', () => {
       const alert = findAlert();
       expect(alert.exists()).toBe(true);
       expect(alert.text()).toContain('Houston, we have a problem');
+    });
+  });
+
+  describe('loading data', () => {
+    it('should load rotation restriction data successfully', async () => {
+      await createComponentWithApollo();
+      await awaitApolloDomMock();
+
+      findModal().vm.$emit('show');
+
+      expect(findForm().props('form')).toMatchObject({
+        isRestrictedToTime: true,
+        restrictedTo: { startTime: 2, endTime: 10 },
+      });
     });
   });
 });
