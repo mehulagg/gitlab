@@ -3114,125 +3114,164 @@ RSpec.describe MergeRequest, factory_default: :keep do
   describe '#mergeable_ci_state?' do
     let(:pipeline) { create(:ci_empty_pipeline) }
 
-    context 'when it is only allowed to merge when build is green' do
-      let_it_be(:project) { create(:project, :repository, only_allow_merge_if_pipeline_succeeds: true) }
-
-      subject { build(:merge_request, source_project: project) }
-
-      context 'and a failed pipeline is associated' do
-        before do
-          pipeline.update(status: 'failed', sha: subject.diff_head_sha)
-          allow(subject).to receive(:head_pipeline) { pipeline }
-        end
-
-        it { expect(subject.mergeable_ci_state?).to be_falsey }
+    context 'when not allowed to merge before pipeline completion' do
+      before do
+        pipeline.project.ci_cd_settings.update(allow_merge_before_pipeline_completes: false)
       end
 
-      context 'and a successful pipeline is associated' do
+      context 'when pipeline is not complete' do
         before do
-          pipeline.update(status: 'success', sha: subject.diff_head_sha)
-          allow(subject).to receive(:head_pipeline) { pipeline }
-        end
-
-        it { expect(subject.mergeable_ci_state?).to be_truthy }
-      end
-
-      context 'and a skipped pipeline is associated' do
-        before do
-          pipeline.update(status: 'skipped', sha: subject.diff_head_sha)
+          pipeline.update(status: :created, sha: subject.diff_head_sha)
           allow(subject).to receive(:head_pipeline).and_return(pipeline)
         end
 
         it { expect(subject.mergeable_ci_state?).to be_falsey }
       end
 
-      context 'when no pipeline is associated' do
+      context 'when pipeline is successful' do
         before do
-          allow(subject).to receive(:head_pipeline).and_return(nil)
+          pipeline.update(status: :success, sha: subject.diff_head_sha)
+          allow(subject).to receive(:head_pipeline).and_return(pipeline)
+        end
+
+        it { expect(subject.mergeable_ci_state?).to be_truthy }
+      end
+
+      context 'when pipeline is failed' do
+        before do
+          pipeline.update(status: :failed, sha: subject.diff_head_sha)
+          allow(subject).to receive(:head_pipeline).and_return(pipeline)
         end
 
         it { expect(subject.mergeable_ci_state?).to be_falsey }
       end
     end
 
-    context 'when it is only allowed to merge when build is green or skipped' do
-      let_it_be(:project) { create(:project, :repository, only_allow_merge_if_pipeline_succeeds: true, allow_merge_on_skipped_pipeline: true) }
-
-      subject { build(:merge_request, source_project: project) }
-
-      context 'and a failed pipeline is associated' do
-        before do
-          pipeline.update!(status: 'failed', sha: subject.diff_head_sha)
-          allow(subject).to receive(:head_pipeline).and_return(pipeline)
-        end
-
-        it { expect(subject.mergeable_ci_state?).to be_falsey }
+    context 'when allowed to merge before pipeline completion' do
+      before do
+        pipeline.project.ci_cd_settings.update(allow_merge_before_pipeline_completes: true)
       end
 
-      context 'and a successful pipeline is associated' do
-        before do
-          pipeline.update!(status: 'success', sha: subject.diff_head_sha)
-          allow(subject).to receive(:head_pipeline).and_return(pipeline)
+      context 'when it is only allowed to merge when build is green' do
+        let_it_be(:project) { create(:project, :repository, only_allow_merge_if_pipeline_succeeds: true) }
+
+        subject { build(:merge_request, source_project: project) }
+
+        context 'and a failed pipeline is associated' do
+          before do
+            pipeline.update(status: 'failed', sha: subject.diff_head_sha)
+            allow(subject).to receive(:head_pipeline) { pipeline }
+          end
+
+          it { expect(subject.mergeable_ci_state?).to be_falsey }
         end
 
-        it { expect(subject.mergeable_ci_state?).to be_truthy }
+        context 'and a successful pipeline is associated' do
+          before do
+            pipeline.update(status: 'success', sha: subject.diff_head_sha)
+            allow(subject).to receive(:head_pipeline) { pipeline }
+          end
+
+          it { expect(subject.mergeable_ci_state?).to be_truthy }
+        end
+
+        context 'and a skipped pipeline is associated' do
+          before do
+            pipeline.update(status: 'skipped', sha: subject.diff_head_sha)
+            allow(subject).to receive(:head_pipeline).and_return(pipeline)
+          end
+
+          it { expect(subject.mergeable_ci_state?).to be_falsey }
+        end
+
+        context 'when no pipeline is associated' do
+          before do
+            allow(subject).to receive(:head_pipeline).and_return(nil)
+          end
+
+          it { expect(subject.mergeable_ci_state?).to be_falsey }
+        end
       end
 
-      context 'and a skipped pipeline is associated' do
-        before do
-          pipeline.update!(status: 'skipped', sha: subject.diff_head_sha)
-          allow(subject).to receive(:head_pipeline).and_return(pipeline)
+      context 'when it is only allowed to merge when build is green or skipped' do
+        let_it_be(:project) { create(:project, :repository, only_allow_merge_if_pipeline_succeeds: true, allow_merge_on_skipped_pipeline: true) }
+
+        subject { build(:merge_request, source_project: project) }
+
+        context 'and a failed pipeline is associated' do
+          before do
+            pipeline.update!(status: 'failed', sha: subject.diff_head_sha)
+            allow(subject).to receive(:head_pipeline).and_return(pipeline)
+          end
+
+          it { expect(subject.mergeable_ci_state?).to be_falsey }
         end
 
-        it { expect(subject.mergeable_ci_state?).to be_truthy }
+        context 'and a successful pipeline is associated' do
+          before do
+            pipeline.update!(status: 'success', sha: subject.diff_head_sha)
+            allow(subject).to receive(:head_pipeline).and_return(pipeline)
+          end
+
+          it { expect(subject.mergeable_ci_state?).to be_truthy }
+        end
+
+        context 'and a skipped pipeline is associated' do
+          before do
+            pipeline.update!(status: 'skipped', sha: subject.diff_head_sha)
+            allow(subject).to receive(:head_pipeline).and_return(pipeline)
+          end
+
+          it { expect(subject.mergeable_ci_state?).to be_truthy }
+        end
+
+        context 'when no pipeline is associated' do
+          before do
+            allow(subject).to receive(:head_pipeline).and_return(nil)
+          end
+
+          it { expect(subject.mergeable_ci_state?).to be_falsey }
+        end
       end
 
-      context 'when no pipeline is associated' do
-        before do
-          allow(subject).to receive(:head_pipeline).and_return(nil)
+      context 'when merges are not restricted to green builds' do
+        let_it_be(:project) { create(:project, :repository, only_allow_merge_if_pipeline_succeeds: false) }
+
+        subject { build(:merge_request, source_project: project) }
+
+        context 'and a failed pipeline is associated' do
+          before do
+            pipeline.statuses << create(:commit_status, status: 'failed', project: project)
+            allow(subject).to receive(:head_pipeline) { pipeline }
+          end
+
+          it { expect(subject.mergeable_ci_state?).to be_truthy }
         end
 
-        it { expect(subject.mergeable_ci_state?).to be_falsey }
-      end
-    end
+        context 'when no pipeline is associated' do
+          before do
+            allow(subject).to receive(:head_pipeline) { nil }
+          end
 
-    context 'when merges are not restricted to green builds' do
-      let_it_be(:project) { create(:project, :repository, only_allow_merge_if_pipeline_succeeds: false) }
-
-      subject { build(:merge_request, source_project: project) }
-
-      context 'and a failed pipeline is associated' do
-        before do
-          pipeline.statuses << create(:commit_status, status: 'failed', project: project)
-          allow(subject).to receive(:head_pipeline) { pipeline }
+          it { expect(subject.mergeable_ci_state?).to be_truthy }
         end
 
-        it { expect(subject.mergeable_ci_state?).to be_truthy }
-      end
+        context 'and a skipped pipeline is associated' do
+          before do
+            pipeline.update!(status: 'skipped', sha: subject.diff_head_sha)
+            allow(subject).to receive(:head_pipeline).and_return(pipeline)
+          end
 
-      context 'when no pipeline is associated' do
-        before do
-          allow(subject).to receive(:head_pipeline) { nil }
+          it { expect(subject.mergeable_ci_state?).to be_truthy }
         end
 
-        it { expect(subject.mergeable_ci_state?).to be_truthy }
-      end
+        context 'when no pipeline is associated' do
+          before do
+            allow(subject).to receive(:head_pipeline).and_return(nil)
+          end
 
-      context 'and a skipped pipeline is associated' do
-        before do
-          pipeline.update!(status: 'skipped', sha: subject.diff_head_sha)
-          allow(subject).to receive(:head_pipeline).and_return(pipeline)
+          it { expect(subject.mergeable_ci_state?).to be_truthy }
         end
-
-        it { expect(subject.mergeable_ci_state?).to be_truthy }
-      end
-
-      context 'when no pipeline is associated' do
-        before do
-          allow(subject).to receive(:head_pipeline).and_return(nil)
-        end
-
-        it { expect(subject.mergeable_ci_state?).to be_truthy }
       end
     end
   end

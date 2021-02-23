@@ -17,6 +17,10 @@ module Mutations
         required: false,
         description: 'Indicates if the latest artifact should be kept for this project.'
 
+      argument :allow_merge_before_pipeline_completes, GraphQL::BOOLEAN_TYPE,
+        required: false,
+        description: "Indicates if merging (via API or 'merge immediately' button) is allowed before a pipeline completes."
+
       def resolve(full_path:, **args)
         project = authorized_find!(full_path)
         settings = project.ci_cd_settings

@@ -7371,6 +7371,16 @@
               "defaultValue": null
             },
             {
+              "name": "allowMergeBeforePipelineCompletes",
+              "description": "Indicates if merging (via API or 'merge immediately' button) is allowed before a pipeline completes.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "clientMutationId",
               "description": "A unique identifier for the client performing the mutation.",
               "type": {
@@ -60548,6 +60558,24 @@
           "name": "ProjectCiCdSetting",
           "description": null,
           "fields": [
+            {
+              "name": "allowMergeBeforePipelineCompletes",
+              "description": "Whether to allow merging (via API or 'merge immediately' button) before a pipeline completes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "keepLatestArtifact",
               "description": "Whether to keep the latest builds artifacts.",

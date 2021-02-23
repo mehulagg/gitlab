@@ -16,6 +16,9 @@ module Types
       field :keep_latest_artifact, GraphQL::BOOLEAN_TYPE, null: true,
         description: 'Whether to keep the latest builds artifacts.',
         method: :keep_latest_artifacts_available?
+      field :allow_merge_before_pipeline_completes, GraphQL::BOOLEAN_TYPE, null: false,
+        description: "Whether to allow merging (via API or 'merge immediately' button) before a pipeline completes.",
+        method: :allow_merge_before_pipeline_completes?
       field :project, Types::ProjectType, null: true,
         description: 'Project the CI/CD settings belong to.'
     end
