@@ -32,6 +32,16 @@ module Gitlab
         end
       rescue => err
         store_timings
+        # rubocop:disable Rails/Output
+        puts `ps aux -m`
+        puts `ps aux | grep gitaly`
+        puts `ps aux | grep praefect`
+        puts `free -m`
+        puts `cat /proc/meminfo`
+        puts `top -o mem -n 100`
+        output, status = Gitlab::Popen.popen(%W(ps -o rss= -p #{Process.pid}), Rails.root.to_s)
+        puts "status: #{status}; rss: #{output}"
+        # rubocop:enable Rails/Output
         raise err
       end
 

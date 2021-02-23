@@ -590,6 +590,14 @@ rspec-ee migration pg11:
     - .rails:rules:ee-only-migration
     - .rspec-ee-migration-parallel
 
+rspec-ee single-20201123123400_migrate_issues_to_separate_index_spec:
+  extends:
+    - .rspec-ee-base-pg11
+    - .rails:rules:ee-and-foss-migration
+  script:
+    - *base-script
+    - rspec_simple_job "-- ee/spec/elastic/migrate/20201123123400_migrate_issues_to_separate_index_spec.rb"
+
 rspec-ee migration pg11 minimal:
   extends:
     - rspec-ee migration pg11
