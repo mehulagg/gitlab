@@ -11,8 +11,8 @@ module Packages
       end
 
       def root
-        p1_path = expose_path(api_v4_group___packages_composer_p1_package_name_path({ id: @group.id, package_name: '%package%$%hash%', format: '.json' }, true))
-        p2_path = expose_path(api_v4_group___packages_composer_p2_package_name_path({ id: @group.id, package_name: '%package%', format: '.json' }, true))
+        v1_path = expose_path(api_v4_group___packages_composer_package_name_path({ id: @group.id, package_name: '%package%$%hash%', format: '.json' }, true))
+        v2_path = expose_path(api_v4_group___packages_composer_p2_package_name_path({ id: @group.id, package_name: '%package%', format: '.json' }, true))
 
         {
           'packages' => [],
@@ -21,8 +21,8 @@ module Packages
               'sha256' => provider_sha
             }
           },
-          'providers-url' => p1_path,
-          'metadata-url' => p2_path
+          'providers-url' => v1_path,
+          'metadata-url' => v2_path
         }
       end
 

@@ -165,10 +165,10 @@ RSpec.describe API::ComposerPackages do
     it_behaves_like 'rejects Composer access with unknown group id'
   end
 
-  describe 'GET /api/v4/group/:id/-/packages/composer/p1/*package_name.json' do
+  describe 'GET /api/v4/group/:id/-/packages/composer/*package_name.json' do
     let(:package_name) { 'foobar' }
     let(:sha) { '$1234' }
-    let(:url) { "/group/#{group.id}/-/packages/composer/p1/#{package_name}#{sha}.json" }
+    let(:url) { "/group/#{group.id}/-/packages/composer/#{package_name}#{sha}.json" }
 
     subject { get api(url), headers: headers }
 

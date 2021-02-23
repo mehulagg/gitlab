@@ -93,9 +93,8 @@ module API
 
       route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
 
-      get ':id/-/packages/composer/p1/*package_name', requirements: COMPOSER_ENDPOINT_REQUIREMENTS, file_path: true do
+      get ':id/-/packages/composer/p2/*package_name', requirements: COMPOSER_ENDPOINT_REQUIREMENTS, file_path: true do
         not_found! if packages.empty?
-        not_found! if params[:sha].blank?
 
         presenter.package_versions
       end
@@ -108,8 +107,9 @@ module API
 
       route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
 
-      get ':id/-/packages/composer/p2/*package_name', requirements: COMPOSER_ENDPOINT_REQUIREMENTS, file_path: true do
+      get ':id/-/packages/composer/*package_name', requirements: COMPOSER_ENDPOINT_REQUIREMENTS, file_path: true do
         not_found! if packages.empty?
+        not_found! if params[:sha].blank?
 
         presenter.package_versions
       end
