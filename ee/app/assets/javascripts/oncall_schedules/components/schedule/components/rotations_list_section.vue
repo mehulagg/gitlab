@@ -89,6 +89,7 @@ export default {
   methods: {
     setRotationToUpdate(rotation) {
       this.rotationToUpdate = rotation;
+      this.$emit('set-rotation-to-update', rotation);
     },
     cellShouldHideOverflow(index) {
       return index + 1 === this.timeframe.length || this.presetIsDay;
@@ -130,7 +131,6 @@ export default {
             <gl-button
               v-gl-modal="$options.editRotationModalId"
               v-gl-tooltip
-              class="gl-display-none"
               category="tertiary"
               :title="$options.i18n.editRotationLabel"
               icon="pencil"

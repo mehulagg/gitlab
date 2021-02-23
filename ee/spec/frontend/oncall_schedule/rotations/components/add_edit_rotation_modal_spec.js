@@ -350,4 +350,18 @@ describe('AddEditRotationModal', () => {
       expect(alert.text()).toContain('Houston, we have a problem');
     });
   });
+
+  describe('loading data', () => {
+    it('should load rotation restriction data successfully', async () => {
+      await createComponentWithApollo();
+      await awaitApolloDomMock();
+
+      findModal().vm.$emit('show');
+
+      expect(findForm().props('form')).toMatchObject({
+        isRestrictedToTime: true,
+        restrictedTo: { startTime: 2, endTime: 10 },
+      });
+    });
+  });
 });
