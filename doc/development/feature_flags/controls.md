@@ -309,5 +309,3 @@ Then, you can delete it from production after the MR is deployed to prod:
 ```shell
 /chatops run feature delete some_feature
 ```
-
-
