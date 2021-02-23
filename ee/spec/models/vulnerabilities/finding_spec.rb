@@ -98,7 +98,6 @@ RSpec.describe Vulnerabilities::Finding do
       let!(:finding3) { create(:vulnerabilities_finding, confidence: ::Enums::Vulnerability.confidence_levels[:high], severity: ::Enums::Vulnerability.severity_levels[:critical]) }
 
       it 'orders by severity and confidence' do
-        res = described_class.all.ordered
         expect(described_class.all.ordered).to eq([finding3, finding2, finding1])
       end
     end
@@ -1008,6 +1007,7 @@ RSpec.describe Vulnerabilities::Finding do
               primary_identifier: identifier,
               location_fingerprint: location_fingerprint1)
       end
+
       let(:finding2) do
         build(:vulnerabilities_finding, report_type,
               project: project,
@@ -1051,7 +1051,7 @@ RSpec.describe Vulnerabilities::Finding do
             finding: finding1
           )
           sha = same_hash ? fingerprint1_hash.fingerprint_sha256 : ::Digest::SHA256.digest(SecureRandom.hex(50))
-          fingerprint2_hash = create(
+          create(
             :vulnerabilities_finding_fingerprint,
             algorithm_type: 'hash',
             finding: finding2,
@@ -1064,7 +1064,7 @@ RSpec.describe Vulnerabilities::Finding do
             finding: finding1
           )
           sha = same_location ? fingerprint1_location.fingerprint_sha256 : ::Digest::SHA256.digest(SecureRandom.hex(50))
-          fingerprint2_location = create(
+          create(
             :vulnerabilities_finding_fingerprint,
             algorithm_type: 'location',
             finding: finding2,
@@ -1079,7 +1079,7 @@ RSpec.describe Vulnerabilities::Finding do
 
           if create_scope_offset
             sha = same_scope_offset ? fingerprint1_scope_offset.fingerprint_sha256 : ::Digest::SHA256.digest(SecureRandom.hex(50))
-            fingerprint2_scope_offset = create(
+            create(
               :vulnerabilities_finding_fingerprint,
               algorithm_type: 'scope_offset',
               finding: finding2,

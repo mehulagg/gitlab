@@ -12,17 +12,14 @@ RSpec.describe Security::StoreReportService, '#execute' do
   let(:pipeline) { artifact.job.pipeline }
   let(:report) { pipeline.security_reports.get_report(report_type.to_s, artifact) }
 
-  before do
-    stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, security_dashboard: true)
-    allow(Security::AutoFixWorker).to receive(:perform_async)
-  end
-
   subject { described_class.new(pipeline, report).execute }
 
   where(vulnerability_finding_fingerprints_enabled: [true, false])
   with_them do
     before do
       stub_feature_flags(vulnerability_finding_fingerprints: vulnerability_finding_fingerprints_enabled)
+      stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, security_dashboard: true)
+      allow(Security::AutoFixWorker).to receive(:perform_async)
     end
 
     context 'without existing data' do

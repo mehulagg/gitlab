@@ -84,7 +84,7 @@ module Security
         finding.project = pipeline.project
         finding.sha = pipeline.sha
         finding.build_scanner(report_finding.scanner&.to_hash)
-        #finding.location = report_finding.location_json
+        # finding.location = report_finding.location_json
         finding.finding_links = report_finding.links.map do |link|
           Vulnerabilities::FindingLink.new(link.to_hash)
         end
@@ -122,6 +122,7 @@ module Security
       end
     end
 
+    # rubocop: disable CodeReuse/ActiveRecord
     def dismissal_feedback_by_finding_fingerprints(finding)
       potential_uuids = finding.fingerprint_uuids
       matching_feedbacks = pipeline.project
@@ -130,6 +131,7 @@ module Security
         .where(finding_uuid: potential_uuids)
       !matching_feedbacks.empty?
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def dismissal_feedback_by_project_fingerprint(finding)
       dismissal_feedback_by_fingerprint[finding.project_fingerprint]

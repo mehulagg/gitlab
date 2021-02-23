@@ -118,7 +118,7 @@ module EE
       end
     rescue StandardError => e
       puts "Error fetching job artifact security report: #{e}"
-      puts e.backtrace.map{|x| "    #{x}"}.join("\n")
+      puts e.backtrace.map {|x| "    #{x}"}.join("\n")
     end
 
     # This method is necessary to remove the reference to the

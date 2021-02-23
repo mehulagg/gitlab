@@ -25,7 +25,7 @@ module Gitlab
           end
 
           def fingerprint_hex
-            fingerprint_sha256.unpack("H*")[0]
+            fingerprint_sha256.unpack1("H*")
           end
 
           def to_hash

@@ -347,7 +347,8 @@ module Vulnerabilities
       return false unless other.report_type == report_type && other.first_fingerprint == first_fingerprint
 
       if ::Feature.enabled?(:vulnerability_finding_fingerprints)
-        matches_fingerprints(other.fingerprints)
+        # TODO add the uuid + 'hash' fingerprint type
+        matches_fingerprints(other.fingerprints, other.uuid)
       else
         other.location_fingerprint == location_fingerprint
       end
@@ -383,32 +384,36 @@ module Vulnerabilities
     end
 
     # this should match the same code as in ee/lib/gitlab/ci/reports/security/finding.rb
-    def matches_fingerprints(other_fingerprints)
-      return false if other_fingerprints.empty? || fingerprints.empty?
-
+    def matches_fingerprints(other_fingerprints, other_uuid)
       other_fingerprint_types = other_fingerprints.index_by(&:algorithm_type)
 
       # highest first
-      fingerprints.sort_by(&:priority).reverse.each do |fingerprint|
+      match_result = nil
+      fingerprints.sort_by(&:priority).reverse_each do |fingerprint|
         matching_other_fingerprint = other_fingerprint_types[fingerprint.algorithm_type]
         next if matching_other_fingerprint.nil?
 
-        return matching_other_fingerprint == fingerprint
+        match_result = matching_other_fingerprint == fingerprint
+        break
       end
 
-      return false
+      if match_result.nil?
+        Set.new([uuid, *fingerprint_uuids]).include?(other_uuid)
+      else
+        match_result
+      end
     end
 
     def fingerprint_uuids
       fingerprints.map do |fingerprint|
-        hex_sha = fingerprint.fingerprint_sha256.unpack("H*")[0]
+        hex_sha = fingerprint.fingerprint_hex
         Gitlab::UUID.v5(uuid_v5_name(location_fingerprint_value: hex_sha))
       end
     end
 
     def fingerprint_uuids_and_priorities
       fingerprints.map do |fingerprint|
-        hex_sha = fingerprint.fingerprint_sha256.unpack("H*")[0]
+        hex_sha = fingerprint.fingerprint_sha256.unpack1("H*")
         [Gitlab::UUID.v5(uuid_v5_name(location_fingerprint_value: hex_sha)), fingerprint.priority]
       end
     end

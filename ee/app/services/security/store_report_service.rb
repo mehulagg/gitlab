@@ -62,6 +62,7 @@ module Security
       if ::Feature.enabled?(:vulnerability_finding_fingerprints)
         update_feedbacks(vulnerability_finding, vulnerability_params[:uuid])
       end
+
       update_finding_fingerprints(finding, vulnerability_finding)
 
       # The maximum number of identifiers is not used in validation

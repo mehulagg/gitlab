@@ -21,7 +21,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingFingerprint do
 
       describe '#valid?' do
         it 'returns true' do
-          expect { subject.valid? }.to eq(true)
+          expect(subject.valid?).to eq(true)
         end
       end
     end
@@ -36,7 +36,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::FindingFingerprint do
 
       describe '#valid?' do
         it 'returns false' do
-          expect { subject.valid? }.to eq(false)
+          expect(subject.valid?).to eq(false)
         end
       end
     end

@@ -240,10 +240,10 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
         it 'sets the uuid according to the higest priority fingerprint' do
           finding = report.findings.first
-          highest_fingerprint = finding.fingerprints.sort_by(&:priority).last
+          highest_fingerprint = finding.fingerprints.max_by(&:priority)
           expect(finding.uuid).to eq(Gitlab::UUID.v5(
-            "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{highest_fingerprint.fingerprint_hex}-#{report.project_id}"
-          ))
+                                       "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{highest_fingerprint.fingerprint_hex}-#{report.project_id}"
+                                     ))
         end
       end
     end
