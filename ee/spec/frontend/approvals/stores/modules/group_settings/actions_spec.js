@@ -1,11 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
-import * as types from 'ee/approvals/stores/modules/group_settings/mutation_types';
 import * as actions from 'ee/approvals/stores/modules/group_settings/actions';
+import * as types from 'ee/approvals/stores/modules/group_settings/mutation_types';
 import getInitialState from 'ee/approvals/stores/modules/group_settings/state';
 import testAction from 'helpers/vuex_action_helper';
 import createFlash from '~/flash';
-import httpStatus from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
+import httpStatus from '~/lib/utils/http_status';
 
 jest.mock('~/flash');
 
@@ -69,17 +69,60 @@ describe('EE approvals group settings module actions', () => {
     });
   });
 
-  describe('updatePreventAuthorApproval', () => {
-    it('updates payload', () => {
-      const value = false;
+  describe('updateSettings', () => {
+    beforeEach(() => {
+      state = {
+        settings: {
+          preventAuthorApproval: false,
+        },
+      };
+    });
 
-      return testAction(
-        actions.updatePreventAuthorApproval,
-        value,
-        state,
-        [{ type: types.UPDATE_PREVENT_AUTHOR_APPROVAL, payload: value }],
-        [],
-      );
+    describe('on success', () => {
+      it('dispatches the request and updates payload', () => {
+        const data = { allow_author_approval: true };
+        mock.onPut(approvalSettingsPath).replyOnce(httpStatus.OK, data);
+
+        return testAction(
+          actions.updateSettings,
+          approvalSettingsPath,
+          state,
+          [
+            { type: types.REQUEST_UPDATE_SETTINGS },
+            { type: types.UPDATE_SETTINGS_SUCCESS, payload: data },
+          ],
+          [],
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'Merge request approval settings have been updated.',
+            type: 'notice',
+          });
+        });
+      });
+    });
+
+    describe('on error', () => {
+      it('dispatches the request, updates payload and sets error message', () => {
+        const data = { message: 'Internal Server Error' };
+        mock.onPut(approvalSettingsPath).replyOnce(httpStatus.INTERNAL_SERVER_ERROR, data);
+
+        return testAction(
+          actions.updateSettings,
+          approvalSettingsPath,
+          state,
+          [
+            { type: types.REQUEST_UPDATE_SETTINGS },
+            { type: types.UPDATE_SETTINGS_ERROR, payload: data.message },
+          ],
+          [],
+        ).then(() => {
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error updating merge request approval settings.',
+            captureError: true,
+            error: 'Internal Server Error',
+          });
+        });
+      });
     });
   });
 });

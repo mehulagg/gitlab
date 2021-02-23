@@ -72,5 +72,13 @@ module EE
 
       ActionDispatch::Http::URL.path_for(path: path, params: params)
     end
+
+    def usage_quotas_path(namespace, *args)
+      if namespace.group?
+        group_usage_quotas_path(namespace, *args)
+      else
+        profile_usage_quotas_path(*args)
+      end
+    end
   end
 end

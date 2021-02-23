@@ -40,6 +40,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :subscriptions, only: [:create, :destroy]
 
         resource :threat_monitoring, only: [:show], controller: :threat_monitoring do
+          get '/alerts/:id', action: 'alert_details'
           resources :policies, only: [:new, :edit], controller: :threat_monitoring
         end
 
@@ -62,6 +63,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
           resources :dashboard, only: [:index], controller: :dashboard
           resources :vulnerability_report, only: [:index], controller: :vulnerability_report
+
+          resource :policy, only: [:show]
 
           resource :configuration, only: [], controller: :configuration do
             post :auto_fix, on: :collection

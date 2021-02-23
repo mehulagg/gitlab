@@ -13,7 +13,7 @@ full list of reference architectures, see
 
 > - **Supported users (approximate):** 50,000
 > - **High Availability:** Yes
-> - **Test requests per second (RPS) rates:** API: 1000 RPS, Web: 100 RPS, Git: 100 RPS
+> - **Test requests per second (RPS) rates:** API: 1000 RPS, Web: 100 RPS, Git (Pull): 100 RPS, Git (Push): 20 RPS
 
 | Service                                 | Nodes       | Configuration           | GCP             | AWS          | Azure    |
 |-----------------------------------------|-------------|-------------------------|-----------------|--------------|----------|
@@ -1512,8 +1512,9 @@ To configure Gitaly with TLS:
 
 ## Configure Sidekiq
 
-Sidekiq requires connections to the Redis, PostgreSQL and Gitaly instances.
-The following IPs will be used as an example:
+Sidekiq requires connection to the [Redis](#configure-redis),
+[PostgreSQL](#configure-postgresql) and [Gitaly](#configure-gitaly) instances.
+[Object storage](#configure-the-object-storage) is also required to be configured.
 
 - `10.6.0.101`: Sidekiq 1
 - `10.6.0.102`: Sidekiq 2
@@ -1624,6 +1625,25 @@ To configure the Sidekiq nodes, on each one:
 
    # Rails Status for prometheus
    gitlab_rails['monitoring_whitelist'] = ['10.6.0.121/32', '127.0.0.0/8']
+
+   #############################
+   ###     Object storage    ###
+   #############################
+
+   # This is an example for configuring Object Storage on GCP
+   # Replace this config with your chosen Object Storage provider as desired
+   gitlab_rails['object_store']['connection'] = {
+     'provider' => 'Google',
+     'google_project' => '<gcp-project-name>',
+     'google_json_key_location' => '<path-to-gcp-service-account-key>'
+   }
+   gitlab_rails['object_store']['objects']['artifacts']['bucket'] = "<gcp-artifacts-bucket-name>"
+   gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = "<gcp-external-diffs-bucket-name>"
+   gitlab_rails['object_store']['objects']['lfs']['bucket'] = "<gcp-lfs-bucket-name>"
+   gitlab_rails['object_store']['objects']['uploads']['bucket'] = "<gcp-uploads-bucket-name>"
+   gitlab_rails['object_store']['objects']['packages']['bucket'] = "<gcp-packages-bucket-name>"
+   gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = "<gcp-dependency-proxy-bucket-name>"
+   gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = "<gcp-terraform-state-bucket-name>"
    ```
 
 1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
@@ -1644,6 +1664,7 @@ You can also run [multiple Sidekiq processes](../operations/extra_sidekiq_proces
 ## Configure GitLab Rails
 
 This section describes how to configure the GitLab application (Rails) component.
+[Object storage](#configure-the-object-storage) is also required to be configured.
 
 The following IPs will be used as an example:
 
@@ -1736,6 +1757,25 @@ On each node perform the following:
    # scrape the NGINX metrics
    gitlab_rails['monitoring_whitelist'] = ['10.6.0.121/32', '127.0.0.0/8']
    nginx['status']['options']['allow'] = ['10.6.0.121/32', '127.0.0.0/8']
+
+   #############################
+   ###     Object storage    ###
+   #############################
+
+   # This is an example for configuring Object Storage on GCP
+   # Replace this config with your chosen Object Storage provider as desired
+   gitlab_rails['object_store']['connection'] = {
+     'provider' => 'Google',
+     'google_project' => '<gcp-project-name>',
+     'google_json_key_location' => '<path-to-gcp-service-account-key>'
+   }
+   gitlab_rails['object_store']['objects']['artifacts']['bucket'] = "<gcp-artifacts-bucket-name>"
+   gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = "<gcp-external-diffs-bucket-name>"
+   gitlab_rails['object_store']['objects']['lfs']['bucket'] = "<gcp-lfs-bucket-name>"
+   gitlab_rails['object_store']['objects']['uploads']['bucket'] = "<gcp-uploads-bucket-name>"
+   gitlab_rails['object_store']['objects']['packages']['bucket'] = "<gcp-packages-bucket-name>"
+   gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = "<gcp-dependency-proxy-bucket-name>"
+   gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = "<gcp-terraform-state-bucket-name>"
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
@@ -1962,20 +2002,9 @@ on what features you intend to use:
 | [Terraform state files](../terraform_state.md#using-object-storage) | Yes |
 
 Using separate buckets for each data type is the recommended approach for GitLab.
-
-A limitation of our configuration is that each use of object storage is separately configured.
-[We have an issue for improving this](https://gitlab.com/gitlab-org/gitlab/-/issues/23345)
-and easily using one bucket with separate folders is one improvement that this might bring.
-
-There is at least one specific issue with using the same bucket:
-when GitLab is deployed with the Helm chart restore from backup
-[will not properly function](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer)
-unless separate buckets are used.
-
-One risk of using a single bucket would be if your organization decided to
-migrate GitLab to the Helm deployment in the future. GitLab would run, but the situation with
-backups might not be realized until the organization had a critical requirement for the backups to
-work.
+This ensures there are no collisions across the various types of data GitLab stores.
+There are plans to [enable the use of a single bucket](https://gitlab.com/gitlab-org/gitlab/-/issues/292958)
+in the future.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

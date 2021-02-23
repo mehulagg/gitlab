@@ -2,19 +2,21 @@ import { inactiveId } from '~/boards/constants';
 
 export default () => ({
   boardType: null,
+  fullPath: null,
   disabled: false,
   isShowingLabels: true,
   activeId: inactiveId,
   sidebarType: '',
   boardLists: {},
   listsFlags: {},
-  issuesByListId: {},
+  boardItemsByListId: {},
   isSettingAssignees: false,
   pageInfoByListId: {},
-  issues: {},
+  boardItems: {},
   filterParams: {},
   boardConfig: {},
   labels: [],
+  highlightedLists: [],
   selectedBoardItems: [],
   groupProjects: [],
   groupProjectsFlags: {

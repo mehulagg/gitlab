@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Projects::Security::ApiFuzzingConfigurationHelper do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
+  let(:security_configuration_path) { project_security_configuration_path(project) }
   let(:full_path) { project.full_path }
   let(:api_fuzzing_documentation_path) { help_page_path('user/application_security/api_fuzzing/index') }
   let(:api_fuzzing_authentication_documentation_path) { help_page_path('user/application_security/api_fuzzing/index', anchor: 'authentication') }
@@ -25,6 +26,7 @@ RSpec.describe Projects::Security::ApiFuzzingConfigurationHelper do
 
       it {
         is_expected.to eq(
+          security_configuration_path: security_configuration_path,
           full_path: full_path,
           api_fuzzing_documentation_path: api_fuzzing_documentation_path,
           api_fuzzing_authentication_documentation_path: api_fuzzing_authentication_documentation_path,
@@ -42,6 +44,7 @@ RSpec.describe Projects::Security::ApiFuzzingConfigurationHelper do
 
       it {
         is_expected.to eq(
+          security_configuration_path: security_configuration_path,
           full_path: full_path,
           api_fuzzing_documentation_path: api_fuzzing_documentation_path,
           api_fuzzing_authentication_documentation_path: api_fuzzing_authentication_documentation_path,

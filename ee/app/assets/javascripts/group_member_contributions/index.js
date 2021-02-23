@@ -2,9 +2,8 @@ import Vue from 'vue';
 
 import Translate from '~/vue_shared/translate';
 
-import GroupMemberStore from './store/group_member_store';
-
 import GroupMemberContributionsApp from './components/app.vue';
+import GroupMemberStore from './store/group_member_store';
 
 Vue.use(Translate);
 

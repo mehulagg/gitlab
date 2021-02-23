@@ -24,6 +24,7 @@ const Api = {
   projectPackagesPath: '/api/:version/projects/:id/packages',
   projectPackagePath: '/api/:version/projects/:id/packages/:package_id',
   groupProjectsPath: '/api/:version/groups/:id/projects.json',
+  groupSharePath: '/api/:version/groups/:id/share',
   projectsPath: '/api/:version/projects.json',
   projectPath: '/api/:version/projects/:id',
   forkedProjectsPath: '/api/:version/projects/:id/forks',
@@ -39,6 +40,7 @@ const Api = {
   projectRunnersPath: '/api/:version/projects/:id/runners',
   projectProtectedBranchesPath: '/api/:version/projects/:id/protected_branches',
   projectSearchPath: '/api/:version/projects/:id/search',
+  projectSharePath: '/api/:version/projects/:id/share',
   projectMilestonesPath: '/api/:version/projects/:id/milestones',
   projectIssuePath: '/api/:version/projects/:id/issues/:issue_iid',
   mergeRequestsPath: '/api/:version/merge_requests',
@@ -81,7 +83,6 @@ const Api = {
   usageDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
   featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
   featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
-  billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
   containerRegistryDetailsPath: '/api/:version/registry/repositories/:id/',
   projectNotificationSettingsPath: '/api/:version/projects/:id/notification_settings',
   groupNotificationSettingsPath: '/api/:version/groups/:id/notification_settings',
@@ -366,6 +367,16 @@ const Api = {
     });
   },
 
+  projectShareWithGroup(id, options = {}) {
+    const url = Api.buildUrl(Api.projectSharePath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, {
+      expires_at: options.expires_at,
+      group_access: options.group_access,
+      group_id: options.group_id,
+    });
+  },
+
   projectMilestones(id, params = {}) {
     const url = Api.buildUrl(Api.projectMilestonesPath).replace(':id', encodeURIComponent(id));
 
@@ -425,6 +436,16 @@ const Api = {
           callback();
         }
       });
+  },
+
+  groupShareWithGroup(id, options = {}) {
+    const url = Api.buildUrl(Api.groupSharePath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, {
+      expires_at: options.expires_at,
+      group_access: options.group_access,
+      group_id: options.group_id,
+    });
   },
 
   commit(id, sha, params = {}) {
@@ -881,33 +902,6 @@ const Api = {
       .replace(':list_iid', listIid);
 
     return axios.delete(url);
-  },
-
-  fetchBillableGroupMembersList(namespaceId, options = {}, callback = () => {}) {
-    const url = Api.buildUrl(this.billableGroupMembersPath).replace(':id', namespaceId);
-    const defaults = {
-      per_page: DEFAULT_PER_PAGE,
-      page: 1,
-    };
-
-    const passedOptions = options;
-
-    // calling search API with empty string will not return results
-    if (!passedOptions.search) {
-      passedOptions.search = undefined;
-    }
-
-    return axios
-      .get(url, {
-        params: {
-          ...defaults,
-          ...passedOptions,
-        },
-      })
-      .then(({ data, headers }) => {
-        callback(data);
-        return { data, headers };
-      });
   },
 
   async updateNotificationSettings(projectId, groupId, data = {}) {

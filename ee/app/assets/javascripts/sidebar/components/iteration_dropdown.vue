@@ -8,8 +8,8 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import { __ } from '~/locale';
-import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import { iterationSelectTextMap, iterationDisplayState } from '../constants';
+import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 
 export default {
   directives: {

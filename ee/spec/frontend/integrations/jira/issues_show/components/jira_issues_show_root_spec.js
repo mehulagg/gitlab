@@ -1,11 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
-import waitForPromises from 'helpers/wait_for_promises';
 import JiraIssuesShow from 'ee/integrations/jira/issues_show/components/jira_issues_show_root.vue';
 import { issueStates } from 'ee/integrations/jira/issues_show/constants';
-import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
+import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
+import axios from '~/lib/utils/axios_utils';
 import { mockJiraIssue } from '../mock_data';
 
 const mockJiraIssuesShowPath = 'jira_issues_show_path';

@@ -1,5 +1,5 @@
-import { __, sprintf } from '~/locale';
 import { getTimeago } from '~/lib/utils/datetime_utility';
+import { __, sprintf } from '~/locale';
 
 import { FilterState } from '../constants';
 

@@ -10,6 +10,7 @@
 # - guidelines for use found in
 #   https://docs.gitlab.com/ee/development/contributing/style_guides.html#resolving-rubocop-exceptions.
 
+# WIP See https://gitlab.com/gitlab-org/gitlab/-/issues/267606
 FactoryBot/InlineAssociation:
   Exclude:
     - 'ee/spec/factories/analytics/cycle_analytics/group_stages.rb'
@@ -28,39 +29,7 @@ FactoryBot/InlineAssociation:
     - 'spec/factories/uploads.rb'
     - 'spec/factories/wiki_pages.rb'
 
-InternalAffairs/DeprecateCopHelper: # issue to resolve: https://gitlab.com/gitlab-org/gitlab/-/issues/276734
-  Exclude:
-    - 'spec/rubocop/cop/migration/safer_boolean_column_spec.rb'
-    - 'spec/rubocop/cop/migration/remove_index_spec.rb'
-    - 'spec/rubocop/cop/migration/add_index_spec.rb'
-    - 'spec/rubocop/cop/migration/drop_table_spec.rb'
-    - 'spec/rubocop/cop/migration/hash_index_spec.rb'
-    - 'spec/rubocop/cop/migration/datetime_spec.rb'
-    - 'spec/rubocop/cop/migration/add_column_with_default_spec.rb'
-    - 'spec/rubocop/cop/migration/prevent_strings_spec.rb'
-    - 'spec/rubocop/cop/migration/add_timestamps_spec.rb'
-    - 'spec/rubocop/cop/migration/add_concurrent_index_spec.rb'
-    - 'spec/rubocop/cop/migration/update_column_in_batches_spec.rb'
-    - 'spec/rubocop/cop/migration/complex_indexes_require_name_spec.rb'
-    - 'spec/rubocop/cop/migration/refer_to_index_by_name_spec.rb'
-    - 'spec/rubocop/cop/migration/schedule_async_spec.rb'
-    - 'spec/rubocop/cop/migration/timestamps_spec.rb'
-    - 'spec/rubocop/cop/migration/remove_concurrent_index_spec.rb'
-    - 'spec/rubocop/cop/migration/add_columns_to_wide_tables_spec.rb'
-    - 'spec/rubocop/cop/migration/with_lock_retries_disallowed_method_spec.rb'
-    - 'spec/rubocop/cop/migration/add_reference_spec.rb'
-    - 'spec/rubocop/cop/migration/remove_column_spec.rb'
-    - 'spec/rubocop/cop/migration/create_table_with_foreign_keys_spec.rb'
-    - 'spec/rubocop/cop/migration/add_concurrent_foreign_key_spec.rb'
-    - 'spec/rubocop/cop/migration/with_lock_retries_with_change_spec.rb'
-    - 'spec/rubocop/cop/migration/add_limit_to_text_columns_spec.rb'
-    - 'spec/rubocop/cop/avoid_return_from_blocks_spec.rb'
-    - 'spec/rubocop/cop/avoid_route_redirect_leading_slash_spec.rb'
-    - 'spec/rubocop/cop/put_group_routes_under_scope_spec.rb'
-    - 'spec/rubocop/cop/sidekiq_options_queue_spec.rb'
-    - 'spec/rubocop/cop/ignored_columns_spec.rb'
-    - 'spec/rubocop/cop/prefer_class_methods_over_module_spec.rb'
-
+# WIP: See https://gitlab.com/gitlab-org/gitlab/-/issues/220040
 Rails/SaveBang:
   Exclude:
     - 'ee/spec/controllers/projects/merge_requests_controller_spec.rb'
@@ -691,47 +660,6 @@ RSpec/TimecopTravel:
     - 'spec/workers/concerns/reenqueuer_spec.rb'
     - 'spec/lib/gitlab/analytics/cycle_analytics/median_spec.rb'
 
-Graphql/Descriptions:
-  Exclude:
-    - 'ee/app/graphql/types/epic_tree/epic_tree_node_input_type.rb'
-    - 'ee/app/graphql/types/external_issue_type.rb'
-    - 'ee/app/graphql/types/geo/geo_node_type.rb'
-    - 'ee/app/graphql/types/geo/merge_request_diff_registry_type.rb'
-    - 'ee/app/graphql/types/geo/package_file_registry_type.rb'
-    - 'ee/app/graphql/types/geo/snippet_repository_registry_type.rb'
-    - 'ee/app/graphql/types/geo/terraform_state_version_registry_type.rb'
-    - 'ee/app/graphql/types/group_stats_type.rb'
-    - 'ee/app/graphql/types/incident_management/oncall_schedule_type.rb'
-    - 'ee/app/graphql/types/instance_security_dashboard_type.rb'
-    - 'ee/app/graphql/types/iteration_type.rb'
-    - 'ee/app/graphql/types/metric_image_type.rb'
-    - 'ee/app/graphql/types/requirements_management/requirement_states_count_type.rb'
-    - 'ee/app/graphql/types/requirements_management/requirement_type.rb'
-    - 'ee/app/graphql/types/requirements_management/test_report_type.rb'
-    - 'ee/app/graphql/types/scanned_resource_type.rb'
-    - 'ee/app/graphql/types/security_report_summary_section_type.rb'
-    - 'ee/app/graphql/types/time_report_stats_type.rb'
-    - 'ee/app/graphql/types/timebox_metrics_type.rb'
-    - 'ee/app/graphql/types/timebox_report_interface.rb'
-    - 'ee/app/graphql/types/timebox_report_type.rb'
-    - 'ee/app/graphql/types/timelog_type.rb'
-    - 'ee/app/graphql/types/vulnerabilities_count_by_day_and_severity_type.rb'
-    - 'ee/app/graphql/types/vulnerabilities_count_by_day_type.rb'
-    - 'ee/app/graphql/types/vulnerability/external_issue_link_type.rb'
-    - 'ee/app/graphql/types/vulnerability/issue_link_type.rb'
-    - 'ee/app/graphql/types/vulnerability_identifier_type.rb'
-    - 'ee/app/graphql/types/vulnerability_location/container_scanning_type.rb'
-    - 'ee/app/graphql/types/vulnerability_location/coverage_fuzzing_type.rb'
-    - 'ee/app/graphql/types/vulnerability_location/dast_type.rb'
-    - 'ee/app/graphql/types/vulnerability_location/dependency_scanning_type.rb'
-    - 'ee/app/graphql/types/vulnerability_location/sast_type.rb'
-    - 'ee/app/graphql/types/vulnerability_location/secret_detection_type.rb'
-    - 'ee/app/graphql/types/vulnerability_scanner_type.rb'
-    - 'ee/app/graphql/types/vulnerability_type.rb'
-    - 'ee/app/graphql/types/vulnerable_dependency_type.rb'
-    - 'ee/app/graphql/types/vulnerable_package_type.rb'
-    - 'ee/app/graphql/types/vulnerable_projects_by_grade_type.rb'
-
 # WIP: https://gitlab.com/gitlab-org/gitlab/-/issues/34997
 RSpec/AnyInstanceOf:
   Exclude:
@@ -1248,22 +1176,9 @@ RSpec/AnyInstanceOf:
     - 'spec/workers/wait_for_cluster_creation_worker_spec.rb'
     - 'ee/spec/workers/security/auto_fix_worker_spec.rb'
 
+# WIP: https://gitlab.com/gitlab-org/gitlab/-/issues/321982
 Gitlab/NamespacedClass:
   Exclude:
-    - 'config/**/*.rb'
-    - 'db/**/*.rb'
-    - 'ee/bin/**/*'
-    - 'ee/db/**/*.rb'
-    - 'ee/elastic/**/*.rb'
-    - 'scripts/**/*'
-    - 'spec/migrations/**/*.rb'
-    # The list above represents the permanent exclusions for this rule
-    # due to the fact these files are related to infrastructure code.
-    # This list should eventually be moved to .rubocop.yml after all TODOs
-    # are addressed.
-    #
-    # The list below represents the classes that require
-    # a namespace as they make the domain related code.
     - 'app/channels/issues_channel.rb'
     - 'app/controllers/abuse_reports_controller.rb'
     - 'app/controllers/acme_challenges_controller.rb'
@@ -2062,7 +1977,6 @@ Gitlab/NamespacedClass:
     - 'app/validators/untrusted_regexp_validator.rb'
     - 'app/validators/nested_attributes_duplicates_validator.rb'
     - 'app/validators/x509_certificate_credentials_validator.rb'
-    - 'app/validators/zoom_url_validator.rb'
     - 'app/workers/admin_email_worker.rb'
     - 'app/workers/approve_blocked_pending_approval_users_worker.rb'
     - 'app/workers/archive_trace_worker.rb'
@@ -2514,78 +2428,3 @@ Gitlab/NamespacedClass:
     - 'spec/support/sidekiq_middleware.rb'
     - 'spec/tasks/gitlab/task_helpers_spec.rb'
     - 'spec/uploaders/object_storage_spec.rb'
-
-# WIP: https://gitlab.com/gitlab-org/gitlab/-/issues/299105
-Style/FrozenStringLiteralComment:
-  Exclude:
-    - 'Gemfile'
-    - 'Rakefile'
-    - 'app/views/dashboard/issues.atom.builder'
-    - 'app/views/dashboard/projects/index.atom.builder'
-    - 'app/views/events/_event.atom.builder'
-    - 'app/views/groups/issues.atom.builder'
-    - 'app/views/groups/show.atom.builder'
-    - 'app/views/issues/_issue.atom.builder'
-    - 'app/views/issues/_issues_calendar.ics.ruby'
-    - 'app/views/layouts/xml.atom.builder'
-    - 'app/views/projects/commits/_commit.atom.builder'
-    - 'app/views/projects/commits/show.atom.builder'
-    - 'app/views/projects/issues/index.atom.builder'
-    - 'app/views/projects/show.atom.builder'
-    - 'app/views/projects/tags/_tag.atom.builder'
-    - 'app/views/projects/tags/index.atom.builder'
-    - 'app/views/users/show.atom.builder'
-    - 'bin/secpick'
-    - 'danger/changes_size/Dangerfile'
-    - 'danger/metadata/Dangerfile'
-    - 'qa/Gemfile'
-    - 'qa/Rakefile'
-    - 'qa/bin/qa'
-    - 'qa/bin/rubymine'
-    - 'qa/qa/fixtures/auto_devops_rack/Gemfile'
-    - 'qa/qa/fixtures/auto_devops_rack/Rakefile'
-    - 'qa/qa/fixtures/auto_devops_rack/config.ru'
-    - 'qa/qa/page/page_concern.rb'
-    - 'rubocop/cop/avoid_keyword_arguments_in_sidekiq_workers.rb'
-    - 'rubocop/cop/gitlab/finder_with_find_by.rb'
-    - 'rubocop/cop/gitlab/keys-first-and-values-first.rb'
-    - 'rubocop/cop/gitlab/module_with_instance_variables.rb'
-    - 'rubocop/cop/gitlab/predicate_memoization.rb'
-    - 'rubocop/cop/migration/add_concurrent_foreign_key.rb'
-    - 'rubocop/cop/migration/add_concurrent_index.rb'
-    - 'rubocop/cop/migration/add_index.rb'
-    - 'rubocop/cop/migration/add_timestamps.rb'
-    - 'rubocop/cop/migration/datetime.rb'
-    - 'rubocop/cop/migration/hash_index.rb'
-    - 'rubocop/cop/migration/remove_column.rb'
-    - 'rubocop/cop/migration/remove_concurrent_index.rb'
-    - 'rubocop/cop/migration/remove_index.rb'
-    - 'rubocop/cop/migration/safer_boolean_column.rb'
-    - 'rubocop/cop/migration/timestamps.rb'
-    - 'rubocop/cop/migration/update_column_in_batches.rb'
-    - 'rubocop/cop/project_path_helper.rb'
-    - 'rubocop/migration_helpers.rb'
-    - 'rubocop/qa_helpers.rb'
-    - 'scripts/flaky_examples/detect-new-flaky-examples'
-    - 'scripts/flaky_examples/prune-old-flaky-examples'
-    - 'scripts/gather-test-memory-data'
-    - 'scripts/generate-gems-memory-metrics-static'
-    - 'scripts/generate-gems-size-metrics-static'
-    - 'scripts/generate-memory-metrics-on-boot'
-    - 'scripts/generate-test-mapping'
-    - 'scripts/gitaly-test-build'
-    - 'scripts/gitaly-test-spawn'
-    - 'scripts/gitaly_test.rb'
-    - 'scripts/insert-rspec-profiling-data'
-    - 'scripts/lint-rugged'
-    - 'scripts/merge-html-reports'
-    - 'scripts/merge-reports'
-    - 'scripts/merge-simplecov'
-    - 'scripts/no-ee-check'
-    - 'scripts/pack-test-mapping'
-    - 'scripts/static-analysis'
-    - 'scripts/sync-reports'
-    - 'scripts/unpack-test-mapping'
-    - 'scripts/update-feature-categories'
-    - 'scripts/used-feature-flags'
-    - 'scripts/verify-tff-mapping'

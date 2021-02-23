@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
-import PipelineGraphWrapper from './components/graph/graph_component_wrapper.vue';
 import { GRAPHQL } from './components/graph/constants';
+import PipelineGraphWrapper from './components/graph/graph_component_wrapper.vue';
 import { reportToSentry } from './components/graph/utils';
 
 Vue.use(VueApollo);
@@ -16,7 +16,7 @@ const apolloProvider = new VueApollo({
   ),
 });
 
-const createPipelinesDetailApp = (selector, pipelineProjectPath, pipelineIid) => {
+const createPipelinesDetailApp = (selector, pipelineProjectPath, pipelineIid, metricsPath) => {
   // eslint-disable-next-line no-new
   new Vue({
     el: selector,
@@ -25,6 +25,7 @@ const createPipelinesDetailApp = (selector, pipelineProjectPath, pipelineIid) =>
     },
     apolloProvider,
     provide: {
+      metricsPath,
       pipelineProjectPath,
       pipelineIid,
       dataMethod: GRAPHQL,

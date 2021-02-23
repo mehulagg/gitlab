@@ -30,11 +30,10 @@ read-only. Please try again later.` message if they try to push new commits.
 
 This API requires you to [authenticate yourself](README.md#authentication) as an administrator.
 
-Snippet repositories can be moved using the [Snippet repository storage moves API](snippet_repository_storage_moves.md).
+For other repository types see:
 
-## Limitations
-
-- Group-level wikis [can't be moved with the API](https://gitlab.com/gitlab-org/gitlab/-/issues/219003).
+- [Snippet repository storage moves API](snippet_repository_storage_moves.md).
+- [Group repository storage moves API](group_repository_storage_moves.md).
 
 ## Retrieve all project repository storage moves
 
@@ -212,7 +211,7 @@ Parameters:
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `project_id` | integer | yes | ID of the project |
-| `destination_storage_name` | string | no | Name of the destination storage shard. In [GitLab 13.5 and later](https://gitlab.com/gitlab-org/gitaly/-/issues/3209), the storage is selected automatically if not provided |
+| `destination_storage_name` | string | no | Name of the destination storage shard. In [GitLab 13.5 and later](https://gitlab.com/gitlab-org/gitaly/-/issues/3209), the storage is selected [automatically based on storage weights](../administration/repository_storage_paths.md#configure-where-new-repositories-are-stored) if not provided |
 
 Example request:
 
@@ -256,7 +255,7 @@ Parameters:
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `source_storage_name` | string | yes | Name of the source storage shard. |
-| `destination_storage_name` | string | no | Name of the destination storage shard. The storage is selected automatically if not provided. |
+| `destination_storage_name` | string | no | Name of the destination storage shard. The storage is selected [automatically based on storage weights](../administration/repository_storage_paths.md#configure-where-new-repositories-are-stored) if not provided. |
 
 Example request:
 

@@ -1,13 +1,13 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlEmptyState, GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
+import AddScheduleModal from 'ee/oncall_schedules/components/add_edit_schedule_modal.vue';
+import OnCallSchedule from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import OnCallScheduleWrapper, {
   i18n,
 } from 'ee/oncall_schedules/components/oncall_schedules_wrapper.vue';
-import OnCallSchedule from 'ee/oncall_schedules/components/oncall_schedule.vue';
-import AddScheduleModal from 'ee/oncall_schedules/components/add_edit_schedule_modal.vue';
+import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
-import getOncallSchedulesWithRotations from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import { preExistingSchedule, newlyCreatedSchedule } from './mocks/apollo_mock';
 
 const localVue = createLocalVue();
@@ -44,7 +44,7 @@ describe('On-call schedule wrapper', () => {
 
   function mountComponentWithApollo() {
     const fakeApollo = createMockApollo([
-      [getOncallSchedulesWithRotations, getOncallSchedulesQuerySpy],
+      [getOncallSchedulesWithRotationsQuery, getOncallSchedulesQuerySpy],
     ]);
     localVue.use(VueApollo);
 
@@ -66,6 +66,7 @@ describe('On-call schedule wrapper', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
+      wrapper = null;
     }
   });
 

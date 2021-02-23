@@ -15,9 +15,13 @@ export default function initClonePanel() {
     }
 
     $('a', $cloneOptions).on('click', (e) => {
-      e.preventDefault();
       const $this = $(e.currentTarget);
       const url = $this.attr('href');
+      if (url && (url.startsWith('vscode://') || url.startsWith('xcode://'))) {
+        // Clone with "..." should open like a normal link
+        return;
+      }
+      e.preventDefault();
       const cloneType = $this.data('cloneType');
 
       $('.is-active', $cloneOptions).removeClass('is-active');

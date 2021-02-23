@@ -1,5 +1,4 @@
 <script>
-import { mapState } from 'vuex';
 import {
   GlAlert,
   GlButton,
@@ -11,6 +10,7 @@ import {
   GlIcon,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { mapState } from 'vuex';
 import { s__ } from '~/locale';
 import { defaultJiraIssueTypeId } from '../constants';
 
@@ -27,7 +27,7 @@ export const i18n = {
     defaultText: s__('JiraService|Select issue type'),
   },
   fetchIssueTypesButtonLabel: s__('JiraService|Fetch issue types for this Jira project'),
-  fetchIssueTypesErrorMessage: s__('JiraService|An error occured while fetching issue list'),
+  fetchIssueTypesErrorMessage: s__('JiraService|An error occurred while fetching issue list'),
   projectKeyWarnings: {
     missing: s__('JiraService|Project key is required to generate issue types'),
     changed: s__('JiraService|Project key changed, refresh list'),

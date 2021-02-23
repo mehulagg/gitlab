@@ -1,6 +1,6 @@
-import Cookies from 'js-cookie';
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
+import Cookies from 'js-cookie';
 import Vuex from 'vuex';
 import EpicsListEmpty from 'ee/roadmap/components/epics_list_empty.vue';
 import RoadmapApp from 'ee/roadmap/components/roadmap_app.vue';

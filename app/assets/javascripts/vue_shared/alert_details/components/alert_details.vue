@@ -11,25 +11,25 @@ import {
   GlButton,
   GlSafeHtmlDirective,
 } from '@gitlab/ui';
-import * as Sentry from '~/sentry/wrapper';
-import { s__ } from '~/locale';
-import { fetchPolicies } from '~/lib/graphql';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import * as Sentry from '@sentry/browser';
 import highlightCurrentUser from '~/behaviors/markdown/highlight_current_user';
-import initUserPopovers from '~/user_popovers';
-import { visitUrl, joinPaths } from '~/lib/utils/url_utility';
-import Tracking from '~/tracking';
+import { fetchPolicies } from '~/lib/graphql';
 import { toggleContainerClasses } from '~/lib/utils/dom_utils';
+import { visitUrl, joinPaths } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
+import Tracking from '~/tracking';
+import initUserPopovers from '~/user_popovers';
 import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
-import alertQuery from '../graphql/queries/alert_details.query.graphql';
-import sidebarStatusQuery from '../graphql/queries/alert_sidebar_status.query.graphql';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import { SEVERITY_LEVELS } from '../constants';
 import createIssueMutation from '../graphql/mutations/alert_issue_create.mutation.graphql';
 import toggleSidebarStatusMutation from '../graphql/mutations/alert_sidebar_status.mutation.graphql';
-import SystemNote from './system_notes/system_note.vue';
-import AlertSidebar from './alert_sidebar.vue';
+import alertQuery from '../graphql/queries/alert_details.query.graphql';
+import sidebarStatusQuery from '../graphql/queries/alert_sidebar_status.query.graphql';
 import AlertMetrics from './alert_metrics.vue';
+import AlertSidebar from './alert_sidebar.vue';
 import AlertSummaryRow from './alert_summary_row.vue';
+import SystemNote from './system_notes/system_note.vue';
 
 const containerEl = document.querySelector('.page-with-contextual-sidebar');
 
@@ -82,6 +82,9 @@ export default {
     },
     alertId: {
       default: '',
+    },
+    isThreatMonitoringPage: {
+      default: false,
     },
     projectId: {
       default: '',
@@ -364,7 +367,11 @@ export default {
           </alert-summary-row>
           <alert-details-table :alert="alert" :loading="loading" />
         </gl-tab>
-        <gl-tab :data-testid="$options.tabsConfig[1].id" :title="$options.tabsConfig[1].title">
+        <gl-tab
+          v-if="!isThreatMonitoringPage"
+          :data-testid="$options.tabsConfig[1].id"
+          :title="$options.tabsConfig[1].title"
+        >
           <alert-metrics :dashboard-url="alert.metricsDashboardUrl" />
         </gl-tab>
         <gl-tab :data-testid="$options.tabsConfig[2].id" :title="$options.tabsConfig[2].title">

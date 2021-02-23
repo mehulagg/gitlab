@@ -4,15 +4,11 @@ import {
   GlCard,
   GlButtonGroup,
   GlButton,
-  GlDropdown,
-  GlDropdownItem,
   GlModalDirective,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { capitalize } from 'lodash';
-import { s__, __ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
-import { fetchPolicies } from '~/lib/graphql';
 import {
   formatDate,
   nWeeksBefore,
@@ -20,13 +16,14 @@ import {
   nDaysBefore,
   nDaysAfter,
 } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
 import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
 import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
-import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
-import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
+import DeleteScheduleModal from './delete_schedule_modal.vue';
 import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
+import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
 
 export const i18n = {
@@ -35,6 +32,10 @@ export const i18n = {
   deleteScheduleLabel: s__('OnCallSchedules|Delete schedule'),
   rotationTitle: s__('OnCallSchedules|Rotations'),
   addARotation: s__('OnCallSchedules|Add a rotation'),
+  presetTypeLabels: {
+    DAYS: s__('OnCallSchedules|1 day'),
+    WEEKS: s__('OnCallSchedules|2 weeks'),
+  },
 };
 export const editScheduleModalId = 'editScheduleModal';
 export const deleteScheduleModalId = 'deleteScheduleModal';
@@ -50,8 +51,6 @@ export default {
     GlButton,
     GlButtonGroup,
     GlCard,
-    GlDropdown,
-    GlDropdownItem,
     GlSprintf,
     AddEditRotationModal,
     DeleteScheduleModal,
@@ -72,9 +71,9 @@ export default {
   },
   apollo: {
     rotations: {
-      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
       query: getShiftsForRotations,
       variables() {
+        this.timeframeStartDate.setHours(0, 0, 0, 0);
         const startsAt = this.timeframeStartDate;
         const endsAt = nWeeksAfter(startsAt, 2);
 
@@ -86,7 +85,7 @@ export default {
       },
       update(data) {
         const nodes = data.project?.incidentManagementOncallSchedules?.nodes ?? [];
-        const schedule = nodes.pop() || {};
+        const schedule = nodes.length ? nodes[nodes.length - 1] : null;
         return schedule?.rotations.nodes ?? [];
       },
       error(error) {
@@ -127,7 +126,7 @@ export default {
           return '';
       }
     },
-    isLoading() {
+    loading() {
       return this.$apollo.queries.rotations.loading;
     },
   },
@@ -163,6 +162,9 @@ export default {
           break;
       }
     },
+    fetchRotationShifts() {
+      this.$apollo.queries.rotations.refetch();
+    },
   },
 };
 </script>
@@ -194,41 +196,41 @@ export default {
           </gl-button-group>
         </div>
       </template>
-      <p
-        class="gl-text-gray-500 gl-mb-3 gl-display-flex gl-justify-content-space-between gl-align-items-center"
-        data-testid="scheduleBody"
-      >
+      <p class="gl-text-gray-500 gl-mb-3" data-testid="scheduleBody">
         <gl-sprintf :message="$options.i18n.scheduleForTz">
           <template #timezone>{{ schedule.timezone }}</template>
         </gl-sprintf>
         | {{ offset }}
-        <gl-dropdown right :text="formatPresetType(presetType)">
-          <gl-dropdown-item
+      </p>
+      <div class="gl-display-flex gl-justify-content-space-between gl-mb-3">
+        <div class="gl-display-flex gl-align-items-center">
+          <gl-button-group>
+            <gl-button
+              data-testid="previous-timeframe-btn"
+              icon="chevron-left"
+              :disabled="loading"
+              @click="updateToViewPreviousTimeframe"
+            />
+            <gl-button
+              data-testid="next-timeframe-btn"
+              icon="chevron-right"
+              :disabled="loading"
+              @click="updateToViewNextTimeframe"
+            />
+          </gl-button-group>
+          <div class="gl-ml-3">{{ scheduleRange }}</div>
+        </div>
+        <gl-button-group data-testid="shift-preset-change">
+          <gl-button
             v-for="type in $options.PRESET_TYPES"
             :key="type"
-            :is-check-item="true"
-            :is-checked="type === presetType"
+            :selected="type === presetType"
+            :title="formatPresetType(type)"
             @click="switchPresetType(type)"
-            >{{ formatPresetType(type) }}</gl-dropdown-item
           >
-        </gl-dropdown>
-      </p>
-      <div class="gl-w-full gl-display-flex gl-align-items-center gl-pb-3">
-        <gl-button-group>
-          <gl-button
-            data-testid="previous-timeframe-btn"
-            icon="chevron-left"
-            :disabled="isLoading"
-            @click="updateToViewPreviousTimeframe"
-          />
-          <gl-button
-            data-testid="next-timeframe-btn"
-            icon="chevron-right"
-            :disabled="isLoading"
-            @click="updateToViewNextTimeframe"
-          />
+            {{ $options.i18n.presetTypeLabels[type] }}
+          </gl-button>
         </gl-button-group>
-        <p class="gl-ml-3 gl-mb-0">{{ scheduleRange }}</p>
       </div>
 
       <gl-card header-class="gl-bg-transparent">
@@ -251,6 +253,7 @@ export default {
             :rotations="rotations"
             :timeframe="timeframe"
             :schedule-iid="schedule.iid"
+            :loading="loading"
           />
         </div>
       </gl-card>
@@ -261,7 +264,11 @@ export default {
       :modal-id="$options.editScheduleModalId"
       is-edit-mode
     />
-    <add-edit-rotation-modal :schedule="schedule" :modal-id="$options.addRotationModalId" />
+    <add-edit-rotation-modal
+      :schedule="schedule"
+      :modal-id="$options.addRotationModalId"
+      @fetchRotationShifts="fetchRotationShifts"
+    />
     <add-edit-rotation-modal
       :schedule="schedule"
       :modal-id="$options.editRotationModalId"

@@ -4,7 +4,7 @@ export * from '~/vue_shared/security_reports/components/constants';
 
 export const SEVERITY_TOOLTIP_TITLE_MAP = {
   unknown: s__(
-    `SecurityReports|The rating "unknown" indicates that the underlying scanner doesn’t contain or provide a severity rating.`,
+    `SecurityReports|Sometimes a scanner can't determine a finding's severity. Those findings may still be a potential source of risk though. Please review these manually.`,
   ),
 };
 

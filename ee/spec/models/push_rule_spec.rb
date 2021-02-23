@@ -11,7 +11,7 @@ RSpec.describe PushRule do
   let(:project) { Projects::CreateService.new(user, { name: 'test', namespace: user.namespace }).execute }
 
   describe "Associations" do
-    it { is_expected.to belong_to(:project) }
+    it { is_expected.to belong_to(:project).inverse_of(:push_rule) }
   end
 
   describe "Validation" do

@@ -1,11 +1,11 @@
 <script>
+import * as Sentry from '@sentry/browser';
 import { visitUrl } from '~/lib/utils/url_utility';
-import * as Sentry from '~/sentry/wrapper';
-import createComplianceFrameworkMutation from '../graphql/queries/create_compliance_framework.mutation.graphql';
 import { SAVE_ERROR } from '../constants';
+import createComplianceFrameworkMutation from '../graphql/queries/create_compliance_framework.mutation.graphql';
 import { initialiseFormData } from '../utils';
-import SharedForm from './shared_form.vue';
 import FormStatus from './form_status.vue';
+import SharedForm from './shared_form.vue';
 
 export default {
   components: {
@@ -20,6 +20,11 @@ export default {
     groupPath: {
       type: String,
       required: true,
+    },
+    pipelineConfigurationFullPathEnabled: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -44,7 +49,7 @@ export default {
       this.errorMessage = '';
 
       try {
-        const { name, description, color } = this.formData;
+        const { name, description, pipelineConfigurationFullPath, color } = this.formData;
         const { data } = await this.$apollo.mutate({
           mutation: createComplianceFrameworkMutation,
           variables: {
@@ -53,6 +58,7 @@ export default {
               params: {
                 name,
                 description,
+                pipelineConfigurationFullPath,
                 color,
               },
             },
@@ -80,8 +86,10 @@ export default {
   <form-status :loading="isLoading" :error="errorMessage">
     <shared-form
       :group-edit-path="groupEditPath"
+      :pipeline-configuration-full-path-enabled="pipelineConfigurationFullPathEnabled"
       :name.sync="formData.name"
       :description.sync="formData.description"
+      :pipeline-configuration-full-path.sync="formData.pipelineConfigurationFullPath"
       :color.sync="formData.color"
       @submit="onSubmit"
     />

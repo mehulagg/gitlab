@@ -1,9 +1,9 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAlert, GlFormInput, GlForm } from '@gitlab/ui';
-import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
+import { shallowMount } from '@vue/test-utils';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import createFlash from '~/flash';
+import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
 import { createStore } from '~/boards/stores';
+import createFlash from '~/flash';
 
 const TEST_TITLE = 'New issue title';
 const TEST_ISSUE_A = {
@@ -34,7 +34,7 @@ describe('~/boards/components/sidebar/board_sidebar_issue_title.vue', () => {
 
   const createWrapper = (issue = TEST_ISSUE_A) => {
     store = createStore();
-    store.state.issues = { [issue.id]: { ...issue } };
+    store.state.boardItems = { [issue.id]: { ...issue } };
     store.dispatch('setActiveId', { id: issue.id });
 
     wrapper = shallowMount(BoardSidebarIssueTitle, {
@@ -74,7 +74,7 @@ describe('~/boards/components/sidebar/board_sidebar_issue_title.vue', () => {
       createWrapper();
 
       jest.spyOn(wrapper.vm, 'setActiveIssueTitle').mockImplementation(() => {
-        store.state.issues[TEST_ISSUE_A.id].title = TEST_TITLE;
+        store.state.boardItems[TEST_ISSUE_A.id].title = TEST_TITLE;
       });
       findFormInput().vm.$emit('input', TEST_TITLE);
       findForm().vm.$emit('submit', { preventDefault: () => {} });
@@ -147,7 +147,7 @@ describe('~/boards/components/sidebar/board_sidebar_issue_title.vue', () => {
       createWrapper(TEST_ISSUE_B);
 
       jest.spyOn(wrapper.vm, 'setActiveIssueTitle').mockImplementation(() => {
-        store.state.issues[TEST_ISSUE_B.id].title = TEST_TITLE;
+        store.state.boardItems[TEST_ISSUE_B.id].title = TEST_TITLE;
       });
       findFormInput().vm.$emit('input', TEST_TITLE);
       findCancelButton().vm.$emit('click');

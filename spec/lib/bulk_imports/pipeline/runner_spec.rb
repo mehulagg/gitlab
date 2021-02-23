@@ -39,6 +39,8 @@ RSpec.describe BulkImports::Pipeline::Runner do
         extractor BulkImports::Extractor
         transformer BulkImports::Transformer
         loader BulkImports::Loader
+
+        def after_run(_); end
       end
 
       stub_const('BulkImports::MyPipeline', pipeline)
@@ -107,12 +109,19 @@ RSpec.describe BulkImports::Pipeline::Runner do
             .with(
               bulk_import_entity_id: entity.id,
               bulk_import_entity_type: 'group_entity',
+              pipeline_class: 'BulkImports::MyPipeline',
+              pipeline_step: :after_run
+            )
+          expect(logger).to receive(:info)
+            .with(
+              bulk_import_entity_id: entity.id,
+              bulk_import_entity_type: 'group_entity',
               message: 'Pipeline finished',
               pipeline_class: 'BulkImports::MyPipeline'
             )
         end
 
-        BulkImports::MyPipeline.new.run(context)
+        BulkImports::MyPipeline.new(context).run
       end
 
       context 'when exception is raised' do
@@ -126,7 +135,7 @@ RSpec.describe BulkImports::Pipeline::Runner do
         end
 
         it 'logs import failure' do
-          BulkImports::MyPipeline.new.run(context)
+          BulkImports::MyPipeline.new(context).run
 
           failure = entity.failures.first
 
@@ -143,7 +152,7 @@ RSpec.describe BulkImports::Pipeline::Runner do
           end
 
           it 'marks entity as failed' do
-            BulkImports::MyPipeline.new.run(context)
+            BulkImports::MyPipeline.new(context).run
 
             expect(entity.failed?).to eq(true)
           end
@@ -159,13 +168,13 @@ RSpec.describe BulkImports::Pipeline::Runner do
                 )
             end
 
-            BulkImports::MyPipeline.new.run(context)
+            BulkImports::MyPipeline.new(context).run
           end
         end
 
         context 'when pipeline is not marked to abort on failure' do
           it 'marks entity as failed' do
-            BulkImports::MyPipeline.new.run(context)
+            BulkImports::MyPipeline.new(context).run
 
             expect(entity.failed?).to eq(false)
           end
@@ -190,7 +199,7 @@ RSpec.describe BulkImports::Pipeline::Runner do
             )
         end
 
-        BulkImports::MyPipeline.new.run(context)
+        BulkImports::MyPipeline.new(context).run
       end
     end
   end

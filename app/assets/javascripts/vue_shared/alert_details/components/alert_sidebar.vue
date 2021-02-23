@@ -1,9 +1,9 @@
 <script>
 import sidebarStatusQuery from '../graphql/queries/alert_sidebar_status.query.graphql';
-import SidebarHeader from './sidebar/sidebar_header.vue';
-import SidebarTodo from './sidebar/sidebar_todo.vue';
-import SidebarStatus from './sidebar/sidebar_status.vue';
 import SidebarAssignees from './sidebar/sidebar_assignees.vue';
+import SidebarHeader from './sidebar/sidebar_header.vue';
+import SidebarStatus from './sidebar/sidebar_status.vue';
+import SidebarTodo from './sidebar/sidebar_todo.vue';
 
 export default {
   components: {
@@ -18,6 +18,10 @@ export default {
     },
     projectId: {
       default: '',
+    },
+    // TODO remove this limitation in https://gitlab.com/gitlab-org/gitlab/-/issues/296717
+    isThreatMonitoringPage: {
+      default: false,
     },
   },
   props: {
@@ -62,6 +66,7 @@ export default {
         @alert-error="$emit('alert-error', $event)"
       />
       <sidebar-status
+        v-if="!isThreatMonitoringPage"
         :project-path="projectPath"
         :alert="alert"
         @toggle-sidebar="$emit('toggle-sidebar')"

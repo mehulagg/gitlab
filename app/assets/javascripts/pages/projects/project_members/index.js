@@ -1,13 +1,14 @@
 import Vue from 'vue';
-import Members from '~/members';
-import memberExpirationDate from '~/member_expiration_date';
-import UsersSelect from '~/users_select';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import groupsSelect from '~/groups_select';
-import RemoveMemberModal from '~/vue_shared/components/remove_member_modal.vue';
+import initInviteGroupTrigger from '~/invite_members/init_invite_group_trigger';
 import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
 import initInviteMembersTrigger from '~/invite_members/init_invite_members_trigger';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import memberExpirationDate from '~/member_expiration_date';
+import Members from '~/members';
+import UsersSelect from '~/users_select';
+import RemoveMemberModal from '~/vue_shared/components/remove_member_modal.vue';
 
 function mountRemoveMemberModal() {
   const el = document.querySelector('.js-remove-member-modal');
@@ -23,17 +24,16 @@ function mountRemoveMemberModal() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  groupsSelect();
-  memberExpirationDate();
-  memberExpirationDate('.js-access-expiration-date-groups');
-  mountRemoveMemberModal();
-  initInviteMembersModal();
-  initInviteMembersTrigger();
+groupsSelect();
+memberExpirationDate();
+memberExpirationDate('.js-access-expiration-date-groups');
+mountRemoveMemberModal();
+initInviteMembersModal();
+initInviteMembersTrigger();
+initInviteGroupTrigger();
 
-  new Members(); // eslint-disable-line no-new
-  new UsersSelect(); // eslint-disable-line no-new
-});
+new Members(); // eslint-disable-line no-new
+new UsersSelect(); // eslint-disable-line no-new
 
 if (window.gon.features.vueProjectMembersList) {
   const SHARED_FIELDS = ['account', 'expires', 'maxRole', 'expiration', 'actions'];

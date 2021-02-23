@@ -32,7 +32,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 
 ### Installing GitLab
 
-- [Install](../install/README.md): Requirements, directory structures, and installation methods.
+- [Install](../install/index.md): Requirements, directory structures, and installation methods.
   - [Database load balancing](database_load_balancing.md): Distribute database queries among multiple database servers.
   - [Omnibus support for log forwarding](https://docs.gitlab.com/omnibus/settings/logs.html#udp-log-shipping-gitlab-enterprise-edition-only).
 - [Reference architectures](reference_architectures/index.md): Add additional resources to support more users.
@@ -92,7 +92,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 
 ### Maintaining GitLab
 
-- [Rake tasks](../raketasks/README.md): Perform various tasks for maintenance, backups, automatic webhooks setup, and more.
+- [Rake tasks](../raketasks/index.md): Perform various tasks for maintenance, backups, automatic webhooks setup, and more.
   - [Backup and restore](../raketasks/backup_restore.md): Backup and restore your GitLab instance.
 - [Operations](operations/index.md): Keeping GitLab up and running (clean up Redis sessions, moving repositories, Sidekiq MemoryKiller, Puma).
 - [Restart GitLab](restart_gitlab.md): Learn how to restart GitLab and its components.
@@ -103,14 +103,14 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 
 - [GitLab versions and maintenance policy](../policy/maintenance.md): Understand GitLab versions and releases (Major, Minor, Patch, Security), as well as update recommendations.
 - [GitLab in maintenance mode](maintenance_mode/index.md): Put GitLab in maintenance mode.
-- [Update GitLab](../update/README.md): Update guides to upgrade your installation to a new version.
-- [Upgrading without downtime](../update/README.md#upgrading-without-downtime): Upgrade to a newer major, minor, or patch version of GitLab without taking your GitLab instance offline.
+- [Update GitLab](../update/index.md): Update guides to upgrade your installation to a new version.
+- [Upgrading without downtime](../update/index.md#upgrading-without-downtime): Upgrade to a newer major, minor, or patch version of GitLab without taking your GitLab instance offline.
 - [Migrate your GitLab CI/CD data to another version of GitLab](../migrate_ci_to_ce/README.md): If you have an old GitLab installation (older than 8.0), follow this guide to migrate your existing GitLab CI/CD data to another version of GitLab.
 
 ### Upgrading or downgrading GitLab
 
-- [Upgrade from GitLab CE to GitLab EE](../update/README.md#upgrading-between-editions): learn how to upgrade GitLab Community Edition to GitLab Enterprise Editions.
-- [Downgrade from GitLab EE to GitLab CE](../downgrade_ee_to_ce/README.md): Learn how to downgrade GitLab Enterprise Editions to Community Edition.
+- [Upgrade from GitLab CE to GitLab EE](../update/index.md#upgrading-between-editions): learn how to upgrade GitLab Community Edition to GitLab Enterprise Editions.
+- [Downgrade from GitLab EE to GitLab CE](../downgrade_ee_to_ce/index.md): Learn how to downgrade GitLab Enterprise Editions to Community Edition.
 
 ### GitLab platform integrations
 
@@ -130,7 +130,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
   - [Kerberos authentication](../integration/kerberos.md).
   - See also other [authentication](../topics/authentication/index.md#gitlab-administrators) topics (for example, enforcing 2FA).
 - [Email users](../tools/email.md): Email GitLab users from within GitLab.
-- [User Cohorts](../user/admin_area/analytics/user_cohorts.md): Display the monthly cohorts of new users and their activities over time.
+- [User Cohorts](../user/admin_area/user_cohorts.md): Display the monthly cohorts of new users and their activities over time.
 - [Audit events](audit_events.md): View the changes made within the GitLab server for:
   - Groups and projects.
   - Instances.
@@ -154,8 +154,8 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 
 ## Package Registry administration
 
-- [Container Registry](packages/container_registry.md): Configure Container Registry with GitLab.
-- [Package Registry](packages/index.md): Enable GitLab to act as an NPM Registry and a Maven Repository.
+- [Container Registry](packages/container_registry.md): Configure GitLab to act as a registry for containers.
+- [Package Registry](packages/index.md): Enable GitLab to act as a registry for packages.
 - [Dependency Proxy](packages/dependency_proxy.md): Configure the Dependency Proxy, a local proxy for frequently used upstream images/packages.
 
 ### Repository settings
@@ -170,7 +170,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 ## Continuous Integration settings
 
 - [Enable/disable GitLab CI/CD](../ci/enable_or_disable_ci.md#site-wide-admin-setting): Enable or disable GitLab CI/CD for your instance.
-- [GitLab CI/CD admin settings](../user/admin_area/settings/continuous_integration.md): Enable or disable Auto DevOps site-wide and define the artifacts' max size and expiration time.
+- [GitLab CI/CD administration settings](../user/admin_area/settings/continuous_integration.md): Enable or disable Auto DevOps site-wide and define the artifacts' max size and expiration time.
 - [External Pipeline Validation](external_pipeline_validation.md): Enable, disable and configure external pipeline validation.
 - [Job artifacts](job_artifacts.md): Enable, disable, and configure job artifacts (a set of files and directories which are outputted by a job when it completes successfully).
 - [Job logs](job_logs.md): Information about the job logs.

@@ -77,7 +77,7 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
 
       context 'migration process' do
         before do
-          allow(migration).to receive(:persisted?).and_return(persisted)
+          allow(migration).to receive(:started?).and_return(started)
           allow(migration).to receive(:completed?).and_return(completed)
           allow(migration).to receive(:batched?).and_return(batched)
         end
@@ -85,7 +85,7 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
         using RSpec::Parameterized::TableSyntax
 
         # completed is evaluated after migrate method is executed
-        where(:persisted, :completed, :execute_migration, :batched) do
+        where(:started, :completed, :execute_migration, :batched) do
           false | false | true  | false
           false | true  | true  | false
           false | false | true  | true
@@ -130,7 +130,7 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
 
           let(:batched) { true }
 
-          where(:persisted, :completed, :expected) do
+          where(:started, :completed, :expected) do
             false | false | false
             true  | false | false
             true  | true  | true

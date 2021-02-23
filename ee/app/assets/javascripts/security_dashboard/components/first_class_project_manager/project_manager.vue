@@ -1,14 +1,14 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 import produce from 'immer';
-import getProjects from 'ee/security_dashboard/graphql/queries/get_projects.query.graphql';
-import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_security_dashboard_projects.query.graphql';
 import addProjectToSecurityDashboard from 'ee/security_dashboard/graphql/mutations/add_project_to_security_dashboard.mutation.graphql';
 import deleteProjectFromSecurityDashboard from 'ee/security_dashboard/graphql/mutations/delete_project_from_security_dashboard.mutation.graphql';
+import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_security_dashboard_projects.query.graphql';
+import getProjects from 'ee/security_dashboard/graphql/queries/get_projects.query.graphql';
 import { createInvalidProjectMessage } from 'ee/security_dashboard/utils/first_class_project_manager_utils';
-import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
-import { __, s__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { __, s__, sprintf } from '~/locale';
+import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
 import ProjectList from './project_list.vue';
 
 export default {

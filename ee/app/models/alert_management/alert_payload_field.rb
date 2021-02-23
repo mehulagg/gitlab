@@ -5,7 +5,7 @@ module AlertManagement
     include ActiveModel::Model
     include ActiveModel::Validations
 
-    attr_accessor :project, :path, :label, :type
+    attr_accessor :project, :path, :label, :type, :field_name
 
     ARRAY_TYPE = 'array'
     DATETIME_TYPE = 'datetime'

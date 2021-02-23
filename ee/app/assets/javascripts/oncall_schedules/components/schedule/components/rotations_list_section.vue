@@ -1,5 +1,11 @@
 <script>
-import { GlButtonGroup, GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
+import {
+  GlButtonGroup,
+  GlButton,
+  GlLoadingIcon,
+  GlTooltipDirective,
+  GlModalDirective,
+} from '@gitlab/ui';
 import DeleteRotationModal from 'ee/oncall_schedules/components/rotations/components/delete_rotation_modal.vue';
 import ScheduleShiftWrapper from 'ee/oncall_schedules/components/schedule/components/shifts/components/schedule_shift_wrapper.vue';
 import {
@@ -14,6 +20,7 @@ import CurrentDayIndicator from './current_day_indicator.vue';
 export const i18n = {
   editRotationLabel: s__('OnCallSchedules|Edit rotation'),
   deleteRotationLabel: s__('OnCallSchedules|Delete rotation'),
+  addRotationLabel: s__('OnCallSchedules|Currently no rotation.'),
 };
 
 export default {
@@ -23,6 +30,7 @@ export default {
   components: {
     GlButton,
     GlButtonGroup,
+    GlLoadingIcon,
     CurrentDayIndicator,
     DeleteRotationModal,
     ScheduleShiftWrapper,
@@ -47,6 +55,11 @@ export default {
     scheduleIid: {
       type: String,
       required: true,
+    },
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -80,58 +93,78 @@ export default {
     cellShouldHideOverflow(index) {
       return index + 1 === this.timeframe.length || this.presetIsDay;
     },
+    timeframeItemUniqueKey(timeframeItem) {
+      return timeframeItem.valueOf();
+    },
   },
 };
 </script>
 
 <template>
   <div class="list-section">
-    <div
-      v-for="rotation in rotations"
-      :key="rotation.id"
-      class="list-item list-item-empty clearfix"
-    >
+    <gl-loading-icon v-if="loading" />
+    <div v-else-if="rotations.length === 0 && !loading" class="gl-clearfix">
       <span
         class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
       >
-        <span class="gl-str-truncated">{{ rotation.name }}</span>
-        <gl-button-group class="gl-px-2">
-          <gl-button
-            v-gl-modal="$options.editRotationModalId"
-            v-gl-tooltip
-            category="tertiary"
-            :title="$options.i18n.editRotationLabel"
-            icon="pencil"
-            :aria-label="$options.i18n.editRotationLabel"
-          />
-          <gl-button
-            v-gl-modal="$options.deleteRotationModalId"
-            v-gl-tooltip
-            category="tertiary"
-            :title="$options.i18n.deleteRotationLabel"
-            icon="remove"
-            :aria-label="$options.i18n.deleteRotationLabel"
-            @click="setRotationToUpdate(rotation)"
-          />
-        </gl-button-group>
+        <span class="gl-text-truncated">{{ $options.i18n.addRotationLabel }}</span>
       </span>
       <span
         v-for="(timeframeItem, index) in timeframeToDraw"
         :key="index"
         class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1"
-        :class="{ 'gl-overflow-hidden': cellShouldHideOverflow(index) }"
         :style="timelineStyles"
-        data-testid="timelineCell"
+        data-testid="empty-timeline-cell"
       >
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
-        <schedule-shift-wrapper
-          v-if="rotation.shifts"
-          :preset-type="presetType"
-          :timeframe-item="timeframeItem"
-          :timeframe="timeframe"
-          :rotation="rotation"
-        />
       </span>
+    </div>
+    <div v-else>
+      <div v-for="rotation in rotations" :key="rotation.id" class="gl-clearfix">
+        <span
+          class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
+        >
+          <span class="gl-text-truncated">{{ rotation.name }}</span>
+          <gl-button-group class="gl-px-2">
+            <!-- TODO: Un-hide this button when: https://gitlab.com/gitlab-org/gitlab/-/issues/262862 is completed -->
+            <gl-button
+              v-gl-modal="$options.editRotationModalId"
+              v-gl-tooltip
+              class="gl-display-none"
+              category="tertiary"
+              :title="$options.i18n.editRotationLabel"
+              icon="pencil"
+              :aria-label="$options.i18n.editRotationLabel"
+            />
+            <gl-button
+              v-gl-modal="$options.deleteRotationModalId"
+              v-gl-tooltip
+              category="tertiary"
+              :title="$options.i18n.deleteRotationLabel"
+              icon="remove"
+              :aria-label="$options.i18n.deleteRotationLabel"
+              @click="setRotationToUpdate(rotation)"
+            />
+          </gl-button-group>
+        </span>
+        <span
+          v-for="(timeframeItem, index) in timeframeToDraw"
+          :key="timeframeItemUniqueKey(timeframeItem)"
+          class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1"
+          :class="{ 'gl-overflow-hidden': cellShouldHideOverflow(index) }"
+          :style="timelineStyles"
+          data-testid="timeline-cell"
+        >
+          <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
+          <schedule-shift-wrapper
+            v-if="rotation.shifts"
+            :preset-type="presetType"
+            :timeframe-item="timeframeItem"
+            :timeframe="timeframe"
+            :rotation="rotation"
+          />
+        </span>
+      </div>
     </div>
     <delete-rotation-modal
       :rotation="rotationToUpdate"

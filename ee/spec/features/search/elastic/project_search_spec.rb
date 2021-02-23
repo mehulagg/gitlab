@@ -10,7 +10,7 @@ RSpec.describe 'Project elastic search', :js, :elastic do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
 
-  describe 'searching', :sidekiq_inline do
+  describe 'searching' do
     before do
       project.add_maintainer(user)
       sign_in(user)
@@ -18,7 +18,7 @@ RSpec.describe 'Project elastic search', :js, :elastic do
       visit project_path(project)
     end
 
-    it 'finds issues' do
+    it 'finds issues', :sidekiq_inline do
       create(:issue, project: project, title: 'Test searching for an issue')
       ensure_elasticsearch_index!
 
@@ -28,7 +28,7 @@ RSpec.describe 'Project elastic search', :js, :elastic do
       expect(page).to have_selector('.results', text: 'Test searching for an issue')
     end
 
-    it 'finds merge requests' do
+    it 'finds merge requests', :sidekiq_inline do
       create(:merge_request, source_project: project, target_project: project, title: 'Test searching for an MR')
       ensure_elasticsearch_index!
 
@@ -38,7 +38,7 @@ RSpec.describe 'Project elastic search', :js, :elastic do
       expect(page).to have_selector('.results', text: 'Test searching for an MR')
     end
 
-    it 'finds milestones' do
+    it 'finds milestones', :sidekiq_inline do
       create(:milestone, project: project, title: 'Test searching for a milestone')
       ensure_elasticsearch_index!
 
@@ -48,10 +48,9 @@ RSpec.describe 'Project elastic search', :js, :elastic do
       expect(page).to have_selector('.results', text: 'Test searching for a milestone')
     end
 
-    it 'finds wiki pages' do
+    it 'finds wiki pages', :sidekiq_inline do
       project.wiki.create_page('test.md', 'Test searching for a wiki page')
       project.wiki.index_wiki_blobs
-      ensure_elasticsearch_index!
 
       submit_search('Test')
       select_search_scope('Wiki')
@@ -59,7 +58,7 @@ RSpec.describe 'Project elastic search', :js, :elastic do
       expect(page).to have_selector('.results', text: 'Test searching for a wiki page')
     end
 
-    it 'finds notes' do
+    it 'finds notes', :sidekiq_inline do
       create(:note, project: project, note: 'Test searching for a comment')
       ensure_elasticsearch_index!
 
@@ -69,9 +68,8 @@ RSpec.describe 'Project elastic search', :js, :elastic do
       expect(page).to have_selector('.results', text: 'Test searching for a comment')
     end
 
-    it 'finds commits' do
+    it 'finds commits', :sidekiq_inline do
       project.repository.index_commits_and_blobs
-      ensure_elasticsearch_index!
 
       submit_search('initial')
       select_search_scope('Commits')
@@ -79,9 +77,8 @@ RSpec.describe 'Project elastic search', :js, :elastic do
       expect(page).to have_selector('.results', text: 'Initial commit')
     end
 
-    it 'finds blobs' do
+    it 'finds blobs', :sidekiq_inline do
       project.repository.index_commits_and_blobs
-      ensure_elasticsearch_index!
 
       submit_search('def')
       select_search_scope('Code')
@@ -129,7 +126,7 @@ RSpec.describe 'Project elastic search', :js, :elastic do
   end
 end
 
-RSpec.describe 'Project elastic search redactions', :elastic, :js do
+RSpec.describe 'Project elastic search redactions', :elastic do
   it_behaves_like 'a redacted search results page' do
     let(:search_path) { project_path(public_restricted_project) }
   end

@@ -1,14 +1,14 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlModal, GlAlert, GlSprintf } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import createMockApollo from 'helpers/mock_apollo_helper';
-import waitForPromises from 'helpers/wait_for_promises';
-import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
-import destroyOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_schedule.mutation.graphql';
 import DeleteScheduleModal, {
   i18n,
 } from 'ee/oncall_schedules/components/delete_schedule_modal.vue';
 import { deleteScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedule';
+import destroyOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_schedule.mutation.graphql';
+import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import {
   getOncallSchedulesQueryResponse,
   destroyScheduleResponse,

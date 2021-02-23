@@ -1,5 +1,0 @@
----
-title: Remove LDAP "Edit Permissions" button for inherited group members
-merge_request: 52847
-author:
-type: fixed

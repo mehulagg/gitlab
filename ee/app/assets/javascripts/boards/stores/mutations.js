@@ -1,8 +1,9 @@
-import Vue from 'vue';
 import { union, unionBy } from 'lodash';
-import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
+import Vue from 'vue';
 import { moveIssueListHelper } from '~/boards/boards_util';
+import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
 import { s__ } from '~/locale';
+import { ErrorMessages } from '../constants';
 import * as mutationTypes from './mutation_types';
 
 const notImplemented = () => {
@@ -63,35 +64,44 @@ export default {
     state.error = s__('Boards|An error occurred while updating the list. Please try again.');
   },
 
-  [mutationTypes.RECEIVE_ISSUES_FOR_LIST_SUCCESS]: (
+  [mutationTypes.RECEIVE_ITEMS_FOR_LIST_SUCCESS]: (
     state,
-    { listIssues, listPageInfo, listId, noEpicIssues },
+    { listItems, listPageInfo, listId, noEpicIssues },
   ) => {
-    const { listData, issues, listIssuesCount } = listIssues;
-    Vue.set(state, 'issues', { ...state.issues, ...issues });
+    const { listData, boardItems, listItemsCount } = listItems;
+    Vue.set(state, 'boardItems', { ...state.boardItems, ...boardItems });
     Vue.set(
-      state.issuesByListId,
+      state.boardItemsByListId,
       listId,
-      union(state.issuesByListId[listId] || [], listData[listId]),
+      union(state.boardItemsByListId[listId] || [], listData[listId]),
     );
     Vue.set(state.pageInfoByListId, listId, listPageInfo[listId]);
     Vue.set(state.listsFlags, listId, {
       isLoading: false,
       isLoadingMore: false,
-      unassignedIssuesCount: noEpicIssues ? listIssuesCount : undefined,
+      unassignedIssuesCount: noEpicIssues ? listItemsCount : undefined,
     });
+  },
+
+  [mutationTypes.RECEIVE_ITEMS_FOR_LIST_FAILURE]: (state, listId) => {
+    state.error = state.isEpicBoard ? ErrorMessages.fetchEpicsError : ErrorMessages.fetchIssueError;
+    Vue.set(state.listsFlags, listId, { isLoading: false, isLoadingMore: false });
   },
 
   [mutationTypes.REQUEST_ISSUES_FOR_EPIC]: (state, epicId) => {
     Vue.set(state.epicsFlags, epicId, { isLoading: true });
   },
 
-  [mutationTypes.RECEIVE_ISSUES_FOR_EPIC_SUCCESS]: (state, { listData, issues, epicId }) => {
+  [mutationTypes.RECEIVE_ISSUES_FOR_EPIC_SUCCESS]: (state, { listData, boardItems, epicId }) => {
     Object.entries(listData).forEach(([listId, list]) => {
-      Vue.set(state.issuesByListId, listId, union(state.issuesByListId[listId] || [], list));
+      Vue.set(
+        state.boardItemsByListId,
+        listId,
+        union(state.boardItemsByListId[listId] || [], list),
+      );
     });
 
-    Vue.set(state, 'issues', { ...state.issues, ...issues });
+    Vue.set(state, 'boardItems', { ...state.boardItems, ...boardItems });
     Vue.set(state.epicsFlags, epicId, { isLoading: false });
   },
 
@@ -157,9 +167,9 @@ export default {
     const issue = moveIssueListHelper(originalIssue, fromList, toList);
 
     if (epicId === null) {
-      Vue.set(state.issues, issue.id, { ...issue, epic: null });
+      Vue.set(state.boardItems, issue.id, { ...issue, epic: null });
     } else if (epicId !== undefined) {
-      Vue.set(state.issues, issue.id, { ...issue, epic: { id: epicId } });
+      Vue.set(state.boardItems, issue.id, { ...issue, epic: { id: epicId } });
     }
 
     removeIssueFromList({ state, listId: fromListId, issueId: issue.id });

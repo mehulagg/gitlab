@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
-import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import component from 'ee/reports/components/modal_open_name.vue';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
+import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 
 Vue.use(Vuex);

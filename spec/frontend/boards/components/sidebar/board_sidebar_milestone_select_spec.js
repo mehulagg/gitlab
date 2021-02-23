@@ -1,8 +1,8 @@
+import { GlLoadingIcon, GlDropdown } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlLoadingIcon } from '@gitlab/ui';
 import { mockMilestone as TEST_MILESTONE } from 'jest/boards/mock_data';
-import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
+import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
 import { createStore } from '~/boards/stores';
 import createFlash from '~/flash';
 
@@ -22,7 +22,7 @@ describe('~/boards/components/sidebar/board_sidebar_milestone_select.vue', () =>
 
   const createWrapper = ({ milestone = null, loading = false } = {}) => {
     store = createStore();
-    store.state.issues = { [TEST_ISSUE.id]: { ...TEST_ISSUE, milestone } };
+    store.state.boardItems = { [TEST_ISSUE.id]: { ...TEST_ISSUE, milestone } };
     store.state.activeId = TEST_ISSUE.id;
 
     wrapper = shallowMount(BoardSidebarMilestoneSelect, {
@@ -46,9 +46,41 @@ describe('~/boards/components/sidebar/board_sidebar_milestone_select.vue', () =>
 
   const findCollapsed = () => wrapper.find('[data-testid="collapsed-content"]');
   const findLoader = () => wrapper.find(GlLoadingIcon);
+  const findDropdown = () => wrapper.find(GlDropdown);
+  const findBoardEditableItem = () => wrapper.find(BoardEditableItem);
   const findDropdownItem = () => wrapper.find('[data-testid="milestone-item"]');
   const findUnsetMilestoneItem = () => wrapper.find('[data-testid="no-milestone-item"]');
   const findNoMilestonesFoundItem = () => wrapper.find('[data-testid="no-milestones-found"]');
+
+  describe('when not editing', () => {
+    it('opens the milestone dropdown on clicking edit', async () => {
+      createWrapper();
+      wrapper.vm.$refs.dropdown.show = jest.fn();
+
+      await findBoardEditableItem().vm.$emit('open');
+
+      expect(wrapper.vm.$refs.dropdown.show).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when editing', () => {
+    beforeEach(() => {
+      createWrapper();
+      jest.spyOn(wrapper.vm.$refs.sidebarItem, 'collapse');
+    });
+
+    it('collapses BoardEditableItem on clicking edit', async () => {
+      await findBoardEditableItem().vm.$emit('close');
+
+      expect(wrapper.vm.$refs.sidebarItem.collapse).toHaveBeenCalledTimes(1);
+    });
+
+    it('collapses BoardEditableItem on hiding dropdown', async () => {
+      await findDropdown().vm.$emit('hide');
+
+      expect(wrapper.vm.$refs.sidebarItem.collapse).toHaveBeenCalledTimes(1);
+    });
+  });
 
   it('renders "None" when no milestone is selected', () => {
     createWrapper();
@@ -81,7 +113,7 @@ describe('~/boards/components/sidebar/board_sidebar_milestone_select.vue', () =>
       createWrapper();
 
       jest.spyOn(wrapper.vm, 'setActiveIssueMilestone').mockImplementation(() => {
-        store.state.issues[TEST_ISSUE.id].milestone = TEST_MILESTONE;
+        store.state.boardItems[TEST_ISSUE.id].milestone = TEST_MILESTONE;
       });
       findDropdownItem().vm.$emit('click');
       await wrapper.vm.$nextTick();
@@ -105,7 +137,7 @@ describe('~/boards/components/sidebar/board_sidebar_milestone_select.vue', () =>
       createWrapper({ milestone: TEST_MILESTONE });
 
       jest.spyOn(wrapper.vm, 'setActiveIssueMilestone').mockImplementation(() => {
-        store.state.issues[TEST_ISSUE.id].milestone = null;
+        store.state.boardItems[TEST_ISSUE.id].milestone = null;
       });
       findUnsetMilestoneItem().vm.$emit('click');
       await wrapper.vm.$nextTick();

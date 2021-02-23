@@ -1,3 +1,4 @@
+import { GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import DismissButton from 'ee/vue_shared/security_reports/components/dismiss_button.vue';
 import component from 'ee/vue_shared/security_reports/components/modal_footer.vue';
@@ -73,6 +74,10 @@ describe('Security Reports modal footer', () => {
 
     it('has the correct text', () => {
       expect(findActionButton().text()).toBe('Create Jira issue');
+    });
+
+    it('has the external-link icon', () => {
+      expect(findActionButton().find(GlIcon).props('name')).toBe('external-link');
     });
   });
 

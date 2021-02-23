@@ -26,6 +26,7 @@ RSpec.describe 'Database schema' do
     chat_names: %w[chat_id team_id user_id],
     chat_teams: %w[team_id],
     ci_builds: %w[erased_by_id runner_id trigger_request_id user_id],
+    ci_namespace_monthly_usages: %w[namespace_id],
     ci_pipelines: %w[user_id],
     ci_runner_projects: %w[runner_id],
     ci_trigger_requests: %w[commit_id],
@@ -101,7 +102,12 @@ RSpec.describe 'Database schema' do
         context 'all foreign keys' do
           # for index to be effective, the FK constraint has to be at first place
           it 'are indexed' do
-            first_indexed_column = indexes.map(&:columns).map(&:first)
+            first_indexed_column = indexes.map(&:columns).map do |columns|
+              # In cases of complex composite indexes, a string is returned eg:
+              # "lower((extern_uid)::text), group_id"
+              columns = columns.split(',') if columns.is_a?(String)
+              columns.first.chomp
+            end
             foreign_keys_columns = foreign_keys.map(&:column)
 
             # Add the primary key column to the list of indexed columns because

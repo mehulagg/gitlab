@@ -14,7 +14,7 @@ For a full list of reference architectures, see
 > - **Supported users (approximate):** 2,000
 > - **High Availability:** No. For a highly-available environment, you can
 >   follow the [3K reference architecture](3k_users.md).
-> - **Test requests per second (RPS) rates:** API: 40 RPS, Web: 4 RPS, Git: 4 RPS
+> - **Test requests per second (RPS) rates:** API: 40 RPS, Web: 4 RPS, Git (Pull): 4 RPS, Git (Push): 1 RPS
 
 | Service                                  | Nodes  | Configuration           | GCP            | AWS          | Azure   |
 |------------------------------------------|--------|-------------------------|----------------|--------------|---------|
@@ -27,44 +27,32 @@ For a full list of reference architectures, see
 | Object storage                           | n/a    | n/a                     | n/a            | n/a          | n/a     |
 | NFS server (optional, not recommended)   | 1      | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | `c5.xlarge`    | F4s v2  |
 
-```mermaid
-stateDiagram-v2
-    [*] --> LoadBalancer
-    LoadBalancer --> ApplicationServer
+```plantuml
+@startuml 2k
+card "**External Load Balancer**" as elb #6a9be7
 
-    ApplicationServer --> Gitaly
-    ApplicationServer --> Redis
-    ApplicationServer --> Database
-    ApplicationServer --> ObjectStorage
+collections "**GitLab Rails** x3" as gitlab #32CD32
+card "**Prometheus + Grafana**" as monitor #7FFFD4
+card "**Gitaly**" as gitaly #FF8C00
+card "**PostgreSQL**" as postgres #4EA7FF
+card "**Redis**" as redis #FF6347
+cloud "**Object Storage**" as object_storage #white
 
-    ApplicationMonitoring -->ApplicationServer
-    ApplicationMonitoring -->Redis
-    ApplicationMonitoring -->Database
+elb -[#6a9be7]-> gitlab
+elb -[#6a9be7]--> monitor
 
+gitlab -[#32CD32]--> gitaly
+gitlab -[#32CD32]--> postgres
+gitlab -[#32CD32]-> object_storage
+gitlab -[#32CD32]--> redis
 
-    state Database {
-      "PG_Node"
-    }
-    state Redis {
-      "Redis_Node"
-    }
+monitor .[#7FFFD4]u-> gitlab
+monitor .[#7FFFD4]-> gitaly
+monitor .[#7FFFD4]-> postgres
+monitor .[#7FFFD4,norank]--> redis
+monitor .[#7FFFD4,norank]u--> elb
 
-    state Gitaly {
-      "Gitaly"
-    }
-
-    state ApplicationServer {
-      "AppServ_1..2"
-    }
-
-    state LoadBalancer {
-      "LoadBalancer"
-    }
-
-    state ApplicationMonitoring {
-      "Prometheus"
-      "Grafana"
-    }
+@enduml
 ```
 
 The Google Cloud Platform (GCP) architectures were built and tested using the
@@ -669,6 +657,25 @@ On each node perform the following:
    gitlab_rails['monitoring_whitelist'] = ['<MONITOR NODE IP>/32', '127.0.0.0/8']
    nginx['status']['options']['allow'] = ['<MONITOR NODE IP>/32', '127.0.0.0/8']
 
+   #############################
+   ###     Object storage    ###
+   #############################
+
+   # This is an example for configuring Object Storage on GCP
+   # Replace this config with your chosen Object Storage provider as desired
+   gitlab_rails['object_store']['connection'] = {
+     'provider' => 'Google',
+     'google_project' => '<gcp-project-name>',
+     'google_json_key_location' => '<path-to-gcp-service-account-key>'
+   }
+   gitlab_rails['object_store']['objects']['artifacts']['bucket'] = "<gcp-artifacts-bucket-name>"
+   gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = "<gcp-external-diffs-bucket-name>"
+   gitlab_rails['object_store']['objects']['lfs']['bucket'] = "<gcp-lfs-bucket-name>"
+   gitlab_rails['object_store']['objects']['uploads']['bucket'] = "<gcp-uploads-bucket-name>"
+   gitlab_rails['object_store']['objects']['packages']['bucket'] = "<gcp-packages-bucket-name>"
+   gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = "<gcp-dependency-proxy-bucket-name>"
+   gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = "<gcp-terraform-state-bucket-name>"
+
    ## Uncomment and edit the following options if you have set up NFS
    ##
    ## Prevent GitLab from starting if NFS data mounts are not available
@@ -913,18 +920,9 @@ on what features you intend to use:
 | [Terraform state files](../terraform_state.md#using-object-storage) | Yes |
 
 Using separate buckets for each data type is the recommended approach for GitLab.
-
-A limitation of our configuration is that each use of object storage is
-separately configured. We have an [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/23345)
-for improving this, which would allow for one bucket with separate folders.
-
-Using a single bucket when GitLab is deployed with the Helm chart causes
-restoring from a backup to
-[not function properly](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer).
-Although you may not be using a Helm deployment right now, if you migrate
-GitLab to a Helm deployment later, GitLab would still work, but you may not
-realize backups aren't working correctly until a critical requirement for
-functioning backups is encountered.
+This ensures there are no collisions across the various types of data GitLab stores.
+There are plans to [enable the use of a single bucket](https://gitlab.com/gitlab-org/gitlab/-/issues/292958)
+in the future.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

@@ -10,13 +10,18 @@ import {
   GlLink,
   GlSprintf,
 } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
+import { isEmptyValue } from '~/lib/utils/forms';
 import { __, s__ } from '~/locale';
-import { SCAN_MODES } from '../constants';
 import DropdownInput from '../../components/dropdown_input.vue';
 import DynamicFields from '../../components/dynamic_fields.vue';
 import FormInput from '../../components/form_input.vue';
+import { SCAN_MODES, CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
+import createApiFuzzingConfigurationMutation from '../graphql/create_api_fuzzing_configuration.mutation.graphql';
+import ConfigurationSnippetModal from './configuration_snippet_modal.vue';
 
 export default {
+  CONFIGURATION_SNIPPET_MODAL_ID,
   components: {
     GlAccordion,
     GlAccordionItem,
@@ -27,24 +32,19 @@ export default {
     GlFormCheckbox,
     GlLink,
     GlSprintf,
+    ConfigurationSnippetModal,
     DropdownInput,
     DynamicFields,
     FormInput,
   },
-  inject: {
-    apiFuzzingAuthenticationDocumentationPath: {
-      from: 'apiFuzzingAuthenticationDocumentationPath',
-    },
-    ciVariablesDocumentationPath: {
-      from: 'ciVariablesDocumentationPath',
-    },
-    projectCiSettingsPath: {
-      from: 'projectCiSettingsPath',
-    },
-    canSetProjectCiVariables: {
-      from: 'canSetProjectCiVariables',
-    },
-  },
+  inject: [
+    'securityConfigurationPath',
+    'fullPath',
+    'apiFuzzingAuthenticationDocumentationPath',
+    'ciVariablesDocumentationPath',
+    'projectCiSettingsPath',
+    'canSetProjectCiVariables',
+  ],
   props: {
     apiFuzzingCiConfiguration: {
       type: Object,
@@ -53,6 +53,8 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
+      showError: false,
       targetUrl: {
         field: 'targetUrl',
         label: s__('APIFuzzing|Target URL'),
@@ -111,6 +113,8 @@ export default {
           }),
         ),
       },
+      ciYamlEditUrl: '',
+      configurationYaml: '',
     };
   },
   computed: {
@@ -142,9 +146,60 @@ export default {
         ({ name }) => name === this.scanProfile.value,
       )?.yaml;
     },
+    someFieldEmpty() {
+      const fields = [this.targetUrl, this.scanMode, this.apiSpecificationFile, this.scanProfile];
+      if (this.authenticationEnabled) {
+        fields.push(...this.authenticationSettings);
+      }
+      return fields.some(({ value }) => isEmptyValue(value));
+    },
   },
   methods: {
-    onSubmit() {},
+    async onSubmit() {
+      this.isLoading = true;
+      this.showError = false;
+      try {
+        const input = {
+          projectPath: this.fullPath,
+          target: this.targetUrl.value,
+          scanMode: this.scanMode.value,
+          apiSpecificationFile: this.apiSpecificationFile.value,
+          scanProfile: this.scanProfile.value,
+        };
+        if (this.authenticationEnabled) {
+          const [authUsername, authPassword] = this.authenticationSettings;
+          input.authUsername = authUsername.value;
+          input.authPassword = authPassword.value;
+        }
+        const {
+          data: {
+            createApiFuzzingCiConfiguration: {
+              gitlabCiYamlEditUrl,
+              configurationYaml,
+              errors = [],
+            },
+          },
+        } = await this.$apollo.mutate({
+          mutation: createApiFuzzingConfigurationMutation,
+          variables: { input },
+        });
+        if (errors.length) {
+          this.showError = true;
+        } else {
+          this.ciYamlEditUrl = gitlabCiYamlEditUrl;
+          this.configurationYaml = configurationYaml;
+          this.$refs[CONFIGURATION_SNIPPET_MODAL_ID].show();
+        }
+      } catch (e) {
+        this.showError = true;
+        Sentry.captureException(e);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    dismissError() {
+      this.showError = false;
+    },
   },
   SCAN_MODES,
 };
@@ -152,6 +207,10 @@ export default {
 
 <template>
   <form @submit.prevent="onSubmit">
+    <gl-alert v-if="showError" variant="danger" class="gl-mb-5" @dismiss="dismissError">
+      {{ s__('APIFuzzing|The configuration could not be saved, please try again later.') }}
+    </gl-alert>
+
     <form-input v-model="targetUrl.value" v-bind="targetUrl" class="gl-mb-7" />
 
     <dropdown-input v-model="scanMode.value" v-bind="scanMode" />
@@ -223,9 +282,26 @@ export default {
 
     <hr />
 
-    <gl-button type="submit" variant="confirm">{{
-      s__('APIFuzzing|Generate code snippet')
-    }}</gl-button>
-    <gl-button>{{ __('Cancel') }}</gl-button>
+    <gl-button
+      :disabled="someFieldEmpty"
+      :loading="isLoading"
+      type="submit"
+      variant="confirm"
+      class="js-no-auto-disable"
+      data-testid="api-fuzzing-configuration-submit-button"
+      >{{ s__('APIFuzzing|Generate code snippet') }}</gl-button
+    >
+    <gl-button
+      :disabled="isLoading"
+      :href="securityConfigurationPath"
+      data-testid="api-fuzzing-configuration-cancel-button"
+      >{{ __('Cancel') }}</gl-button
+    >
+
+    <configuration-snippet-modal
+      :ref="$options.CONFIGURATION_SNIPPET_MODAL_ID"
+      :ci-yaml-edit-url="ciYamlEditUrl"
+      :yaml="configurationYaml"
+    />
   </form>
 </template>

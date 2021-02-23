@@ -1,8 +1,8 @@
 import { GlIntersectionObserver, GlSkeletonLoading } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import AlertsList from 'ee/threat_monitoring/components/alerts/alerts_list.vue';
 import AlertFilters from 'ee/threat_monitoring/components/alerts/alert_filters.vue';
 import AlertStatus from 'ee/threat_monitoring/components/alerts/alert_status.vue';
+import AlertsList from 'ee/threat_monitoring/components/alerts/alerts_list.vue';
 import { DEFAULT_FILTERS } from 'ee/threat_monitoring/components/alerts/constants';
 import { mockAlerts } from '../../mock_data';
 
@@ -133,6 +133,10 @@ describe('AlertsList component', () => {
 
       expect(wrapper.vm.sort).toBe('STATUS_ASC');
       expect(findStatusColumnHeader().attributes('aria-sort')).toBe('ascending');
+    });
+
+    it('navigates to the alert details page on title click', () => {
+      expect(findIdColumn().attributes('href')).toBe('/alerts/01');
     });
   });
 

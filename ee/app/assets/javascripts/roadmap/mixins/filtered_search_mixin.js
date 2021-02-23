@@ -1,11 +1,11 @@
 import { GlFilteredSearchToken } from '@gitlab/ui';
 
-import { __ } from '~/locale';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
+import { __ } from '~/locale';
 
-import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
 
 import { FilterTokenOperators } from '../constants';

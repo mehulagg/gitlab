@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlFormGroup } from '@gitlab/ui';
-import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
+import { shallowMount } from '@vue/test-utils';
 import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/default_stage_fields.vue';
+import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
 import { customStageEvents as stageEvents } from '../../mock_data';
 
 let wrapper = null;
@@ -14,8 +14,8 @@ const ISSUE_CREATED = { id: 'issue_created', name: 'Issue created' };
 const ISSUE_CLOSED = { id: 'issue_closed', name: 'Issue closed' };
 const defaultStage = {
   name: 'Cool new stage',
-  startEventIdentifier: [ISSUE_CREATED.id],
-  endEventIdentifier: [ISSUE_CLOSED.id],
+  startEventIdentifier: ISSUE_CREATED.id,
+  endEventIdentifier: ISSUE_CLOSED.id,
   endEventLabel: 'some_label',
 };
 
@@ -56,6 +56,10 @@ describe('DefaultStageFields', () => {
     expect(findStageFieldName().html()).toContain(defaultStage.name);
   });
 
+  it('disables input for the stage field name', () => {
+    expect(findStageFieldName().attributes('disabled')).toBe('disabled');
+  });
+
   it('renders the field start event', () => {
     expect(findStartEvent().exists()).toBe(true);
     expect(findStartEvent().html()).toContain(ISSUE_CREATED.name);
@@ -72,12 +76,12 @@ describe('DefaultStageFields', () => {
     expect(content).toContain(defaultStage.endEventLabel);
   });
 
-  it('on field input emits an input event', () => {
+  it('does not emits any input', () => {
     expect(wrapper.emitted('input')).toBeUndefined();
 
     const newInput = 'coooool';
     findStageFieldName().vm.$emit('input', newInput);
-    expect(wrapper.emitted('input')[0]).toEqual([newInput]);
+    expect(wrapper.emitted('input')).toBeUndefined();
   });
 
   describe('StageFieldActions', () => {

@@ -56,6 +56,8 @@ Your **Global notification settings** are the default settings unless you select
   - This is the email address your notifications are sent to.
 - Global notification level
   - This is the default [notification level](#notification-levels) which applies to all your notifications.
+- Receive product marketing emails
+  - Check this checkbox if you want to receive periodic emails related to GitLab features.
 - Receive notifications about your own activity.
   - Check this checkbox if you want to receive notification about your own activity. Default: Not checked.
 
@@ -204,7 +206,7 @@ epics:
 | Failed pipeline        | The author of the pipeline |
 | Fixed pipeline ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24309) in GitLab 13.1.)    | The author of the pipeline. Enabled by default. |
 | Merge merge request    |         |
-| Merge when pipeline succeeds ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211961) in GitLab 13.4) |     |
+| Merge when pipeline succeeds ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211961) in GitLab 13.4) | Author, Participants, Watchers, Subscribers, and Custom notification level with this event selected. `Note:` Custom notification level is ignored for Author, Watchers and Subscribers   |
 | New comment            | Participants, Watchers, Subscribers, and Custom notification level with this event selected, plus anyone mentioned by `@username` in the comment, with notification level "Mention" or higher |
 | New epic               |         |
 | New issue              |         |

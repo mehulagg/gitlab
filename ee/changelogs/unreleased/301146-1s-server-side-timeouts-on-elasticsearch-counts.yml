@@ -1,5 +1,0 @@
----
-title: Set 1s server side timeout on Elasticsearch counts
-merge_request: 53435
-author:
-type: performance

@@ -1,6 +1,6 @@
 <script>
-import { mapActions } from 'vuex';
 import { GlLink } from '@gitlab/ui';
+import { mapActions } from 'vuex';
 
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import LicensePackages from './license_packages.vue';

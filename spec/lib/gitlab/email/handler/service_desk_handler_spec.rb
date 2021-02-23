@@ -36,8 +36,15 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
         expect(new_issue.author).to eql(User.support_bot)
         expect(new_issue.confidential?).to be true
         expect(new_issue.all_references.all).to be_empty
-        expect(new_issue.title).to eq("Service Desk (from jake@adventuretime.ooo): The message subject! @all")
+        expect(new_issue.title).to eq("The message subject! @all")
         expect(new_issue.description).to eq(expected_description.strip)
+      end
+
+      it 'creates an issue_email_participant' do
+        receiver.execute
+        new_issue = Issue.last
+
+        expect(new_issue.issue_email_participants.first.email).to eq("jake@adventuretime.ooo")
       end
 
       it 'sends thank you email' do

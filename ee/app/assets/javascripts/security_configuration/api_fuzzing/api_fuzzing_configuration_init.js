@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import { apolloProvider } from './graphql/provider';
 import ApiFuzzingApp from './components/app.vue';
+import { apolloProvider } from './graphql/provider';
 
 export const initApiFuzzingConfiguration = () => {
   const el = document.querySelector('.js-api-fuzzing-configuration');
@@ -11,6 +11,7 @@ export const initApiFuzzingConfiguration = () => {
   }
 
   const {
+    securityConfigurationPath,
     fullPath,
     apiFuzzingDocumentationPath,
     apiFuzzingAuthenticationDocumentationPath,
@@ -23,6 +24,7 @@ export const initApiFuzzingConfiguration = () => {
     el,
     apolloProvider,
     provide: {
+      securityConfigurationPath,
       fullPath,
       apiFuzzingDocumentationPath,
       apiFuzzingAuthenticationDocumentationPath,

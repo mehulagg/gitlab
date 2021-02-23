@@ -1057,6 +1057,78 @@ RSpec.describe ProjectPolicy do
       it { is_expected.to be_allowed(:read_analytics) }
     end
 
+    context 'with various analytics features' do
+      let_it_be(:project_with_analytics_disabled) { create(:project, :analytics_disabled) }
+      let_it_be(:project_with_analytics_private) { create(:project, :analytics_private) }
+      let_it_be(:project_with_analytics_enabled) { create(:project, :analytics_enabled) }
+
+      before do
+        project_with_analytics_disabled.add_developer(developer)
+        project_with_analytics_private.add_developer(developer)
+        project_with_analytics_enabled.add_developer(developer)
+      end
+
+      context 'when analytics is enabled for the project' do
+        let(:project) { project_with_analytics_disabled }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_cycle_analytics) }
+          it { is_expected.to be_disallowed(:read_insights) }
+          it { is_expected.to be_disallowed(:read_repository_graphs) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_disallowed(:read_cycle_analytics) }
+          it { is_expected.to be_disallowed(:read_insights) }
+          it { is_expected.to be_disallowed(:read_repository_graphs) }
+        end
+      end
+
+      context 'when analytics is private for the project' do
+        let(:project) { project_with_analytics_private }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_cycle_analytics) }
+          it { is_expected.to be_disallowed(:read_insights) }
+          it { is_expected.to be_disallowed(:read_repository_graphs) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_allowed(:read_cycle_analytics) }
+          it { is_expected.to be_allowed(:read_insights) }
+          it { is_expected.to be_allowed(:read_repository_graphs) }
+        end
+      end
+
+      context 'when analytics is enabled for the project' do
+        let(:project) { project_with_analytics_private }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_cycle_analytics) }
+          it { is_expected.to be_disallowed(:read_insights) }
+          it { is_expected.to be_disallowed(:read_repository_graphs) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_allowed(:read_cycle_analytics) }
+          it { is_expected.to be_allowed(:read_insights) }
+          it { is_expected.to be_allowed(:read_repository_graphs) }
+        end
+      end
+    end
+
     context 'project member' do
       let(:project) { private_project }
 
@@ -1188,6 +1260,92 @@ RSpec.describe ProjectPolicy do
         else
           guest_operations_permissions
         end
+      end
+    end
+  end
+
+  describe 'access_security_and_compliance' do
+    context 'when the "Security & Compliance" is enabled' do
+      before do
+        project.project_feature.update!(security_and_compliance_access_level: Featurable::PRIVATE)
+      end
+
+      %w[owner maintainer developer].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_allowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with admin' do
+        let(:current_user) { admin }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          it { is_expected.to be_allowed(:access_security_and_compliance) }
+        end
+
+        context 'when admin mode disabled' do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      %w[reporter guest].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with non member' do
+        let(:current_user) { non_member }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+
+      context 'with anonymous' do
+        let(:current_user) { anonymous }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+    end
+
+    context 'when the "Security & Compliance" is not enabled' do
+      before do
+        project.project_feature.update!(security_and_compliance_access_level: Featurable::DISABLED)
+      end
+
+      %w[owner maintainer developer reporter guest].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with admin' do
+        let(:current_user) { admin }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+
+        context 'when admin mode disabled' do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with non member' do
+        let(:current_user) { non_member }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+
+      context 'with anonymous' do
+        let(:current_user) { anonymous }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
       end
     end
   end

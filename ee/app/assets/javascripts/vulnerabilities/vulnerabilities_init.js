@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import App from 'ee/vulnerabilities/components/vulnerability.vue';
 import apolloProvider from 'ee/security_dashboard/graphql/provider';
+import App from 'ee/vulnerabilities/components/vulnerability.vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 export default (el) => {

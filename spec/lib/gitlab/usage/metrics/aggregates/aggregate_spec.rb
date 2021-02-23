@@ -142,6 +142,7 @@ RSpec.describe Gitlab::Usage::Metrics::Aggregates::Aggregate, :clean_gitlab_redi
 
           it 'does not calculate data for aggregates with ff turned off' do
             skip_feature_flags_yaml_validation
+            skip_default_enabled_yaml_check
             stub_feature_flags(enabled_feature_flag => true, disabled_feature_flag => false)
             allow(sources::RedisHll).to receive(:calculate_metrics_union).and_return(6)
 
@@ -219,6 +220,12 @@ RSpec.describe Gitlab::Usage::Metrics::Aggregates::Aggregate, :clean_gitlab_redi
           end
         end
       end
+    end
+
+    it 'allows for YAML aliases in aggregated metrics configs' do
+      expect(YAML).to receive(:safe_load).with(kind_of(String), aliases: true).at_least(:once)
+
+      described_class.new(recorded_at)
     end
 
     describe '.aggregated_metrics_weekly_data' do

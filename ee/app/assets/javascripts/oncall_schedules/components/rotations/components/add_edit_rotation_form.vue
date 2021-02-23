@@ -18,8 +18,8 @@ import {
   CHEVRON_SKIPPING_SHADE_ENUM,
   CHEVRON_SKIPPING_PALETTE_ENUM,
 } from 'ee/oncall_schedules/constants';
-import { s__, __ } from '~/locale';
 import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
 
 export const i18n = {
   selectParticipant: s__('OnCallSchedules|Select participant'),
@@ -30,7 +30,12 @@ export const i18n = {
       title: __('Participants'),
       error: s__('OnCallSchedules|Rotation participants cannot be empty'),
     },
-    rotationLength: { title: s__('OnCallSchedules|Rotation length') },
+    rotationLength: {
+      title: s__('OnCallSchedules|Rotation length'),
+      description: s__(
+        'OnCallSchedules|Please note, rotations with shifts that are less than four hours are currently not supported in the weekly view.',
+      ),
+    },
     startsAt: {
       title: __('Starts on'),
       error: s__('OnCallSchedules|Rotation start date cannot be empty'),
@@ -153,6 +158,7 @@ export default {
 
       <gl-form-group
         :label="$options.i18n.fields.rotationLength.title"
+        :description="$options.i18n.fields.rotationLength.description"
         label-size="sm"
         label-for="rotation-length"
       >

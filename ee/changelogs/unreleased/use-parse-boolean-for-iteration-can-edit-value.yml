@@ -1,5 +1,0 @@
----
-title: Fix invalid prop error for canEdit prop in issue sidebar when user cannot edit iteration
-merge_request: 53819
-author:
-type: fixed

@@ -9,9 +9,9 @@ module EE
     def preload_for_collection
       @preload_for_collection ||= case collection_type
                                   when 'MergeRequest'
-                                    super.push(:approval_rules)
+                                    super + [approval_rules: [:users, :group_users], approval_project_rules: [:users, :group_users]]
                                   when 'Issue'
-                                    super.push(*issue_preloads)
+                                    super + issue_preloads
                                   else
                                     super
                                   end

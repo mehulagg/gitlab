@@ -1,5 +1,5 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlIcon, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueRouter from 'vue-router';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import Item from '~/design_management/components/list/item.vue';
@@ -8,7 +8,7 @@ const localVue = createLocalVue();
 localVue.use(VueRouter);
 const router = new VueRouter();
 
-// Referenced from: doc/api/graphql/reference/gitlab_schema.graphql:DesignVersionEvent
+// Referenced from: gitlab_schema.graphql:DesignVersionEvent
 const DESIGN_VERSION_EVENT = {
   CREATION: 'CREATION',
   DELETION: 'DELETION',

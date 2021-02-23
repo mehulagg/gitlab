@@ -1,11 +1,11 @@
 /* eslint-disable class-methods-use-this */
-import { __ } from '~/locale';
 import { deprecatedCreateFlash as flash } from '~/flash';
+import { __ } from '~/locale';
 import boardsStore from '../stores/boards_store';
-import ListLabel from './label';
 import ListAssignee from './assignee';
-import ListMilestone from './milestone';
 import ListIteration from './iteration';
+import ListLabel from './label';
+import ListMilestone from './milestone';
 import 'ee_else_ce/boards/models/issue';
 
 const TYPES = {
@@ -44,6 +44,7 @@ class List {
     this.isExpandable = Boolean(typeInfo.isExpandable);
     this.isExpanded = !obj.collapsed;
     this.page = 1;
+    this.highlighted = obj.highlighted;
     this.loading = true;
     this.loadingMore = false;
     this.issues = obj.issues || [];

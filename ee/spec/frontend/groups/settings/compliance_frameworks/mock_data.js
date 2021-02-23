@@ -16,6 +16,7 @@ export const validFetchResponse = {
             id: 'gid://gitlab/ComplianceManagement::Framework/1',
             name: 'GDPR',
             description: 'General Data Protection Regulation',
+            pipelineConfigurationFullPath: 'file.yml@group/project',
             color: '#1aaa55',
             __typename: 'ComplianceFramework',
           },
@@ -23,6 +24,7 @@ export const validFetchResponse = {
             id: 'gid://gitlab/ComplianceManagement::Framework/2',
             name: 'PCI-DSS',
             description: 'Payment Card Industry-Data Security Standard',
+            pipelineConfigurationFullPath: 'file.yml@group/project',
             color: '#6666c4',
             __typename: 'ComplianceFramework',
           },
@@ -52,6 +54,7 @@ export const frameworkFoundResponse = {
   id: 'gid://gitlab/ComplianceManagement::Framework/1',
   name: 'GDPR',
   description: 'General Data Protection Regulation',
+  pipelineConfigurationFullPath: 'file.yml@group/project',
   color: '#1aaa55',
 };
 
@@ -66,6 +69,7 @@ export const validFetchOneResponse = {
             id: 'gid://gitlab/ComplianceManagement::Framework/1',
             name: 'GDPR',
             description: 'General Data Protection Regulation',
+            pipelineConfigurationFullPath: 'file.yml@group/project',
             color: '#1aaa55',
             __typename: 'ComplianceFramework',
           },
@@ -84,6 +88,7 @@ export const validCreateResponse = {
         id: 'gid://gitlab/ComplianceManagement::Framework/1',
         name: 'GDPR',
         description: 'General Data Protection Regulation',
+        pipelineConfigurationFullPath: 'file.yml@group/project',
         color: '#1aaa55',
         __typename: 'ComplianceFramework',
       },
@@ -119,6 +124,26 @@ export const errorUpdateResponse = {
       clientMutationId: null,
       errors: ['Invalid values given'],
       __typename: 'UpdateComplianceFrameworkPayload',
+    },
+  },
+};
+
+export const validDeleteResponse = {
+  data: {
+    destroyComplianceFramework: {
+      clientMutationId: null,
+      errors: [],
+      __typename: 'DestroyComplianceFrameworkPayload',
+    },
+  },
+};
+
+export const errorDeleteResponse = {
+  data: {
+    destroyComplianceFramework: {
+      clientMutationId: null,
+      errors: ['graphql error'],
+      __typename: 'DestroyComplianceFrameworkPayload',
     },
   },
 };

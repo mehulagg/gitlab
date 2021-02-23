@@ -10,12 +10,12 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
-import { formatDate } from '~/lib/utils/datetime_utility';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { __ } from '~/locale';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
-import query from '../queries/iteration.query.graphql';
+import { formatDate } from '~/lib/utils/datetime_utility';
+import { __ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { Namespace } from '../constants';
+import query from '../queries/iteration.query.graphql';
 import IterationForm from './iteration_form.vue';
 import IterationReportTabs from './iteration_report_tabs.vue';
 
@@ -69,6 +69,11 @@ export default {
       type: String,
       required: true,
     },
+    hasScopedLabelsFeature: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     iterationId: {
       type: String,
       required: false,
@@ -96,6 +101,11 @@ export default {
       validator: (value) => Object.values(Namespace).includes(value),
     },
     previewMarkdownPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    svgPath: {
       type: String,
       required: false,
       default: '',
@@ -226,9 +236,11 @@ export default {
       />
       <iteration-report-tabs
         :full-path="fullPath"
+        :has-scoped-labels-feature="hasScopedLabelsFeature"
         :iteration-id="iteration.id"
         :labels-fetch-path="labelsFetchPath"
         :namespace-type="namespaceType"
+        :svg-path="svgPath"
       />
     </template>
   </div>

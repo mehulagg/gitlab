@@ -33,14 +33,16 @@ module Integrations
     end
 
     def job_events_data
-      build = project.builds.first
+      build = Ci::JobsFinder.new(current_user: current_user, project: project).execute.first
+
       return { error: s_('TestHooks|Ensure the project has CI jobs.') } unless build.present?
 
       Gitlab::DataBuilder::Build.build(build)
     end
 
     def pipeline_events_data
-      pipeline = project.ci_pipelines.newest_first.first
+      pipeline = Ci::PipelinesFinder.new(project, current_user, order_by: 'id', sort: 'desc').execute.first
+
       return { error: s_('TestHooks|Ensure the project has CI pipelines.') } unless pipeline.present?
 
       Gitlab::DataBuilder::Pipeline.build(pipeline)
@@ -48,6 +50,7 @@ module Integrations
 
     def wiki_page_events_data
       page = project.wiki.list_pages(limit: 1).first
+
       if !project.wiki_enabled? || page.blank?
         return { error: s_('TestHooks|Ensure the wiki is enabled and has pages.') }
       end
@@ -56,14 +59,16 @@ module Integrations
     end
 
     def deployment_events_data
-      deployment = project.deployments.first
+      deployment = DeploymentsFinder.new(project: project, order_by: 'created_at', sort: 'desc').execute.first
+
       return { error: s_('TestHooks|Ensure the project has deployments.') } unless deployment.present?
 
       Gitlab::DataBuilder::Deployment.build(deployment)
     end
 
     def releases_events_data
-      release = project.releases.first
+      release = ReleasesFinder.new(project, current_user, order_by: :created_at, sort: :desc).execute.first
+
       return { error: s_('TestHooks|Ensure the project has releases.') } unless release.present?
 
       release.to_hook_data('create')

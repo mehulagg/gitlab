@@ -1,15 +1,15 @@
 <script>
-import { ApolloMutation } from 'vue-apollo';
 import { GlTooltipDirective, GlIcon, GlLoadingIcon, GlLink, GlBadge } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { ApolloMutation } from 'vue-apollo';
 import createFlash from '~/flash';
+import { s__ } from '~/locale';
 import ReplyPlaceholder from '~/notes/components/discussion_reply_placeholder.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import allVersionsMixin from '../../mixins/all_versions';
+import { ACTIVE_DISCUSSION_SOURCE_TYPES } from '../../constants';
 import createNoteMutation from '../../graphql/mutations/create_note.mutation.graphql';
 import toggleResolveDiscussionMutation from '../../graphql/mutations/toggle_resolve_discussion.mutation.graphql';
 import activeDiscussionQuery from '../../graphql/queries/active_discussion.query.graphql';
-import { ACTIVE_DISCUSSION_SOURCE_TYPES } from '../../constants';
+import allVersionsMixin from '../../mixins/all_versions';
 import { hasErrors } from '../../utils/cache_update';
 import { ADD_DISCUSSION_COMMENT_ERROR } from '../../utils/error_messages';
 import DesignNote from './design_note.vue';
@@ -253,12 +253,12 @@ export default {
         :class="{ 'gl-bg-blue-50': isDiscussionActive }"
         @error="$emit('update-note-error', $event)"
       />
-      <li v-show="isReplyPlaceholderVisible" class="reply-wrapper">
+      <li v-show="isReplyPlaceholderVisible" class="reply-wrapper discussion-reply-holder">
         <reply-placeholder
           v-if="!isFormVisible"
           class="qa-discussion-reply"
-          :button-text="__('Reply...')"
-          @onClick="showForm"
+          :placeholder-text="__('Reply…')"
+          @focus="showForm"
         />
         <apollo-mutation
           v-else

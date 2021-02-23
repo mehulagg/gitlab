@@ -18,7 +18,7 @@ module EE
       end
 
       condition(:export_user_permissions_available) do
-        ::License.feature_available?(:export_user_permissions) && ::Feature.enabled?(:export_user_permissions_feature_flag)
+        ::License.feature_available?(:export_user_permissions)
       end
 
       rule { ~anonymous & operations_dashboard_available }.enable :read_operations_dashboard

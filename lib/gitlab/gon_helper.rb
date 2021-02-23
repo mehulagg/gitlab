@@ -13,7 +13,6 @@ module Gitlab
       gon.asset_host             = ActionController::Base.asset_host
       gon.webpack_public_path    = webpack_public_path
       gon.relative_url_root      = Gitlab.config.gitlab.relative_url_root
-      gon.shortcuts_path         = Gitlab::Routing.url_helpers.help_page_path('shortcuts')
       gon.user_color_scheme      = Gitlab::ColorSchemes.for_user(current_user).css_class
 
       if Gitlab.config.sentry.enabled
@@ -47,7 +46,6 @@ module Gitlab
       push_frontend_feature_flag(:snippets_binary_blob, default_enabled: false)
       push_frontend_feature_flag(:usage_data_api, default_enabled: true)
       push_frontend_feature_flag(:security_auto_fix, default_enabled: false)
-      push_frontend_feature_flag(:gl_tooltips, default_enabled: :yaml)
     end
 
     # Exposes the state of a feature flag to the frontend code.

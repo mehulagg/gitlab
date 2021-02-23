@@ -1,5 +1,4 @@
 <script>
-import { isEqual } from 'lodash';
 import {
   GlAlert,
   GlButton,
@@ -9,11 +8,12 @@ import {
   GlModal,
   GlFormTextarea,
 } from '@gitlab/ui';
-import { initFormField } from 'ee/security_configuration/utils';
+import * as Sentry from '@sentry/browser';
+import { isEqual } from 'lodash';
 import { returnToPreviousPageFactory } from 'ee/security_configuration/dast_profiles/redirect';
-import * as Sentry from '~/sentry/wrapper';
-import { __, s__ } from '~/locale';
+import { initFormField } from 'ee/security_configuration/utils';
 import { serializeFormObject } from '~/lib/utils/forms';
+import { __, s__ } from '~/locale';
 import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';

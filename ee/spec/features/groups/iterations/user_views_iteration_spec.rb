@@ -86,6 +86,7 @@ RSpec.describe 'User views iteration' do
         sign_in(user)
 
         visit group_iteration_path(iteration.group, iteration.id)
+        wait_for_requests
       end
 
       it_behaves_like 'iteration report group by label'

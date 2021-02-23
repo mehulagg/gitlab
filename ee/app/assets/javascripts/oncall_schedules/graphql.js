@@ -1,6 +1,6 @@
+import produce from 'immer';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import produce from 'immer';
 import createDefaultClient from '~/lib/graphql';
 import getShiftTimeUnitWidthQuery from './graphql/queries/get_shift_time_unit_width.query.graphql';
 

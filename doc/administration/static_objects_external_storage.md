@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference
 ---
 
-# Static objects external storage
+# Static objects external storage **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/31025) in GitLab 12.3.
 
@@ -70,7 +70,7 @@ other CDNs or Function as a Service (FaaS) systems should work using the same pr
 
    - `ORIGIN_HOSTNAME`: the hostname of your GitLab installation.
    - `STORAGE_TOKEN`: any arbitrary secure token. You can get a token by running
-     `pwgen -cn1 64` on a UNIX machine. Save this token for the admin panel, as
+     `pwgen -cn1 64` on a UNIX machine. Save this token for the Admin Area, as
      described in the [configuring](#configuring) section.
 
      ```javascript

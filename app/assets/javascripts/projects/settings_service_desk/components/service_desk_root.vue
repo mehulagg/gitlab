@@ -1,7 +1,7 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
+import { __, sprintf } from '~/locale';
 import ServiceDeskSetting from './service_desk_setting.vue';
 
 export default {
@@ -95,7 +95,7 @@ export default {
         })
         .catch((err) => {
           this.showAlert(
-            sprintf(__('An error occured while saving changes: %{error}'), {
+            sprintf(__('An error occurred while saving changes: %{error}'), {
               error: err?.response?.data?.message,
             }),
           );

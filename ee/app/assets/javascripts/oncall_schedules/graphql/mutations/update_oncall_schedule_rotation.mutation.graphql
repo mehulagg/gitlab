@@ -1,7 +1,7 @@
 #import "../fragments/oncall_schedule_rotation.fragment.graphql"
 
-mutation updateRotation($OncallRotationUpdateInput: OncallRotationUpdateInput!) {
-  oncallRotationUpdate(input: $OncallRotationUpdateInput) {
+mutation updateRotation($input: OncallRotationUpdateInput!) {
+  oncallRotationUpdate(input: $input) {
     errors
     oncallRotation {
       ...OnCallRotation

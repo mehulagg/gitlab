@@ -1,8 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdownItem, GlTokenSelector, GlFormGroup, GlToggle } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
+import { shallowMount } from '@vue/test-utils';
 import AddEditRotationForm from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_form.vue';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
+import waitForPromises from 'helpers/wait_for_promises';
 import { participants, getOncallSchedulesQueryResponse } from '../../mocks/apollo_mock';
 
 const projectPath = 'group/project';

@@ -1,8 +1,8 @@
 import MockAdapter from 'axios-mock-adapter';
 import { backoffMockImplementation } from 'helpers/backoff_helper';
 import axios from '~/lib/utils/axios_utils';
-import statusCodes from '~/lib/utils/http_status';
 import * as commonUtils from '~/lib/utils/common_utils';
+import statusCodes from '~/lib/utils/http_status';
 import { getDashboard, getPrometheusQueryData } from '~/monitoring/requests';
 import { metricsDashboardResponse } from '../fixture_data';
 
@@ -94,7 +94,7 @@ describe('monitoring metrics_requests', () => {
     it('rejects after getting an HTTP 500 error', () => {
       mock.onGet(prometheusEndpoint).reply(500, {
         status: 'error',
-        error: 'An error ocurred',
+        error: 'An error occurred',
       });
 
       return getPrometheusQueryData(prometheusEndpoint, params).catch((error) => {
@@ -106,7 +106,7 @@ describe('monitoring metrics_requests', () => {
       // Mock multiple attempts while the cache is filling up and fails
       mock.onGet(prometheusEndpoint).reply(statusCodes.UNAUTHORIZED, {
         status: 'error',
-        error: 'An error ocurred',
+        error: 'An error occurred',
       });
 
       return getPrometheusQueryData(prometheusEndpoint, params).catch((error) => {
@@ -120,7 +120,7 @@ describe('monitoring metrics_requests', () => {
       mock.onGet(prometheusEndpoint).replyOnce(statusCodes.NO_CONTENT);
       mock.onGet(prometheusEndpoint).reply(500, {
         status: 'error',
-        error: 'An error ocurred',
+        error: 'An error occurred',
       }); // 3rd attempt
 
       return getPrometheusQueryData(prometheusEndpoint, params).catch((error) => {

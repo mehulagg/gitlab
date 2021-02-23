@@ -26,6 +26,150 @@ in [Removed Items](../removed_items.md).
 
 <!-- vale gitlab.Spelling = NO -->
 
+## Queries
+
+Queries are used to get the resources, filter or query them.
+
+For more information, visit [Queries and Mutations](https://graphql.org/learn/queries/).
+
+### CiApplicationSettings
+
+CI related settings that apply to the entire instance.
+
+### CiConfig
+
+Get linted and processed contents of a CI config. Should not be requested more than once per request.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `content` | Contents of `.gitlab-ci.yml`. | String! |
+| `dryRun` | Run pipeline creation simulation, or only do static check. | Boolean |
+| `projectPath` | The project of the CI config. | ID! |
+
+### ContainerRepository
+
+Find a container repository.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The global ID of the container repository. | ContainerRepositoryID! |
+
+### CurrentUser
+
+Get information about current user.
+
+### DesignManagement
+
+Fields related to design management.
+
+### Echo
+
+Text to echo back.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `text` | Text to echo back. | String! |
+
+### GeoNode
+
+Find a Geo node.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `name` | The name of the Geo node. Defaults to the current Geo node name. | String |
+
+### Group
+
+Find a group.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+
+### InstanceSecurityDashboard
+
+Fields related to Instance Security Dashboard.
+
+### Issue
+
+Find an Issue.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The global ID of the Issue. | IssueID! |
+
+### Iteration
+
+Find an iteration.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | Find an iteration by its ID. | IterationID! |
+
+### Metadata
+
+Metadata about GitLab.
+
+### Milestone
+
+Find a milestone.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | Find a milestone by its ID. | MilestoneID! |
+
+### Namespace
+
+Find a namespace.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+
+### Package
+
+Find a package.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The global ID of the package. | PackagesPackageID! |
+
+### Project
+
+Find a project.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+
+### RunnerSetup
+
+Get runner setup instructions.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `architecture` | Architecture to generate the instructions for. | String! |
+| `groupId` | Group to register the runner for. | GroupID |
+| `platform` | Platform to generate the instructions for. | String! |
+| `projectId` | Project to register the runner for. | ProjectID |
+
+### User
+
+Find a user.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | ID of the User. | UserID |
+| `username` | Username of the User. | String |
+
+### Vulnerability
+
+Find a vulnerability.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `id` | The Global ID of the Vulnerability. | VulnerabilityID! |
+
 ## Object types
 
 Object types represent the resources that the GitLab GraphQL API can return.
@@ -130,6 +274,9 @@ An endpoint and credentials used to accept alerts for a project.
 | `apiUrl` | String | URL at which Prometheus metrics can be queried to populate the metrics dashboard. |
 | `id` | ID! | ID of the integration. |
 | `name` | String | Name of the integration. |
+| `payloadAlertFields` | AlertManagementPayloadAlertField! => Array | Extract alert fields from payload example for custom mapping. |
+| `payloadAttributeMappings` | AlertManagementPayloadAlertMappingField! => Array | The custom mapping of GitLab alert attributes to fields from the payload_example. |
+| `payloadExample` | JsonString | The example of an alert payload. |
 | `token` | String | Token used to authenticate alert notification requests. |
 | `type` | AlertManagementIntegrationType! | Type of integration. |
 | `url` | String | Endpoint which accepts alert notifications. |
@@ -140,6 +287,17 @@ Parsed field from an alert used for custom mappings.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `label` | String | Human-readable label of the payload path. |
+| `path` | String! => Array | Path to value inside payload JSON. |
+| `type` | AlertManagementPayloadAlertFieldType | Type of the parsed value. |
+
+### AlertManagementPayloadAlertMappingField
+
+Parsed field (with its name) from an alert used for custom mappings.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `fieldName` | AlertManagementPayloadAlertFieldName | A GitLab alert field name. |
 | `label` | String | Human-readable label of the payload path. |
 | `path` | String! => Array | Path to value inside payload JSON. |
 | `type` | AlertManagementPayloadAlertFieldType | Type of the parsed value. |
@@ -191,9 +349,20 @@ Data associated with configuring API fuzzing scans in GitLab CI.
 | `scanModes` | ApiFuzzingScanMode! => Array | All available scan modes. |
 | `scanProfiles` | ApiFuzzingScanProfile! => Array | All default scan profiles. |
 
+### ApiFuzzingCiConfigurationCreatePayload
+
+Autogenerated return type of ApiFuzzingCiConfigurationCreate.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `clientMutationId` | String | A unique identifier for the client performing the mutation. |
+| `configurationYaml` | String | A YAML snippet that can be inserted into the project's `.gitlab-ci.yml` to set up API fuzzing scans. |
+| `errors` | String! => Array | Errors encountered during execution of the mutation. |
+| `gitlabCiYamlEditPath` | String | The location at which the project's `.gitlab-ci.yml` file can be edited in the browser. |
+
 ### ApiFuzzingScanProfile
 
-An API Fuzzing scan profile..
+An API Fuzzing scan profile.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -269,7 +438,7 @@ Autogenerated return type of AwardEmojiToggle.
 
 ### Board
 
-Represents a project or group board.
+Represents a project or group issue board.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -309,6 +478,7 @@ Represents an epic on an issue board.
 | `dueDateFixed` | Time | Fixed due date of the epic. |
 | `dueDateFromMilestones` | Time | Inherited due date of the epic from milestones. |
 | `dueDateIsFixed` | Boolean | Indicates if the due date has been manually set. |
+| `events` | EventConnection | A list of events associated with the object. |
 | `group` | Group! | Group to which the epic belongs. |
 | `hasChildren` | Boolean! | Indicates if the epic has children. |
 | `hasIssues` | Boolean! | Indicates if the epic has direct issues. |
@@ -524,6 +694,7 @@ Autogenerated return type of CiCdSettingsUpdate.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `createdAt` | Time | Timestamp the cluster agent was created. |
+| `createdByUser` | User | User object, containing information about the person who created the agent. |
 | `id` | ID! | ID of the cluster agent. |
 | `name` | String | Name of the cluster agent. |
 | `project` | Project | The project this cluster agent is associated with. |
@@ -545,6 +716,8 @@ Autogenerated return type of ClusterAgentDelete.
 | ----- | ---- | ----------- |
 | `clusterAgent` | ClusterAgent | Cluster agent this token is associated with. |
 | `createdAt` | Time | Timestamp the token was created. |
+| `createdByUser` | User | The user who created the token. |
+| `description` | String | Description of the token. |
 | `id` | ClustersAgentTokenID! | Global ID of the token. |
 
 ### ClusterAgentTokenCreatePayload
@@ -629,7 +802,7 @@ Represents a ComplianceFramework associated with a Project.
 | `description` | String! | Description of the compliance framework. |
 | `id` | ID! | Compliance framework ID. |
 | `name` | String! | Name of the compliance framework. |
-| `pipelineConfigurationFullPath` | String | Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/compliance/soc2/.gitlab-ci.yml`. |
+| `pipelineConfigurationFullPath` | String | Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hipaa` **(ULTIMATE)**. |
 
 ### ComposerMetadata
 
@@ -942,6 +1115,36 @@ Autogenerated return type of DastProfileCreate.
 | `dastProfile` | DastProfile | The created profile. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | String | The URL of the pipeline that was created. Requires `runAfterCreate` to be set to `true`. |
+
+### DastProfileDeletePayload
+
+Autogenerated return type of DastProfileDelete.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `clientMutationId` | String | A unique identifier for the client performing the mutation. |
+| `errors` | String! => Array | Errors encountered during execution of the mutation. |
+
+### DastProfileRunPayload
+
+Autogenerated return type of DastProfileRun.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `clientMutationId` | String | A unique identifier for the client performing the mutation. |
+| `errors` | String! => Array | Errors encountered during execution of the mutation. |
+| `pipelineUrl` | String | URL of the pipeline that was created. |
+
+### DastProfileUpdatePayload
+
+Autogenerated return type of DastProfileUpdate.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `clientMutationId` | String | A unique identifier for the client performing the mutation. |
+| `dastProfile` | DastProfile | The updated profile. |
+| `errors` | String! => Array | Errors encountered during execution of the mutation. |
+| `pipelineUrl` | String | The URL of the pipeline that was created. Requires the input argument `runAfterUpdate` to be set to `true` when calling the mutation, otherwise no pipeline will be created. |
 
 ### DastScannerProfile
 
@@ -1304,10 +1507,9 @@ Segment.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `groups` | Group! => Array | Assigned groups. |
 | `id` | ID! | ID of the segment. |
 | `latestSnapshot` | DevopsAdoptionSnapshot | The latest adoption metrics for the segment. |
-| `name` | String! | Name of the segment. |
+| `namespace` | Namespace | Segment namespace. |
 
 ### DevopsAdoptionSnapshot
 
@@ -1448,6 +1650,7 @@ Represents an epic.
 | `dueDateFixed` | Time | Fixed due date of the epic. |
 | `dueDateFromMilestones` | Time | Inherited due date of the epic from milestones. |
 | `dueDateIsFixed` | Boolean | Indicates if the due date has been manually set. |
+| `events` | EventConnection | A list of events associated with the object. |
 | `group` | Group! | Group to which the epic belongs. |
 | `hasChildren` | Boolean! | Indicates if the epic has children. |
 | `hasIssues` | Boolean! | Indicates if the epic has direct issues. |
@@ -1495,9 +1698,13 @@ Represents an epic board.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `id` | BoardsEpicBoardID! | Global ID of the board. |
+| `hideBacklogList` | Boolean | Whether or not backlog list is hidden. |
+| `hideClosedList` | Boolean | Whether or not closed list is hidden. |
+| `id` | BoardsEpicBoardID! | Global ID of the epic board. |
 | `lists` | EpicListConnection | Epic board lists. |
-| `name` | String | Name of the board. |
+| `name` | String | Name of the epic board. |
+| `webPath` | String! | Web path of the epic board. |
+| `webUrl` | String! | Web URL of the epic board. |
 
 ### EpicBoardCreatePayload
 
@@ -1659,6 +1866,18 @@ Autogenerated return type of EpicTreeReorder.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
+### Event
+
+Representing an event.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `action` | EventAction! | Action of the event. |
+| `author` | User! | Author of this event. |
+| `createdAt` | Time! | When this event was created. |
+| `id` | ID! | ID of the event. |
+| `updatedAt` | Time! | When this event was updated. |
+
 ### ExportRequirementsPayload
 
 Autogenerated return type of ExportRequirements.
@@ -1674,37 +1893,37 @@ Represents an external issue.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `createdAt` | Time | Timestamp of when the issue was created |
-| `externalTracker` | String | Type of external tracker |
-| `relativeReference` | String | Relative reference of the issue in the external tracker |
-| `status` | String | Status of the issue in the external tracker |
-| `title` | String | Title of the issue in the external tracker |
-| `updatedAt` | Time | Timestamp of when the issue was updated |
-| `webUrl` | String | URL to the issue in the external tracker |
+| `createdAt` | Time | Timestamp of when the issue was created. |
+| `externalTracker` | String | Type of external tracker. |
+| `relativeReference` | String | Relative reference of the issue in the external tracker. |
+| `status` | String | Status of the issue in the external tracker. |
+| `title` | String | Title of the issue in the external tracker. |
+| `updatedAt` | Time | Timestamp of when the issue was updated. |
+| `webUrl` | String | URL to the issue in the external tracker. |
 
 ### GeoNode
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `containerRepositoriesMaxCapacity` | Int | The maximum concurrency of container repository sync for this secondary node |
-| `enabled` | Boolean | Indicates whether this Geo node is enabled |
-| `filesMaxCapacity` | Int | The maximum concurrency of LFS/attachment backfill for this secondary node |
-| `id` | ID! | ID of this GeoNode |
-| `internalUrl` | String | The URL defined on the primary node that secondary nodes should use to contact it |
-| `mergeRequestDiffRegistries` | MergeRequestDiffRegistryConnection | Find merge request diff registries on this Geo node |
-| `minimumReverificationInterval` | Int | The interval (in days) in which the repository verification is valid. Once expired, it will be reverified |
-| `name` | String | The unique identifier for this Geo node |
-| `packageFileRegistries` | PackageFileRegistryConnection | Package file registries of the GeoNode |
-| `primary` | Boolean | Indicates whether this Geo node is the primary |
-| `reposMaxCapacity` | Int | The maximum concurrency of repository backfill for this secondary node |
-| `selectiveSyncNamespaces` | NamespaceConnection | The namespaces that should be synced, if `selective_sync_type` == `namespaces` |
-| `selectiveSyncShards` | String! => Array | The repository storages whose projects should be synced, if `selective_sync_type` == `shards` |
-| `selectiveSyncType` | String | Indicates if syncing is limited to only specific groups, or shards |
-| `snippetRepositoryRegistries` | SnippetRepositoryRegistryConnection | Find snippet repository registries on this Geo node |
-| `syncObjectStorage` | Boolean | Indicates if this secondary node will replicate blobs in Object Storage |
-| `terraformStateVersionRegistries` | TerraformStateVersionRegistryConnection | Find terraform state version registries on this Geo node |
-| `url` | String | The user-facing URL for this Geo node |
-| `verificationMaxCapacity` | Int | The maximum concurrency of repository verification for this secondary node |
+| `containerRepositoriesMaxCapacity` | Int | The maximum concurrency of container repository sync for this secondary node. |
+| `enabled` | Boolean | Indicates whether this Geo node is enabled. |
+| `filesMaxCapacity` | Int | The maximum concurrency of LFS/attachment backfill for this secondary node. |
+| `id` | ID! | ID of this GeoNode. |
+| `internalUrl` | String | The URL defined on the primary node that secondary nodes should use to contact it. |
+| `mergeRequestDiffRegistries` | MergeRequestDiffRegistryConnection | Find merge request diff registries on this Geo node. |
+| `minimumReverificationInterval` | Int | The interval (in days) in which the repository verification is valid. Once expired, it will be reverified. |
+| `name` | String | The unique identifier for this Geo node. |
+| `packageFileRegistries` | PackageFileRegistryConnection | Package file registries of the GeoNode. |
+| `primary` | Boolean | Indicates whether this Geo node is the primary. |
+| `reposMaxCapacity` | Int | The maximum concurrency of repository backfill for this secondary node. |
+| `selectiveSyncNamespaces` | NamespaceConnection | The namespaces that should be synced, if `selective_sync_type` == `namespaces`. |
+| `selectiveSyncShards` | String! => Array | The repository storages whose projects should be synced, if `selective_sync_type` == `shards`. |
+| `selectiveSyncType` | String | Indicates if syncing is limited to only specific groups, or shards. |
+| `snippetRepositoryRegistries` | SnippetRepositoryRegistryConnection | Find snippet repository registries on this Geo node. |
+| `syncObjectStorage` | Boolean | Indicates if this secondary node will replicate blobs in Object Storage. |
+| `terraformStateVersionRegistries` | TerraformStateVersionRegistryConnection | Find terraform state version registries on this Geo node. |
+| `url` | String | The user-facing URL for this Geo node. |
+| `verificationMaxCapacity` | Int | The maximum concurrency of repository verification for this secondary node. |
 
 ### GitlabSubscriptionActivatePayload
 
@@ -1829,7 +2048,7 @@ Contains statistics about a group.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `releaseStats` | GroupReleaseStats | Statistics related to releases within the group |
+| `releaseStats` | GroupReleaseStats | Statistics related to releases within the group. |
 
 ### HttpIntegrationCreatePayload
 
@@ -1877,6 +2096,7 @@ Describes an incident management on-call rotation.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `endsAt` | Time | End date and time of the on-call rotation. |
 | `id` | IncidentManagementOncallRotationID! | ID of the on-call rotation. |
 | `length` | Int | Length of the on-call schedule, in the units specified by lengthUnit. |
 | `lengthUnit` | OncallRotationUnitEnum | Unit of the on-call rotation length. |
@@ -1891,15 +2111,15 @@ Describes an incident management on-call schedule.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String | Description of the on-call schedule |
-| `iid` | ID! | Internal ID of the on-call schedule |
-| `name` | String! | Name of the on-call schedule |
-| `rotations` | IncidentManagementOncallRotationConnection! | On-call rotations for the on-call schedule |
-| `timezone` | String! | Time zone of the on-call schedule |
+| `description` | String | Description of the on-call schedule. |
+| `iid` | ID! | Internal ID of the on-call schedule. |
+| `name` | String! | Name of the on-call schedule. |
+| `rotations` | IncidentManagementOncallRotationConnection! | On-call rotations for the on-call schedule. |
+| `timezone` | String! | Time zone of the on-call schedule. |
 
 ### IncidentManagementOncallShift
 
-A block of time for which a participant is on-call..
+A block of time for which a participant is on-call.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -1911,20 +2131,10 @@ A block of time for which a participant is on-call..
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `projects` | ProjectConnection! | Projects selected in Instance Security Dashboard |
-| `vulnerabilityGrades` | VulnerableProjectsByGrade! => Array | Represents vulnerable project counts for each grade |
-| `vulnerabilityScanners` | VulnerabilityScannerConnection | Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard |
-| `vulnerabilitySeveritiesCount` | VulnerabilitySeveritiesCount | Counts for each vulnerability severity from projects selected in Instance Security Dashboard |
-
-### InstanceStatisticsMeasurement
-
-Represents a recorded measurement (object count) for the Admins.
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `count` | Int! | Object count. |
-| `identifier` | MeasurementIdentifier! | The type of objects being measured. |
-| `recordedAt` | Time | The time the measurement was recorded. |
+| `projects` | ProjectConnection! | Projects selected in Instance Security Dashboard. |
+| `vulnerabilityGrades` | VulnerableProjectsByGrade! => Array | Represents vulnerable project counts for each grade. |
+| `vulnerabilityScanners` | VulnerabilityScannerConnection | Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard. |
+| `vulnerabilitySeveritiesCount` | VulnerabilitySeveritiesCount | Counts for each vulnerability severity from projects selected in Instance Security Dashboard. |
 
 ### Issue
 
@@ -2126,21 +2336,21 @@ Represents an iteration object.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `createdAt` | Time! | Timestamp of iteration creation |
-| `description` | String | Description of the iteration |
+| `createdAt` | Time! | Timestamp of iteration creation. |
+| `description` | String | Description of the iteration. |
 | `descriptionHtml` | String | The GitLab Flavored Markdown rendering of `description` |
-| `dueDate` | Time | Timestamp of the iteration due date |
-| `id` | ID! | ID of the iteration |
-| `iid` | ID! | Internal ID of the iteration |
-| `report` | TimeboxReport | Historically accurate report about the timebox |
-| `scopedPath` | String | Web path of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts |
-| `scopedUrl` | String | Web URL of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts |
-| `startDate` | Time | Timestamp of the iteration start date |
-| `state` | IterationState! | State of the iteration |
-| `title` | String! | Title of the iteration |
-| `updatedAt` | Time! | Timestamp of last iteration update |
-| `webPath` | String! | Web path of the iteration |
-| `webUrl` | String! | Web URL of the iteration |
+| `dueDate` | Time | Timestamp of the iteration due date. |
+| `id` | ID! | ID of the iteration. |
+| `iid` | ID! | Internal ID of the iteration. |
+| `report` | TimeboxReport | Historically accurate report about the timebox. |
+| `scopedPath` | String | Web path of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts. |
+| `scopedUrl` | String | Web URL of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts. |
+| `startDate` | Time | Timestamp of the iteration start date. |
+| `state` | IterationState! | State of the iteration. |
+| `title` | String! | Title of the iteration. |
+| `updatedAt` | Time! | Timestamp of last iteration update. |
+| `webPath` | String! | Web path of the iteration. |
+| `webUrl` | String! | Web URL of the iteration. |
 
 ### JiraImport
 
@@ -2206,11 +2416,13 @@ Autogenerated return type of JiraImportUsers.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `color` | String! | Background color of the label. |
+| `createdAt` | Time! | When this label was created. |
 | `description` | String | Description of the label (Markdown rendered as HTML for caching). |
 | `descriptionHtml` | String | The GitLab Flavored Markdown rendering of `description` |
 | `id` | ID! | Label ID. |
 | `textColor` | String! | Text color of the label. |
 | `title` | String! | Content of the label. |
+| `updatedAt` | Time! | When this label was last updated. |
 
 ### LabelCreatePayload
 
@@ -2265,6 +2477,7 @@ Autogenerated return type of MarkAsSpamSnippet.
 | `downvotes` | Int! | Number of downvotes for the merge request. |
 | `forceRemoveSourceBranch` | Boolean | Indicates if the project settings will lead to source branch deletion after merge. |
 | `hasCi` | Boolean! | Indicates if the merge request has CI. |
+| `hasSecurityReports` | Boolean! | Indicates if the source branch has any security reports. |
 | `headPipeline` | Pipeline | The pipeline running on the branch HEAD of the merge request. |
 | `id` | ID! | ID of the merge request. |
 | `iid` | String! | Internal ID of the merge request. |
@@ -2339,7 +2552,7 @@ Represents the Geo sync and verification state of a Merge Request diff.
 | `id` | ID! | ID of the MergeRequestDiffRegistry |
 | `lastSyncFailure` | String | Error message during sync of the MergeRequestDiffRegistry |
 | `lastSyncedAt` | Time | Timestamp of the most recent successful sync of the MergeRequestDiffRegistry |
-| `mergeRequestDiffId` | ID! | ID of the Merge Request diff |
+| `mergeRequestDiffId` | ID! | ID of the Merge Request diff. |
 | `retryAt` | Time | Timestamp after which the MergeRequestDiffRegistry should be resynced |
 | `retryCount` | Int | Number of consecutive failed sync attempts of the MergeRequestDiffRegistry |
 | `state` | RegistryState | Sync state of the MergeRequestDiffRegistry |
@@ -2453,11 +2666,11 @@ Represents a metric image upload.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `fileName` | String | File name of the metric image |
-| `filePath` | String | File path of the metric image |
-| `id` | ID! | ID of the metric upload |
-| `iid` | ID! | Internal ID of the metric upload |
-| `url` | String! | URL of the metric source |
+| `fileName` | String | File name of the metric image. |
+| `filePath` | String | File path of the metric image. |
+| `id` | ID! | ID of the metric upload. |
+| `iid` | ID! | Internal ID of the metric upload. |
+| `url` | String! | URL of the metric source. |
 
 ### MetricsDashboard
 
@@ -2489,7 +2702,7 @@ Represents a milestone.
 | `groupMilestone` | Boolean! | Indicates if milestone is at group level. |
 | `id` | ID! | ID of the milestone. |
 | `projectMilestone` | Boolean! | Indicates if milestone is at project level. |
-| `report` | TimeboxReport | Historically accurate report about the timebox |
+| `report` | TimeboxReport | Historically accurate report about the timebox. |
 | `startDate` | Time | Timestamp of the milestone start date. |
 | `state` | MilestoneStateEnum! | State of the milestone. |
 | `stats` | MilestoneStats | Milestone statistics. |
@@ -2679,7 +2892,7 @@ Represents the Geo sync and verification state of a package file.
 | `id` | ID! | ID of the PackageFileRegistry |
 | `lastSyncFailure` | String | Error message during sync of the PackageFileRegistry |
 | `lastSyncedAt` | Time | Timestamp of the most recent successful sync of the PackageFileRegistry |
-| `packageFileId` | ID! | ID of the PackageFile |
+| `packageFileId` | ID! | ID of the PackageFile. |
 | `retryAt` | Time | Timestamp after which the PackageFileRegistry should be resynced |
 | `retryCount` | Int | Number of consecutive failed sync attempts of the PackageFileRegistry |
 | `state` | RegistryState | Sync state of the PackageFileRegistry |
@@ -2723,7 +2936,7 @@ Represents a version of a package in the Package Registry.
 
 ### PageInfo
 
-Information about pagination in a connection..
+Information about pagination in a connection.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2740,7 +2953,7 @@ Information about pagination in a connection..
 | `beforeSha` | String | Base SHA of the source branch. |
 | `cancelable` | Boolean! | Specifies if a pipeline can be canceled. |
 | `committedAt` | Time | Timestamp of the pipeline's commit. |
-| `configSource` | PipelineConfigSourceEnum | Configuration source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE) |
+| `configSource` | PipelineConfigSourceEnum | Configuration source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE, COMPLIANCE_SOURCE) |
 | `coverage` | Float | Coverage percentage. |
 | `createdAt` | Time! | Timestamp of the pipeline's creation. |
 | `detailedStatus` | DetailedStatus! | Detailed status of the pipeline. |
@@ -2753,6 +2966,7 @@ Information about pagination in a connection..
 | `path` | String | Relative path to the pipeline's page. |
 | `project` | Project | Project the pipeline belongs to. |
 | `retryable` | Boolean! | Specifies if a pipeline can be retried. |
+| `securityReportFindings` | PipelineSecurityReportFindingConnection | Vulnerability findings reported on the pipeline. |
 | `securityReportSummary` | SecurityReportSummary | Vulnerability and scanned resource counts for each security scanner of the pipeline. |
 | `sha` | String! | SHA of the pipeline's commit. |
 | `sourceJob` | CiJob | Job where pipeline was triggered from. |
@@ -2763,6 +2977,7 @@ Information about pagination in a connection..
 | `upstream` | Pipeline | Pipeline that triggered the pipeline. |
 | `user` | User | Pipeline user. |
 | `userPermissions` | PipelinePermissions! | Permissions for the current user on the resource |
+| `warnings` | Boolean! | Indicates if a pipeline has warnings. |
 
 ### PipelineAnalytics
 
@@ -2816,6 +3031,25 @@ Autogenerated return type of PipelineRetry.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `pipeline` | Pipeline | The pipeline after mutation. |
 
+### PipelineSecurityReportFinding
+
+Represents vulnerability finding of a security report on the pipeline.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `confidence` | String | Type of the security report that found the vulnerability. |
+| `description` | String | Description of the vulnerability finding. |
+| `identifiers` | VulnerabilityIdentifier! => Array | Identifiers of the vulnerabilit finding. |
+| `location` | VulnerabilityLocation | Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability. |
+| `name` | String | Name of the vulnerability finding. |
+| `project` | Project | The project on which the vulnerability finding was found. |
+| `projectFingerprint` | String | Name of the vulnerability finding. |
+| `reportType` | VulnerabilityReportType | Type of the security report that found the vulnerability finding. |
+| `scanner` | VulnerabilityScanner | Scanner metadata for the vulnerability. |
+| `severity` | VulnerabilitySeverity | Severity of the vulnerability finding. |
+| `solution` | String | URL to the vulnerability's details page. |
+| `uuid` | String | Name of the vulnerability finding. |
+
 ### Project
 
 | Field | Type | Description |
@@ -2824,6 +3058,7 @@ Autogenerated return type of PipelineRetry.
 | `alertManagementAlert` | AlertManagementAlert | A single Alert Management alert of the project. |
 | `alertManagementAlertStatusCounts` | AlertManagementAlertStatusCountsType | Counts of alerts by status for the project. |
 | `alertManagementAlerts` | AlertManagementAlertConnection | Alert Management alerts of the project. |
+| `alertManagementHttpIntegrations` | AlertManagementHttpIntegrationConnection | HTTP Integrations which can receive alerts for the project. |
 | `alertManagementIntegrations` | AlertManagementIntegrationConnection | Integrations which can receive alerts for the project. |
 | `alertManagementPayloadFields` | AlertManagementPayloadAlertField! => Array | Extract alert fields from payload for custom mapping. |
 | `allowMergeOnSkippedPipeline` | Boolean | If `only_allow_merge_if_pipeline_succeeds` is true, indicates if merge requests of the project can also be merged with skipped jobs. |
@@ -3214,20 +3449,20 @@ Represents a requirement.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `author` | User! | Author of the requirement |
-| `createdAt` | Time! | Timestamp of when the requirement was created |
-| `description` | String | Description of the requirement |
+| `author` | User! | Author of the requirement. |
+| `createdAt` | Time! | Timestamp of when the requirement was created. |
+| `description` | String | Description of the requirement. |
 | `descriptionHtml` | String | The GitLab Flavored Markdown rendering of `description` |
-| `id` | ID! | ID of the requirement |
-| `iid` | ID! | Internal ID of the requirement |
-| `lastTestReportManuallyCreated` | Boolean | Indicates if latest test report was created by user |
-| `lastTestReportState` | TestReportState | Latest requirement test report state |
-| `project` | Project! | Project to which the requirement belongs |
-| `state` | RequirementState! | State of the requirement |
-| `testReports` | TestReportConnection | Test reports of the requirement |
-| `title` | String | Title of the requirement |
+| `id` | ID! | ID of the requirement. |
+| `iid` | ID! | Internal ID of the requirement. |
+| `lastTestReportManuallyCreated` | Boolean | Indicates if latest test report was created by user. |
+| `lastTestReportState` | TestReportState | Latest requirement test report state. |
+| `project` | Project! | Project to which the requirement belongs. |
+| `state` | RequirementState! | State of the requirement. |
+| `testReports` | TestReportConnection | Test reports of the requirement. |
+| `title` | String | Title of the requirement. |
 | `titleHtml` | String | The GitLab Flavored Markdown rendering of `title` |
-| `updatedAt` | Time! | Timestamp of when the requirement was last updated |
+| `updatedAt` | Time! | Timestamp of when the requirement was last updated. |
 | `userPermissions` | RequirementPermissions! | Permissions for the current user on the resource |
 
 ### RequirementPermissions
@@ -3248,8 +3483,8 @@ Counts of requirements by their state.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `archived` | Int | Number of archived requirements |
-| `opened` | Int | Number of opened requirements |
+| `archived` | Int | Number of archived requirements. |
+| `opened` | Int | Number of opened requirements. |
 
 ### RevertVulnerabilityToDetectedPayload
 
@@ -3359,8 +3594,8 @@ Represents a resource scanned by a security scan.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `requestMethod` | String | The HTTP request method used to access the URL |
-| `url` | String | The URL scanned by the scanner |
+| `requestMethod` | String | The HTTP request method used to access the URL. |
+| `url` | String | The URL scanned by the scanner. |
 
 ### SecurityReportSummary
 
@@ -3382,10 +3617,10 @@ Represents a section of a summary of a security report.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `scannedResources` | ScannedResourceConnection | A list of the first 20 scanned resources |
-| `scannedResourcesCount` | Int | Total number of scanned resources |
-| `scannedResourcesCsvPath` | String | Path to download all the scanned resources in CSV format |
-| `vulnerabilitiesCount` | Int | Total number of vulnerabilities |
+| `scannedResources` | ScannedResourceConnection | A list of the first 20 scanned resources. |
+| `scannedResourcesCount` | Int | Total number of scanned resources. |
+| `scannedResourcesCsvPath` | String | Path to download all the scanned resources in CSV format. |
+| `vulnerabilitiesCount` | Int | Total number of vulnerabilities. |
 
 ### SecurityScanners
 
@@ -3596,7 +3831,7 @@ Represents the Geo sync and verification state of a snippet repository.
 | `lastSyncedAt` | Time | Timestamp of the most recent successful sync of the SnippetRepositoryRegistry |
 | `retryAt` | Time | Timestamp after which the SnippetRepositoryRegistry should be resynced |
 | `retryCount` | Int | Number of consecutive failed sync attempts of the SnippetRepositoryRegistry |
-| `snippetRepositoryId` | ID! | ID of the Snippet Repository |
+| `snippetRepositoryId` | ID! | ID of the Snippet Repository. |
 | `state` | RegistryState | Sync state of the SnippetRepositoryRegistry |
 
 ### StatusAction
@@ -3695,7 +3930,7 @@ Represents the Geo sync and verification state of a terraform state version.
 | `retryAt` | Time | Timestamp after which the TerraformStateVersionRegistry should be resynced |
 | `retryCount` | Int | Number of consecutive failed sync attempts of the TerraformStateVersionRegistry |
 | `state` | RegistryState | Sync state of the TerraformStateVersionRegistry |
-| `terraformStateVersionId` | ID! | ID of the terraform state version |
+| `terraformStateVersionId` | ID! | ID of the terraform state version. |
 
 ### TestReport
 
@@ -3703,10 +3938,10 @@ Represents a requirement test report.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `author` | User | Author of the test report |
-| `createdAt` | Time! | Timestamp of when the test report was created |
-| `id` | ID! | ID of the test report |
-| `state` | TestReportState! | State of the test report |
+| `author` | User | Author of the test report. |
+| `createdAt` | Time! | Timestamp of when the test report was created. |
+| `id` | ID! | ID of the test report. |
+| `state` | TestReportState! | State of the test report. |
 
 ### TimeReportStats
 
@@ -3714,9 +3949,9 @@ Represents the time report stats for timeboxes.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `complete` | TimeboxMetrics | Completed issues metrics |
-| `incomplete` | TimeboxMetrics | Incomplete issues metrics |
-| `total` | TimeboxMetrics | Total issues metrics |
+| `complete` | TimeboxMetrics | Completed issues metrics. |
+| `incomplete` | TimeboxMetrics | Incomplete issues metrics. |
+| `total` | TimeboxMetrics | Total issues metrics. |
 
 ### TimeboxMetrics
 
@@ -3724,8 +3959,8 @@ Represents measured stats metrics for timeboxes.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `count` | Int! | The count metric |
-| `weight` | Int! | The weight metric |
+| `count` | Int! | The count metric. |
+| `weight` | Int! | The weight metric. |
 
 ### TimeboxReport
 
@@ -3733,18 +3968,18 @@ Represents a historically accurate report about the timebox.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `burnupTimeSeries` | BurnupChartDailyTotals! => Array | Daily scope and completed totals for burnup charts |
-| `stats` | TimeReportStats | Represents the time report stats for the timebox |
+| `burnupTimeSeries` | BurnupChartDailyTotals! => Array | Daily scope and completed totals for burnup charts. |
+| `stats` | TimeReportStats | Represents the time report stats for the timebox. |
 
 ### Timelog
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `issue` | Issue | The issue that logged time was added to |
-| `note` | Note | The note where the quick action to add the logged time was executed |
-| `spentAt` | Time | Timestamp of when the time tracked was spent at |
-| `timeSpent` | Int! | The time spent displayed in seconds |
-| `user` | User! | The user that logged the time |
+| `issue` | Issue | The issue that logged time was added to. |
+| `note` | Note | The note where the quick action to add the logged time was executed. |
+| `spentAt` | Time | Timestamp of when the time tracked was spent at. |
+| `timeSpent` | Int! | The time spent displayed in seconds. |
+| `user` | User! | The user that logged the time. |
 
 ### Todo
 
@@ -3911,16 +4146,6 @@ Autogenerated return type of UpdateContainerExpirationPolicy.
 | `containerExpirationPolicy` | ContainerExpirationPolicy | The container expiration policy after mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### UpdateDevopsAdoptionSegmentPayload
-
-Autogenerated return type of UpdateDevopsAdoptionSegment.
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `clientMutationId` | String | A unique identifier for the client performing the mutation. |
-| `errors` | String! => Array | Errors encountered during execution of the mutation. |
-| `segment` | DevopsAdoptionSegment | The segment after mutation. |
-
 ### UpdateEpicPayload
 
 Autogenerated return type of UpdateEpic.
@@ -4005,6 +4230,16 @@ Autogenerated return type of UpdateSnippet.
 | `spam` | Boolean | Indicates whether the operation was detected as definite spam. There is no option to resubmit the request with a CAPTCHA response. |
 | `spamLogId` | Int | The spam log ID which must be passed along with a valid CAPTCHA response for an operation to be completed. Included only when an operation was not completed because "NeedsCaptchaResponse" is true. |
 
+### UsageTrendsMeasurement
+
+Represents a recorded measurement (object count) for the Admins.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `count` | Int! | Object count. |
+| `identifier` | MeasurementIdentifier! | The type of objects being measured. |
+| `recordedAt` | Time | The time the measurement was recorded. |
+
 ### User
 
 | Field | Type | Description |
@@ -4012,6 +4247,7 @@ Autogenerated return type of UpdateSnippet.
 | `assignedMergeRequests` | MergeRequestConnection | Merge Requests assigned to the user. |
 | `authoredMergeRequests` | MergeRequestConnection | Merge Requests authored by the user. |
 | `avatarUrl` | String | URL of the user's avatar. |
+| `bot` | Boolean! | Indicates if the user is a bot. |
 | `email` **{warning-solid}** | String | **Deprecated:** Use public_email. Deprecated in 13.7. |
 | `groupCount` | Int | Group count for the user. Available only when feature flag `user_group_counts` is enabled. |
 | `groupMemberships` | GroupMemberConnection | Group memberships of the user. |
@@ -4053,12 +4289,12 @@ Represents the count of vulnerabilities by severity on a particular day. This da
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `critical` | Int! | Total number of vulnerabilities on a particular day with critical severity |
-| `date` | ISO8601Date! | Date for the count |
+| `date` | ISO8601Date! | Date for the count. |
 | `high` | Int! | Total number of vulnerabilities on a particular day with high severity |
 | `info` | Int! | Total number of vulnerabilities on a particular day with info severity |
 | `low` | Int! | Total number of vulnerabilities on a particular day with low severity |
 | `medium` | Int! | Total number of vulnerabilities on a particular day with medium severity |
-| `total` | Int! | Total number of vulnerabilities on a particular day |
+| `total` | Int! | Total number of vulnerabilities on a particular day. |
 | `unknown` | Int! | Total number of vulnerabilities on a particular day with unknown severity |
 
 ### VulnerabilitiesCountByDayAndSeverity
@@ -4067,9 +4303,9 @@ Represents the number of vulnerabilities for a particular severity on a particul
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `count` | Int | Number of vulnerabilities |
-| `day` | ISO8601Date | Date for the count |
-| `severity` | VulnerabilitySeverity | Severity of the counted vulnerabilities |
+| `count` | Int | Number of vulnerabilities. |
+| `day` | ISO8601Date | Date for the count. |
+| `severity` | VulnerabilitySeverity | Severity of the counted vulnerabilities. |
 
 ### Vulnerability
 
@@ -4077,35 +4313,35 @@ Represents a vulnerability.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `confirmedAt` | Time | Timestamp of when the vulnerability state was changed to confirmed |
+| `confirmedAt` | Time | Timestamp of when the vulnerability state was changed to confirmed. |
 | `confirmedBy` | User | The user that confirmed the vulnerability. |
-| `description` | String | Description of the vulnerability |
-| `details` | VulnerabilityDetail! => Array | Details of the vulnerability |
-| `detectedAt` | Time! | Timestamp of when the vulnerability was first detected |
+| `description` | String | Description of the vulnerability. |
+| `details` | VulnerabilityDetail! => Array | Details of the vulnerability. |
+| `detectedAt` | Time! | Timestamp of when the vulnerability was first detected. |
 | `discussions` | DiscussionConnection! | All discussions on this noteable. |
-| `dismissedAt` | Time | Timestamp of when the vulnerability state was changed to dismissed |
+| `dismissedAt` | Time | Timestamp of when the vulnerability state was changed to dismissed. |
 | `dismissedBy` | User | The user that dismissed the vulnerability. |
-| `externalIssueLinks` | VulnerabilityExternalIssueLinkConnection! | List of external issue links related to the vulnerability |
+| `externalIssueLinks` | VulnerabilityExternalIssueLinkConnection! | List of external issue links related to the vulnerability. |
 | `hasSolutions` | Boolean | Indicates whether there is a solution available for this vulnerability. |
-| `id` | ID! | GraphQL ID of the vulnerability |
+| `id` | ID! | GraphQL ID of the vulnerability. |
 | `identifiers` | VulnerabilityIdentifier! => Array | Identifiers of the vulnerability. |
-| `issueLinks` | VulnerabilityIssueLinkConnection! | List of issue links related to the vulnerability |
-| `location` | VulnerabilityLocation | Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability |
+| `issueLinks` | VulnerabilityIssueLinkConnection! | List of issue links related to the vulnerability. |
+| `location` | VulnerabilityLocation | Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability. |
 | `mergeRequest` | MergeRequest | Merge request that fixes the vulnerability. |
 | `notes` | NoteConnection! | All notes on this noteable. |
 | `primaryIdentifier` | VulnerabilityIdentifier | Primary identifier of the vulnerability. |
-| `project` | Project | The project on which the vulnerability was found |
+| `project` | Project | The project on which the vulnerability was found. |
 | `reportType` | VulnerabilityReportType | Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING, API_FUZZING) |
-| `resolvedAt` | Time | Timestamp of when the vulnerability state was changed to resolved |
+| `resolvedAt` | Time | Timestamp of when the vulnerability state was changed to resolved. |
 | `resolvedBy` | User | The user that resolved the vulnerability. |
-| `resolvedOnDefaultBranch` | Boolean! | Indicates whether the vulnerability is fixed on the default branch or not |
+| `resolvedOnDefaultBranch` | Boolean! | Indicates whether the vulnerability is fixed on the default branch or not. |
 | `scanner` | VulnerabilityScanner | Scanner metadata for the vulnerability. |
 | `severity` | VulnerabilitySeverity | Severity of the vulnerability (INFO, UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL) |
 | `state` | VulnerabilityState | State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED) |
-| `title` | String | Title of the vulnerability |
-| `userNotesCount` | Int! | Number of user notes attached to the vulnerability |
+| `title` | String | Title of the vulnerability. |
+| `userNotesCount` | Int! | Number of user notes attached to the vulnerability. |
 | `userPermissions` | VulnerabilityPermissions! | Permissions for the current user on the resource |
-| `vulnerabilityPath` | String | URL to the vulnerability's details page |
+| `vulnerabilityPath` | String | URL to the vulnerability's details page. |
 
 ### VulnerabilityConfirmPayload
 
@@ -4123,9 +4359,9 @@ Represents the vulnerability details base.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 
 ### VulnerabilityDetailBoolean
 
@@ -4133,9 +4369,9 @@ Represents the vulnerability details boolean value.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 | `value` | Boolean! | Value of the field. |
 
 ### VulnerabilityDetailCode
@@ -4144,10 +4380,10 @@ Represents the vulnerability details code field.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
 | `lang` | String | Language of the code. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 | `value` | String! | Source code. |
 
 ### VulnerabilityDetailCommit
@@ -4156,9 +4392,9 @@ Represents the vulnerability details commit field.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 | `value` | String! | The commit SHA value. |
 
 ### VulnerabilityDetailDiff
@@ -4169,9 +4405,9 @@ Represents the vulnerability details diff field.
 | ----- | ---- | ----------- |
 | `after` | String! | Value of the field after the change. |
 | `before` | String! | Value of the field before the change. |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 
 ### VulnerabilityDetailFileLocation
 
@@ -4179,12 +4415,12 @@ Represents the vulnerability details location within a file in the project.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
 | `fileName` | String! | File name. |
 | `lineEnd` | Int! | End line number of the file location. |
 | `lineStart` | Int! | Start line number of the file location. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 
 ### VulnerabilityDetailInt
 
@@ -4192,9 +4428,9 @@ Represents the vulnerability details integer value.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 | `value` | Int! | Value of the field. |
 
 ### VulnerabilityDetailList
@@ -4203,10 +4439,10 @@ Represents the vulnerability details list value.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
 | `items` | VulnerabilityDetail! => Array | List of details. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 
 ### VulnerabilityDetailMarkdown
 
@@ -4214,9 +4450,9 @@ Represents the vulnerability details Markdown field.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 | `value` | String! | Value of the Markdown field. |
 
 ### VulnerabilityDetailModuleLocation
@@ -4225,10 +4461,10 @@ Represents the vulnerability details location within a file in the project.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
 | `moduleName` | String! | Module name. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 | `offset` | Int! | Offset of the module location. |
 
 ### VulnerabilityDetailTable
@@ -4237,10 +4473,10 @@ Represents the vulnerability details table value.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
 | `headers` | VulnerabilityDetail! => Array | Table headers. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 | `rows` | VulnerabilityDetail! => Array | Table rows. |
 
 ### VulnerabilityDetailText
@@ -4249,9 +4485,9 @@ Represents the vulnerability details text field.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 | `value` | String! | Value of the text field. |
 
 ### VulnerabilityDetailUrl
@@ -4260,10 +4496,10 @@ Represents the vulnerability details URL field.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `description` | String! | Description of the field. |
+| `description` | String | Description of the field. |
 | `fieldName` | String | Name of the field. |
 | `href` | String! | Href of the URL. |
-| `name` | String! | Name of the field. |
+| `name` | String | Name of the field. |
 | `text` | String | Text of the URL. |
 
 ### VulnerabilityDismissPayload
@@ -4282,9 +4518,9 @@ Represents an external issue link of a vulnerability.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `externalIssue` | ExternalIssue | The external issue attached to the issue link |
-| `id` | VulnerabilitiesExternalIssueLinkID! | GraphQL ID of the external issue link |
-| `linkType` | VulnerabilityExternalIssueLinkType! | Type of the external issue link |
+| `externalIssue` | ExternalIssue | The external issue attached to the issue link. |
+| `id` | VulnerabilitiesExternalIssueLinkID! | GraphQL ID of the external issue link. |
+| `linkType` | VulnerabilityExternalIssueLinkType! | Type of the external issue link. |
 
 ### VulnerabilityExternalIssueLinkCreatePayload
 
@@ -4311,10 +4547,10 @@ Represents a vulnerability identifier.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `externalId` | String | External ID of the vulnerability identifier |
-| `externalType` | String | External type of the vulnerability identifier |
-| `name` | String | Name of the vulnerability identifier |
-| `url` | String | URL of the vulnerability identifier |
+| `externalId` | String | External ID of the vulnerability identifier. |
+| `externalType` | String | External type of the vulnerability identifier. |
+| `name` | String | Name of the vulnerability identifier. |
+| `url` | String | URL of the vulnerability identifier. |
 
 ### VulnerabilityIssueLink
 
@@ -4322,9 +4558,9 @@ Represents an issue link of a vulnerability.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `id` | ID! | GraphQL ID of the vulnerability |
-| `issue` | Issue! | The issue attached to issue link |
-| `linkType` | VulnerabilityIssueLinkType! | Type of the issue link |
+| `id` | ID! | GraphQL ID of the vulnerability. |
+| `issue` | Issue! | The issue attached to issue link. |
+| `linkType` | VulnerabilityIssueLinkType! | Type of the issue link. |
 
 ### VulnerabilityLocationContainerScanning
 
@@ -4332,9 +4568,9 @@ Represents the location of a vulnerability found by a container security scan.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `dependency` | VulnerableDependency | Dependency containing the vulnerability |
-| `image` | String | Name of the vulnerable container image |
-| `operatingSystem` | String | Operating system that runs on the vulnerable container image |
+| `dependency` | VulnerableDependency | Dependency containing the vulnerability. |
+| `image` | String | Name of the vulnerable container image. |
+| `operatingSystem` | String | Operating system that runs on the vulnerable container image. |
 
 ### VulnerabilityLocationCoverageFuzzing
 
@@ -4342,12 +4578,12 @@ Represents the location of a vulnerability found by a Coverage Fuzzing scan.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `blobPath` | String | Blob path to the vulnerable file |
-| `endLine` | String | Number of the last relevant line in the vulnerable file |
-| `file` | String | Path to the vulnerable file |
-| `startLine` | String | Number of the first relevant line in the vulnerable file |
-| `vulnerableClass` | String | Class containing the vulnerability |
-| `vulnerableMethod` | String | Method containing the vulnerability |
+| `blobPath` | String | Blob path to the vulnerable file. |
+| `endLine` | String | Number of the last relevant line in the vulnerable file. |
+| `file` | String | Path to the vulnerable file. |
+| `startLine` | String | Number of the first relevant line in the vulnerable file. |
+| `vulnerableClass` | String | Class containing the vulnerability. |
+| `vulnerableMethod` | String | Method containing the vulnerability. |
 
 ### VulnerabilityLocationDast
 
@@ -4355,10 +4591,10 @@ Represents the location of a vulnerability found by a DAST scan.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `hostname` | String | Domain name of the vulnerable request |
-| `param` | String | Query parameter for the URL on which the vulnerability occurred |
-| `path` | String | URL path and query string of the vulnerable request |
-| `requestMethod` | String | HTTP method of the vulnerable request |
+| `hostname` | String | Domain name of the vulnerable request. |
+| `param` | String | Query parameter for the URL on which the vulnerability occurred. |
+| `path` | String | URL path and query string of the vulnerable request. |
+| `requestMethod` | String | HTTP method of the vulnerable request. |
 
 ### VulnerabilityLocationDependencyScanning
 
@@ -4366,9 +4602,9 @@ Represents the location of a vulnerability found by a dependency security scan.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `blobPath` | String | Blob path to the vulnerable file |
-| `dependency` | VulnerableDependency | Dependency containing the vulnerability |
-| `file` | String | Path to the vulnerable file |
+| `blobPath` | String | Blob path to the vulnerable file. |
+| `dependency` | VulnerableDependency | Dependency containing the vulnerability. |
+| `file` | String | Path to the vulnerable file. |
 
 ### VulnerabilityLocationSast
 
@@ -4376,12 +4612,12 @@ Represents the location of a vulnerability found by a SAST scan.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `blobPath` | String | Blob path to the vulnerable file |
-| `endLine` | String | Number of the last relevant line in the vulnerable file |
-| `file` | String | Path to the vulnerable file |
-| `startLine` | String | Number of the first relevant line in the vulnerable file |
-| `vulnerableClass` | String | Class containing the vulnerability |
-| `vulnerableMethod` | String | Method containing the vulnerability |
+| `blobPath` | String | Blob path to the vulnerable file. |
+| `endLine` | String | Number of the last relevant line in the vulnerable file. |
+| `file` | String | Path to the vulnerable file. |
+| `startLine` | String | Number of the first relevant line in the vulnerable file. |
+| `vulnerableClass` | String | Class containing the vulnerability. |
+| `vulnerableMethod` | String | Method containing the vulnerability. |
 
 ### VulnerabilityLocationSecretDetection
 
@@ -4389,12 +4625,12 @@ Represents the location of a vulnerability found by a secret detection scan.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `blobPath` | String | Blob path to the vulnerable file |
-| `endLine` | String | Number of the last relevant line in the vulnerable file |
-| `file` | String | Path to the vulnerable file |
-| `startLine` | String | Number of the first relevant line in the vulnerable file |
-| `vulnerableClass` | String | Class containing the vulnerability |
-| `vulnerableMethod` | String | Method containing the vulnerability |
+| `blobPath` | String | Blob path to the vulnerable file. |
+| `endLine` | String | Number of the last relevant line in the vulnerable file. |
+| `file` | String | Path to the vulnerable file. |
+| `startLine` | String | Number of the first relevant line in the vulnerable file. |
+| `vulnerableClass` | String | Class containing the vulnerability. |
+| `vulnerableMethod` | String | Method containing the vulnerability. |
 
 ### VulnerabilityPermissions
 
@@ -4438,10 +4674,10 @@ Represents a vulnerability scanner.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `externalId` | String | External ID of the vulnerability scanner |
-| `name` | String | Name of the vulnerability scanner |
-| `reportType` | VulnerabilityReportType | Type of the vulnerability report |
-| `vendor` | String | Vendor of the vulnerability scanner |
+| `externalId` | String | External ID of the vulnerability scanner. |
+| `name` | String | Name of the vulnerability scanner. |
+| `reportType` | VulnerabilityReportType | Type of the vulnerability report. |
+| `vendor` | String | Vendor of the vulnerability scanner. |
 
 ### VulnerabilitySeveritiesCount
 
@@ -4462,8 +4698,8 @@ Represents a vulnerable dependency. Used in vulnerability location data.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `package` | VulnerablePackage | The package associated with the vulnerable dependency |
-| `version` | String | The version of the vulnerable dependency |
+| `package` | VulnerablePackage | The package associated with the vulnerable dependency. |
+| `version` | String | The version of the vulnerable dependency. |
 
 ### VulnerablePackage
 
@@ -4471,7 +4707,7 @@ Represents a vulnerable package. Used in vulnerability dependency data.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `name` | String | The name of the vulnerable package |
+| `name` | String | The name of the vulnerable package. |
 
 ### VulnerableProjectsByGrade
 
@@ -4479,9 +4715,9 @@ Represents vulnerability letter grades with associated projects.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `count` | Int! | Number of projects within this grade |
-| `grade` | VulnerabilityGrade! | Grade based on the highest severity vulnerability present |
-| `projects` | ProjectConnection! | Projects within this grade |
+| `count` | Int! | Number of projects within this grade. |
+| `grade` | VulnerabilityGrade! | Grade based on the highest severity vulnerability present. |
+| `projects` | ProjectConnection! | Projects within this grade. |
 
 ## Enumeration types
 
@@ -4859,6 +5095,26 @@ Epic ID wildcard values.
 | `ANY` | Any epic is assigned |
 | `NONE` | No epic is assigned |
 
+### EventAction
+
+Event action.
+
+| Value | Description |
+| ----- | ----------- |
+| `APPROVED` | Approved action |
+| `ARCHIVED` | Archived action |
+| `CLOSED` | Closed action |
+| `COMMENTED` | Commented action |
+| `CREATED` | Created action |
+| `DESTROYED` | Destroyed action |
+| `EXPIRED` | Expired action |
+| `JOINED` | Joined action |
+| `LEFT` | Left action |
+| `MERGED` | Merged action |
+| `PUSHED` | Pushed action |
+| `REOPENED` | Reopened action |
+| `UPDATED` | Updated action |
+
 ### GroupMemberRelation
 
 Group member relation.
@@ -5045,6 +5301,15 @@ Possible identifier types for a measurement.
 | `PROJECTS` | Project count |
 | `USERS` | User count |
 
+### MergeRequestNewState
+
+New state to apply to a merge request.
+
+| Value | Description |
+| ----- | ----------- |
+| `CLOSED` | Close the merge request if it is open. |
+| `OPEN` | Open the merge request if it is closed. |
+
 ### MergeRequestSort
 
 Values for sorting merge requests.
@@ -5137,7 +5402,7 @@ Rotation length unit of an on-call rotation.
 | `GENERIC` | Packages from the Generic package manager |
 | `GOLANG` | Packages from the Golang package manager |
 | `MAVEN` | Packages from the Maven package manager |
-| `NPM` | Packages from the NPM package manager |
+| `NPM` | Packages from the npm package manager |
 | `NUGET` | Packages from the Nuget package manager |
 | `PYPI` | Packages from the PyPI package manager |
 | `RUBYGEMS` | Packages from the Rubygems package manager |
@@ -5148,6 +5413,7 @@ Rotation length unit of an on-call rotation.
 | ----- | ----------- |
 | `AUTO_DEVOPS_SOURCE` |  |
 | `BRIDGE_SOURCE` |  |
+| `COMPLIANCE_SOURCE` |  |
 | `EXTERNAL_PROJECT_SOURCE` |  |
 | `PARAMETER_SOURCE` |  |
 | `REMOTE_SOURCE` |  |
@@ -5230,9 +5496,9 @@ Size of UI component in SAST configuration page.
 
 | Value | Description |
 | ----- | ----------- |
-| `LARGE` |  |
-| `MEDIUM` |  |
-| `SMALL` |  |
+| `LARGE` | The size of UI component in SAST configuration page is large. |
+| `MEDIUM` | The size of UI component in SAST configuration page is medium. |
+| `SMALL` | The size of UI component in SAST configuration page is small. |
 
 ### SecurityReportTypeEnum
 

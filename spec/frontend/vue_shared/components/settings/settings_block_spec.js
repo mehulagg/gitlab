@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import component from '~/vue_shared/components/settings/settings_block.vue';
 
 describe('Settings Block', () => {
@@ -48,6 +48,27 @@ describe('Settings Block', () => {
     mountComponent();
 
     expect(findDescriptionSlot().exists()).toBe(true);
+  });
+
+  describe('slide animation behaviour', () => {
+    it('is animated by default', () => {
+      mountComponent();
+
+      expect(wrapper.classes('no-animate')).toBe(false);
+    });
+
+    it.each`
+      slideAnimated | noAnimatedClass
+      ${true}       | ${false}
+      ${false}      | ${true}
+    `(
+      'sets the correct state when slideAnimated is $slideAnimated',
+      ({ slideAnimated, noAnimatedClass }) => {
+        mountComponent({ slideAnimated });
+
+        expect(wrapper.classes('no-animate')).toBe(noAnimatedClass);
+      },
+    );
   });
 
   describe('expanded behaviour', () => {

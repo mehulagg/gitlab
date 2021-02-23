@@ -1,7 +1,7 @@
 import Api from 'ee/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __, sprintf } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
+import { __, sprintf } from '~/locale';
 import { FETCH_VALUE_STREAM_DATA } from '../constants';
 import {
   removeFlash,

@@ -178,12 +178,15 @@ outside world.
    pages_external_url 'https://example.io'
 
    pages_nginx['redirect_http_to_https'] = true
+   ```
+
+1. If you haven’t named your certificate and key `example.io.crt` and `example.io.key`
+then you'll need to also add the full paths as shown below:
+
+   ```ruby
    pages_nginx['ssl_certificate'] = "/etc/gitlab/ssl/pages-nginx.crt"
    pages_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/pages-nginx.key"
    ```
-
-   where `pages-nginx.crt` and `pages-nginx.key` are the SSL cert and key,
-   respectively.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
@@ -234,6 +237,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `domain_config_source` | Domain configuration source (default: `auto`)
 | `gitlab_id` |  The OAuth application public ID. Leave blank to automatically fill when Pages authenticates with GitLab.
 | `gitlab_secret` |  The OAuth application secret. Leave blank to automatically fill when Pages authenticates with GitLab.
+| `auth_scope` |  The OAuth application scope to use for authentication. Must match GitLab Pages OAuth application settings. Leave blank to use `api` scope by default.
 | `gitlab_server` |  Server to use for authentication when access control is enabled; defaults to GitLab `external_url`.
 | `headers` |  Specify any additional http headers that should be sent to the client with each response.
 | `inplace_chroot` |  On [systems that don't support bind-mounts](index.md#additional-configuration-for-docker-container), this instructs GitLab Pages to `chroot` into its `pages_path` directory. Some caveats exist when using in-place `chroot`; refer to the GitLab Pages [README](https://gitlab.com/gitlab-org/gitlab-pages/blob/master/README.md#caveats) for more information.
@@ -399,6 +403,27 @@ Pages access control is disabled by default. To enable it:
 NOTE:
 For this setting to be effective with multi-node setups, it has to be applied to
 all the App nodes and Sidekiq nodes.
+
+#### Using Pages with reduced authentication scope
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-pages/-/merge_requests/423) in GitLab 13.10.
+
+By default, the Pages daemon uses the `api` scope to authenticate. You can configure this. For
+example, this reduces the scope to `read_api` in `/etc/gitlab/gitlab.rb`:
+
+```ruby
+gitlab_pages['auth_scope'] = 'read_api'
+```
+
+The scope to use for authentication must match the GitLab Pages OAuth application settings. Users of
+pre-existing applications must modify the GitLab Pages OAuth application. Follow these steps to do
+this:
+
+1. Navigate to your instance's **Admin Area > Settings > Applications** and expand **GitLab Pages**
+   settings.
+1. Clear the `api` scope's checkbox and select the desired scope's checkbox (for example,
+   `read_api`).
+1. Click **Save changes**.
 
 #### Disabling public access to all Pages websites
 
@@ -689,7 +714,7 @@ Pages server.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217912) in GitLab 13.3.
 
 GitLab Pages can use different sources to get domain configuration.
-The default value is `nil`. However, GitLab Pages defaults to `auto`.
+The default value for Omnibus installations is `nil`.
 
    ```ruby
    gitlab_pages['domain_config_source'] = nil
@@ -700,7 +725,32 @@ preferred source is `gitlab`, which uses [API-based configuration](#gitlab-api-b
 
 For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/how-gitlab-pages-uses-the-gitlab-api-to-serve-content/).
 
+### Deprecated `domain_config_source`
+
+WARNING:
+The flag `gitlab_pages['domain_config_source']` is deprecated for use in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913),
+and is planned for removal in GitLab 14.0.
+
+GitLab 13.0 introduced the special flag `domain_config_source` to support manual opt-in to
+[API-based configuration](#gitlab-api-based-configuration).
+GitLab 13.7 introduced the [`auto` value](https://gitlab.com/gitlab-org/gitlab/-/issues/218358)
+to support a smoother transition to API-based configuration.
+
+Starting with GitLab 14.0, GitLab Pages only supports API-based configuration, and
+[disk source configuration is removed](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/382).
+Therefore, GitLab 14.0 also removes `domain_config_source`.
+
+GitLab Pages fails to start if it can't connect to the GitLab API. For other common issues, see the
+[troubleshooting section](#failed-to-connect-to-the-internal-gitlab-api)
+or report an issue.
+
 ### GitLab API-based configuration
+
+WARNING:
+The flag `gitlab_pages['domain_config_source']` is deprecated for use in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913),
+and is planned for removal in GitLab 14.0. In GitLab 14.0 and later, GitLab Pages attempts to
+connect to the API automatically, without requiring the manual configuration steps shown here. Pages
+fails to start if this automatic connection fails.
 
 GitLab Pages can use an API-based configuration. This replaces disk source configuration, which
 was used prior to GitLab 13.0. Follow these steps to enable it:
@@ -936,6 +986,11 @@ error="failed to connect to internal Pages API: Get \"https://gitlab.example.com
 ```
 
 ### Pages cannot communicate with an instance of the GitLab API
+
+WARNING:
+The flag `gitlab_pages['domain_config_source']` is [deprecated](#deprecated-domain_config_source)
+for use in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913),
+and is planned for removal in GitLab 14.0.
 
 If you use the default value for `domain_config_source=auto` and run multiple instances of GitLab
 Pages, you may see intermittent 502 error responses while serving Pages content. You may also see

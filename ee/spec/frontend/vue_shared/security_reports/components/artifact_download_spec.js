@@ -1,18 +1,18 @@
-import Vue from 'vue';
 import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import Component from 'ee/vue_shared/security_reports/components/artifact_download.vue';
+import {
+  REPORT_TYPE_SAST,
+  REPORT_TYPE_SECRET_DETECTION,
+} from 'ee/vue_shared/security_reports/constants';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import {
   expectedDownloadDropdownProps,
   securityReportDownloadPathsQueryResponse,
 } from 'jest/vue_shared/security_reports/mock_data';
-import {
-  REPORT_TYPE_SAST,
-  REPORT_TYPE_SECRET_DETECTION,
-} from 'ee/vue_shared/security_reports/constants';
-import Component from 'ee/vue_shared/security_reports/components/artifact_download.vue';
-import SecurityReportDownloadDropdown from '~/vue_shared/security_reports/components/security_report_download_dropdown.vue';
 import createFlash from '~/flash';
+import SecurityReportDownloadDropdown from '~/vue_shared/security_reports/components/security_report_download_dropdown.vue';
 import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_download_paths.query.graphql';
 
 jest.mock('~/flash');

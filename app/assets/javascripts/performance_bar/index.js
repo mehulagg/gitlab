@@ -1,12 +1,11 @@
 /* eslint-disable @gitlab/require-i18n-strings */
 import Vue from 'vue';
-import Translate from '~/vue_shared/translate';
 import axios from '~/lib/utils/axios_utils';
-
-import PerformanceBarService from './services/performance_bar_service';
-import PerformanceBarStore from './stores/performance_bar_store';
+import Translate from '~/vue_shared/translate';
 
 import initPerformanceBarLog from './performance_bar_log';
+import PerformanceBarService from './services/performance_bar_service';
+import PerformanceBarStore from './stores/performance_bar_store';
 
 Vue.use(Translate);
 
@@ -30,6 +29,7 @@ const initPerformanceBar = (el) => {
         requestId: performanceBarData.requestId,
         peekUrl: performanceBarData.peekUrl,
         profileUrl: performanceBarData.profileUrl,
+        statsUrl: performanceBarData.statsUrl,
       };
     },
     mounted() {
@@ -120,6 +120,7 @@ const initPerformanceBar = (el) => {
           requestId: this.requestId,
           peekUrl: this.peekUrl,
           profileUrl: this.profileUrl,
+          statsUrl: this.statsUrl,
         },
         on: {
           'add-request': this.addRequestManually,

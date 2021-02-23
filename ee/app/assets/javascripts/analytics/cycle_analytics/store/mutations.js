@@ -93,6 +93,7 @@ export default {
       createdBefore: endDate = null,
       selectedProjects = [],
       selectedValueStream = {},
+      defaultStageConfig = [],
     } = {},
   ) {
     state.isLoading = true;
@@ -101,6 +102,7 @@ export default {
     state.selectedValueStream = selectedValueStream;
     state.startDate = startDate;
     state.endDate = endDate;
+    state.defaultStageConfig = defaultStageConfig;
   },
   [types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS](state) {
     state.isLoading = false;

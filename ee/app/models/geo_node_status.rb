@@ -31,14 +31,18 @@ class GeoNodeStatus < ApplicationRecord
   alias_attribute :last_event_timestamp, :last_event_date_timestamp
   alias_attribute :cursor_last_event_timestamp, :cursor_last_event_date_timestamp
 
+  scope :for_active_secondaries, -> { joins(:geo_node).merge(GeoNode.secondary_nodes.where(enabled: true)) }
+
   def self.status_fields_for(replicable_class)
     {
       "#{replicable_class.replicable_name_plural}_count".to_sym => "Number of #{replicable_class.replicable_title_plural} on the primary",
+      "#{replicable_class.replicable_name_plural}_checksum_total_count".to_sym => "Number of #{replicable_class.replicable_title_plural} available to checksum on primary",
       "#{replicable_class.replicable_name_plural}_checksummed_count".to_sym => "Number of #{replicable_class.replicable_title_plural} checksummed on the primary",
       "#{replicable_class.replicable_name_plural}_checksum_failed_count".to_sym => "Number of #{replicable_class.replicable_title_plural} failed to checksum on primary",
       "#{replicable_class.replicable_name_plural}_synced_count".to_sym => "Number of #{replicable_class.replicable_title_plural} in the registry",
       "#{replicable_class.replicable_name_plural}_failed_count".to_sym => "Number of #{replicable_class.replicable_title_plural} synced on secondary",
       "#{replicable_class.replicable_name_plural}_registry_count".to_sym => "Number of #{replicable_class.replicable_title_plural} failed to sync on secondary",
+      "#{replicable_class.replicable_name_plural}_verification_total_count".to_sym => "Number of #{replicable_class.replicable_title_plural} available to verify on secondary",
       "#{replicable_class.replicable_name_plural}_verified_count".to_sym => "Number of #{replicable_class.replicable_title_plural} verified on the secondary",
       "#{replicable_class.replicable_name_plural}_verification_failed_count".to_sym => "Number of #{replicable_class.replicable_title_plural} failed to verify on secondary"
     }
@@ -72,17 +76,21 @@ class GeoNodeStatus < ApplicationRecord
     job_artifacts_failed_count
     repositories_verified_count
     repositories_verification_failed_count
+    repositories_verification_total_count
     wikis_verified_count
     wikis_verification_failed_count
+    wikis_verification_total_count
     lfs_objects_synced_missing_on_primary_count
     job_artifacts_synced_missing_on_primary_count
     attachments_synced_missing_on_primary_count
     repositories_checksummed_count
     repositories_checksum_failed_count
     repositories_checksum_mismatch_count
+    repositories_checksum_total_count
     wikis_checksummed_count
     wikis_checksum_failed_count
     wikis_checksum_mismatch_count
+    wikis_checksum_total_count
     repositories_retrying_verification_count
     wikis_retrying_verification_count
     projects_count
@@ -562,21 +570,26 @@ class GeoNodeStatus < ApplicationRecord
   def load_primary_verification_data
     self.repositories_checksummed_count = repository_verification_finder.count_verified_repositories
     self.repositories_checksum_failed_count = repository_verification_finder.count_verification_failed_repositories
+    self.repositories_checksum_total_count = self.projects_count
     self.wikis_checksummed_count = repository_verification_finder.count_verified_wikis
     self.wikis_checksum_failed_count = repository_verification_finder.count_verification_failed_wikis
+    self.wikis_checksum_total_count = self.projects_count
 
     Gitlab::Geo::REPLICATOR_CLASSES.each do |replicator|
       public_send("#{replicator.replicable_name_plural}_checksummed_count=", replicator.checksummed_count) # rubocop:disable GitlabSecurity/PublicSend
       public_send("#{replicator.replicable_name_plural}_checksum_failed_count=", replicator.checksum_failed_count) # rubocop:disable GitlabSecurity/PublicSend
+      public_send("#{replicator.replicable_name_plural}_checksum_total_count=", replicator.checksum_total_count) # rubocop:disable GitlabSecurity/PublicSend
     end
   end
 
   def load_secondary_verification_data
     self.repositories_verified_count = Geo::ProjectRegistry.verified(:repository).count
     self.repositories_verification_failed_count = Geo::ProjectRegistry.verification_failed(:repository).count
+    self.repositories_verification_total_count = self.projects_count
     self.repositories_checksum_mismatch_count = Geo::ProjectRegistry.mismatch(:repository).count
     self.wikis_verified_count = Geo::ProjectRegistry.verified(:wiki).count
     self.wikis_verification_failed_count = Geo::ProjectRegistry.verification_failed(:wiki).count
+    self.wikis_verification_total_count = self.projects_count
     self.wikis_checksum_mismatch_count = Geo::ProjectRegistry.mismatch(:wiki).count
     self.repositories_retrying_verification_count = Geo::ProjectRegistry.retrying_verification(:repository).count
     self.wikis_retrying_verification_count = Geo::ProjectRegistry.retrying_verification(:wiki).count
@@ -584,6 +597,7 @@ class GeoNodeStatus < ApplicationRecord
     ::Gitlab::Geo.verification_enabled_replicator_classes.each do |replicator|
       public_send("#{replicator.replicable_name_plural}_verified_count=", replicator.verified_count) # rubocop:disable GitlabSecurity/PublicSend
       public_send("#{replicator.replicable_name_plural}_verification_failed_count=", replicator.verification_failed_count) # rubocop:disable GitlabSecurity/PublicSend
+      public_send("#{replicator.replicable_name_plural}_verification_total_count=", replicator.verification_total_count) # rubocop:disable GitlabSecurity/PublicSend
     end
   end
 

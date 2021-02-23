@@ -1,10 +1,10 @@
+import { GlSkeletonLoader, GlCard } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlSkeletonLoader, GlCard } from '@gitlab/ui';
-import createMockApollo from 'helpers/mock_apollo_helper';
 import ReleaseStatsCard from 'ee/analytics/group_ci_cd_analytics/components/release_stats_card.vue';
 import groupReleaseStatsQuery from 'ee/analytics/group_ci_cd_analytics/graphql/group_release_stats.query.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { groupReleaseStatsQueryResponse } from './mock_data';
 
 const localVue = createLocalVue();

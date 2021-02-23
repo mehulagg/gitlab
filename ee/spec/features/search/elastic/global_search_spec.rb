@@ -77,7 +77,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
     end
   end
 
-  describe 'I search through the issues and I see pagination', :js do
+  describe 'I search through the issues and I see pagination' do
     before do
       create_list(:issue, 21, project: project, title: 'initial')
 
@@ -94,7 +94,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
     end
   end
 
-  describe 'I search through the notes and I see pagination', :js do
+  describe 'I search through the notes and I see pagination' do
     before do
       issue = create(:issue, project: project, title: 'initial')
       create_list(:note, 21, noteable: issue, project: project, note: 'foo')
@@ -112,7 +112,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
     end
   end
 
-  describe 'I search through the blobs', :js do
+  describe 'I search through the blobs' do
     let(:project_2) { create(:project, :repository, :wiki_repo) }
 
     before do
@@ -156,7 +156,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
     end
   end
 
-  describe 'I search through the wiki blobs', :js do
+  describe 'I search through the wiki blobs' do
     before do
       project.wiki.create_page('test.md', '# term')
       project.wiki.index_wiki_blobs
@@ -175,10 +175,9 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
     end
   end
 
-  describe 'I search through the commits', :js do
+  describe 'I search through the commits' do
     before do
       project.repository.index_commits_and_blobs
-
       ensure_elasticsearch_index!
     end
 
@@ -188,7 +187,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       submit_search('add')
       select_search_scope('Commits')
 
-      expect(page).to have_selector('.commit-row-message')
+      expect(page).to have_selector('.commit-row-description')
       expect(page).to have_selector('.project-namespace')
     end
 
@@ -198,7 +197,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       submit_search('add')
       select_search_scope('Commits')
 
-      expected_message = "Merge branch 'tree_helper_spec' into 'master'"
+      expected_message = "Add directory structure for tree_helper spec"
 
       expect(page).not_to have_content(expected_message)
 
@@ -232,7 +231,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
   end
 end
 
-RSpec.describe 'Global elastic search redactions', :elastic, :js do
+RSpec.describe 'Global elastic search redactions', :elastic do
   context 'when block_anonymous_global_searches is disabled' do
     before do
       stub_feature_flags(block_anonymous_global_searches: false)

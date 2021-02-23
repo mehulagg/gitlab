@@ -4,12 +4,12 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import { joinPaths } from '~/lib/utils/url_utility';
+import Tracking from '~/tracking';
 import AlertDetails from '~/vue_shared/alert_details/components/alert_details.vue';
 import AlertSummaryRow from '~/vue_shared/alert_details/components/alert_summary_row.vue';
 import { SEVERITY_LEVELS } from '~/vue_shared/alert_details/constants';
 import createIssueMutation from '~/vue_shared/alert_details/graphql/mutations/alert_issue_create.mutation.graphql';
-import { joinPaths } from '~/lib/utils/url_utility';
-import Tracking from '~/tracking';
 import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import mockAlerts from './mocks/alerts.json';
 
@@ -90,6 +90,7 @@ describe('AlertDetails', () => {
   const findEnvironmentName = () => wrapper.findByTestId('environmentName');
   const findEnvironmentPath = () => wrapper.findByTestId('environmentPath');
   const findDetailsTable = () => wrapper.find(AlertDetailsTable);
+  const findMetricsTab = () => wrapper.findByTestId('metrics');
 
   describe('Alert details', () => {
     describe('when alert is null', () => {
@@ -126,6 +127,10 @@ describe('AlertDetails', () => {
       it('renders a start time', () => {
         expect(wrapper.findByTestId('startTimeItem').exists()).toBe(true);
         expect(wrapper.findByTestId('startTimeItem').props('time')).toBe(mockAlert.startedAt);
+      });
+
+      it('renders the metrics tab', () => {
+        expect(findMetricsTab().exists()).toBe(true);
       });
     });
 
@@ -172,6 +177,16 @@ describe('AlertDetails', () => {
 
         expect(findEnvironmentPath().exists()).toBe(false);
         expect(findEnvironmentName().text()).toBe(environmentName);
+      });
+    });
+
+    describe('Threat Monitoring details', () => {
+      it('should not render the metrics tab', () => {
+        mountComponent({
+          data: { alert: mockAlert },
+          provide: { isThreatMonitoringPage: true },
+        });
+        expect(findMetricsTab().exists()).toBe(false);
       });
     });
 

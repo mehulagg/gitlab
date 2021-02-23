@@ -57,17 +57,20 @@ module EE
     override :project_permissions_settings
     def project_permissions_settings(project)
       super.merge(
-        requirementsAccessLevel: project.requirements_access_level,
-        securityAndComplianceAccessLevel: project.security_and_compliance_access_level
+        requirementsAccessLevel: project.requirements_access_level
       )
     end
 
     override :project_permissions_panel_data
     def project_permissions_panel_data(project)
       super.merge(
-        requirementsAvailable: project.feature_available?(:requirements),
-        securityAndComplianceAvailable: project.feature_available?(:security_and_compliance)
+        requirementsAvailable: project.feature_available?(:requirements)
       )
+    end
+
+    override :show_security_and_compliance_toggle?
+    def show_security_and_compliance_toggle?
+      super || show_audit_events?(@project)
     end
 
     override :default_url_to_repo
@@ -179,6 +182,7 @@ module EE
         projects/threat_monitoring#show
         projects/threat_monitoring#new
         projects/threat_monitoring#edit
+        projects/threat_monitoring#alert_details
         projects/audit_events#index
       ]
     end
@@ -235,6 +239,7 @@ module EE
       if project.vulnerabilities.none?
         {
           has_vulnerabilities: 'false',
+          has_jira_vulnerabilities_integration_enabled: project.configured_to_create_issues_from_vulnerabilities?.to_s,
           empty_state_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
           no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
@@ -243,6 +248,7 @@ module EE
       else
         {
           has_vulnerabilities: 'true',
+          has_jira_vulnerabilities_integration_enabled: project.configured_to_create_issues_from_vulnerabilities?.to_s,
           project: { id: project.id, name: project.name },
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: api_v4_security_projects_vulnerability_exports_path(id: project.id),

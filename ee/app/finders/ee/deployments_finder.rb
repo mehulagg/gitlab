@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# WARNING: This finder does not check permissions!
+#
 # Arguments:
 #   params:
 #     group: Group model - Find deployments within a group (including subgroups)

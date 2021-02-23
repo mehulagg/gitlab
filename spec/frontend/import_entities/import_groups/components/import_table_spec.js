@@ -1,16 +1,15 @@
+import { GlEmptyState, GlLoadingIcon, GlSearchBoxByClick, GlSprintf } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import { GlEmptyState, GlLoadingIcon, GlSearchBoxByClick, GlSprintf } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
 import createMockApollo from 'helpers/mock_apollo_helper';
-import ImportTableRow from '~/import_entities/import_groups/components/import_table_row.vue';
-import ImportTable from '~/import_entities/import_groups/components/import_table.vue';
-import setTargetNamespaceMutation from '~/import_entities/import_groups/graphql/mutations/set_target_namespace.mutation.graphql';
-import setNewNameMutation from '~/import_entities/import_groups/graphql/mutations/set_new_name.mutation.graphql';
-import importGroupMutation from '~/import_entities/import_groups/graphql/mutations/import_group.mutation.graphql';
-import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
-
+import waitForPromises from 'helpers/wait_for_promises';
 import { STATUSES } from '~/import_entities/constants';
+import ImportTable from '~/import_entities/import_groups/components/import_table.vue';
+import ImportTableRow from '~/import_entities/import_groups/components/import_table_row.vue';
+import importGroupMutation from '~/import_entities/import_groups/graphql/mutations/import_group.mutation.graphql';
+import setNewNameMutation from '~/import_entities/import_groups/graphql/mutations/set_new_name.mutation.graphql';
+import setTargetNamespaceMutation from '~/import_entities/import_groups/graphql/mutations/set_target_namespace.mutation.graphql';
+import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
 
 import { availableNamespacesFixture, generateFakeEntry } from '../graphql/fixtures';
 
@@ -22,6 +21,10 @@ describe('import table', () => {
   let apolloProvider;
 
   const FAKE_GROUP = generateFakeEntry({ id: 1, status: STATUSES.NONE });
+  const FAKE_GROUPS = [
+    generateFakeEntry({ id: 1, status: STATUSES.NONE }),
+    generateFakeEntry({ id: 2, status: STATUSES.FINISHED }),
+  ];
   const FAKE_PAGE_INFO = { page: 1, perPage: 20, total: 40, totalPages: 2 };
 
   const createComponent = ({ bulkImportSourceGroups }) => {
@@ -81,14 +84,10 @@ describe('import table', () => {
     });
     await waitForPromises();
 
-    expect(wrapper.find(GlEmptyState).props().title).toBe('No groups available for import');
+    expect(wrapper.find(GlEmptyState).props().title).toBe('You have no groups to import');
   });
 
   it('renders import row for each group in response', async () => {
-    const FAKE_GROUPS = [
-      generateFakeEntry({ id: 1, status: STATUSES.NONE }),
-      generateFakeEntry({ id: 2, status: STATUSES.FINISHED }),
-    ];
     createComponent({
       bulkImportSourceGroups: () => ({
         nodes: FAKE_GROUPS,

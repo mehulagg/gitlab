@@ -1,9 +1,8 @@
 <script>
 import { GlAlert, GlButton, GlEmptyState, GlLoadingIcon, GlModalDirective } from '@gitlab/ui';
-import * as Sentry from '~/sentry/wrapper';
+import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
-import { fetchPolicies } from '~/lib/graphql';
-import getOncallSchedulesWithRotations from '../graphql/queries/get_oncall_schedules.query.graphql';
+import getOncallSchedulesWithRotationsQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import AddScheduleModal from './add_edit_schedule_modal.vue';
 import OncallSchedule from './oncall_schedule.vue';
 
@@ -47,8 +46,7 @@ export default {
   },
   apollo: {
     schedule: {
-      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
-      query: getOncallSchedulesWithRotations,
+      query: getOncallSchedulesWithRotationsQuery,
       variables() {
         return {
           projectPath: this.projectPath,

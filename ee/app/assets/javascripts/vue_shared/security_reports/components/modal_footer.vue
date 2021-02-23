@@ -1,5 +1,5 @@
 <script>
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlIcon } from '@gitlab/ui';
 import DismissButton from 'ee/vue_shared/security_reports/components/dismiss_button.vue';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
 import { s__ } from '~/locale';
@@ -9,6 +9,7 @@ export default {
     DismissButton,
     GlButton,
     SplitButton,
+    GlIcon,
   },
   props: {
     modal: {
@@ -77,6 +78,7 @@ export default {
         isLoading: this.isCreatingIssue,
         action: this.vulnerability.create_jira_issue_url ? undefined : 'createNewIssue',
         href: this.vulnerability.create_jira_issue_url,
+        icon: this.vulnerability.create_jira_issue_url ? 'external-link' : undefined,
       };
       const MRButton = {
         name: s__('ciReport|Resolve with merge request'),
@@ -147,6 +149,11 @@ export default {
       :href="actionButtons[0].href"
       @click="$emit(actionButtons[0].action)"
     >
+      <gl-icon
+        v-if="actionButtons[0].icon"
+        :name="actionButtons[0].icon"
+        class="gl-vertical-align-middle"
+      />
       {{ __(actionButtons[0].name) }}
     </gl-button>
   </div>

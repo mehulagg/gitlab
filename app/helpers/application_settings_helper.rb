@@ -26,6 +26,16 @@ module ApplicationSettingsHelper
     end
   end
 
+  def kroki_available_formats
+    ApplicationSetting.kroki_formats_attributes.map do |key, value|
+      {
+        name: "kroki_formats_#{key}",
+        label: value[:label],
+        value: @application_setting.kroki_formats[key] || false
+      }
+    end
+  end
+
   def storage_weights
     ApplicationSetting.repository_storages_weighted_attributes.map do |attribute|
       storage = attribute.to_s.delete_prefix('repository_storages_weighted_')
@@ -242,6 +252,7 @@ module ApplicationSettingsHelper
       :housekeeping_incremental_repack_period,
       :html_emails_enabled,
       :import_sources,
+      :in_product_marketing_emails_enabled,
       :invisible_captcha_enabled,
       :max_artifacts_size,
       :max_attachment_size,
@@ -259,6 +270,7 @@ module ApplicationSettingsHelper
       :personal_access_token_prefix,
       :kroki_enabled,
       :kroki_url,
+      :kroki_formats,
       :plantuml_enabled,
       :plantuml_url,
       :polling_interval_multiplier,
@@ -329,6 +341,7 @@ module ApplicationSettingsHelper
       :email_restrictions,
       :issues_create_limit,
       :notes_create_limit,
+      :notes_create_limit_allowlist_raw,
       :raw_blob_request_limit,
       :project_import_limit,
       :project_export_limit,

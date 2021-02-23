@@ -119,11 +119,13 @@ RSpec.describe ProjectsHelper do
     let_it_be(:user) { create(:user) }
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, :repository, group: group) }
+    let_it_be(:jira_service) { create(:jira_service, project: project, vulnerabilities_enabled: true, project_key: 'GV', vulnerabilities_issuetype: '10000') }
 
     subject { helper.project_security_dashboard_config(project) }
 
     before do
       group.add_owner(user)
+      stub_licensed_features(jira_vulnerabilities_integration: true)
       allow(helper).to receive(:current_user).and_return(user)
     end
 
@@ -131,6 +133,7 @@ RSpec.describe ProjectsHelper do
       let(:expected_value) do
         {
           has_vulnerabilities: 'false',
+          has_jira_vulnerabilities_integration_enabled: 'true',
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard_empty'),
           security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
           project_full_path: project.full_path,
@@ -145,6 +148,7 @@ RSpec.describe ProjectsHelper do
       let(:base_values) do
         {
           has_vulnerabilities: 'true',
+          has_jira_vulnerabilities_integration_enabled: 'true',
           project: { id: project.id, name: project.name },
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: "/api/v4/security/projects/#{project.id}/vulnerability_exports",
@@ -224,6 +228,7 @@ RSpec.describe ProjectsHelper do
         projects/threat_monitoring#show
         projects/threat_monitoring#new
         projects/threat_monitoring#edit
+        projects/threat_monitoring#alert_details
         projects/audit_events#index
       ]
     end

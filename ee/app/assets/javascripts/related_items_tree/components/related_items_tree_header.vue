@@ -1,12 +1,11 @@
 <script>
-import { mapState, mapActions } from 'vuex';
-
 import { GlTooltip, GlIcon } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 
 import { issuableTypesMap } from '~/related_issues/constants';
 
-import EpicActionsSplitButton from './epic_issue_actions_split_button.vue';
 import EpicHealthStatus from './epic_health_status.vue';
+import EpicActionsSplitButton from './epic_issue_actions_split_button.vue';
 
 export default {
   components: {

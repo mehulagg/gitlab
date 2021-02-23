@@ -14,12 +14,20 @@ RSpec.describe DastScannerProfile, type: :model do
     it { is_expected.to validate_length_of(:name).is_at_most(255) }
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
     it { is_expected.to validate_presence_of(:project_id) }
+    it { is_expected.to validate_presence_of(:name) }
   end
 
   describe 'scopes' do
     describe '.project_id_in' do
       it 'returns the dast_scanner_profiles for given projects' do
         result = DastScannerProfile.project_id_in([subject.project.id])
+        expect(result).to eq([subject])
+      end
+    end
+
+    describe '.with_name' do
+      it 'returns the dast_scanner_profiles with given name' do
+        result = DastScannerProfile.with_name(subject.name)
         expect(result).to eq([subject])
       end
     end

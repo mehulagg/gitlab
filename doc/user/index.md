@@ -31,10 +31,10 @@ For more information, see [All GitLab Features](https://about.gitlab.com/feature
 To get familiar with the concepts needed to develop code on GitLab, read the following articles:
 
 - [Demo: Mastering Code Review With GitLab](https://about.gitlab.com/blog/2017/03/17/demo-mastering-code-review-with-gitlab/).
-- [GitLab Workflow: An Overview](https://about.gitlab.com/blog/2016/10/25/gitlab-workflow-an-overview/#gitlab-workflow-use-case-scenario).
+- [GitLab Workflow: An Overview](https://about.gitlab.com/topics/version-control/what-is-gitlab-workflow/#gitlab-workflow-a-use-case-scenario).
 - [Tutorial: It's all connected in GitLab](https://about.gitlab.com/blog/2016/03/08/gitlab-tutorial-its-all-connected/): an overview on code collaboration with GitLab.
 - [Trends in Version Control Land: Microservices](https://about.gitlab.com/blog/2016/08/16/trends-in-version-control-land-microservices/).
-- [Trends in Version Control Land: Innersourcing](https://about.gitlab.com/blog/2016/07/07/trends-version-control-innersourcing/).
+- [Trends in Version Control Land: Innersourcing](https://about.gitlab.com/topics/version-control/what-is-innersource/).
 
 ## Use cases
 
@@ -82,6 +82,14 @@ There are several types of users in GitLab:
 - [GitLab Administrator](../administration/index.md) with full access to
   self-managed instances' features and settings.
 - [Internal users](../development/internal_users.md).
+
+## User activity
+
+You can follow or unfollow other users from their [user profiles](profile/index.md#user-profile).
+To see their activity in the top-level Activity view, select Follow or Unfollow, and select
+the Followed Users tab:
+
+![Follow users](img/activity_followed_users_v13_9.png)
 
 ## Projects
 

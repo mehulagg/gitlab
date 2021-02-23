@@ -1,11 +1,9 @@
 <script>
-import dateFormat from 'dateformat';
-import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import { GlAlert, GlSkeletonLoader } from '@gitlab/ui';
-import { __, s__, sprintf } from '~/locale';
+import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import dateFormat from 'dateformat';
 import { getDateInPast } from '~/lib/utils/datetime_utility';
-import getPipelineCountByStatus from '../graphql/queries/get_pipeline_count_by_status.query.graphql';
-import getProjectPipelineStatistics from '../graphql/queries/get_project_pipeline_statistics.query.graphql';
+import { __, s__, sprintf } from '~/locale';
 import {
   DEFAULT,
   CHART_CONTAINER_HEIGHT,
@@ -21,8 +19,10 @@ import {
   LOAD_PIPELINES_FAILURE,
   UNSUPPORTED_DATA,
 } from '../constants';
-import StatisticsList from './statistics_list.vue';
+import getPipelineCountByStatus from '../graphql/queries/get_pipeline_count_by_status.query.graphql';
+import getProjectPipelineStatistics from '../graphql/queries/get_project_pipeline_statistics.query.graphql';
 import CiCdAnalyticsCharts from './ci_cd_analytics_charts.vue';
+import StatisticsList from './statistics_list.vue';
 
 const defaultAnalyticsValues = {
   weekPipelinesTotals: [],
@@ -252,10 +252,10 @@ export default {
   },
   errorTexts: {
     [LOAD_ANALYTICS_FAILURE]: s__(
-      'PipelineCharts|An error has ocurred when retrieving the analytics data',
+      'PipelineCharts|An error has occurred when retrieving the analytics data',
     ),
     [LOAD_PIPELINES_FAILURE]: s__(
-      'PipelineCharts|An error has ocurred when retrieving the pipelines data',
+      'PipelineCharts|An error has occurred when retrieving the pipelines data',
     ),
     [PARSE_FAILURE]: s__('PipelineCharts|There was an error parsing the data for the charts.'),
     [DEFAULT]: s__('PipelineCharts|An unknown error occurred while processing CI/CD analytics.'),

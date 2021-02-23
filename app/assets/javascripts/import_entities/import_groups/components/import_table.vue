@@ -9,11 +9,11 @@ import {
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
-import bulkImportSourceGroupsQuery from '../graphql/queries/bulk_import_source_groups.query.graphql';
-import availableNamespacesQuery from '../graphql/queries/available_namespaces.query.graphql';
-import setTargetNamespaceMutation from '../graphql/mutations/set_target_namespace.mutation.graphql';
-import setNewNameMutation from '../graphql/mutations/set_new_name.mutation.graphql';
 import importGroupMutation from '../graphql/mutations/import_group.mutation.graphql';
+import setNewNameMutation from '../graphql/mutations/set_new_name.mutation.graphql';
+import setTargetNamespaceMutation from '../graphql/mutations/set_target_namespace.mutation.graphql';
+import availableNamespacesQuery from '../graphql/queries/available_namespaces.query.graphql';
+import bulkImportSourceGroupsQuery from '../graphql/queries/bulk_import_source_groups.query.graphql';
 import ImportTableRow from './import_table_row.vue';
 
 export default {
@@ -147,10 +147,15 @@ export default {
     </div>
     <gl-loading-icon v-if="$apollo.loading" size="md" class="gl-mt-5" />
     <template v-else>
-      <gl-empty-state v-if="hasEmptyFilter" :title="__('Sorry, your filter produced no results')" />
+      <gl-empty-state
+        v-if="hasEmptyFilter"
+        :title="__('Sorry, your filter produced no results')"
+        :description="__('To widen your search, change or remove filters above.')"
+      />
       <gl-empty-state
         v-else-if="!hasGroups"
-        :title="s__('BulkImport|No groups available for import')"
+        :title="s__('BulkImport|You have no groups to import')"
+        :description="s__('Check your source instance permissions.')"
       />
       <div v-else class="gl-display-flex gl-flex-direction-column gl-align-items-center">
         <table class="gl-w-full">

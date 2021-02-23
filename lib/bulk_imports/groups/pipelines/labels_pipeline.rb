@@ -11,9 +11,11 @@ module BulkImports
 
         transformer Common::Transformers::ProhibitedAttributesTransformer
 
-        loader BulkImports::Groups::Loaders::LabelsLoader
+        def load(context, data)
+          Labels::CreateService.new(data).execute(group: context.group)
+        end
 
-        def after_run(context, extracted_data)
+        def after_run(extracted_data)
           context.entity.update_tracker_for(
             relation: :labels,
             has_next_page: extracted_data.has_next_page?,
@@ -21,7 +23,7 @@ module BulkImports
           )
 
           if extracted_data.has_next_page?
-            run(context)
+            run
           end
         end
       end

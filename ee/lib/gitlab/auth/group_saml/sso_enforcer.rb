@@ -4,7 +4,7 @@ module Gitlab
   module Auth
     module GroupSaml
       class SsoEnforcer
-        DEFAULT_SESSION_TIMEOUT = 7.days
+        DEFAULT_SESSION_TIMEOUT = 1.day
 
         attr_reader :saml_provider
 

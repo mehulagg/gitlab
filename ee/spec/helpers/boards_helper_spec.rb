@@ -5,22 +5,22 @@ require 'spec_helper'
 RSpec.describe BoardsHelper do
   let_it_be(:project) { create(:project) }
   let_it_be(:group) { create(:group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project_board) { create(:board, project: project) }
 
   describe '#board_list_data' do
     let(:results) { helper.board_list_data }
 
     it 'contains an endpoint to get users list' do
-      board = create(:board, project: project)
-      assign(:board, board)
+      assign(:board, project_board)
       assign(:project, project)
 
-      expect(results).to include(list_assignees_path: "/-/boards/#{board.id}/users.json")
+      expect(results).to include(list_assignees_path: "/-/boards/#{project_board.id}/users.json")
     end
   end
 
   describe '#current_board_json' do
     let(:board_json) { helper.current_board_json }
-    let(:user) { create(:user) }
     let(:label1) { create(:label, name: "feijoa") }
     let(:label2) { create(:label, name: "pineapple") }
     let(:milestone) { create(:milestone) }
@@ -33,18 +33,29 @@ RSpec.describe BoardsHelper do
     end
   end
 
+  describe '#board_base_url' do
+    context 'when epic board' do
+      let_it_be(:epic_board) { create(:epic_board, group: group) }
+
+      it 'generates the correct url' do
+        assign(:board, epic_board)
+        assign(:group, group)
+
+        expect(helper.board_base_url).to eq "http://test.host/groups/#{group.full_path}/-/epic_boards"
+      end
+    end
+  end
+
   describe '#board_data' do
-    let_it_be(:user) { create(:user) }
-    let_it_be(:board) { create(:board, project: project) }
     let(:board_data) { helper.board_data }
 
     before do
-      assign(:board, board)
+      assign(:board, project_board)
       assign(:project, project)
 
       allow(helper).to receive(:current_user) { user }
-      allow(helper).to receive(:can?).with(user, :create_non_backlog_issues, board).and_return(true)
-      allow(helper).to receive(:can?).with(user, :admin_issue, board).and_return(true)
+      allow(helper).to receive(:can?).with(user, :create_non_backlog_issues, project_board).and_return(true)
+      allow(helper).to receive(:can?).with(user, :admin_issue, project_board).and_return(true)
     end
 
     context 'when no iteration', :aggregate_failures do
@@ -58,7 +69,7 @@ RSpec.describe BoardsHelper do
       let_it_be(:iteration) { create(:iteration, group: group) }
 
       before do
-        board.update!(iteration: iteration)
+        project_board.update!(iteration: iteration)
       end
 
       it 'serializes board with iteration' do

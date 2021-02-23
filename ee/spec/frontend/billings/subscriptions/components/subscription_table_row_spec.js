@@ -1,10 +1,10 @@
+import { GlIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlIcon } from '@gitlab/ui';
 import SubscriptionTableRow from 'ee/billings/subscriptions/components/subscription_table_row.vue';
 import initialStore from 'ee/billings/subscriptions/store';
-import Popover from '~/vue_shared/components/help_popover.vue';
 import { dateInWords } from '~/lib/utils/datetime_utility';
+import Popover from '~/vue_shared/components/help_popover.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

@@ -1,12 +1,12 @@
 <script>
 import { GlAlert, GlButton, GlIcon, GlLink } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { cloneDeep } from 'lodash';
-import * as Sentry from '~/sentry/wrapper';
-import { __, s__ } from '~/locale';
+import DynamicFields from 'ee/security_configuration/components/dynamic_fields.vue';
+import ExpandableSection from 'ee/security_configuration/components/expandable_section.vue';
 import { redirectTo } from '~/lib/utils/url_utility';
-import configureSastMutation from '../graphql/configure_sast.mutation.graphql';
-import DynamicFields from '../../components/dynamic_fields.vue';
-import ExpandableSection from '../../components/expandable_section.vue';
+import { __, s__ } from '~/locale';
+import configureSastMutation from '~/security_configuration/graphql/configure_sast.mutation.graphql';
 import AnalyzerConfiguration from './analyzer_configuration.vue';
 import {
   toSastCiConfigurationEntityInput,

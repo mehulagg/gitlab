@@ -1,0 +1,15 @@
+---
+key_path: search_unique_visits.search_unique_visits_for_any_target_weekly
+description: ''
+product_section: ''
+product_stage: ''
+product_group: ''
+product_category: ''
+value_type: number
+status: data_available
+time_frame: 7d
+data_source:
+distribution:
+- ee
+tier: []
+skip_validation: true

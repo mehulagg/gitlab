@@ -169,6 +169,68 @@ RSpec.describe Gitlab::Geo::VerificationState do
     end
   end
 
+  describe '.needs_reverification' do
+    before do
+      stub_current_geo_node(primary_node)
+    end
+
+    let(:pending_value) { DummyModel.verification_state_value(:verification_pending) }
+    let(:failed_value) { DummyModel.verification_state_value(:verification_failed) }
+    let(:succeeded_value) { DummyModel.verification_state_value(:verification_succeeded) }
+
+    it 'includes verification_succeeded with expired checksum' do
+      DummyModel.insert_all([
+        { verification_state: succeeded_value, verified_at: 15.days.ago }
+      ])
+
+      expect(subject.class.needs_reverification.count).to eq 1
+    end
+
+    it 'excludes non-success verification states and fresh checksums' do
+      DummyModel.insert_all([
+        { verification_state: pending_value, verified_at: 7.days.ago },
+        { verification_state: failed_value, verified_at: 6.days.ago },
+        { verification_state: succeeded_value, verified_at: 3.days.ago }
+      ])
+
+      expect(subject.class.needs_reverification.count).to eq 0
+    end
+  end
+
+  describe '.reverify_batch' do
+    let!(:other_verified_records) do
+      DummyModel.insert_all([
+        { verification_state: succeeded_value, verified_at: 3.days.ago },
+        { verification_state: succeeded_value, verified_at: 4.days.ago }
+      ])
+    end
+
+    let(:succeeded_value) { DummyModel.verification_state_value(:verification_succeeded) }
+
+    before do
+      stub_current_geo_node(primary_node)
+
+      subject.verification_started
+
+      subject.verification_succeeded_with_checksum!('foo', Time.current)
+
+      subject.update!(verified_at: 15.days.ago)
+    end
+
+    it 'sets pending status to records with outdated verification' do
+      expect do
+        expect(subject.class.reverify_batch(batch_size: 100)).to eq 1
+      end.to change { subject.reload.verification_pending? }.to be_truthy
+    end
+
+    it 'limits the update with batch_size' do
+      DummyModel.update_all(verified_at: 15.days.ago)
+
+      expect(subject.class.reverify_batch(batch_size: 2)).to eq 2
+      expect(DummyModel.verification_pending.count).to eq 2
+    end
+  end
+
   describe '.fail_verification_timeouts' do
     before do
       subject.verification_started!
@@ -295,6 +357,26 @@ RSpec.describe Gitlab::Geo::VerificationState do
         expect(subject.reload.verification_succeeded?).to be_truthy
         expect(subject.reload.verification_checksum).to eq('abc123')
         expect(subject.verified_at).not_to be_nil
+      end
+    end
+
+    context 'primary node' do
+      it 'calls replicator.handle_after_checksum_succeeded' do
+        stub_current_geo_node(primary_node)
+
+        expect(subject.replicator).to receive(:handle_after_checksum_succeeded)
+
+        subject.verification_succeeded_with_checksum!('abc123', Time.current)
+      end
+    end
+
+    context 'secondary node' do
+      it 'does not call replicator.handle_after_checksum_succeeded' do
+        stub_current_geo_node(secondary_node)
+
+        expect(subject.replicator).not_to receive(:handle_after_checksum_succeeded)
+
+        subject.verification_succeeded_with_checksum!('abc123', Time.current)
       end
     end
   end

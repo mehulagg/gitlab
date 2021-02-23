@@ -1,14 +1,14 @@
+import { identity } from 'lodash';
 import Vue from 'vue';
 import { mapActions } from 'vuex';
-import { identity } from 'lodash';
-import Translate from '~/vue_shared/translate';
 import PerformancePlugin from '~/performance/vue_performance_plugin';
+import Translate from '~/vue_shared/translate';
 import { parseBoolean } from '../lib/utils/common_utils';
 import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
 import ide from './components/ide.vue';
-import { createStore } from './stores';
 import { createRouter } from './ide_router';
 import { DEFAULT_THEME } from './lib/themes';
+import { createStore } from './stores';
 
 Vue.use(Translate);
 
@@ -53,7 +53,6 @@ export function initIde(el, options = {}) {
         promotionSvgPath: el.dataset.promotionSvgPath,
       });
       this.setLinks({
-        ciHelpPagePath: el.dataset.ciHelpPagePath,
         webIDEHelpPagePath: el.dataset.webIdeHelpPagePath,
       });
       this.setInitialData({

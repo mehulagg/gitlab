@@ -1,39 +1,33 @@
 <script>
-import Vue from 'vue';
 import { GlButton, GlForm, GlFormInput, GlFormGroup, GlFormRadioGroup, GlModal } from '@gitlab/ui';
+import { cloneDeep } from 'lodash';
+import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
-import { sprintf } from '~/locale';
-import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { swapArrayItems } from '~/lib/utils/array_utility';
+import { sprintf } from '~/locale';
 import {
-  DEFAULT_STAGE_CONFIG,
   STAGE_SORT_DIRECTION,
-  I18N,
+  i18n,
   defaultCustomStageFields,
   PRESET_OPTIONS,
   PRESET_OPTIONS_DEFAULT,
 } from './create_value_stream_form/constants';
-import { validateValueStreamName, validateStage } from './create_value_stream_form/utils';
-import DefaultStageFields from './create_value_stream_form/default_stage_fields.vue';
 import CustomStageFields from './create_value_stream_form/custom_stage_fields.vue';
+import DefaultStageFields from './create_value_stream_form/default_stage_fields.vue';
+import {
+  validateValueStreamName,
+  validateStage,
+  formatStageDataForSubmission,
+  hasDirtyStage,
+} from './create_value_stream_form/utils';
 
-const initializeStageErrors = (selectedPreset = PRESET_OPTIONS_DEFAULT) =>
-  selectedPreset === PRESET_OPTIONS_DEFAULT ? DEFAULT_STAGE_CONFIG.map(() => ({})) : [{}];
+const initializeStageErrors = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DEFAULT) =>
+  selectedPreset === PRESET_OPTIONS_DEFAULT ? defaultStageConfig.map(() => ({})) : [{}];
 
-const initializeStages = (selectedPreset = PRESET_OPTIONS_DEFAULT) =>
+const initializeStages = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DEFAULT) =>
   selectedPreset === PRESET_OPTIONS_DEFAULT
-    ? DEFAULT_STAGE_CONFIG
+    ? defaultStageConfig
     : [{ ...defaultCustomStageFields }];
-
-const formatStageDataForSubmission = (stages) => {
-  return stages.map(({ custom = false, name, ...rest }) => {
-    return custom
-      ? convertObjectPropsToSnakeCase({ ...rest, custom, name })
-      : {
-          name,
-        };
-  });
-};
 
 export default {
   name: 'ValueStreamForm',
@@ -68,15 +62,32 @@ export default {
       required: false,
       default: false,
     },
+    defaultStageConfig: {
+      type: Array,
+      required: true,
+    },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
-    const { hasExtendedFormFields, initialData, initialFormErrors, initialPreset } = this;
+    const {
+      defaultStageConfig = [],
+      hasExtendedFormFields,
+      initialData: { name: initialName, stages: initialStages },
+      initialFormErrors,
+      initialPreset,
+    } = this;
     const { name: nameError = [], stages: stageErrors = [{}] } = initialFormErrors;
     const additionalFields = hasExtendedFormFields
       ? {
-          stages: initializeStages(initialPreset),
-          stageErrors: stageErrors || initializeStageErrors(initialPreset),
-          ...initialData,
+          stages: this.isEditing
+            ? cloneDeep(initialStages)
+            : initializeStages(defaultStageConfig, initialPreset),
+          stageErrors:
+            cloneDeep(stageErrors) || initializeStageErrors(defaultStageConfig, initialPreset),
         }
       : { stages: [], nameError };
 
@@ -84,16 +95,14 @@ export default {
       hiddenStages: [],
       selectedPreset: initialPreset,
       presetOptions: PRESET_OPTIONS,
-      name: '',
+      name: initialName,
       nameError,
       stageErrors,
       ...additionalFields,
     };
   },
   computed: {
-    ...mapState({
-      isCreating: 'isCreatingValueStream',
-    }),
+    ...mapState({ isCreating: 'isCreatingValueStream' }),
     ...mapState('customStages', ['formEvents']),
     isValueStreamNameValid() {
       return !this.nameError?.length;
@@ -108,15 +117,18 @@ export default {
     isLoading() {
       return this.isCreating;
     },
+    formTitle() {
+      return this.isEditing ? this.$options.i18n.EDIT_FORM_TITLE : this.$options.i18n.FORM_TITLE;
+    },
     primaryProps() {
       return {
-        text: this.$options.I18N.FORM_TITLE,
+        text: this.isEditing ? this.$options.i18n.EDIT_FORM_ACTION : this.$options.i18n.FORM_TITLE,
         attributes: [{ variant: 'success' }, { loading: this.isLoading }],
       };
     },
     secondaryProps() {
       return {
-        text: this.$options.I18N.BTN_ADD_ANOTHER_STAGE,
+        text: this.$options.i18n.BTN_ADD_ANOTHER_STAGE,
         attributes: [
           { category: 'secondary' },
           { variant: 'info' },
@@ -129,30 +141,48 @@ export default {
         this.nameError.length || this.stageErrors.some((obj) => Object.keys(obj).length),
       );
     },
-  },
-  watch: {
-    initialFormErrors({ name: nameError, stages: stageErrors }) {
-      Vue.set(this, 'nameError', nameError);
-      Vue.set(this, 'stageErrors', stageErrors);
+    isDirtyEditing() {
+      return (
+        this.isEditing &&
+        (this.hasDirtyName(this.name, this.initialData.name) ||
+          hasDirtyStage(this.stages, this.initialData.stages))
+      );
+    },
+    canRestore() {
+      return this.hiddenStages.length || this.isDirtyEditing;
     },
   },
   methods: {
-    ...mapActions(['createValueStream']),
+    ...mapActions(['createValueStream', 'updateValueStream']),
     onSubmit() {
       this.validate();
       if (this.hasFormErrors) return false;
-      return this.createValueStream({
+
+      let req = this.createValueStream;
+      let params = {
         name: this.name,
-        stages: formatStageDataForSubmission(this.stages),
-      }).then(() => {
+        stages: formatStageDataForSubmission(this.stages, this.isEditing),
+      };
+      if (this.isEditing) {
+        req = this.updateValueStream;
+        params = {
+          ...params,
+          id: this.initialData.id,
+        };
+      }
+
+      return req(params).then(() => {
         if (!this.hasInitialFormErrors) {
-          this.$toast.show(sprintf(this.$options.I18N.FORM_CREATED, { name: this.name }), {
+          const msg = this.isEditing
+            ? this.$options.i18n.FORM_EDITED
+            : this.$options.i18n.FORM_CREATED;
+          this.$toast.show(sprintf(msg, { name: this.name }), {
             position: 'top-center',
           });
           this.name = '';
           this.nameError = [];
-          this.stages = initializeStages(this.selectedPreset);
-          this.stageErrors = initializeStageErrors(this.selectedPreset);
+          this.stages = initializeStages(this.defaultStageConfig, this.selectedPreset);
+          this.stageErrors = initializeStageErrors(this.defaultStageConfig, this.selectedPreset);
         }
       });
     },
@@ -162,10 +192,13 @@ export default {
         : `custom-template-stage-${index}`;
     },
     stageGroupLabel(index) {
-      return sprintf(this.$options.I18N.STAGE_INDEX, { index: index + 1 });
+      return sprintf(this.$options.i18n.STAGE_INDEX, { index: index + 1 });
     },
     recoverStageTitle(name) {
-      return sprintf(this.$options.I18N.HIDDEN_DEFAULT_STAGE, { name });
+      return sprintf(this.$options.i18n.HIDDEN_DEFAULT_STAGE, { name });
+    },
+    hasDirtyName(current, original) {
+      return current.trim().toLowerCase() !== original.trim().toLowerCase();
     },
     validateStages() {
       return this.stages.map(validateStage);
@@ -183,8 +216,8 @@ export default {
     handleMove({ index, direction }) {
       const newStages = this.moveItem(this.stages, index, direction);
       const newErrors = this.moveItem(this.stageErrors, index, direction);
-      Vue.set(this, 'stageErrors', newErrors);
-      Vue.set(this, 'stages', newStages);
+      Vue.set(this, 'stageErrors', cloneDeep(newErrors));
+      Vue.set(this, 'stages', cloneDeep(newStages));
     },
     validateStageFields(index) {
       Vue.set(this.stageErrors, index, validateStage(this.stages[index]));
@@ -221,10 +254,20 @@ export default {
       Vue.set(this.stages, activeStageIndex, updatedStage);
     },
     handleResetDefaults() {
-      this.name = '';
-      DEFAULT_STAGE_CONFIG.forEach((stage, index) => {
-        Vue.set(this.stages, index, { ...stage, hidden: false });
-      });
+      if (this.isEditing) {
+        const {
+          initialData: { name: initialName, stages: initialStages },
+        } = this;
+        Vue.set(this, 'name', initialName);
+        Vue.set(this, 'nameError', []);
+        Vue.set(this, 'stages', cloneDeep(initialStages));
+        Vue.set(this, 'stageErrors', [{}]);
+      } else {
+        this.name = '';
+        this.defaultStageConfig.forEach((stage, index) => {
+          Vue.set(this.stages, index, { ...stage, hidden: false });
+        });
+      }
     },
     handleResetBlank() {
       this.name = '';
@@ -236,10 +279,14 @@ export default {
       } else {
         this.handleResetBlank();
       }
-      Vue.set(this, 'stageErrors', initializeStageErrors(this.selectedPreset));
+      Vue.set(
+        this,
+        'stageErrors',
+        initializeStageErrors(this.defaultStageConfig, this.selectedPreset),
+      );
     },
   },
-  I18N,
+  i18n,
 };
 </script>
 <template>
@@ -248,10 +295,11 @@ export default {
     modal-id="value-stream-form-modal"
     dialog-class="gl-align-items-flex-start! gl-py-7"
     scrollable
-    :title="$options.I18N.FORM_TITLE"
+    :title="formTitle"
     :action-primary="primaryProps"
     :action-secondary="secondaryProps"
-    :action-cancel="{ text: $options.I18N.BTN_CANCEL }"
+    :action-cancel="{ text: $options.i18n.BTN_CANCEL }"
+    @hidden.prevent="$emit('hidden')"
     @secondary.prevent="onAddStage"
     @primary.prevent="onSubmit"
   >
@@ -259,7 +307,7 @@ export default {
       <gl-form-group
         data-testid="create-value-stream-name"
         label-for="create-value-stream-name"
-        :label="$options.I18N.FORM_FIELD_NAME_LABEL"
+        :label="$options.i18n.FORM_FIELD_NAME_LABEL"
         :invalid-feedback="invalidNameFeedback"
         :state="isValueStreamNameValid"
       >
@@ -268,21 +316,21 @@ export default {
             id="create-value-stream-name"
             v-model.trim="name"
             name="create-value-stream-name"
-            :placeholder="$options.I18N.FORM_FIELD_NAME_PLACEHOLDER"
+            :placeholder="$options.i18n.FORM_FIELD_NAME_PLACEHOLDER"
             :state="isValueStreamNameValid"
             required
           />
           <gl-button
-            v-if="hiddenStages.length"
+            v-if="canRestore"
             class="gl-ml-3"
             variant="link"
             @click="handleResetDefaults"
-            >{{ $options.I18N.RESTORE_DEFAULTS }}</gl-button
+            >{{ $options.i18n.RESTORE_DEFAULTS }}</gl-button
           >
         </div>
       </gl-form-group>
       <gl-form-radio-group
-        v-if="hasExtendedFormFields"
+        v-if="hasExtendedFormFields && !isEditing"
         v-model="selectedPreset"
         class="gl-mb-4"
         data-testid="vsa-preset-selector"
@@ -327,7 +375,7 @@ export default {
               recoverStageTitle(stage.name)
             }}</span>
             <gl-button variant="link" @click="onRestore(hiddenStageIndex)">{{
-              $options.I18N.RESTORE_HIDDEN_STAGE
+              $options.i18n.RESTORE_HIDDEN_STAGE
             }}</gl-button>
           </gl-form-group>
         </div>

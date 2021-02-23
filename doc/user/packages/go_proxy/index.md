@@ -4,9 +4,9 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Go proxy for GitLab
+# Go proxy for GitLab **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27376) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.1.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27376) in GitLab Premium 13.1.
 > - It's deployed behind a feature flag, disabled by default.
 > - It's disabled for GitLab.com.
 > - It's not recommended for production use.
@@ -96,7 +96,7 @@ following steps work only if GitLab is configured for HTTPS:
 Create a [personal access token](../../profile/personal_access_tokens.md) with
 the scope set to `api` or `read_api`.
 
-Open your [`~/.netrc`](https://ec.haxx.se/usingcurl/usingcurl-netrc) file
+Open your [`~/.netrc`](https://everything.curl.dev/usingcurl/netrc) file
 and add the following text. Replace the variables in `< >` with your values.
 
 ```plaintext

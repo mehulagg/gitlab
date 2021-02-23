@@ -1,12 +1,11 @@
 /* eslint no-param-reassign: "off" */
-
-import $ from 'jquery';
 import MockAdapter from 'axios-mock-adapter';
+import $ from 'jquery';
+import GfmAutoComplete, { membersBeforeSave } from 'ee_else_ce/gfm_auto_complete';
 import { initEmojiMock } from 'helpers/emoji';
 import '~/lib/utils/jquery_at_who';
-import GfmAutoComplete, { membersBeforeSave } from 'ee_else_ce/gfm_auto_complete';
-import { TEST_HOST } from 'helpers/test_constants';
 import { getJSONFixture } from 'helpers/fixtures';
+import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import AjaxCache from '~/lib/utils/ajax_cache';
 import axios from '~/lib/utils/axios_utils';
@@ -577,55 +576,95 @@ describe('GfmAutoComplete', () => {
     });
   });
 
-  describe('Members.templateFunction', () => {
-    it('should return html with avatarTag and username', () => {
-      expect(
-        GfmAutoComplete.Members.templateFunction({
-          avatarTag: 'IMG',
-          username: 'my-group',
-          title: '',
-          icon: '',
-          availabilityStatus: '',
-        }),
-      ).toBe('<li>IMG my-group <small></small> </li>');
-    });
+  describe('GfmAutoComplete.Members', () => {
+    const member = {
+      name: 'Marge Simpson',
+      username: 'msimpson',
+      search: 'MargeSimpson msimpson',
+    };
 
-    it('should add icon if icon is set', () => {
-      expect(
-        GfmAutoComplete.Members.templateFunction({
-          avatarTag: 'IMG',
-          username: 'my-group',
-          title: '',
-          icon: '<i class="icon"/>',
-          availabilityStatus: '',
-        }),
-      ).toBe('<li>IMG my-group <small></small> <i class="icon"/></li>');
-    });
+    describe('templateFunction', () => {
+      it('should return html with avatarTag and username', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: '',
+            icon: '',
+            availabilityStatus: '',
+          }),
+        ).toBe('<li>IMG my-group <small></small> </li>');
+      });
 
-    it('should add escaped title if title is set', () => {
-      expect(
-        GfmAutoComplete.Members.templateFunction({
-          avatarTag: 'IMG',
-          username: 'my-group',
-          title: 'MyGroup+',
-          icon: '<i class="icon"/>',
-          availabilityStatus: '',
-        }),
-      ).toBe('<li>IMG my-group <small>MyGroup+</small> <i class="icon"/></li>');
-    });
+      it('should add icon if icon is set', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: '',
+            icon: '<i class="icon"/>',
+            availabilityStatus: '',
+          }),
+        ).toBe('<li>IMG my-group <small></small> <i class="icon"/></li>');
+      });
 
-    it('should add user availability status if availabilityStatus is set', () => {
-      expect(
-        GfmAutoComplete.Members.templateFunction({
-          avatarTag: 'IMG',
-          username: 'my-group',
-          title: '',
-          icon: '<i class="icon"/>',
-          availabilityStatus: '<span class="gl-text-gray-500"> (Busy)</span>',
-        }),
-      ).toBe(
-        '<li>IMG my-group <small><span class="gl-text-gray-500"> (Busy)</span></small> <i class="icon"/></li>',
-      );
+      it('should add escaped title if title is set', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: 'MyGroup+',
+            icon: '<i class="icon"/>',
+            availabilityStatus: '',
+          }),
+        ).toBe('<li>IMG my-group <small>MyGroup+</small> <i class="icon"/></li>');
+      });
+
+      it('should add user availability status if availabilityStatus is set', () => {
+        expect(
+          GfmAutoComplete.Members.templateFunction({
+            avatarTag: 'IMG',
+            username: 'my-group',
+            title: '',
+            icon: '<i class="icon"/>',
+            availabilityStatus: '<span class="gl-text-gray-500"> (Busy)</span>',
+          }),
+        ).toBe(
+          '<li>IMG my-group <small><span class="gl-text-gray-500"> (Busy)</span></small> <i class="icon"/></li>',
+        );
+      });
+
+      describe('nameOrUsernameStartsWith', () => {
+        it.each`
+          query             | result
+          ${'mar'}          | ${true}
+          ${'msi'}          | ${true}
+          ${'margesimpson'} | ${true}
+          ${'msimpson'}     | ${true}
+          ${'arge'}         | ${false}
+          ${'rgesimp'}      | ${false}
+          ${'maria'}        | ${false}
+          ${'homer'}        | ${false}
+        `('returns $result for $query', ({ query, result }) => {
+          expect(GfmAutoComplete.Members.nameOrUsernameStartsWith(member, query)).toBe(result);
+        });
+      });
+
+      describe('nameOrUsernameIncludes', () => {
+        it.each`
+          query             | result
+          ${'mar'}          | ${true}
+          ${'msi'}          | ${true}
+          ${'margesimpson'} | ${true}
+          ${'msimpson'}     | ${true}
+          ${'arge'}         | ${true}
+          ${'rgesimp'}      | ${true}
+          ${'maria'}        | ${false}
+          ${'homer'}        | ${false}
+        `('returns $result for $query', ({ query, result }) => {
+          expect(GfmAutoComplete.Members.nameOrUsernameIncludes(member, query)).toBe(result);
+        });
+      });
     });
   });
 

@@ -101,6 +101,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:reviews).inverse_of(:author) }
     it { is_expected.to have_many(:merge_request_assignees).inverse_of(:assignee) }
     it { is_expected.to have_many(:merge_request_reviewers).inverse_of(:reviewer) }
+    it { is_expected.to have_many(:created_custom_emoji).inverse_of(:creator) }
 
     describe "#user_detail" do
       it 'does not persist `user_detail` by default' do
@@ -380,11 +381,11 @@ RSpec.describe User do
     it { is_expected.not_to allow_value(-1).for(:projects_limit) }
     it { is_expected.not_to allow_value(Gitlab::Database::MAX_INT_VALUE + 1).for(:projects_limit) }
 
-    it_behaves_like 'an object with email-formated attributes', :email do
+    it_behaves_like 'an object with email-formatted attributes', :email do
       subject { build(:user) }
     end
 
-    it_behaves_like 'an object with RFC3696 compliant email-formated attributes', :public_email, :notification_email do
+    it_behaves_like 'an object with RFC3696 compliant email-formatted attributes', :public_email, :notification_email do
       subject { create(:user).tap { |user| user.emails << build(:email, email: email_value, confirmed_at: Time.current) } }
     end
 
@@ -2828,6 +2829,79 @@ RSpec.describe User do
       user.toggle_star(project)
 
       expect(user.starred?(project)).to be_falsey
+    end
+  end
+
+  describe '#following?' do
+    it 'check if following another user' do
+      user = create :user
+      followee1 = create :user
+
+      expect(user.follow(followee1)).to be_truthy
+
+      expect(user.following?(followee1)).to be_truthy
+
+      expect(user.unfollow(followee1)).to be_truthy
+
+      expect(user.following?(followee1)).to be_falsey
+    end
+  end
+
+  describe '#follow' do
+    it 'follow another user' do
+      user = create :user
+      followee1 = create :user
+      followee2 = create :user
+
+      expect(user.followees).to be_empty
+
+      expect(user.follow(followee1)).to be_truthy
+      expect(user.follow(followee1)).to be_falsey
+
+      expect(user.followees).to contain_exactly(followee1)
+
+      expect(user.follow(followee2)).to be_truthy
+      expect(user.follow(followee2)).to be_falsey
+
+      expect(user.followees).to contain_exactly(followee1, followee2)
+    end
+
+    it 'follow itself is not possible' do
+      user = create :user
+
+      expect(user.followees).to be_empty
+
+      expect(user.follow(user)).to be_falsey
+
+      expect(user.followees).to be_empty
+    end
+  end
+
+  describe '#unfollow' do
+    it 'unfollow another user' do
+      user = create :user
+      followee1 = create :user
+      followee2 = create :user
+
+      expect(user.followees).to be_empty
+
+      expect(user.follow(followee1)).to be_truthy
+      expect(user.follow(followee1)).to be_falsey
+
+      expect(user.follow(followee2)).to be_truthy
+      expect(user.follow(followee2)).to be_falsey
+
+      expect(user.followees).to contain_exactly(followee1, followee2)
+
+      expect(user.unfollow(followee1)).to be_truthy
+      expect(user.unfollow(followee1)).to be_falsey
+
+      expect(user.followees).to contain_exactly(followee2)
+
+      expect(user.unfollow(followee2)).to be_truthy
+      expect(user.unfollow(followee2)).to be_falsey
+
+      expect(user.followees).to be_empty
     end
   end
 

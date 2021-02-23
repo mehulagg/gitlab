@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
 import {
   GlLink,
   GlLoadingIcon,
@@ -9,12 +8,13 @@ import {
   GlSearchBoxByType,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { noneEpic } from 'ee/vue_shared/constants';
 import { __, s__ } from '~/locale';
-import createStore from './store';
+import { DropdownVariant, DATA_REFETCH_DELAY } from './constants';
 import DropdownValue from './dropdown_value.vue';
 import DropdownValueCollapsed from './dropdown_value_collapsed.vue';
-import { DropdownVariant, DATA_REFETCH_DELAY } from './constants';
+import createStore from './store';
 
 export const i18n = {
   selectEpic: s__('Epics|Select epic'),
@@ -199,6 +199,7 @@ export default {
     },
     hideDropdown() {
       this.isDropdownShowing = this.isDropdownVariantStandalone;
+      this.$emit('hide');
     },
     toggleFormDropdown() {
       const { dropdown } = this.$refs.dropdown.$refs;

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan', :reliable do
+  # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+  RSpec.describe 'Plan', :reliable, :requires_admin do
     describe 'Multiple assignees per issue' do
       before do
         Flow::Login.sign_in
@@ -14,6 +15,8 @@ module QA
         project = Resource::Project.fabricate_via_api! do |project|
           project.name = 'project-to-test-issue-with-multiple-assignees'
         end
+
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
 
         project.add_member(user_1)
         project.add_member(user_2)

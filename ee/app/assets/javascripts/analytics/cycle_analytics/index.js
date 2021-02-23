@@ -1,6 +1,6 @@
+import { GlToast } from '@gitlab/ui';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { GlToast } from '@gitlab/ui';
 import createDefaultClient from '~/lib/graphql';
 import { urlQueryToFilter } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { buildCycleAnalyticsInitialData } from '../shared/utils';

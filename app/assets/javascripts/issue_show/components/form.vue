@@ -2,11 +2,11 @@
 import $ from 'jquery';
 import Autosave from '~/autosave';
 import eventHub from '../event_hub';
-import lockedWarning from './locked_warning.vue';
-import titleField from './fields/title.vue';
-import descriptionField from './fields/description.vue';
 import editActions from './edit_actions.vue';
+import descriptionField from './fields/description.vue';
 import descriptionTemplate from './fields/description_template.vue';
+import titleField from './fields/title.vue';
+import lockedWarning from './locked_warning.vue';
 
 export default {
   components: {
@@ -26,9 +26,9 @@ export default {
       required: true,
     },
     issuableTemplates: {
-      type: Array,
+      type: [Object, Array],
       required: false,
-      default: () => [],
+      default: () => {},
     },
     issuableType: {
       type: String,
@@ -44,6 +44,10 @@ export default {
     },
     projectPath: {
       type: String,
+      required: true,
+    },
+    projectId: {
+      type: Number,
       required: true,
     },
     projectNamespace: {
@@ -68,7 +72,7 @@ export default {
   },
   computed: {
     hasIssuableTemplates() {
-      return this.issuableTemplates.length;
+      return Object.values(Object(this.issuableTemplates)).length;
     },
     showLockedWarning() {
       return this.formState.lockedWarningVisible && !this.formState.updateLoading;
@@ -127,6 +131,7 @@ export default {
           :form-state="formState"
           :issuable-templates="issuableTemplates"
           :project-path="projectPath"
+          :project-id="projectId"
           :project-namespace="projectNamespace"
         />
       </div>

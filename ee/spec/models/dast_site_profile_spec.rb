@@ -16,6 +16,7 @@ RSpec.describe DastSiteProfile, type: :model do
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
     it { is_expected.to validate_presence_of(:project_id) }
     it { is_expected.to validate_presence_of(:dast_site_id) }
+    it { is_expected.to validate_presence_of(:name) }
 
     context 'when the project_id and dast_site.project_id do not match' do
       let(:project) { create(:project) }
@@ -48,6 +49,13 @@ RSpec.describe DastSiteProfile, type: :model do
           expect(subject.status).to eq('failed') # ensures guard passed
           expect(recorder.count).to be_zero
         end
+      end
+    end
+
+    describe '.with_name' do
+      it 'returns the dast_site_profiles with given name' do
+        result = DastSiteProfile.with_name(subject.name)
+        expect(result).to eq([subject])
       end
     end
   end

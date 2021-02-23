@@ -26,6 +26,10 @@ module EE
         show_out_of_pipeline_minutes_notification?(project, namespace)
       end
 
+      def root_ancestor_namespace(project, namespace)
+        (project || namespace).root_ancestor
+      end
+
       private
 
       def notification_dot_acknowledged?

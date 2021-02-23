@@ -31,6 +31,7 @@ module QA
       let(:two_fa_expected_text) { /The group settings for.*require you to enable Two-Factor Authentication for your account.*You need to do this before/ }
 
       before do
+        Runtime::Feature.enable(:invite_members_group_modal, group: group)
         group.add_member(developer_user, Resource::Members::AccessLevel::DEVELOPER)
       end
 
@@ -101,7 +102,7 @@ module QA
 
             two_fa_auth.click_copy_and_proceed
 
-            expect(two_fa_auth).to have_text('Congratulations! You have enabled Two-factor Authentication!')
+            expect(two_fa_auth).to have_text('You have set up 2FA for your account!')
           end
         end
       end

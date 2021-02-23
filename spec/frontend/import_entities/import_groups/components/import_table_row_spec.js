@@ -1,8 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton, GlLink, GlFormInput } from '@gitlab/ui';
-import Select2Select from '~/vue_shared/components/select2_select.vue';
-import ImportTableRow from '~/import_entities/import_groups/components/import_table_row.vue';
+import { shallowMount } from '@vue/test-utils';
 import { STATUSES } from '~/import_entities/constants';
+import ImportTableRow from '~/import_entities/import_groups/components/import_table_row.vue';
+import Select2Select from '~/vue_shared/components/select2_select.vue';
 import { availableNamespacesFixture } from '../graphql/fixtures';
 
 const getFakeGroup = (status) => ({
@@ -73,6 +73,34 @@ describe('import table row', () => {
     it('renders namespace dropdown as not disabled', () => {
       expect(findNamespaceDropdown().attributes('disabled')).toBe(undefined);
     });
+  });
+
+  it('renders only no parent option if available namespaces list is empty', () => {
+    createComponent({
+      group: getFakeGroup(STATUSES.NONE),
+      availableNamespaces: [],
+    });
+
+    const dropdownData = findNamespaceDropdown().props().options.data;
+    const noParentOption = dropdownData.find((o) => o.text === 'No parent');
+    const existingGroupOption = dropdownData.find((o) => o.text === 'Existing groups');
+
+    expect(noParentOption.id).toBe('');
+    expect(existingGroupOption).toBeUndefined();
+  });
+
+  it('renders both no parent option and available namespaces list when available namespaces list is not empty', () => {
+    createComponent({
+      group: getFakeGroup(STATUSES.NONE),
+      availableNamespaces: availableNamespacesFixture,
+    });
+
+    const dropdownData = findNamespaceDropdown().props().options.data;
+    const noParentOption = dropdownData.find((o) => o.text === 'No parent');
+    const existingGroupOption = dropdownData.find((o) => o.text === 'Existing groups');
+
+    expect(noParentOption.id).toBe('');
+    expect(existingGroupOption.children).toHaveLength(availableNamespacesFixture.length);
   });
 
   describe('when entity status is SCHEDULING', () => {

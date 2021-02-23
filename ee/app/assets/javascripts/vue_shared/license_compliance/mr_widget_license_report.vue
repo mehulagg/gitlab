@@ -1,12 +1,12 @@
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
 import { GlLink, GlIcon } from '@gitlab/ui';
-import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import ReportItem from '~/reports/components/report_item.vue';
-import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 import ReportSection from '~/reports/components/report_section.vue';
+import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 import createStore from './store';
 
 const store = createStore();
@@ -176,25 +176,27 @@ export default {
           </gl-link>
         </div>
       </template>
-      <div v-if="showActionButtons" slot="action-buttons" class="gl-mr-3">
-        <a
-          v-if="licenseManagementSettingsPath"
-          :class="{ 'gl-mr-3': fullReportPath }"
-          :href="licenseManagementSettingsPath"
-          class="btn btn-default btn-sm js-manage-licenses"
-          data-qa-selector="manage_licenses_button"
-        >
-          {{ s__('ciReport|Manage licenses') }}
-        </a>
-        <a
-          v-if="fullReportPath"
-          :href="fullReportPath"
-          target="_blank"
-          class="btn btn-default btn-sm js-full-report"
-        >
-          {{ s__('ciReport|View full report') }} <gl-icon :size="16" name="external-link" />
-        </a>
-      </div>
+      <template v-if="showActionButtons" #action-buttons>
+        <div class="gl-display-flex gl-mr-3">
+          <a
+            v-if="licenseManagementSettingsPath"
+            :class="{ 'gl-mr-3': fullReportPath }"
+            :href="licenseManagementSettingsPath"
+            class="btn btn-default btn-sm js-manage-licenses"
+            data-qa-selector="manage_licenses_button"
+          >
+            {{ s__('ciReport|Manage licenses') }}
+          </a>
+          <a
+            v-if="fullReportPath"
+            :href="fullReportPath"
+            target="_blank"
+            class="btn btn-default btn-sm js-full-report"
+          >
+            {{ s__('ciReport|View full report') }} <gl-icon :size="16" name="external-link" />
+          </a>
+        </div>
+      </template>
     </report-section>
   </div>
 </template>

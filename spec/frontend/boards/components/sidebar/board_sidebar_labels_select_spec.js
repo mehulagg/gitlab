@@ -1,12 +1,12 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLabel } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
 import { labels as TEST_LABELS, mockIssue as TEST_ISSUE } from 'jest/boards/mock_data';
-import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import { createStore } from '~/boards/stores';
 import createFlash from '~/flash';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 
 jest.mock('~/flash');
 
@@ -25,7 +25,7 @@ describe('~/boards/components/sidebar/board_sidebar_labels_select.vue', () => {
 
   const createWrapper = ({ labels = [] } = {}) => {
     store = createStore();
-    store.state.issues = { [TEST_ISSUE.id]: { ...TEST_ISSUE, labels } };
+    store.state.boardItems = { [TEST_ISSUE.id]: { ...TEST_ISSUE, labels } };
     store.state.activeId = TEST_ISSUE.id;
 
     wrapper = shallowMount(BoardSidebarLabelsSelect, {
@@ -66,7 +66,7 @@ describe('~/boards/components/sidebar/board_sidebar_labels_select.vue', () => {
 
       jest.spyOn(wrapper.vm, 'setActiveIssueLabels').mockImplementation(() => TEST_LABELS);
       findLabelsSelect().vm.$emit('updateSelectedLabels', TEST_LABELS_PAYLOAD);
-      store.state.issues[TEST_ISSUE.id].labels = TEST_LABELS;
+      store.state.boardItems[TEST_ISSUE.id].labels = TEST_LABELS;
       await wrapper.vm.$nextTick();
     });
 

@@ -184,6 +184,26 @@ RSpec.describe GroupPolicy do
     it { is_expected.not_to be_allowed(:read_group_contribution_analytics) }
   end
 
+  context 'when dora4 analytics is available' do
+    let(:current_user) { developer }
+
+    before do
+      stub_licensed_features(dora4_analytics: true)
+    end
+
+    it { is_expected.to be_allowed(:read_dora4_analytics) }
+  end
+
+  context 'when dora4 analytics is not available' do
+    let(:current_user) { developer }
+
+    before do
+      stub_licensed_features(dora4_analytics: false)
+    end
+
+    it { is_expected.not_to be_allowed(:read_dora4_analytics) }
+  end
+
   context 'when group activity analytics is available' do
     let(:current_user) { developer }
 
@@ -1422,6 +1442,35 @@ RSpec.describe GroupPolicy do
 
         before do
           allow(group).to receive(:eligible_for_trial?).and_return(eligible_for_trial)
+        end
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+      end
+    end
+
+    describe ':admin_compliance_framework' do
+      using RSpec::Parameterized::TableSyntax
+
+      let(:policy) { :admin_compliance_framework }
+
+      where(:role, :licensed, :feature_flag, :allowed) do
+        :owner      | true  | true  | true
+        :owner      | true  | false | false
+        :owner      | false | true  | false
+        :owner      | false | false | false
+        :admin      | true  | true  | true
+        :maintainer | true  | true  | false
+        :developer  | true  | true  | false
+        :reporter   | true  | true  | false
+        :guest      | true  | true  | false
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        before do
+          stub_licensed_features(custom_compliance_frameworks: licensed)
+          stub_feature_flags(ff_custom_compliance_frameworks: feature_flag)
         end
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }

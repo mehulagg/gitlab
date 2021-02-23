@@ -281,14 +281,7 @@ Example response:
 
 ## Generate changelog data
 
-> - [Introduced](https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/351) in GitLab 13.9.
-> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not yet recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-generating-changelog-data).
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> [Introduced](https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/351) in GitLab 13.9.
 
 Generate changelog data based on commits in a repository.
 
@@ -310,7 +303,7 @@ Supported attributes:
 | :-------- | :------- | :--------- | :---------- |
 | `version` | string   | yes | The version to generate the changelog for. The format must follow [semantic versioning](https://semver.org/). |
 | `from`    | string   | no | The start of the range of commits (as a SHA) to use for generating the changelog. This commit itself isn't included in the list. |
-| `to`      | string   | yes | The end of the range of commits (as a SHA) to use for the changelog. This commit _is_ included in the list. |
+| `to`      | string   | no | The end of the range of commits (as a SHA) to use for the changelog. This commit _is_ included in the list. Defaults to the branch specified in the `branch` attribute. |
 | `date`    | datetime | no | The date and time of the release, defaults to the current time. |
 | `branch`  | string   | no | The branch to commit the changelog changes to, defaults to the project's default branch. |
 | `trailer` | string   | no | The Git trailer to use for including commits, defaults to `Changelog`. |
@@ -562,25 +555,6 @@ In an entry, the following variables are available (here `foo.bar` means that
 - `merge_request.reference`: a reference to the merge request that first
   introduced the change (for example, `gitlab-org/gitlab!50063`).
 
-The `author` and `merge_request` objects might not be present if the data couldn't
-be determined (for example, when a commit was created without a corresponding merge
-request).
-
-### Enable or disable generating changelog data **(CORE ONLY)**
-
-This feature is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
-can enable it.
-
-To enable it for a project:
-
-```ruby
-Feature.enable(:changelog_api, Project.find(id_of_the_project))
-```
-
-To disable it for a project:
-
-```ruby
-Feature.disable(:changelog_api, Project.find(id_of_the_project))
-```
+The `author` and `merge_request` objects might not be present if the data
+couldn't be determined. For example, when a commit is created without a
+corresponding merge request, no merge request is displayed.

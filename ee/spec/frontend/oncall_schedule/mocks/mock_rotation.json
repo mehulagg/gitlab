@@ -25,6 +25,7 @@
             "colorWeight": "500",
             "colorPalette": "blue",
             "user": {
+              "id": "1",
               "username": "nora.schaden"
             }
           },
@@ -37,6 +38,7 @@
             "colorWeight": "500",
             "colorPalette": "orange",
             "user": {
+              "id": "2",
               "username": "racheal.loving"
             }
           },

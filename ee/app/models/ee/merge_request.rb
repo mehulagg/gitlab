@@ -52,8 +52,6 @@ module EE
 
       delegate :sha, to: :head_pipeline, prefix: :head_pipeline, allow_nil: true
       delegate :sha, to: :base_pipeline, prefix: :base_pipeline, allow_nil: true
-      delegate :merge_requests_author_approval?, to: :target_project, allow_nil: true
-      delegate :merge_requests_disable_committers_approval?, to: :target_project, allow_nil: true
 
       accepts_nested_attributes_for :approval_rules, allow_destroy: true
 
@@ -70,6 +68,14 @@ module EE
 
       scope :including_merge_train, -> do
         includes(:merge_train)
+      end
+
+      def merge_requests_author_approval?
+        !!target_project&.merge_requests_author_approval?
+      end
+
+      def merge_requests_disable_committers_approval?
+        !!target_project&.merge_requests_disable_committers_approval?
       end
     end
 
@@ -167,6 +173,10 @@ module EE
         secret_detection: report_type_enabled?(:secret_detection),
         api_fuzzing: report_type_enabled?(:api_fuzzing)
       }
+    end
+
+    def has_security_reports?
+      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.security_reports)
     end
 
     def has_dependency_scanning_reports?

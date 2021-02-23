@@ -7,16 +7,14 @@ import {
   GlLink,
   GlAlert,
   GlSkeletonLoader,
-  GlSearchBoxByClick,
 } from '@gitlab/ui';
 import { get } from 'lodash';
 import getContainerRepositoriesQuery from 'shared_queries/container_registry/get_container_repositories.query.graphql';
-import Tracking from '~/tracking';
 import createFlash from '~/flash';
-import RegistryHeader from '../components/list_page/registry_header.vue';
+import Tracking from '~/tracking';
+import RegistrySearch from '~/vue_shared/components/registry/registry_search.vue';
 import DeleteImage from '../components/delete_image.vue';
-
-import getContainerRepositoriesDetails from '../graphql/queries/get_container_repositories_details.query.graphql';
+import RegistryHeader from '../components/list_page/registry_header.vue';
 
 import {
   DELETE_IMAGE_SUCCESS_MESSAGE,
@@ -25,13 +23,13 @@ import {
   CONNECTION_ERROR_MESSAGE,
   REMOVE_REPOSITORY_MODAL_TEXT,
   REMOVE_REPOSITORY_LABEL,
-  SEARCH_PLACEHOLDER_TEXT,
-  IMAGE_REPOSITORY_LIST_LABEL,
   EMPTY_RESULT_TITLE,
   EMPTY_RESULT_MESSAGE,
   GRAPHQL_PAGE_SIZE,
   FETCH_IMAGES_LIST_ERROR_MESSAGE,
+  SORT_FIELDS,
 } from '../constants/index';
+import getContainerRepositoriesDetails from '../graphql/queries/get_container_repositories_details.query.graphql';
 
 export default {
   name: 'RegistryListPage',
@@ -58,9 +56,9 @@ export default {
     GlLink,
     GlAlert,
     GlSkeletonLoader,
-    GlSearchBoxByClick,
     RegistryHeader,
     DeleteImage,
+    RegistrySearch,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -77,11 +75,10 @@ export default {
     CONNECTION_ERROR_MESSAGE,
     REMOVE_REPOSITORY_MODAL_TEXT,
     REMOVE_REPOSITORY_LABEL,
-    SEARCH_PLACEHOLDER_TEXT,
-    IMAGE_REPOSITORY_LIST_LABEL,
     EMPTY_RESULT_TITLE,
     EMPTY_RESULT_MESSAGE,
   },
+  searchConfig: SORT_FIELDS,
   apollo: {
     baseImages: {
       query: getContainerRepositoriesQuery,
@@ -123,7 +120,8 @@ export default {
       containerRepositoriesCount: 0,
       itemToDelete: {},
       deleteAlertType: null,
-      searchValue: null,
+      filter: [],
+      sorting: { orderBy: 'UPDATED', sort: 'desc' },
       name: null,
       mutationLoading: false,
       fetchAdditionalDetails: false,
@@ -142,6 +140,7 @@ export default {
     queryVariables() {
       return {
         name: this.name,
+        sort: this.sortBy,
         fullPath: this.config.isGroupPage ? this.config.groupPath : this.config.projectPath,
         isGroupPage: this.config.isGroupPage,
         first: GRAPHQL_PAGE_SIZE,
@@ -165,6 +164,10 @@ export default {
       return this.deleteAlertType === 'success'
         ? DELETE_IMAGE_SUCCESS_MESSAGE
         : DELETE_IMAGE_ERROR_MESSAGE;
+    },
+    sortBy() {
+      const { orderBy, sort } = this.sorting;
+      return `${orderBy}_${sort}`.toUpperCase();
     },
   },
   mounted() {
@@ -231,6 +234,16 @@ export default {
       this.track('confirm_delete');
       this.mutationLoading = true;
     },
+    updateSorting(value) {
+      this.sorting = {
+        ...this.sorting,
+        ...value,
+      };
+    },
+    doFilter() {
+      const search = this.filter.find((i) => i.type === 'filtered-search-term');
+      this.name = search?.value?.data;
+    },
   },
 };
 </script>
@@ -275,13 +288,22 @@ export default {
         :images-count="containerRepositoriesCount"
         :expiration-policy="config.expirationPolicy"
         :help-page-path="config.helpPagePath"
-        :expiration-policy-help-page-path="config.expirationPolicyHelpPagePath"
         :hide-expiration-policy-data="config.isGroupPage"
       >
         <template #commands>
           <cli-commands v-if="showCommands" />
         </template>
       </registry-header>
+
+      <registry-search
+        :filter="filter"
+        :sorting="sorting"
+        :tokens="[]"
+        :sortable-fields="$options.searchConfig"
+        @sorting:changed="updateSorting"
+        @filter:changed="filter = $event"
+        @filter:submit="doFilter"
+      />
 
       <div v-if="isLoading" class="gl-mt-5">
         <gl-skeleton-loader
@@ -298,20 +320,6 @@ export default {
       </div>
       <template v-else>
         <template v-if="images.length > 0 || name">
-          <div class="gl-display-flex gl-p-1 gl-mt-3" data-testid="listHeader">
-            <div class="gl-flex-fill-1">
-              <h5>{{ $options.i18n.IMAGE_REPOSITORY_LIST_LABEL }}</h5>
-            </div>
-            <div>
-              <gl-search-box-by-click
-                v-model="searchValue"
-                :placeholder="$options.i18n.SEARCH_PLACEHOLDER_TEXT"
-                @clear="name = null"
-                @submit="name = $event"
-              />
-            </div>
-          </div>
-
           <image-list
             v-if="images.length"
             :images="images"

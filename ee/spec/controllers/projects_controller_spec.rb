@@ -568,12 +568,9 @@ RSpec.describe ProjectsController do
           stub_licensed_features(compliance_framework: true)
         end
 
-        context 'current_user is a project maintainer' do
-          let_it_be(:maintainer) { create(:user) }
-
+        context 'current_user is a project owner' do
           before do
-            project.add_maintainer(maintainer)
-            sign_in(maintainer)
+            sign_in(project.owner)
           end
 
           it 'sets the compliance framework' do

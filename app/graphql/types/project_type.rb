@@ -273,6 +273,12 @@ module Types
           description: 'Integrations which can receive alerts for the project.',
           resolver: Resolvers::AlertManagement::IntegrationsResolver
 
+    field :alert_management_http_integrations,
+          Types::AlertManagement::HttpIntegrationType.connection_type,
+          null: true,
+          description: 'HTTP Integrations which can receive alerts for the project.',
+          resolver: Resolvers::AlertManagement::HttpIntegrationsResolver
+
     field :releases,
           Types::ReleaseType.connection_type,
           null: true,
@@ -337,17 +343,8 @@ module Types
     field :labels,
           Types::LabelType.connection_type,
           null: true,
-          description: 'Labels available on this project.' do
-            argument :search_term, GraphQL::STRING_TYPE,
-              required: false,
-              description: 'A search term to find labels with.'
-          end
-
-    def labels(search_term: nil)
-      LabelsFinder
-        .new(current_user, project: project, search: search_term)
-        .execute
-    end
+          description: 'Labels available on this project.',
+          resolver: Resolvers::LabelsResolver
 
     def avatar_url
       object.avatar_url(only_path: false)

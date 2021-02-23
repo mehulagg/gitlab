@@ -8,12 +8,12 @@ export default {
   },
   getIssuesByEpic: (state, getters) => (listId, epicId) => {
     return getters
-      .getIssuesByList(listId)
+      .getBoardItemsByList(listId)
       .filter((issue) => issue.epic && issue.epic.id === epicId);
   },
 
   getUnassignedIssues: (state, getters) => (listId) => {
-    return getters.getIssuesByList(listId).filter((i) => Boolean(i.epic) === false);
+    return getters.getBoardItemsByList(listId).filter((i) => Boolean(i.epic) === false);
   },
 
   shouldUseGraphQL: (state) => {

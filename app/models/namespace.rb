@@ -67,8 +67,6 @@ class Namespace < ApplicationRecord
   validate :changing_shared_runners_enabled_is_allowed
   validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed
 
-  validates_associated :runners
-
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :avatar_url, to: :owner, allow_nil: true
 
@@ -163,6 +161,10 @@ class Namespace < ApplicationRecord
 
       name = host.delete_suffix(gitlab_host)
       Namespace.where(parent_id: nil).by_path(name)
+    end
+
+    def top_most
+      where(parent_id: nil)
     end
   end
 
@@ -398,6 +400,10 @@ class Namespace < ApplicationRecord
 
   def root?
     !has_parent?
+  end
+
+  def recent?
+    created_at >= 90.days.ago
   end
 
   private

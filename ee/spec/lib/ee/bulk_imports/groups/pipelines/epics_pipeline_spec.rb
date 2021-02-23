@@ -25,6 +25,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
     group.add_owner(user)
   end
 
+  subject { described_class.new(context) }
+
   describe '#run' do
     it 'imports group epics into destination group' do
       first_page = extractor_data(has_next_page: true, cursor: cursor)
@@ -36,7 +38,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
           .and_return(first_page, last_page)
       end
 
-      expect { subject.run(context) }.to change(::Epic, :count).by(2)
+      expect { subject.run }.to change(::Epic, :count).by(2)
     end
   end
 
@@ -45,9 +47,9 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
       it 'updates tracker information and runs pipeline again' do
         data = extractor_data(has_next_page: true, cursor: cursor)
 
-        expect(subject).to receive(:run).with(context)
+        expect(subject).to receive(:run)
 
-        subject.after_run(context, data)
+        subject.after_run(data)
 
         tracker = entity.trackers.find_by(relation: :epics)
 
@@ -60,9 +62,9 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
       it 'updates tracker information and does not run pipeline' do
         data = extractor_data(has_next_page: false)
 
-        expect(subject).not_to receive(:run).with(context)
+        expect(subject).not_to receive(:run)
 
-        subject.after_run(context, data)
+        subject.after_run(data)
 
         tracker = entity.trackers.find_by(relation: :epics)
 

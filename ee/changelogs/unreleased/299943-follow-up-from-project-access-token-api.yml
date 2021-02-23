@@ -1,5 +1,0 @@
----
-title: Log token_id in project access token audit events instead of user_id
-merge_request: 52535
-author:
-type: changed

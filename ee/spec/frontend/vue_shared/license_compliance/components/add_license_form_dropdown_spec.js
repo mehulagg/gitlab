@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import $ from 'jquery';
-import waitForPromises from 'helpers/wait_for_promises';
 import Dropdown from 'ee/vue_shared/license_compliance/components/add_license_form_dropdown.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 
 let vm;
 let wrapper;

@@ -6,6 +6,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Performance Bar **(FREE SELF)**
 
+> The **Stats** field [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/271551) in GitLab SaaS 13.9.
+
 You can display the GitLab Performance Bar to see statistics for the performance
 of a page. When activated, it looks as follows:
 
@@ -53,6 +55,8 @@ From left to right, it displays:
 - **Request Selector**: a select box displayed on the right-hand side of the
   Performance Bar which enables you to view these metrics for any requests made while
   the current page was open. Only the first two requests per unique URL are captured.
+- **Stats** (optional): if the `GITLAB_PERFORMANCE_BAR_STATS_URL` environment variable is set,
+  this URL is displayed in the bar. In GitLab 13.9 and later, used only in GitLab SaaS.
 
 ## Request warnings
 
@@ -71,7 +75,7 @@ Requests with warnings display `(!)` after their path in the **Request selector*
 
 ![Request selector showing dropdown](img/performance_bar_request_selector_warning_expanded.png)
 
-## Enable the Performance Bar via the Admin panel
+## Enable the Performance Bar via the Admin Area
 
 The GitLab Performance Bar is disabled by default. To enable it for a given group:
 

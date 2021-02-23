@@ -3,8 +3,8 @@ import MockAdapter from 'axios-mock-adapter';
 import Issue from 'ee/boards/models/issue';
 import List from 'ee/boards/models/list';
 import { listObj } from 'jest/boards/mock_data';
-import CeList from '~/boards/models/list';
 import { ListType } from '~/boards/constants';
+import CeList from '~/boards/models/list';
 
 describe('List model', () => {
   let list;

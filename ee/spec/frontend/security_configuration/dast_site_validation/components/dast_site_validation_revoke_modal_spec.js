@@ -1,13 +1,13 @@
+import { GlAlert, GlModal } from '@gitlab/ui';
 import { within } from '@testing-library/dom';
 import { mount, shallowMount } from '@vue/test-utils';
-import Vue from 'vue';
 import merge from 'lodash/merge';
+import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { GlAlert, GlModal } from '@gitlab/ui';
-import createApolloProvider from 'helpers/mock_apollo_helper';
-import dastSiteValidationRevokeMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validation_revoke.mutation.graphql';
-import waitForPromises from 'helpers/wait_for_promises';
 import DastSiteValidationRevokeModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_revoke_modal.vue';
+import dastSiteValidationRevokeMutation from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validation_revoke.mutation.graphql';
+import createApolloProvider from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import * as responses from '../mock_data/apollo_mock';
 
 Vue.use(VueApollo);

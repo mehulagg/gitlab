@@ -4,7 +4,7 @@ module ComplianceManagement
   module ComplianceFramework
     module GroupSettingsHelper
       def show_compliance_frameworks?
-        License.feature_available?(:custom_compliance_frameworks) && Feature.enabled?(:ff_custom_compliance_frameworks)
+        current_user.can?(:admin_compliance_framework, @group)
       end
 
       def compliance_frameworks_list_data

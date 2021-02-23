@@ -1,8 +1,8 @@
 import { find } from 'lodash';
-import AccessDropdown from '~/projects/settings/access_dropdown';
-import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { s__ } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
+import AccessDropdown from '~/projects/settings/access_dropdown';
+import { FAILED_TO_UPDATE_TAG_MESSAGE } from '~/protected_tags/constants';
 import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 
 export default class ProtectedTagEdit {
@@ -67,7 +67,7 @@ export default class ProtectedTagEdit {
       })
       .catch(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        createFlash(s__('ProjectSettings|Failed to update tag!'));
+        createFlash(FAILED_TO_UPDATE_TAG_MESSAGE);
       });
   }
 

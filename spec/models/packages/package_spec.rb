@@ -4,6 +4,8 @@ require 'spec_helper'
 RSpec.describe Packages::Package, type: :model do
   include SortingHelper
 
+  it_behaves_like 'having unique enum values'
+
   describe 'relationships' do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to belong_to(:creator) }
@@ -159,6 +161,18 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('My/package').for(:name) }
         it { is_expected.not_to allow_value('../../../my_package').for(:name) }
         it { is_expected.not_to allow_value('%2e%2e%2fmy_package').for(:name) }
+      end
+
+      context 'npm package' do
+        subject { build_stubbed(:npm_package) }
+
+        it { is_expected.to allow_value("@group-1/package").for(:name) }
+        it { is_expected.to allow_value("@any-scope/package").for(:name) }
+        it { is_expected.to allow_value("unscoped-package").for(:name) }
+        it { is_expected.not_to allow_value("@inv@lid-scope/package").for(:name) }
+        it { is_expected.not_to allow_value("@scope/../../package").for(:name) }
+        it { is_expected.not_to allow_value("@scope%2e%2e%fpackage").for(:name) }
+        it { is_expected.not_to allow_value("@scope/sub/package").for(:name) }
       end
     end
 
@@ -340,16 +354,6 @@ RSpec.describe Packages::Package, type: :model do
     end
 
     describe '#package_already_taken' do
-      context 'npm package' do
-        let!(:package) { create(:npm_package) }
-
-        it 'will not allow a package of the same name' do
-          new_package = build(:npm_package, project: create(:project), name: package.name)
-
-          expect(new_package).not_to be_valid
-        end
-      end
-
       context 'maven package' do
         let!(:package) { create(:maven_package) }
 
@@ -509,7 +513,7 @@ RSpec.describe Packages::Package, type: :model do
 
   describe '.without_nuget_temporary_name' do
     let!(:package1) { create(:nuget_package) }
-    let!(:package2) { create(:nuget_package, name: Packages::Nuget::CreatePackageService::TEMPORARY_PACKAGE_NAME) }
+    let!(:package2) { create(:nuget_package, name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
 
     subject { described_class.without_nuget_temporary_name }
 
@@ -528,7 +532,7 @@ RSpec.describe Packages::Package, type: :model do
     it { is_expected.to match_array([package1, package2, package3]) }
 
     context 'with temporary packages' do
-      let!(:package1) { create(:nuget_package, name: Packages::Nuget::CreatePackageService::TEMPORARY_PACKAGE_NAME) }
+      let!(:package1) { create(:nuget_package, name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
 
       it { is_expected.to match_array([package2, package3]) }
     end
@@ -604,6 +608,28 @@ RSpec.describe Packages::Package, type: :model do
       subject { described_class.with_normalized_pypi_name('foo-bar-baz-buz') }
 
       it { is_expected.to match_array([pypi_package]) }
+    end
+
+    describe '.displayable' do
+      let_it_be(:hidden_package) { create(:maven_package, :hidden) }
+      let_it_be(:processing_package) { create(:maven_package, :processing) }
+
+      subject { described_class.displayable }
+
+      it 'does not include hidden packages', :aggregate_failures do
+        is_expected.not_to include(hidden_package)
+        is_expected.not_to include(processing_package)
+      end
+    end
+
+    describe '.with_status' do
+      let_it_be(:hidden_package) { create(:maven_package, :hidden) }
+
+      subject { described_class.with_status(:hidden) }
+
+      it 'returns packages with specified status' do
+        is_expected.to match_array([hidden_package])
+      end
     end
   end
 

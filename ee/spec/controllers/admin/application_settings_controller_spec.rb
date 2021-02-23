@@ -372,8 +372,8 @@ RSpec.describe Admin::ApplicationSettingsController do
       end
 
       before_all do
-        HistoricalData.create!(recorded_at: yesterday - 1.day, active_user_count: max_count)
-        HistoricalData.create!(recorded_at: yesterday, active_user_count: current_count)
+        create(:historical_data, recorded_at: yesterday - 1.day, active_user_count: max_count)
+        create(:historical_data, recorded_at: yesterday, active_user_count: current_count)
       end
 
       before do

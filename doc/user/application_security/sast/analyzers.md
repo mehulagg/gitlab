@@ -33,6 +33,7 @@ SAST supports the following official analyzers:
 - [`phpcs-security-audit`](https://gitlab.com/gitlab-org/security-products/analyzers/phpcs-security-audit) (PHP CS security-audit)
 - [`pmd-apex`](https://gitlab.com/gitlab-org/security-products/analyzers/pmd-apex) (PMD (Apex only))
 - [`security-code-scan`](https://gitlab.com/gitlab-org/security-products/analyzers/security-code-scan) (Security Code Scan (.NET))
+- [`semgrep`](https://gitlab.com/gitlab-org/security-products/analyzers/semgrep) (Semgrep)
 - [`sobelow`](https://gitlab.com/gitlab-org/security-products/analyzers/sobelow) (Sobelow (Elixir Phoenix))
 - [`spotbugs`](https://gitlab.com/gitlab-org/security-products/analyzers/spotbugs) (SpotBugs with the Find Sec Bugs plugin (Ant, Gradle and wrapper, Grails, Maven and wrapper, SBT))
 
@@ -44,8 +45,8 @@ GitLab, but users can also integrate their own **custom images**.
 
 ## Official default analyzers
 
-Any custom change to the official analyzers can be achieved by using an
-[environment variable in your `.gitlab-ci.yml`](index.md#customizing-the-sast-settings).
+Any custom change to the official analyzers can be achieved by using a
+[CI/CD variable in your `.gitlab-ci.yml`](index.md#customizing-the-sast-settings).
 
 ### Using a custom Docker mirror
 
@@ -153,24 +154,24 @@ The [Security Scanner Integration](../../../development/integrations/secure.md) 
 
 ## Analyzers Data
 
-| Property / Tool                         | Apex                 | Bandit               | Brakeman             | ESLint security      | SpotBugs             | Flawfinder           | Gosec                | Kubesec Scanner      | MobSF                | NodeJsScan           | PHP CS Security Audit   | Security code Scan (.NET)   | Sobelow            |
-| --------------------------------------- | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :------------------: | :---------------------: | :-------------------------: | :----------------: |
-| Severity                                | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                       | ✗                           | ✗                  |
-| Title                                   | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                       | ✓                           | ✓                  |
-| Description                             | ✓                    | ✗                    | ✗                    | ✓                    | ✓                    | ✗                    | ✗                    | ✓                    | ✓                    | ✓                    | ✗                       | ✗                           | ✓                  |
-| File                                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                       | ✓                           | ✓                  |
-| Start line                              | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✗                    | ✓                    | ✓                    | ✓                       | ✓                           | ✓                  |
-| End line                                | ✓                    | ✓                    | ✗                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
-| Start column                            | ✓                    | ✗                    | ✗                    | ✓                    | ✓                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                    | ✓                       | ✓                           | ✗                  |
-| End column                              | ✓                    | ✗                    | ✗                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
-| External ID (for example, CVE)                  | ✗                    | ✗                    | ⚠                    | ✗                    | ⚠                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
-| URLs                                    | ✓                    | ✗                    | ✓                    | ✗                    | ⚠                    | ✗                    | ⚠                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
-| Internal doc/explanation                | ✓                    | ⚠                    | ✓                    | ✗                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✓                  |
-| Solution                                | ✓                    | ✗                    | ✗                    | ✗                    | ⚠                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
-| Affected item (for example, class or package)   | ✓                    | ✗                    | ✓                    | ✗                    | ✓                    | ✓                    | ✗                    | ✓                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
-| Confidence                              | ✗                    | ✓                    | ✓                    | ✗                    | ✓                    | x                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                       | ✗                           | ✓                  |
-| Source code extract                     | ✗                    | ✓                    | ✓                    | ✓                    | ✗                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                    | ✗                       | ✗                           | ✗                  |
-| Internal ID                             | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✓                    | ✗                    | ✗                    | ✗                    | ✓                       | ✓                           | ✓                  |
+| Property / Tool                | Apex | Bandit | Brakeman | ESLint security | SpotBugs | Flawfinder | Gosec | Kubesec Scanner | MobSF | NodeJsScan | PHP CS Security Audit | Security code Scan (.NET) | Semgrep | Sobelow |
+|--------------------------------|------|--------|----------|-----------------|----------|------------|-------|-----------------|-------|------------|-----------------------|---------------------------|---------|---------|
+| Affected item (for example, class or package) | ✓ | ✗ | ✓ | ✗               | ✓        | ✓          | ✗     | ✓               | ✗     | ✗          | ✗                     | ✗                         | ✗       | ✗       |
+| Confidence                     | ✗    | ✓      | ✓        | ✗               | ✓        | x          | ✓     | ✓               | ✗     | ✗          | ✗                     | ✗                         | ⚠       | ✓       |
+| Description                    | ✓    | ✗      | ✗        | ✓               | ✓        | ✗          | ✗     | ✓               | ✓     | ✓          | ✗                     | ✗                         | ✓       | ✓       |
+| End column                     | ✓    | ✗      | ✗        | ✓               | ✓        | ✗          | ✗     | ✗               | ✗     | ✗          | ✗                     | ✗                         | ✗       | ✗       |
+| End line                       | ✓    | ✓      | ✗        | ✓               | ✓        | ✗          | ✗     | ✗               | ✗     | ✗          | ✗                     | ✗                         | ✗       | ✗       |
+| External ID (for example, CVE) | ✗    | ✗      | ⚠        | ✗               | ⚠        | ✓          | ✗     | ✗               | ✗     | ✗          | ✗                     | ✗                         | ⚠       | ✗       |
+| File                           | ✓    | ✓      | ✓        | ✓               | ✓        | ✓          | ✓     | ✓               | ✓     | ✓          | ✓                     | ✓                         | ✓       | ✓       |
+| Internal doc/explanation       | ✓    | ⚠      | ✓        | ✗               | ✓        | ✗          | ✗     | ✗               | ✗     | ✗          | ✗                     | ✗                         | ✗       | ✓       |
+| Internal ID                    | ✓    | ✓      | ✓        | ✓               | ✓        | ✓          | ✓     | ✗               | ✗     | ✗          | ✓                     | ✓                         | ✓       | ✓       |
+| Severity                       | ✓    | ✓      | ✓        | ✓               | ✓        | ✓          | ✓     | ✓               | ✓     | ✓          | ✓                     | ✗                         | ⚠       | ✗       |
+| Solution                       | ✓    | ✗      | ✗        | ✗               | ⚠        | ✓          | ✗     | ✗               | ✗     | ✗          | ✗                     | ✗                         | ⚠       | ✗       |
+| Source code extract            | ✗    | ✓      | ✓        | ✓               | ✗        | ✓          | ✓     | ✗               | ✗     | ✗          | ✗                     | ✗                         | ✗       | ✗       |
+| Start column                   | ✓    | ✗      | ✗        | ✓               | ✓        | ✓          | ✓     | ✗               | ✗     | ✗          | ✓                     | ✓                         | ✓       | ✗       |
+| Start line                     | ✓    | ✓      | ✓        | ✓               | ✓        | ✓          | ✓     | ✗               | ✓     | ✓          | ✓                     | ✓                         | ✓       | ✓       |
+| Title                          | ✓    | ✓      | ✓        | ✓               | ✓        | ✓          | ✓     | ✓               | ✓     | ✓          | ✓                     | ✓                         | ✓       | ✓       |
+| URLs                           | ✓    | ✗      | ✓        | ✗               | ⚠        | ✗          | ⚠     | ✗               | ✗     | ✗          | ✗                     | ✗                         | ✗       | ✗       |
 
 - ✓ => we have that data
 - ⚠ => we have that data but it's partially reliable, or we need to extract it from unstructured content

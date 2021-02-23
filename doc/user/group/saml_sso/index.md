@@ -18,14 +18,15 @@ If you follow our guidance to automate user provisioning using [SCIM](scim_setup
 User synchronization of SAML SSO groups is supported through [SCIM](scim_setup.md). SCIM supports adding and removing users from the GitLab group.
 For example, if you remove a user from the SCIM app, SCIM removes that same user from the GitLab group.
 
-SAML SSO is not supported at the subgroup level.
+SAML SSO is only configurable at the top-level group.
 
 ## Configuring your Identity Provider
 
 1. Navigate to the group and select **Settings > SAML SSO**.
 1. Configure your SAML server using the **Assertion consumer service URL**, **Identifier**, and **GitLab single sign-on URL**. Alternatively GitLab provides [metadata XML configuration](#metadata-configuration). See [specific identity provider documentation](#providers) for more details.
 1. Configure the SAML response to include a NameID that uniquely identifies each user.
-1. Configure [required assertions](group_managed_accounts.md#assertions) if using [Group Managed Accounts](group_managed_accounts.md).
+1. Configure [required assertions](#assertions) at minimum containing
+   the user's email address.
 1. While the default is enabled for most SAML providers, please ensure the app is set to have [Service Provider](#glossary) initiated calls in order to link existing GitLab accounts.
 1. Once the identity provider is set up, move on to [configuring GitLab](#configuring-gitlab).
 
@@ -52,6 +53,19 @@ Once users have signed into GitLab using the SSO SAML setup, changing the `NameI
 #### NameID Format
 
 We recommend setting the NameID format to `Persistent` unless using a field (such as email) that requires a different format.
+
+### Assertions
+
+For users to be created with the right information with the improved [user access and management](#user-access-and-management),
+the following user details need to be passed to GitLab as SAML assertions.
+
+| Field           | Supported keys |
+|-----------------|----------------|
+| Email (required)| `email`, `mail` |
+| Username        | `username`, `nickname` |
+| Full Name       | `name` |
+| First Name      | `first_name`, `firstname`, `firstName` |
+| Last Name       | `last_name`, `lastname`, `lastName` |
 
 ### Metadata configuration
 
@@ -87,7 +101,7 @@ Please note that the certificate [fingerprint algorithm](#additional-providers-a
 With this option enabled, users must go through your group's GitLab single sign-on URL. They may also be added via SCIM, if configured. Users can't be added manually, and may only access project/group resources via the UI by signing in through the SSO URL.
 
 However, users are not prompted to sign in through SSO on each visit. GitLab checks whether a user
-has authenticated through SSO. If it's been more than 7 days since the last sign-in, GitLab
+has authenticated through SSO. If it's been more than 1 day since the last sign-in, GitLab
 prompts the user to sign in again through SSO.
 You can see more information about how long a session is valid in our [user profile documentation](../../profile/#why-do-i-keep-getting-signed-out).
 
@@ -295,6 +309,10 @@ Users can unlink SAML for a group from their profile page. This can be helpful i
 WARNING:
 Unlinking an account removes all roles assigned to that user in the group.
 If a user re-links their account, roles need to be reassigned.
+
+Groups require at least one owner. If your account is the only owner in the
+group, you are not allowed to unlink the account. In that case, set up another user as a
+group owner, and then you can unlink the account.
 
 For example, to unlink the `MyOrg` account:
 

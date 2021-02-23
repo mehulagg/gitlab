@@ -7,12 +7,16 @@ module Dast
 
       def execute
         return unauthorized unless allowed?
-        return ServiceResponse.error(message: 'ID parameter missing') unless params[:id].present?
-        return ServiceResponse.error(message: 'Profile not found for given parameters') unless dast_profile
+        return error('Profile parameter missing') unless dast_profile
+        return error(dast_profile.errors.full_messages) unless dast_profile.update(dast_profile_params)
 
-        return ServiceResponse.error(message: dast_profile.errors.full_messages) unless dast_profile.update(dast_profile_params)
+        return success(dast_profile: dast_profile, pipeline_url: nil) unless params[:run_after_update]
 
-        ServiceResponse.success(payload: dast_profile)
+        response = create_scan(dast_profile)
+
+        return response if response.error?
+
+        success(dast_profile: dast_profile, pipeline_url: response.payload.fetch(:pipeline_url))
       end
 
       private
@@ -23,23 +27,37 @@ module Dast
           can?(current_user, :create_on_demand_dast_scan, container)
       end
 
+      def error(message, opts = {})
+        ServiceResponse.error(message: message, **opts)
+      end
+
+      def success(payload)
+        ServiceResponse.success(payload: payload)
+      end
+
       def unauthorized
-        ServiceResponse.error(
-          message: 'You are not authorized to update this profile',
-          http_status: 403
-        )
+        error('You are not authorized to update this profile', http_status: 403)
       end
 
       def dast_profile
-        strong_memoize(:dast_profile) do
-          Dast::ProfilesFinder.new(project_id: container.id, id: params[:id])
-            .execute
-            .first
-        end
+        params[:dast_profile]
       end
 
       def dast_profile_params
         params.slice(:dast_site_profile_id, :dast_scanner_profile_id, :name, :description)
+      end
+
+      def create_scan(dast_profile)
+        params = {
+          dast_site_profile: dast_profile.dast_site_profile,
+          dast_scanner_profile: dast_profile.dast_scanner_profile
+        }
+
+        ::DastOnDemandScans::CreateService.new(
+          container: container,
+          current_user: current_user,
+          params: params
+        ).execute
       end
     end
   end

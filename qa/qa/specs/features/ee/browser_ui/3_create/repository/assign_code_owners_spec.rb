@@ -17,6 +17,7 @@ module QA
       let(:branch_name) { 'protected-branch' }
 
       before do
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
         project.add_member(approver, Resource::Members::AccessLevel::DEVELOPER)
         project.add_member(non_approver, Resource::Members::AccessLevel::DEVELOPER)
 

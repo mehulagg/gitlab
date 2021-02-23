@@ -1,14 +1,14 @@
 import $ from 'jquery';
 import '~/lib/utils/jquery_at_who';
 import { escape, template } from 'lodash';
-import { s__ } from '~/locale';
-import SidebarMediator from '~/sidebar/sidebar_mediator';
-import { isUserBusy } from '~/set_status_modal/utils';
-import axios from '~/lib/utils/axios_utils';
 import * as Emoji from '~/emoji';
-import glRegexp from './lib/utils/regexp';
+import axios from '~/lib/utils/axios_utils';
+import { s__ } from '~/locale';
+import { isUserBusy } from '~/set_status_modal/utils';
+import SidebarMediator from '~/sidebar/sidebar_mediator';
 import AjaxCache from './lib/utils/ajax_cache';
 import { spriteIcon } from './lib/utils/common_utils';
+import glRegexp from './lib/utils/regexp';
 
 function sanitize(str) {
   return str.replace(/<(?:.|\n)*?>/gm, '');
@@ -266,6 +266,7 @@ class GfmAutoComplete {
       },
       // eslint-disable-next-line no-template-curly-in-string
       insertTpl: '${atwho-at}${username}',
+      limit: 10,
       searchKey: 'search',
       alwaysHighlightFirst: true,
       skipSpecialCharacterTest: true,
@@ -310,6 +311,38 @@ class GfmAutoComplete {
           }
 
           return data;
+        },
+        sorter(query, items) {
+          if (!query) {
+            return items;
+          }
+
+          // Disable auto-selecting the loading icon
+          this.setting.highlightFirst = this.setting.alwaysHighlightFirst;
+          if (GfmAutoComplete.isLoading(items)) {
+            this.setting.highlightFirst = false;
+            return items;
+          }
+
+          const lowercaseQuery = query.toLowerCase();
+          const members = items.slice();
+          const { nameOrUsernameStartsWith, nameOrUsernameIncludes } = GfmAutoComplete.Members;
+
+          return members.sort((a, b) => {
+            if (nameOrUsernameStartsWith(a, lowercaseQuery)) {
+              return -1;
+            }
+            if (nameOrUsernameStartsWith(b, lowercaseQuery)) {
+              return 1;
+            }
+            if (nameOrUsernameIncludes(a, lowercaseQuery)) {
+              return -1;
+            }
+            if (nameOrUsernameIncludes(b, lowercaseQuery)) {
+              return 1;
+            }
+            return 0;
+          });
         },
       },
     });
@@ -771,6 +804,14 @@ GfmAutoComplete.Members = {
     return `<li>${avatarTag} ${username} <small>${escape(
       title,
     )}${availabilityStatus}</small> ${icon}</li>`;
+  },
+  nameOrUsernameStartsWith(member, query) {
+    // `member.search` is a name:username string like `MargeSimpson msimpson`
+    return member.search.split(' ').some((name) => name.toLowerCase().startsWith(query));
+  },
+  nameOrUsernameIncludes(member, query) {
+    // `member.search` is a name:username string like `MargeSimpson msimpson`
+    return member.search.toLowerCase().includes(query);
   },
 };
 GfmAutoComplete.Labels = {

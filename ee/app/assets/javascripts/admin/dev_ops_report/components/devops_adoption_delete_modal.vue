@@ -1,6 +1,6 @@
 <script>
 import { GlModal, GlSprintf, GlAlert } from '@gitlab/ui';
-import * as Sentry from '~/sentry/wrapper';
+import * as Sentry from '@sentry/browser';
 import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID } from '../constants';
 import deleteDevopsAdoptionSegmentMutation from '../graphql/mutations/delete_devops_adoption_segment.mutation.graphql';
 import { deleteSegmentFromCache } from '../utils/cache_updates';
@@ -42,6 +42,9 @@ export default {
     },
     displayError() {
       return this.errors[0];
+    },
+    displayName() {
+      return this.segment.namespace?.fullName;
     },
   },
   methods: {
@@ -100,7 +103,7 @@ export default {
     </gl-alert>
     <gl-sprintf :message="$options.i18n.confirmationMessage">
       <template #name
-        ><strong>{{ segment.name }}</strong></template
+        ><strong>{{ displayName }}</strong></template
       >
     </gl-sprintf>
   </gl-modal>

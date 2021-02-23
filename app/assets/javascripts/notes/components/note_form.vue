@@ -1,15 +1,15 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { mapGetters, mapActions, mapState } from 'vuex';
 import { GlButton } from '@gitlab/ui';
+import { mapGetters, mapActions, mapState } from 'vuex';
+import { getDraft, updateDraft } from '~/lib/utils/autosave';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
+import { __, sprintf } from '~/locale';
 import markdownField from '~/vue_shared/components/markdown/field.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { __, sprintf } from '~/locale';
-import { getDraft, updateDraft } from '~/lib/utils/autosave';
+import eventHub from '../event_hub';
 import issuableStateMixin from '../mixins/issuable_state';
 import resolvable from '../mixins/resolvable';
-import eventHub from '../event_hub';
 import CommentFieldLayout from './comment_field_layout.vue';
 
 export default {
@@ -345,7 +345,7 @@ export default {
               class="note-textarea js-gfm-input js-note-text js-autosize markdown-area js-vue-issue-note-form"
               data-qa-selector="reply_field"
               dir="auto"
-              :aria-label="__('Description')"
+              :aria-label="__('Reply to comment')"
               :placeholder="__('Write a comment or drag your files here…')"
               @keydown.meta.enter="handleKeySubmit()"
               @keydown.ctrl.enter="handleKeySubmit()"

@@ -179,6 +179,10 @@ export const mockRawEpic = {
   start_date: '2017-6-26',
   end_date: '2018-03-10',
   web_url: '/groups/gitlab-org/marketing/-/epics/2',
+  created_at: '2021-01-22T13:51:19Z',
+  updated_at: '2021-01-27T05:40:19Z',
+  user_discussions_count: 2,
+  confidential: false,
   descendantCounts: {
     openedEpics: 3,
     closedEpics: 2,
@@ -251,6 +255,10 @@ export const mockFormattedEpic = {
   endDateOutOfRange: false,
   webUrl: '/groups/gitlab-org/marketing/-/epics/2',
   newEpic: undefined,
+  createdAt: '2021-01-22T13:51:19Z',
+  updatedAt: '2021-01-27T05:40:19Z',
+  userDiscussionsCount: 2,
+  confidential: false,
   descendantWeightSum: {
     closedIssues: 3,
     openedIssues: 2,

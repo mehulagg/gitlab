@@ -2,6 +2,7 @@
 
 class HelpController < ApplicationController
   skip_before_action :authenticate_user!, unless: :public_visibility_restricted?
+  skip_before_action :check_two_factor_requirement
   feature_category :not_owned
 
   layout 'help'
@@ -84,7 +85,16 @@ class HelpController < ApplicationController
   end
 
   def documentation_base_url
-    @documentation_base_url ||= Gitlab::CurrentSettings.current_application_settings.help_page_documentation_base_url.presence
+    @documentation_base_url ||= documentation_base_url_from_yml_configuration || documentation_base_url_from_db
+  end
+
+  # DEPRECATED
+  def documentation_base_url_from_db
+    Gitlab::CurrentSettings.current_application_settings.help_page_documentation_base_url.presence
+  end
+
+  def documentation_base_url_from_yml_configuration
+    ::Gitlab.config.gitlab_docs.host.presence if ::Gitlab.config.gitlab_docs.enabled
   end
 
   def documentation_file_path

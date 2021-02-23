@@ -38,7 +38,7 @@ in the project namespace.
 If the project's cluster is available and not disabled, GitLab uses the
 project's cluster before using any cluster belonging to the group containing
 the project.
-In the case of sub-groups, GitLab uses the cluster of the closest ancestor group
+In the case of subgroups, GitLab uses the cluster of the closest ancestor group
 to the project, provided the cluster is not disabled.
 
 ## Multiple Kubernetes clusters
@@ -107,7 +107,7 @@ The domain should have a wildcard DNS configured to the Ingress IP address.
 When adding more than one Kubernetes cluster to your project, you need to differentiate
 them with an environment scope. The environment scope associates clusters with
 [environments](../../../ci/environments/index.md) similar to how the
-[environment-specific variables](../../../ci/variables/README.md#limit-the-environment-scopes-of-environment-variables)
+[environment-specific variables](../../../ci/variables/README.md#limit-the-environment-scopes-of-cicd-variables)
 work.
 
 While evaluating which environment matches the environment scope of a

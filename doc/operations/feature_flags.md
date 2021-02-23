@@ -79,8 +79,8 @@ is 200. For GitLab SaaS, the maximum number is determined by [tier](https://abou
 You can apply a feature flag strategy across multiple environments, without defining
 the strategy multiple times.
 
-GitLab Feature Flags use [Unleash](https://unleash.github.io) as the feature flag
-engine. In Unleash, there are [strategies](https://unleash.github.io/docs/activation_strategy)
+GitLab Feature Flags use [Unleash](https://docs.getunleash.ai/) as the feature flag
+engine. In Unleash, there are [strategies](https://docs.getunleash.ai/docs/activation_strategy)
 for granular feature flag controls. GitLab Feature Flags can have multiple strategies,
 and the supported strategies are:
 
@@ -95,7 +95,7 @@ and clicking **{pencil}** (edit).
 
 ### All users
 
-Enables the feature for all users. It uses the [`default`](https://unleash.github.io/docs/activation_strategy#default)
+Enables the feature for all users. It uses the [`default`](https://docs.getunleash.ai/docs/activation_strategy#default)
 Unleash activation strategy.
 
 ### Percent Rollout
@@ -235,6 +235,18 @@ It can be set to:
   - Optionally, you can click the **Include additional user IDs** checkbox and add a list
     of specific users IDs to enable the feature for.
 - [User IDs](#user-ids)
+
+## Legacy feature flag migration
+
+Legacy feature flags became read-only in GitLab 13.4. GitLab 14.0 removes support for legacy feature
+flags. You must migrate your legacy feature flags to the new version. To do so, follow these steps:
+
+1. Take a screenshot of the legacy flag for tracking.
+1. Delete the flag through the API or UI (you don't need to alter the code).
+1. Create a new feature flag with the same name as the legacy flag you deleted. Make sure the
+   strategies and environments match the deleted flag.
+
+See [this video tutorial](https://www.youtube.com/watch?v=CAJY2IGep7Y) for help with this migration.
 
 ## Disable a feature flag for a specific environment
 

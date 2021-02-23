@@ -93,6 +93,48 @@ RSpec.describe MergeRequest do
         end
       end
     end
+
+    describe '#merge_requests_author_approval?' do
+      context 'when project lacks a target_project relation' do
+        before do
+          merge_request.target_project = nil
+        end
+
+        it 'returns false' do
+          expect(merge_request.merge_requests_author_approval?).to be false
+        end
+      end
+
+      context 'when project has a target_project relation' do
+        it 'accesses the value from the target_project' do
+          expect(merge_request.target_project)
+            .to receive(:merge_requests_author_approval?)
+
+          merge_request.merge_requests_author_approval?
+        end
+      end
+    end
+
+    describe '#merge_requests_disable_committers_approval?' do
+      context 'when project lacks a target_project relation' do
+        before do
+          merge_request.target_project = nil
+        end
+
+        it 'returns false' do
+          expect(merge_request.merge_requests_disable_committers_approval?).to be false
+        end
+      end
+
+      context 'when project has a target_project relation' do
+        it 'accesses the value from the target_project' do
+          expect(merge_request.target_project)
+            .to receive(:merge_requests_disable_committers_approval?)
+
+          merge_request.merge_requests_disable_committers_approval?
+        end
+      end
+    end
   end
 
   it_behaves_like 'an editable mentionable with EE-specific mentions' do
@@ -285,6 +327,28 @@ RSpec.describe MergeRequest do
       end
 
       it { is_expected.to eq(expected) }
+    end
+  end
+
+  describe '#has_security_reports?' do
+    subject { merge_request.has_security_reports? }
+
+    let_it_be(:project) { create(:project, :repository) }
+
+    before do
+      stub_licensed_features(dast: true)
+    end
+
+    context 'when head pipeline has security reports' do
+      let(:merge_request) { create(:ee_merge_request, :with_dast_reports, source_project: project) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when head pipeline does not have security reports' do
+      let(:merge_request) { create(:ee_merge_request, source_project: project) }
+
+      it { is_expected.to be_falsey }
     end
   end
 

@@ -1,6 +1,6 @@
+import { PRESET_TYPES } from 'ee/roadmap/constants';
 import * as roadmapItemUtils from 'ee/roadmap/utils/roadmap_item_utils';
 
-import { PRESET_TYPES } from 'ee/roadmap/constants';
 import { dateFromString } from 'helpers/datetime_helpers';
 import { parsePikadayDate } from '~/lib/utils/datetime_utility';
 import {

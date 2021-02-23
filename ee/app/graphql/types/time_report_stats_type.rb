@@ -7,12 +7,12 @@ module Types
     description 'Represents the time report stats for timeboxes'
 
     field :complete, ::Types::TimeboxMetricsType, null: true,
-          description: 'Completed issues metrics'
+          description: 'Completed issues metrics.'
 
     field :incomplete, ::Types::TimeboxMetricsType, null: true,
-          description: 'Incomplete issues metrics'
+          description: 'Incomplete issues metrics.'
 
     field :total, ::Types::TimeboxMetricsType, null: true,
-          description: 'Total issues metrics'
+          description: 'Total issues metrics.'
   end
 end

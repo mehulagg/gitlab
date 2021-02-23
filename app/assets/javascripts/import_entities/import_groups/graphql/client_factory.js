@@ -1,8 +1,8 @@
+import createFlash from '~/flash';
+import createDefaultClient from '~/lib/graphql';
 import axios from '~/lib/utils/axios_utils';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
-import createDefaultClient from '~/lib/graphql';
 import { s__ } from '~/locale';
-import createFlash from '~/flash';
 import { STATUSES } from '../../constants';
 import availableNamespacesQuery from './queries/available_namespaces.query.graphql';
 import { SourceGroupsManager } from './services/source_groups_manager';
@@ -15,44 +15,71 @@ export const clientTypenames = {
   BulkImportPageInfo: 'ClientBulkImportPageInfo',
 };
 
-export function createResolvers({ endpoints }) {
+export function createResolvers({ endpoints, sourceUrl, GroupsManager = SourceGroupsManager }) {
   let statusPoller;
+
+  let sourceGroupManager;
+  const getGroupsManager = (client) => {
+    if (!sourceGroupManager) {
+      sourceGroupManager = new GroupsManager({ client, sourceUrl });
+    }
+    return sourceGroupManager;
+  };
 
   return {
     Query: {
       async bulkImportSourceGroups(_, vars, { client }) {
-        const {
-          data: { availableNamespaces },
-        } = await client.query({ query: availableNamespacesQuery });
+        if (!statusPoller) {
+          statusPoller = new StatusPoller({
+            groupManager: getGroupsManager(client),
+            pollPath: endpoints.jobs,
+          });
+          statusPoller.startPolling();
+        }
 
-        return axios
-          .get(endpoints.status, {
+        const groupsManager = getGroupsManager(client);
+        return Promise.all([
+          axios.get(endpoints.status, {
             params: {
               page: vars.page,
               per_page: vars.perPage,
               filter: vars.filter,
             },
-          })
-          .then(({ headers, data }) => {
+          }),
+          client.query({ query: availableNamespacesQuery }),
+        ]).then(
+          ([
+            { headers, data },
+            {
+              data: { availableNamespaces },
+            },
+          ]) => {
             const pagination = parseIntPagination(normalizeHeaders(headers));
 
             return {
               __typename: clientTypenames.BulkImportSourceGroupConnection,
-              nodes: data.importable_data.map((group) => ({
-                __typename: clientTypenames.BulkImportSourceGroup,
-                ...group,
-                status: STATUSES.NONE,
-                import_target: {
-                  new_name: group.full_path,
-                  target_namespace: availableNamespaces[0].full_path,
-                },
-              })),
+              nodes: data.importable_data.map((group) => {
+                const cachedImportState = groupsManager.getImportStateFromStorageByGroupId(
+                  group.id,
+                );
+
+                return {
+                  __typename: clientTypenames.BulkImportSourceGroup,
+                  ...group,
+                  status: cachedImportState?.status ?? STATUSES.NONE,
+                  import_target: cachedImportState?.importTarget ?? {
+                    new_name: group.full_path,
+                    target_namespace: availableNamespaces[0]?.full_path ?? '',
+                  },
+                };
+              }),
               pageInfo: {
                 __typename: clientTypenames.BulkImportPageInfo,
                 ...pagination,
               },
             };
-          });
+          },
+        );
       },
 
       availableNamespaces: () =>
@@ -65,25 +92,25 @@ export function createResolvers({ endpoints }) {
     },
     Mutation: {
       setTargetNamespace(_, { targetNamespace, sourceGroupId }, { client }) {
-        new SourceGroupsManager({ client }).updateById(sourceGroupId, (sourceGroup) => {
+        getGroupsManager(client).updateById(sourceGroupId, (sourceGroup) => {
           // eslint-disable-next-line no-param-reassign
           sourceGroup.import_target.target_namespace = targetNamespace;
         });
       },
 
       setNewName(_, { newName, sourceGroupId }, { client }) {
-        new SourceGroupsManager({ client }).updateById(sourceGroupId, (sourceGroup) => {
+        getGroupsManager(client).updateById(sourceGroupId, (sourceGroup) => {
           // eslint-disable-next-line no-param-reassign
           sourceGroup.import_target.new_name = newName;
         });
       },
 
       async importGroup(_, { sourceGroupId }, { client }) {
-        const groupManager = new SourceGroupsManager({ client });
+        const groupManager = getGroupsManager(client);
         const group = groupManager.findById(sourceGroupId);
         groupManager.setImportStatus(group, STATUSES.SCHEDULING);
         try {
-          await axios.post(endpoints.createBulkImport, {
+          const response = await axios.post(endpoints.createBulkImport, {
             bulk_import: [
               {
                 source_type: 'group_entity',
@@ -93,16 +120,10 @@ export function createResolvers({ endpoints }) {
               },
             ],
           });
-          groupManager.setImportStatus(group, STATUSES.STARTED);
-          if (!statusPoller) {
-            statusPoller = new StatusPoller({ client, interval: 3000 });
-            statusPoller.startPolling();
-          }
+          groupManager.startImport({ group, importId: response.data.id });
         } catch (e) {
-          createFlash({
-            message: s__('BulkImport|Importing the group failed'),
-          });
-
+          const message = e?.response?.data?.error ?? s__('BulkImport|Importing the group failed');
+          createFlash({ message });
           groupManager.setImportStatus(group, STATUSES.NONE);
           throw e;
         }
@@ -111,5 +132,5 @@ export function createResolvers({ endpoints }) {
   };
 }
 
-export const createApolloClient = ({ endpoints }) =>
-  createDefaultClient(createResolvers({ endpoints }), { assumeImmutableResults: true });
+export const createApolloClient = ({ sourceUrl, endpoints }) =>
+  createDefaultClient(createResolvers({ sourceUrl, endpoints }), { assumeImmutableResults: true });

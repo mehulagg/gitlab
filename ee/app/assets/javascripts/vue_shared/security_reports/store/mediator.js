@@ -1,5 +1,5 @@
-import * as types from './mutation_types';
 import { MODULE_API_FUZZING, MODULE_SAST, MODULE_SECRET_DETECTION } from './constants';
+import * as types from './mutation_types';
 
 export const updateIssueActionsMap = {
   sast: `${MODULE_SAST}/updateVulnerability`,

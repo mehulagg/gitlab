@@ -4,11 +4,12 @@ class DastSiteProfile < ApplicationRecord
   belongs_to :project
   belongs_to :dast_site
 
-  validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }
+  validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }, presence: true
   validates :project_id, :dast_site_id, presence: true
   validate :dast_site_project_id_fk
 
   scope :with_dast_site_and_validation, -> { includes(dast_site: :dast_site_validation) }
+  scope :with_name, -> (name) { where(name: name) }
 
   after_destroy :cleanup_dast_site
 

@@ -1,0 +1,15 @@
+---
+key_path: usage_activity_by_stage.plan.assignee_lists
+description:
+product_section: dev
+product_stage:
+product_group: group::plan
+product_category:
+value_type: number
+status: data_available
+time_frame: all
+data_source:
+distribution:
+- ee
+tier: []
+skip_validation: true

@@ -1,14 +1,14 @@
 <script>
+import { GlButton, GlModalDirective, GlSkeletonLoader } from '@gitlab/ui';
 import $ from 'jquery';
 import { escape } from 'lodash';
-import { GlButton, GlModalDirective, GlSkeletonLoader } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import { mouseenter, debouncedMouseleave, togglePopover } from '~/shared/popover';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
-import StatusIcon from '../mr_widget_status_icon.vue';
 import userPermissionsQuery from '../../queries/permissions.query.graphql';
 import conflictsStateQuery from '../../queries/states/conflicts.query.graphql';
+import StatusIcon from '../mr_widget_status_icon.vue';
 
 export default {
   name: 'MRWidgetConflicts',
@@ -162,7 +162,7 @@ export default {
         <rect x="250" y="7" width="84" height="16" rx="4" />
       </gl-skeleton-loader>
     </div>
-    <div v-else class="media-body space-children">
+    <div v-else class="media-body space-children gl-display-flex gl-align-items-center">
       <span v-if="shouldBeRebased" class="bold">
         {{
           s__(`mrWidget|Fast-forward merge is not possible.

@@ -195,29 +195,33 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
     end
 
     context 'when `jira_issues_show_integration` feature is enabled' do
-      let(:jira_issue) { {} }
+      let(:jira_issue) { { 'from' => 'jira' } }
+      let(:issue_json) { { 'from' => 'backend' } }
 
       before do
         stub_feature_flags(jira_issues_show_integration: true)
-      end
 
-      it 'renders `show` template' do
-        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to render_template(:show)
-      end
-
-      it 'returns JSON response' do
         expect_next_found_instance_of(JiraService) do |service|
           expect(service).to receive(:find_issue).with('1', rendered_fields: true).and_return(jira_issue)
         end
 
         expect_next_instance_of(Integrations::Jira::IssueDetailSerializer) do |serializer|
-          expect(serializer).to receive(:represent).with(jira_issue, project: project)
+          expect(serializer).to receive(:represent).with(jira_issue, project: project).and_return(issue_json)
         end
+      end
 
+      it 'renders `show` template' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
+
+        expect(assigns(:issue_json)).to eq(issue_json)
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to render_template(:show)
+      end
+
+      it 'returns JSON response' do
         get :show, params: { namespace_id: project.namespace, project_id: project, id: 1, format: :json }
+
+        expect(json_response).to eq(issue_json)
       end
     end
   end

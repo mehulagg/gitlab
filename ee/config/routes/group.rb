@@ -26,6 +26,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
           member do
             get :duration_chart
             get :median
+            get :average
             get :records
           end
         end
@@ -34,6 +35,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
             member do
               get :duration_chart
               get :median
+              get :average
               get :records
             end
           end
@@ -138,7 +140,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       end
     end
 
-    resources :epic_boards, only: [:index]
+    resources :epic_boards, only: [:index, :show]
 
     namespace :security do
       resource :dashboard, only: [:show], controller: :dashboard

@@ -311,6 +311,9 @@ Custom event tracking and instrumentation can be added by directly calling the `
 | `property` | String                    | nil           | As described in [Structured event taxonomy](#structured-event-taxonomy).                                                          |
 | `value`    | Numeric                   | nil           | As described in [Structured event taxonomy](#structured-event-taxonomy).                                                          |
 | `context`  | Array\[SelfDescribingJSON\] | nil           | An array of custom contexts to send with this event. Most events should not have any custom contexts.                             |
+| `project`  | Project                   | nil           | The project associated with the event. |
+| `user`     | User                      | nil           | The user associated with the event. |
+| `namespace` | Namespace                | nil           | The namespace associated with the event. |
 
 Tracking can be viewed as either tracking user behavior, or can be used for instrumentation to monitor and visualize performance over time in an area or aspect of code.
 
@@ -321,10 +324,8 @@ class Projects::CreateService < BaseService
   def execute
     project = Project.create(params)
 
-    Gitlab::Tracking.event('Projects::CreateService', 'create_project',
-      label: project.errors.full_messages.to_sentence,
-      value: project.valid?
-    )
+    Gitlab::Tracking.event('Projects::CreateService', 'create_project', label: project.errors.full_messages.to_sentence,
+                           property: project.valid?.to_s, project: project, user: current_user, namespace: namespace)
   end
 end
 ```
@@ -357,6 +358,7 @@ There are several tools for developing and testing Snowplow Event
 
 1. For frontend events, in the MR description section, add a screenshot of the event's relevant section using the [Snowplow Analytics Debugger](https://chrome.google.com/webstore/detail/snowplow-analytics-debugg/jbnlcgeengmijcghameodeaenefieedm) Chrome browser extension.
 1. For backend events, please use Snowplow Micro and add the output of the Snowplow Micro good events  `GET http://localhost:9090/micro/good`.
+1. Include a member of the Product Intelligence team as a reviewer of your MR. Mention `@gitlab-org/growth/product_intelligence/engineers` in your MR to request a review.
 
 ### Snowplow Analytics Debugger Chrome Extension
 
@@ -483,9 +485,9 @@ For GitLab.com, we're setting up a [QA and Testing environment](https://gitlab.c
 
 ### `gitlab_standard`
 
-We are currently working towards including the [`gitlab_standard` schema](https://gitlab.com/gitlab-org/iglu/-/blob/master/public/schemas/com.gitlab/gitlab_standard/jsonschema/) with every event. See [Standardize Snowplow Schema](https://gitlab.com/groups/gitlab-org/-/epics/5218) for details.
+We are including the [`gitlab_standard` schema](https://gitlab.com/gitlab-org/iglu/-/blob/master/public/schemas/com.gitlab/gitlab_standard/jsonschema/) with every event. See [Standardize Snowplow Schema](https://gitlab.com/groups/gitlab-org/-/epics/5218) for details.
 
-The [`StandardContext`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/tracking/standard_context.rb) class represents this schema in the application. 
+The [`StandardContext`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/tracking/standard_context.rb) class represents this schema in the application.
 
 | Field Name     | Required            | Type                  | Description                                                                                 |
 |----------------|---------------------|-----------------------|---------------------------------------------------------------------------------------------|

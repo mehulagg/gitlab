@@ -1,8 +1,8 @@
-import { GlIcon, GlTooltip } from '@gitlab/ui';
+import { GlIcon, GlLoadingIcon, GlTooltip } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { useFakeDate } from 'helpers/fake_date';
-import StateActions from '~/terraform/components/states_table_actions.vue';
 import StatesTable from '~/terraform/components/states_table.vue';
+import StateActions from '~/terraform/components/states_table_actions.vue';
 
 describe('StatesTable', () => {
   let wrapper;
@@ -14,6 +14,8 @@ describe('StatesTable', () => {
         _showDetails: true,
         errorMessages: ['State 1 has errored'],
         name: 'state-1',
+        loadingLock: false,
+        loadingRemove: false,
         lockedAt: '2020-10-13T00:00:00Z',
         lockedByUser: {
           name: 'user-1',
@@ -25,6 +27,8 @@ describe('StatesTable', () => {
         _showDetails: false,
         errorMessages: [],
         name: 'state-2',
+        loadingLock: true,
+        loadingRemove: false,
         lockedAt: null,
         lockedByUser: null,
         updatedAt: '2020-10-10T00:00:00Z',
@@ -34,6 +38,8 @@ describe('StatesTable', () => {
         _showDetails: false,
         errorMessages: [],
         name: 'state-3',
+        loadingLock: true,
+        loadingRemove: false,
         lockedAt: '2020-10-10T00:00:00Z',
         lockedByUser: {
           name: 'user-2',
@@ -63,6 +69,8 @@ describe('StatesTable', () => {
         _showDetails: true,
         errorMessages: ['State 4 has errored'],
         name: 'state-4',
+        loadingLock: false,
+        loadingRemove: false,
         lockedAt: '2020-10-10T00:00:00Z',
         lockedByUser: null,
         updatedAt: '2020-10-10T00:00:00Z',
@@ -84,6 +92,17 @@ describe('StatesTable', () => {
           },
         },
       },
+      {
+        _showDetails: false,
+        errorMessages: [],
+        name: 'state-5',
+        loadingLock: false,
+        loadingRemove: true,
+        lockedAt: null,
+        lockedByUser: null,
+        updatedAt: '2020-10-10T00:00:00Z',
+        latestVersion: null,
+      },
     ],
   };
 
@@ -104,14 +123,15 @@ describe('StatesTable', () => {
   });
 
   it.each`
-    name         | toolTipText                            | locked   | lineNumber
-    ${'state-1'} | ${'Locked by user-1 2 days ago'}       | ${true}  | ${0}
-    ${'state-2'} | ${null}                                | ${false} | ${1}
-    ${'state-3'} | ${'Locked by user-2 5 days ago'}       | ${true}  | ${2}
-    ${'state-4'} | ${'Locked by Unknown User 5 days ago'} | ${true}  | ${3}
+    name         | toolTipText                            | locked   | loading  | lineNumber
+    ${'state-1'} | ${'Locked by user-1 2 days ago'}       | ${true}  | ${false} | ${0}
+    ${'state-2'} | ${'Locking state'}                     | ${false} | ${true}  | ${1}
+    ${'state-3'} | ${'Unlocking state'}                   | ${false} | ${true}  | ${2}
+    ${'state-4'} | ${'Locked by Unknown User 5 days ago'} | ${true}  | ${false} | ${3}
+    ${'state-5'} | ${'Removing'}                          | ${false} | ${true}  | ${4}
   `(
     'displays the name and locked information "$name" for line "$lineNumber"',
-    ({ name, toolTipText, locked, lineNumber }) => {
+    ({ name, toolTipText, locked, loading, lineNumber }) => {
       const states = wrapper.findAll('[data-testid="terraform-states-table-name"]');
 
       const state = states.at(lineNumber);
@@ -119,6 +139,7 @@ describe('StatesTable', () => {
 
       expect(state.text()).toContain(name);
       expect(state.find(GlIcon).exists()).toBe(locked);
+      expect(state.find(GlLoadingIcon).exists()).toBe(loading);
       expect(toolTip.exists()).toBe(locked);
 
       if (locked) {

@@ -1,7 +1,7 @@
 <script>
-import { mapActions, mapState } from 'vuex';
-import { debounce } from 'lodash';
 import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { debounce } from 'lodash';
+import { mapActions, mapState } from 'vuex';
 import { __ } from '~/locale';
 import TokenedInput from '../shared/tokened_input.vue';
 import Item from './item.vue';
@@ -75,7 +75,10 @@ export default {
 
 <template>
   <div>
-    <label class="dropdown-input pt-3 pb-3 mb-0 border-bottom block" @click.stop>
+    <label
+      class="dropdown-input gl-pt-3 gl-pb-5 gl-mb-0 gl-border-b-1 gl-border-b-solid gl-display-block"
+      @click.stop
+    >
       <tokened-input
         v-model="search"
         :tokens="searchTokens"

@@ -1269,6 +1269,16 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
         expect(projects).to include public_project
         expect(results.projects_count).to eq 1
       end
+
+      it 'returns 0 results for count only query' do
+        public_project
+
+        ensure_elasticsearch_index!
+
+        results = described_class.new(user, 'noresults')
+        count = results.formatted_count('projects')
+        expect(count).to eq('0')
+      end
     end
 
     context 'merge requests' do

@@ -33,7 +33,7 @@ with any type of [executor](https://docs.gitlab.com/runner/executors/)
 1. Run the [`ssh-agent`](https://linux.die.net/man/1/ssh-agent) during job to load
    the private key.
 1. Copy the public key to the servers you want to have access to (usually in
-   `~/.ssh/authorized_keys`) or add it as a [deploy key](../../ssh/README.md#deploy-keys)
+   `~/.ssh/authorized_keys`) or add it as a [deploy key](../../user/project/deploy_keys/index.md)
    if you are accessing a private GitLab repository.
 
 The private key is displayed in the job log, unless you enable
@@ -51,7 +51,7 @@ to access it. This is where an SSH key pair comes in handy.
    **Do not** add a passphrase to the SSH key, or the `before_script` will
    prompt for it.
 
-1. Create a new [variable](../variables/README.md#gitlab-cicd-environment-variables).
+1. Create a new [CI/CD variable](../variables/README.md).
    As **Key** enter the name `SSH_PRIVATE_KEY` and in the **Value** field paste
    the content of your _private_ key that you created earlier.
 
@@ -101,7 +101,7 @@ to access it. This is where an SSH key pair comes in handy.
 1. As a final step, add the _public_ key from the one you created in the first
    step to the services that you want to have an access to from within the build
    environment. If you are accessing a private GitLab repository you need to add
-   it as a [deploy key](../../ssh/README.md#deploy-keys).
+   it as a [deploy key](../../user/project/deploy_keys/index.md).
 
 That's it! You can now have access to private servers or repositories in your
 build environment.
@@ -130,7 +130,7 @@ on, and use that key for all projects that are run on this machine.
 1. As a final step, add the _public_ key from the one you created earlier to the
    services that you want to have an access to from within the build environment.
    If you are accessing a private GitLab repository you need to add it as a
-   [deploy key](../../ssh/README.md#deploy-keys).
+   [deploy key](../../user/project/deploy_keys/index.md).
 
 After generating the key, try to sign in to the remote server to accept the
 fingerprint:
@@ -159,7 +159,7 @@ ssh-keyscan example.com
 ssh-keyscan 1.2.3.4
 ```
 
-Create a new [variable](../variables/README.md#gitlab-cicd-environment-variables) with
+Create a new [CI/CD variable](../variables/README.md) with
 `SSH_KNOWN_HOSTS` as "Key", and as a "Value" add the output of `ssh-keyscan`.
 
 If you need to connect to multiple servers, all the server host keys

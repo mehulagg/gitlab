@@ -38,7 +38,7 @@ module EE
 
       has_one :repository_state, class_name: 'ProjectRepositoryState', inverse_of: :project
       has_one :project_registry, class_name: 'Geo::ProjectRegistry', inverse_of: :project
-      has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }
+      has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }, inverse_of: :project
       has_one :index_status
 
       has_one :github_service
@@ -104,6 +104,8 @@ module EE
 
       has_many :incident_management_oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', inverse_of: :project
       has_many :incident_management_oncall_rotations, class_name: 'IncidentManagement::OncallRotation', through: :incident_management_oncall_schedules, source: :rotations
+
+      has_one :security_orchestration_policy_configuration, class_name: 'Security::OrchestrationPolicyConfiguration', foreign_key: :project_id, inverse_of: :project
 
       elastic_index_dependant_association :issues, on_change: :visibility_level
 
@@ -198,9 +200,8 @@ module EE
 
       delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
-      delegate :jira_vulnerabilities_integration_enabled?, to: :jira_service, allow_nil: true
 
-      delegate :requirements_access_level, :security_and_compliance_access_level, to: :project_feature, allow_nil: true
+      delegate :requirements_access_level, to: :project_feature, allow_nil: true
       delegate :pipeline_configuration_full_path, to: :compliance_management_framework, allow_nil: true
       alias_attribute :compliance_pipeline_configuration_full_path, :pipeline_configuration_full_path
 
@@ -236,6 +237,14 @@ module EE
       def jira_issue_association_required_to_merge_enabled?
         ::Feature.enabled?(:jira_issue_association_on_merge_request, self) &&
           feature_available?(:jira_issue_association_enforcement)
+      end
+
+      def jira_vulnerabilities_integration_enabled?
+        !!jira_service&.jira_vulnerabilities_integration_enabled?
+      end
+
+      def configured_to_create_issues_from_vulnerabilities?
+        !!jira_service&.configured_to_create_issues_from_vulnerabilities?
       end
     end
 

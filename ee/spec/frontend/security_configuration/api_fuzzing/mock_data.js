@@ -39,3 +39,14 @@ export const apiFuzzingConfigurationQueryResponse = {
     },
   },
 };
+
+export const createApiFuzzingConfigurationMutationResponse = {
+  data: {
+    createApiFuzzingCiConfiguration: {
+      configurationYaml: 'yaml snippet',
+      gitlabCiYamlEditUrl: '/ci/editor',
+      errors: [],
+      __typename: 'ApiFuzzingCiConfiguration',
+    },
+  },
+};

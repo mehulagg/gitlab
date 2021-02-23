@@ -1,36 +1,54 @@
+import { GlAlert } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { merge } from 'lodash';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import { SCAN_MODES } from 'ee/security_configuration/api_fuzzing/constants';
 import ConfigurationForm from 'ee/security_configuration/api_fuzzing/components/configuration_form.vue';
-import FormInput from 'ee/security_configuration/components/form_input.vue';
+import ConfigurationSnippetModal from 'ee/security_configuration/api_fuzzing/components/configuration_snippet_modal.vue';
+import {
+  SCAN_MODES,
+  CONFIGURATION_SNIPPET_MODAL_ID,
+} from 'ee/security_configuration/api_fuzzing/constants';
 import DropdownInput from 'ee/security_configuration/components/dropdown_input.vue';
-
-const makeScanProfile = (name) => ({
-  name,
-  description: `${name} description`,
-  yaml: `
-  ---
-  :Name: ${name}
-  `.trim(),
-});
+import DynamicFields from 'ee/security_configuration/components/dynamic_fields.vue';
+import FormInput from 'ee/security_configuration/components/form_input.vue';
+import { stripTypenames } from 'helpers/graphql_helpers';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import waitForPromises from 'helpers/wait_for_promises';
+import {
+  apiFuzzingConfigurationQueryResponse,
+  createApiFuzzingConfigurationMutationResponse,
+} from '../mock_data';
 
 describe('EE - ApiFuzzingConfigurationForm', () => {
   let wrapper;
 
-  const apiFuzzingCiConfiguration = {
-    scanModes: Object.keys(SCAN_MODES),
-    scanProfiles: [makeScanProfile('Quick-10'), makeScanProfile('Medium-20')],
-  };
+  const apiFuzzingCiConfiguration = stripTypenames(
+    apiFuzzingConfigurationQueryResponse.data.project.apiFuzzingCiConfiguration,
+  );
 
+  const findAlert = () => wrapper.find(GlAlert);
   const findEnableAuthenticationCheckbox = () =>
     wrapper.findByTestId('api-fuzzing-enable-authentication-checkbox');
+  const findTargetUrlInput = () => wrapper.findAll(FormInput).at(0);
   const findScanModeInput = () => wrapper.findAll(DropdownInput).at(0);
   const findSpecificationFileInput = () => wrapper.findAll(FormInput).at(1);
   const findAuthenticationNotice = () => wrapper.findByTestId('api-fuzzing-authentication-notice');
+  const findAuthenticationFields = () => wrapper.find(DynamicFields);
   const findScanProfileDropdownInput = () => wrapper.findAll(DropdownInput).at(1);
   const findScanProfileYamlViewer = () =>
     wrapper.findByTestId('api-fuzzing-scan-profile-yaml-viewer');
+  const findSubmitButton = () => wrapper.findByTestId('api-fuzzing-configuration-submit-button');
+  const findCancelButton = () => wrapper.findByTestId('api-fuzzing-configuration-cancel-button');
+  const findConfigurationSnippetModal = () => wrapper.find(ConfigurationSnippetModal);
+
+  const setFormData = async () => {
+    findTargetUrlInput().vm.$emit('input', 'https://gitlab.com');
+    await findScanModeInput().vm.$emit('input', 'HAR');
+    findSpecificationFileInput().vm.$emit('input', '/specification/file/path');
+    return findScanProfileDropdownInput().vm.$emit(
+      'input',
+      apiFuzzingCiConfiguration.scanProfiles[0].name,
+    );
+  };
 
   const createWrapper = (options = {}) => {
     wrapper = extendedWrapper(
@@ -39,6 +57,8 @@ describe('EE - ApiFuzzingConfigurationForm', () => {
         merge(
           {
             provide: {
+              fullPath: 'namespace/project',
+              securityConfigurationPath: '/security/configuration',
               apiFuzzingAuthenticationDocumentationPath:
                 'api_fuzzing_authentication/documentation/path',
               ciVariablesDocumentationPath: '/ci_cd_variables/documentation/path',
@@ -47,6 +67,11 @@ describe('EE - ApiFuzzingConfigurationForm', () => {
             },
             propsData: {
               apiFuzzingCiConfiguration,
+            },
+            mocks: {
+              $apollo: {
+                mutate: jest.fn(),
+              },
             },
           },
           options,
@@ -156,12 +181,112 @@ describe('EE - ApiFuzzingConfigurationForm', () => {
     });
 
     it('when a scan profile is selected, its YAML is visible', async () => {
-      const selectedScanProfile = apiFuzzingCiConfiguration.scanProfiles[0];
-      wrapper.findAll(DropdownInput).at(1).vm.$emit('input', selectedScanProfile.name);
+      const [selectedScanProfile] = apiFuzzingCiConfiguration.scanProfiles;
+      findScanProfileDropdownInput().vm.$emit('input', selectedScanProfile.name);
       await wrapper.vm.$nextTick();
 
       expect(findScanProfileYamlViewer().exists()).toBe(true);
-      expect(findScanProfileYamlViewer().text()).toBe(selectedScanProfile.yaml);
+      expect(findScanProfileYamlViewer().text()).toBe(selectedScanProfile.yaml.trim());
+    });
+  });
+
+  describe('form submission', () => {
+    it('cancel button points to Security Configuration page', () => {
+      createWrapper();
+
+      expect(findCancelButton().attributes('href')).toBe('/security/configuration');
+    });
+
+    it('submit button is disabled until all fields are filled', async () => {
+      createWrapper();
+
+      expect(findSubmitButton().props('disabled')).toBe(true);
+
+      await setFormData();
+
+      expect(findSubmitButton().props('disabled')).toBe(false);
+
+      await findEnableAuthenticationCheckbox().trigger('click');
+
+      expect(findSubmitButton().props('disabled')).toBe(true);
+
+      await findAuthenticationFields().vm.$emit('input', [
+        {
+          ...wrapper.vm.authenticationSettings[0],
+          value: '$UsernameVariable',
+        },
+        {
+          ...wrapper.vm.authenticationSettings[1],
+          value: '$PasswordVariable',
+        },
+      ]);
+
+      expect(findSubmitButton().props('disabled')).toBe(false);
+    });
+
+    it('triggers the createApiFuzzingConfiguration mutation on submit and opens the modal with the correct props', async () => {
+      createWrapper();
+      jest
+        .spyOn(wrapper.vm.$apollo, 'mutate')
+        .mockResolvedValue(createApiFuzzingConfigurationMutationResponse);
+      jest.spyOn(wrapper.vm.$refs[CONFIGURATION_SNIPPET_MODAL_ID], 'show');
+      await setFormData();
+      wrapper.find('form').trigger('submit');
+      await waitForPromises();
+
+      expect(findAlert().exists()).toBe(false);
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalled();
+      expect(wrapper.vm.$refs[CONFIGURATION_SNIPPET_MODAL_ID].show).toHaveBeenCalled();
+      expect(findConfigurationSnippetModal().props()).toEqual({
+        ciYamlEditUrl:
+          createApiFuzzingConfigurationMutationResponse.data.createApiFuzzingCiConfiguration
+            .gitlabCiYamlEditUrl,
+        yaml:
+          createApiFuzzingConfigurationMutationResponse.data.createApiFuzzingCiConfiguration
+            .configurationYaml,
+      });
+    });
+
+    it('shows an error on top-level error', async () => {
+      createWrapper({
+        mocks: {
+          $apollo: {
+            mutate: jest.fn().mockRejectedValue(),
+          },
+        },
+      });
+      await setFormData();
+
+      expect(findAlert().exists()).toBe(false);
+
+      wrapper.find('form').trigger('submit');
+      await waitForPromises();
+
+      expect(findAlert().exists()).toBe(true);
+    });
+
+    it('shows an error on error-as-data', async () => {
+      createWrapper({
+        mocks: {
+          $apollo: {
+            mutate: jest.fn().mockResolvedValue({
+              data: {
+                createApiFuzzingCiConfiguration: {
+                  errors: ['error#1'],
+                },
+              },
+            }),
+          },
+        },
+      });
+      await setFormData();
+
+      expect(findAlert().exists()).toBe(false);
+
+      wrapper.find('form').trigger('submit');
+      await waitForPromises();
+
+      expect(findAlert().exists()).toBe(true);
     });
   });
 });

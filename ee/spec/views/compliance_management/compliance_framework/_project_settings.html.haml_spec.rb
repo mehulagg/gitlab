@@ -27,6 +27,40 @@ RSpec.describe 'projects/edit.html.haml' do
 
         expect(rendered).to match /Custom framework 23/
       end
+
+      it 'does not include warning message' do
+        render
+
+        expect(rendered).not_to match /Customizable by owners./
+      end
+
+      it 'contains the dropdown' do
+        render
+
+        expect(rendered).to have_css('select[id=project_compliance_framework_setting_attributes_framework]')
+        expect(rendered).not_to have_css('select[id=project_compliance_framework_setting_attributes_framework][disabled="disabled"]')
+      end
+
+      context 'user is group maintainer' do
+        let_it_be(:maintainer) { create(:user) }
+
+        before do
+          group.add_maintainer(maintainer)
+          allow(view).to receive(:current_user).and_return(maintainer)
+        end
+
+        it 'includes warning message' do
+          render
+
+          expect(rendered).to match /Customizable by owners./
+        end
+
+        it 'disables the dropdown' do
+          render
+
+          expect(rendered).to have_css('input[id=project_compliance_framework_setting_attributes_framework][disabled="disabled"]')
+        end
+      end
     end
 
     context 'group has no compliance frameworks' do

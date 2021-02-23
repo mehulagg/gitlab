@@ -1,12 +1,12 @@
-import Vuex from 'vuex';
 import { shallowMount } from '@vue/test-utils';
-import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
+import Vuex from 'vuex';
 import BoardSidebarEpicSelect from 'ee/boards/components/sidebar/board_sidebar_epic_select.vue';
+import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
 import { stubComponent } from 'helpers/stub_component';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import getters from '~/boards/stores/getters';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createFlash from '~/flash';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import {
   mockIssue3 as mockIssueWithoutEpic,
   mockIssueWithEpic,
@@ -27,10 +27,10 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
     wrapper = null;
   });
 
-  const fakeStore = ({
+  const createStore = ({
     initialState = {
       activeId: mockIssueWithoutEpic.id,
-      issues: { [mockIssueWithoutEpic.id]: { ...mockIssueWithoutEpic } },
+      boardItems: { [mockIssueWithoutEpic.id]: { ...mockIssueWithoutEpic } },
       epicsCacheById: {},
       epicFetchInProgress: false,
     },
@@ -59,7 +59,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
         BoardEditableItem,
         EpicsSelect: stubComponent(EpicsSelect, {
           methods: {
-            handleEditClick: epicsSelectHandleEditClick,
+            toggleFormDropdown: epicsSelectHandleEditClick,
           },
         }),
       },
@@ -69,9 +69,43 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
   const findEpicSelect = () => wrapper.find({ ref: 'epicSelect' });
   const findItemWrapper = () => wrapper.find({ ref: 'sidebarItem' });
   const findCollapsed = () => wrapper.find('[data-testid="collapsed-content"]');
+  const findBoardEditableItem = () => wrapper.find(BoardEditableItem);
+
+  describe('when not editing', () => {
+    it('expands the milestone dropdown on clicking edit', async () => {
+      createStore();
+      createWrapper();
+
+      await findBoardEditableItem().vm.$emit('open');
+
+      expect(epicsSelectHandleEditClick).toHaveBeenCalled();
+    });
+  });
+
+  describe('when editing', () => {
+    beforeEach(() => {
+      createStore();
+      createWrapper();
+
+      findItemWrapper().vm.$emit('open');
+      jest.spyOn(wrapper.vm.$refs.sidebarItem, 'collapse');
+    });
+
+    it('collapses BoardEditableItem on clicking edit', async () => {
+      await findBoardEditableItem().vm.$emit('close');
+
+      expect(wrapper.vm.$refs.sidebarItem.collapse).toHaveBeenCalledTimes(1);
+    });
+
+    it('collapses BoardEditableItem on hiding dropdown', async () => {
+      await wrapper.find(EpicsSelect).vm.$emit('hide');
+
+      expect(wrapper.vm.$refs.sidebarItem.collapse).toHaveBeenCalledTimes(1);
+    });
+  });
 
   it('renders "None" when no epic is assigned to the active issue', async () => {
-    fakeStore();
+    createStore();
     createWrapper();
 
     await wrapper.vm.$nextTick();
@@ -83,10 +117,10 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
     it('fetches an epic for active issue', () => {
       const fetchEpicForActiveIssue = jest.fn(() => Promise.resolve());
 
-      fakeStore({
+      createStore({
         initialState: {
           activeId: mockIssueWithEpic.id,
-          issues: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
+          boardItems: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
           epicsCacheById: {},
           epicFetchInProgress: true,
         },
@@ -101,10 +135,10 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
     });
 
     it('flashes an error message when fetch fails', async () => {
-      fakeStore({
+      createStore({
         initialState: {
           activeId: mockIssueWithEpic.id,
-          issues: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
+          boardItems: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
           epicsCacheById: {},
           epicFetchInProgress: true,
         },
@@ -126,10 +160,10 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
     });
 
     it('renders epic title when issue has an assigned epic', async () => {
-      fakeStore({
+      createStore({
         initialState: {
           activeId: mockIssueWithEpic.id,
-          issues: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
+          boardItems: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
           epicsCacheById: { [mockAssignedEpic.id]: { ...mockAssignedEpic } },
           epicFetchInProgress: false,
         },
@@ -143,21 +177,12 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
     });
   });
 
-  it('expands the dropdown when editing', () => {
-    fakeStore();
-    createWrapper();
-
-    findItemWrapper().vm.$emit('open');
-
-    expect(epicsSelectHandleEditClick).toHaveBeenCalled();
-  });
-
   describe('when epic is selected', () => {
     beforeEach(async () => {
-      fakeStore({
+      createStore({
         initialState: {
           activeId: mockIssueWithoutEpic.id,
-          issues: { [mockIssueWithoutEpic.id]: { ...mockIssueWithoutEpic } },
+          boardItems: { [mockIssueWithoutEpic.id]: { ...mockIssueWithoutEpic } },
           epicsCacheById: {},
           epicFetchInProgress: false,
         },
@@ -168,7 +193,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
         // 'setActiveIssueEpic' sets the active issue's epic to the selected epic
         // and stores the assigned epic's data in 'epicsCacheById'
         store.state.epicFetchInProgress = true;
-        store.state.issues[mockIssueWithoutEpic.id].epic = { ...mockAssignedEpic };
+        store.state.boardItems[mockIssueWithoutEpic.id].epic = { ...mockAssignedEpic };
         store.state.epicsCacheById = { [mockAssignedEpic.id]: { ...mockAssignedEpic } };
         store.state.epicFetchInProgress = false;
       });
@@ -190,14 +215,28 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
       expect(findCollapsed().isVisible()).toBe(true);
       expect(findCollapsed().text()).toBe(mockAssignedEpic.title);
     });
+
+    describe('when the selected epic did not change', () => {
+      it('does not commit change to the server', async () => {
+        createStore();
+        createWrapper();
+        jest.spyOn(wrapper.vm, 'setActiveIssueEpic').mockImplementation();
+
+        findEpicSelect().vm.$emit('epicSelect', null);
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.vm.setActiveIssueEpic).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('when no epic is selected', () => {
     beforeEach(async () => {
-      fakeStore({
+      createStore({
         initialState: {
           activeId: mockIssueWithEpic.id,
-          issues: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
+          boardItems: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
           epicsCacheById: { [mockAssignedEpic.id]: { ...mockAssignedEpic } },
           epicFetchInProgress: false,
         },
@@ -206,7 +245,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
 
       jest.spyOn(wrapper.vm, 'setActiveIssueEpic').mockImplementation(async () => {
         // Remove assigned epic from the active issue
-        store.state.issues[mockIssueWithoutEpic.id].epic = null;
+        store.state.boardItems[mockIssueWithoutEpic.id].epic = null;
       });
 
       findEpicSelect().vm.$emit('epicSelect', null);
@@ -226,7 +265,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
   });
 
   it('flashes an error when update fails', async () => {
-    fakeStore({
+    createStore({
       actionsMock: {
         setActiveIssueEpic: jest.fn().mockRejectedValue('mayday'),
       },
@@ -234,7 +273,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
 
     createWrapper();
 
-    findEpicSelect().vm.$emit('epicSelect', null);
+    findEpicSelect().vm.$emit('epicSelect', { id: 'foo' });
 
     await wrapper.vm.$nextTick();
 

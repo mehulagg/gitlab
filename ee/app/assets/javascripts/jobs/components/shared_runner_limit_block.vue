@@ -1,7 +1,7 @@
 <script>
 import { GlButton, GlAlert } from '@gitlab/ui';
-import { s__, sprintf } from '~/locale';
 import { helpPagePath } from '~/helpers/help_page_helper';
+import { s__, sprintf } from '~/locale';
 
 export default {
   components: {

@@ -15,9 +15,13 @@ module Gitlab
       end
 
       def environment
-        return 'production' if Gitlab.com_and_canary?
-
         return 'staging' if Gitlab.staging?
+
+        return 'production' if Gitlab.com?
+
+        return 'org' if Gitlab.org?
+
+        return 'self-managed' if Rails.env.production?
 
         'development'
       end
@@ -29,11 +33,10 @@ module Gitlab
       private
 
       def to_h
-        public_methods(false).each_with_object({}) do |method, hash|
-          next if method == :to_context
-
-          hash[method] = public_send(method) # rubocop:disable GitlabSecurity/PublicSend
-        end.merge(@data)
+        {
+          environment: environment,
+          source: source
+        }.merge(@data)
       end
     end
   end

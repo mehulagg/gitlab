@@ -75,12 +75,12 @@ RSpec.describe Elastic::DataMigrationService, :elastic do
     end
 
     it 'creates all migration versions' do
-      expect(Elastic::MigrationRecord.persisted_versions(completed: true).count).to eq(0)
+      expect(Elastic::MigrationRecord.load_versions(completed: true).count).to eq(0)
 
       subject.mark_all_as_completed!
       refresh_index!
 
-      expect(Elastic::MigrationRecord.persisted_versions(completed: true).count).to eq(subject.migrations.count)
+      expect(Elastic::MigrationRecord.load_versions(completed: true).count).to eq(subject.migrations.count)
     end
 
     it 'drops all cache keys' do
@@ -186,6 +186,40 @@ RSpec.describe Elastic::DataMigrationService, :elastic do
       subject.drop_migration_halted_cache!(migration)
 
       expect(subject.halted_migration).to eq(migration)
+    end
+  end
+
+  describe 'pending_migrations?' do
+    context 'when there is a pending migration' do
+      let(:migration) { subject.migrations.first }
+
+      before do
+        migration.save!(completed: false)
+      end
+
+      it 'returns true' do
+        expect(subject.pending_migrations?).to eq(true)
+      end
+    end
+
+    context 'when there is no pending migration' do
+      it 'returns false' do
+        expect(subject.pending_migrations?).to eq(false)
+      end
+    end
+  end
+
+  describe 'pending_migrations' do
+    let(:pending_migration1) { subject.migrations[1] }
+    let(:pending_migration2) { subject.migrations[2] }
+
+    before do
+      pending_migration1.save!(completed: false)
+      pending_migration2.save!(completed: false)
+    end
+
+    it 'returns only pending migrations' do
+      expect(subject.pending_migrations.map(&:name)).to eq([pending_migration1, pending_migration2].map(&:name))
     end
   end
 end

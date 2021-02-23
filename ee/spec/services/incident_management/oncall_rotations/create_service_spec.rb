@@ -8,6 +8,7 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
   let_it_be(:user_with_permissions) { create(:user) }
   let_it_be(:user_without_permissions) { create(:user) }
   let_it_be(:current_user) { user_with_permissions }
+  let_it_be(:starts_at) { Time.current.change(usec: 0) }
 
   let(:participants) do
     [
@@ -19,7 +20,7 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
     ]
   end
 
-  let(:params) { { name: 'On-call rotation', starts_at: Time.current, length: '1', length_unit: 'days' }.merge(participants: participants) }
+  let(:params) { { name: 'On-call rotation', starts_at: starts_at, ends_at: 1.month.after(starts_at), length: '1', length_unit: 'days' }.merge(participants: participants) }
   let(:service) { described_class.new(schedule, project, current_user, params) }
 
   before_all do
@@ -127,6 +128,8 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
         oncall_rotation = execute.payload[:oncall_rotation]
         expect(oncall_rotation).to be_a(::IncidentManagement::OncallRotation)
         expect(oncall_rotation.name).to eq('On-call rotation')
+        expect(oncall_rotation.starts_at).to eq(starts_at)
+        expect(oncall_rotation.ends_at).to eq(1.month.after(starts_at))
         expect(oncall_rotation.length).to eq(1)
         expect(oncall_rotation.length_unit).to eq('days')
 

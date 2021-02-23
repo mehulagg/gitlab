@@ -1,5 +1,7 @@
 <script>
 import { GlButton, GlIcon, GlTooltipDirective, GlLink } from '@gitlab/ui';
+import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
+import DastSiteValidationRevokeModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_revoke_modal.vue';
 import {
   DAST_SITE_VALIDATION_STATUS,
   DAST_SITE_VALIDATION_STATUS_PROPS,
@@ -7,12 +9,10 @@ import {
   DAST_SITE_VALIDATION_MODAL_ID,
   DAST_SITE_VALIDATION_REVOKE_MODAL_ID,
 } from 'ee/security_configuration/dast_site_validation/constants';
-import DastSiteValidationModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_modal.vue';
-import DastSiteValidationRevokeModal from 'ee/security_configuration/dast_site_validation/components/dast_site_validation_revoke_modal.vue';
 import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validations.query.graphql';
+import { fetchPolicies } from '~/lib/graphql';
 import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { fetchPolicies } from '~/lib/graphql';
 import { updateSiteProfilesStatuses } from '../graphql/cache_utils';
 import ProfilesList from './dast_profiles_list.vue';
 

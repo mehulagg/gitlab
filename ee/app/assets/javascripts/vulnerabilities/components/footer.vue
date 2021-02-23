@@ -1,20 +1,20 @@
 <script>
-import Visibility from 'visibilityjs';
 import { GlIcon } from '@gitlab/ui';
-import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
-import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
+import Visibility from 'visibilityjs';
 import Api from 'ee/api';
+import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
+import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Poll from '~/lib/utils/poll';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import HistoryEntry from './history_entry.vue';
 import RelatedIssues from './related_issues.vue';
 import RelatedJiraIssues from './related_jira_issues.vue';
-import HistoryEntry from './history_entry.vue';
 import StatusDescription from './status_description.vue';
 
 export default {
@@ -220,7 +220,10 @@ export default {
       />
     </div>
 
-    <related-jira-issues v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl" />
+    <related-jira-issues
+      v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl"
+      class="gl-mt-6"
+    />
     <related-issues
       v-else
       :endpoint="issueLinksEndpoint"

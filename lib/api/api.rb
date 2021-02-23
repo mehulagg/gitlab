@@ -68,6 +68,10 @@ module API
       set_peek_enabled_for_current_request
     end
 
+    after do
+      Gitlab::UsageDataCounters::VSCodeExtensionActivityUniqueCounter.track_api_request_when_trackable(user_agent: request&.user_agent, user: @current_user)
+    end
+
     # The locale is set to the current user's locale when `current_user` is loaded
     after { Gitlab::I18n.use_default_locale }
 
@@ -143,7 +147,7 @@ module API
 
       # Only overwrite `text/plain+deprecated`
       if content_types[api_format] == 'text/plain+deprecated'
-        if Feature.enabled?(:api_always_use_application_json)
+        if Feature.enabled?(:api_always_use_application_json, default_enabled: :yaml)
           content_type 'application/json'
         else
           content_type 'text/plain'

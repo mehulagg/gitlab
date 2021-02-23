@@ -9,7 +9,6 @@ describe('Pipelines Table Row', () => {
     mount(PipelinesTableRowComponent, {
       propsData: {
         pipeline,
-        autoDevopsHelpPath: 'foo',
         viewType: 'root',
       },
     });
@@ -154,11 +153,10 @@ describe('Pipelines Table Row', () => {
     });
 
     it('should render an icon for each stage', () => {
-      expect(
-        wrapper.findAll(
-          '.table-section:nth-child(4) [data-testid="mini-pipeline-graph-dropdown-toggle"]',
-        ).length,
-      ).toEqual(pipeline.details.stages.length);
+      const stages = wrapper.findAll(
+        '.table-section:nth-child(5) [data-testid="mini-pipeline-graph-dropdown"]',
+      );
+      expect(stages).toHaveLength(pipeline.details.stages.length);
     });
   });
 
@@ -183,9 +181,10 @@ describe('Pipelines Table Row', () => {
       expect(wrapper.find('.js-pipelines-retry-button').attributes('title')).toMatch('Retry');
       expect(wrapper.find('.js-pipelines-cancel-button').exists()).toBe(true);
       expect(wrapper.find('.js-pipelines-cancel-button').attributes('title')).toMatch('Cancel');
-      const dropdownMenu = wrapper.find('.dropdown-menu');
 
-      expect(dropdownMenu.text()).toContain(scheduledJobAction.name);
+      const actionsMenu = wrapper.find('[data-testid="pipelines-manual-actions-dropdown"]');
+
+      expect(actionsMenu.text()).toContain(scheduledJobAction.name);
     });
 
     it('emits `retryPipeline` event when retry button is clicked and toggles loading', () => {
