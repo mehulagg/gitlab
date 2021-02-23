@@ -150,7 +150,10 @@ export default {
       );
     },
     isSubmitDisabled() {
-      return this.formHasErrors || this.requiredFieldEmpty;
+      return this.formHasErrors || this.requiredFieldEmpty || this.isPolicyProfile;
+    },
+    isPolicyProfile() {
+      return true;
     },
   },
 
@@ -242,9 +245,15 @@ export default {
 
 <template>
   <gl-form @submit.prevent="onSubmit">
-    <h2 class="gl-mb-6">
-      {{ i18n.title }}
-    </h2>
+    <h2 class="gl-mb-6">{{ i18n.title }}</h2>
+
+    <gl-alert v-if="isPolicyProfile" variant="info" class="gl-mb-5" :dismissible="false">
+      {{
+        s__(
+          'DastProfiles|This profile is currently being used by a policy. To make edits you must remove this scanner from the active policy.',
+        )
+      }}
+    </gl-alert>
 
     <gl-alert v-if="showAlert" variant="danger" class="gl-mb-5" @dismiss="hideErrors">
       {{ s__('DastProfiles|Could not create the scanner profile. Please try again.') }}
@@ -253,7 +262,7 @@ export default {
       </ul>
     </gl-alert>
 
-    <gl-form-group :label="s__('DastProfiles|Profile name')">
+    <gl-form-group :disabled="isPolicyProfile" :label="s__('DastProfiles|Profile name')">
       <gl-form-input
         v-model="form.profileName.value"
         class="mw-460"
@@ -264,7 +273,7 @@ export default {
 
     <hr class="gl-border-gray-100" />
 
-    <gl-form-group>
+    <gl-form-group :disabled="isPolicyProfile">
       <template #label>
         {{ s__('DastProfiles|Scan mode') }}
         <tooltip-icon :title="i18n.tooltips.scanMode" />
@@ -280,6 +289,7 @@ export default {
     <div class="row">
       <gl-form-group
         class="col-md-6 mb-0"
+        :disabled="isPolicyProfile"
         :state="form.spiderTimeout.state"
         :invalid-feedback="form.spiderTimeout.feedback"
       >
@@ -307,6 +317,7 @@ export default {
 
       <gl-form-group
         class="col-md-6 mb-0"
+        :disabled="isPolicyProfile"
         :state="form.targetTimeout.state"
         :invalid-feedback="form.targetTimeout.feedback"
       >
@@ -336,7 +347,7 @@ export default {
     <hr class="gl-border-gray-100" />
 
     <div class="row">
-      <gl-form-group class="col-md-6 mb-0">
+      <gl-form-group class="col-md-6 mb-0" :disabled="isPolicyProfile">
         <template #label>
           {{ s__('DastProfiles|AJAX spider') }}
           <tooltip-icon :title="i18n.tooltips.ajaxSpider" />
@@ -346,7 +357,7 @@ export default {
         }}</gl-form-checkbox>
       </gl-form-group>
 
-      <gl-form-group class="col-md-6 mb-0">
+      <gl-form-group class="col-md-6 mb-0" :disabled="isPolicyProfile">
         <template #label>
           {{ s__('DastProfiles|Debug messages') }}
           <tooltip-icon :title="i18n.tooltips.debugMessage" />

@@ -12,6 +12,7 @@ import {
 } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
 
 export default {
   components: {
@@ -113,6 +114,14 @@ export default {
 
       return [...dataFields, ...staticFields];
     },
+    isPolicyProfile() {
+      return true;
+    },
+    editButton() {
+      return this.isPolicyProfile
+        ? { text: __('View'), title: s__('DastProfiles|View profile') }
+        : { text: __('Edit'), title: s__('DastProfiles|Edit profile') };
+    },
   },
   methods: {
     handleDelete() {
@@ -192,11 +201,13 @@ export default {
               <gl-dropdown-item
                 v-if="item.editPath"
                 :href="item.editPath"
-                :title="s__('DastProfiles|Edit profile')"
-                >{{ __('Edit') }}</gl-dropdown-item
+                :title="editButton.title"
               >
+                {{ editButton.text }}
+              </gl-dropdown-item>
 
               <gl-dropdown-item
+                v-if="!isPolicyProfile"
                 variant="danger"
                 :title="s__('DastProfiles|Delete profile')"
                 @click="prepareProfileDeletion(item.id)"
