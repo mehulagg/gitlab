@@ -184,7 +184,7 @@ However, this also means that a component injecting a provided property won't be
 property is changed elsewhere.
 
 Knowing about this difference between `props` and `provide/inject`, it is recommended to limit the
-latter in the following cases:
+latter to the following cases:
 
 - passing static properties that are not changed over time. For example, paths, constant objects, etc.
 - passing properties that are used purely to set up a component initially but should not change the
