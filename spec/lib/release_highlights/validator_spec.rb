@@ -78,7 +78,9 @@ RSpec.describe ReleaseHighlights::Validator do
   end
 
   describe 'when validating all files' do
-    it 'they should have no errors' do
+    it 'they should have no errors', :stub_invalid_dns_only do
+      stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+
       expect(described_class.validate_all!).to be_truthy, described_class.error_message
     end
   end

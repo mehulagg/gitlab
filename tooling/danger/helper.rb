@@ -192,6 +192,8 @@ module Tooling
         %r{\A\.rubocop((_manual)?_todo)?\.yml\z} => :backend,
         %r{\Afile_hooks/} => :backend,
 
+        %r{\Adata/whats_new/} => [:frontend, :backend],
+
         %r{\A(ee/)?qa/} => :qa,
 
         # Files that don't fit into any category are marked with :none
