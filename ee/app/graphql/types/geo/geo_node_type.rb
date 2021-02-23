@@ -41,7 +41,8 @@ module Types
       field :group_wiki_repository_registries, ::Types::Geo::GroupWikiRepositoryRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::GroupWikiRepositoryRegistriesResolver,
-            description: 'Find group wiki repository registries on this Geo node.'
+            description: 'Find group wiki repository registries on this Geo node.',
+            feature_flag: :geo_group_wiki_replication
     end
   end
 end
