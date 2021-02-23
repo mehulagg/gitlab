@@ -3,8 +3,8 @@ import * as Sentry from '@sentry/browser';
 import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { ApolloMutation } from 'vue-apollo';
-import DevopsAdoptionSegmentModal from 'ee/admin/dev_ops_report/components/devops_adoption_segment_modal.vue';
-import { DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from 'ee/admin/dev_ops_report/constants';
+import DevopsAdoptionSegmentModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_segment_modal.vue';
+import { DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from 'ee/analytics/devops_report/devops_adoption/constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
   groupNodes,

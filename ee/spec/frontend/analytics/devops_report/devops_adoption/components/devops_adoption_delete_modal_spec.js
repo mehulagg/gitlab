@@ -2,8 +2,8 @@ import { GlModal, GlSprintf, GlAlert } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { shallowMount } from '@vue/test-utils';
 import { ApolloMutation } from 'vue-apollo';
-import DevopsAdoptionDeleteModal from 'ee/admin/dev_ops_report/components/devops_adoption_delete_modal.vue';
-import { DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID } from 'ee/admin/dev_ops_report/constants';
+import DevopsAdoptionDeleteModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_delete_modal.vue';
+import { DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID } from 'ee/analytics/devops_report/devops_adoption/constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
   genericDeleteErrorMessage,

@@ -1,7 +1,7 @@
 import {
   deleteSegmentFromCache,
   addSegmentToCache,
-} from 'ee/admin/dev_ops_report/utils/cache_updates';
+} from 'ee/analytics/devops_report/devops_adoption/utils/cache_updates';
 import { devopsAdoptionSegmentsData } from '../mock_data';
 
 describe('addSegmentToCache', () => {
