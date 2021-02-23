@@ -110,9 +110,8 @@ export default {
     },
     labelTarget(label) {
       if (this.enableLabelPermalinks) {
-        const key = encodeURIComponent(`${this.labelFilterParam}[]`);
         const value = encodeURIComponent(this.labelTitle(label));
-        return `?${key}=${value}`;
+        return `?${this.labelFilterParam}[]=${value}`;
       }
       return '#';
     },

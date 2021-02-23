@@ -82,7 +82,7 @@ export default {
         state: this.currentState,
         page: this.currentPage,
         sort: this.sortedBy,
-        labels: this.filterParams.labels,
+        'labels[]': this.filterParams.labels,
         search: this.filterParams.search,
       };
     },

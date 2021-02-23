@@ -495,7 +495,7 @@ export const setUrlParams = (
     }
   });
 
-  urlObj.search = searchParams.toString();
+  urlObj.search = decodeURIComponent(searchParams.toString());
 
   return urlObj.toString();
 };
