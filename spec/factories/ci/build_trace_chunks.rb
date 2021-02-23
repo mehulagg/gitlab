@@ -3,8 +3,9 @@
 FactoryBot.define do
   factory :ci_build_trace_chunk, class: 'Ci::BuildTraceChunk' do
     build factory: :ci_build
-    chunk_index { 0 }
+    chunk_index { generate(:iid) }
     data_store { :redis }
+    
 
     trait :redis_with_data do
       data_store { :redis }

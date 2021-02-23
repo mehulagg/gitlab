@@ -32,7 +32,6 @@ RSpec.describe BatchDestroyDependentAssociations do
       create(:ci_build, project: project)
 
       expect(Ci::Build.count).to eq(2)
-
       project.destroy_dependent_associations_in_batches
 
       expect(Ci::Build.count).to eq(0)

@@ -16,7 +16,9 @@ module BatchDestroyDependentAssociations
   DEPENDENT_ASSOCIATIONS_BATCH_SIZE = 1000
 
   def dependent_associations_to_destroy
-    self.class.reflect_on_all_associations(:has_many).select { |assoc| assoc.options[:dependent] == :destroy }
+    self.class.reflect_on_all_associations(:has_many).select do |assoc| 
+      assoc.options[:dependent] == :destroy || assoc.klass.include?(FastDestroyAll)
+    end
   end
 
   def destroy_dependent_associations_in_batches(exclude: [])
@@ -24,7 +26,21 @@ module BatchDestroyDependentAssociations
       next if exclude.include?(association.name)
 
       # rubocop:disable GitlabSecurity/PublicSend
-      public_send(association.name).find_each(batch_size: DEPENDENT_ASSOCIATIONS_BATCH_SIZE, &:destroy)
+      public_send(association.name).in_batches(
+        of: DEPENDENT_ASSOCIATIONS_BATCH_SIZE,
+        &method(:destroy_dependent_association_in_batches)
+      )
     end
+  end
+
+  private
+
+  def destroy_dependent_association_in_batches(batch)
+      if batch.klass.include? FastDestroyAll
+        batch.fast_destroy_all
+      else
+        batch.destroy_all
+      end
+    rescue FastDestroyAll::ForbiddenActionError
   end
 end
