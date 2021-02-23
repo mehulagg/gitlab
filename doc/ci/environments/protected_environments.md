@@ -129,16 +129,15 @@ to the branch deployed to it, are only granted access to deploy the environment.
 group with the Reporter permission, or in groups added to the project with Reporter permissions,
 appears in the dropdown menu for deployment-only access.
 
-To add a deployment-only access: 
+To add a deployment-only access:
 
-1. Add a group with Reporter permissions. 
+1. Add a group with Reporter permissions.
 1. Assign Reporter Permission.
 1. Add user(s) to the group.
-1. Invite the group to be a project member. 
+1. Invite the group to be a project member.
 1. Follow the steps outlined in [Protected Environments](index.md#protecting-environments).
 
-Note that deployment-only access is the only possible access level for groups with
-[Reporter permissions](../../user/permissions.md).
+Note that deployment-only access is the only possible access level for groups with [Reporter permissions](../../user/permissions.md).
 
 ## Modifying and unprotecting environments
 
