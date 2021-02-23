@@ -26,8 +26,8 @@ describe('EnvironmentPicker component', () => {
     });
   };
 
-  const findEnvironmentsDropdown = () => wrapper.find(GlDropdown);
-  const findEnvironmentsDropdownItems = () => wrapper.findAll(GlDropdownItem);
+  const findEnvironmentsDropdown = () => wrapper.findComponent(GlDropdown);
+  const findEnvironmentsDropdownItems = () => wrapper.findAllComponents(GlDropdownItem);
 
   afterEach(() => {
     wrapper.destroy();
