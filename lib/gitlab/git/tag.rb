@@ -87,6 +87,10 @@ module Gitlab
         end
       end
 
+      def cache_key
+        "tag:#{name}:#{target}"
+      end
+
       private
 
       def message_from_gitaly_tag

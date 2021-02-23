@@ -24,11 +24,14 @@ module API
         use :pagination
       end
       get ':id/repository/tags', feature_category: :source_code_management do
-        tags = ::TagsFinder.new(user_project.repository,
+        repository = user_project.repository
+        tags = ::TagsFinder.new(repository,
                                 sort: "#{params[:order_by]}_#{params[:sort]}",
                                 search: params[:search]).execute
 
-        present paginate(::Kaminari.paginate_array(tags)), with: Entities::Tag, project: user_project
+        paginated_tags = paginate(::Kaminari.paginate_array(tags))
+
+        present_cached paginated_tags, with: Entities::Tag, project: user_project
       end
 
       desc 'Get a single repository tag' do

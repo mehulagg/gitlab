@@ -25,6 +25,7 @@ class Repository
   attr_accessor :full_path, :shard, :disk_path, :container, :repo_type
 
   delegate :lfs_enabled?, to: :container
+  delegate :cache_key, to: :commit
 
   delegate_missing_to :raw_repository
 
