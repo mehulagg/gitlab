@@ -1,11 +1,11 @@
+#import "./iteration.fragment.graphql"
+
 query groupIterations($fullPath: ID!, $title: String, $state: IterationState) {
   group(fullPath: $fullPath) {
     iterations(title: $title, state: $state) {
       nodes {
-        id
-        title
+        ...IterationFragment
         state
-        webUrl
       }
     }
   }

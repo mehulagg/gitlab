@@ -94,6 +94,9 @@ function mountIterationSelect() {
   return new Vue({
     el,
     apolloProvider,
+    provide: {
+      canUpdate: parseBoolean(canEdit)
+    },
     components: {
       IterationSelect,
     },
@@ -101,7 +104,6 @@ function mountIterationSelect() {
       createElement('iteration-select', {
         props: {
           groupPath,
-          canEdit: parseBoolean(canEdit),
           projectPath,
           issueIid,
         },

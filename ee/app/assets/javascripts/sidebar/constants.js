@@ -1,4 +1,8 @@
+import { IssuableType } from '~/issue_show/constants';
 import { s__, __ } from '~/locale';
+import groupIterationsQuery from './queries/group_iterations.query.graphql';
+import currentIterationQuery from './queries/issue_iteration.query.graphql';
+import setIssueIterationMutation from './queries/set_iteration_on_issue.mutation.graphql';
 
 export const healthStatus = {
   ON_TRACK: 'onTrack',
@@ -44,4 +48,17 @@ export const I18N_DROPDOWN = {
   noStatusText: s__('Sidebar|No status'),
   noneText: s__('Sidebar|None'),
   selectPlaceholderText: s__('Select health status'),
+};
+
+export const currentIterationQueries = {
+  [IssuableType.Issue]: {
+    query: currentIterationQuery,
+    mutation: setIssueIterationMutation
+  }
+};
+
+export const iterationsQueries = {
+  [IssuableType.Issue]: {
+    query: groupIterationsQuery
+  }
 };

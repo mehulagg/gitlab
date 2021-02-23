@@ -1,9 +1,14 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { __ } from '~/locale';
 
 export default {
   components: { GlButton, GlLoadingIcon },
   inject: ['canUpdate'],
+  i18n: {
+    edit: __('Edit'),
+    none: __('None')
+  },
   props: {
     title: {
       type: String,
@@ -15,6 +20,15 @@ export default {
       required: false,
       default: false,
     },
+    trackAttrs: {
+      type: Object,
+      required: false,
+      default: {
+        label: "",
+        property: "",
+        event: "",
+      }
+    }
   },
   data() {
     return {
@@ -71,7 +85,8 @@ export default {
 
 <template>
   <div>
-    <div class="gl-display-flex gl-align-items-center gl-mb-3" @click.self="collapse">
+    <!-- .hide-collapsed is only relevant in a collapsible sidebar like the one in issue show page -->
+    <div class="gl-display-flex gl-align-items-center gl-mb-3 hide-collapsed" @click.self="collapse">
       <span data-testid="title">{{ title }}</span>
       <gl-loading-icon v-if="loading" inline class="gl-ml-2" />
       <gl-button
@@ -81,12 +96,15 @@ export default {
         data-testid="edit-button"
         @keyup.esc="toggle"
         @click="toggle"
+        :data-track-label="trackAttrs.label"
+        :data-track-property="trackAttrs.property"
+        :data-track-event="trackAttrs.event"
       >
-        {{ __('Edit') }}
+        {{ $options.i18n.edit }}
       </gl-button>
     </div>
     <div v-show="!edit" class="gl-text-gray-500" data-testid="collapsed-content">
-      <slot name="collapsed">{{ __('None') }}</slot>
+      <slot name="collapsed">{{ $options.i18n.none }}</slot>
     </div>
     <div v-show="edit" data-testid="expanded-content">
       <slot :edit="edit"></slot>

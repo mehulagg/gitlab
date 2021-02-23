@@ -1,0 +1,5 @@
+fragment IterationFragment on Iteration {
+  id
+  title
+  webUrl
+}
