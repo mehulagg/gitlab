@@ -42,7 +42,7 @@ should be leveraged:
   1. When the feature is ready to be announced, create a merge request that adds
      documentation about the feature, including [documentation for the feature flag itself](../documentation/feature_flags.md),
      and a changelog entry. In the same merge request either flip the feature flag to
-     be **default_enabled: true** or remove it entirely in order to enable the new behavior. By default, an environment will follow the `default_enabled` setting in a feature flag's yaml definition. Using GitLab ChatOps for a feature flag overrides the `default_enabled` value until you delete the feature flag in chatops.
+     be **default_enabled: true** or remove it entirely in order to enable the new behavior. By default, an environment will follow the `default_enabled` setting in a feature flag's YAML definition. Using GitLab ChatOps for a feature flag overrides the `default_enabled` value until you delete the feature flag in chatops.
 
 One might be tempted to think that feature flags will delay the release of a
 feature by at least one month (= one release). This is not the case. A feature
