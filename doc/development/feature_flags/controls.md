@@ -44,6 +44,8 @@ code](https://gitlab.com/gitlab-com/chatops/blob/master/lib/chatops/commands/fea
 Note that all the examples in that file must be preceded by
 `/chatops run`.
 
+By default, an environment (self-hosted or .com) will follow the `default_enabled` setting in a feature flag's yaml definition. Using GitLab ChatOps for a feature flag overrides the `default_enabled` value until you delete the feature flag in chatops
+
 If you get an error "Whoops! This action is not allowed. This incident
 will be reported." that means your Slack account is not allowed to
 change feature flags or you do not [have access](#access).
@@ -307,3 +309,5 @@ Then, you can delete it from production after the MR is deployed to prod:
 ```shell
 /chatops run feature delete some_feature
 ```
+
+
