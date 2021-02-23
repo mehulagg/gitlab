@@ -9026,6 +9026,18 @@ msgstr ""
 msgid "Cycle Time"
 msgstr ""
 
+msgid "CycleAnalyticsEvent|%{label_reference} label was added to the issue"
+msgstr ""
+
+msgid "CycleAnalyticsEvent|%{label_reference} label was added to the merge request"
+msgstr ""
+
+msgid "CycleAnalyticsEvent|%{label_reference} label was removed from the issue"
+msgstr ""
+
+msgid "CycleAnalyticsEvent|%{label_reference} label was removed from the merge request"
+msgstr ""
+
 msgid "CycleAnalyticsEvent|Issue closed"
 msgstr ""
 
