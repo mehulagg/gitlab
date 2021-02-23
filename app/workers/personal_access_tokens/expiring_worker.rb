@@ -25,7 +25,9 @@ module PersonalAccessTokens
 
           Gitlab::AppLogger.info "#{self.class}: Notifying User #{user.id} about expiring tokens"
 
-          expiring_user_tokens.update_all(expire_notification_delivered: true)
+          expiring_user_tokens.each_batch do |expiring_tokens|
+            expiring_tokens.update_all(expire_notification_delivered: true)
+          end
         end
       end
     end
