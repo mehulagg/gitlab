@@ -1605,7 +1605,7 @@ class User < ApplicationRecord
 
   def review_requested_open_merge_requests_count(force: false)
     Rails.cache.fetch(['users', id, 'review_requested_open_merge_requests_count'], force: force, expires_in: 20.minutes) do
-      MergeRequestsFinder.new(self, reviewer_id: id, state: 'opened', non_archived: true).execute.count
+      MergeRequestsFinder.new(self, reviewer_id: id, reviewer_state: MergeRequestReviewer.states[:unreviewed], state: 'opened', non_archived: true).execute.count
     end
   end
 

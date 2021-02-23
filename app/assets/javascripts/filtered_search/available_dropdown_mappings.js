@@ -123,6 +123,11 @@ export default class AvailableDropdownMappings {
         gl: DropdownNonUser,
         element: this.container.querySelector('#js-dropdown-wip'),
       },
+      'reviewer-state': {
+        reference: null,
+        gl: DropdownNonUser,
+        element: this.container.querySelector('#js-dropdown-reviewer-state'),
+      },
       confidential: {
         reference: null,
         gl: DropdownNonUser,

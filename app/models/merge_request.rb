@@ -340,11 +340,11 @@ class MergeRequest < ApplicationRecord
   end
 
   scope :review_requested_to, ->(user) do
-    where(
-      reviewers_subquery
-        .where(Arel::Table.new("#{to_ability_name}_reviewers")[:user_id].eq(user))
-        .exists
-    )
+    joins(:merge_request_reviewers).where(merge_request_reviewers: { user_id: user })
+  end
+
+  scope :reviewer_state, ->(reviewer_state) do
+    joins(:merge_request_reviewers).where(merge_request_reviewers: { state: reviewer_state })
   end
 
   scope :no_review_requested_to, ->(user) do

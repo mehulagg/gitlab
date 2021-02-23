@@ -43,6 +43,7 @@ class MergeRequestsFinder < IssuableFinder
       :merged_before,
       :reviewer_id,
       :reviewer_username,
+      :reviewer_state,
       :target_branch,
       :wip
     ]
@@ -69,6 +70,7 @@ class MergeRequestsFinder < IssuableFinder
     items = by_approvals(items)
     items = by_deployments(items)
     items = by_reviewer(items)
+    items = by_reviewer_state(items)
 
     by_source_project_id(items)
   end
@@ -217,6 +219,12 @@ class MergeRequestsFinder < IssuableFinder
     else # reviewer not found
       items.none
     end
+  end
+
+  def by_reviewer_state(items)
+    return items unless params[:reviewer_state]
+
+    items.reviewer_state(params[:reviewer_state])
   end
 end
 

@@ -164,6 +164,14 @@
                   %li.filter-dropdown-item{ data: { value: 'no', capitalize: true } }
                     %button.btn.btn-link{ type: 'button' }
                       = _('No')
+              #js-dropdown-reviewer-state.filtered-search-input-dropdown-menu.dropdown-menu
+                %ul.filter-dropdown{ data: { dropdown: true } }
+                  %li.filter-dropdown-item{ data: { value: 'unreviewed', capitalize: false } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Unreviewed')
+                  %li.filter-dropdown-item{ data: { value: 'reviewed', capitalize: false } }
+                    %button.btn.btn-link{ type: 'button' }
+                      = _('Reviewed')
               #js-dropdown-confidential.filtered-search-input-dropdown-menu.dropdown-menu
                 %ul.filter-dropdown{ data: { dropdown: true } }
                   %li.filter-dropdown-item{ data: { value: 'yes', capitalize: true } }

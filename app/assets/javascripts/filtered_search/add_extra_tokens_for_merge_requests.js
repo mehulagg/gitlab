@@ -145,4 +145,16 @@ export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
     deployedBeforeToken,
     deployedAfterToken,
   );
+
+  const reviewedStateToken = {
+    formattedKey: __('Reviewer state'),
+    key: 'reviewer-state',
+    type: 'string',
+    param: '',
+    symbol: '',
+    icon: 'clock',
+    tag: 'reviewer_state',
+  };
+  IssuableTokenKeys.tokenKeys.push(reviewedStateToken);
+  IssuableTokenKeys.tokenKeysWithAlternative.push(reviewedStateToken);
 };
