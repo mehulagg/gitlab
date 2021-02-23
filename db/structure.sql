@@ -9398,6 +9398,7 @@ CREATE TABLE application_settings (
     keep_latest_artifact boolean DEFAULT true NOT NULL,
     notes_create_limit integer DEFAULT 300 NOT NULL,
     notes_create_limit_allowlist text[] DEFAULT '{}'::text[] NOT NULL,
+    in_product_marketing_emails_enabled boolean DEFAULT true NOT NULL,
     kroki_formats jsonb DEFAULT '{}'::jsonb NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
@@ -13215,6 +13216,7 @@ CREATE TABLE incident_management_oncall_rotations (
     length_unit smallint NOT NULL,
     starts_at timestamp with time zone NOT NULL,
     name text NOT NULL,
+    ends_at timestamp with time zone,
     CONSTRAINT check_5209fb5d02 CHECK ((char_length(name) <= 200))
 );
 
@@ -14373,7 +14375,9 @@ CREATE TABLE namespace_statistics (
     id integer NOT NULL,
     namespace_id integer NOT NULL,
     shared_runners_seconds integer DEFAULT 0 NOT NULL,
-    shared_runners_seconds_last_reset timestamp without time zone
+    shared_runners_seconds_last_reset timestamp without time zone,
+    storage_size bigint DEFAULT 0 NOT NULL,
+    wiki_size bigint DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE namespace_statistics_id_seq

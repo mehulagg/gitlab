@@ -2,6 +2,8 @@
 
 module IncidentManagement
   class OncallShiftGenerator
+    include Gitlab::Utils::StrongMemoize
+
     # @param rotation [IncidentManagement::OncallRotation]
     def initialize(rotation)
       @rotation = rotation
@@ -14,7 +16,7 @@ module IncidentManagement
     # @return [IncidentManagement::OncallShift]
     def for_timeframe(starts_at:, ends_at:)
       starts_at = [apply_timezone(starts_at), rotation_starts_at].max
-      ends_at = apply_timezone(ends_at)
+      ends_at = limit_end_time(apply_timezone(ends_at))
 
       return [] unless starts_at < ends_at
       return [] unless rotation.participants.any?
@@ -44,6 +46,7 @@ module IncidentManagement
       timestamp = apply_timezone(timestamp)
 
       return if timestamp < rotation_starts_at
+      return if rotation_ends_at && rotation_ends_at <= timestamp
       return unless rotation.participants.any?
 
       elapsed_shift_count = elapsed_whole_shifts(timestamp)
@@ -112,7 +115,7 @@ module IncidentManagement
         rotation: rotation,
         participant: participants[participant_rank(elapsed_shift_count)],
         starts_at: shift_starts_at,
-        ends_at: shift_starts_at + shift_duration
+        ends_at: limit_end_time(shift_starts_at + shift_duration)
       )
     end
 
@@ -123,16 +126,30 @@ module IncidentManagement
       elapsed_shifts_count % participants.length
     end
 
+    def limit_end_time(expected_ends_at)
+      [expected_ends_at, rotation_ends_at].compact.min
+    end
+
     def participants
-      @participants ||= rotation.participants
+      strong_memoize(:participants) do
+        rotation.participants
+      end
     end
 
     def rotation_starts_at
-      @rotation_starts_at ||= apply_timezone(rotation.starts_at)
+      strong_memoize(:rotation_starts_at) do
+        apply_timezone(rotation.starts_at)
+      end
+    end
+
+    def rotation_ends_at
+      strong_memoize(:rotation_ends_at) do
+        apply_timezone(rotation.ends_at)
+      end
     end
 
     def apply_timezone(timestamp)
-      timestamp.in_time_zone(rotation.schedule.timezone)
+      timestamp&.in_time_zone(rotation.schedule.timezone)
     end
   end
 end

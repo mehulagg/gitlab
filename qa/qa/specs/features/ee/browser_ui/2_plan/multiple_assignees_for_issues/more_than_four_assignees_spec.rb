@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan', :reliable do
+  # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+  RSpec.describe 'Plan', :reliable, :requires_admin do
     describe 'Multiple assignees per issue' do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|

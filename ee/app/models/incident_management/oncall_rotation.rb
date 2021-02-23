@@ -22,8 +22,9 @@ module IncidentManagement
     validates :starts_at, presence: true
     validates :length, presence: true, numericality: true
     validates :length_unit, presence: true
+    validate :valid_ends_at, if: -> { ends_at && starts_at }
 
-    scope :started, -> { where('starts_at < ?', Time.current) }
+    scope :in_progress, -> { where('starts_at < :time AND (ends_at > :time OR ends_at IS NULL)', time: Time.current) }
     scope :except_ids, -> (ids) { where.not(id: ids) }
     scope :with_shift_generation_associations, -> do
       joins(:participants, :schedule)
@@ -41,6 +42,12 @@ module IncidentManagement
     def shift_duration
       # As length_unit is an enum, input is guaranteed to be appropriate
       length.public_send(length_unit) # rubocop:disable GitlabSecurity/PublicSend
+    end
+
+    private
+
+    def valid_ends_at
+      errors.add(:ends_at, s_('must be after start')) if ends_at <= starts_at
     end
   end
 end

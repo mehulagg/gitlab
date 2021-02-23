@@ -71,7 +71,7 @@ export default {
         participants: [],
         rotationLength: {
           length: 1,
-          unit: this.$options.LENGTH_ENUM.hours,
+          unit: this.$options.LENGTH_ENUM.days,
         },
         startsAt: {
           date: null,

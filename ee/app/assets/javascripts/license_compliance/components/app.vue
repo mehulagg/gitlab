@@ -96,15 +96,19 @@ export default {
   <gl-empty-state
     v-else-if="hasEmptyState"
     :title="s__('Licenses|View license details for your project')"
-    :description="
-      s__(
-        'Licenses|The license list details information about the licenses used within your project.',
-      )
-    "
     :svg-path="emptyStateSvgPath"
-    :primary-button-link="documentationPath"
-    :primary-button-text="s__('Licenses|Learn more about license compliance')"
-  />
+  >
+    <template #description>
+      {{
+        s__(
+          'Licenses|The license list details information about the licenses used within your project.',
+        )
+      }}
+      <gl-link target="_blank" :href="documentationPath">
+        {{ __('More Information') }}
+      </gl-link>
+    </template>
+  </gl-empty-state>
 
   <div v-else>
     <gl-alert v-if="hasPolicyViolations" class="mt-3" variant="warning" :dismissible="false">

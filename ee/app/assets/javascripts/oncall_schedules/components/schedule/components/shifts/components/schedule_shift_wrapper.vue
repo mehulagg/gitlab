@@ -1,8 +1,8 @@
 <script>
-import { PRESET_TYPES, DAYS_IN_DATE_WEEK } from 'ee/oncall_schedules/constants';
+import { PRESET_TYPES, SHIFT_WIDTH_CALCULATION_DELAY } from 'ee/oncall_schedules/constants';
 import getShiftTimeUnitWidthQuery from 'ee/oncall_schedules/graphql/queries/get_shift_time_unit_width.query.graphql';
-import { getOverlapDateInPeriods, nDaysAfter } from '~/lib/utils/datetime_utility';
 import DaysScheduleShift from './days_schedule_shift.vue';
+import { shiftsToRender } from './shift_utils';
 import WeeksScheduleShift from './weeks_schedule_shift.vue';
 
 export default {
@@ -40,31 +40,26 @@ export default {
   apollo: {
     shiftTimeUnitWidth: {
       query: getShiftTimeUnitWidthQuery,
+      debounce: SHIFT_WIDTH_CALCULATION_DELAY,
     },
   },
   computed: {
-    currentTimeframeEndsAt() {
-      return new Date(
-        nDaysAfter(
+    rotationLength() {
+      const { length, lengthUnit } = this.rotation;
+      return { length, lengthUnit };
+    },
+    shiftsToRender() {
+      return Object.freeze(
+        shiftsToRender(
+          this.rotation.shifts.nodes,
           this.timeframeItem,
-          this.presetType === PRESET_TYPES.DAYS ? 1 : DAYS_IN_DATE_WEEK,
+          this.presetType,
+          this.timeframeIndex,
         ),
       );
     },
-    shiftsToRender() {
-      const validShifts = this.rotation.shifts.nodes.filter(
-        ({ startsAt, endsAt }) => this.shiftRangeOverlap(startsAt, endsAt).hoursOverlap > 0,
-      );
-      // TODO: If week view and on same day, dont show more than 1 assignee or use CSS to limit their size to be readable
-      return Object.freeze(validShifts);
-    },
-  },
-  methods: {
-    shiftRangeOverlap(shiftStartsAt, shiftEndsAt) {
-      return getOverlapDateInPeriods(
-        { start: this.timeframeItem, end: this.currentTimeframeEndsAt },
-        { start: shiftStartsAt, end: shiftEndsAt },
-      );
+    timeframeIndex() {
+      return this.timeframe.indexOf(this.timeframeItem);
     },
   },
 };
@@ -82,6 +77,7 @@ export default {
       :timeframe-item="timeframeItem"
       :timeframe="timeframe"
       :shift-time-unit-width="shiftTimeUnitWidth"
+      :rotation-length="rotationLength"
     />
   </div>
 </template>

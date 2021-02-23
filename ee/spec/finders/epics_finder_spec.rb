@@ -105,6 +105,22 @@ RSpec.describe EpicsFinder do
           it 'returns all epics authored by the given user' do
             expect(epics(author_id: user.id)).to contain_exactly(epic2)
           end
+
+          context 'using OR' do
+            it 'returns all epics authored by any of the given users' do
+              expect(epics(or: { author_username: [epic2.author.username, epic3.author.username] })).to contain_exactly(epic2, epic3)
+            end
+
+            context 'when feature flag is disabled' do
+              before do
+                stub_feature_flags(or_issuable_queries: false)
+              end
+
+              it 'does not add any filter' do
+                expect(epics(or: { author_username: [epic2.author.username, epic3.author.username] })).to contain_exactly(epic1, epic2, epic3)
+              end
+            end
+          end
         end
 
         context 'by label' do

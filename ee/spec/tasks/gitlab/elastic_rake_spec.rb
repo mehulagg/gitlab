@@ -231,4 +231,18 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
       end
     end
   end
+
+  describe 'estimate_cluster_size' do
+    subject { run_rake_task('gitlab:elastic:estimate_cluster_size') }
+
+    before do
+      create(:namespace_root_storage_statistics, repository_size: 1.megabyte)
+      create(:namespace_root_storage_statistics, repository_size: 10.megabyte)
+      create(:namespace_root_storage_statistics, repository_size: 30.megabyte)
+    end
+
+    it 'outputs estimates' do
+      expect { subject }.to output(/your cluster size should be at least 20.5 MB/).to_stdout
+    end
+  end
 end

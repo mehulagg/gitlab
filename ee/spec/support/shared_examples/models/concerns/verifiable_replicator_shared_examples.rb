@@ -457,33 +457,47 @@ RSpec.shared_examples 'a verifiable replicator' do
       end
 
       context 'on a Geo secondary' do
-        let(:registry) { replicator.registry }
-
         before do
           stub_secondary_node
         end
 
-        context 'with a registry which is verified' do
-          it 'sets state to verification_pending' do
-            registry.verification_started
-            registry.verification_succeeded_with_checksum!('foo', Time.current)
+        context 'with a persisted registry' do
+          let(:registry) { replicator.registry }
 
-            expect do
-              replicator.consume_event_checksum_succeeded
-            end.to change { registry.reload.verification_state }
-              .from(verification_state_value(:verification_succeeded))
-              .to(verification_state_value(:verification_pending))
+          before do
+            registry.save!
+          end
+
+          context 'with a registry which is verified' do
+            it 'sets state to verification_pending' do
+              registry.verification_started
+              registry.verification_succeeded_with_checksum!('foo', Time.current)
+
+              expect do
+                replicator.consume_event_checksum_succeeded
+              end.to change { registry.reload.verification_state }
+                .from(verification_state_value(:verification_succeeded))
+                .to(verification_state_value(:verification_pending))
+            end
+          end
+
+          context 'with a registry which is pending verification' do
+            it 'does not change state from verification_pending' do
+              registry.save!
+
+              expect do
+                replicator.consume_event_checksum_succeeded
+              end.not_to change { registry.reload.verification_state }
+                .from(verification_state_value(:verification_pending))
+            end
           end
         end
 
-        context 'with a registry which is pending verification' do
-          it 'does not change state from verification_pending' do
-            registry.save!
+        context 'with an unpersisted registry' do
+          it 'does not persist the registry' do
+            replicator.consume_event_checksum_succeeded
 
-            expect do
-              replicator.consume_event_checksum_succeeded
-            end.not_to change { registry.reload.verification_state }
-              .from(verification_state_value(:verification_pending))
+            expect(replicator.registry.persisted?).to be_falsey
           end
         end
       end

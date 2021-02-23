@@ -51,6 +51,13 @@ RSpec.describe DastSiteProfile, type: :model do
         end
       end
     end
+
+    describe '.with_name' do
+      it 'returns the dast_site_profiles with given name' do
+        result = DastSiteProfile.with_name(subject.name)
+        expect(result).to eq([subject])
+      end
+    end
   end
 
   describe '#destroy!' do

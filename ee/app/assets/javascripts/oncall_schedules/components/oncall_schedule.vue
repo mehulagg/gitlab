@@ -32,6 +32,10 @@ export const i18n = {
   deleteScheduleLabel: s__('OnCallSchedules|Delete schedule'),
   rotationTitle: s__('OnCallSchedules|Rotations'),
   addARotation: s__('OnCallSchedules|Add a rotation'),
+  presetTypeLabels: {
+    DAYS: s__('OnCallSchedules|1 day'),
+    WEEKS: s__('OnCallSchedules|2 weeks'),
+  },
 };
 export const editScheduleModalId = 'editScheduleModal';
 export const deleteScheduleModalId = 'deleteScheduleModal';
@@ -69,6 +73,7 @@ export default {
     rotations: {
       query: getShiftsForRotations,
       variables() {
+        this.timeframeStartDate.setHours(0, 0, 0, 0);
         const startsAt = this.timeframeStartDate;
         const endsAt = nWeeksAfter(startsAt, 2);
 
@@ -191,14 +196,30 @@ export default {
           </gl-button-group>
         </div>
       </template>
-      <p
-        class="gl-text-gray-500 gl-mb-3 gl-display-flex gl-justify-content-space-between gl-align-items-center"
-        data-testid="scheduleBody"
-      >
+      <p class="gl-text-gray-500 gl-mb-3" data-testid="scheduleBody">
         <gl-sprintf :message="$options.i18n.scheduleForTz">
           <template #timezone>{{ schedule.timezone }}</template>
         </gl-sprintf>
         | {{ offset }}
+      </p>
+      <div class="gl-display-flex gl-justify-content-space-between gl-mb-3">
+        <div class="gl-display-flex gl-align-items-center">
+          <gl-button-group>
+            <gl-button
+              data-testid="previous-timeframe-btn"
+              icon="chevron-left"
+              :disabled="loading"
+              @click="updateToViewPreviousTimeframe"
+            />
+            <gl-button
+              data-testid="next-timeframe-btn"
+              icon="chevron-right"
+              :disabled="loading"
+              @click="updateToViewNextTimeframe"
+            />
+          </gl-button-group>
+          <div class="gl-ml-3">{{ scheduleRange }}</div>
+        </div>
         <gl-button-group data-testid="shift-preset-change">
           <gl-button
             v-for="type in $options.PRESET_TYPES"
@@ -207,26 +228,9 @@ export default {
             :title="formatPresetType(type)"
             @click="switchPresetType(type)"
           >
-            {{ formatPresetType(type) }}
+            {{ $options.i18n.presetTypeLabels[type] }}
           </gl-button>
         </gl-button-group>
-      </p>
-      <div class="gl-w-full gl-display-flex gl-align-items-center gl-pb-3">
-        <gl-button-group>
-          <gl-button
-            data-testid="previous-timeframe-btn"
-            icon="chevron-left"
-            :disabled="loading"
-            @click="updateToViewPreviousTimeframe"
-          />
-          <gl-button
-            data-testid="next-timeframe-btn"
-            icon="chevron-right"
-            :disabled="loading"
-            @click="updateToViewNextTimeframe"
-          />
-        </gl-button-group>
-        <p class="gl-ml-3 gl-mb-0">{{ scheduleRange }}</p>
       </div>
 
       <gl-card header-class="gl-bg-transparent">

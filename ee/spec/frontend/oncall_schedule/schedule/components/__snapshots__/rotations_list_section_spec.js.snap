@@ -23,8 +23,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         >
           <button
             aria-label="Edit rotation"
-            class="btn btn-default btn-md disabled gl-button btn-default-tertiary btn-icon"
-            disabled="disabled"
+            class="btn gl-display-none btn-default btn-md gl-button btn-default-tertiary btn-icon"
             title="Edit rotation"
             type="button"
           >
@@ -78,8 +77,8 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
          
         <div>
           <div
-            class="gl-absolute gl-h-7 gl-mt-3 gl-z-index-1 gl-overflow-hidden"
-            style="left: 0px; width: 0px;"
+            class="gl-absolute gl-h-7 gl-mt-3"
+            style="left: 0px; width: -2px;"
           >
             <span
               class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-blue-500"
@@ -89,40 +88,17 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                 class="gl-token-content"
               >
                 <div
-                  class="gl-avatar-labeled"
-                  shape="circle"
-                  size="16"
-                  title="nora.schaden"
+                  class="gl-display-flex gl-text-white gl-font-weight-normal"
                 >
                   <div
                     class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
-                    title="nora.schaden"
                   >
                     
   
 
                   </div>
                    
-                  <div
-                    class="gl-avatar-labeled-labels gl-text-left!"
-                  >
-                    <div
-                      class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
-                    >
-                      <span
-                        class="gl-avatar-labeled-label"
-                      >
-                        nora.schaden
-                      </span>
-                       
-                    </div>
-                     
-                    <span
-                      class="gl-avatar-labeled-sublabel"
-                    >
-                      
-                    </span>
-                  </div>
+                  <!---->
                 </div>
                  
                 <!---->
@@ -149,51 +125,28 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
             </div>
           </div>
           <div
-            class="gl-absolute gl-h-7 gl-mt-3 gl-z-index-1 gl-overflow-hidden"
-            style="left: 2px; width: 0px;"
+            class="gl-absolute gl-h-7 gl-mt-3"
+            style="left: 0px; width: -2px;"
           >
             <span
               class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-orange-500"
-              id="2-18"
+              id="2-17"
             >
               <span
                 class="gl-token-content"
               >
                 <div
-                  class="gl-avatar-labeled"
-                  shape="circle"
-                  size="16"
-                  title="racheal.loving"
+                  class="gl-display-flex gl-text-white gl-font-weight-normal"
                 >
                   <div
                     class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
-                    title="racheal.loving"
                   >
                     
   
 
                   </div>
                    
-                  <div
-                    class="gl-avatar-labeled-labels gl-text-left!"
-                  >
-                    <div
-                      class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
-                    >
-                      <span
-                        class="gl-avatar-labeled-label"
-                      >
-                        racheal.loving
-                      </span>
-                       
-                    </div>
-                     
-                    <span
-                      class="gl-avatar-labeled-sublabel"
-                    >
-                      
-                    </span>
-                  </div>
+                  <!---->
                 </div>
                  
                 <!---->

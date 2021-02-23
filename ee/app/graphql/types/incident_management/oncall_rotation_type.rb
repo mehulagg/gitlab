@@ -23,6 +23,11 @@ module Types
             null: true,
             description: 'Start date of the on-call rotation.'
 
+      field :ends_at,
+            Types::TimeType,
+            null: true,
+            description: 'End date and time of the on-call rotation.'
+
       field :length,
             GraphQL::INT_TYPE,
             null: true,

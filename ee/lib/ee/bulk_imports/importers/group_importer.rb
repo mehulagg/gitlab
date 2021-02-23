@@ -12,7 +12,8 @@ module EE
         def pipelines
           super + [
             EE::BulkImports::Groups::Pipelines::EpicsPipeline,
-            EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline
+            EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline,
+            EE::BulkImports::Groups::Pipelines::EpicEventsPipeline
           ]
         end
       end

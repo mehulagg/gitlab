@@ -163,6 +163,21 @@ namespace :gitlab do
       end
     end
 
+    desc "GitLab | Elasticsearch | Estimate Cluster size"
+    task estimate_cluster_size: :environment do
+      include ActionView::Helpers::NumberHelper
+
+      total_size = Namespace::RootStorageStatistics.sum(:repository_size).to_i
+      total_size_human = number_to_human_size(total_size, delimiter: ',', precision: 1, significant: false)
+
+      estimated_cluster_size = total_size * 0.5
+      estimated_cluster_size_human = number_to_human_size(estimated_cluster_size, delimiter: ',', precision: 1, significant: false)
+
+      puts "This GitLab instance repository size is #{total_size_human}."
+      puts "By our estimates for such repository size, your cluster size should be at least #{estimated_cluster_size_human}.".color(:green)
+      puts 'Please note that it is possible to index only selected namespaces/projects by using Elasticsearch indexing restrictions.'
+    end
+
     def project_id_batches(&blk)
       relation = Project.all
 

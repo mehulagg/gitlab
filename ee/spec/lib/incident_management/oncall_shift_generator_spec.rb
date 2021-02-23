@@ -142,6 +142,49 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
            [:participant3, '2021-01-02 00:00:00 UTC', '2021-01-07 00:00:00 UTC'],
            [:participant1, '2021-01-07 00:00:00 UTC', '2021-01-12 00:00:00 UTC']]
       end
+
+      context 'with rotation end time' do
+        let(:equal_to) { rotation_end_time }
+        let(:less_than) { 10.minutes.before(rotation_end_time) }
+        let(:greater_than) { 10.minutes.after(rotation_end_time) }
+        let(:well_past) { shift_length.after(rotation_end_time) }
+
+        before do
+          rotation.update!(ends_at: rotation_end_time)
+        end
+
+        context 'when the rotation end time coincides with a shift end' do
+          let(:rotation_end_time) { rotation_start_time + (shift_length * 3) }
+
+          [:equal_to, :less_than, :greater_than, :well_past].each do |scenario|
+            context "when end time is #{scenario} the rotation end time" do
+              let(:ends_at) { send(scenario) }
+
+              it_behaves_like 'unsaved shifts',
+                '3 shifts of 5 days which ends at the rotation end time',
+                [[:participant1, '2020-12-08 00:00:00 UTC', '2020-12-13 00:00:00 UTC'],
+                 [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC'],
+                 [:participant3, '2020-12-18 00:00:00 UTC', '2020-12-23 00:00:00 UTC']]
+            end
+          end
+        end
+
+        context 'when the rotation end time is partway through a shift' do
+          let(:rotation_end_time) { rotation_start_time + (shift_length * 2.5) }
+
+          [:equal_to, :less_than, :greater_than, :well_past].each do |scenario|
+            context "when end time is #{scenario} the rotation end time" do
+              let(:ends_at) { send(scenario) }
+
+              it_behaves_like 'unsaved shifts',
+                '2 shifts of 5 days and one partial shift which ends at the rotation end time',
+                [[:participant1, '2020-12-08 00:00:00 UTC', '2020-12-13 00:00:00 UTC'],
+                 [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC'],
+                 [:participant3, '2020-12-18 00:00:00 UTC', '2020-12-20 12:00:00 UTC']]
+            end
+          end
+        end
+      end
     end
 
     context 'in timezones with daylight-savings' do
@@ -696,6 +739,34 @@ RSpec.describe IncidentManagement::OncallShiftGenerator do
         it_behaves_like 'unsaved shift',
           'the shift during which the timestamp occurs',
           [:participant2, '2020-12-13 00:00:00 UTC', '2020-12-18 00:00:00 UTC']
+      end
+
+      context 'with rotation end time' do
+        let(:rotation_end_time) { rotation_start_time + (shift_length * 2.5) }
+
+        before do
+          rotation.update!(ends_at: rotation_end_time)
+        end
+
+        context 'when timestamp matches rotation end time' do
+          let(:timestamp) { rotation_end_time }
+
+          it { is_expected.to be_nil }
+        end
+
+        context 'when timestamp is before rotation end time' do
+          let(:timestamp) { 10.minutes.before(rotation_end_time) }
+
+          it_behaves_like 'unsaved shift',
+            'the shift during which the timestamp occurs',
+            [:participant3, '2020-12-18 00:00:00 UTC', '2020-12-20 12:00:00 UTC']
+        end
+
+        context 'when timestamp is at rotation end time' do
+          let(:timestamp) { 10.minutes.after(rotation_end_time) }
+
+          it { is_expected.to be_nil }
+        end
       end
     end
   end
