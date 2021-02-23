@@ -16,6 +16,7 @@ import {
   MAX_SEGMENTS,
   DATE_TIME_FORMAT,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
+  POLLING_INTERVAL,
 } from '../constants';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
@@ -61,6 +62,7 @@ export default {
   apollo: {
     devopsAdoptionSegments: {
       query: devopsAdoptionSegmentsQuery,
+      pollInterval: POLLING_INTERVAL,
       error(error) {
         this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.segments, error);
       },

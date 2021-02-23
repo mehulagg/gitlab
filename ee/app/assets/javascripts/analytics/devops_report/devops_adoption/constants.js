@@ -1,5 +1,7 @@
 import { s__, __, sprintf } from '~/locale';
 
+export const POLLING_INTERVAL = 10000;
+
 export const MAX_SEGMENTS = 30;
 
 export const MAX_REQUEST_COUNT = 10;
