@@ -40,7 +40,6 @@ describe('RepoTab', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders a close link and a name link', () => {

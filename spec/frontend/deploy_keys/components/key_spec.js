@@ -28,7 +28,6 @@ describe('Deploy keys key', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('enabled key', () => {

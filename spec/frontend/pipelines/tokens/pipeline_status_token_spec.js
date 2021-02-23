@@ -41,7 +41,6 @@ describe('Pipeline Status Token', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('passes config correctly', () => {

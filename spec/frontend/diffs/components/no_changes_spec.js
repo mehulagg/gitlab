@@ -37,7 +37,6 @@ describe('Diff no changes empty state', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findMessage = () => wrapper.find('[data-testid="no-changes-message"]');

@@ -7,7 +7,6 @@ describe('Learn GitLab Design A', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const createWrapper = () => {

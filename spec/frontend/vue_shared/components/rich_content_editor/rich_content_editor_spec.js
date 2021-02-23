@@ -50,7 +50,6 @@ describe('Rich Content Editor', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when content is loaded', () => {

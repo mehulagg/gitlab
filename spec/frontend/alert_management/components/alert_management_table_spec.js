@@ -72,7 +72,6 @@ describe('AlertManagementTable', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
     mock.restore();
   });

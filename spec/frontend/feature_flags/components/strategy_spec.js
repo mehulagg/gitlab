@@ -46,7 +46,6 @@ describe('Feature flags strategy', () => {
   ) => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
     wrapper = mount(Strategy, { localVue, store: createStore({ projectId: '1' }), ...opts });
   };
@@ -58,7 +57,6 @@ describe('Feature flags strategy', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

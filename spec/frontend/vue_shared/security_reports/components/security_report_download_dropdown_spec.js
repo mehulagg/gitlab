@@ -17,7 +17,6 @@ describe('SecurityReportDownloadDropdown component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('given report artifacts', () => {

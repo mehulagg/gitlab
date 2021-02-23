@@ -21,7 +21,6 @@ describe('Metadata Item', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findIcon = () => wrapper.find(GlIcon);

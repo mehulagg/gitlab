@@ -60,7 +60,6 @@ describe('Details Header', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('has the correct title ', () => {

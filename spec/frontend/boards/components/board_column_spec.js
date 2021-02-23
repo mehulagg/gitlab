@@ -12,7 +12,6 @@ describe('Board Column Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const createComponent = ({ listType = ListType.backlog, collapsed = false } = {}) => {

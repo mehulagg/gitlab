@@ -37,7 +37,6 @@ describe('Pipelines stage component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
 
     eventHub.$emit.mockRestore();
     mock.restore();

@@ -39,7 +39,6 @@ describe('PypiInstallation', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders all the messages', () => {

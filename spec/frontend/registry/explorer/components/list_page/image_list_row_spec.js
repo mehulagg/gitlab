@@ -48,7 +48,6 @@ describe('Image List Row', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('main tooltip', () => {

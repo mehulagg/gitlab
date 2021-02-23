@@ -18,7 +18,6 @@ describe('IssuableAssignees', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when no assignees are present', () => {

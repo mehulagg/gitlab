@@ -51,7 +51,6 @@ describe('AddIssuableForm', () => {
 
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

@@ -38,7 +38,6 @@ describe('Edit Form Buttons', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when isLoading', () => {

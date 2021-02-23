@@ -34,7 +34,6 @@ describe('Deploy freeze table', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('dispatches fetchFreezePeriods when mounted', () => {

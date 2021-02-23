@@ -26,7 +26,6 @@ describe('Release block milestone info', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const milestoneProgressBarContainer = () => wrapper.find('.js-milestone-progress-bar-container');

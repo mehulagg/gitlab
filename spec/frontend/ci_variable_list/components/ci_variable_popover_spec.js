@@ -26,7 +26,6 @@ describe('Ci Variable Popover', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('displays max count plus ... when character count is over 95', () => {

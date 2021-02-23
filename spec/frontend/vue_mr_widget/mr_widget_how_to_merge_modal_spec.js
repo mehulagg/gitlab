@@ -19,7 +19,6 @@ describe('MRWidgetHowToMerge', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   beforeEach(() => {

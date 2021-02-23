@@ -40,7 +40,6 @@ describe('navigation tabs component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render tabs', () => {

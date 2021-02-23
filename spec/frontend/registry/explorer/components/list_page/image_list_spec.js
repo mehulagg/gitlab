@@ -23,7 +23,6 @@ describe('Image List', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('list', () => {

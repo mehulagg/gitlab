@@ -40,7 +40,6 @@ describe('Pipeline Url Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render a table cell', () => {

@@ -20,7 +20,6 @@ describe('~/boards/components/sidebar/board_sidebar_labels_select.vue', () => {
   afterEach(() => {
     wrapper.destroy();
     store = null;
-    wrapper = null;
   });
 
   const createWrapper = ({ labels = [] } = {}) => {

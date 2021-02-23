@@ -70,7 +70,6 @@ describe('sidebar labels', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('LabelsSelect props', () => {

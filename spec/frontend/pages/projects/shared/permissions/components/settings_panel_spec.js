@@ -101,7 +101,6 @@ describe('Settings Panel', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('Project Visibility', () => {

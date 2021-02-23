@@ -66,7 +66,6 @@ describe('CustomNotificationsModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     mockAxios.restore();
   });
 

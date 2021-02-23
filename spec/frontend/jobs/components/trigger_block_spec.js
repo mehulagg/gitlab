@@ -22,7 +22,6 @@ describe('Trigger block', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with short token and no variables', () => {

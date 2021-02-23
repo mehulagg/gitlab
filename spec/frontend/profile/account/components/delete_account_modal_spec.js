@@ -42,7 +42,6 @@ describe('DeleteAccountModal component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     vm = null;
   });
 

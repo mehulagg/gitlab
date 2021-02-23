@@ -24,7 +24,6 @@ describe('EmptyTagsState component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('contains gl-empty-state', () => {

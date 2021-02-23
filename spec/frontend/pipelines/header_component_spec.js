@@ -66,7 +66,6 @@ describe('Pipeline details header', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('initial loading', () => {

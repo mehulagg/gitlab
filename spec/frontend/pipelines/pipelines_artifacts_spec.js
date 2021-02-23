@@ -31,7 +31,6 @@ describe('Pipelines Artifacts dropdown', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render a dropdown with all the provided artifacts', () => {

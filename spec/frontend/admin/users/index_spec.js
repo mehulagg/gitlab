@@ -21,7 +21,6 @@ describe('initAdminUsersApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     el.remove();
     el = null;
   });

@@ -54,7 +54,6 @@ describe('AppComponent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   beforeEach(() => {

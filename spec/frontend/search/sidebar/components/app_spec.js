@@ -34,7 +34,6 @@ describe('GlobalSearchSidebar', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findSidebarForm = () => wrapper.find('form');

@@ -53,7 +53,6 @@ describe('Actions menu', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('add metric item', () => {

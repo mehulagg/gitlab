@@ -31,7 +31,6 @@ describe('Project Feature Settings', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('Hidden name input', () => {

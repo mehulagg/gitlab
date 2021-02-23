@@ -30,7 +30,6 @@ describe('Pipelines Table Row', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render a table row', () => {

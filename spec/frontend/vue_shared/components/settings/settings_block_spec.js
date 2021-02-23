@@ -18,7 +18,6 @@ describe('Settings Block', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findDefaultSlot = () => wrapper.find('[data-testid="default-slot"]');

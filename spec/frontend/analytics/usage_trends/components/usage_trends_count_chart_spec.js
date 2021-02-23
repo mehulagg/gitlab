@@ -47,7 +47,6 @@ describe('UsageTrendsCountChart', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findLoader = () => wrapper.find(ChartSkeletonLoader);

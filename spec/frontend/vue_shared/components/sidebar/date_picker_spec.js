@@ -6,9 +6,6 @@ describe('SidebarDatePicker', () => {
   let wrapper;
 
   const mountComponent = (propsData = {}, data = {}) => {
-    if (wrapper) {
-      throw new Error('tried to call mountComponent without d');
-    }
     wrapper = mount(SidebarDatePicker, {
       stubs: {
         DatePicker: true,
@@ -20,7 +17,6 @@ describe('SidebarDatePicker', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should emit toggleCollapse when collapsed toggle sidebar is clicked', () => {

@@ -27,7 +27,6 @@ describe('Delete Modal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('contains a GlModal', () => {

@@ -86,7 +86,6 @@ describe('Milestone combobox component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   //

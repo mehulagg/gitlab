@@ -41,7 +41,6 @@ describe('validation directive', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const getFormData = () => wrapper.vm.form;

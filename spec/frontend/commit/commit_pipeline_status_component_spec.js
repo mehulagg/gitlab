@@ -42,7 +42,6 @@ describe('Commit pipeline status component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('Visibility management', () => {

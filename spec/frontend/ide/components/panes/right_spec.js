@@ -32,7 +32,6 @@ describe('ide/components/panes/right.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('pipelines tab', () => {

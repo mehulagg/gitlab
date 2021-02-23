@@ -21,7 +21,6 @@ describe('Delete alert', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when deleteAlertType is null', () => {

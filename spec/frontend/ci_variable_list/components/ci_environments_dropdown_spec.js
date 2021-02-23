@@ -36,7 +36,6 @@ describe('Ci environments dropdown', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('No environments found', () => {

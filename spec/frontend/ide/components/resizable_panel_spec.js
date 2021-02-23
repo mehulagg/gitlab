@@ -21,7 +21,6 @@ describe('~/ide/components/resizable_panel', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const createComponent = (props = {}) => {

@@ -38,7 +38,6 @@ describe('InviteMembersBanner', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     unmockTracking();
   });
 

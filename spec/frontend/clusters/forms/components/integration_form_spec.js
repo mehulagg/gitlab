@@ -29,16 +29,11 @@ describe('ClusterIntegrationForm', () => {
     });
   };
 
-  const destroyWrapper = () => {
-    wrapper.destroy();
-    wrapper = null;
-  };
-
   const findSubmitButton = () => wrapper.find(GlButton);
   const findGlToggle = () => wrapper.find(GlToggle);
 
   afterEach(() => {
-    destroyWrapper();
+    wrapper.destroy();
   });
 
   describe('rendering', () => {

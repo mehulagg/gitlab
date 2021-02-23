@@ -7,7 +7,6 @@ describe('CI Icon component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render a span element with an svg', () => {

@@ -94,7 +94,6 @@ describe('Incidents List', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

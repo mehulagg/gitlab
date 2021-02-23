@@ -47,7 +47,6 @@ describe('~/static_site_editor/components/edit_meta_controls.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders the title input', () => {

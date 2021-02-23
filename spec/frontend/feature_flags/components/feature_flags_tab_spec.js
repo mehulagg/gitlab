@@ -52,8 +52,6 @@ describe('feature_flags/components/feature_flags_tab.vue', () => {
     if (wrapper?.destroy) {
       wrapper.destroy();
     }
-
-    wrapper = null;
   });
 
   describe('alerts', () => {

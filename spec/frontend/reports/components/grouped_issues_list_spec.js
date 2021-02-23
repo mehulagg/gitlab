@@ -17,7 +17,6 @@ describe('Grouped Issues List', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders a smart virtual list with the correct props', () => {

@@ -53,7 +53,6 @@ describe('stage column component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when mounted', () => {

@@ -74,7 +74,6 @@ describe('Manage Sast Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render Button with correct text', () => {

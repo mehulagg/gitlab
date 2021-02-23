@@ -28,7 +28,6 @@ describe('pipeline graph component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with no data', () => {

@@ -32,7 +32,6 @@ describe('Sidebar details block', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

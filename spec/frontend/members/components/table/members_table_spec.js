@@ -70,7 +70,6 @@ describe('MembersTable', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('fields', () => {

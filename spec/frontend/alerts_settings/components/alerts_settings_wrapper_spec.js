@@ -116,7 +116,6 @@ describe('AlertsSettingsWrapper', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('rendered via default permissions', () => {

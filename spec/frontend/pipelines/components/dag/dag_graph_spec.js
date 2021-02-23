@@ -38,7 +38,6 @@ describe('The DAG graph', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('in the basic case', () => {

@@ -43,7 +43,6 @@ describe('CompareVersions', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('template', () => {

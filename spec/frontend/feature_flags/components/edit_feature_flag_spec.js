@@ -28,7 +28,6 @@ describe('Edit feature flag form', () => {
   const factory = (opts = {}) => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
     wrapper = shallowMount(EditFeatureFlag, {
       localVue,

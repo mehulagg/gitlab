@@ -31,7 +31,6 @@ describe('tooltips/components/tooltips.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('addTooltips', () => {

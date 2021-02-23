@@ -21,7 +21,6 @@ describe('static_site_editor/components/app', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('passes merge request illustration path to the router view component', () => {

@@ -84,7 +84,6 @@ describe('Board card layout', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     list = null;
     mock.restore();
   });

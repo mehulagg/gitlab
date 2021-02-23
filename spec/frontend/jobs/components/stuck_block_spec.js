@@ -8,7 +8,6 @@ describe('Stuck Block Job component', () => {
   afterEach(() => {
     if (wrapper?.destroy) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

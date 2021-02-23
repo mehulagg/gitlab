@@ -32,7 +32,6 @@ describe('StatusFilter', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findRadioFilter = () => wrapper.find(RadioFilter);

@@ -40,7 +40,6 @@ describe('releases/components/tag_field_existing', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default', () => {

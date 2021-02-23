@@ -26,7 +26,6 @@ describe('~/static_site_editor/components/edit_drawer.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders the GlDrawer', () => {

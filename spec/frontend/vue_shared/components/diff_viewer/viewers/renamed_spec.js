@@ -44,7 +44,6 @@ describe('Renamed Diff Viewer', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

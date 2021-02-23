@@ -18,7 +18,6 @@ describe('DropdownTitleComponent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('template', () => {

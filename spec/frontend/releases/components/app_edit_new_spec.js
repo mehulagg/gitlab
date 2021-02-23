@@ -85,7 +85,6 @@ describe('Release edit/new component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findSubmitButton = () => wrapper.find('button[type=submit]');

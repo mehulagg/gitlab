@@ -32,7 +32,6 @@ describe('Pipelines Actions dropdown', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
 
     mock.restore();
   });

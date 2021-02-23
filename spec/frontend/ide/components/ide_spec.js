@@ -40,7 +40,6 @@ describe('WebIDE', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('ide component, empty repo', () => {

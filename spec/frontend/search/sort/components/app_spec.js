@@ -41,7 +41,6 @@ describe('GlobalSearchSort', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findSortButtonGroup = () => wrapper.find(GlButtonGroup);

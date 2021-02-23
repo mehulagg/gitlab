@@ -37,7 +37,6 @@ describe('Ide File Row component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findFileRowExtra = () => wrapper.find(FileRowExtra);

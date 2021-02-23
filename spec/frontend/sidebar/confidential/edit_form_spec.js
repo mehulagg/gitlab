@@ -19,7 +19,6 @@ describe('Edit Form Dropdown', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when not confidential', () => {

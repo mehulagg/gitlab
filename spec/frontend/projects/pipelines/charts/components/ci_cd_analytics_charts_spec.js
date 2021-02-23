@@ -40,7 +40,6 @@ describe('~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue', ()
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

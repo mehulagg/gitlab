@@ -46,7 +46,6 @@ describe('Report section', () => {
     }
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

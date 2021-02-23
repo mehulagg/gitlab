@@ -39,7 +39,6 @@ describe('~/releases/components/releases_sort.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   beforeEach(() => {

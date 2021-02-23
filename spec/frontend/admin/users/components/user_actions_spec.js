@@ -32,7 +32,6 @@ describe('AdminUserActions component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('edit button', () => {

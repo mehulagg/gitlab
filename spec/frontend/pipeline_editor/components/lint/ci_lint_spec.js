@@ -27,7 +27,6 @@ describe('~/pipeline_editor/components/lint/ci_lint.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('Valid Results', () => {

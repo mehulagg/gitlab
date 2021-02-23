@@ -30,7 +30,6 @@ describe('Package Files', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('rows', () => {

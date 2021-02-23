@@ -93,7 +93,6 @@ describe('MembersTableCell', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   test.each`

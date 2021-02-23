@@ -30,7 +30,6 @@ describe('InviteMemberModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findLink = () => wrapper.find(GlLink);

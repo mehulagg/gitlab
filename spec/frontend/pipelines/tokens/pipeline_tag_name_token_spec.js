@@ -53,7 +53,6 @@ describe('Pipeline Branch Name Token', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('passes config correctly', () => {

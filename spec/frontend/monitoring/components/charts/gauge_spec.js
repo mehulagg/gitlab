@@ -23,7 +23,6 @@ describe('Gauge Chart component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('chart component', () => {

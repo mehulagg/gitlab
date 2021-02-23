@@ -86,7 +86,6 @@ describe('diffs/components/app', () => {
     // reset component
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
 
     mock.restore();

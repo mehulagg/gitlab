@@ -53,7 +53,6 @@ describe('~/static_site_editor/pages/success.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when savedContentMeta is valid', () => {

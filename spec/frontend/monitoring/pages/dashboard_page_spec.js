@@ -40,7 +40,6 @@ describe('monitoring/pages/dashboard_page', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

@@ -17,7 +17,6 @@ describe('PipelineFailed', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render error message with a disabled merge button', () => {

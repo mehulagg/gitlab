@@ -14,7 +14,6 @@ describe('Experimental new project creation app', () => {
   afterEach(() => {
     wrapper.destroy();
     window.location.hash = '';
-    wrapper = null;
   });
 
   describe('with empty hash', () => {

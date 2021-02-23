@@ -65,7 +65,6 @@ describe('Release edit component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with a basic store state', () => {

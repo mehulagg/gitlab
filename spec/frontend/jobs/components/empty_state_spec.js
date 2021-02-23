@@ -32,7 +32,6 @@ describe('Empty State', () => {
   afterEach(() => {
     if (wrapper?.destroy) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

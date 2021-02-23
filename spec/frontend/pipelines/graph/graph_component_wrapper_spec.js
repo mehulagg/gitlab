@@ -49,7 +49,6 @@ describe('Pipeline graph wrapper', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when data is loading', () => {

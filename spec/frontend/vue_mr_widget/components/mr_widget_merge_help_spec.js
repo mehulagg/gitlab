@@ -15,7 +15,6 @@ describe('MRWidgetMergeHelp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with missing branch', () => {

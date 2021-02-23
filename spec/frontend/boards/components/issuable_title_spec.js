@@ -20,7 +20,6 @@ describe('IssuableTitle', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders a title of an issue in the sidebar', () => {

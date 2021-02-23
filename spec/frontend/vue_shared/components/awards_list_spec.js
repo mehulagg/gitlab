@@ -48,14 +48,9 @@ describe('vue_shared/components/awards_list', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const createComponent = (props = {}) => {
-    if (wrapper) {
-      throw new Error('There should only be one wrapper created per test');
-    }
-
     wrapper = mount(AwardsList, { propsData: props });
   };
   const matchingEmojiTag = (name) => expect.stringMatching(`gl-emoji data-name="${name}"`);

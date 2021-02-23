@@ -40,7 +40,6 @@ describe('JiraIssuesImportStatus', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when Jira import is not in progress', () => {

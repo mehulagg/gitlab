@@ -9,7 +9,6 @@ describe('Comment Field Layout Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const LOCKED_DISCUSSION_DOCS_PATH = 'docs/locked/path';

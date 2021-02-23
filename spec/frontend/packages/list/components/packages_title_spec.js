@@ -23,7 +23,6 @@ describe('PackageTitle', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('title area', () => {

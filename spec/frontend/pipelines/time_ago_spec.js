@@ -20,7 +20,6 @@ describe('Timeago component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const duration = () => wrapper.find('.duration');

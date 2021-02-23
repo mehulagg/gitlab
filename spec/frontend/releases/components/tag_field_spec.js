@@ -26,7 +26,6 @@ describe('releases/components/tag_field', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when an existing release is being edited', () => {

@@ -71,7 +71,6 @@ describe('InviteMembersModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findDropdown = () => wrapper.findComponent(GlDropdown);

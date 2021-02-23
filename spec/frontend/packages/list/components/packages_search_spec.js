@@ -42,7 +42,6 @@ describe('Package Search', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('has a registry search component', () => {

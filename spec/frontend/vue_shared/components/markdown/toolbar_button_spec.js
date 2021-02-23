@@ -21,7 +21,6 @@ describe('toolbar_button', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const getButtonShortcutsAttr = () => {

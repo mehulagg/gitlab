@@ -28,7 +28,6 @@ describe('PDF renderer', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('shows loading icon', () => {

@@ -43,7 +43,6 @@ describe('Deploy freeze modal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('Basic interactions', () => {

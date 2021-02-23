@@ -44,7 +44,6 @@ describe('UsersChart', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findLoader = () => wrapper.find(ChartSkeletonLoader);

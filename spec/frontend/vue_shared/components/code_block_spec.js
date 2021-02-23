@@ -19,7 +19,6 @@ describe('Code Block', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with default props', () => {

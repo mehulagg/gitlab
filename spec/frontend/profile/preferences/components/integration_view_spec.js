@@ -48,7 +48,6 @@ describe('IntegrationView component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render the title correctly', () => {

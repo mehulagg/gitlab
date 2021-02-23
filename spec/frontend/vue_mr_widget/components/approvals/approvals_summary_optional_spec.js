@@ -15,7 +15,6 @@ describe('MRWidget approvals summary optional', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findHelpLink = () => wrapper.find(GlLink);

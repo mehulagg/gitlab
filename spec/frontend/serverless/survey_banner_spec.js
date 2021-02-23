@@ -16,7 +16,6 @@ describe('Knative survey banner', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render the banner when the cookie is absent', () => {

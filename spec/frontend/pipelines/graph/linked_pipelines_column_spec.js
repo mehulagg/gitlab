@@ -58,7 +58,6 @@ describe('Linked Pipelines Column', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('it renders correctly', () => {

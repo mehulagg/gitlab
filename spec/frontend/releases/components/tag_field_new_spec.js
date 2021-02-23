@@ -43,7 +43,6 @@ describe('releases/components/tag_field_new', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findTagNameFormGroup = () => wrapper.find('[data-testid="tag-name-field"]');

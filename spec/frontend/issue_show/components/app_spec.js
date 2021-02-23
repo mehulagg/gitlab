@@ -94,7 +94,6 @@ describe('Issuable output', () => {
 
     wrapper.vm.poll.stop();
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('should render a title/description/edited and update title/description/edited on update', () => {

@@ -31,7 +31,6 @@ describe('Dismissible Feedback Alert', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findAlert = () => wrapper.find(GlAlert);

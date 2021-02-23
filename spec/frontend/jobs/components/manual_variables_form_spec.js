@@ -32,7 +32,6 @@ describe('Manual Variables Form', () => {
     // to wait for those to finish before destroying.
     setImmediate(() => {
       wrapper.destroy();
-      wrapper = null;
 
       done();
     });

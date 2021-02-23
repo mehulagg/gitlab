@@ -121,7 +121,6 @@ describe('Details Page', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when isLoading is true', () => {

@@ -30,7 +30,6 @@ describe('feature_highlight/feature_highlight_popover', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders popover target', () => {

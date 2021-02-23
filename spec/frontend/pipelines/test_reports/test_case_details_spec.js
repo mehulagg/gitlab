@@ -40,7 +40,6 @@ describe('Test case details', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('required details', () => {

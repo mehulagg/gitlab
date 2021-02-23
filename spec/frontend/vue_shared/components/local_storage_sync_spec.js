@@ -15,7 +15,6 @@ describe('Local Storage Sync', () => {
     if (wrapper) {
       wrapper.destroy();
     }
-    wrapper = null;
     localStorage.clear();
   });
 

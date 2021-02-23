@@ -22,7 +22,6 @@ describe('DetailsRow', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('has a default slot', () => {

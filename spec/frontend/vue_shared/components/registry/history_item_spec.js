@@ -24,7 +24,6 @@ describe('History Item', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findTimelineEntry = () => wrapper.find(TimelineEntryItem);

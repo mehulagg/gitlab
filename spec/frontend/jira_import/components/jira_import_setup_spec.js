@@ -19,7 +19,6 @@ describe('JiraImportSetup', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('contains illustration', () => {

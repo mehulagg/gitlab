@@ -34,10 +34,6 @@ describe('Interval Pattern Input Component', () => {
   const selectCustomRadio = () => findCustomRadio().trigger('click');
 
   const createWrapper = (props = {}, data = {}) => {
-    if (wrapper) {
-      throw new Error('A wrapper already exists');
-    }
-
     wrapper = mount(IntervalPatternInput, {
       propsData: { ...props },
       data() {
@@ -62,7 +58,6 @@ describe('Interval Pattern Input Component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     window.gl = oldWindowGl;
   });
 

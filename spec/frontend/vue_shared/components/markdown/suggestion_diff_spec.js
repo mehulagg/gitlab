@@ -63,7 +63,6 @@ describe('Suggestion Diff component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('matches snapshot', () => {

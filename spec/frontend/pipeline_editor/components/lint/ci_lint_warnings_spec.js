@@ -23,7 +23,6 @@ describe('CI lint warnings', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('displays the warning alert', () => {

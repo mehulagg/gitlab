@@ -119,7 +119,6 @@ describe('StatesTable', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it.each`

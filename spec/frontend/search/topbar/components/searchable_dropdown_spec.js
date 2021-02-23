@@ -40,7 +40,6 @@ describe('Global Search Searchable Dropdown', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findGlDropdown = () => wrapper.find(GlDropdown);

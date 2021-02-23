@@ -64,7 +64,6 @@ describe('~/static_site_editor/components/edit_meta_modal.vue', () => {
     mockAxios.restore();
 
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('initializes initial merge request meta with local storage data', async () => {

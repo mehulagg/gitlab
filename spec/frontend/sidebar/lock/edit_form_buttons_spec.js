@@ -52,7 +52,6 @@ describe('EditFormButtons', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe.each`

@@ -52,7 +52,6 @@ describe('Pipeline Trigger Author Token', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('passes config correctly', () => {

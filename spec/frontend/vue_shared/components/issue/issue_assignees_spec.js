@@ -23,7 +23,6 @@ describe('IssueAssigneesComponent', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findTooltipText = () => wrapper.find('.js-assignee-tooltip').text();

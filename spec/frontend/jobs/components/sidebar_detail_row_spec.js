@@ -21,7 +21,6 @@ describe('Sidebar detail row', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with title/value and without helpUrl', () => {

@@ -65,7 +65,6 @@ describe('RepoCommitSection', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('empty state', () => {

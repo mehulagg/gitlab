@@ -27,7 +27,6 @@ describe('UsageCounts', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findMetricCard = () => wrapper.find(MetricCard);

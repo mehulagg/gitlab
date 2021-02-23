@@ -74,7 +74,6 @@ describe('packages_list', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when is loading', () => {

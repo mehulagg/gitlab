@@ -30,7 +30,6 @@ describe('Maven Settings', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findTitle = () => wrapper.find('h5');

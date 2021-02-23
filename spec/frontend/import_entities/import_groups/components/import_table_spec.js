@@ -54,7 +54,6 @@ describe('import table', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders loading icon while performing request', async () => {
