@@ -122,7 +122,7 @@ module Security
 
       get_matched_findings = lambda {
         project.vulnerability_findings.where(**find_params).filter do |vf|
-          vf.matches_fingerprints(normalized_fingerprints)
+          vf.matches_fingerprints(normalized_fingerprints, finding.uuid)
         end
       }
       matched_findings = get_matched_findings.call

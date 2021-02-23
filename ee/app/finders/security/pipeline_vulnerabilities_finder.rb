@@ -122,16 +122,16 @@ module Security
       end
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def dismissal_feedback_by_finding_fingerprints(finding)
-      potential_uuids = finding.fingerprint_uuids
-      matching_feedbacks = pipeline.project
-        .vulnerability_feedback
-        .for_dismissal
-        .where(finding_uuid: potential_uuids)
-      !matching_feedbacks.empty?
+      all_dismissals = strong_memoize(:all_dismissal_feedbacks) do
+        pipeline.project
+                .vulnerability_feedback
+                .for_dismissal
+      end
+
+      potential_uuids = Set.new([*finding.fingerprint_uuids, finding.uuid].compact)
+      all_dismissals.any? { |dismissal| potential_uuids.include?(dismissal.finding_uuid) }
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     def dismissal_feedback_by_project_fingerprint(finding)
       dismissal_feedback_by_fingerprint[finding.project_fingerprint]
