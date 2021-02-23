@@ -485,7 +485,7 @@ the list by filtering by the following:
 
 ### Remove an issue from a list
 
-> - [Removed](https://gitlab.com/gitlab-org/gitlab/-/issues/229507) in GitLab 13.9
+> - [Removed](https://gitlab.com/gitlab-org/gitlab/-/issues/229507) in GitLab 13.10
 
 Removing an issue from a list can be done by clicking the issue card and then
 clicking the **Remove from board** button in the sidebar. The
