@@ -46,7 +46,7 @@ module API
           if obj_or_collection.is_a?(Enumerable)
             cached_collection(obj_or_collection, presenter: with, presenter_args: presenter_args, context: cache_context)
           else
-            cached_object(obj_or_colletion, presenter: with, presenter_args: presenter_args, context: cache_context)
+            cached_object(obj_or_collection, presenter: with, presenter_args: presenter_args, context: cache_context)
           end
 
         body Gitlab::Json::PrecompiledJson.new(json)

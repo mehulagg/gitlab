@@ -101,4 +101,15 @@ RSpec.describe Gitlab::Git::Tag, :seed_helper do
       end
     end
   end
+
+  describe "#cache_key" do
+    subject { repository.tags.first }
+
+    it "returns a cache key that changes based on changeable values" do
+      expect(subject).to receive(:name).and_return("v1.0.0")
+      expect(subject).to receive(:target).and_return(repository.commit.sha)
+
+      expect(subject.cache_key).to eq("tag:v1.0.0:#{repository.commit.sha}")
+    end
+  end
 end

@@ -87,10 +87,6 @@ module Gitlab
         end
       end
 
-      def protected?
-        ProtectedTag.protected?(options[:project], name)
-      end
-
       def cache_key
         "tag:#{name}:#{target}"
       end
