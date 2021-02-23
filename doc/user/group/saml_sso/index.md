@@ -363,7 +363,7 @@ is linked as `Guest` and another `Maintainer`, a user in both groups gets `Maint
 access.
 
 If a user is not a member of any of the mapped SAML groups, they will be removed from the GitLab group. For example, if you are using
-group links to assign `Owner` level access in a top-level group, you should also have a catch-all group link to ensure users are not 
+group links to assign `Owner` level access in a top-level group, you should also have a group for the rest of your members to ensure users are not 
 accidentally removed for not having a mapped SAML group.
 
 ## Glossary
