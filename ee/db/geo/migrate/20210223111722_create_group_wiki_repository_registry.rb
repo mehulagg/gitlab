@@ -19,7 +19,7 @@ class CreateGroupWikiRepositoryRegistry < ActiveRecord::Migration[6.0]
       t.boolean :force_to_redownload
       t.boolean :missing_on_primary
 
-      t.index :group_wiki_repository_id, name: :index_group_wiki_repository_registry_on_group_wiki_repository_id, unique: true
+      t.index :group_wiki_repository_id, name: :index_g_wiki_repository_registry_on_group_wiki_repository_id, unique: true
       t.index :retry_at
       t.index :state
     end
