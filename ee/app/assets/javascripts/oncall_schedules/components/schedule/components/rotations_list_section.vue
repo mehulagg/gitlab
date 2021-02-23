@@ -152,11 +152,11 @@ export default {
             <gl-button
               v-gl-modal="$options.editRotationModalId"
               v-gl-tooltip
-              class="gl-display-none"
               category="tertiary"
               :title="$options.i18n.editRotationLabel"
               icon="pencil"
               :aria-label="$options.i18n.editRotationLabel"
+              @click="setRotationToUpdate(rotation)"
             />
             <gl-button
               v-gl-modal="$options.deleteRotationModalId"
