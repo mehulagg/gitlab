@@ -202,13 +202,21 @@ module Gitlab
       end
     end
 
+    # Wrapper class used to skip JSON dumping on Grape endpoints.
+
     class PrecompiledJson
       UnsupportFormatError = Class.new(StandardError)
 
+      # @overload PrecompiledJson.new("foo")
+      #   @param value [String]
+      #
+      # @overload PrecompiledJson.new(["foo", "bar"])
+      #   @param value [Array<String>]
       def initialize(value)
         @value = value
       end
 
+      # @return [String]
       def to_s
         return @value if @value.is_a?(String)
         return "[#{@value.join(',')}]" if @value.is_a?(Array)
