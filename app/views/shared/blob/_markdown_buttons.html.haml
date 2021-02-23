@@ -16,7 +16,10 @@
                               data: { "md-tag" => "[{text}](url)", "md-select" => "url", "md-shortcuts": '["mod+k"]' },
                               title: sprintf(s_("MarkdownEditor|Add a link (%{modifier_key}K)") % { modifier_key: modifier_key }) })
 
-  = markdown_toolbar_button({ icon: "chevron-right", data: { "md-tag" => "<details><summary>Click to expand!</summary></details>", "md-prepend" => true }, title: _("Add a collapsible section") })
+  = markdown_toolbar_button({ icon: "chevron-right", 
+                              data: { "md-tag" => "<details><summary>Click to expand</summary>\n{text}\n</details>", "md-prepend" => true, "md-select" => "Click to expand" },
+                              title: _("Add a collapsible section") })
+
   = markdown_toolbar_button({ icon: "list-bulleted", data: { "md-tag" => "- ", "md-prepend" => true }, title: _("Add a bullet list") })
   = markdown_toolbar_button({ icon: "list-numbered", data: { "md-tag" => "1. ", "md-prepend" => true }, title: _("Add a numbered list") })
   = markdown_toolbar_button({ icon: "list-task", data: { "md-tag" => "- [ ] ", "md-prepend" => true }, title: _("Add a task list") })
