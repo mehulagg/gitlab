@@ -44,7 +44,8 @@ export default {
     },
   },
   data() {
-    return { searchTerm: '', showForm: false };
+    return { searchTerm: '', showForm: false, isNew: false };
+    showForm = true;
   },
   computed: {
     selectedProfile() {
@@ -60,6 +61,14 @@ export default {
     },
     filteredProfilesEmpty() {
       return this.filteredProfiles.length === 0;
+    },
+  },
+  methods: {
+    onFormSuccess(profile) {
+      this.selectedProfile = profile;
+    },
+    onFormCancel() {
+      this.showForm = false;
     },
   },
 };
@@ -109,7 +118,13 @@ export default {
           {{ __('No matching results...') }}
         </div>
         <template #footer>
-          <gl-dropdown-item :href="newProfilePath" data-testid="create-profile-option">
+          <gl-dropdown-item
+            data-testid="create-profile-option"
+            @click="
+              isNew = true;
+              showForm = true;
+            "
+          >
             <slot name="new-profile"></slot>
           </gl-dropdown-item>
           <gl-dropdown-item :href="libraryPath" data-testid="manage-profiles-option">
@@ -132,7 +147,14 @@ export default {
           class="gl-absolute gl-right-7"
           @click="showForm = true"
         />
-        <slot v-if="showForm" name="profile-form" :profile="selectedProfile"></slot>
+        <slot
+          v-if="showForm"
+          name="profile-form"
+          :profile="selectedProfile"
+          :isNew="isNew"
+          :onSuccess="onFormSuccess"
+          :onCancel="onFormCancel"
+        ></slot>
         <slot v-else name="summary"></slot>
       </div>
     </gl-form-group>
@@ -141,10 +163,14 @@ export default {
         <slot name="no-profiles"></slot>
       </p>
       <gl-button
-        :href="newProfilePath"
         variant="success"
         category="secondary"
         data-testid="create-profile-link"
+        @click="
+          isNew = true;
+          showForm = true;
+          showForm = true;
+        "
       >
         <slot name="new-profile"></slot>
       </gl-button>

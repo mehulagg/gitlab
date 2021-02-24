@@ -67,11 +67,12 @@ export default {
     <template #summary>
       <slot name="summary"></slot>
     </template>
-    <template #profile-form="{ profile }">
+    <template #profile-form="{ profile, onSuccess, onCancel }">
       <dast-scanner-profile-form
         :project-full-path="projectPath"
-        :on-demand-scans-path="onDemandScansPath"
         :profile="profile"
+        @success="onSuccess"
+        @cancel="onCancel"
       ></dast-scanner-profile-form>
     </template>
   </profile-selector>

@@ -53,7 +53,7 @@ export default {
       default: '',
     },
     onDemandScansPath: {
-      // can be removed
+      // Todo: It can be removed
       type: String,
       required: false,
       default: '',
@@ -201,8 +201,8 @@ export default {
           ({
             data: {
               [this.isEdit ? 'dastScannerProfileUpdate' : 'dastScannerProfileCreate']: {
-                id,
                 errors = [],
+                ...profileFields
               },
             },
           }) => {
@@ -210,7 +210,8 @@ export default {
               this.showErrors(errors);
               this.loading = false;
             } else {
-              this.returnToPreviousPage(id);
+              this.$emit('success', profileFields);
+              // this.returnToPreviousPage(id);
             }
           },
         )
@@ -228,7 +229,8 @@ export default {
       }
     },
     discard() {
-      this.returnToPreviousPage();
+      this.$emit('cancel');
+      // this.returnToPreviousPage();
     },
     showErrors(errors = []) {
       this.errors = errors;
