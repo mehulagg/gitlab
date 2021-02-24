@@ -12,14 +12,14 @@ module Gitlab
             @fingerprint_value = params.dig(:fingerprint_value)
           end
 
-          def fingerprint_sha256
-            Digest::SHA256.digest(fingerprint_value)
+          def fingerprint_sha
+            Digest::SHA1.digest(fingerprint_value)
           end
 
           def to_h
             {
               algorithm_type: algorithm_type,
-              fingerprint_sha256: fingerprint_sha256
+              fingerprint_sha: fingerprint_sha
             }
           end
 
