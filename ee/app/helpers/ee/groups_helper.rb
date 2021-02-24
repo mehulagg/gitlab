@@ -151,6 +151,10 @@ module EE
         links << :group_ci_cd_analytics
       end
 
+      if ::Feature.enabled?(:group_devops_adoption_flag, @group, default_enabled: :yaml) && @group.feature_available?(:group_devops_adoption) && can?(current_user, :view_group_devops_adoption, @group)
+        links << :group_devops_adoption
+      end
+
       links
     end
   end

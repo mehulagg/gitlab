@@ -151,6 +151,7 @@ class License < ApplicationRecord
     evaluate_group_level_compliance_pipeline
     group_ci_cd_analytics
     group_level_compliance_dashboard
+    group_devops_adoption
     incident_management
     insights
     issuable_health_status

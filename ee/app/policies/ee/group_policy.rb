@@ -37,6 +37,10 @@ module EE
         @subject.feature_available?(:group_activity_analytics)
       end
 
+      condition(:group_devops_adoption_available) do
+        @subject.feature_available?(:group_devops_adoption)
+      end
+
       condition(:dora4_analytics_available) do
         @subject.feature_available?(:dora4_analytics)
       end
@@ -169,6 +173,9 @@ module EE
       rule { has_access & group_activity_analytics_available }
         .enable :read_group_activity_analytics
 
+      rule { has_access & group_devops_adoption_available }
+        .enable :read_group_devops_adoption
+
       rule { reporter & dora4_analytics_available }
         .enable :read_dora4_analytics
 
@@ -184,6 +191,10 @@ module EE
 
       rule { reporter & group_ci_cd_analytics_available }.policy do
         enable :view_group_ci_cd_analytics
+      end
+
+      rule { reporter & group_devops_adoption_available }.policy do
+        enable :view_group_devops_adoption
       end
 
       rule { owner & ~has_parent & prevent_group_forking_available }.policy do
