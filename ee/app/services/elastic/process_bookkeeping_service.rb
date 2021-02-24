@@ -3,7 +3,7 @@
 module Elastic
   class ProcessBookkeepingService
     LIMIT = 10_000
-    SHARDS = 16
+    SHARDS = 0.upto(16).to_a
 
     class << self
       def redis_set_key(shard_number)
@@ -21,34 +21,45 @@ module Elastic
 
         items.map! { |item| ::Gitlab::Elastic::DocumentReference.serialize(item) }
 
+        grouped_items = items.group_by { |item| Elastic::BookkeepingShardService.shard_number(number_of_shards: SHARDS, data: item) }
+
         with_redis do |redis|
-          # Efficiently generate a guaranteed-unique score for each item
-          max = redis.incrby(self::REDIS_SCORE_KEY, items.size)
-          min = (max - items.size) + 1
+          grouped_items.each do |shard_number, shard_items|
+            # Efficiently generate a guaranteed-unique score for each item
+            max = redis.incrby(redis_score_key(shard_number), shard_items.size)
+            min = (max - shard_items.size) + 1
 
-          (min..max).zip(items).each_slice(1000) do |group|
-            logger.debug(class: self.name,
-                         redis_set: self::REDIS_SET_KEY,
-                         message: 'track_items',
-                         count: group.count,
-                         tracked_items_encoded: group.to_json)
+            (min..max).zip(shard_items).each_slice(1000) do |group|
+              logger.debug(class: self.name,
+                          redis_set: redis_set_key(shard_number),
+                          message: 'track_items',
+                          count: group.count,
+                          tracked_items_encoded: group.to_json)
 
-            redis.zadd(self::REDIS_SET_KEY, group)
+              redis.zadd(redis_set_key(shard_number), group)
+            end
           end
         end
 
         true
       end
 
-      # TODO: Adapt for many shards
       def queue_size
-        with_redis { |redis| redis.zcard(self::REDIS_SET_KEY) }
+        with_redis do |redis|
+          counts = SHARDS.map do |shard_number|
+            redis.zcard(redis_set_key(shard_number))
+          end
+
+          counts.sum
+        end
       end
 
       def clear_tracking!
         with_redis do |redis|
           Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
-            redis.unlink(self::REDIS_SET_KEY, self::REDIS_SCORE_KEY)
+            keys = SHARDS.map { |m| [redis_set_key(m), redis_score_key(m)] }.flatten
+
+            redis.unlink(*keys)
           end
         end
       end
@@ -94,9 +105,7 @@ module Elastic
     private
 
     def each_shard
-      0.upto(SHARDS - 1).each do |shard_number|
-        yield self.class.redis_set_key(shard_number), self.class.redis_score_key(shard_number)
-      end
+      self.class.each_shard
     end
 
     def execute_with_redis(redis)
