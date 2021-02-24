@@ -117,6 +117,23 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
           MergeRequests::UpdateService.new(project, user, opts).execute(draft_merge_request)
         end
+
+        it 'tracks time estimate and spend time changes' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_time_estimate_edit_action).once.with(user: user)
+
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_spend_time_edit_action).once.with(user: user)
+
+          opts[:time_estimate] = 86400
+          opts[:spend_time] = {
+            duration: 3600,
+            user_id: user.id,
+            spent_at: Date.parse('2021-02-24')
+          }
+
+          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+        end
       end
 
       context 'updating milestone' do
