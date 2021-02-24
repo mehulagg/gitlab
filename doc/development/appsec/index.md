@@ -26,7 +26,7 @@ the feature categories in the [Secure](https://about.gitlab.com/stages-devops-li
   - `AppSec::LicenseCompliance`: License Compliance code.
   - `AppSec::Sast`: SAST code.
   - `AppSec::SecretDetection`: Secret Detection code.
-  - `AppSec::Vulnerabilities`: Vulnerability Management code.
+  - `AppSec::VulnMgmt`: Vulnerability Management code.
 
 Most AppSec code does not conform to these namespace guidelines. When developing, make an effort
 to move existing code into the appropriate namespace whenever possible.
