@@ -18,6 +18,8 @@ query ListEpics(
               node {
                 ...EpicNode
                 relativePosition
+                referencePath: reference(full: true)
+                confidential
                 labels {
                   nodes {
                     ...Label

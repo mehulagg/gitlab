@@ -1,20 +1,20 @@
 import { GlLabel } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import IssueCardWeight from 'ee/boards/components/issue_card_weight.vue';
-import IssueCardInner from '~/boards/components/issue_card_inner.vue';
+import BoardCardInner from '~/boards/components/board_card_inner.vue';
 import defaultStore from '~/boards/stores';
 
-describe('Issue card component', () => {
+describe('Board card component', () => {
   let wrapper;
   let issue;
   let list;
 
   const createComponent = (props = {}, store = defaultStore) => {
-    wrapper = shallowMount(IssueCardInner, {
+    wrapper = shallowMount(BoardCardInner, {
       store,
       propsData: {
         list,
-        issue,
+        item: issue,
         ...props,
       },
       provide: {

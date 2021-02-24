@@ -3,8 +3,8 @@ import { isNumber } from 'lodash';
 export default {
   computed: {
     validIssueWeight() {
-      if (this.issue && isNumber(this.issue.weight)) {
-        return this.issue.weight >= 0;
+      if (this.item && isNumber(this.item.weight)) {
+        return this.item.weight >= 0;
       }
 
       return false;
