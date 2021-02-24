@@ -25,7 +25,8 @@ module Elastic
         # do not add the permission fields unless the `remove_permissions_data_from_notes_documents`
         # migration has completed otherwise the migration will never finish
         if Elastic::DataMigrationService.migration_has_finished?(:remove_permissions_data_from_notes_documents)
-          data['visibility_level'] = target.project.visibility_level
+          # default to PRIVATE if project is missing
+          data['visibility_level'] = target.project&.visibility_level || Gitlab::VisibilityLevel::PRIVATE
           merge_project_feature_access_level(data, noteable)
         end
 

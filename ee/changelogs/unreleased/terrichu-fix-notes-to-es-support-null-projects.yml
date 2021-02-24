@@ -1,0 +1,5 @@
+---
+title: Default note visibility_level to private if project missing
+merge_request: 55111
+author:
+type: fixed

@@ -54,9 +54,11 @@ module Elastic
       nil
     end
 
-    # protect against missing project_feature and set visibility to PRIVATE
+    # protect against missing project and project_feature and set visibility to PRIVATE
     # if the project_feature is missing on a project
     def safely_read_project_feature_for_elasticsearch(feature)
+      return unless target.project
+
       if target.project.project_feature
         target.project.project_feature.access_level(feature)
       else

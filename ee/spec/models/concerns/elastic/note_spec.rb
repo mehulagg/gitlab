@@ -128,6 +128,15 @@ RSpec.describe Note, :elastic do
       expect { note.__elasticsearch__.as_indexed_json }.not_to raise_error
     end
 
+    it 'defaults to Gitlab::VisibilityLevel::PRIVATE when notes are missing project reference' do
+      note = create(:note_on_issue)
+      allow(note).to receive(:project).and_return(nil)
+      note_json = note.__elasticsearch__.as_indexed_json
+
+      expect(note_json).to have_key('visibility_level')
+      expect(note_json['visibility_level']).to eq(Gitlab::VisibilityLevel::PRIVATE)
+    end
+
     where(:note_type, :permission, :access_level) do
       :note_on_issue                              | ProjectFeature::ENABLED      | 'issues_access_level'
       :note_on_project_snippet                    | ProjectFeature::DISABLED     | 'snippets_access_level'
