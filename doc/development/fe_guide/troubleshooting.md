@@ -48,12 +48,23 @@ When trying to render our gitlab-ui component GlFilteredSearch, I was getting an
 
 `cannot read suggestionsListClass of undefined`
 
-Apparently, vue-apollo will try to merge provide in the before create method, but when referencing props in the provide function, it doesnt seem to have access to either `this` or props.
+Currently, `vue-apollo` tries to [manually call a component's `provide()` in the `beforeCreate` part](https://github.com/vuejs/vue-apollo/blob/35e27ec398d844869e1bbbde73c6068b8aabe78a/packages/vue-apollo/src/mixin.js#L149) of the component lifecycle. This means that when a `provide()` references props, which aren't actually setup until after `created`, it will blow up.
 
-This closed MR provides more context https://gitlab.com/gitlab-org/gitlab-ui/-/merge_requests/2019
+See this [closed MR](https://gitlab.com/gitlab-org/gitlab-ui/-/merge_requests/2019#note_514671251) for more context.
 
-#### Solution
+**Remedy - try providing `apolloProvider` to the top-level Vue instance options**
 
-Currently, it seems the best solution would be to contribute upstream to VueApollo. But if you come across this issue, it can be solved by adding an `apolloProvider: {}` to the component mount function. (We understand this is ideal but resolves the error temporarily)
+VueApollo will skip manually running `provide()` if it sees that an `apolloProvider` is provided in the `$options`.
+
+```patch
+  new Vue(
+    el,
++   apolloProvider: {},
+    render(h) {
+      return h(App);
+    },
+  );
+```
+
 
 
