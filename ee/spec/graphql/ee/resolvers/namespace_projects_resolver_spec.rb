@@ -78,12 +78,13 @@ RSpec.describe Resolvers::NamespaceProjectsResolver do
     end
   end
 
-  def resolve_projects(has_vulnerabilities: false, sort: :similarity, has_code_coverage: false)
+  def resolve_projects(has_vulnerabilities: false, sort: :similarity, ids: nil, has_code_coverage: false)
     args = {
       include_subgroups: false,
       has_vulnerabilities: has_vulnerabilities,
       sort: sort,
       search: nil,
+      ids: nil,
       has_code_coverage: has_code_coverage
     }
 
