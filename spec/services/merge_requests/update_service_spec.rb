@@ -117,6 +117,28 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
           MergeRequests::UpdateService.new(project, user, opts).execute(draft_merge_request)
         end
+
+        it 'tracks discussion locking' do
+          merge_request.update!(discussion_locked: false)
+
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_discussion_locked_action).once.with(user: user)
+
+          opts[:discussion_locked] = true
+
+          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+        end
+
+        it 'tracks dicussion unlocking' do
+          merge_request.update!(discussion_locked: true)
+
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_discussion_unlocked_action).once.with(user: user)
+
+          opts[:discussion_locked] = false
+
+          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+        end
       end
 
       context 'updating milestone' do
