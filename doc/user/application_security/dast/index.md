@@ -245,6 +245,9 @@ tips for optimizing DAST scans in a [blog post](https://about.gitlab.com/blog/20
 
 #### Domain validation
 
+WARNING:
+In GitLab 13.8, domain validation, outside of the new on-demand scan site profile validation, was deprecated. In GitLab 14.0, domain validation in CI/CD jobs will be permanently removed.
+
 The DAST job can be run anywhere, which means you can accidentally hit live web servers
 and potentially damage them. You could even take down your production environment.
 For that reason, you should use domain validation.
