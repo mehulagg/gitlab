@@ -9,7 +9,7 @@ type: index, dev, reference
 
 Development guides that are specific to the stages that work on Application Security features are listed here.
 
-If you are looking for how to use those features, that documentation can be found [here](../../user/application_security/index.md).
+Please go to [Application Security](../../user/application_security/index.md) if you are looking for documentation on how to use those features.
 
 ## Namespaces
 
@@ -28,5 +28,5 @@ the feature categories in the [Secure](https://about.gitlab.com/stages-devops-li
   - `AppSec::SecretDetection`: Secret Detection code.
   - `AppSec::Vulnerabilities`: Vulnerability Management code.
 
-At the time of writing, most AppSec code does not conform to these namespace guidelines. When developing, make an effort
+Most AppSec code does not conform to these namespace guidelines. When developing, make an effort
 to move existing code into the appropriate namespace whenever possible.
