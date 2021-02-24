@@ -23131,6 +23131,8 @@ CREATE INDEX index_projects_api_vis20_updated_at ON projects USING btree (update
 
 CREATE INDEX index_projects_on_created_at_and_id ON projects USING btree (created_at, id);
 
+CREATE INDEX index_projects_on_created_at_and_import_type ON projects USING btree (import_type, created_at);
+
 CREATE INDEX index_projects_on_creator_id_and_created_at_and_id ON projects USING btree (creator_id, created_at, id);
 
 CREATE INDEX index_projects_on_creator_id_and_id ON projects USING btree (creator_id, id);
