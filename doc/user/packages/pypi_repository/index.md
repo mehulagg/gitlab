@@ -320,6 +320,8 @@ To install the latest version of a package, use the following command:
 pip install --index-url https://__token__:<personal_access_token>@gitlab.example.com/api/v4/projects/<project_id>/packages/pypi/simple --no-deps <package_name>
 ```
 
+**Note**: the difference between `--extra-index-url` and `--index-url` is on how the client will handle requests to the packages registries URLs. `--extra-index-url` adds the provided URL as an additional registry to which the client will check if the package is present. While the later tells the client to check for the package on the provided url only. 
+
 - `<package_name>` is the package name.
 - `<personal_access_token>` is a personal access token with the `read_api` scope.
 - `<project_id>` is the project ID.
