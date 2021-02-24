@@ -123,6 +123,34 @@ latest versions of the scanning tools without having to do anything. There are s
 with this approach, however, and there is a
 [plan to resolve them](https://gitlab.com/gitlab-org/gitlab/-/issues/9725).
 
+## Viewing security scan jobs in the pipeline
+
+### What does it mean when my Application Security testing job succeeds or fails?
+
+In 14.0 all secure analysers standardized on a new [secure exit code](https://docs.gitlab.com/ee/development/integrations/secure.html#exit-code) so that all Secure analyzers exit with `exit_code` 6 when the **job runs successfully, but findings are identified**. Our research showed that the expectation was that a `pass` meant that both the analyzer ran successfully, and there were no findings. As a result of this research we changed our analyzers to match the expected behaviour.
+
+If you see a green check mark - your Secure job has run sucessfully and has not identified any findings.
+
+insert image
+
+If you see a wanrning (!) or an error (X) you can mouse over the icon in the pipeline to see a tooltip, and click the job if you want to see the specific exit code.
+
+insert image
+
+The default analyzer templates and AutoDevOps as of 14.0 are configured to ['allow_failure:exit_codes'](https://docs.gitlab.com/ee/ci/yaml/#allow_failureexit_codes) for exit code 6 so that you will see the warning icon for jobs that run successfully and have findings, and so that it does not fail your pipeline.
+
+This change was made because we recommend that you do not fail your pipeline as a result of a secure job running successfully and identifying findings. If you wish to restrict the merging of code with findings, we recommend enforcing thuis by utilizing our [secure merge request approvals](https://docs.gitlab.com/ee/user/application_security/index.html#security-approvals-in-merge-requests), which is a specific rule subset of subset of GitLab's [merge request approval](https://docs.gitlab.com/ee/user/project/merge_requests/merge_request_approvals.html) functionality.
+
+If you wish for more granular policy and rule enforcement than is available through our exit codes and secure merge request approvals, you should review the upcoming features in the [Security Orchestration category](https://about.gitlab.com/direction/protect/security_orchestration/).
+
+If you wish to modify your pipelines so that your pipeline does fail when findings are identified remove the following lines from the analyzers you wish to apply this change of behaviour to:
+
+```
+allow_failure:
+    exit_codes: 137
+```
+You can read more about [configuring any jobs utilizing exit codes in our documentation](https://docs.gitlab.com/ee/ci/yaml/#allow_failureexit_codes).
+
 ## Viewing security scan information in merge requests **(FREE)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4393) in GitLab Free 13.5.
