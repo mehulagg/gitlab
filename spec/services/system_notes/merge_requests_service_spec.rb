@@ -189,7 +189,7 @@ RSpec.describe ::SystemNotes::MergeRequestsService do
         subject { service.change_branch('target', 'delete', old_branch, new_branch) }
 
         it 'sets the note text' do
-          expect(subject.note).to eq "changed automatically target branch to `#{new_branch}` because `#{old_branch}` was deleted"
+          expect(subject.note).to eq "retargeted the target branch to `#{new_branch}` because `#{old_branch}` was deleted"
         end
       end
 
