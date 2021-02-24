@@ -94,6 +94,14 @@ class Environment < ApplicationRecord
   end
   scope :for_id, -> (id) { where(id: id) }
 
+  enum tier: {
+    production: 0,
+    staging: 1,
+    testing: 2,
+    development: 3,
+    unknown: 4,
+  }
+
   state_machine :state, initial: :available do
     event :start do
       transition stopped: :available
@@ -255,6 +263,10 @@ class Environment < ApplicationRecord
 
     stop!
     stop_action&.play(current_user)
+  end
+
+  def try_initialize_tier
+    self.tier ||= guess_tier
   end
 
   def reset_auto_stop
@@ -428,6 +440,16 @@ class Environment < ApplicationRecord
 
   def generate_slug
     self.slug = Gitlab::Slug::Environment.new(name).generate
+  end
+
+  def guess_tier
+    case name
+    when %r{dev|review}i then tiers[:development]
+    when %r{test}i then tiers[:testing]
+    when %r{st(a|)g}i then tiers[:staging]
+    when %r{pr(o|)d}i then tiers[:production]
+    else tiers[:unknown]
+    end
   end
 end
 

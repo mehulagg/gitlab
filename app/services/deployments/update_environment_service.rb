@@ -30,6 +30,7 @@ module Deployments
         end
 
         renew_auto_stop_in
+        environment.try_initialize_tier
         environment.fire_state_event(action)
 
         if environment.save && !environment.stopped?
