@@ -33,7 +33,7 @@ export const i18n = {
     rotationLength: {
       title: s__('OnCallSchedules|Rotation length'),
       description: s__(
-        'OnCallSchedules|Please note, rotations with shifts that are less than four hours are currently not supported in the weekly view.',
+        'OnCallSchedules|Please note, rotations with shifts that are less than three hours are currently not supported in the weekly view.',
       ),
     },
     startsAt: {
