@@ -72,6 +72,7 @@ class GfmAutoComplete {
   }
 
   setup(input, enableMap = defaultAutocompleteConfig) {
+    console.log('[gfm_auto_complete] setup');
     // Add GFM auto-completion to all input fields, that accept GFM input.
     this.input = input || $('.js-gfm-input');
     this.enableMap = enableMap;
@@ -190,6 +191,7 @@ class GfmAutoComplete {
   }
 
   setupEmoji($input) {
+    console.log('[gfm_auto_complete] setupEmoji');
     const fetchData = this.fetchData.bind(this);
 
     // Emoji
@@ -202,12 +204,14 @@ class GfmAutoComplete {
       callbacks: {
         ...this.getDefaultCallbacks(),
         matcher(flag, subtext) {
+          console.log('[gfm_auto_complete] setupEmoji matcher');
           const regexp = new RegExp(`(?:[^${glRegexp.unicodeLetters}0-9:]|\n|^):([^:]*)$`, 'gi');
           const match = regexp.exec(subtext);
 
           return match && match.length ? match[1] : null;
         },
         filter(query, items) {
+          console.log('[gfm_auto_complete] setupEmoji filter');
           if (GfmAutoComplete.isLoading(items)) {
             fetchData(this.$inputor, this.at);
             return items;
@@ -665,7 +669,9 @@ class GfmAutoComplete {
     } else if (this.cachedData[at]) {
       this.loadData($input, at, this.cachedData[at]);
     } else if (GfmAutoComplete.atTypeMap[at] === 'emojis') {
-      this.loadEmojiData($input, at).catch(() => {});
+      this.loadEmojiData($input, at).catch((e) => {
+        console.error(e);
+      });
     } else if (dataSource) {
       AjaxCache.retrieve(dataSource, true)
         .then((data) => {

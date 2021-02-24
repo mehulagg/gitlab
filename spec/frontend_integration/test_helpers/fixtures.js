@@ -50,3 +50,4 @@ export const getBlobZip = factory.binary(() => require('test_fixtures/blob/binar
 export const getBlobImage = factory.binary(() =>
   require('test_fixtures/blob/images/logo-white.png'),
 );
+export const getEmojis = factory.json(() => require('./fixtures/emojis.json'));

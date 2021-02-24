@@ -12,20 +12,24 @@ export const EMOJI_VERSION = '1';
 const isLocalStorageAvailable = AccessorUtilities.isLocalStorageAccessSafe();
 
 async function loadEmoji() {
+  console.log('load emoji???');
   if (
     isLocalStorageAvailable &&
     window.localStorage.getItem('gl-emoji-map-version') === EMOJI_VERSION &&
     window.localStorage.getItem('gl-emoji-map')
   ) {
+    console.log('[emoji] loadEmoji isLocalStorage');
     return JSON.parse(window.localStorage.getItem('gl-emoji-map'));
   }
 
+  console.log('[emoji] loadEmoji before axios.get');
   // We load the JSON file direct from the server
   // because it can't be loaded from a CDN due to
   // cross domain problems with JSON
   const { data } = await axios.get(
     `${gon.relative_url_root || ''}/-/emojis/${EMOJI_VERSION}/emojis.json`,
   );
+  console.log(data);
   window.localStorage.setItem('gl-emoji-map-version', EMOJI_VERSION);
   window.localStorage.setItem('gl-emoji-map', JSON.stringify(data));
   return data;
