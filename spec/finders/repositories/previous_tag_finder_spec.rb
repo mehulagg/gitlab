@@ -24,7 +24,9 @@ RSpec.describe Repositories::PreviousTagFinder do
         expect(finder.execute('1.5.0')).to eq(tag2)
         expect(finder.execute('1.0.1')).to eq(tag1)
         expect(finder.execute('1.0.0')).to eq(tag4)
-        expect(finder.execute('0.9.0')).to eq(tag5)
+
+        # pre release tags are ignored.
+        expect(finder.execute('0.9.0')).to be_nil
       end
     end
 
