@@ -3225,6 +3225,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | `avatarUrl` | String | URL to avatar image file of the project. |
 | `board` | Board | A single board of the project. |
 | `boards` | BoardConnection | Boards of the project. |
+| `branches` | BranchConnection | Branches available in this project. |
 | `ciCdSettings` | ProjectCiCdSetting | CI/CD settings for the project. |
 | `clusterAgent` | ClusterAgent | Find a single cluster agent by name. |
 | `clusterAgents` | ClusterAgentConnection | Cluster agents associated with the project. |

@@ -331,6 +331,18 @@ module Types
           description: 'Pipeline analytics.',
           resolver: Resolvers::ProjectPipelineStatisticsResolver
 
+    field :labels,
+          Types::LabelType.connection_type,
+          null: true,
+          description: 'Labels available on this project.',
+          resolver: Resolvers::LabelsResolver
+
+    field :branches,
+          Types::BranchType.connection_type,
+          null: true,
+          calls_gitaly: true,
+          description: 'Branches available in this project.'
+
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|
         LabelsFinder
@@ -339,12 +351,6 @@ module Types
           .each { |label| loader.call(label.title, label) }
       end
     end
-
-    field :labels,
-          Types::LabelType.connection_type,
-          null: true,
-          description: 'Labels available on this project.',
-          resolver: Resolvers::LabelsResolver
 
     def avatar_url
       object.avatar_url(only_path: false)
@@ -370,6 +376,10 @@ module Types
       return unless Ability.allowed?(current_user, :download_code, object)
 
       ::Security::CiConfiguration::SastParserService.new(object).configuration
+    end
+
+    def branches
+      project.repository.branches
     end
 
     private
