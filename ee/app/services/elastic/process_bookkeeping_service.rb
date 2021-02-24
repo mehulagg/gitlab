@@ -102,41 +102,43 @@ module Elastic
     def execute_with_redis(redis)
       start_time = Time.current
 
-      specs = redis.zrangebyscore(self.class::REDIS_SET_KEY, '-inf', '+inf', limit: [0, LIMIT], with_scores: true)
-      return 0 if specs.empty?
+      each_shard do |redis_set_key, redis_score_key|
+        specs = redis.zrangebyscore(redis_set_key, '-inf', '+inf', limit: [0, LIMIT], with_scores: true)
+        next 0 if specs.empty?
 
-      first_score = specs.first.last
-      last_score = specs.last.last
+        first_score = specs.first.last
+        last_score = specs.last.last
 
-      logger.info(
-        message: 'bulk_indexing_start',
-        records_count: specs.count,
-        first_score: first_score,
-        last_score: last_score
-      )
+        logger.info(
+          message: 'bulk_indexing_start',
+          records_count: specs.count,
+          first_score: first_score,
+          last_score: last_score
+        )
 
-      refs = deserialize_all(specs)
-      refs.preload_database_records.each { |ref| submit_document(ref) }
-      failures = bulk_indexer.flush
+        refs = deserialize_all(specs)
+        refs.preload_database_records.each { |ref| submit_document(ref) }
+        failures = bulk_indexer.flush
 
-      # Re-enqueue any failures so they are retried
-      self.class.track!(*failures) if failures.present?
+        # Re-enqueue any failures so they are retried
+        self.class.track!(*failures) if failures.present?
 
-      # Remove all the successes
-      redis.zremrangebyscore(self.class::REDIS_SET_KEY, first_score, last_score)
+        # Remove all the successes
+        redis.zremrangebyscore(redis_set_key, first_score, last_score)
 
-      records_count = specs.count
+        records_count = specs.count
 
-      logger.info(
-        message: 'bulk_indexing_end',
-        records_count: records_count,
-        failures_count: failures.count,
-        first_score: first_score,
-        last_score: last_score,
-        bulk_execution_duration_s: Time.current - start_time
-      )
+        logger.info(
+          message: 'bulk_indexing_end',
+          records_count: records_count,
+          failures_count: failures.count,
+          first_score: first_score,
+          last_score: last_score,
+          bulk_execution_duration_s: Time.current - start_time
+        )
 
-      records_count
+        records_count
+      end
     end
 
     def deserialize_all(specs)
