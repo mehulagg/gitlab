@@ -27,6 +27,10 @@ export default {
       type: String,
       required: true,
     },
+    editFrameworkPath: {
+      type: String,
+      required: true,
+    },
     emptyStateSvgPath: {
       type: String,
       required: true,
@@ -152,6 +156,7 @@ export default {
         <list-item
           v-for="framework in complianceFrameworks"
           :key="framework.parsedId"
+          :edit-framework-path="editFrameworkPath"
           :framework="framework"
           :loading="isDeleting(framework)"
           @delete="markForDeletion"

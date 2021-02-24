@@ -49,6 +49,7 @@ describe('List', () => {
       apolloProvider: createMockApolloProvider(resolverMock),
       propsData: {
         addFrameworkPath: 'group/framework/new',
+        editFrameworkPath: 'group/framework/id/edit',
         emptyStateSvgPath: 'dir/image.svg',
         groupPath: 'group-1',
       },

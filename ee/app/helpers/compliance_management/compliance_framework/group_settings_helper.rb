@@ -11,17 +11,22 @@ module ComplianceManagement
         {
           empty_state_svg_path: image_path('illustrations/welcome/ee_trial.svg'),
           group_path: @group.full_path,
-          add_framework_path: new_group_compliance_framework_path(@group)
+          add_framework_path: new_group_compliance_framework_path(@group),
+          edit_framework_path: edit_group_compliance_framework_path(@group, :id)
         }
       end
 
-      def compliance_frameworks_new_form_data
-        {
+      def compliance_frameworks_form_data
+        data = {
           group_path: @group.full_path,
           group_edit_path: edit_group_path(@group, anchor: 'js-compliance-frameworks-settings'),
           graphql_field_name: ComplianceManagement::Framework.name,
           pipeline_configuration_full_path_enabled: pipeline_configuration_full_path_enabled?.to_s
         }
+
+        return data unless params[:id].present?
+
+        data.merge!({ framework_id: params[:id] })
       end
 
       private

@@ -4,7 +4,7 @@ export const DANGER = 'danger';
 export const INFO = 'info';
 
 export const FETCH_ERROR = s__(
-  'ComplianceFrameworks|Error fetching compliance frameworks data. Please refresh the page',
+  'ComplianceFrameworks|Error fetching compliance frameworks data. Please refresh the page or try a different framework',
 );
 
 export const SAVE_ERROR = s__(
