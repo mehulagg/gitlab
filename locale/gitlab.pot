@@ -16929,6 +16929,9 @@ msgstr ""
 msgid "JiraService|An error occurred while fetching issue list"
 msgstr ""
 
+msgid "JiraService|Automatically transitions Jira issues to the \"Done\" category. %{linkStart}Learn more%{linkEnd}"
+msgstr ""
+
 msgid "JiraService|Define the type of Jira issue to create from a vulnerability."
 msgstr ""
 
@@ -16983,7 +16986,7 @@ msgstr ""
 msgid "JiraService|Jira project key"
 msgstr ""
 
-msgid "JiraService|Jira workflow transition IDs"
+msgid "JiraService|Move to Done"
 msgstr ""
 
 msgid "JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}."
@@ -17004,7 +17007,7 @@ msgstr ""
 msgid "JiraService|Select issue type"
 msgstr ""
 
-msgid "JiraService|Set transition IDs for Jira workflow transitions. %{link_start}Learn more%{link_end}"
+msgid "JiraService|Set a custom final state by using transition IDs. %{linkStart}Learn about transition IDs%{linkEnd}"
 msgstr ""
 
 msgid "JiraService|Sign in to GitLab.com to get started."
@@ -17016,10 +17019,16 @@ msgstr ""
 msgid "JiraService|This issue is synchronized with Jira"
 msgstr ""
 
+msgid "JiraService|Transition Jira issues to their final state:"
+msgstr ""
+
 msgid "JiraService|Use a password for server version and an API token for cloud version"
 msgstr ""
 
 msgid "JiraService|Use a username for server version and an email for cloud version"
+msgstr ""
+
+msgid "JiraService|Use custom transitions"
 msgstr ""
 
 msgid "JiraService|Username or Email"
