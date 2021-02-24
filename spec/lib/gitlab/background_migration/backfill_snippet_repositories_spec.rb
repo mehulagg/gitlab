@@ -47,9 +47,7 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillSnippetRepositories, :migrat
   before do
     allow(snippet_with_repo).to receive(:disk_path).and_return(disk_path(snippet_with_repo))
 
-    TestEnv.copy_repo(snippet_with_repo,
-                      bare_repo: TestEnv.factory_repo_path_bare,
-                      refs: TestEnv::BRANCH_SHA)
+    TestEnv.copy_repo(snippet_with_repo)
 
     raw_repository(snippet_with_empty_repo).create_repository
   end

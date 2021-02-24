@@ -68,8 +68,7 @@ module ProjectForksHelper
       forked_project = fork_project_direct(project, user, params)
       TestEnv.copy_repo(
         forked_project,
-        bare_repo: TestEnv.forked_repo_path_bare,
-        refs: TestEnv::FORKED_BRANCH_SHA
+        bare_repo: TestEnv.forked_repo
       )
       forked_project.repository.expire_content_cache
 

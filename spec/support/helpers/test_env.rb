@@ -327,41 +327,37 @@ module TestEnv
   end
 
   def setup_factory_repo
-    setup_repo(factory_repo_path, factory_repo_path_bare, factory_repo_name, BRANCH_SHA)
+    setup_repo(factory_repo, BRANCH_SHA)
+  end
+
+  def setup_repo(repo, refs)
+    clone_url = "https://gitlab.com/gitlab-org/#{FACTORY_REPO_NAME}.git"
+
+    unless repo.exists?
+      puts "\n==> Setting up #{FACTORY_REPO_NAME} repository..."
+      start = Time.now
+      repo.import_repository(clone_url)
+      puts "    #{FACTORY_REPO_NAME} set up in #{Time.now - start} seconds...\n"
+    end
+
+    set_repo_refs(repo, refs)
   end
 
   # This repo has a submodule commit that is not present in the main test
   # repository.
   def setup_forked_repo
-    setup_repo(forked_repo_path, forked_repo_path_bare, forked_repo_name, FORKED_BRANCH_SHA)
+    return if forked_repo.exists?
+
+    ::Gitlab::GitalyClient::RepositoryService.new(forked_repo).fork_repository(factory_repo)
+
+    set_repo_refs(forked_repo, FORKED_BRANCH_SHA)
   end
 
-  def setup_repo(repo_path, repo_path_bare, repo_name, refs)
-    clone_url = "https://gitlab.com/gitlab-org/#{repo_name}.git"
-
-    unless File.directory?(repo_path)
-      puts "\n==> Setting up #{repo_name} repository in #{repo_path}..."
-      start = Time.now
-      system(*%W(#{Gitlab.config.git.bin_path} clone --quiet -- #{clone_url} #{repo_path}))
-      puts "    #{repo_path} set up in #{Time.now - start} seconds...\n"
-    end
-
-    set_repo_refs(repo_path, refs)
-
-    unless File.directory?(repo_path_bare)
-      puts "\n==> Setting up #{repo_name} bare repository in #{repo_path_bare}..."
-      start = Time.now
-      # We must copy bare repositories because we will push to them.
-      system(git_env, *%W(#{Gitlab.config.git.bin_path} clone --quiet --bare -- #{repo_path} #{repo_path_bare}))
-      puts "    #{repo_path_bare} set up in #{Time.now - start} seconds...\n"
-    end
-  end
-
-  def copy_repo(subject, bare_repo:, refs:)
+  def copy_repo(subject, bare_repo: factory_repo)
     target_repo_path = File.expand_path(repos_path + "/#{subject.disk_path}.git")
 
     FileUtils.mkdir_p(target_repo_path)
-    FileUtils.cp_r("#{File.expand_path(bare_repo)}/.", target_repo_path)
+    FileUtils.cp_r(File.join(repos_path, bare_repo.relative_path, '.'), target_repo_path)
     FileUtils.chmod_R 0755, target_repo_path
   end
 
@@ -372,13 +368,6 @@ module TestEnv
       FileUtils.remove_dir(target_repo_refs_path)
     end
   rescue Errno::ENOENT
-  end
-
-  def storage_dir_exists?(storage, dir)
-    Gitlab::GitalyClient::StorageSettings.allow_disk_access do
-      repos_path = Gitlab.config.repositories.storages[storage].legacy_disk_path
-      File.exist?(File.join(repos_path, dir))
-    end
   end
 
   def create_bare_repository(path)
@@ -414,14 +403,6 @@ module TestEnv
 
     puts "Starting the Capybara driver server..."
     Capybara.current_session.visit '/'
-  end
-
-  def factory_repo_path_bare
-    "#{factory_repo_path}_bare"
-  end
-
-  def forked_repo_path_bare
-    "#{forked_repo_path}_bare"
   end
 
   def with_empty_bare_repository(name = nil)
@@ -464,20 +445,15 @@ module TestEnv
     ]
   end
 
-  def factory_repo_path
-    @factory_repo_path ||= Rails.root.join('tmp', 'tests', factory_repo_name)
+  FACTORY_REPO_NAME = 'gitlab-test'
+  FORKED_REPO_NAME = FACTORY_REPO_NAME + "-fork"
+
+  def factory_repo
+    @factory_repo ||= Gitlab::Git::Repository.new(REPOS_STORAGE, FACTORY_REPO_NAME, nil, nil)
   end
 
-  def factory_repo_name
-    'gitlab-test'
-  end
-
-  def forked_repo_path
-    @forked_repo_path ||= Rails.root.join('tmp', 'tests', forked_repo_name)
-  end
-
-  def forked_repo_name
-    'gitlab-test-fork'
+  def forked_repo
+    @forked_repo ||= Gitlab::Git::Repository.new(REPOS_STORAGE, FACTORY_REPO_NAME, nil, nil)
   end
 
   # Prevent developer git configurations from being persisted to test
@@ -486,20 +462,11 @@ module TestEnv
     { 'GIT_TEMPLATE_DIR' => '' }
   end
 
-  def set_repo_refs(repo_path, branch_sha)
-    instructions = branch_sha.map { |branch, sha| "update refs/heads/#{branch}\x00#{sha}\x00" }.join("\x00") << "\x00"
-    update_refs = %W(#{Gitlab.config.git.bin_path} update-ref --stdin -z)
-    reset = proc do
-      Dir.chdir(repo_path) do
-        IO.popen(update_refs, "w") { |io| io.write(instructions) }
-        $?.success?
-      end
-    end
-
-    # Try to reset without fetching to avoid using the network.
-    unless reset.call
-      raise 'Could not fetch test seed repository.' unless system(*%W(#{Gitlab.config.git.bin_path} -C #{repo_path} fetch origin))
-      raise "Could not update test seed repository, please delete #{repo_path} and try again" unless reset.call
+  def set_repo_refs(repo, branch_sha)
+    # WriteRef as RPC should be replaced with WriteRefs and allow multiple refs 
+    # to be written in one RPC request
+    Gitlab::GitalyClient.allow_n_plus_1_calls do
+      branch_sha.each { |ref, new_oid| repo.write_ref(ref, new_oid) }
     end
   end
 

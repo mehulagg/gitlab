@@ -183,9 +183,7 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateProjectSnippetStatistics do
       if with_repo
         allow(snippet).to receive(:disk_path).and_return(disk_path(snippet))
 
-        TestEnv.copy_repo(snippet,
-                          bare_repo: TestEnv.factory_repo_path_bare,
-                          refs: TestEnv::BRANCH_SHA)
+        TestEnv.copy_repo(snippet)
 
         raw_repository(snippet).create_repository
       end

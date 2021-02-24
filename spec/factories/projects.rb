@@ -293,9 +293,7 @@ FactoryBot.define do
 
     trait :test_repo do
       after :create do |project|
-        TestEnv.copy_repo(project,
-          bare_repo: TestEnv.factory_repo_path_bare,
-          refs: TestEnv::BRANCH_SHA)
+        TestEnv.copy_repo(project)
       end
     end
 
@@ -383,9 +381,7 @@ FactoryBot.define do
     path { 'forked-gitlabhq' }
 
     after :create do |project|
-      TestEnv.copy_repo(project,
-        bare_repo: TestEnv.forked_repo_path_bare,
-        refs: TestEnv::FORKED_BRANCH_SHA)
+      TestEnv.copy_repo(project)
     end
   end
 

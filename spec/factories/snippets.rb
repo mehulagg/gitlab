@@ -24,9 +24,7 @@ FactoryBot.define do
     # Test repository - https://gitlab.com/gitlab-org/gitlab-test
     trait :repository do
       after :create do |snippet|
-        TestEnv.copy_repo(snippet,
-          bare_repo: TestEnv.factory_repo_path_bare,
-          refs: TestEnv::BRANCH_SHA)
+        TestEnv.copy_repo(snippet)
 
         snippet.track_snippet_repository(snippet.repository.storage)
       end
