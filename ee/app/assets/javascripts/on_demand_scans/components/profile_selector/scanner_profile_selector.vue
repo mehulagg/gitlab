@@ -2,11 +2,13 @@
 import { SCAN_TYPE_LABEL } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProfileSelector from './profile_selector.vue';
+import DastScannerProfileForm from 'ee/security_configuration/dast_scanner_profiles/components/dast_scanner_profile_form.vue';
 
 export default {
   name: 'OnDemandScansScannerProfileSelector',
   components: {
     ProfileSelector,
+    DastScannerProfileForm,
   },
   mixins: [glFeatureFlagsMixin()],
   inject: {
@@ -14,6 +16,9 @@ export default {
       default: '',
     },
     newScannerProfilePath: {
+      default: '',
+    },
+    projectPath: {
       default: '',
     },
   },
@@ -33,6 +38,10 @@ export default {
           dropdownLabel: addSuffix(profile.profileName),
         };
       });
+    },
+    // Todo: To be removed later
+    onDemandScansPath() {
+      return this.projectPath + '-/on_demand_scans/new';
     },
   },
 };
@@ -57,6 +66,13 @@ export default {
     <template #manage-profile>{{ s__('OnDemandScans|Manage scanner profiles') }}</template>
     <template #summary>
       <slot name="summary"></slot>
+    </template>
+    <template #profile-form="{ profile }">
+      <dast-scanner-profile-form
+        :project-full-path="projectPath"
+        :on-demand-scans-path="onDemandScansPath"
+        :profile="profile"
+      ></dast-scanner-profile-form>
     </template>
   </profile-selector>
 </template>

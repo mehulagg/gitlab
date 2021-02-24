@@ -32,6 +32,7 @@ export default () => {
       newScannerProfilePath,
       newSiteProfilePath,
       dastSiteValidationDocsPath,
+      projectPath,
     },
     render(h) {
       return h(OnDemandScansForm, {

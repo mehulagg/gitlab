@@ -44,7 +44,7 @@ export default {
     },
   },
   data() {
-    return { searchTerm: '' };
+    return { searchTerm: '', showForm: false };
   },
   computed: {
     selectedProfile() {
@@ -98,7 +98,10 @@ export default {
           :key="profile.id"
           :is-checked="value === profile.id"
           is-check-item
-          @click="$emit('input', profile.id)"
+          @click="
+            $emit('input', profile.id);
+            showForm = false;
+          "
         >
           {{ profile.profileName }}
         </gl-dropdown-item>
@@ -121,15 +124,16 @@ export default {
         class="gl-mt-6 gl-pt-6 gl-border-t-solid gl-border-gray-100 gl-border-t-1"
       >
         <gl-button
-          v-if="selectedProfile"
+          v-if="selectedProfile && !showForm"
           v-gl-tooltip
           category="primary"
           icon="pencil"
           :title="s__('DastProfiles|Edit profile')"
-          :href="selectedProfile.editPath"
           class="gl-absolute gl-right-7"
+          @click="showForm = true"
         />
-        <slot name="summary"></slot>
+        <slot v-if="showForm" name="profile-form" :profile="selectedProfile"></slot>
+        <slot v-else name="summary"></slot>
       </div>
     </gl-form-group>
     <template v-else>

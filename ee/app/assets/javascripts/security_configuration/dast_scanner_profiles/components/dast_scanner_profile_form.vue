@@ -49,11 +49,14 @@ export default {
     },
     profilesLibraryPath: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
     },
     onDemandScansPath: {
+      // can be removed
       type: String,
-      required: true,
+      required: false,
+      default: '',
     },
     profile: {
       type: Object,
@@ -63,7 +66,7 @@ export default {
   },
   data() {
     const {
-      name = '',
+      profileName = '',
       spiderTimeout = '',
       targetTimeout = '',
       scanType = SCAN_TYPE.PASSIVE,
@@ -72,7 +75,7 @@ export default {
     } = this.profile;
 
     const form = {
-      profileName: initFormField({ value: name }),
+      profileName: initFormField({ value: profileName }),
       spiderTimeout: initFormField({ value: spiderTimeout }),
       targetTimeout: initFormField({ value: targetTimeout }),
       scanType: initFormField({ value: scanType }),
