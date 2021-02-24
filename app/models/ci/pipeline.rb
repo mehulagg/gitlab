@@ -1117,7 +1117,7 @@ module Ci
       detached_merge_request_pipeline? && !merge_request_ref?
     end
 
-    def merge_request_pipeline?
+    def merged_request_pipeline?
       merge_request? && target_sha.present?
     end
 
@@ -1157,16 +1157,12 @@ module Ci
       return unless merge_request?
 
       strong_memoize(:merge_request_event_type) do
-        if merge_request_pipeline?
+        if merged_request_pipeline?
           :merged_result
         elsif detached_merge_request_pipeline?
           :detached
         end
       end
-    end
-
-    def for_merged_result?
-      merge_request_event_type == :merged_result
     end
 
     def persistent_ref
@@ -1251,7 +1247,7 @@ module Ci
     def merge_request_diff_sha
       return unless merge_request?
 
-      if merge_request_pipeline?
+      if merged_request_pipeline?
         source_sha
       else
         sha

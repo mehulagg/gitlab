@@ -420,8 +420,8 @@ RSpec.describe Ci::Pipeline do
     end
   end
 
-  describe '#latest_merge_request_pipeline?' do
-    subject { pipeline.latest_merge_request_pipeline? }
+  describe '#latest_merged_request_pipeline?' do
+    subject { pipeline.latest_merged_request_pipeline? }
 
     let(:merge_request) { create(:merge_request, :with_merge_request_pipeline) }
     let(:pipeline) { merge_request.all_pipelines.first }
