@@ -90,13 +90,11 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                 <div
                   class="gl-display-flex gl-text-white gl-font-weight-normal"
                 >
-                  <div
-                    class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
-                  >
-                    
-  
-
-                  </div>
+                  <img
+                    alt="avatar"
+                    class="gl-avatar gl-avatar-circle gl-avatar-s16"
+                    src="/url"
+                  />
                    
                   <!---->
                 </div>
@@ -138,13 +136,11 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
                 <div
                   class="gl-display-flex gl-text-white gl-font-weight-normal"
                 >
-                  <div
-                    class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
-                  >
-                    
-  
-
-                  </div>
+                  <img
+                    alt="avatar"
+                    class="gl-avatar gl-avatar-circle gl-avatar-s16"
+                    src="/url"
+                  />
                    
                   <!---->
                 </div>
