@@ -31,5 +31,21 @@ FactoryBot.define do
         }
       end
     end
+
+    trait :with_junit_suite_error do
+      data do
+        {
+          tests: {
+            name: "karma",
+            duration: 0.42,
+            failed: 0,
+            errored: 0,
+            skipped: 0,
+            success: 2,
+            suite_error: 'some error'
+          }
+        }
+      end
+    end
   end
 end

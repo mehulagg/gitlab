@@ -87,12 +87,22 @@ RSpec.describe Gitlab::Ci::Reports::TestSuiteSummary do
     end
   end
 
+  describe '#suite_errors' do
+    let(:build_report_result_1) { build(:ci_build_report_result, :with_junit_suite_error) }
+
+    subject(:suite_errors) { test_suite_summary.suite_errors }
+
+    it 'includes all builds with suite error' do
+      expect(suite_errors).to eq('karma' => 'some error')
+    end
+  end
+
   describe '#to_h' do
     subject { test_suite_summary.to_h }
 
     context 'when test suite summary has several build report results' do
       it 'returns the total as a hash' do
-        expect(subject).to include(:time, :count, :success, :failed, :skipped, :error)
+        expect(subject).to include(:time, :count, :success, :failed, :skipped, :error, :suite_errors)
       end
     end
   end
