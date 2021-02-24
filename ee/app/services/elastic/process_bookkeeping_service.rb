@@ -26,18 +26,20 @@ module Elastic
 
         with_redis do |redis|
           grouped_items.each do |shard_number, shard_items|
+            set_key = redis_set_key(shard_number)
+
             # Efficiently generate a guaranteed-unique score for each item
             max = redis.incrby(redis_score_key(shard_number), shard_items.size)
             min = (max - shard_items.size) + 1
 
             (min..max).zip(shard_items).each_slice(1000) do |group|
               logger.debug(class: self.name,
-                          redis_set: redis_set_key(shard_number),
+                          redis_set: set_key,
                           message: 'track_items',
                           count: group.count,
                           tracked_items_encoded: group.to_json)
 
-              redis.zadd(redis_set_key(shard_number), group)
+              redis.zadd(set_key, group)
             end
           end
         end
