@@ -111,7 +111,9 @@ module Security
 
     def create_or_find_vulnerability_finding_with_fingerprints(finding, create_params)
       find_params = {
-        uuid: finding.uuid,
+        # this isn't taking prioritization into account (happens in the filter
+        # block below), but it *does* limit the number of findings we have to sift through
+        uuid: [finding.uuid, *finding.fingerprint_uuids],
         scanner: scanners_objects[finding.scanner.key],
         primary_identifier: identifiers_objects[finding.primary_identifier.key]
       }
@@ -130,6 +132,7 @@ module Security
       begin
         vulnerability_finding = matched_findings.first
         if vulnerability_finding.nil?
+          find_params[:uuid] = finding.uuid
           vulnerability_finding = project
             .vulnerability_findings
             .create_with(create_params)

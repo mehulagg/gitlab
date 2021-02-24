@@ -124,23 +124,27 @@ RSpec.describe Security::StoreReportService, '#execute' do
       let(:new_build) { create(:ci_build, pipeline: new_pipeline) }
       let(:new_pipeline) { create(:ci_pipeline, project: project) }
       let(:new_report) { new_pipeline.security_reports.get_report(report_type.to_s, artifact) }
-      let(:existing_fingerprint) { create(:vulnerabilities_finding_fingerprint, finding: finding) }
-      let(:unsupported_fingerprint) do
-        create(:vulnerabilities_finding_fingerprint,
-          finding: finding,
-          algorithm_type: ::Vulnerabilities::FindingFingerprint.algorithm_types[:location])
-      end
-
       let(:trait) { :sast }
 
       let!(:finding) do
-        create(:vulnerabilities_finding,
+
+        created_finding = create(:vulnerabilities_finding,
           pipelines: [pipeline],
           identifiers: [identifier],
           primary_identifier: identifier,
           scanner: scanner,
           project: project,
-          location_fingerprint: 'd869ba3f0b3347eb2749135a437dc07c8ae0f420')
+          location_fingerprint: 'd869ba3f0b3347eb2749135a437dc07c8ae0f420',
+          uuid: Gitlab::UUID.v5("#{report_type}-#{identifier.fingerprint}-d869ba3f0b3347eb2749135a437dc07c8ae0f420-#{project.id}"))
+
+        existing_finding = report.findings.find { |f| f.location.fingerprint == created_finding.location_fingerprint }
+
+        create(:vulnerabilities_finding_fingerprint,
+          finding: created_finding,
+          algorithm_type: existing_finding.fingerprints.first.algorithm_type,
+          fingerprint_sha256: existing_finding.fingerprints.first.fingerprint_sha256)
+
+        created_finding
       end
 
       let!(:vulnerability) { create(:vulnerability, findings: [finding], project: project) }
@@ -180,12 +184,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
       it 'updates fingerprints (if applicable) to match new values' do
         next unless vulnerability_finding_fingerprints_enabled
 
-        existing_fingerprint
-        unsupported_fingerprint
+        expect(finding.fingerprints.count).to eq(1)
+        expect(finding.fingerprints.first.algorithm_type).to eq('location')
 
-        expect(finding.fingerprints.count).to eq(2)
-        fingerprint_algs = finding.fingerprints.map(&:algorithm_type)
-        expect(fingerprint_algs).to eq(%w[hash location])
+        existing_fingerprint = finding.fingerprints.first
 
         subject
 
@@ -194,13 +196,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
         expect(finding.fingerprints.count).to eq(2)
         fingerprint_algs = finding.fingerprints.map(&:algorithm_type)
-        expect(fingerprint_algs).to eq(%w[hash scope_offset])
+        expect(fingerprint_algs).to eq(%w[location scope_offset])
 
         # check that the existing hash fingerprint was updated/reused
         expect(existing_fingerprint.id).to eq(finding.fingerprints.first.id)
-
-        # check that the unsupported fingerprint was deleted
-        expect(::Vulnerabilities::FindingFingerprint.exists?(unsupported_fingerprint.id)).to eq(false)
       end
 
       it 'updates existing vulnerability with new data' do

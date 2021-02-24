@@ -141,14 +141,14 @@ module Gitlab
             end
           end
 
-          private
-
           def fingerprint_uuids
             fingerprints.map do |fingerprint|
               hex_sha = fingerprint.fingerprint_hex
               Gitlab::UUID.v5(uuid_v5_name(location_fingerprint_value: hex_sha))
             end
           end
+
+          private
 
           def generate_project_fingerprint
             Digest::SHA1.hexdigest(compare_key)
