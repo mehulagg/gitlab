@@ -5,19 +5,13 @@ module API
     module IssuesHelpers
       extend Grape::API::Helpers
 
-      params :common_negatable_optional_params_ee do
-      end
-
       params :negatable_issue_filter_params_ee do
       end
 
       params :optional_issue_params_ee do
       end
 
-      params :optional_issues_params_ee do
-      end
-
-      params :optional_issue_not_params_ee do
+      params :issues_stats_params_ee do
       end
 
       def self.update_params_at_least_one_of

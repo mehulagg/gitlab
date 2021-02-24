@@ -11,7 +11,25 @@ module API
     feature_category :issue_tracking
 
     helpers do
-      params :common_negatable_optional_params do
+      params :negatable_issue_filter_params do
+        optional :labels, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of label names'
+        optional :milestone, type: String, desc: 'Milestone title'
+        optional :iids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The IID array of issues'
+
+        optional :author_id, type: Integer, desc: 'Return issues which are not authored by the user with the given ID'
+        optional :author_username, type: String, desc: 'Return issues which are not authored by the user with the given username'
+        mutually_exclusive :author_id, :author_username
+
+        optional :assignee_id, type: Integer, desc: 'Return issues which are assigned to the user with the given ID'
+        optional :assignee_username, type: Array[String], check_assignees_count: true,
+                 coerce_with: Validations::Validators::CheckAssigneesCount.coerce,
+                 desc: 'Return issues which are assigned to the user with the given username'
+        mutually_exclusive :assignee_id, :assignee_username
+
+        use :negatable_issue_filter_params_ee
+      end
+
+      params :issues_stats_params do
         optional :labels, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of label names'
         optional :milestone, type: String, desc: 'Milestone title'
         optional :iids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'The IID array of issues'
@@ -27,32 +45,23 @@ module API
         optional :assignee_username, type: Array[String], check_assignees_count: true,
                  coerce_with: Validations::Validators::CheckAssigneesCount.coerce,
                  desc: 'Return issues which are assigned to the user with the given username'
-
-        use :common_negatable_optional_params_ee
-
         mutually_exclusive :assignee_id, :assignee_username
-      end
 
-      params :negatable_issue_filter_params do
-        optional :not, type: Hash do
-          use :common_negatable_optional_params
-          use :negatable_issue_filter_params_ee
-        end
-      end
-
-      params :issues_stats_params do
-        use :common_negatable_optional_params
-        use :optional_issues_params_ee
-        use :negatable_issue_filter_params
         optional :created_after, type: DateTime, desc: 'Return issues created after the specified time'
         optional :created_before, type: DateTime, desc: 'Return issues created before the specified time'
         optional :updated_after, type: DateTime, desc: 'Return issues updated after the specified time'
         optional :updated_before, type: DateTime, desc: 'Return issues updated before the specified time'
 
+        optional :not, type: Hash do
+          use :negatable_issue_filter_params
+        end
+
         optional :scope, type: String, values: %w[created-by-me assigned-to-me created_by_me assigned_to_me all],
                          desc: 'Return issues for the given scope: `created_by_me`, `assigned_to_me` or `all`'
         optional :my_reaction_emoji, type: String, desc: 'Return issues reacted by the authenticated user by the given emoji'
         optional :confidential, type: Boolean, desc: 'Filter confidential or public issues'
+
+        use :issues_stats_params_ee
       end
 
       params :issues_params do
