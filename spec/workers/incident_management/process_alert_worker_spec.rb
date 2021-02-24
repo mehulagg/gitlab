@@ -83,5 +83,17 @@ RSpec.describe IncidentManagement::ProcessAlertWorker do
         expect { subject }.not_to change { Issue.count }
       end
     end
+
+    context 'with existing alert issue' do
+      before do
+        described_class.new.perform(nil, nil, alert.id)
+      end
+
+      it 'does not create issues' do
+        expect(AlertManagement::CreateAlertIssueService).not_to receive(:new)
+
+        expect { subject }.not_to change { Issue.count }
+      end
+    end
   end
 end

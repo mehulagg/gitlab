@@ -15,6 +15,7 @@ module IncidentManagement
 
       alert = find_alert(alert_id)
       return unless alert
+      return if alert.issue
 
       result = create_issue_for(alert)
       return if result.success?
