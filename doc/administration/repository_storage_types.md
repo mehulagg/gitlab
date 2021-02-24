@@ -125,7 +125,7 @@ The output includes the project ID and the project name. For example:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/1606) in GitLab 12.1.
 
-Object pools are a third repository used to deduplicate forks of public and internal projects and
+Object pools are repositories used to deduplicate forks of public and internal projects and
 contain the objects from the source project. Using `objects/info/alternates`, the source project and
 forks use the object pool for shared objects. For more information, see
 [How Git object deduplication works in GitLab](../development/git_object_deduplication.md).
