@@ -82,6 +82,10 @@ export const PACKAGE_TYPES = [
     title: s__('PackageRegistry|PyPI'),
     type: PackageType.PYPI,
   },
+  {
+    title: s__('PackageRegistry|Terraform Module'),
+    type: PackageType.TERRAFORM_MODULE,
+  },
 ];
 
 export const LIST_TITLE_TEXT = s__('PackageRegistry|Package Registry');

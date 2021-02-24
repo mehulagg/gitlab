@@ -7802,6 +7802,7 @@ Rotation length unit of an on-call rotation.
 | `NUGET` | Packages from the Nuget package manager |
 | `PYPI` | Packages from the PyPI package manager |
 | `RUBYGEMS` | Packages from the Rubygems package manager |
+| `TERRAFORM_MODULE` | Packages from the Terraform Module package manager |
 
 ### `PipelineConfigSourceEnum`
 
