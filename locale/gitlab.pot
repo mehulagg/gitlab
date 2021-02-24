@@ -23279,6 +23279,9 @@ msgstr ""
 msgid "ProjectSettings|Allow editing commit messages"
 msgstr ""
 
+msgid "ProjectSettings|Allow merge before pipeline(s) complete"
+msgstr ""
+
 msgid "ProjectSettings|Always show thumbs-up and thumbs-down award emoji buttons on issues, merge requests, and snippets."
 msgstr ""
 
@@ -23409,6 +23412,9 @@ msgid "ProjectSettings|Merge options"
 msgstr ""
 
 msgid "ProjectSettings|Merge requests"
+msgstr ""
+
+msgid "ProjectSettings|Merge requests can be merged before pipeline(s) complete by using the %{strong_open}Merge immediately%{strong_close} button, or an API call."
 msgstr ""
 
 msgid "ProjectSettings|Merge suggestions"

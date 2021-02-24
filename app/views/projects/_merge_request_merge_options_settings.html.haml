@@ -6,6 +6,12 @@
   = render_if_exists 'projects/merge_pipelines_settings', form: form
   = render_if_exists 'projects/merge_trains_settings', form: form
   .form-check.mb-2
+    = form.check_box :allow_merge_before_pipeline_completes, class: 'form-check-input'
+    = form.label :allow_merge_before_pipeline_completes, class: 'form-check-label' do
+      = s_('ProjectSettings|Allow merge before pipeline(s) complete')
+      .descr.text-secondary
+        = html_escape(s_('ProjectSettings|Merge requests can be merged before pipeline(s) complete by using the %{strong_open}Merge immediately%{strong_close} button, or an API call.')) % { strong_open: '<strong>'.html_safe, strong_close: '</strong>'.html_safe }
+  .form-check.mb-2
     = form.check_box :resolve_outdated_diff_discussions, class: 'form-check-input'
     = form.label :resolve_outdated_diff_discussions, class: 'form-check-label' do
       = s_('ProjectSettings|Automatically resolve merge request diff discussions when they become outdated')
