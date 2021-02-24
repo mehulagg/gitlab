@@ -131,7 +131,7 @@ forks use the object pool for shared objects. For more information, see
 [How Git object deduplication works in GitLab](../development/git_object_deduplication.md).
 
 Objects are moved from the source project to the object pool when housekeeping is run on the source
-project. Object pool repositories are stored similar to regular repositories:
+project. Object pool repositories are stored similarly to regular repositories:
 
 ```ruby
 # object pool paths
@@ -144,7 +144,7 @@ regular repositories that depend on the object pool.
 
 ### Object storage support
 
-This table shows which storable objects are storable in which types of storage:
+This table shows which storable objects are storable in each storage type:
 
 | Storable object  | Legacy storage | Hashed storage | S3 compatible | GitLab version |
 |:-----------------|:---------------|:---------------|:--------------|:---------------|
@@ -165,9 +165,9 @@ Files stored in an S3-compatible endpoint can have the same advantages as
 
 #### Avatars
 
-Each file is stored in a directory that takes its name from the file's `id` from the database. The
-filename is always `avatar.png` for user avatars. When avatar is replaced, `Upload` model is
-destroyed and a new one takes place with different `id`.
+Each file is stored in a directory that matches the `id` assign to it in the database. The
+filename is always `avatar.png` for user avatars. When an avatar is replaced, the `Upload` model is
+destroyed and a new one takes place with a different `id`.
 
 #### CI/CD artifacts
 
