@@ -54,6 +54,12 @@ module API
 
       private
 
+      # Optionally uses a `Proc` to add context to a cache key
+      #
+      # @param object [Object] must respond to #cache_key
+      # @param context [Proc] a proc that will be called with the object as an argument, and which should return a
+      #                       string or array of strings to be combined into the cache key
+      # @return [String]
       def contextual_cache_key(object, context)
         return object.cache_key if context.nil?
 
