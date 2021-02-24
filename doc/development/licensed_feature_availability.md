@@ -4,7 +4,7 @@ group: License
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Licensed feature availability **(STARTER)**
+# Licensed feature availability
 
 As of GitLab 9.4, we've been supporting a simplified version of licensed
 feature availability checks via `ee/app/models/license.rb`, both for
@@ -18,8 +18,13 @@ feature such as [Related issues](../user/project/issues/related_issues.md) or
 it should be restricted on namespace scope.
 
 1. Add the feature symbol on `EES_FEATURES`, `EEP_FEATURES` or `EEU_FEATURES` constants in
+<<<<<<< HEAD
   `ee/app/models/license.rb`. Note on `ee/app/models/ee/namespace.rb` that _Bronze_ GitLab.com
   features maps to on-premise _EES_, _Silver/Premium_ to _EEP_ and _Gold/Ultimate_ to _EEU_.
+=======
+  `ee/app/models/license.rb`. Note on `ee/app/models/ee/namespace.rb` that _Starter_ GitLab.com
+  features maps to on-premise _EES_, _Premium_ to _EEP_ and _Ultimate_ to _EEU_.
+>>>>>>> 5547054a5a1 (Update badge references)
 1. Check using:
 
 ```ruby
@@ -35,7 +40,7 @@ the instance license.
 
 1. Add the feature symbol on `EES_FEATURES`, `EEP_FEATURES` or `EEU_FEATURES` constants in
   `ee/app/models/license.rb`.
-1. Add the same feature symbol to `GLOBAL_FEATURES`
+1. Add the same feature symbol to `GLOBAL_FEATURES`.
 1. Check using:
 
 ```ruby
