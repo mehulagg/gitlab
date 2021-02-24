@@ -154,7 +154,7 @@ To find members in a group, you can sort, filter, or search.
 
 Filter a group to find members. By default, all members in the group and subgroups are displayed.
 
-1. Go to the group's **Members** page.
+1. Go to the group and select **Members** (**{users}**).
 1. Above the list of members, in the **Filter members** box, enter filter criteria.
    - To view members in the group only, select **Membership = Direct**.
    - To view members of the group and its subgroups, select **Membership = Inherited**.
@@ -164,18 +164,19 @@ Filter a group to find members. By default, all members in the group and subgrou
 
 You can search for members by name, username, or email.
 
-1. Go to the group's **Members** page.
+1. Go to the group and select **Members** (**{users}**).
 1. Above the list of members, in the **Filter members** box, enter search criteria.
-1. To the right of the **Filter members** box, select the magnifying glass.
+1. To the right of the **Filter members** box, select the magnifying glass (**{search}**).
 
 ### Sort members in a group
 
 You can sort members by **Account**, **Access granted**, **Max role**, or **Last sign-in**.
 
-1. Go to the group's **Members** page.
+1. Go to the group and select **Members** (**{users}**).
 1. Above the list of members, on the top right, from the **Account** list, select
    the criteria to filter by.
-1. To change the sort from ascending to descending, to the right of the **Account** list, select the arrow.
+1. To change the sort from ascending to descending, to the right of the **Account** list, select the
+   arrow (**{sort-lowest}** or **{sort-highest}**).
 
 ## Mention a group in an issue or merge request
 
