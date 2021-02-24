@@ -17,10 +17,6 @@ when appropriate.
 
 You can find the Frontend Architecture experts on the [team page](https://about.gitlab.com/company/team/).
 
-## Widget Architecture
-
-Currently, Plan stage is refactoring a right sidebar to consist of _widgets_. They have a specific architecture to be reusable and to expose an interface that can be used by external Vue applications on the page. You can find a detailed description of the widget architecture [here](widgets.md).
-
 ## Examples
 
 You can find [documentation about the desired architecture](vue.md) for a new
