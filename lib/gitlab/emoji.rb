@@ -9,7 +9,10 @@ module Gitlab
     end
 
     def emojis_by_category
-      Gemojione::Categories.all.values.flatten
+      emojis = Gemojione::Categories.all.values.flatten.map do |emoji|
+        [emoji, Gemojione.index.all.values.filter { |e| e['name'].include?("#{emoji['name']}_tone") }]
+      end
+      emojis.flatten
     end
 
     def emojis_by_moji

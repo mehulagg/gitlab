@@ -323,6 +323,96 @@
     "d": "frowning face with open mouth",
     "u": "6.1"
   },
+  "person_frowning_tone1": {
+    "c": "people",
+    "e": "🙍🏻",
+    "d": "person frowning tone 1",
+    "u": "8.0"
+  },
+  "person_frowning_tone2": {
+    "c": "people",
+    "e": "🙍🏼",
+    "d": "person frowning tone 2",
+    "u": "8.0"
+  },
+  "person_frowning_tone3": {
+    "c": "people",
+    "e": "🙍🏽",
+    "d": "person frowning tone 3",
+    "u": "8.0"
+  },
+  "person_frowning_tone4": {
+    "c": "people",
+    "e": "🙍🏾",
+    "d": "person frowning tone 4",
+    "u": "8.0"
+  },
+  "person_frowning_tone5": {
+    "c": "people",
+    "e": "🙍🏿",
+    "d": "person frowning tone 5",
+    "u": "8.0"
+  },
+  "woman_frowning_tone1": {
+    "c": "people",
+    "e": "🙍🏻‍♀️",
+    "d": "woman frowning: light skin tone",
+    "u": "8.0"
+  },
+  "woman_frowning_tone2": {
+    "c": "people",
+    "e": "🙍🏼‍♀️",
+    "d": "woman frowning: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_frowning_tone3": {
+    "c": "people",
+    "e": "🙍🏽‍♀️",
+    "d": "woman frowning: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_frowning_tone4": {
+    "c": "people",
+    "e": "🙍🏾‍♀️",
+    "d": "woman frowning: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_frowning_tone5": {
+    "c": "people",
+    "e": "🙍🏿‍♀️",
+    "d": "woman frowning: dark skin tone",
+    "u": "8.0"
+  },
+  "man_frowning_tone1": {
+    "c": "people",
+    "e": "🙍🏻‍♂️",
+    "d": "man frowning: light skin tone",
+    "u": "8.0"
+  },
+  "man_frowning_tone2": {
+    "c": "people",
+    "e": "🙍🏼‍♂️",
+    "d": "man frowning: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_frowning_tone3": {
+    "c": "people",
+    "e": "🙍🏽‍♂️",
+    "d": "man frowning: medium skin tone",
+    "u": "8.0"
+  },
+  "man_frowning_tone4": {
+    "c": "people",
+    "e": "🙍🏾‍♂️",
+    "d": "man frowning: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_frowning_tone5": {
+    "c": "people",
+    "e": "🙍🏿‍♂️",
+    "d": "man frowning: dark skin tone",
+    "u": "8.0"
+  },
   "open_mouth": {
     "c": "people",
     "e": "😮",
@@ -629,16 +719,106 @@
     "d": "open hands sign",
     "u": "6.0"
   },
+  "open_hands_tone1": {
+    "c": "people",
+    "e": "👐🏻",
+    "d": "open hands sign tone 1",
+    "u": "8.0"
+  },
+  "open_hands_tone2": {
+    "c": "people",
+    "e": "👐🏼",
+    "d": "open hands sign tone 2",
+    "u": "8.0"
+  },
+  "open_hands_tone3": {
+    "c": "people",
+    "e": "👐🏽",
+    "d": "open hands sign tone 3",
+    "u": "8.0"
+  },
+  "open_hands_tone4": {
+    "c": "people",
+    "e": "👐🏾",
+    "d": "open hands sign tone 4",
+    "u": "8.0"
+  },
+  "open_hands_tone5": {
+    "c": "people",
+    "e": "👐🏿",
+    "d": "open hands sign tone 5",
+    "u": "8.0"
+  },
   "raised_hands": {
     "c": "people",
     "e": "🙌",
     "d": "person raising both hands in celebration",
     "u": "6.0"
   },
+  "raised_hands_tone1": {
+    "c": "people",
+    "e": "🙌🏻",
+    "d": "person raising both hands in celebration tone 1",
+    "u": "8.0"
+  },
+  "raised_hands_tone2": {
+    "c": "people",
+    "e": "🙌🏼",
+    "d": "person raising both hands in celebration tone 2",
+    "u": "8.0"
+  },
+  "raised_hands_tone3": {
+    "c": "people",
+    "e": "🙌🏽",
+    "d": "person raising both hands in celebration tone 3",
+    "u": "8.0"
+  },
+  "raised_hands_tone4": {
+    "c": "people",
+    "e": "🙌🏾",
+    "d": "person raising both hands in celebration tone 4",
+    "u": "8.0"
+  },
+  "raised_hands_tone5": {
+    "c": "people",
+    "e": "🙌🏿",
+    "d": "person raising both hands in celebration tone 5",
+    "u": "8.0"
+  },
   "palms_up_together": {
     "c": "people",
     "e": "🤲",
     "d": "palms up together",
+    "u": "10.0"
+  },
+  "palms_up_together_tone1": {
+    "c": "people",
+    "e": "🤲🏻",
+    "d": "palms up together: light skin tone",
+    "u": "10.0"
+  },
+  "palms_up_together_tone2": {
+    "c": "people",
+    "e": "🤲🏼",
+    "d": "palms up together: medium-light skin tone",
+    "u": "10.0"
+  },
+  "palms_up_together_tone3": {
+    "c": "people",
+    "e": "🤲🏽",
+    "d": "palms up together: medium skin tone",
+    "u": "10.0"
+  },
+  "palms_up_together_tone4": {
+    "c": "people",
+    "e": "🤲🏾",
+    "d": "palms up together: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "palms_up_together_tone5": {
+    "c": "people",
+    "e": "🤲🏿",
+    "d": "palms up together: dark skin tone",
     "u": "10.0"
   },
   "clap": {
@@ -647,11 +827,71 @@
     "d": "clapping hands sign",
     "u": "6.0"
   },
+  "clap_tone1": {
+    "c": "people",
+    "e": "👏🏻",
+    "d": "clapping hands sign tone 1",
+    "u": "8.0"
+  },
+  "clap_tone2": {
+    "c": "people",
+    "e": "👏🏼",
+    "d": "clapping hands sign tone 2",
+    "u": "8.0"
+  },
+  "clap_tone3": {
+    "c": "people",
+    "e": "👏🏽",
+    "d": "clapping hands sign tone 3",
+    "u": "8.0"
+  },
+  "clap_tone4": {
+    "c": "people",
+    "e": "👏🏾",
+    "d": "clapping hands sign tone 4",
+    "u": "8.0"
+  },
+  "clap_tone5": {
+    "c": "people",
+    "e": "👏🏿",
+    "d": "clapping hands sign tone 5",
+    "u": "8.0"
+  },
   "pray": {
     "c": "people",
     "e": "🙏",
     "d": "person with folded hands",
     "u": "6.0"
+  },
+  "pray_tone1": {
+    "c": "people",
+    "e": "🙏🏻",
+    "d": "person with folded hands tone 1",
+    "u": "8.0"
+  },
+  "pray_tone2": {
+    "c": "people",
+    "e": "🙏🏼",
+    "d": "person with folded hands tone 2",
+    "u": "8.0"
+  },
+  "pray_tone3": {
+    "c": "people",
+    "e": "🙏🏽",
+    "d": "person with folded hands tone 3",
+    "u": "8.0"
+  },
+  "pray_tone4": {
+    "c": "people",
+    "e": "🙏🏾",
+    "d": "person with folded hands tone 4",
+    "u": "8.0"
+  },
+  "pray_tone5": {
+    "c": "people",
+    "e": "🙏🏿",
+    "d": "person with folded hands tone 5",
+    "u": "8.0"
   },
   "handshake": {
     "c": "people",
@@ -665,11 +905,71 @@
     "d": "thumbs up sign",
     "u": "6.0"
   },
+  "thumbsup_tone1": {
+    "c": "people",
+    "e": "👍🏻",
+    "d": "thumbs up sign tone 1",
+    "u": "8.0"
+  },
+  "thumbsup_tone2": {
+    "c": "people",
+    "e": "👍🏼",
+    "d": "thumbs up sign tone 2",
+    "u": "8.0"
+  },
+  "thumbsup_tone3": {
+    "c": "people",
+    "e": "👍🏽",
+    "d": "thumbs up sign tone 3",
+    "u": "8.0"
+  },
+  "thumbsup_tone4": {
+    "c": "people",
+    "e": "👍🏾",
+    "d": "thumbs up sign tone 4",
+    "u": "8.0"
+  },
+  "thumbsup_tone5": {
+    "c": "people",
+    "e": "👍🏿",
+    "d": "thumbs up sign tone 5",
+    "u": "8.0"
+  },
   "thumbsdown": {
     "c": "people",
     "e": "👎",
     "d": "thumbs down sign",
     "u": "6.0"
+  },
+  "thumbsdown_tone1": {
+    "c": "people",
+    "e": "👎🏻",
+    "d": "thumbs down sign tone 1",
+    "u": "8.0"
+  },
+  "thumbsdown_tone2": {
+    "c": "people",
+    "e": "👎🏼",
+    "d": "thumbs down sign tone 2",
+    "u": "8.0"
+  },
+  "thumbsdown_tone3": {
+    "c": "people",
+    "e": "👎🏽",
+    "d": "thumbs down sign tone 3",
+    "u": "8.0"
+  },
+  "thumbsdown_tone4": {
+    "c": "people",
+    "e": "👎🏾",
+    "d": "thumbs down sign tone 4",
+    "u": "8.0"
+  },
+  "thumbsdown_tone5": {
+    "c": "people",
+    "e": "👎🏿",
+    "d": "thumbs down sign tone 5",
+    "u": "8.0"
   },
   "punch": {
     "c": "people",
@@ -677,11 +977,131 @@
     "d": "fisted hand sign",
     "u": "6.0"
   },
+  "punch_tone1": {
+    "c": "people",
+    "e": "👊🏻",
+    "d": "fisted hand sign tone 1",
+    "u": "8.0"
+  },
+  "punch_tone2": {
+    "c": "people",
+    "e": "👊🏼",
+    "d": "fisted hand sign tone 2",
+    "u": "8.0"
+  },
+  "punch_tone3": {
+    "c": "people",
+    "e": "👊🏽",
+    "d": "fisted hand sign tone 3",
+    "u": "8.0"
+  },
+  "punch_tone4": {
+    "c": "people",
+    "e": "👊🏾",
+    "d": "fisted hand sign tone 4",
+    "u": "8.0"
+  },
+  "punch_tone5": {
+    "c": "people",
+    "e": "👊🏿",
+    "d": "fisted hand sign tone 5",
+    "u": "8.0"
+  },
   "fist": {
     "c": "people",
     "e": "✊",
     "d": "raised fist",
     "u": "6.0"
+  },
+  "fist_tone1": {
+    "c": "people",
+    "e": "✊🏻",
+    "d": "raised fist tone 1",
+    "u": "8.0"
+  },
+  "fist_tone2": {
+    "c": "people",
+    "e": "✊🏼",
+    "d": "raised fist tone 2",
+    "u": "8.0"
+  },
+  "fist_tone3": {
+    "c": "people",
+    "e": "✊🏽",
+    "d": "raised fist tone 3",
+    "u": "8.0"
+  },
+  "fist_tone4": {
+    "c": "people",
+    "e": "✊🏾",
+    "d": "raised fist tone 4",
+    "u": "8.0"
+  },
+  "fist_tone5": {
+    "c": "people",
+    "e": "✊🏿",
+    "d": "raised fist tone 5",
+    "u": "8.0"
+  },
+  "left_facing_fist_tone1": {
+    "c": "people",
+    "e": "🤛🏻",
+    "d": "left facing fist tone 1",
+    "u": "9.0"
+  },
+  "left_facing_fist_tone2": {
+    "c": "people",
+    "e": "🤛🏼",
+    "d": "left facing fist tone 2",
+    "u": "9.0"
+  },
+  "left_facing_fist_tone3": {
+    "c": "people",
+    "e": "🤛🏽",
+    "d": "left facing fist tone 3",
+    "u": "9.0"
+  },
+  "left_facing_fist_tone4": {
+    "c": "people",
+    "e": "🤛🏾",
+    "d": "left facing fist tone 4",
+    "u": "9.0"
+  },
+  "left_facing_fist_tone5": {
+    "c": "people",
+    "e": "🤛🏿",
+    "d": "left facing fist tone 5",
+    "u": "9.0"
+  },
+  "right_facing_fist_tone1": {
+    "c": "people",
+    "e": "🤜🏻",
+    "d": "right facing fist tone 1",
+    "u": "9.0"
+  },
+  "right_facing_fist_tone2": {
+    "c": "people",
+    "e": "🤜🏼",
+    "d": "right facing fist tone 2",
+    "u": "9.0"
+  },
+  "right_facing_fist_tone3": {
+    "c": "people",
+    "e": "🤜🏽",
+    "d": "right facing fist tone 3",
+    "u": "9.0"
+  },
+  "right_facing_fist_tone4": {
+    "c": "people",
+    "e": "🤜🏾",
+    "d": "right facing fist tone 4",
+    "u": "9.0"
+  },
+  "right_facing_fist_tone5": {
+    "c": "people",
+    "e": "🤜🏿",
+    "d": "right facing fist tone 5",
+    "u": "9.0"
   },
   "left_facing_fist": {
     "c": "people",
@@ -701,16 +1121,106 @@
     "d": "hand with first and index finger crossed",
     "u": "9.0"
   },
+  "fingers_crossed_tone1": {
+    "c": "people",
+    "e": "🤞🏻",
+    "d": "hand with index and middle fingers crossed tone 1",
+    "u": "9.0"
+  },
+  "fingers_crossed_tone2": {
+    "c": "people",
+    "e": "🤞🏼",
+    "d": "hand with index and middle fingers crossed tone 2",
+    "u": "9.0"
+  },
+  "fingers_crossed_tone3": {
+    "c": "people",
+    "e": "🤞🏽",
+    "d": "hand with index and middle fingers crossed tone 3",
+    "u": "9.0"
+  },
+  "fingers_crossed_tone4": {
+    "c": "people",
+    "e": "🤞🏾",
+    "d": "hand with index and middle fingers crossed tone 4",
+    "u": "9.0"
+  },
+  "fingers_crossed_tone5": {
+    "c": "people",
+    "e": "🤞🏿",
+    "d": "hand with index and middle fingers crossed tone 5",
+    "u": "9.0"
+  },
   "v": {
     "c": "people",
     "e": "✌",
     "d": "victory hand",
     "u": "1.1"
   },
+  "v_tone1": {
+    "c": "people",
+    "e": "✌🏻",
+    "d": "victory hand tone 1",
+    "u": "8.0"
+  },
+  "v_tone2": {
+    "c": "people",
+    "e": "✌🏼",
+    "d": "victory hand tone 2",
+    "u": "8.0"
+  },
+  "v_tone3": {
+    "c": "people",
+    "e": "✌🏽",
+    "d": "victory hand tone 3",
+    "u": "8.0"
+  },
+  "v_tone4": {
+    "c": "people",
+    "e": "✌🏾",
+    "d": "victory hand tone 4",
+    "u": "8.0"
+  },
+  "v_tone5": {
+    "c": "people",
+    "e": "✌🏿",
+    "d": "victory hand tone 5",
+    "u": "8.0"
+  },
   "metal": {
     "c": "people",
     "e": "🤘",
     "d": "sign of the horns",
+    "u": "8.0"
+  },
+  "metal_tone1": {
+    "c": "people",
+    "e": "🤘🏻",
+    "d": "sign of the horns tone 1",
+    "u": "8.0"
+  },
+  "metal_tone2": {
+    "c": "people",
+    "e": "🤘🏼",
+    "d": "sign of the horns tone 2",
+    "u": "8.0"
+  },
+  "metal_tone3": {
+    "c": "people",
+    "e": "🤘🏽",
+    "d": "sign of the horns tone 3",
+    "u": "8.0"
+  },
+  "metal_tone4": {
+    "c": "people",
+    "e": "🤘🏾",
+    "d": "sign of the horns tone 4",
+    "u": "8.0"
+  },
+  "metal_tone5": {
+    "c": "people",
+    "e": "🤘🏿",
+    "d": "sign of the horns tone 5",
     "u": "8.0"
   },
   "love_you_gesture": {
@@ -719,11 +1229,71 @@
     "d": "love-you gesture",
     "u": "10.0"
   },
+  "love_you_gesture_tone1": {
+    "c": "people",
+    "e": "🤟🏻",
+    "d": "love-you gesture: light skin tone",
+    "u": "10.0"
+  },
+  "love_you_gesture_tone2": {
+    "c": "people",
+    "e": "🤟🏼",
+    "d": "love-you gesture: medium-light skin tone",
+    "u": "10.0"
+  },
+  "love_you_gesture_tone3": {
+    "c": "people",
+    "e": "🤟🏽",
+    "d": "love-you gesture: medium skin tone",
+    "u": "10.0"
+  },
+  "love_you_gesture_tone4": {
+    "c": "people",
+    "e": "🤟🏾",
+    "d": "love-you gesture: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "love_you_gesture_tone5": {
+    "c": "people",
+    "e": "🤟🏿",
+    "d": "love-you gesture: dark skin tone",
+    "u": "10.0"
+  },
   "ok_hand": {
     "c": "people",
     "e": "👌",
     "d": "ok hand sign",
     "u": "6.0"
+  },
+  "ok_hand_tone1": {
+    "c": "people",
+    "e": "👌🏻",
+    "d": "ok hand sign tone 1",
+    "u": "8.0"
+  },
+  "ok_hand_tone2": {
+    "c": "people",
+    "e": "👌🏼",
+    "d": "ok hand sign tone 2",
+    "u": "8.0"
+  },
+  "ok_hand_tone3": {
+    "c": "people",
+    "e": "👌🏽",
+    "d": "ok hand sign tone 3",
+    "u": "8.0"
+  },
+  "ok_hand_tone4": {
+    "c": "people",
+    "e": "👌🏾",
+    "d": "ok hand sign tone 4",
+    "u": "8.0"
+  },
+  "ok_hand_tone5": {
+    "c": "people",
+    "e": "👌🏿",
+    "d": "ok hand sign tone 5",
+    "u": "8.0"
   },
   "point_left": {
     "c": "people",
@@ -731,11 +1301,71 @@
     "d": "white left pointing backhand index",
     "u": "6.0"
   },
+  "point_left_tone1": {
+    "c": "people",
+    "e": "👈🏻",
+    "d": "white left pointing backhand index tone 1",
+    "u": "8.0"
+  },
+  "point_left_tone2": {
+    "c": "people",
+    "e": "👈🏼",
+    "d": "white left pointing backhand index tone 2",
+    "u": "8.0"
+  },
+  "point_left_tone3": {
+    "c": "people",
+    "e": "👈🏽",
+    "d": "white left pointing backhand index tone 3",
+    "u": "8.0"
+  },
+  "point_left_tone4": {
+    "c": "people",
+    "e": "👈🏾",
+    "d": "white left pointing backhand index tone 4",
+    "u": "8.0"
+  },
+  "point_left_tone5": {
+    "c": "people",
+    "e": "👈🏿",
+    "d": "white left pointing backhand index tone 5",
+    "u": "8.0"
+  },
   "point_right": {
     "c": "people",
     "e": "👉",
     "d": "white right pointing backhand index",
     "u": "6.0"
+  },
+  "point_right_tone1": {
+    "c": "people",
+    "e": "👉🏻",
+    "d": "white right pointing backhand index tone 1",
+    "u": "8.0"
+  },
+  "point_right_tone2": {
+    "c": "people",
+    "e": "👉🏼",
+    "d": "white right pointing backhand index tone 2",
+    "u": "8.0"
+  },
+  "point_right_tone3": {
+    "c": "people",
+    "e": "👉🏽",
+    "d": "white right pointing backhand index tone 3",
+    "u": "8.0"
+  },
+  "point_right_tone4": {
+    "c": "people",
+    "e": "👉🏾",
+    "d": "white right pointing backhand index tone 4",
+    "u": "8.0"
+  },
+  "point_right_tone5": {
+    "c": "people",
+    "e": "👉🏿",
+    "d": "white right pointing backhand index tone 5",
+    "u": "8.0"
   },
   "point_up_2": {
     "c": "people",
@@ -743,11 +1373,71 @@
     "d": "white up pointing backhand index",
     "u": "6.0"
   },
+  "point_up_2_tone1": {
+    "c": "people",
+    "e": "👆🏻",
+    "d": "white up pointing backhand index tone 1",
+    "u": "8.0"
+  },
+  "point_up_2_tone2": {
+    "c": "people",
+    "e": "👆🏼",
+    "d": "white up pointing backhand index tone 2",
+    "u": "8.0"
+  },
+  "point_up_2_tone3": {
+    "c": "people",
+    "e": "👆🏽",
+    "d": "white up pointing backhand index tone 3",
+    "u": "8.0"
+  },
+  "point_up_2_tone4": {
+    "c": "people",
+    "e": "👆🏾",
+    "d": "white up pointing backhand index tone 4",
+    "u": "8.0"
+  },
+  "point_up_2_tone5": {
+    "c": "people",
+    "e": "👆🏿",
+    "d": "white up pointing backhand index tone 5",
+    "u": "8.0"
+  },
   "point_down": {
     "c": "people",
     "e": "👇",
     "d": "white down pointing backhand index",
     "u": "6.0"
+  },
+  "point_down_tone1": {
+    "c": "people",
+    "e": "👇🏻",
+    "d": "white down pointing backhand index tone 1",
+    "u": "8.0"
+  },
+  "point_down_tone2": {
+    "c": "people",
+    "e": "👇🏼",
+    "d": "white down pointing backhand index tone 2",
+    "u": "8.0"
+  },
+  "point_down_tone3": {
+    "c": "people",
+    "e": "👇🏽",
+    "d": "white down pointing backhand index tone 3",
+    "u": "8.0"
+  },
+  "point_down_tone4": {
+    "c": "people",
+    "e": "👇🏾",
+    "d": "white down pointing backhand index tone 4",
+    "u": "8.0"
+  },
+  "point_down_tone5": {
+    "c": "people",
+    "e": "👇🏿",
+    "d": "white down pointing backhand index tone 5",
+    "u": "8.0"
   },
   "point_up": {
     "c": "people",
@@ -755,16 +1445,106 @@
     "d": "white up pointing index",
     "u": "1.1"
   },
+  "point_up_tone1": {
+    "c": "people",
+    "e": "☝🏻",
+    "d": "white up pointing index tone 1",
+    "u": "8.0"
+  },
+  "point_up_tone2": {
+    "c": "people",
+    "e": "☝🏼",
+    "d": "white up pointing index tone 2",
+    "u": "8.0"
+  },
+  "point_up_tone3": {
+    "c": "people",
+    "e": "☝🏽",
+    "d": "white up pointing index tone 3",
+    "u": "8.0"
+  },
+  "point_up_tone4": {
+    "c": "people",
+    "e": "☝🏾",
+    "d": "white up pointing index tone 4",
+    "u": "8.0"
+  },
+  "point_up_tone5": {
+    "c": "people",
+    "e": "☝🏿",
+    "d": "white up pointing index tone 5",
+    "u": "8.0"
+  },
   "raised_hand": {
     "c": "people",
     "e": "✋",
     "d": "raised hand",
     "u": "6.0"
   },
+  "raised_hand_tone1": {
+    "c": "people",
+    "e": "✋🏻",
+    "d": "raised hand tone 1",
+    "u": "8.0"
+  },
+  "raised_hand_tone2": {
+    "c": "people",
+    "e": "✋🏼",
+    "d": "raised hand tone 2",
+    "u": "8.0"
+  },
+  "raised_hand_tone3": {
+    "c": "people",
+    "e": "✋🏽",
+    "d": "raised hand tone 3",
+    "u": "8.0"
+  },
+  "raised_hand_tone4": {
+    "c": "people",
+    "e": "✋🏾",
+    "d": "raised hand tone 4",
+    "u": "8.0"
+  },
+  "raised_hand_tone5": {
+    "c": "people",
+    "e": "✋🏿",
+    "d": "raised hand tone 5",
+    "u": "8.0"
+  },
   "raised_back_of_hand": {
     "c": "people",
     "e": "🤚",
     "d": "raised back of hand",
+    "u": "9.0"
+  },
+  "raised_back_of_hand_tone1": {
+    "c": "people",
+    "e": "🤚🏻",
+    "d": "raised back of hand tone 1",
+    "u": "9.0"
+  },
+  "raised_back_of_hand_tone2": {
+    "c": "people",
+    "e": "🤚🏼",
+    "d": "raised back of hand tone 2",
+    "u": "9.0"
+  },
+  "raised_back_of_hand_tone3": {
+    "c": "people",
+    "e": "🤚🏽",
+    "d": "raised back of hand tone 3",
+    "u": "9.0"
+  },
+  "raised_back_of_hand_tone4": {
+    "c": "people",
+    "e": "🤚🏾",
+    "d": "raised back of hand tone 4",
+    "u": "9.0"
+  },
+  "raised_back_of_hand_tone5": {
+    "c": "people",
+    "e": "🤚🏿",
+    "d": "raised back of hand tone 5",
     "u": "9.0"
   },
   "hand_splayed": {
@@ -773,11 +1553,71 @@
     "d": "raised hand with fingers splayed",
     "u": "7.0"
   },
+  "hand_splayed_tone1": {
+    "c": "people",
+    "e": "🖐🏻",
+    "d": "raised hand with fingers splayed tone 1",
+    "u": "8.0"
+  },
+  "hand_splayed_tone2": {
+    "c": "people",
+    "e": "🖐🏼",
+    "d": "raised hand with fingers splayed tone 2",
+    "u": "8.0"
+  },
+  "hand_splayed_tone3": {
+    "c": "people",
+    "e": "🖐🏽",
+    "d": "raised hand with fingers splayed tone 3",
+    "u": "8.0"
+  },
+  "hand_splayed_tone4": {
+    "c": "people",
+    "e": "🖐🏾",
+    "d": "raised hand with fingers splayed tone 4",
+    "u": "8.0"
+  },
+  "hand_splayed_tone5": {
+    "c": "people",
+    "e": "🖐🏿",
+    "d": "raised hand with fingers splayed tone 5",
+    "u": "8.0"
+  },
   "vulcan": {
     "c": "people",
     "e": "🖖",
     "d": "raised hand with part between middle and ring fingers",
     "u": "7.0"
+  },
+  "vulcan_tone1": {
+    "c": "people",
+    "e": "🖖🏻",
+    "d": "raised hand with part between middle and ring fingers tone 1",
+    "u": "8.0"
+  },
+  "vulcan_tone2": {
+    "c": "people",
+    "e": "🖖🏼",
+    "d": "raised hand with part between middle and ring fingers tone 2",
+    "u": "8.0"
+  },
+  "vulcan_tone3": {
+    "c": "people",
+    "e": "🖖🏽",
+    "d": "raised hand with part between middle and ring fingers tone 3",
+    "u": "8.0"
+  },
+  "vulcan_tone4": {
+    "c": "people",
+    "e": "🖖🏾",
+    "d": "raised hand with part between middle and ring fingers tone 4",
+    "u": "8.0"
+  },
+  "vulcan_tone5": {
+    "c": "people",
+    "e": "🖖🏿",
+    "d": "raised hand with part between middle and ring fingers tone 5",
+    "u": "8.0"
   },
   "wave": {
     "c": "people",
@@ -785,10 +1625,70 @@
     "d": "waving hand sign",
     "u": "6.0"
   },
+  "wave_tone1": {
+    "c": "people",
+    "e": "👋🏻",
+    "d": "waving hand sign tone 1",
+    "u": "8.0"
+  },
+  "wave_tone2": {
+    "c": "people",
+    "e": "👋🏼",
+    "d": "waving hand sign tone 2",
+    "u": "8.0"
+  },
+  "wave_tone3": {
+    "c": "people",
+    "e": "👋🏽",
+    "d": "waving hand sign tone 3",
+    "u": "8.0"
+  },
+  "wave_tone4": {
+    "c": "people",
+    "e": "👋🏾",
+    "d": "waving hand sign tone 4",
+    "u": "8.0"
+  },
+  "wave_tone5": {
+    "c": "people",
+    "e": "👋🏿",
+    "d": "waving hand sign tone 5",
+    "u": "8.0"
+  },
   "call_me": {
     "c": "people",
     "e": "🤙",
     "d": "call me hand",
+    "u": "9.0"
+  },
+  "call_me_tone1": {
+    "c": "people",
+    "e": "🤙🏻",
+    "d": "call me hand tone 1",
+    "u": "9.0"
+  },
+  "call_me_tone2": {
+    "c": "people",
+    "e": "🤙🏼",
+    "d": "call me hand tone 2",
+    "u": "9.0"
+  },
+  "call_me_tone3": {
+    "c": "people",
+    "e": "🤙🏽",
+    "d": "call me hand tone 3",
+    "u": "9.0"
+  },
+  "call_me_tone4": {
+    "c": "people",
+    "e": "🤙🏾",
+    "d": "call me hand tone 4",
+    "u": "9.0"
+  },
+  "call_me_tone5": {
+    "c": "people",
+    "e": "🤙🏿",
+    "d": "call me hand tone 5",
     "u": "9.0"
   },
   "muscle": {
@@ -797,11 +1697,71 @@
     "d": "flexed biceps",
     "u": "6.0"
   },
+  "muscle_tone1": {
+    "c": "people",
+    "e": "💪🏻",
+    "d": "flexed biceps tone 1",
+    "u": "8.0"
+  },
+  "muscle_tone2": {
+    "c": "people",
+    "e": "💪🏼",
+    "d": "flexed biceps tone 2",
+    "u": "8.0"
+  },
+  "muscle_tone3": {
+    "c": "people",
+    "e": "💪🏽",
+    "d": "flexed biceps tone 3",
+    "u": "8.0"
+  },
+  "muscle_tone4": {
+    "c": "people",
+    "e": "💪🏾",
+    "d": "flexed biceps tone 4",
+    "u": "8.0"
+  },
+  "muscle_tone5": {
+    "c": "people",
+    "e": "💪🏿",
+    "d": "flexed biceps tone 5",
+    "u": "8.0"
+  },
   "middle_finger": {
     "c": "people",
     "e": "🖕",
     "d": "reversed hand with middle finger extended",
     "u": "7.0"
+  },
+  "middle_finger_tone1": {
+    "c": "people",
+    "e": "🖕🏻",
+    "d": "reversed hand with middle finger extended tone 1",
+    "u": "8.0"
+  },
+  "middle_finger_tone2": {
+    "c": "people",
+    "e": "🖕🏼",
+    "d": "reversed hand with middle finger extended tone 2",
+    "u": "8.0"
+  },
+  "middle_finger_tone3": {
+    "c": "people",
+    "e": "🖕🏽",
+    "d": "reversed hand with middle finger extended tone 3",
+    "u": "8.0"
+  },
+  "middle_finger_tone4": {
+    "c": "people",
+    "e": "🖕🏾",
+    "d": "reversed hand with middle finger extended tone 4",
+    "u": "8.0"
+  },
+  "middle_finger_tone5": {
+    "c": "people",
+    "e": "🖕🏿",
+    "d": "reversed hand with middle finger extended tone 5",
+    "u": "8.0"
   },
   "writing_hand": {
     "c": "people",
@@ -809,10 +1769,70 @@
     "d": "writing hand",
     "u": "1.1"
   },
+  "writing_hand_tone1": {
+    "c": "people",
+    "e": "✍🏻",
+    "d": "writing hand tone 1",
+    "u": "8.0"
+  },
+  "writing_hand_tone2": {
+    "c": "people",
+    "e": "✍🏼",
+    "d": "writing hand tone 2",
+    "u": "8.0"
+  },
+  "writing_hand_tone3": {
+    "c": "people",
+    "e": "✍🏽",
+    "d": "writing hand tone 3",
+    "u": "8.0"
+  },
+  "writing_hand_tone4": {
+    "c": "people",
+    "e": "✍🏾",
+    "d": "writing hand tone 4",
+    "u": "8.0"
+  },
+  "writing_hand_tone5": {
+    "c": "people",
+    "e": "✍🏿",
+    "d": "writing hand tone 5",
+    "u": "8.0"
+  },
   "selfie": {
     "c": "people",
     "e": "🤳",
     "d": "selfie",
+    "u": "9.0"
+  },
+  "selfie_tone1": {
+    "c": "people",
+    "e": "🤳🏻",
+    "d": "selfie tone 1",
+    "u": "9.0"
+  },
+  "selfie_tone2": {
+    "c": "people",
+    "e": "🤳🏼",
+    "d": "selfie tone 2",
+    "u": "9.0"
+  },
+  "selfie_tone3": {
+    "c": "people",
+    "e": "🤳🏽",
+    "d": "selfie tone 3",
+    "u": "9.0"
+  },
+  "selfie_tone4": {
+    "c": "people",
+    "e": "🤳🏾",
+    "d": "selfie tone 4",
+    "u": "9.0"
+  },
+  "selfie_tone5": {
+    "c": "people",
+    "e": "🤳🏿",
+    "d": "selfie tone 5",
     "u": "9.0"
   },
   "nail_care": {
@@ -820,6 +1840,36 @@
     "e": "💅",
     "d": "nail polish",
     "u": "6.0"
+  },
+  "nail_care_tone1": {
+    "c": "people",
+    "e": "💅🏻",
+    "d": "nail polish tone 1",
+    "u": "8.0"
+  },
+  "nail_care_tone2": {
+    "c": "people",
+    "e": "💅🏼",
+    "d": "nail polish tone 2",
+    "u": "8.0"
+  },
+  "nail_care_tone3": {
+    "c": "people",
+    "e": "💅🏽",
+    "d": "nail polish tone 3",
+    "u": "8.0"
+  },
+  "nail_care_tone4": {
+    "c": "people",
+    "e": "💅🏾",
+    "d": "nail polish tone 4",
+    "u": "8.0"
+  },
+  "nail_care_tone5": {
+    "c": "people",
+    "e": "💅🏿",
+    "d": "nail polish tone 5",
+    "u": "8.0"
   },
   "ring": {
     "c": "people",
@@ -857,11 +1907,71 @@
     "d": "ear",
     "u": "6.0"
   },
+  "ear_tone1": {
+    "c": "people",
+    "e": "👂🏻",
+    "d": "ear tone 1",
+    "u": "8.0"
+  },
+  "ear_tone2": {
+    "c": "people",
+    "e": "👂🏼",
+    "d": "ear tone 2",
+    "u": "8.0"
+  },
+  "ear_tone3": {
+    "c": "people",
+    "e": "👂🏽",
+    "d": "ear tone 3",
+    "u": "8.0"
+  },
+  "ear_tone4": {
+    "c": "people",
+    "e": "👂🏾",
+    "d": "ear tone 4",
+    "u": "8.0"
+  },
+  "ear_tone5": {
+    "c": "people",
+    "e": "👂🏿",
+    "d": "ear tone 5",
+    "u": "8.0"
+  },
   "nose": {
     "c": "people",
     "e": "👃",
     "d": "nose",
     "u": "6.0"
+  },
+  "nose_tone1": {
+    "c": "people",
+    "e": "👃🏻",
+    "d": "nose tone 1",
+    "u": "8.0"
+  },
+  "nose_tone2": {
+    "c": "people",
+    "e": "👃🏼",
+    "d": "nose tone 2",
+    "u": "8.0"
+  },
+  "nose_tone3": {
+    "c": "people",
+    "e": "👃🏽",
+    "d": "nose tone 3",
+    "u": "8.0"
+  },
+  "nose_tone4": {
+    "c": "people",
+    "e": "👃🏾",
+    "d": "nose tone 4",
+    "u": "8.0"
+  },
+  "nose_tone5": {
+    "c": "people",
+    "e": "👃🏿",
+    "d": "nose tone 5",
+    "u": "8.0"
   },
   "footprints": {
     "c": "people",
@@ -905,11 +2015,71 @@
     "d": "baby",
     "u": "6.0"
   },
+  "baby_tone1": {
+    "c": "people",
+    "e": "👶🏻",
+    "d": "baby tone 1",
+    "u": "8.0"
+  },
+  "baby_tone2": {
+    "c": "people",
+    "e": "👶🏼",
+    "d": "baby tone 2",
+    "u": "8.0"
+  },
+  "baby_tone3": {
+    "c": "people",
+    "e": "👶🏽",
+    "d": "baby tone 3",
+    "u": "8.0"
+  },
+  "baby_tone4": {
+    "c": "people",
+    "e": "👶🏾",
+    "d": "baby tone 4",
+    "u": "8.0"
+  },
+  "baby_tone5": {
+    "c": "people",
+    "e": "👶🏿",
+    "d": "baby tone 5",
+    "u": "8.0"
+  },
   "boy": {
     "c": "people",
     "e": "👦",
     "d": "boy",
     "u": "6.0"
+  },
+  "boy_tone1": {
+    "c": "people",
+    "e": "👦🏻",
+    "d": "boy tone 1",
+    "u": "8.0"
+  },
+  "boy_tone2": {
+    "c": "people",
+    "e": "👦🏼",
+    "d": "boy tone 2",
+    "u": "8.0"
+  },
+  "boy_tone3": {
+    "c": "people",
+    "e": "👦🏽",
+    "d": "boy tone 3",
+    "u": "8.0"
+  },
+  "boy_tone4": {
+    "c": "people",
+    "e": "👦🏾",
+    "d": "boy tone 4",
+    "u": "8.0"
+  },
+  "boy_tone5": {
+    "c": "people",
+    "e": "👦🏿",
+    "d": "boy tone 5",
+    "u": "8.0"
   },
   "girl": {
     "c": "people",
@@ -917,11 +2087,341 @@
     "d": "girl",
     "u": "6.0"
   },
+  "girl_tone1": {
+    "c": "people",
+    "e": "👧🏻",
+    "d": "girl tone 1",
+    "u": "8.0"
+  },
+  "girl_tone2": {
+    "c": "people",
+    "e": "👧🏼",
+    "d": "girl tone 2",
+    "u": "8.0"
+  },
+  "girl_tone3": {
+    "c": "people",
+    "e": "👧🏽",
+    "d": "girl tone 3",
+    "u": "8.0"
+  },
+  "girl_tone4": {
+    "c": "people",
+    "e": "👧🏾",
+    "d": "girl tone 4",
+    "u": "8.0"
+  },
+  "girl_tone5": {
+    "c": "people",
+    "e": "👧🏿",
+    "d": "girl tone 5",
+    "u": "8.0"
+  },
   "man": {
     "c": "people",
     "e": "👨",
     "d": "man",
     "u": "6.0"
+  },
+  "guardsman_tone1": {
+    "c": "people",
+    "e": "💂🏻",
+    "d": "guardsman tone 1",
+    "u": "8.0"
+  },
+  "guardsman_tone2": {
+    "c": "people",
+    "e": "💂🏼",
+    "d": "guardsman tone 2",
+    "u": "8.0"
+  },
+  "guardsman_tone3": {
+    "c": "people",
+    "e": "💂🏽",
+    "d": "guardsman tone 3",
+    "u": "8.0"
+  },
+  "guardsman_tone4": {
+    "c": "people",
+    "e": "💂🏾",
+    "d": "guardsman tone 4",
+    "u": "8.0"
+  },
+  "guardsman_tone5": {
+    "c": "people",
+    "e": "💂🏿",
+    "d": "guardsman tone 5",
+    "u": "8.0"
+  },
+  "man_tone1": {
+    "c": "people",
+    "e": "👨🏻",
+    "d": "man tone 1",
+    "u": "8.0"
+  },
+  "man_tone2": {
+    "c": "people",
+    "e": "👨🏼",
+    "d": "man tone 2",
+    "u": "8.0"
+  },
+  "man_tone3": {
+    "c": "people",
+    "e": "👨🏽",
+    "d": "man tone 3",
+    "u": "8.0"
+  },
+  "man_tone4": {
+    "c": "people",
+    "e": "👨🏾",
+    "d": "man tone 4",
+    "u": "8.0"
+  },
+  "man_tone5": {
+    "c": "people",
+    "e": "👨🏿",
+    "d": "man tone 5",
+    "u": "8.0"
+  },
+  "ok_woman_tone1": {
+    "c": "people",
+    "e": "🙆🏻",
+    "d": "face with ok gesture tone1",
+    "u": "8.0"
+  },
+  "ok_woman_tone2": {
+    "c": "people",
+    "e": "🙆🏼",
+    "d": "face with ok gesture tone2",
+    "u": "8.0"
+  },
+  "ok_woman_tone3": {
+    "c": "people",
+    "e": "🙆🏽",
+    "d": "face with ok gesture tone3",
+    "u": "8.0"
+  },
+  "ok_woman_tone4": {
+    "c": "people",
+    "e": "🙆🏾",
+    "d": "face with ok gesture tone4",
+    "u": "8.0"
+  },
+  "ok_woman_tone5": {
+    "c": "people",
+    "e": "🙆🏿",
+    "d": "face with ok gesture tone5",
+    "u": "8.0"
+  },
+  "older_man_tone1": {
+    "c": "people",
+    "e": "👴🏻",
+    "d": "older man tone 1",
+    "u": "8.0"
+  },
+  "older_man_tone2": {
+    "c": "people",
+    "e": "👴🏼",
+    "d": "older man tone 2",
+    "u": "8.0"
+  },
+  "older_man_tone3": {
+    "c": "people",
+    "e": "👴🏽",
+    "d": "older man tone 3",
+    "u": "8.0"
+  },
+  "older_man_tone4": {
+    "c": "people",
+    "e": "👴🏾",
+    "d": "older man tone 4",
+    "u": "8.0"
+  },
+  "older_man_tone5": {
+    "c": "people",
+    "e": "👴🏿",
+    "d": "older man tone 5",
+    "u": "8.0"
+  },
+  "older_woman_tone1": {
+    "c": "people",
+    "e": "👵🏻",
+    "d": "older woman tone 1",
+    "u": "8.0"
+  },
+  "older_woman_tone2": {
+    "c": "people",
+    "e": "👵🏼",
+    "d": "older woman tone 2",
+    "u": "8.0"
+  },
+  "older_woman_tone3": {
+    "c": "people",
+    "e": "👵🏽",
+    "d": "older woman tone 3",
+    "u": "8.0"
+  },
+  "older_woman_tone4": {
+    "c": "people",
+    "e": "👵🏾",
+    "d": "older woman tone 4",
+    "u": "8.0"
+  },
+  "older_woman_tone5": {
+    "c": "people",
+    "e": "👵🏿",
+    "d": "older woman tone 5",
+    "u": "8.0"
+  },
+  "pregnant_woman_tone1": {
+    "c": "people",
+    "e": "🤰🏻",
+    "d": "pregnant woman tone 1",
+    "u": "9.0"
+  },
+  "pregnant_woman_tone2": {
+    "c": "people",
+    "e": "🤰🏼",
+    "d": "pregnant woman tone 2",
+    "u": "9.0"
+  },
+  "pregnant_woman_tone3": {
+    "c": "people",
+    "e": "🤰🏽",
+    "d": "pregnant woman tone 3",
+    "u": "9.0"
+  },
+  "pregnant_woman_tone4": {
+    "c": "people",
+    "e": "🤰🏾",
+    "d": "pregnant woman tone 4",
+    "u": "9.0"
+  },
+  "pregnant_woman_tone5": {
+    "c": "people",
+    "e": "🤰🏿",
+    "d": "pregnant woman tone 5",
+    "u": "9.0"
+  },
+  "woman_tone1": {
+    "c": "people",
+    "e": "👩🏻",
+    "d": "woman tone 1",
+    "u": "8.0"
+  },
+  "woman_tone2": {
+    "c": "people",
+    "e": "👩🏼",
+    "d": "woman tone 2",
+    "u": "8.0"
+  },
+  "woman_tone3": {
+    "c": "people",
+    "e": "👩🏽",
+    "d": "woman tone 3",
+    "u": "8.0"
+  },
+  "woman_tone4": {
+    "c": "people",
+    "e": "👩🏾",
+    "d": "woman tone 4",
+    "u": "8.0"
+  },
+  "woman_tone5": {
+    "c": "people",
+    "e": "👩🏿",
+    "d": "woman tone 5",
+    "u": "8.0"
+  },
+  "blond-haired_woman_tone1": {
+    "c": "people",
+    "e": "👱🏻‍♀️",
+    "d": "blond-haired woman: light skin tone",
+    "u": "8.0"
+  },
+  "blond-haired_woman_tone2": {
+    "c": "people",
+    "e": "👱🏼‍♀️",
+    "d": "blond-haired woman: medium-light skin tone",
+    "u": "8.0"
+  },
+  "blond-haired_woman_tone3": {
+    "c": "people",
+    "e": "👱🏽‍♀️",
+    "d": "blond-haired woman: medium skin tone",
+    "u": "8.0"
+  },
+  "blond-haired_woman_tone4": {
+    "c": "people",
+    "e": "👱🏾‍♀️",
+    "d": "blond-haired woman: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "blond-haired_woman_tone5": {
+    "c": "people",
+    "e": "👱🏿‍♀️",
+    "d": "blond-haired woman: dark skin tone",
+    "u": "8.0"
+  },
+  "blond-haired_man_tone1": {
+    "c": "people",
+    "e": "👱🏻‍♂️",
+    "d": "blond-haired man: light skin tone",
+    "u": "8.0"
+  },
+  "blond-haired_man_tone2": {
+    "c": "people",
+    "e": "👱🏼‍♂️",
+    "d": "blond-haired man: medium-light skin tone",
+    "u": "8.0"
+  },
+  "blond-haired_man_tone3": {
+    "c": "people",
+    "e": "👱🏽‍♂️",
+    "d": "blond-haired man: medium skin tone",
+    "u": "8.0"
+  },
+  "blond-haired_man_tone4": {
+    "c": "people",
+    "e": "👱🏾‍♂️",
+    "d": "blond-haired man: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "blond-haired_man_tone5": {
+    "c": "people",
+    "e": "👱🏿‍♂️",
+    "d": "blond-haired man: dark skin tone",
+    "u": "8.0"
+  },
+  "merman_tone1": {
+    "c": "people",
+    "e": "🧜🏻‍♂️",
+    "d": "merman: light skin tone",
+    "u": "10.0"
+  },
+  "merman_tone2": {
+    "c": "people",
+    "e": "🧜🏼‍♂️",
+    "d": "merman: medium-light skin tone",
+    "u": "10.0"
+  },
+  "merman_tone3": {
+    "c": "people",
+    "e": "🧜🏽‍♂️",
+    "d": "merman: medium skin tone",
+    "u": "10.0"
+  },
+  "merman_tone4": {
+    "c": "people",
+    "e": "🧜🏾‍♂️",
+    "d": "merman: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "merman_tone5": {
+    "c": "people",
+    "e": "🧜🏿‍♂️",
+    "d": "merman: dark skin tone",
+    "u": "10.0"
   },
   "woman": {
     "c": "people",
@@ -959,11 +2459,71 @@
     "d": "woman wearing turban",
     "u": "6.0"
   },
+  "woman_wearing_turban_tone1": {
+    "c": "people",
+    "e": "👳🏻‍♀️",
+    "d": "woman wearing turban: light skin tone",
+    "u": "8.0"
+  },
+  "woman_wearing_turban_tone2": {
+    "c": "people",
+    "e": "👳🏼‍♀️",
+    "d": "woman wearing turban: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_wearing_turban_tone3": {
+    "c": "people",
+    "e": "👳🏽‍♀️",
+    "d": "woman wearing turban: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_wearing_turban_tone4": {
+    "c": "people",
+    "e": "👳🏾‍♀️",
+    "d": "woman wearing turban: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_wearing_turban_tone5": {
+    "c": "people",
+    "e": "👳🏿‍♀️",
+    "d": "woman wearing turban: dark skin tone",
+    "u": "8.0"
+  },
   "man_wearing_turban": {
     "c": "people",
     "e": "👳‍♂️",
     "d": "man wearing turban",
     "u": "6.0"
+  },
+  "man_wearing_turban_tone1": {
+    "c": "people",
+    "e": "👳🏻‍♂️",
+    "d": "man wearing turban: light skin tone",
+    "u": "8.0"
+  },
+  "man_wearing_turban_tone2": {
+    "c": "people",
+    "e": "👳🏼‍♂️",
+    "d": "man wearing turban: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_wearing_turban_tone3": {
+    "c": "people",
+    "e": "👳🏽‍♂️",
+    "d": "man wearing turban: medium skin tone",
+    "u": "8.0"
+  },
+  "man_wearing_turban_tone4": {
+    "c": "people",
+    "e": "👳🏾‍♂️",
+    "d": "man wearing turban: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_wearing_turban_tone5": {
+    "c": "people",
+    "e": "👳🏿‍♂️",
+    "d": "man wearing turban: dark skin tone",
+    "u": "8.0"
   },
   "woman_police_officer": {
     "c": "people",
@@ -971,11 +2531,71 @@
     "d": "woman police officer",
     "u": "6.0"
   },
+  "woman_police_officer_tone1": {
+    "c": "people",
+    "e": "👮🏻‍♀️",
+    "d": "woman police officer: light skin tone",
+    "u": "8.0"
+  },
+  "woman_police_officer_tone2": {
+    "c": "people",
+    "e": "👮🏼‍♀️",
+    "d": "woman police officer: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_police_officer_tone3": {
+    "c": "people",
+    "e": "👮🏽‍♀️",
+    "d": "woman police officer: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_police_officer_tone4": {
+    "c": "people",
+    "e": "👮🏾‍♀️",
+    "d": "woman police officer: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_police_officer_tone5": {
+    "c": "people",
+    "e": "👮🏿‍♀️",
+    "d": "woman police officer: dark skin tone",
+    "u": "8.0"
+  },
   "man_police_officer": {
     "c": "people",
     "e": "👮‍♂️",
     "d": "man police officer",
     "u": "6.0"
+  },
+  "man_police_officer_tone1": {
+    "c": "people",
+    "e": "👮🏻‍♂️",
+    "d": "man police officer: light skin tone",
+    "u": "8.0"
+  },
+  "man_police_officer_tone2": {
+    "c": "people",
+    "e": "👮🏼‍♂️",
+    "d": "man police officer: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_police_officer_tone3": {
+    "c": "people",
+    "e": "👮🏽‍♂️",
+    "d": "man police officer: medium skin tone",
+    "u": "8.0"
+  },
+  "man_police_officer_tone4": {
+    "c": "people",
+    "e": "👮🏾‍♂️",
+    "d": "man police officer: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_police_officer_tone5": {
+    "c": "people",
+    "e": "👮🏿‍♂️",
+    "d": "man police officer: dark skin tone",
+    "u": "8.0"
   },
   "woman_construction_worker": {
     "c": "people",
@@ -983,11 +2603,101 @@
     "d": "woman construction worker",
     "u": "6.0"
   },
+  "woman_construction_worker_tone1": {
+    "c": "people",
+    "e": "👷🏻‍♀️",
+    "d": "woman construction worker: light skin tone",
+    "u": "8.0"
+  },
+  "woman_construction_worker_tone2": {
+    "c": "people",
+    "e": "👷🏼‍♀️",
+    "d": "woman construction worker: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_construction_worker_tone3": {
+    "c": "people",
+    "e": "👷🏽‍♀️",
+    "d": "woman construction worker: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_construction_worker_tone4": {
+    "c": "people",
+    "e": "👷🏾‍♀️",
+    "d": "woman construction worker: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_construction_worker_tone5": {
+    "c": "people",
+    "e": "👷🏿‍♀️",
+    "d": "woman construction worker: dark skin tone",
+    "u": "8.0"
+  },
   "construction_worker": {
     "c": "people",
     "e": "👷",
     "d": "construction worker",
     "u": "6.0"
+  },
+  "construction_worker_tone1": {
+    "c": "people",
+    "e": "👷🏻",
+    "d": "construction worker tone 1",
+    "u": "8.0"
+  },
+  "construction_worker_tone2": {
+    "c": "people",
+    "e": "👷🏼",
+    "d": "construction worker tone 2",
+    "u": "8.0"
+  },
+  "construction_worker_tone3": {
+    "c": "people",
+    "e": "👷🏽",
+    "d": "construction worker tone 3",
+    "u": "8.0"
+  },
+  "construction_worker_tone4": {
+    "c": "people",
+    "e": "👷🏾",
+    "d": "construction worker tone 4",
+    "u": "8.0"
+  },
+  "construction_worker_tone5": {
+    "c": "people",
+    "e": "👷🏿",
+    "d": "construction worker tone 5",
+    "u": "8.0"
+  },
+  "man_construction_worker_tone1": {
+    "c": "people",
+    "e": "👷🏻‍♂️",
+    "d": "man construction worker: light skin tone",
+    "u": "8.0"
+  },
+  "man_construction_worker_tone2": {
+    "c": "people",
+    "e": "👷🏼‍♂️",
+    "d": "man construction worker: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_construction_worker_tone3": {
+    "c": "people",
+    "e": "👷🏽‍♂️",
+    "d": "man construction worker: medium skin tone",
+    "u": "8.0"
+  },
+  "man_construction_worker_tone4": {
+    "c": "people",
+    "e": "👷🏾‍♂️",
+    "d": "man construction worker: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_construction_worker_tone5": {
+    "c": "people",
+    "e": "👷🏿‍♂️",
+    "d": "man construction worker: dark skin tone",
+    "u": "8.0"
   },
   "woman_guard": {
     "c": "people",
@@ -995,11 +2705,71 @@
     "d": "woman guard",
     "u": "6.0"
   },
+  "woman_guard_tone1": {
+    "c": "people",
+    "e": "💂🏻‍♀️",
+    "d": "woman guard: light skin tone",
+    "u": "8.0"
+  },
+  "woman_guard_tone2": {
+    "c": "people",
+    "e": "💂🏼‍♀️",
+    "d": "woman guard: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_guard_tone3": {
+    "c": "people",
+    "e": "💂🏽‍♀️",
+    "d": "woman guard: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_guard_tone4": {
+    "c": "people",
+    "e": "💂🏾‍♀️",
+    "d": "woman guard: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_guard_tone5": {
+    "c": "people",
+    "e": "💂🏿‍♀️",
+    "d": "woman guard: dark skin tone",
+    "u": "8.0"
+  },
   "man_guard": {
     "c": "people",
     "e": "💂‍♂️",
     "d": "man guard",
     "u": "6.0"
+  },
+  "man_guard_tone1": {
+    "c": "people",
+    "e": "💂🏻‍♂️",
+    "d": "man guard: light skin tone",
+    "u": "8.0"
+  },
+  "man_guard_tone2": {
+    "c": "people",
+    "e": "💂🏼‍♂️",
+    "d": "man guard: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_guard_tone3": {
+    "c": "people",
+    "e": "💂🏽‍♂️",
+    "d": "man guard: medium skin tone",
+    "u": "8.0"
+  },
+  "man_guard_tone4": {
+    "c": "people",
+    "e": "💂🏾‍♂️",
+    "d": "man guard: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_guard_tone5": {
+    "c": "people",
+    "e": "💂🏿‍♂️",
+    "d": "man guard: dark skin tone",
+    "u": "8.0"
   },
   "woman_detective": {
     "c": "people",
@@ -1007,11 +2777,71 @@
     "d": "woman detective",
     "u": "7.0"
   },
+  "woman_detective_tone1": {
+    "c": "people",
+    "e": "🕵🏻‍♀️",
+    "d": "woman detective: light skin tone",
+    "u": "8.0"
+  },
+  "woman_detective_tone2": {
+    "c": "people",
+    "e": "🕵🏼‍♀️",
+    "d": "woman detective: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_detective_tone3": {
+    "c": "people",
+    "e": "🕵🏽‍♀️",
+    "d": "woman detective: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_detective_tone4": {
+    "c": "people",
+    "e": "🕵🏾‍♀️",
+    "d": "woman detective: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_detective_tone5": {
+    "c": "people",
+    "e": "🕵🏿‍♀️",
+    "d": "woman detective: dark skin tone",
+    "u": "8.0"
+  },
   "man_detective": {
     "c": "people",
     "e": "🕵️‍♂️",
     "d": "man detective",
     "u": "7.0"
+  },
+  "man_detective_tone1": {
+    "c": "people",
+    "e": "🕵🏻‍♂️",
+    "d": "man detective: light skin tone",
+    "u": "8.0"
+  },
+  "man_detective_tone2": {
+    "c": "people",
+    "e": "🕵🏼‍♂️",
+    "d": "man detective: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_detective_tone3": {
+    "c": "people",
+    "e": "🕵🏽‍♂️",
+    "d": "man detective: medium skin tone",
+    "u": "8.0"
+  },
+  "man_detective_tone4": {
+    "c": "people",
+    "e": "🕵🏾‍♂️",
+    "d": "man detective: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_detective_tone5": {
+    "c": "people",
+    "e": "🕵🏿‍♂️",
+    "d": "man detective: dark skin tone",
+    "u": "8.0"
   },
   "woman_health_worker": {
     "c": "people",
@@ -1019,11 +2849,71 @@
     "d": "woman health worker",
     "u": "6.0"
   },
+  "woman_health_worker_tone1": {
+    "c": "people",
+    "e": "👩🏻‍⚕️",
+    "d": "woman health worker: light skin tone",
+    "u": "8.0"
+  },
+  "woman_health_worker_tone2": {
+    "c": "people",
+    "e": "👩🏼‍⚕️",
+    "d": "woman health worker: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_health_worker_tone3": {
+    "c": "people",
+    "e": "👩🏽‍⚕️",
+    "d": "woman health worker: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_health_worker_tone4": {
+    "c": "people",
+    "e": "👩🏾‍⚕️",
+    "d": "woman health worker: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_health_worker_tone5": {
+    "c": "people",
+    "e": "👩🏿‍⚕️",
+    "d": "woman health worker: dark skin tone",
+    "u": "8.0"
+  },
   "man_health_worker": {
     "c": "people",
     "e": "👨‍⚕️",
     "d": "man health worker",
     "u": "6.0"
+  },
+  "man_health_worker_tone1": {
+    "c": "people",
+    "e": "👨🏻‍⚕️",
+    "d": "man health worker: light skin tone",
+    "u": "8.0"
+  },
+  "man_health_worker_tone2": {
+    "c": "people",
+    "e": "👨🏼‍⚕️",
+    "d": "man health worker: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_health_worker_tone3": {
+    "c": "people",
+    "e": "👨🏽‍⚕️",
+    "d": "man health worker: medium skin tone",
+    "u": "8.0"
+  },
+  "man_health_worker_tone4": {
+    "c": "people",
+    "e": "👨🏾‍⚕️",
+    "d": "man health worker: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_health_worker_tone5": {
+    "c": "people",
+    "e": "👨🏿‍⚕️",
+    "d": "man health worker: dark skin tone",
+    "u": "8.0"
   },
   "woman_farmer": {
     "c": "people",
@@ -1031,11 +2921,71 @@
     "d": "woman farmer",
     "u": "6.0"
   },
+  "woman_farmer_tone1": {
+    "c": "people",
+    "e": "👩🏻‍🌾",
+    "d": "woman farmer: light skin tone",
+    "u": "8.0"
+  },
+  "woman_farmer_tone2": {
+    "c": "people",
+    "e": "👩🏼‍🌾",
+    "d": "woman farmer: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_farmer_tone3": {
+    "c": "people",
+    "e": "👩🏽‍🌾",
+    "d": "woman farmer: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_farmer_tone4": {
+    "c": "people",
+    "e": "👩🏾‍🌾",
+    "d": "woman farmer: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_farmer_tone5": {
+    "c": "people",
+    "e": "👩🏿‍🌾",
+    "d": "woman farmer: dark skin tone",
+    "u": "8.0"
+  },
   "man_farmer": {
     "c": "people",
     "e": "👨‍🌾",
     "d": "man farmer",
     "u": "6.0"
+  },
+  "man_farmer_tone1": {
+    "c": "people",
+    "e": "👨🏻‍🌾",
+    "d": "man farmer: light skin tone",
+    "u": "8.0"
+  },
+  "man_farmer_tone2": {
+    "c": "people",
+    "e": "👨🏼‍🌾",
+    "d": "man farmer: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_farmer_tone3": {
+    "c": "people",
+    "e": "👨🏽‍🌾",
+    "d": "man farmer: medium skin tone",
+    "u": "8.0"
+  },
+  "man_farmer_tone4": {
+    "c": "people",
+    "e": "👨🏾‍🌾",
+    "d": "man farmer: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_farmer_tone5": {
+    "c": "people",
+    "e": "👨🏿‍🌾",
+    "d": "man farmer: dark skin tone",
+    "u": "8.0"
   },
   "woman_cook": {
     "c": "people",
@@ -1043,11 +2993,71 @@
     "d": "woman cook",
     "u": "6.0"
   },
+  "woman_cook_tone1": {
+    "c": "people",
+    "e": "👩🏻‍🍳",
+    "d": "woman cook: light skin tone",
+    "u": "8.0"
+  },
+  "woman_cook_tone2": {
+    "c": "people",
+    "e": "👩🏼‍🍳",
+    "d": "woman cook: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_cook_tone3": {
+    "c": "people",
+    "e": "👩🏽‍🍳",
+    "d": "woman cook: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_cook_tone4": {
+    "c": "people",
+    "e": "👩🏾‍🍳",
+    "d": "woman cook: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_cook_tone5": {
+    "c": "people",
+    "e": "👩🏿‍🍳",
+    "d": "woman cook: dark skin tone",
+    "u": "8.0"
+  },
   "man_cook": {
     "c": "people",
     "e": "👨‍🍳",
     "d": "man cook",
     "u": "6.0"
+  },
+  "man_cook_tone1": {
+    "c": "people",
+    "e": "👨🏻‍🍳",
+    "d": "man cook: light skin tone",
+    "u": "8.0"
+  },
+  "man_cook_tone2": {
+    "c": "people",
+    "e": "👨🏼‍🍳",
+    "d": "man cook: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_cook_tone3": {
+    "c": "people",
+    "e": "👨🏽‍🍳",
+    "d": "man cook: medium skin tone",
+    "u": "8.0"
+  },
+  "man_cook_tone4": {
+    "c": "people",
+    "e": "👨🏾‍🍳",
+    "d": "man cook: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_cook_tone5": {
+    "c": "people",
+    "e": "👨🏿‍🍳",
+    "d": "man cook: dark skin tone",
+    "u": "8.0"
   },
   "woman_student": {
     "c": "people",
@@ -1055,11 +3065,71 @@
     "d": "woman student",
     "u": "6.0"
   },
+  "woman_student_tone1": {
+    "c": "people",
+    "e": "👩🏻‍🎓",
+    "d": "woman student: light skin tone",
+    "u": "8.0"
+  },
+  "woman_student_tone2": {
+    "c": "people",
+    "e": "👩🏼‍🎓",
+    "d": "woman student: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_student_tone3": {
+    "c": "people",
+    "e": "👩🏽‍🎓",
+    "d": "woman student: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_student_tone4": {
+    "c": "people",
+    "e": "👩🏾‍🎓",
+    "d": "woman student: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_student_tone5": {
+    "c": "people",
+    "e": "👩🏿‍🎓",
+    "d": "woman student: dark skin tone",
+    "u": "8.0"
+  },
   "man_student": {
     "c": "people",
     "e": "👨‍🎓",
     "d": "man student",
     "u": "6.0"
+  },
+  "man_student_tone1": {
+    "c": "people",
+    "e": "👨🏻‍🎓",
+    "d": "man student: light skin tone",
+    "u": "8.0"
+  },
+  "man_student_tone2": {
+    "c": "people",
+    "e": "👨🏼‍🎓",
+    "d": "man student: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_student_tone3": {
+    "c": "people",
+    "e": "👨🏽‍🎓",
+    "d": "man student: medium skin tone",
+    "u": "8.0"
+  },
+  "man_student_tone4": {
+    "c": "people",
+    "e": "👨🏾‍🎓",
+    "d": "man student: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_student_tone5": {
+    "c": "people",
+    "e": "👨🏿‍🎓",
+    "d": "man student: dark skin tone",
+    "u": "8.0"
   },
   "woman_singer": {
     "c": "people",
@@ -1067,11 +3137,71 @@
     "d": "woman singer",
     "u": "6.0"
   },
+  "woman_singer_tone1": {
+    "c": "people",
+    "e": "👩🏻‍🎤",
+    "d": "woman singer: light skin tone",
+    "u": "8.0"
+  },
+  "woman_singer_tone2": {
+    "c": "people",
+    "e": "👩🏼‍🎤",
+    "d": "woman singer: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_singer_tone3": {
+    "c": "people",
+    "e": "👩🏽‍🎤",
+    "d": "woman singer: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_singer_tone4": {
+    "c": "people",
+    "e": "👩🏾‍🎤",
+    "d": "woman singer: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_singer_tone5": {
+    "c": "people",
+    "e": "👩🏿‍🎤",
+    "d": "woman singer: dark skin tone",
+    "u": "8.0"
+  },
   "man_singer": {
     "c": "people",
     "e": "👨‍🎤",
     "d": "man singer",
     "u": "6.0"
+  },
+  "man_singer_tone1": {
+    "c": "people",
+    "e": "👨🏻‍🎤",
+    "d": "man singer: light skin tone",
+    "u": "8.0"
+  },
+  "man_singer_tone2": {
+    "c": "people",
+    "e": "👨🏼‍🎤",
+    "d": "man singer: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_singer_tone3": {
+    "c": "people",
+    "e": "👨🏽‍🎤",
+    "d": "man singer: medium skin tone",
+    "u": "8.0"
+  },
+  "man_singer_tone4": {
+    "c": "people",
+    "e": "👨🏾‍🎤",
+    "d": "man singer: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_singer_tone5": {
+    "c": "people",
+    "e": "👨🏿‍🎤",
+    "d": "man singer: dark skin tone",
+    "u": "8.0"
   },
   "woman_teacher": {
     "c": "people",
@@ -1079,11 +3209,71 @@
     "d": "woman teacher",
     "u": "6.0"
   },
+  "woman_teacher_tone1": {
+    "c": "people",
+    "e": "👩🏻‍🏫",
+    "d": "woman teacher: light skin tone",
+    "u": "8.0"
+  },
+  "woman_teacher_tone2": {
+    "c": "people",
+    "e": "👩🏼‍🏫",
+    "d": "woman teacher: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_teacher_tone3": {
+    "c": "people",
+    "e": "👩🏽‍🏫",
+    "d": "woman teacher: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_teacher_tone4": {
+    "c": "people",
+    "e": "👩🏾‍🏫",
+    "d": "woman teacher: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_teacher_tone5": {
+    "c": "people",
+    "e": "👩🏿‍🏫",
+    "d": "woman teacher: dark skin tone",
+    "u": "8.0"
+  },
   "man_teacher": {
     "c": "people",
     "e": "👨‍🏫",
     "d": "man teacher",
     "u": "6.0"
+  },
+  "man_teacher_tone1": {
+    "c": "people",
+    "e": "👨🏻‍🏫",
+    "d": "man teacher: light skin tone",
+    "u": "8.0"
+  },
+  "man_teacher_tone2": {
+    "c": "people",
+    "e": "👨🏼‍🏫",
+    "d": "man teacher: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_teacher_tone3": {
+    "c": "people",
+    "e": "👨🏽‍🏫",
+    "d": "man teacher: medium skin tone",
+    "u": "8.0"
+  },
+  "man_teacher_tone4": {
+    "c": "people",
+    "e": "👨🏾‍🏫",
+    "d": "man teacher: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_teacher_tone5": {
+    "c": "people",
+    "e": "👨🏿‍🏫",
+    "d": "man teacher: dark skin tone",
+    "u": "8.0"
   },
   "woman_factory_worker": {
     "c": "people",
@@ -1091,11 +3281,71 @@
     "d": "woman factory worker",
     "u": "6.0"
   },
+  "woman_factory_worker_tone1": {
+    "c": "people",
+    "e": "👩🏻‍🏭",
+    "d": "woman factory worker: light skin tone",
+    "u": "8.0"
+  },
+  "woman_factory_worker_tone2": {
+    "c": "people",
+    "e": "👩🏼‍🏭",
+    "d": "woman factory worker: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_factory_worker_tone3": {
+    "c": "people",
+    "e": "👩🏽‍🏭",
+    "d": "woman factory worker: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_factory_worker_tone4": {
+    "c": "people",
+    "e": "👩🏾‍🏭",
+    "d": "woman factory worker: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_factory_worker_tone5": {
+    "c": "people",
+    "e": "👩🏿‍🏭",
+    "d": "woman factory worker: dark skin tone",
+    "u": "8.0"
+  },
   "man_factory_worker": {
     "c": "people",
     "e": "👨‍🏭",
     "d": "man factory worker",
     "u": "6.0"
+  },
+  "man_factory_worker_tone1": {
+    "c": "people",
+    "e": "👨🏻‍🏭",
+    "d": "man factory worker: light skin tone",
+    "u": "8.0"
+  },
+  "man_factory_worker_tone2": {
+    "c": "people",
+    "e": "👨🏼‍🏭",
+    "d": "man factory worker: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_factory_worker_tone3": {
+    "c": "people",
+    "e": "👨🏽‍🏭",
+    "d": "man factory worker: medium skin tone",
+    "u": "8.0"
+  },
+  "man_factory_worker_tone4": {
+    "c": "people",
+    "e": "👨🏾‍🏭",
+    "d": "man factory worker: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_factory_worker_tone5": {
+    "c": "people",
+    "e": "👨🏿‍🏭",
+    "d": "man factory worker: dark skin tone",
+    "u": "8.0"
   },
   "woman_technologist": {
     "c": "people",
@@ -1103,11 +3353,71 @@
     "d": "woman technologist",
     "u": "6.0"
   },
+  "woman_technologist_tone1": {
+    "c": "people",
+    "e": "👩🏻‍💻",
+    "d": "woman technologist: light skin tone",
+    "u": "8.0"
+  },
+  "woman_technologist_tone2": {
+    "c": "people",
+    "e": "👩🏼‍💻",
+    "d": "woman technologist: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_technologist_tone3": {
+    "c": "people",
+    "e": "👩🏽‍💻",
+    "d": "woman technologist: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_technologist_tone4": {
+    "c": "people",
+    "e": "👩🏾‍💻",
+    "d": "woman technologist: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_technologist_tone5": {
+    "c": "people",
+    "e": "👩🏿‍💻",
+    "d": "woman technologist: dark skin tone",
+    "u": "8.0"
+  },
   "man_technologist": {
     "c": "people",
     "e": "👨‍💻",
     "d": "man technologist",
     "u": "6.0"
+  },
+  "man_technologist_tone1": {
+    "c": "people",
+    "e": "👨🏻‍💻",
+    "d": "man technologist: light skin tone",
+    "u": "8.0"
+  },
+  "man_technologist_tone2": {
+    "c": "people",
+    "e": "👨🏼‍💻",
+    "d": "man technologist: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_technologist_tone3": {
+    "c": "people",
+    "e": "👨🏽‍💻",
+    "d": "man technologist: medium skin tone",
+    "u": "8.0"
+  },
+  "man_technologist_tone4": {
+    "c": "people",
+    "e": "👨🏾‍💻",
+    "d": "man technologist: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_technologist_tone5": {
+    "c": "people",
+    "e": "👨🏿‍💻",
+    "d": "man technologist: dark skin tone",
+    "u": "8.0"
   },
   "woman_office_worker": {
     "c": "people",
@@ -1115,11 +3425,71 @@
     "d": "woman office worker",
     "u": "6.0"
   },
+  "woman_office_worker_tone1": {
+    "c": "people",
+    "e": "👩🏻‍💼",
+    "d": "woman office worker: light skin tone",
+    "u": "8.0"
+  },
+  "woman_office_worker_tone2": {
+    "c": "people",
+    "e": "👩🏼‍💼",
+    "d": "woman office worker: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_office_worker_tone3": {
+    "c": "people",
+    "e": "👩🏽‍💼",
+    "d": "woman office worker: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_office_worker_tone4": {
+    "c": "people",
+    "e": "👩🏾‍💼",
+    "d": "woman office worker: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_office_worker_tone5": {
+    "c": "people",
+    "e": "👩🏿‍💼",
+    "d": "woman office worker: dark skin tone",
+    "u": "8.0"
+  },
   "man_office_worker": {
     "c": "people",
     "e": "👨‍💼",
     "d": "man office worker",
     "u": "6.0"
+  },
+  "man_office_worker_tone1": {
+    "c": "people",
+    "e": "👨🏻‍💼",
+    "d": "man office worker: light skin tone",
+    "u": "8.0"
+  },
+  "man_office_worker_tone2": {
+    "c": "people",
+    "e": "👨🏼‍💼",
+    "d": "man office worker: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_office_worker_tone3": {
+    "c": "people",
+    "e": "👨🏽‍💼",
+    "d": "man office worker: medium skin tone",
+    "u": "8.0"
+  },
+  "man_office_worker_tone4": {
+    "c": "people",
+    "e": "👨🏾‍💼",
+    "d": "man office worker: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_office_worker_tone5": {
+    "c": "people",
+    "e": "👨🏿‍💼",
+    "d": "man office worker: dark skin tone",
+    "u": "8.0"
   },
   "woman_mechanic": {
     "c": "people",
@@ -1127,11 +3497,71 @@
     "d": "woman mechanic",
     "u": "6.0"
   },
+  "woman_mechanic_tone1": {
+    "c": "people",
+    "e": "👩🏻‍🔧",
+    "d": "woman mechanic: light skin tone",
+    "u": "8.0"
+  },
+  "woman_mechanic_tone2": {
+    "c": "people",
+    "e": "👩🏼‍🔧",
+    "d": "woman mechanic: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_mechanic_tone3": {
+    "c": "people",
+    "e": "👩🏽‍🔧",
+    "d": "woman mechanic: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_mechanic_tone4": {
+    "c": "people",
+    "e": "👩🏾‍🔧",
+    "d": "woman mechanic: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_mechanic_tone5": {
+    "c": "people",
+    "e": "👩🏿‍🔧",
+    "d": "woman mechanic: dark skin tone",
+    "u": "8.0"
+  },
   "man_mechanic": {
     "c": "people",
     "e": "👨‍🔧",
     "d": "man mechanic",
     "u": "6.0"
+  },
+  "man_mechanic_tone1": {
+    "c": "people",
+    "e": "👨🏻‍🔧",
+    "d": "man mechanic: light skin tone",
+    "u": "8.0"
+  },
+  "man_mechanic_tone2": {
+    "c": "people",
+    "e": "👨🏼‍🔧",
+    "d": "man mechanic: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_mechanic_tone3": {
+    "c": "people",
+    "e": "👨🏽‍🔧",
+    "d": "man mechanic: medium skin tone",
+    "u": "8.0"
+  },
+  "man_mechanic_tone4": {
+    "c": "people",
+    "e": "👨🏾‍🔧",
+    "d": "man mechanic: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_mechanic_tone5": {
+    "c": "people",
+    "e": "👨🏿‍🔧",
+    "d": "man mechanic: dark skin tone",
+    "u": "8.0"
   },
   "woman_scientist": {
     "c": "people",
@@ -1139,11 +3569,71 @@
     "d": "woman scientist",
     "u": "6.0"
   },
+  "woman_scientist_tone1": {
+    "c": "people",
+    "e": "👩🏻‍🔬",
+    "d": "woman scientist: light skin tone",
+    "u": "8.0"
+  },
+  "woman_scientist_tone2": {
+    "c": "people",
+    "e": "👩🏼‍🔬",
+    "d": "woman scientist: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_scientist_tone3": {
+    "c": "people",
+    "e": "👩🏽‍🔬",
+    "d": "woman scientist: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_scientist_tone4": {
+    "c": "people",
+    "e": "👩🏾‍🔬",
+    "d": "woman scientist: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_scientist_tone5": {
+    "c": "people",
+    "e": "👩🏿‍🔬",
+    "d": "woman scientist: dark skin tone",
+    "u": "8.0"
+  },
   "man_scientist": {
     "c": "people",
     "e": "👨‍🔬",
     "d": "man scientist",
     "u": "6.0"
+  },
+  "man_scientist_tone1": {
+    "c": "people",
+    "e": "👨🏻‍🔬",
+    "d": "man scientist: light skin tone",
+    "u": "8.0"
+  },
+  "man_scientist_tone2": {
+    "c": "people",
+    "e": "👨🏼‍🔬",
+    "d": "man scientist: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_scientist_tone3": {
+    "c": "people",
+    "e": "👨🏽‍🔬",
+    "d": "man scientist: medium skin tone",
+    "u": "8.0"
+  },
+  "man_scientist_tone4": {
+    "c": "people",
+    "e": "👨🏾‍🔬",
+    "d": "man scientist: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_scientist_tone5": {
+    "c": "people",
+    "e": "👨🏿‍🔬",
+    "d": "man scientist: dark skin tone",
+    "u": "8.0"
   },
   "woman_artist": {
     "c": "people",
@@ -1151,11 +3641,71 @@
     "d": "woman artist",
     "u": "6.0"
   },
+  "woman_artist_tone1": {
+    "c": "people",
+    "e": "👩🏻‍🎨",
+    "d": "woman artist: light skin tone",
+    "u": "8.0"
+  },
+  "woman_artist_tone2": {
+    "c": "people",
+    "e": "👩🏼‍🎨",
+    "d": "woman artist: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_artist_tone3": {
+    "c": "people",
+    "e": "👩🏽‍🎨",
+    "d": "woman artist: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_artist_tone4": {
+    "c": "people",
+    "e": "👩🏾‍🎨",
+    "d": "woman artist: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_artist_tone5": {
+    "c": "people",
+    "e": "👩🏿‍🎨",
+    "d": "woman artist: dark skin tone",
+    "u": "8.0"
+  },
   "man_artist": {
     "c": "people",
     "e": "👨‍🎨",
     "d": "man artist",
     "u": "6.0"
+  },
+  "man_artist_tone1": {
+    "c": "people",
+    "e": "👨🏻‍🎨",
+    "d": "man artist: light skin tone",
+    "u": "8.0"
+  },
+  "man_artist_tone2": {
+    "c": "people",
+    "e": "👨🏼‍🎨",
+    "d": "man artist: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_artist_tone3": {
+    "c": "people",
+    "e": "👨🏽‍🎨",
+    "d": "man artist: medium skin tone",
+    "u": "8.0"
+  },
+  "man_artist_tone4": {
+    "c": "people",
+    "e": "👨🏾‍🎨",
+    "d": "man artist: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_artist_tone5": {
+    "c": "people",
+    "e": "👨🏿‍🎨",
+    "d": "man artist: dark skin tone",
+    "u": "8.0"
   },
   "woman_firefighter": {
     "c": "people",
@@ -1163,11 +3713,71 @@
     "d": "woman firefighter",
     "u": "6.0"
   },
+  "woman_firefighter_tone1": {
+    "c": "people",
+    "e": "👩🏻‍🚒",
+    "d": "woman firefighter: light skin tone",
+    "u": "8.0"
+  },
+  "woman_firefighter_tone2": {
+    "c": "people",
+    "e": "👩🏼‍🚒",
+    "d": "woman firefighter: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_firefighter_tone3": {
+    "c": "people",
+    "e": "👩🏽‍🚒",
+    "d": "woman firefighter: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_firefighter_tone4": {
+    "c": "people",
+    "e": "👩🏾‍🚒",
+    "d": "woman firefighter: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_firefighter_tone5": {
+    "c": "people",
+    "e": "👩🏿‍🚒",
+    "d": "woman firefighter: dark skin tone",
+    "u": "8.0"
+  },
   "man_firefighter": {
     "c": "people",
     "e": "👨‍🚒",
     "d": "man firefighter",
     "u": "6.0"
+  },
+  "man_firefighter_tone1": {
+    "c": "people",
+    "e": "👨🏻‍🚒",
+    "d": "man firefighter: light skin tone",
+    "u": "8.0"
+  },
+  "man_firefighter_tone2": {
+    "c": "people",
+    "e": "👨🏼‍🚒",
+    "d": "man firefighter: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_firefighter_tone3": {
+    "c": "people",
+    "e": "👨🏽‍🚒",
+    "d": "man firefighter: medium skin tone",
+    "u": "8.0"
+  },
+  "man_firefighter_tone4": {
+    "c": "people",
+    "e": "👨🏾‍🚒",
+    "d": "man firefighter: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_firefighter_tone5": {
+    "c": "people",
+    "e": "👨🏿‍🚒",
+    "d": "man firefighter: dark skin tone",
+    "u": "8.0"
   },
   "woman_pilot": {
     "c": "people",
@@ -1175,11 +3785,71 @@
     "d": "woman pilot",
     "u": "6.0"
   },
+  "woman_pilot_tone1": {
+    "c": "people",
+    "e": "👩🏻‍✈️",
+    "d": "woman pilot: light skin tone",
+    "u": "8.0"
+  },
+  "woman_pilot_tone2": {
+    "c": "people",
+    "e": "👩🏼‍✈️",
+    "d": "woman pilot: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_pilot_tone3": {
+    "c": "people",
+    "e": "👩🏽‍✈️",
+    "d": "woman pilot: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_pilot_tone4": {
+    "c": "people",
+    "e": "👩🏾‍✈️",
+    "d": "woman pilot: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_pilot_tone5": {
+    "c": "people",
+    "e": "👩🏿‍✈️",
+    "d": "woman pilot: dark skin tone",
+    "u": "8.0"
+  },
   "man_pilot": {
     "c": "people",
     "e": "👨‍✈️",
     "d": "man pilot",
     "u": "6.0"
+  },
+  "man_pilot_tone1": {
+    "c": "people",
+    "e": "👨🏻‍✈️",
+    "d": "man pilot: light skin tone",
+    "u": "8.0"
+  },
+  "man_pilot_tone2": {
+    "c": "people",
+    "e": "👨🏼‍✈️",
+    "d": "man pilot: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_pilot_tone3": {
+    "c": "people",
+    "e": "👨🏽‍✈️",
+    "d": "man pilot: medium skin tone",
+    "u": "8.0"
+  },
+  "man_pilot_tone4": {
+    "c": "people",
+    "e": "👨🏾‍✈️",
+    "d": "man pilot: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_pilot_tone5": {
+    "c": "people",
+    "e": "👨🏿‍✈️",
+    "d": "man pilot: dark skin tone",
+    "u": "8.0"
   },
   "woman_astronaut": {
     "c": "people",
@@ -1187,11 +3857,71 @@
     "d": "woman astronaut",
     "u": "6.0"
   },
+  "woman_astronaut_tone1": {
+    "c": "people",
+    "e": "👩🏻‍🚀",
+    "d": "woman astronaut: light skin tone",
+    "u": "8.0"
+  },
+  "woman_astronaut_tone2": {
+    "c": "people",
+    "e": "👩🏼‍🚀",
+    "d": "woman astronaut: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_astronaut_tone3": {
+    "c": "people",
+    "e": "👩🏽‍🚀",
+    "d": "woman astronaut: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_astronaut_tone4": {
+    "c": "people",
+    "e": "👩🏾‍🚀",
+    "d": "woman astronaut: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_astronaut_tone5": {
+    "c": "people",
+    "e": "👩🏿‍🚀",
+    "d": "woman astronaut: dark skin tone",
+    "u": "8.0"
+  },
   "man_astronaut": {
     "c": "people",
     "e": "👨‍🚀",
     "d": "man astronaut",
     "u": "6.0"
+  },
+  "man_astronaut_tone1": {
+    "c": "people",
+    "e": "👨🏻‍🚀",
+    "d": "man astronaut: light skin tone",
+    "u": "8.0"
+  },
+  "man_astronaut_tone2": {
+    "c": "people",
+    "e": "👨🏼‍🚀",
+    "d": "man astronaut: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_astronaut_tone3": {
+    "c": "people",
+    "e": "👨🏽‍🚀",
+    "d": "man astronaut: medium skin tone",
+    "u": "8.0"
+  },
+  "man_astronaut_tone4": {
+    "c": "people",
+    "e": "👨🏾‍🚀",
+    "d": "man astronaut: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_astronaut_tone5": {
+    "c": "people",
+    "e": "👨🏿‍🚀",
+    "d": "man astronaut: dark skin tone",
+    "u": "8.0"
   },
   "woman_judge": {
     "c": "people",
@@ -1199,16 +3929,106 @@
     "d": "woman judge",
     "u": "6.0"
   },
+  "woman_judge_tone1": {
+    "c": "people",
+    "e": "👩🏻‍⚖️",
+    "d": "woman judge: light skin tone",
+    "u": "8.0"
+  },
+  "woman_judge_tone2": {
+    "c": "people",
+    "e": "👩🏼‍⚖️",
+    "d": "woman judge: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_judge_tone3": {
+    "c": "people",
+    "e": "👩🏽‍⚖️",
+    "d": "woman judge: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_judge_tone4": {
+    "c": "people",
+    "e": "👩🏾‍⚖️",
+    "d": "woman judge: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_judge_tone5": {
+    "c": "people",
+    "e": "👩🏿‍⚖️",
+    "d": "woman judge: dark skin tone",
+    "u": "8.0"
+  },
   "man_judge": {
     "c": "people",
     "e": "👨‍⚖️",
     "d": "man judge",
     "u": "6.0"
   },
+  "man_judge_tone1": {
+    "c": "people",
+    "e": "👨🏻‍⚖️",
+    "d": "man judge: light skin tone",
+    "u": "8.0"
+  },
+  "man_judge_tone2": {
+    "c": "people",
+    "e": "👨🏼‍⚖️",
+    "d": "man judge: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_judge_tone3": {
+    "c": "people",
+    "e": "👨🏽‍⚖️",
+    "d": "man judge: medium skin tone",
+    "u": "8.0"
+  },
+  "man_judge_tone4": {
+    "c": "people",
+    "e": "👨🏾‍⚖️",
+    "d": "man judge: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_judge_tone5": {
+    "c": "people",
+    "e": "👨🏿‍⚖️",
+    "d": "man judge: dark skin tone",
+    "u": "8.0"
+  },
   "mrs_claus": {
     "c": "people",
     "e": "🤶",
     "d": "mother christmas",
+    "u": "9.0"
+  },
+  "mrs_claus_tone1": {
+    "c": "people",
+    "e": "🤶🏻",
+    "d": "mother christmas tone 1",
+    "u": "9.0"
+  },
+  "mrs_claus_tone2": {
+    "c": "people",
+    "e": "🤶🏼",
+    "d": "mother christmas tone 2",
+    "u": "9.0"
+  },
+  "mrs_claus_tone3": {
+    "c": "people",
+    "e": "🤶🏽",
+    "d": "mother christmas tone 3",
+    "u": "9.0"
+  },
+  "mrs_claus_tone4": {
+    "c": "people",
+    "e": "🤶🏾",
+    "d": "mother christmas tone 4",
+    "u": "9.0"
+  },
+  "mrs_claus_tone5": {
+    "c": "people",
+    "e": "🤶🏿",
+    "d": "mother christmas tone 5",
     "u": "9.0"
   },
   "santa": {
@@ -1217,16 +4037,106 @@
     "d": "father christmas",
     "u": "6.0"
   },
+  "santa_tone1": {
+    "c": "people",
+    "e": "🎅🏻",
+    "d": "father christmas tone 1",
+    "u": "8.0"
+  },
+  "santa_tone2": {
+    "c": "people",
+    "e": "🎅🏼",
+    "d": "father christmas tone 2",
+    "u": "8.0"
+  },
+  "santa_tone3": {
+    "c": "people",
+    "e": "🎅🏽",
+    "d": "father christmas tone 3",
+    "u": "8.0"
+  },
+  "santa_tone4": {
+    "c": "people",
+    "e": "🎅🏾",
+    "d": "father christmas tone 4",
+    "u": "8.0"
+  },
+  "santa_tone5": {
+    "c": "people",
+    "e": "🎅🏿",
+    "d": "father christmas tone 5",
+    "u": "8.0"
+  },
   "princess": {
     "c": "people",
     "e": "👸",
     "d": "princess",
     "u": "6.0"
   },
+  "princess_tone1": {
+    "c": "people",
+    "e": "👸🏻",
+    "d": "princess tone 1",
+    "u": "8.0"
+  },
+  "princess_tone2": {
+    "c": "people",
+    "e": "👸🏼",
+    "d": "princess tone 2",
+    "u": "8.0"
+  },
+  "princess_tone3": {
+    "c": "people",
+    "e": "👸🏽",
+    "d": "princess tone 3",
+    "u": "8.0"
+  },
+  "princess_tone4": {
+    "c": "people",
+    "e": "👸🏾",
+    "d": "princess tone 4",
+    "u": "8.0"
+  },
+  "princess_tone5": {
+    "c": "people",
+    "e": "👸🏿",
+    "d": "princess tone 5",
+    "u": "8.0"
+  },
   "prince": {
     "c": "people",
     "e": "🤴",
     "d": "prince",
+    "u": "9.0"
+  },
+  "prince_tone1": {
+    "c": "people",
+    "e": "🤴🏻",
+    "d": "prince tone 1",
+    "u": "9.0"
+  },
+  "prince_tone2": {
+    "c": "people",
+    "e": "🤴🏼",
+    "d": "prince tone 2",
+    "u": "9.0"
+  },
+  "prince_tone3": {
+    "c": "people",
+    "e": "🤴🏽",
+    "d": "prince tone 3",
+    "u": "9.0"
+  },
+  "prince_tone4": {
+    "c": "people",
+    "e": "🤴🏾",
+    "d": "prince tone 4",
+    "u": "9.0"
+  },
+  "prince_tone5": {
+    "c": "people",
+    "e": "🤴🏿",
+    "d": "prince tone 5",
     "u": "9.0"
   },
   "bride_with_veil": {
@@ -1235,10 +4145,70 @@
     "d": "bride with veil",
     "u": "6.0"
   },
+  "bride_with_veil_tone1": {
+    "c": "people",
+    "e": "👰🏻",
+    "d": "bride with veil tone 1",
+    "u": "8.0"
+  },
+  "bride_with_veil_tone2": {
+    "c": "people",
+    "e": "👰🏼",
+    "d": "bride with veil tone 2",
+    "u": "8.0"
+  },
+  "bride_with_veil_tone3": {
+    "c": "people",
+    "e": "👰🏽",
+    "d": "bride with veil tone 3",
+    "u": "8.0"
+  },
+  "bride_with_veil_tone4": {
+    "c": "people",
+    "e": "👰🏾",
+    "d": "bride with veil tone 4",
+    "u": "8.0"
+  },
+  "bride_with_veil_tone5": {
+    "c": "people",
+    "e": "👰🏿",
+    "d": "bride with veil tone 5",
+    "u": "8.0"
+  },
   "man_in_tuxedo": {
     "c": "people",
     "e": "🤵",
     "d": "man in tuxedo",
+    "u": "9.0"
+  },
+  "man_in_tuxedo_tone1": {
+    "c": "people",
+    "e": "🤵🏻",
+    "d": "man in tuxedo tone 1",
+    "u": "9.0"
+  },
+  "man_in_tuxedo_tone2": {
+    "c": "people",
+    "e": "🤵🏼",
+    "d": "man in tuxedo tone 2",
+    "u": "9.0"
+  },
+  "man_in_tuxedo_tone3": {
+    "c": "people",
+    "e": "🤵🏽",
+    "d": "man in tuxedo tone 3",
+    "u": "9.0"
+  },
+  "man_in_tuxedo_tone4": {
+    "c": "people",
+    "e": "🤵🏾",
+    "d": "man in tuxedo tone 4",
+    "u": "9.0"
+  },
+  "man_in_tuxedo_tone5": {
+    "c": "people",
+    "e": "🤵🏿",
+    "d": "man in tuxedo tone 5",
     "u": "9.0"
   },
   "angel": {
@@ -1246,6 +4216,36 @@
     "e": "👼",
     "d": "baby angel",
     "u": "6.0"
+  },
+  "angel_tone1": {
+    "c": "people",
+    "e": "👼🏻",
+    "d": "baby angel tone 1",
+    "u": "8.0"
+  },
+  "angel_tone2": {
+    "c": "people",
+    "e": "👼🏼",
+    "d": "baby angel tone 2",
+    "u": "8.0"
+  },
+  "angel_tone3": {
+    "c": "people",
+    "e": "👼🏽",
+    "d": "baby angel tone 3",
+    "u": "8.0"
+  },
+  "angel_tone4": {
+    "c": "people",
+    "e": "👼🏾",
+    "d": "baby angel tone 4",
+    "u": "8.0"
+  },
+  "angel_tone5": {
+    "c": "people",
+    "e": "👼🏿",
+    "d": "baby angel tone 5",
+    "u": "8.0"
   },
   "pregnant_woman": {
     "c": "people",
@@ -1259,11 +4259,71 @@
     "d": "breast-feeding",
     "u": "10.0"
   },
+  "breast_feeding_tone1": {
+    "c": "people",
+    "e": "🤱🏻",
+    "d": "breast-feeding: light skin tone",
+    "u": "10.0"
+  },
+  "breast_feeding_tone2": {
+    "c": "people",
+    "e": "🤱🏼",
+    "d": "breast-feeding: medium-light skin tone",
+    "u": "10.0"
+  },
+  "breast_feeding_tone3": {
+    "c": "people",
+    "e": "🤱🏽",
+    "d": "breast-feeding: medium skin tone",
+    "u": "10.0"
+  },
+  "breast_feeding_tone4": {
+    "c": "people",
+    "e": "🤱🏾",
+    "d": "breast-feeding: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "breast_feeding_tone5": {
+    "c": "people",
+    "e": "🤱🏿",
+    "d": "breast-feeding: dark skin tone",
+    "u": "10.0"
+  },
   "woman_bowing": {
     "c": "people",
     "e": "🙇‍♀️",
     "d": "woman bowing",
     "u": "6.0"
+  },
+  "woman_bowing_tone1": {
+    "c": "people",
+    "e": "🙇🏻‍♀️",
+    "d": "woman bowing: light skin tone",
+    "u": "8.0"
+  },
+  "woman_bowing_tone2": {
+    "c": "people",
+    "e": "🙇🏼‍♀️",
+    "d": "woman bowing: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_bowing_tone3": {
+    "c": "people",
+    "e": "🙇🏽‍♀️",
+    "d": "woman bowing: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_bowing_tone4": {
+    "c": "people",
+    "e": "🙇🏾‍♀️",
+    "d": "woman bowing: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_bowing_tone5": {
+    "c": "people",
+    "e": "🙇🏿‍♀️",
+    "d": "woman bowing: dark skin tone",
+    "u": "8.0"
   },
   "man_bowing": {
     "c": "people",
@@ -1271,11 +4331,71 @@
     "d": "man bowing",
     "u": "6.0"
   },
+  "man_bowing_tone1": {
+    "c": "people",
+    "e": "🙇🏻‍♂️",
+    "d": "man bowing: light skin tone",
+    "u": "8.0"
+  },
+  "man_bowing_tone2": {
+    "c": "people",
+    "e": "🙇🏼‍♂️",
+    "d": "man bowing: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_bowing_tone3": {
+    "c": "people",
+    "e": "🙇🏽‍♂️",
+    "d": "man bowing: medium skin tone",
+    "u": "8.0"
+  },
+  "man_bowing_tone4": {
+    "c": "people",
+    "e": "🙇🏾‍♂️",
+    "d": "man bowing: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_bowing_tone5": {
+    "c": "people",
+    "e": "🙇🏿‍♂️",
+    "d": "man bowing: dark skin tone",
+    "u": "8.0"
+  },
   "woman_tipping_hand": {
     "c": "people",
     "e": "💁‍♀️",
     "d": "woman tipping hand",
     "u": "6.0"
+  },
+  "woman_tipping_hand_tone1": {
+    "c": "people",
+    "e": "💁🏻‍♀️",
+    "d": "woman tipping hand: light skin tone",
+    "u": "8.0"
+  },
+  "woman_tipping_hand_tone2": {
+    "c": "people",
+    "e": "💁🏼‍♀️",
+    "d": "woman tipping hand: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_tipping_hand_tone3": {
+    "c": "people",
+    "e": "💁🏽‍♀️",
+    "d": "woman tipping hand: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_tipping_hand_tone4": {
+    "c": "people",
+    "e": "💁🏾‍♀️",
+    "d": "woman tipping hand: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_tipping_hand_tone5": {
+    "c": "people",
+    "e": "💁🏿‍♀️",
+    "d": "woman tipping hand: dark skin tone",
+    "u": "8.0"
   },
   "man_tipping_hand": {
     "c": "people",
@@ -1283,11 +4403,71 @@
     "d": "man tipping hand",
     "u": "6.0"
   },
+  "man_tipping_hand_tone1": {
+    "c": "people",
+    "e": "💁🏻‍♂️",
+    "d": "man tipping hand: light skin tone",
+    "u": "8.0"
+  },
+  "man_tipping_hand_tone2": {
+    "c": "people",
+    "e": "💁🏼‍♂️",
+    "d": "man tipping hand: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_tipping_hand_tone3": {
+    "c": "people",
+    "e": "💁🏽‍♂️",
+    "d": "man tipping hand: medium skin tone",
+    "u": "8.0"
+  },
+  "man_tipping_hand_tone4": {
+    "c": "people",
+    "e": "💁🏾‍♂️",
+    "d": "man tipping hand: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_tipping_hand_tone5": {
+    "c": "people",
+    "e": "💁🏿‍♂️",
+    "d": "man tipping hand: dark skin tone",
+    "u": "8.0"
+  },
   "woman_gesturing_no": {
     "c": "people",
     "e": "🙅‍♀️",
     "d": "woman gesturing NO",
     "u": "6.0"
+  },
+  "woman_gesturing_no_tone1": {
+    "c": "people",
+    "e": "🙅🏻‍♀️",
+    "d": "woman gesturing NO: light skin tone",
+    "u": "8.0"
+  },
+  "woman_gesturing_no_tone2": {
+    "c": "people",
+    "e": "🙅🏼‍♀️",
+    "d": "woman gesturing NO: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_gesturing_no_tone3": {
+    "c": "people",
+    "e": "🙅🏽‍♀️",
+    "d": "woman gesturing NO: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_gesturing_no_tone4": {
+    "c": "people",
+    "e": "🙅🏾‍♀️",
+    "d": "woman gesturing NO: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_gesturing_no_tone5": {
+    "c": "people",
+    "e": "🙅🏿‍♀️",
+    "d": "woman gesturing NO: dark skin tone",
+    "u": "8.0"
   },
   "man_gesturing_no": {
     "c": "people",
@@ -1295,11 +4475,71 @@
     "d": "man gesturing NO",
     "u": "6.0"
   },
+  "man_gesturing_no_tone1": {
+    "c": "people",
+    "e": "🙅🏻‍♂️",
+    "d": "man gesturing NO: light skin tone",
+    "u": "8.0"
+  },
+  "man_gesturing_no_tone2": {
+    "c": "people",
+    "e": "🙅🏼‍♂️",
+    "d": "man gesturing NO: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_gesturing_no_tone3": {
+    "c": "people",
+    "e": "🙅🏽‍♂️",
+    "d": "man gesturing NO: medium skin tone",
+    "u": "8.0"
+  },
+  "man_gesturing_no_tone4": {
+    "c": "people",
+    "e": "🙅🏾‍♂️",
+    "d": "man gesturing NO: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_gesturing_no_tone5": {
+    "c": "people",
+    "e": "🙅🏿‍♂️",
+    "d": "man gesturing NO: dark skin tone",
+    "u": "8.0"
+  },
   "woman_gesturing_ok": {
     "c": "people",
     "e": "🙆‍♀️",
     "d": "woman gesturing OK",
     "u": "6.0"
+  },
+  "woman_gesturing_ok_tone1": {
+    "c": "people",
+    "e": "🙆🏻‍♀️",
+    "d": "woman gesturing OK: light skin tone",
+    "u": "8.0"
+  },
+  "woman_gesturing_ok_tone2": {
+    "c": "people",
+    "e": "🙆🏼‍♀️",
+    "d": "woman gesturing OK: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_gesturing_ok_tone3": {
+    "c": "people",
+    "e": "🙆🏽‍♀️",
+    "d": "woman gesturing OK: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_gesturing_ok_tone4": {
+    "c": "people",
+    "e": "🙆🏾‍♀️",
+    "d": "woman gesturing OK: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_gesturing_ok_tone5": {
+    "c": "people",
+    "e": "🙆🏿‍♀️",
+    "d": "woman gesturing OK: dark skin tone",
+    "u": "8.0"
   },
   "man_gesturing_ok": {
     "c": "people",
@@ -1307,11 +4547,71 @@
     "d": "man gesturing OK",
     "u": "6.0"
   },
+  "man_gesturing_ok_tone1": {
+    "c": "people",
+    "e": "🙆🏻‍♂️",
+    "d": "man gesturing OK: light skin tone",
+    "u": "8.0"
+  },
+  "man_gesturing_ok_tone2": {
+    "c": "people",
+    "e": "🙆🏼‍♂️",
+    "d": "man gesturing OK: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_gesturing_ok_tone3": {
+    "c": "people",
+    "e": "🙆🏽‍♂️",
+    "d": "man gesturing OK: medium skin tone",
+    "u": "8.0"
+  },
+  "man_gesturing_ok_tone4": {
+    "c": "people",
+    "e": "🙆🏾‍♂️",
+    "d": "man gesturing OK: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_gesturing_ok_tone5": {
+    "c": "people",
+    "e": "🙆🏿‍♂️",
+    "d": "man gesturing OK: dark skin tone",
+    "u": "8.0"
+  },
   "woman_raising_hand": {
     "c": "people",
     "e": "🙋‍♀️",
     "d": "woman raising hand",
     "u": "6.0"
+  },
+  "woman_raising_hand_tone1": {
+    "c": "people",
+    "e": "🙋🏻‍♀️",
+    "d": "woman raising hand: light skin tone",
+    "u": "8.0"
+  },
+  "woman_raising_hand_tone2": {
+    "c": "people",
+    "e": "🙋🏼‍♀️",
+    "d": "woman raising hand: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_raising_hand_tone3": {
+    "c": "people",
+    "e": "🙋🏽‍♀️",
+    "d": "woman raising hand: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_raising_hand_tone4": {
+    "c": "people",
+    "e": "🙋🏾‍♀️",
+    "d": "woman raising hand: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_raising_hand_tone5": {
+    "c": "people",
+    "e": "🙋🏿‍♀️",
+    "d": "woman raising hand: dark skin tone",
+    "u": "8.0"
   },
   "man_raising_hand": {
     "c": "people",
@@ -1319,10 +4619,70 @@
     "d": "man raising hand",
     "u": "6.0"
   },
+  "man_raising_hand_tone1": {
+    "c": "people",
+    "e": "🙋🏻‍♂️",
+    "d": "man raising hand: light skin tone",
+    "u": "8.0"
+  },
+  "man_raising_hand_tone2": {
+    "c": "people",
+    "e": "🙋🏼‍♂️",
+    "d": "man raising hand: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_raising_hand_tone3": {
+    "c": "people",
+    "e": "🙋🏽‍♂️",
+    "d": "man raising hand: medium skin tone",
+    "u": "8.0"
+  },
+  "man_raising_hand_tone4": {
+    "c": "people",
+    "e": "🙋🏾‍♂️",
+    "d": "man raising hand: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_raising_hand_tone5": {
+    "c": "people",
+    "e": "🙋🏿‍♂️",
+    "d": "man raising hand: dark skin tone",
+    "u": "8.0"
+  },
   "woman_facepalming": {
     "c": "people",
     "e": "🤦‍♀️",
     "d": "woman facepalming",
+    "u": "9.0"
+  },
+  "woman_facepalming_tone1": {
+    "c": "people",
+    "e": "🤦🏻‍♀️",
+    "d": "woman facepalming: light skin tone",
+    "u": "9.0"
+  },
+  "woman_facepalming_tone2": {
+    "c": "people",
+    "e": "🤦🏼‍♀️",
+    "d": "woman facepalming: medium-light skin tone",
+    "u": "9.0"
+  },
+  "woman_facepalming_tone3": {
+    "c": "people",
+    "e": "🤦🏽‍♀️",
+    "d": "woman facepalming: medium skin tone",
+    "u": "9.0"
+  },
+  "woman_facepalming_tone4": {
+    "c": "people",
+    "e": "🤦🏾‍♀️",
+    "d": "woman facepalming: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "woman_facepalming_tone5": {
+    "c": "people",
+    "e": "🤦🏿‍♀️",
+    "d": "woman facepalming: dark skin tone",
     "u": "9.0"
   },
   "man_facepalming": {
@@ -1331,10 +4691,70 @@
     "d": "man facepalming",
     "u": "9.0"
   },
+  "man_facepalming_tone1": {
+    "c": "people",
+    "e": "🤦🏻‍♂️",
+    "d": "man facepalming: light skin tone",
+    "u": "9.0"
+  },
+  "man_facepalming_tone2": {
+    "c": "people",
+    "e": "🤦🏼‍♂️",
+    "d": "man facepalming: medium-light skin tone",
+    "u": "9.0"
+  },
+  "man_facepalming_tone3": {
+    "c": "people",
+    "e": "🤦🏽‍♂️",
+    "d": "man facepalming: medium skin tone",
+    "u": "9.0"
+  },
+  "man_facepalming_tone4": {
+    "c": "people",
+    "e": "🤦🏾‍♂️",
+    "d": "man facepalming: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "man_facepalming_tone5": {
+    "c": "people",
+    "e": "🤦🏿‍♂️",
+    "d": "man facepalming: dark skin tone",
+    "u": "9.0"
+  },
   "woman_shrugging": {
     "c": "people",
     "e": "🤷‍♀️",
     "d": "woman shrugging",
+    "u": "9.0"
+  },
+  "woman_shrugging_tone1": {
+    "c": "people",
+    "e": "🤷🏻‍♀️",
+    "d": "woman shrugging: light skin tone",
+    "u": "9.0"
+  },
+  "woman_shrugging_tone2": {
+    "c": "people",
+    "e": "🤷🏼‍♀️",
+    "d": "woman shrugging: medium-light skin tone",
+    "u": "9.0"
+  },
+  "woman_shrugging_tone3": {
+    "c": "people",
+    "e": "🤷🏽‍♀️",
+    "d": "woman shrugging: medium skin tone",
+    "u": "9.0"
+  },
+  "woman_shrugging_tone4": {
+    "c": "people",
+    "e": "🤷🏾‍♀️",
+    "d": "woman shrugging: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "woman_shrugging_tone5": {
+    "c": "people",
+    "e": "🤷🏿‍♀️",
+    "d": "woman shrugging: dark skin tone",
     "u": "9.0"
   },
   "man_shrugging": {
@@ -1343,17 +4763,107 @@
     "d": "man shrugging",
     "u": "9.0"
   },
+  "man_shrugging_tone1": {
+    "c": "people",
+    "e": "🤷🏻‍♂️",
+    "d": "man shrugging: light skin tone",
+    "u": "9.0"
+  },
+  "man_shrugging_tone2": {
+    "c": "people",
+    "e": "🤷🏼‍♂️",
+    "d": "man shrugging: medium-light skin tone",
+    "u": "9.0"
+  },
+  "man_shrugging_tone3": {
+    "c": "people",
+    "e": "🤷🏽‍♂️",
+    "d": "man shrugging: medium skin tone",
+    "u": "9.0"
+  },
+  "man_shrugging_tone4": {
+    "c": "people",
+    "e": "🤷🏾‍♂️",
+    "d": "man shrugging: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "man_shrugging_tone5": {
+    "c": "people",
+    "e": "🤷🏿‍♂️",
+    "d": "man shrugging: dark skin tone",
+    "u": "9.0"
+  },
   "woman_pouting": {
     "c": "people",
     "e": "🙎‍♀️",
     "d": "woman pouting",
     "u": "6.0"
   },
+  "woman_pouting_tone1": {
+    "c": "people",
+    "e": "🙎🏻‍♀️",
+    "d": "woman pouting: light skin tone",
+    "u": "8.0"
+  },
+  "woman_pouting_tone2": {
+    "c": "people",
+    "e": "🙎🏼‍♀️",
+    "d": "woman pouting: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_pouting_tone3": {
+    "c": "people",
+    "e": "🙎🏽‍♀️",
+    "d": "woman pouting: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_pouting_tone4": {
+    "c": "people",
+    "e": "🙎🏾‍♀️",
+    "d": "woman pouting: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_pouting_tone5": {
+    "c": "people",
+    "e": "🙎🏿‍♀️",
+    "d": "woman pouting: dark skin tone",
+    "u": "8.0"
+  },
   "man_pouting": {
     "c": "people",
     "e": "🙎‍♂️",
     "d": "man pouting",
     "u": "6.0"
+  },
+  "man_pouting_tone1": {
+    "c": "people",
+    "e": "🙎🏻‍♂️",
+    "d": "man pouting: light skin tone",
+    "u": "8.0"
+  },
+  "man_pouting_tone2": {
+    "c": "people",
+    "e": "🙎🏼‍♂️",
+    "d": "man pouting: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_pouting_tone3": {
+    "c": "people",
+    "e": "🙎🏽‍♂️",
+    "d": "man pouting: medium skin tone",
+    "u": "8.0"
+  },
+  "man_pouting_tone4": {
+    "c": "people",
+    "e": "🙎🏾‍♂️",
+    "d": "man pouting: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_pouting_tone5": {
+    "c": "people",
+    "e": "🙎🏿‍♂️",
+    "d": "man pouting: dark skin tone",
+    "u": "8.0"
   },
   "woman_frowning": {
     "c": "people",
@@ -1373,11 +4883,71 @@
     "d": "woman getting haircut",
     "u": "6.0"
   },
+  "woman_getting_haircut_tone1": {
+    "c": "people",
+    "e": "💇🏻‍♀️",
+    "d": "woman getting haircut: light skin tone",
+    "u": "8.0"
+  },
+  "woman_getting_haircut_tone2": {
+    "c": "people",
+    "e": "💇🏼‍♀️",
+    "d": "woman getting haircut: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_getting_haircut_tone3": {
+    "c": "people",
+    "e": "💇🏽‍♀️",
+    "d": "woman getting haircut: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_getting_haircut_tone4": {
+    "c": "people",
+    "e": "💇🏾‍♀️",
+    "d": "woman getting haircut: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_getting_haircut_tone5": {
+    "c": "people",
+    "e": "💇🏿‍♀️",
+    "d": "woman getting haircut: dark skin tone",
+    "u": "8.0"
+  },
   "man_getting_haircut": {
     "c": "people",
     "e": "💇‍♂️",
     "d": "man getting haircut",
     "u": "6.0"
+  },
+  "man_getting_haircut_tone1": {
+    "c": "people",
+    "e": "💇🏻‍♂️",
+    "d": "man getting haircut: light skin tone",
+    "u": "8.0"
+  },
+  "man_getting_haircut_tone2": {
+    "c": "people",
+    "e": "💇🏼‍♂️",
+    "d": "man getting haircut: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_getting_haircut_tone3": {
+    "c": "people",
+    "e": "💇🏽‍♂️",
+    "d": "man getting haircut: medium skin tone",
+    "u": "8.0"
+  },
+  "man_getting_haircut_tone4": {
+    "c": "people",
+    "e": "💇🏾‍♂️",
+    "d": "man getting haircut: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_getting_haircut_tone5": {
+    "c": "people",
+    "e": "💇🏿‍♂️",
+    "d": "man getting haircut: dark skin tone",
+    "u": "8.0"
   },
   "woman_getting_face_massage": {
     "c": "people",
@@ -1385,11 +4955,71 @@
     "d": "woman getting massage",
     "u": "6.0"
   },
+  "woman_getting_face_massage_tone1": {
+    "c": "people",
+    "e": "💆🏻‍♀️",
+    "d": "woman getting massage: light skin tone",
+    "u": "8.0"
+  },
+  "woman_getting_face_massage_tone2": {
+    "c": "people",
+    "e": "💆🏼‍♀️",
+    "d": "woman getting massage: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_getting_face_massage_tone3": {
+    "c": "people",
+    "e": "💆🏽‍♀️",
+    "d": "woman getting massage: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_getting_face_massage_tone4": {
+    "c": "people",
+    "e": "💆🏾‍♀️",
+    "d": "woman getting massage: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_getting_face_massage_tone5": {
+    "c": "people",
+    "e": "💆🏿‍♀️",
+    "d": "woman getting massage: dark skin tone",
+    "u": "8.0"
+  },
   "man_getting_face_massage": {
     "c": "people",
     "e": "💆‍♂️",
     "d": "man getting massage",
     "u": "6.0"
+  },
+  "man_getting_face_massage_tone1": {
+    "c": "people",
+    "e": "💆🏻‍♂️",
+    "d": "man getting massage: light skin tone",
+    "u": "8.0"
+  },
+  "man_getting_face_massage_tone2": {
+    "c": "people",
+    "e": "💆🏼‍♂️",
+    "d": "man getting massage: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_getting_face_massage_tone3": {
+    "c": "people",
+    "e": "💆🏽‍♂️",
+    "d": "man getting massage: medium skin tone",
+    "u": "8.0"
+  },
+  "man_getting_face_massage_tone4": {
+    "c": "people",
+    "e": "💆🏾‍♂️",
+    "d": "man getting massage: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_getting_face_massage_tone5": {
+    "c": "people",
+    "e": "💆🏿‍♂️",
+    "d": "man getting massage: dark skin tone",
+    "u": "8.0"
   },
   "levitate": {
     "c": "activity",
@@ -1397,16 +5027,106 @@
     "d": "man in business suit levitating",
     "u": "7.0"
   },
+  "levitate_tone1": {
+    "c": "people",
+    "e": "🕴🏻",
+    "d": "man in suit levitating: light skin tone",
+    "u": "8.0"
+  },
+  "levitate_tone2": {
+    "c": "people",
+    "e": "🕴🏼",
+    "d": "man in suit levitating: medium-light skin tone",
+    "u": "8.0"
+  },
+  "levitate_tone3": {
+    "c": "people",
+    "e": "🕴🏽",
+    "d": "man in suit levitating: medium skin tone",
+    "u": "8.0"
+  },
+  "levitate_tone4": {
+    "c": "people",
+    "e": "🕴🏾",
+    "d": "man in suit levitating: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "levitate_tone5": {
+    "c": "people",
+    "e": "🕴🏿",
+    "d": "man in suit levitating: dark skin tone",
+    "u": "8.0"
+  },
   "dancer": {
     "c": "people",
     "e": "💃",
     "d": "dancer",
     "u": "6.0"
   },
+  "dancer_tone1": {
+    "c": "people",
+    "e": "💃🏻",
+    "d": "dancer tone 1",
+    "u": "8.0"
+  },
+  "dancer_tone2": {
+    "c": "people",
+    "e": "💃🏼",
+    "d": "dancer tone 2",
+    "u": "8.0"
+  },
+  "dancer_tone3": {
+    "c": "people",
+    "e": "💃🏽",
+    "d": "dancer tone 3",
+    "u": "8.0"
+  },
+  "dancer_tone4": {
+    "c": "people",
+    "e": "💃🏾",
+    "d": "dancer tone 4",
+    "u": "8.0"
+  },
+  "dancer_tone5": {
+    "c": "people",
+    "e": "💃🏿",
+    "d": "dancer tone 5",
+    "u": "8.0"
+  },
   "man_dancing": {
     "c": "people",
     "e": "🕺",
     "d": "man dancing",
+    "u": "9.0"
+  },
+  "man_dancing_tone1": {
+    "c": "activity",
+    "e": "🕺🏻",
+    "d": "man dancing tone 1",
+    "u": "9.0"
+  },
+  "man_dancing_tone2": {
+    "c": "activity",
+    "e": "🕺🏼",
+    "d": "man dancing tone 2",
+    "u": "9.0"
+  },
+  "man_dancing_tone3": {
+    "c": "activity",
+    "e": "🕺🏽",
+    "d": "man dancing tone 3",
+    "u": "9.0"
+  },
+  "man_dancing_tone4": {
+    "c": "activity",
+    "e": "🕺🏾",
+    "d": "man dancing tone 4",
+    "u": "9.0"
+  },
+  "man_dancing_tone5": {
+    "c": "activity",
+    "e": "🕺🏿",
+    "d": "man dancing tone 5",
     "u": "9.0"
   },
   "women_with_bunny_ears_partying": {
@@ -1427,11 +5147,71 @@
     "d": "woman walking",
     "u": "6.0"
   },
+  "woman_walking_tone1": {
+    "c": "people",
+    "e": "🚶🏻‍♀️",
+    "d": "woman walking: light skin tone",
+    "u": "8.0"
+  },
+  "woman_walking_tone2": {
+    "c": "people",
+    "e": "🚶🏼‍♀️",
+    "d": "woman walking: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_walking_tone3": {
+    "c": "people",
+    "e": "🚶🏽‍♀️",
+    "d": "woman walking: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_walking_tone4": {
+    "c": "people",
+    "e": "🚶🏾‍♀️",
+    "d": "woman walking: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_walking_tone5": {
+    "c": "people",
+    "e": "🚶🏿‍♀️",
+    "d": "woman walking: dark skin tone",
+    "u": "8.0"
+  },
   "man_walking": {
     "c": "people",
     "e": "🚶‍♂️",
     "d": "man walking",
     "u": "6.0"
+  },
+  "man_walking_tone1": {
+    "c": "people",
+    "e": "🚶🏻‍♂️",
+    "d": "man walking: light skin tone",
+    "u": "8.0"
+  },
+  "man_walking_tone2": {
+    "c": "people",
+    "e": "🚶🏼‍♂️",
+    "d": "man walking: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_walking_tone3": {
+    "c": "people",
+    "e": "🚶🏽‍♂️",
+    "d": "man walking: medium skin tone",
+    "u": "8.0"
+  },
+  "man_walking_tone4": {
+    "c": "people",
+    "e": "🚶🏾‍♂️",
+    "d": "man walking: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_walking_tone5": {
+    "c": "people",
+    "e": "🚶🏿‍♂️",
+    "d": "man walking: dark skin tone",
+    "u": "8.0"
   },
   "woman_running": {
     "c": "people",
@@ -1439,11 +5219,71 @@
     "d": "woman running",
     "u": "6.0"
   },
+  "woman_running_tone1": {
+    "c": "people",
+    "e": "🏃🏻‍♀️",
+    "d": "woman running: light skin tone",
+    "u": "8.0"
+  },
+  "woman_running_tone2": {
+    "c": "people",
+    "e": "🏃🏼‍♀️",
+    "d": "woman running: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_running_tone3": {
+    "c": "people",
+    "e": "🏃🏽‍♀️",
+    "d": "woman running: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_running_tone4": {
+    "c": "people",
+    "e": "🏃🏾‍♀️",
+    "d": "woman running: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_running_tone5": {
+    "c": "people",
+    "e": "🏃🏿‍♀️",
+    "d": "woman running: dark skin tone",
+    "u": "8.0"
+  },
   "man_running": {
     "c": "people",
     "e": "🏃‍♂️",
     "d": "man running",
     "u": "6.0"
+  },
+  "man_running_tone1": {
+    "c": "people",
+    "e": "🏃🏻‍♂️",
+    "d": "man running: light skin tone",
+    "u": "8.0"
+  },
+  "man_running_tone2": {
+    "c": "people",
+    "e": "🏃🏼‍♂️",
+    "d": "man running: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_running_tone3": {
+    "c": "people",
+    "e": "🏃🏽‍♂️",
+    "d": "man running: medium skin tone",
+    "u": "8.0"
+  },
+  "man_running_tone4": {
+    "c": "people",
+    "e": "🏃🏾‍♂️",
+    "d": "man running: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_running_tone5": {
+    "c": "people",
+    "e": "🏃🏿‍♂️",
+    "d": "man running: dark skin tone",
+    "u": "8.0"
   },
   "couple": {
     "c": "people",
@@ -1655,10 +5495,70 @@
     "d": "bearded person",
     "u": "10.0"
   },
+  "bearded_person_tone1": {
+    "c": "people",
+    "e": "🧔🏻",
+    "d": "bearded person: light skin tone",
+    "u": "10.0"
+  },
+  "bearded_person_tone2": {
+    "c": "people",
+    "e": "🧔🏼",
+    "d": "bearded person: medium-light skin tone",
+    "u": "10.0"
+  },
+  "bearded_person_tone3": {
+    "c": "people",
+    "e": "🧔🏽",
+    "d": "bearded person: medium skin tone",
+    "u": "10.0"
+  },
+  "bearded_person_tone4": {
+    "c": "people",
+    "e": "🧔🏾",
+    "d": "bearded person: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "bearded_person_tone5": {
+    "c": "people",
+    "e": "🧔🏿",
+    "d": "bearded person: dark skin tone",
+    "u": "10.0"
+  },
   "woman_with_headscarf": {
     "c": "people",
     "e": "🧕",
     "d": "woman with headscarf",
+    "u": "10.0"
+  },
+  "woman_with_headscarf_tone1": {
+    "c": "people",
+    "e": "🧕🏻",
+    "d": "woman with headscarf: light skin tone",
+    "u": "10.0"
+  },
+  "woman_with_headscarf_tone2": {
+    "c": "people",
+    "e": "🧕🏼",
+    "d": "woman with headscarf: medium-light skin tone",
+    "u": "10.0"
+  },
+  "woman_with_headscarf_tone3": {
+    "c": "people",
+    "e": "🧕🏽",
+    "d": "woman with headscarf: medium skin tone",
+    "u": "10.0"
+  },
+  "woman_with_headscarf_tone4": {
+    "c": "people",
+    "e": "🧕🏾",
+    "d": "woman with headscarf: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "woman_with_headscarf_tone5": {
+    "c": "people",
+    "e": "🧕🏿",
+    "d": "woman with headscarf: dark skin tone",
     "u": "10.0"
   },
   "woman_mage": {
@@ -1667,10 +5567,70 @@
     "d": "woman mage",
     "u": "10.0"
   },
+  "woman_mage_tone1": {
+    "c": "people",
+    "e": "🧙🏻‍♀️",
+    "d": "woman mage: light skin tone",
+    "u": "10.0"
+  },
+  "woman_mage_tone2": {
+    "c": "people",
+    "e": "🧙🏼‍♀️",
+    "d": "woman mage: medium-light skin tone",
+    "u": "10.0"
+  },
+  "woman_mage_tone3": {
+    "c": "people",
+    "e": "🧙🏽‍♀️",
+    "d": "woman mage: medium skin tone",
+    "u": "10.0"
+  },
+  "woman_mage_tone4": {
+    "c": "people",
+    "e": "🧙🏾‍♀️",
+    "d": "woman mage: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "woman_mage_tone5": {
+    "c": "people",
+    "e": "🧙🏿‍♀️",
+    "d": "woman mage: dark skin tone",
+    "u": "10.0"
+  },
   "man_mage": {
     "c": "people",
     "e": "🧙‍♂️",
     "d": "man mage",
+    "u": "10.0"
+  },
+  "man_mage_tone1": {
+    "c": "people",
+    "e": "🧙🏻‍♂️",
+    "d": "man mage: light skin tone",
+    "u": "10.0"
+  },
+  "man_mage_tone2": {
+    "c": "people",
+    "e": "🧙🏼‍♂️",
+    "d": "man mage: medium-light skin tone",
+    "u": "10.0"
+  },
+  "man_mage_tone3": {
+    "c": "people",
+    "e": "🧙🏽‍♂️",
+    "d": "man mage: medium skin tone",
+    "u": "10.0"
+  },
+  "man_mage_tone4": {
+    "c": "people",
+    "e": "🧙🏾‍♂️",
+    "d": "man mage: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "man_mage_tone5": {
+    "c": "people",
+    "e": "🧙🏿‍♂️",
+    "d": "man mage: dark skin tone",
     "u": "10.0"
   },
   "woman_fairy": {
@@ -1679,10 +5639,70 @@
     "d": "woman fairy",
     "u": "10.0"
   },
+  "woman_fairy_tone1": {
+    "c": "people",
+    "e": "🧚🏻‍♀️",
+    "d": "woman fairy: light skin tone",
+    "u": "10.0"
+  },
+  "woman_fairy_tone2": {
+    "c": "people",
+    "e": "🧚🏼‍♀️",
+    "d": "woman fairy: medium-light skin tone",
+    "u": "10.0"
+  },
+  "woman_fairy_tone3": {
+    "c": "people",
+    "e": "🧚🏽‍♀️",
+    "d": "woman fairy: medium skin tone",
+    "u": "10.0"
+  },
+  "woman_fairy_tone4": {
+    "c": "people",
+    "e": "🧚🏾‍♀️",
+    "d": "woman fairy: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "woman_fairy_tone5": {
+    "c": "people",
+    "e": "🧚🏿‍♀️",
+    "d": "woman fairy: dark skin tone",
+    "u": "10.0"
+  },
   "man_fairy": {
     "c": "people",
     "e": "🧚‍♂️",
     "d": "man fairy",
+    "u": "10.0"
+  },
+  "man_fairy_tone1": {
+    "c": "people",
+    "e": "🧚🏻‍♂️",
+    "d": "man fairy: light skin tone",
+    "u": "10.0"
+  },
+  "man_fairy_tone2": {
+    "c": "people",
+    "e": "🧚🏼‍♂️",
+    "d": "man fairy: medium-light skin tone",
+    "u": "10.0"
+  },
+  "man_fairy_tone3": {
+    "c": "people",
+    "e": "🧚🏽‍♂️",
+    "d": "man fairy: medium skin tone",
+    "u": "10.0"
+  },
+  "man_fairy_tone4": {
+    "c": "people",
+    "e": "🧚🏾‍♂️",
+    "d": "man fairy: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "man_fairy_tone5": {
+    "c": "people",
+    "e": "🧚🏿‍♂️",
+    "d": "man fairy: dark skin tone",
     "u": "10.0"
   },
   "woman_vampire": {
@@ -1691,16 +5711,106 @@
     "d": "woman vampire",
     "u": "10.0"
   },
+  "woman_vampire_tone1": {
+    "c": "people",
+    "e": "🧛🏻‍♀️",
+    "d": "woman vampire: light skin tone",
+    "u": "10.0"
+  },
+  "woman_vampire_tone2": {
+    "c": "people",
+    "e": "🧛🏼‍♀️",
+    "d": "woman vampire: medium-light skin tone",
+    "u": "10.0"
+  },
+  "woman_vampire_tone3": {
+    "c": "people",
+    "e": "🧛🏽‍♀️",
+    "d": "woman vampire: medium skin tone",
+    "u": "10.0"
+  },
+  "woman_vampire_tone4": {
+    "c": "people",
+    "e": "🧛🏾‍♀️",
+    "d": "woman vampire: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "woman_vampire_tone5": {
+    "c": "people",
+    "e": "🧛🏿‍♀️",
+    "d": "woman vampire: dark skin tone",
+    "u": "10.0"
+  },
   "man_vampire": {
     "c": "people",
     "e": "🧛‍♂️",
     "d": "man vampire",
     "u": "10.0"
   },
+  "man_vampire_tone1": {
+    "c": "people",
+    "e": "🧛🏻‍♂️",
+    "d": "man vampire: light skin tone",
+    "u": "10.0"
+  },
+  "man_vampire_tone2": {
+    "c": "people",
+    "e": "🧛🏼‍♂️",
+    "d": "man vampire: medium-light skin tone",
+    "u": "10.0"
+  },
+  "man_vampire_tone3": {
+    "c": "people",
+    "e": "🧛🏽‍♂️",
+    "d": "man vampire: medium skin tone",
+    "u": "10.0"
+  },
+  "man_vampire_tone4": {
+    "c": "people",
+    "e": "🧛🏾‍♂️",
+    "d": "man vampire: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "man_vampire_tone5": {
+    "c": "people",
+    "e": "🧛🏿‍♂️",
+    "d": "man vampire: dark skin tone",
+    "u": "10.0"
+  },
   "mermaid": {
     "c": "people",
     "e": "🧜‍♀️",
     "d": "mermaid",
+    "u": "10.0"
+  },
+  "mermaid_tone1": {
+    "c": "people",
+    "e": "🧜🏻‍♀️",
+    "d": "mermaid: light skin tone",
+    "u": "10.0"
+  },
+  "mermaid_tone2": {
+    "c": "people",
+    "e": "🧜🏼‍♀️",
+    "d": "mermaid: medium-light skin tone",
+    "u": "10.0"
+  },
+  "mermaid_tone3": {
+    "c": "people",
+    "e": "🧜🏽‍♀️",
+    "d": "mermaid: medium skin tone",
+    "u": "10.0"
+  },
+  "mermaid_tone4": {
+    "c": "people",
+    "e": "🧜🏾‍♀️",
+    "d": "mermaid: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "mermaid_tone5": {
+    "c": "people",
+    "e": "🧜🏿‍♀️",
+    "d": "mermaid: dark skin tone",
     "u": "10.0"
   },
   "merman": {
@@ -1715,10 +5825,70 @@
     "d": "woman elf",
     "u": "10.0"
   },
+  "woman_elf_tone1": {
+    "c": "people",
+    "e": "🧝🏻‍♀️",
+    "d": "woman elf: light skin tone",
+    "u": "10.0"
+  },
+  "woman_elf_tone2": {
+    "c": "people",
+    "e": "🧝🏼‍♀️",
+    "d": "woman elf: medium-light skin tone",
+    "u": "10.0"
+  },
+  "woman_elf_tone3": {
+    "c": "people",
+    "e": "🧝🏽‍♀️",
+    "d": "woman elf: medium skin tone",
+    "u": "10.0"
+  },
+  "woman_elf_tone4": {
+    "c": "people",
+    "e": "🧝🏾‍♀️",
+    "d": "woman elf: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "woman_elf_tone5": {
+    "c": "people",
+    "e": "🧝🏿‍♀️",
+    "d": "woman elf: dark skin tone",
+    "u": "10.0"
+  },
   "man_elf": {
     "c": "people",
     "e": "🧝‍♂️",
     "d": "man elf",
+    "u": "10.0"
+  },
+  "man_elf_tone1": {
+    "c": "people",
+    "e": "🧝🏻‍♂️",
+    "d": "man elf: light skin tone",
+    "u": "10.0"
+  },
+  "man_elf_tone2": {
+    "c": "people",
+    "e": "🧝🏼‍♂️",
+    "d": "man elf: medium-light skin tone",
+    "u": "10.0"
+  },
+  "man_elf_tone3": {
+    "c": "people",
+    "e": "🧝🏽‍♂️",
+    "d": "man elf: medium skin tone",
+    "u": "10.0"
+  },
+  "man_elf_tone4": {
+    "c": "people",
+    "e": "🧝🏾‍♂️",
+    "d": "man elf: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "man_elf_tone5": {
+    "c": "people",
+    "e": "🧝🏿‍♂️",
+    "d": "man elf: dark skin tone",
     "u": "10.0"
   },
   "woman_genie": {
@@ -3653,17 +7823,107 @@
     "d": "snowboarder",
     "u": "6.0"
   },
+  "snowboarder_tone1": {
+    "c": "activity",
+    "e": "🏂🏻",
+    "d": "snowboarder: light skin tone",
+    "u": "8.0"
+  },
+  "snowboarder_tone2": {
+    "c": "activity",
+    "e": "🏂🏼",
+    "d": "snowboarder: medium-light skin tone",
+    "u": "8.0"
+  },
+  "snowboarder_tone3": {
+    "c": "activity",
+    "e": "🏂🏽",
+    "d": "snowboarder: medium skin tone",
+    "u": "8.0"
+  },
+  "snowboarder_tone4": {
+    "c": "activity",
+    "e": "🏂🏾",
+    "d": "snowboarder: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "snowboarder_tone5": {
+    "c": "activity",
+    "e": "🏂🏿",
+    "d": "snowboarder: dark skin tone",
+    "u": "8.0"
+  },
   "woman_lifting_weights": {
     "c": "activity",
     "e": "🏋️‍♀️",
     "d": "woman lifting weights",
     "u": "7.0"
   },
+  "woman_lifting_weights_tone1": {
+    "c": "activity",
+    "e": "🏋🏻‍♀️",
+    "d": "woman lifting weights: light skin tone",
+    "u": "8.0"
+  },
+  "woman_lifting_weights_tone2": {
+    "c": "activity",
+    "e": "🏋🏼‍♀️",
+    "d": "woman lifting weights: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_lifting_weights_tone3": {
+    "c": "activity",
+    "e": "🏋🏽‍♀️",
+    "d": "woman lifting weights: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_lifting_weights_tone4": {
+    "c": "activity",
+    "e": "🏋🏾‍♀️",
+    "d": "woman lifting weights: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_lifting_weights_tone5": {
+    "c": "activity",
+    "e": "🏋🏿‍♀️",
+    "d": "woman lifting weights: dark skin tone",
+    "u": "8.0"
+  },
   "man_lifting_weights": {
     "c": "activity",
     "e": "🏋️‍♂️",
     "d": "man lifting weights",
     "u": "7.0"
+  },
+  "man_lifting_weights_tone1": {
+    "c": "activity",
+    "e": "🏋🏻‍♂️",
+    "d": "man lifting weights: light skin tone",
+    "u": "8.0"
+  },
+  "man_lifting_weights_tone2": {
+    "c": "activity",
+    "e": "🏋🏼‍♂️",
+    "d": "man lifting weights: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_lifting_weights_tone3": {
+    "c": "activity",
+    "e": "🏋🏽‍♂️",
+    "d": "man lifting weights: medium skin tone",
+    "u": "8.0"
+  },
+  "man_lifting_weights_tone4": {
+    "c": "activity",
+    "e": "🏋🏾‍♂️",
+    "d": "man lifting weights: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_lifting_weights_tone5": {
+    "c": "activity",
+    "e": "🏋🏿‍♂️",
+    "d": "man lifting weights: dark skin tone",
+    "u": "8.0"
   },
   "fencer": {
     "c": "activity",
@@ -3689,10 +7949,70 @@
     "d": "woman cartwheeling",
     "u": "9.0"
   },
+  "woman_cartwheeling_tone1": {
+    "c": "activity",
+    "e": "🤸🏻‍♀️",
+    "d": "woman cartwheeling: light skin tone",
+    "u": "9.0"
+  },
+  "woman_cartwheeling_tone2": {
+    "c": "activity",
+    "e": "🤸🏼‍♀️",
+    "d": "woman cartwheeling: medium-light skin tone",
+    "u": "9.0"
+  },
+  "woman_cartwheeling_tone3": {
+    "c": "activity",
+    "e": "🤸🏽‍♀️",
+    "d": "woman cartwheeling: medium skin tone",
+    "u": "9.0"
+  },
+  "woman_cartwheeling_tone4": {
+    "c": "activity",
+    "e": "🤸🏾‍♀️",
+    "d": "woman cartwheeling: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "woman_cartwheeling_tone5": {
+    "c": "activity",
+    "e": "🤸🏿‍♀️",
+    "d": "woman cartwheeling: dark skin tone",
+    "u": "9.0"
+  },
   "man_cartwheeling": {
     "c": "activity",
     "e": "🤸‍♂️",
     "d": "man cartwheeling",
+    "u": "9.0"
+  },
+  "man_cartwheeling_tone1": {
+    "c": "activity",
+    "e": "🤸🏻‍♂️",
+    "d": "man cartwheeling: light skin tone",
+    "u": "9.0"
+  },
+  "man_cartwheeling_tone2": {
+    "c": "activity",
+    "e": "🤸🏼‍♂️",
+    "d": "man cartwheeling: medium-light skin tone",
+    "u": "9.0"
+  },
+  "man_cartwheeling_tone3": {
+    "c": "activity",
+    "e": "🤸🏽‍♂️",
+    "d": "man cartwheeling: medium skin tone",
+    "u": "9.0"
+  },
+  "man_cartwheeling_tone4": {
+    "c": "activity",
+    "e": "🤸🏾‍♂️",
+    "d": "man cartwheeling: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "man_cartwheeling_tone5": {
+    "c": "activity",
+    "e": "🤸🏿‍♂️",
+    "d": "man cartwheeling: dark skin tone",
     "u": "9.0"
   },
   "woman_bouncing_ball": {
@@ -3701,16 +8021,106 @@
     "d": "woman bouncing ball",
     "u": "5.2"
   },
+  "woman_bouncing_ball_tone1": {
+    "c": "activity",
+    "e": "⛹🏻‍♀️",
+    "d": "woman bouncing ball: light skin tone",
+    "u": "8.0"
+  },
+  "woman_bouncing_ball_tone2": {
+    "c": "activity",
+    "e": "⛹🏼‍♀️",
+    "d": "woman bouncing ball: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_bouncing_ball_tone3": {
+    "c": "activity",
+    "e": "⛹🏽‍♀️",
+    "d": "woman bouncing ball: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_bouncing_ball_tone4": {
+    "c": "activity",
+    "e": "⛹🏾‍♀️",
+    "d": "woman bouncing ball: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_bouncing_ball_tone5": {
+    "c": "activity",
+    "e": "⛹🏿‍♀️",
+    "d": "woman bouncing ball: dark skin tone",
+    "u": "8.0"
+  },
   "man_bouncing_ball": {
     "c": "activity",
     "e": "⛹️‍♂️",
     "d": "man bouncing ball",
     "u": "5.2"
   },
+  "man_bouncing_ball_tone1": {
+    "c": "activity",
+    "e": "⛹🏻‍♂️",
+    "d": "man bouncing ball: light skin tone",
+    "u": "8.0"
+  },
+  "man_bouncing_ball_tone2": {
+    "c": "activity",
+    "e": "⛹🏼‍♂️",
+    "d": "man bouncing ball: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_bouncing_ball_tone3": {
+    "c": "activity",
+    "e": "⛹🏽‍♂️",
+    "d": "man bouncing ball: medium skin tone",
+    "u": "8.0"
+  },
+  "man_bouncing_ball_tone4": {
+    "c": "activity",
+    "e": "⛹🏾‍♂️",
+    "d": "man bouncing ball: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_bouncing_ball_tone5": {
+    "c": "activity",
+    "e": "⛹🏿‍♂️",
+    "d": "man bouncing ball: dark skin tone",
+    "u": "8.0"
+  },
   "woman_playing_handball": {
     "c": "activity",
     "e": "🤾‍♀️",
     "d": "woman playing handball",
+    "u": "9.0"
+  },
+  "woman_playing_handball_tone1": {
+    "c": "activity",
+    "e": "🤾🏻‍♀️",
+    "d": "woman playing handball: light skin tone",
+    "u": "9.0"
+  },
+  "woman_playing_handball_tone2": {
+    "c": "activity",
+    "e": "🤾🏼‍♀️",
+    "d": "woman playing handball: medium-light skin tone",
+    "u": "9.0"
+  },
+  "woman_playing_handball_tone3": {
+    "c": "activity",
+    "e": "🤾🏽‍♀️",
+    "d": "woman playing handball: medium skin tone",
+    "u": "9.0"
+  },
+  "woman_playing_handball_tone4": {
+    "c": "activity",
+    "e": "🤾🏾‍♀️",
+    "d": "woman playing handball: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "woman_playing_handball_tone5": {
+    "c": "activity",
+    "e": "🤾🏿‍♀️",
+    "d": "woman playing handball: dark skin tone",
     "u": "9.0"
   },
   "man_playing_handball": {
@@ -3719,11 +8129,71 @@
     "d": "man playing handball",
     "u": "9.0"
   },
+  "man_playing_handball_tone1": {
+    "c": "activity",
+    "e": "🤾🏻‍♂️",
+    "d": "man playing handball: light skin tone",
+    "u": "9.0"
+  },
+  "man_playing_handball_tone2": {
+    "c": "activity",
+    "e": "🤾🏼‍♂️",
+    "d": "man playing handball: medium-light skin tone",
+    "u": "9.0"
+  },
+  "man_playing_handball_tone3": {
+    "c": "activity",
+    "e": "🤾🏽‍♂️",
+    "d": "man playing handball: medium skin tone",
+    "u": "9.0"
+  },
+  "man_playing_handball_tone4": {
+    "c": "activity",
+    "e": "🤾🏾‍♂️",
+    "d": "man playing handball: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "man_playing_handball_tone5": {
+    "c": "activity",
+    "e": "🤾🏿‍♂️",
+    "d": "man playing handball: dark skin tone",
+    "u": "9.0"
+  },
   "woman_golfing": {
     "c": "activity",
     "e": "🏌️‍♀️",
     "d": "woman golfing",
     "u": "7.0"
+  },
+  "woman_golfing_tone1": {
+    "c": "activity",
+    "e": "🏌🏻‍♀️",
+    "d": "woman golfing: light skin tone",
+    "u": "8.0"
+  },
+  "woman_golfing_tone2": {
+    "c": "activity",
+    "e": "🏌🏼‍♀️",
+    "d": "woman golfing: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_golfing_tone3": {
+    "c": "activity",
+    "e": "🏌🏽‍♀️",
+    "d": "woman golfing: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_golfing_tone4": {
+    "c": "activity",
+    "e": "🏌🏾‍♀️",
+    "d": "woman golfing: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_golfing_tone5": {
+    "c": "activity",
+    "e": "🏌🏿‍♀️",
+    "d": "woman golfing: dark skin tone",
+    "u": "8.0"
   },
   "man_golfing": {
     "c": "activity",
@@ -3731,11 +8201,71 @@
     "d": "man golfing",
     "u": "7.0"
   },
+  "man_golfing_tone1": {
+    "c": "activity",
+    "e": "🏌🏻‍♂️",
+    "d": "man golfing: light skin tone",
+    "u": "8.0"
+  },
+  "man_golfing_tone2": {
+    "c": "activity",
+    "e": "🏌🏼‍♂️",
+    "d": "man golfing: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_golfing_tone3": {
+    "c": "activity",
+    "e": "🏌🏽‍♂️",
+    "d": "man golfing: medium skin tone",
+    "u": "8.0"
+  },
+  "man_golfing_tone4": {
+    "c": "activity",
+    "e": "🏌🏾‍♂️",
+    "d": "man golfing: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_golfing_tone5": {
+    "c": "activity",
+    "e": "🏌🏿‍♂️",
+    "d": "man golfing: dark skin tone",
+    "u": "8.0"
+  },
   "woman_surfing": {
     "c": "activity",
     "e": "🏄‍♀️",
     "d": "woman surfing",
     "u": "6.0"
+  },
+  "woman_surfing_tone1": {
+    "c": "activity",
+    "e": "🏄🏻‍♀️",
+    "d": "woman surfing: light skin tone",
+    "u": "8.0"
+  },
+  "woman_surfing_tone2": {
+    "c": "activity",
+    "e": "🏄🏼‍♀️",
+    "d": "woman surfing: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_surfing_tone3": {
+    "c": "activity",
+    "e": "🏄🏽‍♀️",
+    "d": "woman surfing: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_surfing_tone4": {
+    "c": "activity",
+    "e": "🏄🏾‍♀️",
+    "d": "woman surfing: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_surfing_tone5": {
+    "c": "activity",
+    "e": "🏄🏿‍♀️",
+    "d": "woman surfing: dark skin tone",
+    "u": "8.0"
   },
   "man_surfing": {
     "c": "activity",
@@ -3743,11 +8273,71 @@
     "d": "man surfing",
     "u": "6.0"
   },
+  "man_surfing_tone1": {
+    "c": "activity",
+    "e": "🏄🏻‍♂️",
+    "d": "man surfing: light skin tone",
+    "u": "8.0"
+  },
+  "man_surfing_tone2": {
+    "c": "activity",
+    "e": "🏄🏼‍♂️",
+    "d": "man surfing: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_surfing_tone3": {
+    "c": "activity",
+    "e": "🏄🏽‍♂️",
+    "d": "man surfing: medium skin tone",
+    "u": "8.0"
+  },
+  "man_surfing_tone4": {
+    "c": "activity",
+    "e": "🏄🏾‍♂️",
+    "d": "man surfing: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_surfing_tone5": {
+    "c": "activity",
+    "e": "🏄🏿‍♂️",
+    "d": "man surfing: dark skin tone",
+    "u": "8.0"
+  },
   "woman_swimming": {
     "c": "activity",
     "e": "🏊‍♀️",
     "d": "woman swimming",
     "u": "6.0"
+  },
+  "woman_swimming_tone1": {
+    "c": "activity",
+    "e": "🏊🏻‍♀️",
+    "d": "woman swimming: light skin tone",
+    "u": "8.0"
+  },
+  "woman_swimming_tone2": {
+    "c": "activity",
+    "e": "🏊🏼‍♀️",
+    "d": "woman swimming: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_swimming_tone3": {
+    "c": "activity",
+    "e": "🏊🏽‍♀️",
+    "d": "woman swimming: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_swimming_tone4": {
+    "c": "activity",
+    "e": "🏊🏾‍♀️",
+    "d": "woman swimming: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_swimming_tone5": {
+    "c": "activity",
+    "e": "🏊🏿‍♀️",
+    "d": "woman swimming: dark skin tone",
+    "u": "8.0"
   },
   "man_swimming": {
     "c": "activity",
@@ -3755,10 +8345,70 @@
     "d": "man swimming",
     "u": "6.0"
   },
+  "man_swimming_tone1": {
+    "c": "activity",
+    "e": "🏊🏻‍♂️",
+    "d": "man swimming: light skin tone",
+    "u": "8.0"
+  },
+  "man_swimming_tone2": {
+    "c": "activity",
+    "e": "🏊🏼‍♂️",
+    "d": "man swimming: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_swimming_tone3": {
+    "c": "activity",
+    "e": "🏊🏽‍♂️",
+    "d": "man swimming: medium skin tone",
+    "u": "8.0"
+  },
+  "man_swimming_tone4": {
+    "c": "activity",
+    "e": "🏊🏾‍♂️",
+    "d": "man swimming: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_swimming_tone5": {
+    "c": "activity",
+    "e": "🏊🏿‍♂️",
+    "d": "man swimming: dark skin tone",
+    "u": "8.0"
+  },
   "woman_playing_water_polo": {
     "c": "activity",
     "e": "🤽‍♀️",
     "d": "woman playing water polo",
+    "u": "9.0"
+  },
+  "woman_playing_water_polo_tone1": {
+    "c": "activity",
+    "e": "🤽🏻‍♀️",
+    "d": "woman playing water polo: light skin tone",
+    "u": "9.0"
+  },
+  "woman_playing_water_polo_tone2": {
+    "c": "activity",
+    "e": "🤽🏼‍♀️",
+    "d": "woman playing water polo: medium-light skin tone",
+    "u": "9.0"
+  },
+  "woman_playing_water_polo_tone3": {
+    "c": "activity",
+    "e": "🤽🏽‍♀️",
+    "d": "woman playing water polo: medium skin tone",
+    "u": "9.0"
+  },
+  "woman_playing_water_polo_tone4": {
+    "c": "activity",
+    "e": "🤽🏾‍♀️",
+    "d": "woman playing water polo: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "woman_playing_water_polo_tone5": {
+    "c": "activity",
+    "e": "🤽🏿‍♀️",
+    "d": "woman playing water polo: dark skin tone",
     "u": "9.0"
   },
   "man_playing_water_polo": {
@@ -3767,11 +8417,71 @@
     "d": "man playing water polo",
     "u": "9.0"
   },
+  "man_playing_water_polo_tone1": {
+    "c": "activity",
+    "e": "🤽🏻‍♂️",
+    "d": "man playing water polo: light skin tone",
+    "u": "9.0"
+  },
+  "man_playing_water_polo_tone2": {
+    "c": "activity",
+    "e": "🤽🏼‍♂️",
+    "d": "man playing water polo: medium-light skin tone",
+    "u": "9.0"
+  },
+  "man_playing_water_polo_tone3": {
+    "c": "activity",
+    "e": "🤽🏽‍♂️",
+    "d": "man playing water polo: medium skin tone",
+    "u": "9.0"
+  },
+  "man_playing_water_polo_tone4": {
+    "c": "activity",
+    "e": "🤽🏾‍♂️",
+    "d": "man playing water polo: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "man_playing_water_polo_tone5": {
+    "c": "activity",
+    "e": "🤽🏿‍♂️",
+    "d": "man playing water polo: dark skin tone",
+    "u": "9.0"
+  },
   "woman_rowing_boat": {
     "c": "activity",
     "e": "🚣‍♀️",
     "d": "woman rowing boat",
     "u": "6.0"
+  },
+  "woman_rowing_boat_tone1": {
+    "c": "activity",
+    "e": "🚣🏻‍♀️",
+    "d": "woman rowing boat: light skin tone",
+    "u": "8.0"
+  },
+  "woman_rowing_boat_tone2": {
+    "c": "activity",
+    "e": "🚣🏼‍♀️",
+    "d": "woman rowing boat: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_rowing_boat_tone3": {
+    "c": "activity",
+    "e": "🚣🏽‍♀️",
+    "d": "woman rowing boat: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_rowing_boat_tone4": {
+    "c": "activity",
+    "e": "🚣🏾‍♀️",
+    "d": "woman rowing boat: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_rowing_boat_tone5": {
+    "c": "activity",
+    "e": "🚣🏿‍♀️",
+    "d": "woman rowing boat: dark skin tone",
+    "u": "8.0"
   },
   "man_rowing_boat": {
     "c": "activity",
@@ -3779,11 +8489,71 @@
     "d": "man rowing boat",
     "u": "6.0"
   },
+  "man_rowing_boat_tone1": {
+    "c": "activity",
+    "e": "🚣🏻‍♂️",
+    "d": "man rowing boat: light skin tone",
+    "u": "8.0"
+  },
+  "man_rowing_boat_tone2": {
+    "c": "activity",
+    "e": "🚣🏼‍♂️",
+    "d": "man rowing boat: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_rowing_boat_tone3": {
+    "c": "activity",
+    "e": "🚣🏽‍♂️",
+    "d": "man rowing boat: medium skin tone",
+    "u": "8.0"
+  },
+  "man_rowing_boat_tone4": {
+    "c": "activity",
+    "e": "🚣🏾‍♂️",
+    "d": "man rowing boat: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_rowing_boat_tone5": {
+    "c": "activity",
+    "e": "🚣🏿‍♂️",
+    "d": "man rowing boat: dark skin tone",
+    "u": "8.0"
+  },
   "horse_racing": {
     "c": "activity",
     "e": "🏇",
     "d": "horse racing",
     "u": "6.0"
+  },
+  "horse_racing_tone1": {
+    "c": "activity",
+    "e": "🏇🏻",
+    "d": "horse racing tone 1",
+    "u": "8.0"
+  },
+  "horse_racing_tone2": {
+    "c": "activity",
+    "e": "🏇🏼",
+    "d": "horse racing tone 2",
+    "u": "8.0"
+  },
+  "horse_racing_tone3": {
+    "c": "activity",
+    "e": "🏇🏽",
+    "d": "horse racing tone 3",
+    "u": "8.0"
+  },
+  "horse_racing_tone4": {
+    "c": "activity",
+    "e": "🏇🏾",
+    "d": "horse racing tone 4",
+    "u": "8.0"
+  },
+  "horse_racing_tone5": {
+    "c": "activity",
+    "e": "🏇🏿",
+    "d": "horse racing tone 5",
+    "u": "8.0"
   },
   "woman_biking": {
     "c": "activity",
@@ -3791,11 +8561,71 @@
     "d": "woman biking",
     "u": "6.0"
   },
+  "woman_biking_tone1": {
+    "c": "activity",
+    "e": "🚴🏻‍♀️",
+    "d": "woman biking: light skin tone",
+    "u": "8.0"
+  },
+  "woman_biking_tone2": {
+    "c": "activity",
+    "e": "🚴🏼‍♀️",
+    "d": "woman biking: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_biking_tone3": {
+    "c": "activity",
+    "e": "🚴🏽‍♀️",
+    "d": "woman biking: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_biking_tone4": {
+    "c": "activity",
+    "e": "🚴🏾‍♀️",
+    "d": "woman biking: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_biking_tone5": {
+    "c": "activity",
+    "e": "🚴🏿‍♀️",
+    "d": "woman biking: dark skin tone",
+    "u": "8.0"
+  },
   "man_biking": {
     "c": "activity",
     "e": "🚴‍♂️",
     "d": "man biking",
     "u": "6.0"
+  },
+  "man_biking_tone1": {
+    "c": "activity",
+    "e": "🚴🏻‍♂️",
+    "d": "man biking: light skin tone",
+    "u": "8.0"
+  },
+  "man_biking_tone2": {
+    "c": "activity",
+    "e": "🚴🏼‍♂️",
+    "d": "man biking: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_biking_tone3": {
+    "c": "activity",
+    "e": "🚴🏽‍♂️",
+    "d": "man biking: medium skin tone",
+    "u": "8.0"
+  },
+  "man_biking_tone4": {
+    "c": "activity",
+    "e": "🚴🏾‍♂️",
+    "d": "man biking: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_biking_tone5": {
+    "c": "activity",
+    "e": "🚴🏿‍♂️",
+    "d": "man biking: dark skin tone",
+    "u": "8.0"
   },
   "woman_mountain_biking": {
     "c": "activity",
@@ -3803,16 +8633,106 @@
     "d": "woman mountain biking",
     "u": "6.0"
   },
+  "woman_mountain_biking_tone1": {
+    "c": "activity",
+    "e": "🚵🏻‍♀️",
+    "d": "woman mountain biking: light skin tone",
+    "u": "8.0"
+  },
+  "woman_mountain_biking_tone2": {
+    "c": "activity",
+    "e": "🚵🏼‍♀️",
+    "d": "woman mountain biking: medium-light skin tone",
+    "u": "8.0"
+  },
+  "woman_mountain_biking_tone3": {
+    "c": "activity",
+    "e": "🚵🏽‍♀️",
+    "d": "woman mountain biking: medium skin tone",
+    "u": "8.0"
+  },
+  "woman_mountain_biking_tone4": {
+    "c": "activity",
+    "e": "🚵🏾‍♀️",
+    "d": "woman mountain biking: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "woman_mountain_biking_tone5": {
+    "c": "activity",
+    "e": "🚵🏿‍♀️",
+    "d": "woman mountain biking: dark skin tone",
+    "u": "8.0"
+  },
   "man_mountain_biking": {
     "c": "activity",
     "e": "🚵‍♂️",
     "d": "man mountain biking",
     "u": "6.0"
   },
+  "man_mountain_biking_tone1": {
+    "c": "activity",
+    "e": "🚵🏻‍♂️",
+    "d": "man mountain biking: light skin tone",
+    "u": "8.0"
+  },
+  "man_mountain_biking_tone2": {
+    "c": "activity",
+    "e": "🚵🏼‍♂️",
+    "d": "man mountain biking: medium-light skin tone",
+    "u": "8.0"
+  },
+  "man_mountain_biking_tone3": {
+    "c": "activity",
+    "e": "🚵🏽‍♂️",
+    "d": "man mountain biking: medium skin tone",
+    "u": "8.0"
+  },
+  "man_mountain_biking_tone4": {
+    "c": "activity",
+    "e": "🚵🏾‍♂️",
+    "d": "man mountain biking: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "man_mountain_biking_tone5": {
+    "c": "activity",
+    "e": "🚵🏿‍♂️",
+    "d": "man mountain biking: dark skin tone",
+    "u": "8.0"
+  },
   "woman_in_steamy_room": {
     "c": "people",
     "e": "🧖‍♀️",
     "d": "woman in steamy room",
+    "u": "10.0"
+  },
+  "woman_in_steamy_room_tone1": {
+    "c": "people",
+    "e": "🧖🏻‍♀️",
+    "d": "woman in steamy room: light skin tone",
+    "u": "10.0"
+  },
+  "woman_in_steamy_room_tone2": {
+    "c": "people",
+    "e": "🧖🏼‍♀️",
+    "d": "woman in steamy room: medium-light skin tone",
+    "u": "10.0"
+  },
+  "woman_in_steamy_room_tone3": {
+    "c": "people",
+    "e": "🧖🏽‍♀️",
+    "d": "woman in steamy room: medium skin tone",
+    "u": "10.0"
+  },
+  "woman_in_steamy_room_tone4": {
+    "c": "people",
+    "e": "🧖🏾‍♀️",
+    "d": "woman in steamy room: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "woman_in_steamy_room_tone5": {
+    "c": "people",
+    "e": "🧖🏿‍♀️",
+    "d": "woman in steamy room: dark skin tone",
     "u": "10.0"
   },
   "man_in_steamy_room": {
@@ -3821,10 +8741,70 @@
     "d": "man in steamy room",
     "u": "10.0"
   },
+  "man_in_steamy_room_tone1": {
+    "c": "people",
+    "e": "🧖🏻‍♂️",
+    "d": "man in steamy room: light skin tone",
+    "u": "10.0"
+  },
+  "man_in_steamy_room_tone2": {
+    "c": "people",
+    "e": "🧖🏼‍♂️",
+    "d": "man in steamy room: medium-light skin tone",
+    "u": "10.0"
+  },
+  "man_in_steamy_room_tone3": {
+    "c": "people",
+    "e": "🧖🏽‍♂️",
+    "d": "man in steamy room: medium skin tone",
+    "u": "10.0"
+  },
+  "man_in_steamy_room_tone4": {
+    "c": "people",
+    "e": "🧖🏾‍♂️",
+    "d": "man in steamy room: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "man_in_steamy_room_tone5": {
+    "c": "people",
+    "e": "🧖🏿‍♂️",
+    "d": "man in steamy room: dark skin tone",
+    "u": "10.0"
+  },
   "woman_climbing": {
     "c": "activity",
     "e": "🧗‍♀️",
     "d": "woman climbing",
+    "u": "10.0"
+  },
+  "woman_climbing_tone1": {
+    "c": "activity",
+    "e": "🧗🏻‍♀️",
+    "d": "woman climbing: light skin tone",
+    "u": "10.0"
+  },
+  "woman_climbing_tone2": {
+    "c": "activity",
+    "e": "🧗🏼‍♀️",
+    "d": "woman climbing: medium-light skin tone",
+    "u": "10.0"
+  },
+  "woman_climbing_tone3": {
+    "c": "activity",
+    "e": "🧗🏽‍♀️",
+    "d": "woman climbing: medium skin tone",
+    "u": "10.0"
+  },
+  "woman_climbing_tone4": {
+    "c": "activity",
+    "e": "🧗🏾‍♀️",
+    "d": "woman climbing: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "woman_climbing_tone5": {
+    "c": "activity",
+    "e": "🧗🏿‍♀️",
+    "d": "woman climbing: dark skin tone",
     "u": "10.0"
   },
   "man_climbing": {
@@ -3833,16 +8813,106 @@
     "d": "man climbing",
     "u": "10.0"
   },
+  "man_climbing_tone1": {
+    "c": "activity",
+    "e": "🧗🏻‍♂️",
+    "d": "man climbing: light skin tone",
+    "u": "10.0"
+  },
+  "man_climbing_tone2": {
+    "c": "activity",
+    "e": "🧗🏼‍♂️",
+    "d": "man climbing: medium-light skin tone",
+    "u": "10.0"
+  },
+  "man_climbing_tone3": {
+    "c": "activity",
+    "e": "🧗🏽‍♂️",
+    "d": "man climbing: medium skin tone",
+    "u": "10.0"
+  },
+  "man_climbing_tone4": {
+    "c": "activity",
+    "e": "🧗🏾‍♂️",
+    "d": "man climbing: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "man_climbing_tone5": {
+    "c": "activity",
+    "e": "🧗🏿‍♂️",
+    "d": "man climbing: dark skin tone",
+    "u": "10.0"
+  },
   "woman_in_lotus_position": {
     "c": "activity",
     "e": "🧘‍♀️",
     "d": "woman in lotus position",
     "u": "10.0"
   },
+  "woman_in_lotus_position_tone1": {
+    "c": "activity",
+    "e": "🧘🏻‍♀️",
+    "d": "woman in lotus position: light skin tone",
+    "u": "10.0"
+  },
+  "woman_in_lotus_position_tone2": {
+    "c": "activity",
+    "e": "🧘🏼‍♀️",
+    "d": "woman in lotus position: medium-light skin tone",
+    "u": "10.0"
+  },
+  "woman_in_lotus_position_tone3": {
+    "c": "activity",
+    "e": "🧘🏽‍♀️",
+    "d": "woman in lotus position: medium skin tone",
+    "u": "10.0"
+  },
+  "woman_in_lotus_position_tone4": {
+    "c": "activity",
+    "e": "🧘🏾‍♀️",
+    "d": "woman in lotus position: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "woman_in_lotus_position_tone5": {
+    "c": "activity",
+    "e": "🧘🏿‍♀️",
+    "d": "woman in lotus position: dark skin tone",
+    "u": "10.0"
+  },
   "man_in_lotus_position": {
     "c": "activity",
     "e": "🧘‍♂️",
     "d": "man in lotus position",
+    "u": "10.0"
+  },
+  "man_in_lotus_position_tone1": {
+    "c": "activity",
+    "e": "🧘🏻‍♂️",
+    "d": "man in lotus position: light skin tone",
+    "u": "10.0"
+  },
+  "man_in_lotus_position_tone2": {
+    "c": "activity",
+    "e": "🧘🏼‍♂️",
+    "d": "man in lotus position: medium-light skin tone",
+    "u": "10.0"
+  },
+  "man_in_lotus_position_tone3": {
+    "c": "activity",
+    "e": "🧘🏽‍♂️",
+    "d": "man in lotus position: medium skin tone",
+    "u": "10.0"
+  },
+  "man_in_lotus_position_tone4": {
+    "c": "activity",
+    "e": "🧘🏾‍♂️",
+    "d": "man in lotus position: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "man_in_lotus_position_tone5": {
+    "c": "activity",
+    "e": "🧘🏿‍♂️",
+    "d": "man in lotus position: dark skin tone",
     "u": "10.0"
   },
   "running_shirt_with_sash": {
@@ -3923,10 +8993,70 @@
     "d": "woman juggling",
     "u": "9.0"
   },
+  "woman_juggling_tone1": {
+    "c": "activity",
+    "e": "🤹🏻‍♀️",
+    "d": "woman juggling: light skin tone",
+    "u": "9.0"
+  },
+  "woman_juggling_tone2": {
+    "c": "activity",
+    "e": "🤹🏼‍♀️",
+    "d": "woman juggling: medium-light skin tone",
+    "u": "9.0"
+  },
+  "woman_juggling_tone3": {
+    "c": "activity",
+    "e": "🤹🏽‍♀️",
+    "d": "woman juggling: medium skin tone",
+    "u": "9.0"
+  },
+  "woman_juggling_tone4": {
+    "c": "activity",
+    "e": "🤹🏾‍♀️",
+    "d": "woman juggling: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "woman_juggling_tone5": {
+    "c": "activity",
+    "e": "🤹🏿‍♀️",
+    "d": "woman juggling: dark skin tone",
+    "u": "9.0"
+  },
   "man_juggling": {
     "c": "activity",
     "e": "🤹‍♂️",
     "d": "man juggling",
+    "u": "9.0"
+  },
+  "man_juggling_tone1": {
+    "c": "activity",
+    "e": "🤹🏻‍♂️",
+    "d": "man juggling: light skin tone",
+    "u": "9.0"
+  },
+  "man_juggling_tone2": {
+    "c": "activity",
+    "e": "🤹🏼‍♂️",
+    "d": "man juggling: medium-light skin tone",
+    "u": "9.0"
+  },
+  "man_juggling_tone3": {
+    "c": "activity",
+    "e": "🤹🏽‍♂️",
+    "d": "man juggling: medium skin tone",
+    "u": "9.0"
+  },
+  "man_juggling_tone4": {
+    "c": "activity",
+    "e": "🤹🏾‍♂️",
+    "d": "man juggling: medium-dark skin tone",
+    "u": "9.0"
+  },
+  "man_juggling_tone5": {
+    "c": "activity",
+    "e": "🤹🏿‍♂️",
+    "d": "man juggling: dark skin tone",
     "u": "9.0"
   },
   "performing_arts": {
@@ -5285,6 +10415,36 @@
     "d": "bath",
     "u": "6.0"
   },
+  "bath_tone1": {
+    "c": "activity",
+    "e": "🛀🏻",
+    "d": "bath tone 1",
+    "u": "8.0"
+  },
+  "bath_tone2": {
+    "c": "activity",
+    "e": "🛀🏼",
+    "d": "bath tone 2",
+    "u": "8.0"
+  },
+  "bath_tone3": {
+    "c": "activity",
+    "e": "🛀🏽",
+    "d": "bath tone 3",
+    "u": "8.0"
+  },
+  "bath_tone4": {
+    "c": "activity",
+    "e": "🛀🏾",
+    "d": "bath tone 4",
+    "u": "8.0"
+  },
+  "bath_tone5": {
+    "c": "activity",
+    "e": "🛀🏿",
+    "d": "bath tone 5",
+    "u": "8.0"
+  },
   "bellhop": {
     "c": "objects",
     "e": "🛎",
@@ -5320,6 +10480,36 @@
     "e": "🛏",
     "d": "bed",
     "u": "7.0"
+  },
+  "person_in_bed_tone1": {
+    "c": "objects",
+    "e": "🛌🏻",
+    "d": "person in bed: light skin tone",
+    "u": "8.0"
+  },
+  "person_in_bed_tone2": {
+    "c": "objects",
+    "e": "🛌🏼",
+    "d": "person in bed: medium-light skin tone",
+    "u": "8.0"
+  },
+  "person_in_bed_tone3": {
+    "c": "objects",
+    "e": "🛌🏽",
+    "d": "person in bed: medium skin tone",
+    "u": "8.0"
+  },
+  "person_in_bed_tone4": {
+    "c": "objects",
+    "e": "🛌🏾",
+    "d": "person in bed: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "person_in_bed_tone5": {
+    "c": "objects",
+    "e": "🛌🏿",
+    "d": "person in bed: dark skin tone",
+    "u": "8.0"
   },
   "sleeping_accommodation": {
     "c": "objects",
@@ -6227,6 +11417,156 @@
     "d": "heavy large circle",
     "u": "5.2"
   },
+  "man_with_gua_pi_mao_tone1": {
+    "c": "people",
+    "e": "👲🏻",
+    "d": "man with gua pi mao tone 1",
+    "u": "8.0"
+  },
+  "man_with_gua_pi_mao_tone2": {
+    "c": "people",
+    "e": "👲🏼",
+    "d": "man with gua pi mao tone 2",
+    "u": "8.0"
+  },
+  "man_with_gua_pi_mao_tone3": {
+    "c": "people",
+    "e": "👲🏽",
+    "d": "man with gua pi mao tone 3",
+    "u": "8.0"
+  },
+  "man_with_gua_pi_mao_tone4": {
+    "c": "people",
+    "e": "👲🏾",
+    "d": "man with gua pi mao tone 4",
+    "u": "8.0"
+  },
+  "man_with_gua_pi_mao_tone5": {
+    "c": "people",
+    "e": "👲🏿",
+    "d": "man with gua pi mao tone 5",
+    "u": "8.0"
+  },
+  "water_polo_tone1": {
+    "c": "activity",
+    "e": "🤽🏻",
+    "d": "water polo tone 1",
+    "u": "9.0"
+  },
+  "water_polo_tone2": {
+    "c": "activity",
+    "e": "🤽🏼",
+    "d": "water polo tone 2",
+    "u": "9.0"
+  },
+  "water_polo_tone3": {
+    "c": "activity",
+    "e": "🤽🏽",
+    "d": "water polo tone 3",
+    "u": "9.0"
+  },
+  "water_polo_tone4": {
+    "c": "activity",
+    "e": "🤽🏾",
+    "d": "water polo tone 4",
+    "u": "9.0"
+  },
+  "water_polo_tone5": {
+    "c": "activity",
+    "e": "🤽🏿",
+    "d": "water polo tone 5",
+    "u": "9.0"
+  },
+  "superhero_tone1": {
+    "c": "people",
+    "e": "🦸🏻",
+    "d": "superhero: light skin tone",
+    "u": "11.0"
+  },
+  "superhero_tone2": {
+    "c": "people",
+    "e": "🦸🏼",
+    "d": "superhero: medium-light skin tone",
+    "u": "11.0"
+  },
+  "superhero_tone3": {
+    "c": "people",
+    "e": "🦸🏽",
+    "d": "superhero: medium skin tone",
+    "u": "11.0"
+  },
+  "superhero_tone4": {
+    "c": "people",
+    "e": "🦸🏾",
+    "d": "superhero: medium-dark skin tone",
+    "u": "11.0"
+  },
+  "superhero_tone5": {
+    "c": "people",
+    "e": "🦸🏿",
+    "d": "superhero: dark skin tone",
+    "u": "11.0"
+  },
+  "woman_superhero_tone1": {
+    "c": "people",
+    "e": "🦸🏻‍♀️",
+    "d": "woman superhero: light skin tone",
+    "u": "11.0"
+  },
+  "woman_superhero_tone2": {
+    "c": "people",
+    "e": "🦸🏼‍♀️",
+    "d": "woman superhero: medium-light skin tone",
+    "u": "11.0"
+  },
+  "woman_superhero_tone3": {
+    "c": "people",
+    "e": "🦸🏽‍♀️",
+    "d": "woman superhero: medium skin tone",
+    "u": "11.0"
+  },
+  "woman_superhero_tone4": {
+    "c": "people",
+    "e": "🦸🏾‍♀️",
+    "d": "woman superhero: medium-dark skin tone",
+    "u": "11.0"
+  },
+  "woman_superhero_tone5": {
+    "c": "people",
+    "e": "🦸🏿‍♀️",
+    "d": "woman superhero: dark skin tone",
+    "u": "11.0"
+  },
+  "man_superhero_tone1": {
+    "c": "people",
+    "e": "🦸🏻‍♂️",
+    "d": "man superhero: light skin tone",
+    "u": "11.0"
+  },
+  "man_superhero_tone2": {
+    "c": "people",
+    "e": "🦸🏼‍♂️",
+    "d": "man superhero: medium-light skin tone",
+    "u": "11.0"
+  },
+  "man_superhero_tone3": {
+    "c": "people",
+    "e": "🦸🏽‍♂️",
+    "d": "man superhero: medium skin tone",
+    "u": "11.0"
+  },
+  "man_superhero_tone4": {
+    "c": "people",
+    "e": "🦸🏾‍♂️",
+    "d": "man superhero: medium-dark skin tone",
+    "u": "11.0"
+  },
+  "man_superhero_tone5": {
+    "c": "people",
+    "e": "🦸🏿‍♂️",
+    "d": "man superhero: dark skin tone",
+    "u": "11.0"
+  },
   "octagonal_sign": {
     "c": "symbols",
     "e": "🛑",
@@ -6455,6 +11795,66 @@
     "d": "circled latin capital letter m",
     "u": "1.1"
   },
+  "face_palm_tone1": {
+    "c": "people",
+    "e": "🤦🏻",
+    "d": "face palm tone 1",
+    "u": "9.0"
+  },
+  "face_palm_tone2": {
+    "c": "people",
+    "e": "🤦🏼",
+    "d": "face palm tone 2",
+    "u": "9.0"
+  },
+  "face_palm_tone3": {
+    "c": "people",
+    "e": "🤦🏽",
+    "d": "face palm tone 3",
+    "u": "9.0"
+  },
+  "face_palm_tone4": {
+    "c": "people",
+    "e": "🤦🏾",
+    "d": "face palm tone 4",
+    "u": "9.0"
+  },
+  "face_palm_tone5": {
+    "c": "people",
+    "e": "🤦🏿",
+    "d": "face palm tone 5",
+    "u": "9.0"
+  },
+  "person_in_steamy_room_tone1": {
+    "c": "people",
+    "e": "🧖🏻",
+    "d": "person in steamy room: light skin tone",
+    "u": "10.0"
+  },
+  "person_in_steamy_room_tone2": {
+    "c": "people",
+    "e": "🧖🏼",
+    "d": "person in steamy room: medium-light skin tone",
+    "u": "10.0"
+  },
+  "person_in_steamy_room_tone3": {
+    "c": "people",
+    "e": "🧖🏽",
+    "d": "person in steamy room: medium skin tone",
+    "u": "10.0"
+  },
+  "person_in_steamy_room_tone4": {
+    "c": "people",
+    "e": "🧖🏾",
+    "d": "person in steamy room: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "person_in_steamy_room_tone5": {
+    "c": "people",
+    "e": "🧖🏿",
+    "d": "person in steamy room: dark skin tone",
+    "u": "10.0"
+  },
   "cyclone": {
     "c": "symbols",
     "e": "🌀",
@@ -6610,6 +12010,126 @@
     "e": "🆖",
     "d": "squared ng",
     "u": "6.0"
+  },
+  "juggling_tone1": {
+    "c": "activity",
+    "e": "🤹🏻",
+    "d": "juggling tone 1",
+    "u": "9.0"
+  },
+  "juggling_tone2": {
+    "c": "activity",
+    "e": "🤹🏼",
+    "d": "juggling tone 2",
+    "u": "9.0"
+  },
+  "juggling_tone3": {
+    "c": "activity",
+    "e": "🤹🏽",
+    "d": "juggling tone 3",
+    "u": "9.0"
+  },
+  "juggling_tone4": {
+    "c": "activity",
+    "e": "🤹🏾",
+    "d": "juggling tone 4",
+    "u": "9.0"
+  },
+  "juggling_tone5": {
+    "c": "activity",
+    "e": "🤹🏿",
+    "d": "juggling tone 5",
+    "u": "9.0"
+  },
+  "walking_tone1": {
+    "c": "people",
+    "e": "🚶🏻",
+    "d": "pedestrian tone 1",
+    "u": "8.0"
+  },
+  "walking_tone2": {
+    "c": "people",
+    "e": "🚶🏼",
+    "d": "pedestrian tone 2",
+    "u": "8.0"
+  },
+  "walking_tone3": {
+    "c": "people",
+    "e": "🚶🏽",
+    "d": "pedestrian tone 3",
+    "u": "8.0"
+  },
+  "walking_tone4": {
+    "c": "people",
+    "e": "🚶🏾",
+    "d": "pedestrian tone 4",
+    "u": "8.0"
+  },
+  "walking_tone5": {
+    "c": "people",
+    "e": "🚶🏿",
+    "d": "pedestrian tone 5",
+    "u": "8.0"
+  },
+  "person_golfing_tone1": {
+    "c": "activity",
+    "e": "🏌🏻",
+    "d": "person golfing: light skin tone",
+    "u": "8.0"
+  },
+  "person_golfing_tone2": {
+    "c": "activity",
+    "e": "🏌🏼",
+    "d": "person golfing: medium-light skin tone",
+    "u": "8.0"
+  },
+  "person_golfing_tone3": {
+    "c": "activity",
+    "e": "🏌🏽",
+    "d": "person golfing: medium skin tone",
+    "u": "8.0"
+  },
+  "person_golfing_tone4": {
+    "c": "activity",
+    "e": "🏌🏾",
+    "d": "person golfing: medium-dark skin tone",
+    "u": "8.0"
+  },
+  "person_golfing_tone5": {
+    "c": "activity",
+    "e": "🏌🏿",
+    "d": "person golfing: dark skin tone",
+    "u": "8.0"
+  },
+  "person_climbing_tone1": {
+    "c": "activity",
+    "e": "🧗🏻",
+    "d": "person climbing: light skin tone",
+    "u": "10.0"
+  },
+  "person_climbing_tone2": {
+    "c": "activity",
+    "e": "🧗🏼",
+    "d": "person climbing: medium-light skin tone",
+    "u": "10.0"
+  },
+  "person_climbing_tone3": {
+    "c": "activity",
+    "e": "🧗🏽",
+    "d": "person climbing: medium skin tone",
+    "u": "10.0"
+  },
+  "person_climbing_tone4": {
+    "c": "activity",
+    "e": "🧗🏾",
+    "d": "person climbing: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "person_climbing_tone5": {
+    "c": "activity",
+    "e": "🧗🏿",
+    "d": "person climbing: dark skin tone",
+    "u": "10.0"
   },
   "ok": {
     "c": "symbols",
@@ -7030,6 +12550,96 @@
     "e": "🔛",
     "d": "on with exclamation mark with left right arrow abo",
     "u": "6.0"
+  },
+  "information_desk_person_tone1": {
+    "c": "people",
+    "e": "💁🏻",
+    "d": "information desk person tone 1",
+    "u": "8.0"
+  },
+  "information_desk_person_tone2": {
+    "c": "people",
+    "e": "💁🏼",
+    "d": "information desk person tone 2",
+    "u": "8.0"
+  },
+  "information_desk_person_tone3": {
+    "c": "people",
+    "e": "💁🏽",
+    "d": "information desk person tone 3",
+    "u": "8.0"
+  },
+  "information_desk_person_tone4": {
+    "c": "people",
+    "e": "💁🏾",
+    "d": "information desk person tone 4",
+    "u": "8.0"
+  },
+  "information_desk_person_tone5": {
+    "c": "people",
+    "e": "💁🏿",
+    "d": "information desk person tone 5",
+    "u": "8.0"
+  },
+  "person_in_lotus_position_tone1": {
+    "c": "activity",
+    "e": "🧘🏻",
+    "d": "person in lotus position: light skin tone",
+    "u": "10.0"
+  },
+  "person_in_lotus_position_tone2": {
+    "c": "activity",
+    "e": "🧘🏼",
+    "d": "person in lotus position: medium-light skin tone",
+    "u": "10.0"
+  },
+  "person_in_lotus_position_tone3": {
+    "c": "activity",
+    "e": "🧘🏽",
+    "d": "person in lotus position: medium skin tone",
+    "u": "10.0"
+  },
+  "person_in_lotus_position_tone4": {
+    "c": "activity",
+    "e": "🧘🏾",
+    "d": "person in lotus position: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "person_in_lotus_position_tone5": {
+    "c": "activity",
+    "e": "🧘🏿",
+    "d": "person in lotus position: dark skin tone",
+    "u": "10.0"
+  },
+  "merperson_tone1": {
+    "c": "people",
+    "e": "🧜🏻",
+    "d": "merperson: light skin tone",
+    "u": "10.0"
+  },
+  "merperson_tone2": {
+    "c": "people",
+    "e": "🧜🏼",
+    "d": "merperson: medium-light skin tone",
+    "u": "10.0"
+  },
+  "merperson_tone3": {
+    "c": "people",
+    "e": "🧜🏽",
+    "d": "merperson: medium skin tone",
+    "u": "10.0"
+  },
+  "merperson_tone4": {
+    "c": "people",
+    "e": "🧜🏾",
+    "d": "merperson: medium-dark skin tone",
+    "u": "10.0"
+  },
+  "merperson_tone5": {
+    "c": "people",
+    "e": "🧜🏿",
+    "d": "merperson: dark skin tone",
+    "u": "10.0"
   },
   "top": {
     "c": "symbols",
