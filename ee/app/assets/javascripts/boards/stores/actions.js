@@ -30,6 +30,7 @@ import {
 
 import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
 import epicQuery from '../graphql/epic.query.graphql';
+import createEpicBoardListMutation from '../graphql/epic_board_list_create.mutation.graphql';
 import epicBoardListsQuery from '../graphql/epic_board_lists.query.graphql';
 import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
 import issueMoveListMutation from '../graphql/issue_move_list.mutation.graphql';
@@ -553,5 +554,49 @@ export default {
         commit(types.RECEIVE_BOARD_LISTS_SUCCESS, formatBoardLists(lists));
       })
       .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
+  },
+
+  createList: ({ state, dispatch }, { backlog, labelId, milestoneId, assigneeId }) => {
+    const { isEpicBoard } = state;
+
+    if (!isEpicBoard) {
+      dispatch('createIssueList', { backlog, labelId, milestoneId, assigneeId });
+    } else {
+      dispatch('createEpicList', { backlog, labelId });
+    }
+  },
+
+  createEpicList: ({ state, commit, dispatch, getters }, { backlog, labelId }) => {
+    const { boardId } = state;
+
+    const existingList = getters.getListByLabelId(labelId);
+
+    if (existingList) {
+      dispatch('highlightList', existingList.id);
+      return;
+    }
+
+    gqlClient
+      .mutate({
+        mutation: createEpicBoardListMutation,
+        variables: {
+          boardId: fullEpicBoardId(boardId),
+          backlog,
+          labelId,
+        },
+      })
+      .then(({ data }) => {
+        if (data?.epicBoardListCreate?.errors.length) {
+          commit(types.CREATE_LIST_FAILURE);
+        } else {
+          const list = data.epicBoardListCreate?.list;
+          dispatch('addList', list);
+          dispatch('highlightList', list.id);
+        }
+      })
+      .catch((e) => {
+        commit(types.CREATE_LIST_FAILURE);
+        throw e;
+      });
   },
 };

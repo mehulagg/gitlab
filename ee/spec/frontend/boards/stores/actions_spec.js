@@ -947,4 +947,121 @@ describe('moveIssue', () => {
       done,
     );
   });
+
+  describe('createList', () => {
+    it('should dispatch createIssueList action when isEpicBoard is false on state', async () => {
+      await testAction({
+        action: actions.createList,
+        payload: { backlog: true },
+        state: { isEpicBoard: false },
+        expectedActions: [{ type: 'createIssueList', payload: { backlog: true } }],
+      });
+    });
+
+    it('should dispatch createEpicList action when isEpicBoard is true on state', async () => {
+      await testAction({
+        action: actions.createList,
+        payload: { backlog: true },
+        state: { isEpicBoard: true },
+        expectedActions: [{ type: 'createEpicList', payload: { backlog: true } }],
+      });
+    });
+  });
+
+  describe('createEpicList', () => {
+    let commit;
+    let dispatch;
+    let getters;
+
+    beforeEach(() => {
+      commit = jest.fn();
+      dispatch = jest.fn();
+      getters = {
+        getListByLabelId: jest.fn(),
+      };
+    });
+
+    it('should dispatch addList action when creating backlog list', async () => {
+      const backlogList = {
+        id: 'gid://gitlab/List/1',
+        listType: 'backlog',
+        title: 'Open',
+        position: 0,
+      };
+
+      jest.spyOn(gqlClient, 'mutate').mockReturnValue(
+        Promise.resolve({
+          data: {
+            epicBoardListCreate: {
+              list: backlogList,
+              errors: [],
+            },
+          },
+        }),
+      );
+
+      await actions.createEpicList({ getters, state, commit, dispatch }, { backlog: true });
+
+      expect(dispatch).toHaveBeenCalledWith('addList', backlogList);
+    });
+
+    it('dispatches highlightList after addList has succeeded', async () => {
+      const list = {
+        id: 'gid://gitlab/List/1',
+        listType: 'label',
+        title: 'Open',
+        labelId: '4',
+      };
+
+      jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+        data: {
+          epicBoardListCreate: {
+            list,
+            errors: [],
+          },
+        },
+      });
+
+      await actions.createEpicList({ getters, state, commit, dispatch }, { labelId: '4' });
+
+      expect(dispatch).toHaveBeenCalledWith('addList', list);
+      expect(dispatch).toHaveBeenCalledWith('highlightList', list.id);
+    });
+
+    it('should commit CREATE_LIST_FAILURE mutation when API returns an error', async () => {
+      jest.spyOn(gqlClient, 'mutate').mockReturnValue(
+        Promise.resolve({
+          data: {
+            epicBoardListCreate: {
+              list: {},
+              errors: [{ foo: 'bar' }],
+            },
+          },
+        }),
+      );
+
+      await actions.createEpicList({ getters, state, commit, dispatch }, { backlog: true });
+
+      expect(commit).toHaveBeenCalledWith(types.CREATE_LIST_FAILURE);
+    });
+
+    it('highlights list and does not re-query if it already exists', async () => {
+      const existingList = {
+        id: 'gid://gitlab/List/1',
+        listType: 'label',
+        title: 'Some label',
+        position: 1,
+      };
+
+      getters = {
+        getListByLabelId: jest.fn().mockReturnValue(existingList),
+      };
+
+      await actions.createIssueList({ getters, state, commit, dispatch }, { backlog: true });
+
+      expect(dispatch).toHaveBeenCalledWith('highlightList', existingList.id);
+      expect(dispatch).toHaveBeenCalledTimes(1);
+      expect(commit).not.toHaveBeenCalled();
+    });
+  });
 });
