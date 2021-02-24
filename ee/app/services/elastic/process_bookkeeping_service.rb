@@ -121,6 +121,7 @@ module Elastic
 
         logger.info(
           message: 'bulk_indexing_start',
+          redis_set: set_key,
           records_count: specs.count,
           first_score: first_score,
           last_score: last_score
