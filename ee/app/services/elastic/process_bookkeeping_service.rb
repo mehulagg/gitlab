@@ -94,7 +94,8 @@ module Elastic
     private
 
     def each_shard
-      0.upto(SHARDS - 1).each do |shard|
+      0.upto(SHARDS - 1).each do |shard_number|
+        yield self.class.redis_set_key(shard_number), self.class.redis_score_key(shard_number)
       end
     end
 
