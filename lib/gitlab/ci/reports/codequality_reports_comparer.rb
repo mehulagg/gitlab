@@ -5,7 +5,7 @@ module Gitlab
     module Reports
       class CodequalityReportsComparer < ReportsComparer
         def initialize(base_report, head_report)
-          @base_report = base_report || CodequalityReports.new
+          @base_report = base_report
           @head_report = head_report
         end
 

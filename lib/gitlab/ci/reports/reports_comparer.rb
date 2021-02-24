@@ -18,10 +18,10 @@ module Gitlab
         end
 
         def status
-          if success?
-            STATUS_SUCCESS
-          elsif base_report.nil? || head_report.nil?
+          if base_report.nil? || head_report.nil?
             STATUS_NOT_FOUND
+          elsif success?
+            STATUS_SUCCESS
           else
             STATUS_FAILED
           end

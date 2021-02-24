@@ -27,6 +27,22 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReportsComparer do
         expect(report_status).to eq(described_class::STATUS_SUCCESS)
       end
     end
+
+    context 'when head report does not exist' do
+      let(:head_report) { nil }
+
+      it 'returns status not found' do
+        expect(report_status).to eq(described_class::STATUS_NOT_FOUND)
+      end
+    end
+
+    context 'when base report does not exist' do
+      let(:base_report) { nil }
+
+      it 'returns status success' do
+        expect(report_status).to eq(described_class::STATUS_NOT_FOUND)
+      end
+    end
   end
 
   describe '#errors_count' do
