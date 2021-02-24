@@ -1149,31 +1149,68 @@ You can download any older version of Firefox from the releases FTP server, <htt
 
 ## Snapshots
 
-A snapshot test is a simple way to evaluate changes in a components output. Snapshot tests can be a very powerful tool but they are mean't to supplement not replace unit tests.
+By now you probably have heard of [Snapshot tests](https://jestjs.io/docs/en/snapshot-testing) and they are very useful for various reasons. 
+To use them within GitLab, there are a few guidelines that should be highlighted: 
 
-Jest renders your component into a JSON file and takes a snapshot of the file. When you run your test, Jest compares the snapshot with the latest rendered output. If there is any difference in the two snapshots the test will alert you.
+- Treat Snapshots as code
+- Don't think of a Snpashot file as a Blackbox
+- Care for the output you put into a Snapshot, otherwise it's not providing value
 
-Jests official documentation [https://jestjs.io/docs/en/snapshot-testing](https://jestjs.io/docs/en/snapshot-testing)
+Think of a Snapshot test as a simple way to store a string representation of what you put in. This can be used to evaluate changes in a component, a store, a complex piece of generated output... see the list below for some recommended `Do's and Don'ts`.
+While Snapshot tests can be a very powerful tool but they are meant to supplement, not to replace unit tests.
+
+### How does a Snapshot work?
+
+A Snapshot is purely a stringified version of what you throw in. This means, any kind of changes you make the to the formatting of the string has impact on the outcome. These process is done through leveraging serializers for an automatic transform step. For Vue this is already taken care off by leveraging the `vue-jest` package which offers the proper serializer.
+
+Should the outcome of your spec be different from what is in the snapshot file, you'll get alarmed about it by a failing test.
+
+Find all details in Jests official documentation [https://jestjs.io/docs/en/snapshot-testing](https://jestjs.io/docs/en/snapshot-testing)
 
 ### How to take a snapshot
 
 ```javascript
+it('makes the name look pretty', () => {
+  expect(prettifyName('Homer Simpson')).toMatchSnapshot()
+})
+```
+
+When this test runs the first time a fresh `.snap` file will be created. It will look something like this:
+
+```txt
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`makes the name look pretty`] = `
+Sir Homer Simpson the Third
+`
+```
+
+Now, everytime you call this test, it will be evaluated against what is created. This should highlight the fact that it's super important to understand the content of your snapshot file and treat it with care. If there's a clear dump of a whole HTML page, or a major instance with hundreds of keys it's not readable and impossible to evaluate if that is the desired outcome.
+The same can be done for `wrappers` or `elements`
+
+
+```javascript
 it('renders the component correctly', () => {
+  expect(wrapper).toMatchSnapshot()
   expect(wrapper.element).toMatchSnapshot();
 })
 ```
 
+This will create two snapshots for you. Important to decide is, which of the snapshots provides more value.
+
 ### Pros and Cons
 
-Pros
+**Pros**
 
 - Speed up the creation of unit tests
 - Easy to keep up-to-date
+- Provides a good safety net to protect against accidental breakage of important HTML structures
 
-Cons
+**Cons**
 
-- Tightly coupled to an components output
-- No meaningful assertions or expectations
+- Is not a catch-all solution that replaces the work of integration or unit tests
+- No meaningful assertions or expectations within snapshots
+- When carelessly used with gitlab-ui it might appear as failing tests for intended good changes
 
 A good guideline to follow: the more complex the component you may want to steer away from just snapshot testing. But that's not to say you can't still snapshot test and test your component as normal.
 
@@ -1194,8 +1231,9 @@ Use
 
 Don't use
 
-- Composed of custom components
-- TODO...
+- To capture large data structures just to have something
+- To just have some kind of test written
+- To capture highly volatile ui elements without stubbing them (Think of gitlab-ui version updates)
 
 ---
 
