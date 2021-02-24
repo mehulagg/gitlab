@@ -2,7 +2,7 @@
 import { GlButton, GlForm, GlFormGroup, GlFormInput } from '@gitlab/ui';
 
 export default {
-  name: 'CloudLicenseShowApp',
+  name: 'CloudLicenseApp',
   components: {
     GlButton,
     GlForm,
@@ -34,13 +34,13 @@ export default {
       </gl-form-group>
 
       <div class="gl-display-flex gl-justify-content-end">
-        <gl-button type="reset" variant="secondary" class="gl-mr-3">{{ __('Cancel') }}</gl-button>
+        <gl-button type="reset" class="gl-mr-3">{{ __('Cancel') }}</gl-button>
         <gl-button
           class="gl-mr-3"
           category="primary"
-          variant="success"
-          type="submit"
-          data-testid="submit-button"
+          variant="confirm"
+          data-testid="activate-button"
+          @click.prevent="go"
         >
           {{ __('Activate') }}
         </gl-button>

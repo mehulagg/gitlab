@@ -1,3 +1,3 @@
-import initShowCloudLicense from '~/admin/cloud_licenses/mount_show';
+import initShowCloudLicense from '~/admin/cloud_license/mount_cloud_license';
 
-document.addEventListener('DOMContentLoaded', initShowCloudLicense);
+initShowCloudLicense();
