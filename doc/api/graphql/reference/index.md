@@ -5772,13 +5772,15 @@ State of a test report.
 
 | Value | Description |
 | ----- | ----------- |
-| `approval_required` |  |
-| `assigned` |  |
-| `build_failed` |  |
-| `directly_addressed` |  |
-| `marked` |  |
-| `mentioned` |  |
-| `unmergeable` |  |
+| `approval_required` | User was set as an approver |
+| `assigned` | User was assigned |
+| `build_failed` | A build triggered by the user failed |
+| `directly_addressed` | User was directly addressed |
+| `marked` | User added a TODO |
+| `mentioned` | User was mentioned |
+| `merge_train_removed` | A merge request authored by the user was removed from the merge train |
+| `review_requested` | A review was requested from the user |
+| `unmergeable` | A merge request authored by the user could not be merged |
 
 ### TodoStateEnum
 
