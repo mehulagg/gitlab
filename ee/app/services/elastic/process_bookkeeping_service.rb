@@ -3,7 +3,8 @@
 module Elastic
   class ProcessBookkeepingService
     LIMIT = 10_000
-    SHARDS = 0.upto(16).to_a
+    SHARDS_NUMBER = 16
+    SHARDS = 0.upto(SHARDS_NUMBER).to_a
 
     class << self
       def redis_set_key(shard_number)
@@ -21,7 +22,7 @@ module Elastic
 
         items.map! { |item| ::Gitlab::Elastic::DocumentReference.serialize(item) }
 
-        grouped_items = items.group_by { |item| Elastic::BookkeepingShardService.shard_number(number_of_shards: SHARDS, data: item) }
+        grouped_items = items.group_by { |item| Elastic::BookkeepingShardService.shard_number(number_of_shards: SHARDS_NUMBER, data: item) }
 
         with_redis do |redis|
           grouped_items.each do |shard_number, shard_items|
@@ -104,15 +105,13 @@ module Elastic
 
     private
 
-    def each_shard
-      self.class.each_shard
-    end
-
     def execute_with_redis(redis)
       start_time = Time.current
 
-      each_shard do |redis_set_key, redis_score_key|
-        specs = redis.zrangebyscore(redis_set_key, '-inf', '+inf', limit: [0, LIMIT], with_scores: true)
+      SHARDS.map do |shard_number|
+        set_key = self.class.redis_set_key(shard_number)
+
+        specs = redis.zrangebyscore(set_key, '-inf', '+inf', limit: [0, LIMIT], with_scores: true)
         next 0 if specs.empty?
 
         first_score = specs.first.last
@@ -133,12 +132,13 @@ module Elastic
         self.class.track!(*failures) if failures.present?
 
         # Remove all the successes
-        redis.zremrangebyscore(redis_set_key, first_score, last_score)
+        redis.zremrangebyscore(set_key, first_score, last_score)
 
         records_count = specs.count
 
         logger.info(
           message: 'bulk_indexing_end',
+          redis_set: set_key,
           records_count: records_count,
           failures_count: failures.count,
           first_score: first_score,
