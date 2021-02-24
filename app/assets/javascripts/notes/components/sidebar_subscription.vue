@@ -28,7 +28,7 @@ export default {
     },
   },
   created() {
-    if (this.issuableType !== IssuableType.Issue) {
+    if (this.issuableType !== IssuableType.Issue && this.issuableType !== IssuableType.Epic) {
       return;
     }
 

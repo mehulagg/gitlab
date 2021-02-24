@@ -5,6 +5,7 @@ import AncestorsTree from 'ee/sidebar/components/ancestors_tree/ancestors_tree.v
 
 import notesEventHub from '~/notes/event_hub';
 import ConfidentialIssueSidebar from '~/sidebar/components/confidential/confidential_issue_sidebar.vue';
+import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import SidebarParticipants from '~/sidebar/components/participants/participants.vue';
 import sidebarEventHub from '~/sidebar/event_hub';
 import SidebarDatePickerCollapsed from '~/vue_shared/components/sidebar/collapsed_grouped_date_picker.vue';
@@ -29,6 +30,7 @@ export default {
     SidebarParticipants,
     SidebarSubscription,
     ConfidentialIssueSidebar,
+    SidebarConfidentialityWidget,
   },
   computed: {
     ...mapState([
@@ -215,6 +217,8 @@ export default {
         :full-path="fullPath"
         issuable-type="epic"
       />
+
+      <sidebar-confidentiality-widget issuable-type="epic" />
 
       <div class="block participants">
         <sidebar-participants
