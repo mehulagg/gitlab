@@ -9,62 +9,28 @@ type: reference, howto
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4348) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
 
-Running [static checks](../sast/index.md) on your code is the first step to detect
-vulnerabilities that can put the security of your code at risk. Yet, once
-deployed, your application is exposed to a new category of possible attacks,
-such as cross-site scripting or broken authentication flaws. This is where
-Dynamic Application Security Testing (DAST) comes into place.
+Your application is exposed to a new category of attacks once deployed into a new environment. For
+example, application server misconfigurations or incorrect assumptions about security controls may
+not be visible from source code alone. Dynamic Application Security Testing (DAST) checks an
+application for these types of vulnerabilities in a deployed environment.
 
 NOTE:
 The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
 explains how 4 of the top 6 attacks were application based. Download it to learn how to protect your
 organization.
 
-## Overview
+In GitLab, DAST is commonly initiated by a merge request and runs as a job in the CI/CD pipeline.
+You can also run a DAST scan on demand, outside the CI/CD pipeline. Your running web application is
+analyzed for known vulnerabilities. GitLab checks the DAST report, compares the vulnerabilities
+found between the source and target branches, and shows any relevant findings on the merge request.
 
-If you're using [GitLab CI/CD](../../../ci/README.md), you can analyze your running web applications
-for known vulnerabilities using Dynamic Application Security Testing (DAST).
-You can take advantage of DAST by either:
-
-- [Including the CI job](#configuration) in
-  your existing `.gitlab-ci.yml` file.
-- Implicitly using
-  [Auto DAST](../../../topics/autodevops/stages.md#auto-dast),
-  provided by [Auto DevOps](../../../topics/autodevops/index.md).
-
-GitLab checks the DAST report, compares the found vulnerabilities between the source and target
-branches, and shows the information on the merge request.
+![DAST Widget](img/dast_v13_4.png)
 
 Note that this comparison logic uses only the latest pipeline executed for the target branch's base
 commit. Running the pipeline on any other commit has no effect on the merge request.
 
-![DAST Widget](img/dast_v13_4.png)
-
-By clicking on one of the detected linked vulnerabilities, you can
-see the details and the URL(s) affected.
-
-![DAST Widget Clicked](img/dast_single_v13_0.png)
-
-[Dynamic Application Security Testing (DAST)](https://en.wikipedia.org/wiki/Dynamic_Application_Security_Testing)
-uses the popular open source tool [OWASP Zed Attack Proxy](https://www.zaproxy.org/)
-to perform an analysis on your running web application.
-
-By default, DAST executes [ZAP Baseline Scan](https://www.zaproxy.org/docs/docker/baseline-scan/)
-and performs passive scanning only. It doesn't actively attack your application.
-However, DAST can be [configured](#full-scan)
-to also perform an *active scan*: attack your application and produce a more extensive security report.
-It can be very useful combined with [Review Apps](../../../ci/review_apps/index.md).
-
-Note that a pipeline may consist of multiple jobs, including SAST and DAST scanning. If any job
-fails to finish for any reason, the security dashboard doesn't show DAST scanner output. For
-example, if the DAST job finishes but the SAST job fails, the security dashboard doesn't show DAST
-results. On failure, the analyzer outputs an
-[exit code](../../../development/integrations/secure.md#exit-code).
-
-## Use cases
-
-It helps you automatically find security vulnerabilities in your running web
-applications while you're developing and testing your applications.
+GitLab DAST uses the popular open source tool OWASP Zed Attack Proxy to analyze your running web
+application.
 
 ## Requirements
 
