@@ -205,7 +205,7 @@ export default {
       v-if="hasError"
       :variant="failure.variant"
       :dismissible="failure.dismissible"
-      @dismiss="failure.dismissible ? resetFailure : null"
+      @dismiss="resetFailure"
     >
       {{ failure.text }}
     </gl-alert>
