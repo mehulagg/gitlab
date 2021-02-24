@@ -3,19 +3,21 @@
 require 'spec_helper'
 
 RSpec.describe ComplianceManagement::ComplianceFramework::GroupSettingsHelper do
-  let_it_be(:group) { build(:group) }
+  let_it_be_with_refind(:group) { create(:group) }
+  let_it_be(:current_user) { build(:admin) }
 
   before do
     assign(:group, group)
+    allow(helper).to receive(:current_user) { current_user }
   end
 
   describe '#show_compliance_frameworks?' do
     using RSpec::Parameterized::TableSyntax
 
     where(:feature_flag_enabled, :license_feature_enabled, :result) do
-      true | true | true
-      false | true | false
-      true | false | false
+      true  | true  | true
+      false | true  | false
+      true  | false | false
       false | false | false
     end
 

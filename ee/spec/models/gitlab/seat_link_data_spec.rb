@@ -27,10 +27,10 @@ RSpec.describe Gitlab::SeatLinkData do
     let_it_be(:today_active_count) { 20 }
 
     before_all do
-      HistoricalData.create!(recorded_at: license_start_date, active_user_count: 10)
-      HistoricalData.create!(recorded_at: license_start_date + 1.day, active_user_count: max_before_today)
-      HistoricalData.create!(recorded_at: utc_time - 1.day, active_user_count: yesterday_active_count)
-      HistoricalData.create!(recorded_at: utc_time, active_user_count: today_active_count)
+      create(:historical_data, recorded_at: license_start_date, active_user_count: 10)
+      create(:historical_data, recorded_at: license_start_date + 1.day, active_user_count: max_before_today)
+      create(:historical_data, recorded_at: utc_time - 1.day, active_user_count: yesterday_active_count)
+      create(:historical_data, recorded_at: utc_time, active_user_count: today_active_count)
     end
 
     around do |example|

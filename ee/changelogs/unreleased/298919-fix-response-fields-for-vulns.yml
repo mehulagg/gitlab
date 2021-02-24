@@ -1,5 +1,0 @@
----
-title: Fix Vuln detail and modal when reasonPhrase is empty string
-merge_request: 52156
-author:
-type: fixed

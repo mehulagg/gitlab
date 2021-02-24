@@ -12,13 +12,5 @@ module EE
     def requirements_access_level=(value)
       write_feature_attribute_string(:requirements_access_level, value)
     end
-
-    def security_and_compliance_enabled=(value)
-      write_feature_attribute_boolean(:security_and_compliance_access_level, value)
-    end
-
-    def security_and_compliance_access_level=(value)
-      write_feature_attribute_string(:security_and_compliance_access_level, value)
-    end
   end
 end

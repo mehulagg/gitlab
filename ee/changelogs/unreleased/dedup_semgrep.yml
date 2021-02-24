@@ -1,5 +1,0 @@
----
-title: Dedupe vulnerability_findings for bandit and semgrep
-merge_request: 54181
-author:
-type: added

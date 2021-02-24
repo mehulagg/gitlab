@@ -7,7 +7,7 @@ RSpec.describe GeoNodeStatus, :geo do
   using RSpec::Parameterized::TableSyntax
 
   let!(:primary) { create(:geo_node, :primary) }
-  let!(:secondary) { create(:geo_node) }
+  let!(:secondary) { create(:geo_node, :secondary) }
 
   let_it_be(:group)     { create(:group) }
   let_it_be(:project_1) { create(:project, group: group) }
@@ -43,6 +43,16 @@ RSpec.describe GeoNodeStatus, :geo do
       expect(rails_cache).to receive(:write).with(described_class.cache_key, kind_of(Hash))
 
       status.update_cache!
+    end
+  end
+
+  describe '#for_active_secondaries' do
+    it 'excludes primaries and disabled nodes' do
+      create(:geo_node_status, geo_node: primary)
+      create(:geo_node_status, geo_node: create(:geo_node, :secondary, enabled: false))
+      enabled_secondary_status = create(:geo_node_status, geo_node: create(:geo_node, :secondary, enabled: true))
+
+      expect(described_class.for_active_secondaries).to match_array([enabled_secondary_status])
     end
   end
 

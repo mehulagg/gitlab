@@ -1,5 +1,0 @@
----
-title: Fix epic assignment in the createIssue mutation
-merge_request: 51817
-author:
-type: fixed

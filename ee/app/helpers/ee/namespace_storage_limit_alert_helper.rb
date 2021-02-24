@@ -51,14 +51,6 @@ module EE
         namespace.additional_repo_storage_by_namespace_enabled?
     end
 
-    def namespace_storage_usage_link(namespace)
-      if namespace.group?
-        group_usage_quotas_path(namespace, anchor: 'storage-quota-tab')
-      else
-        profile_usage_quotas_path(anchor: 'storage-quota-tab')
-      end
-    end
-
     def purchase_storage_url
       EE::SUBSCRIPTIONS_MORE_STORAGE_URL
     end

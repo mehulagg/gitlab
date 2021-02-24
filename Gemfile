@@ -31,7 +31,8 @@ gem 'doorkeeper', '~> 5.5.0.rc2'
 gem 'doorkeeper-openid_connect', '~> 1.7.5'
 gem 'omniauth', '~> 1.8'
 gem 'omniauth-auth0', '~> 2.0.0'
-gem 'omniauth-azure-oauth2', '~> 0.0.9'
+gem 'omniauth-azure-activedirectory-v2', '~> 0.1'
+gem 'omniauth-azure-oauth2', '~> 0.0.9' # Deprecated v1 version
 gem 'omniauth-cas3', '~> 1.1.4'
 gem 'omniauth-facebook', '~> 4.0.0'
 gem 'omniauth-github', '~> 1.4'
@@ -88,7 +89,7 @@ gem 'grape-entity', '~> 0.7.1'
 gem 'rack-cors', '~> 1.0.6', require: 'rack/cors'
 
 # GraphQL API
-gem 'graphql', '~> 1.11.4'
+gem 'graphql', '~> 1.11.8'
 # NOTE: graphiql-rails v1.5+ doesn't work: https://gitlab.com/gitlab-org/gitlab/issues/31771
 # TODO: remove app/views/graphiql/rails/editors/show.html.erb when https://github.com/rmosolgo/graphiql-rails/pull/71 is released:
 # https://gitlab.com/gitlab-org/gitlab/issues/31747
@@ -121,7 +122,7 @@ gem 'fog-local', '~> 0.6'
 gem 'fog-openstack', '~> 1.0'
 gem 'fog-rackspace', '~> 0.1.1'
 gem 'fog-aliyun', '~> 0.3'
-gem 'gitlab-fog-azure-rm', '~> 1.0', require: false
+gem 'gitlab-fog-azure-rm', '~> 1.0.1', require: false
 
 # for Google storage
 gem 'google-api-client', '~> 0.33'
@@ -156,7 +157,7 @@ gem 'wikicloth', '0.8.1'
 gem 'asciidoctor', '~> 2.0.10'
 gem 'asciidoctor-include-ext', '~> 0.3.1', require: false
 gem 'asciidoctor-plantuml', '~> 0.0.12'
-gem 'asciidoctor-kroki', '~> 0.2.2', require: false
+gem 'asciidoctor-kroki', '~> 0.3.0', require: false
 gem 'rouge', '~> 3.26.0'
 gem 'truncato', '~> 0.7.11'
 gem 'bootstrap_form', '~> 4.2.0'
@@ -195,7 +196,7 @@ gem 'acts-as-taggable-on', '~> 7.0'
 gem 'sidekiq', '~> 5.2.7'
 gem 'sidekiq-cron', '~> 1.0'
 gem 'redis-namespace', '~> 1.7.0'
-gem 'gitlab-sidekiq-fetcher', '0.5.2', require: 'sidekiq-reliable-fetch'
+gem 'gitlab-sidekiq-fetcher', '0.5.5', require: 'sidekiq-reliable-fetch'
 
 # Cron Parser
 gem 'fugit', '~> 1.2.1'
@@ -233,7 +234,7 @@ gem 'connection_pool', '~> 2.0'
 gem 'redis-rails', '~> 5.0.2'
 
 # Discord integration
-gem 'discordrb-webhooks-blackst0ne', '~> 3.3', require: false
+gem 'discordrb-webhooks', '~> 3.4', require: false
 
 # HipChat integration
 gem 'hipchat', '~> 1.5.0'
@@ -318,7 +319,7 @@ gem 'gettext_i18n_rails', '~> 1.8.0'
 gem 'gettext_i18n_rails_js', '~> 1.3'
 gem 'gettext', '~> 3.3', require: false, group: :development
 
-gem 'batch-loader', '~> 1.4.0'
+gem 'batch-loader', '~> 2.0.1'
 
 # Perf bar
 gem 'peek', '~> 1.1'
@@ -374,7 +375,6 @@ group :development, :test do
 
   gem 'gitlab-styles', '~> 6.0.0', require: false
 
-  gem 'scss_lint', '~> 0.59.0', require: false
   gem 'haml_lint', '~> 0.36.0', require: false
   gem 'bundler-audit', '~> 0.7.0.1', require: false
 
@@ -479,7 +479,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.4.9'
+gem 'gitlab-experiment', '~> 0.4.12'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

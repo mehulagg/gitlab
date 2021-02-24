@@ -5,8 +5,6 @@ module EE
     module Groups
       module Transformers
         class EpicAttributesTransformer
-          def initialize(*args); end
-
           def transform(context, data)
             data
               .then { |data| add_group_id(context, data) }

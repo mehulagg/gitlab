@@ -40,11 +40,11 @@ class Packages::Package < ApplicationRecord
   validate :unique_debian_package_name, if: :debian_package?
 
   validate :valid_conan_package_recipe, if: :conan?
-  validate :valid_npm_package_name, if: :npm?
   validate :valid_composer_global_name, if: :composer?
   validate :package_already_taken, if: :npm?
   validates :name, format: { with: Gitlab::Regex.conan_recipe_component_regex }, if: :conan?
   validates :name, format: { with: Gitlab::Regex.generic_package_name_regex }, if: :generic?
+  validates :name, format: { with: Gitlab::Regex.npm_package_name_regex }, if: :npm?
   validates :name, format: { with: Gitlab::Regex.nuget_package_name_regex }, if: :nuget?
   validates :name, format: { with: Gitlab::Regex.debian_package_name_regex }, if: :debian_package?
   validates :name, inclusion: { in: %w[incoming] }, if: :debian_incoming?
@@ -69,6 +69,8 @@ class Packages::Package < ApplicationRecord
                        composer: 6, generic: 7, golang: 8, debian: 9,
                        rubygems: 10 }
 
+  enum status: { default: 0, hidden: 1, processing: 2 }
+
   scope :with_name, ->(name) { where(name: name) }
   scope :with_name_like, ->(name) { where(arel_table[:name].matches(name)) }
   scope :with_normalized_pypi_name, ->(name) { where("LOWER(regexp_replace(name, '[-_.]+', '-', 'g')) = ?", name.downcase) }
@@ -76,6 +78,8 @@ class Packages::Package < ApplicationRecord
   scope :with_version, ->(version) { where(version: version) }
   scope :without_version_like, -> (version) { where.not(arel_table[:version].matches(version)) }
   scope :with_package_type, ->(package_type) { where(package_type: package_type) }
+  scope :with_status, ->(status) { where(status: status) }
+  scope :displayable, -> { with_status(:default) }
   scope :including_build_info, -> { includes(pipelines: :user) }
   scope :including_project_route, -> { includes(project: { namespace: :route }) }
   scope :including_tags, -> { includes(:tags) }
@@ -94,12 +98,12 @@ class Packages::Package < ApplicationRecord
   end
   scope :preload_composer, -> { preload(:composer_metadatum) }
 
-  scope :without_nuget_temporary_name, -> { where.not(name: Packages::Nuget::CreatePackageService::TEMPORARY_PACKAGE_NAME) }
+  scope :without_nuget_temporary_name, -> { where.not(name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
 
   scope :has_version, -> { where.not(version: nil) }
   scope :processed, -> do
     where.not(package_type: :nuget).or(
-      where.not(name: Packages::Nuget::CreatePackageService::TEMPORARY_PACKAGE_NAME)
+      where.not(name: Packages::Nuget::TEMPORARY_PACKAGE_NAME)
     )
   end
   scope :preload_files, -> { preload(:package_files) }
@@ -240,14 +244,6 @@ class Packages::Package < ApplicationRecord
     # See https://github.com/rails/rails/pull/35186
     if Packages::Package.default_scoped.composer.with_name(name).where.not(project_id: project_id).exists?
       errors.add(:name, 'is already taken by another project')
-    end
-  end
-
-  def valid_npm_package_name
-    return unless project&.root_namespace
-
-    unless name =~ %r{\A@#{project.root_namespace.path}/[^/]+\z}
-      errors.add(:name, 'is not valid')
     end
   end
 

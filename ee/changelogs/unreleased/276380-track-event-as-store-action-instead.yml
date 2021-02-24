@@ -1,5 +1,0 @@
----
-title: Track code quality view event only once tab is active
-merge_request: 52140
-author:
-type: fixed

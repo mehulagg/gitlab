@@ -10,7 +10,7 @@ type: index
 # GitLab CI/CD **(FREE)**
 
 GitLab CI/CD is a tool built into GitLab for software development
-through the [continuous methodologies](introduction/index.md#introduction-to-cicd-methodologies):
+through the [continuous methodologies](introduction/index.md):
 
 - Continuous Integration (CI)
 - Continuous Delivery (CD)
@@ -37,6 +37,9 @@ the development cycle, ensuring that all the code deployed to
 production complies with the code standards you established for
 your app.
 
+GitLab can also automatically detect, build, test, deploy, and
+monitor your applications by using [Auto DevOps](../topics/autodevops/index.md).
+
 For a complete overview of these methodologies and GitLab CI/CD,
 read the [Introduction to CI/CD with GitLab](introduction/index.md).
 
@@ -57,7 +60,7 @@ the following documents:
 
 - [Get started with GitLab CI/CD](quick_start/index.md).
 - [Fundamental pipeline architectures](pipelines/pipeline_architectures.md).
-- [GitLab CI/CD basic workflow](introduction/index.md#basic-cicd-workflow).
+- [GitLab CI/CD basic workflow](introduction/index.md#gitlab-cicd-workflow).
 - [Step-by-step guide for writing `.gitlab-ci.yml` for the first time](../user/project/pages/getting_started/pages_from_scratch.md).
 
 If you're migrating from another CI/CD tool, check out our handy references:

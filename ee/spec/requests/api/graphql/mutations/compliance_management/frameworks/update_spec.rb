@@ -13,8 +13,7 @@ RSpec.describe 'Update a compliance framework' do
       params: {
         name: 'New Name',
         description: 'New Description',
-        color: '#AAC112',
-        pipeline_configuration_full_path: 'compliance/.gitlab-ci.yml'
+        color: '#AAC112'
       }
     }
   end
@@ -62,7 +61,36 @@ RSpec.describe 'Update a compliance framework' do
         expect(mutation_response['complianceFramework']['name']).to eq 'New Name'
         expect(mutation_response['complianceFramework']['description']).to eq 'New Description'
         expect(mutation_response['complianceFramework']['color']).to eq '#AAC112'
-        expect(mutation_response['complianceFramework']['pipelineConfigurationFullPath']).to eq 'compliance/.gitlab-ci.yml'
+      end
+
+      context 'pipeline configuration full path' do
+        before do
+          params[:params][:pipeline_configuration_full_path] = '.compliance-gitlab-ci.yml@compliance/hipaa'
+        end
+
+        context 'when compliance pipeline configuration feature is available' do
+          before do
+            stub_licensed_features(custom_compliance_frameworks: true, evaluate_group_level_compliance_pipeline: true)
+          end
+
+          it 'updates the pipeline configuration path attribute' do
+            subject
+
+            expect(mutation_response['complianceFramework']['pipelineConfigurationFullPath']).to eq '.compliance-gitlab-ci.yml@compliance/hipaa'
+          end
+        end
+
+        context 'when compliance pipeline configuration feature is not available' do
+          before do
+            stub_licensed_features(custom_compliance_frameworks: true, evaluate_group_level_compliance_pipeline: false)
+          end
+
+          it 'returns an error' do
+            subject
+
+            expect(mutation_response['errors']).to contain_exactly "Pipeline configuration full path feature is not available"
+          end
+        end
       end
 
       context 'current_user is not permitted to update framework' do

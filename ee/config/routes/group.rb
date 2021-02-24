@@ -26,6 +26,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
           member do
             get :duration_chart
             get :median
+            get :average
             get :records
           end
         end
@@ -34,6 +35,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
             member do
               get :duration_chart
               get :median
+              get :average
               get :records
             end
           end

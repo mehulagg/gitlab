@@ -7,7 +7,7 @@ RSpec.describe 'get list of epic boards' do
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:group) { create(:group, :private) }
-  let_it_be(:board1) { create(:epic_board, group: group, name: 'B') }
+  let_it_be(:board1) { create(:epic_board, group: group, name: 'B', hide_closed_list: true, hide_backlog_list: false) }
   let_it_be(:board2) { create(:epic_board, group: group, name: 'A') }
   let_it_be(:board3) { create(:epic_board, group: group, name: 'a') }
 
@@ -47,6 +47,26 @@ RSpec.describe 'get list of epic boards' do
         # nil value will be ignored by ::Graphql::Arguments
         let(:sort_param) { nil }
         let(:first_param) { 2 }
+      end
+    end
+
+    context 'field values' do
+      let(:query) do
+        graphql_query_for(:group, { fullPath: group.full_path }, query_graphql_field(:epicBoard, { id: board1.to_global_id.to_s }, epic_board_fields))
+      end
+
+      let(:epic_board_fields) do
+        <<~QUERY
+        hideBacklogList
+        hideClosedList
+        QUERY
+      end
+
+      it 'returns the correct values for hiding board lists' do
+        post_graphql(query, current_user: current_user)
+
+        expect(graphql_data.dig('group', 'epicBoard', 'hideBacklogList')).to eq board1.hide_backlog_list
+        expect(graphql_data.dig('group', 'epicBoard', 'hideClosedList')).to eq board1.hide_closed_list
       end
     end
 

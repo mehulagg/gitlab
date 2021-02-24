@@ -67,8 +67,6 @@ class Namespace < ApplicationRecord
   validate :changing_shared_runners_enabled_is_allowed
   validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed
 
-  validates_associated :runners
-
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :avatar_url, to: :owner, allow_nil: true
 
@@ -83,6 +81,8 @@ class Namespace < ApplicationRecord
   after_update :move_dir, if: :saved_change_to_path_or_parent?
   before_destroy(prepend: true) { prepare_for_destroy }
   after_destroy :rm_dir
+
+  before_save :ensure_delayed_project_removal_assigned_to_namespace_settings, if: :delayed_project_removal_changed?
 
   scope :for_user, -> { where('type IS NULL') }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
@@ -163,6 +163,10 @@ class Namespace < ApplicationRecord
 
       name = host.delete_suffix(gitlab_host)
       Namespace.where(parent_id: nil).by_path(name)
+    end
+
+    def top_most
+      where(parent_id: nil)
     end
   end
 
@@ -400,7 +404,18 @@ class Namespace < ApplicationRecord
     !has_parent?
   end
 
+  def recent?
+    created_at >= 90.days.ago
+  end
+
   private
+
+  def ensure_delayed_project_removal_assigned_to_namespace_settings
+    return if Feature.disabled?(:migrate_delayed_project_removal, default_enabled: true)
+
+    self.namespace_settings || build_namespace_settings
+    namespace_settings.delayed_project_removal = delayed_project_removal
+  end
 
   def all_projects_with_pages
     if all_projects.pages_metadata_not_migrated.exists?

@@ -12,7 +12,6 @@ class License < ApplicationRecord
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
 
   EES_FEATURES = %i[
-    security_and_compliance
     audit_events
     blocked_issues
     board_iteration_lists
@@ -149,6 +148,7 @@ class License < ApplicationRecord
     enforce_ssh_key_expiration
     enterprise_templates
     environment_alerts
+    evaluate_group_level_compliance_pipeline
     group_ci_cd_analytics
     group_level_compliance_dashboard
     incident_management
@@ -169,6 +169,7 @@ class License < ApplicationRecord
     secret_detection
     security_dashboard
     security_on_demand_scans
+    security_orchestration_policies
     status_page
     subepics
     threat_monitoring
@@ -240,6 +241,7 @@ class License < ApplicationRecord
   before_validation :reset_license, if: :data_changed?
 
   after_create :reset_current
+  after_create :update_trial_setting
   after_destroy :reset_current
   after_commit :reset_future_dated, on: [:create, :destroy]
   after_commit :reset_previous, on: [:create, :destroy]
@@ -464,7 +466,7 @@ class License < ApplicationRecord
 
   def daily_billable_users_count
     strong_memoize(:daily_billable_users_count) do
-      ::Analytics::InstanceStatistics::Measurement.find_latest_or_fallback(:billable_users).count
+      ::Analytics::UsageTrends::Measurement.find_latest_or_fallback(:billable_users).count
     end
   end
 
@@ -502,8 +504,18 @@ class License < ApplicationRecord
     overage(maximum_user_count)
   end
 
+  def historical_data(from: nil, to: nil)
+    from ||= starts_at_for_historical_data
+    to ||= expires_at_for_historical_data
+
+    HistoricalData.during(from..to)
+  end
+
   def historical_max(from: nil, to: nil)
-    HistoricalData.max_historical_user_count(license: self, from: from, to: to)
+    from ||= starts_at_for_historical_data
+    to ||= expires_at_for_historical_data
+
+    HistoricalData.max_historical_user_count(from: from, to: to)
   end
 
   def maximum_user_count
@@ -665,5 +677,13 @@ class License < ApplicationRecord
 
   def previous_expired_at
     (License.previous&.expires_at || starts_at).end_of_day
+  end
+
+  def starts_at_for_historical_data
+    (starts_at || Time.current - 1.year).beginning_of_day
+  end
+
+  def expires_at_for_historical_data
+    (expires_at || Time.current).end_of_day
   end
 end

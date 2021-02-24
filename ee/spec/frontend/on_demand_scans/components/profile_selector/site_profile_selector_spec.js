@@ -33,7 +33,6 @@ describe('OnDemandScansSiteProfileSelector', () => {
             siteProfilesLibraryPath: TEST_LIBRARY_PATH,
             newSiteProfilePath: TEST_NEW_PATH,
             glFeatures: {
-              securityOnDemandScansSiteValidation: true,
               securityDastSiteProfilesAdditionalFields: true,
             },
           },
@@ -94,35 +93,6 @@ describe('OnDemandScansSiteProfileSelector', () => {
         value: null,
       });
       expect(sel.attributes()).toMatchObject(TEST_ATTRS);
-    });
-
-    describe('feature flags disabled', () => {
-      beforeEach(() => {
-        createComponent({
-          propsData: { profiles },
-          provide: {
-            glFeatures: {
-              securityOnDemandScansSiteValidation: false,
-              securityDastSiteProfilesAdditionalFields: false,
-            },
-          },
-        });
-      });
-
-      it('renders profile selector', () => {
-        const sel = findProfileSelector();
-
-        expect(sel.props()).toEqual({
-          libraryPath: TEST_LIBRARY_PATH,
-          newProfilePath: TEST_NEW_PATH,
-          profiles: siteProfiles.map((x) => ({
-            ...x,
-            dropdownLabel: `${x.profileName}: ${x.targetUrl}`,
-          })),
-          value: null,
-        });
-        expect(sel.attributes()).toMatchObject(TEST_ATTRS);
-      });
     });
   });
 });

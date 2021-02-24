@@ -3,7 +3,6 @@ import { GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
 import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
 import CommitComponent from '~/vue_shared/components/commit.vue';
-import { PIPELINES_TABLE } from '../../constants';
 import eventHub from '../../event_hub';
 import PipelineTriggerer from './pipeline_triggerer.vue';
 import PipelineUrl from './pipeline_url.vue';
@@ -47,10 +46,6 @@ export default {
       required: false,
       default: false,
     },
-    autoDevopsHelpPath: {
-      type: String,
-      required: true,
-    },
     viewType: {
       type: String,
       required: true,
@@ -61,7 +56,6 @@ export default {
       default: null,
     },
   },
-  pipelinesTable: PIPELINES_TABLE,
   data() {
     return {
       isRetrying: false,
@@ -177,6 +171,10 @@ export default {
       this.isRetrying = true;
       eventHub.$emit('retryPipeline', this.pipeline.retry_path);
     },
+    handlePipelineActionRequestComplete() {
+      // warn the pipelines table to update
+      eventHub.$emit('refreshPipelinesTable');
+    },
   },
 };
 </script>
@@ -194,11 +192,7 @@ export default {
       </div>
     </div>
 
-    <pipeline-url
-      :pipeline="pipeline"
-      :pipeline-schedule-url="pipelineScheduleUrl"
-      :auto-devops-help-path="autoDevopsHelpPath"
-    />
+    <pipeline-url :pipeline="pipeline" :pipeline-schedule-url="pipelineScheduleUrl" />
     <pipeline-triggerer :pipeline="pipeline" />
 
     <div class="table-section section-wrap section-20">
@@ -228,9 +222,9 @@ export default {
             data-testid="widget-mini-pipeline-graph"
           >
             <pipeline-stage
-              :type="$options.pipelinesTable"
               :stage="stage"
               :update-dropdown="updateGraphDropdown"
+              @pipelineActionRequestComplete="handlePipelineActionRequestComplete"
             />
           </div>
         </template>

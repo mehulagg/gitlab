@@ -18,10 +18,6 @@ RSpec.describe Dast::Profiles::DestroyService do
   end
 
   describe '#execute' do
-    before do
-      project.clear_memoization(:licensed_feature_available)
-    end
-
     context 'when the feature flag dast_saved_scans is disabled' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: true)

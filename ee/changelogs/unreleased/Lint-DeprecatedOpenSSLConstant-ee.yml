@@ -1,5 +1,0 @@
----
-title: Replace OpenSSL constants with strings
-merge_request: 52431
-author: Takuya Noguchi
-type: other

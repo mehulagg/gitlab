@@ -25,7 +25,8 @@ module Types
 
       field :pipeline_configuration_full_path, GraphQL::STRING_TYPE,
             null: true,
-            description: 'Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hippa`.'
+            description: 'Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hipaa` **(ULTIMATE)**.',
+            authorize: :manage_group_level_compliance_pipeline_config
     end
   end
 end

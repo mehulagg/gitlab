@@ -64,9 +64,9 @@ By default, this seeds an average of 10 issues per week for the last 52 weeks
 per project. All issues are also randomly labeled with team, type, severity,
 and priority.
 
-#### Seeding groups with sub-groups
+#### Seeding groups with subgroups
 
-You can seed groups with sub-groups that contain milestones/projects/issues
+You can seed groups with subgroups that contain milestones/projects/issues
 with the `gitlab:seed:group_seed` task:
 
 ```shell
@@ -340,3 +340,7 @@ bundle exec rake gitlab:graphql:schema:dump
 ```
 
 This uses GraphQL Ruby's built-in Rake tasks to generate files in both [IDL](https://www.prisma.io/blog/graphql-sdl-schema-definition-language-6755bcb9ce51) and JSON formats.
+
+### Update documentation and schema definitions
+
+The following command combines the intent of [Update GraphQL documentation and schema definitions](#update-graphql-documentation-and-schema-definitions) and [Update machine-readable schema files](#update-machine-readable-schema-files):

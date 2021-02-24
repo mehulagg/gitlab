@@ -29,7 +29,7 @@ module AlertManagement
     # Creates or closes issue for alert and notifies stakeholders
     def complete_post_processing_tasks
       process_incident_issues if process_issues?
-      send_alert_email if send_email?
+      send_alert_email if send_email? && notifying_alert?
     end
 
     def process_existing_alert
@@ -41,14 +41,21 @@ module AlertManagement
     end
 
     def process_resolved_alert
-      return unless auto_close_incident?
-      return close_issue(alert.issue) if alert.resolve(incoming_payload.ends_at)
+      SystemNoteService.log_resolving_alert(alert, alert_source)
 
-      logger.warn(
-        message: 'Unable to update AlertManagement::Alert status to resolved',
-        project_id: project.id,
-        alert_id: alert.id
-      )
+      return unless auto_close_incident?
+
+      if alert.resolve(incoming_payload.ends_at)
+        SystemNoteService.change_alert_status(alert, User.alert_bot)
+
+        close_issue(alert.issue)
+      else
+        logger.warn(
+          message: 'Unable to update AlertManagement::Alert status to resolved',
+          project_id: project.id,
+          alert_id: alert.id
+        )
+      end
     end
 
     def process_firing_alert
@@ -114,6 +121,10 @@ module AlertManagement
 
     def resolving_alert?
       incoming_payload.ends_at.present?
+    end
+
+    def notifying_alert?
+      alert.triggered? || alert.resolved?
     end
 
     def alert_source

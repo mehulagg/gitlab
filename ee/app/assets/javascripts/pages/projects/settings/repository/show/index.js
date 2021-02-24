@@ -10,6 +10,7 @@ import ProtectedBranchCreate from '~/protected_branches/protected_branch_create'
 import CEProtectedBranchEditList from '~/protected_branches/protected_branch_edit_list';
 import CEProtectedTagCreate from '~/protected_tags/protected_tag_create';
 import CEProtectedTagEditList from '~/protected_tags/protected_tag_edit_list';
+import initSearchSettings from '~/search_settings';
 import initSettingsPanels from '~/settings_panels';
 import UserCallout from '~/user_callout';
 import UsersSelect from '~/users_select';
@@ -41,3 +42,7 @@ if (pushPullContainer) new EEMirrorRepos(pushPullContainer).init();
 new DueDateSelectors();
 
 fileUpload('.js-choose-file', '.js-object-map-input');
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSearchSettings();
+});

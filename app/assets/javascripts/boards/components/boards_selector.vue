@@ -10,6 +10,8 @@ import {
 } from '@gitlab/ui';
 import { throttle } from 'lodash';
 
+import BoardForm from 'ee_else_ce/boards/components/board_form.vue';
+
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
@@ -17,8 +19,6 @@ import httpStatusCodes from '~/lib/utils/http_status';
 import eventHub from '../eventhub';
 import groupQuery from '../graphql/group_boards.query.graphql';
 import projectQuery from '../graphql/project_boards.query.graphql';
-
-import BoardForm from './board_form.vue';
 
 const MIN_BOARDS_TO_VIEW_RECENT = 10;
 
@@ -123,6 +123,9 @@ export default {
     board() {
       return this.currentBoard;
     },
+    showCreate() {
+      return this.multipleIssueBoardsAvailable;
+    },
     showDelete() {
       return this.boards.length > 1;
     },
@@ -158,6 +161,18 @@ export default {
     cancel() {
       this.showPage('');
     },
+    boardUpdate(data) {
+      if (!data?.[this.parentType]) {
+        return [];
+      }
+      return data[this.parentType].boards.edges.map(({ node }) => ({
+        id: getIdFromGraphQLId(node.id),
+        name: node.name,
+      }));
+    },
+    boardQuery() {
+      return this.groupId ? groupQuery : projectQuery;
+    },
     loadBoards(toggleDropdown = true) {
       if (toggleDropdown && this.boards.length > 0) {
         return;
@@ -167,21 +182,14 @@ export default {
         variables() {
           return { fullPath: this.fullPath };
         },
-        query() {
-          return this.groupId ? groupQuery : projectQuery;
-        },
+        query: this.boardQuery,
         loadingKey: 'loadingBoards',
-        update(data) {
-          if (!data?.[this.parentType]) {
-            return [];
-          }
-          return data[this.parentType].boards.edges.map(({ node }) => ({
-            id: getIdFromGraphQLId(node.id),
-            name: node.name,
-          }));
-        },
+        update: this.boardUpdate,
       });
 
+      this.loadRecentBoards();
+    },
+    loadRecentBoards() {
       this.loadingRecentBoards = true;
       // Follow up to fetch recent boards using GraphQL
       // https://gitlab.com/gitlab-org/gitlab/-/issues/300985
@@ -322,7 +330,7 @@ export default {
           <gl-dropdown-divider />
 
           <gl-dropdown-item
-            v-if="multipleIssueBoardsAvailable"
+            v-if="showCreate"
             v-gl-modal-directive="'board-config-modal'"
             data-qa-selector="create_new_board_button"
             @click.prevent="showPage('new')"

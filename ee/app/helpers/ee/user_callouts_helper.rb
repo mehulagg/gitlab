@@ -9,7 +9,6 @@ module EE
     GEO_ENABLE_HASHED_STORAGE      = 'geo_enable_hashed_storage'
     GEO_MIGRATE_HASHED_STORAGE     = 'geo_migrate_hashed_storage'
     GOLD_TRIAL                     = 'gold_trial'
-    GOLD_TRIAL_BILLINGS            = 'gold_trial_billings'
     NEW_USER_SIGNUPS_CAP_REACHED   = 'new_user_signups_cap_reached'
     PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
     THREAT_MONITORING_INFO         = 'threat_monitoring_info'
@@ -61,14 +60,6 @@ module EE
           !user_dismissed?(ACCOUNT_RECOVERY_REGULAR_CHECK, 3.months.ago)
 
       render 'shared/check_recovery_settings'
-    end
-
-    def render_billings_gold_trial(user, namespace)
-      return if namespace.gold_plan?
-      return unless namespace.never_had_trial?
-      return unless show_gold_trial?(user, GOLD_TRIAL_BILLINGS)
-
-      render 'shared/gold_trial_callout_content', is_dismissable: !namespace.free_plan?, callout: GOLD_TRIAL_BILLINGS
     end
 
     def show_threat_monitoring_info?

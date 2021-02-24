@@ -1,5 +1,0 @@
----
-title: Remove target_name parameter from Elasticsearch rake tasks
-merge_request: 52958
-author:
-type: changed

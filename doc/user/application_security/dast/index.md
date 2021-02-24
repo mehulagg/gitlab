@@ -473,7 +473,7 @@ URLs to scan can be specified by either of the following methods:
 
 To define the URLs to scan in a file, create a plain text file with one path per line.
 
-```txt
+```plaintext
 page1.html
 /page2.html
 category/shoes/page1.html
@@ -728,6 +728,8 @@ Alternatively, you can use the CI/CD variable `SECURE_ANALYZERS_PREFIX` to overr
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218465) in GitLab 13.2.
 > - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/218465) in GitLab 13.3.
+> - The saved scans feature was [added](https://gitlab.com/groups/gitlab-org/-/epics/5100) in
+>   GitLab 13.9.
 
 An on-demand DAST scan runs outside the DevOps life cycle. Changes in your repository don't trigger
 the scan. You must start it manually.
@@ -766,9 +768,11 @@ To run an on-demand scan, either:
 - [Create and run an on-demand scan](#create-and-run-an-on-demand-scan).
 - [Run a previously saved on-demand scan](#run-a-saved-on-demand-scan).
 
-### Create and run an on-demand scan
+#### Create and run an on-demand scan
 
-1. From your project's home page, go to **Security & Compliance > On-demand Scans** in the left sidebar.
+1. From your project's home page, go to **Security & Compliance > On-demand Scans** in the left
+   sidebar.
+1. Complete the **Scan name** and **Description** fields.
 1. In **Scanner profile**, select a scanner profile from the dropdown.
 1. In **Site profile**, select a site profile from the dropdown.
 1. To run the on-demand scan now, select **Save and run scan**. Otherwise select **Save scan** to
@@ -788,6 +792,7 @@ To list saved on-demand scans:
 To view details of an on-demand scan:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Select **Manage DAST scans**.
 1. Select **Manage** in the **DAST Profiles** row.
 1. Select the **Saved Scans** tab.
 1. In the saved scan's row select **More actions** (**{ellipsis_v}**), then select **Edit**.
@@ -797,6 +802,7 @@ To view details of an on-demand scan:
 To run a saved on-demand scan:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Select **Manage DAST scans**.
 1. Select **Manage** in the **DAST Profiles** row.
 1. Select the **Saved Scans** tab.
 1. In the scan's row select **Run scan**.
@@ -808,6 +814,7 @@ The on-demand DAST scan runs and the project's dashboard shows the results.
 To edit an on-demand scan:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Select **Manage DAST scans**.
 1. Select **Manage** in the **DAST Profiles** row.
 1. Select the **Saved Scans** tab.
 1. In the saved scan's row select **More actions** (**{ellipsis_v}**), then select **Edit**.
@@ -819,6 +826,7 @@ To edit an on-demand scan:
 To delete an on-demand scan:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
+1. Select **Manage DAST scans**.
 1. Select **Manage** in the **DAST Profiles** row.
 1. Select the **Saved Scans** tab.
 1. In the saved scan's row select **More actions** (**{ellipsis_v}**), then select **Delete**.

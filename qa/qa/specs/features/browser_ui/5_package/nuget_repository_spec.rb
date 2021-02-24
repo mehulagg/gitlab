@@ -43,7 +43,7 @@ module QA
         another_runner.remove_via_api!
       end
 
-      it 'publishes a nuget package at the project level, installs and deletes it at the group level', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1073' do
+      it 'publishes a nuget package at the project level, installs and deletes it at the group level', quarantine: { only: { pipeline: :canary }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/321425', type: :stale }, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1073' do
         Flow::Login.sign_in
 
         Resource::Repository::Commit.fabricate_via_api! do |commit|
@@ -54,7 +54,7 @@ module QA
                 {
                     file_path: '.gitlab-ci.yml',
                     content: <<~YAML
-                      image: mcr.microsoft.com/dotnet/core/sdk:3.1
+                      image: mcr.microsoft.com/dotnet/sdk:5.0
 
                       stages:
                         - deploy
@@ -102,7 +102,7 @@ module QA
 
                           <PropertyGroup>
                             <OutputType>Exe</OutputType>
-                            <TargetFramework>netcoreapp3.1</TargetFramework>
+                            <TargetFramework>net5.0</TargetFramework>
                           </PropertyGroup>
 
                         </Project>
@@ -115,7 +115,7 @@ module QA
                 {
                     file_path: '.gitlab-ci.yml',
                     content: <<~YAML
-                        image: mcr.microsoft.com/dotnet/core/sdk:3.1
+                        image: mcr.microsoft.com/dotnet/sdk:5.0
 
                         stages:
                           - install

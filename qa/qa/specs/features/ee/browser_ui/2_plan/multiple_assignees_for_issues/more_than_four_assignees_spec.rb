@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan', :reliable do
+  # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+  RSpec.describe 'Plan', :reliable, :requires_admin do
     describe 'Multiple assignees per issue' do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
@@ -10,6 +11,8 @@ module QA
       end
 
       before do
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
+
         Flow::Login.sign_in
 
         user_1 = Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1)

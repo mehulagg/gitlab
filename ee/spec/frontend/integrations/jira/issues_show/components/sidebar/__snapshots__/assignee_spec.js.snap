@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JiraIssuesSidebarAssignee with assignee template renders avatar components 1`] = `
+<div>
+  <div
+    class="hide-collapsed"
+  >
+    <assignee-title-stub
+      numberofassignees="1"
+    />
+     
+    <gl-avatar-link-stub
+      href="http://127.0.0.1:3000/root"
+      target="_blank"
+      title="Justin Ho"
+    >
+      <gl-avatar-labeled-stub
+        alt="Justin Ho"
+        entity-name="Justin Ho"
+        label="Justin Ho"
+        labellink=""
+        size="32"
+        src="http://127.0.0.1:3000/uploads/-/system/user/avatar/1/avatar.png?width=90"
+        sublabel="Jira user"
+        sublabellink=""
+      />
+    </gl-avatar-link-stub>
+  </div>
+   
+  <div
+    class="sidebar-collapsed-icon"
+    data-testid="sidebar-collapsed-icon-wrapper"
+    title="Justin Ho"
+  >
+    <gl-avatar-stub
+      alt="Justin Ho"
+      entityid="0"
+      entityname="Justin Ho"
+      shape="circle"
+      size="24"
+      src="http://127.0.0.1:3000/uploads/-/system/user/avatar/1/avatar.png?width=90"
+    />
+  </div>
+</div>
+`;
+
+exports[`JiraIssuesSidebarAssignee with no assignee template renders template without avatar components (the "None" state) 1`] = `
+<div>
+  <div
+    class="hide-collapsed"
+  >
+    <assignee-title-stub
+      numberofassignees="0"
+    />
+     
+    <span
+      class="gl-text-gray-500"
+      data-testid="no-assignee-text"
+    >
+      None
+    </span>
+  </div>
+   
+  <div
+    class="sidebar-collapsed-icon"
+    data-testid="sidebar-collapsed-icon-wrapper"
+    title="No assignee"
+  >
+    <gl-icon-stub
+      data-testid="no-assignee-icon"
+      name="user"
+      size="16"
+    />
+  </div>
+</div>
+`;

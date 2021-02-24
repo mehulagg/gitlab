@@ -35,7 +35,7 @@ describe('RotationsListSectionComponent', () => {
     });
   }
 
-  const findTimelineCells = () => wrapper.findAll('[data-testid="timelineCell"]');
+  const findTimelineCells = () => wrapper.findAll('[data-testid="timeline-cell"]');
   const findRotationAssignees = () => wrapper.findAllComponents(RotationsAssignee);
   const findCurrentDayIndicatorContent = () =>
     wrapper.find('[data-testid="current-day-indicator"]');

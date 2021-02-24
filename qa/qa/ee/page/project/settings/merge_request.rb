@@ -18,6 +18,10 @@ module QA
                   element :merged_results_pipeline_checkbox
                 end
 
+                view 'ee/app/views/projects/_merge_request_settings.html.haml' do
+                  element :default_merge_request_template_field
+                end
+
                 view 'ee/app/views/projects/_merge_trains_settings.html.haml' do
                   element :merge_trains_checkbox
                 end
@@ -36,6 +40,13 @@ module QA
               click_pipelines_for_merged_results_checkbox
               click_merge_trains_checkbox
               click_save_changes
+            end
+
+            def set_default_merge_request_template(template)
+              fill_element(:default_merge_request_template_field, template)
+              click_save_changes
+
+              wait_for_requests
             end
           end
         end

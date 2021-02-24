@@ -30,7 +30,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
   const createStore = ({
     initialState = {
       activeId: mockIssueWithoutEpic.id,
-      issues: { [mockIssueWithoutEpic.id]: { ...mockIssueWithoutEpic } },
+      boardItems: { [mockIssueWithoutEpic.id]: { ...mockIssueWithoutEpic } },
       epicsCacheById: {},
       epicFetchInProgress: false,
     },
@@ -120,7 +120,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
       createStore({
         initialState: {
           activeId: mockIssueWithEpic.id,
-          issues: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
+          boardItems: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
           epicsCacheById: {},
           epicFetchInProgress: true,
         },
@@ -138,7 +138,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
       createStore({
         initialState: {
           activeId: mockIssueWithEpic.id,
-          issues: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
+          boardItems: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
           epicsCacheById: {},
           epicFetchInProgress: true,
         },
@@ -163,7 +163,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
       createStore({
         initialState: {
           activeId: mockIssueWithEpic.id,
-          issues: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
+          boardItems: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
           epicsCacheById: { [mockAssignedEpic.id]: { ...mockAssignedEpic } },
           epicFetchInProgress: false,
         },
@@ -182,7 +182,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
       createStore({
         initialState: {
           activeId: mockIssueWithoutEpic.id,
-          issues: { [mockIssueWithoutEpic.id]: { ...mockIssueWithoutEpic } },
+          boardItems: { [mockIssueWithoutEpic.id]: { ...mockIssueWithoutEpic } },
           epicsCacheById: {},
           epicFetchInProgress: false,
         },
@@ -193,7 +193,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
         // 'setActiveIssueEpic' sets the active issue's epic to the selected epic
         // and stores the assigned epic's data in 'epicsCacheById'
         store.state.epicFetchInProgress = true;
-        store.state.issues[mockIssueWithoutEpic.id].epic = { ...mockAssignedEpic };
+        store.state.boardItems[mockIssueWithoutEpic.id].epic = { ...mockAssignedEpic };
         store.state.epicsCacheById = { [mockAssignedEpic.id]: { ...mockAssignedEpic } };
         store.state.epicFetchInProgress = false;
       });
@@ -236,7 +236,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
       createStore({
         initialState: {
           activeId: mockIssueWithEpic.id,
-          issues: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
+          boardItems: { [mockIssueWithEpic.id]: { ...mockIssueWithEpic } },
           epicsCacheById: { [mockAssignedEpic.id]: { ...mockAssignedEpic } },
           epicFetchInProgress: false,
         },
@@ -245,7 +245,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
 
       jest.spyOn(wrapper.vm, 'setActiveIssueEpic').mockImplementation(async () => {
         // Remove assigned epic from the active issue
-        store.state.issues[mockIssueWithoutEpic.id].epic = null;
+        store.state.boardItems[mockIssueWithoutEpic.id].epic = null;
       });
 
       findEpicSelect().vm.$emit('epicSelect', null);

@@ -272,6 +272,20 @@ module EE
       def search(query)
         fuzzy_search(query, [:title, :description])
       end
+
+      def ids_for_base_and_decendants(epic_ids)
+        ::Gitlab::ObjectHierarchy.new(self.for_ids(epic_ids)).base_and_descendants.pluck(:id)
+      end
+
+      def issue_metadata_for_epics(epic_ids:, limit:)
+        records = self.for_ids(epic_ids)
+          .left_joins(epic_issues: :issue)
+          .group("epics.id", "epics.iid", "epics.parent_id", "epics.state_id", "issues.state_id")
+          .select("epics.id, epics.iid, epics.parent_id, epics.state_id AS epic_state_id, issues.state_id AS issues_state_id, COUNT(issues) AS issues_count, SUM(COALESCE(issues.weight, 0)) AS issues_weight_sum")
+          .limit(limit)
+
+        records.map { |record| record.attributes.with_indifferent_access }
+      end
     end
 
     def resource_parent

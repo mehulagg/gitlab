@@ -1,7 +1,7 @@
 <script>
+import * as Sentry from '@sentry/browser';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { visitUrl } from '~/lib/utils/url_utility';
-import * as Sentry from '~/sentry/wrapper';
 
 import { FETCH_ERROR, SAVE_ERROR } from '../constants';
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';

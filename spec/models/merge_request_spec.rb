@@ -9,8 +9,8 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
   using RSpec::Parameterized::TableSyntax
 
-  let_it_be(:namespace) { create_default(:namespace) }
-  let_it_be(:project, refind: true) { create_default(:project, :repository) }
+  let_it_be(:namespace) { create_default(:namespace).freeze }
+  let_it_be(:project, refind: true) { create_default(:project, :repository).freeze }
 
   subject { create(:merge_request) }
 
@@ -1365,6 +1365,10 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
     it "doesn't detect WIP by default" do
       expect(subject.work_in_progress?).to eq false
+    end
+
+    it "is aliased to #draft?" do
+      expect(subject.method(:work_in_progress?)).to eq(subject.method(:draft?))
     end
   end
 
@@ -3082,32 +3086,83 @@ RSpec.describe MergeRequest, factory_default: :keep do
   end
 
   describe "#head_pipeline_active? " do
-    it do
-      is_expected
-        .to delegate_method(:active?)
-        .to(:head_pipeline)
-        .with_prefix
-        .with_arguments(allow_nil: true)
+    context 'when project lacks a head_pipeline relation' do
+      before do
+        subject.head_pipeline = nil
+      end
+
+      it 'returns false' do
+        expect(subject.head_pipeline_active?).to be false
+      end
+    end
+
+    context 'when project has a head_pipeline relation' do
+      let(:pipeline) { create(:ci_empty_pipeline) }
+
+      before do
+        allow(subject).to receive(:head_pipeline) { pipeline }
+      end
+
+      it 'accesses the value from the head_pipeline' do
+        expect(subject.head_pipeline)
+          .to receive(:active?)
+
+        subject.head_pipeline_active?
+      end
     end
   end
 
   describe "#actual_head_pipeline_success? " do
-    it do
-      is_expected
-        .to delegate_method(:success?)
-        .to(:actual_head_pipeline)
-        .with_prefix
-        .with_arguments(allow_nil: true)
+    context 'when project lacks an actual_head_pipeline relation' do
+      before do
+        allow(subject).to receive(:actual_head_pipeline) { nil }
+      end
+
+      it 'returns false' do
+        expect(subject.actual_head_pipeline_success?).to be false
+      end
+    end
+
+    context 'when project has a actual_head_pipeline relation' do
+      let(:pipeline) { create(:ci_empty_pipeline) }
+
+      before do
+        allow(subject).to receive(:actual_head_pipeline) { pipeline }
+      end
+
+      it 'accesses the value from the actual_head_pipeline' do
+        expect(subject.actual_head_pipeline)
+          .to receive(:success?)
+
+        subject.actual_head_pipeline_success?
+      end
     end
   end
 
   describe "#actual_head_pipeline_active? " do
-    it do
-      is_expected
-        .to delegate_method(:active?)
-        .to(:actual_head_pipeline)
-        .with_prefix
-        .with_arguments(allow_nil: true)
+    context 'when project lacks an actual_head_pipeline relation' do
+      before do
+        allow(subject).to receive(:actual_head_pipeline) { nil }
+      end
+
+      it 'returns false' do
+        expect(subject.actual_head_pipeline_active?).to be false
+      end
+    end
+
+    context 'when project has a actual_head_pipeline relation' do
+      let(:pipeline) { create(:ci_empty_pipeline) }
+
+      before do
+        allow(subject).to receive(:actual_head_pipeline) { pipeline }
+      end
+
+      it 'accesses the value from the actual_head_pipeline' do
+        expect(subject.actual_head_pipeline)
+          .to receive(:active?)
+
+        subject.actual_head_pipeline_active?
+      end
     end
   end
 
@@ -3780,6 +3835,87 @@ RSpec.describe MergeRequest, factory_default: :keep do
     context 'neither source nor target branch has coverage information' do
       it 'returns nil for coverage_delta' do
         expect(merge_request.pipeline_coverage_delta).to be_nil
+      end
+    end
+  end
+
+  describe '#use_merge_base_pipeline_for_comparison?' do
+    let(:project) { create(:project, :public, :repository) }
+    let(:merge_request) { create(:merge_request, :with_codequality_reports, source_project: project) }
+
+    subject { merge_request.use_merge_base_pipeline_for_comparison?(service_class) }
+
+    context 'when service class is Ci::CompareCodequalityReportsService' do
+      let(:service_class) { 'Ci::CompareCodequalityReportsService' }
+
+      context 'when feature flag is enabled' do
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(codequality_backend_comparison: false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when service class is different' do
+      let(:service_class) { 'Ci::GenerateCoverageReportsService' }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#comparison_base_pipeline' do
+    subject(:pipeline) { merge_request.comparison_base_pipeline(service_class) }
+
+    let(:project) { create(:project, :public, :repository) }
+    let(:merge_request) { create(:merge_request, :with_codequality_reports, source_project: project) }
+    let!(:base_pipeline) do
+      create(:ci_pipeline,
+        :with_test_reports,
+        project: project,
+        ref: merge_request.target_branch,
+        sha: merge_request.diff_base_sha
+      )
+    end
+
+    context 'when service class is Ci::CompareCodequalityReportsService' do
+      let(:service_class) { 'Ci::CompareCodequalityReportsService' }
+
+      context 'when merge request has a merge request pipeline' do
+        let(:merge_request) do
+          create(:merge_request, :with_merge_request_pipeline)
+        end
+
+        let(:merge_base_pipeline) do
+          create(:ci_pipeline, ref: merge_request.target_branch, sha: merge_request.target_branch_sha)
+        end
+
+        before do
+          merge_base_pipeline
+          merge_request.update_head_pipeline
+        end
+
+        it 'returns the merge_base_pipeline' do
+          expect(pipeline).to eq(merge_base_pipeline)
+        end
+      end
+
+      context 'when merge does not have a merge request pipeline' do
+        it 'returns the base_pipeline' do
+          expect(pipeline).to eq(base_pipeline)
+        end
+      end
+    end
+
+    context 'when service_class is different' do
+      let(:service_class) { 'Ci::GenerateCoverageReportsService' }
+
+      it 'returns the base_pipeline' do
+        expect(pipeline).to eq(base_pipeline)
       end
     end
   end

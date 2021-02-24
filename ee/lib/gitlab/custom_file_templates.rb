@@ -116,7 +116,7 @@ module Gitlab
     def translate(template, project, category:)
       return unless template
 
-      template.category = category
+      template.category = category if category
 
       # License templates require special handling as the "vendored" licenses
       # are actually in a gem, not on disk like the rest of the templates. So,

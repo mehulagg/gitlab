@@ -3,8 +3,11 @@
 module QA
   RSpec.describe 'Create' do
     context 'Push Rules' do
-      describe 'using non signed commits' do
+      # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+      describe 'using non signed commits', :requires_admin do
         before(:context) do
+          Runtime::Feature.enable(:invite_members_group_modal)
+
           prepare
 
           @file_name_limitation = 'denied_file'

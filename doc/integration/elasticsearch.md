@@ -56,6 +56,12 @@ A few notes on CPU and storage:
   to any spinning media for Elasticsearch. In testing, nodes that use SSD storage
   see boosts in both query and indexing performance.
 
+- We've introduced the [`estimate_cluster_size`](#gitlab-advanced-search-rake-tasks)
+  Rake task to estimate the Advanced Search storage requirements in advance, which
+- The [`estimate_cluster_size`](#gitlab-advanced-search-rake-tasks) Rake task estimates the
+  Advanced Search storage requirements in advance. The Rake task uses total repository size
+  for the calculation. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221177) in GitLab 13.10.
+
 Keep in mind, these are **minimum requirements** for Elasticsearch.
 Heavily-used Elasticsearch clusters will likely require considerably more
 resources.
@@ -218,7 +224,7 @@ The following Elasticsearch settings are available:
 | `Elasticsearch indexing`                              | Enables or disables Elasticsearch indexing and creates an empty index if one does not already exist. You may want to enable indexing but disable search in order to give the index time to be fully completed, for example. Also, keep in mind that this option doesn't have any impact on existing data, this only enables/disables the background indexer which tracks data changes and ensures new data is indexed. |
 | `Pause Elasticsearch indexing`                        | Enables or disables temporary indexing pause. This is useful for cluster migration/reindexing. All changes are still tracked, but they are not committed to the Elasticsearch index until resumed. |
 | `Search with Elasticsearch enabled`                   | Enables or disables using Elasticsearch in search. |
-| `URL`                                                 | The URL to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., `http://host1, https://host2:9200`). If your Elasticsearch instance is password protected, pass the `username:password` in the URL (e.g., `http://<username>:<password>@<elastic_host>:9200/`). |
+| `URL`                                                 | The URL to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., `http://host1, https://host2:9200`). If your Elasticsearch instance is password protected, pass the `username:password` in the URL (e.g., `http://<username>:<password>@<elastic_host>:9200/`). Special characters in the username or password should use [percentage encoding](https://en.wikipedia.org/wiki/Percent-encoding). |
 | `Number of Elasticsearch shards`                      | Elasticsearch indexes are split into multiple shards for performance reasons. In general, larger indexes need to have more shards. Changes to this value do not take effect until the index is recreated. You can read more about tradeoffs in the [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/scalability.html). |
 | `Number of Elasticsearch replicas`                    | Each Elasticsearch shard can have a number of replicas. These are a complete copy of the shard, and can provide increased query performance or resilience against hardware failure. Increasing this value will greatly increase total disk space required by the index. |
 | `Limit namespaces and projects that can be indexed`   | Enabling this will allow you to select namespaces and projects to index. All other namespaces and projects will use database search instead. Please note that if you enable this option but do not select any namespaces or projects, none will be indexed. [Read more below](#limiting-namespaces-and-projects).
@@ -232,6 +238,12 @@ The following Elasticsearch settings are available:
 | `Bulk request concurrency`                            | The Bulk request concurrency indicates how many of the GitLab Golang-based indexer processes (or threads) can run in parallel to collect data to subsequently submit to Elasticsearch’s Bulk API. This increases indexing performance, but fills the Elasticsearch bulk requests queue faster. This setting should be used together with the Maximum bulk request size setting (see above) and needs to accommodate the resource constraints of both the Elasticsearch host(s) and the host(s) running the GitLab Golang-based indexer either from the `gitlab-rake` command or the Sidekiq tasks. |
 | `Client request timeout` | Elasticsearch HTTP client request timeout value in seconds. `0` means using the system default timeout value, which depends on the libraries that GitLab application is built upon. |
 
+WARNING:
+Increasing the values of `Maximum bulk request size (MiB)` and `Bulk request concurrency` can negatively impact
+Sidekiq performance. Return them to their default values if you see increased `scheduling_latency_s` durations
+in your Sidekiq logs. For more information, see
+[issue 322147](https://gitlab.com/gitlab-org/gitlab/-/issues/322147).
+
 ### Limiting namespaces and projects
 
 If you select `Limit namespaces and projects that can be indexed`, more options will become available.
@@ -239,7 +251,7 @@ If you select `Limit namespaces and projects that can be indexed`, more options 
 ![limit namespaces and projects options](img/limit_namespaces_projects_options.png)
 
 You can select namespaces and projects to index exclusively. Note that if the namespace is a group it will include
-any sub-groups and projects belonging to those sub-groups to be indexed as well.
+any subgroups and projects belonging to those subgroups to be indexed as well.
 
 Advanced Search only provides cross-group code/commit search (global) if all name-spaces are indexed. In this particular scenario where only a subset of namespaces are indexed, a global search will not provide a code or commit scope. This will be possible only in the scope of an indexed namespace. Currently there is no way to code/commit search in multiple indexed namespaces (when only a subset of namespaces has been indexed). For example if two groups are indexed, there is no way to run a single code search on both. You can only run a code search on the first group and then on the second.
 
@@ -415,7 +427,9 @@ The following are some available Rake tasks:
 | [`sudo gitlab-rake gitlab:elastic:index_snippets`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/tasks/gitlab/elastic.rake)                   | Performs an Elasticsearch import that indexes the snippets data.                                                                                                                          |
 | [`sudo gitlab-rake gitlab:elastic:projects_not_indexed`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/tasks/gitlab/elastic.rake)             | Displays which projects are not indexed.                                                                                                                                                  |
 | [`sudo gitlab-rake gitlab:elastic:reindex_cluster`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/tasks/gitlab/elastic.rake)                  | Schedules a zero-downtime cluster reindexing task. This feature should be used with an index that was created after GitLab 13.0. |
-| [`sudo gitlab-rake gitlab:elastic:mark_reindex_failed`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/tasks/gitlab/elastic.rake)`]            | Mark the most recent re-index job as failed. |
+| [`sudo gitlab-rake gitlab:elastic:mark_reindex_failed`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/tasks/gitlab/elastic.rake)              | Mark the most recent re-index job as failed. |
+| [`sudo gitlab-rake gitlab:elastic:list_pending_migrations`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/tasks/gitlab/elastic.rake)          | List pending migrations. Pending migrations include those that have not yet started, have started but not finished, and those that are halted. |
+| [`sudo gitlab-rake gitlab:elastic:estimate_cluster_size`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/tasks/gitlab/elastic.rake)            | Get an estimate of cluster size based on the total repository size. |
 
 ### Environment variables
 

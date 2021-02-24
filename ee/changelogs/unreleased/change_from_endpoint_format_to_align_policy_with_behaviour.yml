@@ -1,7 +1,0 @@
----
-title: Revert text back to Allow instead of Deny. Fixes fromEndpoints/toEndpoints
-  format to keep it aligned with the allow all logic. The previous code was causing
-  a allowing none while it should be allowing all.
-merge_request: 53940
-author:
-type: fixed

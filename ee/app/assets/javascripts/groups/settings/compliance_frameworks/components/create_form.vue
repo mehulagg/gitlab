@@ -1,6 +1,6 @@
 <script>
+import * as Sentry from '@sentry/browser';
 import { visitUrl } from '~/lib/utils/url_utility';
-import * as Sentry from '~/sentry/wrapper';
 import { SAVE_ERROR } from '../constants';
 import createComplianceFrameworkMutation from '../graphql/queries/create_compliance_framework.mutation.graphql';
 import { initialiseFormData } from '../utils';

@@ -4,14 +4,16 @@ query($fullPath: ID!, $pipelineIid: ID!) {
       securityReportSummary {
         dast {
           vulnerabilitiesCount
-          scannedResourcesCount
           scannedResourcesCsvPath
-          scannedResources {
-            nodes {
-              requestMethod
-              url
-            }
-          }
+          # The following fields will be added in
+          # https://gitlab.com/gitlab-org/gitlab/-/issues/321586
+          # scannedResourcesCount
+          # scannedResources {
+          #   nodes {
+          #     requestMethod
+          #     url
+          #   }
+          # }
         }
         sast {
           vulnerabilitiesCount

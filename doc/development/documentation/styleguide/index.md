@@ -526,6 +526,7 @@ You can use these fake tokens as examples:
 | scalability           | Do not use when talking about increasing GitLab performance for additional users. The words scale or scaling are sometimes acceptable, but references to increasing GitLab performance for additional users should direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md) page. |
 | simply                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
 | slashes               | Instead of **and/or**, use **or** or another sensible construction. This rule also applies to other slashes, like **follow/unfollow**. Some exceptions (like **CI/CD**) are allowed. |
+| subgroup              | Use instead of `sub-group`. |
 | that                  | Do not use. Example: `the file that you save` can be `the file you save`. |
 | useful                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
 | utilize               | Do not use. Use **use** instead. It's more succinct and easier for non-native English speakers to understand. |
@@ -600,6 +601,7 @@ Follow these guidelines for punctuation:
 
 | Rule                                                             | Example                                                |
 |------------------------------------------------------------------|--------------------------------------------------------|
+| Avoid semicolons. Use two sentences instead.                     | _That's the way that the world goes 'round. You're up one day and the next you're down._
 | Always end full sentences with a period.                         | _For a complete overview, read through this document._ |
 | Always add a space after a period when beginning a new sentence. | _For a complete overview, check this doc. For other references, check out this guide._ |
 | Do not use double spaces. (Tested in [`SentenceSpacing.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/SentenceSpacing.yml).) | --- |

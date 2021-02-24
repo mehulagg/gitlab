@@ -7,6 +7,9 @@ class Groups::EpicBoardsController < Groups::ApplicationController
 
   before_action :authorize_read_board!, only: [:index]
   before_action :assign_endpoint_vars
+  before_action do
+    push_frontend_feature_flag(:epic_boards, group, default_enabled: :yaml)
+  end
 
   feature_category :boards
 

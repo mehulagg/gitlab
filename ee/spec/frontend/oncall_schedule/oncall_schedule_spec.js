@@ -66,7 +66,7 @@ describe('On-call schedule', () => {
   beforeEach(() => {
     jest.spyOn(utils, 'getTimeframeForWeeksView').mockReturnValue(mockWeeksTimeFrame);
     jest.spyOn(commonUtils, 'getFormattedTimezone').mockReturnValue(formattedTimezone);
-    createComponent({ schedule: mockSchedule });
+    createComponent({ schedule: mockSchedule, loading: false });
   });
 
   afterEach(() => {
@@ -119,6 +119,7 @@ describe('On-call schedule', () => {
       timeframe: mockWeeksTimeFrame,
       rotations: expect.any(Array),
       scheduleIid: mockSchedule.iid,
+      loading: wrapper.vm.$apollo.queries.rotations.loading,
     });
   });
 

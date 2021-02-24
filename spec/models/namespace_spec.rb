@@ -6,7 +6,7 @@ RSpec.describe Namespace do
   include ProjectForksHelper
   include GitHelpers
 
-  let!(:namespace) { create(:namespace) }
+  let!(:namespace) { create(:namespace, :with_namespace_settings) }
   let(:gitlab_shell) { Gitlab::Shell.new }
   let(:repository_storage) { 'default' }
 
@@ -114,6 +114,28 @@ RSpec.describe Namespace do
   describe 'inclusions' do
     it { is_expected.to include_module(Gitlab::VisibilityLevel) }
     it { is_expected.to include_module(Namespaces::Traversal::Recursive) }
+  end
+
+  describe 'callbacks' do
+    describe 'before_save :ensure_delayed_project_removal_assigned_to_namespace_settings' do
+      it 'sets the matching value in namespace_settings' do
+        expect { namespace.update!(delayed_project_removal: true) }.to change {
+          namespace.namespace_settings.delayed_project_removal
+        }.from(false).to(true)
+      end
+
+      context 'when the feature flag is disabled' do
+        before do
+          stub_feature_flags(migrate_delayed_project_removal: false)
+        end
+
+        it 'does not set the matching value in namespace_settings' do
+          expect { namespace.update!(delayed_project_removal: true) }.not_to change {
+            namespace.namespace_settings.delayed_project_removal
+          }
+        end
+      end
+    end
   end
 
   describe '#visibility_level_field' do
@@ -282,6 +304,17 @@ RSpec.describe Namespace do
       host = "namespace.io"
 
       expect(described_class.find_by_pages_host(host)).to eq(nil)
+    end
+  end
+
+  describe '.top_most' do
+    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:sub_namespace) { create(:namespace, parent: namespace) }
+
+    subject { described_class.top_most.ids }
+
+    it 'only contains root namespace' do
+      is_expected.to eq([namespace.id])
     end
   end
 
@@ -1447,6 +1480,26 @@ RSpec.describe Namespace do
       it 'returns true' do
         is_expected.to eq(true)
       end
+    end
+  end
+
+  describe '#recent?' do
+    subject { namespace.recent? }
+
+    context 'when created more than 90 days ago' do
+      before do
+        namespace.update_attribute(:created_at, 91.days.ago)
+      end
+
+      it { is_expected.to be(false) }
+    end
+
+    context 'when created less than 90 days ago' do
+      before do
+        namespace.update_attribute(:created_at, 89.days.ago)
+      end
+
+      it { is_expected.to be(true) }
     end
   end
 end

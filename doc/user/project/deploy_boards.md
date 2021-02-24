@@ -16,6 +16,10 @@ of the pods in the deployment. Developers and other teammates can view the
 progress and status of a rollout, pod by pod, in the workflow they already use
 without any need to access Kubernetes.
 
+NOTE:
+If you have a Kubernetes cluster, you can Auto Deploy applications to production
+environments by using [Auto DevOps](../../topics/autodevops/index.md).
+
 ## Overview
 
 With Deploy Boards you can gain more insight into deploys with benefits such as:
@@ -86,7 +90,7 @@ To display the Deploy Boards for a specific [environment](../../ci/environments/
    [`kubernetes`](https://docs.gitlab.com/runner/executors/kubernetes.html) executor.
 1. Configure the [Kubernetes integration](clusters/index.md) in your project for the
    cluster. The Kubernetes namespace is of particular note as you need it
-   for your deployment scripts (exposed by the `KUBE_NAMESPACE` environment variable).
+   for your deployment scripts (exposed by the `KUBE_NAMESPACE` deployment variable).
 1. Ensure Kubernetes annotations of `app.gitlab.com/env: $CI_ENVIRONMENT_SLUG`
    and `app.gitlab.com/app: $CI_PROJECT_PATH_SLUG` are applied to the
    deployments, replica sets, and pods, where `$CI_ENVIRONMENT_SLUG` and
@@ -159,6 +163,6 @@ version of your application.
 ## Further reading
 
 - [GitLab Auto deploy](../../topics/autodevops/stages.md#auto-deploy)
-- [GitLab CI/CD environment variables](../../ci/variables/README.md)
+- [GitLab CI/CD variables](../../ci/variables/README.md)
 - [Environments and deployments](../../ci/environments/index.md)
 - [Kubernetes deploy example](https://gitlab.com/gitlab-examples/kubernetes-deploy)

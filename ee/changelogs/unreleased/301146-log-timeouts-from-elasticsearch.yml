@@ -1,5 +1,0 @@
----
-title: Track elasticsearch_timed_out_count for all ES requests in log
-merge_request: 54180
-author:
-type: changed

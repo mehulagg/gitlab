@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe ComplianceManagement::Frameworks::DestroyService do
-  let_it_be(:namespace) { create(:namespace) }
-  let_it_be(:framework) { create(:compliance_framework, namespace: namespace) }
+  let_it_be_with_refind(:namespace) { create(:namespace) }
+  let_it_be_with_refind(:framework) { create(:compliance_framework, namespace: namespace) }
 
   context 'when feature is disabled' do
     before do

@@ -53,6 +53,13 @@ RSpec.describe Clusters::Agents::CreateService do
         expect(result[:message]).to be_nil
       end
 
+      it 'returns agent values', :aggregate_failures do
+        new_agent = service.execute(name: 'new-agent')[:cluster_agent]
+
+        expect(new_agent.name).to eq('new-agent')
+        expect(new_agent.created_by_user).to eq(user)
+      end
+
       it 'generates an error message when name is invalid' do
         expect(service.execute(name: '@bad_agent_name!')).to eq({
           status: :error,

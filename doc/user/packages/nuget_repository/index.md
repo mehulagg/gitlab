@@ -219,7 +219,7 @@ To use the [project-level](#use-the-gitlab-endpoint-for-nuget-packages) Package 
    <configuration>
     <packageSources>
         <clear />
-        <add key="gitlab" value="https://gitlab.example.com/api/v4/project/<your_project_id>/packages/nuget/index.json" />
+        <add key="gitlab" value="https://gitlab.example.com/api/v4/projects/<your_project_id>/packages/nuget/index.json" />
     </packageSources>
     <packageSourceCredentials>
         <gitlab>
@@ -263,7 +263,7 @@ Prerequisite:
 
 When publishing packages:
 
-- The Package Registry on GitLab.com can store up to 500 MB of content.
+- The Package Registry on GitLab.com can store up to 5 GB of content.
   This limit is [configurable for self-managed GitLab instances](../../../administration/instance_limits.md#package-registry-limits).
 - If you publish the same package with the same version multiple times, each
   consecutive upload is saved as a separate file. When installing a package,

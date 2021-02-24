@@ -1,6 +1,8 @@
 <script>
-import { GlBadge, GlFormSelect, GlTab, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlBadge, GlEmptyState, GlFormSelect, GlLabel, GlTab, GlTabs } from '@gitlab/ui';
 import { differenceBy, unionBy } from 'lodash';
+import Vue from 'vue';
+import { isScopedLabel } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import { DropdownVariant } from '~/vue_shared/components/sidebar/labels_select_vue/constants';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
@@ -20,8 +22,11 @@ export default {
   ],
   variant: DropdownVariant.Standalone,
   components: {
+    GlAlert,
     GlBadge,
+    GlEmptyState,
     GlFormSelect,
+    GlLabel,
     GlTab,
     GlTabs,
     IterationReportIssues,
@@ -31,6 +36,11 @@ export default {
     fullPath: {
       type: String,
       required: true,
+    },
+    hasScopedLabelsFeature: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     iterationId: {
       type: String,
@@ -47,6 +57,11 @@ export default {
       default: Namespace.Group,
       validator: (value) => Object.values(Namespace).includes(value),
     },
+    svgPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   data() {
     return {
@@ -59,17 +74,38 @@ export default {
     shouldShowFilterByLabel() {
       return this.groupBySelection === GroupBy.Label;
     },
+    showEmptyState() {
+      return this.selectedLabels.length && !this.labelsWithIssues.length;
+    },
+    labelsWithIssues() {
+      return this.selectedLabels.filter((label) => label.hasIssues);
+    },
+    labelsWithoutIssues() {
+      return this.selectedLabels.filter((label) => !label.hasIssues);
+    },
   },
   methods: {
-    handleIssueCount(count) {
-      this.issueCount = count;
+    handleIssuesUpdate({ count, labelId }) {
+      if (!labelId) {
+        this.issueCount = count;
+        return;
+      }
+
+      const index = this.selectedLabels.findIndex((l) => l.id === labelId);
+
+      if (index > -1) {
+        const label = this.selectedLabels[index];
+        label.hasIssues = Boolean(count);
+        Vue.set(this.selectedLabels, index, label);
+      }
     },
     handleSelectChange() {
       if (this.groupBySelection === GroupBy.None) {
         this.selectedLabels = [];
       }
     },
-    handleUpdateSelectedLabels(labels) {
+    handleUpdateSelectedLabels(selectedLabels) {
+      const labels = selectedLabels.map((label) => ({ ...label, hasIssues: true }));
       const labelsToAdd = labels.filter((label) => label.set);
       const labelsToRemove = labels.filter((label) => !label.set);
       const idProperty = 'id';
@@ -79,6 +115,9 @@ export default {
         labelsToAdd,
         idProperty,
       );
+    },
+    shouldShowScopedLabel(label) {
+      return this.hasScopedLabelsFeature && isScopedLabel(label);
     },
   },
 };
@@ -93,7 +132,7 @@ export default {
       </template>
 
       <div class="card gl-bg-gray-10 gl-display-flex gl-flex-direction-row gl-flex-wrap gl-px-4">
-        <div class="gl-my-3">
+        <div class="gl-my-3 gl-mr-4">
           <label for="iteration-group-by">{{ __('Group by') }}</label>
           <gl-form-select
             id="iteration-group-by"
@@ -106,14 +145,14 @@ export default {
 
         <div
           v-if="shouldShowFilterByLabel"
-          class="gl-display-flex gl-align-items-center gl-flex-basis-half gl-white-space-nowrap gl-my-3 gl-ml-4"
+          class="gl-display-flex gl-align-items-center gl-flex-basis-half gl-white-space-nowrap gl-my-3"
         >
           <label class="gl-mb-0 gl-mr-2">{{ __('Filter by label') }}</label>
           <labels-select
             :allow-label-create="false"
             :allow-label-edit="true"
             :allow-multiselect="true"
-            :allow-scoped-labels="true"
+            :allow-scoped-labels="hasScopedLabelsFeature"
             :labels-fetch-path="labelsFetchPath"
             :selected-labels="selectedLabels"
             :variant="$options.variant"
@@ -122,23 +161,45 @@ export default {
         </div>
       </div>
 
+      <gl-alert v-if="labelsWithoutIssues.length" class="gl-mb-4" :dismissible="false">
+        {{ __('Labels with no issues in this iteration:') }}
+        <gl-label
+          v-for="label in labelsWithoutIssues"
+          :key="label.id"
+          class="gl-ml-1 gl-vertical-align-middle"
+          :background-color="label.color"
+          :description="label.description"
+          :scoped="shouldShowScopedLabel(label)"
+          :target="null"
+          :title="label.title"
+        />
+      </gl-alert>
+
+      <gl-empty-state
+        v-if="showEmptyState"
+        :svg-path="svgPath"
+        :title="__('No issues found for the selected labels')"
+      />
+
       <iteration-report-issues
-        v-for="label in selectedLabels"
+        v-for="label in labelsWithIssues"
         :key="label.id"
         class="gl-mb-6"
         :full-path="fullPath"
+        :has-scoped-labels-feature="hasScopedLabelsFeature"
         :iteration-id="iterationId"
         :label="label"
         :namespace-type="namespaceType"
-        :data-testid="`iteration-label-group-${label.id}`"
+        @issuesUpdate="handleIssuesUpdate"
       />
 
       <iteration-report-issues
         v-show="!selectedLabels.length"
         :full-path="fullPath"
+        :has-scoped-labels-feature="hasScopedLabelsFeature"
         :iteration-id="iterationId"
         :namespace-type="namespaceType"
-        @issueCount="handleIssueCount"
+        @issuesUpdate="handleIssuesUpdate"
       />
     </gl-tab>
   </gl-tabs>

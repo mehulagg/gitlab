@@ -21,6 +21,10 @@ describe('import table', () => {
   let apolloProvider;
 
   const FAKE_GROUP = generateFakeEntry({ id: 1, status: STATUSES.NONE });
+  const FAKE_GROUPS = [
+    generateFakeEntry({ id: 1, status: STATUSES.NONE }),
+    generateFakeEntry({ id: 2, status: STATUSES.FINISHED }),
+  ];
   const FAKE_PAGE_INFO = { page: 1, perPage: 20, total: 40, totalPages: 2 };
 
   const createComponent = ({ bulkImportSourceGroups }) => {
@@ -80,14 +84,10 @@ describe('import table', () => {
     });
     await waitForPromises();
 
-    expect(wrapper.find(GlEmptyState).props().title).toBe('No groups available for import');
+    expect(wrapper.find(GlEmptyState).props().title).toBe('You have no groups to import');
   });
 
   it('renders import row for each group in response', async () => {
-    const FAKE_GROUPS = [
-      generateFakeEntry({ id: 1, status: STATUSES.NONE }),
-      generateFakeEntry({ id: 2, status: STATUSES.FINISHED }),
-    ];
     createComponent({
       bulkImportSourceGroups: () => ({
         nodes: FAKE_GROUPS,

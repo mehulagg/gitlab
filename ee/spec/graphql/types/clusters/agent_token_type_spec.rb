@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['ClusterAgentToken'] do
-  let(:fields) { %i[cluster_agent created_at created_by_user id] }
+  let(:fields) { %i[cluster_agent created_at created_by_user description id] }
 
   it { expect(described_class.graphql_name).to eq('ClusterAgentToken') }
 

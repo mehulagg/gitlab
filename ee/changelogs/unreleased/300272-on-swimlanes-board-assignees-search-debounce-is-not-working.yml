@@ -1,5 +1,0 @@
----
-title: Fix search debounce for Swimlanes board assignees
-merge_request: 52786
-author:
-type: fixed

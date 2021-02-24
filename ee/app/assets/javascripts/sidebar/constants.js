@@ -6,6 +6,9 @@ export const healthStatus = {
   AT_RISK: 'atRisk',
 };
 
+export const edit = __('Edit');
+export const none = __('None');
+
 export const healthStatusTextMap = {
   [healthStatus.ON_TRACK]: __('On track'),
   [healthStatus.NEEDS_ATTENTION]: __('Needs attention'),

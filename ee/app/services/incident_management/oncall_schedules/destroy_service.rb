@@ -2,7 +2,7 @@
 
 module IncidentManagement
   module OncallSchedules
-    class DestroyService
+    class DestroyService < OncallSchedules::BaseService
       # @param oncall_schedule [IncidentManagement::OncallSchedule]
       # @param user [User]
       def initialize(oncall_schedule, user)
@@ -16,7 +16,7 @@ module IncidentManagement
         return error_no_permissions unless allowed?
 
         if oncall_schedule.destroy
-          success
+          success(oncall_schedule)
         else
           error(oncall_schedule.errors.full_messages.to_sentence)
         end
@@ -26,28 +26,8 @@ module IncidentManagement
 
       attr_reader :oncall_schedule, :user, :project
 
-      def allowed?
-        user&.can?(:admin_incident_management_oncall_schedule, project)
-      end
-
-      def available?
-        ::Gitlab::IncidentManagement.oncall_schedules_available?(project)
-      end
-
-      def error(message)
-        ServiceResponse.error(message: message)
-      end
-
-      def success
-        ServiceResponse.success(payload: { oncall_schedule: oncall_schedule })
-      end
-
       def error_no_permissions
         error(_('You have insufficient permissions to remove an on-call schedule from this project'))
-      end
-
-      def error_no_license
-        error(_('Your license does not support on-call schedules'))
       end
     end
   end

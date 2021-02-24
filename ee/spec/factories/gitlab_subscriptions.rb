@@ -42,8 +42,16 @@ FactoryBot.define do
       association :hosted_plan, factory: :silver_plan
     end
 
+    trait :premium do
+      association :hosted_plan, factory: :premium_plan
+    end
+
     trait :gold do
       association :hosted_plan, factory: :gold_plan
+    end
+
+    trait :ultimate do
+      association :hosted_plan, factory: :ultimate_plan
     end
   end
 end

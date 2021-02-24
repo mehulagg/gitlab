@@ -6,14 +6,22 @@ module Gitlab
       class Collection
         include Enumerable
 
-        def initialize(variables = [])
+        attr_reader :errors
+
+        def initialize(variables = [], errors = nil)
           @variables = []
+          @variables_by_key = {}
+          @errors = errors
 
           variables.each { |variable| self.append(variable) }
         end
 
         def append(resource)
-          tap { @variables.append(Collection::Item.fabricate(resource)) }
+          item = Collection::Item.fabricate(resource)
+          @variables.append(item)
+          @variables_by_key[item[:key]] = item
+
+          self
         end
 
         def concat(resources)
@@ -33,6 +41,14 @@ module Gitlab
           end
         end
 
+        def [](key)
+          @variables_by_key[key]
+        end
+
+        def size
+          @variables.size
+        end
+
         def to_runner_variables
           self.map(&:to_runner_variable)
         end
@@ -41,6 +57,11 @@ module Gitlab
           self.to_runner_variables
             .map { |env| [env.fetch(:key), env.fetch(:value)] }
             .to_h.with_indifferent_access
+        end
+
+        # Returns a sorted Collection object, and sets errors property in case of an error
+        def sorted_collection(project)
+          Sort.new(self, project).collection
         end
       end
     end

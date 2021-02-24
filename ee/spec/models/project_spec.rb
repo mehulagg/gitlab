@@ -59,6 +59,48 @@ RSpec.describe Project do
     it { is_expected.to have_many(:incident_management_oncall_schedules).class_name('IncidentManagement::OncallSchedule') }
     it { is_expected.to have_many(:incident_management_oncall_rotations).through(:incident_management_oncall_schedules).source(:rotations) }
 
+    describe '#jira_vulnerabilities_integration_enabled?' do
+      context 'when project lacks a jira_service relation' do
+        it 'returns false' do
+          expect(project.jira_vulnerabilities_integration_enabled?).to be false
+        end
+      end
+
+      context 'when project has a jira_service relation' do
+        before do
+          create(:jira_service, project: project)
+        end
+
+        it 'accesses the value from the jira_service' do
+          expect(project.jira_service)
+            .to receive(:jira_vulnerabilities_integration_enabled?)
+
+          project.jira_vulnerabilities_integration_enabled?
+        end
+      end
+    end
+
+    describe '#configured_to_create_issues_from_vulnerabilities?' do
+      context 'when project lacks a jira_service relation' do
+        it 'returns false' do
+          expect(project.configured_to_create_issues_from_vulnerabilities?).to be false
+        end
+      end
+
+      context 'when project has a jira_service relation' do
+        before do
+          create(:jira_service, project: project)
+        end
+
+        it 'accesses the value from the jira_service' do
+          expect(project.jira_service)
+            .to receive(:configured_to_create_issues_from_vulnerabilities?)
+
+          project.configured_to_create_issues_from_vulnerabilities?
+        end
+      end
+    end
+
     describe '#jira_issue_association_required_to_merge_enabled?' do
       using RSpec::Parameterized::TableSyntax
 
@@ -897,9 +939,11 @@ RSpec.describe Project do
 
     it 'only loads licensed availability once' do
       expect(project).to receive(:load_licensed_feature_available)
-                             .once.and_call_original
+        .once.and_call_original
 
-      2.times { project.feature_available?(:push_rules) }
+      with_license_feature_cache do
+        2.times { project.feature_available?(:push_rules) }
+      end
     end
 
     context 'when feature symbol is not included on Namespace features code' do

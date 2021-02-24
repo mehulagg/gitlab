@@ -68,7 +68,7 @@ describe('License Report MR Widget', () => {
     getters = defaultGetters,
     state = defaultState,
     actions = defaultActions,
-    stubs = {},
+    stubs = { ReportSection },
   } = {}) => {
     const store = new Vuex.Store({
       modules: {
@@ -185,21 +185,6 @@ describe('License Report MR Widget', () => {
   });
 
   describe('report section', () => {
-    it('should render correctly', () => {
-      const mockReportGroups = [generateReportGroup()];
-
-      mountComponent({
-        getters: {
-          ...defaultGetters,
-          licenseReportGroups() {
-            return mockReportGroups;
-          },
-        },
-      });
-
-      expect(wrapper.find(ReportSection).element).toMatchSnapshot();
-    });
-
     describe('report body', () => {
       it('should render correctly', () => {
         const mockReportGroups = [generateReportGroup()];
@@ -211,7 +196,6 @@ describe('License Report MR Widget', () => {
               return mockReportGroups;
             },
           },
-          stubs: { ReportSection },
         });
 
         expect(wrapper.find({ ref: 'reportSectionBody' }).element).toMatchSnapshot();
@@ -234,7 +218,6 @@ describe('License Report MR Widget', () => {
                 return mockReportGroups;
               },
             },
-            stubs: { ReportSection },
           });
 
           expect(wrapper.findAll({ ref: 'reportHeading' })).toHaveLength(
@@ -259,7 +242,6 @@ describe('License Report MR Widget', () => {
                 return mockReportGroups;
               },
             },
-            stubs: { ReportSection },
           });
 
           expect(findAllReportItems()).toHaveLength(numberOfLicenses);
@@ -280,7 +262,6 @@ describe('License Report MR Widget', () => {
               return mockReportGroups;
             },
           },
-          stubs: { ReportSection },
         });
 
         const allReportItems = findAllReportItems();
@@ -360,9 +341,7 @@ describe('License Report MR Widget', () => {
     const findSecurityApprovalHelpLink = () => wrapper.find('.js-security-approval-help-link');
 
     it('does not show a link to security approval help page if report does not contain blacklisted licenses', () => {
-      mountComponent({
-        stubs: { ReportSection },
-      });
+      mountComponent();
 
       expect(findSecurityApprovalHelpLink().exists()).toBe(false);
     });
@@ -376,7 +355,6 @@ describe('License Report MR Widget', () => {
       };
       mountComponent({
         getters,
-        stubs: { ReportSection },
       });
 
       const securityApprovalHelpLink = findSecurityApprovalHelpLink();

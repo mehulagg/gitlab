@@ -75,6 +75,34 @@ describe('import table row', () => {
     });
   });
 
+  it('renders only no parent option if available namespaces list is empty', () => {
+    createComponent({
+      group: getFakeGroup(STATUSES.NONE),
+      availableNamespaces: [],
+    });
+
+    const dropdownData = findNamespaceDropdown().props().options.data;
+    const noParentOption = dropdownData.find((o) => o.text === 'No parent');
+    const existingGroupOption = dropdownData.find((o) => o.text === 'Existing groups');
+
+    expect(noParentOption.id).toBe('');
+    expect(existingGroupOption).toBeUndefined();
+  });
+
+  it('renders both no parent option and available namespaces list when available namespaces list is not empty', () => {
+    createComponent({
+      group: getFakeGroup(STATUSES.NONE),
+      availableNamespaces: availableNamespacesFixture,
+    });
+
+    const dropdownData = findNamespaceDropdown().props().options.data;
+    const noParentOption = dropdownData.find((o) => o.text === 'No parent');
+    const existingGroupOption = dropdownData.find((o) => o.text === 'Existing groups');
+
+    expect(noParentOption.id).toBe('');
+    expect(existingGroupOption.children).toHaveLength(availableNamespacesFixture.length);
+  });
+
   describe('when entity status is SCHEDULING', () => {
     beforeEach(() => {
       group = getFakeGroup(STATUSES.SCHEDULING);

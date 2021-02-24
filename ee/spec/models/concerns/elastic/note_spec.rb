@@ -129,10 +129,28 @@ RSpec.describe Note, :elastic do
     end
 
     where(:note_type, :permission, :access_level) do
-      :note_on_issue                      | ProjectFeature::ENABLED      | 'issues_access_level'
-      :note_on_project_snippet            | ProjectFeature::DISABLED     | 'snippets_access_level'
-      :note_on_merge_request              | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
-      :note_on_commit                     | ProjectFeature::PRIVATE      | 'repository_access_level'
+      :note_on_issue                              | ProjectFeature::ENABLED      | 'issues_access_level'
+      :note_on_project_snippet                    | ProjectFeature::DISABLED     | 'snippets_access_level'
+      :note_on_personal_snippet                   | ProjectFeature::DISABLED     | 'snippets_access_level'
+      :note_on_merge_request                      | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :note_on_commit                             | ProjectFeature::PRIVATE      | 'repository_access_level'
+      :diff_note_on_merge_request                 | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :diff_note_on_commit                        | ProjectFeature::PRIVATE      | 'repository_access_level'
+      :diff_note_on_design                        | ProjectFeature::ENABLED      | false
+      :legacy_diff_note_on_merge_request          | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :legacy_diff_note_on_commit                 | ProjectFeature::PRIVATE      | 'repository_access_level'
+      :note_on_alert                              | ProjectFeature::PRIVATE      | false
+      :note_on_design                             | ProjectFeature::ENABLED      | false
+      :note_on_epic                               | ProjectFeature::ENABLED      | false
+      :note_on_vulnerability                      | ProjectFeature::PRIVATE      | false
+      :discussion_note_on_vulnerability           | ProjectFeature::PRIVATE      | false
+      :discussion_note_on_merge_request           | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :discussion_note_on_issue                   | ProjectFeature::ENABLED      | 'issues_access_level'
+      :discussion_note_on_project_snippet         | ProjectFeature::DISABLED     | 'snippets_access_level'
+      :discussion_note_on_personal_snippet        | ProjectFeature::DISABLED     | 'snippets_access_level'
+      :note_on_merge_request                      | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
+      :discussion_note_on_commit                  | ProjectFeature::PRIVATE      | 'repository_access_level'
+      :track_mr_picking_note                      | ProjectFeature::PUBLIC       | 'merge_requests_access_level'
     end
 
     with_them do
@@ -141,7 +159,7 @@ RSpec.describe Note, :elastic do
       let(:note_json) { note.__elasticsearch__.as_indexed_json }
 
       before do
-        project.project_feature.update_attribute(access_level.to_sym, permission)
+        project.project_feature.update_attribute(access_level.to_sym, permission) if access_level.present?
       end
 
       it 'does not contain permissions if remove_permissions_data_from_notes_documents is not finished' do
@@ -149,14 +167,18 @@ RSpec.describe Note, :elastic do
                                                   .with(:remove_permissions_data_from_notes_documents)
                                                   .and_return(false)
 
-        expect(note_json).not_to have_key(access_level)
+        expect(note_json).not_to have_key(access_level) if access_level.present?
         expect(note_json).not_to have_key('visibility_level')
       end
 
       it 'contains the correct permissions', :aggregate_failures do
-        expect(note_json).to have_key(access_level)
-        expect(note_json[access_level]).to eq(permission)
+        if access_level
+          expect(note_json).to have_key(access_level)
+          expect(note_json[access_level]).to eq(permission)
+        end
+
         expect(note_json).to have_key('visibility_level')
+        expect(note_json['visibility_level']).to eq(project.visibility_level)
       end
     end
   end

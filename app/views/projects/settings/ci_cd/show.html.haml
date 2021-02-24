@@ -5,9 +5,11 @@
 - expanded = expanded_by_default?
 - general_expanded = @project.errors.empty? ? expanded : true
 
+- enable_search_settings locals: { container_class: 'gl-my-5' }
+
 %section.settings#js-general-pipeline-settings.no-animate{ class: ('expanded' if general_expanded), data: { qa_selector: 'general_pipelines_settings_content' } }
   .settings-header
-    %h4
+    %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
       = _("General pipelines")
     %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
@@ -18,7 +20,7 @@
 
 %section.settings#autodevops-settings.no-animate{ class: ('expanded' if expanded), data: { qa_selector: 'autodevops_settings_content' } }
   .settings-header
-    %h4
+    %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
       = s_('CICD|Auto DevOps')
     %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
@@ -35,7 +37,7 @@
 
 %section.settings.no-animate#js-runners-settings{ class: ('expanded' if expanded || params[:expand_runners]), data: { qa_selector: 'runners_settings_content' } }
   .settings-header
-    %h4
+    %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
       = _("Runners")
     %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
@@ -45,16 +47,17 @@
   .settings-content
     = render 'projects/runners/index'
 
-%section.settings.no-animate#js-artifacts-settings{ class: ('expanded' if expanded) }
-  .settings-header
-    %h4
-      = _("Artifacts")
-    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
-      = expanded ? _('Collapse') : _('Expand')
-    %p
-      = _("A job artifact is an archive of files and directories saved by a job when it finishes.")
-  .settings-content
-    #js-artifacts-settings-app{ data: { full_path: @project.full_path, help_page_path: help_page_path('ci/pipelines/job_artifacts', anchor: 'keep-artifacts-from-most-recent-successful-jobs') } }
+- if Gitlab::CurrentSettings.current_application_settings.keep_latest_artifact?
+  %section.settings.no-animate#js-artifacts-settings{ class: ('expanded' if expanded) }
+    .settings-header
+      %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
+        = _("Artifacts")
+      %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
+        = expanded ? _('Collapse') : _('Expand')
+      %p
+        = _("A job artifact is an archive of files and directories saved by a job when it finishes.")
+    .settings-content
+      #js-artifacts-settings-app{ data: { full_path: @project.full_path, help_page_path: help_page_path('ci/pipelines/job_artifacts', anchor: 'keep-artifacts-from-most-recent-successful-jobs') } }
 
 %section.qa-variables-settings.settings.no-animate#js-cicd-variables-settings{ class: ('expanded' if expanded), data: { qa_selector: 'variables_settings_content' } }
   .settings-header
@@ -64,7 +67,7 @@
 
 %section.settings.no-animate#js-pipeline-triggers{ class: ('expanded' if expanded) }
   .settings-header
-    %h4
+    %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
       = _("Pipeline triggers")
     %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
@@ -77,7 +80,7 @@
 - if settings_container_registry_expiration_policy_available?(@project)
   %section.settings.no-animate#js-registry-policies{ class: ('expanded' if expanded) }
     .settings-header
-      %h4
+      %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
         = _("Clean up image tags")
       %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
         = expanded ? _('Collapse') : _('Expand')
@@ -92,7 +95,7 @@
 - if can?(current_user, :create_freeze_period, @project)
   %section.settings.no-animate#js-deploy-freeze-settings{ class: ('expanded' if expanded) }
     .settings-header
-      %h4
+      %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
         = _("Deploy freezes")
       %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
         = expanded ? _('Collapse') : _('Expand')

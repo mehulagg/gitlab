@@ -178,12 +178,15 @@ outside world.
    pages_external_url 'https://example.io'
 
    pages_nginx['redirect_http_to_https'] = true
+   ```
+
+1. If you haven’t named your certificate and key `example.io.crt` and `example.io.key`
+then you'll need to also add the full paths as shown below:
+
+   ```ruby
    pages_nginx['ssl_certificate'] = "/etc/gitlab/ssl/pages-nginx.crt"
    pages_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/pages-nginx.key"
    ```
-
-   where `pages-nginx.crt` and `pages-nginx.key` are the SSL cert and key,
-   respectively.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
@@ -402,6 +405,8 @@ For this setting to be effective with multi-node setups, it has to be applied to
 all the App nodes and Sidekiq nodes.
 
 #### Using Pages with reduced authentication scope
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-pages/-/merge_requests/423) in GitLab 13.10.
 
 By default, the Pages daemon uses the `api` scope to authenticate. You can configure this. For
 example, this reduces the scope to `read_api` in `/etc/gitlab/gitlab.rb`:
@@ -720,7 +725,7 @@ preferred source is `gitlab`, which uses [API-based configuration](#gitlab-api-b
 
 For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/how-gitlab-pages-uses-the-gitlab-api-to-serve-content/).
 
-### Deprecated domain_config_source
+### Deprecated `domain_config_source`
 
 WARNING:
 The flag `gitlab_pages['domain_config_source']` is deprecated for use in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913),

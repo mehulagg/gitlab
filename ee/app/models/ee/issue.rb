@@ -25,6 +25,7 @@ module EE
       scope :order_status_page_published_last, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS FIRST') }
       scope :order_sla_due_at_asc, -> { includes(:issuable_sla).order('issuable_slas.due_at ASC NULLS LAST') }
       scope :order_sla_due_at_desc, -> { includes(:issuable_sla).order('issuable_slas.due_at DESC NULLS LAST') }
+      scope :without_weights, ->(weights) { where(weight: nil).or(where.not(weight: weights)) }
       scope :no_epic, -> { left_outer_joins(:epic_issue).where(epic_issues: { epic_id: nil }) }
       scope :any_epic, -> { joins(:epic_issue) }
       scope :in_epics, ->(epics) { joins(:epic_issue).where(epic_issues: { epic_id: epics }) }
@@ -66,8 +67,6 @@ module EE
 
       validates :weight, allow_nil: true, numericality: { greater_than_or_equal_to: 0 }
       validate :validate_confidential_epic
-
-      after_create :update_generic_alert_title, if: :generic_alert_with_default_title?
 
       state_machine :state_id do
         after_transition do |issue|
@@ -261,15 +260,6 @@ module EE
 
     def blocking_issues_ids
       @blocking_issues_ids ||= ::IssueLink.blocking_issue_ids_for(self)
-    end
-
-    def update_generic_alert_title
-      update(title: "#{title} #{iid}")
-    end
-
-    def generic_alert_with_default_title?
-      title == ::Gitlab::AlertManagement::Payload::Generic::DEFAULT_TITLE &&
-        author == ::User.alert_bot
     end
 
     def validate_confidential_epic

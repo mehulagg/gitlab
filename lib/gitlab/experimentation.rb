@@ -34,10 +34,6 @@
 module Gitlab
   module Experimentation
     EXPERIMENTS = {
-      ci_notification_dot: {
-        tracking_category: 'Growth::Expansion::Experiment::CiNotificationDot',
-        use_backwards_compatible_subject_index: true
-      },
       upgrade_link_in_user_menu_a: {
         tracking_category: 'Growth::Expansion::Experiment::UpgradeLinkInUserMenuA',
         use_backwards_compatible_subject_index: true
@@ -56,10 +52,6 @@ module Gitlab
       },
       contact_sales_btn_in_app: {
         tracking_category: 'Growth::Conversion::Experiment::ContactSalesInApp',
-        use_backwards_compatible_subject_index: true
-      },
-      customize_homepage: {
-        tracking_category: 'Growth::Expansion::Experiment::CustomizeHomepage',
         use_backwards_compatible_subject_index: true
       },
       group_only_trials: {
@@ -81,7 +73,7 @@ module Gitlab
       trial_during_signup: {
         tracking_category: 'Growth::Conversion::Experiment::TrialDuringSignup'
       },
-      ci_syntax_templates: {
+      ci_syntax_templates_b: {
         tracking_category: 'Growth::Activation::Experiment::CiSyntaxTemplates',
         rollout_strategy: :user
       },

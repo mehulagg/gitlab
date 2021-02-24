@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import IssuesLaneList from 'ee/boards/components/issues_lane_list.vue';
 import { mockList } from 'jest/boards/mock_data';
-import BoardCard from '~/boards/components/board_card_layout.vue';
+import BoardCard from '~/boards/components/board_card.vue';
 import { ListType } from '~/boards/constants';
 import { createStore } from '~/boards/stores';
 import { mockIssues } from '../mock_data';

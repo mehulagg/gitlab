@@ -245,6 +245,38 @@ RSpec.describe Security::MergeReportsService, '#execute' do
       specify { expect(ds_merged_report.findings.count).to eq(3) }
       specify { expect(ds_merged_report.findings.last.identifiers).to match_array(finding_id_2_loc_1.identifiers) }
     end
+
+    context 'merging reports step by step' do # rubocop:disable RSpec/MultipleMemoizedHelpers
+      let(:gitlab_identifier) { build(:ci_reports_security_identifier, external_id: 'GL-01', external_type: 'gitlab') }
+      let(:finding_id_4) { build(:ci_reports_security_finding, identifiers: [identifier_cwe, gitlab_identifier], scanner: gemnasium_scanner, report_type: :dependency_scanning) }
+      let(:finding_id_5) { build(:ci_reports_security_finding, identifiers: [identifier_cwe, gitlab_identifier], scanner: retire_js_scaner, report_type: :dependency_scanning) }
+      let(:pre_merged_report) { described_class.new(bundler_audit_report, gemnasium_report).execute }
+
+      let(:gemnasium_report) do
+        build( :ci_reports_security_report,
+          type: :dependency_scanning,
+          scanners: [gemnasium_scanner],
+          findings: [finding_id_1, finding_id_4],
+          identifiers: [finding_id_1.identifiers, finding_id_4.identifiers].flatten
+        )
+      end
+
+      let(:retirejs_report) do
+        build(
+          :ci_reports_security_report,
+          type: :dependency_scanning,
+          scanners: [retire_js_scaner],
+          findings: [finding_id_3, finding_id_5],
+          identifiers: [finding_id_3.identifiers, finding_id_5.identifiers].flatten
+        )
+      end
+
+      subject(:merged_report) { described_class.new(pre_merged_report, retirejs_report).execute }
+
+      it 'keeps the finding from `retirejs` as it has higher priority', pending: 'https://gitlab.com/gitlab-org/gitlab/-/issues/296520' do
+        expect(merged_report.findings).to include(finding_id_5)
+      end
+    end
   end
 
   context 'ordering reports for sast analyzers' do

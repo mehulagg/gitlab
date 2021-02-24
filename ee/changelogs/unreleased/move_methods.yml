@@ -1,5 +1,0 @@
----
-title: Move sast_reports and secret_detection_reports to CE
-merge_request: 48200
-author:
-type: changed

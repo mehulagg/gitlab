@@ -207,4 +207,42 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
       end
     end
   end
+
+  describe 'list_pending_migrations' do
+    subject { run_rake_task('gitlab:elastic:list_pending_migrations') }
+
+    context 'when there are pending migrations' do
+      let(:pending_migration1) { ::Elastic::DataMigrationService.migrations[1] }
+      let(:pending_migration2) { ::Elastic::DataMigrationService.migrations[2] }
+
+      before do
+        pending_migration1.save!(completed: false)
+        pending_migration2.save!(completed: false)
+      end
+
+      it 'outputs pending migrations' do
+        expect { subject }.to output(/#{pending_migration1.name}\n#{pending_migration2.name}/).to_stdout
+      end
+    end
+
+    context 'when there is no pending migrations' do
+      it 'outputs message there are no pending migrations' do
+        expect { subject }.to output(/There are no pending migrations./).to_stdout
+      end
+    end
+  end
+
+  describe 'estimate_cluster_size' do
+    subject { run_rake_task('gitlab:elastic:estimate_cluster_size') }
+
+    before do
+      create(:namespace_root_storage_statistics, repository_size: 1.megabyte)
+      create(:namespace_root_storage_statistics, repository_size: 10.megabyte)
+      create(:namespace_root_storage_statistics, repository_size: 30.megabyte)
+    end
+
+    it 'outputs estimates' do
+      expect { subject }.to output(/your cluster size should be at least 20.5 MB/).to_stdout
+    end
+  end
 end

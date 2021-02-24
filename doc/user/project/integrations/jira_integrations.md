@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Jira integrations
+# Jira integrations **(FREE)**
 
 GitLab can be integrated with [Jira](https://www.atlassian.com/software/jira).
 
@@ -53,3 +53,4 @@ time.
 | Record Jira time tracking information against an issue                      | No                                                                                                                                                            | Yes. Time can be specified via Jira Smart Commits.                                                                     |
 | Transition or close a Jira issue with a Git commit or merge request         | Yes. Only a single transition type, typically configured to close the issue by setting it to Done.                                                            | Yes. Transition to any state using Jira Smart Commits.                                                                 |
 | Display a list of Jira issues                                               | Yes **(PREMIUM)**                                                                                                                                             | No                                                                                                                     |
+| Create a Jira issue from a vulnerability or finding **(ULTIMATE)**          | Yes                                    | No                     |

@@ -127,71 +127,69 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
     end
   end
 
-  shared_examples 'shared examples for #deploys' do
-    describe "#deploys" do
-      context 'with from date' do
-        before do
-          travel_to(5.days.ago) { create(:deployment, :success, project: project, finished_at: Time.zone.now) }
-          travel_to(5.days.from_now) { create(:deployment, :success, project: project, finished_at: Time.zone.now) }
-          travel_to(5.days.ago) { create(:deployment, :success, project: project_2, finished_at: Time.zone.now) }
-          travel_to(5.days.from_now) { create(:deployment, :success, project: project_2, finished_at: Time.zone.now) }
-        end
+  describe "#deploys" do
+    context 'with from date' do
+      before do
+        travel_to(5.days.ago) { create(:deployment, :success, project: project, finished_at: Time.zone.now) }
+        travel_to(5.days.from_now) { create(:deployment, :success, project: project, finished_at: Time.zone.now) }
+        travel_to(5.days.ago) { create(:deployment, :success, project: project_2, finished_at: Time.zone.now) }
+        travel_to(5.days.from_now) { create(:deployment, :success, project: project_2, finished_at: Time.zone.now) }
+      end
 
-        it "finds the number of deploys made created after it" do
-          expect(subject.second[:value]).to eq('2')
-        end
+      it "finds the number of deploys made created after it" do
+        expect(subject.second[:value]).to eq('2')
+      end
 
-        it 'returns the localized title' do
-          Gitlab::I18n.with_locale(:ru) do
-            expect(subject.second[:title]).to eq(n_('Deploy', 'Deploys', 2))
-          end
-        end
-
-        context 'with subgroups' do
-          before do
-            travel_to(5.days.from_now) do
-              create(:deployment, :success, finished_at: Time.zone.now, project: create(:project, :repository, namespace: create(:group, parent: group)))
-            end
-          end
-
-          it "finds deploys from them" do
-            expect(subject.second[:value]).to eq('3')
-          end
-        end
-
-        context 'with projects specified in options' do
-          before do
-            travel_to(5.days.from_now) do
-              create(:deployment, :success, finished_at: Time.zone.now, project: create(:project, :repository, namespace: group, name: 'not_applicable'))
-            end
-          end
-
-          subject { described_class.new(group, options: { from: Time.now, current_user: user, projects: [project.id, project_2.id] }).data }
-
-          it 'shows deploys from those projects' do
-            expect(subject.second[:value]).to eq('2')
-          end
-        end
-
-        context 'when `from` and `to` parameters are provided' do
-          subject { described_class.new(group, options: { from: 10.days.ago, to: Time.now, current_user: user }).data }
-
-          it 'finds deployments from 5 days ago' do
-            expect(subject.second[:value]).to eq('2')
-          end
+      it 'returns the localized title' do
+        Gitlab::I18n.with_locale(:ru) do
+          expect(subject.second[:title]).to eq(n_('Deploy', 'Deploys', 2))
         end
       end
 
-      context 'with other projects' do
+      context 'with subgroups' do
         before do
           travel_to(5.days.from_now) do
-            create(:deployment, :success, finished_at: Time.zone.now, project: create(:project, :repository, namespace: create(:group)))
+            create(:deployment, :success, finished_at: Time.zone.now, project: create(:project, :repository, namespace: create(:group, parent: group)))
           end
         end
 
-        it "doesn't find deploys from them" do
-          expect(subject.second[:value]).to eq('-')
+        it "finds deploys from them" do
+          expect(subject.second[:value]).to eq('3')
         end
+      end
+
+      context 'with projects specified in options' do
+        before do
+          travel_to(5.days.from_now) do
+            create(:deployment, :success, finished_at: Time.zone.now, project: create(:project, :repository, namespace: group, name: 'not_applicable'))
+          end
+        end
+
+        subject { described_class.new(group, options: { from: Time.now, current_user: user, projects: [project.id, project_2.id] }).data }
+
+        it 'shows deploys from those projects' do
+          expect(subject.second[:value]).to eq('2')
+        end
+      end
+
+      context 'when `from` and `to` parameters are provided' do
+        subject { described_class.new(group, options: { from: 10.days.ago, to: Time.now, current_user: user }).data }
+
+        it 'finds deployments from 5 days ago' do
+          expect(subject.second[:value]).to eq('2')
+        end
+      end
+    end
+
+    context 'with other projects' do
+      before do
+        travel_to(5.days.from_now) do
+          create(:deployment, :success, finished_at: Time.zone.now, project: create(:project, :repository, namespace: create(:group)))
+        end
+      end
+
+      it "doesn't find deploys from them" do
+        expect(subject.second[:value]).to eq('-')
       end
     end
 
@@ -240,21 +238,5 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
         end
       end
     end
-  end
-
-  context 'when query_deploymenys_via_finished_at_in_vsa feature flag is enabled' do
-    before do
-      stub_feature_flags(query_deploymenys_via_finished_at_in_vsa: true)
-    end
-
-    it_behaves_like 'shared examples for #deploys'
-  end
-
-  context 'when query_deploymenys_via_finished_at_in_vsa feature flag is disabled' do
-    before do
-      stub_feature_flags(query_deploymenys_via_finished_at_in_vsa: false)
-    end
-
-    it_behaves_like 'shared examples for #deploys'
   end
 end

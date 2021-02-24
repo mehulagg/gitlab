@@ -42,9 +42,13 @@ module Elastic
           data['snippets_access_level'] = safely_read_project_feature_for_elasticsearch(:snippets)
         when Commit
           data['repository_access_level'] = safely_read_project_feature_for_elasticsearch(:repository)
-        else
+        when Issue, MergeRequest
           access_level_attribute = ProjectFeature.access_level_attribute(noteable)
           data[access_level_attribute.to_s] = safely_read_project_feature_for_elasticsearch(noteable)
+        else
+          # do nothing for other note types (DesignManagement::Design, AlertManagement::Alert, Epic, Vulnerability )
+          # are indexed but not currently searchable so we will not add permission
+          # data for them until the search capability is implemented
         end
       end
     end

@@ -12,6 +12,7 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import {
   SCAN_TYPE_LABEL,
   SCAN_TYPE,
@@ -22,7 +23,6 @@ import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { serializeFormObject } from '~/lib/utils/forms';
 import { redirectTo, queryToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -209,12 +209,7 @@ export default {
       return this.selectedSiteProfile?.validationStatus === DAST_SITE_VALIDATION_STATUS.PASSED;
     },
     hasProfilesConflict() {
-      return (
-        this.glFeatures.securityOnDemandScansSiteValidation &&
-        !this.someFieldEmpty &&
-        this.isActiveScannerProfile &&
-        !this.isValidatedSiteProfile
-      );
+      return !this.someFieldEmpty && this.isActiveScannerProfile && !this.isValidatedSiteProfile;
     },
     isFormInvalid() {
       return this.someFieldEmpty || this.hasProfilesConflict;

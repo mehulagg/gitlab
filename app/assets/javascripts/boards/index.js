@@ -6,7 +6,6 @@ import 'ee_else_ce/boards/models/issue';
 import 'ee_else_ce/boards/models/list';
 import BoardSidebar from 'ee_else_ce/boards/components/board_sidebar';
 import initNewListDropdown from 'ee_else_ce/boards/components/new_list_dropdown';
-import boardConfigToggle from 'ee_else_ce/boards/config_toggle';
 import {
   setWeightFetchingState,
   setEpicFetchingState,
@@ -40,6 +39,7 @@ import {
 } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
+import boardConfigToggle from './config_toggle';
 import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
 
 Vue.use(VueApollo);
@@ -86,7 +86,7 @@ export default () => {
       groupId: Number($boardApp.dataset.groupId),
       rootPath: $boardApp.dataset.rootPath,
       currentUserId: gon.current_user_id || null,
-      canUpdate: $boardApp.dataset.canUpdate,
+      canUpdate: parseBoolean($boardApp.dataset.canUpdate),
       labelsFetchPath: $boardApp.dataset.labelsFetchPath,
       labelsManagePath: $boardApp.dataset.labelsManagePath,
       labelsFilterBasePath: $boardApp.dataset.labelsFilterBasePath,

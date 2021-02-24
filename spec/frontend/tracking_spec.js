@@ -1,5 +1,5 @@
 import { setHTMLFixture } from 'helpers/fixtures';
-import Tracking, { initUserTracking, initDefaultTrackers } from '~/tracking';
+import Tracking, { initUserTracking, initDefaultTrackers, STANDARD_CONTEXT } from '~/tracking';
 
 describe('Tracking', () => {
   let snowplowSpy;
@@ -45,7 +45,7 @@ describe('Tracking', () => {
     it('should activate features based on what has been enabled', () => {
       initDefaultTrackers();
       expect(snowplowSpy).toHaveBeenCalledWith('enableActivityTracking', 30, 30);
-      expect(snowplowSpy).toHaveBeenCalledWith('trackPageView');
+      expect(snowplowSpy).toHaveBeenCalledWith('trackPageView', null, [STANDARD_CONTEXT]);
       expect(snowplowSpy).not.toHaveBeenCalledWith('enableFormTracking');
       expect(snowplowSpy).not.toHaveBeenCalledWith('enableLinkClickTracking');
 
@@ -78,6 +78,34 @@ describe('Tracking', () => {
       navigator.msDoNotTrack = undefined;
     });
 
+    describe('builds the standard context', () => {
+      let standardContext;
+
+      beforeAll(async () => {
+        window.gl = window.gl || {};
+        window.gl.snowplowStandardContext = {
+          schema: 'iglu:com.gitlab/gitlab_standard',
+          data: {
+            environment: 'testing',
+            source: 'unknown',
+          },
+        };
+
+        jest.resetModules();
+
+        ({ STANDARD_CONTEXT: standardContext } = await import('~/tracking'));
+      });
+
+      it('uses server data', () => {
+        expect(standardContext.schema).toBe('iglu:com.gitlab/gitlab_standard');
+        expect(standardContext.data.environment).toBe('testing');
+      });
+
+      it('overrides schema source', () => {
+        expect(standardContext.data.source).toBe('gitlab-javascript');
+      });
+    });
+
     it('tracks to snowplow (our current tracking system)', () => {
       Tracking.event('_category_', '_eventName_', { label: '_label_' });
 
@@ -88,7 +116,7 @@ describe('Tracking', () => {
         '_label_',
         undefined,
         undefined,
-        undefined,
+        [STANDARD_CONTEXT],
       );
     });
 
@@ -118,6 +146,27 @@ describe('Tracking', () => {
       Tracking.event('_category_', '_eventName_');
 
       expect(snowplowSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('.flushPendingEvents', () => {
+    it('flushes any pending events', () => {
+      Tracking.initialized = false;
+      Tracking.event('_category_', '_eventName_', { label: '_label_' });
+
+      expect(snowplowSpy).not.toHaveBeenCalled();
+
+      Tracking.flushPendingEvents();
+
+      expect(snowplowSpy).toHaveBeenCalledWith(
+        'trackStructEvent',
+        '_category_',
+        '_eventName_',
+        '_label_',
+        undefined,
+        undefined,
+        [STANDARD_CONTEXT],
+      );
     });
   });
 
