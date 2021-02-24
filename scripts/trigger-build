@@ -344,7 +344,7 @@ module Trigger
     end
 
     def ref
-      ENV['GITLABCOM_DATABASE_TESTING_TRIGGER_REF'] || 'master'
+      'ab/pkmigration'
     end
   end
 
