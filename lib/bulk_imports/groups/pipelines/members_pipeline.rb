@@ -11,6 +11,7 @@ module BulkImports
 
         transformer Common::Transformers::ProhibitedAttributesTransformer
         transformer BulkImports::Groups::Transformers::MemberAttributesTransformer
+        transformer BulkImports::Common::Transformers::UserReferenceTransformer, default_to_current_user: false
 
         def load(context, data)
           return unless data

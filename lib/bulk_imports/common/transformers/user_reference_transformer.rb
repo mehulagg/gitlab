@@ -14,12 +14,21 @@ module BulkImports
         def initialize(options = {})
           @reference = options[:reference] || DEFAULT_REFERENCE
           @suffixed_reference = "#{@reference}_id"
+          @default_to_current_user = options[:default_to_current_user] || true
         end
 
         def transform(context, data)
           return unless data
 
-          user = find_user(context, data&.dig(@reference, 'public_email')) || context.current_user
+          found_user = find_user(context, data&.dig(@reference, 'public_email'))
+
+          user = if @default_to_current_user
+                   find_user(context, data&.dig(@reference, 'public_email')) || context.current_user
+                 else
+                   find_user(context, data&.dig(@reference, 'public_email'))
+                 end
+
+          return unless user
 
           data
             .except(@reference)

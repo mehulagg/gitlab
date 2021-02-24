@@ -6,28 +6,11 @@ module BulkImports
       class MemberAttributesTransformer
         def transform(context, data)
           data
-            .then { |data| add_user(data) }
             .then { |data| add_access_level(data) }
             .then { |data| add_author(data, context) }
         end
 
         private
-
-        def add_user(data)
-          user = find_user(data&.dig('user', 'public_email'))
-
-          return unless user
-
-          data
-            .except('user')
-            .merge('user_id' => user.id)
-        end
-
-        def find_user(email)
-          return unless email
-
-          User.find_by_any_email(email, confirmed: true)
-        end
 
         def add_access_level(data)
           access_level = data&.dig('access_level', 'integer_value')
