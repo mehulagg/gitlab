@@ -67,22 +67,33 @@ A project launched in GitLab looks like:
 ## Tips and tricks for GitPod users
 
 **Question**: How do I switch branches?
-- _Answer here._
 
-**Question**: Why can't I see a feature belonging to a Premium or Ultimate tier?
-- _Answer here._
-
-**Question**: How do I save my workspace for later?
 - _Answer here._
 
 **Question**: Why is GitPod asking me to reset my password?
+
 - _Answer here._
 
+**Question**: Why can't I see a feature belonging to a Premium or Ultimate tier?
+
+_Answer here._
+
 **Question**: How do I enable or disable feature flags?
+
 - _Answer here._
 
 **Question**: How do I edit a .yml file?
+
+- _Answer here._
+
+**Question**: How do I save my workspace for later?
+
+- _Answer here._
+
+**Question**: Why is saving a workspace valuable?
+
 - _Answer here._
 
 **Question**: How do I share my workspace with others?
+
 - _Answer here._
