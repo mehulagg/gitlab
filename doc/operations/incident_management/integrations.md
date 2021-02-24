@@ -76,6 +76,14 @@ For GitLab versions 13.1 and greater, read
 [External Prometheus Instances](../metrics/alerts.md#external-prometheus-instances)
 to configure alerts for this integration.
 
+### Webhook URLs
+
+Webhook URLs for Alert Integrations are read-only and will be generated once the integration is saved for the first time. It includes a name segment as well as a generated id.
+
+![Webhook URL](img/alert_integration_url_v13_10.png)
+
+The name segment serves as a way to more easily distinguish multiple integrations externally, and is ignored by the alert reciever. This means that if you update an integration name, alerts sent to the previous endpoint will continue to work.
+
 ## Customize the alert payload outside of GitLab
 
 For all integration types, you can customize the payload by sending the following
