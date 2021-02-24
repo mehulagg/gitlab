@@ -48,11 +48,8 @@ module Registrations
     end
 
     def create_learn_gitlab_project
-      title, filename = if helpers.in_trial_onboarding_flow?
-                          [s_('Learn GitLab - Ultimate trial'), 'learn_gitlab_gold_trial.tar.gz']
-                        else
-                          [s_('Learn GitLab'), 'learn_gitlab.tar.gz']
-                        end
+      title = helpers.in_trial_onboarding_flow? ? s_('Learn GitLab - Ultimate trial') : s_('Learn GitLab')
+      filename = helpers.in_trial_onboarding_flow? || learn_gitlab_experiment_enabled? ? 'learn_gitlab_gold_trial.tar.gz' : 'learn_gitlab.tar.gz'
 
       learn_gitlab_template_path = Rails.root.join('vendor', 'project_templates', filename)
 
@@ -87,6 +84,11 @@ module Registrations
         :path,
         :visibility_level
       ]
+    end
+
+    def learn_gitlab_experiment_enabled?
+      Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_a, subject: current_user) ||
+        Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_b, subject: current_user)
     end
   end
 end

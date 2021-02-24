@@ -76,6 +76,64 @@ RSpec.describe Registrations::ProjectsController do
         expect(namespace.projects.find_by_name(s_('Learn GitLab'))).to be_import_finished
       end
 
+      context 'learn gitlab project' do
+        let(:path) { Rails.root.join('vendor', 'project_templates', filename) }
+        let(:handle) { double }
+        let(:expected_arguments) { { namespace_id: namespace.id, file: handle, name: name } }
+
+        before do
+          allow(File).to receive(:open).and_call_original
+          allow(File).to receive(:open).with(path).and_yield(handle)
+        end
+
+        context 'when learn_gitlab experiment is active' do
+          let(:filename) { 'learn_gitlab_gold_trial.tar.gz' }
+          let(:name) { 'Learn Gitlab' }
+
+          before do
+            stub_experiment_for_subject(learn_gitlab_a: true)
+          end
+
+          it 'imports project from the gold trial project file' do
+            expect(::Projects::GitlabProjectsImportService).to receive(:new).with(
+              user,
+              expected_arguments
+            ).and_call_original
+
+            subject
+          end
+        end
+
+        context 'when experiment is not active' do
+          let(:filename) { 'learn_gitlab.tar.gz' }
+          let(:name) { 'Learn Gitlab' }
+
+          it 'imports project from the learn gitlab project file' do
+            expect(::Projects::GitlabProjectsImportService).to receive(:new).with(
+              user,
+              expected_arguments
+            ).and_call_original
+
+            subject
+          end
+        end
+
+        context 'when in trial' do
+          let(:trial_onboarding_flow_params) { { trial_onboarding_flow: true } }
+          let(:filename) { 'learn_gitlab_gold_trial.tar.gz' }
+          let(:name) { 'Learn Gitlab - Ultimate trial' }
+
+          it 'imports project from the gold trial project file' do
+            expect(::Projects::GitlabProjectsImportService).to receive(:new).with(
+              user,
+              expected_arguments
+            ).and_call_original
+
+            subject
+          end
+        end
+      end
+
       context 'when the trial onboarding is active' do
         let_it_be(:trial_onboarding_flow_params) { { trial_onboarding_flow: true } }
         let_it_be(:trial_onboarding_issues_enabled) { true }
