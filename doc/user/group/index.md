@@ -175,7 +175,7 @@ You can sort members by **Account**, **Access granted**, **Max role**, or **Last
 1. Go to the group and select **Members** (**{users}**).
 1. Above the list of members, on the top right, from the **Account** list, select
    the criteria to filter by.
-1. To change the sort from ascending to descending, to the right of the **Account** list, select the
+1. To switch the sort between ascending and descending, to the right of the **Account** list, select the
    arrow (**{sort-lowest}** or **{sort-highest}**).
 
 ## Mention a group in an issue or merge request
