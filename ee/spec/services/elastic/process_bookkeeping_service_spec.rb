@@ -10,13 +10,17 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
     end
   end
 
-  let(:zset) { 'elastic:incremental:updates:0:zset' }
+  let(:zset) { 'elastic:incremental:updates:10:zset' }
   let(:redis) { @redis }
   let(:ref_class) { ::Gitlab::Elastic::DocumentReference }
 
   let(:fake_refs) { Array.new(10) { |i| ref_class.new(Issue, i, "issue_#{i}", 'project_1') } }
   let(:issue) { fake_refs.first }
   let(:issue_spec) { issue.serialize }
+
+  before do
+    allow(described_class).to receive(:shard_number).and_return(10)
+  end
 
   describe '.track' do
     it 'enqueues a record' do

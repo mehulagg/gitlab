@@ -7,6 +7,10 @@ module Elastic
     SHARDS = 0.upto(SHARDS_NUMBER).to_a
 
     class << self
+      def shard_number(data)
+        Elastic::BookkeepingShardService.shard_number(number_of_shards: SHARDS_NUMBER, data: data)
+      end
+
       def redis_set_key(shard_number)
         "elastic:incremental:updates:#{shard_number}:zset"
       end
@@ -22,7 +26,7 @@ module Elastic
 
         items.map! { |item| ::Gitlab::Elastic::DocumentReference.serialize(item) }
 
-        grouped_items = items.group_by { |item| Elastic::BookkeepingShardService.shard_number(number_of_shards: SHARDS_NUMBER, data: item) }
+        grouped_items = items.group_by { |item| shard_number(item) }
 
         with_redis do |redis|
           grouped_items.each do |shard_number, shard_items|
@@ -110,7 +114,7 @@ module Elastic
     def execute_with_redis(redis)
       start_time = Time.current
 
-      SHARDS.map do |shard_number|
+      SHARDS.sum do |shard_number|
         set_key = self.class.redis_set_key(shard_number)
 
         specs = redis.zrangebyscore(set_key, '-inf', '+inf', limit: [0, LIMIT], with_scores: true)
