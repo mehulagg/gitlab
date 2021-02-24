@@ -111,6 +111,19 @@ export default {
         },
       };
     },
+    canFormSubmit() {
+      return (
+        isNameFieldValid(this.form.name) &&
+        this.form.participants.length > 0 &&
+        Boolean(this.form.startsAt.date)
+      );
+    },
+    isFormValid() {
+      return Object.values(this.validationState).every(Boolean) && this.canFormSubmit;
+    },
+    isLoading() {
+      return this.loading || this.$apollo.queries.participants.loading;
+    },
     rotationVariables() {
       const {
         name,
@@ -133,12 +146,6 @@ export default {
         },
         participants: getParticipantsForSave(participants),
       };
-    },
-    isFormValid() {
-      return Object.values(this.validationState).every(Boolean);
-    },
-    isLoading() {
-      return this.loading || this.$apollo.queries.participants.loading;
     },
     title() {
       return this.isEditMode ? this.$options.i18n.editRotation : this.$options.i18n.addRotation;

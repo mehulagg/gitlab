@@ -137,6 +137,7 @@ export default {
           :dropdown-items="participants"
           :loading="isLoading"
           container-class="gl-h-13! gl-overflow-y-auto"
+          menu-class="gl-overflow-y-auto"
           @text-input="$emit('filter-participants', $event)"
           @blur="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
           @input="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
