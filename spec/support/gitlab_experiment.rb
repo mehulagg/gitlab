@@ -2,13 +2,26 @@
 
 # Require the provided spec helper and matchers.
 require 'gitlab/experiment/rspec'
+require_relative 'stub_snowplow'
 
 # This is a temporary fix until we have a larger discussion around the
 # challenges raised in https://gitlab.com/gitlab-org/gitlab/-/issues/300104
-class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/NamespacedClass
-  def initialize(...)
-    super(...)
-    Feature.persist_used!(feature_flag_name)
+RSpec.configure do |config|
+  config.include StubSnowplow, :experiment
+
+  config.before(:each, :experiment) do
+    ApplicationExperiment.class_eval do
+      def initialize(...)
+        super(...)
+        Feature.persist_used!(feature_flag_name)
+      end
+
+      def should_track?
+        true
+      end
+    end
+
+    stub_snowplow
   end
 end
 
