@@ -2,11 +2,18 @@
 
 module Elastic
   class ProcessBookkeepingService
-    REDIS_SET_KEY = 'elastic:incremental:updates:0:zset'
-    REDIS_SCORE_KEY = 'elastic:incremental:updates:0:score'
     LIMIT = 10_000
+    SHARDS = 16
 
     class << self
+      def redis_set_key(shard_number)
+        "elastic:incremental:updates:#{shard_number}:zset"
+      end
+
+      def redis_score_key(shard_number)
+        "elastic:incremental:updates:#{shard_number}:score"
+      end
+
       # Add some records to the processing queue. Items must be serializable to
       # a Gitlab::Elastic::DocumentReference
       def track!(*items)
@@ -33,6 +40,7 @@ module Elastic
         true
       end
 
+      # TODO: Adapt for many shards
       def queue_size
         with_redis { |redis| redis.zcard(self::REDIS_SET_KEY) }
       end
@@ -84,6 +92,11 @@ module Elastic
     end
 
     private
+
+    def each_shard
+      0.upto(SHARDS - 1).each do |shard|
+      end
+    end
 
     def execute_with_redis(redis)
       start_time = Time.current
