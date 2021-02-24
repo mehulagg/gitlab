@@ -9,9 +9,9 @@ type: reference, howto
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4348) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
 
-Your application is exposed to a new category of attacks once deployed into a new environment. For
-example, application server misconfigurations or incorrect assumptions about security controls may
-not be visible from source code alone. Dynamic Application Security Testing (DAST) checks an
+Your application may be exposed to a new category of attacks once deployed into a new environment.
+For example, application server misconfigurations or incorrect assumptions about security controls
+may not be visible from source code alone. Dynamic Application Security Testing (DAST) checks an
 application for these types of vulnerabilities in a deployed environment.
 
 NOTE:
