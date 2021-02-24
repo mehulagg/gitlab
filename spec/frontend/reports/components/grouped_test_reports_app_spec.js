@@ -295,6 +295,23 @@ describe('Grouped test reports app', () => {
     });
   });
 
+  describe('with a report parsing error', () => {
+    beforeEach(() => {
+      const reports = failedReport;
+      reports.suites[0].suite_errors = {
+        head: 'JUnit XML parsing failed: 2:24: FATAL: attributes construct error',
+      };
+      setReports(reports);
+      mountComponent();
+    });
+
+    it('renders the error message', () => {
+      expect(findSummaryDescription().text()).toContain(
+        'JUnit XML parsing failed: 2:24: FATAL: attributes construct error',
+      );
+    });
+  });
+
   describe('with error', () => {
     beforeEach(() => {
       mockStore.state.isLoading = false;
