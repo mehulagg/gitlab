@@ -58,7 +58,7 @@ module EE
               ::Types::ComplianceManagement::ComplianceFrameworkType.connection_type,
               null: true,
               description: 'Compliance frameworks available to projects in this namespace.',
-              resolver: ::Resolvers::ComplianceFrameworkResolver
+              resolver: ::Resolvers::ComplianceManagement::FrameworkResolver
 
         def additional_purchased_storage_size
           object.additional_purchased_storage_size.megabytes
