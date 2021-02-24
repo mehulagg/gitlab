@@ -557,10 +557,12 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         draw :repository
 
         # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/28848
-        get '/snippets/:snippet_id/raw',
-          to: 'projects/snippets#raw',
+        # rubocop: disable Cop/PutProjectRoutesUnderScope
+        get '/snippets/:id/raw',
+          to: 'snippets#raw',
           format: false,
-          constraints: { snippet_id: /\d+/ }
+          constraints: { id: /\d+/ }
+        # rubocop: enable Cop/PutProjectRoutesUnderScope
       end
 
       # All new routes should go under /-/ scope.
