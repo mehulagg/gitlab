@@ -19,7 +19,7 @@ export default {
   computed: {
     fullPath() {
       if (this.noteableData.web_url) {
-        return this.noteableData.web_url.split('/-/')[0].substring(1);
+        return this.noteableData.web_url.split('/-/')[0].substring(1).replace('groups/', '');
       }
       return null;
     },
