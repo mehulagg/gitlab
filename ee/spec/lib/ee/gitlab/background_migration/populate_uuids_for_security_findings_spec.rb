@@ -54,7 +54,7 @@ RSpec.describe ::Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings d
   end
 
   describe '#perform' do
-    subject(:populate_uuids) { described_class.new.perform([security_scan_1.id, security_scan_2.id, security_scan_3.id]) }
+    subject(:populate_uuids) { described_class.new.perform(security_scan_1.id, security_scan_2.id, security_scan_3.id) }
 
     it 'sets the `uuid` of findings' do
       expect { populate_uuids }.to change { finding_1.reload.uuid }.from(nil)

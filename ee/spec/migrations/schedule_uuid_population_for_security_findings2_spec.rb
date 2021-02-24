@@ -3,7 +3,7 @@
 require 'spec_helper'
 require_migration!
 
-RSpec.describe ScheduleUuidPopulationForSecurityFindings do
+RSpec.describe ScheduleUuidPopulationForSecurityFindings2 do
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
   let(:ci_pipelines) { table(:ci_pipelines) }
