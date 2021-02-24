@@ -26,7 +26,8 @@
             "colorPalette": "blue",
             "user": {
               "id": "1",
-              "username": "nora.schaden"
+              "username": "nora.schaden",
+              "avatarUrl": "/url"
             }
           },
           "startsAt": "2021-01-12T10:04:56.333Z",
@@ -39,7 +40,8 @@
             "colorPalette": "orange",
             "user": {
               "id": "2",
-              "username": "racheal.loving"
+              "username": "racheal.loving",
+              "avatarUrl": "/url"
             }
           },
           "startsAt": "2021-01-16T10:04:56.333Z",

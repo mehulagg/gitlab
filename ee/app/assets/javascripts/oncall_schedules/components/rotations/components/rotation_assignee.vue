@@ -79,7 +79,7 @@ export default {
       :view-only="true"
     >
       <div class="gl-display-flex gl-text-white gl-font-weight-normal">
-        <gl-avatar :src="assignee.avatarUrl" :size="16" />
+        <gl-avatar :src="assignee.user.avatarUrl" :size="16" />
         <span v-if="!rotationMobileView" class="gl-ml-2" data-testid="rotation-assignee-name">{{
           assigneeName
         }}</span>
