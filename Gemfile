@@ -523,6 +523,3 @@ gem 'webauthn', '~> 2.3'
 gem 'ipaddress', '~> 0.8.3'
 
 gem 'parslet', '~> 1.8'
-
-gem 'sprite-factory'
-gem 'rmagick'
