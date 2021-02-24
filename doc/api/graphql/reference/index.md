@@ -4419,10 +4419,18 @@ Represents a recorded measurement (object count) for the Admins.
 | `state` | UserState! | State of the user. |
 | `status` | UserStatus | User status. |
 | `todos` | TodoConnection! | To-do items of the user. |
+| `userCallouts` | UserCalloutConnection | User callouts that belong to the user. |
 | `userPermissions` | UserPermissions! | Permissions for the current user on the resource |
 | `username` | String! | Username of the user. Unique within this instance of GitLab. |
 | `webPath` | String! | Web path of the user. |
 | `webUrl` | String! | Web URL of the user. |
+
+### UserCallout
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `dismissedAt` | Time | Date when the callout was dismissed. |
+| `featureName` | UserCalloutFeatureNameEnum! | Name of the feature that the callout is for. |
 
 ### UserPermissions
 
@@ -5806,6 +5814,39 @@ State of a test report.
 | ----- | ----------- |
 | `personal` |  |
 | `project` |  |
+
+### UserCalloutFeatureNameEnum
+
+Name of the feature that the callout is for.
+
+| Value | Description |
+| ----- | ----------- |
+| `ACCOUNT_RECOVERY_REGULAR_CHECK` |  |
+| `ACTIVE_USER_COUNT_THRESHOLD` |  |
+| `ADMIN_INTEGRATIONS_MOVED` |  |
+| `BUY_PIPELINE_MINUTES_NOTIFICATION_DOT` |  |
+| `CANARY_DEPLOYMENT` |  |
+| `CLUSTER_SECURITY_WARNING` |  |
+| `CUSTOMIZE_HOMEPAGE` |  |
+| `EOA_BRONZE_PLAN_BANNER` |  |
+| `FEATURE_FLAGS_NEW_VERSION` |  |
+| `GCP_SIGNUP_OFFER` |  |
+| `GEO_ENABLE_HASHED_STORAGE` |  |
+| `GEO_MIGRATE_HASHED_STORAGE` |  |
+| `GKE_CLUSTER_INTEGRATION` |  |
+| `GOLD_TRIAL` |  |
+| `GOLD_TRIAL_BILLINGS` |  |
+| `NEW_USER_SIGNUPS_CAP_REACHED` |  |
+| `PERSONAL_ACCESS_TOKEN_EXPIRY` |  |
+| `REGISTRATION_ENABLED_CALLOUT` |  |
+| `SERVICE_TEMPLATES_DEPRECATED` |  |
+| `SUGGEST_PIPELINE` |  |
+| `SUGGEST_POPOVER_DISMISSED` |  |
+| `TABS_POSITION_HIGHLIGHT` |  |
+| `THREAT_MONITORING_INFO` |  |
+| `UNFINISHED_TAG_CLEANUP_CALLOUT` |  |
+| `WEBHOOKS_MOVED` |  |
+| `WEB_IDE_ALERT_DISMISSED` |  |
 
 ### UserState
 
