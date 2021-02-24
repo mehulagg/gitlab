@@ -5,7 +5,7 @@ namespace :gitlab do
     desc 'Run background migration scheduler inline'
     task scheduler: :environment do
       10.times do
-        puts "Running the scheduler..."
+        Gitlab::Database::BackgroundMigration::Scheduler.new.perform
         sleep 10
       end
     end
