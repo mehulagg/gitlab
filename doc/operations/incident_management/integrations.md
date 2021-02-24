@@ -78,7 +78,7 @@ to configure alerts for this integration.
 
 ### Webhook URLs
 
-Webhook URLs for Alert Integrations are read-only and will be generated once the integration is saved for the first time. It includes a name segment as well as a generated id.
+Webhook URLs for Alert Integrations are read-only and will be generated once the integration is saved for the first time. It includes a name segment as well as a generated ID.
 
 ![Webhook URL](img/alert_integration_url_v13_10.png)
 
