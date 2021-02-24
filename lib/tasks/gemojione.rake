@@ -36,7 +36,9 @@ namespace :gemojione do
     resultant_emoji_map = {}
     resultant_emoji_map_new = {}
 
-    Gitlab::Emoji.emojis.each do |name, emoji_hash|
+    Gitlab::Emoji.emojis_by_category.each do |emoji_hash|
+      name = emoji_hash['name']
+
       # Ignore aliases
       unless Gitlab::Emoji.emojis_aliases.key?(name)
         fpath = File.join(dir, "#{emoji_hash['unicode']}.png")
@@ -74,7 +76,7 @@ namespace :gemojione do
       handle.write(Gitlab::Json.pretty_generate(resultant_emoji_map))
     end
 
-    out_new = File.join(Rails.root, 'public', '-', 'emojis', '1', 'emojis.json')
+    out_new = File.join(Rails.root, 'public', '-', 'emojis', '2', 'emojis.json')
     File.open(out_new, 'w') do |handle|
       handle.write(Gitlab::Json.pretty_generate(resultant_emoji_map_new))
     end
@@ -106,7 +108,9 @@ namespace :gemojione do
 
     # Set up a map to rename image files
     emoji_unicode_string_to_name_map = {}
-    Gitlab::Emoji.emojis.each do |name, emoji_hash|
+    Gitlab::Emoji.emojis_by_category.each do |emoji_hash|
+      name = emoji_hash['name']
+
       # Ignore aliases
       unless Gitlab::Emoji.emojis_aliases.key?(name)
         emoji_unicode_string_to_name_map[emoji_hash['unicode']] = name

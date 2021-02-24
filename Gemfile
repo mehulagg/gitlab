@@ -291,7 +291,7 @@ gem 'autoprefixer-rails', '10.2.0.0'
 gem 'terser', '1.0.2'
 
 gem 'addressable', '~> 2.7'
-gem 'gemojione', '~> 3.3'
+gem 'gemojione', '~> 4.3.3'
 gem 'gon', '~> 6.2'
 gem 'request_store', '~> 1.5'
 gem 'base32', '~> 0.3.0'
@@ -523,3 +523,6 @@ gem 'webauthn', '~> 2.3'
 gem 'ipaddress', '~> 0.8.3'
 
 gem 'parslet', '~> 1.8'
+
+gem 'sprite-factory'
+gem 'rmagick'

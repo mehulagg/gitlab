@@ -8,6 +8,10 @@ module Gitlab
       Gemojione.index.instance_variable_get(:@emoji_by_name)
     end
 
+    def emojis_by_category
+      Gemojione::Categories.all.values.flatten
+    end
+
     def emojis_by_moji
       Gemojione.index.instance_variable_get(:@emoji_by_moji)
     end
