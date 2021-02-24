@@ -151,6 +151,10 @@ module QA
         "#{api_get_path}/runners"
       end
 
+      def api_packages_path
+        "#{api_get_path}/packages"
+      end
+
       def api_commits_path
         "#{api_get_path}/repository/commits"
       end
@@ -253,6 +257,11 @@ module QA
                      get Runtime::API::Request.new(api_client, "#{api_runners_path}").url
                    end
 
+        parse_body(response)
+      end
+
+      def packages
+        response = get Runtime::API::Request.new(api_client, "#{api_packages_path}").url
         parse_body(response)
       end
 

@@ -95,6 +95,7 @@ module QA
     autoload :Visibility, 'qa/resource/visibility'
     autoload :ProjectSnippet, 'qa/resource/project_snippet'
     autoload :Design, 'qa/resource/design'
+    autoload :Package, 'qa/resource/package'
 
     module KubernetesCluster
       autoload :Base, 'qa/resource/kubernetes_cluster/base'
