@@ -114,7 +114,10 @@ module Elastic
     def execute_with_redis(redis)
       start_time = Time.current
 
-      SHARDS.sum do |shard_number|
+      scores = {}
+      records_count = 0
+
+      SHARDS.each do |shard_number|
         set_key = self.class.redis_set_key(shard_number)
 
         specs = redis.zrangebyscore(set_key, '-inf', '+inf', limit: [0, LIMIT], with_scores: true)
@@ -133,28 +136,33 @@ module Elastic
 
         refs = deserialize_all(specs)
         refs.preload_database_records.each { |ref| submit_document(ref) }
-        failures = bulk_indexer.flush
 
-        # Re-enqueue any failures so they are retried
-        self.class.track!(*failures) if failures.present?
+        scores[set_key] = [first_score, last_score]
+        records_count += specs.count
 
-        # Remove all the successes
-        redis.zremrangebyscore(set_key, first_score, last_score)
-
-        records_count = specs.count
-
-        logger.info(
-          message: 'bulk_indexing_end',
-          redis_set: set_key,
-          records_count: records_count,
-          failures_count: failures.count,
-          first_score: first_score,
-          last_score: last_score,
-          bulk_execution_duration_s: Time.current - start_time
-        )
-
-        records_count
+        break if records_count >= LIMIT
       end
+
+      return 0 if records_count == 0
+
+      failures = bulk_indexer.flush
+
+      # Re-enqueue any failures so they are retried
+      self.class.track!(*failures) if failures.present?
+
+      # Remove all the successes
+      scores.each do |set_key, (first_score, last_score)|
+        redis.zremrangebyscore(set_key, first_score, last_score)
+      end
+
+      logger.info(
+        message: 'bulk_indexing_end',
+        records_count: records_count,
+        failures_count: failures.count,
+        bulk_execution_duration_s: Time.current - start_time
+      )
+
+      records_count
     end
 
     def deserialize_all(specs)
