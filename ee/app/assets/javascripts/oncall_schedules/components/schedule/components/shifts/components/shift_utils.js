@@ -225,7 +225,7 @@ export const weekDisplayShiftLeft = (
  * @returns {Number}
  *
  * @example
- * weekDisplayShiftWidth(false, { daysOverlap: 3 }, false , 50)
+ * weekDisplayShiftWidth(false, { daysOverlap: 3, hoursOverlap: 72, overlapEndDate: 1610496000000 }, false , 50)
  * => 148
  *
  */
