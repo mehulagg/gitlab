@@ -220,7 +220,7 @@ RSpec.describe PipelineDetailsEntity do
     end
 
     it 'queries for build metadata only once per environment', :request_store do
-      result = ActiveRecord::QueryRecorder.new(skip_cached: false, query_recorder_debug: true) do
+      result = ActiveRecord::QueryRecorder.new(skip_cached: false) do
         entity.to_json
       end
 
