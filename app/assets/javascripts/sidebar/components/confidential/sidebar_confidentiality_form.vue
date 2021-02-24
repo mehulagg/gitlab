@@ -1,13 +1,13 @@
 <script>
 import { GlSprintf, GlButton } from '@gitlab/ui';
 import createFlash from '~/flash';
-import { __ } from '~/locale';
+import { __, sprintf } from '~/locale';
 import { confidentialityQueries } from '~/sidebar/constants';
 
 export default {
   i18n: {
     confidentialityOnWarning: __(
-      'You are going to turn on the confidentiality. This means that only team members with %{strongStart}at least Reporter access%{strongEnd} will be able to see and leave comments on the %{issuableType}.',
+      'You are going to turn on confidentiality. Only team members with %{strongStart}at least Reporter access%{strongEnd} will be able to see and leave comments on the %{issuableType}.',
     ),
     confidentialityOffWarning: __(
       'You are going to turn off the confidentiality. This means %{strongStart}everyone%{strongEnd} will be able to see and leave a comment on this %{issuableType}.',
@@ -30,15 +30,15 @@ export default {
   },
   data() {
     return {
-      isLoading: false,
+      loading: false,
     };
   },
   computed: {
     toggleButtonText() {
-      if (this.isLoading) {
+      if (this.loading) {
         return __('Applying');
       }
-      return this.confidential ? __('Turn Off') : __('Turn On');
+      return this.confidential ? __('Turn off') : __('Turn on');
     },
     warningMessage() {
       return this.confidential
@@ -48,7 +48,7 @@ export default {
   },
   methods: {
     submitForm() {
-      this.isLoading = true;
+      this.loading = true;
       this.$apollo
         .mutate({
           mutation: confidentialityQueries[this.issuableType].mutation,
@@ -76,11 +76,16 @@ export default {
         )
         .catch(() => {
           createFlash({
-            message: __('Something went wrong while setting issue confidentiality.'),
+            message: sprintf(
+              __('Something went wrong while setting %{issuableType} confidentiality.'),
+              {
+                issuableType: this.issuableType,
+              },
+            ),
           });
         })
         .finally(() => {
-          this.isLoading = false;
+          this.loading = false;
         });
     },
   },
@@ -106,8 +111,8 @@ export default {
           <gl-button
             category="secondary"
             variant="warning"
-            :disabled="isLoading"
-            :loading="isLoading"
+            :disabled="loading"
+            :loading="loading"
             data-testid="confidential-toggle"
             @click.prevent="submitForm"
           >

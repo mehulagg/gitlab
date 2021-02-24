@@ -18,8 +18,8 @@ export default {
   },
   computed: {
     fullPath() {
-      if (this.noteableData?.web_url) {
-        return this.noteableData?.web_url.split('/-/')[0].substring(1);
+      if (this.noteableData.web_url) {
+        return this.noteableData.web_url.split('/-/')[0].substring(1);
       }
       return null;
     },
@@ -36,7 +36,7 @@ export default {
       .watchQuery({
         query: confidentialityQueries[this.issuableType].query,
         variables: {
-          iid: this.iid.toString(10),
+          iid: String(this.iid),
           fullPath: this.fullPath,
         },
         fetchPolicy: fetchPolicies.CACHE_ONLY,

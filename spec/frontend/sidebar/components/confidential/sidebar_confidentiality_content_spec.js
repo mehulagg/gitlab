@@ -18,7 +18,6 @@ describe('Sidebar Confidentiality Content', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('when issue is non-confidential', () => {

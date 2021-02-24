@@ -42,7 +42,6 @@ describe('Sidebar Confidentiality Form', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('emits a `closeForm` event when Cancel button is clicked', () => {
@@ -92,12 +91,12 @@ describe('Sidebar Confidentiality Form', () => {
 
     it('renders a message about making an issue confidential', () => {
       expect(findWarningMessage().text()).toBe(
-        'You are going to turn on the confidentiality. This means that only team members with at least Reporter access are able to see and leave comments on the issue.',
+        'You are going to turn on confidentiality. Only team members with at least Reporter access will be able to see and leave comments on the issue.',
       );
     });
 
-    it('has a `Turn On` button text', () => {
-      expect(findConfidentialToggle().text()).toBe('Turn On');
+    it('has a `Turn on` button text', () => {
+      expect(findConfidentialToggle().text()).toBe('Turn on');
     });
 
     it('calls a mutation to set confidential to true on button click', () => {
@@ -126,8 +125,8 @@ describe('Sidebar Confidentiality Form', () => {
       );
     });
 
-    it('has a `Turn Off` button text', () => {
-      expect(findConfidentialToggle().text()).toBe('Turn Off');
+    it('has a `Turn off` button text', () => {
+      expect(findConfidentialToggle().text()).toBe('Turn off');
     });
 
     it('calls a mutation to set confidential to false on button click', () => {

@@ -2,8 +2,7 @@
 import produce from 'immer';
 import Vue from 'vue';
 import createFlash from '~/flash';
-import { IssuableType } from '~/issue_show/constants';
-import { __ } from '~/locale';
+import { __, sprintf } from '~/locale';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 import { confidentialityQueries } from '~/sidebar/constants';
 import SidebarConfidentialityContent from './sidebar_confidentiality_content.vue';
@@ -31,12 +30,8 @@ export default {
   inject: ['fullPath', 'iid'],
   props: {
     issuableType: {
-      required: false,
+      required: true,
       type: String,
-      default: 'issue',
-      validator(value) {
-        return [IssuableType.Issue, IssuableType.Epic].includes(value);
-      },
     },
   },
   data() {
@@ -60,7 +55,12 @@ export default {
       },
       error() {
         createFlash({
-          message: __('Something went wrong while fetching issue confidentiality status'),
+          message: sprintf(
+            __('Something went wrong while setting %{issuableType} confidentiality.'),
+            {
+              issuableType: this.issuableType,
+            },
+          ),
         });
       },
     },

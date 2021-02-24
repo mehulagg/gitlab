@@ -151,7 +151,14 @@ function mountConfidentialComponent() {
       fullPath,
       canUpdate: initialData.is_editable,
     },
-    render: (createElement) => createElement('sidebar-confidentiality-widget'),
+
+    render: (createElement) =>
+      createElement('sidebar-confidentiality-widget', {
+        props: {
+          issuableType:
+            isInIssuePage() || isInIncidentPage() || isInDesignPage() ? 'issue' : 'merge_request',
+        },
+      }),
   });
 }
 

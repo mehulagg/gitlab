@@ -39,6 +39,9 @@ describe('Sidebar Confidentiality Widget', () => {
         iid: '1',
         canUpdate: true,
       },
+      propsData: {
+        issuableType: 'issue',
+      },
       stubs: {
         SidebarEditableItem,
       },
@@ -47,7 +50,6 @@ describe('Sidebar Confidentiality Widget', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     fakeApollo = null;
   });
 
@@ -78,7 +80,7 @@ describe('Sidebar Confidentiality Widget', () => {
       expect(findConfidentialityContent().props('confidential')).toBe(false);
     });
 
-    it('changes confidentiality tp true after setConfidentiality is called', async () => {
+    it('changes confidentiality to true after setConfidentiality is called', async () => {
       confidentialWidget.setConfidentiality();
       await nextTick();
       expect(findConfidentialityForm().props('confidential')).toBe(true);
@@ -103,7 +105,7 @@ describe('Sidebar Confidentiality Widget', () => {
       expect(findConfidentialityContent().props('confidential')).toBe(true);
     });
 
-    it('changes confidentiality tp false after setConfidentiality is called', async () => {
+    it('changes confidentiality to false after setConfidentiality is called', async () => {
       confidentialWidget.setConfidentiality();
       await nextTick();
       expect(findConfidentialityForm().props('confidential')).toBe(false);
