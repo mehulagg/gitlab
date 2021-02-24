@@ -24,19 +24,19 @@ You can also run a DAST scan on demand, outside the CI/CD pipeline. Your running
 analyzed for known vulnerabilities. GitLab checks the DAST report, compares the vulnerabilities
 found between the source and target branches, and shows any relevant findings on the merge request.
 
-![DAST Widget](img/dast_v13_4.png)
-
 Note that this comparison logic uses only the latest pipeline executed for the target branch's base
 commit. Running the pipeline on any other commit has no effect on the merge request.
 
 GitLab DAST uses the popular open source tool [OWASP Zed Attack Proxy](https://www.zaproxy.org/)
 to analyze your running web application.
 
-## Requirements
-
-- GitLab Runner with the [`docker` executor](https://docs.gitlab.com/runner/executors/docker.html).
+![DAST widget, showing the vulnerability statistics and a list of vulnerabilities](img/dast_v13_4.png)
 
 ## Enable DAST
+
+### Prerequisites
+
+- GitLab Runner with the [`docker` executor](https://docs.gitlab.com/runner/executors/docker.html).
 
 To enable DAST, either:
 
@@ -47,7 +47,8 @@ To enable DAST, either:
 ### DAST CI template
 
 The DAST job is defined in a CI/CD template file you reference in your CI/CD configuration file. The
-template is included with GitLab. You benefit from any improvements and additions.
+template is included with GitLab. Updates to the template are provided with GitLab upgrades. You
+benefit from any improvements and additions.
 
 The following templates are available:
 
@@ -58,10 +59,10 @@ The following templates are available:
   in GitLab 13.8). Please note that the latest version may include breaking changes. Check the
   [DAST troubleshooting guide](#troubleshooting) if you experience problems.
 
+Use the stable template unless you need a feature provided only in the latest template.
+
 See the CI [docs](../../../development/cicd/templates.md#latest-version)
 on template versioning for more information.
-
-Use the stable template unless you need a feature provided only in the latest template.
 
 #### Include the DAST template
 
@@ -978,7 +979,7 @@ app.get('/dast-website-target', function(req, res) {
 })
 ```
 
-## Scanner profile
+### Scanner profile
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222767) in GitLab 13.4.
 > - [Added](https://gitlab.com/gitlab-org/gitlab/-/issues/225804) in GitLab 13.5: scan mode, AJAX spider, debug messages.
@@ -993,7 +994,7 @@ A scanner profile defines the scanner settings used to run an on-demand scan:
 - **AJAX spider:**  Run the AJAX spider, in addition to the traditional spider, to crawl the target site.
 - **Debug messages:** Include debug messages in the DAST console output.
 
-### Create a scanner profile
+#### Create a scanner profile
 
 To create a scanner profile:
 
@@ -1003,7 +1004,7 @@ To create a scanner profile:
 1. Complete the form. For details of each field, see [Scanner profile](#scanner-profile).
 1. Click **Save profile**.
 
-### Edit a scanner profile
+#### Edit a scanner profile
 
 To edit a scanner profile:
 
@@ -1016,7 +1017,7 @@ To edit a scanner profile:
 
 The scanner profile is updated with the edited details.
 
-### Delete a scanner profile
+#### Delete a scanner profile
 
 To delete a scanner profile:
 
