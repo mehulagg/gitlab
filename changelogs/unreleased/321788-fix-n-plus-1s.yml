@@ -1,0 +1,5 @@
+---
+title: Fix N+1s related to per-build environment lookups
+merge_request:
+author:
+type: performance

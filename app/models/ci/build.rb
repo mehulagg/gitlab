@@ -75,7 +75,11 @@ module Ci
       return unless has_environment?
 
       strong_memoize(:persisted_environment) do
-        Environment.find_by(name: expanded_environment_name, project: project)
+        key = "persisted_environment_by_name:#{project.id}:#{expanded_environment_name}"
+
+        ::Gitlab::SafeRequestStore.fetch(key) do
+          Environment.find_by(name: expanded_environment_name, project: project)
+        end
       end
     end
 

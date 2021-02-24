@@ -69,8 +69,6 @@ module Ci
     has_many :variables, class_name: 'Ci::PipelineVariable'
     has_many :deployments, through: :builds
     has_many :environments, -> { distinct }, through: :deployments
-    has_many :latest_builds, -> { latest.with_project_and_metadata }, foreign_key: :commit_id, inverse_of: :pipeline, class_name: 'Ci::Build'
-    has_many :downloadable_artifacts, -> { not_expired.downloadable.with_job }, through: :latest_builds, source: :job_artifacts
 
     has_many :messages, class_name: 'Ci::PipelineMessage', inverse_of: :pipeline
 
@@ -78,12 +76,16 @@ module Ci
     # the merge request's latest commit.
     has_many :merge_requests_as_head_pipeline, foreign_key: "head_pipeline_id", class_name: 'MergeRequest'
 
-    has_many :pending_builds, -> { pending }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
-    has_many :failed_builds, -> { latest.failed }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
-    has_many :retryable_builds, -> { latest.failed_or_canceled.includes(:project) }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
     has_many :cancelable_statuses, -> { cancelable }, foreign_key: :commit_id, class_name: 'CommitStatus'
-    has_many :manual_actions, -> { latest.manual_actions.includes(:project) }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
-    has_many :scheduled_actions, -> { latest.scheduled_actions.includes(:project) }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
+
+    has_many :latest_builds, -> { latest.includes(:project, :metadata) }, foreign_key: :commit_id, inverse_of: :pipeline, class_name: 'Ci::Build'
+    has_many :pending_builds, -> { pending.includes(:project, :metadata) }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
+    has_many :failed_builds, -> { latest.failed.includes(:project, :metadata) }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
+    has_many :retryable_builds, -> { latest.failed_or_canceled.includes(:project, :metadata) }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
+    has_many :manual_actions, -> { latest.manual_actions.includes(:project, :metadata) }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
+    has_many :scheduled_actions, -> { latest.scheduled_actions.includes(:project, :metadata) }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
+
+    has_many :downloadable_artifacts, -> { not_expired.downloadable.with_job }, through: :latest_builds, source: :job_artifacts
 
     has_many :auto_canceled_pipelines, class_name: 'Ci::Pipeline', foreign_key: 'auto_canceled_by_id'
     has_many :auto_canceled_jobs, class_name: 'CommitStatus', foreign_key: 'auto_canceled_by_id'

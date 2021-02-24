@@ -186,4 +186,49 @@ RSpec.describe PipelineDetailsEntity do
 
     it_behaves_like 'public artifacts'
   end
+
+  context 'N+1 queries' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:pipeline) do
+      create(:ci_pipeline, status: :pending, project: project)
+    end
+
+    before(:all) do
+      create(:environment, name: 'env1')
+      create(:environment, name: 'env2')
+      create(:ci_build, :scheduled, pipeline: pipeline, environment: 'env1')
+      create(:ci_build, :manual, pipeline: pipeline, environment: 'env1')
+      create(:ci_build, :manual, pipeline: pipeline, environment: 'env2')
+      project.add_developer(user)
+    end
+
+    before do
+      stub_licensed_features(protected_environments: true)
+      pipeline.reset # force query execution between tests
+    end
+
+    it 'caches build environment in request store', :request_store do
+      result = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+        entity.to_json
+      end
+
+      query_count = result.occurrences.filter do |q|
+        q.start_with?("SELECT \"environments\".* FROM \"environments\"")
+      end.values.sum
+
+      expect(query_count).to eq(Environment.count)
+    end
+
+    it 'queries for build metadata only once per environment', :request_store do
+      result = ActiveRecord::QueryRecorder.new(skip_cached: false, query_recorder_debug: true) do
+        entity.to_json
+      end
+
+      query_count = result.occurrences.filter do |q|
+        q.start_with?("SELECT \"ci_builds_metadata\".*")
+      end.values.sum
+
+      expect(query_count).to eq(Environment.count)
+    end
+  end
 end
