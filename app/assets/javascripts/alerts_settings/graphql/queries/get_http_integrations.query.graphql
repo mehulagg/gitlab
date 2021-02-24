@@ -5,7 +5,6 @@ query getHttpIntegrations($projectPath: ID!) {
   project(fullPath: $projectPath) {
     alertManagementHttpIntegrations {
       nodes {
-        id
         ...HttpIntegrationPayloadData
       }
     }

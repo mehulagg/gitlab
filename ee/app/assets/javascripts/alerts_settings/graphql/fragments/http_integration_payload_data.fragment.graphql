@@ -1,4 +1,5 @@
 fragment HttpIntegrationPayloadData on AlertManagementHttpIntegration {
+  id
   payloadExample
   payloadAttributeMappings {
     fieldName
