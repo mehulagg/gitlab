@@ -12,7 +12,9 @@ type: reference, howto
 Your application is exposed to a new category of attacks once deployed into a new environment. For
 example, application server misconfigurations or incorrect assumptions about security controls may
 not be visible from source code alone. Dynamic Application Security Testing (DAST) checks an
-application for these types of vulnerabilities in a deployed environment.
+application for these types of vulnerabilities in a deployed environment. GitLab DAST uses the
+popular open source tool [OWASP Zed Attack Proxy](https://www.zaproxy.org/) to analyze your running
+web application.
 
 NOTE:
 The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
@@ -26,9 +28,6 @@ found between the source and target branches, and shows any relevant findings on
 
 Note that this comparison logic uses only the latest pipeline executed for the target branch's base
 commit. Running the pipeline on any other commit has no effect on the merge request.
-
-GitLab DAST uses the popular open source tool [OWASP Zed Attack Proxy](https://www.zaproxy.org/)
-to analyze your running web application.
 
 ![DAST widget, showing the vulnerability statistics and a list of vulnerabilities](img/dast_v13_4.png)
 
