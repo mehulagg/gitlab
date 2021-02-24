@@ -8,8 +8,7 @@ type: reference
 # Pipeline Editor **(FREE)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4540) in GitLab 13.8.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/270059) in GitLab 13.10.
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
