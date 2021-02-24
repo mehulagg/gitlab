@@ -776,14 +776,14 @@ To run an on-demand scan, either:
 
 The on-demand DAST scan runs and the project's dashboard shows the results.
 
-#### List saved on-demand scans
+### List saved on-demand scans
 
 To list saved on-demand scans:
 
 1. From your project's home page, go to **Security & Compliance > Configuration**.
 1. Select the **Saved Scans** tab.
 
-#### View details of an on-demand scan
+### View details of an on-demand scan
 
 To view details of an on-demand scan:
 
@@ -792,7 +792,7 @@ To view details of an on-demand scan:
 1. Select the **Saved Scans** tab.
 1. In the saved scan's row select **More actions** (**{ellipsis_v}**), then select **Edit**.
 
-#### Run a saved on-demand scan
+### Run a saved on-demand scan
 
 To run a saved on-demand scan:
 
@@ -803,7 +803,7 @@ To run a saved on-demand scan:
 
 The on-demand DAST scan runs and the project's dashboard shows the results.
 
-#### Edit an on-demand scan
+### Edit an on-demand scan
 
 To edit an on-demand scan:
 
@@ -814,7 +814,7 @@ To edit an on-demand scan:
 1. Edit the form.
 1. Select **Save scan**.
 
-#### Delete an on-demand scan
+### Delete an on-demand scan
 
 To delete an on-demand scan:
 
@@ -824,7 +824,7 @@ To delete an on-demand scan:
 1. In the saved scan's row select **More actions** (**{ellipsis_v}**), then select **Delete**.
 1. Select **Delete** to confirm the deletion.
 
-## Site profile
+### Site profile
 
 A site profile describes the attributes of a web site to scan on demand with DAST. A site profile is
 required for an on-demand DAST scan.
@@ -834,7 +834,7 @@ A site profile contains the following:
 - **Profile name**: A name you assign to the site to be scanned.
 - **Target URL**: The URL that DAST runs against.
 
-### Site profile validation
+#### Site profile validation
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233020) in GitLab 13.8.
 
@@ -851,7 +851,7 @@ follows:
   
 Both methods are equivalent in functionality. Use whichever is feasible.
 
-### Create a site profile
+#### Create a site profile
 
 To create a site profile:
 
@@ -862,7 +862,7 @@ To create a site profile:
 
 The site profile is created.
 
-### Edit a site profile
+#### Edit a site profile
 
 To edit an existing site profile:
 
@@ -874,7 +874,7 @@ To edit an existing site profile:
 
 The site profile is updated with the edited details.
 
-### Delete a site profile
+#### Delete a site profile
 
 To delete an existing site profile:
 
@@ -886,7 +886,7 @@ To delete an existing site profile:
 
 The site profile is deleted.
 
-### Validate a site profile
+#### Validate a site profile
 
 Prerequisites:
 
@@ -914,7 +914,7 @@ The site is validated and an active scan can run against it.
 
 If a validated site profile's target URL is edited, the site's validation status is revoked.
 
-### Revoke a site profile's validation status
+#### Revoke a site profile's validation status
 
 Note that all site profiles with the same URL have their validation status revoked.
 
