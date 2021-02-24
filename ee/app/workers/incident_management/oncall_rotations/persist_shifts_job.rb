@@ -37,6 +37,7 @@ module IncidentManagement
       def shift_generation_start_time
         [
           rotation.created_at,
+          rotation.updated_at,
           rotation.starts_at,
           rotation.shifts.order_starts_at_desc.first&.ends_at
         ].compact.max
