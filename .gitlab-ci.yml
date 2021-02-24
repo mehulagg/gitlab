@@ -19,7 +19,7 @@ stages:
 default:
   image: "registry.gitlab.com/gitlab-org/gitlab-build-images:ruby-2.7.2.patched-golang-1.14-git-2.29-lfs-2.9-chrome-87-node-14.15-yarn-1.22-postgresql-11-graphicsmagick-1.3.34"
   tags:
-    - gitlab-org
+    - rymai-autoscale-runner-manager
   # All jobs are interruptible by default
   interruptible: true
   # Default job timeout set to 90m https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/10520
