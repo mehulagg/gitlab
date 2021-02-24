@@ -21045,6 +21045,9 @@ msgstr ""
 msgid "PackageRegistry|Source project located at %{link}"
 msgstr ""
 
+msgid "PackageRegistry|Terraform Module"
+msgstr ""
+
 msgid "PackageRegistry|There are no other versions of this package."
 msgstr ""
 

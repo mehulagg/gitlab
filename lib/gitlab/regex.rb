@@ -71,6 +71,10 @@ module Gitlab
         /x.freeze
       end
 
+      def terraform_module_package_name_regex
+        @terraform_module_package_name_regex ||= %r{\A[-a-z0-9]+\/[-a-z0-9]+\z}.freeze
+      end
+
       def pypi_version_regex
         # See the official regex: https://github.com/pypa/packaging/blob/16.7/packaging/version.py#L159
 

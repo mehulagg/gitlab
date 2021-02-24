@@ -8,6 +8,7 @@ export const PackageType = {
   PYPI: 'pypi',
   COMPOSER: 'composer',
   GENERIC: 'generic',
+  TERRAFORM_MODULE: 'terraform_module',
 };
 
 export const TrackingActions = {

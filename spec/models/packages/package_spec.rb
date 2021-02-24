@@ -159,6 +159,20 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('../../../my_package').for(:name) }
         it { is_expected.not_to allow_value('%2e%2e%2fmy_package').for(:name) }
       end
+
+      context 'terraform module package' do
+        subject { build_stubbed(:terraform_module_package) }
+
+        it { is_expected.to allow_value('my-module').for(:name) }
+        it { is_expected.to allow_value('my-module-123').for(:name) }
+        it { is_expected.not_to allow_value('MyModule').for(:name) }
+        it { is_expected.not_to allow_value('My.23.Module').for(:name) }
+        it { is_expected.not_to allow_value('My23Module').for(:name) }
+        it { is_expected.not_to allow_value('my_module').for(:name) }
+        it { is_expected.not_to allow_value('My/module').for(:name) }
+        it { is_expected.not_to allow_value('../../../my_module').for(:name) }
+        it { is_expected.not_to allow_value('%2e%2e%2fmy_module').for(:name) }
+      end
     end
 
     describe '#version' do
@@ -330,6 +344,7 @@ RSpec.describe Packages::Package, type: :model do
       end
 
       it_behaves_like 'validating version to be SemVer compliant for', :npm_package
+      it_behaves_like 'validating version to be SemVer compliant for', :terraform_module_package
 
       context 'nuget package' do
         it_behaves_like 'validating version to be SemVer compliant for', :nuget_package

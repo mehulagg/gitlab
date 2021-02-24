@@ -23,6 +23,8 @@ export const getPackageTypeLabel = (packageType) => {
       return s__('PackageType|Composer');
     case PackageType.GENERIC:
       return s__('PackageType|Generic');
+    case PackageType.TERRAFORM_MODULE:
+      return s__('PackageType|Terraform Module');
     default:
       return null;
   }
