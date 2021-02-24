@@ -1,4 +1,4 @@
-import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import { defaultDataIdFromObject } from '@apollo/client/core';
 import produce from 'immer';
 import { debounce, merge } from 'lodash';
 import { STATUSES } from '../../../constants';

@@ -1,4 +1,4 @@
-import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import { defaultDataIdFromObject } from '@apollo/client/core';
 import { clientTypenames } from '~/import_entities/import_groups/graphql/client_factory';
 import ImportSourceGroupFragment from '~/import_entities/import_groups/graphql/fragments/bulk_import_source_group_item.fragment.graphql';
 import {

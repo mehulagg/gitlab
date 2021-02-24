@@ -1,7 +1,5 @@
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { ApolloClient } from 'apollo-client';
-import { ApolloLink } from 'apollo-link';
-import { BatchHttpLink } from 'apollo-link-batch-http';
+import { ApolloClient, InMemoryCache, ApolloLink } from '@apollo/client/core';
+import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { createUploadLink } from 'apollo-upload-client';
 import { StartupJSLink } from '~/lib/utils/apollo_startup_js_link';
 import csrf from '~/lib/utils/csrf';

@@ -1,4 +1,4 @@
-import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import { defaultDataIdFromObject } from '@apollo/client/core';
 import produce from 'immer';
 import { uniqueId } from 'lodash';
 import Vue from 'vue';

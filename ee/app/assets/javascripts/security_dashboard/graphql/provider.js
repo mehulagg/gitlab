@@ -1,4 +1,4 @@
-import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
+import { IntrospectionFragmentMatcher } from '@apollo/client/core';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';

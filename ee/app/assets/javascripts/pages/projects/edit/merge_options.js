@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client/core';
 import createDefaultClient from '~/lib/graphql';
 
 const containerEl = document.querySelector('#project-merge-options');
