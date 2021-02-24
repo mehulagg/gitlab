@@ -69,7 +69,7 @@ module Mutations
         end
 
         def authorize_admin_rights!
-          raise_resource_not_available_error! unless Ability.allowed?(current_user, :admin_list, board)
+          raise_resource_not_available_error! unless Ability.allowed?(current_user, :admin_issue_board_list, board)
         end
 
         def find_list_by_global_id(gid)

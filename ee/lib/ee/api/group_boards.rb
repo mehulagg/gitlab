@@ -34,7 +34,7 @@ module EE
             requires :name, type: String, desc: 'The board name'
           end
           post '/' do
-            authorize!(:admin_board, board_parent)
+            authorize!(:admin_issue_board, board_parent)
 
             create_board
           end
@@ -44,7 +44,7 @@ module EE
             success ::API::Entities::Board
           end
           delete '/:board_id' do
-            authorize!(:admin_board, board_parent)
+            authorize!(:admin_issue_board, board_parent)
 
             delete_board
           end
