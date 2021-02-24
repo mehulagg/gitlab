@@ -139,7 +139,8 @@ export default {
           v-show="shouldShowCommentButton"
           ref="addDiffNoteButton"
           type="button"
-          class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
+          class="add-diff-note note-button js-add-diff-note-button"
+          data-qa-selector="diff_comment_button"
           :disabled="line.commentsDisabled"
           @click="handleCommentButton"
         >
@@ -167,7 +168,12 @@ export default {
         "
       />
     </td>
-    <td ref="newTd" class="diff-line-num new_line qa-new-diff-line" :class="classNameMapCell">
+    <td
+      ref="newTd"
+      class="diff-line-num new_line"
+      :class="classNameMapCell"
+      data-qa-selector="new_diff_line_link"
+    >
       <a
         v-if="line.new_line"
         ref="lineNumberRefNew"

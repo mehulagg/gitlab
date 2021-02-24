@@ -458,7 +458,7 @@ export default {
               <gl-button
                 size="medium"
                 category="primary"
-                class="qa-merge-button accept-merge-request"
+                class="rspec-merge-button accept-merge-request"
                 :variant="mergeButtonVariant"
                 :disabled="isMergeButtonDisabled"
                 :loading="isMakingRequest"
@@ -481,7 +481,7 @@ export default {
                 <gl-dropdown-item
                   icon-name="warning"
                   button-class="accept-merge-request js-merge-immediately-button"
-                  data-qa-selector="merge_immediately_option"
+                  data-qa-selector="merge_immediately_menu_item"
                   @click="handleMergeImmediatelyButtonClick"
                 >
                   {{ __('Merge immediately') }}
@@ -559,7 +559,11 @@ export default {
         :merge-train-when-pipeline-succeeds-docs-path="mr.mergeTrainWhenPipelineSucceedsDocsPath"
       />
       <template v-if="shouldShowMergeControls">
-        <div v-if="!shouldShowMergeEdit" class="mr-fast-forward-message">
+        <div
+          v-if="!shouldShowMergeEdit"
+          class="mr-fast-forward-message"
+          data-qa-selector="fast_forward_message_content"
+        >
           {{ __('Fast-forward merge without a merge commit') }}
         </div>
         <commits-header
