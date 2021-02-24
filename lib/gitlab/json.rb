@@ -217,6 +217,7 @@ module Gitlab
       end
 
       # @return [String]
+      # @raise [PrecompiledJson::UnsupportedFormatError] if the value is neither a String or Array
       def to_s
         return @value if @value.is_a?(String)
         return "[#{@value.join(',')}]" if @value.is_a?(Array)
