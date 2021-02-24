@@ -50,6 +50,7 @@ Include details of the feature flag in the documentation:
 - Say whether it's recommended for production use.
 - Document how to enable and disable it.
 - Add a warning to the user saying that the feature might be disabled.
+- Add a warning to the user saying that the behavior of a feature in development may change or be removed.
 
 For example, for a feature disabled by default, disabled on GitLab.com, cannot
 be enabled for a single project, and is not ready for production use:
@@ -61,6 +62,7 @@ be enabled for a single project, and is not ready for production use:
 > - It's [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
+> - The behavior of this feature in development may abruptly change or be completely removed in a future version of GitLab.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(FREE SELF)**
 
 WARNING:
@@ -73,7 +75,9 @@ This feature might not be available to you. Check the **version history** note a
 ### Enable or disable <Feature Name> **(FREE SELF)**
 
 <Feature Name> is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+deployed behind a feature flag that is **disabled by default**. The behavior of
+this feature in development may abruptly change or be completely removed in a
+future version of GitLab.
 [GitLab administrators with access to the GitLab Rails console](<replace with path to>/administration/feature_flags.md)
 can enable it.
 
@@ -107,10 +111,11 @@ default:
 - Say whether it's recommended for production use.
 - Document how to disable and enable it.
 - Add a warning to the user saying that the feature might be disabled.
+- Say whether we intend to remove the feature flag.
 
 For example, for a feature initially deployed disabled by default, that became
-enabled by default, that is enabled on GitLab.com, and is ready for production
-use:
+enabled by default, that is enabled on GitLab.com, is ready for production use,
+and whose feature flag is intended to be removed:
 
 ````markdown
 # Feature Name
@@ -120,6 +125,7 @@ use:
 > - [Became enabled by default](link-to-issue) on GitLab 12.1.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
+> - The feature flag is intended to be removed, so disabling it may not be possible in a future version of GitLab.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(FREE SELF)**
 
 WARNING:
@@ -134,7 +140,8 @@ This feature might not be available to you. Check the **version history** note a
 <Feature Name> is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](<replace with path to>/administration/feature_flags.md)
-can opt to disable it.
+can opt to disable it. But note that the feature flag is intended to be removed,
+so disabling it may not be possible in a future version of GitLab.
 
 To enable it:
 
