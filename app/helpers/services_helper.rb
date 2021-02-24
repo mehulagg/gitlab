@@ -108,6 +108,7 @@ module ServicesHelper
     }
 
     if integration.is_a?(JiraService)
+      form_data[:jira_issue_transition_enabled] = integration.jira_issue_transition_enabled
       form_data[:jira_issue_transition_id] = integration.jira_issue_transition_id
     end
 

@@ -13,8 +13,9 @@ module QA
             end
 
             view 'app/assets/javascripts/integrations/edit/components/jira_trigger_fields.vue' do
-              element :service_issue_transition_mode_auto, ':data-qa-selector="`service_issue_transition_mode_${issueTransitionOption.value}`"' # rubocop:disable QA/ElementWithPattern
-              element :service_issue_transition_mode_custom, ':data-qa-selector="`service_issue_transition_mode_${issueTransitionOption.value}`"' # rubocop:disable QA/ElementWithPattern
+              element :service_jira_issue_transition_enabled
+              element :service_jira_issue_transition_mode_auto, ':data-qa-selector="`service_jira_issue_transition_mode_${issueTransitionOption.value}`"' # rubocop:disable QA/ElementWithPattern
+              element :service_jira_issue_transition_mode_custom, ':data-qa-selector="`service_jira_issue_transition_mode_${issueTransitionOption.value}`"' # rubocop:disable QA/ElementWithPattern
               element :service_jira_issue_transition_id_field
             end
 
@@ -29,6 +30,7 @@ module QA
               set_username(Runtime::Env.jira_admin_username)
               set_password(Runtime::Env.jira_admin_password)
 
+              enable_transitions
               use_custom_transitions
               set_transition_ids('11,21,31,41')
 
@@ -52,12 +54,16 @@ module QA
               fill_element(:service_password_field, password)
             end
 
+            def enable_transitions
+              check_element :service_jira_issue_transition_enabled
+            end
+
             def use_automatic_transitions
-              click_element :service_issue_transition_mode_auto
+              click_element :service_jira_issue_transition_mode_auto
             end
 
             def use_custom_transitions
-              click_element :service_issue_transition_mode_custom
+              click_element :service_jira_issue_transition_mode_custom
             end
 
             def set_transition_ids(transition_ids)

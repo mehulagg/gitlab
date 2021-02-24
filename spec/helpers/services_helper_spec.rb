@@ -27,7 +27,12 @@ RSpec.describe ServicesHelper do
       ]
     end
 
-    let(:jira_fields) { %i[jira_issue_transition_id] }
+    let(:jira_fields) do
+      [
+        :jira_issue_transition_enabled,
+        :jira_issue_transition_id
+      ]
+    end
 
     subject { helper.integration_form_data(integration) }
 

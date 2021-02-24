@@ -9,6 +9,7 @@ describe('JiraTriggerFields', () => {
     initialTriggerCommit: false,
     initialTriggerMergeRequest: false,
     initialEnableComments: false,
+    initialJiraIssueTransitionEnabled: false,
   };
 
   const createComponent = (props, isInheriting = false) => {
@@ -30,10 +31,12 @@ describe('JiraTriggerFields', () => {
   const findCommentSettings = () => wrapper.find('[data-testid="comment-settings"]');
   const findCommentDetail = () => wrapper.find('[data-testid="comment-detail"]');
   const findCommentSettingsCheckbox = () => findCommentSettings().find(GlFormCheckbox);
-  const findIssueTransitionSettings = () =>
-    wrapper.find('[data-testid="issue-transition-settings"]');
+  const findIssueTransitionToggle = () => wrapper.find('[data-testid="issue-transition-toggle"]');
+  const findIssueTransitionToggleCheckbox = () =>
+    findIssueTransitionToggle().find('input[type="checkbox"]');
+  const findIssueTransitionMode = () => wrapper.find('[data-testid="issue-transition-mode"]');
   const findIssueTransitionModeRadios = () =>
-    findIssueTransitionSettings().findAll('input[type="radio"]');
+    findIssueTransitionMode().findAll('input[type="radio"]');
   const findIssueTransitionIdsField = () =>
     wrapper.find('input[type="text"][name="service[jira_issue_transition_id]"]');
 
@@ -44,7 +47,8 @@ describe('JiraTriggerFields', () => {
 
         expect(findCommentSettings().isVisible()).toBe(false);
         expect(findCommentDetail().isVisible()).toBe(false);
-        expect(findIssueTransitionSettings().isVisible()).toBe(false);
+        expect(findIssueTransitionToggle().isVisible()).toBe(false);
+        expect(findIssueTransitionMode().isVisible()).toBe(false);
       });
     });
 
@@ -58,7 +62,8 @@ describe('JiraTriggerFields', () => {
       it('shows trigger settings', () => {
         expect(findCommentSettings().isVisible()).toBe(true);
         expect(findCommentDetail().isVisible()).toBe(false);
-        expect(findIssueTransitionSettings().isVisible()).toBe(true);
+        expect(findIssueTransitionToggle().isVisible()).toBe(true);
+        expect(findIssueTransitionMode().isVisible()).toBe(false);
       });
 
       // As per https://vuejs.org/v2/guide/forms.html#Checkbox-1,
@@ -88,7 +93,9 @@ describe('JiraTriggerFields', () => {
 
         expect(findCommentSettings().isVisible()).toBe(true);
         expect(findCommentDetail().isVisible()).toBe(false);
-        expect(findIssueTransitionSettings().isVisible()).toBe(true);
+        expect(findIssueTransitionToggle().isVisible()).toBe(true);
+        expect(findIssueTransitionMode().isVisible()).toBe(false);
+        expect(findIssueTransitionToggleCheckbox().element.checked).toBe(false);
       });
     });
 
@@ -104,11 +111,26 @@ describe('JiraTriggerFields', () => {
       });
     });
 
-    describe('initialJiraIssueTransitionId is not set', () => {
+    describe('initialTriggerCommit is true, initialJiraIssueTransitionEnabled is true', () => {
+      it('shows transition settings', () => {
+        createComponent({
+          initialTriggerCommit: true,
+          initialJiraIssueTransitionEnabled: true,
+        });
+
+        expect(findIssueTransitionToggle().isVisible()).toBe(true);
+        expect(findIssueTransitionMode().isVisible()).toBe(true);
+      });
+    });
+
+    describe('initialJiraIssueTransitionEnabled is true, initialJiraIssueTransitionId is blank', () => {
       it('uses automatic transitions', () => {
         createComponent({
           initialTriggerCommit: true,
+          initialJiraIssueTransitionEnabled: true,
         });
+
+        expect(findIssueTransitionToggleCheckbox().element.checked).toBe(true);
 
         const [radio1, radio2] = findIssueTransitionModeRadios().wrappers;
         expect(radio1.element.checked).toBe(true);
@@ -118,12 +140,15 @@ describe('JiraTriggerFields', () => {
       });
     });
 
-    describe('initialJiraIssueTransitionId is set', () => {
+    describe('initialJiraIssueTransitionEnabled is true, initialJiraIssueTransitionId is set', () => {
       it('uses custom transitions', () => {
         createComponent({
-          initialJiraIssueTransitionId: '1, 2, 3',
           initialTriggerCommit: true,
+          initialJiraIssueTransitionEnabled: true,
+          initialJiraIssueTransitionId: '1, 2, 3',
         });
+
+        expect(findIssueTransitionToggleCheckbox().element.checked).toBe(true);
 
         const [radio1, radio2] = findIssueTransitionModeRadios().wrappers;
         expect(radio1.element.checked).toBe(false);
@@ -143,6 +168,7 @@ describe('JiraTriggerFields', () => {
         {
           initialTriggerCommit: true,
           initialEnableComments: true,
+          initialJiraIssueTransitionEnabled: true,
         },
         true,
       );

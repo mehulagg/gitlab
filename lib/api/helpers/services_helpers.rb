@@ -543,9 +543,15 @@ module API
             },
             {
               required: false,
+              name: :jira_issue_transition_enabled,
+              type: Boolean,
+              desc: 'Enable Jira issue transitions for closing references'
+            },
+            {
+              required: false,
               name: :jira_issue_transition_id,
               type: String,
-              desc: 'The ID of a transition that moves issues to a closed state. You can find this number under the Jira workflow administration (**Administration > Issues > Workflows**) by selecting **View** under **Operations** of the desired workflow of your project. The ID of each state can be found inside the parenthesis of each transition name under the **Transitions (id)** column ([see screenshot][trans]). By default, this ID is set to `2`'
+              desc: 'The ID of one or more transitions to move issues to a closed state'
             },
             {
               required: false,

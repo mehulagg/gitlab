@@ -44,6 +44,7 @@ module ServiceParams
     # make those event names plural as special case.
     :issues_events,
     :issues_url,
+    :jira_issue_transition_enabled,
     :jira_issue_transition_id,
     :manual_configuration,
     :merge_requests_events,
@@ -85,6 +86,15 @@ module ServiceParams
       FILTER_BLANK_PARAMS.each do |param|
         service_params[:service].delete(param) if service_params[:service][param].blank?
       end
+    end
+
+    # Handle clients submitting a form from a previous GitLab version, we don't want to create a record
+    # with jira_issue_transition_enabled set to false if the user has entered custom transitions.
+    #
+    # TODO: Remove this in the next release
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/323366
+    if @service.is_a?(JiraService) && service_params[:service][:jira_issue_transition_enabled].nil? # rubocop:disable Gitlab/ModuleWithInstanceVariables
+      service_params[:service][:jira_issue_transition_enabled] = service_params[:service][:jira_issue_transition_id].present?
     end
 
     service_params

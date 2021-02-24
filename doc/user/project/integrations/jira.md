@@ -106,6 +106,9 @@ To enable the Jira integration in a project:
 1. To include a comment on the Jira issue when the above reference is made in GitLab, select
    **Enable comments**.
 
+1. To transition Jira issues when a [closing reference](../issues/managing_issues.md#closing-issues-automatically) is made in GitLab,
+   select **Enable Jira transitions**.
+
 1. Enter the further details on the page as described in the following table.
 
    | Field | Description |
@@ -137,12 +140,19 @@ displays a Jira link that opens the Jira project.
 
 #### Automatic issue transitions
 
-When you [close a Jira issues with a trigger word](../issues/managing_issues.md#closing-issues-automatically),
-GitLab by default transitions the issue to the next available status with a category of "Done".
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/...) in GitLab 13.10.
+
+In this mode the referenced Jira issue is transitioned to the next available status with a category of "Done".
+
+See the [Configure GitLab](#configure-gitlab) section, check the **Enable Jira transitions** setting and select the **Move to Done** option.
 
 #### Custom issue transitions
 
-For advanced workflows you can specify custom Jira transition IDs. If you insert multiple transition IDs separated by `,` or `;`, the issue is moved to each state, one after another, using the given order.
+For advanced workflows you can specify custom Jira transition IDs.
+
+See the [Configure GitLab](#configure-gitlab) section, check the **Enable Jira transitions** setting, select the **Custom transitions** option, and enter your transition IDs in the text field.
+
+If you insert multiple transition IDs separated by `,` or `;`, the issue is moved to each state, one after another, using the given order. If a transition fails the sequence is aborted.
 
 To see the transition IDs on Jira Cloud, edit a workflow in the **Text** view.
 The transition IDs display in the **Transitions** column.

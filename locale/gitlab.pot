@@ -16944,6 +16944,9 @@ msgstr ""
 msgid "JiraService|Enable Jira issues creation from vulnerabilities"
 msgstr ""
 
+msgid "JiraService|Enable Jira transitions"
+msgstr ""
+
 msgid "JiraService|Events for %{noteable_model_name} are disabled."
 msgstr ""
 

@@ -491,7 +491,8 @@ RSpec.describe JiraService do
       end
 
       before do
-        allow(jira_service).to receive_messages(jira_issue_transition_id: '999')
+        jira_service.jira_issue_transition_enabled = true
+        jira_service.jira_issue_transition_id = '999'
 
         # These stubs are needed to test JiraService#close_issue.
         # We close the issue then do another request to API to check if it got closed.
@@ -659,6 +660,34 @@ RSpec.describe JiraService do
         expect(WebMock).to have_requested(:post, transitions_url).with(
           body: /"id":"999"/
         ).once
+      end
+
+      context 'when issue transitions are disabled' do
+        before do
+          jira_service.jira_issue_transition_enabled = false
+        end
+
+        it 'does not transition the issue' do
+          close_issue
+
+          expect(WebMock).not_to have_requested(:post, transitions_url)
+        end
+      end
+
+      # TODO: Remove this in the next release
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/323366
+      context 'when issue transitions are implicitly enabled' do
+        before do
+          jira_service.jira_issue_transition_enabled = nil
+        end
+
+        it 'transitions the issue' do
+          close_issue
+
+          expect(WebMock).to have_requested(:post, transitions_url).with(
+            body: /"id":"999"/
+          ).once
+        end
       end
 
       context 'when using automatic issue transitions' do

@@ -28,6 +28,7 @@ function parseDatasetToProps(data) {
     testPath,
     resetPath,
     vulnerabilitiesIssuetype,
+    jiraIssueTransitionEnabled,
     jiraIssueTransitionId,
     ...booleanAttributes
   } = data;
@@ -60,6 +61,7 @@ function parseDatasetToProps(data) {
       initialTriggerMergeRequest: mergeRequestEvents,
       initialEnableComments: enableComments,
       initialCommentDetail: commentDetail,
+      initialJiraIssueTransitionEnabled: jiraIssueTransitionEnabled,
       initialJiraIssueTransitionId: jiraIssueTransitionId,
     },
     jiraIssuesProps: {

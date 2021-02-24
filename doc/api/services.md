@@ -814,6 +814,7 @@ Parameters:
 | `username`      | string | yes  | The username of the user created to be used with GitLab/Jira. |
 | `password`      | string | yes  | The password of the user created to be used with GitLab/Jira. |
 | `active`        | boolean | no  | Activates or deactivates the service. Defaults to false (deactivated). |
+| `jira_issue_transition_enabled` | boolean | no | Enable Jira issue transitions for closing references. Defaults to false. |
 | `jira_issue_transition_id` | string | no | The ID of one or more transitions to move issues to a closed state. Read [custom issue transitions](../user/project/integrations/jira.md#custom-issue-transitions) for details. Defaults to a blank string, which enables [automatic issue transitions](../user/project/integrations/jira.md#automatic-issue-transitions). |
 | `commit_events` | boolean | false | Enable notifications for commit events |
 | `merge_requests_events` | boolean | false | Enable notifications for merge request events |

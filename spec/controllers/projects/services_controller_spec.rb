@@ -196,6 +196,26 @@ RSpec.describe Projects::ServicesController do
           expect(service.reload.inherit_from_id).to eq(instance_service.id)
         end
       end
+
+      # TODO: Remove this in the next release
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/323366
+      context 'when param `jira_issue_transition_enabled` is not sent' do
+        context 'and `jira_issue_transition_id` is present' do
+          let(:service_params) { { jira_issue_transition_id: '123' } }
+
+          it 'sets `jira_issue_transition_enabled` to true' do
+            expect(service.reload.data_fields.jira_issue_transition_enabled).to be(true)
+          end
+        end
+
+        context 'and `jira_issue_transition_id` is blank' do
+          let(:service_params) { { jira_issue_transition_id: '' } }
+
+          it 'sets `jira_issue_transition_enabled` to false' do
+            expect(service.reload.data_fields.jira_issue_transition_enabled).to be(false)
+          end
+        end
+      end
     end
 
     describe 'as JSON' do

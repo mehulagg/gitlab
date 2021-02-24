@@ -81,6 +81,10 @@ export default {
       required: false,
       default: 'standard',
     },
+    initialJiraIssueTransitionEnabled: {
+      type: Boolean,
+      required: true,
+    },
     initialJiraIssueTransitionId: {
       type: String,
       required: false,
@@ -94,6 +98,7 @@ export default {
       triggerMergeRequest: this.initialTriggerMergeRequest,
       enableComments: this.initialEnableComments,
       commentDetail: this.initialCommentDetail,
+      jiraIssueTransitionEnabled: this.initialJiraIssueTransitionEnabled,
       jiraIssueTransitionId: this.initialJiraIssueTransitionId,
       issueTransitionMode: this.initialJiraIssueTransitionId.length
         ? ISSUE_TRANSITION_CUSTOM
@@ -200,7 +205,26 @@ export default {
       v-show="showTriggerSettings"
       :label="s__('JiraService|Transition Jira issues to their final state:')"
       class="gl-pl-6"
-      data-testid="issue-transition-settings"
+      data-testid="issue-transition-toggle"
+    >
+      <input
+        name="service[jira_issue_transition_enabled]"
+        type="hidden"
+        :value="jiraIssueTransitionEnabled || false"
+      />
+      <gl-form-checkbox
+        v-model="jiraIssueTransitionEnabled"
+        :disabled="isInheriting"
+        data-qa-selector="service_jira_issue_transition_enabled"
+      >
+        {{ s__('JiraService|Enable Jira transitions') }}
+      </gl-form-checkbox>
+    </gl-form-group>
+
+    <gl-form-group
+      v-show="showTriggerSettings && jiraIssueTransitionEnabled"
+      class="gl-pl-9"
+      data-testid="issue-transition-mode"
     >
       <input type="hidden" name="service[jira_issue_transition_id]" value="" />
 
@@ -210,7 +234,7 @@ export default {
         v-model="issueTransitionMode"
         :value="issueTransitionOption.value"
         :disabled="isInheriting"
-        :data-qa-selector="`service_issue_transition_mode_${issueTransitionOption.value}`"
+        :data-qa-selector="`service_jira_issue_transition_mode_${issueTransitionOption.value}`"
       >
         {{ issueTransitionOption.label }}
 

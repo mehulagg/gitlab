@@ -85,8 +85,12 @@ RSpec.describe 'User activates Jira', :js do
   end
 
   describe 'issue transition settings' do
-    it 'shows validation errors' do
+    it 'using custom transitions' do
       visit_project_integration('Jira')
+
+      expect(page).to have_field('Enable Jira transitions', checked: false)
+
+      check 'Enable Jira transitions'
 
       expect(page).to have_field('Move to Done', checked: true)
 
@@ -94,7 +98,7 @@ RSpec.describe 'User activates Jira', :js do
       choose 'Use custom transitions'
       click_save_integration
 
-      within '[data-testid="issue-transition-settings"]' do
+      within '[data-testid="issue-transition-mode"]' do
         expect(page).to have_content('This field is required.')
       end
 
@@ -105,10 +109,11 @@ RSpec.describe 'User activates Jira', :js do
       expect(project.reload.jira_service.jira_issue_transition_id).to eq('1, 2, 3')
     end
 
-    it 'clears the transition IDs when using automatic transitions' do
-      create(:jira_service, project: project, jira_issue_transition_id: '1, 2, 3')
+    it 'using automatic transitions' do
+      create(:jira_service, project: project, jira_issue_transition_enabled: true, jira_issue_transition_id: '1, 2, 3')
       visit_project_integration('Jira')
 
+      expect(page).to have_field('Enable Jira transitions', checked: true)
       expect(page).to have_field('Use custom transitions', checked: true)
       expect(page).to have_field('service[jira_issue_transition_id]', with: '1, 2, 3')
 

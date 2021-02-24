@@ -31,7 +31,7 @@ class JiraService < IssueTrackerService
 
   # TODO: we can probably just delegate as part of
   # https://gitlab.com/gitlab-org/gitlab/issues/29404
-  data_field :username, :password, :url, :api_url, :jira_issue_transition_id, :project_key, :issues_enabled,
+  data_field :username, :password, :url, :api_url, :jira_issue_transition_enabled, :jira_issue_transition_id, :project_key, :issues_enabled,
     :vulnerabilities_enabled, :vulnerabilities_issuetype, :proxy_address, :proxy_port, :proxy_username, :proxy_password
 
   before_update :reset_password
@@ -165,9 +165,9 @@ class JiraService < IssueTrackerService
   end
 
   def close_issue(entity, external_issue, current_user)
-    issue = find_issue(external_issue.iid, transitions: automatic_issue_transitions?)
+    issue = find_issue(external_issue.iid, transitions: automatic_issue_transition?)
 
-    return if issue.nil? || has_resolution?(issue)
+    return if issue.nil? || has_resolution?(issue) || !jira_issue_transition_enabled
 
     commit_id = case entity
                 when Commit then entity.id
@@ -242,6 +242,17 @@ class JiraService < IssueTrackerService
     true
   end
 
+  # Handle existing records with a null value on jira_issue_transition_enabled.
+  #
+  # TODO: Remove this in the next release
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/323366
+  override :jira_issue_transition_enabled
+  def jira_issue_transition_enabled
+    return jira_issue_transition_id.present? if data_fields.jira_issue_transition_enabled.nil?
+
+    data_fields.jira_issue_transition_enabled
+  end
+
   private
 
   def server_info
@@ -258,15 +269,15 @@ class JiraService < IssueTrackerService
     end
   end
 
-  def automatic_issue_transitions?
-    jira_issue_transition_id.blank?
+  def automatic_issue_transition?
+    jira_issue_transition_enabled && jira_issue_transition_id.blank?
   end
 
   # jira_issue_transition_id can have multiple values split by , or ;
   # the issue is transitioned at the order given by the user
   # if any transition fails it will log the error message and stop the transition sequence
   def transition_issue(issue)
-    return transition_issue_to_done(issue) if automatic_issue_transitions?
+    return transition_issue_to_done(issue) if automatic_issue_transition?
 
     jira_issue_transition_id.scan(Gitlab::Regex.jira_transition_id_regex).all? do |transition_id|
       transition_issue_to_id(issue, transition_id)
