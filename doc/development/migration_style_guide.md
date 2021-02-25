@@ -367,6 +367,28 @@ def up
 end
 ```
 
+When creating a table outside of the transaction wrapper, we should check that the table exists before attempting to create it
+because if we encounter a failure after creating the table, there is no way to re-run the migration without first manually dropping the table.
+
+```ruby
+disable_ddl_transaction!
+
+def up
+  with_lock_retries do
+    create_table :issues, if_not_exists: true do |t|
+    end
+  end
+
+  # other operation
+end
+
+def down
+  with_lock_retries do
+    drop_table :issues, if_exists: true
+  end
+end
+```
+
 ### When to use the helper method
 
 The `with_lock_retries` helper method can be used when you normally use
