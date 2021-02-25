@@ -1,0 +1,13 @@
+query BoardMilestones($fullPath: ID!, $searchTerm: String) {
+  group(fullPath: $fullPath) {
+    # TODO: onlyGroupMilestones: true
+    # and maybe includeAncestors??
+    # also group_milestones_resolver has includeDescendents - do we want that?
+    milestones(searchTitle: $searchTerm) {
+      nodes {
+        id
+        title
+      }
+    }
+  }
+}

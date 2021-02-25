@@ -13,4 +13,6 @@ export default () => ({
   epicFetchInProgress: false,
   epicsFlags: {},
   isEpicBoard: false,
+  milestones: [],
+  milestonesLoading: false,
 });
