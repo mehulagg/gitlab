@@ -162,8 +162,9 @@ For NameID, the following settings are recommended; for SCIM, the following sett
 
 ### OneLogin setup notes
 
-The GitLab app listed in the OneLogin app catalog is for self-managed GitLab instances.
-For GitLab.com, use a generic SAML Test Connector such as the SAML Test Connector (Advanced).
+OneLogin has a "GitLab (SaaS)" app, which is developed by OneLogin. If there are any issues, please reach out to OneLogin.
+
+If you decide to use a generic SAML Test Connector such as the "SAML Test Connector (Advanced)", the following are the recommended settings.
 
 | GitLab Setting | OneLogin Field |
 |--------------|----------------|
