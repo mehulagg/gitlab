@@ -1,0 +1,5 @@
+---
+title: Add reviewers detail to new merge request email
+merge_request:
+author:
+type: added
