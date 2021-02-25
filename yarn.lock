@@ -908,10 +908,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@27.14.0":
-  version "27.14.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-27.14.0.tgz#f80c11df3650380f66aa763867afa32d1901d407"
-  integrity sha512-cQaMN4pjcV0lCic3w1eiZUru9kV8XHwI3ZRT3LOWoBRQEbK0r3qv71SNKzEGDOtVPYq+WBl0/PRDlThk9H+CAg==
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1055677091/artifacts/raw/gitlab-ui.1073-success-warning-input-variants.tgz":
+  version "27.7.1"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1055677091/artifacts/raw/gitlab-ui.1073-success-warning-input-variants.tgz#41d20ee1ae8fbeb14206c8f9618d21fc781cc21d"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
@@ -919,7 +918,7 @@
     copy-to-clipboard "^3.0.8"
     dompurify "^2.2.6"
     echarts "^4.9.0"
-    highlight.js "^10.6.0"
+    highlight.js "^9.13.1"
     js-beautify "^1.8.8"
     lodash "^4.17.20"
     portal-vue "^2.1.6"
@@ -5923,10 +5922,10 @@ he@^1.1.0, he@^1.1.1, he@^1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-highlight.js@^10.6.0:
-  version "10.6.0"
-  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-10.6.0.tgz#0073aa71d566906965ba6e1b7be7b2682f5e18b6"
-  integrity sha512-8mlRcn5vk/r4+QcqerapwBYTe+iPL5ih6xrNylxrnBdHQiijDETfXX7VIxC3UiCRiINBJfANBAsPzAvRQj8RpQ==
+highlight.js@^9.13.1:
+  version "9.18.5"
+  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.18.5.tgz#d18a359867f378c138d6819edfc2a8acd5f29825"
+  integrity sha512-a5bFyofd/BHCX52/8i8uJkjr9DYwXIPnM/plwI6W7ezItLGqzt7X2G2nXuYSfsIJdkwwj/g9DG1LkcGJI/dDoA==
 
 highlight.js@~9.13.0:
   version "9.13.1"
