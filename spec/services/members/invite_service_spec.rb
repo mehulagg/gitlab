@@ -2,14 +2,10 @@
 
 require 'spec_helper'
 
-RSpec.describe Members::InviteService do
-  let(:project) { create(:project) }
-  let(:user) { create(:user) }
-  let(:project_user) { create(:user) }
-
-  before do
-    project.add_maintainer(user)
-  end
+RSpec.describe Members::InviteService, :aggregate_failures do
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { project.owner }
+  let_it_be(:project_user) { create(:user) }
 
   it 'adds an existing user to members' do
     params = { email: project_user.email.to_s, access_level: Gitlab::Access::GUEST }
@@ -27,13 +23,22 @@ RSpec.describe Members::InviteService do
   end
 
   it 'limits the number of emails to 100' do
-    emails = Array.new(101).map { |n| "email#{n}@example.com" }
+    emails = Array(1..101).map { |n| "email#{n}@example.com" }
     params = { email: emails, access_level: Gitlab::Access::GUEST }
 
     result = described_class.new(user, params).execute(project)
 
     expect(result[:status]).to eq(:error)
     expect(result[:message]).to eq('Too many users specified (limit is 100)')
+  end
+
+  it 'does not limit number of emails' do
+    emails = Array(1..101).map { |n| "email#{n}@example.com" }
+    params = { email: emails, access_level: Gitlab::Access::GUEST, limit: -1 }
+
+    result = described_class.new(user, params).execute(project)
+
+    expect(result[:status]).to eq(:success)
   end
 
   it 'does not invite an invalid email' do
