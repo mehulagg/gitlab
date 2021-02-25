@@ -657,7 +657,6 @@ RSpec.describe 'Pipelines', :js do
       let(:project) { create(:project, :repository) }
 
       before do
-        stub_feature_flags(new_pipeline_form: false)
         visit new_project_pipeline_path(project)
       end
 
@@ -666,8 +665,10 @@ RSpec.describe 'Pipelines', :js do
           click_button project.default_branch
 
           page.within '.dropdown-menu' do
-            click_link 'master'
+            find("p", text: "master").click
           end
+
+          find("[data-testid='ci-variable-row']")
         end
 
         context 'with gitlab-ci.yml' do
@@ -676,21 +677,31 @@ RSpec.describe 'Pipelines', :js do
           end
 
           it 'creates a new pipeline' do
-            expect { click_on 'Run Pipeline' }
+            expect do
+              click_on 'Run Pipeline'
+              wait_for_requests
+            end
               .to change { Ci::Pipeline.count }.by(1)
+
+            wait_for_requests
 
             expect(Ci::Pipeline.last).to be_web
           end
 
           context 'when variables are specified' do
             it 'creates a new pipeline with variables' do
-              page.within '.ci-variable-row-body' do
-                fill_in "Input variable key", with: "key_name"
-                fill_in "Input variable value", with: "value"
+              page.within(all("[data-testid='ci-variable-row']")[0]) do
+                find("[data-testid='pipeline-form-ci-variable-key']").set('key_name')
+                find("[data-testid='pipeline-form-ci-variable-value']").set('value')
               end
 
-              expect { click_on 'Run Pipeline' }
+              expect do
+                click_on 'Run Pipeline'
+                wait_for_requests
+              end
                 .to change { Ci::Pipeline.count }.by(1)
+
+              wait_for_requests
 
               expect(Ci::Pipeline.last.variables.map { |var| var.slice(:key, :secret_value) })
                 .to eq [{ key: "key_name", secret_value: "value" }.with_indifferent_access]
