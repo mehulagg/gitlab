@@ -1,0 +1,5 @@
+---
+title: Route repository size Gitaly RPCs to primary
+merge_request: 55150
+author:
+type: fixed

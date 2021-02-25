@@ -14,7 +14,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a repository_exists message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:repository_exists)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return(double(exists: true))
 
       client.exists?
@@ -25,7 +26,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a cleanup message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:cleanup)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
 
       client.cleanup
     end
@@ -35,7 +37,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a garbage_collect message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:garbage_collect)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return(double(:garbage_collect_response))
 
       client.garbage_collect(true, prune: true)
@@ -46,7 +49,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a repack_full message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:repack_full)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return(double(:repack_full_response))
 
       client.repack_full(true)
@@ -57,7 +61,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a repack_incremental message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:repack_incremental)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return(double(:repack_incremental_response))
 
       client.repack_incremental
@@ -68,7 +73,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a repository_size message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:repository_size)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(true))
         .and_return(size: 0)
 
       client.repository_size
@@ -79,7 +85,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a get_object_directory_size message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:get_object_directory_size)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(true))
         .and_return(size: 0)
 
       client.get_object_directory_size
@@ -92,7 +99,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends an apply_gitattributes message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:apply_gitattributes)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return(double(:apply_gitattributes_response))
 
       client.apply_gitattributes(revision)
@@ -103,7 +111,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'reads the info attributes' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:get_info_attributes)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return([])
 
       client.info_attributes
@@ -114,7 +123,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a has_local_branches message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:has_local_branches)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return(double(value: true))
 
       expect(client.has_local_branches?).to be(true)
@@ -193,7 +203,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a repository_rebase_in_progress message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:is_rebase_in_progress)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+             gitaly_kwargs_routed_to_primary(false))
         .and_return(double(in_progress: true))
 
       client.rebase_in_progress?(rebase_id)
@@ -206,7 +217,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a repository_squash_in_progress message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:is_squash_in_progress)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return(double(in_progress: true))
 
       client.squash_in_progress?(squash_id)
@@ -217,7 +229,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a calculate_checksum message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:calculate_checksum)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return(double(checksum: 0))
 
       client.calculate_checksum
@@ -228,7 +241,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a create_repository_from_snapshot message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:create_repository_from_snapshot)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return(double)
 
       client.create_from_snapshot('http://example.com?wiki=1', 'Custom xyz')
@@ -280,7 +294,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a rename_repository message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:rename_repository)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return(double(value: true))
 
       client.rename('some/new/path')
@@ -291,7 +306,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a remove_repository message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:remove_repository)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
         .and_return(double(value: true))
 
       client.remove
@@ -304,7 +320,8 @@ RSpec.describe Gitlab::GitalyClient::RepositoryService do
     it 'sends a replicate_repository message' do
       expect_any_instance_of(Gitaly::RepositoryService::Stub)
         .to receive(:replicate_repository)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
+        .with(gitaly_request_with_path(storage_name, relative_path),
+              gitaly_kwargs_routed_to_primary(false))
 
       client.replicate(source_repository)
     end

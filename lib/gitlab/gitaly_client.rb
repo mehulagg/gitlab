@@ -30,6 +30,13 @@ module Gitlab
     CLIENT_NAME = (Gitlab::Runtime.sidekiq? ? 'gitlab-sidekiq' : 'gitlab-web').freeze
     GITALY_METADATA_FILENAME = '.gitaly-metadata'
 
+    # RPCs that should always be routed to the Gitaly Cluster primary
+    ROUTE_TO_PRIMARY_SERVICE_RPCS = [
+      # Repository size can vary due to state of garbage collection
+      [:repository_service, :repository_size],
+      [:repository_service, :get_object_directory_size]
+    ].freeze
+
     MUTEX = Mutex.new
 
     def self.stub(name, storage)
@@ -171,7 +178,8 @@ module Gitlab
       enforce_gitaly_request_limits(:call)
       Gitlab::RequestContext.instance.ensure_deadline_not_exceeded!
 
-      kwargs = request_kwargs(storage, timeout: timeout.to_f, remote_storage: remote_storage)
+      use_primary = self.route_to_primary?(service, rpc)
+      kwargs = request_kwargs(storage, timeout: timeout.to_f, remote_storage: remote_storage, use_primary: use_primary)
       kwargs = yield(kwargs) if block_given?
 
       stub(service, storage).__send__(rpc, request, kwargs) # rubocop:disable GitlabSecurity/PublicSend
@@ -209,7 +217,7 @@ module Gitlab
     end
     private_class_method :authorization_token
 
-    def self.request_kwargs(storage, timeout:, remote_storage: nil)
+    def self.request_kwargs(storage, timeout:, remote_storage: nil, use_primary: false)
       metadata = {
         'authorization' => "Bearer #{authorization_token(storage)}",
         'client_name' => CLIENT_NAME
@@ -226,7 +234,7 @@ module Gitlab
       metadata['username'] = context_data['meta.user'] if context_data&.fetch('meta.user', nil)
       metadata['remote_ip'] = context_data['meta.remote_ip'] if context_data&.fetch('meta.remote_ip', nil)
       metadata.merge!(Feature::Gitaly.server_feature_flags)
-      metadata.merge!(route_to_primary)
+      metadata.merge!(route_to_primary) if use_primary
 
       deadline_info = request_deadline(timeout)
       metadata.merge!(deadline_info.slice(:deadline_type))
@@ -244,13 +252,17 @@ module Gitlab
     # forced to route all requests to the primary node which has injected the
     # quarantine object directory to us.
     def self.route_to_primary
-      return {} unless Gitlab::SafeRequestStore.active?
-
-      return {} if Gitlab::SafeRequestStore[:gitlab_git_env].blank?
-
       { 'gitaly-route-repository-accessor-policy' => 'primary-only' }
     end
     private_class_method :route_to_primary
+
+    def self.route_to_primary?(service, rpc)
+      return true if Gitlab::SafeRequestStore[:gitlab_git_env].present?
+      return true if ROUTE_TO_PRIMARY_SERVICE_RPCS.include?([service, rpc])
+
+      false
+    end
+    private_class_method :route_to_primary?
 
     def self.request_deadline(timeout)
       # timeout being 0 means the request is allowed to run indefinitely.

@@ -290,41 +290,19 @@ RSpec.describe Gitlab::GitalyClient do
       end
     end
 
-    context 'gitlab_git_env' do
+    context 'primary routing' do
       let(:policy) { 'gitaly-route-repository-accessor-policy' }
 
-      context 'when RequestStore is disabled' do
-        it 'does not force-route to primary' do
-          expect(described_class.request_kwargs('default', timeout: 1)[:metadata][policy]).to be_nil
-        end
+      it 'does not adds policy to force-route to primary' do
+        args = described_class.request_kwargs('default', timeout: 1)
+
+        expect(args[:metadata][policy]).to be_nil
       end
 
-      context 'when RequestStore is enabled without git_env', :request_store do
-        it 'does not force-orute to primary' do
-          expect(described_class.request_kwargs('default', timeout: 1)[:metadata][policy]).to be_nil
-        end
-      end
+      it 'adds policy to force-route to primary' do
+        args = described_class.request_kwargs('default', timeout: 1, use_primary: true)
 
-      context 'when RequestStore is enabled with empty git_env', :request_store do
-        before do
-          Gitlab::SafeRequestStore[:gitlab_git_env] = {}
-        end
-
-        it 'disables force-routing to primary' do
-          expect(described_class.request_kwargs('default', timeout: 1)[:metadata][policy]).to be_nil
-        end
-      end
-
-      context 'when RequestStore is enabled with populated git_env', :request_store do
-        before do
-          Gitlab::SafeRequestStore[:gitlab_git_env] = {
-            "GIT_OBJECT_DIRECTORY_RELATIVE" => "foo/bar"
-          }
-        end
-
-        it 'enables force-routing to primary' do
-          expect(described_class.request_kwargs('default', timeout: 1)[:metadata][policy]).to eq('primary-only')
-        end
+        expect(args[:metadata][policy]).to eq('primary-only')
       end
     end
 
