@@ -5,25 +5,35 @@ module Packages
     class PackagesPresenter
       include API::Helpers::RelatedResourcesHelpers
 
-      def initialize(group, packages)
+      def initialize(group, packages, is_v2)
         @group = group
         @packages = packages
+        @is_v2 = is_v2
       end
 
       def root
         v1_path = expose_path(api_v4_group___packages_composer_package_name_path({ id: @group.id, package_name: '%package%$%hash%', format: '.json' }, true))
         v2_path = expose_path(api_v4_group___packages_composer_p2_package_name_path({ id: @group.id, package_name: '%package%', format: '.json' }, true))
 
-        {
-          'packages' => [],
-          'provider-includes' => {
-            'p/%hash%.json' => {
-              'sha256' => provider_sha
-            }
-          },
-          'providers-url' => v1_path,
-          'metadata-url' => v2_path
-        }
+        index = { 'packages' => [] }
+
+        # if the client is composer v2 then we don't want to
+        # include the provider_sha and it's computationally expensive
+        # to compute.
+        unless @is_v2
+          index.merge!(
+            'provider-includes' => {
+              'p/%hash%.json' => {
+                'sha256' => provider_sha
+              }
+            },
+            'providers-url' => v1_path
+          )
+        end
+
+        index['metadata-url'] = v2_path
+
+        index
       end
 
       def provider
