@@ -1,0 +1,5 @@
+---
+title: Add Gitlab::AvatarCache and cache lookups by email
+merge_request: 55184
+author:
+type: performance
