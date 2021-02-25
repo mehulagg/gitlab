@@ -8,11 +8,13 @@ import {
   GlModalDirective,
 } from '@gitlab/ui';
 import permissionsQuery from 'shared_queries/repository/permissions.query.graphql';
+import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
 import { __ } from '../../locale';
 import getRefMixin from '../mixins/get_ref';
 import projectPathQuery from '../queries/project_path.query.graphql';
 import projectShortPathQuery from '../queries/project_short_path.query.graphql';
+import NewDirectoryModal from './new_directory_modal.vue';
 import UploadBlobModal from './upload_blob_modal.vue';
 
 const ROW_TYPES = {
@@ -30,6 +32,7 @@ export default {
     GlDropdownItem,
     GlIcon,
     UploadBlobModal,
+    NewDirectoryModal,
   },
   apollo: {
     projectShortPath: {
@@ -198,6 +201,10 @@ export default {
             },
             text: __('New directory'),
           },
+          {
+            click: () => this.$root.$emit(BV_SHOW_MODAL, 'new-directory-modal'),
+            text: __('New directory (new)'),
+          },
         );
       } else if (this.canCreateMrFromFork) {
         items.push(
@@ -310,5 +317,6 @@ export default {
       :can-push-code="canPushCode"
       :path="uploadPath"
     />
+    <new-directory-modal :new-dir-path="`test`" />
   </nav>
 </template>
