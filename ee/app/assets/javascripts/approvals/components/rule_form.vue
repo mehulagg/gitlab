@@ -305,70 +305,59 @@ export default {
 
 <template>
   <form novalidate @submit.prevent.stop="submit">
-    <div class="row">
-      <div v-if="isNameVisible" class="form-group col-sm-6">
-        <label class="label-wrapper">
-          <span class="mb-2 bold inline">{{ s__('ApprovalRule|Rule name') }}</span>
-          <input
-            v-model="name"
-            :class="{ 'is-invalid': validation.name }"
-            :disabled="isNameDisabled"
-            class="form-control"
-            name="name"
-            type="text"
-            data-qa-selector="rule_name_field"
-          />
-          <span class="invalid-feedback">{{ validation.name }}</span>
-          <span class="text-secondary">{{ s__('ApprovalRule|e.g. QA, Security, etc.') }}</span>
-        </label>
-      </div>
-      <div class="form-group col-sm-6">
-        <label class="label-wrapper">
-          <span class="mb-2 bold inline">{{ s__('ApprovalRule|Approvals required') }}</span>
-          <input
-            v-model.number="approvalsRequired"
-            :class="{ 'is-invalid': validation.approvalsRequired }"
-            class="form-control mw-6em"
-            name="approvals_required"
-            type="number"
-            :min="minApprovalsRequired"
-            data-qa-selector="approvals_required_field"
-          />
-          <span class="invalid-feedback">{{ validation.approvalsRequired }}</span>
-        </label>
-      </div>
+    <div v-if="isNameVisible" class="form-group">
+      <label class="mb-2 bold inline">{{ s__('ApprovalRule|Rule name') }}</label>
+      <input
+        v-model="name"
+        :class="{ 'is-invalid': validation.name }"
+        :disabled="isNameDisabled"
+        class="form-control"
+        name="name"
+        type="text"
+        data-qa-selector="rule_name_field"
+      />
+      <span class="invalid-feedback">{{ validation.name }}</span>
+      <p class="text-muted">
+        {{ s__('ApprovalRule|Example: QA, Security, etc.') }}
+      </p>
     </div>
     <div v-if="showProtectedBranch" class="form-group">
       <label class="label-bold">{{ s__('ApprovalRule|Target branch') }}</label>
-      <div class="d-flex align-items-start">
-        <div class="w-100">
-          <branches-select
-            v-model="branchesToAdd"
-            :project-id="settings.projectId"
-            :is-invalid="!!validation.branches"
-            :init-rule="rule"
-          />
-          <div class="invalid-feedback">{{ validation.branches }}</div>
-        </div>
-      </div>
+      <branches-select
+        v-model="branchesToAdd"
+        :project-id="settings.projectId"
+        :is-invalid="!!validation.branches"
+        :init-rule="rule"
+      />
+      <span class="invalid-feedback">{{ validation.branches }}</span>
       <p class="text-muted">
         {{ __('Apply this approval rule to any branch or a specific protected branch.') }}
       </p>
     </div>
     <div class="form-group">
-      <label class="label-bold">{{ s__('ApprovalRule|Approvers') }}</label>
-      <div class="d-flex align-items-start">
-        <div class="w-100" data-qa-selector="member_select_field">
-          <approvers-select
-            v-model="approversToAdd"
-            :project-id="settings.projectId"
-            :skip-user-ids="userIds"
-            :skip-group-ids="groupIds"
-            :is-invalid="!!validation.approvers"
-          />
-          <div class="invalid-feedback">{{ validation.approvers }}</div>
-        </div>
-      </div>
+      <span class="mb-2 bold inline">{{ s__('ApprovalRule|Approvals required') }}</span>
+      <input
+        v-model.number="approvalsRequired"
+        :class="{ 'is-invalid': validation.approvalsRequired }"
+        class="form-control mw-6em"
+        name="approvals_required"
+        type="number"
+        :min="minApprovalsRequired"
+        data-qa-selector="approvals_required_field"
+      />
+      <span class="invalid-feedback">{{ validation.approvalsRequired }}</span>
+    </div>
+    <div class="form-group">
+      <label class="label-bold">{{ s__('ApprovalRule|Add approvers') }}</label>
+      <approvers-select
+        v-model="approversToAdd"
+        :project-id="settings.projectId"
+        :skip-user-ids="userIds"
+        :skip-group-ids="groupIds"
+        :is-invalid="!!validation.approvers"
+        data-qa-selector="member_select_field"
+      />
+      <span class="invalid-feedback">{{ validation.approvers }}</span>
     </div>
     <div class="bordered-box overflow-auto h-12em">
       <approvers-list v-model="approvers" />

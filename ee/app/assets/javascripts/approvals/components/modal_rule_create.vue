@@ -47,7 +47,7 @@ export default {
     :modal-id="modalId"
     :title="title"
     :ok-title="title"
-    ok-variant="success"
+    ok-variant="confirm"
     :cancel-title="__('Cancel')"
     size="sm"
     @ok.prevent="submit"
