@@ -8,6 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gitlab 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-25 09:56-0500\n"
+"PO-Revision-Date: 2021-02-25 09:56-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -3794,6 +3796,9 @@ msgid "Approval rules"
 msgstr ""
 
 msgid "Approval rules reset to project defaults"
+msgstr ""
+
+msgid "Approval settings"
 msgstr ""
 
 msgid "ApprovalRuleRemove|%d member"
