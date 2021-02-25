@@ -30,7 +30,7 @@ From the pipeline editor page you can:
 
 NOTE:
 You must already have [a `.gitlab-ci.yml` file](../quick_start/index.md#create-a-gitlab-ciyml-file)
-on the default branch (usually `master`) of your project to use the editor.
+on the default branch of your project to use the editor.
 
 ## Validate CI configuration
 
