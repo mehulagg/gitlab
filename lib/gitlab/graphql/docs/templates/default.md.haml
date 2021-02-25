@@ -76,6 +76,6 @@
     = render_name_and_description(enum)
     ~ "| Value | Description |"
     ~ "| ----- | ----------- |"
-    - sorted_by_name(enum[:values]).each do |value|
+    - enum[:values].each do |value|
       = render_enum_value(value)
     \

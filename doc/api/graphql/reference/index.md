@@ -4905,12 +4905,12 @@ Access level to a resource.
 
 | Value | Description |
 | ----- | ----------- |
-| `DEVELOPER` |  |
-| `GUEST` |  |
-| `MAINTAINER` |  |
 | `NO_ACCESS` |  |
-| `OWNER` |  |
+| `GUEST` |  |
 | `REPORTER` |  |
+| `DEVELOPER` |  |
+| `MAINTAINER` |  |
+| `OWNER` |  |
 
 ### AlertManagementAlertSort
 
@@ -4918,28 +4918,28 @@ Values for sorting alerts.
 
 | Value | Description |
 | ----- | ----------- |
-| `CREATED_ASC` | Created at ascending order |
+| `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
+| `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
+| `created_desc` **{warning-solid}** | **Deprecated:** Use CREATED_DESC. Deprecated in 13.5. |
+| `created_asc` **{warning-solid}** | **Deprecated:** Use CREATED_ASC. Deprecated in 13.5. |
+| `UPDATED_DESC` | Updated at descending order |
+| `UPDATED_ASC` | Updated at ascending order |
 | `CREATED_DESC` | Created at descending order |
-| `CREATED_TIME_ASC` | Created time by ascending order |
-| `CREATED_TIME_DESC` | Created time by descending order |
+| `CREATED_ASC` | Created at ascending order |
+| `STARTED_AT_ASC` | Start time by ascending order |
+| `STARTED_AT_DESC` | Start time by descending order |
 | `ENDED_AT_ASC` | End time by ascending order |
 | `ENDED_AT_DESC` | End time by descending order |
+| `CREATED_TIME_ASC` | Created time by ascending order |
+| `CREATED_TIME_DESC` | Created time by descending order |
+| `UPDATED_TIME_ASC` | Created time by ascending order |
+| `UPDATED_TIME_DESC` | Created time by descending order |
 | `EVENT_COUNT_ASC` | Events count by ascending order |
 | `EVENT_COUNT_DESC` | Events count by descending order |
 | `SEVERITY_ASC` | Severity from less critical to more critical |
 | `SEVERITY_DESC` | Severity from more critical to less critical |
-| `STARTED_AT_ASC` | Start time by ascending order |
-| `STARTED_AT_DESC` | Start time by descending order |
 | `STATUS_ASC` | Status by order: Ignored > Resolved > Acknowledged > Triggered |
 | `STATUS_DESC` | Status by order: Triggered > Acknowledged > Resolved > Ignored |
-| `UPDATED_ASC` | Updated at ascending order |
-| `UPDATED_DESC` | Updated at descending order |
-| `UPDATED_TIME_ASC` | Created time by ascending order |
-| `UPDATED_TIME_DESC` | Created time by descending order |
-| `created_asc` **{warning-solid}** | **Deprecated:** Use CREATED_ASC. Deprecated in 13.5. |
-| `created_desc` **{warning-solid}** | **Deprecated:** Use CREATED_DESC. Deprecated in 13.5. |
-| `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
-| `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
 ### AlertManagementDomainFilter
 
@@ -4956,8 +4956,8 @@ Values of types of integrations.
 
 | Value | Description |
 | ----- | ----------- |
-| `HTTP` | Integration with any monitoring tool |
 | `PROMETHEUS` | Prometheus integration |
+| `HTTP` | Integration with any monitoring tool |
 
 ### AlertManagementPayloadAlertFieldName
 
@@ -4965,16 +4965,16 @@ Values for alert field names used in the custom mapping.
 
 | Value | Description |
 | ----- | ----------- |
+| `TITLE` | The title of the incident. |
 | `DESCRIPTION` | A high-level summary of the problem. |
+| `START_TIME` | The time of the incident. |
 | `END_TIME` | The resolved time of the incident. |
+| `SERVICE` | The affected service. |
+| `MONITORING_TOOL` | The name of the associated monitoring tool. |
+| `HOSTS` | One or more hosts, as to where this incident occurred. |
+| `SEVERITY` | The severity of the alert. |
 | `FINGERPRINT` | The unique identifier of the alert. This can be used to group occurrences of the same alert. |
 | `GITLAB_ENVIRONMENT_NAME` | The name of the associated GitLab environment. |
-| `HOSTS` | One or more hosts, as to where this incident occurred. |
-| `MONITORING_TOOL` | The name of the associated monitoring tool. |
-| `SERVICE` | The affected service. |
-| `SEVERITY` | The severity of the alert. |
-| `START_TIME` | The time of the incident. |
-| `TITLE` | The title of the incident. |
 
 ### AlertManagementPayloadAlertFieldType
 
@@ -4994,9 +4994,9 @@ Alert severity values.
 | ----- | ----------- |
 | `CRITICAL` | Critical severity |
 | `HIGH` | High severity |
-| `INFO` | Info severity |
-| `LOW` | Low severity |
 | `MEDIUM` | Medium severity |
+| `LOW` | Low severity |
+| `INFO` | Info severity |
 | `UNKNOWN` | Unknown severity |
 
 ### AlertManagementStatus
@@ -5005,10 +5005,10 @@ Alert status values.
 
 | Value | Description |
 | ----- | ----------- |
-| `ACKNOWLEDGED` | Acknowledged status |
-| `IGNORED` | Ignored status |
-| `RESOLVED` | Resolved status |
 | `TRIGGERED` | Triggered status |
+| `ACKNOWLEDGED` | Acknowledged status |
+| `RESOLVED` | Resolved status |
+| `IGNORED` | Ignored status |
 
 ### ApiFuzzingScanMode
 
@@ -5025,8 +5025,8 @@ User availability status.
 
 | Value | Description |
 | ----- | ----------- |
-| `BUSY` | Busy |
 | `NOT_SET` | Not Set |
+| `BUSY` | Busy |
 
 ### BlobViewersType
 
@@ -5034,9 +5034,9 @@ Types of blob viewers.
 
 | Value | Description |
 | ----- | ----------- |
-| `auxiliary` | Auxiliary blob viewers type. |
 | `rich` | Rich blob viewers type. |
 | `simple` | Simple blob viewers type. |
+| `auxiliary` | Auxiliary blob viewers type. |
 
 ### CiConfigStatus
 
@@ -5044,8 +5044,8 @@ Values for YAML processor result.
 
 | Value | Description |
 | ----- | ----------- |
-| `INVALID` | The configuration file is not valid |
 | `VALID` | The configuration file is valid |
+| `INVALID` | The configuration file is not valid |
 
 ### CommitActionMode
 
@@ -5053,48 +5053,48 @@ Mode of a commit action.
 
 | Value | Description |
 | ----- | ----------- |
-| `CHMOD` | Chmod command |
 | `CREATE` | Create command |
 | `DELETE` | Delete command |
 | `MOVE` | Move command |
 | `UPDATE` | Update command |
+| `CHMOD` | Chmod command |
 
 ### CommitEncoding
 
 | Value | Description |
 | ----- | ----------- |
-| `BASE64` | Base64 encoding |
 | `TEXT` | Text encoding |
+| `BASE64` | Base64 encoding |
 
 ### ContainerExpirationPolicyCadenceEnum
 
 | Value | Description |
 | ----- | ----------- |
 | `EVERY_DAY` | Every day |
+| `EVERY_WEEK` | Every week |
+| `EVERY_TWO_WEEKS` | Every two weeks |
 | `EVERY_MONTH` | Every month |
 | `EVERY_THREE_MONTHS` | Every three months |
-| `EVERY_TWO_WEEKS` | Every two weeks |
-| `EVERY_WEEK` | Every week |
 
 ### ContainerExpirationPolicyKeepEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `FIFTY_TAGS` | 50 tags per image name |
-| `FIVE_TAGS` | 5 tags per image name |
-| `ONE_HUNDRED_TAGS` | 100 tags per image name |
 | `ONE_TAG` | 1 tag per image name |
+| `FIVE_TAGS` | 5 tags per image name |
 | `TEN_TAGS` | 10 tags per image name |
 | `TWENTY_FIVE_TAGS` | 25 tags per image name |
+| `FIFTY_TAGS` | 50 tags per image name |
+| `ONE_HUNDRED_TAGS` | 100 tags per image name |
 
 ### ContainerExpirationPolicyOlderThanEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `FOURTEEN_DAYS` | 14 days until tags are automatically removed |
-| `NINETY_DAYS` | 90 days until tags are automatically removed |
 | `SEVEN_DAYS` | 7 days until tags are automatically removed |
+| `FOURTEEN_DAYS` | 14 days until tags are automatically removed |
 | `THIRTY_DAYS` | 30 days until tags are automatically removed |
+| `NINETY_DAYS` | 90 days until tags are automatically removed |
 
 ### ContainerRepositoryCleanupStatus
 
@@ -5102,10 +5102,10 @@ Status of the tags cleanup of a container repository.
 
 | Value | Description |
 | ----- | ----------- |
-| `ONGOING` | The tags cleanup is ongoing. |
+| `UNSCHEDULED` | The tags cleanup is not scheduled. This is the default state. |
 | `SCHEDULED` | The tags cleanup is scheduled and is going to be executed shortly. |
 | `UNFINISHED` | The tags cleanup has been partially executed. There are still remaining tags to delete. |
-| `UNSCHEDULED` | The tags cleanup is not scheduled. This is the default state. |
+| `ONGOING` | The tags cleanup is ongoing. |
 
 ### ContainerRepositorySort
 
@@ -5113,16 +5113,16 @@ Values for sorting container repositories.
 
 | Value | Description |
 | ----- | ----------- |
-| `CREATED_ASC` | Created at ascending order |
+| `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
+| `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
+| `created_desc` **{warning-solid}** | **Deprecated:** Use CREATED_DESC. Deprecated in 13.5. |
+| `created_asc` **{warning-solid}** | **Deprecated:** Use CREATED_ASC. Deprecated in 13.5. |
+| `UPDATED_DESC` | Updated at descending order |
+| `UPDATED_ASC` | Updated at ascending order |
 | `CREATED_DESC` | Created at descending order |
+| `CREATED_ASC` | Created at ascending order |
 | `NAME_ASC` | Name by ascending order |
 | `NAME_DESC` | Name by descending order |
-| `UPDATED_ASC` | Updated at ascending order |
-| `UPDATED_DESC` | Updated at descending order |
-| `created_asc` **{warning-solid}** | **Deprecated:** Use CREATED_ASC. Deprecated in 13.5. |
-| `created_desc` **{warning-solid}** | **Deprecated:** Use CREATED_DESC. Deprecated in 13.5. |
-| `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
-| `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
 ### ContainerRepositoryStatus
 
@@ -5130,32 +5130,32 @@ Status of a container repository.
 
 | Value | Description |
 | ----- | ----------- |
-| `DELETE_FAILED` | Delete Failed status. |
 | `DELETE_SCHEDULED` | Delete Scheduled status. |
+| `DELETE_FAILED` | Delete Failed status. |
 
 ### DastScanTypeEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `ACTIVE` | Active DAST scan. This scan will make active attacks against the target site. |
 | `PASSIVE` | Passive DAST scan. This scan will not make active attacks against the target site. |
+| `ACTIVE` | Active DAST scan. This scan will make active attacks against the target site. |
 
 ### DastSiteProfileValidationStatusEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `FAILED_VALIDATION` | Site validation process finished but failed |
-| `INPROGRESS_VALIDATION` | Site validation process is in progress |
 | `NONE` | No site validation exists |
-| `PASSED_VALIDATION` | Site validation process finished successfully |
 | `PENDING_VALIDATION` | Site validation process has not started |
+| `INPROGRESS_VALIDATION` | Site validation process is in progress |
+| `PASSED_VALIDATION` | Site validation process finished successfully |
+| `FAILED_VALIDATION` | Site validation process finished but failed |
 
 ### DastSiteValidationStrategyEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `HEADER` | Header validation |
 | `TEXT_FILE` | Text file validation |
+| `HEADER` | Header validation |
 
 ### DataVisualizationColorEnum
 
@@ -5163,11 +5163,11 @@ Color of the data visualization palette.
 
 | Value | Description |
 | ----- | ----------- |
-| `AQUA` | Aqua color |
 | `BLUE` | Blue color |
+| `ORANGE` | Orange color |
+| `AQUA` | Aqua color |
 | `GREEN` | Green color |
 | `MAGENTA` | Magenta color |
-| `ORANGE` | Orange color |
 
 ### DataVisualizationWeightEnum
 
@@ -5175,11 +5175,11 @@ Weight of the data visualization palette.
 
 | Value | Description |
 | ----- | ----------- |
+| `WEIGHT_50` | 50 weight |
 | `WEIGHT_100` | 100 weight |
 | `WEIGHT_200` | 200 weight |
 | `WEIGHT_300` | 300 weight |
 | `WEIGHT_400` | 400 weight |
-| `WEIGHT_50` | 50 weight |
 | `WEIGHT_500` | 500 weight |
 | `WEIGHT_600` | 600 weight |
 | `WEIGHT_700` | 700 weight |
@@ -5193,9 +5193,9 @@ Copy state of a DesignCollection.
 
 | Value | Description |
 | ----- | ----------- |
-| `ERROR` | The DesignCollection encountered an error during a copy |
-| `IN_PROGRESS` | The DesignCollection is being copied |
 | `READY` | The DesignCollection has no copy in progress |
+| `IN_PROGRESS` | The DesignCollection is being copied |
+| `ERROR` | The DesignCollection encountered an error during a copy |
 
 ### DesignVersionEvent
 
@@ -5203,10 +5203,10 @@ Mutation event of a design within a version.
 
 | Value | Description |
 | ----- | ----------- |
-| `CREATION` | A creation event |
-| `DELETION` | A deletion event |
-| `MODIFICATION` | A modification event |
 | `NONE` | No change |
+| `CREATION` | A creation event |
+| `MODIFICATION` | A modification event |
+| `DELETION` | A deletion event |
 
 ### DiffPositionType
 
@@ -5214,8 +5214,8 @@ Type of file the position refers to.
 
 | Value | Description |
 | ----- | ----------- |
-| `image` |  |
 | `text` |  |
+| `image` |  |
 
 ### EntryType
 
@@ -5223,9 +5223,9 @@ Type of a tree entry.
 
 | Value | Description |
 | ----- | ----------- |
+| `tree` |  |
 | `blob` |  |
 | `commit` |  |
-| `tree` |  |
 
 ### EpicSort
 
@@ -5233,10 +5233,10 @@ Roadmap sort values.
 
 | Value | Description |
 | ----- | ----------- |
-| `end_date_asc` | End date at ascending order |
-| `end_date_desc` | End date at descending order |
-| `start_date_asc` | Start date at ascending order |
 | `start_date_desc` | Start date at descending order |
+| `start_date_asc` | Start date at ascending order |
+| `end_date_desc` | End date at descending order |
+| `end_date_asc` | End date at ascending order |
 
 ### EpicState
 
@@ -5245,8 +5245,8 @@ State of an epic.
 | Value | Description |
 | ----- | ----------- |
 | `all` |  |
-| `closed` |  |
 | `opened` |  |
+| `closed` |  |
 
 ### EpicStateEvent
 
@@ -5254,8 +5254,8 @@ State event of an epic.
 
 | Value | Description |
 | ----- | ----------- |
-| `CLOSE` | Close the epic |
 | `REOPEN` | Reopen the epic |
+| `CLOSE` | Close the epic |
 
 ### EpicWildcardId
 
@@ -5263,8 +5263,8 @@ Epic ID wildcard values.
 
 | Value | Description |
 | ----- | ----------- |
-| `ANY` | Any epic is assigned |
 | `NONE` | No epic is assigned |
+| `ANY` | Any epic is assigned |
 
 ### EventAction
 
@@ -5272,19 +5272,19 @@ Event action.
 
 | Value | Description |
 | ----- | ----------- |
-| `APPROVED` | Approved action |
-| `ARCHIVED` | Archived action |
-| `CLOSED` | Closed action |
-| `COMMENTED` | Commented action |
 | `CREATED` | Created action |
-| `DESTROYED` | Destroyed action |
-| `EXPIRED` | Expired action |
+| `UPDATED` | Updated action |
+| `CLOSED` | Closed action |
+| `REOPENED` | Reopened action |
+| `PUSHED` | Pushed action |
+| `COMMENTED` | Commented action |
+| `MERGED` | Merged action |
 | `JOINED` | Joined action |
 | `LEFT` | Left action |
-| `MERGED` | Merged action |
-| `PUSHED` | Pushed action |
-| `REOPENED` | Reopened action |
-| `UPDATED` | Updated action |
+| `DESTROYED` | Destroyed action |
+| `EXPIRED` | Expired action |
+| `APPROVED` | Approved action |
+| `ARCHIVED` | Archived action |
 
 ### GroupMemberRelation
 
@@ -5292,9 +5292,9 @@ Group member relation.
 
 | Value | Description |
 | ----- | ----------- |
-| `DESCENDANTS` | Descendants members |
 | `DIRECT` | Direct members |
 | `INHERITED` | Inherited members |
+| `DESCENDANTS` | Descendants members |
 
 ### HealthStatus
 
@@ -5302,9 +5302,9 @@ Health status of an issue or epic.
 
 | Value | Description |
 | ----- | ----------- |
-| `atRisk` |  |
-| `needsAttention` |  |
 | `onTrack` |  |
+| `needsAttention` |  |
+| `atRisk` |  |
 
 ### IssuableSeverity
 
@@ -5312,11 +5312,11 @@ Incident severity.
 
 | Value | Description |
 | ----- | ----------- |
-| `CRITICAL` | Critical severity |
-| `HIGH` | High severity |
+| `UNKNOWN` | Unknown severity |
 | `LOW` | Low severity |
 | `MEDIUM` | Medium severity |
-| `UNKNOWN` | Unknown severity |
+| `HIGH` | High severity |
+| `CRITICAL` | Critical severity |
 
 ### IssuableState
 
@@ -5324,10 +5324,10 @@ State of a GitLab issue or merge request.
 
 | Value | Description |
 | ----- | ----------- |
-| `all` | All available |
+| `opened` | In open state |
 | `closed` | In closed state |
 | `locked` | Discussion has been locked |
-| `opened` | In open state |
+| `all` | All available |
 
 ### IssueSort
 
@@ -5335,31 +5335,31 @@ Values for sorting issues.
 
 | Value | Description |
 | ----- | ----------- |
-| `CREATED_ASC` | Created at ascending order |
+| `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
+| `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
+| `created_desc` **{warning-solid}** | **Deprecated:** Use CREATED_DESC. Deprecated in 13.5. |
+| `created_asc` **{warning-solid}** | **Deprecated:** Use CREATED_ASC. Deprecated in 13.5. |
+| `UPDATED_DESC` | Updated at descending order |
+| `UPDATED_ASC` | Updated at ascending order |
 | `CREATED_DESC` | Created at descending order |
-| `DUE_DATE_ASC` | Due date by ascending order |
-| `DUE_DATE_DESC` | Due date by descending order |
+| `CREATED_ASC` | Created at ascending order |
+| `PRIORITY_ASC` | Priority by ascending order |
+| `PRIORITY_DESC` | Priority by descending order |
 | `LABEL_PRIORITY_ASC` | Label priority by ascending order |
 | `LABEL_PRIORITY_DESC` | Label priority by descending order |
 | `MILESTONE_DUE_ASC` | Milestone due date by ascending order |
 | `MILESTONE_DUE_DESC` | Milestone due date by descending order |
-| `PRIORITY_ASC` | Priority by ascending order |
-| `PRIORITY_DESC` | Priority by descending order |
-| `PUBLISHED_ASC` | Published issues shown last |
-| `PUBLISHED_DESC` | Published issues shown first |
+| `DUE_DATE_ASC` | Due date by ascending order |
+| `DUE_DATE_DESC` | Due date by descending order |
 | `RELATIVE_POSITION_ASC` | Relative position by ascending order |
 | `SEVERITY_ASC` | Severity from less critical to more critical |
 | `SEVERITY_DESC` | Severity from more critical to less critical |
-| `SLA_DUE_AT_ASC` | Issues with earliest SLA due time shown first |
-| `SLA_DUE_AT_DESC` | Issues with latest SLA due time shown first |
-| `UPDATED_ASC` | Updated at ascending order |
-| `UPDATED_DESC` | Updated at descending order |
 | `WEIGHT_ASC` | Weight by ascending order |
 | `WEIGHT_DESC` | Weight by descending order |
-| `created_asc` **{warning-solid}** | **Deprecated:** Use CREATED_ASC. Deprecated in 13.5. |
-| `created_desc` **{warning-solid}** | **Deprecated:** Use CREATED_DESC. Deprecated in 13.5. |
-| `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
-| `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
+| `PUBLISHED_ASC` | Published issues shown last |
+| `PUBLISHED_DESC` | Published issues shown first |
+| `SLA_DUE_AT_ASC` | Issues with earliest SLA due time shown first |
+| `SLA_DUE_AT_DESC` | Issues with latest SLA due time shown first |
 
 ### IssueState
 
@@ -5367,10 +5367,10 @@ State of a GitLab issue.
 
 | Value | Description |
 | ----- | ----------- |
-| `all` | All available |
+| `opened` | In open state |
 | `closed` | In closed state |
 | `locked` | Discussion has been locked |
-| `opened` | In open state |
+| `all` | All available |
 
 ### IssueStateEvent
 
@@ -5378,8 +5378,8 @@ Values for issue state events.
 
 | Value | Description |
 | ----- | ----------- |
-| `CLOSE` | Closes the issue |
 | `REOPEN` | Reopens the issue |
+| `CLOSE` | Closes the issue |
 
 ### IssueType
 
@@ -5387,8 +5387,8 @@ Issue type.
 
 | Value | Description |
 | ----- | ----------- |
-| `INCIDENT` | Incident issue type |
 | `ISSUE` | Issue issue type |
+| `INCIDENT` | Incident issue type |
 | `TEST_CASE` | Test Case issue type |
 
 ### IterationState
@@ -5397,11 +5397,11 @@ State of a GitLab iteration.
 
 | Value | Description |
 | ----- | ----------- |
-| `all` |  |
-| `closed` |  |
-| `opened` |  |
-| `started` |  |
 | `upcoming` |  |
+| `started` |  |
+| `opened` |  |
+| `closed` |  |
+| `all` |  |
 
 ### IterationWildcardId
 
@@ -5409,41 +5409,41 @@ Iteration ID wildcard values.
 
 | Value | Description |
 | ----- | ----------- |
+| `NONE` | No iteration is assigned |
 | `ANY` | An iteration is assigned |
 | `CURRENT` | Current iteration |
-| `NONE` | No iteration is assigned |
 
 ### JobArtifactFileType
 
 | Value | Description |
 | ----- | ----------- |
-| `ACCESSIBILITY` |  |
-| `API_FUZZING` |  |
 | `ARCHIVE` |  |
-| `BROWSER_PERFORMANCE` |  |
-| `CLUSTER_APPLICATIONS` |  |
-| `COBERTURA` |  |
-| `CODEQUALITY` |  |
-| `CONTAINER_SCANNING` |  |
-| `COVERAGE_FUZZING` |  |
-| `DAST` |  |
-| `DEPENDENCY_SCANNING` |  |
-| `DOTENV` |  |
-| `JUNIT` |  |
-| `LICENSE_MANAGEMENT` |  |
-| `LICENSE_SCANNING` |  |
-| `LOAD_PERFORMANCE` |  |
-| `LSIF` |  |
 | `METADATA` |  |
+| `TRACE` |  |
+| `JUNIT` |  |
 | `METRICS` |  |
 | `METRICS_REFEREE` |  |
 | `NETWORK_REFEREE` |  |
-| `PERFORMANCE` |  |
-| `REQUIREMENTS` |  |
+| `DOTENV` |  |
+| `COBERTURA` |  |
+| `CLUSTER_APPLICATIONS` |  |
+| `LSIF` |  |
 | `SAST` |  |
 | `SECRET_DETECTION` |  |
+| `DEPENDENCY_SCANNING` |  |
+| `CONTAINER_SCANNING` |  |
+| `DAST` |  |
+| `LICENSE_MANAGEMENT` |  |
+| `LICENSE_SCANNING` |  |
+| `ACCESSIBILITY` |  |
+| `CODEQUALITY` |  |
+| `PERFORMANCE` |  |
+| `BROWSER_PERFORMANCE` |  |
+| `LOAD_PERFORMANCE` |  |
 | `TERRAFORM` |  |
-| `TRACE` |  |
+| `REQUIREMENTS` |  |
+| `COVERAGE_FUZZING` |  |
+| `API_FUZZING` |  |
 
 ### ListLimitMetric
 
@@ -5461,16 +5461,16 @@ Possible identifier types for a measurement.
 
 | Value | Description |
 | ----- | ----------- |
-| `GROUPS` | Group count |
-| `ISSUES` | Issue count |
-| `MERGE_REQUESTS` | Merge request count |
-| `PIPELINES` | Pipeline count |
-| `PIPELINES_CANCELED` | Pipeline count with canceled status |
-| `PIPELINES_FAILED` | Pipeline count with failed status |
-| `PIPELINES_SKIPPED` | Pipeline count with skipped status |
-| `PIPELINES_SUCCEEDED` | Pipeline count with success status |
 | `PROJECTS` | Project count |
 | `USERS` | User count |
+| `ISSUES` | Issue count |
+| `MERGE_REQUESTS` | Merge request count |
+| `GROUPS` | Group count |
+| `PIPELINES` | Pipeline count |
+| `PIPELINES_SUCCEEDED` | Pipeline count with success status |
+| `PIPELINES_FAILED` | Pipeline count with failed status |
+| `PIPELINES_CANCELED` | Pipeline count with canceled status |
+| `PIPELINES_SKIPPED` | Pipeline count with skipped status |
 
 ### MergeRequestNewState
 
@@ -5478,8 +5478,8 @@ New state to apply to a merge request.
 
 | Value | Description |
 | ----- | ----------- |
-| `CLOSED` | Close the merge request if it is open. |
 | `OPEN` | Open the merge request if it is closed. |
+| `CLOSED` | Close the merge request if it is open. |
 
 ### MergeRequestSort
 
@@ -5487,22 +5487,22 @@ Values for sorting merge requests.
 
 | Value | Description |
 | ----- | ----------- |
-| `CREATED_ASC` | Created at ascending order |
+| `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
+| `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
+| `created_desc` **{warning-solid}** | **Deprecated:** Use CREATED_DESC. Deprecated in 13.5. |
+| `created_asc` **{warning-solid}** | **Deprecated:** Use CREATED_ASC. Deprecated in 13.5. |
+| `UPDATED_DESC` | Updated at descending order |
+| `UPDATED_ASC` | Updated at ascending order |
 | `CREATED_DESC` | Created at descending order |
-| `LABEL_PRIORITY_ASC` | Label priority by ascending order |
-| `LABEL_PRIORITY_DESC` | Label priority by descending order |
-| `MERGED_AT_ASC` | Merge time by ascending order |
-| `MERGED_AT_DESC` | Merge time by descending order |
-| `MILESTONE_DUE_ASC` | Milestone due date by ascending order |
-| `MILESTONE_DUE_DESC` | Milestone due date by descending order |
+| `CREATED_ASC` | Created at ascending order |
 | `PRIORITY_ASC` | Priority by ascending order |
 | `PRIORITY_DESC` | Priority by descending order |
-| `UPDATED_ASC` | Updated at ascending order |
-| `UPDATED_DESC` | Updated at descending order |
-| `created_asc` **{warning-solid}** | **Deprecated:** Use CREATED_ASC. Deprecated in 13.5. |
-| `created_desc` **{warning-solid}** | **Deprecated:** Use CREATED_DESC. Deprecated in 13.5. |
-| `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
-| `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
+| `LABEL_PRIORITY_ASC` | Label priority by ascending order |
+| `LABEL_PRIORITY_DESC` | Label priority by descending order |
+| `MILESTONE_DUE_ASC` | Milestone due date by ascending order |
+| `MILESTONE_DUE_DESC` | Milestone due date by descending order |
+| `MERGED_AT_ASC` | Merge time by ascending order |
+| `MERGED_AT_DESC` | Merge time by descending order |
 
 ### MergeRequestState
 
@@ -5510,11 +5510,11 @@ State of a GitLab merge request.
 
 | Value | Description |
 | ----- | ----------- |
-| `all` | All available |
+| `opened` | In open state |
 | `closed` | In closed state |
 | `locked` | Discussion has been locked |
+| `all` | All available |
 | `merged` | Merge Request has been merged |
-| `opened` | In open state |
 
 ### MilestoneStateEnum
 
@@ -5531,8 +5531,8 @@ The position to which the adjacent object should be moved.
 
 | Value | Description |
 | ----- | ----------- |
-| `after` | The adjacent object will be moved after the object that is being moved |
 | `before` | The adjacent object will be moved before the object that is being moved |
+| `after` | The adjacent object will be moved after the object that is being moved |
 
 ### MutationOperationMode
 
@@ -5540,9 +5540,9 @@ Different toggles for changing mutator behavior.
 
 | Value | Description |
 | ----- | ----------- |
+| `REPLACE` | Performs a replace operation |
 | `APPEND` | Performs an append operation |
 | `REMOVE` | Performs a removal operation |
-| `REPLACE` | Performs a replace operation |
 
 ### NamespaceProjectSort
 
@@ -5559,54 +5559,54 @@ Rotation length unit of an on-call rotation.
 
 | Value | Description |
 | ----- | ----------- |
-| `DAYS` | Days |
 | `HOURS` | Hours |
+| `DAYS` | Days |
 | `WEEKS` | Weeks |
 
 ### PackageTypeEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `COMPOSER` | Packages from the Composer package manager |
-| `CONAN` | Packages from the Conan package manager |
-| `DEBIAN` | Packages from the Debian package manager |
-| `GENERIC` | Packages from the Generic package manager |
-| `GOLANG` | Packages from the Golang package manager |
 | `MAVEN` | Packages from the Maven package manager |
 | `NPM` | Packages from the npm package manager |
+| `CONAN` | Packages from the Conan package manager |
 | `NUGET` | Packages from the Nuget package manager |
 | `PYPI` | Packages from the PyPI package manager |
+| `COMPOSER` | Packages from the Composer package manager |
+| `GENERIC` | Packages from the Generic package manager |
+| `GOLANG` | Packages from the Golang package manager |
+| `DEBIAN` | Packages from the Debian package manager |
 | `RUBYGEMS` | Packages from the Rubygems package manager |
 
 ### PipelineConfigSourceEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `AUTO_DEVOPS_SOURCE` |  |
-| `BRIDGE_SOURCE` |  |
-| `COMPLIANCE_SOURCE` |  |
-| `EXTERNAL_PROJECT_SOURCE` |  |
-| `PARAMETER_SOURCE` |  |
-| `REMOTE_SOURCE` |  |
-| `REPOSITORY_SOURCE` |  |
 | `UNKNOWN_SOURCE` |  |
+| `REPOSITORY_SOURCE` |  |
+| `AUTO_DEVOPS_SOURCE` |  |
 | `WEBIDE_SOURCE` |  |
+| `REMOTE_SOURCE` |  |
+| `EXTERNAL_PROJECT_SOURCE` |  |
+| `BRIDGE_SOURCE` |  |
+| `PARAMETER_SOURCE` |  |
+| `COMPLIANCE_SOURCE` |  |
 
 ### PipelineStatusEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `CANCELED` |  |
 | `CREATED` |  |
-| `FAILED` |  |
-| `MANUAL` |  |
-| `PENDING` |  |
-| `PREPARING` |  |
-| `RUNNING` |  |
-| `SCHEDULED` |  |
-| `SKIPPED` |  |
-| `SUCCESS` |  |
 | `WAITING_FOR_RESOURCE` |  |
+| `PREPARING` |  |
+| `PENDING` |  |
+| `RUNNING` |  |
+| `FAILED` |  |
+| `SUCCESS` |  |
+| `CANCELED` |  |
+| `SKIPPED` |  |
+| `MANUAL` |  |
+| `SCHEDULED` |  |
 
 ### ProjectMemberRelation
 
@@ -5614,9 +5614,9 @@ Project member relation.
 
 | Value | Description |
 | ----- | ----------- |
-| `DESCENDANTS` | Descendants members |
 | `DIRECT` | Direct members |
 | `INHERITED` | Inherited members |
+| `DESCENDANTS` | Descendants members |
 | `INVITED_GROUPS` | Invited Groups members |
 
 ### RegistryState
@@ -5625,10 +5625,10 @@ State of a Geo registry.
 
 | Value | Description |
 | ----- | ----------- |
-| `FAILED` | Registry that failed to sync |
 | `PENDING` | Registry waiting to be synced |
 | `STARTED` | Registry currently syncing |
 | `SYNCED` | Registry that is synced |
+| `FAILED` | Registry that failed to sync |
 
 ### ReleaseAssetLinkType
 
@@ -5636,10 +5636,10 @@ Type of the link: `other`, `runbook`, `image`, `package`.
 
 | Value | Description |
 | ----- | ----------- |
-| `IMAGE` | Image link type |
 | `OTHER` | Other link type |
-| `PACKAGE` | Package link type |
 | `RUNBOOK` | Runbook link type |
+| `PACKAGE` | Package link type |
+| `IMAGE` | Image link type |
 
 ### ReleaseSort
 
@@ -5647,10 +5647,10 @@ Values for sorting releases.
 
 | Value | Description |
 | ----- | ----------- |
-| `CREATED_ASC` | Created at ascending order |
 | `CREATED_DESC` | Created at descending order |
-| `RELEASED_AT_ASC` | Released at by ascending order |
+| `CREATED_ASC` | Created at ascending order |
 | `RELEASED_AT_DESC` | Released at by descending order |
+| `RELEASED_AT_ASC` | Released at by ascending order |
 
 ### RequirementState
 
@@ -5658,8 +5658,8 @@ State of a requirement.
 
 | Value | Description |
 | ----- | ----------- |
-| `ARCHIVED` |  |
 | `OPENED` |  |
+| `ARCHIVED` |  |
 
 ### SastUiComponentSize
 
@@ -5667,21 +5667,21 @@ Size of UI component in SAST configuration page.
 
 | Value | Description |
 | ----- | ----------- |
-| `LARGE` | The size of UI component in SAST configuration page is large. |
-| `MEDIUM` | The size of UI component in SAST configuration page is medium. |
 | `SMALL` | The size of UI component in SAST configuration page is small. |
+| `MEDIUM` | The size of UI component in SAST configuration page is medium. |
+| `LARGE` | The size of UI component in SAST configuration page is large. |
 
 ### SecurityReportTypeEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `API_FUZZING` | API FUZZING scan report |
-| `CONTAINER_SCANNING` | CONTAINER SCANNING scan report |
-| `COVERAGE_FUZZING` | COVERAGE FUZZING scan report |
+| `SAST` | SAST scan report |
 | `DAST` | DAST scan report |
 | `DEPENDENCY_SCANNING` | DEPENDENCY SCANNING scan report |
-| `SAST` | SAST scan report |
+| `CONTAINER_SCANNING` | CONTAINER SCANNING scan report |
 | `SECRET_DETECTION` | SECRET DETECTION scan report |
+| `COVERAGE_FUZZING` | COVERAGE FUZZING scan report |
+| `API_FUZZING` | API FUZZING scan report |
 
 ### SecurityScannerType
 
@@ -5689,13 +5689,13 @@ The type of the security scanner.
 
 | Value | Description |
 | ----- | ----------- |
-| `API_FUZZING` |  |
-| `CONTAINER_SCANNING` |  |
-| `COVERAGE_FUZZING` |  |
+| `SAST` |  |
 | `DAST` |  |
 | `DEPENDENCY_SCANNING` |  |
-| `SAST` |  |
+| `CONTAINER_SCANNING` |  |
 | `SECRET_DETECTION` |  |
+| `COVERAGE_FUZZING` |  |
+| `API_FUZZING` |  |
 
 ### SentryErrorStatus
 
@@ -5703,10 +5703,10 @@ State of a Sentry error.
 
 | Value | Description |
 | ----- | ----------- |
-| `IGNORED` | Error has been ignored |
 | `RESOLVED` | Error has been resolved |
 | `RESOLVED_IN_NEXT_RELEASE` | Error has been ignored until next release |
 | `UNRESOLVED` | Error is unresolved |
+| `IGNORED` | Error has been ignored |
 
 ### ServiceType
 
@@ -5756,9 +5756,9 @@ Type of a snippet blob input action.
 | Value | Description |
 | ----- | ----------- |
 | `create` |  |
+| `update` |  |
 | `delete` |  |
 | `move` |  |
-| `update` |  |
 
 ### Sort
 
@@ -5766,14 +5766,14 @@ Common sort values.
 
 | Value | Description |
 | ----- | ----------- |
-| `CREATED_ASC` | Created at ascending order |
-| `CREATED_DESC` | Created at descending order |
-| `UPDATED_ASC` | Updated at ascending order |
-| `UPDATED_DESC` | Updated at descending order |
-| `created_asc` **{warning-solid}** | **Deprecated:** Use CREATED_ASC. Deprecated in 13.5. |
-| `created_desc` **{warning-solid}** | **Deprecated:** Use CREATED_DESC. Deprecated in 13.5. |
-| `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
+| `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
+| `created_desc` **{warning-solid}** | **Deprecated:** Use CREATED_DESC. Deprecated in 13.5. |
+| `created_asc` **{warning-solid}** | **Deprecated:** Use CREATED_ASC. Deprecated in 13.5. |
+| `UPDATED_DESC` | Updated at descending order |
+| `UPDATED_ASC` | Updated at ascending order |
+| `CREATED_DESC` | Created at descending order |
+| `CREATED_ASC` | Created at ascending order |
 
 ### TestReportState
 
@@ -5781,38 +5781,38 @@ State of a test report.
 
 | Value | Description |
 | ----- | ----------- |
-| `FAILED` |  |
 | `PASSED` |  |
+| `FAILED` |  |
 
 ### TodoActionEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `approval_required` |  |
 | `assigned` |  |
-| `build_failed` |  |
-| `directly_addressed` |  |
-| `marked` |  |
 | `mentioned` |  |
+| `build_failed` |  |
+| `marked` |  |
+| `approval_required` |  |
 | `unmergeable` |  |
+| `directly_addressed` |  |
 
 ### TodoStateEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `done` | The state of the todo is done. |
 | `pending` | The state of the todo is pending. |
+| `done` | The state of the todo is done. |
 
 ### TodoTargetEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `ALERT` | An Alert |
 | `COMMIT` | A Commit |
-| `DESIGN` | A Design |
-| `EPIC` | An Epic |
 | `ISSUE` | An Issue |
 | `MERGEREQUEST` | A MergeRequest |
+| `DESIGN` | A Design |
+| `ALERT` | An Alert |
+| `EPIC` | An Epic |
 
 ### TypeEnum
 
@@ -5835,16 +5835,16 @@ Possible states of a user.
 
 | Value | Description |
 | ----- | ----------- |
-| `internal` | Internal visibility level. |
 | `private` | Private visibility level. |
+| `internal` | Internal visibility level. |
 | `public` | Public visibility level. |
 
 ### VisibilityScopesEnum
 
 | Value | Description |
 | ----- | ----------- |
-| `internal` |  |
 | `private` |  |
+| `internal` |  |
 | `public` |  |
 
 ### VulnerabilityDismissalReason
@@ -5856,8 +5856,8 @@ The dismissal reason of the Vulnerability.
 | `ACCEPTABLE_RISK` | The likelihood of the Vulnerability occurring and its impact are deemed acceptable |
 | `FALSE_POSITIVE` | The Vulnerability was incorrectly identified as being present |
 | `MITIGATING_CONTROL` | There is a mitigating control that eliminates the Vulnerability or makes its risk acceptable |
-| `NOT_APPLICABLE` | Other reasons for dismissal |
 | `USED_IN_TESTS` | The Vulnerability is used in tests and does not pose an actual risk |
+| `NOT_APPLICABLE` | Other reasons for dismissal |
 
 ### VulnerabilityExternalIssueLinkExternalTracker
 
@@ -5893,8 +5893,8 @@ The type of the issue link related to a vulnerability.
 
 | Value | Description |
 | ----- | ----------- |
-| `CREATED` |  |
 | `RELATED` |  |
+| `CREATED` |  |
 
 ### VulnerabilityReportType
 
@@ -5902,13 +5902,13 @@ The type of the security scan that found the vulnerability.
 
 | Value | Description |
 | ----- | ----------- |
-| `API_FUZZING` |  |
-| `CONTAINER_SCANNING` |  |
-| `COVERAGE_FUZZING` |  |
-| `DAST` |  |
-| `DEPENDENCY_SCANNING` |  |
 | `SAST` |  |
+| `DEPENDENCY_SCANNING` |  |
+| `CONTAINER_SCANNING` |  |
+| `DAST` |  |
 | `SECRET_DETECTION` |  |
+| `COVERAGE_FUZZING` |  |
+| `API_FUZZING` |  |
 
 ### VulnerabilitySeverity
 
@@ -5916,12 +5916,12 @@ The severity of the vulnerability.
 
 | Value | Description |
 | ----- | ----------- |
-| `CRITICAL` |  |
-| `HIGH` |  |
 | `INFO` |  |
+| `UNKNOWN` |  |
 | `LOW` |  |
 | `MEDIUM` |  |
-| `UNKNOWN` |  |
+| `HIGH` |  |
+| `CRITICAL` |  |
 
 ### VulnerabilitySort
 
@@ -5929,16 +5929,16 @@ Vulnerability sort values.
 
 | Value | Description |
 | ----- | ----------- |
-| `detected_asc` | Detection timestamp in ascending order |
-| `detected_desc` | Detection timestamp in descending order |
-| `report_type_asc` | Report Type in ascending order |
-| `report_type_desc` | Report Type in descending order |
-| `severity_asc` | Severity in ascending order |
 | `severity_desc` | Severity in descending order |
-| `state_asc` | State in ascending order |
-| `state_desc` | State in descending order |
-| `title_asc` | Title in ascending order |
+| `severity_asc` | Severity in ascending order |
 | `title_desc` | Title in descending order |
+| `title_asc` | Title in ascending order |
+| `detected_desc` | Detection timestamp in descending order |
+| `detected_asc` | Detection timestamp in ascending order |
+| `report_type_desc` | Report Type in descending order |
+| `report_type_asc` | Report Type in ascending order |
+| `state_desc` | State in descending order |
+| `state_asc` | State in ascending order |
 
 ### VulnerabilityState
 
@@ -5946,7 +5946,7 @@ The state of the vulnerability.
 
 | Value | Description |
 | ----- | ----------- |
-| `CONFIRMED` |  |
 | `DETECTED` |  |
-| `DISMISSED` |  |
+| `CONFIRMED` |  |
 | `RESOLVED` |  |
+| `DISMISSED` |  |
