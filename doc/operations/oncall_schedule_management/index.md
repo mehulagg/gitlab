@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4544) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.10.
 
-Most businesses are becoming tech companies where they have a software service that they provide to their customers. Software services do not get "turned off" at the end of the business day - customers expect 24/7 reliable availability. When things go wrong, you need a a team (or multiple!) that can quickly and effectively respond to service outages.
+Most businesses are becoming tech companies where they have a software service that they provide to their customers. Software services do not get "turned off" at the end of the business day - customers expect 24/7 reliable availability. When things go wrong, you need a team (or multiple!) that can quickly and effectively respond to service outages.
 
 If you have at least Maintainer [permissions](../../user/permissions.md), to create an
 schedule, you have one option to do this manually.
