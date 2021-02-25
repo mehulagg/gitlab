@@ -5,7 +5,7 @@ require 'faker'
 module QA
   RSpec.describe 'Verify' do
     describe 'Merge train', :runner, :requires_admin do
-      let(:file_name) { 'custom_file.txt' }
+      let(:file_name) { Faker::Lorem.word }
       let(:mr_title) { Faker::Lorem.sentence }
       let(:executor) { "qa-runner-#{Faker::Alphanumeric.alphanumeric(8)}" }
 
@@ -23,7 +23,7 @@ module QA
         end
       end
 
-      let!(:ci_file) do
+      let!(:original_files) do
         Resource::Repository::Commit.fabricate_via_api! do |commit|
           commit.project = project
           commit.commit_message = 'Add .gitlab-ci.yml'
@@ -41,32 +41,18 @@ module QA
                         only:
                           - merge_requests
                     YAML
+                },
+                {
+                    file_path: file_name,
+                    content: Faker::Lorem.sentence
                 }
             ]
           )
         end
       end
 
-      let(:user) do
-        Resource::User.fabricate_via_api! do |resource|
-          resource.api_client = admin_api_client
-        end
-      end
-
+      let(:user) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
       let(:user_api_client) { Runtime::API::Client.new(:gitlab, user: user) }
-      let(:admin_api_client) { Runtime::API::Client.as_admin }
-
-      let(:merge_request) do
-        Resource::MergeRequest.fabricate_via_api! do |merge_request|
-          merge_request.api_client = user_api_client
-          merge_request.title = mr_title
-          merge_request.project = project
-          merge_request.description = Faker::Lorem.sentence
-          merge_request.target_new_branch = false
-          merge_request.file_name = file_name
-          merge_request.file_content = Faker::Lorem.sentence
-        end
-      end
 
       before do
         Runtime::Feature.enable(:invite_members_group_modal, project: project)
@@ -75,7 +61,16 @@ module QA
         Flow::MergeRequest.enable_merge_trains
         project.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
 
-        create_user_personal_access_token
+        merge_request = Resource::MergeRequest.fabricate_via_api! do |merge_request|
+          merge_request.api_client = user_api_client
+          merge_request.title = mr_title
+          merge_request.project = project
+          merge_request.description = Faker::Lorem.sentence
+          merge_request.target_new_branch = false
+          merge_request.file_name = file_name
+          merge_request.file_content = Faker::Lorem.sentence
+        end
+
         Flow::Login.sign_in(as: user)
         merge_request.visit!
 
@@ -89,7 +84,6 @@ module QA
 
       after do
         runner.remove_via_api!
-        user.remove_via_api!
       end
 
       context 'when system cancels a merge request' do
@@ -99,7 +93,7 @@ module QA
             commit.api_client = user_api_client
             commit.project = project
             commit.commit_message = 'changing text file'
-            commit.add_files(
+            commit.update_files(
               [
                   {
                       file_path: file_name,
@@ -123,12 +117,6 @@ module QA
             expect(todos).to have_latest_todo_item_with_content("Removed from Merge Train:", "#{mr_title}")
           end
         end
-      end
-
-      private
-
-      def create_user_personal_access_token
-        user_api_client.personal_access_token
       end
     end
   end
