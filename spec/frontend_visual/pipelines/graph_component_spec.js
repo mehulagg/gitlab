@@ -1,5 +1,7 @@
 // TODO: Make tests not take so long
-import { toMatchImageSnapshot } from 'jest-image-snapshot';
+// import { toMatchImageSnapshot } from 'jest-image-snapshot';
+const { toMatchImageSnapshot } = require('jest-image-snapshot');
+
 
 const TIMEOUT = 120 * 1000;
 jest.setTimeout(TIMEOUT);

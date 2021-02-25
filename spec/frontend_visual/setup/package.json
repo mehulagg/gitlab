@@ -1,0 +1,28 @@
+{
+  "name": "setup",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.13.1",
+    "@storybook/addon-actions": "^6.1.20",
+    "@storybook/addon-essentials": "^6.1.20",
+    "@storybook/addon-links": "^6.1.20",
+    "@storybook/addon-storyshots": "^6.1.20",
+    "@storybook/addon-storyshots-puppeteer": "^6.1.20",
+    "@storybook/vue": "^6.1.20",
+    "babel-jest": "^26.6.3",
+    "babel-loader": "^8.2.2",
+    "jest": "^26.6.3",
+    "puppeteer": "^7.1.0"
+  },
+  "dependencies": {
+    "jest-vue-preprocessor": "^1.7.1"
+  },
+  "scripts": {
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "test:inside": "jest --config ../../../jest.config.visual.js",
+    "test:pkg": "jest --config jest.config.visual.js"
+  }
+}
