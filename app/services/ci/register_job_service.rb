@@ -6,6 +6,8 @@ module Ci
   class RegisterJobService
     attr_reader :runner, :metrics
 
+    TEMPORARY_LOCK_TIMEOUT = 3.seconds
+
     Result = Struct.new(:build, :build_json, :valid?)
 
     def initialize(runner)
@@ -31,6 +33,16 @@ module Ci
       each_build(params) do |build|
         depth += 1
         @metrics.increment_queue_operation(:queue_iteration)
+
+        if Feature.enabled?(:ci_register_job_temporary_lock, runner)
+          unless Gitlab::ExclusiveLease
+            .new("build/register/#{build.id}", timeout: TEMPORARY_LOCK_TIMEOUT.to_i)
+            .try_obtain
+            @metrics.increment_queue_operation(:build_temporary_locked)
+            valid = false
+            next
+          end
+        end
 
         result = process_build(build, params)
         next unless result

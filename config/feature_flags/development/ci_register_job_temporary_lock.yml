@@ -1,0 +1,8 @@
+---
+name: ci_register_job_temporary_lock
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '13.10'
+type: development
+group: group::memory
+default_enabled: false
