@@ -9,12 +9,12 @@ RSpec.describe Gitlab::Usage::Docs::Renderer do
 
     it 'generates dictionary for given items' do
       generated_dictionary = described_class.new(items).contents
+
       generated_dictionary_keys = RDoc::Markdown
         .parse(generated_dictionary)
         .table_of_contents
-        .select { |metric_doc| metric_doc.level == 2 && !metric_doc.text.start_with?('info:') }
-        .map(&:text)
-        .map { |text| text.sub('<code>', '').sub('</code>', '') }
+        .select { |metric_doc| metric_doc.level == 3 }
+        .map { |item| item.text.scan(/<code>.*<\/code>/).first.sub('<code>', '').sub('</code>', '') }
 
       expect(generated_dictionary_keys).to match_array(items.keys)
     end
