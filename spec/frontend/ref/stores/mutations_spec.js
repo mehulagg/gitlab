@@ -13,6 +13,7 @@ describe('Ref selector Vuex store mutations', () => {
   describe('initial state', () => {
     it('is created with the correct structure and initial values', () => {
       expect(state).toEqual({
+        enabledRefTypes: [],
         projectId: null,
 
         query: '',
