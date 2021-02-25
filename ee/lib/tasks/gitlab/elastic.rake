@@ -218,7 +218,7 @@ namespace :gitlab do
             end
 
       arr.each do |p|
-        puts "Project '#{p.full_path}' (ID: #{p.id}) isn't indexed.".color(:red)
+        puts "Project '#{p.full_path}' (ID: #{p.id}) isn't indexed. If it contains no repository, this is expected.".color(:red)
       end
 
       puts "#{arr.count} out of #{projects.count} non-indexed projects shown."
