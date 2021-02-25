@@ -3,8 +3,8 @@
 require 'airborne'
 
 module QA
-  RSpec.describe 'Plan', :reliable do
-    describe 'Epics milestone dates API', quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/219495', type: :investigating } do
+  RSpec.describe 'Plan', :reliable, quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/219495', type: :investigating } do
+    describe 'Epics milestone dates API' do
       before(:context) do
         @api_client = Runtime::API::Client.new(:gitlab)
         @group_id = Resource::Group.fabricate_via_api!.id
