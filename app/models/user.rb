@@ -292,6 +292,7 @@ class User < ApplicationRecord
             :sourcegraph_enabled, :sourcegraph_enabled=,
             :gitpod_enabled, :gitpod_enabled=,
             :setup_for_company, :setup_for_company=,
+            :company_name, :company_name=,
             :render_whitespace_in_code, :render_whitespace_in_code=,
             :experience_level, :experience_level=,
             to: :user_preference
