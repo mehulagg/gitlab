@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'spamcheck'
 
 module Spam
   class SpamVerdictService
@@ -70,25 +71,47 @@ module Spam
       project = target.try(:project)
 
       emails = user.emails.map { |email| { email: email.email, verified: !email.confirmed_at.nil? } }
+      
+      case context[:target].to_sym
+      when :issue
+        issue = Spamcheck::Issue.new()
+        issue.title = target.spam_title
+        issue.description = target.spam_description
+        issue.created_at = target.created_at
+        issue.updated_at = target.updated_at
+        issue.user_in_project = user.authorized_project?(project)
+        issue.action = action_to_enum(context[:action])
+      else
+        {
+          user: {
+            created_at: user.created_at,
+            username: user.username,
+            org: user.organization,
+            emails: emails
+          },
+          title: target.spam_title,
+          description: target.spam_description,
+          created_at: target.created_at,
+          updated_at: target.updated_at,
+          user_in_project: user.authorized_project?(project),
+          action: context[:action] == 'create' ? 0 : 1
+        }
+      end
 
-      {
-        user: {
-          created_at: user.created_at,
-          username: user.username,
-          org: user.organization,
-          emails: emails
-        },
-        title: target.spam_title,
-        description: target.spam_description,
-        created_at: target.created_at,
-        updated_at: target.updated_at,
-        user_in_project: user.authorized_project?(project),
-        action: context[:action] == 'create' ? 0 : 1
-      }
     end
 
     def endpoint_url
       @endpoint_url ||= Gitlab::CurrentSettings.current_application_settings.spam_check_endpoint_url
+    end
+
+    def action_to_enum(action_str)
+      case action_str
+      when 'create'
+        Spamcheck::Action::CREATE
+      when 'update'
+        Spamcheck::Action::UPDATE
+      else
+      end
     end
   end
 end
