@@ -277,9 +277,9 @@ else blocking it. Note that the merge request could still be blocked by other co
 such as merge conflicts, [pending discussions](../../discussions/index.md#only-allow-merge-requests-to-be-merged-if-all-threads-are-resolved),
 or a [failed CI/CD pipeline](merge_when_pipeline_succeeds.md).
 
-### Merge request approvals project settings
+### Approvals Settings
 
-The project settings for Merge request approvals are found by going to
+The settings for Merge request approvals are found by going to
 **Settings > General** and expanding **Merge request approvals**.
 
 #### Prevent overriding default approvals
