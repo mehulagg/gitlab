@@ -327,8 +327,11 @@ gem 'peek', '~> 1.1'
 # Snowplow events tracking
 gem 'snowplow-tracker', '~> 0.6.1'
 
-gem 'gitlab-gollum-lib', git: 'https://gitlab.com/gitlab-org/gollum-lib.git', branch: 'master'
-gem 'gitlab-gollum-rugged_adapter'
+# gem 'gitlab-gollum-lib', git: 'https://gitlab.com/gitlab-org/gollum-lib.git', branch: 'gitaly-adapter'
+gem 'gitlab-gollum-lib', path: '../../gitlab-gems/gollum-lib'
+# gem 'gitlab-gollum-rugged_adapter'
+#gem 'gollum-gitaly_adapter', git: 'https://gitlab.com/gitlab-org/gollum-gitaly_adapter.git', branch: 'initial-poc' #path: '../../gitlab-gems/gollum-gitaly_adapter'
+gem 'gollum-gitaly_adapter', path: '../../gitlab-gems/gollum-gitaly_adapter'
 
 # Metrics
 group :metrics do

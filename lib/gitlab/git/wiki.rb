@@ -211,7 +211,12 @@ module Gitlab
       end
 
       def gollum_wiki
-        @gollum_wiki ||= Gollum::Wiki.new(@repository.path)
+        # @gollum_wiki ||= Gollum::Wiki.new(@repository.path)
+
+        @gollum_wiki ||= begin
+          access = Gollum::GitAccess.new(@repository.relative_path, nil, nil, { storage: @repository.storage, gl_repository: @repository.gl_repository, gl_project_path: @repository.gl_project_path})
+          Gollum::Wiki.new(access)
+        end
       end
 
       def new_page(gollum_page)
