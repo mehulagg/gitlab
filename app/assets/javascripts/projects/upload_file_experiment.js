@@ -1,7 +1,9 @@
 import ExperimentTracking from '~/experiment_tracking';
 
 function trackEvent(eventName) {
-  const Tracking = new ExperimentTracking('empty_repo_upload', { label: 'blob-upload-modal' });
+  const property = !!document.querySelector('.project-home-panel.empty-project') ? 'empty' : 'nonempty';
+  const label = 'blob-upload-modal';
+  const Tracking = new ExperimentTracking('empty_repo_upload', { label, property });
 
   Tracking.event(eventName);
 }
