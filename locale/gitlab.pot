@@ -22483,9 +22483,6 @@ msgstr ""
 msgid "Please wait while we import the repository for you. Refresh at will."
 msgstr ""
 
-msgid "Plugins directory is deprecated and will be removed in 14.0. Please move this file into /file_hooks directory."
-msgstr ""
-
 msgid "Pod does not exist"
 msgstr ""
 
