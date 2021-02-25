@@ -120,7 +120,7 @@ module Tooling
       # @param [Teammate] person
       # @return [Boolean]
       def mr_author?(person)
-        person.username == mr_author_username
+        person.username.downcase == mr_author_username.downcase
       end
 
       def mr_author_username
