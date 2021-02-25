@@ -96,7 +96,11 @@ class Deployment < ApplicationRecord
       end
     end
 
-    after_transition any => FINISHED_STATUSES do |deployment|
+    # Q: Why do we need to link merge request for failed and canceled deployments?
+    # Since `deployment_merge_requests` represents what's actually deployed into the
+    # target environment, we shouldn't include failed and canceled status because
+    # the merge request didn't make into the environment.
+    after_transition any => :success do |deployment|
       deployment.run_after_commit do
         Deployments::LinkMergeRequestWorker.perform_async(id)
       end
@@ -298,7 +302,10 @@ class Deployment < ApplicationRecord
     # MergeRequest.select(1, 1).to_sql #=> SELECT 1 FROM "merge_requests"
     select = relation.select('merge_requests.id',
                              "#{id} as deployment_id",
-                             "#{environment_id} as environment_id").to_sql
+                             "#{environment_id} as environment_id",
+                             "(merge_request_metrics.merged_at - #{finished_at}) as lead_time_to_deploy")
+                     .join('merge_request_metrics')
+                     .to_sql
 
     # We don't use `Gitlab::Database.bulk_insert` here so that we don't need to
     # first pluck lots of IDs into memory.
@@ -307,7 +314,7 @@ class Deployment < ApplicationRecord
     # for the same deployment, only inserting any missing merge requests.
     DeploymentMergeRequest.connection.execute(<<~SQL)
       INSERT INTO #{DeploymentMergeRequest.table_name}
-      (merge_request_id, deployment_id, environment_id)
+      (merge_request_id, deployment_id, environment_id, lead_time_to_deploy)
       #{select}
       ON CONFLICT DO NOTHING
     SQL
