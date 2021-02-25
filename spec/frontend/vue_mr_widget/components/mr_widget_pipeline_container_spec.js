@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
+import { trimText } from 'helpers/text_helper';
 import axios from '~/lib/utils/axios_utils';
 import ArtifactsApp from '~/vue_merge_request_widget/components/artifacts_list_app.vue';
 import MrWidgetPipeline from '~/vue_merge_request_widget/components/mr_widget_pipeline.vue';
@@ -109,6 +110,48 @@ describe('MrWidgetPipelineContainer', () => {
       factory();
 
       expect(wrapper.find(ArtifactsApp).isVisible()).toBe(true);
+    });
+  });
+  describe('with many deployments', () => {
+    let deployments;
+    let collapsibleExtension;
+
+    beforeEach(() => {
+      deployments = [
+        ...mockStore.deployments,
+        ...mockStore.deployments.map((deployment) => ({
+          ...deployment,
+          id: deployment.id + mockStore.deployments.length,
+        })),
+      ];
+      factory({
+        mr: {
+          ...mockStore,
+          deployments,
+        },
+      });
+      collapsibleExtension = wrapper.find('[data-testid="mr-collapsed-deployments"]');
+    });
+
+    it('renders them collapsed', () => {
+      expect(collapsibleExtension.exists()).toBe(true);
+      expect(trimText(collapsibleExtension.text())).toBe(
+        `${deployments.length} environments impacted. View all environments.`,
+      );
+    });
+
+    it('shows them when clicked', async () => {
+      const expectedProps = deployments.map((dep) =>
+        expect.objectContaining({
+          deployment: dep,
+          showMetrics: false,
+        }),
+      );
+      await collapsibleExtension.find('button').trigger('click');
+
+      const deploymentWrappers = collapsibleExtension.findAll('.js-pre-deployment');
+
+      expect(deploymentWrappers.wrappers.map((x) => x.props())).toEqual(expectedProps);
     });
   });
 });
