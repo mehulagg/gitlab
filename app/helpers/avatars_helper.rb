@@ -22,11 +22,16 @@ module AvatarsHelper
   end
 
   def avatar_icon_for_email(email = nil, size = nil, scale = 2, only_path: true)
-    user = User.find_by_any_email(email)
-    if user
-      avatar_icon_for_user(user, size, scale, only_path: only_path)
-    else
-      gravatar_icon(email, size, scale)
+    return gravatar_icon(email, size, scale) if email.nil?
+
+    Gitlab::AvatarCache.by_email(email, size, scale, only_path) do
+      user = User.find_by_any_email(email)
+
+      if user
+        avatar_icon_for_user(user, size, scale, only_path: only_path)
+      else
+        gravatar_icon(email, size, scale)
+      end
     end
   end
 

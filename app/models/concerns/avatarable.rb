@@ -20,6 +20,7 @@ module Avatarable
     mount_uploader :avatar, AvatarUploader
 
     after_initialize :add_avatar_to_batch
+    after_save :clear_avatar_caches
   end
 
   module ShadowMethods
@@ -126,5 +127,11 @@ module Avatarable
 
   def avatar_mounter
     strong_memoize(:avatar_mounter) { _mounter(:avatar) }
+  end
+
+  def clear_avatar_caches
+    return unless respond_to?(:all_emails) && all_emails.any? && avatar_changed?
+
+    Gitlab::AvatarCache.delete_by_email(*all_emails)
   end
 end

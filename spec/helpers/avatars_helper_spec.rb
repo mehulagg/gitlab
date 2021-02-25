@@ -89,14 +89,22 @@ RSpec.describe AvatarsHelper do
     end
   end
 
-  describe '#avatar_icon_for_email' do
+  describe '#avatar_icon_for_email', :clean_gitlab_redis_cache do
     let(:user) { create(:user, avatar: File.open(uploaded_image_temp_path)) }
 
     context 'using an email' do
       context 'when there is a matching user' do
+        subject { helper.avatar_icon_for_email(user.email).to_s }
+
         it 'returns a relative URL for the avatar' do
-          expect(helper.avatar_icon_for_email(user.email).to_s)
-            .to eq(user.avatar.url)
+          expect(subject).to eq(user.avatar.url)
+        end
+
+        it 'is cached' do
+          expect(User).to receive(:find_by_any_email).once.and_call_original
+
+          expect(subject).to eq(user.avatar.url)
+          expect(subject).to eq(user.avatar.url)
         end
       end
 
@@ -106,11 +114,19 @@ RSpec.describe AvatarsHelper do
 
           helper.avatar_icon_for_email('foo@example.com', 20, 2)
         end
+
+        it 'is cached' do
+          expect(User).to receive(:find_by_any_email).once.and_call_original
+
+          helper.avatar_icon_for_email('foo@example.com', 20, 2)
+          helper.avatar_icon_for_email('foo@example.com', 20, 2)
+        end
       end
 
       context 'without an email passed' do
         it 'calls gravatar_icon' do
           expect(helper).to receive(:gravatar_icon).with(nil, 20, 2)
+          expect(User).not_to receive(:find_by_any_email)
 
           helper.avatar_icon_for_email(nil, 20, 2)
         end

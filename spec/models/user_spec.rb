@@ -2493,6 +2493,18 @@ RSpec.describe User do
     end
   end
 
+  describe '#clear_avatar_caches' do
+    let(:user) { create(:user) }
+
+    it "clears the avatar cache" do
+      allow(user).to receive(:avatar_changed?).and_return(true)
+
+      expect(Gitlab::AvatarCache).to receive(:delete_by_email).with(*user.all_emails)
+
+      user.update(avatar: fixture_file_upload('spec/fixtures/dk.png'))
+    end
+  end
+
   describe '#accept_pending_invitations!' do
     let(:user) { create(:user, email: 'user@email.com') }
     let!(:project_member_invite) { create(:project_member, :invited, invite_email: user.email) }
