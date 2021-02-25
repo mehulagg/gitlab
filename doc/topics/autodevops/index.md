@@ -107,6 +107,32 @@ Auto DevOps at the group and project level, respectively.
    for Auto Deploy and Auto Review Apps to use.
 1. Click **Save changes** for the changes to take effect.
 
+### Deployment strategy
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/38542) in GitLab 11.0.
+
+You can change the deployment strategy used by Auto DevOps by visiting your
+project's **Settings > CI/CD > Auto DevOps**. The following options
+are available:
+
+- **Continuous deployment to production**: Enables [Auto Deploy](stages.md#auto-deploy)
+  with `master` branch directly deployed to production.
+- **Continuous deployment to production using timed incremental rollout**: Sets the
+  [`INCREMENTAL_ROLLOUT_MODE`](customize.md#timed-incremental-rollout-to-production) variable
+  to `timed`. Production deployments execute with a 5 minute delay between
+  each increment in rollout.
+- **Automatic deployment to staging, manual deployment to production**: Sets the
+  [`STAGING_ENABLED`](customize.md#deploy-policy-for-staging-and-production-environments) and
+  [`INCREMENTAL_ROLLOUT_MODE`](customize.md#incremental-rollout-to-production) variables
+  to `1` and `manual`. This means:
+
+  - `master` branch is directly deployed to staging.
+  - Manual actions are provided for incremental rollout to production.
+
+NOTE:
+Use the [blue-green deployment](../../ci/environments/incremental_rollouts.md#blue-green-deployment) technique
+to minimize downtime and risk.
+
 ## Quick start
 
 If you're using GitLab.com, see the [quick start guide](quick_start_guide.md)
@@ -229,32 +255,6 @@ to the Kubernetes pods running your application.
 ### AWS ECS
 
 See [Auto DevOps requirements for Amazon ECS](requirements.md#auto-devops-requirements-for-amazon-ecs).
-
-### Deployment strategy
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/38542) in GitLab 11.0.
-
-You can change the deployment strategy used by Auto DevOps by visiting your
-project's **Settings > CI/CD > Auto DevOps**. The following options
-are available:
-
-- **Continuous deployment to production**: Enables [Auto Deploy](stages.md#auto-deploy)
-  with `master` branch directly deployed to production.
-- **Continuous deployment to production using timed incremental rollout**: Sets the
-  [`INCREMENTAL_ROLLOUT_MODE`](customize.md#timed-incremental-rollout-to-production) variable
-  to `timed`. Production deployments execute with a 5 minute delay between
-  each increment in rollout.
-- **Automatic deployment to staging, manual deployment to production**: Sets the
-  [`STAGING_ENABLED`](customize.md#deploy-policy-for-staging-and-production-environments) and
-  [`INCREMENTAL_ROLLOUT_MODE`](customize.md#incremental-rollout-to-production) variables
-  to `1` and `manual`. This means:
-
-  - `master` branch is directly deployed to staging.
-  - Manual actions are provided for incremental rollout to production.
-
-NOTE:
-Use the [blue-green deployment](../../ci/environments/incremental_rollouts.md#blue-green-deployment) technique
-to minimize downtime and risk.
 
 ## Using multiple Kubernetes clusters
 
