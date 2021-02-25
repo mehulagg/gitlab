@@ -206,6 +206,7 @@ In these cases, use the following workflow:
 - [Newlines style guide](newlines_styleguide.md)
 - [Image scaling guide](image_scaling.md)
 - [Export to CSV](export_csv.md)
+- [FIPS compliance](fips_compliance.md)
 
 ## Performance guides
 
