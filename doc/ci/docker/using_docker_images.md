@@ -10,15 +10,15 @@ type: concepts, howto
 You can run your CI/CD jobs in separate, isolated Docker containers.
 
 When you run a Docker container on your local machine, it acts as a reproducible build environment.
-When the container is running, you can test commands from your shell, rather than testing
-on a dedicated CI server.
+You can tests in the container, instead of testing on a dedicated CI/CD server.
 
 To run CI/CD jobs in a Docker container, you need to:
 
-- Register a runner that uses the Docker executor. This ensures that all jobs run in a Docker container.
-- Specify an image in your `.gitlab-ci.yml` file. This tells the runner which container to use.
-- Optional. Specify other "services" in your `.gitlab-ci.yml` file. This tells the runner to use a container
-  that is already running.
+- Register a runner that uses the Docker executor. Then all jobs run in a Docker container.
+- Specify an image in your `.gitlab-ci.yml` file. The runner creates a container from this image
+  and runs the jobs in it.
+- Optional. Specify other images in your `.gitlab-ci.yml` file. These containers are known as
+  ["services"](#what-is-a-service) and you can use them to run services like MySQL separately.
 
 ## Register a runner that uses the Docker executor
 
