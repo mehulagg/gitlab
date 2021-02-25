@@ -21,6 +21,12 @@ module Types
             GraphQL::ID_TYPE,
             null: true,
             description: 'Internal ID of the GitLab issue attached to the alert.'
+            
+      field :issue,
+            Types::IssueType,
+            null: true,
+            description: 'Internal status of the GitLab issue attached to the alert.',
+            resolver: Resolvers::IssuesResolver.single
 
       field :title,
             GraphQL::STRING_TYPE,
