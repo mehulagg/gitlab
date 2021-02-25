@@ -34,6 +34,7 @@ class Environment < ApplicationRecord
   has_one :last_visible_pipeline, through: :last_visible_deployable, source: 'pipeline'
   has_one :upcoming_deployment, -> { running.order('deployments.id DESC') }, class_name: 'Deployment'
   has_one :latest_opened_most_severe_alert, -> { order_severity_with_open_prometheus_alert }, class_name: 'AlertManagement::Alert', inverse_of: :environment
+  has_one :daily_metrics, class_name: 'Deployments::DailyMetrics'
 
   before_validation :nullify_external_url
   before_validation :generate_slug, if: ->(env) { env.slug.blank? }
@@ -408,6 +409,16 @@ class Environment < ApplicationRecord
   def clear_all_caches
     expire_etag_cache
     clear_reactive_cache!
+  end
+
+  def update_daily_deployments_metrics!(deployment)
+    return unless deployment.success?
+
+    daily_metrics.safe_insert_or_update(
+      date: Time.not.utc.to_date,
+      project: project,
+      deployments_count: 1
+    )
   end
 
   private

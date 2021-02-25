@@ -34,6 +34,7 @@ module Deployments
 
         if environment.save && !environment.stopped?
           deployment.update_merge_request_metrics!
+          environment.update_daily_deployments_metrics!(deployment)
         end
       end
     end
