@@ -2,7 +2,7 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import { mount, createLocalVue } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import VueApollo from 'vue-apollo';
-import createHttpIntegrationMutation from 'ee_else_ce/alerts_settings/graphql/mutations/create_http_integration.mutation.graphql';
+import httpIntegrationCreateMutation from 'ee_else_ce/alerts_settings/graphql/mutations/http_integration_create.mutation.graphql';
 import updateHttpIntegrationMutation from 'ee_else_ce/alerts_settings/graphql/mutations/update_http_integration.mutation.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
@@ -11,8 +11,8 @@ import IntegrationsList from '~/alerts_settings/components/alerts_integrations_l
 import AlertsSettingsForm from '~/alerts_settings/components/alerts_settings_form.vue';
 import AlertsSettingsWrapper from '~/alerts_settings/components/alerts_settings_wrapper.vue';
 import { typeSet } from '~/alerts_settings/constants';
-import createPrometheusIntegrationMutation from '~/alerts_settings/graphql/mutations/create_prometheus_integration.mutation.graphql';
 import destroyHttpIntegrationMutation from '~/alerts_settings/graphql/mutations/destroy_http_integration.mutation.graphql';
+import prometheusIntegrationCreateMutation from '~/alerts_settings/graphql/mutations/prometheus_integration_create.mutation.graphql';
 import resetHttpTokenMutation from '~/alerts_settings/graphql/mutations/reset_http_token.mutation.graphql';
 import resetPrometheusTokenMutation from '~/alerts_settings/graphql/mutations/reset_prometheus_token.mutation.graphql';
 import updateCurrentHttpIntegrationMutation from '~/alerts_settings/graphql/mutations/update_current_http_integration.mutation.graphql';
@@ -169,14 +169,14 @@ describe('AlertsSettingsWrapper', () => {
       expect(findIntegrations()).toHaveLength(mockIntegrations.length);
     });
 
-    it('calls `$apollo.mutate` with `createHttpIntegrationMutation`', () => {
+    it('calls `$apollo.mutate` with `httpIntegrationCreateMutation`', () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         loading: false,
       });
 
       jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue({
-        data: { createHttpIntegrationMutation: { integration: { id: '1' } } },
+        data: { httpIntegrationCreateMutation: { integration: { id: '1' } } },
       });
       wrapper.find(AlertsSettingsForm).vm.$emit('create-new-integration', {
         type: typeSet.http,
@@ -185,7 +185,7 @@ describe('AlertsSettingsWrapper', () => {
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(1);
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
-        mutation: createHttpIntegrationMutation,
+        mutation: httpIntegrationCreateMutation,
         update: expect.anything(),
         variables: createHttpVariables,
       });
@@ -233,14 +233,14 @@ describe('AlertsSettingsWrapper', () => {
       });
     });
 
-    it('calls `$apollo.mutate` with `createPrometheusIntegrationMutation`', () => {
+    it('calls `$apollo.mutate` with `prometheusIntegrationCreateMutation`', () => {
       createComponent({
         data: { integrations: { list: mockIntegrations }, currentIntegration: mockIntegrations[0] },
         loading: false,
       });
 
       jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue({
-        data: { createPrometheusIntegrationMutation: { integration: { id: '2' } } },
+        data: { prometheusIntegrationCreateMutation: { integration: { id: '2' } } },
       });
       wrapper.find(AlertsSettingsForm).vm.$emit('create-new-integration', {
         type: typeSet.prometheus,
@@ -249,7 +249,7 @@ describe('AlertsSettingsWrapper', () => {
 
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(1);
       expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
-        mutation: createPrometheusIntegrationMutation,
+        mutation: prometheusIntegrationCreateMutation,
         update: expect.anything(),
         variables: createPrometheusVariables,
       });

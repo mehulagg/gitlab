@@ -1,12 +1,12 @@
 <script>
-import createHttpIntegrationMutation from 'ee_else_ce/alerts_settings/graphql/mutations/create_http_integration.mutation.graphql';
+import httpIntegrationCreateMutation from 'ee_else_ce/alerts_settings/graphql/mutations/http_integration_create.mutation.graphql';
 import updateHttpIntegrationMutation from 'ee_else_ce/alerts_settings/graphql/mutations/update_http_integration.mutation.graphql';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import { fetchPolicies } from '~/lib/graphql';
 import { s__ } from '~/locale';
 import { typeSet } from '../constants';
-import createPrometheusIntegrationMutation from '../graphql/mutations/create_prometheus_integration.mutation.graphql';
 import destroyHttpIntegrationMutation from '../graphql/mutations/destroy_http_integration.mutation.graphql';
+import prometheusIntegrationCreateMutation from '../graphql/mutations/prometheus_integration_create.mutation.graphql';
 import resetHttpTokenMutation from '../graphql/mutations/reset_http_token.mutation.graphql';
 import resetPrometheusTokenMutation from '../graphql/mutations/reset_prometheus_token.mutation.graphql';
 import updateCurrentHttpIntegrationMutation from '../graphql/mutations/update_current_http_integration.mutation.graphql';
@@ -141,7 +141,7 @@ export default {
       this.isUpdating = true;
       this.$apollo
         .mutate({
-          mutation: isHttp ? createHttpIntegrationMutation : createPrometheusIntegrationMutation,
+          mutation: isHttp ? httpIntegrationCreateMutation : prometheusIntegrationCreateMutation,
           variables: {
             ...variables,
             projectPath,
