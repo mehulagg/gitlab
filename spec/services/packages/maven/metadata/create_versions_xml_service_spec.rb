@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ::Packages::Maven::Metadata::SyncVersionsXmlFromDatabaseService do
+RSpec.describe ::Packages::Maven::Metadata::CreateVersionsXmlService do
   let_it_be(:package) { create(:maven_package, version: nil) }
 
   let(:versions_in_database) { %w[1.3 2.0-SNAPSHOT 1.6 1.4 1.5-SNAPSHOT] }
@@ -47,7 +47,7 @@ RSpec.describe ::Packages::Maven::Metadata::SyncVersionsXmlFromDatabaseService d
         result = subject
 
         expect(result).to be_success
-        expect(result.payload).to eq(changes_exist: false)
+        expect(result.payload).to eq(changes_exist: false, empty_versions: false)
       end
     end
 
@@ -64,6 +64,17 @@ RSpec.describe ::Packages::Maven::Metadata::SyncVersionsXmlFromDatabaseService d
         let(:versions_in_database) { versions_in_xml + additional_versions }
 
         it_behaves_like 'returning an xml with versions in the database'
+      end
+    end
+
+    context 'with no versions in the database' do
+      let(:versions_in_database) { [] }
+
+      it 'returns a success' do
+        result = subject
+
+        expect(result).to be_success
+        expect(result.payload).to eq(changes_exist: true, empty_versions: true)
       end
     end
 
@@ -131,6 +142,39 @@ RSpec.describe ::Packages::Maven::Metadata::SyncVersionsXmlFromDatabaseService d
       it_behaves_like 'returning an error service response', message: 'metadata_content is invalid'
     end
 
+    context 'with metadata content pointing to a file' do
+      let(:service) { described_class.new(metadata_content: file, package: package) }
+      let(:file) do
+        Tempfile.new('metadata').tap do |file|
+          file.write(file_contents)
+          file.flush
+          file.rewind
+        end
+      end
+
+      after do
+        file.close
+        file.unlink
+      end
+
+      context 'with valid content' do
+        let(:file_contents) { metadata_xml }
+
+        it 'returns no changes' do
+          result = subject
+
+          expect(result).to be_success
+          expect(result.payload).to eq(changes_exist: false, empty_versions: false)
+        end
+      end
+
+      context 'with invalid content' do
+        let(:file_contents) { '<meta></metadata>' }
+
+        it_behaves_like 'returning an error service response', message: 'metadata_content is invalid'
+      end
+    end
+
     context 'with no package' do
       let(:metadata_xml) { '' }
       let(:package) { nil }
@@ -146,20 +190,22 @@ RSpec.describe ::Packages::Maven::Metadata::SyncVersionsXmlFromDatabaseService d
   end
 
   def metadata_xml
-    metadata_versioning = {
-      'release' => version_release,
-      'lastUpdated' => '20210113130531',
-      'versions' => versions_in_xml
-    }
-
-    metadata_versioning['latest'] = version_latest if version_latest
-
-    metadata = {
-      'groupId' => package.maven_metadatum.app_group,
-      'artifactdId' => package.maven_metadatum.app_name,
-      'versioning' => metadata_versioning
-    }
-    metadata.to_xml(root: 'metadata')
+    Nokogiri::XML::Builder.new do |xml|
+      xml.metadata do
+        xml.groupId(package.maven_metadatum.app_group)
+        xml.artifactId(package.maven_metadatum.app_name)
+        xml.versioning do
+          xml.release(version_release)
+          xml.latest(version_latest) if version_latest
+          xml.lastUpdated('20210113130531')
+          xml.versions do
+            versions_in_xml.each do |version|
+              xml.version(version)
+            end
+          end
+        end
+      end
+    end.to_xml
   end
 
   def versions_from(xml_content)

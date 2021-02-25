@@ -3,7 +3,7 @@
 module Packages
   module Maven
     module Metadata
-      class SyncVersionsXmlFromDatabaseService
+      class CreateVersionsXmlService
         include Gitlab::Utils::StrongMemoize
 
         XPATH_VERSIONING = '//metadata/versioning'
@@ -15,6 +15,11 @@ module Packages
 
         INDENT_SPACE = 2
 
+        EMPTY_VERSIONS_PAYLOAD = {
+          changes_exist: true,
+          empty_versions: true
+        }.freeze
+
         def initialize(metadata_content:, package:)
           @metadata_content = metadata_content
           @package = package
@@ -24,6 +29,7 @@ module Packages
           return ServiceResponse.error(message: 'package not set') unless @package
           return ServiceResponse.error(message: 'metadata_content not set') unless @metadata_content
           return ServiceResponse.error(message: 'metadata_content is invalid') unless valid_metadata_content?
+          return ServiceResponse.success(payload: EMPTY_VERSIONS_PAYLOAD) if versions_from_database.empty?
 
           changes_exist = false
           changes_exist = true if update_versions_list
@@ -31,7 +37,7 @@ module Packages
           changes_exist = true if update_release
           update_last_updated_timestamp if changes_exist
 
-          payload = { changes_exist: changes_exist }
+          payload = { changes_exist: changes_exist, empty_versions: false }
           payload[:metadata_content] = xml_doc.to_xml(indent: INDENT_SPACE) if changes_exist
 
           ServiceResponse.success(payload: payload)
@@ -96,7 +102,7 @@ module Packages
         end
 
         def update_last_updated_timestamp
-          last_updated_xml_node.content = Time.now.strftime('%Y%m%d%H%M%S')
+          last_updated_xml_node.content = Time.zone.now.strftime('%Y%m%d%H%M%S')
         end
 
         def versioning_xml_node

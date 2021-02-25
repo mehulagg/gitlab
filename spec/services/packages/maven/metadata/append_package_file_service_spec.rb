@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ::Packages::Maven::Metadata::AppendFileService do
+RSpec.describe ::Packages::Maven::Metadata::AppendPackageFileService do
   let_it_be(:package) { create(:maven_package, version: nil) }
 
   let(:service) { described_class.new(package: package, metadata_content: content) }
@@ -52,7 +52,7 @@ RSpec.describe ::Packages::Maven::Metadata::AppendFileService do
     end
 
     def metadata_file_name
-      ::Packages::Maven::FindOrCreatePackageService::MAVEN_METADATA_FILE
+      ::Packages::Maven::Metadata.filename
     end
   end
 end

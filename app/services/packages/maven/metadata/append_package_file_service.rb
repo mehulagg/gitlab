@@ -3,7 +3,7 @@
 module Packages
   module Maven
     module Metadata
-      class AppendFileService
+      class AppendPackageFileService
         def initialize(package:, metadata_content:)
           @package = package
           @metadata_content = metadata_content
@@ -18,20 +18,22 @@ module Packages
           file_sha256 = digest_from(@metadata_content, :sha256)
           file_sha512 = digest_from(@metadata_content, :sha512)
 
-          append_metadata_file(
-            content: @metadata_content,
-            file_name: metadata_filename,
-            sha1: file_sha1,
-            md5: file_md5,
-            sha256: file_sha256
-          )
+          @package.transaction do
+            append_metadata_file(
+              content: @metadata_content,
+              file_name: Metadata.filename,
+              sha1: file_sha1,
+              md5: file_md5,
+              sha256: file_sha256
+            )
 
-          append_metadata_file(content: file_md5, file_name: "#{metadata_filename}.md5")
-          append_metadata_file(content: file_sha1, file_name: "#{metadata_filename}.sha1")
-          append_metadata_file(content: file_sha256, file_name: "#{metadata_filename}.sha256")
-          append_metadata_file(content: file_sha512, file_name: "#{metadata_filename}.sha512")
+            append_metadata_file(content: file_md5, file_name: "#{Metadata.filename}.md5")
+            append_metadata_file(content: file_sha1, file_name: "#{Metadata.filename}.sha1")
+            append_metadata_file(content: file_sha256, file_name: "#{Metadata.filename}.sha256")
+            append_metadata_file(content: file_sha512, file_name: "#{Metadata.filename}.sha512")
+          end
 
-          ServiceResponse.success
+          ServiceResponse.success(message: 'New metadata package file created')
         end
 
         private
@@ -70,10 +72,6 @@ module Packages
                            Digest::SHA512
                          end
           digest_class.hexdigest(content)
-        end
-
-        def metadata_filename
-          ::Packages::Maven::FindOrCreatePackageService::MAVEN_METADATA_FILE
         end
       end
     end
