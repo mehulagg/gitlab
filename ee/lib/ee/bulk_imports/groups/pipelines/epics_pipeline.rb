@@ -13,7 +13,11 @@ module EE
           transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
           transformer EE::BulkImports::Groups::Transformers::EpicAttributesTransformer
 
-          loader EE::BulkImports::Groups::Loaders::EpicsLoader
+          def load(context, data)
+            raise ::BulkImports::Pipeline::NotAllowedError unless authorized?
+
+            context.group.epics.create!(data)
+          end
 
           def after_run(extracted_data)
             context.entity.update_tracker_for(
@@ -25,6 +29,12 @@ module EE
             if extracted_data.has_next_page?
               run
             end
+          end
+
+          private
+
+          def authorized?
+            context.current_user.can?(:admin_epic, context.group)
           end
         end
       end
