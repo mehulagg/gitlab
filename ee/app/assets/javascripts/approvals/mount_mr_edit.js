@@ -20,6 +20,8 @@ export default function mountApprovalInput(el) {
     ...el.dataset,
     prefix: 'mr-edit',
     canEdit: parseBoolean(el.dataset.canEdit),
+    canUpdateApprovers: parseBoolean(el.dataset.canUpdateApprovers),
+    showCodeOwnerTip: parseBoolean(el.dataset.showCodeOwnerTip),
     allowMultiRule: parseBoolean(el.dataset.allowMultiRule),
     canOverride: parseBoolean(el.dataset.canOverride),
   });

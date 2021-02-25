@@ -24,6 +24,11 @@ module Types
             null: true,
             description: 'The user who created the token.'
 
+      field :description,
+            GraphQL::STRING_TYPE,
+            null: true,
+            description: 'Description of the token.'
+
       field :id,
             ::Types::GlobalIDType[::Clusters::AgentToken],
             null: false,

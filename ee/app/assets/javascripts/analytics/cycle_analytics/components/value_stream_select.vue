@@ -7,18 +7,23 @@ import {
   GlDropdownDivider,
   GlModal,
   GlModalDirective,
+  GlSprintf,
 } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import { sprintf, __ } from '~/locale';
+import { sprintf, __, s__ } from '~/locale';
+import { generateInitialStageData } from './create_value_stream_form/utils';
 import ValueStreamForm from './value_stream_form.vue';
 
-const I18N = {
-  DELETE_NAME: __('Delete %{name}'),
-  DELETE_CONFIRMATION: __('Are you sure you want to delete "%{name}" Value Stream?'),
-  DELETED: __("'%{name}' Value Stream deleted"),
+const i18n = {
+  DELETE_NAME: s__('DeleteValueStream|Delete %{name}'),
+  DELETE_CONFIRMATION: s__(
+    'DeleteValueStream|Are you sure you want to delete the "%{name}" Value Stream?',
+  ),
+  DELETED: s__("DeleteValueStream|'%{name}' Value Stream deleted"),
   DELETE: __('Delete'),
-  CREATE_VALUE_STREAM: __('Create new Value Stream'),
+  CREATE_VALUE_STREAM: s__('CreateValueStreamForm|Create new Value Stream'),
   CANCEL: __('Cancel'),
+  EDIT_VALUE_STREAM: __('Edit'),
 };
 
 export default {
@@ -29,6 +34,7 @@ export default {
     GlDropdownItem,
     GlDropdownDivider,
     GlModal,
+    GlSprintf,
     ValueStreamForm,
   },
   directives: {
@@ -41,12 +47,23 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      showCreateModal: false,
+      isEditing: false,
+      initialData: {
+        name: '',
+        stages: [],
+      },
+    };
+  },
   computed: {
     ...mapState({
       isDeleting: 'isDeletingValueStream',
       deleteValueStreamError: 'deleteValueStreamError',
       data: 'valueStreams',
       selectedValueStream: 'selectedValueStream',
+      selectedValueStreamStages: 'stages',
       initialFormErrors: 'createValueStreamErrors',
       defaultStageConfig: 'defaultStageConfig',
     }),
@@ -59,14 +76,11 @@ export default {
     selectedValueStreamId() {
       return this.selectedValueStream?.id || null;
     },
-    canDeleteSelectedStage() {
+    isCustomValueStream() {
       return this.selectedValueStream?.isCustom || false;
     },
-    deleteSelectedText() {
-      return sprintf(this.$options.I18N.DELETE_NAME, { name: this.selectedValueStreamName });
-    },
     deleteConfirmationText() {
-      return sprintf(this.$options.I18N.DELETE_CONFIRMATION, {
+      return sprintf(this.$options.i18n.DELETE_CONFIRMATION, {
         name: this.selectedValueStreamName,
       });
     },
@@ -86,16 +100,39 @@ export default {
       const name = this.selectedValueStreamName;
       return this.deleteValueStream(this.selectedValueStreamId).then(() => {
         if (!this.deleteValueStreamError) {
-          this.onSuccess(sprintf(this.$options.I18N.DELETED, { name }));
+          this.onSuccess(sprintf(this.$options.i18n.DELETED, { name }));
         }
       });
     },
+    onCreate() {
+      this.showCreateModal = true;
+      this.isEditing = false;
+      this.initialData = {
+        name: '',
+        stages: [],
+      };
+    },
+    onEdit() {
+      this.showCreateModal = true;
+      this.isEditing = true;
+      this.initialData = {
+        ...this.selectedValueStream,
+        stages: generateInitialStageData(this.defaultStageConfig, this.selectedValueStreamStages),
+      };
+    },
   },
-  I18N,
+  i18n,
 };
 </script>
 <template>
   <div>
+    <gl-button
+      v-if="isCustomValueStream"
+      v-gl-modal-directive="'value-stream-form-modal'"
+      data-testid="edit-value-stream"
+      @click="onEdit"
+      >{{ $options.i18n.EDIT_VALUE_STREAM }}</gl-button
+    >
     <gl-dropdown
       v-if="hasValueStreams"
       data-testid="dropdown-value-streams"
@@ -111,40 +148,58 @@ export default {
         >{{ streamName }}</gl-dropdown-item
       >
       <gl-dropdown-divider />
-      <gl-dropdown-item v-gl-modal-directive="'value-stream-form-modal'">{{
-        $options.I18N.CREATE_VALUE_STREAM
-      }}</gl-dropdown-item>
       <gl-dropdown-item
-        v-if="canDeleteSelectedStage"
+        v-gl-modal-directive="'value-stream-form-modal'"
+        data-testid="create-value-stream"
+        @click="onCreate"
+        >{{ $options.i18n.CREATE_VALUE_STREAM }}</gl-dropdown-item
+      >
+      <gl-dropdown-item
+        v-if="isCustomValueStream"
         v-gl-modal-directive="'delete-value-stream-modal'"
         variant="danger"
         data-testid="delete-value-stream"
-        >{{ deleteSelectedText }}</gl-dropdown-item
       >
+        <gl-sprintf :message="$options.i18n.DELETE_NAME">
+          <template #name>{{ selectedValueStreamName }}</template>
+        </gl-sprintf>
+      </gl-dropdown-item>
     </gl-dropdown>
-    <gl-button v-else v-gl-modal-directive="'value-stream-form-modal'">{{
-      $options.I18N.CREATE_VALUE_STREAM
-    }}</gl-button>
+    <gl-button
+      v-else
+      v-gl-modal-directive="'value-stream-form-modal'"
+      data-testid="create-value-stream-button"
+      @click="onCreate"
+      >{{ $options.i18n.CREATE_VALUE_STREAM }}</gl-button
+    >
     <value-stream-form
+      v-if="showCreateModal"
+      :initial-data="initialData"
       :initial-form-errors="initialFormErrors"
       :has-extended-form-fields="hasExtendedFormFields"
       :default-stage-config="defaultStageConfig"
+      :is-editing="isEditing"
+      @hidden="showCreateModal = false"
     />
     <gl-modal
       data-testid="delete-value-stream-modal"
       modal-id="delete-value-stream-modal"
       :title="__('Delete Value Stream')"
       :action-primary="{
-        text: $options.I18N.DELETE,
+        text: $options.i18n.DELETE,
         attributes: [{ variant: 'danger' }, { loading: isDeleting }],
       }"
-      :action-cancel="{ text: $options.I18N.CANCEL }"
+      :action-cancel="{ text: $options.i18n.CANCEL }"
       @primary.prevent="onDelete"
     >
       <gl-alert v-if="deleteValueStreamError" variant="danger">{{
         deleteValueStreamError
       }}</gl-alert>
-      <p>{{ deleteConfirmationText }}</p>
+      <p>
+        <gl-sprintf :message="$options.i18n.DELETE_CONFIRMATION">
+          <template #name>{{ selectedValueStreamName }}</template>
+        </gl-sprintf>
+      </p>
     </gl-modal>
   </div>
 </template>

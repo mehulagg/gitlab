@@ -10,7 +10,7 @@ import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/qu
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import createFlash, { FLASH_TYPES } from '~/flash';
-import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
+import searchProjectMembersQuery from '~/graphql_shared/queries/project_user_members_search.query.graphql';
 import {
   participants,
   getOncallSchedulesQueryResponse,
@@ -84,7 +84,7 @@ describe('AddEditRotationModal', () => {
         getOncallSchedulesWithRotationsQuery,
         jest.fn().mockResolvedValue(getOncallSchedulesQueryResponse),
       ],
-      [usersSearchQuery, userSearchQueryHandler],
+      [searchProjectMembersQuery, userSearchQueryHandler],
       [createOncallScheduleRotationMutation, createRotationHandler],
     ]);
 
@@ -142,7 +142,6 @@ describe('AddEditRotationModal', () => {
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
       expect(mutate).toHaveBeenCalledWith({
         mutation: expect.any(Object),
-        update: expect.anything(),
         variables: { input: expect.objectContaining({ projectPath }) },
       });
     });
@@ -159,7 +158,7 @@ describe('AddEditRotationModal', () => {
   });
 
   describe('with mocked Apollo client', () => {
-    it('it calls searchUsers query with the search parameter', async () => {
+    it('it calls the `searchProjectMembersQuery` query with the search parameter and project path', async () => {
       userSearchQueryHandler = jest.fn().mockResolvedValue({
         data: {
           users: {
@@ -169,11 +168,15 @@ describe('AddEditRotationModal', () => {
       });
       createComponentWithApollo({ search: 'root' });
       await awaitApolloDomMock();
-      expect(userSearchQueryHandler).toHaveBeenCalledWith({ search: 'root' });
+      expect(userSearchQueryHandler).toHaveBeenCalledWith({
+        search: 'root',
+        fullPath: projectPath,
+      });
     });
 
     it('calls a mutation with correct parameters and creates a rotation', async () => {
       createComponentWithApollo();
+      expect(wrapper.emitted('fetchRotationShifts')).toBeUndefined();
 
       await createRotation(wrapper);
       await awaitApolloDomMock();
@@ -184,6 +187,7 @@ describe('AddEditRotationModal', () => {
         message: i18n.rotationCreated,
         type: FLASH_TYPES.SUCCESS,
       });
+      expect(wrapper.emitted('fetchRotationShifts')).toHaveLength(1);
     });
 
     it('displays alert if mutation had a recoverable error', async () => {

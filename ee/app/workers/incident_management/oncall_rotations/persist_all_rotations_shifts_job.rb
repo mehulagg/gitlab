@@ -10,7 +10,7 @@ module IncidentManagement
       queue_namespace :cronjob
 
       def perform
-        IncidentManagement::OncallRotation.started.pluck(:id).each do |rotation_id| # rubocop: disable CodeReuse/ActiveRecord
+        IncidentManagement::OncallRotation.in_progress.pluck(:id).each do |rotation_id| # rubocop: disable CodeReuse/ActiveRecord
           IncidentManagement::OncallRotations::PersistShiftsJob.perform_async(rotation_id)
         end
       end

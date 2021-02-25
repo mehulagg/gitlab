@@ -69,7 +69,7 @@ RSpec.describe TrialStatusWidgetHelper do
         subscription.trial_ends_on = Date.current
       end
 
-      it { is_expected.to eq('Gold Trial – 0 days left') }
+      it { is_expected.to eq('Ultimate Trial – 0 days left') }
     end
 
     context 'when there is 1 day remaining' do
@@ -77,7 +77,7 @@ RSpec.describe TrialStatusWidgetHelper do
         subscription.trial_ends_on = Date.current.advance(days: 1)
       end
 
-      it { is_expected.to eq('Gold Trial – 1 day left') }
+      it { is_expected.to eq('Ultimate Trial – 1 day left') }
     end
 
     context 'when there are 2+ days remaining' do
@@ -85,7 +85,7 @@ RSpec.describe TrialStatusWidgetHelper do
         subscription.trial_ends_on = Date.current.advance(days: 13)
       end
 
-      it { is_expected.to eq('Gold Trial – 13 days left') }
+      it { is_expected.to eq('Ultimate Trial – 13 days left') }
     end
   end
 end

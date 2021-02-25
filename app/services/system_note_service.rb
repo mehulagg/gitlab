@@ -241,6 +241,10 @@ module SystemNoteService
     ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).mark_canonical_issue_of_duplicate(duplicate_issue)
   end
 
+  def add_email_participants(noteable, project, author, body)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).add_email_participants(body)
+  end
+
   def discussion_lock(issuable, author)
     ::SystemNotes::IssuablesService.new(noteable: issuable, project: issuable.project, author: author).discussion_lock
   end
@@ -321,6 +325,10 @@ module SystemNoteService
 
   def change_incident_severity(incident, author)
     ::SystemNotes::IncidentService.new(noteable: incident, project: incident.project, author: author).change_incident_severity
+  end
+
+  def log_resolving_alert(alert, monitoring_tool)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project).log_resolving_alert(monitoring_tool)
   end
 
   private

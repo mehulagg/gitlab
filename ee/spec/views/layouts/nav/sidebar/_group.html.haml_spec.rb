@@ -122,7 +122,7 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
   end
 
   describe 'security dashboard tab' do
-    let(:group) { create(:group_with_plan, plan: :gold_plan) }
+    let(:group) { create(:group_with_plan, plan: :ultimate_plan) }
 
     before do
       enable_namespace_license_check!

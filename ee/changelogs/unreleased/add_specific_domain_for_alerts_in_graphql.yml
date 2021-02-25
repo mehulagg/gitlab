@@ -1,6 +1,0 @@
----
-title: Add specific domain for threat management related alerts in order to tie the
-  frontend and backend together.
-merge_request: 51029
-author:
-type: changed

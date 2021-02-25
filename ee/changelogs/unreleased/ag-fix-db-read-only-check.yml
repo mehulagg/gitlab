@@ -1,5 +1,0 @@
----
-title: Default maintenance_mode value to false if not explicitly set
-merge_request: 54428
-author:
-type: fixed

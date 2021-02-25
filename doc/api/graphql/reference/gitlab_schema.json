@@ -8573,6 +8573,34 @@
               "deprecationReason": null
             },
             {
+              "name": "duration",
+              "description": "Duration of the job in seconds.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "finishedAt",
+              "description": "When a job has finished running.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "name",
               "description": "Name of the job.",
               "args": [
@@ -9176,20 +9204,6 @@
               "deprecationReason": null
             },
             {
-              "name": "createdByUser",
-              "description": "User object, containing information about the person who created the agent.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "User",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "id",
               "description": "ID of the cluster agent.",
               "args": [
@@ -9556,20 +9570,6 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Time",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "createdByUser",
-              "description": "The user who created the token.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "User",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -40575,7 +40575,7 @@
                 "name": "String",
                 "ofType": null
               },
-              "defaultValue": "\"#6699cc\""
+              "defaultValue": "\"#428BCA\""
             },
             {
               "name": "clientMutationId",
@@ -43542,29 +43542,6 @@
           "possibleTypes": null
         },
         {
-          "kind": "ENUM",
-          "name": "MergeRequestNewState",
-          "description": "New state to apply to a merge request.",
-          "fields": null,
-          "inputFields": null,
-          "interfaces": null,
-          "enumValues": [
-            {
-              "name": "OPEN",
-              "description": "Open the merge request if it is closed.",
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "CLOSED",
-              "description": "Close the merge request if it is open.",
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "possibleTypes": null
-        },
-        {
           "kind": "OBJECT",
           "name": "MergeRequestPermissions",
           "description": "Check permissions for the current user on a merge request",
@@ -44889,16 +44866,6 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
-                "ofType": null
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "state",
-              "description": "The action to perform to change the state.",
-              "type": {
-                "kind": "ENUM",
-                "name": "MergeRequestNewState",
                 "ofType": null
               },
               "defaultValue": null
@@ -54675,24 +54642,6 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
-            },
-            {
-              "name": "warnings",
-              "description": "Indicates if a pipeline has warnings.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -62232,7 +62181,7 @@
                 },
                 {
                   "name": "content",
-                  "description": "Contents of `.gitlab-ci.yml`.",
+                  "description": "Contents of '.gitlab-ci.yml'.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -62435,7 +62384,7 @@
               "args": [
                 {
                   "name": "fullPath",
-                  "description": "The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.",
+                  "description": "The full path of the project, group or namespace, e.g., \"gitlab-org/gitlab-foss\".",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -62559,7 +62508,7 @@
             },
             {
               "name": "issue",
-              "description": "Find an Issue.",
+              "description": "Find an issue.",
               "args": [
                 {
                   "name": "id",
@@ -62658,7 +62607,7 @@
               "args": [
                 {
                   "name": "fullPath",
-                  "description": "The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.",
+                  "description": "The full path of the project, group or namespace, e.g., \"gitlab-org/gitlab-foss\".",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -62712,7 +62661,7 @@
               "args": [
                 {
                   "name": "fullPath",
-                  "description": "The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.",
+                  "description": "The full path of the project, group or namespace, e.g., \"gitlab-org/gitlab-foss\".",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,

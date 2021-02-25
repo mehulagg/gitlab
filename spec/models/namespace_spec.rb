@@ -6,7 +6,7 @@ RSpec.describe Namespace do
   include ProjectForksHelper
   include GitHelpers
 
-  let!(:namespace) { create(:namespace) }
+  let!(:namespace) { create(:namespace, :with_namespace_settings) }
   let(:gitlab_shell) { Gitlab::Shell.new }
   let(:repository_storage) { 'default' }
 
@@ -114,6 +114,28 @@ RSpec.describe Namespace do
   describe 'inclusions' do
     it { is_expected.to include_module(Gitlab::VisibilityLevel) }
     it { is_expected.to include_module(Namespaces::Traversal::Recursive) }
+  end
+
+  describe 'callbacks' do
+    describe 'before_save :ensure_delayed_project_removal_assigned_to_namespace_settings' do
+      it 'sets the matching value in namespace_settings' do
+        expect { namespace.update!(delayed_project_removal: true) }.to change {
+          namespace.namespace_settings.delayed_project_removal
+        }.from(false).to(true)
+      end
+
+      context 'when the feature flag is disabled' do
+        before do
+          stub_feature_flags(migrate_delayed_project_removal: false)
+        end
+
+        it 'does not set the matching value in namespace_settings' do
+          expect { namespace.update!(delayed_project_removal: true) }.not_to change {
+            namespace.namespace_settings.delayed_project_removal
+          }
+        end
+      end
+    end
   end
 
   describe '#visibility_level_field' do
@@ -282,6 +304,17 @@ RSpec.describe Namespace do
       host = "namespace.io"
 
       expect(described_class.find_by_pages_host(host)).to eq(nil)
+    end
+  end
+
+  describe '.top_most' do
+    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:sub_namespace) { create(:namespace, parent: namespace) }
+
+    subject { described_class.top_most.ids }
+
+    it 'only contains root namespace' do
+      is_expected.to eq([namespace.id])
     end
   end
 
@@ -800,7 +833,7 @@ RSpec.describe Namespace do
   end
 
   describe '#all_projects' do
-    shared_examples 'all projects for a group' do
+    context 'when namespace is a group' do
       let(:namespace) { create(:group) }
       let(:child) { create(:group, parent: namespace) }
       let!(:project1) { create(:project_empty_repo, namespace: namespace) }
@@ -808,49 +841,25 @@ RSpec.describe Namespace do
 
       it { expect(namespace.all_projects.to_a).to match_array([project2, project1]) }
       it { expect(child.all_projects.to_a).to match_array([project2]) }
+
+      it 'queries for the namespace and its descendants' do
+        expect(Project).to receive(:where).with(namespace: [namespace, child])
+
+        namespace.all_projects
+      end
     end
 
-    shared_examples 'all projects for personal namespace' do
+    context 'when namespace is a user namespace' do
       let_it_be(:user) { create(:user) }
       let_it_be(:user_namespace) { create(:namespace, owner: user) }
       let_it_be(:project) { create(:project, namespace: user_namespace) }
 
       it { expect(user_namespace.all_projects.to_a).to match_array([project]) }
-    end
 
-    context 'with recursive approach' do
-      context 'when namespace is a group' do
-        include_examples 'all projects for a group'
+      it 'only queries for the namespace itself' do
+        expect(Project).to receive(:where).with(namespace: user_namespace)
 
-        it 'queries for the namespace and its descendants' do
-          expect(Project).to receive(:where).with(namespace: [namespace, child])
-
-          namespace.all_projects
-        end
-      end
-
-      context 'when namespace is a user namespace' do
-        include_examples 'all projects for personal namespace'
-
-        it 'only queries for the namespace itself' do
-          expect(Project).to receive(:where).with(namespace: user_namespace)
-
-          user_namespace.all_projects
-        end
-      end
-    end
-
-    context 'with route path wildcard approach' do
-      before do
-        stub_feature_flags(recursive_approach_for_all_projects: false)
-      end
-
-      context 'when namespace is a group' do
-        include_examples 'all projects for a group'
-      end
-
-      context 'when namespace is a user namespace' do
-        include_examples 'all projects for personal namespace'
+        user_namespace.all_projects
       end
     end
   end
@@ -1447,6 +1456,26 @@ RSpec.describe Namespace do
       it 'returns true' do
         is_expected.to eq(true)
       end
+    end
+  end
+
+  describe '#recent?' do
+    subject { namespace.recent? }
+
+    context 'when created more than 90 days ago' do
+      before do
+        namespace.update_attribute(:created_at, 91.days.ago)
+      end
+
+      it { is_expected.to be(false) }
+    end
+
+    context 'when created less than 90 days ago' do
+      before do
+        namespace.update_attribute(:created_at, 89.days.ago)
+      end
+
+      it { is_expected.to be(true) }
     end
   end
 end

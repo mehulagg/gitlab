@@ -9,6 +9,7 @@ import { mapActions } from 'vuex';
 import BoardSidebar from 'ee_component/boards/components/board_sidebar';
 import toggleLabels from 'ee_component/boards/toggle_labels';
 
+import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import BoardContent from '~/boards/components/board_content.vue';
 import BoardAddIssuesModal from '~/boards/components/modal/index.vue';
 import mountMultipleBoardsSwitcher from '~/boards/mount_multiple_boards_switcher';
@@ -83,6 +84,7 @@ export default () => {
         fullPath: $boardApp.dataset.fullPath,
         boardType: this.parent,
         disabled: this.disabled,
+        isEpicBoard: true,
         boardConfig: {
           milestoneId: parseInt($boardApp.dataset.boardMilestoneId, 10),
           milestoneTitle: $boardApp.dataset.boardMilestoneTitle || '',
@@ -96,7 +98,6 @@ export default () => {
             ? parseInt($boardApp.dataset.boardWeight, 10)
             : null,
         },
-        isEpicBoard: true,
       });
     },
     mounted() {
@@ -110,10 +111,26 @@ export default () => {
     },
   });
 
+  const createColumnTriggerEl = document.querySelector('.js-create-column-trigger');
+  if (createColumnTriggerEl) {
+    // eslint-disable-next-line no-new
+    new Vue({
+      el: createColumnTriggerEl,
+      components: {
+        BoardAddNewColumnTrigger,
+      },
+      store,
+      render(createElement) {
+        return createElement(BoardAddNewColumnTrigger);
+      },
+    });
+  }
+
   toggleLabels();
 
   mountMultipleBoardsSwitcher({
     fullPath: $boardApp.dataset.fullPath,
     rootPath: $boardApp.dataset.boardsEndpoint,
+    isEpicBoard: true,
   });
 };

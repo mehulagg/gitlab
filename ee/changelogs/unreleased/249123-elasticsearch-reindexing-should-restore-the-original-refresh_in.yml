@@ -1,5 +1,0 @@
----
-title: Restore refresh_interval from settings after reindex
-merge_request: 51147
-author:
-type: changed

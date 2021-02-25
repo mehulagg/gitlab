@@ -1,5 +1,163 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.9.1 (2021-02-23)
+
+- No changes.
+
+## 13.9.0 (2021-02-22)
+
+### Removed (1 change)
+
+- Remove reviewer_approval_rules feature flag. !53205
+
+### Fixed (33 changes)
+
+- Fix Jira issue list links when Jira runs on a subpath. !51797
+- Fix epic assignment in the createIssue mutation. !51817
+- Show Response fields for vulnerabilties sourced from DAST. !51948
+- Display error message if group member can not be updated because their email does not match the list of allowed domains. !52014
+- Fix JS error on welcome page. !52022
+- Track code quality view event only once tab is active. !52140
+- Fix Vuln detail and modal when reasonPhrase is empty string. !52156
+- Fix duplicit epics on roadmap page when filtering by milestone. !52201
+- Fix file templates return same content for templates with same name but from different projects. !52332
+- Fixed bug that overwrote issue description changes from vulnerabilities. !52376
+- Swimlanes - Support negated filters. !52449
+- Fix line spacing in billing card header. !52521
+- Change FAQ link on the billing page. !52577
+- Properly populate descriptions in an issue created from a vulnerability. !52592
+- Properly populate description in an issue created from a vulnerability. !52619
+- Ignore connection error when changing the Elasticsearch Server URL. !52645
+- Fix Epic autocomplete reference. !52663
+- Fix search debounce for Swimlanes board assignees. !52786
+- Remove LDAP "Edit Permissions" button for inherited group members. !52847
+- Resolve Filter count does not get reflected in Test Cases. !52889
+- Scope iteration report to subgroups. !52926
+- Fixed iteration dropdown UI. !52987
+- Fix approvals widget alignment issues. !53213
+- Fix sub-group projects being locked after storage purchase. !53249
+- Add license check for full code quality report. !53258
+- Fix blank alert field when creating an issue from a vulnerability. !53656
+- Fix invalid prop error for canEdit prop in issue sidebar when user cannot edit iteration. !53819
+- Revert text back to Allow instead of Deny. Fixes fromEndpoints/toEndpoints format to keep it aligned with the allow all logic. The previous code was causing a allowing none while it should be allowing all. !53940
+- Fix security dashboard for Safari (< 14.0). !54042
+- Fix issue where maintainers could not set compliance framework for projects. !54071
+- Fix buy more minutes link to wrong destination. !54080
+- Advanced Search: fix project count_only queries. !54303
+- Default maintenance_mode value to false if not explicitly set. !54428
+
+### Changed (40 changes)
+
+- New epic button in Epic Roadmap empty state should direct the user to a full epic creation page. !45948
+- Move sast_reports and secret_detection_reports to CE. !48200
+- Make the waiting period for deletion dynamic on project removal page. !50597
+- Move Advanced Search Admin Settings to Top Level. !51026
+- Add specific domain for threat management related alerts in order to tie the frontend and backend together. !51029
+- Restore refresh_interval from settings after reindex. !51147
+- Move all the changes related to Mutation.configureSast to CE. !51169
+- Enable Merge Train checkbox based on Merge Pipelines checkbox. !51233
+- Redirect user to previous page after DAST profiles creation. !51482
+- Add iteration to bulk issue edit sidebar. !51657
+- Use old purchase flow when user last name is blank. !51730
+- Move empty state into the threat monitoring tabs. !51748
+- Improve UX for DAST Profiles selector. !51957
+- Add 12 month limit to MR Analytics. !52070
+- Modify herders in exported requirements CSV file. !52118
+- Issues created from Vulnerabilities set to Confidential by default. !52127
+- Add feedback creation in controller. !52141
+- Updated text and styling of the DAST-modal footer button. !52245
+- Migrate health status dropdown to use gitlab ui. !52273
+- Remove badges design from DAST validation statuses. !52301
+- Process one record at a time in Bulk Import pipelines. !52330
+- Feat(EpicSelect): Migrate epic select to internal GitLab UI compoenent. !52528
+- Log token_id in project access token audit events instead of user_id. !52535
+- BulkImports: Import Epic's labels. !52626
+- Preserve Epic parent-child association when importing using Bulk Import. !52662
+- Add last_activity_on attribute to Billable Members API. !52666
+- Update Deployment Frequency graphs to always use UTC dates. !52919
+- Remove target_name parameter from Elasticsearch rake tasks. !52958
+- Update Issue Weights Paywall CTAs. !53117
+- Add Event type to GraphQL and events to epics. !53152
+- BulkImports: Associate mapped users to imported epics. !53296
+- Disable ability for maintainers to change project compliance framework. !53370
+- Add alert related labels to CiliumNetworkPolicies. The label will contain the project id and will be applicable to both new and existing policies. !53401
+- Regularly reverify Packages on primary. !53470
+- Allow token revocation for public projects only. !53734
+- Use previous license term for seat overage. !53878
+- Show loading state for vulnerability list when filter/sort is changed. !53934
+- Strip trailing whitespace from DAST site validation HTTP response body. !53951
+- Track elasticsearch_timed_out_count for all ES requests in log. !54180
+- Start license_scanning job within its stage, and not when pipeline starts. !54234
+
+### Performance (5 changes)
+
+- Speed up roadmap show page by removing an extra epic count check. !51610
+- Improve Advanced Search counts queries. !51971
+- Resolve N+1 issue loading approval rules on the MR list. !52364
+- Set 1s server side timeout on Elasticsearch counts. !53435
+- Improve the performance of the Merge Request Analytics chart. !53704
+
+### Added (45 changes, 1 of them is from the community)
+
+- Add activity filter to security dashboards. !48196 (Kev @KevSlashNull)
+- Add usage ping for user secure scans. !49444
+- Add details to Vulnerability GraphQL. !49465
+- Add description text to Deployment Frequency charts. !51250
+- Capture metrics for group coverage project links. !51411
+- Add route for threat monitoring alert details. !51417
+- Audit events for project access tokens. !51660
+- Update renew/upgrade banner with actionable links. !51705
+- Adds API support for Group Deployment Frequency. !51938
+- Display train badge for pipelines that are merge trains. !52137
+- Add web_url to iterations API. !52178
+- Add create epic board via GraphQL. !52258
+- Add MTTM stat to MR Analytics. !52316
+- Add URL Navigation to Pipeline Analytics Charts. !52338
+- Log user instance request and rejection in Audit Events. !52543
+- Implement "Security & Compliance" visibility settings. !52551
+- Add blobPath field to VulnerabilityLocation types in GraphQL. !52599
+- Add End of Availability banner for Bronze Plans for relevant users. !52607
+- Add support for subgroup events in Group webhooks. !52658
+- Track load performance widget expansions via usage ping. !52688
+- Allows fields selection when exporting Requirements with GraphQL. !52706
+- Support /parent_epic quick action when creating new epic. !52727
+- Support setting customizable timeouts for git CLI 2FA via UI & API. !52769
+- Forbid git pushes to group wikis when repo is read only. !52801
+- Add award emoji to epics in GraphQL. !52922
+- Add group repository storage move endpoints. !53016
+- Add ability to enforce SSH key expiration (feature flag removed). !53035
+- Add a meaningful error message for assigning confidential epics to issues. !53078
+- Add support for revoking DAST site validations. !53134
+- Add group wikis import/export functionality. !53247
+- Replace text with links on Usage Quota page. !53279
+- Add group-level CI/CD Analytics page with release stats. !53295
+- Adds a historical coverage graph to the group repositories analytics page. !53319
+- Dynamically rename plan title after EoA rollout date. !53473
+- Optional enforcement of PAT expiration (feature flag removed). !53660
+- Export only selected fields in requirements. !53707
+- Change the GitLab Elasticsearch Indexer version to 2.9.0. !53764
+- Allow to filter requirements by latest requirement test report status on GraphQL. !53767
+- Enable threat_monitoring_alerts feature flag by default. !53776
+- Release maintenance mode. !53895
+- Add hasSecurityReports field to GraphQL MergeRequest type. !53925
+- Add ability to save and manage DAST scans. !53942
+- Add cancel button to On-demand scans form. !54050
+- Dedupe vulnerability_findings for bandit and semgrep. !54181
+- Ability to create a Jira issue for a vulnerability. !54182
+
+### Other (9 changes, 2 of them are from the community)
+
+- Geo: Add verification state fields to package file registry. !49737
+- Update project's advanced settings UI text. !51442
+- Convert path-lock unlock button to pajamas. !52276
+- Adding audit event for default branch change. !52339 (Abdul Shaheed)
+- Use plan name instead of plan code in new subscription app. !52414
+- Replace OpenSSL constants with strings. !52431 (Takuya Noguchi)
+- Add manual renew button to billings page. !52652
+- Abstract out details of policy_helper. !52714
+- Review UI text - repo push rules settings. !52797
+
+
 ## 13.8.4 (2021-02-11)
 
 ### Security (1 change)

@@ -1,5 +1,0 @@
----
-title: Resolve N+1 issue loading approval rules on the MR list
-merge_request: 52364
-author:
-type: performance

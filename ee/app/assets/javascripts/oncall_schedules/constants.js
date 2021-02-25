@@ -39,9 +39,6 @@ export const addRotationModalId = 'addRotationModal';
 export const editRotationModalId = 'editRotationModal';
 export const deleteRotationModalId = 'deleteRotationModal';
 
-/**
- * Used as a JavaScript week is represented as 0 - 6
- */
-export const DAYS_IN_DATE_WEEK = 6;
 export const ASSIGNEE_SPACER = 2;
 export const TIMELINE_CELL_WIDTH = 180;
+export const SHIFT_WIDTH_CALCULATION_DELAY = 250;

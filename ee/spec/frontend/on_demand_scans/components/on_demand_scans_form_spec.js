@@ -145,7 +145,6 @@ describe('OnDemandScansForm', () => {
             newScannerProfilePath,
             newSiteProfilePath,
             glFeatures: {
-              securityOnDemandScansSiteValidation: true,
               dastSavedScans: true,
             },
           },
@@ -502,24 +501,6 @@ describe('OnDemandScansForm', () => {
           expect(findSubmitButton().props('disabled')).toBe(hasConflict);
         },
       );
-
-      describe('securityOnDemandScansSiteValidation feature flag disabled', () => {
-        beforeEach(() => {
-          mountShallowSubject({
-            provide: {
-              glFeatures: {
-                securityOnDemandScansSiteValidation: false,
-              },
-            },
-          });
-          return setFormData();
-        });
-
-        it(`does not report any conflict when user selects ${description}`, () => {
-          expect(findProfilesConflictAlert().exists()).toBe(false);
-          expect(findSubmitButton().props('disabled')).toBe(false);
-        });
-      });
     },
   );
 

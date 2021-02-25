@@ -18,7 +18,9 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
   specify { expect(described_class).to require_graphql_authorizations(:create_cluster) }
 
   describe '#resolve' do
-    subject { mutation.resolve(cluster_agent_id: cluster_agent.to_global_id) }
+    let(:description) { 'new token!' }
+
+    subject { mutation.resolve(cluster_agent_id: cluster_agent.to_global_id, description: description) }
 
     context 'without token permissions' do
       it 'raises an error if the resource is not accessible to the user' do
@@ -44,8 +46,12 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
 
       it 'creates a new token', :aggregate_failures do
         expect { subject }.to change { ::Clusters::AgentToken.count }.by(1)
-        expect(subject[:secret]).not_to be_nil
         expect(subject[:errors]).to eq([])
+      end
+
+      it 'returns token information', :aggregate_failures do
+        expect(subject[:secret]).not_to be_nil
+        expect(subject[:token].description).to eq(description)
       end
 
       context 'invalid params' do

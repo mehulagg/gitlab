@@ -36,6 +36,10 @@ class MergeRequest < ApplicationRecord
 
   SORTING_PREFERENCE_FIELD = :merge_requests_sort
 
+  ALLOWED_TO_USE_MERGE_BASE_PIPELINE_FOR_COMPARISON = {
+    'Ci::CompareCodequalityReportsService' => ->(project) { ::Gitlab::Ci::Features.display_codequality_backend_comparison?(project) }
+  }.freeze
+
   belongs_to :target_project, class_name: "Project"
   belongs_to :source_project, class_name: "Project"
   belongs_to :merge_user, class_name: "User"
@@ -317,6 +321,8 @@ class MergeRequest < ApplicationRecord
   scope :preload_author, -> { preload(:author) }
   scope :preload_approved_by_users, -> { preload(:approved_by_users) }
   scope :preload_metrics, -> (relation) { preload(metrics: relation) }
+  scope :preload_project_and_latest_diff, -> { preload(:source_project, :latest_merge_request_diff) }
+  scope :preload_latest_diff_comment, -> { preload(latest_merge_request_diff: :merge_request_diff_commits) }
   scope :with_web_entity_associations, -> { preload(:author, :target_project) }
 
   scope :with_auto_merge_enabled, -> do
@@ -374,8 +380,7 @@ class MergeRequest < ApplicationRecord
   alias_attribute :auto_merge_enabled, :merge_when_pipeline_succeeds
   alias_method :issuing_parent, :target_project
 
-  delegate :active?, :builds_with_coverage, to: :head_pipeline, prefix: true, allow_nil: true
-  delegate :success?, :active?, to: :actual_head_pipeline, prefix: true, allow_nil: true
+  delegate :builds_with_coverage, to: :head_pipeline, prefix: true, allow_nil: true
 
   RebaseLockTimeout = Class.new(StandardError)
 
@@ -433,6 +438,18 @@ class MergeRequest < ApplicationRecord
     # either the squash commit (if the MR was squashed) or the diff head commit.
     sha = merge_commit_sha || squash_commit_sha || diff_head_sha
     target_project.latest_pipeline(target_branch, sha)
+  end
+
+  def head_pipeline_active?
+    !!head_pipeline&.active?
+  end
+
+  def actual_head_pipeline_active?
+    !!actual_head_pipeline&.active?
+  end
+
+  def actual_head_pipeline_success?
+    !!actual_head_pipeline&.success?
   end
 
   # Pattern used to extract `!123` merge request references from text
@@ -1026,6 +1043,7 @@ class MergeRequest < ApplicationRecord
   def work_in_progress?
     self.class.work_in_progress?(title)
   end
+  alias_method :draft?, :work_in_progress?
 
   def wipless_title
     self.class.wipless_title(self.title)
@@ -1550,7 +1568,7 @@ class MergeRequest < ApplicationRecord
   def compare_reports(service_class, current_user = nil, report_type = nil )
     with_reactive_cache(service_class.name, current_user&.id, report_type) do |data|
       unless service_class.new(project, current_user, id: id, report_type: report_type)
-        .latest?(base_pipeline, actual_head_pipeline, data)
+        .latest?(comparison_base_pipeline(service_class.name), actual_head_pipeline, data)
         raise InvalidateReactiveCache
       end
 
@@ -1586,7 +1604,7 @@ class MergeRequest < ApplicationRecord
     raise NameError, service_class unless service_class < Ci::CompareReportsBaseService
 
     current_user = User.find_by(id: current_user_id)
-    service_class.new(project, current_user, id: id, report_type: report_type).execute(base_pipeline, actual_head_pipeline)
+    service_class.new(project, current_user, id: id, report_type: report_type).execute(comparison_base_pipeline(identifier), actual_head_pipeline)
   end
 
   def all_commits
@@ -1708,6 +1726,14 @@ class MergeRequest < ApplicationRecord
     if base_pipeline&.coverage && head_pipeline&.coverage
       '%.2f' % (head_pipeline.coverage.to_f - base_pipeline.coverage.to_f)
     end
+  end
+
+  def use_merge_base_pipeline_for_comparison?(service_class)
+    ALLOWED_TO_USE_MERGE_BASE_PIPELINE_FOR_COMPARISON[service_class]&.call(project)
+  end
+
+  def comparison_base_pipeline(service_class)
+    (use_merge_base_pipeline_for_comparison?(service_class) && merge_base_pipeline) || base_pipeline
   end
 
   def base_pipeline

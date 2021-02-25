@@ -1,5 +1,0 @@
----
-title: Add ability to enforce SSH key expiration (feature flag removed)
-merge_request: 53035
-author:
-type: added

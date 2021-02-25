@@ -1,7 +1,8 @@
 <script>
 import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
-import { DAYS_IN_WEEK, DAYS_IN_DATE_WEEK, ASSIGNEE_SPACER } from 'ee/oncall_schedules/constants';
+import { DAYS_IN_WEEK, HOURS_IN_DAY } from 'ee/oncall_schedules/constants';
 import { getOverlapDateInPeriods, nDaysAfter } from '~/lib/utils/datetime_utility';
+import { weekDisplayShiftLeft, weekDisplayShiftWidth } from './shift_utils';
 
 export default {
   components: {
@@ -32,31 +33,46 @@ export default {
       type: Number,
       required: true,
     },
+    rotationLength: {
+      type: Object,
+      required: true,
+    },
   },
   computed: {
-    currentTimeframeEndsAt() {
-      return nDaysAfter(this.timeframeItem, DAYS_IN_DATE_WEEK);
+    currentTimeFrameEnd() {
+      return nDaysAfter(this.timeframeEndsAt, DAYS_IN_WEEK);
     },
-    daysUntilEndOfTimeFrame() {
-      return (
-        this.currentTimeframeEndsAt.getDate() -
-        new Date(this.shiftRangeOverlap.overlapStartDate).getDate() +
-        1
-      );
+    shiftStyles() {
+      const {
+        shiftUnitIsHour,
+        totalShiftRangeOverlap,
+        shiftStartDateOutOfRange,
+        shiftTimeUnitWidth,
+        shiftStartsAt,
+        timeframeItem,
+        presetType,
+      } = this;
+
+      return {
+        left: weekDisplayShiftLeft(
+          shiftUnitIsHour,
+          totalShiftRangeOverlap,
+          shiftStartDateOutOfRange,
+          shiftTimeUnitWidth,
+          shiftStartsAt,
+          timeframeItem,
+          presetType,
+        ),
+        width: weekDisplayShiftWidth(
+          shiftUnitIsHour,
+          totalShiftRangeOverlap,
+          shiftStartDateOutOfRange,
+          shiftTimeUnitWidth,
+        ),
+      };
     },
     rotationAssigneeStyle() {
-      const startDate = this.shiftStartsAt.getDay();
-      const firstDayOfWeek = this.timeframeItem.getDay();
-      const isFirstCell = startDate === firstDayOfWeek;
-      let left = 0;
-
-      if (!(isFirstCell || this.shiftStartDateOutOfRange)) {
-        left =
-          (DAYS_IN_WEEK - this.daysUntilEndOfTimeFrame) * this.shiftTimeUnitWidth + ASSIGNEE_SPACER;
-      }
-
-      const width = this.shiftTimeUnitWidth * this.shiftWidth;
-
+      const { left, width } = this.shiftStyles;
       return {
         left: `${left}px`,
         width: `${width}px`,
@@ -71,49 +87,27 @@ export default {
     shiftStartDateOutOfRange() {
       return this.shiftStartsAt.getTime() < this.timeframeItem.getTime();
     },
-    shiftShouldRender() {
-      if (this.timeFrameIndex !== 0) {
-        return (
-          new Date(this.shiftRangeOverlap.overlapStartDate) > this.timeframeItem &&
-          new Date(this.shiftRangeOverlap.overlapStartDate) < this.currentTimeframeEndsAt
-        );
-      }
-
-      return Boolean(this.shiftRangeOverlap.daysOverlap);
+    shiftUnitIsHour() {
+      return (
+        this.totalShiftRangeOverlap.hoursOverlap <= HOURS_IN_DAY &&
+        this.rotationLength?.lengthUnit === 'HOURS'
+      );
     },
-    shiftRangeOverlap() {
-      try {
-        return getOverlapDateInPeriods(
-          { start: this.timeframeItem, end: this.currentTimeframeEndsAt },
-          { start: this.shiftStartsAt, end: this.shiftEndsAt },
-        );
-      } catch (error) {
-        return { daysOverlap: 0 };
-      }
-    },
-    shiftWidth() {
-      const offset = this.shiftStartDateOutOfRange ? 0 : 1;
-      const baseWidth =
-        this.timeFrameIndex === 0
-          ? this.totalShiftRangeOverlap.daysOverlap
-          : this.shiftRangeOverlap.daysOverlap;
-
-      return baseWidth + offset;
-    },
-    timeFrameIndex() {
-      return this.timeframe.indexOf(this.timeframeItem);
-    },
-    timeFrameEndsAt() {
+    timeframeEndsAt() {
       return this.timeframe[this.timeframe.length - 1];
     },
     totalShiftRangeOverlap() {
-      return getOverlapDateInPeriods(
-        {
-          start: this.timeframeItem,
-          end: nDaysAfter(this.timeFrameEndsAt, DAYS_IN_DATE_WEEK),
-        },
-        { start: this.shiftStartsAt, end: this.shiftEndsAt },
-      );
+      try {
+        return getOverlapDateInPeriods(
+          {
+            start: this.timeframeItem,
+            end: this.currentTimeFrameEnd,
+          },
+          { start: this.shiftStartsAt, end: this.shiftEndsAt },
+        );
+      } catch (error) {
+        return { hoursOverlap: 0 };
+      }
     },
   },
 };
@@ -121,10 +115,10 @@ export default {
 
 <template>
   <rotation-assignee
-    v-if="shiftShouldRender"
     :assignee="shift.participant"
     :rotation-assignee-style="rotationAssigneeStyle"
     :rotation-assignee-starts-at="shift.startsAt"
     :rotation-assignee-ends-at="shift.endsAt"
+    :shift-width="shiftStyles.width"
   />
 </template>

@@ -33,6 +33,13 @@ module EE
       super.merge(data)
     end
 
+    override :board_base_url
+    def board_base_url
+      return group_epic_boards_url(@group) if board.is_a?(::Boards::EpicBoard)
+
+      super
+    end
+
     override :recent_boards_path
     def recent_boards_path
       return recent_group_boards_path(@group) if current_board_parent.is_a?(Group)

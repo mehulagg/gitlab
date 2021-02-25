@@ -305,6 +305,7 @@ listed in the descriptions of the relevant settings.
 | `housekeeping_incremental_repack_period` | integer          | required by: `housekeeping_enabled`  | Number of Git pushes after which an incremental `git repack` is run. |
 | `html_emails_enabled`                    | boolean          | no                                   | Enable HTML emails. |
 | `import_sources`                         | array of strings | no                                   | Sources to allow project import from, possible values: `github`, `bitbucket`, `bitbucket_server`, `gitlab`, `fogbugz`, `git`, `gitlab_project`, `gitea`, `manifest`, and `phabricator`. |
+| `in_product_marketing_emails_enabled`    | boolean          | no                                   | Enable in-product marketing emails. Enabled by default. |
 | `invisible_captcha_enabled`              | boolean          | no                                   | <!-- vale gitlab.Spelling = NO --> Enable Invisible Captcha <!-- vale gitlab.Spelling = YES --> spam detection during sign-up. Disabled by default. |
 | `issues_create_limit`                    | integer          | no                                   | Max number of issue creation requests per minute per user. Disabled by default.|
 | `local_markdown_version`                 | integer          | no                                   | Increase this value when any cached Markdown should be invalidated. |
@@ -334,7 +335,7 @@ listed in the descriptions of the relevant settings.
 | `polling_interval_multiplier`            | decimal          | no                                   | Interval multiplier used by endpoints that perform polling. Set to `0` to disable polling. |
 | `project_export_enabled`                 | boolean          | no                                   | Enable project export. |
 | `prometheus_metrics_enabled`             | boolean          | no                                   | Enable Prometheus metrics. |
-| `protected_ci_variables`                 | boolean          | no                                   | Environment variables are protected by default. |
+| `protected_ci_variables`                 | boolean          | no                                   | CI/CD variables are protected by default. |
 | `pseudonymizer_enabled`                  | boolean          | no                                   | **(PREMIUM)** When enabled, GitLab runs a background job that produces pseudonymized CSVs of the GitLab database to upload to your configured object storage directory.
 | `push_event_activities_limit`            | integer          | no                                   | Number of changes (branches or tags) in a single push to determine whether individual push events or bulk push events are created. [Bulk push events are created](../user/admin_area/settings/push_event_activities_limit.md) if it surpasses that value. |
 | `push_event_hooks_limit`                 | integer          | no                                   | Number of changes (branches or tags) in a single push to determine whether webhooks and services fire or not. Webhooks and services aren't submitted if it surpasses that value. |

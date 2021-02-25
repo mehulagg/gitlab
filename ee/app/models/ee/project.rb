@@ -62,6 +62,7 @@ module EE
           includes(:protected_branches).reject { |rule| rule.applies_to_branch?(branch) }
         end
       end
+      has_many :external_approval_rules, class_name: 'ApprovalRules::ExternalApprovalRule'
       has_many :approval_merge_request_rules, through: :merge_requests, source: :approval_rules
       has_many :audit_events, as: :entity
       has_many :path_locks
@@ -108,6 +109,7 @@ module EE
       has_one :security_orchestration_policy_configuration, class_name: 'Security::OrchestrationPolicyConfiguration', foreign_key: :project_id, inverse_of: :project
 
       elastic_index_dependant_association :issues, on_change: :visibility_level
+      elastic_index_dependant_association :notes, on_change: :visibility_level
 
       scope :with_shared_runners_limit_enabled, -> do
         if ::Ci::Runner.has_shared_runners_with_non_zero_public_cost?
@@ -201,7 +203,7 @@ module EE
       delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
       delegate :closest_gitlab_subscription, to: :namespace
 
-      delegate :requirements_access_level, :security_and_compliance_access_level, to: :project_feature, allow_nil: true
+      delegate :requirements_access_level, to: :project_feature, allow_nil: true
       delegate :pipeline_configuration_full_path, to: :compliance_management_framework, allow_nil: true
       alias_attribute :compliance_pipeline_configuration_full_path, :pipeline_configuration_full_path
 
@@ -240,15 +242,11 @@ module EE
       end
 
       def jira_vulnerabilities_integration_enabled?
-        return false unless jira_service
-
-        jira_service.jira_vulnerabilities_integration_enabled?
+        !!jira_service&.jira_vulnerabilities_integration_enabled?
       end
 
       def configured_to_create_issues_from_vulnerabilities?
-        return false unless jira_service
-
-        jira_service.configured_to_create_issues_from_vulnerabilities?
+        !!jira_service&.configured_to_create_issues_from_vulnerabilities?
       end
     end
 

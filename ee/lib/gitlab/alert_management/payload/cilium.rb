@@ -4,8 +4,6 @@ module Gitlab
   module AlertManagement
     module Payload
       class Cilium < Gitlab::AlertManagement::Payload::Generic
-        DEFAULT_TITLE = 'New: Alert'
-
         attribute :description, paths: %w(flow verdict)
         attribute :title, paths: %w(ciliumNetworkPolicy metadata name), fallback: -> { DEFAULT_TITLE }
 

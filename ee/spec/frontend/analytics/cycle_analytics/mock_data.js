@@ -144,6 +144,7 @@ export const codeEvents = deepCamelCase(stageFixtures.code);
 export const testEvents = deepCamelCase(stageFixtures.test);
 export const stagingEvents = deepCamelCase(stageFixtures.staging);
 export const rawCustomStage = {
+  name: 'Coolest beans stage',
   title: 'Coolest beans stage',
   hidden: false,
   legend: '',

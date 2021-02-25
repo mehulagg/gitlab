@@ -96,7 +96,7 @@ export const rawIssue = {
 
 export const mockIssue = {
   id: '436',
-  iid: 27,
+  iid: '27',
   title: 'Issue 1',
   referencePath: '#27',
   dueDate: null,

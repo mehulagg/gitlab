@@ -37,6 +37,14 @@ RSpec.describe IssuesFinder do
             expect(issues).to contain_exactly(issue_with_weight_42)
           end
         end
+
+        context 'filer issues by negated weight' do
+          let(:params) { { not: { weight: 1 } } }
+
+          it 'filters out issues with the specified weight' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5, issue_with_weight_42)
+          end
+        end
       end
 
       context 'filtering by assignee IDs' do

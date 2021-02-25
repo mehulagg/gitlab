@@ -77,7 +77,7 @@ If you do not have an existing SSH key pair, generate a new one.
 1. Type `ssh-keygen -t` followed by the key type and an optional comment.
    This comment is included in the `.pub` file that's created.
    You may want to use an email address for the comment.
-  
+
    For example, for ED25519:
 
    ```shell
@@ -111,7 +111,7 @@ If you do not have an existing SSH key pair, generate a new one.
 
 1. A confirmation is displayed, including information about where your files are stored.
 
-A public and private key are generated. 
+A public and private key are generated.
 [Add the public SSH key to your GitLab account](#add-an-ssh-key-to-your-gitlab-account) and keep
 the private key secure.
 
@@ -141,7 +141,7 @@ configure your SSH client to point to the directory where the private key is sto
      IdentityFile ~/.ssh/example_com_rsa
    ```
 
-   For more information on these settings, see the [`man ssh_config` (SSH config manual)](https://man.openbsd.org/ssh_config) page.
+   For more information on these settings, see the [`man ssh_config`](https://man.openbsd.org/ssh_config) page in the SSH configuration manual.
 
 Public SSH keys must be unique to GitLab because they bind to your account.
 Your SSH key is the only identifier you have when you push code with SSH.
@@ -278,7 +278,7 @@ Instead, you can assign aliases to hosts in the `~.ssh/config` file.
 - For the `Host`, use an alias like `user_1.gitlab.com` and
   `user_2.gitlab.com`. Advanced configurations
   are more difficult to maintain, and these strings are easier to
-  understand when you use tools like `git remote`. 
+  understand when you use tools like `git remote`.
 - For the `IdentityFile`, use the path the private key.
 
 ```conf

@@ -1,6 +1,6 @@
 ---
 stage: Create
-group: Source Code
+group: Code Review
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: index, reference
 description: "Getting started with Merge Requests."
@@ -60,7 +60,7 @@ request's page at the top-right side:
 - [Close issues automatically](#merge-requests-to-close-issues) when they are merged.
 - Enable the [delete source branch when merge request is accepted](#deleting-the-source-branch) option to keep your repository clean.
 - Enable the [squash commits when merge request is accepted](squash_and_merge.md) option to combine all the commits into one before merging, thus keep a clean commit history in your repository.
-- Set the merge request as a [**Draft**](work_in_progress_merge_requests.md) to avoid accidental merges before it is ready.
+- Set the merge request as a [**Draft**](drafts.md) to avoid accidental merges before it is ready.
 
 After you have created the merge request, you can also:
 
@@ -122,13 +122,15 @@ Requesting a code review is an important part of contributing code. However, dec
 your code and asking for a review are no easy tasks. Using the "assignee" field for both authors and
 reviewers makes it hard for others to determine who's doing what on a merge request.
 
-GitLab Merge Request Reviewers easily allow authors to request a review as well as see the status of the
-review. By selecting one or more users from the **Reviewers** field in the merge request's right-hand
-sidebar, the assigned reviewers will receive a notification of the request to review the merge request.
+The Merge Request Reviewers feature enables you to request a review of your work, and
+see the status of the review. Reviewers help distinguish the roles of the users
+involved in the merge request. In comparison to an **Assignee**, who is directly
+responsible for creating or merging a merge request, a **Reviewer** is a team member
+who may only be involved in one aspect of the merge request, such as a peer review.
 
-This makes it easy to determine the relevant roles for the users involved in the merge request, as well as formally requesting a review from a peer.
-
-To request it, open the **Reviewers** drop-down box to search for the user you wish to get a review from.
+To request a review of a merge request, expand the **Reviewers** select box in
+the right-hand sidebar. Search for the users you want to request a review from.
+When selected, GitLab creates a [to-do list item](../../todos.md) for each reviewer.
 
 #### Approval Rule information for Reviewers **(PREMIUM)**
 

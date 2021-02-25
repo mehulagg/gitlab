@@ -14,6 +14,9 @@ export default {
     PipelineGraph,
   },
   inject: {
+    metricsPath: {
+      default: '',
+    },
     pipelineIid: {
       default: '',
     },
@@ -29,7 +32,7 @@ export default {
     };
   },
   errorTexts: {
-    [DRAW_FAILURE]: __('An error ocurred while drawing job relationship links.'),
+    [DRAW_FAILURE]: __('An error occurred while drawing job relationship links.'),
     [LOAD_FAILURE]: __('We are currently unable to fetch data for this pipeline.'),
     [DEFAULT]: __('An unknown error occurred while loading this graph.'),
   },
@@ -108,6 +111,7 @@ export default {
     <gl-loading-icon v-if="showLoadingIcon" class="gl-mx-auto gl-my-4" size="lg" />
     <pipeline-graph
       v-if="pipeline"
+      :metrics-path="metricsPath"
       :pipeline="pipeline"
       @error="reportFailure"
       @refreshPipelineGraph="refreshPipelineGraph"

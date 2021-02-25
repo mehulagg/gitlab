@@ -17,9 +17,9 @@ jest.mock('~/lib/utils/url_utility', () => ({
 }));
 
 const {
-  gitlabCiYamlEditUrl,
+  gitlabCiYamlEditPath,
   configurationYaml,
-} = createApiFuzzingConfigurationMutationResponse.data.createApiFuzzingCiConfiguration;
+} = createApiFuzzingConfigurationMutationResponse.data.apiFuzzingCiConfigurationCreate;
 
 describe('EE - ApiFuzzingConfigurationSnippetModal', () => {
   let wrapper;
@@ -34,7 +34,7 @@ describe('EE - ApiFuzzingConfigurationSnippetModal', () => {
         merge(
           {
             propsData: {
-              ciYamlEditUrl: gitlabCiYamlEditUrl,
+              ciYamlEditUrl: gitlabCiYamlEditPath,
               yaml: configurationYaml,
             },
             attrs: {
@@ -66,7 +66,7 @@ describe('EE - ApiFuzzingConfigurationSnippetModal', () => {
     expect(Clipboard).toHaveBeenCalledWith('#copy-yaml-snippet-and-edit-button', {
       text: expect.any(Function),
     });
-    expect(redirectTo).toHaveBeenCalledWith(gitlabCiYamlEditUrl);
+    expect(redirectTo).toHaveBeenCalledWith(gitlabCiYamlEditPath);
   });
 
   it('on secondary event, text is copied to the clipbard', async () => {

@@ -5,13 +5,10 @@ import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
 import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
-import {
-  updateStoreAfterRotationAdd,
-  updateStoreAfterRotationEdit,
-} from 'ee/oncall_schedules/utils/cache_updates';
+import { updateStoreAfterRotationEdit } from 'ee/oncall_schedules/utils/cache_updates';
 import { isNameFieldValid, getParticipantsForSave } from 'ee/oncall_schedules/utils/common_utils';
 import createFlash, { FLASH_TYPES } from '~/flash';
-import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
+import searchProjectMembersQuery from '~/graphql_shared/queries/project_user_members_search.query.graphql';
 import { format24HourTimeStringFromInt, formatDate } from '~/lib/utils/datetime_utility';
 import { s__, __ } from '~/locale';
 import AddEditRotationForm from './add_edit_rotation_form.vue';
@@ -50,14 +47,15 @@ export default {
   },
   apollo: {
     participants: {
-      query: usersSearchQuery,
+      query: searchProjectMembersQuery,
       variables() {
         return {
+          fullPath: this.projectPath,
           search: this.ptSearchTerm,
         };
       },
-      update({ users: { nodes = [] } = {} }) {
-        return nodes;
+      update({ project: { projectMembers: { nodes = [] } = {} } = {} } = {}) {
+        return nodes.map(({ user }) => ({ ...user }));
       },
       error(error) {
         this.error = error;
@@ -74,7 +72,7 @@ export default {
         participants: [],
         rotationLength: {
           length: 1,
-          unit: this.$options.LENGTH_ENUM.hours,
+          unit: this.$options.LENGTH_ENUM.days,
         },
         startsAt: {
           date: null,
@@ -149,22 +147,11 @@ export default {
   methods: {
     createRotation() {
       this.loading = true;
-      const { projectPath, schedule } = this;
 
       this.$apollo
         .mutate({
           mutation: createOncallScheduleRotationMutation,
           variables: { input: this.rotationVariables },
-          update(store, { data }) {
-            updateStoreAfterRotationAdd(
-              store,
-              getOncallSchedulesWithRotationsQuery,
-              { ...data, scheduleIid: schedule.iid },
-              {
-                projectPath,
-              },
-            );
-          },
         })
         .then(
           ({
@@ -179,6 +166,7 @@ export default {
             }
 
             this.$refs.addEditScheduleRotationModal.hide();
+            this.$emit('fetchRotationShifts');
             return createFlash({
               message: this.$options.i18n.rotationCreated,
               type: FLASH_TYPES.SUCCESS,

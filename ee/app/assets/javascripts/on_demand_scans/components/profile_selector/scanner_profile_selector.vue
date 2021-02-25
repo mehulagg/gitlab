@@ -27,10 +27,7 @@ export default {
   computed: {
     formattedProfiles() {
       return this.profiles.map((profile) => {
-        const addSuffix = (str) =>
-          this.glFeatures.securityOnDemandScansSiteValidation
-            ? `${str} (${SCAN_TYPE_LABEL[profile.scanType]})`
-            : str;
+        const addSuffix = (str) => `${str} (${SCAN_TYPE_LABEL[profile.scanType]})`;
         return {
           ...profile,
           dropdownLabel: addSuffix(profile.profileName),

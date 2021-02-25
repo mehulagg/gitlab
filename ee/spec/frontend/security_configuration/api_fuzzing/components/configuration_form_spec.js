@@ -239,10 +239,10 @@ describe('EE - ApiFuzzingConfigurationForm', () => {
       expect(wrapper.vm.$refs[CONFIGURATION_SNIPPET_MODAL_ID].show).toHaveBeenCalled();
       expect(findConfigurationSnippetModal().props()).toEqual({
         ciYamlEditUrl:
-          createApiFuzzingConfigurationMutationResponse.data.createApiFuzzingCiConfiguration
-            .gitlabCiYamlEditUrl,
+          createApiFuzzingConfigurationMutationResponse.data.apiFuzzingCiConfigurationCreate
+            .gitlabCiYamlEditPath,
         yaml:
-          createApiFuzzingConfigurationMutationResponse.data.createApiFuzzingCiConfiguration
+          createApiFuzzingConfigurationMutationResponse.data.apiFuzzingCiConfigurationCreate
             .configurationYaml,
       });
     });
@@ -271,7 +271,7 @@ describe('EE - ApiFuzzingConfigurationForm', () => {
           $apollo: {
             mutate: jest.fn().mockResolvedValue({
               data: {
-                createApiFuzzingCiConfiguration: {
+                apiFuzzingCiConfigurationCreate: {
                   errors: ['error#1'],
                 },
               },

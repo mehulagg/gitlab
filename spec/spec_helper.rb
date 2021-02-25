@@ -180,6 +180,8 @@ RSpec.configure do |config|
   end
 
   if ENV['FLAKY_RSPEC_GENERATE_REPORT']
+    require_relative '../tooling/rspec_flaky/listener'
+
     config.reporter.register_listener(
       RspecFlaky::Listener.new,
       :example_passed,
@@ -248,9 +250,6 @@ RSpec.configure do |config|
     else
       unstub_all_feature_flags
     end
-
-    # Enable Marginalia feature for all specs in the test suite.
-    Gitlab::Marginalia.enabled = true
 
     # Stub these calls due to being expensive operations
     # It can be reenabled for specific tests via:

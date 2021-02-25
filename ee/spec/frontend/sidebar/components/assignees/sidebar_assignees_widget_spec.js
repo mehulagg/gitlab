@@ -100,6 +100,7 @@ describe('BoardCardAssigneeDropdown', () => {
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
+    fakeApollo = null;
     delete window.gon.current_username;
   });
 

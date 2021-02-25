@@ -157,10 +157,7 @@ module EE
 
       def billable
         scope = active.without_bots
-
-        License.with_valid_license do |license|
-          scope = scope.excluding_guests if license.exclude_guests_from_active_count?
-        end
+        scope = scope.excluding_guests if License.current&.exclude_guests_from_active_count?
 
         scope
       end
@@ -357,8 +354,8 @@ module EE
     end
 
     def owns_upgradeable_namespace?
-      !owns_paid_namespace?(plans: [::Plan::GOLD]) &&
-        owns_paid_namespace?(plans: [::Plan::BRONZE, ::Plan::SILVER])
+      !owns_paid_namespace?(plans: [::Plan::GOLD, ::Plan::ULTIMATE]) &&
+        owns_paid_namespace?(plans: [::Plan::BRONZE, ::Plan::SILVER, ::Plan::PREMIUM])
     end
 
     # Returns the groups a user has access to, either through a membership or a project authorization

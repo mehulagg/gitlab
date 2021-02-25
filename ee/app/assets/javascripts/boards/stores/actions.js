@@ -30,6 +30,7 @@ import {
 
 import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
 import epicQuery from '../graphql/epic.query.graphql';
+import createEpicBoardListMutation from '../graphql/epic_board_list_create.mutation.graphql';
 import epicBoardListsQuery from '../graphql/epic_board_lists.query.graphql';
 import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
 import issueMoveListMutation from '../graphql/issue_move_list.mutation.graphql';
@@ -76,7 +77,7 @@ const fetchAndFormatListIssues = (state, extraVariables) => {
     })
     .then(({ data }) => {
       const { lists } = data[boardType]?.board;
-      return { listIssues: formatListIssues(lists), listPageInfo: formatListsPageInfo(lists) };
+      return { listItems: formatListIssues(lists), listPageInfo: formatListsPageInfo(lists) };
     });
 };
 
@@ -100,7 +101,7 @@ const fetchAndFormatListEpics = (state, extraVariables) => {
     })
     .then(({ data }) => {
       const { lists } = data.group?.epicBoard;
-      return { listEpics: formatListEpics(lists), listPageInfo: formatEpicListsPageInfo(lists) };
+      return { listItems: formatListEpics(lists), listPageInfo: formatEpicListsPageInfo(lists) };
     });
 };
 
@@ -317,12 +318,10 @@ export default {
     };
 
     if (state.isEpicBoard) {
-      // This currently always fails. Epics will be loaded and displayed in the next iteration
-      // Issue: https://gitlab.com/gitlab-org/gitlab/-/issues/233438
       return fetchAndFormatListEpics(state, variables)
-        .then(({ listEpics, listPageInfo }) => {
+        .then(({ listItems, listPageInfo }) => {
           commit(types.RECEIVE_ITEMS_FOR_LIST_SUCCESS, {
-            listEpics,
+            listItems,
             listPageInfo,
             listId,
             noEpicIssues,
@@ -332,9 +331,9 @@ export default {
     }
 
     return fetchAndFormatListIssues(state, variables)
-      .then(({ listIssues, listPageInfo }) => {
+      .then(({ listItems, listPageInfo }) => {
         commit(types.RECEIVE_ITEMS_FOR_LIST_SUCCESS, {
-          listIssues,
+          listItems,
           listPageInfo,
           listId,
           noEpicIssues,
@@ -353,8 +352,8 @@ export default {
     };
 
     return fetchAndFormatListIssues(state, variables)
-      .then(({ listIssues }) => {
-        commit(types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, { ...listIssues, epicId });
+      .then(({ listItems }) => {
+        commit(types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, { ...listItems, epicId });
       })
       .catch(() => commit(types.RECEIVE_ISSUES_FOR_EPIC_FAILURE, epicId));
   },
@@ -484,8 +483,8 @@ export default {
     { state, commit },
     { issueId, issueIid, issuePath, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
   ) => {
-    const originalIssue = state.issues[issueId];
-    const fromList = state.issuesByListId[fromListId];
+    const originalIssue = state.boardItems[issueId];
+    const fromList = state.boardItemsByListId[fromListId];
     const originalIndex = fromList.indexOf(Number(issueId));
     commit(types.MOVE_ISSUE, {
       originalIssue,
@@ -555,5 +554,49 @@ export default {
         commit(types.RECEIVE_BOARD_LISTS_SUCCESS, formatBoardLists(lists));
       })
       .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
+  },
+
+  createList: ({ state, dispatch }, { backlog, labelId, milestoneId, assigneeId }) => {
+    const { isEpicBoard } = state;
+
+    if (!isEpicBoard) {
+      dispatch('createIssueList', { backlog, labelId, milestoneId, assigneeId });
+    } else {
+      dispatch('createEpicList', { backlog, labelId });
+    }
+  },
+
+  createEpicList: ({ state, commit, dispatch, getters }, { backlog, labelId }) => {
+    const { boardId } = state;
+
+    const existingList = getters.getListByLabelId(labelId);
+
+    if (existingList) {
+      dispatch('highlightList', existingList.id);
+      return;
+    }
+
+    gqlClient
+      .mutate({
+        mutation: createEpicBoardListMutation,
+        variables: {
+          boardId: fullEpicBoardId(boardId),
+          backlog,
+          labelId,
+        },
+      })
+      .then(({ data }) => {
+        if (data?.epicBoardListCreate?.errors.length) {
+          commit(types.CREATE_LIST_FAILURE);
+        } else {
+          const list = data.epicBoardListCreate?.list;
+          dispatch('addList', list);
+          dispatch('highlightList', list.id);
+        }
+      })
+      .catch((e) => {
+        commit(types.CREATE_LIST_FAILURE);
+        throw e;
+      });
   },
 };

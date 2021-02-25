@@ -34,6 +34,8 @@
   - 1
 - - analytics_instance_statistics_counter_job
   - 1
+- - analytics_usage_trends_counter_job
+  - 1
 - - approve_blocked_pending_approval_users
   - 1
 - - authorized_keys
@@ -212,6 +214,8 @@
   - 1
 - - namespaces_onboarding_pipeline_created
   - 1
+- - namespaces_onboarding_progress
+  - 1
 - - namespaces_onboarding_user_added
   - 1
 - - new_epic
@@ -280,6 +284,10 @@
   - 1
 - - projects_git_garbage_collect
   - 1
+- - projects_schedule_bulk_repository_shard_moves
+  - 1
+- - projects_update_repository_storage
+  - 1
 - - prometheus_create_default_alerts
   - 1
 - - propagate_integration
@@ -300,6 +308,8 @@
   - 2
 - - refresh_license_compliance_checks
   - 2
+- - releases_create_evidence
+  - 1
 - - remote_mirror_notification
   - 2
 - - repository_check
@@ -337,6 +347,10 @@
 - - snippet_schedule_bulk_repository_shard_moves
   - 1
 - - snippet_update_repository_storage
+  - 1
+- - snippets_schedule_bulk_repository_shard_moves
+  - 1
+- - snippets_update_repository_storage
   - 1
 - - status_page_publish
   - 1

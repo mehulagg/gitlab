@@ -293,6 +293,10 @@ module QA
         autoload :Show, 'qa/page/project/packages/show'
       end
 
+      module Registry
+        autoload :Show, 'qa/page/project/registry/show'
+      end
+
       module Settings
         autoload :Advanced, 'qa/page/project/settings/advanced'
         autoload :Main, 'qa/page/project/settings/main'
@@ -489,6 +493,7 @@ module QA
       autoload :ProjectSelector, 'qa/page/component/project_selector'
       autoload :Snippet, 'qa/page/component/snippet'
       autoload :NewSnippet, 'qa/page/component/new_snippet'
+      autoload :InviteMembersModal, 'qa/page/component/invite_members_modal'
 
       module Issuable
         autoload :Common, 'qa/page/component/issuable/common'

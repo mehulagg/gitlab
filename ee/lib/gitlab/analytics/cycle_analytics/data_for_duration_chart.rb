@@ -16,7 +16,7 @@ module Gitlab
 
         # rubocop: disable CodeReuse/ActiveRecord
         def load
-          order_by_end_event(query)
+          order_by(query, :end_event, :desc)
             .select(round_duration_to_seconds.as('duration_in_seconds'), stage.end_event.timestamp_projection.as('finished_at'))
             .limit(MAX_RESULTS)
         end

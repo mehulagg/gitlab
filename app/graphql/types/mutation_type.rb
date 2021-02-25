@@ -24,6 +24,7 @@ module Types
     mount_mutation Mutations::AwardEmojis::Toggle
     mount_mutation Mutations::Boards::Create
     mount_mutation Mutations::Boards::Destroy
+    mount_mutation Mutations::Boards::Update
     mount_mutation Mutations::Boards::Issues::IssueMoveList
     mount_mutation Mutations::Boards::Lists::Create
     mount_mutation Mutations::Boards::Lists::Update
@@ -70,6 +71,7 @@ module Types
     mount_mutation Mutations::Releases::Create
     mount_mutation Mutations::Releases::Update
     mount_mutation Mutations::Releases::Delete
+    mount_mutation Mutations::ReleaseAssetLinks::Create
     mount_mutation Mutations::Terraform::State::Delete
     mount_mutation Mutations::Terraform::State::Lock
     mount_mutation Mutations::Terraform::State::Unlock

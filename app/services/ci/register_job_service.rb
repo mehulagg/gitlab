@@ -4,21 +4,27 @@ module Ci
   # This class responsible for assigning
   # proper pending build to runner on runner API request
   class RegisterJobService
-    attr_reader :runner
-
-    JOB_QUEUE_DURATION_SECONDS_BUCKETS = [1, 3, 10, 30, 60, 300, 900, 1800, 3600].freeze
-    JOBS_RUNNING_FOR_PROJECT_MAX_BUCKET = 5.freeze
-    METRICS_SHARD_TAG_PREFIX = 'metrics_shard::'
-    DEFAULT_METRICS_SHARD = 'default'
+    attr_reader :runner, :metrics
 
     Result = Struct.new(:build, :build_json, :valid?)
 
     def initialize(runner)
       @runner = runner
+      @metrics = ::Gitlab::Ci::Queue::Metrics.new(runner)
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def execute(params = {})
+      @metrics.increment_queue_operation(:queue_attempt)
+
+      @metrics.observe_queue_time do
+        process_queue(params)
+      end
+    end
+
+    private
+
+    # rubocop: disable CodeReuse/ActiveRecord
+    def process_queue(params)
       builds =
         if runner.instance_type?
           builds_for_shared_runner
@@ -27,8 +33,6 @@ module Ci
         else
           builds_for_project_runner
         end
-
-      valid = true
 
       # pick builds that does not have other tags than runner's one
       builds = builds.matches_tag_ids(runner.tags.ids)
@@ -43,14 +47,23 @@ module Ci
         builds = builds.queued_before(params[:job_age].seconds.ago)
       end
 
+      @metrics.observe_queue_size(-> { builds.to_a.size })
+
+      valid = true
+      depth = 0
+
       builds.each do |build|
+        depth += 1
+        @metrics.increment_queue_operation(:queue_iteration)
+
         result = process_build(build, params)
         next unless result
 
         if result.valid?
-          register_success(result.build)
+          @metrics.register_success(result.build)
+          @metrics.observe_queue_depth(:found, depth)
 
-          return result
+          return result # rubocop:disable Cop/AvoidReturnFromBlocks
         else
           # The usage of valid: is described in
           # handling of ActiveRecord::StaleObjectError
@@ -58,22 +71,30 @@ module Ci
         end
       end
 
-      register_failure
+      @metrics.increment_queue_operation(:queue_conflict) unless valid
+      @metrics.observe_queue_depth(:conflict, depth) unless valid
+      @metrics.observe_queue_depth(:not_found, depth) if valid
+      @metrics.register_failure
+
       Result.new(nil, nil, valid)
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
-    private
-
     def process_build(build, params)
-      return unless runner.can_pick?(build)
+      if runner.can_pick?(build)
+        @metrics.increment_queue_operation(:build_can_pick)
+      else
+        @metrics.increment_queue_operation(:build_not_pick)
+
+        return
+      end
 
       # In case when 2 runners try to assign the same build, second runner will be declined
       # with StateMachines::InvalidTransition or StaleObjectError when doing run! or save method.
       if assign_runner!(build, params)
         present_build!(build)
       end
-    rescue StateMachines::InvalidTransition, ActiveRecord::StaleObjectError
+    rescue ActiveRecord::StaleObjectError
       # We are looping to find another build that is not conflicting
       # It also indicates that this build can be picked and passed to runner.
       # If we don't do it, basically a bunch of runners would be competing for a build
@@ -83,8 +104,16 @@ module Ci
       # In case we hit the concurrency-access lock,
       # we still have to return 409 in the end,
       # to make sure that this is properly handled by runner.
+      @metrics.increment_queue_operation(:build_conflict_lock)
+
+      Result.new(nil, nil, false)
+    rescue StateMachines::InvalidTransition
+      @metrics.increment_queue_operation(:build_conflict_transition)
+
       Result.new(nil, nil, false)
     rescue => ex
+      @metrics.increment_queue_operation(:build_conflict_exception)
+
       # If an error (e.g. GRPC::DeadlineExceeded) occurred constructing
       # the result, consider this as a failure to be retried.
       scheduler_failure!(build)
@@ -110,8 +139,12 @@ module Ci
       failure_reason, _ = pre_assign_runner_checks.find { |_, check| check.call(build, params) }
 
       if failure_reason
+        @metrics.increment_queue_operation(:runner_pre_assign_checks_failed)
+
         build.drop!(failure_reason)
       else
+        @metrics.increment_queue_operation(:runner_pre_assign_checks_success)
+
         build.run!
       end
 
@@ -187,48 +220,6 @@ module Ci
       builds = Ci::Build.pending.unstarted
       builds = builds.ref_protected if runner.ref_protected?
       builds
-    end
-
-    def register_failure
-      failed_attempt_counter.increment
-      attempt_counter.increment
-    end
-
-    def register_success(job)
-      labels = { shared_runner: runner.instance_type?,
-                 jobs_running_for_project: jobs_running_for_project(job),
-                 shard: DEFAULT_METRICS_SHARD }
-
-      if runner.instance_type?
-        shard = runner.tag_list.sort.find { |name| name.starts_with?(METRICS_SHARD_TAG_PREFIX) }
-        labels[:shard] = shard.gsub(METRICS_SHARD_TAG_PREFIX, '') if shard
-      end
-
-      job_queue_duration_seconds.observe(labels, Time.current - job.queued_at) unless job.queued_at.nil?
-      attempt_counter.increment
-    end
-
-    # rubocop: disable CodeReuse/ActiveRecord
-    def jobs_running_for_project(job)
-      return '+Inf' unless runner.instance_type?
-
-      # excluding currently started job
-      running_jobs_count = job.project.builds.running.where(runner: Ci::Runner.instance_type)
-                              .limit(JOBS_RUNNING_FOR_PROJECT_MAX_BUCKET + 1).count - 1
-      running_jobs_count < JOBS_RUNNING_FOR_PROJECT_MAX_BUCKET ? running_jobs_count : "#{JOBS_RUNNING_FOR_PROJECT_MAX_BUCKET}+"
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
-
-    def failed_attempt_counter
-      @failed_attempt_counter ||= Gitlab::Metrics.counter(:job_register_attempts_failed_total, "Counts the times a runner tries to register a job")
-    end
-
-    def attempt_counter
-      @attempt_counter ||= Gitlab::Metrics.counter(:job_register_attempts_total, "Counts the times a runner tries to register a job")
-    end
-
-    def job_queue_duration_seconds
-      @job_queue_duration_seconds ||= Gitlab::Metrics.histogram(:job_queue_duration_seconds, 'Request handling execution time', {}, JOB_QUEUE_DURATION_SECONDS_BUCKETS)
     end
 
     def pre_assign_runner_checks

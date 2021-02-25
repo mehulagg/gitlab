@@ -24,6 +24,13 @@ RSpec.describe DastScannerProfile, type: :model do
         expect(result).to eq([subject])
       end
     end
+
+    describe '.with_name' do
+      it 'returns the dast_scanner_profiles with given name' do
+        result = DastScannerProfile.with_name(subject.name)
+        expect(result).to eq([subject])
+      end
+    end
   end
 
   describe 'full_scan_enabled?' do

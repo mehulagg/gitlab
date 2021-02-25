@@ -180,9 +180,12 @@ module Gitlab
               return
             end
 
-            name = uuid_v5_name_components.values.join('-')
-
-            Gitlab::UUID.v5(name)
+            ::Security::VulnerabilityUUID.generate(
+              report_type: uuid_v5_name_components[:report_type],
+              primary_identifier_fingerprint: uuid_v5_name_components[:primary_identifier_fingerprint],
+              location_fingerprint: uuid_v5_name_components[:location_fingerprint],
+              project_id: uuid_v5_name_components[:project_id]
+            )
           end
         end
       end

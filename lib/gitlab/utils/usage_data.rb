@@ -24,7 +24,8 @@
 #     alt_usage_data(fallback: nil) { Gitlab.config.registry.enabled }
 #
 #   * redis_usage_data method
-#     handles ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent
+#     handles ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent,
+#     Gitlab::UsageDataCounters::HLLRedisCounter::EventError
 #     returns -1 when a block is sent or hash with all values -1 when a counter is sent
 #     different behaviour due to 2 different implementations of redis counter
 #
@@ -83,6 +84,14 @@ module Gitlab
       def sum(relation, column, batch_size: nil, start: nil, finish: nil)
         Gitlab::Database::BatchCount.batch_sum(relation, column, batch_size: batch_size, start: start, finish: finish)
       rescue ActiveRecord::StatementInvalid
+        FALLBACK
+      end
+
+      def add(*args)
+        return -1 if args.any?(&:negative?)
+
+        args.sum
+      rescue StandardError
         FALLBACK
       end
 
@@ -160,7 +169,7 @@ module Gitlab
 
       def redis_usage_counter
         yield
-      rescue ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent
+      rescue ::Redis::CommandError, Gitlab::UsageDataCounters::BaseCounter::UnknownEvent, Gitlab::UsageDataCounters::HLLRedisCounter::EventError
         FALLBACK
       end
 

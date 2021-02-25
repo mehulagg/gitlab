@@ -87,32 +87,6 @@ const updateScheduleFromStore = (store, query, { oncallScheduleUpdate }, variabl
   });
 };
 
-const addRotationToStore = (store, query, { oncallRotationCreate, scheduleIid }, variables) => {
-  const rotation = oncallRotationCreate?.oncallRotation;
-  if (!rotation) {
-    return;
-  }
-
-  const sourceData = store.readQuery({
-    query,
-    variables,
-  });
-
-  const data = produce(sourceData, (draftData) => {
-    const scheduleToUpdate = draftData.project.incidentManagementOncallSchedules.nodes.find(
-      ({ iid }) => iid === scheduleIid,
-    );
-
-    scheduleToUpdate.rotations.nodes = [...scheduleToUpdate.rotations.nodes, rotation];
-  });
-
-  store.writeQuery({
-    query,
-    variables,
-    data,
-  });
-};
-
 const updateRotationFromStore = (
   store,
   query,
@@ -209,14 +183,6 @@ export const updateStoreAfterScheduleEdit = (store, query, data, variables) => {
     onError(data, UPDATE_SCHEDULE_ERROR);
   } else {
     updateScheduleFromStore(store, query, data, variables);
-  }
-};
-
-export const updateStoreAfterRotationAdd = (store, query, data, variables) => {
-  if (hasErrors(data)) {
-    onError(data, UPDATE_SCHEDULE_ERROR);
-  } else {
-    addRotationToStore(store, query, data, variables);
   }
 };
 

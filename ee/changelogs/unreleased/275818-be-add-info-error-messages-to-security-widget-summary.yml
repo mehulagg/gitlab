@@ -1,5 +1,0 @@
----
-title: Add hasSecurityReports field to GraphQL MergeRequest type
-merge_request: 53925
-author:
-type: added

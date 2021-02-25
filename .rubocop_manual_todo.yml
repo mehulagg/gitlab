@@ -10,6 +10,7 @@
 # - guidelines for use found in
 #   https://docs.gitlab.com/ee/development/contributing/style_guides.html#resolving-rubocop-exceptions.
 
+# WIP See https://gitlab.com/gitlab-org/gitlab/-/issues/267606
 FactoryBot/InlineAssociation:
   Exclude:
     - 'ee/spec/factories/analytics/cycle_analytics/group_stages.rb'
@@ -28,6 +29,7 @@ FactoryBot/InlineAssociation:
     - 'spec/factories/uploads.rb'
     - 'spec/factories/wiki_pages.rb'
 
+# WIP: See https://gitlab.com/gitlab-org/gitlab/-/issues/220040
 Rails/SaveBang:
   Exclude:
     - 'ee/spec/controllers/projects/merge_requests_controller_spec.rb'
@@ -483,8 +485,8 @@ Rails/TimeZone:
     - 'lib/json_web_token/token.rb'
     - 'lib/object_storage/direct_upload.rb'
     - 'lib/quality/seeders/issues.rb'
-    - 'lib/rspec_flaky/flaky_example.rb'
-    - 'lib/rspec_flaky/report.rb'
+    - 'tooling/rspec_flaky/flaky_example.rb'
+    - 'tooling/rspec_flaky/report.rb'
     - 'lib/tasks/gitlab/assets.rake'
     - 'lib/tasks/gitlab/backup.rake'
     - 'lib/tasks/gitlab/cleanup.rake'
@@ -550,9 +552,9 @@ Rails/TimeZone:
     - 'spec/lib/gitlab/x509/signature_spec.rb'
     - 'spec/lib/grafana/time_window_spec.rb'
     - 'spec/lib/json_web_token/hmac_token_spec.rb'
-    - 'spec/lib/rspec_flaky/flaky_example_spec.rb'
-    - 'spec/lib/rspec_flaky/listener_spec.rb'
-    - 'spec/lib/rspec_flaky/report_spec.rb'
+    - 'spec/tooling/rspec_flaky/flaky_example_spec.rb'
+    - 'spec/tooling/rspec_flaky/listener_spec.rb'
+    - 'spec/tooling/rspec_flaky/report_spec.rb'
 
 RSpec/TimecopFreeze:
   Exclude:
@@ -625,8 +627,8 @@ RSpec/TimecopFreeze:
     - 'spec/lib/gitlab/puma_logging/json_formatter_spec.rb'
     - 'spec/lib/gitlab/sidekiq_logging/structured_logger_spec.rb'
     - 'spec/lib/json_web_token/hmac_token_spec.rb'
-    - 'spec/lib/rspec_flaky/flaky_example_spec.rb'
-    - 'spec/lib/rspec_flaky/listener_spec.rb'
+    - 'spec/tooling/rspec_flaky/flaky_example_spec.rb'
+    - 'spec/tooling/rspec_flaky/listener_spec.rb'
     - 'spec/models/active_session_spec.rb'
     - 'spec/serializers/entity_date_helper_spec.rb'
     - 'spec/support/cycle_analytics_helpers/test_generation.rb'
@@ -779,7 +781,7 @@ RSpec/AnyInstanceOf:
     - 'ee/spec/services/slash_commands/global_slack_handler_spec.rb'
     - 'ee/spec/support/helpers/ee/stub_configuration.rb'
     - 'ee/spec/support/shared_examples/controllers/analytics/cycle_analytics/shared_stage_shared_examples.rb'
-    - 'ee/spec/support/shared_examples/features/gold_trial_callout_shared_examples.rb'
+    - 'ee/spec/support/shared_examples/features/ultimate_trial_callout_shared_examples.rb'
     - 'ee/spec/support/shared_examples/lib/gitlab/geo/geo_logs_event_source_info_shared_examples.rb'
     - 'ee/spec/support/shared_examples/models/member_shared_examples.rb'
     - 'ee/spec/support/shared_examples/services/base_sync_service_shared_examples.rb'
@@ -1174,22 +1176,9 @@ RSpec/AnyInstanceOf:
     - 'spec/workers/wait_for_cluster_creation_worker_spec.rb'
     - 'ee/spec/workers/security/auto_fix_worker_spec.rb'
 
+# WIP: https://gitlab.com/gitlab-org/gitlab/-/issues/321982
 Gitlab/NamespacedClass:
   Exclude:
-    - 'config/**/*.rb'
-    - 'db/**/*.rb'
-    - 'ee/bin/**/*'
-    - 'ee/db/**/*.rb'
-    - 'ee/elastic/**/*.rb'
-    - 'scripts/**/*'
-    - 'spec/migrations/**/*.rb'
-    # The list above represents the permanent exclusions for this rule
-    # due to the fact these files are related to infrastructure code.
-    # This list should eventually be moved to .rubocop.yml after all TODOs
-    # are addressed.
-    #
-    # The list below represents the classes that require
-    # a namespace as they make the domain related code.
     - 'app/channels/issues_channel.rb'
     - 'app/controllers/abuse_reports_controller.rb'
     - 'app/controllers/acme_challenges_controller.rb'
@@ -1988,7 +1977,6 @@ Gitlab/NamespacedClass:
     - 'app/validators/untrusted_regexp_validator.rb'
     - 'app/validators/nested_attributes_duplicates_validator.rb'
     - 'app/validators/x509_certificate_credentials_validator.rb'
-    - 'app/validators/zoom_url_validator.rb'
     - 'app/workers/admin_email_worker.rb'
     - 'app/workers/approve_blocked_pending_approval_users_worker.rb'
     - 'app/workers/archive_trace_worker.rb'

@@ -33,7 +33,7 @@ module Projects
       checksum_before = project.repository.checksum
 
       update_tags do
-        project.fetch_mirror(forced: true, check_tags_changed: Feature.enabled?(:fetch_mirror_check_tags_changed, project))
+        project.fetch_mirror(forced: true, check_tags_changed: true)
       end
 
       update_branches

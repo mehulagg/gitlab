@@ -12,7 +12,6 @@ class License < ApplicationRecord
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
 
   EES_FEATURES = %i[
-    security_and_compliance
     audit_events
     blocked_issues
     board_iteration_lists
@@ -138,6 +137,7 @@ class License < ApplicationRecord
     api_fuzzing
     auto_rollback
     cilium_alerts
+    compliance_approval_gates
     container_scanning
     coverage_fuzzing
     credentials_inventory
@@ -149,6 +149,7 @@ class License < ApplicationRecord
     enforce_ssh_key_expiration
     enterprise_templates
     environment_alerts
+    evaluate_group_level_compliance_pipeline
     group_ci_cd_analytics
     group_level_compliance_dashboard
     incident_management
@@ -169,6 +170,7 @@ class License < ApplicationRecord
     secret_detection
     security_dashboard
     security_on_demand_scans
+    security_orchestration_policies
     status_page
     subepics
     threat_monitoring
@@ -240,6 +242,7 @@ class License < ApplicationRecord
   before_validation :reset_license, if: :data_changed?
 
   after_create :reset_current
+  after_create :update_trial_setting
   after_destroy :reset_current
   after_commit :reset_future_dated, on: [:create, :destroy]
   after_commit :reset_previous, on: [:create, :destroy]
@@ -464,7 +467,7 @@ class License < ApplicationRecord
 
   def daily_billable_users_count
     strong_memoize(:daily_billable_users_count) do
-      ::Analytics::InstanceStatistics::Measurement.find_latest_or_fallback(:billable_users).count
+      ::Analytics::UsageTrends::Measurement.find_latest_or_fallback(:billable_users).count
     end
   end
 

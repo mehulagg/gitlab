@@ -649,7 +649,7 @@ RSpec.describe Group do
         end
 
         it 'returns true for groups in proper plan' do
-          create(:gitlab_subscription, namespace: group, hosted_plan: create(:gold_plan))
+          create(:gitlab_subscription, namespace: group, hosted_plan: create(:ultimate_plan))
 
           is_expected.to be true
         end

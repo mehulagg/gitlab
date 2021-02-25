@@ -1,5 +1,0 @@
----
-title: Start license_scanning job within its stage, and not when pipeline starts
-merge_request: 54234
-author:
-type: changed

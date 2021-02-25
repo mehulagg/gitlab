@@ -27,20 +27,34 @@ RSpec.describe "Custom file template classes" do
     'Dockerfile/category/baz.txt' => 'CustomDockerfileTemplate category baz',
     'gitignore/category/baz.txt'  => 'CustomGitignoreTemplate category baz',
     'gitlab-ci/category/baz.yml'  => 'CustomGitlabCiYmlTemplate category baz',
-    'LICENSE/category/baz.txt'    => 'CustomLicenseTemplate category baz'
+    'LICENSE/category/baz.txt'    => 'CustomLicenseTemplate category baz',
+
+    '.gitlab/issue_templates/bar.md' => 'IssueTemplate Bar',
+    '.gitlab/issue_templates/foo.md' => 'IssueTemplate Foo',
+    '.gitlab/issue_templates/bad.txt' => 'IssueTemplate Bad',
+    '.gitlab/issue_templates/baz.xyz' => 'IssueTemplate Baz',
+
+    '.gitlab/merge_request_templates/bar.md' => 'MergeRequestTemplate Bar',
+    '.gitlab/merge_request_templates/foo.md' => 'MergeRequestTemplate Foo',
+    '.gitlab/merge_request_templates/bad.txt' => 'MergeRequestTemplate Bad',
+    '.gitlab/merge_request_templates/baz.xyz' => 'MergeRequestTemplate Baz'
   }
 
   let_it_be(:project) { create(:project, :custom_repo, files: files) }
 
-  [
-    ::Gitlab::Template::CustomDockerfileTemplate,
-    ::Gitlab::Template::CustomGitignoreTemplate,
-    ::Gitlab::Template::CustomGitlabCiYmlTemplate,
-    ::Gitlab::Template::CustomLicenseTemplate,
-    ::Gitlab::Template::CustomMetricsDashboardYmlTemplate
-  ].each do |template_class|
-    describe template_class do
-      let(:name) { template_class.name.demodulize }
+  custom_templates = [
+    { class_name: ::Gitlab::Template::CustomDockerfileTemplate, category: 'Custom' },
+    { class_name: ::Gitlab::Template::CustomGitignoreTemplate, category: 'Custom' },
+    { class_name: ::Gitlab::Template::CustomGitlabCiYmlTemplate, category: 'Custom' },
+    { class_name: ::Gitlab::Template::CustomLicenseTemplate, category: 'Custom' },
+    { class_name: ::Gitlab::Template::CustomMetricsDashboardYmlTemplate, category: 'Custom' },
+    { class_name: ::Gitlab::Template::IssueTemplate, category: 'Project Templates' },
+    { class_name: ::Gitlab::Template::MergeRequestTemplate, category: 'Project Templates' }
+  ].freeze
+
+  custom_templates.each do |template_class|
+    describe template_class[:class_name] do
+      let(:name) { template_class[:class_name].name.demodulize }
 
       describe '.all' do
         it 'returns all valid templates' do
@@ -48,7 +62,7 @@ RSpec.describe "Custom file template classes" do
 
           aggregate_failures do
             expect(found.map(&:name)).to contain_exactly('foo', 'bar')
-            expect(found.map(&:category).uniq).to contain_exactly('Custom')
+            expect(found.map(&:category).uniq).to contain_exactly(template_class[:category])
           end
         end
       end

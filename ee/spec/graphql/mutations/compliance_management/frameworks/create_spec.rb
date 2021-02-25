@@ -27,7 +27,7 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Create do
 
     context 'feature is licensed' do
       before do
-        stub_licensed_features(custom_compliance_frameworks: true)
+        stub_licensed_features(custom_compliance_frameworks: true, evaluate_group_level_compliance_pipeline: true)
       end
 
       context 'feature flag is disabled' do
@@ -107,7 +107,7 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Create do
         name: 'GDPR',
         description: 'Example description',
         color: '#abc123',
-        pipeline_configuration_full_path: 'compliance/.gitlab-ci.yml'
+        pipeline_configuration_full_path: '.compliance-gitlab-ci.yml@compliance/hipaa'
       }
     }
   end

@@ -101,5 +101,24 @@ RSpec.describe Analytics::CycleAnalytics::ValueStreams::UpdateService do
         expect(subject.payload[:value_stream].stages.last.name).to eq('plan')
       end
     end
+
+    context 'when removing a stage and adding a new stage' do
+      let(:params) do
+        {
+          name: 'VS 1',
+          stages: [
+            { id: first_stage.id, name: first_stage.name, custom: true },
+            { name: 'new stage', custom: true, start_event_identifier: 'merge_request_created', end_event_identifier: 'merge_request_closed' }
+          ]
+        }
+      end
+
+      it 'creates the stage' do
+        expect(subject).to be_success
+
+        current_stage_names = subject.payload[:value_stream].stages.map(&:name)
+        expect(current_stage_names).to match_array([first_stage.name, 'new stage'])
+      end
+    end
   end
 end

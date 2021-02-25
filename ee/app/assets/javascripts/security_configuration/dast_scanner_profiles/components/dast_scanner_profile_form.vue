@@ -11,12 +11,12 @@ import {
   GlFormCheckbox,
   GlFormRadioGroup,
 } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { isEqual } from 'lodash';
 import { returnToPreviousPageFactory } from 'ee/security_configuration/dast_profiles/redirect';
 import { initFormField } from 'ee/security_configuration/utils';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import { __, s__ } from '~/locale';
-import * as Sentry from '~/sentry/wrapper';
 import { SCAN_TYPE, SCAN_TYPE_OPTIONS } from '../constants';
 import dastScannerProfileCreateMutation from '../graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from '../graphql/dast_scanner_profile_update.mutation.graphql';

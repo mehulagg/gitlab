@@ -1,7 +1,17 @@
+export const mockGroupPath = 'gitlab-org';
+export const mockProjectPath = `${mockGroupPath}/some-project`;
+
 export const mockIssue = {
-  projectPath: 'gitlab-org/some-project',
+  projectPath: mockProjectPath,
   iid: '1',
-  groupPath: 'gitlab-org',
+  groupPath: mockGroupPath,
+};
+
+// This mock issue has a different format b/c
+// it is used in board_sidebar_iteration_select_spec.js (swimlane sidebar)
+export const mockIssue2 = {
+  referencePath: `${mockProjectPath}#1`,
+  iid: '1',
 };
 
 export const mockIssueId = 'gid://gitlab/Issue/1';

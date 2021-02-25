@@ -11,13 +11,13 @@ module EE
     include ::Gitlab::Utils::StrongMemoize
 
     NAMESPACE_PLANS_TO_LICENSE_PLANS = {
-      ::Plan::BRONZE        => License::STARTER_PLAN,
-      ::Plan::SILVER        => License::PREMIUM_PLAN,
-      ::Plan::GOLD          => License::ULTIMATE_PLAN
+      ::Plan::BRONZE => License::STARTER_PLAN,
+      [::Plan::SILVER, ::Plan::PREMIUM] => License::PREMIUM_PLAN,
+      [::Plan::GOLD, ::Plan::ULTIMATE] => License::ULTIMATE_PLAN
     }.freeze
 
     LICENSE_PLANS_TO_NAMESPACE_PLANS = NAMESPACE_PLANS_TO_LICENSE_PLANS.invert.freeze
-    PLANS = (NAMESPACE_PLANS_TO_LICENSE_PLANS.keys + [Plan::FREE]).freeze
+    PLANS = (NAMESPACE_PLANS_TO_LICENSE_PLANS.keys + [Plan::FREE]).flatten.freeze
     TEMPORARY_STORAGE_INCREASE_DAYS = 30
 
     prepended do
@@ -36,8 +36,6 @@ module EE
       scope :include_gitlab_subscription, -> { includes(:gitlab_subscription) }
       scope :include_gitlab_subscription_with_hosted_plan, -> { includes(gitlab_subscription: :hosted_plan) }
       scope :join_gitlab_subscription, -> { joins("LEFT OUTER JOIN gitlab_subscriptions ON gitlab_subscriptions.namespace_id=namespaces.id") }
-
-      scope :top_most, -> { where(parent_id: nil) }
 
       scope :in_active_trial, -> do
         left_joins(gitlab_subscription: :hosted_plan)
@@ -110,7 +108,7 @@ module EE
       extend ::Gitlab::Utils::Override
 
       def plans_with_feature(feature)
-        LICENSE_PLANS_TO_NAMESPACE_PLANS.values_at(*License.plans_with_feature(feature))
+        LICENSE_PLANS_TO_NAMESPACE_PLANS.values_at(*License.plans_with_feature(feature)).flatten
       end
     end
 
@@ -336,8 +334,16 @@ module EE
       actual_plan_name == ::Plan::SILVER
     end
 
+    def premium_plan?
+      actual_plan_name == ::Plan::PREMIUM
+    end
+
     def gold_plan?
       actual_plan_name == ::Plan::GOLD
+    end
+
+    def ultimate_plan?
+      actual_plan_name == ::Plan::ULTIMATE
     end
 
     def plan_eligible_for_trial?

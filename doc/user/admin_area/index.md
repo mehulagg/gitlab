@@ -157,6 +157,22 @@ All impersonation activities are [captured with audit events](../../administrati
 
 ![user impersonation button](img/impersonate_user_button_v13_8.png)
 
+#### User Permission Export **(PREMIUM SELF)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1772) in GitLab 13.8.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/292436) in GitLab 13.9.
+
+An administrator can export user permissions for all users in the GitLab instance from the Admin Area's Users page.
+The export lists direct membership the users have in groups and projects.
+
+The following data is included in the export:
+
+- Username
+- Email
+- Type
+- Path
+- Access level ([Project](../permissions.md#project-members-permissions) and [Group](../permissions.md#group-members-permissions))
+
 #### Users statistics
 
 The **Users statistics** page provides an overview of user accounts by role. These statistics are
@@ -169,6 +185,10 @@ The following totals are also included:
 - Total users
 
 GitLab billing is based on the number of [**Billable users**](../../subscriptions/self_managed/index.md#billable-users).
+
+### User cohorts
+
+The [Cohorts](user_cohorts.md) tab displays the monthly cohorts of new users and their activities over time.
 
 ### Administering Groups
 
@@ -187,7 +207,7 @@ sort order is by **Last created**.
 To search for groups by name, enter your criteria in the search field. The group search is case
 insensitive, and applies partial matching.
 
-To [Create a new group](../group/index.md#create-a-new-group) click **New group**.
+To [Create a new group](../group/index.md#create-a-group) click **New group**.
 
 ### Administering Jobs
 

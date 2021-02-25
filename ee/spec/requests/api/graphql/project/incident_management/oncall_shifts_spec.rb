@@ -11,7 +11,7 @@ RSpec.describe 'getting Incident Management on-call shifts' do
   let_it_be(:current_user) { participant.user }
 
   let(:starts_at) { rotation.starts_at }
-  let(:ends_at) { rotation.starts_at + rotation.shift_duration } # intentionally return one shift
+  let(:ends_at) { rotation.starts_at + rotation.shift_cycle_duration } # intentionally return one shift
   let(:params) { { start_time: starts_at.iso8601, end_time: ends_at.iso8601 } }
 
   let(:shift_fields) do

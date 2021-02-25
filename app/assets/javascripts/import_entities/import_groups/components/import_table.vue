@@ -33,6 +33,10 @@ export default {
       type: String,
       required: true,
     },
+    groupPathRegex: {
+      type: RegExp,
+      required: true,
+    },
   },
 
   data() {
@@ -147,10 +151,15 @@ export default {
     </div>
     <gl-loading-icon v-if="$apollo.loading" size="md" class="gl-mt-5" />
     <template v-else>
-      <gl-empty-state v-if="hasEmptyFilter" :title="__('Sorry, your filter produced no results')" />
+      <gl-empty-state
+        v-if="hasEmptyFilter"
+        :title="__('Sorry, your filter produced no results')"
+        :description="__('To widen your search, change or remove filters above.')"
+      />
       <gl-empty-state
         v-else-if="!hasGroups"
-        :title="s__('BulkImport|No groups available for import')"
+        :title="s__('BulkImport|You have no groups to import')"
+        :description="s__('Check your source instance permissions.')"
       />
       <div v-else class="gl-display-flex gl-flex-direction-column gl-align-items-center">
         <table class="gl-w-full">
@@ -160,12 +169,13 @@ export default {
             <th class="gl-py-4 import-jobs-status-col">{{ __('Status') }}</th>
             <th class="gl-py-4 import-jobs-cta-col"></th>
           </thead>
-          <tbody>
+          <tbody class="gl-vertical-align-top">
             <template v-for="group in bulkImportSourceGroups.nodes">
               <import-table-row
                 :key="group.id"
                 :group="group"
                 :available-namespaces="availableNamespaces"
+                :group-path-regex="groupPathRegex"
                 @update-target-namespace="updateTargetNamespace(group.id, $event)"
                 @update-new-name="updateNewName(group.id, $event)"
                 @import-group="importGroup(group.id)"

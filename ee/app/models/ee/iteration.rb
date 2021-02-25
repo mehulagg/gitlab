@@ -14,8 +14,6 @@ module EE
     end
 
     prepended do
-      include Timebox
-
       has_many :issues, foreign_key: 'sprint_id'
       has_many :merge_requests, foreign_key: 'sprint_id'
     end

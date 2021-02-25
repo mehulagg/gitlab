@@ -1,5 +1,0 @@
----
-title: Remove reviewer_approval_rules feature flag
-merge_request: 53205
-author:
-type: removed

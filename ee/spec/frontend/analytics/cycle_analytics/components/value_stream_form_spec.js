@@ -1,4 +1,4 @@
-import { GlModal } from '@gitlab/ui';
+import { GlModal, GlFormInput } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { PRESET_OPTIONS_BLANK } from 'ee/analytics/cycle_analytics/components/create_value_stream_form/constants';
@@ -6,7 +6,11 @@ import CustomStageFields from 'ee/analytics/cycle_analytics/components/create_va
 import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/default_stage_fields.vue';
 import ValueStreamForm from 'ee/analytics/cycle_analytics/components/value_stream_form.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import { customStageEvents as formEvents, defaultStageConfig } from '../mock_data';
+import {
+  convertObjectPropsToCamelCase,
+  convertObjectPropsToSnakeCase,
+} from '~/lib/utils/common_utils';
+import { customStageEvents as formEvents, defaultStageConfig, rawCustomStage } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -15,6 +19,7 @@ describe('ValueStreamForm', () => {
   let wrapper = null;
 
   const createValueStreamMock = jest.fn(() => Promise.resolve());
+  const updateValueStreamMock = jest.fn(() => Promise.resolve());
   const mockEvent = { preventDefault: jest.fn() };
   const mockToastShow = jest.fn();
   const streamName = 'Cool stream';
@@ -28,6 +33,14 @@ describe('ValueStreamForm', () => {
     ],
   };
 
+  const initialData = {
+    stages: [convertObjectPropsToCamelCase(rawCustomStage)],
+    id: 1337,
+    name: 'Editable value stream',
+  };
+
+  const initialPreset = PRESET_OPTIONS_BLANK;
+
   const fakeStore = () =>
     new Vuex.Store({
       state: {
@@ -35,6 +48,7 @@ describe('ValueStreamForm', () => {
       },
       actions: {
         createValueStream: createValueStreamMock,
+        updateValueStream: updateValueStreamMock,
       },
       modules: {
         customStages: {
@@ -71,14 +85,13 @@ describe('ValueStreamForm', () => {
       }),
     );
 
-  const findModal = () => wrapper.find(GlModal);
+  const findModal = () => wrapper.findComponent(GlModal);
   const clickSubmit = () => findModal().vm.$emit('primary', mockEvent);
   const clickAddStage = () => findModal().vm.$emit('secondary', mockEvent);
   const findExtendedFormFields = () => wrapper.findByTestId('extended-form-fields');
   const findPresetSelector = () => wrapper.findByTestId('vsa-preset-selector');
   const findBtn = (btn) => findModal().props(btn);
-  const findSubmitDisabledAttribute = (attribute) =>
-    findBtn('actionPrimary').attributes[1][attribute];
+  const findSubmitAttribute = (attribute) => findBtn('actionPrimary').attributes[1][attribute];
   const expectFieldError = (testId, error = '') =>
     expect(wrapper.findByTestId(testId).attributes('invalid-feedback')).toBe(error);
 
@@ -93,7 +106,7 @@ describe('ValueStreamForm', () => {
     });
 
     it('submit button is enabled', () => {
-      expect(findSubmitDisabledAttribute('disabled')).toBeUndefined();
+      expect(findSubmitAttribute('disabled')).toBeUndefined();
     });
 
     it('does not include extended fields', () => {
@@ -118,6 +131,10 @@ describe('ValueStreamForm', () => {
 
     it('has the extended fields', () => {
       expect(findExtendedFormFields().exists()).toBe(true);
+    });
+
+    it('sets the submit action text to "Create Value Stream"', () => {
+      expect(findBtn('actionPrimary').text).toBe('Create Value Stream');
     });
 
     describe('Preset selector', () => {
@@ -183,6 +200,114 @@ describe('ValueStreamForm', () => {
           'custom-stage-end-event-0',
           initialFormStageErrors.stages[0].endEventIdentifier[0],
         );
+      });
+    });
+
+    describe('isEditing=true', () => {
+      const stageCount = initialData.stages.length;
+      beforeEach(() => {
+        wrapper = createComponent({
+          props: {
+            initialPreset,
+            initialData,
+            isEditing: true,
+            hasExtendedFormFields: true,
+          },
+        });
+      });
+
+      it('does not have the preset button', () => {
+        expect(findPresetSelector().exists()).toBe(false);
+      });
+
+      it('sets the submit action text to "Save Value Stream"', () => {
+        expect(findBtn('actionPrimary').text).toBe('Save Value Stream');
+      });
+
+      describe('Add stage button', () => {
+        it('has the add stage button', () => {
+          expect(findBtn('actionSecondary')).toMatchObject({ text: 'Add another stage' });
+        });
+
+        it('adds a blank custom stage when clicked', () => {
+          expect(wrapper.vm.stages.length).toBe(stageCount);
+
+          clickAddStage();
+
+          expect(wrapper.vm.stages.length).toBe(stageCount + 1);
+        });
+
+        it('validates existing fields when clicked', () => {
+          expect(wrapper.vm.nameError).toEqual([]);
+
+          wrapper.findByTestId('create-value-stream-name').find(GlFormInput).vm.$emit('input', '');
+
+          clickAddStage();
+
+          expect(wrapper.vm.nameError).toEqual(['Name is required']);
+        });
+      });
+
+      describe('with valid fields', () => {
+        beforeEach(() => {
+          wrapper = createComponent({
+            props: {
+              initialPreset,
+              initialData,
+              isEditing: true,
+              hasExtendedFormFields: true,
+            },
+          });
+        });
+
+        describe('form submitted successfully', () => {
+          beforeEach(() => {
+            clickSubmit();
+          });
+
+          it('calls the "updateValueStreamMock" event when submitted', () => {
+            expect(updateValueStreamMock).toHaveBeenCalledWith(expect.any(Object), {
+              ...initialData,
+              stages: initialData.stages.map((stage) =>
+                convertObjectPropsToSnakeCase(stage, { deep: true }),
+              ),
+            });
+          });
+
+          it('displays a toast message', () => {
+            expect(mockToastShow).toHaveBeenCalledWith(
+              `'${initialData.name}' Value Stream edited`,
+              {
+                position: 'top-center',
+              },
+            );
+          });
+        });
+
+        describe('form submission fails', () => {
+          beforeEach(() => {
+            wrapper = createComponent({
+              data: { name: streamName },
+              props: {
+                initialFormErrors,
+              },
+            });
+
+            clickSubmit();
+          });
+
+          it('does not call the updateValueStreamMock action', () => {
+            expect(updateValueStreamMock).not.toHaveBeenCalled();
+          });
+
+          it('does not clear the name field', () => {
+            expect(wrapper.vm.name).toBe(streamName);
+          });
+
+          it('does not display a toast message', () => {
+            expect(mockToastShow).not.toHaveBeenCalled();
+          });
+        });
       });
     });
   });

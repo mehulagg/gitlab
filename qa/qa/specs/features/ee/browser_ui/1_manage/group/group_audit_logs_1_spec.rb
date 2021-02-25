@@ -24,21 +24,22 @@ module QA
       end
     end
 
-    describe 'Group' do
+    describe 'Group', :requires_admin do
       let(:group) do
         Resource::Group.fabricate_via_api! do |resource|
           resource.path = "test-group-#{SecureRandom.hex(8)}"
         end
       end
 
-      before do
-        @event_count = get_audit_event_count(group)
-      end
-
       let(:project) do
         Resource::Project.fabricate_via_api! do |resource|
           resource.name = 'project-shared-with-group'
         end
+      end
+
+      before do
+        @event_count = get_audit_event_count(group)
+        Runtime::Feature.enable(:invite_members_group_modal)
       end
 
       let(:user) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
@@ -103,7 +104,7 @@ module QA
       context 'Add and remove project access', :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/735' do
         before do
           Runtime::Feature.enable('vue_project_members_list', project: project)
-
+          Runtime::Feature.enable(:invite_members_group_modal)
           sign_in
           project.visit!
 

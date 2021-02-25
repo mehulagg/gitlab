@@ -742,12 +742,23 @@ Arguments:
 - or a `block`: which is evaluated
 - `fallback: -1`: the common value used for any metrics that are failing.
 
-Example of usage:
+Usage:
 
 ```ruby
 alt_usage_data { Gitlab::VERSION }
 alt_usage_data { Gitlab::CurrentSettings.uuid }
 alt_usage_data(999)
+```
+
+### Adding counters to build new metrics
+
+When adding the results of two counters, use the `add` usage data method that 
+handles fallback values and exceptions. It also generates a valid [SQL export](#exporting-usage-ping-sql-queries-and-definitions).
+
+Example usage:
+
+```ruby
+add(User.active, User.bot)
 ```
 
 ### Prometheus Queries
@@ -840,7 +851,9 @@ We also use `#database-lab` and [explain.depesz.com](https://explain.depesz.com/
 
 ### 5. Add the metric definition
 
-When adding, changing, or updating metrics, please update the [Event Dictionary's **Usage Ping** table](https://about.gitlab.com/handbook/product/product-intelligence-guide/#event-dictionary).
+[Check Metrics Dictionary Guide](usage_ping/metrics_dictionary.md)
+
+When adding, updating, or removing metrics, please update the [Metrics Dictionary](usage_ping/dictionary.md).
 
 ### 6. Add new metric to Versions Application
 

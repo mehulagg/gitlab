@@ -4,9 +4,15 @@ FactoryBot.define do
   factory :incident_management_oncall_rotation, class: 'IncidentManagement::OncallRotation' do
     association :schedule, factory: :incident_management_oncall_schedule
     sequence(:name) { |n| "On-call Rotation ##{n}" }
-    starts_at { Time.current.floor }
+    starts_at { Time.current.change(usec: 0) }
+    ends_at { nil }
     length { 5 }
     length_unit { :days }
+
+    trait :with_active_period do
+      active_period_start { '08:00' }
+      active_period_end { '17:00' }
+    end
 
     trait :with_participant do
       after(:create) do |rotation|

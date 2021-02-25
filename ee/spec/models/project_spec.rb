@@ -62,7 +62,7 @@ RSpec.describe Project do
     describe '#jira_vulnerabilities_integration_enabled?' do
       context 'when project lacks a jira_service relation' do
         it 'returns false' do
-          expect(project.jira_vulnerabilities_integration_enabled?).to be_falsey
+          expect(project.jira_vulnerabilities_integration_enabled?).to be false
         end
       end
 
@@ -83,7 +83,7 @@ RSpec.describe Project do
     describe '#configured_to_create_issues_from_vulnerabilities?' do
       context 'when project lacks a jira_service relation' do
         it 'returns false' do
-          expect(project.configured_to_create_issues_from_vulnerabilities?).to be_falsey
+          expect(project.configured_to_create_issues_from_vulnerabilities?).to be false
         end
       end
 
@@ -861,7 +861,7 @@ RSpec.describe Project do
 
               context 'allowed by Plan License AND Global License' do
                 let(:allowed_on_global_license) { true }
-                let(:plan_license) { build(:gold_plan) }
+                let(:plan_license) { build(:ultimate_plan) }
 
                 before do
                   allow(namespace).to receive(:plans) { [plan_license] }
@@ -905,7 +905,7 @@ RSpec.describe Project do
 
               context 'not allowed by Global License' do
                 let(:allowed_on_global_license) { false }
-                let(:plan_license) { build(:gold_plan) }
+                let(:plan_license) { build(:ultimate_plan) }
 
                 it 'returns false' do
                   is_expected.to eq(false)
@@ -1495,9 +1495,9 @@ RSpec.describe Project do
     before do
       allow(License).to receive(:current).and_return(global_license)
       allow(global_license).to receive(:features).and_return([
-        :subepics, # Gold only
-        :epics, # Silver and up
-        :push_rules, # Silver and up
+        :subepics, # Ultimate only
+        :epics, # Premium and up
+        :push_rules, # Premium and up
         :audit_events, # Bronze and up
         :geo # Global feature, should not be checked at namespace level
       ])
@@ -1518,18 +1518,18 @@ RSpec.describe Project do
         end
       end
 
-      context 'when silver' do
-        let(:plan_license) { :silver }
+      context 'when premium' do
+        let(:plan_license) { :premium }
 
-        it 'filters for silver features' do
+        it 'filters for premium features' do
           is_expected.to contain_exactly(:push_rules, :audit_events, :geo, :epics)
         end
       end
 
-      context 'when gold' do
-        let(:plan_license) { :gold }
+      context 'when ultimate' do
+        let(:plan_license) { :ultimate }
 
-        it 'filters for gold features' do
+        it 'filters for ultimate features' do
           is_expected.to contain_exactly(:epics, :push_rules, :audit_events, :geo, :subepics)
         end
       end
@@ -2707,8 +2707,8 @@ RSpec.describe Project do
       let!(:issue) { create(:issue, project: project) }
 
       context 'when updating the visibility_level' do
-        it 'triggers ElasticAssociationIndexerWorker to update issues' do
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+        it 'triggers ElasticAssociationIndexerWorker to update issues and notes' do
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues notes])
 
           project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
         end

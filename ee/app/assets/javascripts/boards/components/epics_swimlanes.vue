@@ -4,6 +4,7 @@ import Draggable from 'vuedraggable';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
 import { isListDraggable } from '~/boards/boards_util';
+import BoardAddNewColumn from '~/boards/components/board_add_new_column.vue';
 import { n__ } from '~/locale';
 import defaultSortableConfig from '~/sortable/sortable_config';
 import { DRAGGABLE_TAG } from '../constants';
@@ -12,6 +13,7 @@ import IssuesLaneList from './issues_lane_list.vue';
 
 export default {
   components: {
+    BoardAddNewColumn,
     BoardListHeader,
     EpicLane,
     IssuesLaneList,
@@ -37,8 +39,11 @@ export default {
     },
   },
   computed: {
-    ...mapState(['epics', 'pageInfoByListId', 'listsFlags']),
+    ...mapState(['epics', 'pageInfoByListId', 'listsFlags', 'addColumnForm']),
     ...mapGetters(['getUnassignedIssues']),
+    addColumnFormVisible() {
+      return this.addColumnForm?.visible;
+    },
     unassignedIssues() {
       return (listId) => this.getUnassignedIssues(listId);
     },
@@ -98,6 +103,13 @@ export default {
     isListDraggable(list) {
       return isListDraggable(list);
     },
+    afterFormEnters() {
+      const container = this.$refs.scrollableContainer;
+      container.scrollTo({
+        left: container.scrollWidth,
+        behavior: 'smooth',
+      });
+    },
   },
 };
 </script>
@@ -136,7 +148,7 @@ export default {
           />
         </div>
       </component>
-      <div class="board-epics-swimlanes gl-display-table gl-pb-5">
+      <div class="board-epics-swimlanes gl-display-table">
         <epic-lane
           v-for="epic in epics"
           :key="epic.id"
@@ -193,6 +205,12 @@ export default {
           {{ s__('Board|Load more issues') }}
         </gl-button>
       </div>
+      <!-- placeholder for some space below lane lists -->
+      <div v-else class="gl-pb-5"></div>
     </div>
+
+    <transition name="slide" @after-enter="afterFormEnters">
+      <board-add-new-column v-if="addColumnFormVisible" class="gl-sticky gl-top-5" />
+    </transition>
   </div>
 </template>

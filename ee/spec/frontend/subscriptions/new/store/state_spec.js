@@ -7,7 +7,7 @@ constants.TAX_RATE = 0;
 describe('projectsSelector default state', () => {
   const availablePlans = [
     { id: 'firstPlanId', code: 'bronze', price_per_year: 48, name: 'Bronze Plan' },
-    { id: 'secondPlanId', code: 'silver', price_per_year: 228, name: 'silver Plan' },
+    { id: 'secondPlanId', code: 'premium', price_per_year: 228, name: 'Premium Plan' },
   ];
 
   const groupData = [
@@ -39,7 +39,7 @@ describe('projectsSelector default state', () => {
     it('sets the availablePlans to the provided parsed availablePlans', () => {
       expect(state.availablePlans).toEqual([
         { value: 'firstPlanId', text: 'Bronze Plan', pricePerUserPerYear: 48 },
-        { value: 'secondPlanId', text: 'Silver Plan', pricePerUserPerYear: 228 },
+        { value: 'secondPlanId', text: 'Premium Plan', pricePerUserPerYear: 228 },
       ]);
     });
 

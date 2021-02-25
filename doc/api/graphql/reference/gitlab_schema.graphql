@@ -3189,6 +3189,16 @@ type CiJob {
   detailedStatus: DetailedStatus
 
   """
+  Duration of the job in seconds.
+  """
+  duration: Int
+
+  """
+  When a job has finished running.
+  """
+  finishedAt: Time
+
+  """
   Name of the job.
   """
   name: String
@@ -3395,11 +3405,6 @@ type ClusterAgent {
   createdAt: Time
 
   """
-  User object, containing information about the person who created the agent.
-  """
-  createdByUser: User
-
-  """
   ID of the cluster agent.
   """
   id: ID!
@@ -3525,11 +3530,6 @@ type ClusterAgentToken {
   Timestamp the token was created.
   """
   createdAt: Time
-
-  """
-  The user who created the token.
-  """
-  createdByUser: User
 
   """
   Global ID of the token.
@@ -12203,7 +12203,8 @@ type Group {
     First day for which to fetch vulnerability history.
     """
     startDate: ISO8601Date!
-  ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
+  ): VulnerabilitiesCountByDayAndSeverityConnection
+    @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
 
   """
   Represents vulnerable project counts for each grade.
@@ -14850,7 +14851,7 @@ input LabelCreateInput {
   (e.g. #FFAABB) or one of the CSS color names in
   https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#Color_keywords.
   """
-  color: String = "#6699cc"
+  color: String = "#428BCA"
 
   """
   Description of the label.
@@ -15928,21 +15929,6 @@ Identifier of MergeRequest.
 scalar MergeRequestID
 
 """
-New state to apply to a merge request.
-"""
-enum MergeRequestNewState {
-  """
-  Close the merge request if it is open.
-  """
-  CLOSED
-
-  """
-  Open the merge request if it is closed.
-  """
-  OPEN
-}
-
-"""
 Check permissions for the current user on a merge request
 """
 type MergeRequestPermissions {
@@ -16442,11 +16428,6 @@ input MergeRequestUpdateInput {
   projectPath: ID!
 
   """
-  The action to perform to change the state.
-  """
-  state: MergeRequestNewState
-
-  """
   Target branch of the merge request.
   """
   targetBranch: String
@@ -16794,17 +16775,26 @@ enum MoveType {
 }
 
 type Mutation {
-  addAwardEmoji(input: AddAwardEmojiInput!): AddAwardEmojiPayload @deprecated(reason: "Use awardEmojiAdd. Deprecated in 13.2.")
-  addProjectToSecurityDashboard(input: AddProjectToSecurityDashboardInput!): AddProjectToSecurityDashboardPayload
-  adminSidekiqQueuesDeleteJobs(input: AdminSidekiqQueuesDeleteJobsInput!): AdminSidekiqQueuesDeleteJobsPayload
+  addAwardEmoji(input: AddAwardEmojiInput!): AddAwardEmojiPayload
+    @deprecated(reason: "Use awardEmojiAdd. Deprecated in 13.2.")
+  addProjectToSecurityDashboard(
+    input: AddProjectToSecurityDashboardInput!
+  ): AddProjectToSecurityDashboardPayload
+  adminSidekiqQueuesDeleteJobs(
+    input: AdminSidekiqQueuesDeleteJobsInput!
+  ): AdminSidekiqQueuesDeleteJobsPayload
   alertSetAssignees(input: AlertSetAssigneesInput!): AlertSetAssigneesPayload
   alertTodoCreate(input: AlertTodoCreateInput!): AlertTodoCreatePayload
-  apiFuzzingCiConfigurationCreate(input: ApiFuzzingCiConfigurationCreateInput!): ApiFuzzingCiConfigurationCreatePayload
+  apiFuzzingCiConfigurationCreate(
+    input: ApiFuzzingCiConfigurationCreateInput!
+  ): ApiFuzzingCiConfigurationCreatePayload
   awardEmojiAdd(input: AwardEmojiAddInput!): AwardEmojiAddPayload
   awardEmojiRemove(input: AwardEmojiRemoveInput!): AwardEmojiRemovePayload
   awardEmojiToggle(input: AwardEmojiToggleInput!): AwardEmojiTogglePayload
   boardListCreate(input: BoardListCreateInput!): BoardListCreatePayload
-  boardListUpdateLimitMetrics(input: BoardListUpdateLimitMetricsInput!): BoardListUpdateLimitMetricsPayload
+  boardListUpdateLimitMetrics(
+    input: BoardListUpdateLimitMetricsInput!
+  ): BoardListUpdateLimitMetricsPayload
   ciCdSettingsUpdate(input: CiCdSettingsUpdateInput!): CiCdSettingsUpdatePayload
   clusterAgentDelete(input: ClusterAgentDeleteInput!): ClusterAgentDeletePayload
   clusterAgentTokenCreate(input: ClusterAgentTokenCreateInput!): ClusterAgentTokenCreatePayload
@@ -16816,13 +16806,17 @@ type Mutation {
   createBoard(input: CreateBoardInput!): CreateBoardPayload
   createBranch(input: CreateBranchInput!): CreateBranchPayload
   createClusterAgent(input: CreateClusterAgentInput!): CreateClusterAgentPayload
-  createComplianceFramework(input: CreateComplianceFrameworkInput!): CreateComplianceFrameworkPayload
+  createComplianceFramework(
+    input: CreateComplianceFrameworkInput!
+  ): CreateComplianceFrameworkPayload
 
   """
-   Available only when feature flag `custom_emoji` is enabled.
+  Available only when feature flag `custom_emoji` is enabled.
   """
   createCustomEmoji(input: CreateCustomEmojiInput!): CreateCustomEmojiPayload
-  createDevopsAdoptionSegment(input: CreateDevopsAdoptionSegmentInput!): CreateDevopsAdoptionSegmentPayload
+  createDevopsAdoptionSegment(
+    input: CreateDevopsAdoptionSegmentInput!
+  ): CreateDevopsAdoptionSegmentPayload
   createDiffNote(input: CreateDiffNoteInput!): CreateDiffNotePayload
   createEpic(input: CreateEpicInput!): CreateEpicPayload
   createImageDiffNote(input: CreateImageDiffNoteInput!): CreateImageDiffNotePayload
@@ -16847,15 +16841,23 @@ type Mutation {
   dastSiteValidationCreate(input: DastSiteValidationCreateInput!): DastSiteValidationCreatePayload
   dastSiteValidationRevoke(input: DastSiteValidationRevokeInput!): DastSiteValidationRevokePayload
   deleteAnnotation(input: DeleteAnnotationInput!): DeleteAnnotationPayload
-  deleteDevopsAdoptionSegment(input: DeleteDevopsAdoptionSegmentInput!): DeleteDevopsAdoptionSegmentPayload
+  deleteDevopsAdoptionSegment(
+    input: DeleteDevopsAdoptionSegmentInput!
+  ): DeleteDevopsAdoptionSegmentPayload
   designManagementDelete(input: DesignManagementDeleteInput!): DesignManagementDeletePayload
   designManagementMove(input: DesignManagementMoveInput!): DesignManagementMovePayload
   designManagementUpload(input: DesignManagementUploadInput!): DesignManagementUploadPayload
   destroyBoard(input: DestroyBoardInput!): DestroyBoardPayload
   destroyBoardList(input: DestroyBoardListInput!): DestroyBoardListPayload
-  destroyComplianceFramework(input: DestroyComplianceFrameworkInput!): DestroyComplianceFrameworkPayload
-  destroyContainerRepository(input: DestroyContainerRepositoryInput!): DestroyContainerRepositoryPayload
-  destroyContainerRepositoryTags(input: DestroyContainerRepositoryTagsInput!): DestroyContainerRepositoryTagsPayload
+  destroyComplianceFramework(
+    input: DestroyComplianceFrameworkInput!
+  ): DestroyComplianceFrameworkPayload
+  destroyContainerRepository(
+    input: DestroyContainerRepositoryInput!
+  ): DestroyContainerRepositoryPayload
+  destroyContainerRepositoryTags(
+    input: DestroyContainerRepositoryTagsInput!
+  ): DestroyContainerRepositoryTagsPayload
   destroyNote(input: DestroyNoteInput!): DestroyNotePayload
   destroySnippet(input: DestroySnippetInput!): DestroySnippetPayload
 
@@ -16863,18 +16865,25 @@ type Mutation {
   Toggles the resolved state of a discussion
   """
   discussionToggleResolve(input: DiscussionToggleResolveInput!): DiscussionToggleResolvePayload
-  dismissVulnerability(input: DismissVulnerabilityInput!): DismissVulnerabilityPayload @deprecated(reason: "Use vulnerabilityDismiss. Deprecated in 13.5.")
-  environmentsCanaryIngressUpdate(input: EnvironmentsCanaryIngressUpdateInput!): EnvironmentsCanaryIngressUpdatePayload
+  dismissVulnerability(input: DismissVulnerabilityInput!): DismissVulnerabilityPayload
+    @deprecated(reason: "Use vulnerabilityDismiss. Deprecated in 13.5.")
+  environmentsCanaryIngressUpdate(
+    input: EnvironmentsCanaryIngressUpdateInput!
+  ): EnvironmentsCanaryIngressUpdatePayload
   epicAddIssue(input: EpicAddIssueInput!): EpicAddIssuePayload
   epicBoardCreate(input: EpicBoardCreateInput!): EpicBoardCreatePayload
   epicBoardListCreate(input: EpicBoardListCreateInput!): EpicBoardListCreatePayload
   epicSetSubscription(input: EpicSetSubscriptionInput!): EpicSetSubscriptionPayload
   epicTreeReorder(input: EpicTreeReorderInput!): EpicTreeReorderPayload
   exportRequirements(input: ExportRequirementsInput!): ExportRequirementsPayload
-  gitlabSubscriptionActivate(input: GitlabSubscriptionActivateInput!): GitlabSubscriptionActivatePayload
+  gitlabSubscriptionActivate(
+    input: GitlabSubscriptionActivateInput!
+  ): GitlabSubscriptionActivatePayload
   httpIntegrationCreate(input: HttpIntegrationCreateInput!): HttpIntegrationCreatePayload
   httpIntegrationDestroy(input: HttpIntegrationDestroyInput!): HttpIntegrationDestroyPayload
-  httpIntegrationResetToken(input: HttpIntegrationResetTokenInput!): HttpIntegrationResetTokenPayload
+  httpIntegrationResetToken(
+    input: HttpIntegrationResetTokenInput!
+  ): HttpIntegrationResetTokenPayload
   httpIntegrationUpdate(input: HttpIntegrationUpdateInput!): HttpIntegrationUpdatePayload
   issueMove(input: IssueMoveInput!): IssueMovePayload
   issueMoveList(input: IssueMoveListInput!): IssueMoveListPayload
@@ -16892,19 +16901,25 @@ type Mutation {
   labelCreate(input: LabelCreateInput!): LabelCreatePayload
   markAsSpamSnippet(input: MarkAsSpamSnippetInput!): MarkAsSpamSnippetPayload
   mergeRequestCreate(input: MergeRequestCreateInput!): MergeRequestCreatePayload
-  mergeRequestReviewerRereview(input: MergeRequestReviewerRereviewInput!): MergeRequestReviewerRereviewPayload
+  mergeRequestReviewerRereview(
+    input: MergeRequestReviewerRereviewInput!
+  ): MergeRequestReviewerRereviewPayload
   mergeRequestSetAssignees(input: MergeRequestSetAssigneesInput!): MergeRequestSetAssigneesPayload
   mergeRequestSetLabels(input: MergeRequestSetLabelsInput!): MergeRequestSetLabelsPayload
   mergeRequestSetLocked(input: MergeRequestSetLockedInput!): MergeRequestSetLockedPayload
   mergeRequestSetMilestone(input: MergeRequestSetMilestoneInput!): MergeRequestSetMilestonePayload
-  mergeRequestSetSubscription(input: MergeRequestSetSubscriptionInput!): MergeRequestSetSubscriptionPayload
+  mergeRequestSetSubscription(
+    input: MergeRequestSetSubscriptionInput!
+  ): MergeRequestSetSubscriptionPayload
   mergeRequestSetWip(input: MergeRequestSetWipInput!): MergeRequestSetWipPayload
 
   """
   Update attributes of a merge request
   """
   mergeRequestUpdate(input: MergeRequestUpdateInput!): MergeRequestUpdatePayload
-  namespaceIncreaseStorageTemporarily(input: NamespaceIncreaseStorageTemporarilyInput!): NamespaceIncreaseStorageTemporarilyPayload
+  namespaceIncreaseStorageTemporarily(
+    input: NamespaceIncreaseStorageTemporarilyInput!
+  ): NamespaceIncreaseStorageTemporarilyPayload
   oncallRotationCreate(input: OncallRotationCreateInput!): OncallRotationCreatePayload
   oncallRotationDestroy(input: OncallRotationDestroyInput!): OncallRotationDestroyPayload
   oncallScheduleCreate(input: OncallScheduleCreateInput!): OncallScheduleCreatePayload
@@ -16913,22 +16928,35 @@ type Mutation {
   pipelineCancel(input: PipelineCancelInput!): PipelineCancelPayload
   pipelineDestroy(input: PipelineDestroyInput!): PipelineDestroyPayload
   pipelineRetry(input: PipelineRetryInput!): PipelineRetryPayload
-  prometheusIntegrationCreate(input: PrometheusIntegrationCreateInput!): PrometheusIntegrationCreatePayload
-  prometheusIntegrationResetToken(input: PrometheusIntegrationResetTokenInput!): PrometheusIntegrationResetTokenPayload
-  prometheusIntegrationUpdate(input: PrometheusIntegrationUpdateInput!): PrometheusIntegrationUpdatePayload
+  prometheusIntegrationCreate(
+    input: PrometheusIntegrationCreateInput!
+  ): PrometheusIntegrationCreatePayload
+  prometheusIntegrationResetToken(
+    input: PrometheusIntegrationResetTokenInput!
+  ): PrometheusIntegrationResetTokenPayload
+  prometheusIntegrationUpdate(
+    input: PrometheusIntegrationUpdateInput!
+  ): PrometheusIntegrationUpdatePayload
   promoteToEpic(input: PromoteToEpicInput!): PromoteToEpicPayload
   releaseCreate(input: ReleaseCreateInput!): ReleaseCreatePayload
   releaseDelete(input: ReleaseDeleteInput!): ReleaseDeletePayload
   releaseUpdate(input: ReleaseUpdateInput!): ReleaseUpdatePayload
-  removeAwardEmoji(input: RemoveAwardEmojiInput!): RemoveAwardEmojiPayload @deprecated(reason: "Use awardEmojiRemove. Deprecated in 13.2.")
-  removeProjectFromSecurityDashboard(input: RemoveProjectFromSecurityDashboardInput!): RemoveProjectFromSecurityDashboardPayload
+  removeAwardEmoji(input: RemoveAwardEmojiInput!): RemoveAwardEmojiPayload
+    @deprecated(reason: "Use awardEmojiRemove. Deprecated in 13.2.")
+  removeProjectFromSecurityDashboard(
+    input: RemoveProjectFromSecurityDashboardInput!
+  ): RemoveProjectFromSecurityDashboardPayload
 
   """
   Repositions a DiffNote on an image (a `Note` where the `position.positionType` is `"image"`)
   """
   repositionImageDiffNote(input: RepositionImageDiffNoteInput!): RepositionImageDiffNotePayload
-  revertVulnerabilityToDetected(input: RevertVulnerabilityToDetectedInput!): RevertVulnerabilityToDetectedPayload @deprecated(reason: "Use vulnerabilityRevertToDetected. Deprecated in 13.5.")
-  runDastScan(input: RunDASTScanInput!): RunDASTScanPayload @deprecated(reason: "Use DastOnDemandScanCreate. Deprecated in 13.4.")
+  revertVulnerabilityToDetected(
+    input: RevertVulnerabilityToDetectedInput!
+  ): RevertVulnerabilityToDetectedPayload
+    @deprecated(reason: "Use vulnerabilityRevertToDetected. Deprecated in 13.5.")
+  runDastScan(input: RunDASTScanInput!): RunDASTScanPayload
+    @deprecated(reason: "Use DastOnDemandScanCreate. Deprecated in 13.4.")
   terraformStateDelete(input: TerraformStateDeleteInput!): TerraformStateDeletePayload
   terraformStateLock(input: TerraformStateLockInput!): TerraformStateLockPayload
   terraformStateUnlock(input: TerraformStateUnlockInput!): TerraformStateUnlockPayload
@@ -16937,13 +16965,20 @@ type Mutation {
   todoRestore(input: TodoRestoreInput!): TodoRestorePayload
   todoRestoreMany(input: TodoRestoreManyInput!): TodoRestoreManyPayload
   todosMarkAllDone(input: TodosMarkAllDoneInput!): TodosMarkAllDonePayload
-  toggleAwardEmoji(input: ToggleAwardEmojiInput!): ToggleAwardEmojiPayload @deprecated(reason: "Use awardEmojiToggle. Deprecated in 13.2.")
+  toggleAwardEmoji(input: ToggleAwardEmojiInput!): ToggleAwardEmojiPayload
+    @deprecated(reason: "Use awardEmojiToggle. Deprecated in 13.2.")
   updateAlertStatus(input: UpdateAlertStatusInput!): UpdateAlertStatusPayload
   updateBoard(input: UpdateBoardInput!): UpdateBoardPayload
-  updateBoardEpicUserPreferences(input: UpdateBoardEpicUserPreferencesInput!): UpdateBoardEpicUserPreferencesPayload
+  updateBoardEpicUserPreferences(
+    input: UpdateBoardEpicUserPreferencesInput!
+  ): UpdateBoardEpicUserPreferencesPayload
   updateBoardList(input: UpdateBoardListInput!): UpdateBoardListPayload
-  updateComplianceFramework(input: UpdateComplianceFrameworkInput!): UpdateComplianceFrameworkPayload
-  updateContainerExpirationPolicy(input: UpdateContainerExpirationPolicyInput!): UpdateContainerExpirationPolicyPayload
+  updateComplianceFramework(
+    input: UpdateComplianceFrameworkInput!
+  ): UpdateComplianceFrameworkPayload
+  updateContainerExpirationPolicy(
+    input: UpdateContainerExpirationPolicyInput!
+  ): UpdateContainerExpirationPolicyPayload
   updateEpic(input: UpdateEpicInput!): UpdateEpicPayload
 
   """
@@ -16954,7 +16989,9 @@ type Mutation {
   updateImageDiffNote(input: UpdateImageDiffNoteInput!): UpdateImageDiffNotePayload
   updateIssue(input: UpdateIssueInput!): UpdateIssuePayload
   updateIteration(input: UpdateIterationInput!): UpdateIterationPayload
-  updateNamespacePackageSettings(input: UpdateNamespacePackageSettingsInput!): UpdateNamespacePackageSettingsPayload
+  updateNamespacePackageSettings(
+    input: UpdateNamespacePackageSettingsInput!
+  ): UpdateNamespacePackageSettingsPayload
 
   """
   Updates a Note. If the body of the Note contains only quick actions, the Note
@@ -16965,10 +17002,16 @@ type Mutation {
   updateSnippet(input: UpdateSnippetInput!): UpdateSnippetPayload
   vulnerabilityConfirm(input: VulnerabilityConfirmInput!): VulnerabilityConfirmPayload
   vulnerabilityDismiss(input: VulnerabilityDismissInput!): VulnerabilityDismissPayload
-  vulnerabilityExternalIssueLinkCreate(input: VulnerabilityExternalIssueLinkCreateInput!): VulnerabilityExternalIssueLinkCreatePayload
-  vulnerabilityExternalIssueLinkDestroy(input: VulnerabilityExternalIssueLinkDestroyInput!): VulnerabilityExternalIssueLinkDestroyPayload
+  vulnerabilityExternalIssueLinkCreate(
+    input: VulnerabilityExternalIssueLinkCreateInput!
+  ): VulnerabilityExternalIssueLinkCreatePayload
+  vulnerabilityExternalIssueLinkDestroy(
+    input: VulnerabilityExternalIssueLinkDestroyInput!
+  ): VulnerabilityExternalIssueLinkDestroyPayload
   vulnerabilityResolve(input: VulnerabilityResolveInput!): VulnerabilityResolvePayload
-  vulnerabilityRevertToDetected(input: VulnerabilityRevertToDetectedInput!): VulnerabilityRevertToDetectedPayload
+  vulnerabilityRevertToDetected(
+    input: VulnerabilityRevertToDetectedInput!
+  ): VulnerabilityRevertToDetectedPayload
 }
 
 """
@@ -18668,11 +18711,6 @@ type Pipeline {
   Permissions for the current user on the resource
   """
   userPermissions: PipelinePermissions!
-
-  """
-  Indicates if a pipeline has warnings.
-  """
-  warnings: Boolean!
 }
 
 type PipelineAnalytics {
@@ -21475,7 +21513,7 @@ type Query {
   """
   ciConfig(
     """
-    Contents of `.gitlab-ci.yml`.
+    Contents of '.gitlab-ci.yml'.
     """
     content: String!
 
@@ -21560,7 +21598,7 @@ type Query {
   """
   group(
     """
-    The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.
+    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss".
     """
     fullPath: ID!
   ): Group
@@ -21611,7 +21649,7 @@ type Query {
   ): InstanceStatisticsMeasurementConnection
 
   """
-  Find an Issue.
+  Find an issue.
   """
   issue(
     """
@@ -21650,7 +21688,7 @@ type Query {
   """
   namespace(
     """
-    The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.
+    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss".
     """
     fullPath: ID!
   ): Namespace
@@ -21670,7 +21708,7 @@ type Query {
   """
   project(
     """
-    The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.
+    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss".
     """
     fullPath: ID!
   ): Project
@@ -22030,7 +22068,8 @@ type Query {
     First day for which to fetch vulnerability history.
     """
     startDate: ISO8601Date!
-  ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
+  ): VulnerabilitiesCountByDayAndSeverityConnection
+    @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
 
   """
   Find a vulnerability.
@@ -28292,7 +28331,20 @@ type VulnerabilityConnection {
 """
 Represents a vulnerability detail field. The fields with data will depend on the vulnerability detail type
 """
-union VulnerabilityDetail = VulnerabilityDetailBase | VulnerabilityDetailBoolean | VulnerabilityDetailCode | VulnerabilityDetailCommit | VulnerabilityDetailDiff | VulnerabilityDetailFileLocation | VulnerabilityDetailInt | VulnerabilityDetailList | VulnerabilityDetailMarkdown | VulnerabilityDetailModuleLocation | VulnerabilityDetailTable | VulnerabilityDetailText | VulnerabilityDetailUrl
+union VulnerabilityDetail =
+    VulnerabilityDetailBase
+  | VulnerabilityDetailBoolean
+  | VulnerabilityDetailCode
+  | VulnerabilityDetailCommit
+  | VulnerabilityDetailDiff
+  | VulnerabilityDetailFileLocation
+  | VulnerabilityDetailInt
+  | VulnerabilityDetailList
+  | VulnerabilityDetailMarkdown
+  | VulnerabilityDetailModuleLocation
+  | VulnerabilityDetailTable
+  | VulnerabilityDetailText
+  | VulnerabilityDetailUrl
 
 """
 Represents the vulnerability details base
@@ -28996,7 +29048,13 @@ enum VulnerabilityIssueLinkType {
 """
 Represents a vulnerability location. The fields with data will depend on the vulnerability report type
 """
-union VulnerabilityLocation = VulnerabilityLocationContainerScanning | VulnerabilityLocationCoverageFuzzing | VulnerabilityLocationDast | VulnerabilityLocationDependencyScanning | VulnerabilityLocationSast | VulnerabilityLocationSecretDetection
+union VulnerabilityLocation =
+    VulnerabilityLocationContainerScanning
+  | VulnerabilityLocationCoverageFuzzing
+  | VulnerabilityLocationDast
+  | VulnerabilityLocationDependencyScanning
+  | VulnerabilityLocationSast
+  | VulnerabilityLocationSecretDetection
 
 """
 Represents the location of a vulnerability found by a container security scan

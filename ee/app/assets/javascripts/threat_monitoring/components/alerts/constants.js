@@ -35,6 +35,13 @@ export const FIELDS = [
     thClass: `gl-bg-white! gl-pointer-events-none`,
   },
   {
+    key: 'eventCount',
+    label: s__('ThreatMonitoring|Events'),
+    thClass: `gl-bg-white! gl-w-10p gl-text-right`,
+    tdClass: `gl-pl-6! gl-text-right`,
+    sortable: true,
+  },
+  {
     key: 'status',
     label: s__('ThreatMonitoring|Status'),
     thAttr: { 'data-testid': 'threat-alerts-status-header' },

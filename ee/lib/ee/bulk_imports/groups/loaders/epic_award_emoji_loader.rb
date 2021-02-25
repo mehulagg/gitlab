@@ -7,10 +7,6 @@ module EE
         class EpicAwardEmojiLoader
           NotAllowedError = Class.new(StandardError)
 
-          def initialize(options = {})
-            @options = options
-          end
-
           # rubocop: disable CodeReuse/ActiveRecord
           def load(context, data)
             return unless data
