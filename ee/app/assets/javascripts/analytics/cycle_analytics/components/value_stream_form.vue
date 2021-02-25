@@ -243,11 +243,25 @@ export default {
       ]);
       Vue.set(this, 'stages', [...this.stages, target]);
     },
+    lastStage() {
+      const stages = Array.from(
+        this.$refs.formStages.querySelectorAll('[name*="custom-stage-name"]'),
+      );
+      return stages.slice(-1)[0];
+    },
     onAddStage() {
       // validate previous stages only and add a new stage
       this.validate();
       Vue.set(this, 'stages', [...this.stages, { ...defaultCustomStageFields }]);
       Vue.set(this, 'stageErrors', [...this.stageErrors, {}]);
+      // Scroll to the new stage we have added
+      setTimeout(
+        () =>
+          this.lastStage().scrollIntoView({
+            behavior: 'smooth',
+          }),
+        125,
+      );
     },
     onFieldInput(activeStageIndex, { field, value }) {
       const updatedStage = { ...this.stages[activeStageIndex], [field]: value };
@@ -338,7 +352,7 @@ export default {
         name="preset"
         @input="onSelectPreset"
       />
-      <div v-if="hasExtendedFormFields" data-testid="extended-form-fields">
+      <div v-if="hasExtendedFormFields" ref="formStages" data-testid="extended-form-fields">
         <div v-for="(stage, activeStageIndex) in stages" :key="stageKey(activeStageIndex)">
           <hr class="gl-my-3" />
           <span
