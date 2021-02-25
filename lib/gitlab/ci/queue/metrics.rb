@@ -18,6 +18,7 @@ module Gitlab
         OPERATION_COUNTERS = [
           :build_can_pick,
           :build_not_pick,
+          :build_not_pending,
           :build_conflict_lock,
           :build_conflict_exception,
           :build_conflict_transition,
