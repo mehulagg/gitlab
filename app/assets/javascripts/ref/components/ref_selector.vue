@@ -79,6 +79,9 @@ export default {
     showNoResults() {
       return !this.showBranchesSection && !this.showTagsSection && !this.showCommitsSection;
     },
+    showSectionHeaders() {
+      return this.enabledRefTypes.length > 1;
+    },
   },
   watch: {
     // Keep the Vuex store synchronized if the parent
@@ -177,6 +180,7 @@ export default {
               :selected-ref="selectedRef"
               :error="matches.branches.error"
               :error-message="i18n.branchesErrorMessage"
+              :show-header="showSectionHeaders"
               data-testid="branches-section"
               @selected="selectRef($event)"
             />
@@ -192,6 +196,7 @@ export default {
               :selected-ref="selectedRef"
               :error="matches.tags.error"
               :error-message="i18n.tagsErrorMessage"
+              :show-header="showSectionHeaders"
               data-testid="tags-section"
               @selected="selectRef($event)"
             />
@@ -207,6 +212,7 @@ export default {
               :selected-ref="selectedRef"
               :error="matches.commits.error"
               :error-message="i18n.commitsErrorMessage"
+              :show-header="showSectionHeaders"
               data-testid="commits-section"
               @selected="selectRef($event)"
             />

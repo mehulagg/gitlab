@@ -619,5 +619,25 @@ describe('Ref selector component', () => {
         reqsNotCalled.forEach((req) => expect(requestSpies[req]).not.toHaveBeenCalled());
       },
     );
+
+    it.each`
+      enabledRefType       | findVisibleSection     | findHiddenSections
+      ${REF_TYPE_BRANCHES} | ${findBranchesSection} | ${[findTagsSection, findCommitsSection]}
+      ${REF_TYPE_TAGS}     | ${findTagsSection}     | ${[findBranchesSection, findCommitsSection]}
+      ${REF_TYPE_COMMITS}  | ${findCommitsSection}  | ${[findBranchesSection, findTagsSection]}
+    `(
+      'hides section headers if a single ref type is enabled',
+      async ({ enabledRefType, findVisibleSection, findHiddenSections }) => {
+        createComponent({ enabledRefTypes: [enabledRefType] });
+        updateQuery('abcd1234');
+        await waitForRequests();
+
+        expect(findVisibleSection().exists()).toBe(true);
+        expect(findVisibleSection().find('[data-testid="section-header"]').exists()).toBe(false);
+        findHiddenSections.forEach((findHiddenSection) =>
+          expect(findHiddenSection().exists()).toBe(false),
+        );
+      },
+    );
   });
 });
