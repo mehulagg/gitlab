@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :protected_tag do
     name
-    project
+    project { create(:project) }
 
     transient do
       default_access_level { true }
