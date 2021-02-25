@@ -148,6 +148,7 @@ RSpec.describe Gitlab::GitalyClient::Call do
           context 'with repository size RPC' do
             let(:service) { :repository_service }
             let(:rpc) { :repository_size }
+            let(:request) { Gitaly::RepositorySizeRequest.new }
 
             it 'enables force-routing to primary' do
               subject do |kwargs|

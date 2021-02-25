@@ -33,8 +33,8 @@ module Gitlab
     # RPCs that should always be routed to the Gitaly Cluster primary
     ROUTE_TO_PRIMARY_SERVICE_RPCS = [
       # Repository size can vary due to state of garbage collection
-      [:repository_service, :repository_size],
-      [:repository_service, :get_object_directory_size]
+      Gitaly::RepositorySizeRequest,
+      Gitaly::GetObjectDirectorySizeRequest
     ].freeze
 
     MUTEX = Mutex.new
@@ -178,7 +178,7 @@ module Gitlab
       enforce_gitaly_request_limits(:call)
       Gitlab::RequestContext.instance.ensure_deadline_not_exceeded!
 
-      use_primary = self.route_to_primary?(service, rpc)
+      use_primary = self.route_to_primary?(request)
       kwargs = request_kwargs(storage, timeout: timeout.to_f, remote_storage: remote_storage, use_primary: use_primary)
       kwargs = yield(kwargs) if block_given?
 
@@ -256,9 +256,9 @@ module Gitlab
     end
     private_class_method :route_to_primary
 
-    def self.route_to_primary?(service, rpc)
+    def self.route_to_primary?(request)
       return true if Gitlab::SafeRequestStore[:gitlab_git_env].present?
-      return true if ROUTE_TO_PRIMARY_SERVICE_RPCS.include?([service, rpc])
+      return true if ROUTE_TO_PRIMARY_SERVICE_RPCS.include?(request.class)
 
       false
     end
