@@ -1,17 +1,26 @@
 import Api from '~/api';
 import * as types from './mutation_types';
+import { REF_TYPES } from '../constants';
 
 export const setProjectId = ({ commit }, projectId) => commit(types.SET_PROJECT_ID, projectId);
 
 export const setSelectedRef = ({ commit }, selectedRef) =>
   commit(types.SET_SELECTED_REF, selectedRef);
 
-export const search = ({ dispatch, commit }, query) => {
+export const search = ({ dispatch, commit }, { query, refTypes }) => {
   commit(types.SET_QUERY, query);
 
-  dispatch('searchBranches');
-  dispatch('searchTags');
-  dispatch('searchCommits');
+  if (refTypes.includes(REF_TYPES.branches)) {
+    dispatch('searchBranches');
+  }
+
+  if (refTypes.includes(REF_TYPES.tags)) {
+    dispatch('searchTags');
+  }
+
+  if (refTypes.includes(REF_TYPES.commits)) {
+    dispatch('searchCommits');
+  }
 };
 
 export const searchBranches = ({ commit, state }) => {

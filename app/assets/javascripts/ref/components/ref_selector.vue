@@ -8,15 +8,14 @@ import {
   GlIcon,
   GlLoadingIcon,
 } from '@gitlab/ui';
-import { debounce } from 'lodash';
+import { debounce, isArray } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { SEARCH_DEBOUNCE_MS, DEFAULT_I18N } from '../constants';
+import { SEARCH_DEBOUNCE_MS, DEFAULT_I18N, REF_TYPES, ALL_REF_TYPES } from '../constants';
 import createStore from '../stores';
 import RefResultsSection from './ref_results_section.vue';
 
 export default {
   name: 'RefSelector',
-  store: createStore(),
   components: {
     GlDropdown,
     GlDropdownDivider,
@@ -42,6 +41,20 @@ export default {
       required: false,
       default: () => ({}),
     },
+    refTypes: {
+      type: Array,
+      required: false,
+      default: () => ALL_REF_TYPES,
+      validator: (val) =>
+        // It has to be an arrray
+        isArray(val) &&
+        // with at least one item
+        val.length > 0 &&
+        // and only "branches", "tags", and "commits" are allowed
+        val.every((item) => ALL_REF_TYPES.includes(item)) &&
+        // and no duplicates are allowed
+        val.length === new Set(val).size,
+    },
   },
   data() {
     return {
@@ -62,16 +75,40 @@ export default {
       };
     },
     showBranchesSection() {
+      if (!this.refTypes.includes(REF_TYPES.branches)) {
+        return false;
+      }
+
       return Boolean(this.matches.branches.totalCount > 0 || this.matches.branches.error);
     },
     showTagsSection() {
+      if (!this.refTypes.includes(REF_TYPES.tags)) {
+        return false;
+      }
+
       return Boolean(this.matches.tags.totalCount > 0 || this.matches.tags.error);
     },
     showCommitsSection() {
+      if (!this.refTypes.includes(REF_TYPES.commits)) {
+        return false;
+      }
+
       return Boolean(this.matches.commits.totalCount > 0 || this.matches.commits.error);
     },
     showNoResults() {
       return !this.showBranchesSection && !this.showTagsSection && !this.showCommitsSection;
+    },
+    showSectionHeaders() {
+      return this.refTypes.length > 1;
+    },
+    branchesSectionTitle() {
+      return this.showSectionHeaders ? this.i18n.branches : '';
+    },
+    tagsSectionTitle() {
+      return this.showSectionHeaders ? this.i18n.tags : '';
+    },
+    commitsSectionTitle() {
+      return this.showSectionHeaders ? this.i18n.commits : '';
     },
   },
   watch: {
@@ -85,6 +122,26 @@ export default {
         }
       },
     },
+
+    isLoading: function (newVal) {
+      this.$emit('is-loading-updated', newVal);
+
+      if (!newVal) {
+        this.$emit('matches-updated', this.matches);
+      }
+    },
+
+    lastQuery: function (newVal) {
+      this.$emit('query-updated', this.lastQuery);
+    },
+  },
+  beforeCreate() {
+    // Setting the store here instead of using
+    // the built in `store` component option because
+    // we need each new `RefSelector` instance to
+    // create a new Vuex store instance.
+    // See https://github.com/vuejs/vuex/issues/414#issue-184491718.
+    this.$store = createStore();
   },
   created() {
     // This method is defined here instead of in `methods`
@@ -93,20 +150,21 @@ export default {
     // made inaccessible by Vue. More info:
     // https://stackoverflow.com/a/52988020/1063392
     this.debouncedSearch = debounce(function search() {
-      this.search(this.query);
+      this.search();
     }, SEARCH_DEBOUNCE_MS);
 
     this.setProjectId(this.projectId);
-    this.search(this.query);
+    this.search();
   },
   methods: {
-    ...mapActions(['setProjectId', 'setSelectedRef', 'search']),
+    ...mapActions(['setProjectId', 'setSelectedRef']),
+    ...mapActions({ storeSearch: 'search' }),
     focusSearchBox() {
       this.$refs.searchBox.$el.querySelector('input').focus();
     },
     onSearchBoxEnter() {
       this.debouncedSearch.cancel();
-      this.search(this.query);
+      this.search();
     },
     onSearchBoxInput() {
       this.debouncedSearch();
@@ -114,6 +172,9 @@ export default {
     selectRef(ref) {
       this.setSelectedRef(ref);
       this.$emit('input', this.selectedRef);
+    },
+    search() {
+      this.storeSearch({ query: this.query, refTypes: this.refTypes });
     },
   },
 };
@@ -160,7 +221,7 @@ export default {
     <template v-else>
       <template v-if="showBranchesSection">
         <ref-results-section
-          :section-title="i18n.branches"
+          :section-title="branchesSectionTitle"
           :total-count="matches.branches.totalCount"
           :items="matches.branches.list"
           :selected-ref="selectedRef"
@@ -175,7 +236,7 @@ export default {
 
       <template v-if="showTagsSection">
         <ref-results-section
-          :section-title="i18n.tags"
+          :section-title="tagsSectionTitle"
           :total-count="matches.tags.totalCount"
           :items="matches.tags.list"
           :selected-ref="selectedRef"
@@ -190,7 +251,7 @@ export default {
 
       <template v-if="showCommitsSection">
         <ref-results-section
-          :section-title="i18n.commits"
+          :section-title="commitsSectionTitle"
           :total-count="matches.commits.totalCount"
           :items="matches.commits.list"
           :selected-ref="selectedRef"
@@ -200,6 +261,10 @@ export default {
           @selected="selectRef($event)"
         />
       </template>
+    </template>
+
+    <template #footer>
+      <slot name="footer" />
     </template>
   </gl-dropdown>
 </template>

@@ -17,3 +17,11 @@ export const DEFAULT_I18N = Object.freeze({
   commits: __('Commits'),
   noRefSelected: __('No ref selected'),
 });
+
+export const REF_TYPES = Object.freeze({
+  branches: 'branches',
+  tags: 'tags',
+  commits: 'commits',
+});
+
+export const ALL_REF_TYPES = Object.freeze(Object.values(REF_TYPES));
