@@ -201,8 +201,9 @@ export default {
           ({
             data: {
               [this.isEdit ? 'dastScannerProfileUpdate' : 'dastScannerProfileCreate']: {
+                id,
                 errors = [],
-                ...profileFields
+                // ...profileFields
               },
             },
           }) => {
@@ -210,7 +211,10 @@ export default {
               this.showErrors(errors);
               this.loading = false;
             } else {
-              this.$emit('success', profileFields);
+              this.$emit('success', {
+                id,
+                ...serializeFormObject(this.form),
+              });
               // this.returnToPreviousPage(id);
             }
           },

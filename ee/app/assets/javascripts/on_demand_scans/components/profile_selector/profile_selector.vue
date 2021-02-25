@@ -65,7 +65,9 @@ export default {
   },
   methods: {
     onFormSuccess(profile) {
-      this.selectedProfile = profile;
+      debugger;
+      this.profiles.push(profile);
+      this.showForm = false;
     },
     onFormCancel() {
       this.showForm = false;

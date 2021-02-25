@@ -1,12 +1,12 @@
 mutation dastScannerProfileUpdate($input: DastScannerProfileUpdateInput!) {
   dastScannerProfileUpdate(input: $input) {
     id
-    profileName
-    spiderTimeout
-    targetTimeout
-    scanType
-    useAjaxSpider
-    showDebugMessages
+    # profileName
+    # spiderTimeout
+    # targetTimeout
+    # scanType
+    # useAjaxSpider
+    # showDebugMessages
     errors
   }
 }
