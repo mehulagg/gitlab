@@ -173,6 +173,11 @@ msgid_plural "%d days"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "%d epic"
+msgid_plural "%d epics"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "%d error"
 msgid_plural "%d errors"
 msgstr[0] ""
@@ -554,6 +559,9 @@ msgid "%{issuesCount} issues with a limit of %{maxIssueCount}"
 msgstr ""
 
 msgid "%{issuesSize} with a limit of %{maxIssueCount}"
+msgstr ""
+
+msgid "%{itemsCount} issues with a limit of %{maxIssueCount}"
 msgstr ""
 
 msgid "%{labelStart}Actual response:%{labelEnd} %{headers}"

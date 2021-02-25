@@ -14,6 +14,7 @@ describe('Board List Header Component', () => {
   let store;
 
   const updateListSpy = jest.fn();
+  const toggleListCollapsedSpy = jest.fn();
 
   afterEach(() => {
     wrapper.destroy();
@@ -43,14 +44,14 @@ describe('Board List Header Component', () => {
 
     if (withLocalStorage) {
       localStorage.setItem(
-        `boards.${boardId}.${listMock.listType}.${listMock.id}.expanded`,
-        (!collapsed).toString(),
+        `boards.${boardId}.${listMock.listType}.${listMock.id}.collapsed`,
+        collapsed.toString(),
       );
     }
 
     store = new Vuex.Store({
       state: {},
-      actions: { updateList: updateListSpy },
+      actions: { updateList: updateListSpy, toggleListCollapsed: toggleListCollapsedSpy },
       getters: {},
     });
 
@@ -70,7 +71,6 @@ describe('Board List Header Component', () => {
   };
 
   const isCollapsed = () => wrapper.vm.list.collapsed;
-  const isExpanded = () => !isCollapsed;
 
   const findAddIssueButton = () => wrapper.find({ ref: 'newIssueBtn' });
   const findTitle = () => wrapper.find('.board-title');
@@ -132,6 +132,9 @@ describe('Board List Header Component', () => {
       expect(isCollapsed()).toBe(false);
 
       findCaret().vm.$emit('click');
+      wrapper.setProps({
+        list: { ...mockLabelList, collapsed: !wrapper.vm.list.collapsed },
+      });
 
       await wrapper.vm.$nextTick();
 
@@ -144,6 +147,9 @@ describe('Board List Header Component', () => {
       expect(isCollapsed()).toBe(true);
 
       findCaret().vm.$emit('click');
+      wrapper.setProps({
+        list: { ...mockLabelList, collapsed: !wrapper.vm.list.collapsed },
+      });
 
       await wrapper.vm.$nextTick();
 
@@ -157,7 +163,7 @@ describe('Board List Header Component', () => {
       await wrapper.vm.$nextTick();
 
       expect(updateListSpy).toHaveBeenCalledTimes(1);
-      expect(localStorage.getItem(`${wrapper.vm.uniqueKey}.expanded`)).toBe(null);
+      expect(localStorage.getItem(`${wrapper.vm.uniqueKey}.collapsed`)).toBe(null);
     });
 
     it("when logged out it doesn't call list update and sets localStorage", async () => {
@@ -167,7 +173,7 @@ describe('Board List Header Component', () => {
       await wrapper.vm.$nextTick();
 
       expect(updateListSpy).not.toHaveBeenCalled();
-      expect(localStorage.getItem(`${wrapper.vm.uniqueKey}.expanded`)).toBe(String(isExpanded()));
+      expect(localStorage.getItem(`${wrapper.vm.uniqueKey}.collapsed`)).toBe(String(isCollapsed()));
     });
   });
 

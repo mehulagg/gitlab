@@ -202,6 +202,23 @@ describe('Board Store Mutations', () => {
     });
   });
 
+  describe('TOGGLE_LIST_COLLAPSED', () => {
+    it('updates collapsed attribute of list in boardLists state', () => {
+      state = {
+        ...state,
+        boardLists: {
+          'gid://gitlab/List/1': mockLists[0],
+        },
+      };
+
+      expect(state.boardLists['gid://gitlab/List/1'].collapsed).toEqual(false);
+
+      mutations.TOGGLE_LIST_COLLAPSED(state, { listId: 'gid://gitlab/List/1', collapsed: true });
+
+      expect(state.boardLists['gid://gitlab/List/1'].collapsed).toEqual(true);
+    });
+  });
+
   describe('REMOVE_LIST', () => {
     it('removes list from boardLists', () => {
       const [list, secondList] = mockLists;
