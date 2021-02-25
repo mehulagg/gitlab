@@ -18206,8 +18206,7 @@ CREATE TABLE vulnerability_finding_fingerprints (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     algorithm_type smallint NOT NULL,
-    fingerprint_sha256 bytea,
-    CONSTRAINT check_ed01209504 CHECK ((fingerprint_sha256 IS NOT NULL))
+    fingerprint_sha256 bytea NOT NULL
 );
 
 CREATE SEQUENCE vulnerability_finding_fingerprints_id_seq
