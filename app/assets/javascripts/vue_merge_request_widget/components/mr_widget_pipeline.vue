@@ -11,8 +11,8 @@ import {
 } from '@gitlab/ui';
 import mrWidgetPipelineMixin from 'ee_else_ce/vue_merge_request_widget/mixins/mr_widget_pipeline';
 import { s__, n__ } from '~/locale';
+import PipelineMiniGraph from '~/pipelines/components/pipelines_list/pipeline_mini_graph.vue';
 import PipelineArtifacts from '~/pipelines/components/pipelines_list/pipelines_artifacts.vue';
-import PipelineStage from '~/pipelines/components/pipelines_list/stage.vue';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 
@@ -26,7 +26,7 @@ export default {
     GlSprintf,
     GlTooltip,
     PipelineArtifacts,
-    PipelineStage,
+    PipelineMiniGraph,
     TooltipOnTruncate,
     LinkedPipelinesMiniList: () =>
       import('ee_component/vue_shared/components/linked_pipelines_mini_list.vue'),
@@ -92,11 +92,6 @@ export default {
       return this.pipeline.details && this.pipeline.details.status
         ? this.pipeline.details.status
         : {};
-    },
-    hasStages() {
-      return (
-        this.pipeline.details && this.pipeline.details.stages && this.pipeline.details.stages.length
-      );
     },
     hasCommitInfo() {
       return this.pipeline.commit && Object.keys(this.pipeline.commit).length > 0;
@@ -242,16 +237,12 @@ export default {
           <span class="mr-widget-pipeline-graph">
             <span class="stage-cell">
               <linked-pipelines-mini-list v-if="triggeredBy.length" :triggered-by="triggeredBy" />
-              <template v-if="hasStages">
-                <div
-                  v-for="(stage, i) in pipeline.details.stages"
-                  :key="i"
-                  class="stage-container dropdown mr-widget-pipeline-stages"
-                  data-testid="widget-mini-pipeline-graph"
-                >
-                  <pipeline-stage :stage="stage" />
-                </div>
-              </template>
+              <pipeline-mini-graph
+                v-if="pipeline.details && pipeline.details.stages"
+                class="gl-display-inline-block"
+                stages-class="mr-widget-pipeline-stages"
+                :stages="pipeline.details.stages"
+              />
             </span>
             <linked-pipelines-mini-list v-if="triggered.length" :triggered="triggered" />
             <pipeline-artifacts
