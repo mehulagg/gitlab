@@ -82,4 +82,10 @@ class ApplicationRecord < ActiveRecord::Base
     values = enum_mod.definition.transform_values { |v| v[:value] }
     enum(enum_mod.key => values)
   end
+
+  # Determines if dependant batch destroy can use delete_all rather than destroy_all
+  # to reduce N+1 queries
+  def self.delete_callbacks_required?
+    true
+  end
 end

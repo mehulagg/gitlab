@@ -32,10 +32,21 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
 
   shared_examples 'deleting the project with pipeline and build' do
     context 'with pipeline and build', :sidekiq_inline do # which has optimistic locking
-      let!(:pipeline) { create(:ci_pipeline, project: project) }
-      let!(:build) { create(:ci_build, :artifacts, pipeline: pipeline) }
+      let(:pipeline) { create(:ci_pipeline, project: project) }
+      let(:build) { create(:ci_build, :artifacts, pipeline: pipeline) }
 
       it_behaves_like 'deleting the project'
+
+      it 'avoids N+1 queries' do
+        recorder = ActiveRecord::QueryRecorder.new { destroy_project(project, user, {}) }.count
+
+        project = create(:project, :repository, namespace: user.namespace)
+        pipeline = create(:ci_pipeline, project: project)
+        builds = create_list(:ci_build, 4, :artifacts, pipeline: pipeline)
+        create_list(:ci_build_trace_chunk, 4, build: builds[0])
+
+        expect { destroy_project(project, project.owner, {}) }.not_to exceed_query_limit(recorder + 6)
+      end
     end
   end
 

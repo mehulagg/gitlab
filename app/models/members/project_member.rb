@@ -57,6 +57,10 @@ class ProjectMember < Member
       end
     end
 
+    def delete_callbacks_required?
+      false
+    end
+
     def truncate_teams(project_ids)
       ProjectMember.transaction do
         members = ProjectMember.where(source_id: project_ids)

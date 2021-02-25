@@ -9,5 +9,9 @@ module Ci
 
     validates :name, :project, presence: true, allow_blank: false
     validates :name, uniqueness: { scope: :project_id }
+
+    def self.delete_callbacks_required?
+      false
+    end
   end
 end
