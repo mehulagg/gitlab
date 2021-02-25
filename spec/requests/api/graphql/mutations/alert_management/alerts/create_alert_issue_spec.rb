@@ -48,7 +48,7 @@ RSpec.describe 'Create an alert issue from an alert' do
       expect(mutation_response.slice('alert', 'issue')).to eq(
         'alert' => {
           'iid' => alert.iid.to_s,
-          'issue' => { 'iid' => new_issue.iid.to_s}
+          'issue' => { 'iid' => new_issue.iid.to_s }
         },
         'issue' => {
           'iid' => new_issue.iid.to_s,
