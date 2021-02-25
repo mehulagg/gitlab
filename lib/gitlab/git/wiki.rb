@@ -214,7 +214,7 @@ module Gitlab
         # @gollum_wiki ||= Gollum::Wiki.new(@repository.path)
 
         @gollum_wiki ||= begin
-          access = Gollum::GitAccess.new(@repository.relative_path, nil, nil, { storage: @repository.storage, gl_repository: @repository.gl_repository, gl_project_path: @repository.gl_project_path})
+          access = Gollum::GitAccess.new(@repository.relative_path, nil, nil, { storage: @repository.storage, gl_repository: @repository.gl_repository, gl_project_path: @repository.gl_project_path })
           Gollum::Wiki.new(access)
         end
       end
