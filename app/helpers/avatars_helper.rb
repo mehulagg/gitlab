@@ -36,10 +36,10 @@ module AvatarsHelper
   end
 
   def avatar_icon_for_user(user = nil, size = nil, scale = 2, only_path: true)
-    if user
+    return gravatar_icon(nil, size, scale) if user.nil?
+
+    Gitlab::AvatarCache.by_user(user, size, scale, only_path) do
       user.avatar_url(size: size, only_path: only_path) || default_avatar
-    else
-      gravatar_icon(nil, size, scale)
     end
   end
 
@@ -62,36 +62,38 @@ module AvatarsHelper
   end
 
   def user_avatar_without_link(options = {})
-    avatar_size = options[:size] || 16
-    user_name = options[:user].try(:name) || options[:user_name]
+    Gitlab::AvatarCache.by_user_or_email(user: options[:user], email: options[:user_email], **options, expires_in: 1.day) do
+      avatar_size = options[:size] || 16
+      user_name = options[:user].try(:name) || options[:user_name]
 
-    avatar_url = user_avatar_url_for(**options.merge(size: avatar_size))
+      avatar_url = user_avatar_url_for(**options.merge(size: avatar_size))
 
-    has_tooltip = options[:has_tooltip].nil? ? true : options[:has_tooltip]
-    data_attributes = options[:data] || {}
-    css_class = %W[avatar s#{avatar_size}].push(*options[:css_class])
-    alt_text = user_name ? "#{user_name}'s avatar" : "default avatar"
+      has_tooltip = options[:has_tooltip].nil? ? true : options[:has_tooltip]
+      data_attributes = options[:data] || {}
+      css_class = %W[avatar s#{avatar_size}].push(*options[:css_class])
+      alt_text = user_name ? "#{user_name}'s avatar" : "default avatar"
 
-    if has_tooltip
-      css_class.push('has-tooltip')
-      data_attributes[:container] = 'body'
-    end
+      if has_tooltip
+        css_class.push('has-tooltip')
+        data_attributes[:container] = 'body'
+      end
 
-    if options[:lazy]
-      css_class << 'lazy'
-      data_attributes[:src] = avatar_url
-      avatar_url = LazyImageTagHelper.placeholder_image
-    end
+      if options[:lazy]
+        css_class << 'lazy'
+        data_attributes[:src] = avatar_url
+        avatar_url = LazyImageTagHelper.placeholder_image
+      end
 
-    image_options = {
-      alt:   alt_text,
-      src:   avatar_url,
-      data:  data_attributes,
-      class: css_class,
-      title: user_name
-    }
+      image_options = {
+        alt:   alt_text,
+        src:   avatar_url,
+        data:  data_attributes,
+        class: css_class,
+        title: user_name
+      }
 
-    tag(:img, image_options)
+      tag(:img, image_options)
+    end.html_safe
   end
 
   def user_avatar(options = {})
