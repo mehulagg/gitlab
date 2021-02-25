@@ -28,12 +28,14 @@ module EE
         field :epic_board,
               ::Types::Boards::EpicBoardType, null: true,
               description: 'Find a single epic board.',
-              resolver: ::Resolvers::Boards::EpicBoardsResolver.single
+              resolver: ::Resolvers::Boards::EpicBoardsResolver.single,
+              feature_flag: :epic_boards
 
         field :epic_boards,
               ::Types::Boards::EpicBoardType.connection_type, null: true,
               description: 'Find epic boards.',
-              resolver: ::Resolvers::Boards::EpicBoardsResolver
+              resolver: ::Resolvers::Boards::EpicBoardsResolver,
+              feature_flag: :epic_boards
 
         field :iterations, ::Types::IterationType.connection_type, null: true,
               description: 'Find iterations.',
