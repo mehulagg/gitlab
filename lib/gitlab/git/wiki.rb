@@ -1,7 +1,45 @@
 # frozen_string_literal: true
 
+require 'gollum-lib'
+
 module Gitlab
   module Git
+    class CommitterWithHooks < Gollum::Committer
+      attr_reader :gl_wiki
+
+      def initialize(gl_wiki, options = {})
+        @gl_wiki = gl_wiki
+        super(gl_wiki.gollum_wiki, options)
+      end
+
+      def commit
+        result = Gitlab::Git::OperationService.new(git_user, gl_wiki.repository).with_branch(
+          @wiki.ref,
+          start_branch_name: @wiki.ref
+        ) do |_start_commit|
+          super(false)
+        end
+
+        result[:newrev]
+      rescue Gitlab::Git::PreReceiveError => e
+        message = "Hook failed: #{e.message}"
+        raise Gitlab::Git::Wiki::OperationError, message
+      end
+
+      private
+
+      def git_user
+        @git_user ||= Gitlab::Git::User.new(@options[:username],
+                                            @options[:name],
+                                            @options[:email],
+                                            gitlab_id)
+      end
+
+      def gitlab_id
+        Gitlab::GlId.gl_id_from_id_value(@options[:user_id])
+      end
+    end
+
     class Wiki
       include Gitlab::Git::WrapsGitalyErrors
 
@@ -68,15 +106,31 @@ module Gitlab
       end
 
       def write_page(name, format, content, commit_details)
-        wrapped_gitaly_errors do
-          gitaly_write_page(name, format, content, commit_details)
+        assert_type!(format, Symbol)
+        assert_type!(commit_details, CommitDetails)
+
+        with_committer_with_hooks(commit_details) do |committer|
+          filename = File.basename(name)
+          dir = (tmp_dir = File.dirname(name)) == '.' ? '' : tmp_dir
+
+          gollum_wiki.write_page(filename, format, content, { committer: committer }, dir)
         end
+      rescue Gollum::DuplicatePageError => e
+        raise Gitlab::Git::Wiki::DuplicatePageError, e.message
+        # wrapped_gitaly_errors do
+        #   gitaly_write_page(name, format, content, commit_details)
+        # end
       end
 
       def delete_page(page_path, commit_details)
-        wrapped_gitaly_errors do
-          gitaly_delete_page(page_path, commit_details)
+        assert_type!(commit_details, CommitDetails)
+
+        with_committer_with_hooks(commit_details) do |committer|
+          gollum_wiki.delete_page(gollum_page_by_path(page_path), committer: committer)
         end
+        # wrapped_gitaly_errors do
+        #   gitaly_delete_page(page_path, commit_details)
+        # end
       end
 
       def update_page(page_path, title, format, content, commit_details)
@@ -86,26 +140,45 @@ module Gitlab
       end
 
       def list_pages(limit: 0, sort: nil, direction_desc: false, load_content: false)
-        wrapped_gitaly_errors do
-          gitaly_list_pages(
-            limit: limit,
-            sort: sort,
-            direction_desc: direction_desc,
-            load_content: load_content
-          )
+        gollum_wiki.pages(
+          limit: limit, sort: sort, direction_desc: direction_desc
+        ).map do |gollum_page|
+          new_page(gollum_page)
         end
+        # wrapped_gitaly_errors do
+        #   gitaly_list_pages(
+        #     limit: limit,
+        #     sort: sort,
+        #     direction_desc: direction_desc,
+        #     load_content: load_content
+        #   )
+        # end
       end
 
       def page(title:, version: nil, dir: nil)
-        wrapped_gitaly_errors do
-          gitaly_find_page(title: title, version: version, dir: dir)
+        if version
+          version = Gitlab::Git::Commit.find(@repository, version)&.id
+          return unless version
         end
+
+        gollum_page = gollum_wiki.page(title, version, dir)
+        return unless gollum_page
+
+        new_page(gollum_page)
+        # wrapped_gitaly_errors do
+        #   gitaly_find_page(title: title, version: version, dir: dir)
+        # end
       end
 
       def file(name, version)
-        wrapped_gitaly_errors do
-          gitaly_find_file(name, version)
-        end
+        version ||= self.class.default_ref
+        gollum_file = gollum_wiki.file(name, version)
+        return unless gollum_file
+
+        Gitlab::Git::WikiFile.new(gollum_file)
+        # wrapped_gitaly_errors do
+        #   gitaly_find_file(name, version)
+        # end
       end
 
       # options:
@@ -113,15 +186,20 @@ module Gitlab
       #  :per_page - The number of items per page.
       #  :limit    - Total number of items to return.
       def page_versions(page_path, options = {})
-        versions = wrapped_gitaly_errors do
-          gitaly_wiki_client.page_versions(page_path, options)
+        page = gollum_wiki.paged(Gollum::Page.canonicalize_filename(page_path), File.split(page_path).first)
+        page.versions(per_page: options[:per_page], page: options[:per_page]).map do |versions|
+          new_version(page, page.version.id)
         end
+
+        # versions = wrapped_gitaly_errors do
+        #   gitaly_wiki_client.page_versions(page_path, options)
+        # end
 
         # Gitaly uses gollum-lib to get the versions. Gollum defaults to 20
         # per page, but also fetches 20 if `limit` or `per_page` < 20.
         # Slicing returns an array with the expected number of items.
-        slice_bound = options[:limit] || options[:per_page] || DEFAULT_PAGINATION
-        versions[0..slice_bound]
+        # slice_bound = options[:limit] || options[:per_page] || DEFAULT_PAGINATION
+        # versions[0..slice_bound]
       end
 
       def count_page_versions(page_path)
@@ -130,6 +208,47 @@ module Gitlab
 
       def preview_slug(title, format)
         GollumSlug.generate(title, format)
+      end
+
+      def gollum_wiki
+        @gollum_wiki ||= Gollum::Wiki.new(@repository.path)
+      end
+
+      def new_page(gollum_page)
+        Gitlab::Git::WikiPage.new(gollum_page, new_version(gollum_page, gollum_page.version.id))
+      end
+
+      def new_version(gollum_page, commit_id)
+        Gitlab::Git::WikiPageVersion.new(version(commit_id), gollum_page&.format)
+      end
+
+      def version(commit_id)
+        Gitlab::Git::Commit.find(@repository, commit_id)
+      end
+
+      def assert_type!(object, klass)
+        raise ArgumentError, "expected a #{klass}, got #{object.inspect}" unless object.is_a?(klass)
+      end
+
+      def committer_with_hooks(commit_details)
+        Gitlab::Git::CommitterWithHooks.new(self, commit_details.to_h)
+      end
+
+      def with_committer_with_hooks(commit_details)
+        committer = committer_with_hooks(commit_details)
+
+        yield committer
+
+        committer.commit
+
+        nil
+      end
+
+      def gollum_page_by_path(page_path)
+        page_name = Gollum::Page.canonicalize_filename(page_path)
+        page_dir = File.split(page_path).first
+
+        gollum_wiki.paged(page_name, page_dir) || (raise PageNotFound, page_path)
       end
 
       private

@@ -61,9 +61,9 @@ module Gitlab
 
       def legacy_disk_path
         # Do not use self.class due to Spring reloading issues
-        if Gitlab::GitalyClient::StorageSettings.disk_access_denied?
-          raise DirectPathAccessError, "git disk access denied"
-        end
+        # if Gitlab::GitalyClient::StorageSettings.disk_access_denied?
+        #   raise DirectPathAccessError, "git disk access denied"
+        # end
 
         @legacy_disk_path
       end
