@@ -11,7 +11,7 @@
 # - ./INSTALLATION_TYPE
 # - ./VERSION
 
-/.git/
+/.git//
 /app/
 /bin/
 /builds/
