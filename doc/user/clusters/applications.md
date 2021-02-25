@@ -591,7 +591,7 @@ falco:
 You can check these logs with the following command:
 
 ```shell
-kubectl -n gitlab-managed-apps logs -l app=falco
+kubectl -n gitlab-managed-apps logs -l app=falco | jq .
 ```
 
 Support for installing the Falco managed application is provided by the
