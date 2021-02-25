@@ -36,20 +36,49 @@ module GraphqlHelpers
     field_options = resolver_class.field_options.merge(name: 'value')
     field = ::Types::BaseField.new(**field_options)
 
-    resolve_field(field, obj, args: args, ctx: ctx, schema: schema,
-                  parent_class: resolver_parent,
+    resolve_field(field, obj,
+                  args: args,
+                  ctx: ctx,
+                  schema: schema,
+                  object_type: resolver_parent,
                   extras: { parent: parent, lookahead: lookahead })
   end
 
+  # Resolve the value of a field on an object.
+  #
+  # Use this method to test individual fields within type specs.
+  #
+  # e.g.
+  #
+  #   issue = create(:issue)
+  #   user = issue.author
+  #   project = issue.project
+  #
+  #   resolve_field(:author, issue, current_user: user, object_type: ::Types::IssueType)
+  #   resolve_field(:issue, project, args: { iid: issue.iid }, current_user: user, object_type: ::Types::ProjectType)
+  #
+  # The `object_type` defaults to the `described_class`, so when called from type specs,
+  # the above can be written as:
+  #
+  #   # In project_type_spec.rb
+  #   resolve_field(:author, issue, current_user: user)
+  #
+  #   # In issue_type_spec.rb
+  #   resolve_field(:issue, project, args: { iid: issue.iid }, current_user: user)
+  #
+  # NB: Arguments are passed from the client's perspective. If there is an argument
+  # `foo` aliased as `bar`, then we would pass `args: { bar: the_value }`, and
+  # types are checked before resolution.
   def resolve_field(
-    field,    # An instance of BaseField, or the name of a field on the current described_class
-    object,   # The current object of the BaseObject this field 'belongs' to
-    ctx: {}, # Context values (important ones are :current_user)
-    current_user: :not_given, # The current user (specified explicitly)
-    args: {}, # Field arguments (keys will be fieldnamerized)
-    extras: {}, # Stub values for field extras (parent and lookahead)
-    schema: GitlabSchema, # A specific schema instance
-    parent_class: described_class)
+    field,                       # An instance of `BaseField`, or the name of a field on the current described_class
+    object,                      # The current object of the `BaseObject` this field 'belongs' to
+    args:   {},                  # Field arguments (keys will be fieldnamerized)
+    ctx:    {},                  # Context values (important ones are :current_user)
+    extras: {},                  # Stub values for field extras (parent and lookahead)
+    current_user: :not_given,    # The current user (specified explicitly, overrides ctx[:current_user])
+    schema: GitlabSchema,        # A specific schema instance
+    object_type: described_class # The `BaseObject` type this field belongs to
+  )
     field = to_base_field(field)
     ctx[:current_user] = current_user unless current_user == :not_given
     query = GraphQL::Query.new(schema, context: ctx)
@@ -59,7 +88,7 @@ module GraphqlHelpers
 
     mock_extras(query_ctx, **extras)
 
-    parent = parent_class.authorized_new(object, query_ctx)
+    parent = object_type.authorized_new(object, query_ctx)
     raise UnauthorizedObject unless parent
 
     # TODO: This will need to change when we move to the interpreter:
@@ -83,6 +112,7 @@ module GraphqlHelpers
     allow(context).to receive(:lookahead).and_return(lookahead) unless lookahead == :not_given
   end
 
+  # a synthetic BaseObject type to be used in resolver specs. See `GraphqlHelpers#resolve`
   def resolver_parent
     @resolver_parent ||= Class.new(::Types::BaseObject) { graphql_name 'ResolverParent' }
   end
