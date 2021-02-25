@@ -9,6 +9,37 @@ module Gitlab
       # @return [ActiveSupport::Duration]
       DEFAULT_EXPIRY = 7.days
 
+      # Return the number of cached records for a user or array
+      # of email addresses
+      #
+      # @param user [User, Nil]
+      # @param emails [Array<String>, Nil]
+      # @return [Integer] the number of cache records for this query
+      def size(user: nil, emails: [])
+        size = 0
+
+        with do |redis|
+          size += redis.hlen(user_key(user)) unless user.nil?
+
+          break if emails.empty?
+
+          emails.each do |email|
+            size += redis.hlen(email_key(email)) unless email.nil?
+          end
+        end
+
+        size
+      end
+
+      # Attempt to find a cached avatar using the supplied information
+      #
+      # First attempts to find by the user if supplied, then by the email.
+      # Both arguments are required, even if one is nil. Keyword argument
+      # values are passed onto the next method to use as part of the cache key.
+      #
+      # @param user [User, Nil]
+      # @param email [String, Nil]
+      # @return [String]
       def by_user_or_email(user:, email:, **other_opts, &block)
         return by_user(user, *other_opts.values, &block) if user.present?
         return by_email(email, *other_opts.values, &block) if email.present?
@@ -17,6 +48,13 @@ module Gitlab
         block.call
       end
 
+      # Look up cached avatar data by user.
+      # This accepts a block to provide the value to be
+      # cached in the event nothing is found.
+      #
+      # @param user [User]
+      # @param expires_in [ActiveSupport::Duration, Integer]
+      # @return [String]
       def by_user(user, *additional_keys, expires_in: DEFAULT_EXPIRY, &block)
         key = user_key(user)
         subkey = sub_key(additional_keys)
@@ -30,7 +68,6 @@ module Gitlab
       #
       # @param email [String]
       # @param expires_in [ActiveSupport::Duration, Integer]
-      # @yield [email, *additional_keys] yields the supplied params back to the block
       # @return [String]
       def by_email(email, *additional_keys, expires_in: DEFAULT_EXPIRY, &block)
         key = email_key(email)
@@ -57,6 +94,8 @@ module Gitlab
 
       private
 
+      # @param user [User]
+      # @return [String]
       def user_key(user)
         "#{BASE_KEY}:#{user.cache_key}"
       end
@@ -67,10 +106,12 @@ module Gitlab
         "#{BASE_KEY}:#{email}"
       end
 
+      # @return [String]
       def sub_key(parts)
         parts.join(":")
       end
 
+      # @return [String]
       def fetch_by_subkey(key, subkey, expires_in:, &block)
         with do |redis|
           # Look for existing cache value

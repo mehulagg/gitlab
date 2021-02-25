@@ -101,6 +101,10 @@ module Avatarable
     avatar_mounter.blank_uploader.store_dirs.map { |store, path| File.join(path, identifier) }
   end
 
+  def avatar_cache_size
+    Gitlab::AvatarCache.size(user: self, emails: all_emails)
+  end
+
   private
 
   def retrieve_upload_from_batch(identifier)
