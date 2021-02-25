@@ -108,7 +108,7 @@ export default {
     v-model.trim="searchTerm"
     :name="filter.name"
     :selected-options="selectedOptionsOrAll"
-    :show-search-box="showSearchBox"
+    :show-search-box="true"
   >
     <filter-item
       v-if="filter.allOption && !searchTerm.length"
