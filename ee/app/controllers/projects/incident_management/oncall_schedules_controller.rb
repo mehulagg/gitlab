@@ -7,6 +7,10 @@ module Projects
 
       feature_category :incident_management
 
+      push_before_action do
+        push_frontend_feature_flag(:oncall_schedules_mvc_edit_rotations, default_enabled: false)
+      end
+
       def index
       end
     end
