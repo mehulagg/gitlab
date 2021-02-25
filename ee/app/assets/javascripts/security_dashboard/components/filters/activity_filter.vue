@@ -6,7 +6,13 @@ import FilterBody from './filter_body.vue';
 import FilterItem from './filter_item.vue';
 import StandardFilter from './standard_filter.vue';
 
-const { NO_ACTIVITY, WITH_ISSUES, NO_LONGER_DETECTED } = activityOptions;
+const {
+  NO_ACTIVITY,
+  WITH_ISSUES,
+  NO_LONGER_DETECTED,
+  WITH_AUTO_FIX,
+  WITH_REMEDIATED_VULNERABILITY,
+} = activityOptions;
 
 export default {
   components: { FilterBody, FilterItem, GlDropdownDivider },
@@ -18,16 +24,20 @@ export default {
         return {
           hasIssues: undefined,
           hasResolution: undefined,
+          hasAutoFix: this.isSelected(WITH_AUTO_FIX),
+          hasRemediatedVulnerability: this.isSelected(WITH_REMEDIATED_VULNERABILITY),
         };
       }
 
       return {
         hasIssues: this.isSelected(WITH_ISSUES),
         hasResolution: this.isSelected(NO_LONGER_DETECTED),
+        hasAutoFix: this.isSelected(WITH_AUTO_FIX),
+        hasRemediatedVulnerability: this.isSelected(WITH_REMEDIATED_VULNERABILITY),
       };
     },
     multiselectOptions() {
-      return [WITH_ISSUES, NO_LONGER_DETECTED];
+      return [WITH_ISSUES, WITH_AUTO_FIX, WITH_REMEDIATED_VULNERABILITY, NO_LONGER_DETECTED];
     },
   },
   methods: {
@@ -36,14 +46,14 @@ export default {
         this.selectedOptions = this.selectedSet.has(NO_ACTIVITY) ? [] : [NO_ACTIVITY];
       } else {
         remove(this.selectedOptions, NO_ACTIVITY);
-        // Toggle the option's existence in the array.
         this.selectedOptions = xor(this.selectedOptions, [option]);
       }
-
       this.updateRouteQuery();
     },
   },
   NO_ACTIVITY,
+  WITH_AUTO_FIX,
+  WITH_REMEDIATED_VULNERABILITY,
 };
 </script>
 

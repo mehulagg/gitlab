@@ -55,6 +55,11 @@ export const activityOptions = {
   NO_ACTIVITY: { id: 'NO_ACTIVITY', name: s__('SecurityReports|No activity') },
   WITH_ISSUES: { id: 'WITH_ISSUES', name: s__('SecurityReports|With issues') },
   NO_LONGER_DETECTED: { id: 'NO_LONGER_DETECTED', name: s__('SecurityReports|No longer detected') },
+  WITH_AUTO_FIX: { id: 'WITH_AUTO_FIX', name: s__('SecurityReports|With Autofix') },
+  WITH_REMEDIATED_VULNERABILITY: {
+    id: 'WITH_REMEDIATED_VULNERABILITY',
+    name: s__('SecurityReports|With remediated vulnerability'),
+  },
 };
 
 export const activityFilter = {
