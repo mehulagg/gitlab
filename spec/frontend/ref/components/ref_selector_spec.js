@@ -7,7 +7,13 @@ import { trimText } from 'helpers/text_helper';
 import { ENTER_KEY } from '~/lib/utils/keys';
 import { sprintf } from '~/locale';
 import RefSelector from '~/ref/components/ref_selector.vue';
-import { X_TOTAL_HEADER, DEFAULT_I18N } from '~/ref/constants';
+import {
+  X_TOTAL_HEADER,
+  DEFAULT_I18N,
+  REF_TYPE_BRANCHES,
+  REF_TYPE_TAGS,
+  REF_TYPE_COMMITS,
+} from '~/ref/constants';
 import createStore from '~/ref/stores/';
 
 const localVue = createLocalVue();
@@ -26,6 +32,7 @@ describe('Ref selector component', () => {
   let branchesApiCallSpy;
   let tagsApiCallSpy;
   let commitApiCallSpy;
+  let requestSpies;
 
   const createComponent = (props = {}, attrs = {}) => {
     wrapper = mount(RefSelector, {
@@ -58,6 +65,7 @@ describe('Ref selector component', () => {
       .mockReturnValue([200, fixtures.branches, { [X_TOTAL_HEADER]: '123' }]);
     tagsApiCallSpy = jest.fn().mockReturnValue([200, fixtures.tags, { [X_TOTAL_HEADER]: '456' }]);
     commitApiCallSpy = jest.fn().mockReturnValue([200, fixtures.commit]);
+    requestSpies = { branchesApiCallSpy, tagsApiCallSpy, commitApiCallSpy };
 
     mock
       .onGet(`/api/v4/projects/${projectId}/repository/branches`)
@@ -591,5 +599,25 @@ describe('Ref selector component', () => {
         });
       });
     });
+  });
+
+  describe('with non-default ref types', () => {
+    it.each`
+      enabledRefTypes                      | reqsCalled                | reqsNotCalled
+      ${[REF_TYPE_BRANCHES]}               | ${['branchesApiCallSpy']} | ${['tagsApiCallSpy', 'commitApiCallSpy']}
+      ${[REF_TYPE_TAGS]}                   | ${['tagsApiCallSpy']}     | ${['branchesApiCallSpy', 'commitApiCallSpy']}
+      ${[REF_TYPE_COMMITS]}                | ${[]}                     | ${['branchesApiCallSpy', 'tagsApiCallSpy', 'commitApiCallSpy']}
+      ${[REF_TYPE_TAGS, REF_TYPE_COMMITS]} | ${['tagsApiCallSpy']}     | ${['branchesApiCallSpy', 'commitApiCallSpy']}
+    `(
+      'only calls $reqsCalled requests when $enabledRefTypes are enabled',
+      async ({ enabledRefTypes, reqsCalled, reqsNotCalled }) => {
+        createComponent({ enabledRefTypes });
+
+        await waitForRequests();
+
+        reqsCalled.forEach((req) => expect(requestSpies[req]).toHaveBeenCalledTimes(1));
+        reqsNotCalled.forEach((req) => expect(requestSpies[req]).not.toHaveBeenCalled());
+      },
+    );
   });
 });

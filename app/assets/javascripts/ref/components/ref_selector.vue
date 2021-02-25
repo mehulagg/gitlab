@@ -10,7 +10,7 @@ import {
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { SEARCH_DEBOUNCE_MS, DEFAULT_I18N } from '../constants';
+import { ALL_REF_TYPES, SEARCH_DEBOUNCE_MS, DEFAULT_I18N } from '../constants';
 import createStore from '../stores';
 import RefResultsSection from './ref_results_section.vue';
 
@@ -28,6 +28,12 @@ export default {
     RefResultsSection,
   },
   props: {
+    enabledRefTypes: {
+      type: Array,
+      required: false,
+      default: () => ALL_REF_TYPES,
+      validator: (refTypes) => refTypes.every((refType) => ALL_REF_TYPES.includes(refType)),
+    },
     value: {
       type: String,
       required: false,
@@ -96,11 +102,12 @@ export default {
       this.search(this.query);
     }, SEARCH_DEBOUNCE_MS);
 
+    this.setEnabledRefTypes(this.enabledRefTypes);
     this.setProjectId(this.projectId);
     this.search(this.query);
   },
   methods: {
-    ...mapActions(['setProjectId', 'setSelectedRef', 'search']),
+    ...mapActions(['setEnabledRefTypes', 'setProjectId', 'setSelectedRef', 'search']),
     focusSearchBox() {
       this.$refs.searchBox.$el.querySelector('input').focus();
     },
