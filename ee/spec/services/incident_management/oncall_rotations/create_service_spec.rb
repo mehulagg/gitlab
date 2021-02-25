@@ -82,7 +82,7 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
 
       it 'has an informative error message' do
         expect(execute).to be_error
-        expect(execute.message).to eq("A maximum of #{IncidentManagement::OncallRotations::CreateService::MAXIMUM_PARTICIPANTS} participants can be added")
+        expect(execute.message).to eq("A maximum of #{IncidentManagement::OncallRotations::SharedRotationLogic::MAXIMUM_PARTICIPANTS} participants can be added")
       end
     end
 

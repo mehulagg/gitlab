@@ -17,13 +17,13 @@ RSpec.describe IncidentManagement::OncallUsersFinder do
 
   # Schedule 1 / Rotation 1
   let_it_be(:s1) { create(:incident_management_oncall_schedule, project: project) }
-  let_it_be(:s1_r1) { create(:incident_management_oncall_rotation, :with_participant, schedule: s1) }
+  let_it_be(:s1_r1) { create(:incident_management_oncall_rotation, :with_participants, schedule: s1) }
   let_it_be(:s1_r1_p1) { s1_r1.participants.first }
   let_it_be(:user_1) { s1_r1_p1.user }
   let_it_be(:s1_r1_shift1) { create(:incident_management_oncall_shift, participant: s1_r1_p1) }
 
   # Schedule 1 / Rotation 2
-  let_it_be(:s1_r2) { create(:incident_management_oncall_rotation, :with_participant, schedule: s1) }
+  let_it_be(:s1_r2) { create(:incident_management_oncall_rotation, :with_participants, schedule: s1) }
   let_it_be(:s1_r2_p1) { s1_r2.participants.first }
   let_it_be(:user_2) { s1_r2_p1.user }
   let_it_be(:s1_r2_shift1) { create(:incident_management_oncall_shift, participant: s1_r2_p1) }
@@ -33,7 +33,7 @@ RSpec.describe IncidentManagement::OncallUsersFinder do
 
   # Schedule 2 / Rotation 1
   let_it_be(:s2) { create(:incident_management_oncall_schedule, project: project) }
-  let_it_be(:s2_r1) { create(:incident_management_oncall_rotation, :with_participant, schedule: s2) }
+  let_it_be(:s2_r1) { create(:incident_management_oncall_rotation, :with_participants, schedule: s2) }
   let_it_be(:s2_r1_p1) { s2_r1.participants.first }
   let_it_be(:user_4) { s2_r1_p1.user }
   let_it_be(:s2_r1_shift1) { create(:incident_management_oncall_shift, participant: s2_r1_p1) }
