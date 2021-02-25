@@ -24,7 +24,7 @@ RSpec.describe Packages::Maven::Metadata::SyncWorker, type: :worker do
 
     context 'with a valid package name' do
       before do
-        Tempfile.create do |file|
+        Tempfile.create do |file| # rubocop: disable Rails/SaveBang
           file.write(versions_xml_content)
           file.flush
           file.rewind
