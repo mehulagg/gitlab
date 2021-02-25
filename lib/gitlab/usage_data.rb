@@ -506,13 +506,11 @@ module Gitlab
         end
       end
 
-      def ohai
-        @ohai ||= Ohai::System.new.tap do |oh|
+      def operating_system
+        ohai = Ohai::System.new.tap do |oh|
           oh.all_plugins(['platform'])
         end.data
-      end
 
-      def operating_system
         platform = ohai['platform']
         platform = 'raspbian' if ohai['platform'] == 'debian' && /armv/.match?(ohai['kernel']['machine'])
 
