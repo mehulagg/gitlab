@@ -2,6 +2,7 @@ import { GlTable, GlAlert, GlLoadingIcon, GlDropdown, GlIcon, GlAvatar } from '@
 import { mount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import mockAlerts from 'jest/vue_shared/alert_details/mocks/alerts.json';
 import AlertManagementTable from '~/alert_management/components/alert_management_table.vue';
 import { visitUrl } from '~/lib/utils/url_utility';
@@ -18,19 +19,18 @@ describe('AlertManagementTable', () => {
   let wrapper;
   let mock;
 
-  const findAlertsTable = () => wrapper.find(GlTable);
+  const findAlertsTable = () => wrapper.findComponent(GlTable);
   const findAlerts = () => wrapper.findAll('table tbody tr');
-  const findAlert = () => wrapper.find(GlAlert);
-  const findLoader = () => wrapper.find(GlLoadingIcon);
-  const findStatusDropdown = () => wrapper.find(GlDropdown);
-  const findDateFields = () => wrapper.findAll(TimeAgo);
-  const findSearch = () => wrapper.find(FilteredSearchBar);
-  const findSeverityColumnHeader = () =>
-    wrapper.find('[data-testid="alert-management-severity-sort"]');
-  const findFirstIDField = () => wrapper.findAll('[data-testid="idField"]').at(0);
-  const findAssignees = () => wrapper.findAll('[data-testid="assigneesField"]');
-  const findSeverityFields = () => wrapper.findAll('[data-testid="severityField"]');
-  const findIssueFields = () => wrapper.findAll('[data-testid="issueField"]');
+  const findAlert = () => wrapper.findComponent(GlAlert);
+  const findLoader = () => wrapper.findComponent(GlLoadingIcon);
+  const findStatusDropdown = () => wrapper.findComponent(GlDropdown);
+  const findDateFields = () => wrapper.findAllComponents(TimeAgo);
+  const findSearch = () => wrapper.findComponent(FilteredSearchBar);
+  const findSeverityColumnHeader = () => wrapper.findByTestId('alert-management-severity-sort');
+  const findFirstIDField = () => wrapper.findAllByTestId('idField').at(0);
+  const findAssignees = () => wrapper.findAllByTestId('assigneesField');
+  const findSeverityFields = () => wrapper.findAllByTestId('severityField');
+  const findIssueFields = () => wrapper.findAllByTestId('issueField');
   const alertsCount = {
     open: 24,
     triggered: 20,
@@ -40,29 +40,31 @@ describe('AlertManagementTable', () => {
   };
 
   function mountComponent({ provide = {}, data = {}, loading = false, stubs = {} } = {}) {
-    wrapper = mount(AlertManagementTable, {
-      provide: {
-        ...defaultProvideValues,
-        alertManagementEnabled: true,
-        userCanEnableAlertManagement: true,
-        ...provide,
-      },
-      data() {
-        return data;
-      },
-      mocks: {
-        $apollo: {
-          mutate: jest.fn(),
-          query: jest.fn(),
-          queries: {
-            alerts: {
-              loading,
+    wrapper = extendedWrapper(
+      mount(AlertManagementTable, {
+        provide: {
+          ...defaultProvideValues,
+          alertManagementEnabled: true,
+          userCanEnableAlertManagement: true,
+          ...provide,
+        },
+        data() {
+          return data;
+        },
+        mocks: {
+          $apollo: {
+            mutate: jest.fn(),
+            query: jest.fn(),
+            queries: {
+              alerts: {
+                loading,
+              },
             },
           },
         },
-      },
-      stubs,
-    });
+        stubs,
+      }),
+    );
   }
 
   beforeEach(() => {
@@ -72,7 +74,6 @@ describe('AlertManagementTable', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
     mock.restore();
   });
@@ -241,8 +242,8 @@ describe('AlertManagementTable', () => {
         expect(findIssueFields().at(0).text()).toBe('None');
       });
 
-      it('renders a link when one exists', () => {
-        expect(findIssueFields().at(1).text()).toBe('#1');
+      it('renders a link when one exists with the issue state', () => {
+        expect(findIssueFields().at(1).text()).toBe(`#1 (closed)`);
         expect(findIssueFields().at(1).attributes('href')).toBe('/gitlab-org/gitlab/-/issues/1');
       });
     });

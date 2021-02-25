@@ -17,10 +17,10 @@ module Types
             null: false,
             description: 'Internal ID of the alert.'
 
-      field :issue_iid,
-            GraphQL::ID_TYPE,
+      field :issue,
+            Types::IssueType,
             null: true,
-            description: 'Internal ID of the GitLab issue attached to the alert.'
+            description: 'Internal GitLab Issue attached to the alert.'
 
       field :title,
             GraphQL::STRING_TYPE,

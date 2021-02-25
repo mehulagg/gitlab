@@ -75,7 +75,7 @@ export default {
     {
       key: 'issue',
       label: s__('AlertManagement|Incident'),
-      thClass: 'gl-w-12 gl-pointer-events-none',
+      thClass: 'gl-w-15p gl-pointer-events-none',
       tdClass,
     },
     {
@@ -221,8 +221,8 @@ export default {
     hasAssignees(assignees) {
       return Boolean(assignees.nodes?.length);
     },
-    getIssueLink(item) {
-      return joinPaths('/', this.projectPath, '-', 'issues', item.issueIid);
+    getIssueLink({ issue: { iid } }) {
+      return joinPaths('/', this.projectPath, '-', 'issues', iid);
     },
     tbodyTrClass(item) {
       return {
@@ -343,8 +343,8 @@ export default {
           </template>
 
           <template #cell(issue)="{ item }">
-            <gl-link v-if="item.issueIid" data-testid="issueField" :href="getIssueLink(item)">
-              #{{ item.issueIid }}
+            <gl-link v-if="item.issue" data-testid="issueField" :href="getIssueLink(item)">
+              #{{ item.issue.iid }} ({{ item.issue.state }})
             </gl-link>
             <div v-else data-testid="issueField">{{ s__('AlertManagement|None') }}</div>
           </template>
