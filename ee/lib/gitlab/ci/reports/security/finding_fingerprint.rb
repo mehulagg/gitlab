@@ -19,7 +19,7 @@ module Gitlab
           def to_h
             {
               algorithm_type: algorithm_type,
-              fingerprint_sha: fingerprint_sha
+              fingerprint_sha256: fingerprint_sha
             }
           end
 
