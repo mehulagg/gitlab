@@ -209,18 +209,18 @@ describe('~ee/oncall_schedules/components/schedule/components/shifts/components/
 
   describe('weekDisplayShiftWidth', () => {
     const shiftTimeUnitWidth = 50;
-    const mockTimeframeInitialDate = new Date(2018, 0, 1, 0, 0, 0, 0);
+    const mockTimeframeInitialDate = new Date('2018-01-01T00:00:00');
 
     it.each`
-      shiftUnitIsHour | shiftRangeOverlapObject                  | shiftStartDateOutOfRange | value
-      ${true}         | ${{ daysOverlap: 1, hoursOverlap: 4 }}   | ${false}                 | ${6}
-      ${true}         | ${{ daysOverlap: 1, hoursOverlap: 8 }}   | ${false}                 | ${14}
-      ${true}         | ${{ daysOverlap: 1, hoursOverlap: 24 }}  | ${false}                 | ${48}
-      ${true}         | ${{ daysOverlap: 1, hoursOverlap: 24 }}  | ${true}                  | ${48}
-      ${false}        | ${{ daysOverlap: 1, hoursOverlap: 24 }}  | ${false}                 | ${48}
-      ${false}        | ${{ daysOverlap: 2, hoursOverlap: 48 }}  | ${false}                 | ${98}
-      ${false}        | ${{ daysOverlap: 3, hoursOverlap: 72 }}  | ${false}                 | ${148}
-      ${false}        | ${{ daysOverlap: 5, hoursOverlap: 120 }} | ${true}                  | ${248}
+      shiftUnitIsHour | shiftRangeOverlapObject                 | shiftStartDateOutOfRange | value
+      ${true}         | ${{ daysOverlap: 1, hoursOverlap: 4 }}  | ${false}                 | ${6}
+      ${true}         | ${{ daysOverlap: 1, hoursOverlap: 8 }}  | ${false}                 | ${14}
+      ${true}         | ${{ daysOverlap: 1, hoursOverlap: 24 }} | ${false}                 | ${48}
+      ${true}         | ${{ daysOverlap: 1, hoursOverlap: 24 }} | ${true}                  | ${48}
+      ${false}        | ${{ daysOverlap: 1, hoursOverlap: 24 }} | ${false}                 | ${48}
+      ${false}        | ${{ daysOverlap: 2, hoursOverlap: 48 }} | ${false}                 | ${98}
+      ${false}        | ${{ daysOverlap: 3, hoursOverlap: 72 }} | ${false}                 | ${148}
+      ${false}        | ${{ daysOverlap: 3, hoursOverlap: 72 }} | ${true}                  | ${148}
     `(
       `returns $value px as the rotation width when shiftUnitIsHour is $shiftUnitIsHour, shiftStartDateOutOfRange is $shiftStartDateOutOfRange and shiftTimeUnitWidth is ${shiftTimeUnitWidth}`,
       ({
@@ -246,7 +246,7 @@ describe('~ee/oncall_schedules/components/schedule/components/shifts/components/
   });
 
   it('returns with an offset of 1 day width less only when the shift start date is before the timeframe start and the shift does not end at midnight', () => {
-    const mockOverlapEndDateNotAtMidnight = new Date(2018, 0, 31, 3, 4, 2, 1);
+    const mockOverlapEndDateNotAtMidnight = new Date('2018-01-01T03:02:01');
 
     expect(
       weekDisplayShiftWidth(
