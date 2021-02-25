@@ -99,6 +99,22 @@ RSpec.describe TimeboxesHelper do
     end
   end
 
+  describe "#timebox_date_range" do
+    let(:yesterday) { Date.yesterday }
+    let(:tomorrow) { yesterday + 2 }
+    let(:format) { '%b %-d, %Y' }
+    let(:yesterday_formatted) { yesterday.strftime(format) }
+    let(:tomorrow_formatted) { tomorrow.strftime(format) }
+
+    context 'iteration' do
+      # Iterations always have start and due dates, so only A-B format is expected
+      it 'formats properly' do
+        iteration = build(:iteration, start_date: yesterday, due_date: tomorrow)
+
+        expect(timebox_date_range(iteration)).to eq("#{yesterday_formatted}–#{tomorrow_formatted}")
+      end
+    end
+  end
   def create_resource_state_event(created_at = Date.current)
     create(:resource_state_event, created_at: created_at)
   end
