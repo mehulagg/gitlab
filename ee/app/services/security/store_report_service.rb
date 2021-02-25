@@ -155,7 +155,6 @@ module Security
     # rubocop: enable CodeReuse/ActiveRecord
 
     def update_finding_fingerprints(finding, vulnerability_finding)
-      to_delete = []
       to_update = {}
       to_create = []
 
@@ -168,7 +167,6 @@ module Security
         # we're updating the persisted vulnerability, no need carry these
         # fingerprints forward
         if poro_fingerprint.nil?
-          to_delete << fingerprint.id
           next
         end
 
@@ -187,10 +185,6 @@ module Security
       ::Vulnerabilities::FindingFingerprint.transaction do
         if to_update.count > 0
           ::Vulnerabilities::FindingFingerprint.update(to_update.keys, to_update.values)
-        end
-
-        if to_delete.count > 0
-          ::Vulnerabilities::FindingFingerprint.delete(to_delete)
         end
 
         if to_create.count > 0
