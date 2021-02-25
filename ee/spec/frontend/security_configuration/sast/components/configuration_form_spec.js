@@ -1,4 +1,4 @@
-import { GlAlert, GlLink } from '@gitlab/ui';
+import { GlLink } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
@@ -65,11 +65,12 @@ describe('ConfigurationForm component', () => {
 
   const findForm = () => wrapper.find('form');
   const findSubmitButton = () => wrapper.find({ ref: 'submitButton' });
-  const findErrorAlert = () => wrapper.find(GlAlert);
+  const findErrorAlert = () => wrapper.find('[data-testid="analyzers-error-alert"]');
   const findCancelButton = () => wrapper.find({ ref: 'cancelButton' });
   const findDynamicFieldsComponents = () => wrapper.findAll(DynamicFields);
   const findAnalyzerConfigurations = () => wrapper.findAll(AnalyzerConfiguration);
   const findAnalyzersSection = () => wrapper.find('[data-testid="analyzers-section"]');
+  const findAnalyzersSectionTip = () => wrapper.find('[data-testid="analyzers-section-tip"]');
 
   const expectPayloadForEntities = () => {
     const expectedPayload = {
@@ -186,6 +187,13 @@ describe('ConfigurationForm component', () => {
       analyzerEntities.forEach((entity, i) => {
         expect(analyzerComponents.at(i).props()).toEqual({ entity });
       });
+    });
+
+    it('renders alert-tip', () => {
+      const analyzersSectionTip = findAnalyzersSectionTip();
+      expect(analyzersSectionTip.exists()).toBe(true);
+      expect(analyzersSectionTip.html()).toContain(ConfigurationForm.i18n.analyzersTipHeading);
+      expect(analyzersSectionTip.html()).toContain(ConfigurationForm.i18n.analyzersTipBody);
     });
 
     describe('when an AnalyzerConfiguration emits an input event', () => {

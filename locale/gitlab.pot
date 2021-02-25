@@ -17206,6 +17206,9 @@ msgstr ""
 msgid "Keep editing"
 msgstr ""
 
+msgid "Keeping all SAST analyzers enabled future-proofs the project in case new languages are added later on. Determining which analyzers apply is a process that consumes minimal resources and adds minimal time to the pipeline. Leaving all SAST analyzers enabled ensures maximum coverage."
+msgstr ""
+
 msgid "Kerberos access denied"
 msgstr ""
 
@@ -33218,6 +33221,9 @@ msgid "We heard back from your device. You have been authenticated."
 msgstr ""
 
 msgid "We recommend cloud-based mobile authenticator apps such as Authy, Duo Mobile, and LastPass. They can restore access if you lose your hardware device."
+msgstr ""
+
+msgid "We recommend leaving all SAST analyzers enabled"
 msgstr ""
 
 msgid "We recommend that you buy more Pipeline minutes to avoid any interruption of service."
