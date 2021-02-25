@@ -23,6 +23,7 @@ module Packages
           metadata_package_file_for_versions.file.use_open_file do |file|
             result = CreateVersionsXmlService.new(metadata_content: file, package: versionless_package_for_versions)
                                              .execute
+
             next result unless result.success?
             next success('No changes for versions xml') unless result.payload[:changes_exist]
 
