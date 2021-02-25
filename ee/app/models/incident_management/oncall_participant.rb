@@ -23,6 +23,12 @@ module IncidentManagement
 
     scope :not_removed, -> { where(is_removed: false) }
     scope :removed, -> { where(is_removed: true) }
+    scope :including_users, -> (users) { includes(:user).where(user_id: users) }
+    scope :excluding_users, -> (users) { includes(:user).where('user_id NOT IN (?)', users) }
+
+    def self.mark_as_removed
+      update_all(is_removed: true)
+    end
 
     def mark_as_removed
       update_column(:is_removed, true)
