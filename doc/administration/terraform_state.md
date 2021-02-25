@@ -72,9 +72,9 @@ The following settings are:
 
 ### Migrating to Object storage
 
-Progress for a Rake task that would perform this migration is [tracked here](https://gitlab.com/gitlab-org/gitlab/-/issues/247042).
+Migrating to Object storage with a Rake task is not supported yet. See this issue for its [implementation process and status](https://gitlab.com/gitlab-org/gitlab/-/issues/247042).
 
-Until the Rake task is available, there's a documented workaround for users running `13.6`:
+While the Rake task is not available, a possible workaround for users running GitLab 13.6 or higher versions is given by the script below (through the GitLab Rails console):
 
 ```Ruby
 gitlab-rails c
