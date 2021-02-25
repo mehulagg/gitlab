@@ -13,4 +13,9 @@
         .flex-grow-1
           = f.radio_button :setup_for_company, false, class: 'js-setup-for-me'
           = f.label :setup_for_company, _('Just me'), class: 'normal', value: 'false'
+      .gl-display-flex.gl-flex-direction-column.hidden.js-setup_for_company_details
+        .gl-flex-direction-row
+          .form-group.flex-grow-1
+            = f.label :company_name, _('Name of company or organization'), class: 'label-bold'
+            = f.text_field :company_name, class: 'form-control'
       = render_if_exists 'devise/shared/email_opted_in', f: f, hidden: true
