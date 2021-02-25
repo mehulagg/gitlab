@@ -186,7 +186,7 @@ This icon is only displayed if the user has permission to edit the issue.
 ### Description
 
 The plain text title and description of the issue fill the top center of the issue page.
-The description fully supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm),
+The description fully supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown),
 allowing many formatting options.
 
 [In GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/issues/10103) and later, changes to an
