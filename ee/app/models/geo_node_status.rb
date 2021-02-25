@@ -290,7 +290,6 @@ class GeoNodeStatus < ApplicationRecord
       self.container_repositories_replication_enabled = Geo::ContainerRepositoryRegistry.replication_enabled?
       self.design_repositories_replication_enabled = Geo::DesignRegistry.replication_enabled?
       self.job_artifacts_replication_enabled = Geo::JobArtifactRegistry.replication_enabled?
-      self.lfs_objects_replication_enabled = Geo::LfsObjectRegistry.replication_enabled?
       self.repositories_replication_enabled = Geo::ProjectRegistry.replication_enabled?
     end
   end
@@ -593,10 +592,6 @@ class GeoNodeStatus < ApplicationRecord
 
   def attachments_finder
     @attachments_finder ||= Geo::AttachmentRegistryFinder.new
-  end
-
-  def lfs_objects_finder
-    @lfs_objects_finder ||= Geo::LfsObjectRegistryFinder.new
   end
 
   def job_artifacts_finder
