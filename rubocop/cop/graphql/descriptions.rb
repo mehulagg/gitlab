@@ -38,8 +38,8 @@ module RuboCop
         MSG_NO_PERIOD = '`description` strings must end with a `.`.'
 
         # ability_field and permission_field set a default description.
-        def_node_matcher :field_or_argument?, <<~PATTERN
-          (send nil? {:field :argument} ...)
+        def_node_matcher :describable?, <<~PATTERN
+          (send nil? {:field :argument :value} ...)
         PATTERN
 
         def_node_matcher :description, <<~PATTERN
@@ -47,7 +47,7 @@ module RuboCop
         PATTERN
 
         def on_send(node)
-          return unless field_or_argument?(node)
+          return unless describable?(node)
 
           description = description(node)
 
