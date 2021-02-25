@@ -13,7 +13,15 @@ module EE
           transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
           transformer EE::BulkImports::Groups::Transformers::EpicAttributesTransformer
 
-          loader EE::BulkImports::Groups::Loaders::EpicsLoader
+          def transform(_, data)
+            cache_epic_source_params(data)
+          end
+
+          def load(context, data)
+            raise NotAllowedError unless authorized?
+
+            context.group.epics.create!(data)
+          end
 
           def after_run(extracted_data)
             context.entity.update_tracker_for(
@@ -25,6 +33,28 @@ module EE
             if extracted_data.has_next_page?
               run
             end
+          end
+
+          private
+
+          def authorized?
+            Ability.allowed?(context.current_user, :admin_epic, context.group)
+          end
+
+          def cache_epic_source_params(data)
+            source_id = GlobalID.parse(data['id'])&.model_id
+            source_iid = data['iid']
+
+            if source_id
+              cache_key = "bulk_import:#{context.bulk_import.id}:entity:#{context.entity.id}:epic:#{source_iid}"
+              source_params = { source_id: source_id }
+
+              ::Gitlab::Redis::Cache.with do |redis|
+                redis.set(cache_key, source_params.to_json, ex: ::BulkImports::Pipeline::CACHE_KEY_EXPIRATION)
+              end
+            end
+
+            data
           end
         end
       end

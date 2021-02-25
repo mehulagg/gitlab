@@ -7,6 +7,8 @@ module BulkImports
     include Gitlab::ClassAttributes
     include Runner
 
+    CACHE_KEY_EXPIRATION = 2.hours
+
     def initialize(context)
       @context = context
     end
