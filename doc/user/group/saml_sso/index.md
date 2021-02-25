@@ -162,7 +162,7 @@ For NameID, the following settings are recommended; for SCIM, the following sett
 
 ### OneLogin setup notes
 
-OneLogin has a "GitLab (SaaS)" app, which is developed by OneLogin. If there are any issues, please reach out to OneLogin.
+OneLogin has a "GitLab (SaaS)" app. As the app is developed by OneLogin, please reach out to OneLogin if you encounter issues.
 
 If you decide to use a generic SAML Test Connector such as the "SAML Test Connector (Advanced)", the following are the recommended settings.
 
