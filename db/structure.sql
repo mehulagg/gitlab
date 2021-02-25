@@ -17925,7 +17925,9 @@ CREATE TABLE user_preferences (
     tab_width smallint,
     experience_level smallint,
     view_diffs_file_by_file boolean DEFAULT false NOT NULL,
-    gitpod_enabled boolean DEFAULT false NOT NULL
+    gitpod_enabled boolean DEFAULT false NOT NULL,
+    company_name text,
+    CONSTRAINT check_19875f6bb5 CHECK ((char_length(company_name) <= 512))
 );
 
 CREATE SEQUENCE user_preferences_id_seq
