@@ -295,7 +295,13 @@ Settings['pages'] ||= Settingslogic.new({})
 Settings['pages'] = ::Gitlab::Pages::Settings.new(Settings.pages) # For path access detection https://gitlab.com/gitlab-org/gitlab/-/issues/230702
 Settings.pages['enabled']           = false if Settings.pages['enabled'].nil?
 Settings.pages['access_control']    = false if Settings.pages['access_control'].nil?
-Settings.pages['path']              = Settings.absolute(Settings.pages['path'] || File.join(Settings.shared['path'], "pages"))
+
+Settings.pages['path']              = if !Settings.pages['path'] && Settings.pages['path'].to_s == 'false'
+                                        false
+                                      else
+                                        Settings.absolute(Settings.pages['path'] || File.join(Settings.shared['path'], "pages"))
+                                      end
+
 Settings.pages['https']             = false if Settings.pages['https'].nil?
 Settings.pages['host'] ||= "example.com"
 Settings.pages['port'] ||= Settings.pages.https ? 443 : 80
