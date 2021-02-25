@@ -59,7 +59,7 @@ be enabled for a single project, and is not ready for production use:
 # Feature Name
 
 > - [Introduced](link-to-issue) in GitLab 12.0.
-> - It's [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default. See [reasoning for this development approach.](https://docs.gitlab.com/ee/development/feature_flags/#when-to-use-feature-flags)
+> - It's [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default. See [reasoning for this development approach.](<replace with path to>/ee/development/feature_flags/#when-to-use-feature-flags)
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
 > - It may change or be removed without notice in a future version of GitLab.
