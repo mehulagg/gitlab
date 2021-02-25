@@ -59,7 +59,7 @@ module Gitlab
         @hash.fetch(:gitaly_address)
       end
 
-      def legacy_disk_path
+      def legacy_disk_path # rubocop:disable Style/TrivialAccessors
         # Do not use self.class due to Spring reloading issues
         # if Gitlab::GitalyClient::StorageSettings.disk_access_denied?
         #   raise DirectPathAccessError, "git disk access denied"
