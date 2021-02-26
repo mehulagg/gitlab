@@ -83,9 +83,9 @@ module GraphqlHelpers
     schema: GitlabSchema,        # A specific schema instance
     object_type: described_class # The `BaseObject` type this field belongs to
   )
-    field = to_base_field(field)
+    field = to_base_field(field, object_type)
     ctx[:current_user] = current_user unless current_user == :not_given
-    query = GraphQL::Query.new(schema, context: ctx)
+    query = GraphQL::Query.new(schema, context: ctx.to_h)
     extras[:lookahead] = negative_lookahead if extras[:lookahead] == :not_given && field.extras.include?(:lookahead)
 
     query_ctx = query.context
@@ -212,9 +212,9 @@ module GraphqlHelpers
     lazy_vals.is_a?(Array) ? lazy_vals.map { |val| sync(val) } : sync(lazy_vals)
   end
 
-  def graphql_query_for(name, attributes = {}, fields = nil)
+  def graphql_query_for(name, args = {}, selection = nil)
     type = GitlabSchema.types['Query'].fields[GraphqlHelpers.fieldnamerize(name)]&.type
-    wrap_query(query_graphql_field(name, attributes, fields, type))
+    wrap_query(query_graphql_field(name, args, selection, type))
   end
 
   def wrap_query(query)
@@ -682,19 +682,19 @@ module GraphqlHelpers
 
   private
 
-  def to_base_field(name_or_field)
+  def to_base_field(name_or_field, object_type)
     case name_or_field
     when ::Types::BaseField
       name_or_field
     else
-      field_by_name(name_or_field)
+      field_by_name(name_or_field, object_type)
     end
   end
 
-  def field_by_name(name)
+  def field_by_name(name, object_type)
     name = ::GraphqlHelpers.fieldnamerize(name)
 
-    described_class.fields[name] || (raise ArgumentError, "Unknown field #{name} for #{described_class.graphql_name}")
+    object_type.fields[name] || (raise ArgumentError, "Unknown field #{name} for #{described_class.graphql_name}")
   end
 end
 
