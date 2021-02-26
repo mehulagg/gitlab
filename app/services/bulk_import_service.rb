@@ -54,14 +54,10 @@ class BulkImportService
       bulk_import = BulkImport.create!(user: current_user, source_type: 'gitlab')
       bulk_import.create_configuration!(credentials.slice(:url, :access_token))
 
-      params.each do |entity|
-        BulkImports::Entity.create!(
-          bulk_import: bulk_import,
-          source_type: entity[:source_type],
-          source_full_path: entity[:source_full_path],
-          destination_name: entity[:destination_name],
-          destination_namespace: entity[:destination_namespace]
-        )
+      params.each do |entity_params|
+        BulkImports::CreateEntityService
+          .new(bulk_import, entity_params)
+          .execute
       end
 
       bulk_import

@@ -7,26 +7,20 @@ class BulkImportWorker # rubocop:disable Scalability/IdempotentWorker
 
   sidekiq_options retry: false, dead: false
 
-  PERFORM_DELAY = 5.seconds
   DEFAULT_BATCH_SIZE = 5
 
   def perform(bulk_import_id)
     @bulk_import = BulkImport.find_by_id(bulk_import_id)
 
-    return unless @bulk_import
-    return if @bulk_import.finished?
+    return if @bulk_import.blank? || @bulk_import.finished?
     return @bulk_import.finish! if all_entities_processed? && @bulk_import.started?
     return re_enqueue if max_batch_size_exceeded? # Do not start more jobs if max allowed are already running
 
     @bulk_import.start! if @bulk_import.created?
 
     created_entities.first(next_batch_size).each do |entity|
-      entity.start!
-
       BulkImports::EntityWorker.perform_async(entity.id)
     end
-
-    re_enqueue
   rescue => e
     Gitlab::ErrorTracking.track_exception(e, bulk_import_id: @bulk_import&.id)
 
@@ -57,12 +51,5 @@ class BulkImportWorker # rubocop:disable Scalability/IdempotentWorker
 
   def next_batch_size
     [DEFAULT_BATCH_SIZE - started_entities.count, 0].max
-  end
-
-  # A new BulkImportWorker job is enqueued to either
-  #   - Process the new BulkImports::Entity created during import (e.g. for the subgroups)
-  #   - Or to mark the `bulk_import` as finished
-  def re_enqueue
-    BulkImportWorker.perform_in(PERFORM_DELAY, @bulk_import.id)
   end
 end

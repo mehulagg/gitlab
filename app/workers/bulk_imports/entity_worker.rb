@@ -14,11 +14,10 @@ module BulkImports
       entity = BulkImports::Entity.with_status(:started).find_by_id(entity_id)
 
       if entity
-        entity.update!(jid: jid)
+        entity.update!(status_event: 'start', jid: jid)
 
         BulkImports::Importers::GroupImporter.new(entity).execute
       end
-
     rescue => e
       extra = {
         bulk_import_id: entity&.bulk_import&.id,

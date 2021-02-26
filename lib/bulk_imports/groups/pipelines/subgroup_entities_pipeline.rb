@@ -11,7 +11,10 @@ module BulkImports
         transformer BulkImports::Groups::Transformers::SubgroupToEntityTransformer
 
         def load(context, data)
-          context.bulk_import.entities.create!(data)
+          # Use the service to ensure the BulkImportWorker
+          # will be called to import the new entities
+          BulkImport::CreateEntityService
+            .new(context.bulk_import, data)
         end
       end
     end
