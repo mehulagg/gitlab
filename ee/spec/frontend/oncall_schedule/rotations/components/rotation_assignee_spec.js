@@ -1,4 +1,4 @@
-import { GlToken, GlAvatar, GlPopover } from '@gitlab/ui';
+import { GlAvatar, GlPopover } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import RotationAssignee, {
   SHIFT_WIDTHS,
@@ -13,7 +13,7 @@ describe('RotationAssignee', () => {
 
   const shiftWidth = 100;
   const assignee = mockRotations[0].shifts.nodes[0];
-  const findToken = () => wrapper.findComponent(GlToken);
+  const findToken = () => wrapper.findByTestId('rotation-assignee');
   const findAvatar = () => wrapper.findComponent(GlAvatar);
   const findPopOver = () => wrapper.findComponent(GlPopover);
   const findStartsAt = () => wrapper.findByTestId('rotation-assignee-starts-at');

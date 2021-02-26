@@ -1,5 +1,5 @@
 <script>
-import { GlToken, GlAvatar, GlPopover } from '@gitlab/ui';
+import { GlAvatar, GlPopover } from '@gitlab/ui';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { truncate } from '~/lib/utils/text_utility';
 import { __, sprintf } from '~/locale';
@@ -10,11 +10,13 @@ export const SHIFT_WIDTHS = {
   xs: 40,
 };
 
+const ROTATION_CENTER_CLASS = 'gl-display-flex gl-justify-content-center gl-align-items-center';
+
 export default {
+  ROTATION_CENTER_CLASS,
   components: {
     GlAvatar,
     GlPopover,
-    GlToken,
   },
   props: {
     assignee: {
@@ -72,19 +74,19 @@ export default {
 
 <template>
   <div class="gl-absolute gl-h-7 gl-mt-3" :style="rotationAssigneeStyle">
-    <gl-token
+    <div
       :id="rotationAssigneeUniqueID"
-      class="gl-w-full gl-h-6 gl-align-items-center"
-      :class="chevronClass"
-      :view-only="true"
+      class="gl-h-6"
+      :class="[chevronClass, $options.ROTATION_CENTER_CLASS]"
+      data-testid="rotation-assignee"
     >
-      <div class="gl-display-flex gl-text-white gl-font-weight-normal">
+      <div class="gl-text-white" :class="$options.ROTATION_CENTER_CLASS">
         <gl-avatar :src="assignee.user.avatarUrl" :size="16" />
         <span v-if="!rotationMobileView" class="gl-ml-2" data-testid="rotation-assignee-name">{{
           assigneeName
         }}</span>
       </div>
-    </gl-token>
+    </div>
     <gl-popover
       :target="rotationAssigneeUniqueID"
       :title="assignee.user.username"
