@@ -18,10 +18,10 @@ RSpec.describe Banzai::Filter::CustomEmojiFilter do
   end
 
   it 'ignores non existent custom emoji' do
-    exp = act = '<p>:foo:</p>'
-    doc = filter(act)
+    exp = '<p>:foo:</p>'
+    doc = filter(exp)
 
-    expect(doc.to_html).to match Regexp.escape(exp)
+    expect(doc.to_html).to eq(exp)
   end
 
   it 'correctly uses the custom emoji URL' do
@@ -64,6 +64,24 @@ RSpec.describe Banzai::Filter::CustomEmojiFilter do
     doc = filter("'2a00:tanuki:100::1'")
 
     expect(doc.css('gl-emoji').size).to eq 0
+  end
+
+  it 'does not match emoji in a pre tag' do
+    doc = filter('<p><pre>:tanuki:</pre></p>')
+
+    expect(doc.css('img').size).to be 0
+  end
+
+  it 'does not match emoji in code tag' do
+    doc = filter('<p><code>:tanuki: wow</code></p>')
+
+    expect(doc.css('img').size).to be 0
+  end
+
+  it 'does not match emoji in tt tag' do
+    doc = filter('<p><tt>:tanuki: yes!</tt></p>')
+
+    expect(doc.css('img').size).to be 0
   end
 
   it 'does not do N+1 query' do

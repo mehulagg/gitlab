@@ -75,6 +75,24 @@ RSpec.describe Banzai::Filter::EmojiFilter do
     expect(doc.css('gl-emoji').size).to eq 1
   end
 
+  it 'does not match emoji in a pre tag' do
+    doc = filter('<p><pre>:see_no_evil:</pre></p>')
+
+    expect(doc.css('img').size).to be 0
+  end
+
+  it 'does not match emoji in code tag' do
+    doc = filter('<p><code>:see_no_evil: wow</code></p>')
+
+    expect(doc.css('img').size).to be 0
+  end
+
+  it 'does not match emoji in tt tag' do
+    doc = filter('<p><tt>:see_no_evil: yes!</tt></p>')
+
+    expect(doc.css('img').size).to be 0
+  end
+
   it 'does not match multiple emoji in a row' do
     doc = filter(':see_no_evil::hear_no_evil::speak_no_evil:')
     expect(doc.css('gl-emoji').size).to eq 0
