@@ -11,7 +11,7 @@ module Types
 
     def initialize(**kwargs, &block)
       @calls_gitaly = !!kwargs.delete(:calls_gitaly)
-      @constant_complexity = !!kwargs[:complexity]
+      @constant_complexity = kwargs[:complexity].is_a?(Integer) && kwargs[:complexity] > 0
       @requires_argument = !!kwargs.delete(:requires_argument)
       kwargs[:complexity] = field_complexity(kwargs[:resolver_class], kwargs[:complexity])
       @feature_flag = kwargs[:feature_flag]
