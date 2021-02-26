@@ -36,6 +36,10 @@ module GraphqlHelpers
     field_options = resolver_class.field_options.merge(name: 'value')
     field = ::Types::BaseField.new(**field_options)
 
+    if resolver_class <= ::Mutations::BaseMutation && !args.key?(:input)
+      args = { input: args }
+    end
+
     resolve_field(field, obj,
                   args: args,
                   ctx: ctx,
@@ -102,9 +106,16 @@ module GraphqlHelpers
       defaults_used: []
     )
 
-    # TODO: This will need to change when we move to the interpreter - at that
-    # point we will call `field#resolve`
-    field.resolve_field(parent, arguments, query_ctx)
+    # we enable the request store so we can track gitaly calls.
+    ::Gitlab::WithRequestStore.with_request_store do
+      # TODO: This will need to change when we move to the interpreter - at that
+      # point we will call `field#resolve`
+
+      # hack alert
+      arguments = arguments.to_kwargs[:input] if field.resolver && field.resolver <= ::Mutations::BaseMutation
+
+      field.resolve_field(parent, arguments, query_ctx)
+    end
   end
 
   def mock_extras(context, parent: :not_given, lookahead: :not_given)
@@ -114,7 +125,11 @@ module GraphqlHelpers
 
   # a synthetic BaseObject type to be used in resolver specs. See `GraphqlHelpers#resolve`
   def resolver_parent
-    @resolver_parent ||= Class.new(::Types::BaseObject) { graphql_name 'ResolverParent' }
+    @resolver_parent ||= fresh_object_type('ResolverParent')
+  end
+
+  def fresh_object_type(name = 'Object')
+    Class.new(::Types::BaseObject) { graphql_name name }
   end
 
   def resolver_instance(resolver_class, obj: nil, ctx: {}, field: nil, schema: GitlabSchema)
