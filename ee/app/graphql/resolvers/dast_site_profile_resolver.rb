@@ -7,7 +7,8 @@ module Resolvers
     type Types::DastSiteProfileType.connection_type, null: true
 
     when_single do
-      argument :id, ::Types::GlobalIDType[::DastSiteProfile], required: true,
+      argument :id, ::Types::GlobalIDType[::DastSiteProfile],
+               required: true,
                description: "ID of the site profile."
     end
 

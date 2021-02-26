@@ -3345,7 +3345,9 @@ Represents vulnerability finding of a security report on the pipeline.
 | `confidence` | String | Type of the security report that found the vulnerability. |
 | `description` | String | Description of the vulnerability finding. |
 | `identifiers` | VulnerabilityIdentifier! => Array | Identifiers of the vulnerabilit finding. |
-| `location` | VulnerabilityLocation | Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability. |
+| `location` | VulnerabilityLocation | Location metadata for the vulnerability.
+Its fields depend on the type of security scan that found the vulnerability.
+ |
 | `name` | String | Name of the vulnerability finding. |
 | `project` | Project | The project on which the vulnerability finding was found. |
 | `projectFingerprint` | String | Name of the vulnerability finding. |

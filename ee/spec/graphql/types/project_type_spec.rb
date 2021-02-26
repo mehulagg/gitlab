@@ -57,12 +57,12 @@ RSpec.describe GitlabSchema.types['Project'] do
 
     it 'returns a list of analyzers enabled for the project' do
       query_result = subject.dig('data', 'project', 'securityScanners', 'enabled')
-      expect(query_result).to match_array(%w(SAST DAST SECRET_DETECTION))
+      expect(query_result).to match_array(%w[SAST DAST SECRET_DETECTION])
     end
 
     it 'returns a list of analyzers which were run in the last pipeline for the project' do
       query_result = subject.dig('data', 'project', 'securityScanners', 'pipelineRun')
-      expect(query_result).to match_array(%w(DAST SAST))
+      expect(query_result).to match_array(%w[DAST SAST])
     end
   end
 

@@ -124,7 +124,7 @@ class GitlabSchema < GraphQL::Schema
 
       raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab ID." unless gid
 
-      if expected_type && !gid.model_class.ancestors.include?(expected_type)
+      if expected_type && gid.model_class.ancestors.exclude?(expected_type)
         vars = { global_id: global_id, expected_type: expected_type }
         msg = _('%{global_id} is not a valid ID for %{expected_type}.') % vars
         raise Gitlab::Graphql::Errors::ArgumentError, msg
@@ -133,12 +133,10 @@ class GitlabSchema < GraphQL::Schema
       gid
     end
 
-    def unauthorized_object(unauthorized_error)
-      if unauthorized_error.context.query.mutation? && unauthorized_error.type < ::Mutations::BaseMutation
-        ::Gitlab::Graphql::Authorize::AuthorizeResource.raise_resource_not_available_error!
-      else
-        nil
-      end
+    def unauthorized_object(error)
+      return unless error.context.query.mutation? && error.type < ::Mutations::BaseMutation
+
+      ::Gitlab::Graphql::Authorize::AuthorizeResource.raise_resource_not_available_error!
     end
 
     private

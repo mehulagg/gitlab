@@ -44,10 +44,10 @@ RSpec.describe LooksAhead do
       graphql_name 'User'
       field :name, String, null: true
       field :issues, issue.connection_type,
-        null: true
+            null: true
       field :issues_with_lookahead, issue.connection_type,
-        resolver: issues_resolver,
-        null: true
+            resolver: issues_resolver,
+            null: true
     end
 
     Class.new(GraphQL::Schema) do
@@ -106,7 +106,7 @@ RSpec.describe LooksAhead do
 
       expect(res['errors']).to be_blank
       expect(res.dig('data', 'findUser', 'name')).to eq(the_user.name)
-      %w(issues issuesWithLookahead).each do |field|
+      %w[issues issuesWithLookahead].each do |field|
         expect(all_issue_titles(res, field)).to match_array(issue_titles)
         expect(all_label_ids(res, field)).to match_array(expected_label_ids)
       end
