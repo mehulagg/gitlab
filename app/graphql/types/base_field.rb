@@ -9,7 +9,7 @@ module Types
 
     DEFAULT_COMPLEXITY = 1
 
-    def initialize(*args, **kwargs, &block)
+    def initialize(**kwargs, &block)
       @calls_gitaly = !!kwargs.delete(:calls_gitaly)
       @constant_complexity = !!kwargs[:complexity]
       @requires_argument = !!kwargs.delete(:requires_argument)
@@ -18,7 +18,15 @@ module Types
       kwargs = check_feature_flag(kwargs)
       kwargs = gitlab_deprecation(kwargs)
 
-      super(*args, **kwargs, &block)
+      super(**kwargs, &block)
+
+      # We want to avoid the overhead of this in prod, or if
+      # this field has announced it will call gitaly
+      unless Rails.env.production? || @constant_complexity || @calls_gitaly
+        extension ::Gitlab::Graphql::CallsGitaly::FieldExtension
+      end
+
+      extension ::Gitlab::Graphql::Present::FieldExtension if owner.try(:presenter_class)
     end
 
     def requires_argument?
