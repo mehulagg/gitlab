@@ -370,7 +370,7 @@ module SearchHelper
       max_length: 200
     )
 
-    html = markdown(source)
+    html = markdown(EscapeUtils.unescape_html(source))
 
     # Truncato's filtered_tags and filtered_attributes are not quite the same
     sanitize(html, tags: %w(a p ol ul li pre code))
