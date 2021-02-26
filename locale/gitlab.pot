@@ -13218,6 +13218,9 @@ msgstr ""
 msgid "Fork project?"
 msgstr ""
 
+msgid "ForkProject|A fork is a copy of a project."
+msgstr ""
+
 msgid "ForkProject|Cancel"
 msgstr ""
 
@@ -13225,6 +13228,9 @@ msgid "ForkProject|Create a group"
 msgstr ""
 
 msgid "ForkProject|Fork project"
+msgstr ""
+
+msgid "ForkProject|Forking a repository allows you to make changes without affecting the original project."
 msgstr ""
 
 msgid "ForkProject|Internal"
