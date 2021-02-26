@@ -21,6 +21,8 @@ These locations can be configured using the options described below.
 ## Disabling Terraform state
 
 To disable terraform state site-wide, follow the steps below.
+A GitLab administrator may want to disable Terraform state to reduce diskspace or if Terraform is not used in your instance.
+To do so, follow the steps below according to your installation's type.
 
 **In Omnibus installations:**
 
