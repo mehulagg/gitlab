@@ -27,13 +27,19 @@ RSpec.describe 'getting merge request listings nested in a project' do
     )
   end
 
-  let(:query) do
-    query_merge_requests(all_graphql_fields_for('MergeRequest', max_depth: 1))
-  end
-
   it_behaves_like 'a working graphql query' do
+    let(:query) do
+      query_merge_requests(all_graphql_fields_for('MergeRequest', max_depth: 2))
+    end
+
     before do
-      post_graphql(query, current_user: current_user)
+      # We cannot call the whitelist here, since the transaction does not
+      # begin until we enter the controller.
+      headers = {
+        'X-GITLAB-QUERY-WHITELIST-ISSUE' => 'https://gitlab.com/gitlab-org/gitlab/-/issues/322979'
+      }
+
+      post_graphql(query, current_user: current_user, headers: headers)
     end
   end
 
@@ -96,6 +102,10 @@ RSpec.describe 'getting merge request listings nested in a project' do
   end
 
   shared_examples 'searching with parameters' do
+    let(:query) do
+      query_merge_requests('iid title')
+    end
+
     let(:expected) do
       mrs.map { |mr| a_hash_including('iid' => mr.iid.to_s, 'title' => mr.title) }
     end

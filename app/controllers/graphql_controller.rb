@@ -59,6 +59,13 @@ class GraphqlController < ApplicationController
 
   private
 
+  # Tests may mark some queries as exempt from query limits
+  def whitelist_query!
+    if whitelist_issue = request.headers['HTTP_X_GITLAB_QUERY_WHITELIST_ISSUE']
+      Gitlab::QueryLimiting.whitelist(whitelist_issue)
+    end
+  end
+
   def set_user_last_activity
     return unless current_user
 
@@ -70,12 +77,14 @@ class GraphqlController < ApplicationController
   end
 
   def execute_multiplex
+    whitelist_query!
     GitlabSchema.multiplex(multiplex_queries, context: context)
   end
 
   def execute_query
     variables = build_variables(params[:variables])
     operation_name = params[:operationName]
+    whitelist_query!
 
     GitlabSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
   end
