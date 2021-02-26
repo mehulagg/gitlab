@@ -13,6 +13,16 @@ RSpec.describe Gitlab::Graphql::Present::FieldExtension do
     ::Types::BaseField.new(name: field_name, type: GraphQL::STRING_TYPE, null: true, owner: owner)
   end
 
+  let(:base_presenter) do
+    Class.new(SimpleDelegator) do
+      def initialize(object, **options)
+        super(object)
+        @object = object
+        @options = options
+      end
+    end
+  end
+
   def resolve_value
     resolve_field(field, object, current_user: user, object_type: owner)
   end
@@ -23,14 +33,53 @@ RSpec.describe Gitlab::Graphql::Present::FieldExtension do
     end
   end
 
-  context 'when the object declare a presenter' do
-    context 'when the presenter overrides the original method' do
-      let(:twice) do
-        Class.new do
-          def initialize(object, **options)
-            @object = object
-          end
+  describe 'interactions with inheritance' do
+    def parent
+      type = fresh_object_type('Parent')
+      type.present_using(provide_foo)
+      type.field :foo, ::GraphQL::INT_TYPE, null: true
+      type.field :value, ::GraphQL::STRING_TYPE, null: true
+      type
+    end
 
+    def child
+      type = Class.new(parent)
+      type.graphql_name 'Child'
+      type.present_using(provide_bar)
+      type.field :bar, ::GraphQL::INT_TYPE, null: true
+      type
+    end
+
+    def provide_foo
+      Class.new(base_presenter) do
+        def foo
+          100
+        end
+      end
+    end
+
+    def provide_bar
+      Class.new(base_presenter) do
+        def bar
+          101
+        end
+      end
+    end
+
+    it 'can resolve value, foo and bar' do
+      type = child
+      value = resolve_field(:value, object, object_type: type)
+      foo = resolve_field(:foo, object, object_type: type)
+      bar = resolve_field(:bar, object, object_type: type)
+
+      expect([value, foo, bar]).to eq ['foo', 100, 101]
+    end
+  end
+
+  context 'when the object declares a presenter' do
+    context 'when the presenter overrides the original method' do
+      def twice
+        Class.new(base_presenter) do
           def value
             @object.value * 2
           end
@@ -49,19 +98,10 @@ RSpec.describe Gitlab::Graphql::Present::FieldExtension do
     end
 
     context 'when the presenter provides a new method' do
-      let(:presenter) do
-        Class.new do
-          delegate :value, to: :object
-
-          attr_reader :object, :options
-
-          def initialize(object, **options)
-            @object = object
-            @options = options
-          end
-
+      def presenter
+        Class.new(base_presenter) do
           def current_username
-            "Hello #{options[:current_user]&.username} from the presenter!"
+            "Hello #{@options[:current_user]&.username} from the presenter!"
           end
         end
       end

@@ -7,7 +7,7 @@ module Gitlab
         SAFE_CONTEXT_KEYS = %i[current_user].freeze
 
         def resolve(object:, arguments:, context:)
-          object.try(:present, safe_context_values(context))
+          object.try(:present, field.owner, safe_context_values(context))
 
           yield(object, arguments)
         end
