@@ -576,7 +576,6 @@ issue is in progress, directly edit the deployment with the
 This error is shown if the version of the agent is newer that the version of KAS.
 To fix it, make sure that both `agentk` and KAS use the same versions.
 
-
 ### Agent logs - Certificate signed by unknown authority
 
 ```plaintext
@@ -624,7 +623,7 @@ Then in `resources.yml`:
 
 Alternatively, you can mount the certificate file at a different location and include it using the `--ca-cert-file` agent parameter:
 
-```
+```plaintext
       containers:
       - name: agent
         image: "registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/agentk:latest"
