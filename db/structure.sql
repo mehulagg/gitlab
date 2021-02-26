@@ -22493,8 +22493,6 @@ CREATE UNIQUE INDEX index_issue_links_on_source_id_and_target_id ON issue_links 
 
 CREATE INDEX index_issue_links_on_target_id ON issue_links USING btree (target_id);
 
-CREATE INDEX index_issue_metrics ON issue_metrics USING btree (issue_id);
-
 CREATE INDEX index_issue_metrics_on_issue_id_and_timestamps ON issue_metrics USING btree (issue_id, first_mentioned_in_commit_at, first_associated_with_milestone_at, first_added_to_board_at);
 
 CREATE INDEX index_issue_on_project_id_state_id_and_blocking_issues_count ON issues USING btree (project_id, state_id, blocking_issues_count);
@@ -23637,6 +23635,8 @@ CREATE INDEX index_u2f_registrations_on_key_handle ON u2f_registrations USING bt
 
 CREATE INDEX index_u2f_registrations_on_user_id ON u2f_registrations USING btree (user_id);
 
+CREATE UNIQUE INDEX index_unique_issue_metrics_issue_id ON issue_metrics USING btree (issue_id);
+
 CREATE INDEX index_uploads_on_checksum ON uploads USING btree (checksum);
 
 CREATE INDEX index_uploads_on_model_id_and_model_type ON uploads USING btree (model_id, model_type);
@@ -23948,6 +23948,8 @@ CREATE UNIQUE INDEX uniq_pkgs_debian_group_distributions_group_id_and_suite ON p
 CREATE UNIQUE INDEX uniq_pkgs_debian_project_distributions_project_id_and_codename ON packages_debian_project_distributions USING btree (project_id, codename);
 
 CREATE UNIQUE INDEX uniq_pkgs_debian_project_distributions_project_id_and_suite ON packages_debian_project_distributions USING btree (project_id, suite);
+
+CREATE UNIQUE INDEX unique_issue_metrics_by_issue_id ON issue_metrics USING btree (issue_id);
 
 CREATE UNIQUE INDEX unique_merge_request_metrics_by_merge_request_id ON merge_request_metrics USING btree (merge_request_id);
 

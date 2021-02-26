@@ -24,6 +24,8 @@ class Issue < ApplicationRecord
   include Todoable
   include FromUnion
 
+  extend ::Gitlab::Utils::Override
+
   DueDateStruct                   = Struct.new(:title, :name).freeze
   NoDueDate                       = DueDateStruct.new('No Due Date', '0').freeze
   AnyDueDate                      = DueDateStruct.new('Any Due Date', '').freeze
@@ -444,9 +446,17 @@ class Issue < ApplicationRecord
 
   private
 
+  override :ensure_metrics
   def ensure_metrics
-    super
-    metrics.record!
+    # Backward compatibility: some merge request metrics records will not have project_id filled in.
+    # In that case the first `safe_find_or_create_by` will return false.
+    metrics_record = Issue::Metrics.safe_find_or_create_by(issue_id: id)
+
+    metrics_record.tap do |metrics_record|
+      metrics_record.record!
+      metrics_record.association(:issue).target = self
+      association(:metrics).target = metrics_record
+    end
   end
 
   def record_create_action
