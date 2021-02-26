@@ -12,7 +12,7 @@ module BulkImports
 
         pipelines.each { |pipeline| pipeline.new(context).run }
 
-        entity.finish!
+        BulkImports::Groups::Pipelines::EntityFinisher.new(context).run
       end
 
       private

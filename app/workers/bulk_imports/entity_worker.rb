@@ -6,12 +6,12 @@ module BulkImports
 
     feature_category :importers
 
-    sidekiq_options retry: false, dead: false
-
+    deduplicate :until_executed
+    idempotent!
     worker_has_external_dependencies!
 
     def perform(entity_id)
-      entity = BulkImports::Entity.with_status(:started).find_by_id(entity_id)
+      entity = BulkImports::Entity.with_status(:created).find_by_id(entity_id)
 
       if entity
         entity.update!(status_event: 'start', jid: jid)

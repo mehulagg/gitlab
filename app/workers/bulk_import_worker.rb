@@ -5,51 +5,31 @@ class BulkImportWorker # rubocop:disable Scalability/IdempotentWorker
 
   feature_category :importers
 
-  sidekiq_options retry: false, dead: false
+  idempotent!
+  # Only one job for per BulkImport can be enqueued per time.
+  # This will avoid processing the same entity more than once
+  # and avoid
+  deduplicate :until_executing
 
+  PERFORM_DELAY = 5.seconds
   DEFAULT_BATCH_SIZE = 5
 
   def perform(bulk_import_id)
     @bulk_import = BulkImport.find_by_id(bulk_import_id)
 
     return if @bulk_import.blank? || @bulk_import.finished?
-    return @bulk_import.finish! if all_entities_processed? && @bulk_import.started?
-    return re_enqueue if max_batch_size_exceeded? # Do not start more jobs if max allowed are already running
 
     @bulk_import.start! if @bulk_import.created?
 
-    created_entities.first(next_batch_size).each do |entity|
-      BulkImports::EntityWorker.perform_async(entity.id)
-    end
+    BulkImports::EntityWorker.bulk_perform_in(
+      PERFORM_DELAY,
+      @bulk_import.entities.with_status(:created).pluck(:id),
+      batch_size: DEFAULT_BATCH_SIZE,
+      batch_delay: PERFORM_DELAY
+    )
   rescue => e
     Gitlab::ErrorTracking.track_exception(e, bulk_import_id: @bulk_import&.id)
 
     @bulk_import&.fail_op
-  end
-
-  private
-
-  def entities
-    @entities ||= @bulk_import.entities
-  end
-
-  def started_entities
-    entities.with_status(:started)
-  end
-
-  def created_entities
-    entities.with_status(:created)
-  end
-
-  def all_entities_processed?
-    entities.all? { |entity| entity.finished? || entity.failed? }
-  end
-
-  def max_batch_size_exceeded?
-    started_entities.count >= DEFAULT_BATCH_SIZE
-  end
-
-  def next_batch_size
-    [DEFAULT_BATCH_SIZE - started_entities.count, 0].max
   end
 end

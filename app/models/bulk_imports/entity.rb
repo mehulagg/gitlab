@@ -48,6 +48,8 @@ class BulkImports::Entity < ApplicationRecord
 
   enum source_type: { group_entity: 0, project_entity: 1 }
 
+  scope :unfinished, -> { without_status(:finished, :failed) }
+
   state_machine :status, initial: :created do
     state :created, value: 0
     state :started, value: 1

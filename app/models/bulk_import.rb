@@ -16,7 +16,9 @@ class BulkImport < ApplicationRecord
   state_machine :status, initial: :created do
     state :created, value: 0
     state :started, value: 1
-    state :finished, value: 2
+    state :finished, value: 2 do
+      validate :all_entities_finished?
+    end
     state :failed, value: -1
 
     event :start do
@@ -30,5 +32,11 @@ class BulkImport < ApplicationRecord
     event :fail_op do
       transition any => :failed
     end
+  end
+
+  private
+
+  def all_entities_finished?
+    entities.unfinished.none?
   end
 end
