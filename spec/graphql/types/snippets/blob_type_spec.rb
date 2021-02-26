@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['SnippetBlob'] do
+  include GraphqlHelpers
+
   it 'has the correct fields' do
     expected_fields = [:rich_data, :plain_data,
                        :raw_path, :size, :binary, :name, :path,
@@ -24,4 +26,15 @@ RSpec.describe GitlabSchema.types['SnippetBlob'] do
   specify { expect(described_class.fields['mode'].type).not_to be_non_null }
   specify { expect(described_class.fields['externalStorage'].type).not_to be_non_null }
   specify { expect(described_class.fields['renderedAsText'].type).to be_non_null }
+
+  let_it_be(:snippet) { create(:snippet, :public, :repository) }
+
+  described_class.fields.each_value do |field|
+    it "resolves #{field.graphql_name} using the presenter", :request_store do
+      blob = Snippet.find(snippet.id).blobs.first
+      presented = SnippetBlobPresenter.new(blob)
+
+      expect(resolve_field(field, blob)).to eq(presented.try(field.method_sym))
+    end
+  end
 end
