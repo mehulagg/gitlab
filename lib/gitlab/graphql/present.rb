@@ -14,8 +14,12 @@ module Gitlab
         end
       end
 
-      def self.use(schema_definition)
-        schema_definition.instrument(:field, ::Gitlab::Graphql::Present::Instrumentation.new)
+      def present(attrs)
+        klass = self.class.presenter_class
+        return if !klass || object.is_a?(klass)
+
+        # The @object variable is not exposed through a setter
+        @object = klass.new(object, **attrs) # rubocop: disable Gitlab/ModuleWithInstanceVariables
       end
     end
   end
