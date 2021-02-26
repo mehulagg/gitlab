@@ -3,10 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Parsers::Security::DependencyList do
-  let(:parser) { described_class.new(project, sha) }
+  let(:parser) { described_class.new(project, sha, pipeline) }
   let(:project) { create(:project) }
   let(:sha) { '4242424242424242' }
   let(:report) { Gitlab::Ci::Reports::DependencyList::Report.new }
+
+  let_it_be(:pipeline) { create :ee_ci_pipeline, :with_dependency_list_report }
+  let_it_be(:vulnerability) { create(:vulnerability, report_type: :dependency_scanning) }
+  let_it_be(:finding) { create(:vulnerabilities_finding, :with_dependency_scanning_metadata, vulnerability: vulnerability) }
+  let_it_be(:finding_pipeline) { create(:vulnerabilities_finding_pipeline, finding: finding, pipeline: pipeline) }
 
   describe '#parse!' do
     before do
@@ -16,7 +21,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyList do
     end
 
     context 'with dependency_list artifact' do
-      let(:artifact) { create(:ee_ci_job_artifact, :dependency_list) }
+      let(:artifact) { pipeline.job_artifacts.last }
 
       it 'parses all files' do
         blob_path = "/#{project.full_path}/-/blob/#{sha}/yarn/yarn.lock"
@@ -52,13 +57,26 @@ RSpec.describe Gitlab::Ci::Parsers::Security::DependencyList do
         expect(vuln_debug[0][:name]).to eq('Regular Expression Denial of Service in debug')
         expect(vuln_async.size).to eq(0)
       end
+
+      context 'with vulnerabilities in the database' do
+        it 'does not causes N+1 query' do
+          control_count = ActiveRecord::QueryRecorder.new {  }
+        end
+
+        it 'merges vulnerability data' do
+          vuln_nokogiri = report.dependencies[1][:vulnerabilities]
+
+          expect(vuln_nokogiri.size).to eq(1)
+          expect(vuln_nokogiri[0][:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
+        end
+      end
     end
 
     context 'with dependency scanning artifact without dependency_list' do
       let(:artifact) { create(:ee_ci_job_artifact, :dependency_scanning) }
 
       it 'list of dependencies with vulnerabilities' do
-        expect(report.dependencies.size).to eq(4)
+        expect(report.dependencies.size).to eq(1)
       end
     end
   end

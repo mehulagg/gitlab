@@ -5,8 +5,10 @@ module Gitlab
     module Parsers
       module Security
         class DependencyList
-          def initialize(project, sha)
+          def initialize(project, sha, pipeline)
             @formatter = Formatters::DependencyList.new(project, sha)
+            @pipeline = pipeline
+            @project = project
           end
 
           def parse!(json_data, report)
@@ -24,10 +26,23 @@ module Gitlab
           end
 
           def parse_vulnerabilities(report_data, report)
-            report_data.fetch('vulnerabilities', []).each do |vulnerability|
-              dependency = vulnerability.dig("location", "dependency")
-              file = vulnerability.dig("location", "file")
-              report.add_dependency(formatter.format(dependency, '', file, vulnerability))
+            vuln_occurrences = pipeline.vulnerability_findings.dependency_scanning
+
+            if Feature.enabled?(:standalone_vuln_dependency_list, project)
+              vuln_occurrences.each do |occurrence|
+                dependency = occurrence.location.dig("dependency")
+                next unless dependency
+                package_manager = "" # package manager will be extracted from the dependency_files
+                file = occurrence.file
+                vulnerability = occurrence.metadata
+                report.add_dependency(formatter.format(dependency, package_manager, file, vulnerability))
+              end
+            else
+              report_data.fetch('vulnerabilities', []).each do |vulnerability|
+                dependency = vulnerability.dig("location", "dependency")
+                file = vulnerability.dig("location", "file")
+                report.add_dependency(formatter.format(dependency, '', file, vulnerability))
+              end
             end
           end
 
@@ -40,7 +55,7 @@ module Gitlab
 
           private
 
-          attr_reader :formatter
+          attr_reader :formatter, :pipeline, :project
         end
       end
     end

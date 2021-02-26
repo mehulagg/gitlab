@@ -21,6 +21,7 @@ module Gitlab
           end
 
           def add_dependency(dependency)
+            Rails.logger.error("HAWLLO1 #{dependency} ")
             dep = Dependency.new(dependency)
             key = dep.composite_key
 

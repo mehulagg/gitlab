@@ -88,13 +88,13 @@ FactoryBot.define do
         evidence: {
           summary: 'Credit card detected',
           request: {
-            headers: [{ name: 'Accept', value: '*/*' }],
+            headers: [{name: 'Accept', value: '*/*'}],
             method: 'GET',
             url: 'http://goat:8080/WebGoat/logout',
             body: nil
           },
           response: {
-            headers: [{ name: 'Content-Length', value: '0' }],
+            headers: [{name: 'Content-Length', value: '0'}],
             reason_phrase: 'OK',
             status_code: 200,
             body: nil
@@ -108,7 +108,7 @@ FactoryBot.define do
             {
               name: 'Origional',
               request: {
-                headers: [{ name: 'Accept', value: '*/*' }],
+                headers: [{name: 'Accept', value: '*/*'}],
                 method: 'GET',
                 url: 'http://goat:8080/WebGoat/logout',
                 body: ''
@@ -117,13 +117,13 @@ FactoryBot.define do
             {
               name: 'Recorded',
               request: {
-                headers: [{ name: 'Accept', value: '*/*' }],
+                headers: [{name: 'Accept', value: '*/*'}],
                 method: 'GET',
                 url: 'http://goat:8080/WebGoat/logout',
                 body: ''
               },
               response: {
-                headers: [{ name: 'Content-Length', value: '0' }],
+                headers: [{name: 'Content-Length', value: '0'}],
                 reason_phrase: 'OK',
                 status_code: 200,
                 body: ''
@@ -186,19 +186,19 @@ FactoryBot.define do
         finding.name = "AWS API key"
         finding.metadata_version = "3.0"
         finding.raw_metadata =
-          { category: "secret_detection",
-            name: "AWS API key",
-            message: "AWS API key",
-            description: "Amazon Web Services API key detected; please remove and revoke it if this is a leak.",
-            cve: "aws-key.py:fac8c3618ca3c0b55431402635743c0d6884016058f696be4a567c4183c66cfd:AWS",
-            severity: "Critical",
-            confidence: "Unknown",
-            raw_source_code_extract: "AKIAIOSFODNN7EXAMPLE",
-            scanner: { id: "gitleaks", name: "Gitleaks" },
-            location: { file: "aws-key.py",
-                        commit: { author: "Analyzer", sha: "d874aae969588eb718e1ed18aa0be73ea69b3539" },
-                        start_line: 5, end_line: 5 },
-            identifiers: [{ type: "gitleaks_rule_id", name: "Gitleaks rule ID AWS", value: "AWS" }] }.to_json
+          {category: "secret_detection",
+           name: "AWS API key",
+           message: "AWS API key",
+           description: "Amazon Web Services API key detected; please remove and revoke it if this is a leak.",
+           cve: "aws-key.py:fac8c3618ca3c0b55431402635743c0d6884016058f696be4a567c4183c66cfd:AWS",
+           severity: "Critical",
+           confidence: "Unknown",
+           raw_source_code_extract: "AKIAIOSFODNN7EXAMPLE",
+           scanner: {id: "gitleaks", name: "Gitleaks"},
+           location: {file: "aws-key.py",
+                      commit: {author: "Analyzer", sha: "d874aae969588eb718e1ed18aa0be73ea69b3539"},
+                      start_line: 5, end_line: 5},
+           identifiers: [{type: "gitleaks_rule_id", name: "Gitleaks rule ID AWS", value: "AWS"}]}.to_json
       end
 
       after(:create) do |finding|
@@ -447,6 +447,55 @@ FactoryBot.define do
             value: 'More info about this vulnerability'
           }
         }
+      end
+    end
+
+    trait :with_dependency_scanning_metadata do
+      after(:build) do |finding|
+        finding.report_type = "dependency_scanning"
+        finding.name = "Vulnerabilities in libxml2"
+        finding.metadata_version = "2.1"
+        finding.raw_metadata =
+          {
+            "category": "dependency_scanning",
+            "name": "Vulnerabilities in libxml2",
+            "message": "Vulnerabilities in libxml2 in nokogiri",
+            "description": "  The version of libxml2 packaged with Nokogiri contains several vulnerabilities.",
+            "cve": "rails/Gemfile.lock:nokogiri:gemnasium:06565b64-486d-4326-b906-890d9915804d",
+            "severity": "High",
+            "solution": "Upgrade to latest version.",
+            "scanner": {
+              "id": "gemnasium",
+              "name": "Gemnasium"
+            },
+            "location": {
+              "file": "rails/Gemfile.lock",
+              "dependency": {
+                "package": {
+                  "name": "nokogiri"
+                },
+                "version": "1.8.0"
+              }
+            },
+            "identifiers": [
+              {
+                "type": "gemnasium",
+                "name": "Gemnasium-06565b64-486d-4326-b906-890d9915804d",
+                "value": "06565b64-486d-4326-b906-890d9915804d",
+                "url": "https://deps.sec.gitlab.com/packages/gem/nokogiri/versions/1.8.0/advisories"
+              },
+              {
+                "type": "usn",
+                "name": "USN-3424-1",
+                "value": "USN-3424-1",
+                "url": "https://usn.ubuntu.com/3424-1/"
+              }
+            ],
+            "links": [
+              {
+                "url": "https://github.com/sparklemotion/nokogiri/issues/1673"
+              }
+            ]}.to_json
       end
     end
 
