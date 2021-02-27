@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Gitlab::Graphql::Authorization' do
+RSpec.describe 'Gitlab::Graphql::Authorize' do
   include GraphqlHelpers
 
   let_it_be(:user) { create(:user) }
@@ -10,7 +10,11 @@ RSpec.describe 'Gitlab::Graphql::Authorization' do
   let(:permission_collection) { [:foo, :bar] }
   let(:test_object) { double(name: 'My name') }
   let(:query_string) { '{ item { name } }' }
-  let(:result) { execute_query(query_type)['data'] }
+  let(:result) do
+    schema = empty_schema
+    schema.use(Gitlab::Graphql::Authorize)
+    execute_query(query_type, schema)['data']
+  end
 
   subject { result['item'] }
 

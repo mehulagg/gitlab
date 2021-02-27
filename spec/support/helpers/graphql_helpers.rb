@@ -649,21 +649,22 @@ module GraphqlHelpers
     end
   end
 
-  def execute_query(query_type)
-    schema = Class.new(GraphQL::Schema) do
-      use GraphQL::Pagination::Connections
-      use Gitlab::Graphql::Pagination::Connections
-
-      lazy_resolve ::Gitlab::Graphql::Lazy, :force
-
-      query(query_type)
-    end
-
+  def execute_query(query_type, schema = empty_schema)
+    schema.query(query_type)
     schema.execute(
       query_string,
       context: { current_user: user },
       variables: {}
     )
+  end
+
+  def empty_schema
+    Class.new(GraphQL::Schema) do
+      use GraphQL::Pagination::Connections
+      use Gitlab::Graphql::Pagination::Connections
+
+      lazy_resolve ::Gitlab::Graphql::Lazy, :force
+    end
   end
 
   # A lookahead that selects everything
