@@ -131,9 +131,32 @@ The Pages daemon doesn't listen to the outside world.
      https: false
    ```
 
-1. Edit `/etc/default/gitlab` and set `gitlab_pages_enabled` to `true` in
-   order to enable the pages daemon. In `gitlab_pages_options` the
-   `-pages-domain` must match the `host` setting that you set above.
+1. If your system is using systemd as init, copy
+   `lib/support/systemd/gitlab-pages.service` to `/etc/systemd/system` and type
+
+   ```shell
+   systemctl daemon-reload
+   systemctl edit gitlab-pages.service
+   ```
+
+   In the opening editor write
+
+   ```ini
+   [Service]
+   Environment="GITLAB_PAGES_DOMAIN=example.io"
+   ```
+
+   setting `example.io` to match the `host` setting that you set above. Finally
+   enable the service
+
+   ```shell
+   systemctl enable gitlab-pages.service
+   ```
+
+   When using SysV init instead, edit `/etc/default/gitlab` and set
+   `gitlab_pages_enabled` to `true` in order to enable the pages daemon. In
+   `gitlab_pages_options` the `-pages-domain` must match the `host` setting that
+   you set above.
 
    ```ini
    gitlab_pages_enabled=true
