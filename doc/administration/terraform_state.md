@@ -77,8 +77,6 @@ Migrating to Object storage with a Rake task is not supported yet. See this issu
 While the Rake task is not available, a possible workaround for users running GitLab 13.6 or higher versions is given by the script below (through the GitLab Rails console):
 
 ```Ruby
-gitlab-rails c
-
 Terraform::StateUploader.alias_method(:upload, :model)
 
 Terraform::StateVersion.where(file_store: ::ObjectStorage::Store::LOCAL).find_each(batch_size: 10) do |terraform_state_version|
