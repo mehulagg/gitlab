@@ -70,11 +70,9 @@ The following settings are:
 | `remote_directory` | The bucket name where Terraform state files are stored | |
 | `connection` | Various connection options described below | |
 
-### Migrating to Object storage
+### Migrating to object storage in GitLab 13.8 and earlier
 
-Migrating to Object storage with a Rake task is not supported yet. See this issue for its [implementation process and status](https://gitlab.com/gitlab-org/gitlab/-/issues/247042).
-
-While the Rake task is not available, a possible workaround for users running GitLab 13.6 or higher versions is given by the script below (through the GitLab Rails console):
+A Rake task for migrating to object storage was implemented in GitLab 13.9 ([see the issue](https://gitlab.com/gitlab-org/gitlab/-/issues/247042)). For GitLab 13.8 and earlier, a possible workaround is given by the script below (through the GitLab [Rails console](./operations/rails_console.md)):
 
 ```Ruby
 Terraform::StateUploader.alias_method(:upload, :model)
