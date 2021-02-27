@@ -33,7 +33,10 @@ module GraphqlHelpers
     # All resolution goes through fields, so we need to create one here that
     # uses our resolver. Thankfully, apart from the field name, resolvers
     # contain all the configuration needed to define one.
-    field_options = resolver_class.field_options.merge(name: 'value')
+    field_options = resolver_class.field_options.merge(
+      owner: resolver_parent,
+      name: 'value'
+    )
     field = ::Types::BaseField.new(**field_options)
 
     if resolver_class <= ::Mutations::BaseMutation && !args.key?(:input)

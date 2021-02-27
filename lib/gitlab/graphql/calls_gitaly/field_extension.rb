@@ -79,7 +79,7 @@ module Gitlab
         end
 
         def field_name
-          "#{field.owner_type.graphql_name}.#{field.graphql_name}"
+          "#{field.owner.graphql_name}.#{field.graphql_name}"
         end
       end
     end
