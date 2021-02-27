@@ -54,8 +54,10 @@ module Types
     end
 
     def check_feature_flag(args)
-      args[:description] = feature_documentation_message(args[:feature_flag], args[:description]) if args[:feature_flag].present?
-      args.delete(:feature_flag)
+      ff = args.delete(:feature_flag)
+      return args unless ff.present?
+
+      args[:description] = feature_documentation_message(ff, args[:description])
 
       args
     end
@@ -78,7 +80,9 @@ module Types
       # items which can be loaded.
       proc do |ctx, args, child_complexity|
         # Resolvers may add extra complexity depending on used arguments
-        complexity = child_complexity + self.resolver&.try(:resolver_complexity, args, child_complexity: child_complexity).to_i
+        complexity = child_complexity + resolver&.try(
+          :resolver_complexity, args, child_complexity: child_complexity
+        ).to_i
         complexity += 1 if calls_gitaly?
         complexity += complexity * connection_complexity_multiplier(ctx, args)
 
@@ -93,7 +97,7 @@ module Types
 
       page_size   = field_defn.connection_max_page_size || ctx.schema.default_max_page_size
       limit_value = [args[:first], args[:last], page_size].compact.min
-      multiplier  = self.resolver&.try(:complexity_multiplier, args).to_f
+      multiplier  = resolver&.try(:complexity_multiplier, args).to_f
       limit_value * multiplier
     end
   end
