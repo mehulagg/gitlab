@@ -13,7 +13,6 @@ import {
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { isEqual } from 'lodash';
-import { returnToPreviousPageFactory } from 'ee/security_configuration/dast_profiles/redirect';
 import { initFormField } from 'ee/security_configuration/utils';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import { __, s__ } from '~/locale';
@@ -47,17 +46,6 @@ export default {
       type: String,
       required: true,
     },
-    profilesLibraryPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    onDemandScansPath: {
-      // Todo: It can be removed
-      type: String,
-      required: false,
-      default: '',
-    },
     profile: {
       type: Object,
       required: false,
@@ -88,11 +76,6 @@ export default {
       initialFormValues: serializeFormObject(form),
       loading: false,
       showAlert: false,
-      returnToPreviousPage: returnToPreviousPageFactory({
-        onDemandScansPath: this.onDemandScansPath,
-        profilesLibraryPath: this.profilesLibraryPath,
-        urlParamKey: 'scanner_profile_id',
-      }),
     };
   },
   spiderTimeoutRange: {
@@ -203,7 +186,6 @@ export default {
               [this.isEdit ? 'dastScannerProfileUpdate' : 'dastScannerProfileCreate']: {
                 id,
                 errors = [],
-                // ...profileFields
               },
             },
           }) => {
@@ -213,9 +195,8 @@ export default {
             } else {
               this.$emit('success', {
                 id,
-                ...serializeFormObject(this.form),
+                ...serializeFormObject(this.form), // TODO: #...
               });
-              // this.returnToPreviousPage(id);
             }
           },
         )
@@ -234,7 +215,6 @@ export default {
     },
     discard() {
       this.$emit('cancel');
-      // this.returnToPreviousPage();
     },
     showErrors(errors = []) {
       this.errors = errors;
