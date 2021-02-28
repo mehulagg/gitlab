@@ -1,0 +1,5 @@
+---
+title: Add last activity time column to seat usage table
+merge_request: 55321
+author:
+type: added
