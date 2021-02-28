@@ -41,7 +41,7 @@ To enable DAST, either:
 
 - Enable [Auto DAST](../../../topics/autodevops/stages.md#auto-dast), provided by
   [Auto DevOps](../../../topics/autodevops/index.md).
-- [Include the DAST template](#dast-ci-template) in your existing `.gitlab-ci.yml` file.
+- [Include the DAST template](#dast-cicd-template) in your existing `.gitlab-ci.yml` file.
 
 ### DAST CI/CD template
 
@@ -60,11 +60,7 @@ The following templates are available:
 
 Use the stable template unless you need a feature provided only in the latest template.
 
-<<<<<<< HEAD
-See the CI [docs](../../../development/cicd/templates.md#latest-version)
-=======
 See the CI/CD [documentation](../../../development/cicd/templates.md#latest-version)
->>>>>>> 8bdb9bb62573412814206bdbacc5879d73538935
 on template versioning for more information.
 
 #### Include the DAST template
@@ -133,13 +129,6 @@ Find the latest DAST versions on the [Releases](https://gitlab.com/gitlab-org/se
 
 ### DAST application analysis
 
-<<<<<<< HEAD
-By default, DAST executes [ZAP's Baseline Scan](https://www.zaproxy.org/docs/docker/baseline-scan/)
-and performs passive scanning only. It doesn't actively attack your application.
-However, DAST can be [configured](#full-scan)
-to also perform an *active scan*: attack your application and produce a more extensive security report.
-It can be very useful combined with [Review Apps](../../../ci/review_apps/index.md).
-=======
 DAST can analyze applications in two ways:
 
 - Passive scan only (DAST default). DAST executes
@@ -148,7 +137,6 @@ DAST can analyze applications in two ways:
 - Passive and active scan. DAST can be [configured](#full-scan) to also perform an active scan
   to attack your application and produce a more extensive security report. It can be very
   useful when combined with [Review Apps](../../../ci/review_apps/index.md).
->>>>>>> 8bdb9bb62573412814206bdbacc5879d73538935
 
 Note that a pipeline may consist of multiple jobs, including SAST and DAST scanning. If any job
 fails to finish for any reason, the security dashboard doesn't show DAST scanner output. For
