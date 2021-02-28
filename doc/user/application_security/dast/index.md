@@ -43,11 +43,7 @@ To enable DAST, either:
   [Auto DevOps](../../../topics/autodevops/index.md).
 - [Include the DAST template](#dast-ci-template) in your existing `.gitlab-ci.yml` file.
 
-<<<<<<< HEAD
-### DAST CI template
-=======
 ### DAST CI/CD template
->>>>>>> 8bdb9bb62573412814206bdbacc5879d73538935
 
 The DAST job is defined in a CI/CD template file you reference in your CI/CD configuration file. The
 template is included with GitLab. Updates to the template are provided with GitLab upgrades. You
