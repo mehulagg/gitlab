@@ -19,6 +19,7 @@ import {
   SEARCH_DEBOUNCE_MS,
   REMOVE_MEMBER_MODAL_ID,
 } from 'ee/billings/seat_usage/constants';
+import { getTimeago } from '~/lib/utils/datetime_utility';
 import { s__ } from '~/locale';
 import RemoveMemberModal from './remove_member_modal.vue';
 
@@ -108,6 +109,11 @@ export default {
         this.resetMembers();
       }
     },
+    timeAgo(time) {
+      const timeago = getTimeago();
+
+      return timeago.format(time);
+    },
   },
   i18n: {
     emailNotVisibleTooltipText: s__(
@@ -151,7 +157,6 @@ export default {
       :show-empty="true"
       data-testid="table"
       :empty-text="emptyText"
-      thead-class="gl-display-none"
     >
       <template #cell(user)="data">
         <div class="gl-display-flex">
@@ -177,6 +182,12 @@ export default {
           >
             {{ s__('Billing|Private') }}
           </span>
+        </div>
+      </template>
+
+      <template #cell(lastActivityTime)="data">
+        <div data-testid="last-activity-on">
+          <span>{{ timeAgo(data.item.user.lastActivityOn) }}</span>
         </div>
       </template>
 

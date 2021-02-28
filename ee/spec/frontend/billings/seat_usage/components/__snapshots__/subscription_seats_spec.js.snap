@@ -5,6 +5,7 @@ Array [
   Object {
     "dropdownExists": true,
     "email": "administrator@email.com",
+    "lastActivityOn": "just now",
     "tooltip": undefined,
     "user": Object {
       "avatarLabeled": Object {
@@ -21,6 +22,7 @@ Array [
   Object {
     "dropdownExists": true,
     "email": "agustin_walker@email.com",
+    "lastActivityOn": "just now",
     "tooltip": undefined,
     "user": Object {
       "avatarLabeled": Object {
@@ -37,6 +39,7 @@ Array [
   Object {
     "dropdownExists": true,
     "email": "Private",
+    "lastActivityOn": "just now",
     "tooltip": "An email address is only visible for users with public emails.",
     "user": Object {
       "avatarLabeled": Object {

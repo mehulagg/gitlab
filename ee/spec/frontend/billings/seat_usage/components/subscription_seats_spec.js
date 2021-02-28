@@ -93,6 +93,7 @@ describe('Subscription Seats', () => {
       user: serializeUser(rowWrapper),
       email: emailWrapper.text(),
       tooltip: emailWrapper.find('span').attributes('title'),
+      lastActivityOn: rowWrapper.find('[data-testid="last-activity-on"]').text(),
       dropdownExists: rowWrapper.find(GlDropdown).exists(),
     };
   };

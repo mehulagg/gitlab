@@ -16,6 +16,11 @@ export const FIELDS = [
     thClass: thWidthClass(40),
   },
   {
+    key: 'lastActivityTime',
+    label: __('Last activity'),
+    thClass: thWidthClass(40),
+  },
+  {
     key: 'actions',
     label: '',
     tdClass: 'text-right',
