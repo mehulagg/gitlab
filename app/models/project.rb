@@ -73,7 +73,6 @@ class Project < ApplicationRecord
   default_value_for :packages_enabled, true
   default_value_for :archived, false
   default_value_for :resolve_outdated_diff_discussions, false
-  default_value_for :container_registry_enabled, gitlab_config_features.container_registry
   default_value_for(:repository_storage) do
     Repository.pick_storage_shard
   end
@@ -94,6 +93,8 @@ class Project < ApplicationRecord
   before_validation :mark_remote_mirrors_for_removal, if: -> { RemoteMirror.table_exists? }
 
   before_save :ensure_runners_token
+
+  before_update :set_container_registry_access_level, if: :will_save_change_to_container_registry_enabled?
 
   after_save :update_project_statistics, if: :saved_change_to_namespace_id?
 
@@ -521,7 +522,17 @@ class Project < ApplicationRecord
   scope :include_project_feature, -> { includes(:project_feature) }
   scope :with_service, ->(service) { joins(service).eager_load(service) }
   scope :with_shared_runners, -> { where(shared_runners_enabled: true) }
-  scope :with_container_registry, -> { where(container_registry_enabled: true) }
+  scope :with_container_registry, -> {
+    # ProjectFeature.arel_table[:container_registry_access_level]
+    access_level_attribute = ProjectFeature.arel_table[ProjectFeature.access_level_attribute(:container_registry)]
+    enabled_feature = access_level_attribute.gt(ProjectFeature::DISABLED)
+
+    # coalesce("projects"."container_registry_enabled", "project_features"."container_registry_access_level" > 0)
+    coalesce = Arel::Nodes::NamedFunction.new("COALESCE", [Project.arel_table[:container_registry_enabled], enabled_feature])
+
+    with_project_feature.where(coalesce.eq(true).to_sql)
+  }
+
   scope :inside_path, ->(path) do
     # We need routes alias rs for JOIN so it does not conflict with
     # includes(:route) which we use in ProjectsFinder.
@@ -813,6 +824,29 @@ class Project < ApplicationRecord
     end
 
     super
+  end
+
+  def container_registry_enabled
+    value = read_attribute(:container_registry_enabled)
+    value unless value.nil?
+
+    !!project_feature&.container_registry_enabled?
+  end
+  alias_method :container_registry_enabled?, :container_registry_enabled
+
+  def set_container_registry_access_level
+    value = changes_to_save['container_registry_enabled'][1]
+
+    access_level =
+      if value
+        ProjectFeature::ENABLED
+      else
+        ProjectFeature::DISABLED
+      end
+
+    project_feature.update!(container_registry_access_level: access_level)
+
+    self.container_registry_enabled = nil
   end
 
   def project_setting

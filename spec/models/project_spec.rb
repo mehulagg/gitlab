@@ -2202,6 +2202,47 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#container_registry_enabled' do
+    let_it_be_with_reload(:project) { create(:project) }
+
+    context 'when the default is disabled' do
+      let(:project) { create(:project) }
+
+      it 'creates project with false container_registry_enabled' do
+        stub_config_setting(default_projects_features: { container_registry: false } )
+
+        expect(project.read_attribute(:container_registry_enabled)).to eq(nil)
+        expect(project.container_registry_enabled).to eq(false)
+        expect(project.container_registry_enabled?).to eq(false)
+      end
+    end
+
+    context 'when default is true' do
+      it 'creates project with true container_registry_enabled' do
+        expect(project.read_attribute(:container_registry_enabled)).to eq(nil)
+        expect(project.container_registry_enabled).to eq(true)
+        expect(project.container_registry_enabled?).to eq(true)
+      end
+    end
+  end
+
+  describe '#set_container_registry_access_level' do
+    let_it_be_with_reload(:project) { create(:project) }
+
+    it 'sets container_registry_enabled to nil when updating' do
+      # Simulate an existing project that has container_registry enabled
+      project.update_column(:container_registry_enabled, true)
+
+      expect(project.read_attribute(:container_registry_enabled)).to eq(true)
+      expect(project.container_registry_enabled).to eq(true)
+
+      project.update!(container_registry_enabled: false)
+
+      expect(project.read_attribute(:container_registry_enabled)).to eq(nil)
+      expect(project.container_registry_enabled).to eq(false)
+    end
+  end
+
   describe '#has_container_registry_tags?' do
     let(:project) { build(:project) }
 
