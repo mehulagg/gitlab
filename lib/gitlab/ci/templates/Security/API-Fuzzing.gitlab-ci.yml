@@ -47,6 +47,7 @@ apifuzzer_fuzz:
         FUZZAPI_PROJECT: $CI_PROJECT_PATH
         FUZZAPI_API: http://localhost:80
         FUZZAPI_NEW_REPORT: 1
+        FUZZAPI_LOG_SCANNER: gl-apifuzzing-api-scanner.log
         TZ: America/Los_Angeles
     allow_failure: true
     rules:
@@ -77,7 +78,7 @@ apifuzzer_fuzz:
         - mkdir -p $FUZZAPI_REPORT_ASSET_PATH
         #
         # Start API Security background process
-        - dotnet /peach/Peach.Web.dll &> gl-apifuzzing-api-scanner.log &
+        - dotnet /peach/Peach.Web.dll &> $FUZZAPI_LOG_SCANNER &
         - APISEC_PID=$!
         #
         # Start scanning
@@ -95,7 +96,7 @@ apifuzzer_fuzz:
         paths:
             - $FUZZAPI_REPORT_ASSET_PATH
             - $FUZZAPI_REPORT
-            - gl-apifuzzing-api-scanner.log
+            - $FUZZAPI_LOG_SCANNER
         reports:
             api_fuzzing: $FUZZAPI_REPORT
 
