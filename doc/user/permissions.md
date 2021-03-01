@@ -104,7 +104,8 @@ The following table depicts the various user permission levels in a project.
 | Publish [packages](packages/index.md)             |         |            | ✓           | ✓        | ✓      |
 | Create/edit/delete a Cleanup policy               |         |            | ✓           | ✓        | ✓      |
 | Upload [Design Management](project/issues/design_management.md) files |  |  | ✓        | ✓        | ✓      |
-| Create/edit/delete [Releases](project/releases/index.md)|   |            | ✓           | ✓        | ✓      |
+| Create/edit [Releases](project/releases/index.md)|   |            | ✓           | ✓        | ✓      |
+| Delete [Releases](project/releases/index.md)|   |            |            | ✓        | ✓      |
 | Create new branches                               |         |            | ✓           | ✓        | ✓      |
 | Push to non-protected branches                    |         |            | ✓           | ✓        | ✓      |
 | Force push to non-protected branches              |         |            | ✓           | ✓        | ✓      |

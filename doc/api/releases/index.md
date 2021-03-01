@@ -350,7 +350,7 @@ Example response:
 
 ## Create a release
 
-Create a Release. You need push access to the repository to create a Release.
+Create a Release. Developer level access to the project is required to create a Release.
 
 ```plaintext
 POST /projects/:id/releases
@@ -524,7 +524,7 @@ Example response:
 
 ## Update a release
 
-Update a Release.
+Update a Release. Developer level access to the project is required to update a Release.
 
 ```plaintext
 PUT /projects/:id/releases/:tag_name
@@ -631,7 +631,7 @@ Example response:
 
 ## Delete a Release
 
-Delete a Release. Deleting a Release doesn't delete the associated tag.
+Delete a Release. Deleting a Release doesn't delete the associated tag. Maintainer level access to the project is required to delete a Release.
 
 ```plaintext
 DELETE /projects/:id/releases/:tag_name
