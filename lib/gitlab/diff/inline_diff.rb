@@ -97,8 +97,8 @@ module Gitlab
         old_length = old_line.length + offset
         new_length = new_line.length + offset
 
-        old_diff_range = lcp..(old_length - lcs - 1)
-        new_diff_range = lcp..(new_length - lcs - 1)
+        old_diff_range = MarkerRange.new(lcp, (old_length - lcs - 1), mode: MarkerRange::DELETION)
+        new_diff_range = MarkerRange.new(lcp, (new_length - lcs - 1), mode: MarkerRange::ADDITION)
 
         old_diffs = [old_diff_range] if old_diff_range.begin <= old_diff_range.end
         new_diffs = [new_diff_range] if new_diff_range.begin <= new_diff_range.end
