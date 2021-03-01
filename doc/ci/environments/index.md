@@ -165,7 +165,7 @@ trace on the deployment job page:
 
 ![Deployment cluster information](../img/environments_deployment_cluster_v12_8.png)
 
-### Configuring incremental rollouts
+### Configure incremental rollouts
 
 Learn how to release production changes to only a portion of your Kubernetes pods with
 [incremental rollouts](../environments/incremental_rollouts.md).
@@ -192,7 +192,7 @@ If you change the name of an existing environment, the:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17066) in GitLab 12.9.
 
-In a job script, you can specify a static [environment URL](#using-the-environment-url).
+In a job script, you can specify a static environment URL.
 However, there may be times when you want a dynamic URL. For example,
 if you deploy a Review App to an external hosting
 service that generates a random URL per deployment, like `https://94dd65b.amazonaws.com/qa-lambda-1234567`,
@@ -247,7 +247,7 @@ You can also specify a static part of the URL at `environment:url:`, such as
 `https://$DYNAMIC_ENVIRONMENT_URL`. If the value of `DYNAMIC_ENVIRONMENT_URL` is
 `example.com`, the final result is `https://example.com`.
 
-The assigned URL for the `review/your-branch-name` environment is [visible in the UI](#using-the-environment-url).
+The assigned URL for the `review/your-branch-name` environment is visible in the UI.
 
 Note the following:
 
@@ -503,7 +503,7 @@ Environments can also be deleted by using the [Environments API](../../api/envir
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208655) in GitLab 13.2.
 
-By default, GitLab creates a [deployment](#view-the-deployment-history) every time a
+By default, GitLab creates a deployment every time a
 build with the specified environment runs. Newer deployments can also
 [cancel older ones](deployment_safety.md#skip-outdated-deployment-jobs).
 
@@ -528,15 +528,15 @@ build:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/7015) in GitLab 8.14.
 
-As documented in [Configuring dynamic environments](#configuring-dynamic-environments), you can
+As documented in [Create a dynamic environment](#create-a-dynamic-environment), you can
 prepend environment name with a word, followed by a `/`, and finally the branch
 name, which is automatically defined by the `CI_COMMIT_REF_NAME` predefined CI/CD variable.
 
 In short, environments that are named like `type/foo` are all presented under the same
 group, named `type`.
 
-In our [minimal example](#example-configuration), we named the environments `review/$CI_COMMIT_REF_NAME`
-where `$CI_COMMIT_REF_NAME` is the branch name. Here is a snippet of the example:
+If you name the environments `review/$CI_COMMIT_REF_NAME`
+where `$CI_COMMIT_REF_NAME` is the branch name:
 
 ```yaml
 deploy_review:
@@ -547,7 +547,7 @@ deploy_review:
     name: review/$CI_COMMIT_REF_NAME
 ```
 
-In this case, if you visit the **Environments** page and the branches
+If you visit the **Environments** page and the branches
 exist, you should see something like:
 
 ![Environment groups](../img/environments_dynamic_groups.png)
