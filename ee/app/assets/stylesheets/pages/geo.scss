@@ -28,3 +28,12 @@
     }
   }
 }
+
+.geo-node-header-grid-columns {
+  grid-template-columns: 1fr auto;
+  grid-gap: 1rem;
+
+  @include media-breakpoint-up(md) {
+    grid-template-columns: 3fr 1fr;
+  }
+}
