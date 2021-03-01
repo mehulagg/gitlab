@@ -1,4 +1,4 @@
-import { GlSprintf } from '@gitlab/ui';
+import { GlButton, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import PipelineEditorEmptyState from '~/pipeline_editor/components/ui/pipeline_editor_empty_state.vue';
 
@@ -16,6 +16,7 @@ describe('Pipeline editor empty state', () => {
 
   const findSvgImage = () => wrapper.find('img');
   const findTitle = () => wrapper.find('h1');
+  const findConfirmButton = () => wrapper.findComponent(GlButton);
   const findDescription = () => wrapper.findComponent(GlSprintf);
 
   beforeEach(() => {
@@ -26,17 +27,34 @@ describe('Pipeline editor empty state', () => {
     wrapper.destroy();
   });
 
-  it('renders an svg image', () => {
-    expect(findSvgImage().exists()).toBe(true);
+  describe('template', () => {
+    it('renders an svg image', () => {
+      expect(findSvgImage().exists()).toBe(true);
+    });
+
+    it('renders a title', () => {
+      expect(findTitle().exists()).toBe(true);
+      expect(findTitle().text()).toBe(wrapper.vm.$options.i18n.title);
+    });
+
+    it('renders a description', () => {
+      expect(findDescription().exists()).toBe(true);
+      expect(findDescription().html()).toContain(wrapper.vm.$options.i18n.body);
+    });
+
+    it('renders a CTA button', () => {
+      expect(findConfirmButton().exists()).toBe(true);
+      expect(findConfirmButton().text()).toBe(wrapper.vm.$options.i18n.btnText);
+    });
   });
 
-  it('renders a title', () => {
-    expect(findTitle().exists()).toBe(true);
-    expect(findTitle().text()).toBe(wrapper.vm.$options.i18n.title);
-  });
+  describe('actions', () => {
+    it('emits an event when clicking on the CTA', async () => {
+      const expectedEvent = 'createEmptyConfigFile';
+      expect(wrapper.emitted(expectedEvent)).toBeUndefined();
 
-  it('renders a description', () => {
-    expect(findDescription().exists()).toBe(true);
-    expect(findDescription().html()).toContain(wrapper.vm.$options.i18n.body);
+      await findConfirmButton().vm.$emit('click');
+      expect(wrapper.emitted(expectedEvent)).toHaveLength(1);
+    });
   });
 });

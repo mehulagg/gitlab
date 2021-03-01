@@ -21,7 +21,7 @@ export default {
   },
   inject: {
     ciConfigPath: {
-      default: '',
+      default: '.gitlab-ci.yml',
     },
     defaultBranch: {
       default: null,
@@ -37,6 +37,7 @@ export default {
       failureType: null,
       failureReasons: [],
       hasNoCiConfigFile: false,
+      isNewConfigFile: false,
       initialCiFileContent: '',
       lastCommittedContent: '',
       currentCiFileContent: '',
@@ -48,6 +49,11 @@ export default {
   apollo: {
     initialCiFileContent: {
       query: getBlobContent,
+      // If we are working off a new file, we don't want to fetch
+      // the base data as there is nothing to fetch.
+      skip({ isNewConfigFile }) {
+        return isNewConfigFile;
+      },
       variables() {
         return {
           projectPath: this.projectFullPath,
@@ -183,6 +189,10 @@ export default {
     resetContent() {
       this.currentCiFileContent = this.lastCommittedContent;
     },
+    setNewEmptyCiConfigFile() {
+      this.hasNoCiConfigFile = false;
+      this.isNewConfigFile = true;
+    },
     showErrorAlert({ type, reasons = [] }) {
       this.reportFailure(type, reasons);
     },
@@ -202,7 +212,10 @@ export default {
 <template>
   <div class="gl-mt-4 gl-relative">
     <gl-loading-icon v-if="isBlobContentLoading" size="lg" class="gl-m-3" />
-    <pipeline-editor-empty-state v-else-if="hasNoCiConfigFile" />
+    <pipeline-editor-empty-state
+      v-else-if="hasNoCiConfigFile"
+      @createEmptyConfigFile="setNewEmptyCiConfigFile"
+    />
     <div v-else>
       <gl-alert v-if="showSuccessAlert" :variant="success.variant" @dismiss="dismissSuccess">
         {{ success.text }}

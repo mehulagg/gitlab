@@ -8650,6 +8650,9 @@ msgstr ""
 msgid "Create new %{name} by email"
 msgstr ""
 
+msgid "Create new CI/CD pipeline"
+msgstr ""
+
 msgid "Create new Value Stream"
 msgstr ""
 
