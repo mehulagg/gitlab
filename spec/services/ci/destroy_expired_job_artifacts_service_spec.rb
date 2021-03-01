@@ -77,14 +77,6 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
           it 'does not remove the files' do
             expect { subject }.not_to change { artifact.file.exists? }
           end
-
-          it 'reports metrics for destroyed artifacts' do
-            counter = service.send(:destroyed_artifacts_counter)
-
-            expect(counter).to receive(:increment).with({}, 1).and_call_original
-
-            subject
-          end
         end
       end
 
