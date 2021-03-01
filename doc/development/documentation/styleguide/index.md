@@ -1608,8 +1608,11 @@ displayed for the page or feature.
 #### Version text in the **Version History**
 
 If all content in a section is related, add version text after the header
-for the section. The version information must be surrounded by blank lines, and
-each entry should be on its own line.
+for the section. The version information must:
+
+- Be surrounded by blank lines.
+- Start with `>`. For multiple entries, use `> -` for each line to create an unordered list.
+- Have each entry on its own line (long lines are OK).
 
 Add the version history information as a blockquote:
 
