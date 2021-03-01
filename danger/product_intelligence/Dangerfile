@@ -53,13 +53,13 @@ js_patterns = Regexp.union(
 )
 
 dictionary_pattern = Regexp.union(
-  'key_path:',
-  'description:',
-  'product_section:',
-  'product_stage:',
-  'product_group:',
-  'status:',
-  'tier:'
+  'key_path',
+  'description',
+  'product_section',
+  'product_stage',
+  'product_group',
+  'status',
+  'tier'
 )
 
 snowplow_changed_files = all_changed_files.select do |file|
@@ -70,7 +70,7 @@ snowplow_changed_files = all_changed_files.select do |file|
 end
 
 required_dictionary_update_changed_files = dictionary_changed_file.select do |file|
-  matching_files?(file, extension: '.yml', pattern: dictionary_pattern)
+  matching_files?(file, extension: '.md', pattern: dictionary_pattern)
 end
 
 matching_changed_files = usage_data_changed_files +
