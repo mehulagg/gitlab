@@ -146,13 +146,13 @@ module Gitlab
           #`repository.ls_files` ?
           # Maybe we can provide an option for pages to indicate not to load content.
           # in the meantime we stick to this
-          gollum_wiki.pages(
+          gollum_wiki.pages( # rubocop:disable Style/IdenticalConditionalBranches
             limit: pages_limit, sort: sort, direction_desc: direction_desc
           ).map do |gollum_page|
             new_page(gollum_page)
           end
         else
-          gollum_wiki.pages(
+          gollum_wiki.pages( # rubocop:disable Style/IdenticalConditionalBranches
             limit: pages_limit, sort: sort, direction_desc: direction_desc
           ).map do |gollum_page|
             new_page(gollum_page)
