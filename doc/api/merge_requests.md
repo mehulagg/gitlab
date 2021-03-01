@@ -44,7 +44,9 @@ is fetched from its project, `relative` format would be the same as `short` form
 diffs associated with the set of changes have the same size limitations applied as other diffs
 returned by the API or viewed via the UI. When these limits impact the results, the `overflow`
 field contains a value of `true`. Diff data without these limits applied can be retrieved by
-adding the `access_raw_diffs` parameter, but it is slower and more resource-intensive.
+adding the `access_raw_diffs` parameter, accessing diffs not from the DB but from Gitaly directly,
+which will generally be slower and more resource-intensive, but not subject to size limits
+placed on DB-backed diffs. [Limits inherent to Gitaly will still apply](../development/diffs.md#diff_limits).
 
 ## List merge requests
 
@@ -846,7 +848,7 @@ Parameters:
 |----------------------------------|----------------|----------|------------------------------------------------------------------------------------------------------------------|
 | `id`                             | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid`              | integer        | yes      | The internal ID of the merge request.                                                                            |
-| `access_raw_diffs`               | boolean        | no       | Retrieve change diffs without size limitations.                                                                  |
+| `access_raw_diffs`               | boolean        | no       | Retrieve change diffs via Gitaly.                                                                 |
 
 ```json
 {
