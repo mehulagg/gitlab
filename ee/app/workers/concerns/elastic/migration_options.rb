@@ -19,7 +19,19 @@ module Elastic
       self.class.get_pause_indexing
     end
 
+    def check_storage?
+      self.class.get_check_storage
+    end
+
     class_methods do
+      def check_storage!
+        class_attributes[:check_storage] = true
+      end
+
+      def get_check_storage
+        class_attributes[:check_storage]
+      end
+
       def batched!
         class_attributes[:batched] = true
       end
