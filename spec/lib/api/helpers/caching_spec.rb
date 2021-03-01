@@ -54,7 +54,7 @@ RSpec.describe API::Helpers::Caching do
         subject
       end
 
-      context "a cache context is supplied" do
+      context "when a cache context is supplied" do
         let(:cache_context) do
           -> (todo) { todo.project.cache_key }
         end
@@ -66,7 +66,7 @@ RSpec.describe API::Helpers::Caching do
         end
       end
 
-      context "expires_in is supplied" do
+      context "when expires_in is supplied" do
         it "sets the expiry when accessing the cache" do
           kwargs[:expires_in] = 7.days
 
@@ -77,7 +77,7 @@ RSpec.describe API::Helpers::Caching do
       end
     end
 
-    context "collection of objects" do
+    context "for a collection of objects" do
       let_it_be(:presentable) { Array.new(5).map { create(:todo, project: project) } }
 
       it { is_expected.to be_an(Gitlab::Json::PrecompiledJson) }
@@ -106,7 +106,7 @@ RSpec.describe API::Helpers::Caching do
         subject
       end
 
-      context "a cache context is supplied" do
+      context "when a cache context is supplied" do
         let(:cache_context) do
           -> (todo) { todo.project.cache_key }
         end
