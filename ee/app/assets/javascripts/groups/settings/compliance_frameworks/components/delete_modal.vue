@@ -37,13 +37,14 @@ export default {
       this.reportDeleting();
 
       try {
+        const { id } = this;
         const {
           data: { destroyComplianceFramework },
         } = await this.$apollo.mutate({
           mutation: deleteComplianceFrameworkMutation,
           variables: {
             input: {
-              id: this.id,
+              id,
             },
           },
           awaitRefetchQueries: true,
@@ -62,7 +63,7 @@ export default {
         if (error) {
           this.reportError(new Error(error));
         } else {
-          this.reportSuccess();
+          this.reportSuccess(id);
         }
       } catch (error) {
         this.reportError(error);
@@ -75,8 +76,8 @@ export default {
       Sentry.captureException(error);
       this.$emit('error');
     },
-    reportSuccess() {
-      this.$emit('delete');
+    reportSuccess(id) {
+      this.$emit('delete', id);
     },
     show() {
       this.$refs.modal.show();
