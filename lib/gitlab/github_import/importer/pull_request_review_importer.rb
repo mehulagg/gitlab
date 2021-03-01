@@ -76,6 +76,7 @@ module Gitlab
 
         def add_approval!(user_id)
           return unless review.review_type == 'APPROVED'
+          return if merge_request_approved_by?(user_id)
 
           add_approval_system_note!(user_id)
 
@@ -83,6 +84,10 @@ module Gitlab
             user_id: user_id,
             created_at: review.submitted_at
           )
+        end
+
+        def merge_request_approved_by?(user_id)
+          merge_request.approvals.exists?(user_id: user_id)
         end
 
         def add_approval_system_note!(user_id)

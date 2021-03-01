@@ -19,8 +19,10 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequestReviewImporter, :clean
       context 'when the review is "APPROVED"' do
         let(:review) { create_review(type: 'APPROVED', note: '') }
 
-        it 'creates a note for the review' do
-          expect { subject.execute }.to change(Note, :count)
+        it 'creates a note for the review and approves the Merge Request' do
+          expect { subject.execute }
+            .to change(Note, :count)
+            .and change(Approval, :count)
 
           last_note = merge_request.notes.last
           expect(last_note.note).to eq('approved this merge request')
@@ -30,6 +32,13 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequestReviewImporter, :clean
 
           expect(merge_request.approved_by_users.reload).to include(author)
           expect(merge_request.approvals.last.created_at).to eq(submitted_at)
+        end
+
+        it 'does nothing if the user already approved the merge request' do
+          create(:approval, merge_request: merge_request, user: author)
+
+          expect { subject.execute }
+            .not_to change(Approval, :count)
         end
       end
 
