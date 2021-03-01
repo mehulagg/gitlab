@@ -11,6 +11,9 @@
 # This option will take precedence over the global setting.
 module Gitlab
   class HTTPConnectionAdapter < HTTParty::ConnectionAdapter
+    extend ::Gitlab::Utils::Override
+
+    override :connection
     def connection
       begin
         @uri, hostname = Gitlab::UrlBlocker.validate!(uri, allow_local_network: allow_local_requests?,
@@ -18,6 +21,18 @@ module Gitlab
                                                            dns_rebind_protection: dns_rebind_protection?)
       rescue Gitlab::UrlBlocker::BlockedUrlError => e
         raise Gitlab::HTTP::BlockedUrlError, "URL '#{uri}' is blocked: #{e.message}"
+      end
+
+      if options.key?(:http_proxyaddr)
+        begin
+          @options[:http_proxyaddr], _ = Gitlab::UrlBlocker.validate!(options[:http_proxyaddr],
+                                                                      ports: options[:http_proxyport],
+                                                                      allow_local_network: allow_local_requests?,
+                                                                      allow_localhost: allow_local_requests?,
+                                                                      dns_rebind_protection: dns_rebind_protection?)
+        rescue Gitlab::UrlBlocker::BlockedUrlError => e
+          raise Gitlab::HTTP::BlockedUrlError, "URL '#{options[:http_proxyaddr]}' is blocked: #{e.message}"
+        end
       end
 
       super.tap do |http|
