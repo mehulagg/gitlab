@@ -77,13 +77,13 @@ export const updateSiteProfilesStatuses = ({ fullPath, normalizedTargetUrl, stat
       id: `DastSiteProfile:${id}`,
       fragment: gql`
         fragment profile on DastSiteProfile {
-          validationStatus
+          spiderTimeout
           __typename
         }
       `,
       data: {
-        validationStatus: status,
-        __typename: 'DastSiteProfile',
+        spiderTimeout: 55,
+        __typename: 'DastScannerProfile',
       },
     });
   });

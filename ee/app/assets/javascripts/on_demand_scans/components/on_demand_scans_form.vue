@@ -43,6 +43,7 @@ import {
 import ScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
 import SiteProfileSelector from './profile_selector/site_profile_selector.vue';
 import ProfileSelectorSummaryCell from './profile_selector/summary_cell.vue';
+import { updateProfile } from '../graphql/cache_utils';
 
 export const ON_DEMAND_SCANS_STORAGE_KEY = 'on-demand-scans-new-form';
 
@@ -329,6 +330,13 @@ export default {
       this.selectedSiteProfileId = this.selectedSiteProfileId ?? selectedSiteProfileId;
       this.selectedScannerProfileId = this.selectedScannerProfileId ?? selectedScannerProfileId;
     },
+    updateProfileData(profile) {
+      // updateProfile({
+      //   fullPath: this.projectPath,
+      //   profile,
+      //   store: this.$apollo.getClient(),
+      // });
+    },
   },
   ON_DEMAND_SCANS_STORAGE_KEY,
 };
@@ -435,6 +443,7 @@ export default {
         v-model="selectedScannerProfileId"
         class="gl-mb-5"
         :profiles="scannerProfiles"
+        @update-profile="updateProfileData"
       >
         <template v-if="selectedScannerProfile" #summary>
           <div class="row">

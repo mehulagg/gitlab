@@ -9,7 +9,7 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
-
+import { addOrUpdateProfile } from '../../graphql/cache_utils';
 export default {
   name: 'OnDemandScansProfileSelector',
   components: {
@@ -22,6 +22,11 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+  },
+  inject: {
+    projectPath: {
+      default: '',
+    },
   },
   props: {
     libraryPath: {
@@ -62,14 +67,32 @@ export default {
     filteredProfilesEmpty() {
       return this.filteredProfiles.length === 0;
     },
+    profileObject() {
+      return this.isNew ? {} : this.selectedProfile;
+    },
   },
   methods: {
-    onFormSuccess(profile) {
-      debugger;
-      this.profiles.push(profile);
+    onFormSuccess(updatedProfile) {
+      // only needed for new profiles
+      this.$emit('input', updatedProfile.id);
+      // this.$emit('update-profile', updatedProfile);
+      // updateProfile({
+      //   fullPath: this.projectPath,
+      //   profile: updatedProfile,
+      //   store: this.$apollo.getClient(),
+      // });
+
+      addOrUpdateProfile({
+        fullPath: this.projectPath,
+        profile: updatedProfile,
+        store: this.$apollo.getClient(),
+        isNew: this.isNew,
+      });
+      this.isNew = false;
       this.showForm = false;
     },
     onFormCancel() {
+      this.isNew = false;
       this.showForm = false;
     },
   },
@@ -152,8 +175,7 @@ export default {
         <slot
           v-if="showForm"
           name="profile-form"
-          :profile="selectedProfile"
-          :isNew="isNew"
+          :profile="profileObject"
           :onSuccess="onFormSuccess"
           :onCancel="onFormCancel"
         ></slot>

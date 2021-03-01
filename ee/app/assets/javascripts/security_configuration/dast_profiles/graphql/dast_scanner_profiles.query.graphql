@@ -13,7 +13,7 @@ query DastScannerProfiles(
       before: $before
       first: $first
       last: $last
-    ) {
+    ) @connection(key: "dastScannerProfiles") {
       pageInfo {
         ...PageInfo
       }
