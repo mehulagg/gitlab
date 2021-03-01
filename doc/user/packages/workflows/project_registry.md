@@ -77,6 +77,10 @@ depending on your final package recipe. For example:
 CONAN_LOGIN_USERNAME=<gitlab-username> CONAN_PASSWORD=<personal_access_token> conan upload MyPackage/1.0.0@foo+bar+my-proj/channel --all --remote=gitlab
 ```
 
+### Composer
+
+It is currently not possible to publish a Composer package to a project that is different from where its code resides. Once [this feature](https://gitlab.com/gitlab-org/gitlab/-/issues/250633) is implemented, it will be possible to do that for Composer packages. 
+
 ### All other package types
 
 [All package types supported by GitLab](../index.md) can be published in
