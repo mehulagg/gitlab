@@ -157,7 +157,7 @@ export default {
         this.$apollo.query({
           query: blobRawQuery,
           variables: {
-            path: `/${this.projectPath}/-/raw/${this.ref}/${this.path}?inline=false`,
+            path: `/${this.projectPath}/-/raw/${this.ref}/${this.path}`,
           },
         });
       }

@@ -24,6 +24,11 @@ export default {
       required: false,
       default: false,
     },
+    editing: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
   },
   data() {
     return {
@@ -38,6 +43,13 @@ export default {
   watch: {
     fileName(newVal) {
       this.editor.updateModelLanguage(newVal);
+    },
+    editing(newVal) {
+      this.editor.updateOptions({ readOnly: !newVal });
+
+      if (newVal) {
+        this.editor.focus();
+      }
     },
   },
   mounted() {

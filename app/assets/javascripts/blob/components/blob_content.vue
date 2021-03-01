@@ -31,6 +31,11 @@ export default {
       default: true,
       required: false,
     },
+    editing: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
     activeViewer: {
       type: Object,
       required: true,
@@ -72,6 +77,7 @@ export default {
         :content="content"
         :type="activeViewer.fileType"
         :file-name="path"
+        :editing="editing"
         data-qa-selector="file_content"
       />
     </template>

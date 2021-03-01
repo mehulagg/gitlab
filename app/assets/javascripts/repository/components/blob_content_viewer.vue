@@ -1,5 +1,5 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton } from '@gitlab/ui';
 
 import BlobContent from '~/blob/components/blob_content.vue';
 import BlobHeader from '~/blob/components/blob_header.vue';
@@ -20,7 +20,7 @@ const PAGE_SIZE = 100;
 export const INITIAL_FETCH_COUNT = LIMIT / PAGE_SIZE;
 
 export default {
-  components: { GlLoadingIcon, BlobContent, BlobHeader },
+  components: { GlLoadingIcon, GlButton, BlobContent, BlobHeader },
   mixins: [getRefMixin],
   apollo: {
     projectPath: {
@@ -53,6 +53,7 @@ export default {
       blobInfo: {},
       blobRaw: null,
       activeViewerType: RICH_BLOB_VIEWER,
+      editing: false,
       activeViewerMock: {
         fileType: 'text',
         tooLarge: false,
@@ -84,6 +85,9 @@ export default {
   methods: {
     switchViewer(newViewer) {
       this.activeViewerType = newViewer || SIMPLE_BLOB_VIEWER;
+    },
+    toggleEditMode() {
+      this.editing = !this.editing;
     },
     forceQuery() {
       this.$apollo.queries.blobContent.skip = false;
@@ -138,13 +142,23 @@ export default {
         <div
           class="file-actions gl-display-flex gl-align-items-center gl-flex-wrap gl-md-justify-content-end"
         >
+          <gl-button
+            v-if="!editing"
+            class="gl-ml-3"
+            category="secondary"
+            data-qa-selector="edit_button"
+            @click="toggleEditMode"
+            >{{ s__('Edit') }}</gl-button
+          >
+          <gl-button
+            v-if="editing"
+            class="gl-ml-3"
+            category="secondary"
+            data-qa-selector="cancel_edit_button"
+            @click="toggleEditMode"
+            >{{ s__('Cancel Edit') }}</gl-button
+          >
           <a
-            class="btn gl-button btn-confirm js-edit-blob gl-ml-3"
-            data-track-event="click_edit"
-            data-track-label="Edit"
-            href="/flightjs/Flight/-/edit/master/team.yml"
-            >Edit</a
-          ><a
             class="btn gl-button btn-confirm ide-edit-button gl-ml-3 btn-inverted"
             data-track-event="click_edit_ide"
             data-track-label="Web IDE"
@@ -228,7 +242,76 @@ export default {
         :blob="blobInfo"
         :active-viewer="activeViewerMock"
         :path="path"
+        :editing="editing"
       />
     </article>
+    <div v-if="editing" class="mt-4">
+      <div class="form-group row commit_message-group">
+        <label class="col-form-label col-sm-2" for="commit_message-faf541afec369ceb745508b074850cc8"
+          >Commit message
+        </label>
+        <div class="col-sm-10">
+          <div class="commit-message-container">
+            <div class="max-width-marker"></div>
+            <textarea
+              name="commit_message"
+              id="commit_message-faf541afec369ceb745508b074850cc8"
+              class="form-control gl-form-input js-commit-message"
+              placeholder="Update test-main.js"
+              required="required"
+              rows="3"
+            >
+Update test-main.js</textarea
+            >
+          </div>
+        </div>
+      </div>
+      <div class="form-group row branch">
+        <label class="col-form-label col-sm-2" for="branch_name">Target Branch</label>
+        <div class="col-sm-10">
+          <input
+            type="text"
+            name="branch_name"
+            id="branch_name"
+            value="master"
+            required="required"
+            class="form-control gl-form-input js-branch-name ref-name"
+          />
+          <div class="js-create-merge-request-container" style="display: none">
+            <div class="form-check gl-mt-3">
+              <input
+                type="checkbox"
+                name="create_merge_request"
+                id="create_merge_request-5baaaa619bfdc5d2ee28d3a1e5a45334"
+                value="1"
+                class="js-create-merge-request form-check-input"
+                checked="checked"
+              />
+              <label
+                class="form-check-label"
+                for="create_merge_request-5baaaa619bfdc5d2ee28d3a1e5a45334"
+                >Start a <strong>new merge request</strong> with these changes
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button
+          name="button"
+          type="submit"
+          id="commit-changes"
+          class="gl-button btn btn-success js-commit-button qa-commit-button"
+        >
+          Commit changes
+        </button>
+        <a
+          class="gl-button btn btn-default btn-cancel"
+          data-confirm="Leave edit mode? All unsaved changes will be lost."
+          href="/flightjs/Flight/-/blob/master/test/test-main.js"
+          >Cancel</a
+        >
+      </div>
+    </div>
   </div>
 </template>
