@@ -2,7 +2,6 @@
 import {
   GlDropdown,
   GlDropdownDivider,
-  GlDropdownSectionHeader,
   GlSearchBoxByType,
   GlSprintf,
   GlIcon,
@@ -27,7 +26,6 @@ export default {
   components: {
     GlDropdown,
     GlDropdownDivider,
-    GlDropdownSectionHeader,
     GlSearchBoxByType,
     GlSprintf,
     GlIcon,
