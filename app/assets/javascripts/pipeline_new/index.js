@@ -12,16 +12,17 @@ export default () => {
     refParam,
     varParam,
     fileParam,
-    branchRefs,
-    tagRefs,
+    // branchRefs,
+    // tagRefs,
+    refsEndpoint,
     settingsLink,
     maxWarnings,
   } = el?.dataset;
 
   const variableParams = JSON.parse(varParam);
   const fileParams = JSON.parse(fileParam);
-  const branches = formatRefs(JSON.parse(branchRefs), 'branch');
-  const tags = formatRefs(JSON.parse(tagRefs), 'tag');
+  // const branches = formatRefs(JSON.parse(branchRefs), 'branch');
+  // const tags = formatRefs(JSON.parse(tagRefs), 'tag');
 
   return new Vue({
     el,
@@ -35,8 +36,9 @@ export default () => {
           refParam,
           variableParams,
           fileParams,
-          branches,
-          tags,
+          // branches,
+          // tags,
+          refsEndpoint,
           settingsLink,
           maxWarnings: Number(maxWarnings),
         },

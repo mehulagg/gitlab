@@ -19,6 +19,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
 }));
 
+const refsEndpoint = '/root/project/refs';
 const pipelinesPath = '/root/project/-/pipelines';
 const configVariablesPath = '/root/project/-/pipelines/config_variables';
 const postResponse = { id: 1 };
@@ -53,8 +54,9 @@ describe('Pipeline New Form', () => {
         projectId: mockProjectId,
         pipelinesPath,
         configVariablesPath,
-        branches: mockBranches,
-        tags: mockTags,
+        // branches: mockBranches,
+        // tags: mockTags,
+        refsEndpoint,
         defaultBranch: 'master',
         settingsLink: '',
         maxWarnings: 25,
@@ -88,13 +90,13 @@ describe('Pipeline New Form', () => {
     it('displays dropdown with all branches and tags', () => {
       const refLength = mockBranches.length + mockTags.length;
 
-      createComponent();
+      createComponent('', {}, mount);
 
       expect(findDropdownItems()).toHaveLength(refLength);
     });
 
     it('when user enters search term the list is filtered', () => {
-      createComponent('master');
+      createComponent('master', {}, mount);
 
       expect(findDropdownItems()).toHaveLength(1);
       expect(findDropdownItems().at(0).text()).toBe('master');

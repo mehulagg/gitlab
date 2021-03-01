@@ -9,14 +9,11 @@ import {
   GlFormSelect,
   GlFormTextarea,
   GlLink,
-  GlDropdown,
-  GlDropdownItem,
-  GlDropdownSectionHeader,
-  GlSearchBoxByType,
   GlSprintf,
   GlLoadingIcon,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
+
 import * as Sentry from '@sentry/browser';
 import { uniqueId } from 'lodash';
 import Vue from 'vue';
@@ -26,6 +23,7 @@ import httpStatusCodes from '~/lib/utils/http_status';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { s__, __, n__ } from '~/locale';
 import { VARIABLE_TYPE, FILE_TYPE, CONFIG_VARIABLES_TIMEOUT } from '../constants';
+import PipelineRefsDropdown from './pipeline_refs_dropodown.vue';
 
 export default {
   typeOptions: [
@@ -52,12 +50,9 @@ export default {
     GlFormSelect,
     GlFormTextarea,
     GlLink,
-    GlDropdown,
-    GlDropdownItem,
-    GlDropdownSectionHeader,
-    GlSearchBoxByType,
     GlSprintf,
     GlLoadingIcon,
+    PipelineRefsDropdown,
   },
   directives: { SafeHtml },
   props: {
@@ -77,12 +72,8 @@ export default {
       type: String,
       required: true,
     },
-    branches: {
-      type: Array,
-      required: true,
-    },
-    tags: {
-      type: Array,
+    refsEndpoint: {
+      type: String,
       required: true,
     },
     settingsLink: {
@@ -111,7 +102,6 @@ export default {
   },
   data() {
     return {
-      searchTerm: '',
       refValue: {
         shortName: this.refParam,
       },
@@ -125,22 +115,6 @@ export default {
     };
   },
   computed: {
-    lowerCasedSearchTerm() {
-      return this.searchTerm.toLowerCase();
-    },
-    filteredBranches() {
-      return this.branches.filter((branch) =>
-        branch.shortName.toLowerCase().includes(this.lowerCasedSearchTerm),
-      );
-    },
-    filteredTags() {
-      return this.tags.filter((tag) =>
-        tag.shortName.toLowerCase().includes(this.lowerCasedSearchTerm),
-      );
-    },
-    hasTags() {
-      return this.tags.length > 0;
-    },
     overMaxWarningsLimit() {
       return this.totalWarnings > this.maxWarnings;
     },
@@ -380,31 +354,11 @@ export default {
       </details>
     </gl-alert>
     <gl-form-group :label="s__('Pipeline|Run for branch name or tag')">
-      <gl-dropdown :text="refShortName" block>
-        <gl-search-box-by-type v-model.trim="searchTerm" :placeholder="__('Search refs')" />
-        <gl-dropdown-section-header>{{ __('Branches') }}</gl-dropdown-section-header>
-        <gl-dropdown-item
-          v-for="branch in filteredBranches"
-          :key="branch.fullName"
-          class="gl-font-monospace"
-          is-check-item
-          :is-checked="isSelected(branch)"
-          @click="setRefSelected(branch)"
-        >
-          {{ branch.shortName }}
-        </gl-dropdown-item>
-        <gl-dropdown-section-header v-if="hasTags">{{ __('Tags') }}</gl-dropdown-section-header>
-        <gl-dropdown-item
-          v-for="tag in filteredTags"
-          :key="tag.fullName"
-          class="gl-font-monospace"
-          is-check-item
-          :is-checked="isSelected(tag)"
-          @click="setRefSelected(tag)"
-        >
-          {{ tag.shortName }}
-        </gl-dropdown-item>
-      </gl-dropdown>
+      <pipeline-refs-dropdown
+        :value="refValue"
+        :refs-endpoint="refsEndpoint"
+        @input="setRefSelected"
+      />
     </gl-form-group>
 
     <gl-loading-icon v-if="isLoading" class="gl-mb-5" size="lg" />
