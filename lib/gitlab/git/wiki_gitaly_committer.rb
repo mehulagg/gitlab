@@ -42,7 +42,7 @@ module Gitlab
 
         path = @wiki.page_file_name(name, format)
 
-        dir  = '/' if dir.strip.empty?
+        dir = '/' if dir.strip.empty?
 
         fullpath = ::File.join(*[dir, path])
         fullpath = fullpath[1..-1] if fullpath =~ /^\//
@@ -81,8 +81,6 @@ module Gitlab
         @callbacks.each do |cb|
           cb.call(self, new_sha)
         end
-        puts wiki.repo.instance_variable_get(:@repo).commit(new_sha)
-        puts "EL NEW SHAS ES #{new_sha}"
         new_sha
       end
 

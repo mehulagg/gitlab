@@ -137,7 +137,7 @@ module Gitlab
           gollum_wiki.update_page(page, page.name, format, content, committer: committer)
           gollum_wiki.rename_page(page, title, committer: committer)
         end
-        puts "ACABO UPDATE*****"
+
         # wrapped_gitaly_errors do
         #   gitaly_update_page(page_path, title, format, content, commit_details)
         # end
@@ -180,7 +180,6 @@ module Gitlab
 
       # Supported
       def page(title:, version: nil, dir: nil)
-        puts "**** ENTRO EN PAGGEGEGE #{version}"
         if version
           version = Gitlab::Git::Commit.find(@repository, version)&.id
           return unless version
