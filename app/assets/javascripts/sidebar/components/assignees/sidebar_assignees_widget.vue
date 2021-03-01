@@ -112,7 +112,7 @@ export default {
         const searchResults = data.issuable?.users?.nodes.map(({ user }) => user) || [];
         const mergedSearchResults = this.participants.reduce((acc, current) => {
           if (
-            !acc.includes(current) &&
+            !acc.some((user) => current.username === user.username) &&
             (current.name.includes(this.search) || current.username.includes(this.search))
           ) {
             acc.push(current);
