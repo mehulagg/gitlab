@@ -58,6 +58,7 @@ the `author` field. GitLab team members **should not**.
 - Any change that adds new usage data metrics and changes that needs to be documented in Product Intelligence [Event Dictionary](https://about.gitlab.com/handbook/product/product-intelligence-guide/#event-dictionary) **should** have a changelog entry.
 - A change that adds snowplow events **should** have a changelog entry -
 - A change that [removes a feature flag](feature_flags/development.md) **must** have a changelog entry.
+- Any change that introduces a [Global Search migration](https://docs.gitlab.com/ee/development/elasticsearch.html#creating-a-new-global-search-migration) **must** have a changelog entry.
 - A fix for a regression introduced and then fixed in the same release (i.e.,
   fixing a bug introduced during a monthly release candidate) **should not**
   have a changelog entry.
