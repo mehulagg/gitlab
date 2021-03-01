@@ -7,18 +7,6 @@ type: reference
 
 # Using Git submodules with GitLab CI
 
-> **Notes:**
->
-> - GitLab 8.12 introduced a new [CI job permissions model](../user/project/new_ci_build_permissions_model.md) and you
->   are encouraged to upgrade your GitLab instance if you haven't done already.
->   If you are **not** using GitLab 8.12 or higher, you would need to work your way
->   around submodules in order to access the sources of e.g., `gitlab.com/group/project`
->   with the use of [SSH keys](ssh_keys/index.md).
-> - With GitLab 8.12 onward, your permissions are used to evaluate what a CI job
->   can access. More information about how this system works can be found in the
->   [Jobs permissions model](../user/permissions.md#job-permissions).
-> - The HTTP(S) Git protocol [must be enabled](../user/admin_area/settings/visibility_and_access_controls.md#enabled-git-access-protocols) in your GitLab instance.
-
 ## Configuring the `.gitmodules` file
 
 If dealing with [Git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules), your project probably has a file
