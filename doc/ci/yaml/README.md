@@ -2225,6 +2225,53 @@ in the same parent-child pipeline hierarchy of the given pipeline.
 The `pipeline` attribute does not accept the current pipeline ID (`$CI_PIPELINE_ID`).
 To download artifacts from a job in the current pipeline, use the basic form of [`needs`](#artifact-downloads-with-needs).
 
+#### Optional requirement with `needs`
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30680) in GitLab 13.10.
+
+Use `optional: false` (default) or `optional: true` to control if the needed job is required
+to persist in the pipeline.
+
+In this example, when the branch is not "master", the `build` job is not added to the pipeline.
+However, the `rspec` job runs because its requirement to the `build` is optional.
+
+```yaml
+build:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master"
+
+rspec:
+  stage: test
+  needs:
+    - job: build
+      optional: true
+```
+
+NOTE:
+If `optional: true` was not used, the pipeline would not be created with an error
+`'rspec' job needs 'build' job, but it was not added to the pipeline`.
+
+In this example, when the `build1` job is not added to the pipeline,
+the `rspec` job starts to run without waiting other jobs in the `build` stage finishes.
+It is the same behavior as `needs: []`.
+
+```yaml
+build1:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master"
+
+build2:
+  stage: build
+
+rspec:
+  stage: test
+  needs:
+    - job: build1
+      optional: true
+```
+
 ### `tags`
 
 Use `tags` to select a specific runner from the list of all runners that are
