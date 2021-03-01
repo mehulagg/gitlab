@@ -159,6 +159,8 @@ class Projects::CommitController < Projects::ApplicationController
     @notes_count = commit.notes.count
 
     @environment = EnvironmentsFinder.new(@project, current_user, commit: @commit, find_latest: true).execute.last
+
+    @last_pipeline_represented_poc = PipelineSerializer.new(project: @project, current_user: @current_user).represent(@commit.last_pipeline)
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
