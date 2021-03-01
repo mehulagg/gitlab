@@ -132,6 +132,12 @@ class Wiki
     end
   end
 
+  # SUpported. I think there is something wrong with search_files_by_name
+  # because it doesn't seem to return the files
+  def search(query)
+    wiki.search(query)
+  end
+
   def sidebar_entries(limit: Gitlab::WikiPages::MAX_SIDEBAR_PAGES, **options)
     pages = list_pages(**options.merge(limit: limit + 1))
     limited = pages.size > limit
@@ -187,10 +193,32 @@ class Wiki
   def delete_page(page, message = nil)
     return unless page
 
-    wiki.delete_page(page.path, commit_details(:deleted, message, page.title))
-    after_wiki_activity
+    result = begin
+      commit_message = message.presence || default_message(:deleted, page.title)
 
-    true
+      repository.delete_file(
+        user,
+        page.path,
+        branch_name: repository.root_ref,
+        message: commit_message,
+        author_email: user.email,
+        author_name: user.name)
+
+      true
+    rescue Gitlab::Git::Index::IndexError,
+           Gitlab::Git::CommitError,
+           Gitlab::Git::PreReceiveError,
+           Gitlab::Git::CommandError,
+           ArgumentError
+
+      false
+    end
+
+    # wiki.delete_page(page.path, commit_details(:deleted, message, page.title))
+
+    result.tap do |res|
+      after_wiki_activity if res
+    end
   end
 
   def page_title_and_dir(title)
@@ -271,7 +299,8 @@ class Wiki
     commit_message = message.presence || default_message(action, title)
     git_user = Gitlab::Git::User.from_gitlab(user)
 
-    Gitlab::Git::Wiki::CommitDetails.new(user.id,
+    Gitlab::Git::Wiki::CommitDetails.new(user,
+                                         user.id,
                                          git_user.username,
                                          git_user.name,
                                          git_user.email,

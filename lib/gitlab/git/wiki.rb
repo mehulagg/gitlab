@@ -123,14 +123,9 @@ module Gitlab
       end
 
       def delete_page(page_path, commit_details)
-        assert_type!(commit_details, CommitDetails)
-
-        with_committer_with_hooks(commit_details) do |committer|
-          gollum_wiki.delete_page(gollum_page_by_path(page_path), committer: committer)
+        wrapped_gitaly_errors do
+          gitaly_delete_page(page_path, commit_details)
         end
-        # wrapped_gitaly_errors do
-        #   gitaly_delete_page(page_path, commit_details)
-        # end
       end
 
       def update_page(page_path, title, format, content, commit_details)
@@ -139,12 +134,31 @@ module Gitlab
         end
       end
 
+      # Almost supported
+      # list_pages with content works (only sort by created_at is not supported)
+      # When we don't want to load the content, we can perform a
+      # `repository.ls_files` but we would need to support order and limit options
+      # in Gitaly
       def list_pages(limit: 0, sort: nil, direction_desc: false, load_content: false)
-        gollum_wiki.pages(
-          limit: limit, sort: sort, direction_desc: direction_desc
-        ).map do |gollum_page|
-          new_page(gollum_page)
+        pages_limit = limit == 0 ? nil : limit
+
+        if load_content == false
+          #`repository.ls_files` ?
+          # Maybe we can provide an option for pages to indicate not to load content.
+          # in the meantime we stick to this
+          gollum_wiki.pages(
+            limit: pages_limit, sort: sort, direction_desc: direction_desc
+          ).map do |gollum_page|
+            new_page(gollum_page)
+          end
+        else
+          gollum_wiki.pages(
+            limit: pages_limit, sort: sort, direction_desc: direction_desc
+          ).map do |gollum_page|
+            new_page(gollum_page)
+          end
         end
+
         # wrapped_gitaly_errors do
         #   gitaly_list_pages(
         #     limit: limit,
@@ -155,6 +169,7 @@ module Gitlab
         # end
       end
 
+      # Supported
       def page(title:, version: nil, dir: nil)
         if version
           version = Gitlab::Git::Commit.find(@repository, version)&.id
@@ -170,6 +185,7 @@ module Gitlab
         # end
       end
 
+      # Supported
       def file(name, version)
         version ||= self.class.default_ref
         gollum_file = gollum_wiki.file(name, version)
@@ -181,6 +197,7 @@ module Gitlab
         # end
       end
 
+      # Supported
       # options:
       #  :page     - The Integer page number.
       #  :per_page - The number of items per page.
@@ -202,6 +219,17 @@ module Gitlab
         # versions[0..slice_bound]
       end
 
+      # Supported
+      # New method
+      # Public: Search all pages for this wiki.
+      #
+      # query - The string to search for
+      #
+      # Returns an Array with Objects of page name and count of matches
+      def search(query)
+        gollum_wiki.search(query)
+      end
+
       def count_page_versions(page_path)
         @repository.count_commits(ref: 'HEAD', path: page_path)
       end
@@ -214,9 +242,12 @@ module Gitlab
         # @gollum_wiki ||= Gollum::Wiki.new(@repository.path)
 
         @gollum_wiki ||= begin
-          access = Gollum::GitAccess.new(@repository.relative_path, nil, nil, { storage: @repository.storage, gl_repository: @repository.gl_repository, gl_project_path: @repository.gl_project_path })
-          Gollum::Wiki.new(access)
+          Gollum::Wiki.new(gollum_wiki_access)
         end
+      end
+
+      def gollum_wiki_access
+        @gollum_wiki_access ||= Gollum::GitAccess.new(@repository.relative_path, nil, nil, { storage: @repository.storage, gl_repository: @repository.gl_repository, gl_project_path: @repository.gl_project_path })
       end
 
       def new_page(gollum_page)
