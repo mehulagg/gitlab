@@ -337,38 +337,36 @@ attribute.
 
 ### Examples
 
-For these examples we use the project ID 42, and assume the project is hosted on
-GitLab.com. The example API token we use is `token`. We use
-[curl](https://curl.se/) to perform the HTTP requests.
+For these examples we assume the following when using [curl](https://curl.se/) to
+perform the HTTP requests:
 
-Let's start with a basic example:
+- **Project ID**: 42
+- **Location**: hosted on GitLab.com
+- **Example API token**: `token`
+
+This command generates a changelog for version `1.0.0`. The range of commits included
+starts with the tag of the last release. The range ends with the last commit on the target
+branch, which defaults to the project's default branch. If the last tag is `v0.9.0`, and
+the default branch is `main`, the range of commits included in this example is `v0.9.0..main`:
 
 ```shell
 curl --header "PRIVATE-TOKEN: token" --data "version=1.0.0" "https://gitlab.com/api/v4/projects/42/repository/changelog"
 ```
 
-This generates a changelog for version `1.0.0`. The start of the range of
-commits to include is the tag of the last release. The end of the range is the
-last commit on the target branch, which defaults to the project's default
-branch. So if the last tag is `v0.9.0`, and the default branch is `main`, this
-means the range of commits is `v0.9.0..main`.
-
-If you want to generate the data on a different branch, you can do so as
-follows:
+To generate the data on a different branch, specify the `branch` parameter. This
+command generates data from the `foo` branch:
 
 ```shell
 curl --header "PRIVATE-TOKEN: token" --data "version=1.0.0&branch=foo" "https://gitlab.com/api/v4/projects/42/repository/changelog"
 ```
 
-This generates the data on the `foo` branch.
-
-A different trailer to use is specified as follows:
+To use a different trailer, use the `trailer` parameter:
 
 ```shell
 curl --header "PRIVATE-TOKEN: token" --data "version=1.0.0&trailer=Type" "https://gitlab.com/api/v4/projects/42/repository/changelog"
 ```
 
-Or perhaps you want to store the results in a different file:
+To store the results in a different file, use the `file` parameter:
 
 ```shell
 curl --header "PRIVATE-TOKEN: token" --data "version=1.0.0&file=NEWS" "https://gitlab.com/api/v4/projects/42/repository/changelog"
