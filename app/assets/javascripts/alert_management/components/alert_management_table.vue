@@ -221,8 +221,11 @@ export default {
     hasAssignees(assignees) {
       return Boolean(assignees.nodes?.length);
     },
-    getIssueLink({ issue: { iid } }) {
-      return joinPaths('/', this.projectPath, '-', 'issues', iid);
+    getIssueMeta({ issue: { iid, state } }) {
+      return {
+        state: state === 'closed' ? `(${state})` : '',
+        link: joinPaths('/', this.projectPath, '-', 'issues', iid),
+      };
     },
     tbodyTrClass(item) {
       return {
@@ -343,8 +346,14 @@ export default {
           </template>
 
           <template #cell(issue)="{ item }">
-            <gl-link v-if="item.issue" data-testid="issueField" :href="getIssueLink(item)">
-              #{{ item.issue.iid }} ({{ item.issue.state }})
+            <gl-link
+              v-if="item.issue"
+              v-gl-tooltip
+              :title="item.issue.title"
+              data-testid="issueField"
+              :href="getIssueMeta(item).link"
+            >
+              #{{ item.issue.iid }} {{ getIssueMeta(item).state }}
             </gl-link>
             <div v-else data-testid="issueField">{{ s__('AlertManagement|None') }}</div>
           </template>

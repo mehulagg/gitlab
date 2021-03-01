@@ -2,6 +2,7 @@ import { GlTable, GlAlert, GlLoadingIcon, GlDropdown, GlIcon, GlAvatar } from '@
 import { mount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import mockAlerts from 'jest/vue_shared/alert_details/mocks/alerts.json';
 import AlertManagementTable from '~/alert_management/components/alert_management_table.vue';
@@ -63,6 +64,9 @@ describe('AlertManagementTable', () => {
           },
         },
         stubs,
+        directives: {
+          GlTooltip: createMockDirective(),
+        },
       }),
     );
   }
@@ -242,9 +246,14 @@ describe('AlertManagementTable', () => {
         expect(findIssueFields().at(0).text()).toBe('None');
       });
 
-      it('renders a link when one exists with the issue state', () => {
-        expect(findIssueFields().at(1).text()).toBe(`#1 (closed)`);
-        expect(findIssueFields().at(1).attributes('href')).toBe('/gitlab-org/gitlab/-/issues/1');
+      it('renders a link when one exists with the issue state and title tooltip', () => {
+        const issueField = findIssueFields().at(1);
+        const tooltip = getBinding(issueField.element, 'gl-tooltip');
+
+        expect(issueField.text()).toBe(`#1 (closed)`);
+        expect(issueField.attributes('href')).toBe('/gitlab-org/gitlab/-/issues/1');
+        expect(issueField.attributes('title')).toBe('My test issue');
+        expect(tooltip).not.toBe(undefined);
       });
     });
 
