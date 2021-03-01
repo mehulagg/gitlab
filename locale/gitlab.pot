@@ -22186,6 +22186,9 @@ msgstr ""
 msgid "Pipeline|Merge train pipeline"
 msgstr ""
 
+msgid "Pipeline|Merge train pipeline jobs can not be retried"
+msgstr ""
+
 msgid "Pipeline|Merged result pipeline"
 msgstr ""
 

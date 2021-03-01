@@ -2,6 +2,7 @@
 import { isNumber } from 'lodash';
 import { sanitize } from '~/lib/dompurify';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import MergeRequestStore from '../stores/mr_widget_store';
 import ArtifactsApp from './artifacts_list_app.vue';
 import MrWidgetContainer from './mr_widget_container.vue';
 import MrWidgetPipeline from './mr_widget_pipeline.vue';
@@ -68,6 +69,15 @@ export default {
     },
     showMergeTrainPositionIndicator() {
       return isNumber(this.mr.mergeTrainIndex);
+    },
+    preferredAutoMergeStrategy() {
+      if (this.glFeatures.mergeRequestWidgetGraphql) {
+        return MergeRequestStore.getPreferredAutoMergeStrategy(
+          this.state.availableAutoMergeStrategies,
+        );
+      }
+
+      return this.mr.preferredAutoMergeStrategy;
     },
   },
 };
