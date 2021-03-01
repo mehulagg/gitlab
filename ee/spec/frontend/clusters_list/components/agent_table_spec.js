@@ -6,10 +6,10 @@ const propsData = {
   agents: [
     {
       name: 'agent-1',
-      webPath: '/agent-1',
       configFolder: {
         webPath: '/agent/full/path',
       },
+      webPath: '/agent-1',
     },
     {
       name: 'agent-2',
