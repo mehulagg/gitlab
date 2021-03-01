@@ -161,7 +161,7 @@ For example, if you use `"PRIVATE-TOKEN: ${PRIVATE_TOKEN}"` as part of a cURL co
 pages-job:
   stage: deploy
   script:
-    - curl -i -f -L -H 'PRIVATE-TOKEN: ${PRIVATE_TOKEN}' -o swagger.json "https://example.com/namespace/project/-/jobs/artifacts/develop/raw/swagger.json?job=doc"
+    - curl --header 'PRIVATE-TOKEN: ${PRIVATE_TOKEN}' "https://gitlab.example.com/api/v4/projects"
 ```
 
 The YAML parser thinks the `:` defines a YAML keyword, and outputs the
@@ -174,5 +174,5 @@ in single quotes. You might need to change existing single quotes (`'`) into dou
 pages-job:
   stage: deploy
   script:
-    - 'curl -i -f -L -H "PRIVATE-TOKEN: ${PRIVATE_TOKEN}" -o swagger.json "https://example.com/namespace/project/-/jobs/artifacts/develop/raw/swagger.json?job=doc"'
+    - 'curl --header "PRIVATE-TOKEN: ${PRIVATE_TOKEN}" "https://gitlab.example.com/api/v4/projects"'
 ```
