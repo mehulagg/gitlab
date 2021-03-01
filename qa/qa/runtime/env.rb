@@ -110,9 +110,9 @@ module QA
         ENV['QA_LOG_PATH'] || $stdout
       end
 
-      # set to 'false' to have Chrome run visibly instead of headless
-      def chrome_headless?
-        enabled?(ENV['CHROME_HEADLESS'])
+      # set to 'false' to have the browser run visibly instead of headless
+      def webdriver_headless?
+        enabled?(ENV['WEBDRIVER_HEADLESS'])
       end
 
       # set to 'true' to have Chrome use a fixed profile directory
