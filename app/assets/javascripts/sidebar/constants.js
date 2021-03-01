@@ -1,5 +1,6 @@
 import { IssuableType } from '~/issue_show/constants';
 import issueConfidentialQuery from '~/sidebar/queries/issue_confidential.query.graphql';
+import issueReferenceQuery from '~/sidebar/queries/issue_reference.query.graphql';
 import updateIssueConfidentialMutation from '~/sidebar/queries/update_issue_confidential.mutation.graphql';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/get_issue_participants.query.graphql';
 import getMergeRequestParticipants from '~/vue_shared/components/sidebar/queries/get_mr_participants.query.graphql';
@@ -21,5 +22,11 @@ export const confidentialityQueries = {
   [IssuableType.Issue]: {
     query: issueConfidentialQuery,
     mutation: updateIssueConfidentialMutation,
+  },
+};
+
+export const referenceQueries = {
+  [IssuableType.Issue]: {
+    query: issueReferenceQuery,
   },
 };

@@ -10,6 +10,7 @@ import {
 } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
+import SidebarReferenceWidget from '~/sidebar/components/reference/sidebar_reference_widget.vue';
 import { apolloProvider } from '~/sidebar/graphql';
 import Translate from '../vue_shared/translate';
 import SidebarAssignees from './components/assignees/sidebar_assignees.vue';
@@ -154,6 +155,36 @@ function mountConfidentialComponent() {
 
     render: (createElement) =>
       createElement('sidebar-confidentiality-widget', {
+        props: {
+          issuableType:
+            isInIssuePage() || isInIncidentPage() || isInDesignPage() ? 'issue' : 'merge_request',
+        },
+      }),
+  });
+}
+
+function mountReferenceComponent() {
+  const el = document.getElementById('js-reference-entry-point');
+  if (!el) {
+    return;
+  }
+
+  const { fullPath, iid } = getSidebarOptions();
+
+  // eslint-disable-next-line no-new
+  new Vue({
+    el,
+    apolloProvider,
+    components: {
+      SidebarReferenceWidget,
+    },
+    provide: {
+      iid: String(iid),
+      fullPath,
+    },
+
+    render: (createElement) =>
+      createElement('sidebar-reference-widget', {
         props: {
           issuableType:
             isInIssuePage() || isInIncidentPage() || isInDesignPage() ? 'issue' : 'merge_request',
@@ -307,6 +338,7 @@ export function mountSidebar(mediator) {
   mountAssigneesComponent(mediator);
   mountReviewersComponent(mediator);
   mountConfidentialComponent(mediator);
+  mountReferenceComponent(mediator);
   mountLockComponent();
   mountParticipantsComponent(mediator);
   mountSubscriptionsComponent(mediator);

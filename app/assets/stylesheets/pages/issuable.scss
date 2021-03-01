@@ -229,7 +229,7 @@
   .sidebar-mr-source-branch {
     color: inherit;
 
-    span {
+    > span {
       white-space: nowrap;
       width: 85%;
       overflow: hidden;
@@ -259,6 +259,7 @@
 
   .btn-clipboard:hover {
     color: $gl-text-color;
+    box-shadow: none !important;
   }
 
   .issuable-sidebar {
