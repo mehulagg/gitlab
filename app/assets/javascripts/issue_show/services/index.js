@@ -5,7 +5,7 @@ export default class Service {
   constructor(endpoint) {
     this.endpoint = `${endpoint}.json`;
     this.realtimeEndpoint = `${endpoint}/realtime_changes`;
-    registerCaptchaModalInterceptor();
+    registerCaptchaModalInterceptor(axios);
   }
 
   getData() {

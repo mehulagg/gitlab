@@ -1,14 +1,13 @@
-import axios from '../lib/utils/axios_utils';
-import waitForCaptchaToBeSolved from './wait_for_captcha_to_be_solved';
+import waitForCaptchaToBeSolved from '~/captcha/wait_for_captcha_to_be_solved';
 
-export default function registerCaptchaModalInterceptor() {
+export default function registerCaptchaModalInterceptor(axios) {
   return axios.interceptors.response.use(
     (response) => {
       return response;
     },
     (err) => {
-      const { data } = err.response;
-      if (data.needs_captcha_response) {
+      if (err?.response?.data?.needs_captcha_response) {
+        const { data } = err.response;
         const captchaSiteKey = data.captcha_site_key;
         const spamLogId = data.spam_log_id;
         return waitForCaptchaToBeSolved(captchaSiteKey).then((captchaResponse) => {
@@ -16,7 +15,7 @@ export default function registerCaptchaModalInterceptor() {
           const originalData = JSON.parse(errConfig.data);
           return axios({
             method: errConfig.method,
-            url: err.config.url,
+            url: errConfig.url,
             data: {
               ...originalData,
               captcha_response: captchaResponse,
