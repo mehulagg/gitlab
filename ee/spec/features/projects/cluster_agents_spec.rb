@@ -3,8 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe 'ClusterAgents', :js do
-  let_it_be(:agent) { create(:cluster_agent) }
+  let_it_be(:token) { create(:cluster_agent_token, description: 'feature test token')}
 
+  let(:agent) { token.agent }
   let(:project) { agent.project }
   let(:user) { project.creator }
 
@@ -25,6 +26,17 @@ RSpec.describe 'ClusterAgents', :js do
       it 'does not display agent information', :aggregate_failures do
         expect(page).to have_content('Integrate with a cluster certificate')
         expect(page).not_to have_content('GitLab Agent managed clusters')
+      end
+    end
+
+    context 'when user visits agents show page' do
+      before do
+        visit project_cluster_agent_path(project, agent.name)
+      end
+
+      it 'displays not found' do
+        expect(page).to have_title('Not Found')
+        expect(page).to have_content('Page Not Found')
       end
     end
   end
@@ -49,15 +61,28 @@ RSpec.describe 'ClusterAgents', :js do
       end
     end
 
-    context 'when user has an agent and visits the index page' do
-      before do
-        visit project_clusters_path(project)
+    context 'when user has an agent' do
+      context 'when visiting the index page' do
+        before do
+          visit project_clusters_path(project)
+        end
+
+        it 'displays a table with agent', :aggregate_failures do
+          click_link 'GitLab Agent managed clusters'
+          expect(page).to have_content(agent.name)
+          expect(page).to have_selector('[data-testid="cluster-agent-list-table"] tbody tr', count: 1)
+        end
       end
 
-      it 'displays a table with agent', :aggregate_failures do
-        click_link 'GitLab Agent managed clusters'
-        expect(page).to have_content(agent.name)
-        expect(page).to have_selector('[data-testid="cluster-agent-list-table"] tbody tr', count: 1)
+      context 'when visiting the show page' do
+        before do
+          visit project_cluster_agent_path(project, agent.name)
+        end
+
+        it 'displays agent and token information', :aggregate_failures do
+          expect(page).to have_content(agent.name)
+          expect(page).to have_content(token.description)
+        end
       end
     end
   end
