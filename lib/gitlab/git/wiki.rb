@@ -143,7 +143,7 @@ module Gitlab
         pages_limit = limit == 0 ? nil : limit
 
         if load_content == false
-          #`repository.ls_files` ?
+          # `repository.ls_files` ?
           # Maybe we can provide an option for pages to indicate not to load content.
           # in the meantime we stick to this
           gollum_wiki.pages( # rubocop:disable Style/IdenticalConditionalBranches
