@@ -1067,7 +1067,7 @@ CI/CD > Container Registry > Authorization token duration (minutes)**.
 
 [Registry relies on GitLab to validate credentials](https://docs.gitlab.com/omnibus/architecture/registry/). If the registry fails to authenticate valid login attempts, you'll see the following error message:
 
-```
+```log
 # docker login gitlab.company.com:4567
 Username: user
 Password: 
@@ -1076,7 +1076,7 @@ Error response from daemon: login attempt to https://gitlab.company.com:4567/v2/
 
 And more specifically, in the `/var/log/gitlab/registry/current` log file:
 
-```
+```log
 level=info msg="token signed by untrusted key with ID: "TOKE:NL6Q:7PW6:EXAM:PLET:OKEN:BG27:RCIB:D2S3:EXAM:PLET:OKEN"" 
 level=warning msg="error authorizing context: invalid token" go.version=go1.12.7 http.request.host="gitlab.company.com:4567" http.request.id=74613829-2655-4f96-8991-1c9fe33869b8 http.request.method=GET http.request.remoteaddr=10.72.11.20 http.request.uri="/v2/" http.request.useragent="docker/19.03.2 go/go1.12.8 git-commit/6a30dfc kernel/3.10.0-693.2.2.el7.x86_64 os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.2 \(linux\))" 
 ```
@@ -1085,8 +1085,9 @@ This means that the contents of the certificate key pair used to encrypt the com
 
 Check which files are in use:
 
-- grep -A6 'auth:' /var/opt/gitlab/registry/config.yml
-```
+- grep -A6 'auth:' `/var/opt/gitlab/registry/config.yml`
+
+```yaml
 ## Container Registry Certificate
    auth:
      token:
@@ -1097,8 +1098,9 @@ Check which files are in use:
        autoredirect: false
 ```
 
-- grep -A9 'Container Registry' /var/opt/gitlab/gitlab-rails/etc/gitlab.yml
-```
+- grep -A9 'Container Registry' `/var/opt/gitlab/gitlab-rails/etc/gitlab.yml`
+
+```yaml
 ## Container Registry Key
    registry:
      enabled: true
@@ -1112,7 +1114,8 @@ Check which files are in use:
 ```
 
 In the example above, the output of these commands should match:
-```
+
+```bash
 openssl x509 -noout -modulus -in /var/opt/gitlab/registry/gitlab-registry.crt | openssl sha256
 openssl rsa -noout -modulus -in /var/opt/gitlab/gitlab-rails/etc/gitlab-registry.key | openssl sha256
 ```
