@@ -13666,6 +13666,9 @@ msgstr ""
 msgid "Geo|Next sync scheduled at"
 msgstr ""
 
+msgid "Geo|Node Details"
+msgstr ""
+
 msgid "Geo|Node name can't be blank"
 msgstr ""
 
@@ -14987,6 +14990,9 @@ msgid "Health"
 msgstr ""
 
 msgid "Health Check"
+msgstr ""
+
+msgid "Health Status"
 msgstr ""
 
 msgid "Health information can be retrieved from the following endpoints. More information is available"
@@ -17551,6 +17557,9 @@ msgid "Last Pipeline"
 msgstr ""
 
 msgid "Last Seen"
+msgstr ""
+
+msgid "Last Updated"
 msgstr ""
 
 msgid "Last Used"
