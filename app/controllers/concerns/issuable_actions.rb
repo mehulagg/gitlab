@@ -17,7 +17,12 @@ module IssuableActions
     respond_to do |format|
       format.html do
         @issuable_sidebar = serializer.represent(issuable, serializer: 'sidebar') # rubocop:disable Gitlab/ModuleWithInstanceVariables
-        render 'show'
+
+        if should_redirect_on_show?
+          project_quality_test_case_path(project, test_case) # Maybe move this away from here?
+        else
+          render 'show'
+        end
       end
 
       format.json do
@@ -260,6 +265,10 @@ module IssuableActions
     }.tap { |new_params| new_params[:project] = project if respond_to?(:project, true) }
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
+
+  def should_redirect_on_show?
+    false
+  end
 end
 
 IssuableActions.prepend_if_ee('EE::IssuableActions')
