@@ -14992,9 +14992,6 @@ msgstr ""
 msgid "Health Check"
 msgstr ""
 
-msgid "Health Status"
-msgstr ""
-
 msgid "Health information can be retrieved from the following endpoints. More information is available"
 msgstr ""
 
@@ -17557,9 +17554,6 @@ msgid "Last Pipeline"
 msgstr ""
 
 msgid "Last Seen"
-msgstr ""
-
-msgid "Last Updated"
 msgstr ""
 
 msgid "Last Used"
@@ -21915,6 +21909,9 @@ msgid "Pause Elasticsearch indexing"
 msgstr ""
 
 msgid "Pause replication"
+msgstr ""
+
+msgid "Paused"
 msgstr ""
 
 msgid "Paused runners don't accept new jobs"

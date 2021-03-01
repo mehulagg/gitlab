@@ -1,11 +1,17 @@
 <script>
 import { GlIcon, GlBadge } from '@gitlab/ui';
+import GeoNodeActions from './geo_node_actions.vue';
+import GeoNodeHealthStatus from './geo_node_health_status.vue';
+import GeoNodeLastUpdated from './geo_node_last_updated.vue';
 
 export default {
   name: 'GeoNodeHeader',
   components: {
     GlIcon,
     GlBadge,
+    GeoNodeHealthStatus,
+    GeoNodeLastUpdated,
+    GeoNodeActions,
   },
   props: {
     node: {
@@ -46,13 +52,16 @@ export default {
           <h4 class="gl-font-lg">{{ node.name }}</h4>
         </div>
         <div class="gl-display-flex gl-align-items-center gl-flex-fill-2">
-          <span>{{ __('Health Status') }}</span>
-          <span class="gl-ml-2">{{ __('Last Updated') }}</span>
+          <geo-node-health-status :status="node.healthStatus" />
+          <geo-node-last-updated
+            class="gl-ml-2"
+            :status-check-timestamp="node.lastSuccessfulStatusCheckTimestamp * 1000"
+          />
         </div>
       </div>
     </div>
     <div class="gl-display-flex gl-align-items-center gl-justify-content-end">
-      <span>{{ __('Actions') }}</span>
+      <geo-node-actions :primary="node.primary" />
     </div>
   </div>
 </template>
