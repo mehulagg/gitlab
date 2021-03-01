@@ -41,8 +41,8 @@ On your profile page, you can see the following information:
 - Personal projects: your personal projects (respecting the project's visibility level)
 - Starred projects: projects you starred
 - Snippets: your personal code [snippets](../snippets.md#personal-snippets)
-- Followers: people [following](../user/#user-activity) you
-- Following: people you are [following](../user/#user-activity)
+- Followers: people [following](../#user-activity) you
+- Following: people you are [following](../#user-activity)
 
 Profile page with active Following view:
 
