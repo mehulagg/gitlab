@@ -1,0 +1,5 @@
+---
+title: Make the requires_python attribute optional when publishing PyPI packages
+merge_request: 55435
+author:
+type: other
