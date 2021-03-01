@@ -8,7 +8,7 @@ import { joinPaths } from '~/lib/utils/url_utility';
 import Tracking from '~/tracking';
 import AlertDetails from '~/vue_shared/alert_details/components/alert_details.vue';
 import AlertSummaryRow from '~/vue_shared/alert_details/components/alert_summary_row.vue';
-import { SEVERITY_LEVELS } from '~/vue_shared/alert_details/constants';
+import { SEVERITY_LEVELS, ISSUES_INCIDENT_PATH } from '~/vue_shared/alert_details/constants';
 import createIssueMutation from '~/vue_shared/alert_details/graphql/mutations/alert_issue_create.mutation.graphql';
 import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import mockAlerts from './mocks/alerts.json';
@@ -198,7 +198,9 @@ describe('AlertDetails', () => {
         });
 
         expect(findViewIncidentBtn().exists()).toBe(true);
-        expect(findViewIncidentBtn().attributes('href')).toBe(joinPaths(projectIssuesPath, iid));
+        expect(findViewIncidentBtn().attributes('href')).toBe(
+          joinPaths(projectIssuesPath, ISSUES_INCIDENT_PATH, iid),
+        );
         expect(findCreateIncidentBtn().exists()).toBe(false);
       });
 

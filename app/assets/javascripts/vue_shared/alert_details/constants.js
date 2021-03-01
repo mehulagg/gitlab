@@ -29,3 +29,5 @@ export const PAGE_CONFIG = {
     TITLE: 'THREAT_MONITORING',
   },
 };
+
+export const ISSUES_INCIDENT_PATH = 'incident';

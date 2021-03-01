@@ -21,7 +21,7 @@ import Tracking from '~/tracking';
 import initUserPopovers from '~/user_popovers';
 import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import { SEVERITY_LEVELS } from '../constants';
+import { SEVERITY_LEVELS, ISSUES_INCIDENT_PATH } from '../constants';
 import createIssueMutation from '../graphql/mutations/alert_issue_create.mutation.graphql';
 import toggleSidebarStatusMutation from '../graphql/mutations/alert_sidebar_status.mutation.graphql';
 import alertQuery from '../graphql/queries/alert_details.query.graphql';
@@ -222,7 +222,7 @@ export default {
         });
     },
     incidentPath(issueId) {
-      return joinPaths(this.projectIssuesPath, issueId);
+      return joinPaths(this.projectIssuesPath, ISSUES_INCIDENT_PATH, issueId);
     },
     trackPageViews() {
       const { category, action } = this.trackAlertsDetailsViewsOptions;
