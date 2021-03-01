@@ -56,6 +56,10 @@ module EE
               description: 'Find iterations.',
               resolver: ::Resolvers::IterationsResolver
 
+        field :iterations_cadences, ::Types::Iterations::CadenceType.connection_type, null: true,
+              description: 'Find iterations cadences.',
+              resolver: ::Resolvers::Iterations::CadencesResolver
+
         field :dast_profiles,
               ::Types::Dast::ProfileType.connection_type,
               null: true,
