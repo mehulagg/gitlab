@@ -27,7 +27,7 @@ module Gitlab
           # ignore highlighting for "match" lines
           next diff_line if diff_line.meta?
 
-          rich_line = highlight_line(diff_line) || ERB::Util.html_escape(diff_line.text)
+          rich_line = apply_syntax_highlight(diff_line)
 
           if line_inline_diffs = inline_diffs[i]
             begin
@@ -48,41 +48,18 @@ module Gitlab
 
       private
 
-      def highlight_line(diff_line)
+      def apply_syntax_highlight(diff_line)
+        highlight_syntax(diff_line) || ERB::Util.html_escape(diff_line.text)
+      end
+
+      def highlight_syntax(diff_line)
         return unless diff_file && diff_file.diff_refs
 
-        rich_line =
-          if diff_line.unchanged? || diff_line.added?
-            new_lines[diff_line.new_pos - 1]&.html_safe
-          elsif diff_line.removed?
-            old_lines[diff_line.old_pos - 1]&.html_safe
-          end
-
-        # Only update text if line is found. This will prevent
-        # issues with submodules given the line only exists in diff content.
-        if rich_line
-          line_prefix = diff_line.text =~ /\A(.)/ ? Regexp.last_match(1) : ' '
-          "#{line_prefix}#{rich_line}".html_safe
-        end
+        syntax_highlight.highlight(diff_line)
       end
 
       def inline_diffs
         @inline_diffs ||= InlineDiff.for_lines(@raw_lines, project: project)
-      end
-
-      def old_lines
-        @old_lines ||= highlighted_blob_lines(diff_file.old_blob)
-      end
-
-      def new_lines
-        @new_lines ||= highlighted_blob_lines(diff_file.new_blob)
-      end
-
-      def highlighted_blob_lines(blob)
-        return [] unless blob
-
-        blob.load_all_data!
-        blob.present.highlight.lines
       end
     end
   end
