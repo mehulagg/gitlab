@@ -337,17 +337,22 @@ attribute.
 
 ### Examples
 
-For these examples we assume the following when using [curl](https://curl.se/) to
-perform the HTTP requests:
+These examples use [cURL](https://curl.se/) to perform HTTP requests.
+The example commands use these values:
 
 - **Project ID**: 42
 - **Location**: hosted on GitLab.com
 - **Example API token**: `token`
 
-This command generates a changelog for version `1.0.0`. The range of commits included
-starts with the tag of the last release. The range ends with the last commit on the target
-branch, which defaults to the project's default branch. If the last tag is `v0.9.0`, and
-the default branch is `main`, the range of commits included in this example is `v0.9.0..main`:
+This command generates a changelog for version `1.0.0`.
+
+The commit range:
+
+- Starts with the tag of the last release.
+- Ends with the last commit on the target branch. The default target branch is the project's default branch.
+
+If the last tag is `v0.9.0` and the default branch is `main`, the range of commits
+included in this example is `v0.9.0..main`:
 
 ```shell
 curl --header "PRIVATE-TOKEN: token" --data "version=1.0.0" "https://gitlab.com/api/v4/projects/42/repository/changelog"
