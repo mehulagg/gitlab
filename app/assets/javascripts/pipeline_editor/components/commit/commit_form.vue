@@ -21,10 +21,9 @@ export default {
     GlSprintf,
   },
   props: {
-    defaultBranch: {
+    currentBranch: {
       type: String,
-      required: false,
-      default: '',
+      required: true,
     },
     defaultMessage: {
       type: String,
@@ -40,13 +39,13 @@ export default {
   data() {
     return {
       message: this.defaultMessage,
-      branch: this.defaultBranch,
+      branch: this.currentBranch,
       openMergeRequest: false,
     };
   },
   computed: {
-    isDefaultBranch() {
-      return this.branch === this.defaultBranch;
+    isCurrentBranch() {
+      return this.branch === this.currentBranch;
     },
     submitDisabled() {
       return !(this.message && this.branch);
@@ -105,7 +104,7 @@ export default {
           required
         />
         <gl-form-checkbox
-          v-if="!isDefaultBranch"
+          v-if="!isCurrentBranch"
           v-model="openMergeRequest"
           data-testid="new-mr-checkbox"
           class="gl-mt-3"

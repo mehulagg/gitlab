@@ -1,11 +1,13 @@
 import { GlAlert, GlButton, GlLoadingIcon, GlTabs } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
+import VueRouter from 'vue-router';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import httpStatusCodes from '~/lib/utils/http_status';
 import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
 import TextEditor from '~/pipeline_editor/components/editor/text_editor.vue';
+import createRouter from '~/pipeline_editor/router';
 
 import { COMMIT_SUCCESS, COMMIT_FAILURE, LOAD_FAILURE_UNKNOWN } from '~/pipeline_editor/constants';
 import getCiConfigData from '~/pipeline_editor/graphql/queries/ci_config.graphql';
@@ -21,6 +23,7 @@ import {
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
+localVue.use(VueRouter);
 
 const MockEditorLite = {
   template: '<div/>',
@@ -34,14 +37,17 @@ const mockProvide = {
 
 describe('Pipeline editor app component', () => {
   let wrapper;
+  let router;
 
   let mockApollo;
   let mockBlobContentData;
   let mockCiConfigData;
 
   const createComponent = ({ blobLoading = false, options = {} } = {}) => {
+    router = createRouter();
     wrapper = shallowMount(PipelineEditorApp, {
       provide: mockProvide,
+      router,
       stubs: {
         GlTabs,
         GlButton,

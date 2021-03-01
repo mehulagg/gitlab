@@ -19,6 +19,10 @@ export default {
       type: String,
       required: true,
     },
+    currentBranch: {
+      type: String,
+      required: true,
+    },
     isCiConfigDataLoading: {
       type: Boolean,
       required: true,
@@ -55,6 +59,11 @@ export default {
       v-on="$listeners"
       @set-current-tab="setCurrentTab"
     />
-    <commit-section v-if="showCommitForm" :ci-file-content="ciFileContent" v-on="$listeners" />
+    <commit-section
+      v-if="showCommitForm"
+      :ci-file-content="ciFileContent"
+      :current-branch="currentBranch"
+      v-on="$listeners"
+    />
   </div>
 </template>

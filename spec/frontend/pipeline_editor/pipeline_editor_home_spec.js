@@ -7,7 +7,7 @@ import PipelineEditorTabs from '~/pipeline_editor/components/pipeline_editor_tab
 import { MERGED_TAB, VISUALIZE_TAB } from '~/pipeline_editor/constants';
 import PipelineEditorHome from '~/pipeline_editor/pipeline_editor_home.vue';
 
-import { mockLintResponse, mockCiYml } from './mock_data';
+import { mockDefaultBranch, mockLintResponse, mockCiYml } from './mock_data';
 
 describe('Pipeline editor home wrapper', () => {
   let wrapper;
@@ -17,6 +17,7 @@ describe('Pipeline editor home wrapper', () => {
       propsData: {
         ciConfigData: mockLintResponse,
         ciFileContent: mockCiYml,
+        currentBranch: mockDefaultBranch,
         isCiConfigDataLoading: false,
         ...props,
       },

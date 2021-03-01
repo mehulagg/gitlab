@@ -44,7 +44,10 @@ describe('Pipeline Editor | Commit section', () => {
   let wrapper;
   let mockMutate;
 
-  const defaultProps = { ciFileContent: mockCiYml };
+  const defaultProps = {
+    ciFileContent: mockCiYml,
+    currentBranch: mockDefaultBranch,
+  };
 
   const createComponent = ({ props = {}, options = {}, provide = {} } = {}) => {
     mockMutate = jest.fn().mockResolvedValue({

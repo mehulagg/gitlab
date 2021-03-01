@@ -37,6 +37,7 @@ export default {
   data() {
     return {
       ciConfigData: {},
+      currentBranch: this.$route.query?.branch_name || this.defaultBranch,
       // Success and failure state
       failureType: null,
       failureReasons: [],
@@ -55,7 +56,7 @@ export default {
         return {
           projectPath: this.projectFullPath,
           path: this.ciConfigPath,
-          ref: this.defaultBranch,
+          ref: this.currentBranch,
         };
       },
       update(data) {
@@ -232,6 +233,7 @@ export default {
         :is-ci-config-data-loading="isCiConfigDataLoading"
         :ci-config-data="ciConfigData"
         :ci-file-content="currentCiFileContent"
+        :current-branch="currentBranch"
         @commit="updateOnCommit"
         @resetContent="resetContent"
         @showError="showErrorAlert"

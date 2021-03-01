@@ -13,6 +13,7 @@ describe('Pipeline Editor | Commit Form', () => {
       propsData: {
         defaultMessage: mockCommitMessage,
         defaultBranch: mockDefaultBranch,
+        currentBranch: mockDefaultBranch,
         ...props,
       },
 

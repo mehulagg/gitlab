@@ -21,9 +21,13 @@ export default {
   components: {
     CommitForm,
   },
-  inject: ['projectFullPath', 'ciConfigPath', 'defaultBranch', 'newMergeRequestPath'],
+  inject: ['projectFullPath', 'ciConfigPath', 'newMergeRequestPath'],
   props: {
     ciFileContent: {
+      type: String,
+      required: true,
+    },
+    currentBranch: {
       type: String,
       required: true,
     },
@@ -49,7 +53,7 @@ export default {
       const url = mergeUrlParams(
         {
           [MR_SOURCE_BRANCH]: sourceBranch,
-          [MR_TARGET_BRANCH]: this.defaultBranch,
+          [MR_TARGET_BRANCH]: this.currentBranch,
         },
         this.newMergeRequestPath,
       );
@@ -68,7 +72,7 @@ export default {
           variables: {
             projectPath: this.projectFullPath,
             branch,
-            startBranch: this.defaultBranch,
+            startBranch: this.currentBranch,
             message,
             filePath: this.ciConfigPath,
             content: this.ciFileContent,
@@ -105,7 +109,7 @@ export default {
 
 <template>
   <commit-form
-    :default-branch="defaultBranch"
+    :current-branch="currentBranch"
     :default-message="defaultCommitMessage"
     :is-saving="isSaving"
     @cancel="onCommitCancel"

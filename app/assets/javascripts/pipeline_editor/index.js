@@ -6,6 +6,7 @@ import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
 import { resolvers } from './graphql/resolvers';
 import typeDefs from './graphql/typedefs.graphql';
 import PipelineEditorApp from './pipeline_editor_app.vue';
+import createRouter from './router';
 
 export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
   // Prevent issues loading syntax validation workers
@@ -45,9 +46,12 @@ export const initPipelineEditor = (selector = '#js-pipeline-editor') => {
     },
   });
 
+  const router = createRouter();
+
   return new Vue({
     el,
     apolloProvider,
+    router,
     provide: {
       ciConfigPath,
       defaultBranch,
