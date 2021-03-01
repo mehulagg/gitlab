@@ -13581,6 +13581,9 @@ msgstr ""
 msgid "Geo|Next sync scheduled at"
 msgstr ""
 
+msgid "Geo|Node Details"
+msgstr ""
+
 msgid "Geo|Node name can't be blank"
 msgstr ""
 
@@ -21785,6 +21788,9 @@ msgid "Pause Elasticsearch indexing"
 msgstr ""
 
 msgid "Pause replication"
+msgstr ""
+
+msgid "Paused"
 msgstr ""
 
 msgid "Paused runners don't accept new jobs"
