@@ -26,293 +26,341 @@ in [Removed Items](../removed_items.md).
 
 <!-- vale gitlab.Spelling = NO -->
 
-## Queries
+## Query Type
 
 Queries are used to get the resources, filter or query them.
 
 For more information, visit [Queries and Mutations](https://graphql.org/learn/queries/).
 
-### CiApplicationSettings
+### ciApplicationSettings
 
 CI related settings that apply to the entire instance.
 
-### CiConfig
+### ciConfig
 
 Get linted and processed contents of a CI config. Should not be requested more than once per request.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `content` | Contents of `.gitlab-ci.yml`. | String! |
-| `dryRun` | Run pipeline creation simulation, or only do static check. | Boolean |
-| `projectPath` | The project of the CI config. | ID! |
+#### Arguments
 
-### ContainerRepository
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `content` | String! | Contents of `.gitlab-ci.yml`. |
+| `dryRun` | Boolean | Run pipeline creation simulation, or only do static check. |
+| `projectPath` | ID! | The project of the CI config. |
+
+### containerRepository
 
 Find a container repository.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `id` | The global ID of the container repository. | ContainerRepositoryID! |
+#### Arguments
 
-### CurrentUser
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `id` | ContainerRepositoryID! | The global ID of the container repository. |
+
+### currentUser
 
 Get information about current user.
 
-### DesignManagement
+### designManagement
 
 Fields related to design management.
 
-### DevopsAdoptionSegments
+### devopsAdoptionSegments
 
 Get configured DevOps adoption segments on the instance.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `after` | Returns the elements in the list that come after the specified cursor. | String |
-| `before` | Returns the elements in the list that come before the specified cursor. | String |
-| `first` | Returns the first _n_ elements from the list. | Int |
-| `last` | Returns the last _n_ elements from the list. | Int |
+#### Arguments
 
-### Echo
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `after` | String | Returns the elements in the list that come after the specified cursor. |
+| `before` | String | Returns the elements in the list that come before the specified cursor. |
+| `first` | Int | Returns the first _n_ elements from the list. |
+| `last` | Int | Returns the last _n_ elements from the list. |
+
+### echo
 
 Text to echo back.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `text` | Text to echo back. | String! |
+#### Arguments
 
-### GeoNode
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `text` | String! | Text to echo back. |
+
+### geoNode
 
 Find a Geo node.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `name` | The name of the Geo node. Defaults to the current Geo node name. | String |
+#### Arguments
 
-### Group
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `name` | String | The name of the Geo node. Defaults to the current Geo node name. |
+
+### group
 
 Find a group.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+#### Arguments
 
-### InstanceSecurityDashboard
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `fullPath` | ID! | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
+
+### instanceSecurityDashboard
 
 Fields related to Instance Security Dashboard.
 
-### InstanceStatisticsMeasurements
+### instanceStatisticsMeasurements
 
 Get statistics on the instance. Deprecated in 13.10: This field was renamed. Use the `usageTrendsMeasurements` field instead.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `after` | Returns the elements in the list that come after the specified cursor. | String |
-| `before` | Returns the elements in the list that come before the specified cursor. | String |
-| `first` | Returns the first _n_ elements from the list. | Int |
-| `identifier` | The type of measurement/statistics to retrieve. | MeasurementIdentifier! |
-| `last` | Returns the last _n_ elements from the list. | Int |
-| `recordedAfter` | Measurement recorded after this date. | Time |
-| `recordedBefore` | Measurement recorded before this date. | Time |
+#### Arguments
 
-### Issue
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `after` | String | Returns the elements in the list that come after the specified cursor. |
+| `before` | String | Returns the elements in the list that come before the specified cursor. |
+| `first` | Int | Returns the first _n_ elements from the list. |
+| `identifier` | MeasurementIdentifier! | The type of measurement/statistics to retrieve. |
+| `last` | Int | Returns the last _n_ elements from the list. |
+| `recordedAfter` | Time | Measurement recorded after this date. |
+| `recordedBefore` | Time | Measurement recorded before this date. |
+
+### issue
 
 Find an Issue.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `id` | The global ID of the Issue. | IssueID! |
+#### Arguments
 
-### Iteration
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `id` | IssueID! | The global ID of the Issue. |
+
+### iteration
 
 Find an iteration.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `id` | Find an iteration by its ID. | IterationID! |
+#### Arguments
 
-### Metadata
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `id` | IterationID! | Find an iteration by its ID. |
+
+### metadata
 
 Metadata about GitLab.
 
-### Milestone
+### milestone
 
 Find a milestone.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `id` | Find a milestone by its ID. | MilestoneID! |
+#### Arguments
 
-### Namespace
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `id` | MilestoneID! | Find a milestone by its ID. |
+
+### namespace
 
 Find a namespace.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+#### Arguments
 
-### Package
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `fullPath` | ID! | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
+
+### package
 
 Find a package.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `id` | The global ID of the package. | PackagesPackageID! |
+#### Arguments
 
-### Project
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `id` | PackagesPackageID! | The global ID of the package. |
+
+### project
 
 Find a project.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
+#### Arguments
 
-### Projects
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `fullPath` | ID! | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
+
+### projects
 
 Find projects visible to the current user.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `after` | Returns the elements in the list that come after the specified cursor. | String |
-| `before` | Returns the elements in the list that come before the specified cursor. | String |
-| `first` | Returns the first _n_ elements from the list. | Int |
-| `ids` | Filter projects by IDs. | ID! => Array |
-| `last` | Returns the last _n_ elements from the list. | Int |
-| `membership` | Limit projects that the current user is a member of. | Boolean |
-| `search` | Search query for project name, path, or description. | String |
-| `searchNamespaces` | Include namespace in project search. | Boolean |
-| `sort` | Sort order of results. | String |
+#### Arguments
 
-### RunnerPlatforms
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `after` | String | Returns the elements in the list that come after the specified cursor. |
+| `before` | String | Returns the elements in the list that come before the specified cursor. |
+| `first` | Int | Returns the first _n_ elements from the list. |
+| `ids` | ID! => Array | Filter projects by IDs. |
+| `last` | Int | Returns the last _n_ elements from the list. |
+| `membership` | Boolean | Limit projects that the current user is a member of. |
+| `search` | String | Search query for project name, path, or description. |
+| `searchNamespaces` | Boolean | Include namespace in project search. |
+| `sort` | String | Sort order of results. |
+
+### runnerPlatforms
 
 Supported runner platforms.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `after` | Returns the elements in the list that come after the specified cursor. | String |
-| `before` | Returns the elements in the list that come before the specified cursor. | String |
-| `first` | Returns the first _n_ elements from the list. | Int |
-| `last` | Returns the last _n_ elements from the list. | Int |
+#### Arguments
 
-### RunnerSetup
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `after` | String | Returns the elements in the list that come after the specified cursor. |
+| `before` | String | Returns the elements in the list that come before the specified cursor. |
+| `first` | Int | Returns the first _n_ elements from the list. |
+| `last` | Int | Returns the last _n_ elements from the list. |
+
+### runnerSetup
 
 Get runner setup instructions.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `architecture` | Architecture to generate the instructions for. | String! |
-| `groupId` | Group to register the runner for. | GroupID |
-| `platform` | Platform to generate the instructions for. | String! |
-| `projectId` | Project to register the runner for. | ProjectID |
+#### Arguments
 
-### Snippets
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `architecture` | String! | Architecture to generate the instructions for. |
+| `groupId` | GroupID | Group to register the runner for. |
+| `platform` | String! | Platform to generate the instructions for. |
+| `projectId` | ProjectID | Project to register the runner for. |
+
+### snippets
 
 Find Snippets visible to the current user.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `after` | Returns the elements in the list that come after the specified cursor. | String |
-| `authorId` | The ID of an author. | UserID |
-| `before` | Returns the elements in the list that come before the specified cursor. | String |
-| `explore` | Explore personal snippets. | Boolean |
-| `first` | Returns the first _n_ elements from the list. | Int |
-| `ids` | Array of global snippet IDs. For example, `gid://gitlab/ProjectSnippet/1`. | SnippetID! => Array |
-| `last` | Returns the last _n_ elements from the list. | Int |
-| `projectId` | The ID of a project. | ProjectID |
-| `type` | The type of snippet. | TypeEnum |
-| `visibility` | The visibility of the snippet. | VisibilityScopesEnum |
+#### Arguments
 
-### UsageTrendsMeasurements
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `after` | String | Returns the elements in the list that come after the specified cursor. |
+| `authorId` | UserID | The ID of an author. |
+| `before` | String | Returns the elements in the list that come before the specified cursor. |
+| `explore` | Boolean | Explore personal snippets. |
+| `first` | Int | Returns the first _n_ elements from the list. |
+| `ids` | SnippetID! => Array | Array of global snippet IDs. For example, `gid://gitlab/ProjectSnippet/1`. |
+| `last` | Int | Returns the last _n_ elements from the list. |
+| `projectId` | ProjectID | The ID of a project. |
+| `type` | TypeEnum | The type of snippet. |
+| `visibility` | VisibilityScopesEnum | The visibility of the snippet. |
+
+### usageTrendsMeasurements
 
 Get statistics on the instance.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `after` | Returns the elements in the list that come after the specified cursor. | String |
-| `before` | Returns the elements in the list that come before the specified cursor. | String |
-| `first` | Returns the first _n_ elements from the list. | Int |
-| `identifier` | The type of measurement/statistics to retrieve. | MeasurementIdentifier! |
-| `last` | Returns the last _n_ elements from the list. | Int |
-| `recordedAfter` | Measurement recorded after this date. | Time |
-| `recordedBefore` | Measurement recorded before this date. | Time |
+#### Arguments
 
-### User
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `after` | String | Returns the elements in the list that come after the specified cursor. |
+| `before` | String | Returns the elements in the list that come before the specified cursor. |
+| `first` | Int | Returns the first _n_ elements from the list. |
+| `identifier` | MeasurementIdentifier! | The type of measurement/statistics to retrieve. |
+| `last` | Int | Returns the last _n_ elements from the list. |
+| `recordedAfter` | Time | Measurement recorded after this date. |
+| `recordedBefore` | Time | Measurement recorded before this date. |
+
+### user
 
 Find a user.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `id` | ID of the User. | UserID |
-| `username` | Username of the User. | String |
+#### Arguments
 
-### Users
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `id` | UserID | ID of the User. |
+| `username` | String | Username of the User. |
+
+### users
 
 Find users.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `admins` | Return only admin users. | Boolean |
-| `after` | Returns the elements in the list that come after the specified cursor. | String |
-| `before` | Returns the elements in the list that come before the specified cursor. | String |
-| `first` | Returns the first _n_ elements from the list. | Int |
-| `ids` | List of user Global IDs. | ID! => Array |
-| `last` | Returns the last _n_ elements from the list. | Int |
-| `search` | Query to search users by name, username, or primary email. | String |
-| `sort` | Sort users by this criteria. | Sort |
-| `usernames` | List of usernames. | String! => Array |
+#### Arguments
 
-### Vulnerabilities
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `admins` | Boolean | Return only admin users. |
+| `after` | String | Returns the elements in the list that come after the specified cursor. |
+| `before` | String | Returns the elements in the list that come before the specified cursor. |
+| `first` | Int | Returns the first _n_ elements from the list. |
+| `ids` | ID! => Array | List of user Global IDs. |
+| `last` | Int | Returns the last _n_ elements from the list. |
+| `search` | String | Query to search users by name, username, or primary email. |
+| `sort` | Sort | Sort users by this criteria. |
+| `usernames` | String! => Array | List of usernames. |
+
+### vulnerabilities
 
 Vulnerabilities reported on projects on the current user's instance security dashboard.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `after` | Returns the elements in the list that come after the specified cursor. | String |
-| `before` | Returns the elements in the list that come before the specified cursor. | String |
-| `first` | Returns the first _n_ elements from the list. | Int |
-| `hasIssues` | Returns only the vulnerabilities which have linked issues. | Boolean |
-| `hasResolution` | Returns only the vulnerabilities which have been resolved on default branch. | Boolean |
-| `last` | Returns the last _n_ elements from the list. | Int |
-| `projectId` | Filter vulnerabilities by project. | ID! => Array |
-| `reportType` | Filter vulnerabilities by report type. | VulnerabilityReportType! => Array |
-| `scanner` | Filter vulnerabilities by VulnerabilityScanner.externalId. | String! => Array |
-| `severity` | Filter vulnerabilities by severity. | VulnerabilitySeverity! => Array |
-| `sort` | List vulnerabilities by sort order. | VulnerabilitySort |
-| `state` | Filter vulnerabilities by state. | VulnerabilityState! => Array |
+#### Arguments
 
-### VulnerabilitiesCountByDay
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `after` | String | Returns the elements in the list that come after the specified cursor. |
+| `before` | String | Returns the elements in the list that come before the specified cursor. |
+| `first` | Int | Returns the first _n_ elements from the list. |
+| `hasIssues` | Boolean | Returns only the vulnerabilities which have linked issues. |
+| `hasResolution` | Boolean | Returns only the vulnerabilities which have been resolved on default branch. |
+| `last` | Int | Returns the last _n_ elements from the list. |
+| `projectId` | ID! => Array | Filter vulnerabilities by project. |
+| `reportType` | VulnerabilityReportType! => Array | Filter vulnerabilities by report type. |
+| `scanner` | String! => Array | Filter vulnerabilities by VulnerabilityScanner.externalId. |
+| `severity` | VulnerabilitySeverity! => Array | Filter vulnerabilities by severity. |
+| `sort` | VulnerabilitySort | List vulnerabilities by sort order. |
+| `state` | VulnerabilityState! => Array | Filter vulnerabilities by state. |
+
+### vulnerabilitiesCountByDay
 
 Number of vulnerabilities per day for the projects on the current user's instance security dashboard.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `after` | Returns the elements in the list that come after the specified cursor. | String |
-| `before` | Returns the elements in the list that come before the specified cursor. | String |
-| `endDate` | Last day for which to fetch vulnerability history. | ISO8601Date! |
-| `first` | Returns the first _n_ elements from the list. | Int |
-| `last` | Returns the last _n_ elements from the list. | Int |
-| `startDate` | First day for which to fetch vulnerability history. | ISO8601Date! |
+#### Arguments
 
-### VulnerabilitiesCountByDayAndSeverity
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `after` | String | Returns the elements in the list that come after the specified cursor. |
+| `before` | String | Returns the elements in the list that come before the specified cursor. |
+| `endDate` | ISO8601Date! | Last day for which to fetch vulnerability history. |
+| `first` | Int | Returns the first _n_ elements from the list. |
+| `last` | Int | Returns the last _n_ elements from the list. |
+| `startDate` | ISO8601Date! | First day for which to fetch vulnerability history. |
+
+### vulnerabilitiesCountByDayAndSeverity
 
 Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `after` | Returns the elements in the list that come after the specified cursor. | String |
-| `before` | Returns the elements in the list that come before the specified cursor. | String |
-| `endDate` | Last day for which to fetch vulnerability history. | ISO8601Date! |
-| `first` | Returns the first _n_ elements from the list. | Int |
-| `last` | Returns the last _n_ elements from the list. | Int |
-| `startDate` | First day for which to fetch vulnerability history. | ISO8601Date! |
+#### Arguments
 
-### Vulnerability
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `after` | String | Returns the elements in the list that come after the specified cursor. |
+| `before` | String | Returns the elements in the list that come before the specified cursor. |
+| `endDate` | ISO8601Date! | Last day for which to fetch vulnerability history. |
+| `first` | Int | Returns the first _n_ elements from the list. |
+| `last` | Int | Returns the last _n_ elements from the list. |
+| `startDate` | ISO8601Date! | First day for which to fetch vulnerability history. |
+
+### vulnerability
 
 Find a vulnerability.
 
-| Name | Description | Type |
-| ----- | ---- | ----------- |
-| `id` | The Global ID of the Vulnerability. | VulnerabilityID! |
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `id` | VulnerabilityID! | The Global ID of the Vulnerability. |
 
 ## Object types
 

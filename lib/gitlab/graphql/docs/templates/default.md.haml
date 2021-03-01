@@ -21,21 +21,19 @@
 \
 
 :plain
-  ## Queries
+  ## `Query` type
 
-  Queries are used to get the resources, filter or query them.
-
-  For more information, visit [Queries and Mutations](https://graphql.org/learn/queries/).
+  The `Query` type contains the API's top-level entry points for all queries that can be executed.
 \
 
 - sorted_by_name(queries).each do |query|
-
   = render_name_and_description(query)
   - unless query[:arguments].empty?
-    ~ "| Name | Description | Type |"
-    ~ "| ----- | ---- | ----------- |"
+    ~ "#### Arguments\n"
+    ~ "| Name | Type | Description |"
+    ~ "| ---- | ---- | ----------- |"
     - sorted_by_name(query[:arguments]).each do |argument|
-      = render_argument(argument)
+      = render_field(argument)
     \
 
 :plain
