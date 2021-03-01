@@ -414,14 +414,14 @@ the flag's default value gets overwritten and it takes precedence over the `defa
 This can cause confusion when changing the flag's `default_enabled` attribute.
 
 For example, flags are commonly enabled and disabled several times during the development process.
-When we finally enable the flag by default, we set `default_enabled: true` in the .yml file.
+When we finally enable the flag by default, we set `default_enabled: true` in the YAML file.
 
 - If the flag was manually enabled before, the feature will be enabled. Not because of the new 
 `default_enabled` value of the flag but because it was enabled manually.
 - If the flag was manually disabled before, the feature will remain disabled.
 
-You need to take one more step. To reset the feature flag to the default status set in
-its .yml file, remove it using the rails console (`rails c`) as follows:
+To reset the feature flag to the default status set in its YAML file, remove it using the Rails console
+(`rails c`) as follows:
 
 ```ruby
 Feature.remove(:feature_flag_name)
