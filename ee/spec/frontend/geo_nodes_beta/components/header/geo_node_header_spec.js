@@ -1,7 +1,10 @@
 import { GlIcon, GlBadge } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
+import GeoNodeActions from 'ee/geo_nodes_beta/components/header/geo_node_actions.vue';
 import GeoNodeHeader from 'ee/geo_nodes_beta/components/header/geo_node_header.vue';
+import GeoNodeHealthStatus from 'ee/geo_nodes_beta/components/header/geo_node_health_status.vue';
+import GeoNodeLastUpdated from 'ee/geo_nodes_beta/components/header/geo_node_last_updated.vue';
 import {
   MOCK_PRIMARY_VERSION,
   MOCK_REPLICABLE_TYPES,
@@ -46,11 +49,26 @@ describe('GeoNodeHeader', () => {
 
   const findHeaderCollapseIcon = () => wrapper.find(GlIcon);
   const findCurrentNodeBadge = () => wrapper.find(GlBadge);
+  const findGeoNodeHealthStatus = () => wrapper.find(GeoNodeHealthStatus);
+  const findGeoNodeLastUpdated = () => wrapper.find(GeoNodeLastUpdated);
+  const findGeoNodeActions = () => wrapper.find(GeoNodeActions);
 
   describe('template', () => {
     describe('always', () => {
       beforeEach(() => {
         createComponent();
+      });
+
+      it('renders the Geo Node Health Status', () => {
+        expect(findGeoNodeHealthStatus().exists()).toBe(true);
+      });
+
+      it('renders the Geo Node Last Updated', () => {
+        expect(findGeoNodeLastUpdated().exists()).toBe(true);
+      });
+
+      it('renders the Geo Node Actions', () => {
+        expect(findGeoNodeActions().exists()).toBe(true);
       });
     });
 
