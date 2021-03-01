@@ -183,13 +183,14 @@ graph TB
 
 #### Implementation schema
 
-`HandleTunnelConnection()` is called with the server-side interface of the reverse
-tunnel. It registers the connection and blocks, waiting for a request to proxy
-through the connection.
+`HandleTunnel()` is called with the server-side interface of the reverse
+tunnel. It registers the tunnel and blocks, waiting for a request to proxy
+through it.
 
-`HandleIncomingConnection()` is called with the server-side interface of the incoming
-connection. It registers the connection and blocks, waiting for a matching tunnel
-to proxy the connection through.
+The tunnel is found using `FindTunnel()` method of the `Connection registry`. It blocks, waiting for a matching tunnel to proxy the connection through.
+
+`ForwardStream()` is called on the matching tunnel with the server-side interface of the incoming
+connection. It proxy the connection through the tunnel. 
 
 After it has two connections that match, `Connection registry` starts bi-directional
 data streaming:
@@ -211,9 +212,9 @@ graph TB
         agent-module-b[/Agent side of module B/]
     end
 
-    server-tunnel-module -- "HandleTunnelConnection()" --> connection-registry
-    server-internal-grpc-server -- "HandleIncomingConnection()" --> connection-registry
-    server-api-grpc-server -- "HandleIncomingConnection()" --> connection-registry
+    server-tunnel-module -- "HandleTunnel()" --> connection-registry
+    server-internal-grpc-server -- "ForwardStream()" --> connection-registry
+    server-api-grpc-server -- "ForwardStream()" --> connection-registry
     server-module-a-. expose API on .-> server-internal-grpc-server
     server-module-b-. expose API on .-> server-api-grpc-server
 
@@ -228,3 +229,4 @@ graph TB
 - [`agent_tracker/agent_tracker.proto`](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/internal/module/agent_tracker/agent_tracker.proto)
 - [`agent_tracker/rpc/rpc.proto`](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/internal/module/agent_tracker/rpc/rpc.proto)
 - [`reverse_tunnel/rpc/rpc.proto`](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/internal/module/reverse_tunnel/rpc/rpc.proto)
+- [`cmd/kas/kasapp/kasapp.proto`](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/cmd/kas/kasapp/kasapp.proto)
