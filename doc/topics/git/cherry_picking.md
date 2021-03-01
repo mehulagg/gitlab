@@ -45,7 +45,7 @@ the commit on the default branch, and then cherry pick in to stable.
 1. Check out the 'stable' branch.
 
    ```shell
-   shellgit checkout stable
+   git checkout stable
    ```
 
 1. Cherry pick the commit using the previously obtained SHA:
