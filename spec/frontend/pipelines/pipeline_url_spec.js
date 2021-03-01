@@ -7,6 +7,7 @@ const projectPath = 'test/test';
 describe('Pipeline Url Component', () => {
   let wrapper;
 
+  const findTableCell = () => wrapper.find('[data-testid="pipeline-url-table-cell"]');
   const findPipelineUrlLink = () => wrapper.find('[data-testid="pipeline-url-link"]');
   const findScheduledTag = () => wrapper.find('[data-testid="pipeline-url-scheduled"]');
   const findLatestTag = () => wrapper.find('[data-testid="pipeline-url-latest"]');
@@ -34,6 +35,9 @@ describe('Pipeline Url Component', () => {
       propsData: { ...defaultProps, ...props },
       provide: {
         targetProjectFullPath: projectPath,
+        glFeatures: {
+          newPipelinesTable: true,
+        },
       },
     });
   };
@@ -43,10 +47,10 @@ describe('Pipeline Url Component', () => {
     wrapper = null;
   });
 
-  it('should render a table cell', () => {
+  it('should render pipeline url table cell', () => {
     createComponent();
 
-    expect(wrapper.attributes('class')).toContain('table-section');
+    expect(findTableCell().exists()).toBe(true);
   });
 
   it('should render a link the provided path and id', () => {

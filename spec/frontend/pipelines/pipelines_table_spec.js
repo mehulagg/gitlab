@@ -29,7 +29,17 @@ describe('Pipelines Table', () => {
 
   const findRows = () => wrapper.findAll('.commit.gl-responsive-table-row');
   const findGlTable = () => wrapper.findComponent(GlTable);
-  const findLegacyTable = () => wrapper.findByTestId('ci-table');
+  const findLegacyTable = () => wrapper.findByTestId('legacy-ci-table');
+  const findTableRows = () => wrapper.findAll('[data-testid="pipeline-table-row"]');
+
+  const findStatusTh = () => wrapper.findByTestId('status-th');
+  const findPipelineTh = () => wrapper.findByTestId('pipeline-th');
+  const findTriggererTh = () => wrapper.findByTestId('triggerer-th');
+  const findCommitTh = () => wrapper.findByTestId('commit-th');
+  const findStagesTh = () => wrapper.findByTestId('stages-th');
+  const findTimeAgoTh = () => wrapper.findByTestId('timeago-th');
+  const findActionsTh = () => wrapper.findByTestId('actions-th');
+  const findPipelineUrl = () => wrapper.findByTestId('pipeline-url-link');
 
   preloadFixtures(jsonFixtureName);
 
@@ -82,11 +92,29 @@ describe('Pipelines Table', () => {
   });
 
   describe('table with feature flag on', () => {
-    it('displays new table', () => {
-      createComponent(defaultProps, true);
+    beforeEach(() => {
+      createComponent({ pipelines: [pipeline], viewType: 'root' }, true);
+    });
 
+    it('displays new table', () => {
       expect(findGlTable().exists()).toBe(true);
       expect(findLegacyTable().exists()).toBe(false);
+    });
+
+    it('should render table head with correct columns', () => {
+      expect(findStatusTh().text()).toBe('Status');
+      expect(findPipelineTh().text()).toBe('Pipeline');
+      expect(findTriggererTh().text()).toBe('Triggerer');
+      expect(findCommitTh().text()).toBe('Commit');
+      expect(findStagesTh().text()).toBe('Stages');
+      expect(findTimeAgoTh().text()).toBe('Duration');
+
+      // last column should have no text in th
+      expect(findActionsTh().text()).toBe('');
+    });
+
+    it('should display a table row', () => {
+      expect(findTableRows()).toHaveLength(1);
     });
   });
 });
