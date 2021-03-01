@@ -22,11 +22,6 @@ export default {
       return [{ type: 'filtered-search-term', value: { data: this.search } }];
     },
   },
-  mounted() {
-    const searchWrapper = document.querySelector('.filtered-search-wrapper');
-
-    searchWrapper.classList.add('gl-display-none!');
-  },
   methods: {
     ...mapActions(['performSearch']),
     handleSearch(filters) {
