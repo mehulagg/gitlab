@@ -144,7 +144,12 @@ export default {
   >
     <template #body>
       <gl-form-group :label="$options.i18n.selectedPlanLabel" label-size="sm" class="mb-3">
-        <gl-form-select v-model="selectedPlanModel" v-autofocusonshow :options="availablePlans" />
+        <gl-form-select
+          v-model="selectedPlanModel"
+          v-autofocusonshow
+          :options="availablePlans"
+          data-qa-selector="plan_name"
+        />
       </gl-form-group>
       <gl-form-group
         v-if="isShowingGroupSelector"
@@ -157,6 +162,7 @@ export default {
           ref="group-select"
           v-model="selectedGroupModel"
           :options="groupOptionsWithDefault"
+          data-qa-selector="group_name"
         />
       </gl-form-group>
       <gl-form-group
@@ -175,6 +181,7 @@ export default {
             type="number"
             :min="selectedGroupUsers"
             :disabled="!isSetupForCompany"
+            data-qa-selector="number_of_users"
           />
         </gl-form-group>
         <gl-form-group
