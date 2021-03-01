@@ -163,7 +163,7 @@ application described above.
 
 ### OneLogin
 
-OneLogin provides a "GitLab (SaaS)" app in their catalogue, which includes a SCIM integration.
+OneLogin provides a "GitLab (SaaS)" app in their catalog, which includes a SCIM integration.
 As the app is developed by OneLogin, please reach out to OneLogin if you encounter issues.
 
 ## User access and linking setup
