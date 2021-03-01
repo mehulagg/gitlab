@@ -82,7 +82,7 @@ RSpec.describe GroupPolicy do
       stub_licensed_features(iterations: false)
     end
 
-    it { is_expected.to be_disallowed(:read_iteration, :create_iteration, :admin_iteration, :create_iterations_cadence) }
+    it { is_expected.to be_disallowed(:read_iteration, :create_iteration, :admin_iteration, :create_iterations_cadence, :admin_iterations_cadence) }
   end
 
   context 'when iterations feature is enabled' do
@@ -93,14 +93,14 @@ RSpec.describe GroupPolicy do
     context 'when user is a developer' do
       let(:current_user) { developer }
 
-      it { is_expected.to be_allowed(:read_iteration, :create_iteration, :admin_iteration, :read_iterations_cadence, :create_iterations_cadence) }
+      it { is_expected.to be_allowed(:read_iteration, :create_iteration, :admin_iteration, :read_iterations_cadence, :create_iterations_cadence, :admin_iterations_cadence) }
     end
 
     context 'when user is a guest' do
       let(:current_user) { guest }
 
       it { is_expected.to be_allowed(:read_iteration, :read_iterations_cadence) }
-      it { is_expected.to be_disallowed(:create_iteration, :admin_iteration, :create_iterations_cadence) }
+      it { is_expected.to be_disallowed(:create_iteration, :admin_iteration, :create_iterations_cadence, :admin_iterations_cadence) }
     end
 
     context 'when user is logged out' do
@@ -116,7 +116,7 @@ RSpec.describe GroupPolicy do
         let(:current_user) { nil }
 
         it { is_expected.to be_allowed(:read_iteration, :read_iterations_cadence) }
-        it { is_expected.to be_disallowed(:create_iteration, :admin_iteration, :create_iterations_cadence) }
+        it { is_expected.to be_disallowed(:create_iteration, :admin_iteration, :create_iterations_cadence, :admin_iterations_cadence) }
       end
     end
   end
