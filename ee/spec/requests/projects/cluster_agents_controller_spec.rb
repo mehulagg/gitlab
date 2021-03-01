@@ -6,10 +6,9 @@ RSpec.describe Projects::ClusterAgentsController do
   let_it_be(:cluster_agent) { create(:cluster_agent) }
 
   let(:project) { cluster_agent.project }
-  let(:params) { { namespace_id: project.namespace, project_id: project, name: cluster_agent.name } }
 
-  describe 'GET show' do
-    subject { get :show, params: params }
+  describe 'GET #show' do
+    subject { get project_cluster_agent_path(project, cluster_agent.name) }
 
     context 'when user is unauthorized' do
       let_it_be(:user) { create(:user) }
