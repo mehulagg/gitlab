@@ -4,6 +4,7 @@ module EE
   module Resolvers
     module NamespaceProjectsResolver
       extend ActiveSupport::Concern
+      extend ::Gitlab::Utils::Override
 
       prepended do
         argument :has_code_coverage, GraphQL::BOOLEAN_TYPE,
@@ -17,12 +18,18 @@ module EE
                  description: 'Returns only the projects which have vulnerabilities.'
       end
 
-      def resolve(include_subgroups:, search:, sort:, ids:, has_vulnerabilities: false, has_code_coverage: false)
-        projects = super(include_subgroups: include_subgroups, search: search, sort: sort, ids: ids)
-        projects = projects.has_vulnerabilities if has_vulnerabilities
-        projects = projects.order_by_total_repository_size_excess_desc(namespace.actual_size_limit) if sort == :storage
-        projects = projects.with_code_coverage if has_code_coverage
-        projects
+      private
+
+      override :params
+      def params(args)
+        {
+          include_subgroups: args.dig(:include_subgroups),
+          sort: args.dig(:sort),
+          search: args.dig(:search),
+          ids: parse_gids(args.dig(:ids)),
+          has_vulnerabilities: args.dig(:has_vulnerabilities),
+          has_code_coverage: args.dig(:has_code_coverage)
+        }
       end
     end
   end
