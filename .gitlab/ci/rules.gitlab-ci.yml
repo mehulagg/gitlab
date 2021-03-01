@@ -222,6 +222,7 @@
   - "{,ee/}rubocop/**/*"
   - "{,ee/}spec/**/*"
   - "{,spec/}tooling/**/*"
+  - "data/whats_new/*.yml"
 
 .code-qa-patterns: &code-qa-patterns
   - "{package.json,yarn.lock}"
