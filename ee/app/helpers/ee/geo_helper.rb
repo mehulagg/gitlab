@@ -167,12 +167,6 @@ module EE
           name_plural: 'wikis'
         },
         {
-          title: _('LFS object'),
-          title_plural: _('LFS objects'),
-          name: 'lfs_object',
-          name_plural: 'lfs_objects'
-        },
-        {
           title: _('Attachment'),
           title_plural: _('Attachments'),
           name: 'attachment',

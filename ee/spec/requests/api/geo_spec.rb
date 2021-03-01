@@ -375,7 +375,6 @@ RSpec.describe API::Geo do
           container_repositories_replication_enabled: true,
           design_repositories_replication_enabled: false,
           job_artifacts_replication_enabled: true,
-          lfs_objects_replication_enabled: true,
           repositories_replication_enabled: true,
           repository_verification_enabled: true
         }

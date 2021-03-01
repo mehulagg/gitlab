@@ -11,6 +11,10 @@ module EE
     STORE_COLUMN = :file_store
 
     prepended do
+      include ::Gitlab::Geo::ReplicableModel
+
+      with_replicator Geo::LfsObjectReplicator
+
       after_destroy :log_geo_deleted_event
 
       scope :project_id_in, ->(ids) { joins(:projects).merge(::Project.id_in(ids)) }
