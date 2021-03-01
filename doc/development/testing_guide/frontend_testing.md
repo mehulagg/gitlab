@@ -1149,25 +1149,25 @@ You can download any older version of Firefox from the releases FTP server, <htt
 
 ## Snapshots
 
-By now you probably have heard of [Snapshot tests](https://jestjs.io/docs/en/snapshot-testing) and they are very useful for various reasons. 
+By now you've probably heard of [Jest snapshot tests](https://jestjs.io/docs/en/snapshot-testing) and why they are useful for various reasons. 
 To use them within GitLab, there are a few guidelines that should be highlighted: 
 
 - Treat Snapshots as code
 - Don't think of a Snpashot file as a Blackbox
-- Care for the output you put into a Snapshot, otherwise it's not providing value
+- Care for the output you put into a Snapshot, otherwise, it's not providing any real value. This will usually involve reading the generated snapshot file as you would read any other piece of code
 
-Think of a Snapshot test as a simple way to store a string representation of what you put in. This can be used to evaluate changes in a component, a store, a complex piece of generated output... see the list below for some recommended `Do's and Don'ts`.
+Think of a Snapshot test as a simple way to store a raw `String` representation of what you've put into the item being tested. This can be used to evaluate changes in a component, a store, a complex piece of generated output, etc. You can see more in the list below for some recommended `Do's and Don'ts`.
 While Snapshot tests can be a very powerful tool but they are meant to supplement, not to replace unit tests.
 
 ### How does a Snapshot work?
 
-A Snapshot is purely a stringified version of what you throw in. This means, any kind of changes you make the to the formatting of the string has impact on the outcome. These process is done through leveraging serializers for an automatic transform step. For Vue this is already taken care off by leveraging the `vue-jest` package which offers the proper serializer.
+A snapshot is purely a stringified version of what you ask to be tested on the lefthand side of the function call. This means any kind of changes you make to the formatting of the string has an impact on the outcome. This process is done by leveraging serializers for an automatic transform step. For Vue this is already taken care of by leveraging the `vue-jest` package which offers the proper serializer.
 
-Should the outcome of your spec be different from what is in the snapshot file, you'll get alarmed about it by a failing test.
+Should the outcome of your spec be different from what is in the generated snapshot file, you'll be notified about it by a failing test in your test suite.
 
 Find all details in Jests official documentation [https://jestjs.io/docs/en/snapshot-testing](https://jestjs.io/docs/en/snapshot-testing)
 
-### How to take a snapshot
+### How to take a Snapshot
 
 ```javascript
 it('makes the name look pretty', () => {
@@ -1185,7 +1185,7 @@ Sir Homer Simpson the Third
 `
 ```
 
-Now, everytime you call this test, it will be evaluated against what is created. This should highlight the fact that it's super important to understand the content of your snapshot file and treat it with care. If there's a clear dump of a whole HTML page, or a major instance with hundreds of keys it's not readable and impossible to evaluate if that is the desired outcome.
+Now, every time you call this test, the new snapshot will be evaluated against the previously created version. This should highlight the fact that it's important to understand the content of your snapshot file and treat it with care. Snapshots will lose their value if the output of the snapshot is too big or complex to read, this means keeping snapshots isolated to human-readable items that can be either evaluated in a merge request review or are guaranteed to never change. 
 The same can be done for `wrappers` or `elements`
 
 ```javascript
@@ -1195,7 +1195,7 @@ it('renders the component correctly', () => {
 })
 ```
 
-This will create two snapshots for you. Important to decide is, which of the snapshots provides more value.
+The above test will create two snapshots, what's important is to decide which of the snapshots provide more value for the codebase safety i.e. if one of these snapshots changes, does that highlight a possible un-wanted break in the codebase? This can help catch unexpected changes if something in an underlying dependencies changes without our knowledge. 
 
 ### Pros and Cons
 
@@ -1209,13 +1209,13 @@ This will create two snapshots for you. Important to decide is, which of the sna
 
 - Is not a catch-all solution that replaces the work of integration or unit tests
 - No meaningful assertions or expectations within snapshots
-- When carelessly used with GitLab UI it might appear as failing tests for intended good changes
+- When carelessly used with [GitLab UI](https://gitlab.com/gitlab-org/gitlab-ui) it can create fragility in tests when the underlying library changes the HTML of a component we are testing
 
 A good guideline to follow: the more complex the component you may want to steer away from just snapshot testing. But that's not to say you can't still snapshot test and test your component as normal.
 
 ### When to use
 
-Use
+**Use snapshots when**
 
 - to capture a components rendered output
 - to fully or partially match templates
@@ -1228,7 +1228,7 @@ Use
 
 ### When not to use
 
-Don't use
+**Don't use snapshots when**
 
 - To capture large data structures just to have something
 - To just have some kind of test written
