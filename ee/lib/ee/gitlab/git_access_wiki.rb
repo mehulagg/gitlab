@@ -50,6 +50,19 @@ module EE
         super
       end
 
+      override right_feature_access_level?
+      def right_feature_access_level?
+        return super unless container.is_a?(GroupWiki)
+
+        # There is no access_level feature yet for group wikis
+        # but, if we don't override this here, users won't be able to clone
+        # group wikis using deploy tokens
+        #
+        # Once https://gitlab.com/gitlab-org/gitlab/-/issues/208412 is
+        # implemented we can add the access_level to this check.
+        group?
+      end
+
       private
 
       def check_group!

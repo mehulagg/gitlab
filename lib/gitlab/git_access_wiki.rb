@@ -34,6 +34,11 @@ module Gitlab
       true
     end
 
+    override :right_feature_access_level?
+    def right_feature_access_level?
+      project? && project&.wiki_access_level != ::Featurable::DISABLED
+    end
+
     def push_to_read_only_message
       error_message(:read_only)
     end
