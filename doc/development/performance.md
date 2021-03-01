@@ -347,12 +347,88 @@ example, you can find which tests take longest to run or which execute the most
 queries. This can be handy for optimizing our tests or identifying performance
 issues in our code.
 
-## Memory profiling
+## Memory optimisation
 
-We can use two approaches, often in combination, to track down memory issues:
+We can use a bunch of different approaches, often in combination, to track down memory issues:
 
 - Leaving the code intact and wrapping a profiler around it.
+- Use memory allocation counters for requests and services.
 - Monitor memory usage of the process while disabling/enabling different parts of the code we suspect could be problematic.
+
+### Memory allocations
+
+Ruby shipped with GitLab includes a special patch to allow [tracing memory allocations](https://gitlab.com/gitlab-org/gitlab/-/issues/296530).
+This patch is available by default for
+[Omnibus](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/4948),
+[CNG](https://gitlab.com/gitlab-org/build/CNG/-/merge_requests/591),
+[GitLab CI](https://gitlab.com/gitlab-org/gitlab-build-images/-/merge_requests/355),
+[GCK](https://gitlab.com/gitlab-org/gitlab-compose-kit/-/merge_requests/149)
+and can additionally be enabled for [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/advanced.md#apply-custom-patches-for-ruby).
+
+This patch provides a set of 3 metrics that allows to understand the impact of a given codepath:
+
+- `mem_objects` a number of slots allocated, ex. a number of string objects
+- `mem_bytes` a number of bytes allocated, ex. a bytes allocated by strings
+- `mem_mallocs` a number of allocations, ex. a number of allocations done by strings
+
+The amount of objects or bytes allocated do impact how often GC cycles do happen. The less of objects allocations results
+in a significantly more responsive application.
+
+#### Measuring own code
+
+There are two ways of measuring own code:
+
+1. Review `api_json.log`, `development_json.log`, `sidekiq.log` that includes a memory allocation counters.
+1. Use `Gitlab::Memory::Instrumentation.with_memory_allocations` for a given codeblock and log it.
+
+```json
+{"time":"2021-02-15T11:20:40.821Z","severity":"INFO","duration_s":0.27412,"db_duration_s":0.05755,"view_duration_s":0.21657,"status":201,"method":"POST","path":"/api/v4/projects/user/1","mem_objects":86705,"mem_bytes":4277179,"mem_mallocs":22693,"correlation_id":"...}
+```
+
+#### Different types of allocations
+
+The difference between these values are best presented with:
+
+1. This will create around of `1000` of `mem_objects`, but do not allocate any bytes as strings are fixed:
+
+```ruby
+Gitlab::Memory::Instrumentation.with_memory_allocations do
+  1_000.times { 'aaaa' }
+end
+
+=> {:mem_objects=>1001, :mem_bytes=>0, :mem_mallocs=>0}
+```
+
+1. This will create a few objects, but allocate 4kB of data, and perform 1000 allocations:
+
+```ruby
+Gitlab::Memory::Instrumentation.with_memory_allocations do
+  str = ''
+  append = '0123456789012345678901234567890123456789' # 40 bytes
+  1_000.times { str.concat(append) }
+end
+=> {:mem_objects=>3, :mem_bytes=>49152, :mem_mallocs=>1}
+```
+
+1. This will create many objects around 1k objects, 1k allocations, and re-allocate a lot of memory:
+
+```ruby
+Gitlab::Memory::Instrumentation.with_memory_allocations do
+  str = ''
+  append = '0123456789012345678901234567890123456789' # 40 bytes
+  1_000.times { str += append }
+end
+=> {:mem_objects=>1003, :mem_bytes=>21968752, :mem_mallocs=>1000}
+```
+
+1. This will create 2k objects, 1k allocations, and allocate over 40kB of memory:
+
+```ruby
+Gitlab::Memory::Instrumentation.with_memory_allocations do
+  1_000.times { '0' * 40 }
+end
+=> {:mem_objects=>2001, :mem_bytes=>48000, :mem_mallocs=>1000}
+```
 
 ### Using Memory Profiler
 
