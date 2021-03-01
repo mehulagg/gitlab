@@ -160,15 +160,15 @@ for modules, so you can add new features:
 ```mermaid
 graph TB
     subgraph kas
-        server-internal-grpc-server[Internal gRPC server]
-        server-api-grpc-server[Public API gRPC server]
-        server-module-a[Server side of module A]
-        server-module-b[Server side of module B]
+        server-internal-grpc-server{{Internal gRPC server}}
+        server-api-grpc-server{{Public API gRPC server}}
+        server-module-a[/Server side of module A/]
+        server-module-b[/Server side of module B/]
     end
     subgraph agentk
-        agent-internal-grpc-server[Internal gRPC server]
-        agent-module-a[Agent side of module A]
-        agent-module-b[Agent side of module B]
+        agent-internal-grpc-server{{Internal gRPC server}}
+        agent-module-a[/Agent side of module A/]
+        agent-module-b[/Agent side of module B/]
     end
 
     agent-internal-grpc-server -- request --> agent-module-a
@@ -197,18 +197,18 @@ data streaming:
 ```mermaid
 graph TB
     subgraph kas
-        server-tunnel-module[Server tunnel module]
+        server-tunnel-module[/Server tunnel module/]
         connection-registry[Connection registry]
-        server-internal-grpc-server[Internal gRPC server]
-        server-api-grpc-server[Public API gRPC server]
-        server-module-a[Server side of module A]
-        server-module-b[Server side of module B]
+        server-internal-grpc-server{{Internal gRPC server}}
+        server-api-grpc-server{{Public API gRPC server}}
+        server-module-a[/Server side of module A/]
+        server-module-b[/Server side of module B/]
     end
     subgraph agentk
-        agent-internal-grpc-server[Internal gRPC server]
-        agent-tunnel-module[Agent tunnel module]
-        agent-module-a[Agent side of module A]
-        agent-module-b[Agent side of module B]
+        agent-internal-grpc-server{{Internal gRPC server}}
+        agent-tunnel-module[/Agent tunnel module/]
+        agent-module-a[/Agent side of module A/]
+        agent-module-b[/Agent side of module B/]
     end
 
     server-tunnel-module -- "HandleTunnelConnection()" --> connection-registry
