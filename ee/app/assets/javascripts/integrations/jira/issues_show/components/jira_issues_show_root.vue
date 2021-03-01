@@ -1,10 +1,27 @@
 <script>
-import { GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
+import { GlAlert, GlSprintf, GlLink, GlBadge } from '@gitlab/ui';
 import { fetchIssue } from 'ee/integrations/jira/issues_show/api';
 import JiraIssueSidebar from 'ee/integrations/jira/issues_show/components/sidebar/jira_issues_sidebar_root.vue';
 import { issueStates, issueStateLabels } from 'ee/integrations/jira/issues_show/constants';
+import DesignNote from '~/design_management/components/design_notes/design_note.vue';
 import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+
+function jiraCommentToNote(comment) {
+  return {
+    id: '1',
+    body: comment.note,
+    bodyHtml: comment.note,
+    createdAt: comment.created_at,
+    author: {
+      webUrl: '',
+      avatarUrl: '',
+      username: '',
+      id: '',
+      name: comment.name,
+    },
+  };
+}
 
 export default {
   name: 'JiraIssuesShow',
@@ -12,8 +29,10 @@ export default {
     GlAlert,
     GlSprintf,
     GlLink,
+    GlBadge,
     IssuableShow,
     JiraIssueSidebar,
+    DesignNote,
   },
   inject: {
     issuesShowPath: {
@@ -45,6 +64,24 @@ export default {
       deep: true,
     });
     this.isLoading = false;
+    this.issue.comments = [
+      {
+        name: 'Tom Quirk',
+        web_url: 'https://google.com',
+        avatar_url: 'https://google.com',
+        note: 'Great idea',
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        name: 'Tom Quirk',
+        web_url: 'https://google.com',
+        avatar_url: 'https://google.com',
+        note: 'Thanks!',
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ].map(jiraCommentToNote);
   },
 };
 </script>
@@ -81,6 +118,21 @@ export default {
 
       <template #right-sidebar-items="{ sidebarExpanded }">
         <jira-issue-sidebar :sidebar-expanded="sidebarExpanded" :issue="issue" />
+      </template>
+
+      <template #discussion>
+        <design-note
+          v-for="(comment, idx) in issue.comments"
+          :key="`jira-comment-${idx}`"
+          class-override="note note-wrapper"
+          :note="comment"
+          :show-reply-button="false"
+          :editable="false"
+        >
+          <template #badges>
+            <gl-badge>{{ __('Jira user') }}</gl-badge>
+          </template>
+        </design-note>
       </template>
     </issuable-show>
   </div>

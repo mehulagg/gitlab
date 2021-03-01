@@ -33,6 +33,17 @@ export default {
       required: false,
       default: '',
     },
+    editable: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+
+    classOverride: {
+      type: String,
+      required: false,
+      default: undefined,
+    },
   },
   data() {
     return {
@@ -57,7 +68,7 @@ export default {
       };
     },
     isEditButtonVisible() {
-      return !this.isEditing && this.note.userPermissions.adminNote;
+      return this.editable && !this.isEditing && this.note?.userPermissions?.adminNote;
     },
   },
   methods: {
@@ -77,7 +88,10 @@ export default {
 </script>
 
 <template>
-  <timeline-entry-item :id="`note_${noteAnchorId}`" class="design-note note-form">
+  <timeline-entry-item
+    :id="`note_${noteAnchorId}`"
+    :class="classOverride || 'design-note note-form'"
+  >
     <user-avatar-link
       :link-href="author.webUrl"
       :img-src="author.avatarUrl"
@@ -89,13 +103,13 @@ export default {
         <gl-link
           v-once
           :href="author.webUrl"
-          class="js-user-link"
+          class="js-user-link gl-text-black-normal"
           :data-user-id="author.id"
           :data-username="author.username"
         >
           <span class="note-header-author-name gl-font-weight-bold">{{ author.name }}</span>
           <span v-if="author.status_tooltip_html" v-safe-html="author.status_tooltip_html"></span>
-          <span class="note-headline-light">@{{ author.username }}</span>
+          <span v-if="author.username" class="note-headline-light">@{{ author.username }}</span>
         </gl-link>
         <span class="note-headline-light note-headline-meta">
           <span class="system-note-message"> <slot></slot> </span>
@@ -108,7 +122,9 @@ export default {
         </span>
       </div>
       <div class="gl-display-flex gl-align-items-baseline">
+        <slot name="badges"></slot>
         <slot name="resolve-discussion"></slot>
+
         <button
           v-if="isEditButtonVisible"
           v-gl-tooltip
@@ -121,6 +137,7 @@ export default {
         </button>
       </div>
     </div>
+
     <template v-if="!isEditing">
       <div
         v-safe-html="note.bodyHtml"
