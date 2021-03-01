@@ -235,7 +235,7 @@ Replace the value of `agent-token` and `kas-address` with the token received fro
 docker run --rm registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/cli:latest generate --agent-token=your-agent-token --kas-address=wss://kas.gitlab.example.com --agent-version latest | kubectl apply -f -
 ```
 
-To find out the various options the above Docker container supports, run
+To find out the various options the above Docker container supports, run:
 
 ```shell
 docker run --rm -it registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/cli:latest generate --help
