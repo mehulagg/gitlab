@@ -68,37 +68,65 @@ class SafeMathRenderer {
 
     this.renderElement = this.renderElement.bind(this);
     this.render = this.render.bind(this);
+    this.attachEvents = this.attachEvents.bind(this);
   }
 
-  renderElement() {
-    if (!this.queue.length) {
+  renderElement(chosenEl) {
+    if (!this.queue.length && !chosenEl) {
       return;
     }
 
-    const el = this.queue.shift();
+    const el = chosenEl || this.queue.shift();
+    const forceRender = Boolean(chosenEl);
     const text = el.textContent;
 
     el.removeAttribute('style');
-
-    if (this.totalMS >= MAX_RENDER_TIME_MS || text.length > MAX_MATH_CHARS) {
-      if (!this.flashShown) {
-        flash(RENDER_FLASH_MSG);
-        this.flashShown = true;
-      }
-
+    if (!forceRender && (this.totalMS >= MAX_RENDER_TIME_MS || text.length > MAX_MATH_CHARS)) {
       // Show unrendered math code
+      const wrapperElement = document.createElement('div');
       const codeElement = document.createElement('pre');
+
       codeElement.className = 'code';
       codeElement.textContent = el.textContent;
-      el.parentNode.replaceChild(codeElement, el);
+
+      const parentNode = el.parentNode;
+      parentNode.replaceChild(wrapperElement, el);
+
+      const html = `
+          <div class="alert gl-alert gl-alert-warning alert-dismissible lazy-render-math-container js-lazy-render-math-container fade show" role="alert">
+            <div>
+              <div class="display-flex">
+                <div>${__(
+                  'Warning: Displaying this math block might cause performance issues on this page.',
+                )}</div>
+                <div class="gl-alert-actions">
+                  <button class="js-lazy-render-math btn gl-alert-action btn-warning btn-md gl-button">Display</button>
+                </div>
+              </div>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          </div>
+          `;
+
+      if (!wrapperElement.classList.contains('lazy-alert-shown')) {
+        wrapperElement.innerHTML = html;
+        wrapperElement.prepend(codeElement);
+        wrapperElement.classList.add('lazy-alert-shown');
+      }
 
       // Render the next math
       this.renderElement();
     } else {
       this.startTime = Date.now();
-
+      let displayContainer = el;
+      if (el.tagName === 'PRE') {
+        displayContainer = el.parentElement;
+        displayContainer;
+      }
       try {
-        el.innerHTML = this.katex.renderToString(text, {
+        displayContainer.innerHTML = this.katex.renderToString(text, {
           displayMode: el.getAttribute('data-math-style') === 'display',
           throwOnError: true,
           maxSize: 20,
@@ -136,6 +164,17 @@ class SafeMathRenderer {
     // and less prone to timeouts.
     setTimeout(this.renderElement, 400);
   }
+
+  attachEvents() {
+    $(document.body).on('click', '.js-lazy-render-math', (event) => {
+      const parent = $(event.target).closest('.js-lazy-render-math-container');
+      const pre = parent.prev();
+
+      parent.remove();
+
+      this.renderElement(pre[0]);
+    });
+  }
 }
 
 export default function renderMath($els) {
@@ -147,6 +186,7 @@ export default function renderMath($els) {
     .then(([katex]) => {
       const renderer = new SafeMathRenderer($els.get(), katex);
       renderer.render();
+      renderer.attachEvents();
     })
     .catch(() => {});
 }
