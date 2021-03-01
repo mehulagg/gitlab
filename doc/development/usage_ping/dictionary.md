@@ -5575,6 +5575,63 @@ Missing description
 | `tier` | free |
 | `skip_validation` | true |
 
+## `counts.package_events_i_package_rubygems_delete_package`
+
+Missing description
+
+| field | value |
+| --- | --- |
+| `key_path` | **`counts.package_events_i_package_rubygems_delete_package`** |
+| `product_section` |  |
+| `product_stage` |  |
+| `product_group` |  |
+| `product_category` |  |
+| `value_type` | number |
+| `status` | data_available |
+| `time_frame` | all |
+| `data_source` | Database |
+| `distribution` |  |
+| `tier` |  |
+| `skip_validation` | true |
+
+## `counts.package_events_i_package_rubygems_pull_package`
+
+Missing description
+
+| field | value |
+| --- | --- |
+| `key_path` | **`counts.package_events_i_package_rubygems_pull_package`** |
+| `product_section` |  |
+| `product_stage` |  |
+| `product_group` |  |
+| `product_category` |  |
+| `value_type` | number |
+| `status` | data_available |
+| `time_frame` | all |
+| `data_source` | Database |
+| `distribution` |  |
+| `tier` |  |
+| `skip_validation` | true |
+
+## `counts.package_events_i_package_rubygems_push_package`
+
+Missing description
+
+| field | value |
+| --- | --- |
+| `key_path` | **`counts.package_events_i_package_rubygems_push_package`** |
+| `product_section` |  |
+| `product_stage` |  |
+| `product_group` |  |
+| `product_category` |  |
+| `value_type` | number |
+| `status` | data_available |
+| `time_frame` | all |
+| `data_source` | Database |
+| `distribution` |  |
+| `tier` |  |
+| `skip_validation` | true |
+
 ## `counts.package_events_i_package_tag_delete_package`
 
 Missing description
@@ -14486,6 +14543,44 @@ Missing description
 | `tier` |  |
 | `skip_validation` | true |
 
+## `redis_hll_counters.deploy_token_packages.i_package_rubygems_deploy_token_monthly`
+
+Missing description
+
+| field | value |
+| --- | --- |
+| `key_path` | **`redis_hll_counters.deploy_token_packages.i_package_rubygems_deploy_token_monthly`** |
+| `product_section` |  |
+| `product_stage` |  |
+| `product_group` |  |
+| `product_category` |  |
+| `value_type` | number |
+| `status` | data_available |
+| `time_frame` | 28d |
+| `data_source` | Redis |
+| `distribution` |  |
+| `tier` |  |
+| `skip_validation` | true |
+
+## `redis_hll_counters.deploy_token_packages.i_package_rubygems_deploy_token_weekly`
+
+Missing description
+
+| field | value |
+| --- | --- |
+| `key_path` | **`redis_hll_counters.deploy_token_packages.i_package_rubygems_deploy_token_weekly`** |
+| `product_section` |  |
+| `product_stage` |  |
+| `product_group` |  |
+| `product_category` |  |
+| `value_type` | number |
+| `status` | data_available |
+| `time_frame` | 7d |
+| `data_source` | Redis |
+| `distribution` | ee |
+| `tier` |  |
+| `skip_validation` | true |
+
 ## `redis_hll_counters.deploy_token_packages.i_package_tag_deploy_token_monthly`
 
 Missing description
@@ -17661,6 +17756,25 @@ Missing description
 | `tier` | free |
 | `skip_validation` | true |
 
+## `redis_hll_counters.quickactions.i_quickactions_invite_email_multiple_weekly`
+
+Missing description
+
+| field | value |
+| --- | --- |
+| `key_path` | **`redis_hll_counters.quickactions.i_quickactions_invite_email_multiple_weekly`** |
+| `product_section` |  |
+| `product_stage` |  |
+| `product_group` |  |
+| `product_category` |  |
+| `value_type` | number |
+| `status` | data_available |
+| `time_frame` | 7d |
+| `data_source` | Redis |
+| `distribution` | ee |
+| `tier` |  |
+| `skip_validation` | true |
+
 ## `redis_hll_counters.quickactions.i_quickactions_invite_email_single_monthly`
 
 Missing description
@@ -17680,6 +17794,25 @@ Missing description
 | `data_source` | Redis_hll |
 | `distribution` | ce |
 | `tier` | free |
+| `skip_validation` | true |
+
+## `redis_hll_counters.quickactions.i_quickactions_invite_email_single_weekly`
+
+Missing description
+
+| field | value |
+| --- | --- |
+| `key_path` | **`redis_hll_counters.quickactions.i_quickactions_invite_email_single_weekly`** |
+| `product_section` |  |
+| `product_stage` |  |
+| `product_group` |  |
+| `product_category` |  |
+| `value_type` | number |
+| `status` | data_available |
+| `time_frame` | 7d |
+| `data_source` | Redis |
+| `distribution` | ee |
+| `tier` |  |
 | `skip_validation` | true |
 
 ## `redis_hll_counters.quickactions.i_quickactions_iteration_monthly`
@@ -20558,6 +20691,44 @@ Missing description
 | `status` | data_available |
 | `time_frame` | 7d |
 | `data_source` | Redis_hll |
+| `distribution` | ee |
+| `tier` |  |
+| `skip_validation` | true |
+
+## `redis_hll_counters.user_packages.i_package_rubygems_user_monthly`
+
+Missing description
+
+| field | value |
+| --- | --- |
+| `key_path` | **`redis_hll_counters.user_packages.i_package_rubygems_user_monthly`** |
+| `product_section` |  |
+| `product_stage` |  |
+| `product_group` |  |
+| `product_category` |  |
+| `value_type` | number |
+| `status` | data_available |
+| `time_frame` | 28d |
+| `data_source` | Redis |
+| `distribution` |  |
+| `tier` |  |
+| `skip_validation` | true |
+
+## `redis_hll_counters.user_packages.i_package_rubygems_user_weekly`
+
+Missing description
+
+| field | value |
+| --- | --- |
+| `key_path` | **`redis_hll_counters.user_packages.i_package_rubygems_user_weekly`** |
+| `product_section` |  |
+| `product_stage` |  |
+| `product_group` |  |
+| `product_category` |  |
+| `value_type` | number |
+| `status` | data_available |
+| `time_frame` | 7d |
+| `data_source` | Redis |
 | `distribution` | ee |
 | `tier` |  |
 | `skip_validation` | true |
