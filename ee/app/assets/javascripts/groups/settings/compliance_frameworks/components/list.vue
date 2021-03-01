@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlButton, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -16,12 +16,17 @@ export default {
     DeleteModal,
     EmptyState,
     GlAlert,
+    GlButton,
     GlLoadingIcon,
     ListItem,
     GlTab,
     GlTabs,
   },
   props: {
+    addFrameworkPath: {
+      type: String,
+      required: true,
+    },
     emptyStateSvgPath: {
       type: String,
       required: true,
@@ -121,6 +126,7 @@ export default {
     ),
     allTab: s__('ComplianceFrameworks|All'),
     regulatedTab: s__('ComplianceFrameworks|Regulated'),
+    addBtn: s__('ComplianceFrameworks|Add framework'),
   },
 };
 </script>
@@ -135,7 +141,11 @@ export default {
       {{ alertMessage }}
     </gl-alert>
     <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-5" />
-    <empty-state v-if="isEmpty" :image-path="emptyStateSvgPath" />
+    <empty-state
+      v-if="isEmpty"
+      :image-path="emptyStateSvgPath"
+      :add-framework-path="addFrameworkPath"
+    />
 
     <gl-tabs v-if="hasFrameworks">
       <gl-tab class="gl-mt-6" :title="$options.i18n.allTab">
@@ -148,6 +158,16 @@ export default {
         />
       </gl-tab>
       <gl-tab disabled :title="$options.i18n.regulatedTab" />
+      <template #tabs-end>
+        <gl-button
+          class="gl-align-self-center gl-ml-auto"
+          category="primary"
+          variant="confirm"
+          :href="addFrameworkPath"
+        >
+          {{ $options.i18n.addBtn }}
+        </gl-button>
+      </template>
     </gl-tabs>
     <delete-modal
       v-if="hasFrameworks"

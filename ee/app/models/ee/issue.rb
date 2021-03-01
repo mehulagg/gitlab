@@ -68,8 +68,6 @@ module EE
       validates :weight, allow_nil: true, numericality: { greater_than_or_equal_to: 0 }
       validate :validate_confidential_epic
 
-      after_create :update_generic_alert_title, if: :generic_alert_with_default_title?
-
       state_machine :state_id do
         after_transition do |issue|
           issue.refresh_blocking_and_blocked_issues_cache!
@@ -262,15 +260,6 @@ module EE
 
     def blocking_issues_ids
       @blocking_issues_ids ||= ::IssueLink.blocking_issue_ids_for(self)
-    end
-
-    def update_generic_alert_title
-      update(title: "#{title} #{iid}")
-    end
-
-    def generic_alert_with_default_title?
-      title == ::Gitlab::AlertManagement::Payload::Generic::DEFAULT_TITLE &&
-        author == ::User.alert_bot
     end
 
     def validate_confidential_epic

@@ -40,4 +40,29 @@ export default {
 
     state.isLoading = false;
   },
+
+  [types.SET_MEMBER_TO_REMOVE](state, memberToRemove) {
+    if (!memberToRemove) {
+      state.memberToRemove = null;
+    } else {
+      state.memberToRemove = state.members.find((member) => member.id === memberToRemove.id);
+    }
+  },
+
+  [types.REMOVE_MEMBER](state) {
+    state.isLoading = true;
+    state.hasError = false;
+  },
+
+  [types.REMOVE_MEMBER_SUCCESS](state) {
+    state.isLoading = false;
+    state.hasError = false;
+    state.memberToRemove = null;
+  },
+
+  [types.REMOVE_MEMBER_ERROR](state) {
+    state.isLoading = false;
+    state.hasError = true;
+    state.memberToRemove = null;
+  },
 };

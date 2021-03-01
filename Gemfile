@@ -89,7 +89,7 @@ gem 'grape-entity', '~> 0.7.1'
 gem 'rack-cors', '~> 1.0.6', require: 'rack/cors'
 
 # GraphQL API
-gem 'graphql', '~> 1.11.4'
+gem 'graphql', '~> 1.11.8'
 # NOTE: graphiql-rails v1.5+ doesn't work: https://gitlab.com/gitlab-org/gitlab/issues/31771
 # TODO: remove app/views/graphiql/rails/editors/show.html.erb when https://github.com/rmosolgo/graphiql-rails/pull/71 is released:
 # https://gitlab.com/gitlab-org/gitlab/issues/31747
@@ -122,7 +122,7 @@ gem 'fog-local', '~> 0.6'
 gem 'fog-openstack', '~> 1.0'
 gem 'fog-rackspace', '~> 0.1.1'
 gem 'fog-aliyun', '~> 0.3'
-gem 'gitlab-fog-azure-rm', '~> 1.0', require: false
+gem 'gitlab-fog-azure-rm', '~> 1.0.1', require: false
 
 # for Google storage
 gem 'google-api-client', '~> 0.33'
@@ -196,7 +196,7 @@ gem 'acts-as-taggable-on', '~> 7.0'
 gem 'sidekiq', '~> 5.2.7'
 gem 'sidekiq-cron', '~> 1.0'
 gem 'redis-namespace', '~> 1.7.0'
-gem 'gitlab-sidekiq-fetcher', '0.5.3', require: 'sidekiq-reliable-fetch'
+gem 'gitlab-sidekiq-fetcher', '0.5.5', require: 'sidekiq-reliable-fetch'
 
 # Cron Parser
 gem 'fugit', '~> 1.2.1'
@@ -479,7 +479,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.4.9'
+gem 'gitlab-experiment', '~> 0.4.12'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

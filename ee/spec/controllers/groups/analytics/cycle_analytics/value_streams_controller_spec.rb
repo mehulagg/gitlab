@@ -135,6 +135,17 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
           expect(json_response['id']).to eq(value_stream.id)
           expect(json_response['stages'].first['title']).to eq('updated stage name')
         end
+
+        context 'when deleting the stage by excluding it from the stages array' do
+          let(:value_stream_params) { { name: 'no stages', stages: [] } }
+
+          it 'returns a successful 200 response' do
+            put :update, params: { id: value_stream.id, group_id: group, value_stream: value_stream_params }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['stages']).to be_empty
+          end
+        end
       end
     end
   end

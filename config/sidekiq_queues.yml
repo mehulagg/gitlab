@@ -212,7 +212,11 @@
   - 1
 - - namespaceless_project_destroy
   - 1
+- - namespaces_onboarding_issue_created
+  - 1
 - - namespaces_onboarding_pipeline_created
+  - 1
+- - namespaces_onboarding_progress
   - 1
 - - namespaces_onboarding_user_added
   - 1
@@ -345,6 +349,10 @@
 - - snippet_schedule_bulk_repository_shard_moves
   - 1
 - - snippet_update_repository_storage
+  - 1
+- - snippets_schedule_bulk_repository_shard_moves
+  - 1
+- - snippets_update_repository_storage
   - 1
 - - status_page_publish
   - 1

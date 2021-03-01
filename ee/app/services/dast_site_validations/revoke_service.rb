@@ -23,8 +23,7 @@ module DastSiteValidations
     private
 
     def allowed?
-      container.feature_available?(:security_on_demand_scans) &&
-        Feature.enabled?(:security_on_demand_scans_site_validation, container, default_enabled: :yaml)
+      container.feature_available?(:security_on_demand_scans)
     end
 
     def url_base

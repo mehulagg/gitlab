@@ -94,24 +94,28 @@ export const formattedMockNetworkPolicyStatisticsResponse = {
 export const mockAlerts = [
   {
     iid: '01',
+    eventCount: '1',
     title: 'Issue 01',
     status: 'TRIGGERED',
     startedAt: '2020-11-19T18:36:23Z',
   },
   {
     iid: '02',
+    eventCount: '2',
     title: 'Issue 02',
     status: 'ACKNOWLEDGED',
     startedAt: '2020-11-16T21:59:28Z',
   },
   {
     iid: '03',
+    eventCount: '3',
     title: 'Issue 03',
     status: 'RESOLVED',
     startedAt: '2020-11-13T20:03:04Z',
   },
   {
     iid: '04',
+    eventCount: '4',
     title: 'Issue 04',
     status: 'IGNORED',
     startedAt: '2020-10-29T13:37:55Z',

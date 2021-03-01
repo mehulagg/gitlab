@@ -5,7 +5,7 @@ group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Groups
+# Groups **(FREE)**
 
 In GitLab, you can put related projects together in a group.
 
@@ -57,11 +57,12 @@ To create a group:
    - To the left of the search box, select the plus sign and then **New group**.
 1. For the **Group name**, use only:
    - Alphanumeric characters
+   - Emojis
    - Underscores
-   - Dashes and dots
-   - Spaces
+   - Dashes, dots, spaces and parenthesis (however, it cannot start with any of these characters)
 
    For a list of words that cannot be used as group names, see [reserved names](../reserved_names.md).
+
 1. For the **Group URL**, which is used for the [namespace](#namespaces),
    use only:
    - Alphanumeric characters
@@ -148,54 +149,35 @@ To remove a member from a group:
 > - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/228675) in GitLab 13.7.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/289911) in GitLab 13.8.
 
-The following sections illustrate how you can filter and sort members in a group. To view these options,
-navigate to your desired group, go to **Members**, and include the noted search terms.
+To find members in a group, you can sort, filter, or search.
 
-### Membership filter
+### Filter a group
 
-By default, inherited and direct members are displayed. The [membership](subgroups/index.md#membership) filter can be used to display only inherited or only direct members.
+Filter a group to find members. By default, all members in the group and subgroups are displayed.
 
-#### Only display inherited members
+1. Go to the group and select **Members** (**{users}**).
+1. Above the list of members, in the **Filter members** box, enter filter criteria.
+   - To view members in the group only, select **Membership = Direct**.
+   - To view members of the group and its subgroups, select **Membership = Inherited**.
+   - To view members with two-factor authentication enabled or disabled, select **2FA = Enabled** or **Disabled**.
 
-Include `Membership` `=` `Inherited` in the search text box.
-
-![Group members filter inherited](img/group_members_filter_inherited_13_7.png)
-
-#### Only display direct members
-
-Include `Membership` `=` `Direct` in the search text box.
-
-![Group members filter direct](img/group_members_filter_direct_13_7.png)
-
-### 2FA filter
-
-[Owner](../permissions.md#group-members-permissions) permissions required.
-
-By default, members with 2FA enabled and disabled are displayed. The 2FA filter can be used to display only members with 2FA enabled or only members with 2FA disabled.
-
-#### Only display members with 2FA enabled
-
-Include `2FA` `=` `Enabled` in the search text box.
-
-![Group members filter 2FA enabled](img/group_members_filter_2fa_enabled_13_7.png)
-
-#### Only display members with 2FA disabled
-
-Include `2FA` `=` `Disabled` in the search text box.
-
-![Group members filter 2FA disabled](img/group_members_filter_2fa_disabled_13_7.png)
-
-### Search
+### Search a group
 
 You can search for members by name, username, or email.
 
-![Group members search](img/group_members_search_13_7.png)
+1. Go to the group and select **Members** (**{users}**).
+1. Above the list of members, in the **Filter members** box, enter search criteria.
+1. To the right of the **Filter members** box, select the magnifying glass (**{search}**).
 
-### Sort
+### Sort members in a group
 
-You can sort members by **Account**, **Access granted**, **Max role**, or **Last sign-in** in ascending or descending order.
+You can sort members by **Account**, **Access granted**, **Max role**, or **Last sign-in**.
 
-![Group members sort](img/group_members_sort_13_7.png)
+1. Go to the group and select **Members** (**{users}**).
+1. Above the list of members, on the top right, from the **Account** list, select
+   the criteria to filter by.
+1. To switch the sort between ascending and descending, to the right of the **Account** list, select the
+   arrow (**{sort-lowest}** or **{sort-highest}**).
 
 ## Mention a group in an issue or merge request
 
@@ -209,7 +191,7 @@ added to their To-do list.
 
 A to-do item is created for all the group and subgroup members.
 
-## Changing the default branch protection of a group
+## Change the default branch protection of a group
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7583) in GitLab 12.9.
 
@@ -497,7 +479,7 @@ username, you can create a new group and transfer projects to it.
 
 You can change settings that are specific to repositories in your group.
 
-#### Custom initial branch name **(FREE)**
+#### Custom initial branch name
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43290) in GitLab 13.6.
 

@@ -13,6 +13,10 @@ module Gitlab
             :merge_request_label_added
           end
 
+          def markdown_description
+            s_("CycleAnalyticsEvent|%{label_reference} label was added to the merge request") % { label_reference: label.to_reference }
+          end
+
           def object_type
             MergeRequest
           end

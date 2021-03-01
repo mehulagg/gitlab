@@ -275,12 +275,9 @@ describe('ValueStreamForm', () => {
           });
 
           it('displays a toast message', () => {
-            expect(mockToastShow).toHaveBeenCalledWith(
-              `'${initialData.name}' Value Stream edited`,
-              {
-                position: 'top-center',
-              },
-            );
+            expect(mockToastShow).toHaveBeenCalledWith(`'${initialData.name}' Value Stream saved`, {
+              position: 'top-center',
+            });
           });
         });
 

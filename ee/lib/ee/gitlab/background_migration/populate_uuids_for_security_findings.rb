@@ -228,7 +228,7 @@ module EE
         end
 
         override :perform
-        def perform(scan_ids)
+        def perform(*scan_ids)
           SecurityScan.where(id: scan_ids).includes(:pipeline, :artifacts).each(&:recover_findings)
 
           log_info(scan_ids.count)

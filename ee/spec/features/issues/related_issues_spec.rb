@@ -123,23 +123,11 @@ RSpec.describe 'Related issues', :js do
           expect(find('.js-related-issues-header-issue-count')).to have_content('1')
         end
 
-        it_behaves_like 'page with comment and close button', 'Close issue' do
-          def setup
-            visit project_issue_path(project, issue_a)
-
-            wait_for_requests
-          end
-        end
-
         context 'when clicking the top `Close issue` button in the issue header', :aggregate_failures do
           it_behaves_like 'issue closed by modal', '.detail-page-header'
         end
 
         context 'when clicking the bottom `Close issue` button below the comment textarea', :aggregate_failures do
-          before do
-            stub_feature_flags(remove_comment_close_reopen: false)
-          end
-
           it_behaves_like 'issue closed by modal', '.new-note'
         end
       end

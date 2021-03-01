@@ -58,34 +58,25 @@ RSpec.describe TrialStatusWidgetHelper do
     end
   end
 
-  describe '#trial_days_remaining_in_words' do
-    let_it_be(:group) { build(:group) }
-    let!(:subscription) { build(:gitlab_subscription, :active_trial, namespace: group) }
+  describe '#plan_title_for_group' do
+    using RSpec::Parameterized::TableSyntax
 
-    subject { helper.trial_days_remaining_in_words(group) }
+    let_it_be(:group) { create(:group) }
 
-    context 'when there are 0 days remaining' do
-      before do
-        subscription.trial_ends_on = Date.current
-      end
+    subject { helper.plan_title_for_group(group) }
 
-      it { is_expected.to eq('Gold Trial – 0 days left') }
+    where(:plan, :title) do
+      :bronze   | 'Bronze'
+      :silver   | 'Silver'
+      :gold     | 'Gold'
+      :premium  | 'Premium'
+      :ultimate | 'Ultimate'
     end
 
-    context 'when there is 1 day remaining' do
-      before do
-        subscription.trial_ends_on = Date.current.advance(days: 1)
-      end
+    with_them do
+      let!(:subscription) { build(:gitlab_subscription, plan, namespace: group) }
 
-      it { is_expected.to eq('Gold Trial – 1 day left') }
-    end
-
-    context 'when there are 2+ days remaining' do
-      before do
-        subscription.trial_ends_on = Date.current.advance(days: 13)
-      end
-
-      it { is_expected.to eq('Gold Trial – 13 days left') }
+      it { is_expected.to eq(title) }
     end
   end
 end

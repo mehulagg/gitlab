@@ -165,16 +165,13 @@ RSpec.describe EE::NamespaceStorageLimitAlertHelper do
 
     let_it_be(:namespace) { build(:namespace) }
 
-    where(:buy_storage_link_enabled, :additional_repo_storage_by_namespace_enabled, :result) do
-      false | false | false
-      false | true  | false
-      true  | false | false
-      true  | true  | true
+    where(:additional_repo_storage_by_namespace_enabled, :result) do
+      false | false
+      true  | true
     end
 
     with_them do
       before do
-        stub_feature_flags(buy_storage_link: buy_storage_link_enabled)
         allow(namespace).to receive(:additional_repo_storage_by_namespace_enabled?)
           .and_return(additional_repo_storage_by_namespace_enabled)
       end

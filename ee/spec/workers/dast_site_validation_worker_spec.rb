@@ -20,13 +20,12 @@ RSpec.describe DastSiteValidationWorker do
       subject
     end
 
-    context 'when the feature is enabled' do
+    context 'when the feature is available' do
       let(:response_body) { dast_site_validation.dast_site_token.token }
       let(:headers) { { 'Content-Type' => 'text/plain; charset=utf-8' } }
 
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
         stub_request(:get, dast_site_validation.validation_url).to_return(body: response_body, headers: headers)
       end
 

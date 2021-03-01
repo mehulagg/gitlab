@@ -2,6 +2,23 @@
 
 module IncidentManagement
   class OncallRotation < ApplicationRecord
+    ActivePeriod = Struct.new(:start_time, :end_time) do
+      def present?
+        start_time && end_time
+      end
+
+      def end_after_start?
+        end_time > start_time if present?
+      end
+
+      def for_date(date)
+        [
+          date.change(hour: start_time.hour, min: start_time.min),
+          date.change(hour: end_time.hour, min: end_time.min)
+        ]
+      end
+    end
+
     self.table_name = 'incident_management_oncall_rotations'
 
     enum length_unit: {
@@ -24,6 +41,11 @@ module IncidentManagement
     validates :length_unit, presence: true
     validate :valid_ends_at, if: -> { ends_at && starts_at }
 
+    validates :active_period_start, presence: true, if: :active_period_end
+    validates :active_period_end, presence: true, if: :active_period_start
+    validate :active_period_end_after_start, if: :active_period_start
+    validate :no_active_period_for_hourly_shifts, if: :hours?
+
     scope :in_progress, -> { where('starts_at < :time AND (ends_at > :time OR ends_at IS NULL)', time: Time.current) }
     scope :except_ids, -> (ids) { where.not(id: ids) }
     scope :with_shift_generation_associations, -> do
@@ -39,15 +61,46 @@ module IncidentManagement
       joins(shifts: { participant: :user }).pluck(:id, 'users.id')
     end
 
-    def shift_duration
+    # The duration of a shift cycle, which is the time until the next participant is on-call.
+    # If a shift active period is setup then many shifts will be within a shift_cycle_duration.
+    def shift_cycle_duration
       # As length_unit is an enum, input is guaranteed to be appropriate
       length.public_send(length_unit) # rubocop:disable GitlabSecurity/PublicSend
+    end
+
+    # If there is an active period, and the rotation unit is weeks, we multiple the
+    # count of shifts per cycle by 7, as there are 7 days in a week.
+    def shifts_per_cycle
+      return 1 unless has_shift_active_period?
+
+      weeks? ? (7 * length) : length
+    end
+
+    def active_period
+      ActivePeriod.new(active_period_start, active_period_end)
+    end
+
+    def has_shift_active_period?
+      !hours? && active_period.present?
     end
 
     private
 
     def valid_ends_at
       errors.add(:ends_at, s_('must be after start')) if ends_at <= starts_at
+    end
+
+    def active_period_end_after_start
+      return unless active_period.present?
+      return if active_period.end_after_start?
+
+      errors.add(:active_period_end, _('must be later than active period start'))
+    end
+
+    def no_active_period_for_hourly_shifts
+      if active_period_start || active_period_end
+        errors.add(:length_unit, _('Restricted shift times are not available for hourly shifts'))
+      end
     end
   end
 end

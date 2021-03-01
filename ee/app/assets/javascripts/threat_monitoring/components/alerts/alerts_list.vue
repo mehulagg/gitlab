@@ -193,6 +193,12 @@ export default {
         </gl-link>
       </template>
 
+      <template #cell(eventCount)="{ item }">
+        <div data-testid="threat-alerts-event-count">
+          {{ item.eventCount }}
+        </div>
+      </template>
+
       <template #cell(status)="{ item }">
         <alert-status
           :alert="item"

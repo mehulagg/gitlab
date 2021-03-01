@@ -35,9 +35,7 @@ The security dashboard and vulnerability report displays information about vulne
 - [Static Application Security Testing](../sast/index.md)
 - And [others](../index.md#security-scanning-tools)!
 
-## Requirements
-
-To use the security dashboards and vulnerability reports:
+## Prerequisites
 
 1. At least one project inside a group must be configured with at least one of
    the [supported reports](#supported-reports).
@@ -63,13 +61,21 @@ job finishes but the DAST job fails, the security dashboard doesn't show SAST re
 the analyzer outputs an
 [exit code](../../../development/integrations/secure.md#exit-code).
 
+### Scan details
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3728) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.10.
+
+The **Scan details** section lists the scans run in the pipeline and the total number of
+vulnerabilities per scan. For the DAST scan, select **Download scanned resources** to download a
+CSV file containing details of the resources scanned.
+
 ## Project Security Dashboard
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235558) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.6.
 
 At the project level, the Security Dashboard displays a chart with the number of vulnerabilities over time.
 Access it by navigating to **Security & Compliance > Security Dashboard**. We display historical
-data up to 365 days.
+data up to 365 days. The chart's data is updated daily.
 
 ![Project Security Dashboard](img/project_security_dashboard_chart_v13_6.png)
 

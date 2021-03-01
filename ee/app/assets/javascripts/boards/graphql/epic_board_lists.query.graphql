@@ -1,17 +1,11 @@
-#import "~/graphql_shared/fragments/label.fragment.graphql"
+#import "./epic_board_list.fragment.graphql"
 
 query ListEpics($fullPath: ID!, $boardId: BoardsEpicBoardID!) {
   group(fullPath: $fullPath) {
     epicBoard(id: $boardId) {
       lists {
         nodes {
-          id
-          title
-          position
-          listType
-          label {
-            ...Label
-          }
+          ...EpicBoardListFragment
         }
       }
     }

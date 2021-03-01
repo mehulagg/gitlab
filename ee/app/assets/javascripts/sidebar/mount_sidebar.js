@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { store } from '~/notes/stores';
+import { apolloProvider } from '~/sidebar/graphql';
 import * as CEMountSidebar from '~/sidebar/mount_sidebar';
 import IterationSelect from './components/iteration_select.vue';
 import SidebarItemEpicsSelect from './components/sidebar_item_epics_select.vue';
@@ -85,10 +85,6 @@ function mountIterationSelect() {
   if (!el) {
     return false;
   }
-
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
   const { groupPath, canEdit, projectPath, issueIid } = el.dataset;
 
   return new Vue({

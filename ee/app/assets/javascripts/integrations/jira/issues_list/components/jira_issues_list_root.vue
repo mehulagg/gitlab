@@ -75,13 +75,14 @@ export default {
       );
     },
     hasFiltersApplied() {
-      return Boolean(this.filterParams.search);
+      return Boolean(this.filterParams.search || this.filterParams.labels);
     },
     urlParams() {
       return {
         state: this.currentState,
         page: this.currentPage,
         sort: this.sortedBy,
+        'labels[]': this.filterParams.labels,
         search: this.filterParams.search,
       };
     },
@@ -101,6 +102,7 @@ export default {
             per_page: this.$options.defaultPageSize,
             state: this.currentState,
             sort: this.sortedBy,
+            labels: this.filterParams.labels,
             search: this.filterParams.search,
           },
         })
@@ -190,7 +192,7 @@ export default {
     :previous-page="currentPage - 1"
     :next-page="currentPage + 1"
     :url-params="urlParams"
-    :enable-label-permalinks="false"
+    label-filter-param="labels"
     recent-searches-storage-key="jira_issues"
     @click-tab="fetchIssuesBy('currentState', $event)"
     @page-change="fetchIssuesBy('currentPage', $event)"

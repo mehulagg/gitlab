@@ -15,7 +15,7 @@ RSpec.describe Banzai::Filter::JiraPrivateImageLinkFilter do
     it 'replaces the Jira private images with the link to the image' do
       doc = filter("<img src=\"#{img_link}\">", context)
 
-      expect(doc.to_html).to eq("<a href=\"#{jira_service.url}#{img_link}\">#{jira_service.url}#{img_link}</a>")
+      expect(doc.to_html).to eq("<a class=\"with-attachment-icon\" href=\"#{jira_service.url}#{img_link}\">#{jira_service.url}#{img_link}</a>")
     end
   end
 

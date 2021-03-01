@@ -240,6 +240,7 @@ export default {
           ref="createIssue"
           variant="success"
           category="secondary"
+          data-qa-selector="create_issue_button"
           :loading="isProcessingAction"
           @click="createIssue"
         >

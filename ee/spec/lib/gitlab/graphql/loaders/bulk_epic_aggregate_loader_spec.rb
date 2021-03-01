@@ -88,9 +88,15 @@ RSpec.describe Gitlab::Graphql::Loaders::BulkEpicAggregateLoader do
     end
 
     it 'errors when the number of retrieved records exceeds the maximum' do
-      stub_const("Gitlab::Graphql::Loaders::BulkEpicAggregateLoader::MAXIMUM_LOADABLE", 1)
+      stub_const("Gitlab::Graphql::Loaders::BulkEpicAggregateLoader::MAXIMUM_LOADABLE", 4)
 
       expect { subject.execute }.to raise_error(ArgumentError, /too many records/)
+    end
+
+    it 'errors when the number of retrieved epics exceeds the maximum' do
+      stub_const("Gitlab::Graphql::Loaders::BulkEpicAggregateLoader::MAXIMUM_LOADABLE", 1)
+
+      expect { subject.execute }.to raise_error(ArgumentError, /too many epics/)
     end
 
     context 'testing for a single database query' do

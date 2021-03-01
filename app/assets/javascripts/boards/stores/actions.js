@@ -1,4 +1,5 @@
 import { pick } from 'lodash';
+import createBoardListMutation from 'ee_else_ce/boards/graphql/board_list_create.mutation.graphql';
 import boardListsQuery from 'ee_else_ce/boards/graphql/board_lists.query.graphql';
 import {
   BoardType,
@@ -21,7 +22,6 @@ import {
   transformNotFilters,
 } from '../boards_util';
 import boardLabelsQuery from '../graphql/board_labels.query.graphql';
-import createBoardListMutation from '../graphql/board_list_create.mutation.graphql';
 import destroyBoardListMutation from '../graphql/board_list_destroy.mutation.graphql';
 import updateBoardListMutation from '../graphql/board_list_update.mutation.graphql';
 import groupProjectsQuery from '../graphql/group_projects.query.graphql';
@@ -128,7 +128,11 @@ export default {
     }, flashAnimationDuration);
   },
 
-  createList: (
+  createList: ({ dispatch }, { backlog, labelId, milestoneId, assigneeId }) => {
+    dispatch('createIssueList', { backlog, labelId, milestoneId, assigneeId });
+  },
+
+  createIssueList: (
     { state, commit, dispatch, getters },
     { backlog, labelId, milestoneId, assigneeId },
   ) => {
@@ -161,15 +165,18 @@ export default {
           dispatch('highlightList', list.id);
         }
       })
-      .catch(() => commit(types.CREATE_LIST_FAILURE));
+      .catch((e) => {
+        commit(types.CREATE_LIST_FAILURE);
+        throw e;
+      });
   },
 
   addList: ({ commit }, list) => {
     commit(types.RECEIVE_ADD_LIST_SUCCESS, updateListPosition(list));
   },
 
-  fetchLabels: ({ state, commit }, searchTerm) => {
-    const { fullPath, boardType } = state;
+  fetchLabels: ({ state, commit, getters }, searchTerm) => {
+    const { fullPath, boardType, isEpicBoard } = state;
 
     const variables = {
       fullPath,
@@ -178,15 +185,29 @@ export default {
       isProject: boardType === BoardType.project,
     };
 
+    commit(types.RECEIVE_LABELS_REQUEST);
+
     return gqlClient
       .query({
         query: boardLabelsQuery,
         variables,
       })
       .then(({ data }) => {
-        const labels = data[boardType]?.labels.nodes;
+        let labels = data[boardType]?.labels.nodes;
+
+        if (!getters.shouldUseGraphQL && !isEpicBoard) {
+          labels = labels.map((label) => ({
+            ...label,
+            id: getIdFromGraphQLId(label.id),
+          }));
+        }
+
         commit(types.RECEIVE_LABELS_SUCCESS, labels);
         return labels;
+      })
+      .catch((e) => {
+        commit(types.RECEIVE_LABELS_FAILURE);
+        throw e;
       });
   },
 

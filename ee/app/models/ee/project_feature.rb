@@ -5,6 +5,12 @@ module EE
     extend ActiveSupport::Concern
 
     EE_FEATURES = %i(requirements).freeze
+    NOTES_PERMISSION_TRACKED_FIELDS = %w(
+      issues_access_level
+      repository_access_level
+      merge_requests_access_level
+      snippets_access_level
+    ).freeze
 
     prepended do
       set_available_features(EE_FEATURES)
@@ -14,7 +20,11 @@ module EE
         if project.maintaining_elasticsearch?
           project.maintain_elasticsearch_update
 
-          ElasticAssociationIndexerWorker.perform_async(self.project.class.name, project_id, ['issues']) if elasticsearch_project_associations_need_updating?
+          associations_to_update = []
+          associations_to_update << 'issues' if elasticsearch_project_issues_need_updating?
+          associations_to_update << 'notes' if elasticsearch_project_notes_need_updating?
+
+          ElasticAssociationIndexerWorker.perform_async(self.project.class.name, project_id, associations_to_update) if associations_to_update.any?
         end
       end
 
@@ -22,7 +32,11 @@ module EE
 
       private
 
-      def elasticsearch_project_associations_need_updating?
+      def elasticsearch_project_notes_need_updating?
+        self.previous_changes.keys.any? { |key| NOTES_PERMISSION_TRACKED_FIELDS.include?(key) }
+      end
+
+      def elasticsearch_project_issues_need_updating?
         self.previous_changes.key?(:issues_access_level)
       end
     end

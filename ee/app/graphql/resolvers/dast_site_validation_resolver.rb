@@ -10,15 +10,7 @@ module Resolvers
              description: 'Normalized URL of the target to be scanned.'
 
     def resolve(**args)
-      return DastSiteValidation.none unless allowed?
-
       DastSiteValidationsFinder.new(project_id: project.id, url_base: args[:normalized_target_urls], most_recent: true).execute
-    end
-
-    private
-
-    def allowed?
-      ::Feature.enabled?(:security_on_demand_scans_site_validation, project, default_enabled: :yaml)
     end
   end
 end

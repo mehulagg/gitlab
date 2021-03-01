@@ -63,6 +63,7 @@ class Namespace < ApplicationRecord
 
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
+  validate :validate_parent_type, if: -> { Feature.enabled?(:validate_namespace_parent_type) }
   validate :nesting_level_allowed
   validate :changing_shared_runners_enabled_is_allowed
   validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed
@@ -81,6 +82,8 @@ class Namespace < ApplicationRecord
   after_update :move_dir, if: :saved_change_to_path_or_parent?
   before_destroy(prepend: true) { prepare_for_destroy }
   after_destroy :rm_dir
+
+  before_save :ensure_delayed_project_removal_assigned_to_namespace_settings, if: :delayed_project_removal_changed?
 
   scope :for_user, -> { where('type IS NULL') }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
@@ -257,12 +260,8 @@ class Namespace < ApplicationRecord
   # Includes projects from this namespace and projects from all subgroups
   # that belongs to this namespace
   def all_projects
-    if Feature.enabled?(:recursive_approach_for_all_projects)
-      namespace = user? ? self : self_and_descendants
-      Project.where(namespace: namespace)
-    else
-      Project.inside_path(full_path)
-    end
+    namespace = user? ? self : self_and_descendants
+    Project.where(namespace: namespace)
   end
 
   # Includes pipelines from this namespace and pipelines from all subgroups
@@ -408,6 +407,13 @@ class Namespace < ApplicationRecord
 
   private
 
+  def ensure_delayed_project_removal_assigned_to_namespace_settings
+    return if Feature.disabled?(:migrate_delayed_project_removal, default_enabled: true)
+
+    self.namespace_settings || build_namespace_settings
+    namespace_settings.delayed_project_removal = delayed_project_removal
+  end
+
   def all_projects_with_pages
     if all_projects.pages_metadata_not_migrated.exists?
       Gitlab::BackgroundMigration::MigratePagesMetadata.new.perform_on_relation(
@@ -440,6 +446,16 @@ class Namespace < ApplicationRecord
   def nesting_level_allowed
     if ancestors.count > Group::NUMBER_OF_ANCESTORS_ALLOWED
       errors.add(:parent_id, 'has too deep level of nesting')
+    end
+  end
+
+  def validate_parent_type
+    return unless has_parent?
+
+    if user?
+      errors.add(:parent_id, 'a user namespace cannot have a parent')
+    elsif group?
+      errors.add(:parent_id, 'a group cannot have a user namespace as its parent') if parent.user?
     end
   end
 

@@ -8,7 +8,7 @@ RSpec.describe API::Namespaces do
 
   let_it_be(:group1, reload: true) { create(:group, name: 'test.test-group.2') }
   let_it_be(:group2) { create(:group, :nested) }
-  let_it_be(:gold_plan) { create(:gold_plan) }
+  let_it_be(:ultimate_plan) { create(:ultimate_plan) }
 
   describe "GET /namespaces" do
     context "when authenticated as admin" do
@@ -99,9 +99,9 @@ RSpec.describe API::Namespaces do
         end
       end
 
-      context 'when requesting silver plan' do
+      context 'when requesting premium plan' do
         it 'counts guest members' do
-          get api("/namespaces?requested_hosted_plan=silver", user)
+          get api("/namespaces?requested_hosted_plan=premium", user)
 
           expect(json_response.first['billable_members_count']).to eq(3)
         end
@@ -272,7 +272,7 @@ RSpec.describe API::Namespaces do
         {
           start_date: '2019-06-01',
           end_date: '2020-06-01',
-          plan_code: 'gold',
+          plan_code: 'ultimate',
           seats: 20,
           max_seats_used: 10,
           auto_renew: true,
@@ -392,11 +392,11 @@ RSpec.describe API::Namespaces do
       get api("/namespaces/#{namespace.id}/gitlab_subscription", current_user)
     end
 
-    let_it_be(:silver_plan) { create(:silver_plan) }
+    let_it_be(:premium_plan) { create(:premium_plan) }
     let_it_be(:owner) { create(:user) }
     let_it_be(:developer) { create(:user) }
     let_it_be(:namespace) { create(:group) }
-    let_it_be(:gitlab_subscription) { create(:gitlab_subscription, hosted_plan: silver_plan, namespace: namespace) }
+    let_it_be(:gitlab_subscription) { create(:gitlab_subscription, hosted_plan: premium_plan, namespace: namespace) }
 
     before do
       namespace.add_owner(owner)
@@ -429,8 +429,8 @@ RSpec.describe API::Namespaces do
 
         expect(json_response.keys).to match_array(%w[plan usage billing])
         expect(json_response['plan'].keys).to match_array(%w[name code trial upgradable auto_renew])
-        expect(json_response['plan']['name']).to eq('Silver')
-        expect(json_response['plan']['code']).to eq('silver')
+        expect(json_response['plan']['name']).to eq('Premium')
+        expect(json_response['plan']['code']).to eq('premium')
         expect(json_response['plan']['trial']).to eq(false)
         expect(json_response['plan']['upgradable']).to eq(true)
         expect(json_response['usage'].keys).to match_array(%w[seats_in_subscription seats_in_use max_seats_used seats_owed])
@@ -444,14 +444,14 @@ RSpec.describe API::Namespaces do
       put api("/namespaces/#{namespace_id}/gitlab_subscription", current_user), params: payload
     end
 
-    let_it_be(:silver_plan) { create(:silver_plan) }
+    let_it_be(:premium_plan) { create(:premium_plan) }
     let_it_be(:namespace) { create(:group, name: 'test.test-group.22') }
     let_it_be(:gitlab_subscription) { create(:gitlab_subscription, namespace: namespace) }
 
     let(:params) do
       {
         seats: 150,
-        plan_code: 'silver',
+        plan_code: 'premium',
         start_date: '01/01/2018',
         end_date: '01/01/2019'
       }
@@ -499,8 +499,8 @@ RSpec.describe API::Namespaces do
           expect(response).to have_gitlab_http_status(:ok)
           expect(gitlab_subscription.reload.seats).to eq(150)
           expect(gitlab_subscription.max_seats_used).to eq(0)
-          expect(gitlab_subscription.plan_name).to eq('silver')
-          expect(gitlab_subscription.plan_title).to eq('Silver')
+          expect(gitlab_subscription.plan_name).to eq('premium')
+          expect(gitlab_subscription.plan_title).to eq('Premium')
         end
 
         it 'is successful using full_path when namespace path contains dots' do

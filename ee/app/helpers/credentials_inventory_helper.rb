@@ -25,6 +25,10 @@ module CredentialsInventoryHelper
     false
   end
 
+  def gpg_keys_available?
+    false
+  end
+
   def credentials_inventory_path(args)
     raise NotImplementedError, "#{self.class} does not implement #{__method__}"
   end

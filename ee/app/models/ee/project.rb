@@ -62,6 +62,7 @@ module EE
           includes(:protected_branches).reject { |rule| rule.applies_to_branch?(branch) }
         end
       end
+      has_many :external_approval_rules, class_name: 'ApprovalRules::ExternalApprovalRule'
       has_many :approval_merge_request_rules, through: :merge_requests, source: :approval_rules
       has_many :audit_events, as: :entity
       has_many :path_locks
@@ -108,6 +109,7 @@ module EE
       has_one :security_orchestration_policy_configuration, class_name: 'Security::OrchestrationPolicyConfiguration', foreign_key: :project_id, inverse_of: :project
 
       elastic_index_dependant_association :issues, on_change: :visibility_level
+      elastic_index_dependant_association :notes, on_change: :visibility_level
 
       scope :with_shared_runners_limit_enabled, -> do
         if ::Ci::Runner.has_shared_runners_with_non_zero_public_cost?

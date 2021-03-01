@@ -669,19 +669,58 @@ RSpec.describe Epic do
     end
   end
 
-  describe '.related_issues' do
-    it 'returns epic issues ordered by relative position' do
-      epic1 = create(:epic, group: group)
-      epic2 = create(:epic, group: group)
-      issue1 = create(:issue, project: project)
-      issue2 = create(:issue, project: project)
-      create(:issue, project: project)
-      create(:epic_issue, epic: epic1, issue: issue1, relative_position: 5)
-      create(:epic_issue, epic: epic2, issue: issue2, relative_position: 2)
+  context 'with existing epics and related issues' do
+    let_it_be(:epic1) { create(:epic, group: group) }
+    let_it_be(:epic2) { create(:epic, group: group, parent: epic1) }
+    let_it_be(:epic3) { create(:epic, group: group, parent: epic2, state: :closed) }
+    let_it_be(:epic4) { create(:epic, group: group) }
+    let_it_be(:issue1) { create(:issue, weight: 2) }
+    let_it_be(:issue2) { create(:issue, weight: 3) }
+    let_it_be(:issue3) { create(:issue, state: :closed) }
+    let_it_be(:epic_issue1) { create(:epic_issue, epic: epic2, issue: issue1, relative_position: 5) }
+    let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2, issue: issue2, relative_position: 2) }
+    let_it_be(:epic_issue3) { create(:epic_issue, epic: epic3, issue: issue3) }
 
-      result = described_class.related_issues(ids: [epic1.id, epic2.id])
+    describe '.related_issues' do
+      it 'returns epic issues ordered by relative position' do
+        result = described_class.related_issues(ids: [epic1.id, epic2.id])
 
-      expect(result.pluck(:id)).to eq [issue2.id, issue1.id]
+        expect(result.pluck(:id)).to eq [issue2.id, issue1.id]
+      end
+    end
+
+    describe '.ids_for_base_and_decendants' do
+      it 'returns epic ids only for selected epics or its descendant epics' do
+        create(:epic, group: group)
+
+        expect(described_class.ids_for_base_and_decendants([epic1.id, epic4.id]))
+          .to match_array([epic1.id, epic2.id, epic3.id, epic4.id])
+      end
+    end
+
+    describe '.issue_metadata_for_epics' do
+      it 'returns hash containing epic issues count and weight and epic status' do
+        result = described_class.issue_metadata_for_epics(epic_ids: [epic2.id, epic3.id], limit: 100)
+
+        expected = [{
+          "epic_state_id" => 1,
+          "id" => epic2.id,
+          "iid" => epic2.iid,
+          "issues_count" => 2,
+          "issues_state_id" => 1,
+          "issues_weight_sum" => 5,
+          "parent_id" => epic1.id
+        }, {
+          "epic_state_id" => 2,
+          "id" => epic3.id,
+          "iid" => epic3.iid,
+          "issues_count" => 1,
+          "issues_state_id" => 2,
+          "issues_weight_sum" => 0,
+          "parent_id" => epic2.id
+        }]
+        expect(result).to match_array(expected)
+      end
     end
   end
 

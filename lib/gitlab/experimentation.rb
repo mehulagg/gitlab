@@ -34,10 +34,6 @@
 module Gitlab
   module Experimentation
     EXPERIMENTS = {
-      ci_notification_dot: {
-        tracking_category: 'Growth::Expansion::Experiment::CiNotificationDot',
-        use_backwards_compatible_subject_index: true
-      },
       upgrade_link_in_user_menu_a: {
         tracking_category: 'Growth::Expansion::Experiment::UpgradeLinkInUserMenuA',
         use_backwards_compatible_subject_index: true
@@ -64,9 +60,6 @@ module Gitlab
       },
       remove_known_trial_form_fields: {
         tracking_category: 'Growth::Conversion::Experiment::RemoveKnownTrialFormFields'
-      },
-      trimmed_skip_trial_copy: {
-        tracking_category: 'Growth::Conversion::Experiment::TrimmedSkipTrialCopy'
       },
       trial_registration_with_social_signin: {
         tracking_category: 'Growth::Conversion::Experiment::TrialRegistrationWithSocialSigning'

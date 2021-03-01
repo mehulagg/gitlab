@@ -181,8 +181,8 @@ module EE
         {
           data_type: 'blob',
           data_type_title: _('File'),
-          title: _('Attachment'),
-          title_plural: _('Attachments'),
+          title: _('Upload'),
+          title_plural: _('Uploads'),
           name: 'attachment',
           name_plural: 'attachments',
           secondary_view: true

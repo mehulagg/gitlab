@@ -9,6 +9,11 @@ FactoryBot.define do
     length { 5 }
     length_unit { :days }
 
+    trait :with_active_period do
+      active_period_start { '08:00' }
+      active_period_end { '17:00' }
+    end
+
     trait :with_participant do
       after(:create) do |rotation|
         user = create(:user)

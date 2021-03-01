@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.secure.coverage_fuzzing_scans
-description: 'Counts fuzzing jobs '
+description: 'Counts fuzzing jobs'
 product_section: sec
 product_stage: secure
 product_group: group::fuzz testing

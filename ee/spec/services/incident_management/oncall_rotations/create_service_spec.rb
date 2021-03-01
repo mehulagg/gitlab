@@ -122,23 +122,68 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
     end
 
     context 'with valid params' do
-      it 'successfully creates an on-call rotation with participants' do
-        expect(execute).to be_success
+      shared_examples 'successfully creates rotation' do
+        it 'successfully creates an on-call rotation with participants' do
+          expect(execute).to be_success
 
-        oncall_rotation = execute.payload[:oncall_rotation]
-        expect(oncall_rotation).to be_a(::IncidentManagement::OncallRotation)
-        expect(oncall_rotation.name).to eq('On-call rotation')
-        expect(oncall_rotation.starts_at).to eq(starts_at)
-        expect(oncall_rotation.ends_at).to eq(1.month.after(starts_at))
-        expect(oncall_rotation.length).to eq(1)
-        expect(oncall_rotation.length_unit).to eq('days')
+          oncall_rotation = execute.payload[:oncall_rotation]
+          expect(oncall_rotation).to be_a(::IncidentManagement::OncallRotation)
+          expect(oncall_rotation.name).to eq('On-call rotation')
+          expect(oncall_rotation.starts_at).to eq(starts_at)
+          expect(oncall_rotation.ends_at).to eq(1.month.after(starts_at))
+          expect(oncall_rotation.length).to eq(1)
+          expect(oncall_rotation.length_unit).to eq('days')
 
-        expect(oncall_rotation.participants.length).to eq(1)
-        expect(oncall_rotation.participants.first).to have_attributes(
-          **participants.first,
-          rotation: oncall_rotation,
-          persisted?: true
-        )
+          expect(oncall_rotation.participants.length).to eq(1)
+          expect(oncall_rotation.participants.first).to have_attributes(
+            **participants.first,
+            rotation: oncall_rotation,
+            persisted?: true
+          )
+        end
+      end
+
+      it_behaves_like 'successfully creates rotation'
+
+      context 'with an active period given' do
+        let(:active_period_start) { '08:00' }
+        let(:active_period_end) { '17:00' }
+
+        before do
+          params[:active_period_start] = active_period_start
+          params[:active_period_end] = active_period_end
+        end
+
+        shared_examples 'saved the active period times' do
+          it 'saves the active period times' do
+            oncall_rotation = execute.payload[:oncall_rotation]
+
+            expect(oncall_rotation.active_period_start.strftime('%H:%M')).to eq(active_period_start)
+            expect(oncall_rotation.active_period_end.strftime('%H:%M')).to eq(active_period_end)
+          end
+        end
+
+        it_behaves_like 'successfully creates rotation'
+        it_behaves_like 'saved the active period times'
+
+        context 'when only active period end time is set' do
+          let(:active_period_start) { nil }
+
+          it_behaves_like 'error response', "Active period start can't be blank"
+        end
+
+        context 'when only active period start time is set' do
+          let(:active_period_end) { nil }
+
+          it_behaves_like 'error response', "Active period end can't be blank"
+        end
+
+        context 'when end active time is before start active time' do
+          let(:active_period_start) { '17:00' }
+          let(:active_period_end) { '08:00' }
+
+          it_behaves_like 'error response', "Active period end must be later than active period start"
+        end
       end
     end
   end

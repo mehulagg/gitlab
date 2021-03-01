@@ -11,6 +11,9 @@ export default {
   extends: BoardsSelectorFoss,
   computed: {
     ...mapState(['isEpicBoard']),
+    showCreate() {
+      return this.isEpicBoard || this.multipleIssueBoardsAvailable;
+    },
   },
   methods: {
     epicBoardUpdate(data) {

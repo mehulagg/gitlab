@@ -38,6 +38,11 @@ module Types
             null: true,
             description: 'Unit of the on-call rotation length.'
 
+      field :active_period,
+            Types::IncidentManagement::OncallRotationActivePeriodType,
+            null: true,
+            description: 'Active period for the on-call rotation.'
+
       field :participants,
             ::Types::IncidentManagement::OncallParticipantType.connection_type,
             null: true,

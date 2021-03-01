@@ -195,7 +195,7 @@ RSpec.describe EpicsFinder do
               .to receive(:should_check_namespace_plan?)
               .and_return(true)
 
-            create(:gitlab_subscription, :gold, namespace: group)
+            create(:gitlab_subscription, :ultimate, namespace: group)
 
             expect { epics.to_a }.not_to exceed_all_query_limit(6)
           end

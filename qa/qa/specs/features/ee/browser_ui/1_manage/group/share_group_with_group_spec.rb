@@ -2,7 +2,8 @@
 
 module QA
   RSpec.describe 'Manage' do
-    describe 'Group with members' do
+    # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+    describe 'Group with members', :requires_admin do
       let(:admin_api_client) { Runtime::API::Client.as_admin }
 
       let(:source_group_with_members) do
@@ -31,8 +32,7 @@ module QA
       end
 
       before do
-        Runtime::Feature.enable(:invite_members_group_modal, group: source_group_with_members)
-        Runtime::Feature.enable(:invite_members_group_modal, group: target_group_with_project)
+        Runtime::Feature.enable(:invite_members_group_modal)
 
         source_group_with_members.add_member(maintainer_user, Resource::Members::AccessLevel::MAINTAINER)
       end

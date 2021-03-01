@@ -45,7 +45,7 @@ module EE
 
       def epics
         if params[:include_subepics]
-          ::Gitlab::ObjectHierarchy.new(::Epic.for_ids(params[:epic_id])).base_and_descendants.select(:id)
+          ::Gitlab::ObjectHierarchy.new(::Epic.id_in(params[:epic_id])).base_and_descendants.select(:id)
         else
           params[:epic_id]
         end

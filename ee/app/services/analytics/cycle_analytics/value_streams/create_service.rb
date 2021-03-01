@@ -9,7 +9,7 @@ module Analytics
         def initialize(group:, params:, current_user:, value_stream: ::Analytics::CycleAnalytics::GroupValueStream.new(group: group))
           @value_stream = value_stream
           @group = group
-          @params = process_params(params.dup)
+          @params = process_params(params.dup.to_h)
           @current_user = current_user
         end
 
@@ -34,10 +34,8 @@ module Analytics
         attr_reader :value_stream, :group, :params, :current_user
 
         def process_params(raw_params)
-          if raw_params[:stages]
-            raw_params[:stages_attributes] = raw_params.delete(:stages)
-            raw_params[:stages_attributes].map! { |attrs| build_stage_attributes(attrs) }
-          end
+          raw_params[:stages_attributes] = raw_params.delete(:stages) || []
+          raw_params[:stages_attributes].map! { |attrs| build_stage_attributes(attrs) }
 
           raw_params
         end

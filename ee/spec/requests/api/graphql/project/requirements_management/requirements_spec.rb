@@ -169,6 +169,17 @@ RSpec.describe 'getting a requirement list for a project' do
 
           match_single_result(requirement1)
         end
+
+        context 'for MISSING status' do
+          let_it_be(:requirement3) { create(:requirement, project: filter_project, author: other_user, title: 'need test report') }
+          let(:params) { '(lastTestReportState: MISSING)' }
+
+          it 'returns filtered requirements' do
+            expect(graphql_errors).to be_nil
+
+            match_single_result(requirement3)
+          end
+        end
       end
     end
 

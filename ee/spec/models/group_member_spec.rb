@@ -254,7 +254,7 @@ RSpec.describe GroupMember do
   end
 
   context 'group member webhooks', :sidekiq_inline do
-    let_it_be(:group) { create(:group_with_plan, plan: :gold_plan) }
+    let_it_be(:group) { create(:group_with_plan, plan: :ultimate_plan) }
     let_it_be(:group_hook) { create(:group_hook, group: group, member_events: true) }
     let_it_be(:user) { create(:user) }
 
@@ -361,7 +361,7 @@ RSpec.describe GroupMember do
   end
 
   context 'group member welcome email', :sidekiq_inline do
-    let_it_be(:group) { create(:group_with_plan, plan: :gold_plan) }
+    let_it_be(:group) { create(:group_with_plan, plan: :ultimate_plan) }
     let(:user) { create(:user) }
 
     context 'when user is provisioned by group' do
@@ -406,7 +406,7 @@ RSpec.describe GroupMember do
         user_id: group_member.user.id,
         group_access: group_member.human_access,
         expires_at: group_member.expires_at&.xmlschema,
-        group_plan: 'gold',
+        group_plan: 'ultimate',
         event_name: event
       }.to_json
     }

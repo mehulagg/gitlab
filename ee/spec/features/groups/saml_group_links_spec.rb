@@ -14,7 +14,6 @@ RSpec.describe 'SAML group links' do
   context 'when SAML group links is available' do
     before do
       stub_licensed_features(group_saml: true, group_saml_group_sync: true)
-      stub_feature_flags(saml_group_links: true)
 
       create(:saml_provider, group: group, enabled: true)
 

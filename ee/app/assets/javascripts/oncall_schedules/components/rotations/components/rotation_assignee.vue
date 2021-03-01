@@ -39,32 +39,32 @@ export default {
     },
   },
   computed: {
-    chevronClass() {
-      return `gl-bg-data-viz-${this.assignee.colorPalette}-${this.assignee.colorWeight}`;
-    },
-    startsAt() {
-      return sprintf(__('Starts: %{startsAt}'), {
-        startsAt: formatDate(this.rotationAssigneeStartsAt, 'mmmm d, yyyy, h:MMtt Z'),
-      });
-    },
-    rotationAssigneeUniqueID() {
-      const { _uid } = this;
-      return `${this.assignee.user.id}-${_uid}`;
-    },
-    endsAt() {
-      return sprintf(__('Ends: %{endsAt}'), {
-        endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, h:MMtt Z'),
-      });
-    },
-    rotationMobileView() {
-      return this.shiftWidth <= SHIFT_WIDTHS.xs;
-    },
     assigneeName() {
       if (this.shiftWidth <= SHIFT_WIDTHS.sm) {
         return truncate(this.assignee.user.username, 3);
       }
 
       return this.assignee.user.username;
+    },
+    chevronClass() {
+      return `gl-bg-data-viz-${this.assignee.colorPalette}-${this.assignee.colorWeight}`;
+    },
+    endsAt() {
+      return sprintf(__('Ends: %{endsAt}'), {
+        endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, h:MMtt Z'),
+      });
+    },
+    rotationAssigneeUniqueID() {
+      const { _uid } = this;
+      return `${this.assignee.user.id}-${_uid}`;
+    },
+    rotationMobileView() {
+      return this.shiftWidth <= SHIFT_WIDTHS.xs;
+    },
+    startsAt() {
+      return sprintf(__('Starts: %{startsAt}'), {
+        startsAt: formatDate(this.rotationAssigneeStartsAt, 'mmmm d, yyyy, h:MMtt Z'),
+      });
     },
   },
 };
@@ -79,7 +79,7 @@ export default {
       :view-only="true"
     >
       <div class="gl-display-flex gl-text-white gl-font-weight-normal">
-        <gl-avatar :src="assignee.avatarUrl" :size="16" />
+        <gl-avatar :src="assignee.user.avatarUrl" :size="16" />
         <span v-if="!rotationMobileView" class="gl-ml-2" data-testid="rotation-assignee-name">{{
           assigneeName
         }}</span>

@@ -26,7 +26,6 @@ RSpec.describe EE::BulkImports::Groups::Transformers::EpicAttributesTransformer 
         'due_date_is_fixed' => false,
         'relative_position' => 1073716855,
         'confidential' => false,
-        'group_id' => group.id,
         'author_id' => importer_user.id,
         'parent' => nil,
         'children' => [],

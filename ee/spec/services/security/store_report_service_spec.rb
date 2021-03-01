@@ -111,6 +111,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
   context 'with existing data from previous pipeline' do
     let(:scanner) { build(:vulnerabilities_scanner, project: project, external_id: 'bandit', name: 'Bandit') }
     let(:identifier) { build(:vulnerabilities_identifier, project: project, fingerprint: 'e6dd15eda2137be0034977a85b300a94a4f243a3') }
+    let(:different_identifier) { build(:vulnerabilities_identifier, project: project, fingerprint: 'fa47ee81f079e5c38ea6edb700b44eaeb62f67ee') }
     let!(:new_artifact) { create(:ee_ci_job_artifact, :sast, job: new_build) }
     let(:new_build) { create(:ci_build, pipeline: new_pipeline) }
     let(:new_pipeline) { create(:ci_pipeline, project: project) }
@@ -124,10 +125,32 @@ RSpec.describe Security::StoreReportService, '#execute' do
         primary_identifier: identifier,
         scanner: scanner,
         project: project,
+        uuid: "80571acf-8660-4bc8-811a-1d8dec9ab6f4",
         location_fingerprint: 'd869ba3f0b3347eb2749135a437dc07c8ae0f420')
     end
 
     let!(:vulnerability) { create(:vulnerability, findings: [finding], project: project) }
+
+    let(:desired_uuid) do
+      Security::VulnerabilityUUID.generate(
+        report_type: finding.report_type,
+        primary_identifier_fingerprint: finding.primary_identifier.fingerprint,
+        location_fingerprint: finding.location_fingerprint,
+        project_id: finding.project_id
+      )
+    end
+
+    let!(:finding_with_uuidv5) do
+      create(:vulnerabilities_finding,
+        pipelines: [pipeline],
+        identifiers: [different_identifier],
+        primary_identifier: different_identifier,
+        scanner: scanner,
+        project: project,
+        location_fingerprint: '34661e23abcf78ff80dfcc89d0700437612e3f88')
+    end
+
+    let!(:vulnerability_with_uuid5) { create(:vulnerability, findings: [finding_with_uuidv5], project: project) }
 
     before do
       project.add_developer(user)
@@ -135,6 +158,16 @@ RSpec.describe Security::StoreReportService, '#execute' do
     end
 
     subject { described_class.new(new_pipeline, new_report).execute }
+
+    it 'does not change existing UUIDv5' do
+      expect { subject }.not_to change(finding_with_uuidv5, :uuid)
+    end
+
+    it 'updates UUIDv4 to UUIDv5' do
+      subject
+
+      expect(finding.reload.uuid).to eq(desired_uuid)
+    end
 
     it 'inserts only new scanners and reuse existing ones' do
       expect { subject }.to change { Vulnerabilities::Scanner.count }.by(2)
@@ -158,11 +191,13 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     it 'updates existing findings with new data' do
       subject
+
       expect(finding.reload).to have_attributes(severity: 'medium', name: 'Probable insecure usage of temp file/directory.')
     end
 
     it 'updates existing vulnerability with new data' do
       subject
+
       expect(vulnerability.reload).to have_attributes(severity: 'medium', title: 'Probable insecure usage of temp file/directory.', title_html: 'Probable insecure usage of temp file/directory.')
     end
 

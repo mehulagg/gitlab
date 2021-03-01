@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.secure.container_scanning_scans
-description: 'Counts container scanning jobs '
+description: 'Counts container scanning jobs'
 product_section: sec
 product_stage: protect
 product_group: group::container security

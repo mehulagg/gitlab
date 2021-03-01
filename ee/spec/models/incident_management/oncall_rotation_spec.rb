@@ -51,6 +51,48 @@ RSpec.describe IncidentManagement::OncallRotation do
         end
       end
     end
+
+    describe 'active period start/end time' do
+      context 'missing values' do
+        before do
+          allow(subject).to receive(stubbed_field).and_return('08:00')
+        end
+
+        context 'start time set' do
+          let(:stubbed_field) { :active_period_start }
+
+          it { is_expected.to validate_presence_of(:active_period_end) }
+        end
+
+        context 'end time set' do
+          let(:stubbed_field) { :active_period_end }
+
+          it { is_expected.to validate_presence_of(:active_period_start) }
+        end
+      end
+
+      context 'hourly shifts' do
+        subject { build(:incident_management_oncall_rotation, schedule: schedule, name: 'Test rotation', length_unit: :hours) }
+
+        it 'raises a validation error if an active period is set' do
+          subject.active_period_start = '08:00'
+          subject.active_period_end = '17:00'
+
+          expect(subject.valid?).to eq(false)
+          expect(subject.errors.full_messages).to include(/Restricted shift times are not available for hourly shifts/)
+        end
+      end
+
+      context 'end time before start time' do
+        it 'raises a validation error if an active period is set' do
+          subject.active_period_start = '17:00'
+          subject.active_period_end = '08:00'
+
+          expect(subject.valid?).to eq(false)
+          expect(subject.errors.full_messages).to include('Active period end must be later than active period start')
+        end
+      end
+    end
   end
 
   describe 'scopes' do
@@ -66,10 +108,10 @@ RSpec.describe IncidentManagement::OncallRotation do
     end
   end
 
-  describe '#shift_duration' do
+  describe '#shift_cycle_duration' do
     let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule, length: 5, length_unit: :days) }
 
-    subject { rotation.shift_duration }
+    subject { rotation.shift_cycle_duration }
 
     it { is_expected.to eq(5.days) }
 
@@ -78,6 +120,42 @@ RSpec.describe IncidentManagement::OncallRotation do
         let(:rotation) { build(:incident_management_oncall_rotation, schedule: schedule, length_unit: unit) }
 
         it { is_expected.to be_a(ActiveSupport::Duration) }
+      end
+    end
+  end
+
+  describe '#shifts_per_cycle' do
+    let(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule, length: 5, length_unit: length_unit, active_period_start: active_period_start, active_period_end: active_period_end) }
+    let(:length_unit) { :weeks }
+    let(:active_period_start) { nil }
+    let(:active_period_end) { nil }
+
+    subject { rotation.shifts_per_cycle }
+
+    context 'when no shift active period set up' do
+      it { is_expected.to eq(1) }
+    end
+
+    context 'when hours' do
+      let(:length_unit) { :hours }
+
+      it { is_expected.to eq(1) }
+    end
+
+    context 'with shift active periods' do
+      let(:active_period_start) { '08:00' }
+      let(:active_period_end) { '17:00' }
+
+      context 'weeks length unit' do
+        let(:length_unit) { :weeks }
+
+        it { is_expected.to eq(35) }
+      end
+
+      context 'days length unit' do
+        let(:length_unit) { :days }
+
+        it { is_expected.to eq(5) }
       end
     end
   end

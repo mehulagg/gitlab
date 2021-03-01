@@ -23,7 +23,7 @@ module Gitlab
           end
           # rubocop: enable CodeReuse/ActiveRecord
 
-          def skippable?
+          def registry_exists?
             registry.new_record?
           end
 

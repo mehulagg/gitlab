@@ -22,39 +22,6 @@ RSpec.describe Issue do
     it { is_expected.to include_module(EE::WeightEventable) }
   end
 
-  context 'callbacks' do
-    describe '.after_create' do
-      let_it_be(:project) { create(:project) }
-      let(:author) { User.alert_bot }
-
-      context 'when issue title is "New: Incident"' do
-        let(:issue) { build(:issue, project: project, author: author, title: 'New: Incident', iid: 503503) }
-
-        context 'when the author is Alert Bot' do
-          it 'updates issue title with the IID' do
-            expect { issue.save }.to change { issue.title }.to("New: Incident 503503")
-          end
-        end
-
-        context 'when the author is not an Alert Bot' do
-          let(:author) { create(:user) }
-
-          it 'does not change issue title' do
-            expect { issue.save }.not_to change { issue.title }
-          end
-        end
-      end
-
-      context 'when issue title is not "New: Incident"' do
-        let(:issue) { build(:issue, project: project, title: 'Not New: Incident') }
-
-        it 'does not change issue title' do
-          expect { issue.save }.not_to change { issue.title }
-        end
-      end
-    end
-  end
-
   context 'scopes' do
     describe '.counts_by_health_status' do
       it 'returns counts grouped by health_status' do

@@ -409,7 +409,7 @@ RSpec.describe GroupPolicy do
 
         before_all do
           create(:license, plan: License::ULTIMATE_PLAN)
-          create(:gitlab_subscription, :silver, namespace: group)
+          create(:gitlab_subscription, :premium, namespace: group)
         end
 
         context 'without an enabled SAML provider' do
@@ -1284,7 +1284,7 @@ RSpec.describe GroupPolicy do
   end
 
   it_behaves_like 'model with wiki policies' do
-    let_it_be_with_refind(:container) { create(:group_with_plan, plan: :silver_plan) }
+    let_it_be_with_refind(:container) { create(:group_with_plan, plan: :premium_plan) }
     let_it_be(:user) { owner }
 
     before_all do
@@ -1447,11 +1447,11 @@ RSpec.describe GroupPolicy do
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
       end
     end
+  end
 
-    describe ':admin_compliance_framework' do
+  describe 'compliance framework permissions' do
+    shared_context 'compliance framework permissions' do
       using RSpec::Parameterized::TableSyntax
-
-      let(:policy) { :admin_compliance_framework }
 
       where(:role, :licensed, :feature_flag, :allowed) do
         :owner      | true  | true  | true
@@ -1469,12 +1469,26 @@ RSpec.describe GroupPolicy do
         let(:current_user) { public_send(role) }
 
         before do
-          stub_licensed_features(custom_compliance_frameworks: licensed)
+          stub_licensed_features(licensed_feature => licensed)
           stub_feature_flags(ff_custom_compliance_frameworks: feature_flag)
         end
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
       end
+    end
+
+    context ':admin_compliance_framework' do
+      let(:policy) { :admin_compliance_framework }
+      let(:licensed_feature) { :custom_compliance_frameworks }
+
+      include_context 'compliance framework permissions'
+    end
+
+    context ':admin_compliance_pipeline_configuration' do
+      let(:policy) { :admin_compliance_pipeline_configuration }
+      let(:licensed_feature) { :evaluate_group_level_compliance_pipeline }
+
+      include_context 'compliance framework permissions'
     end
   end
 end

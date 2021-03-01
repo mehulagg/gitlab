@@ -62,6 +62,17 @@ Get information about current user.
 
 Fields related to design management.
 
+### DevopsAdoptionSegments
+
+Get configured DevOps adoption segments on the instance.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `after` | Returns the elements in the list that come after the specified cursor. | String |
+| `before` | Returns the elements in the list that come before the specified cursor. | String |
+| `first` | Returns the first _n_ elements from the list. | Int |
+| `last` | Returns the last _n_ elements from the list. | Int |
+
 ### Echo
 
 Text to echo back.
@@ -89,6 +100,20 @@ Find a group.
 ### InstanceSecurityDashboard
 
 Fields related to Instance Security Dashboard.
+
+### InstanceStatisticsMeasurements
+
+Get statistics on the instance. Deprecated in 13.10: This field was renamed. Use the `usageTrendsMeasurements` field instead.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `after` | Returns the elements in the list that come after the specified cursor. | String |
+| `before` | Returns the elements in the list that come before the specified cursor. | String |
+| `first` | Returns the first _n_ elements from the list. | Int |
+| `identifier` | The type of measurement/statistics to retrieve. | MeasurementIdentifier! |
+| `last` | Returns the last _n_ elements from the list. | Int |
+| `recordedAfter` | Measurement recorded after this date. | Time |
+| `recordedBefore` | Measurement recorded before this date. | Time |
 
 ### Issue
 
@@ -142,6 +167,33 @@ Find a project.
 | ----- | ---- | ----------- |
 | `fullPath` | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. | ID! |
 
+### Projects
+
+Find projects visible to the current user.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `after` | Returns the elements in the list that come after the specified cursor. | String |
+| `before` | Returns the elements in the list that come before the specified cursor. | String |
+| `first` | Returns the first _n_ elements from the list. | Int |
+| `ids` | Filter projects by IDs. | ID! => Array |
+| `last` | Returns the last _n_ elements from the list. | Int |
+| `membership` | Limit projects that the current user is a member of. | Boolean |
+| `search` | Search query for project name, path, or description. | String |
+| `searchNamespaces` | Include namespace in project search. | Boolean |
+| `sort` | Sort order of results. | String |
+
+### RunnerPlatforms
+
+Supported runner platforms.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `after` | Returns the elements in the list that come after the specified cursor. | String |
+| `before` | Returns the elements in the list that come before the specified cursor. | String |
+| `first` | Returns the first _n_ elements from the list. | Int |
+| `last` | Returns the last _n_ elements from the list. | Int |
+
 ### RunnerSetup
 
 Get runner setup instructions.
@@ -153,6 +205,37 @@ Get runner setup instructions.
 | `platform` | Platform to generate the instructions for. | String! |
 | `projectId` | Project to register the runner for. | ProjectID |
 
+### Snippets
+
+Find Snippets visible to the current user.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `after` | Returns the elements in the list that come after the specified cursor. | String |
+| `authorId` | The ID of an author. | UserID |
+| `before` | Returns the elements in the list that come before the specified cursor. | String |
+| `explore` | Explore personal snippets. | Boolean |
+| `first` | Returns the first _n_ elements from the list. | Int |
+| `ids` | Array of global snippet IDs. For example, `gid://gitlab/ProjectSnippet/1`. | SnippetID! => Array |
+| `last` | Returns the last _n_ elements from the list. | Int |
+| `projectId` | The ID of a project. | ProjectID |
+| `type` | The type of snippet. | TypeEnum |
+| `visibility` | The visibility of the snippet. | VisibilityScopesEnum |
+
+### UsageTrendsMeasurements
+
+Get statistics on the instance.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `after` | Returns the elements in the list that come after the specified cursor. | String |
+| `before` | Returns the elements in the list that come before the specified cursor. | String |
+| `first` | Returns the first _n_ elements from the list. | Int |
+| `identifier` | The type of measurement/statistics to retrieve. | MeasurementIdentifier! |
+| `last` | Returns the last _n_ elements from the list. | Int |
+| `recordedAfter` | Measurement recorded after this date. | Time |
+| `recordedBefore` | Measurement recorded before this date. | Time |
+
 ### User
 
 Find a user.
@@ -161,6 +244,67 @@ Find a user.
 | ----- | ---- | ----------- |
 | `id` | ID of the User. | UserID |
 | `username` | Username of the User. | String |
+
+### Users
+
+Find users.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `admins` | Return only admin users. | Boolean |
+| `after` | Returns the elements in the list that come after the specified cursor. | String |
+| `before` | Returns the elements in the list that come before the specified cursor. | String |
+| `first` | Returns the first _n_ elements from the list. | Int |
+| `ids` | List of user Global IDs. | ID! => Array |
+| `last` | Returns the last _n_ elements from the list. | Int |
+| `search` | Query to search users by name, username, or primary email. | String |
+| `sort` | Sort users by this criteria. | Sort |
+| `usernames` | List of usernames. | String! => Array |
+
+### Vulnerabilities
+
+Vulnerabilities reported on projects on the current user's instance security dashboard.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `after` | Returns the elements in the list that come after the specified cursor. | String |
+| `before` | Returns the elements in the list that come before the specified cursor. | String |
+| `first` | Returns the first _n_ elements from the list. | Int |
+| `hasIssues` | Returns only the vulnerabilities which have linked issues. | Boolean |
+| `hasResolution` | Returns only the vulnerabilities which have been resolved on default branch. | Boolean |
+| `last` | Returns the last _n_ elements from the list. | Int |
+| `projectId` | Filter vulnerabilities by project. | ID! => Array |
+| `reportType` | Filter vulnerabilities by report type. | VulnerabilityReportType! => Array |
+| `scanner` | Filter vulnerabilities by VulnerabilityScanner.externalId. | String! => Array |
+| `severity` | Filter vulnerabilities by severity. | VulnerabilitySeverity! => Array |
+| `sort` | List vulnerabilities by sort order. | VulnerabilitySort |
+| `state` | Filter vulnerabilities by state. | VulnerabilityState! => Array |
+
+### VulnerabilitiesCountByDay
+
+Number of vulnerabilities per day for the projects on the current user's instance security dashboard.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `after` | Returns the elements in the list that come after the specified cursor. | String |
+| `before` | Returns the elements in the list that come before the specified cursor. | String |
+| `endDate` | Last day for which to fetch vulnerability history. | ISO8601Date! |
+| `first` | Returns the first _n_ elements from the list. | Int |
+| `last` | Returns the last _n_ elements from the list. | Int |
+| `startDate` | First day for which to fetch vulnerability history. | ISO8601Date! |
+
+### VulnerabilitiesCountByDayAndSeverity
+
+Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.
+
+| Name | Description | Type |
+| ----- | ---- | ----------- |
+| `after` | Returns the elements in the list that come after the specified cursor. | String |
+| `before` | Returns the elements in the list that come before the specified cursor. | String |
+| `endDate` | Last day for which to fetch vulnerability history. | ISO8601Date! |
+| `first` | Returns the first _n_ elements from the list. | Int |
+| `last` | Returns the last _n_ elements from the list. | Int |
+| `startDate` | First day for which to fetch vulnerability history. | ISO8601Date! |
 
 ### Vulnerability
 
@@ -525,7 +669,7 @@ Represents a list for an issue board.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `assignee` | User | Assignee in the list. |
-| `collapsed` | Boolean | Indicates if list is collapsed for this user. |
+| `collapsed` | Boolean | Indicates if the list is collapsed for this user. |
 | `id` | ID! | ID (global ID) of the list. |
 | `issues` | IssueConnection | Board issues. |
 | `issuesCount` | Int | Count of issues in the list. |
@@ -669,6 +813,8 @@ Autogenerated return type of CiCdSettingsUpdate.
 | ----- | ---- | ----------- |
 | `artifacts` | CiJobArtifactConnection | Artifacts generated by the job. |
 | `detailedStatus` | DetailedStatus | Detailed status of the job. |
+| `duration` | Int | Duration of the job in seconds. |
+| `finishedAt` | Time | When a job has finished running. |
 | `name` | String | Name of the job. |
 | `needs` | CiBuildNeedConnection | References to builds that must complete before the jobs run. |
 | `pipeline` | Pipeline | Pipeline the job belongs to. |
@@ -1098,12 +1244,22 @@ Represents a DAST Profile.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `branch` | DastProfileBranch | The associated branch. Will always return `null` if `dast_branch_selection` feature flag is disabled. |
 | `dastScannerProfile` | DastScannerProfile | The associated scanner profile. |
 | `dastSiteProfile` | DastSiteProfile | The associated site profile. |
 | `description` | String | The description of the scan. |
 | `editPath` | String | Relative web path to the edit page of a profile. |
 | `id` | DastProfileID! | ID of the profile. |
 | `name` | String | The name of the profile. |
+
+### DastProfileBranch
+
+Represents a DAST Profile Branch.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `exists` | Boolean | Indicates whether or not the branch exists. |
+| `name` | String | The name of the branch. |
 
 ### DastProfileCreatePayload
 
@@ -1156,6 +1312,7 @@ Represents a DAST scanner profile.
 | `globalId` **{warning-solid}** | DastScannerProfileID! | **Deprecated:** Use `id`. Deprecated in 13.6. |
 | `id` | DastScannerProfileID! | ID of the DAST scanner profile. |
 | `profileName` | String | Name of the DAST scanner profile. |
+| `referencedInSecurityPolicies` | String! => Array | List of security policy names that are referencing given project. |
 | `scanType` | DastScanTypeEnum | Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan. |
 | `showDebugMessages` | Boolean! | Indicates if debug messages should be included in DAST console output. True to include the debug messages. |
 | `spiderTimeout` | Int | The maximum number of minutes allowed for the spider to traverse the site. |
@@ -1202,6 +1359,7 @@ Represents a DAST Site Profile.
 | `id` | DastSiteProfileID! | ID of the site profile. |
 | `normalizedTargetUrl` | String | Normalized URL of the target to be scanned. |
 | `profileName` | String | The name of the site profile. |
+| `referencedInSecurityPolicies` | String! => Array | List of security policy names that are referencing given project. |
 | `targetUrl` | String | The URL of the target to be scanned. |
 | `userPermissions` | DastSiteProfilePermissions! | Permissions for the current user on the resource |
 | `validationStatus` | DastSiteProfileValidationStatusEnum | The current validation status of the site profile. |
@@ -1767,6 +1925,7 @@ Relationship between an epic and an issue.
 | `author` | User! | User that created the issue. |
 | `blocked` | Boolean! | Indicates the issue is blocked. |
 | `blockedByCount` | Int | Count of issues blocking this issue. |
+| `blockedByIssues` | IssueConnection | Issues blocking this issue. |
 | `closedAt` | Time | Timestamp of when the issue was closed. |
 | `confidential` | Boolean! | Indicates the issue is confidential. |
 | `createNoteEmail` | String | User specific email address for the issue. |
@@ -1825,7 +1984,9 @@ Represents an epic board list.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `collapsed` | Boolean | Indicates if this list is collapsed for this user. |
 | `epics` | EpicConnection | List epics. |
+| `epicsCount` | Int | Count of epics in the list. |
 | `id` | BoardsEpicListID! | Global ID of the board list. |
 | `label` | Label | Label of the list. |
 | `listType` | String! | Type of the list. |
@@ -2096,6 +2257,7 @@ Describes an incident management on-call rotation.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `activePeriod` | OncallRotationActivePeriodType | Active period for the on-call rotation. |
 | `endsAt` | Time | End date and time of the on-call rotation. |
 | `id` | IncidentManagementOncallRotationID! | ID of the on-call rotation. |
 | `length` | Int | Length of the on-call schedule, in the units specified by lengthUnit. |
@@ -2145,6 +2307,7 @@ A block of time for which a participant is on-call.
 | `author` | User! | User that created the issue. |
 | `blocked` | Boolean! | Indicates the issue is blocked. |
 | `blockedByCount` | Int | Count of issues blocking this issue. |
+| `blockedByIssues` | IssueConnection | Issues blocking this issue. |
 | `closedAt` | Time | Timestamp of when the issue was closed. |
 | `confidential` | Boolean! | Indicates the issue is confidential. |
 | `createNoteEmail` | String | User specific email address for the issue. |
@@ -2474,6 +2637,7 @@ Autogenerated return type of MarkAsSpamSnippet.
 | `diffStatsSummary` | DiffStatsSummary | Summary of which files were changed in this merge request. |
 | `discussionLocked` | Boolean! | Indicates if comments on the merge request are locked to members only. |
 | `discussions` | DiscussionConnection! | All discussions on this noteable. |
+| `divergedFromTargetBranch` | Boolean! | Indicates if the source branch is behind the target branch. |
 | `downvotes` | Int! | Number of downvotes for the merge request. |
 | `forceRemoveSourceBranch` | Boolean | Indicates if the project settings will lead to source branch deletion after merge. |
 | `hasCi` | Boolean! | Indicates if the merge request has CI. |
@@ -2530,7 +2694,7 @@ Autogenerated return type of MarkAsSpamSnippet.
 | `userNotesCount` | Int | User notes count of the merge request. |
 | `userPermissions` | MergeRequestPermissions! | Permissions for the current user on the resource |
 | `webUrl` | String | Web URL of the merge request. |
-| `workInProgress` | Boolean! | Indicates if the merge request is a work in progress (WIP). |
+| `workInProgress` | Boolean! | Indicates if the merge request is a draft. |
 
 ### MergeRequestCreatePayload
 
@@ -2802,6 +2966,15 @@ The rotation participant and color palette.
 | `colorWeight` | String | The color weight to assign to for the on-call user, for example "500". Max 4 chars. For easy identification of the user. |
 | `id` | IncidentManagementOncallParticipantID! | ID of the on-call participant. |
 | `user` | User! | The user who is participating. |
+
+### OncallRotationActivePeriodType
+
+Active period time range for on-call rotation.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `endTime` | String | The end of the rotation active period. |
+| `startTime` | String | The start of the rotation active period. |
 
 ### OncallRotationCreatePayload
 
@@ -3082,7 +3255,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | `dastScannerProfiles` | DastScannerProfileConnection | The DAST scanner profiles associated with the project. |
 | `dastSiteProfile` | DastSiteProfile | DAST Site Profile associated with the project. |
 | `dastSiteProfiles` | DastSiteProfileConnection | DAST Site Profiles associated with the project. |
-| `dastSiteValidations` | DastSiteValidationConnection | DAST Site Validations associated with the project. Always returns no nodes if `security_on_demand_scans_site_validation` is disabled. |
+| `dastSiteValidations` | DastSiteValidationConnection | DAST Site Validations associated with the project. |
 | `description` | String | Short description of the project. |
 | `descriptionHtml` | String | The GitLab Flavored Markdown rendering of `description` |
 | `environment` | Environment | A single environment of the project. |
@@ -3332,6 +3505,16 @@ Represents an asset link associated with a release.
 | `linkType` | ReleaseAssetLinkType | Type of the link: `other`, `runbook`, `image`, `package`; defaults to `other`. |
 | `name` | String | Name of the link. |
 | `url` | String | URL of the link. |
+
+### ReleaseAssetLinkCreatePayload
+
+Autogenerated return type of ReleaseAssetLinkCreate.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `clientMutationId` | String | A unique identifier for the client performing the mutation. |
+| `errors` | String! => Array | Errors encountered during execution of the mutation. |
+| `link` | ReleaseAssetLink | The asset link after mutation. |
 
 ### ReleaseAssets
 
@@ -4863,9 +5046,9 @@ Types of blob viewers.
 
 | Value | Description |
 | ----- | ----------- |
-| `auxiliary` |  |
-| `rich` |  |
-| `simple` |  |
+| `auxiliary` | Auxiliary blob viewers type. |
+| `rich` | Rich blob viewers type. |
+| `simple` | Simple blob viewers type. |
 
 ### CiConfigStatus
 
@@ -5153,10 +5336,10 @@ State of a GitLab issue or merge request.
 
 | Value | Description |
 | ----- | ----------- |
-| `all` |  |
-| `closed` |  |
-| `locked` |  |
-| `opened` |  |
+| `all` | All available |
+| `closed` | In closed state |
+| `locked` | Discussion has been locked |
+| `opened` | In open state |
 
 ### IssueSort
 
@@ -5196,10 +5379,10 @@ State of a GitLab issue.
 
 | Value | Description |
 | ----- | ----------- |
-| `all` |  |
-| `closed` |  |
-| `locked` |  |
-| `opened` |  |
+| `all` | All available |
+| `closed` | In closed state |
+| `locked` | Discussion has been locked |
+| `opened` | In open state |
 
 ### IssueStateEvent
 
@@ -5246,33 +5429,33 @@ Iteration ID wildcard values.
 
 | Value | Description |
 | ----- | ----------- |
-| `ACCESSIBILITY` |  |
-| `API_FUZZING` |  |
-| `ARCHIVE` |  |
-| `BROWSER_PERFORMANCE` |  |
-| `CLUSTER_APPLICATIONS` |  |
-| `COBERTURA` |  |
-| `CODEQUALITY` |  |
-| `CONTAINER_SCANNING` |  |
-| `COVERAGE_FUZZING` |  |
-| `DAST` |  |
-| `DEPENDENCY_SCANNING` |  |
-| `DOTENV` |  |
-| `JUNIT` |  |
-| `LICENSE_MANAGEMENT` |  |
-| `LICENSE_SCANNING` |  |
-| `LOAD_PERFORMANCE` |  |
-| `LSIF` |  |
-| `METADATA` |  |
-| `METRICS` |  |
-| `METRICS_REFEREE` |  |
-| `NETWORK_REFEREE` |  |
-| `PERFORMANCE` |  |
-| `REQUIREMENTS` |  |
-| `SAST` |  |
-| `SECRET_DETECTION` |  |
-| `TERRAFORM` |  |
-| `TRACE` |  |
+| `ACCESSIBILITY` | ACCESSIBILITY job artifact file type. |
+| `API_FUZZING` | API FUZZING job artifact file type. |
+| `ARCHIVE` | ARCHIVE job artifact file type. |
+| `BROWSER_PERFORMANCE` | BROWSER PERFORMANCE job artifact file type. |
+| `CLUSTER_APPLICATIONS` | CLUSTER APPLICATIONS job artifact file type. |
+| `COBERTURA` | COBERTURA job artifact file type. |
+| `CODEQUALITY` | CODE QUALITY job artifact file type. |
+| `CONTAINER_SCANNING` | CONTAINER SCANNING job artifact file type. |
+| `COVERAGE_FUZZING` | COVERAGE FUZZING job artifact file type. |
+| `DAST` | DAST job artifact file type. |
+| `DEPENDENCY_SCANNING` | DEPENDENCY SCANNING job artifact file type. |
+| `DOTENV` | DOTENV job artifact file type. |
+| `JUNIT` | JUNIT job artifact file type. |
+| `LICENSE_MANAGEMENT` | LICENSE MANAGEMENT job artifact file type. |
+| `LICENSE_SCANNING` | LICENSE SCANNING job artifact file type. |
+| `LOAD_PERFORMANCE` | LOAD PERFORMANCE job artifact file type. |
+| `LSIF` | LSIF job artifact file type. |
+| `METADATA` | METADATA job artifact file type. |
+| `METRICS` | METRICS job artifact file type. |
+| `METRICS_REFEREE` | METRICS REFEREE job artifact file type. |
+| `NETWORK_REFEREE` | NETWORK REFEREE job artifact file type. |
+| `PERFORMANCE` | PERFORMANCE job artifact file type. |
+| `REQUIREMENTS` | REQUIREMENTS job artifact file type. |
+| `SAST` | SAST job artifact file type. |
+| `SECRET_DETECTION` | SECRET DETECTION job artifact file type. |
+| `TERRAFORM` | TERRAFORM job artifact file type. |
+| `TRACE` | TRACE job artifact file type. |
 
 ### ListLimitMetric
 
@@ -5339,11 +5522,11 @@ State of a GitLab merge request.
 
 | Value | Description |
 | ----- | ----------- |
-| `all` |  |
-| `closed` |  |
-| `locked` |  |
+| `all` | All available |
+| `closed` | In closed state |
+| `locked` | Discussion has been locked |
 | `merged` | Merge Request has been merged |
-| `opened` |  |
+| `opened` | In open state |
 
 ### MilestoneStateEnum
 
@@ -5490,6 +5673,16 @@ State of a requirement.
 | `ARCHIVED` |  |
 | `OPENED` |  |
 
+### RequirementStatusFilter
+
+Status of a requirement based on last test report.
+
+| Value | Description |
+| ----- | ----------- |
+| `FAILED` |  |
+| `MISSING` | Requirements without any test report. |
+| `PASSED` |  |
+
 ### SastUiComponentSize
 
 Size of UI component in SAST configuration page.
@@ -5629,8 +5822,8 @@ State of a test report.
 
 | Value | Description |
 | ----- | ----------- |
-| `done` |  |
-| `pending` |  |
+| `done` | The state of the todo is done. |
+| `pending` | The state of the todo is pending. |
 
 ### TodoTargetEnum
 
@@ -5664,9 +5857,9 @@ Possible states of a user.
 
 | Value | Description |
 | ----- | ----------- |
-| `internal` |  |
-| `private` |  |
-| `public` |  |
+| `internal` | Internal visibility level. |
+| `private` | Private visibility level. |
+| `public` | Public visibility level. |
 
 ### VisibilityScopesEnum
 

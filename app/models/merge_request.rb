@@ -36,6 +36,10 @@ class MergeRequest < ApplicationRecord
 
   SORTING_PREFERENCE_FIELD = :merge_requests_sort
 
+  ALLOWED_TO_USE_MERGE_BASE_PIPELINE_FOR_COMPARISON = {
+    'Ci::CompareCodequalityReportsService' => ->(project) { ::Gitlab::Ci::Features.display_codequality_backend_comparison?(project) }
+  }.freeze
+
   belongs_to :target_project, class_name: "Project"
   belongs_to :source_project, class_name: "Project"
   belongs_to :merge_user, class_name: "User"
@@ -1039,6 +1043,7 @@ class MergeRequest < ApplicationRecord
   def work_in_progress?
     self.class.work_in_progress?(title)
   end
+  alias_method :draft?, :work_in_progress?
 
   def wipless_title
     self.class.wipless_title(self.title)
@@ -1277,7 +1282,14 @@ class MergeRequest < ApplicationRecord
   # Returns the oldest multi-line commit message, or the MR title if none found
   def default_squash_commit_message
     strong_memoize(:default_squash_commit_message) do
-      recent_commits.without_merge_commits.reverse_each.find(&:description?)&.safe_message || title
+      first_multiline_commit&.safe_message || title
+    end
+  end
+
+  # Returns the oldest multi-line commit
+  def first_multiline_commit
+    strong_memoize(:first_multiline_commit) do
+      recent_commits.without_merge_commits.reverse_each.find(&:description?)
     end
   end
 
@@ -1563,7 +1575,7 @@ class MergeRequest < ApplicationRecord
   def compare_reports(service_class, current_user = nil, report_type = nil )
     with_reactive_cache(service_class.name, current_user&.id, report_type) do |data|
       unless service_class.new(project, current_user, id: id, report_type: report_type)
-        .latest?(base_pipeline, actual_head_pipeline, data)
+        .latest?(comparison_base_pipeline(service_class.name), actual_head_pipeline, data)
         raise InvalidateReactiveCache
       end
 
@@ -1599,7 +1611,7 @@ class MergeRequest < ApplicationRecord
     raise NameError, service_class unless service_class < Ci::CompareReportsBaseService
 
     current_user = User.find_by(id: current_user_id)
-    service_class.new(project, current_user, id: id, report_type: report_type).execute(base_pipeline, actual_head_pipeline)
+    service_class.new(project, current_user, id: id, report_type: report_type).execute(comparison_base_pipeline(identifier), actual_head_pipeline)
   end
 
   def all_commits
@@ -1721,6 +1733,14 @@ class MergeRequest < ApplicationRecord
     if base_pipeline&.coverage && head_pipeline&.coverage
       '%.2f' % (head_pipeline.coverage.to_f - base_pipeline.coverage.to_f)
     end
+  end
+
+  def use_merge_base_pipeline_for_comparison?(service_class)
+    ALLOWED_TO_USE_MERGE_BASE_PIPELINE_FOR_COMPARISON[service_class]&.call(project)
+  end
+
+  def comparison_base_pipeline(service_class)
+    (use_merge_base_pipeline_for_comparison?(service_class) && merge_base_pipeline) || base_pipeline
   end
 
   def base_pipeline

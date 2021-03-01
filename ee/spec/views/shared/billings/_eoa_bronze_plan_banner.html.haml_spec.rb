@@ -53,7 +53,7 @@ RSpec.describe 'shared/billings/_eoa_bronze_plan_banner.html.haml' do
 
   shared_examples 'with a different plan than Bronze' do
     before do
-      allow(namespace).to receive(:actual_plan_name).and_return(::Plan::SILVER)
+      allow(namespace).to receive(:actual_plan_name).and_return(::Plan::PREMIUM)
     end
 
     it 'does not display the banner' do

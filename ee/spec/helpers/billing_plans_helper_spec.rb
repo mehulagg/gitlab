@@ -156,14 +156,14 @@ RSpec.describe BillingPlansHelper do
 
     context 'when plan has a valid property' do
       where(:plan_name, :for_free, :plan_id, :result) do
-        Plan::BRONZE | true  | '123456789'  | :upgrade_for_free
-        Plan::BRONZE | true  | '987654321'  | :no_offer
-        Plan::BRONZE | true  | nil          | :no_offer
-        Plan::BRONZE | false | '123456789'  | :upgrade_for_offer
-        Plan::BRONZE | false | nil          | :no_offer
-        Plan::BRONZE | nil   | nil          | :no_offer
-        Plan::SILVER | nil   | nil          | :no_offer
-        nil          | true  | nil          | :no_offer
+        Plan::BRONZE  | true  | '123456789'  | :upgrade_for_free
+        Plan::BRONZE  | true  | '987654321'  | :no_offer
+        Plan::BRONZE  | true  | nil          | :no_offer
+        Plan::BRONZE  | false | '123456789'  | :upgrade_for_offer
+        Plan::BRONZE  | false | nil          | :no_offer
+        Plan::BRONZE  | nil   | nil          | :no_offer
+        Plan::PREMIUM | nil   | nil          | :no_offer
+        nil           | true  | nil          | :no_offer
       end
 
       with_them do
@@ -374,7 +374,7 @@ RSpec.describe BillingPlansHelper do
   end
 
   describe '#billing_available_plans' do
-    let(:plan) { double('Plan', deprecated?: false, code: 'silver', hide_deprecated_card?: false) }
+    let(:plan) { double('Plan', deprecated?: false, code: 'premium', hide_deprecated_card?: false) }
     let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_deprecated_card?: false) }
     let(:plans_data) { [plan, deprecated_plan] }
 
@@ -385,7 +385,7 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when namespace is on an active plan' do
-      let(:current_plan) { OpenStruct.new(code: 'silver') }
+      let(:current_plan) { OpenStruct.new(code: 'premium') }
 
       it 'returns plans without deprecated' do
         expect(helper.billing_available_plans(plans_data, nil)).to eq([plan])
@@ -410,8 +410,8 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when namespace is on a plan that has hide_deprecated_card set to true, but deprecated? is false' do
-      let(:current_plan) { OpenStruct.new(code: 'silver') }
-      let(:plan) { double('Plan', deprecated?: false, code: 'silver', hide_deprecated_card?: true) }
+      let(:current_plan) { OpenStruct.new(code: 'premium') }
+      let(:plan) { double('Plan', deprecated?: false, code: 'premium', hide_deprecated_card?: true) }
 
       it 'returns plans with the deprecated plan' do
         expect(helper.billing_available_plans(plans_data, current_plan)).to eq([plan])
@@ -422,23 +422,23 @@ RSpec.describe BillingPlansHelper do
   describe '#subscription_plan_info' do
     it 'returns the current plan' do
       other_plan = Hashie::Mash.new(code: 'bronze')
-      current_plan = Hashie::Mash.new(code: 'gold')
+      current_plan = Hashie::Mash.new(code: 'ultimate')
 
-      expect(helper.subscription_plan_info([other_plan, current_plan], 'gold')).to eq(current_plan)
+      expect(helper.subscription_plan_info([other_plan, current_plan], 'ultimate')).to eq(current_plan)
     end
 
     it 'returns nil if no plan matches the code' do
       plan_a = Hashie::Mash.new(code: 'bronze')
-      plan_b = Hashie::Mash.new(code: 'gold')
+      plan_b = Hashie::Mash.new(code: 'ultimate')
 
       expect(helper.subscription_plan_info([plan_a, plan_b], 'default')).to be_nil
     end
 
     it 'breaks a tie with the current_subscription_plan attribute if multiple plans have the same code' do
-      other_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'silver')
-      current_plan = Hashie::Mash.new(current_subscription_plan: true, code: 'silver')
+      other_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'premium')
+      current_plan = Hashie::Mash.new(current_subscription_plan: true, code: 'premium')
 
-      expect(helper.subscription_plan_info([other_plan, current_plan], 'silver')).to eq(current_plan)
+      expect(helper.subscription_plan_info([other_plan, current_plan], 'premium')).to eq(current_plan)
     end
 
     it 'returns nil if no plan matches the code even if current_subscription_plan is true' do
@@ -450,9 +450,9 @@ RSpec.describe BillingPlansHelper do
 
     it 'returns the plan matching the plan code even if current_subscription_plan is false' do
       other_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'bronze')
-      current_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'silver')
+      current_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'premium')
 
-      expect(helper.subscription_plan_info([other_plan, current_plan], 'silver')).to eq(current_plan)
+      expect(helper.subscription_plan_info([other_plan, current_plan], 'premium')).to eq(current_plan)
     end
   end
 end

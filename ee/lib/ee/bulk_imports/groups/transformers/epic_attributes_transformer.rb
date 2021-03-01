@@ -7,7 +7,6 @@ module EE
         class EpicAttributesTransformer
           def transform(context, data)
             data
-              .then { |data| add_group_id(context, data) }
               .then { |data| add_author_id(context, data) }
               .then { |data| add_parent(context, data) }
               .then { |data| add_children(context, data) }
@@ -15,10 +14,6 @@ module EE
           end
 
           private
-
-          def add_group_id(context, data)
-            data.merge('group_id' => context.group.id)
-          end
 
           def add_author_id(context, data)
             user = find_user_by_email(context, data.dig('author', 'public_email'))

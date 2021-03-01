@@ -19,39 +19,11 @@ module Registrations
     def create
       @group = Groups::CreateService.new(current_user, group_params).execute
 
-      render_new && return unless @group.persisted?
-
-      trial = params[:trial] == 'true'
-      url_params = { namespace_id: @group.id, trial: trial }
-
-      if helpers.in_trial_onboarding_flow?
-        render_new && return unless apply_trial
-
-        record_experiment_user(:remove_known_trial_form_fields, namespace_id: @group.id)
-        record_experiment_user(:trimmed_skip_trial_copy, namespace_id: @group.id)
-        record_experiment_user(:trial_registration_with_social_signin, namespace_id: @group.id)
-        record_experiment_user(:trial_onboarding_issues, namespace_id: @group.id)
-        record_experiment_conversion_event(:remove_known_trial_form_fields)
-        record_experiment_conversion_event(:trimmed_skip_trial_copy)
-        record_experiment_conversion_event(:trial_registration_with_social_signin)
-        record_experiment_conversion_event(:trial_onboarding_issues)
-
-        url_params[:trial_onboarding_flow] = true
+      if @group.persisted?
+        create_successful_flow
       else
-        record_experiment_user(:trial_during_signup, trial_chosen: trial, namespace_id: @group.id)
-
-        if experiment_enabled?(:trial_during_signup)
-          if trial
-            render_new && return unless create_lead && apply_trial
-
-            record_experiment_conversion_event(:trial_during_signup)
-          end
-        else
-          invite_members(@group)
-        end
+        render action: :new
       end
-
-      redirect_to new_users_sign_up_project_path(url_params)
     end
 
     protected
@@ -66,6 +38,14 @@ module Registrations
       access_denied! unless helpers.signup_onboarding_enabled?
     end
 
+    def create_successful_flow
+      if helpers.in_trial_onboarding_flow?
+        apply_trial_for_trial_onboarding_flow
+      else
+        registration_onboarding_flow
+      end
+    end
+
     def authorize_create_group!
       access_denied! unless can?(current_user, :create_group)
     end
@@ -74,8 +54,53 @@ module Registrations
       params.require(:group).permit(:name, :path, :visibility_level)
     end
 
-    def render_new
-      render action: :new
+    def apply_trial_for_trial_onboarding_flow
+      if apply_trial
+        record_experiment_user(:remove_known_trial_form_fields, namespace_id: @group.id)
+        record_experiment_user(:trial_registration_with_social_signin, namespace_id: @group.id)
+        record_experiment_user(:trial_onboarding_issues, namespace_id: @group.id)
+        record_experiment_conversion_event(:remove_known_trial_form_fields)
+        record_experiment_conversion_event(:trial_registration_with_social_signin)
+        record_experiment_conversion_event(:trial_onboarding_issues)
+
+        redirect_to new_users_sign_up_project_path(namespace_id: @group.id, trial: helpers.in_trial_during_signup_flow?, trial_onboarding_flow: true)
+      else
+        render action: :new
+      end
+    end
+
+    def registration_onboarding_flow
+      record_experiment_user(:trial_during_signup, trial_chosen: helpers.in_trial_during_signup_flow?, namespace_id: @group.id)
+
+      if experiment_enabled?(:trial_during_signup)
+        trial_during_signup_flow
+      else
+        invite_on_create
+      end
+    end
+
+    def invite_on_create
+      invite_members(@group)
+
+      redirect_to new_users_sign_up_project_path(namespace_id: @group.id, trial: helpers.in_trial_during_signup_flow?)
+    end
+
+    def trial_during_signup_flow
+      if helpers.in_trial_during_signup_flow?
+        create_lead_and_apply_trial_flow
+      else
+        redirect_to new_users_sign_up_project_path(namespace_id: @group.id, trial: helpers.in_trial_during_signup_flow?)
+      end
+    end
+
+    def create_lead_and_apply_trial_flow
+      if create_lead && apply_trial
+        record_experiment_conversion_event(:trial_during_signup)
+
+        redirect_to new_users_sign_up_project_path(namespace_id: @group.id, trial: helpers.in_trial_during_signup_flow?)
+      else
+        render action: :new
+      end
     end
 
     def create_lead

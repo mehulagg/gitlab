@@ -36,7 +36,8 @@ module QA
         it_behaves_like 'audit event', ["Added project"]
       end
 
-      context "Add user access as guest", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/729' do
+      # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+      context "Add user access as guest", :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/729' do
         before do
           Runtime::Feature.enable(:invite_members_group_modal)
           project.visit!
@@ -82,7 +83,7 @@ module QA
         it_behaves_like 'audit event', ["Changed visibility from Public to Private"]
       end
 
-      context "Export file download", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1127' do
+      context "Export file download", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1127', quarantine: { only: { pipeline: [:staging, :canary, :production] }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/296212', type: :bug } do
         before do
           QA::Support::Retrier.retry_until do
             project = Resource::Project.fabricate_via_api! do |project|
