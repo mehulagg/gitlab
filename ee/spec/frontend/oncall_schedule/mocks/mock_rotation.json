@@ -2,6 +2,7 @@
     "id": "gid://gitlab/IncidentManagement::OncallRotation/2",
     "name": "Rotation 242",
     "startsAt": "2021-01-13T10:04:56.333Z",
+    "endsAt": "2021-03-13T10:04:56.333Z",
     "length": 1,
     "lengthUnit": "WEEKS",
     "participants": {
@@ -54,6 +55,7 @@
     "id": "gid://gitlab/IncidentManagement::OncallRotation/55",
     "name": "Rotation 242",
     "startsAt": "2021-01-13T10:04:56.333Z",
+    "endsAt": "2021-03-13T10:04:56.333Z",
     "length": 1,
     "lengthUnit": "WEEKS",
     "participants": {
@@ -102,6 +104,7 @@
     "id": "gid://gitlab/IncidentManagement::OncallRotation/3",
     "name": "Rotation 244",
     "startsAt": "2021-01-06T10:04:56.333Z",
+    "endsAt": "2021-01-10T10:04:56.333Z",
     "length": 1,
     "lengthUnit": "WEEKS",
     "participants": {
@@ -150,6 +153,7 @@
   "id": "gid://gitlab/IncidentManagement::OncallRotation/5",
   "name": "Rotation 247",
   "startsAt": "2021-01-06T10:04:56.333Z",
+  "endsAt": "2021-01-11T10:04:56.333Z",
   "length": 1,
   "lengthUnit": "WEEKS",
   "participants": {

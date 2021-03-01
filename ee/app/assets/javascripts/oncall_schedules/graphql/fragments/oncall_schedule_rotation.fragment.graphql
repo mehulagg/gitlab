@@ -4,6 +4,7 @@ fragment OnCallRotation on IncidentManagementOncallRotation {
   id
   name
   startsAt
+  endsAt
   length
   lengthUnit
   participants {
