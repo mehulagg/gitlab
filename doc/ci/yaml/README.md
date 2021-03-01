@@ -5,7 +5,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Keyword reference for the `.gitlab-ci.yml` file
+<!-- markdownlint-disable MD044 -->
+<!-- vale gitlab.Spelling = NO -->
+# Keyword reference for the .gitlab-ci.yml file
+<!-- vale gitlab.Spelling = YES -->
+<!-- markdownlint-enable MD044 -->
 
 This document lists the configuration options for your GitLab `.gitlab-ci.yml` file.
 
