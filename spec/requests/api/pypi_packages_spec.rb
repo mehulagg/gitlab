@@ -193,6 +193,19 @@ RSpec.describe API::PypiPackages do
       it_behaves_like 'process PyPI api request', :developer, :bad_request, true
     end
 
+    context 'required_python empty' do
+      let(:requires_python) { '' }
+      let(:token) { personal_access_token.token }
+      let(:user_headers) { basic_auth_header(user.username, token) }
+      let(:headers) { user_headers.merge(workhorse_headers) }
+
+      before do
+        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+      end
+
+      it_behaves_like 'process PyPI api request', :developer, :bad_request, false
+    end
+
     context 'with an invalid package' do
       let(:token) { personal_access_token.token }
       let(:user_headers) { basic_auth_header(user.username, token) }

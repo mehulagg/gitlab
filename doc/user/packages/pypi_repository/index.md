@@ -126,7 +126,7 @@ After you create a project, you can create a package.
            "License :: OSI Approved :: MIT License",
            "Operating System :: OS Independent",
        ],
-       python_requires='>=3.6',
+       requires_python='>=3.6',
    )
    ```
 
