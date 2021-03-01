@@ -24,6 +24,22 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
     it { is_expected.to validate_uniqueness_of(:security_policy_management_project) }
   end
 
+  describe '#enabled?' do
+    subject { security_orchestration_policy_configuration.enabled? }
+
+    context 'when feature is enabled' do
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(security_orchestration_policies_configuration: false)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
   describe '#active_policies' do
     let(:enforce_dast_yaml) do
       <<-EOS
@@ -85,6 +101,16 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
 
     it 'returns only enabled policies' do
       expect(active_policies).to eq(expected_active_policies)
+    end
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(security_orchestration_policies_configuration: false)
+      end
+
+      it 'returns empty array' do
+        expect(active_policies).to eq([])
+      end
     end
   end
 
@@ -171,6 +197,70 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
 
     it 'returns only actions for on-demand scans applicable for branch' do
       expect(on_demand_scan_actions).to eq(expected_actions)
+    end
+  end
+
+  describe '#active_policy_names_with_dast_site_profile' do
+    let(:enforce_dast_yaml) do
+      <<-EOS
+      type: scan_execution_policy
+      name: Run DAST in every pipeline
+      description: This policy enforces to run DAST for every pipeline within the project
+      enabled: true
+      rules:
+      - type: pipeline
+        branches:
+        - "production"
+      actions:
+      - scan: dast
+        site_profile: Site Profile
+        scanner_profile: Scanner Profile
+      - scan: dast
+        site_profile: Site Profile
+        scanner_profile: Scanner Profile 2
+      EOS
+    end
+
+    before do
+      allow(security_policy_management_project).to receive(:repository).and_return(repository)
+      allow(repository).to receive(:ls_files).and_return(['.gitlab/security-policies/enforce-dast.yml'])
+      allow(repository).to receive(:blob_data_at).with(default_branch, '.gitlab/security-policies/enforce-dast.yml').and_return(enforce_dast_yaml)
+    end
+
+    it 'returns list of policy names where site profile is referenced' do
+      expect(security_orchestration_policy_configuration.active_policy_names_with_dast_site_profile('Site Profile')).to contain_exactly('Run DAST in every pipeline')
+    end
+  end
+
+  describe '#active_policy_names_with_dast_scanner_profile' do
+    let(:enforce_dast_yaml) do
+      <<-EOS
+      type: scan_execution_policy
+      name: Run DAST in every pipeline
+      description: This policy enforces to run DAST for every pipeline within the project
+      enabled: true
+      rules:
+      - type: pipeline
+        branches:
+        - "production"
+      actions:
+      - scan: dast
+        site_profile: Site Profile
+        scanner_profile: Scanner Profile
+      - scan: dast
+        site_profile: Site Profile 2
+        scanner_profile: Scanner Profile
+      EOS
+    end
+
+    before do
+      allow(security_policy_management_project).to receive(:repository).and_return(repository)
+      allow(repository).to receive(:ls_files).and_return(['.gitlab/security-policies/enforce-dast.yml'])
+      allow(repository).to receive(:blob_data_at).with(default_branch, '.gitlab/security-policies/enforce-dast.yml').and_return(enforce_dast_yaml)
+    end
+
+    it 'returns list of policy names where site profile is referenced' do
+      expect(security_orchestration_policy_configuration.active_policy_names_with_dast_scanner_profile('Scanner Profile')).to contain_exactly('Run DAST in every pipeline')
     end
   end
 end

@@ -16,7 +16,7 @@ module Resolvers
                required: false,
                description: 'List of IIDs of requirements, e.g., [1, 2].'
 
-      argument :last_test_report_state, ::Types::RequirementsManagement::TestReportStateEnum,
+      argument :last_test_report_state, ::Types::RequirementsManagement::RequirementStatusFilterEnum,
                required: false,
                description: 'The state of latest requirement test report.'
 

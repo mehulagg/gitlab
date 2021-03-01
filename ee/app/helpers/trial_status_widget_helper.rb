@@ -8,15 +8,8 @@ module TrialStatusWidgetHelper
       user_can_administer_group?(group)
   end
 
-  def trial_days_remaining_in_words(group)
-    num_of_days = group.trial_days_remaining
-    plan_title = group.gitlab_subscription&.plan_title
-
-    ns_(
-      "Trials|%{plan} Trial %{en_dash} %{num} day left",
-      "Trials|%{plan} Trial %{en_dash} %{num} days left",
-      num_of_days
-    ) % { plan: plan_title, num: num_of_days, en_dash: '–' }
+  def plan_title_for_group(group)
+    group.gitlab_subscription&.plan_title
   end
 
   private

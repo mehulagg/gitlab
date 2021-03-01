@@ -88,4 +88,52 @@ describe('EE billings seats module mutations', () => {
       expect(state.isLoading).toBeFalsy();
     });
   });
+
+  describe('member removal', () => {
+    const memberToRemove = mockDataSeats.data[0];
+
+    beforeEach(() => {
+      mutations[types.RECEIVE_BILLABLE_MEMBERS_SUCCESS](state, mockDataSeats);
+    });
+
+    describe(types.SET_MEMBER_TO_REMOVE, () => {
+      it('sets the member to remove', () => {
+        mutations[types.SET_MEMBER_TO_REMOVE](state, memberToRemove);
+
+        expect(state.memberToRemove).toMatchObject(memberToRemove);
+      });
+    });
+
+    describe(types.REMOVE_MEMBER, () => {
+      it('sets state to loading', () => {
+        mutations[types.REMOVE_MEMBER](state, memberToRemove);
+
+        expect(state).toMatchObject({ isLoading: true, hasError: false });
+      });
+    });
+
+    describe(types.REMOVE_MEMBER_SUCCESS, () => {
+      it('sets state to successfull', () => {
+        mutations[types.REMOVE_MEMBER_SUCCESS](state, memberToRemove);
+
+        expect(state).toMatchObject({
+          isLoading: false,
+          hasError: false,
+          memberToRemove: null,
+        });
+      });
+    });
+
+    describe(types.REMOVE_MEMBER_ERROR, () => {
+      it('sets state to errored', () => {
+        mutations[types.REMOVE_MEMBER_ERROR](state, memberToRemove);
+
+        expect(state).toMatchObject({
+          isLoading: false,
+          hasError: true,
+          memberToRemove: null,
+        });
+      });
+    });
+  });
 });

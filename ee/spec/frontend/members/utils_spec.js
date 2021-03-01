@@ -10,7 +10,11 @@ import {
 describe('Members Utils', () => {
   describe('generateBadges', () => {
     it('has correct properties for each badge', () => {
-      const badges = generateBadges(memberMock, true);
+      const badges = generateBadges({
+        member: memberMock,
+        isCurrentUser: true,
+        canManageMembers: true,
+      });
 
       badges.forEach((badge) => {
         expect(badge).toEqual(
@@ -30,7 +34,9 @@ describe('Members Utils', () => {
       ${{ ...memberMock, groupManagedAccount: true }} | ${{ show: true, text: 'Managed Account', variant: 'info' }}
       ${{ ...memberMock, canOverride: true }}         | ${{ show: true, text: 'LDAP', variant: 'info' }}
     `('returns expected output for "$expected.text" badge', ({ member, expected }) => {
-      expect(generateBadges(member, true)).toContainEqual(expect.objectContaining(expected));
+      expect(
+        generateBadges({ member, isCurrentUser: true, canManageMembers: true }),
+      ).toContainEqual(expect.objectContaining(expected));
     });
   });
 

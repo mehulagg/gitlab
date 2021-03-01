@@ -36,7 +36,7 @@ module QA
         project.visit!
       end
 
-      it 'shows four assignees in the issues list', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/643' do
+      it 'shows four assignees in the issues list', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1718' do
         Page::Project::Menu.perform(&:click_issues)
 
         Page::Project::Issue::Index.perform do |index|

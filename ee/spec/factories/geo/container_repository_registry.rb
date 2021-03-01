@@ -24,5 +24,9 @@ FactoryBot.define do
       last_synced_at { 1.day.ago }
       retry_count { 0 }
     end
+
+    trait :with_repository_id do
+      sequence(:container_repository_id)
+    end
   end
 end

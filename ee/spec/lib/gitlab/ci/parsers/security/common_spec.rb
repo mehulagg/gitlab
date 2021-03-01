@@ -163,10 +163,24 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
     describe 'setting the uuid' do
       let(:finding_uuids) { report.findings.map(&:uuid) }
-      let(:uuid_1_components) { "dependency_scanning-4ff8184cd18485b6e85d5b101e341b12eacd1b3b-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
-      let(:uuid_2_components) { "dependency_scanning-d55f9e66e79882ae63af9fd55cc822ab75307e31-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
-      let(:uuid_1) { Gitlab::UUID.v5(uuid_1_components) }
-      let(:uuid_2) { Gitlab::UUID.v5(uuid_2_components) }
+      let(:uuid_1) do
+        Security::VulnerabilityUUID.generate(
+          report_type: "dependency_scanning",
+          primary_identifier_fingerprint: "4ff8184cd18485b6e85d5b101e341b12eacd1b3b",
+          location_fingerprint: "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5",
+          project_id: pipeline.project_id
+        )
+      end
+
+      let(:uuid_2) do
+        Security::VulnerabilityUUID.generate(
+          report_type: "dependency_scanning",
+          primary_identifier_fingerprint: "d55f9e66e79882ae63af9fd55cc822ab75307e31",
+          location_fingerprint: "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5",
+          project_id: pipeline.project_id
+        )
+      end
+
       let(:expected_uuids) { [uuid_1, uuid_2, nil] }
 
       it 'sets the UUIDv5 for findings', :aggregate_failures do

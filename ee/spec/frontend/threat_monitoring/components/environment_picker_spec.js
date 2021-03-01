@@ -1,3 +1,4 @@
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import EnvironmentPicker from 'ee/threat_monitoring/components/environment_picker.vue';
 import {
@@ -25,8 +26,8 @@ describe('EnvironmentPicker component', () => {
     });
   };
 
-  const findEnvironmentsDropdown = () => wrapper.find({ ref: 'environmentsDropdown' });
-  const findEnvironmentsDropdownItems = () => wrapper.findAll({ ref: 'environmentsDropdownItem' });
+  const findEnvironmentsDropdown = () => wrapper.findComponent(GlDropdown);
+  const findEnvironmentsDropdownItems = () => wrapper.findAllComponents(GlDropdownItem);
 
   afterEach(() => {
     wrapper.destroy();

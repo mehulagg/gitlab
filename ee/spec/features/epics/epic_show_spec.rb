@@ -28,8 +28,6 @@ RSpec.describe 'Epic show', :js do
   let_it_be(:child_issue_a) { create(:epic_issue, epic: epic, issue: public_issue, relative_position: 1) }
 
   before do
-    stub_feature_flags(remove_comment_close_reopen: false)
-
     group.add_developer(user)
     stub_licensed_features(epics: true, subepics: true)
     sign_in(user)
@@ -294,15 +292,9 @@ RSpec.describe 'Epic show', :js do
     end
 
     describe 'when open' do
-      let(:open_epic) { create(:epic, group: group) }
-
-      it_behaves_like 'page with comment and close button', 'Close epic' do
-        def setup
-          visit group_epic_path(group, open_epic)
-        end
-      end
-
       context 'when clicking the top `Close epic` button', :aggregate_failures do
+        let(:open_epic) { create(:epic, group: group) }
+
         before do
           visit group_epic_path(group, open_epic)
         end
@@ -311,6 +303,8 @@ RSpec.describe 'Epic show', :js do
       end
 
       context 'when clicking the bottom `Close epic` button', :aggregate_failures do
+        let(:open_epic) { create(:epic, group: group) }
+
         before do
           visit group_epic_path(group, open_epic)
         end
@@ -320,15 +314,9 @@ RSpec.describe 'Epic show', :js do
     end
 
     describe 'when closed' do
-      let(:closed_epic) { create(:epic, group: group, state: 'closed') }
-
-      it_behaves_like 'page with comment and close button', 'Reopen epic' do
-        def setup
-          visit group_epic_path(group, closed_epic)
-        end
-      end
-
       context 'when clicking the top `Reopen epic` button', :aggregate_failures do
+        let(:closed_epic) { create(:epic, group: group, state: 'closed') }
+
         before do
           visit group_epic_path(group, closed_epic)
         end
@@ -337,6 +325,8 @@ RSpec.describe 'Epic show', :js do
       end
 
       context 'when clicking the bottom `Reopen epic` button', :aggregate_failures do
+        let(:closed_epic) { create(:epic, group: group, state: 'closed') }
+
         before do
           visit group_epic_path(group, closed_epic)
         end

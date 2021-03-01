@@ -298,14 +298,14 @@ RSpec.describe PushRule do
           it_behaves_like 'an unavailable push_rule'
         end
 
-        context 'with a Silver plan' do
-          let(:plan) { :silver }
+        context 'with a Premium plan' do
+          let(:plan) { :premium }
 
           it_behaves_like 'an available push_rule'
         end
 
-        context 'with a Gold plan' do
-          let(:plan) { :gold }
+        context 'with a Ultimate plan' do
+          let(:plan) { :ultimate }
 
           it_behaves_like 'an available push_rule'
         end

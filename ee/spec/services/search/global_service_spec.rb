@@ -18,8 +18,43 @@ RSpec.describe Search::GlobalService do
     let(:service) { described_class.new(user, params) }
   end
 
+  context 'issue search' do
+    let(:results) { described_class.new(nil, search: '*').execute.objects('issues') }
+
+    before do
+      allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
+      allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+                                                .with(:migrate_issues_to_separate_index)
+                                                .and_return(false)
+    end
+
+    it_behaves_like 'search query applies joins based on migrations shared examples', :add_new_data_to_issues_documents
+  end
+
+  context 'notes search' do
+    let(:results) { described_class.new(nil, search: '*').execute.objects('notes') }
+
+    before do
+      allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
+    end
+
+    it_behaves_like 'search query applies joins based on migrations shared examples', :add_permissions_data_to_notes_documents
+  end
+
   context 'visibility', :elastic, :sidekiq_inline do
     include_context 'ProjectPolicyTable context'
+
+    shared_examples 'search respects visibility' do
+      it 'respects visibility' do
+        enable_admin_mode!(user) if admin_mode
+        update_feature_access_level(project, feature_access_level)
+        ensure_elasticsearch_index!
+
+        expect_search_results(user, scope, expected_count: expected_count) do |user|
+          described_class.new(user, search: search).execute
+        end
+      end
+    end
 
     let_it_be(:group) { create(:group) }
     let(:project) { create(:project, project_level, namespace: group) }
@@ -27,54 +62,148 @@ RSpec.describe Search::GlobalService do
 
     context 'merge request' do
       let!(:merge_request) { create :merge_request, target_project: project, source_project: project }
-      let!(:note) { create :note, project: project, noteable: merge_request }
+      let(:scope) { 'merge_requests' }
+      let(:search) { merge_request.title }
 
       where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_reporter_feature_access
       end
 
       with_them do
-        it "respects visibility" do
-          enable_admin_mode!(user) if admin_mode
-          update_feature_access_level(project, feature_access_level)
-          ensure_elasticsearch_index!
-
-          expect_search_results(user, 'merge_requests', expected_count: expected_count) do |user|
-            described_class.new(user, search: merge_request.title).execute
-          end
-
-          expect_search_results(user, 'notes', expected_count: expected_count) do |user|
-            described_class.new(user, search: note.note).execute
-          end
-        end
+        it_behaves_like 'search respects visibility'
       end
     end
 
-    context 'code' do
+    context 'blob and commit' do
       let!(:project) { create(:project, project_level, :repository, namespace: group ) }
-      let!(:note) { create :note_on_commit, project: project }
 
       where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access_and_non_private_project_only
       end
 
       with_them do
-        it "respects visibility" do
-          enable_admin_mode!(user) if admin_mode
-          update_feature_access_level(project, feature_access_level)
-          ElasticCommitIndexerWorker.new.perform(project.id)
-          ensure_elasticsearch_index!
+        before do
+          project.repository.index_commits_and_blobs
+        end
 
-          expect_search_results(user, 'commits', expected_count: expected_count) do |user|
-            described_class.new(user, search: 'initial').execute
+        it_behaves_like 'search respects visibility' do
+          let(:scope) { 'commits' }
+          let(:search) { 'initial' }
+        end
+
+        it_behaves_like 'search respects visibility' do
+          let(:scope) { 'blobs' }
+          let(:search) { '.gitmodules' }
+        end
+      end
+    end
+
+    context 'note' do
+      let(:scope) { 'notes' }
+      let(:search) { note.note }
+
+      context 'on issues' do
+        let!(:note) { create :note_on_issue, project: project }
+
+        where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
+          permission_table_for_guest_feature_access
+        end
+
+        with_them do
+          before do
+            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
           end
 
-          expect_search_results(user, 'blobs', expected_count: expected_count) do |user|
-            described_class.new(user, search: '.gitmodules').execute
+          context 'when add_permissions_data_to_notes_documents migration is finished' do
+            it_behaves_like 'search respects visibility'
           end
 
-          expect_search_results(user, 'notes', expected_count: expected_count) do |user|
-            described_class.new(user, search: note.note).execute
+          context 'when add_permissions_data_to_notes_documents migration is not finished' do
+            before do
+              allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).with(:add_permissions_data_to_notes_documents).and_return(false)
+            end
+
+            it_behaves_like 'search respects visibility'
+          end
+        end
+      end
+
+      context 'on merge requests' do
+        let!(:note) { create :note_on_merge_request, project: project }
+
+        where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
+          permission_table_for_reporter_feature_access
+        end
+
+        with_them do
+          before do
+            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
+          end
+
+          context 'when add_permissions_data_to_notes_documents migration is finished' do
+            it_behaves_like 'search respects visibility'
+          end
+
+          context 'when add_permissions_data_to_notes_documents migration is not finished' do
+            before do
+              allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).with(:add_permissions_data_to_notes_documents).and_return(false)
+            end
+
+            it_behaves_like 'search respects visibility'
+          end
+        end
+      end
+
+      context 'on commits' do
+        let!(:project) { create(:project, project_level, :repository, namespace: group ) }
+        let!(:note) { create :note_on_commit, project: project }
+
+        where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
+          permission_table_for_guest_feature_access_and_non_private_project_only
+        end
+
+        with_them do
+          before do
+            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
+            project.repository.index_commits_and_blobs
+          end
+
+          context 'when add_permissions_data_to_notes_documents migration is finished' do
+            it_behaves_like 'search respects visibility'
+          end
+
+          context 'when add_permissions_data_to_notes_documents migration is not finished' do
+            before do
+              allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).with(:add_permissions_data_to_notes_documents).and_return(false)
+            end
+
+            it_behaves_like 'search respects visibility'
+          end
+        end
+      end
+
+      context 'on snippets' do
+        let!(:note) { create :note_on_project_snippet, project: project }
+
+        where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
+          permission_table_for_guest_feature_access
+        end
+
+        with_them do
+          before do
+            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
+          end
+
+          context 'when add_permissions_data_to_notes_documents migration is finished' do
+            it_behaves_like 'search respects visibility'
+          end
+
+          context 'when add_permissions_data_to_notes_documents migration is not finished' do
+            before do
+              allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).with(:add_permissions_data_to_notes_documents).and_return(false)
+            end
+
+            it_behaves_like 'search respects visibility'
           end
         end
       end
@@ -82,29 +211,17 @@ RSpec.describe Search::GlobalService do
 
     context 'issue' do
       let(:scope) { 'issues' }
+      let(:search) { issue.title }
 
-      context 'visibility' do
+      context 'when add_new_data_to_issues_documents migration is finished' do
         let!(:issue) { create :issue, project: project }
-        let!(:note) { create :note, project: project, noteable: issue }
 
         where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
           permission_table_for_guest_feature_access
         end
 
         with_them do
-          it "respects visibility" do
-            enable_admin_mode!(user) if admin_mode
-            update_feature_access_level(project, feature_access_level)
-            ensure_elasticsearch_index!
-
-            expect_search_results(user, 'issues', expected_count: expected_count) do |user|
-              described_class.new(user, search: issue.title).execute
-            end
-
-            expect_search_results(user, 'notes', expected_count: expected_count) do |user|
-              described_class.new(user, search: note.note).execute
-            end
-          end
+          it_behaves_like 'search respects visibility'
         end
       end
 
@@ -132,134 +249,28 @@ RSpec.describe Search::GlobalService do
         end
 
         with_them do
-          it "respects visibility" do
-            enable_admin_mode!(user) if admin_mode
-            update_feature_access_level(project, feature_access_level)
-            ensure_elasticsearch_index!
-
-            expect_search_results(user, 'issues', expected_count: expected_count) do |user|
-              described_class.new(user, search: issue.title).execute
-            end
-          end
-        end
-      end
-
-      context 'ordering' do
-        let_it_be(:project) { create(:project, :public) }
-
-        let!(:old_result) { create(:issue, project: project, title: 'sorted old', created_at: 1.month.ago) }
-        let!(:new_result) { create(:issue, project: project, title: 'sorted recent', created_at: 1.day.ago) }
-        let!(:very_old_result) { create(:issue, project: project, title: 'sorted very old', created_at: 1.year.ago) }
-
-        let!(:old_updated) { create(:issue, project: project, title: 'updated old', updated_at: 1.month.ago) }
-        let!(:new_updated) { create(:issue, project: project, title: 'updated recent', updated_at: 1.day.ago) }
-        let!(:very_old_updated) { create(:issue, project: project, title: 'updated very old', updated_at: 1.year.ago) }
-
-        before do
-          ensure_elasticsearch_index!
-        end
-
-        include_examples 'search results sorted' do
-          let(:results_created) { described_class.new(nil, search: 'sorted', sort: sort).execute }
-          let(:results_updated) { described_class.new(nil, search: 'updated', sort: sort).execute }
-        end
-      end
-
-      context 'using joins for global permission checks' do
-        let(:results) { described_class.new(nil, search: '*').execute.objects('issues') }
-        let(:es_host) { Gitlab::CurrentSettings.elasticsearch_url[0] }
-        let(:search_url) { Addressable::Template.new("#{es_host}/{index}/doc/_search{?params*}") }
-
-        before do
-          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
-          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
-            .with(:migrate_issues_to_separate_index)
-            .and_return(false)
-
-          ensure_elasticsearch_index!
-        end
-
-        context 'when add_new_data_to_issues_documents migration is finished' do
-          before do
-            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
-              .with(:add_new_data_to_issues_documents)
-              .and_return(true)
-          end
-
-          it 'does not use joins to apply permissions' do
-            request = a_request(:get, search_url).with do |req|
-              expect(req.body).not_to include("has_parent")
-            end
-
-            results
-
-            expect(request).to have_been_made
-          end
-        end
-
-        context 'when add_new_data_to_issues_documents migration is not finished' do
-          before do
-            allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
-              .with(:add_new_data_to_issues_documents)
-              .and_return(false)
-          end
-
-          it 'uses joins to apply permissions' do
-            request = a_request(:get, search_url).with do |req|
-              expect(req.body).to include("has_parent")
-            end
-
-            results
-
-            expect(request).to have_been_made
-          end
-        end
-      end
-    end
-
-    context 'merge_request' do
-      let(:scope) { 'merge_requests' }
-
-      context 'sorting' do
-        let!(:project) { create(:project, :public) }
-
-        let!(:old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'old-1', title: 'sorted old', created_at: 1.month.ago) }
-        let!(:new_result) { create(:merge_request, :opened, source_project: project, source_branch: 'new-1', title: 'sorted recent', created_at: 1.day.ago) }
-        let!(:very_old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'very-old-1', title: 'sorted very old', created_at: 1.year.ago) }
-
-        let!(:old_updated) { create(:merge_request, :opened, source_project: project, source_branch: 'updated-old-1', title: 'updated old', updated_at: 1.month.ago) }
-        let!(:new_updated) { create(:merge_request, :opened, source_project: project, source_branch: 'updated-new-1', title: 'updated recent', updated_at: 1.day.ago) }
-        let!(:very_old_updated) { create(:merge_request, :opened, source_project: project, source_branch: 'updated-very-old-1', title: 'updated very old', updated_at: 1.year.ago) }
-
-        before do
-          ensure_elasticsearch_index!
-        end
-
-        include_examples 'search results sorted' do
-          let(:results_created) { described_class.new(nil, search: 'sorted', sort: sort).execute }
-          let(:results_updated) { described_class.new(nil, search: 'updated', sort: sort).execute }
+          it_behaves_like 'search respects visibility'
         end
       end
     end
 
     context 'wiki' do
       let!(:project) { create(:project, project_level, :wiki_repo) }
+      let(:scope) { 'wiki_blobs' }
+      let(:search) { 'term' }
 
       where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
         permission_table_for_guest_feature_access
       end
 
       with_them do
-        it "respects visibility" do
-          enable_admin_mode!(user) if admin_mode
-          project.wiki.create_page('test.md', '# term')
+        before do
+          project.wiki.create_page('test.md', "# #{search}")
           project.wiki.index_wiki_blobs
-          update_feature_access_level(project, feature_access_level)
-          ensure_elasticsearch_index!
+        end
 
-          expect_search_results(user, 'wiki_blobs', expected_count: expected_count) do |user|
-            described_class.new(user, search: 'term').execute
-          end
+        it_behaves_like 'search respects visibility' do
+          let(:projects) { [project] }
         end
       end
     end
@@ -308,6 +319,52 @@ RSpec.describe Search::GlobalService do
             described_class.new(user, search: project.name).execute
           end
         end
+      end
+    end
+  end
+
+  context 'sorting', :elastic, :sidekiq_inline do
+    context 'issue' do
+      let(:scope) { 'issues' }
+      let_it_be(:project) { create(:project, :public) }
+
+      let!(:old_result) { create(:issue, project: project, title: 'sorted old', created_at: 1.month.ago) }
+      let!(:new_result) { create(:issue, project: project, title: 'sorted recent', created_at: 1.day.ago) }
+      let!(:very_old_result) { create(:issue, project: project, title: 'sorted very old', created_at: 1.year.ago) }
+
+      let!(:old_updated) { create(:issue, project: project, title: 'updated old', updated_at: 1.month.ago) }
+      let!(:new_updated) { create(:issue, project: project, title: 'updated recent', updated_at: 1.day.ago) }
+      let!(:very_old_updated) { create(:issue, project: project, title: 'updated very old', updated_at: 1.year.ago) }
+
+      before do
+        ensure_elasticsearch_index!
+      end
+
+      include_examples 'search results sorted' do
+        let(:results_created) { described_class.new(nil, search: 'sorted', sort: sort).execute }
+        let(:results_updated) { described_class.new(nil, search: 'updated', sort: sort).execute }
+      end
+    end
+
+    context 'merge request' do
+      let(:scope) { 'merge_requests' }
+      let(:project) { create(:project, :public) }
+
+      let!(:old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'old-1', title: 'sorted old', created_at: 1.month.ago) }
+      let!(:new_result) { create(:merge_request, :opened, source_project: project, source_branch: 'new-1', title: 'sorted recent', created_at: 1.day.ago) }
+      let!(:very_old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'very-old-1', title: 'sorted very old', created_at: 1.year.ago) }
+
+      let!(:old_updated) { create(:merge_request, :opened, source_project: project, source_branch: 'updated-old-1', title: 'updated old', updated_at: 1.month.ago) }
+      let!(:new_updated) { create(:merge_request, :opened, source_project: project, source_branch: 'updated-new-1', title: 'updated recent', updated_at: 1.day.ago) }
+      let!(:very_old_updated) { create(:merge_request, :opened, source_project: project, source_branch: 'updated-very-old-1', title: 'updated very old', updated_at: 1.year.ago) }
+
+      before do
+        ensure_elasticsearch_index!
+      end
+
+      include_examples 'search results sorted' do
+        let(:results_created) { described_class.new(nil, search: 'sorted', sort: sort).execute }
+        let(:results_updated) { described_class.new(nil, search: 'updated', sort: sort).execute }
       end
     end
   end
@@ -396,23 +453,81 @@ RSpec.describe Search::GlobalService do
   end
 
   context 'confidential notes' do
-    let(:project) { create(:project, :public) }
+    let(:project) { create(:project, :public, :repository) }
+
+    before do
+      allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
+    end
 
     context 'with notes on issues' do
-      it_behaves_like 'search notes shared examples' do
-        let(:noteable) { create :issue, project: project }
+      let(:noteable) { create :issue, project: project }
+
+      context 'when add_permissions_data_to_notes_documents migration has not finished' do
+        before do
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+                                                    .with(:add_permissions_data_to_notes_documents)
+                                                    .and_return(false)
+        end
+
+        it_behaves_like 'search notes shared examples', :note_on_issue
+      end
+
+      context 'when add_permissions_data_to_notes_documents migration has finished' do
+        before do
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+                                                    .with(:add_permissions_data_to_notes_documents)
+                                                    .and_return(true)
+        end
+
+        it_behaves_like 'search notes shared examples', :note_on_issue
       end
     end
 
     context 'with notes on merge requests' do
-      it_behaves_like 'search notes shared examples' do
-        let(:noteable) { create :merge_request, target_project: project, source_project: project }
+      let(:noteable) { create :merge_request, target_project: project, source_project: project }
+
+      context 'when add_permissions_data_to_notes_documents migration has not finished' do
+        before do
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+                                                    .with(:add_permissions_data_to_notes_documents)
+                                                    .and_return(false)
+        end
+
+        it_behaves_like 'search notes shared examples', :note_on_merge_request
+      end
+
+      context 'when add_permissions_data_to_notes_documents migration has finished' do
+        before do
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+                                                    .with(:add_permissions_data_to_notes_documents)
+                                                    .and_return(true)
+        end
+
+        it_behaves_like 'search notes shared examples', :note_on_merge_request
       end
     end
 
     context 'with notes on commits' do
-      it_behaves_like 'search notes shared examples' do
-        let(:noteable) { create(:commit, project: project) }
+      let(:noteable) { create(:commit, project: project) }
+
+      context 'when add_permissions_data_to_notes_documents migration has not finished' do
+        before do
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+                                                    .with(:add_permissions_data_to_notes_documents)
+                                                    .and_return(false)
+        end
+
+        it_behaves_like 'search notes shared examples', :note_on_commit
+      end
+
+      context 'when add_permissions_data_to_notes_documents migration has finished' do
+        before do
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+                                                    .with(:add_permissions_data_to_notes_documents)
+                                                    .and_return(true)
+        end
+
+        it_behaves_like 'search notes shared examples', :note_on_commit
       end
     end
   end

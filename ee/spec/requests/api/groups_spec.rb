@@ -519,7 +519,7 @@ RSpec.describe API::Groups do
       subject { get api("/groups/#{group.id}/projects", user), params: { with_security_reports: true } }
 
       context 'when security dashboard is enabled for a group' do
-        let(:group) { create(:group_with_plan, plan: :gold_plan) } # overriding group from parent context
+        let(:group) { create(:group_with_plan, plan: :ultimate_plan) } # overriding group from parent context
 
         before do
           stub_licensed_features(security_dashboard: true)

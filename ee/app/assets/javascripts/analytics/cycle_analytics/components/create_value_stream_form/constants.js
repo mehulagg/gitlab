@@ -7,7 +7,7 @@ export const i18n = {
   EDIT_FORM_TITLE: s__('CreateValueStreamForm|Edit Value Stream'),
   EDIT_FORM_ACTION: s__('CreateValueStreamForm|Save Value Stream'),
   FORM_CREATED: s__("CreateValueStreamForm|'%{name}' Value Stream created"),
-  FORM_EDITED: s__("CreateValueStreamForm|'%{name}' Value Stream edited"),
+  FORM_EDITED: s__("CreateValueStreamForm|'%{name}' Value Stream saved"),
   RECOVER_HIDDEN_STAGE: s__('CreateValueStreamForm|Recover hidden stage'),
   RESTORE_HIDDEN_STAGE: s__('CreateValueStreamForm|Restore stage'),
   RESTORE_DEFAULTS: s__('CreateValueStreamForm|Restore defaults'),

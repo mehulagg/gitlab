@@ -217,7 +217,7 @@ describe('JiraIssuesListRoot', () => {
         nextPage: 2,
         urlParams: wrapper.vm.urlParams,
         recentSearchesStorageKey: 'jira_issues',
-        enableLabelPermalinks: false,
+        enableLabelPermalinks: true,
       });
     });
 

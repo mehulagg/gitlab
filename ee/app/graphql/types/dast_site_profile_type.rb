@@ -29,6 +29,11 @@ module Types
     field :normalized_target_url, GraphQL::STRING_TYPE, null: true,
           description: 'Normalized URL of the target to be scanned.'
 
+    field :referenced_in_security_policies, [GraphQL::STRING_TYPE], null: true,
+          complexity: 10,
+          calls_gitaly: true,
+          description: 'List of security policy names that are referencing given project.'
+
     def target_url
       object.dast_site.url
     end

@@ -42,9 +42,15 @@ RSpec.describe 'Multiple value streams', :js do
 
   def add_custom_stage_to_form
     page.find_button(s_('CreateValueStreamForm|Add another stage')).click
-    fill_in "custom-stage-name-6", with: "Cool custom stage - name"
-    select_dropdown_option_by_value "custom-stage-start-event-6", :merge_request_created
-    select_dropdown_option_by_value "custom-stage-end-event-6", :merge_request_merged
+
+    index = page.all('[data-testid="value-stream-stage-fields"]').length
+    last_stage = page.all('[data-testid="value-stream-stage-fields"]').last
+
+    within last_stage do
+      find('[name*="custom-stage-name-"]').fill_in with: "Cool custom stage - name #{index}"
+      select_dropdown_option_by_value "custom-stage-start-event-", :merge_request_created
+      select_dropdown_option_by_value "custom-stage-end-event-", :merge_request_merged
+    end
   end
 
   def create_value_stream
@@ -52,6 +58,14 @@ RSpec.describe 'Multiple value streams', :js do
 
     page.find_button(_('Create Value Stream')).click
     wait_for_requests
+  end
+
+  def create_custom_value_stream
+    toggle_value_stream_dropdown
+    page.find_button(_('Create new Value Stream')).click
+
+    add_custom_stage_to_form
+    create_value_stream
   end
 
   describe 'Create value stream' do
@@ -84,6 +98,40 @@ RSpec.describe 'Multiple value streams', :js do
 
       expect(page).to have_text(_("'%{name}' Value Stream created") % { name: custom_value_stream_name })
       expect(page.all("[data-testid='gl-path-nav'] .gl-path-button").count).to eq(4)
+    end
+  end
+
+  describe 'Edit value stream' do
+    before do
+      select_group(group)
+
+      create_custom_value_stream
+
+      page.find_button(_('Edit')).click
+    end
+
+    it 'includes additional form fields' do
+      expect(page).to have_selector(extended_form_fields_selector)
+      expect(page).to have_button("Save Value Stream")
+    end
+
+    it 'can update the value stream name' do
+      edited_name = "Edit new value stream"
+      fill_in 'create-value-stream-name', with: edited_name
+
+      page.find_button(_('Save Value Stream')).click
+      wait_for_requests
+
+      expect(page).to have_text(_("'%{name}' Value Stream saved") % { name: edited_name })
+    end
+
+    it 'can add a custom stage' do
+      add_custom_stage_to_form
+
+      page.find_button(_('Save Value Stream')).click
+      wait_for_requests
+
+      expect(page).to have_text(_("'%{name}' Value Stream saved") % { name: custom_value_stream_name })
     end
   end
 

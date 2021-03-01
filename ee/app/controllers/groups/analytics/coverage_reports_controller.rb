@@ -42,8 +42,8 @@ class Groups::Analytics::CoverageReportsController < Groups::Analytics::Applicat
     {
       group: @group,
       coverage: true,
-      start_date: Date.parse(params.require(:start_date)),
-      end_date: Date.parse(params.require(:end_date)),
+      start_date: params[:start_date],
+      end_date: params[:end_date],
       ref_path: params[:ref_path],
       sort: true
     }

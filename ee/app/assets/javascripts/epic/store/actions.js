@@ -1,5 +1,6 @@
 import epicDetailsQuery from 'shared_queries/epic/epic_details.query.graphql';
 import { deprecatedCreateFlash as flash } from '~/flash';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 
 import axios from '~/lib/utils/axios_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
@@ -60,7 +61,7 @@ export const triggerIssuableEvent = (_, { isEpicOpen }) => {
   // comment form (part of Notes app) We've wrapped
   // call to `$(document).trigger` within `triggerDocumentEvent`
   // for ease of testing
-  epicUtils.triggerDocumentEvent('issuable_vue_app:change', isEpicOpen);
+  epicUtils.triggerDocumentEvent(EVENT_ISSUABLE_VUE_APP_CHANGE, isEpicOpen);
   epicUtils.triggerDocumentEvent('issuable:change', isEpicOpen);
 };
 

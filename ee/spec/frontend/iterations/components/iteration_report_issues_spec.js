@@ -189,13 +189,11 @@ describe('Iterations report issues', () => {
 
       it('passes prev, next, and current page props', () => {
         expect(findPagination().exists()).toBe(true);
-        expect(findPagination().props()).toEqual(
-          expect.objectContaining({
-            value: wrapper.vm.pagination.currentPage,
-            prevPage: wrapper.vm.prevPage,
-            nextPage: wrapper.vm.nextPage,
-          }),
-        );
+        expect(findPagination().props()).toMatchObject({
+          value: wrapper.vm.pagination.currentPage,
+          prevPage: wrapper.vm.prevPage,
+          nextPage: wrapper.vm.nextPage,
+        });
       });
 
       it('updates query variables when going to previous page', () => {
@@ -287,14 +285,19 @@ describe('Iterations report issues', () => {
     });
 
     it('shows label with the label title', () => {
-      expect(findGlLabel().props()).toEqual(
-        expect.objectContaining({
-          backgroundColor: label.color,
-          description: label.description,
-          target: null,
-          title: label.title,
-        }),
-      );
+      expect(findGlLabel().props()).toMatchObject({
+        backgroundColor: label.color,
+        description: label.description,
+        showCloseButton: true,
+        target: null,
+        title: label.title,
+      });
+    });
+
+    it('emits removeLabel event when label `x` is clicked', () => {
+      findGlLabel().vm.$emit('close');
+
+      expect(wrapper.emitted('removeLabel')).toEqual([[label.id]]);
     });
 
     it('shows badge with issue count', () => {

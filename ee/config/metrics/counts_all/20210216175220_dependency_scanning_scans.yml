@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.secure.dependency_scanning_scans
-description: 'Counts dependency scanning jobs '
+description: 'Counts dependency scanning jobs'
 product_section: sec
 product_stage: secure
 product_group: group::composition analysis

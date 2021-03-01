@@ -1,6 +1,7 @@
 <script>
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { mapState, mapGetters, mapActions } from 'vuex';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 
 import { __ } from '~/locale';
 
@@ -58,7 +59,7 @@ export default {
      * across the UI so we directly call `requestEpicStatusChangeSuccess` action
      * to update store state.
      */
-    epicUtils.bindDocumentEvent('issuable_vue_app:change', (e, isClosed) => {
+    epicUtils.bindDocumentEvent(EVENT_ISSUABLE_VUE_APP_CHANGE, (e, isClosed) => {
       const isEpicOpen = e.detail ? !e.detail.isClosed : !isClosed;
       this.requestEpicStatusChangeSuccess({
         state: isEpicOpen ? statusType.open : statusType.close,

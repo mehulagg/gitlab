@@ -1,0 +1,23 @@
+- verified = gpg_key.verified?
+- verified_css_classes = %w(badge gl-badge)
+- verified_css_classes << (verified ? 'badge-success': 'badge-danger')
+- verified_text = verified ? _('Verified') : _('Unverified')
+
+.gl-responsive-table-row{ role: 'row', data: { qa_selector: 'credentials_gpg_key_row_content' } }
+  .table-section.section-40
+    .table-mobile-header{ role: 'rowheader' }
+      = _('Owner')
+    .table-mobile-content
+      = render 'shared/credentials_inventory/users/user_detail', user: gpg_key.user
+  .table-section.section-20
+    .table-mobile-header{ role: 'rowheader' }
+      = _('ID')
+    .table-mobile-content
+      %code
+        = gpg_key.primary_keyid
+  .table-section.section-15
+    .table-mobile-header{ role: 'rowheader' }
+      = _('Status')
+    .table-mobile-content
+      %div{ class: verified_css_classes }
+        = verified_text

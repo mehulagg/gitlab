@@ -47,8 +47,7 @@ module EE
     end
 
     def purchase_storage_link_enabled?(namespace)
-      ::Feature.enabled?(:buy_storage_link) &&
-        namespace.additional_repo_storage_by_namespace_enabled?
+      namespace.additional_repo_storage_by_namespace_enabled?
     end
 
     def purchase_storage_url

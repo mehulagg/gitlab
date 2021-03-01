@@ -128,6 +128,11 @@ module EE
           ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject)
       end
 
+      condition(:group_level_compliance_pipeline_available) do
+        @subject.feature_available?(:evaluate_group_level_compliance_pipeline) &&
+          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject, default_enabled: :yaml)
+      end
+
       rule { public_group | logged_in_viewable }.policy do
         enable :read_wiki
         enable :download_wiki_code
@@ -349,6 +354,7 @@ module EE
       end
 
       rule { can?(:owner_access) & compliance_framework_available }.enable :admin_compliance_framework
+      rule { can?(:owner_access) & group_level_compliance_pipeline_available }.enable :admin_compliance_pipeline_configuration
     end
 
     override :lookup_access_level!

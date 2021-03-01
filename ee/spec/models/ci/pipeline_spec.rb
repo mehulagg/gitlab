@@ -369,18 +369,6 @@ RSpec.describe Ci::Pipeline do
       end
     end
 
-    context 'when pipeline is web terminal triggered' do
-      before do
-        pipeline.source = 'webide'
-      end
-
-      it 'does not schedule the pipeline cache worker' do
-        expect(ExpirePipelineCacheWorker).not_to receive(:perform_async)
-
-        pipeline.cancel!
-      end
-    end
-
     context 'when pipeline project has downstream subscriptions' do
       let(:pipeline) { create(:ci_empty_pipeline, project: create(:project, :public)) }
 
@@ -420,8 +408,8 @@ RSpec.describe Ci::Pipeline do
     end
   end
 
-  describe '#latest_merge_request_pipeline?' do
-    subject { pipeline.latest_merge_request_pipeline? }
+  describe '#latest_merged_result_pipeline?' do
+    subject { pipeline.latest_merged_result_pipeline? }
 
     let(:merge_request) { create(:merge_request, :with_merge_request_pipeline) }
     let(:pipeline) { merge_request.all_pipelines.first }

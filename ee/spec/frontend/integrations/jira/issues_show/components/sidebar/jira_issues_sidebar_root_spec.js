@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import Assignee from 'ee/integrations/jira/issues_show/components/sidebar/assignee.vue';
+import IssueReference from 'ee/integrations/jira/issues_show/components/sidebar/issue_reference.vue';
 import Sidebar from 'ee/integrations/jira/issues_show/components/sidebar/jira_issues_sidebar_root.vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
@@ -15,9 +16,9 @@ describe('JiraIssuesSidebar', () => {
     issue: mockJiraIssue,
   };
 
-  const createComponent = () => {
+  const createComponent = ({ props = {} } = {}) => {
     wrapper = shallowMount(Sidebar, {
-      propsData: defaultProps,
+      propsData: { ...defaultProps, ...props },
     });
   };
 
@@ -30,6 +31,7 @@ describe('JiraIssuesSidebar', () => {
 
   const findLabelsSelect = () => wrapper.findComponent(LabelsSelect);
   const findAssignee = () => wrapper.findComponent(Assignee);
+  const findIssueReference = () => wrapper.findComponent(IssueReference);
 
   it('renders Labels block', async () => {
     createComponent();
@@ -44,5 +46,27 @@ describe('JiraIssuesSidebar', () => {
 
     expect(assignee.exists()).toBe(true);
     expect(assignee.props('assignee')).toEqual(mockJiraIssue.assignees[0]);
+  });
+
+  describe('when references.relative is null', () => {
+    it('does not render IssueReference', () => {
+      createComponent({
+        props: {
+          issue: {
+            references: {},
+          },
+        },
+      });
+
+      expect(findIssueReference().exists()).toBe(false);
+    });
+  });
+
+  describe('when references.relative is provided', () => {
+    it('renders IssueReference', () => {
+      createComponent();
+
+      expect(findIssueReference().exists()).toBe(true);
+    });
   });
 });

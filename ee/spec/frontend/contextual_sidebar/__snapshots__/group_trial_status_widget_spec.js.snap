@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TrialStatusWidget component matches the snapshot 1`] = `
+exports[`TrialStatusWidget component without the optional containerId prop matches the snapshot 1`] = `
 <gl-link-stub
   href="billing/path-for/group"
-  title="Gold Trial – 27 days left"
+  title="Ultimate Trial – 20 days left"
 >
   <div
     class="gl-display-flex gl-flex-direction-column gl-align-items-stretch gl-w-full"
@@ -25,7 +25,7 @@ exports[`TrialStatusWidget component matches the snapshot 1`] = `
         class="nav-item-name gl-white-space-normal"
       >
         
-        Gold Trial – 27 days left
+        Ultimate Trial – 20 days left
       
       </span>
     </span>

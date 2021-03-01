@@ -209,7 +209,7 @@ module EE
                 projects_reporting_ci_cd_back_to_github: count(::GithubService.active),
                 status_page_projects: count(::StatusPage::ProjectSetting.enabled),
                 status_page_issues: count(::Issue.on_status_page, start: issue_minimum_id, finish: issue_maximum_id),
-                template_repositories: count(::Project.with_repos_templates) + count(::Project.with_groups_level_repos_templates)
+                template_repositories: add(count(::Project.with_repos_templates), count(::Project.with_groups_level_repos_templates))
               },
               requirements_counts,
               security_products_usage,

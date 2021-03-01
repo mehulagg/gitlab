@@ -1,40 +1,58 @@
 <script>
 import {
-  GlTable,
   GlAvatarLabeled,
   GlAvatarLink,
-  GlPagination,
-  GlTooltipDirective,
-  GlSearchBoxByType,
   GlBadge,
+  GlDropdown,
+  GlDropdownItem,
+  GlModalDirective,
+  GlPagination,
+  GlSearchBoxByType,
+  GlTable,
+  GlTooltipDirective,
 } from '@gitlab/ui';
 import { parseInt, debounce } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
+import {
+  FIELDS,
+  AVATAR_SIZE,
+  SEARCH_DEBOUNCE_MS,
+  REMOVE_MEMBER_MODAL_ID,
+} from 'ee/billings/seat_usage/constants';
 import { s__ } from '~/locale';
-
-const AVATAR_SIZE = 32;
-const SEARCH_DEBOUNCE_MS = 250;
+import RemoveMemberModal from './remove_member_modal.vue';
 
 export default {
   directives: {
+    GlModal: GlModalDirective,
     GlTooltip: GlTooltipDirective,
   },
   components: {
-    GlTable,
     GlAvatarLabeled,
     GlAvatarLink,
+    GlBadge,
+    GlDropdown,
+    GlDropdownItem,
     GlPagination,
     GlSearchBoxByType,
-    GlBadge,
+    GlTable,
+    RemoveMemberModal,
   },
   data() {
     return {
-      fields: ['user', 'email'],
       searchQuery: '',
     };
   },
   computed: {
-    ...mapState(['isLoading', 'page', 'perPage', 'total', 'namespaceName']),
+    ...mapState([
+      'isLoading',
+      'page',
+      'perPage',
+      'total',
+      'namespaceName',
+      'namespaceId',
+      'memberToRemove',
+    ]),
     ...mapGetters(['tableItems']),
     currentPage: {
       get() {
@@ -75,7 +93,7 @@ export default {
     this.fetchBillableMembersList();
   },
   methods: {
-    ...mapActions(['fetchBillableMembersList', 'resetMembers']),
+    ...mapActions(['fetchBillableMembersList', 'resetMembers', 'setMemberToRemove']),
     onSearchEnter() {
       this.debouncedSearch.cancel();
       this.executeQuery();
@@ -91,10 +109,14 @@ export default {
       }
     },
   },
+  i18n: {
+    emailNotVisibleTooltipText: s__(
+      'Billing|An email address is only visible for users with public emails.',
+    ),
+  },
   avatarSize: AVATAR_SIZE,
-  emailNotVisibleTooltipText: s__(
-    'Billing|An email address is only visible for users with public emails.',
-  ),
+  fields: FIELDS,
+  removeMemberModalId: REMOVE_MEMBER_MODAL_ID,
 };
 </script>
 
@@ -124,7 +146,7 @@ export default {
     <gl-table
       class="seats-table"
       :items="tableItems"
-      :fields="fields"
+      :fields="$options.fields"
       :busy="isLoading"
       :show-empty="true"
       data-testid="table"
@@ -150,11 +172,23 @@ export default {
           <span
             v-else
             v-gl-tooltip
-            :title="$options.emailNotVisibleTooltipText"
+            :title="$options.i18n.emailNotVisibleTooltipText"
             class="gl-font-style-italic"
-            >{{ s__('Billing|Private') }}</span
           >
+            {{ s__('Billing|Private') }}
+          </span>
         </div>
+      </template>
+
+      <template #cell(actions)="data">
+        <gl-dropdown icon="ellipsis_h" right data-testid="user-actions">
+          <gl-dropdown-item
+            v-gl-modal="$options.removeMemberModalId"
+            @click="setMemberToRemove(data.item.user)"
+          >
+            {{ __('Remove user') }}
+          </gl-dropdown-item>
+        </gl-dropdown>
       </template>
     </gl-table>
 
@@ -166,5 +200,7 @@ export default {
       align="center"
       class="gl-mt-5"
     />
+
+    <remove-member-modal v-if="memberToRemove" :modal-id="$options.removeMemberModalId" />
   </section>
 </template>

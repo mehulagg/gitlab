@@ -223,7 +223,7 @@ RSpec.describe 'Edit group settings' do
       end
 
       context 'namespace is on the proper plan' do
-        let(:plan) { create(:gold_plan) }
+        let(:plan) { create(:ultimate_plan) }
 
         context 'when the group is a top parent group' do
           let(:selected_group) { group }

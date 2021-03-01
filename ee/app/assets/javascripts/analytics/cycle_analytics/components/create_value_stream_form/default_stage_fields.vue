@@ -59,7 +59,7 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-mb-4">
+  <div class="gl-mb-4" data-testid="value-stream-stage-fields">
     <div class="gl-display-flex">
       <gl-form-group
         class="gl-flex-grow-1 gl-mb-0"

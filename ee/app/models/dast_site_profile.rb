@@ -21,6 +21,12 @@ class DastSiteProfile < ApplicationRecord
     dast_site_validation.state
   end
 
+  def referenced_in_security_policies
+    return [] unless project.security_orchestration_policy_configuration.present?
+
+    project.security_orchestration_policy_configuration.active_policy_names_with_dast_site_profile(name)
+  end
+
   private
 
   def cleanup_dast_site

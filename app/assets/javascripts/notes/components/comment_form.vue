@@ -180,9 +180,6 @@ export default {
     trackingLabel() {
       return slugifyWithUnderscore(`${this.commentButtonTitle} button`);
     },
-    hasCloseAndCommentButton() {
-      return !this.glFeatures.removeCommentCloseReopen;
-    },
     confidentialNotesEnabled() {
       return Boolean(this.glFeatures.confidentialNotes);
     },
@@ -366,7 +363,7 @@ export default {
                     data-qa-selector="comment_field"
                     data-testid="comment-field"
                     :data-supports-quick-actions="!glFeatures.tributeAutocomplete"
-                    :aria-label="__('Description')"
+                    :aria-label="__('Comment')"
                     :placeholder="__('Write a comment or drag your files here…')"
                     @keydown.up="editCurrentUserLastNote()"
                     @keydown.meta.enter="handleSave()"
@@ -426,7 +423,7 @@ export default {
                 </gl-dropdown-item>
               </gl-dropdown>
               <gl-button
-                v-if="hasCloseAndCommentButton && canToggleIssueState"
+                v-if="canToggleIssueState"
                 :loading="isToggleStateButtonLoading"
                 category="secondary"
                 :variant="buttonVariant"

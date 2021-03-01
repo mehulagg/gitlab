@@ -28,7 +28,7 @@ describe('RotationAssignee', () => {
     wrapper = extendedWrapper(
       shallowMount(RotationAssignee, {
         propsData: {
-          assignee: { avatarUrl: '/url', ...assignee.participant },
+          assignee: { ...assignee.participant },
           rotationAssigneeStartsAt: assignee.startsAt,
           rotationAssigneeEndsAt: assignee.endsAt,
           rotationAssigneeStyle: { left: '0px', width: `${shiftWidth}px` },
@@ -49,7 +49,7 @@ describe('RotationAssignee', () => {
 
   describe('rotation assignee token', () => {
     it('should render an assignee name and avatar', () => {
-      expect(findAvatar().props('src')).toBe(wrapper.vm.assignee.avatarUrl);
+      expect(findAvatar().props('src')).toBe(assignee.participant.user.avatarUrl);
       expect(findName().text()).toBe(assignee.participant.user.username);
     });
 

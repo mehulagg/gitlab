@@ -167,21 +167,25 @@ describe('Iterations report tabs', () => {
       });
 
       it('shows issues for `Security` label', () => {
-        expect(findIterationReportIssuesAt(0).props()).toMatchObject({
-          ...defaultProps,
-          label: selectedLabels[0],
-        });
+        expect(findIterationReportIssuesAt(0).props()).toMatchObject({ label: selectedLabels[0] });
       });
 
       it('shows issues for `Tooling` label', () => {
-        expect(findIterationReportIssuesAt(1).props()).toMatchObject({
-          ...defaultProps,
-          label: selectedLabels[1],
-        });
+        expect(findIterationReportIssuesAt(1).props()).toMatchObject({ label: selectedLabels[1] });
       });
 
       it('hides issues for the ungrouped issues list', () => {
         expect(findIterationReportIssuesAt(2).isVisible()).toBe(false);
+      });
+
+      it('hides label issues when the label is removed', async () => {
+        expect(findAllIterationReportIssues()).toHaveLength(3);
+
+        await findIterationReportIssues().vm.$emit('removeLabel', selectedLabels[0].id);
+
+        expect(findAllIterationReportIssues()).toHaveLength(2);
+        expect(findIterationReportIssuesAt(0).props()).toMatchObject({ label: selectedLabels[1] });
+        expect(findIterationReportIssuesAt(1).isVisible()).toBe(false);
       });
     });
 
@@ -223,10 +227,7 @@ describe('Iterations report tabs', () => {
       });
 
       it('shows issues for `Security` label', () => {
-        expect(findIterationReportIssuesAt(0).props()).toMatchObject({
-          ...defaultProps,
-          label: selectedLabels[0],
-        });
+        expect(findIterationReportIssuesAt(0).props()).toMatchObject({ label: selectedLabels[0] });
       });
 
       it('hides issues for the ungrouped issues list', () => {
@@ -262,7 +263,10 @@ describe('Iterations report tabs', () => {
       });
 
       it('shows empty state', () => {
-        expect(findEmptyState().props('title')).toBe('No issues found for the selected labels');
+        expect(findEmptyState().props()).toMatchObject({
+          description: 'Try grouping with different labels',
+          title: 'There are no issues with the selected labels',
+        });
       });
 
       it('shows 1 IterationReportIssues block (one for the hidden ungrouped list)', () => {

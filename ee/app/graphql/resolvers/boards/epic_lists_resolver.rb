@@ -22,12 +22,22 @@ module Resolvers
         # point there is not reason to introduce a ListService
         # https://gitlab.com/gitlab-org/gitlab/-/issues/294043
         lists = epic_board.epic_lists
+
+        if load_preferences?(lookahead)
+          ::Boards::EpicList.preload_preferences_for_user(lists, current_user)
+        end
+
         lists = lists.where(id: id.model_id) if id # rubocop: disable CodeReuse/ActiveRecord
 
         offset_pagination(apply_lookahead(lists))
       end
 
       private
+
+      def load_preferences?(lookahead)
+        lookahead&.selection(:edges)&.selection(:node)&.selects?(:collapsed) ||
+            lookahead&.selection(:nodes)&.selects?(:collapsed)
+      end
 
       def authorize!
         Ability.allowed?(context[:current_user], :read_epic_board_list, epic_board.group) || raise_resource_not_available_error!

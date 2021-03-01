@@ -242,8 +242,10 @@ export default {
         :background-color="label.color"
         :description="label.description"
         :scoped="shouldShowScopedLabel(label)"
+        show-close-button
         :target="null"
         :title="label.title"
+        @close="$emit('removeLabel', label.id)"
       />
       <gl-badge class="gl-ml-2" size="sm" variant="muted" :aria-label="badgeAriaLabel">
         {{ issues.count }}

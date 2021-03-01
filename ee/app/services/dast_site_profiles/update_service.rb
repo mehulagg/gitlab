@@ -5,9 +5,11 @@ module DastSiteProfiles
     def execute(id:, profile_name:, target_url:)
       return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
 
-      ActiveRecord::Base.transaction do
-        dast_site_profile = find_dast_site_profile!(id)
+      dast_site_profile = find_dast_site_profile!(id)
 
+      return ServiceResponse.error(message: "Cannot modify #{dast_site_profile.name} referenced in security policy") if referenced_in_security_policy?(dast_site_profile)
+
+      ActiveRecord::Base.transaction do
         service = DastSites::FindOrCreateService.new(project, current_user)
         dast_site = service.execute!(url: target_url)
 
@@ -26,6 +28,10 @@ module DastSiteProfiles
 
     def allowed?
       Ability.allowed?(current_user, :create_on_demand_dast_scan, project)
+    end
+
+    def referenced_in_security_policy?(profile)
+      profile.referenced_in_security_policies.present?
     end
 
     # rubocop: disable CodeReuse/ActiveRecord

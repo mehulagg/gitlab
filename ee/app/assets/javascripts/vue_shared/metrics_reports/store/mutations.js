@@ -13,11 +13,14 @@ export default {
     state.isLoading = false;
 
     state.newMetrics = response.new_metrics || [];
-    state.existingMetrics = response.existing_metrics || [];
+    state.existingMetrics = [
+      ...(response.existing_metrics?.filter((metric) => metric?.previous_value) || []),
+      ...(response.existing_metrics?.filter((metric) => !metric?.previous_value) || []),
+    ];
     state.removedMetrics = response.removed_metrics || [];
 
     state.numberOfChanges =
-      state.existingMetrics.filter((metric) => metric.previous_value !== undefined).length +
+      state.existingMetrics.filter((metric) => metric?.previous_value !== undefined).length +
       state.newMetrics.length +
       state.removedMetrics.length;
   },

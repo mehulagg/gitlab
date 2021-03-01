@@ -99,7 +99,7 @@ export default {
       ),
     ],
     discoverPlanCaption: s__(
-      'Discover|See the other features of the %{linkStart}gold plan%{linkEnd}',
+      'Discover|See the other features of the %{linkStart}ultimate plan%{linkEnd}',
     ),
   },
 };

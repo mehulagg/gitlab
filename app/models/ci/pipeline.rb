@@ -228,7 +228,7 @@ module Ci
 
         pipeline.run_after_commit do
           PipelineHooksWorker.perform_async(pipeline.id)
-          ExpirePipelineCacheWorker.perform_async(pipeline.id) if pipeline.cacheable?
+          ExpirePipelineCacheWorker.perform_async(pipeline.id)
         end
       end
 
@@ -938,6 +938,12 @@ module Ci
         .first
     end
 
+    def self_with_ancestors_and_descendants(same_project: false)
+      ::Gitlab::Ci::PipelineObjectHierarchy
+        .new(self.class.unscoped.where(id: id), options: { same_project: same_project })
+        .all_objects
+    end
+
     def bridge_triggered?
       source_bridge.present?
     end
@@ -1117,7 +1123,7 @@ module Ci
       detached_merge_request_pipeline? && !merge_request_ref?
     end
 
-    def merge_request_pipeline?
+    def merged_result_pipeline?
       merge_request? && target_sha.present?
     end
 
@@ -1157,7 +1163,7 @@ module Ci
       return unless merge_request?
 
       strong_memoize(:merge_request_event_type) do
-        if merge_request_pipeline?
+        if merged_result_pipeline?
           :merged_result
         elsif detached_merge_request_pipeline?
           :detached
@@ -1167,10 +1173,6 @@ module Ci
 
     def persistent_ref
       @persistent_ref ||= PersistentRef.new(pipeline: self)
-    end
-
-    def cacheable?
-      !dangling?
     end
 
     def dangling?
@@ -1247,7 +1249,7 @@ module Ci
     def merge_request_diff_sha
       return unless merge_request?
 
-      if merge_request_pipeline?
+      if merged_result_pipeline?
         source_sha
       else
         sha

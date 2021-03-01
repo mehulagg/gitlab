@@ -17,4 +17,10 @@ class DastScannerProfile < ApplicationRecord
   def full_scan_enabled?
     scan_type == 'active'
   end
+
+  def referenced_in_security_policies
+    return [] unless project.security_orchestration_policy_configuration.present?
+
+    project.security_orchestration_policy_configuration.active_policy_names_with_dast_scanner_profile(name)
+  end
 end
