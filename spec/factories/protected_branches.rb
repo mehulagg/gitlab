@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :protected_branch do
     name
-    project { create(:project) }
+    project
 
     transient do
       default_push_level { true }

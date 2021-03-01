@@ -6,7 +6,7 @@ FactoryBot.define do
     sha { 'b83d6e391c22777fca1ed3012fce84f633d7fed0' }
     name { tag }
     description { "Awesome release" }
-    project { create(:project) }
+    project
     author
     released_at { Time.zone.parse('2018-10-20T18:00:00Z') }
 
