@@ -1188,7 +1188,6 @@ Sir Homer Simpson the Third
 Now, everytime you call this test, it will be evaluated against what is created. This should highlight the fact that it's super important to understand the content of your snapshot file and treat it with care. If there's a clear dump of a whole HTML page, or a major instance with hundreds of keys it's not readable and impossible to evaluate if that is the desired outcome.
 The same can be done for `wrappers` or `elements`
 
-
 ```javascript
 it('renders the component correctly', () => {
   expect(wrapper).toMatchSnapshot()
@@ -1210,7 +1209,7 @@ This will create two snapshots for you. Important to decide is, which of the sna
 
 - Is not a catch-all solution that replaces the work of integration or unit tests
 - No meaningful assertions or expectations within snapshots
-- When carelessly used with gitlab-ui it might appear as failing tests for intended good changes
+- When carelessly used with GitLab UI it might appear as failing tests for intended good changes
 
 A good guideline to follow: the more complex the component you may want to steer away from just snapshot testing. But that's not to say you can't still snapshot test and test your component as normal.
 
@@ -1233,7 +1232,7 @@ Don't use
 
 - To capture large data structures just to have something
 - To just have some kind of test written
-- To capture highly volatile ui elements without stubbing them (Think of gitlab-ui version updates)
+- To capture highly volatile ui elements without stubbing them (Think of GitLab UI version updates)
 
 ---
 
