@@ -103,7 +103,7 @@ The following table depicts the various user permission levels in a project.
 | Pull [packages](packages/index.md)                |         | ✓          | ✓           | ✓        | ✓      |
 | Publish [packages](packages/index.md)             |         |            | ✓           | ✓        | ✓      |
 | Create/edit/delete a Cleanup policy               |         |            | ✓           | ✓        | ✓      |
-| Upload [Design Management](project/issues/design_management.md) files |  |  | ✓        | ✓        | ✓      |
+| Upload [Design Management](project/issues/design_management.md) files |  | ✓(*13*) | ✓        | ✓        | ✓      |
 | Create/edit [releases](project/releases/index.md)|   |            | ✓           | ✓        | ✓      |
 | Delete [releases](project/releases/index.md)|   |            |            | ✓        | ✓      |
 | Create new branches                               |         |            | ✓           | ✓        | ✓      |
@@ -202,6 +202,7 @@ The following table depicts the various user permission levels in a project.
 1. Owner permission is only available at the group or personal namespace level (and for instance admins) and is inherited by its projects.
 1. Applies only to comments on [Design Management](project/issues/design_management.md) designs.
 1. Users can only view events based on their individual actions.
+1. Reporters are allowed to move [Design Management](https://docs.gitlab.com/ee/user/project/issues/design_management.html) files to an issue
 
 ## Project features permissions
 
