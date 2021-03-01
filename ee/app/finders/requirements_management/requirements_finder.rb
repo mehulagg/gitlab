@@ -60,12 +60,25 @@ module RequirementsManagement
     end
 
     def by_last_test_report_state(items)
-      return items unless params[:last_test_report_state]
+      return items unless last_test_report_state
 
-      if params[:last_test_report_state] == 'missing'
+      if last_test_report_state == 'missing'
         items.without_test_reports
       else
-        items.with_last_test_report_state(params[:last_test_report_state])
+        items.with_last_test_report_state(last_test_report_state)
+      end
+    end
+
+    def last_test_report_state
+      strong_memoize(:last_test_report_state) do
+        next unless params[:last_test_report_state]
+
+        allowed_params = Types::RequirementsManagement::RequirementStatusFilterEnum.values
+        allowed_params = allowed_params.values.map(&:value)
+
+        next unless allowed_params.include?(params[:last_test_report_state])
+
+        params[:last_test_report_state]
       end
     end
 

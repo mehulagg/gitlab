@@ -62,6 +62,18 @@ RSpec.describe RequirementsManagement::RequirementsFinder do
 
           is_expected.to match_array([requirement1, requirement3])
         end
+
+        context 'when last_test_report_state is not valid' do
+          let(:params) { { project_id: project.id, last_test_report_state: 'not_valid' } }
+
+          it 'does not filter requirements' do
+            is_expected.to match_array([requirement1, requirement2, requirement3])
+          end
+
+          it 'does not raise error' do
+            expect { subject }.not_to raise_error
+          end
+        end
       end
 
       context 'when user can not read requirements in the project' do
