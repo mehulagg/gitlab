@@ -30,6 +30,18 @@ RSpec.describe API::ResourceAccessTokens do
           expect(token_ids).to match_array(access_tokens.pluck(:id))
         end
 
+        it "exposes the correct token information", :aggregate_failures do
+          get_tokens
+
+          token = access_tokens.last
+          api_get_token = json_response.last
+
+          expect(api_get_token["name"]).to eq(token.name)
+          expect(api_get_token["scopes"]).to eq(token.scopes)
+          expect(api_get_token["expires_at"]).to eq(token.expires_at.to_date.iso8601)
+          expect(api_get_token["token"]).to be_nil
+        end
+
         context "when using a project access token to GET other project access tokens" do
           let_it_be(:token) { access_tokens.first }
 
@@ -203,6 +215,7 @@ RSpec.describe API::ResourceAccessTokens do
               expect(json_response["name"]).to eq("test")
               expect(json_response["scopes"]).to eq(["api"])
               expect(json_response["expires_at"]).to eq(expires_at.to_date.iso8601)
+              expect(json_response["token"]).not_to be_nil
             end
           end
 
