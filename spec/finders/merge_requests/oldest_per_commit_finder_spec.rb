@@ -42,5 +42,39 @@ RSpec.describe MergeRequests::OldestPerCommitFinder do
       expect(described_class.new(mr.target_project).execute(commits))
         .to be_empty
     end
+
+    it 'includes the merge request for a merge commit' do
+      project = create(:project)
+      sha = Digest::SHA1.hexdigest('foo')
+      mr = create(
+        :merge_request,
+        :merged,
+        target_project: project,
+        merge_commit_sha: sha
+      )
+
+      commits = [double(:commit, id: sha)]
+
+      expect(described_class.new(project).execute(commits)).to eq(sha => mr)
+    end
+
+    it 'includes the oldest merge request when a merge commit is present in a newer merge request' do
+      project = create(:project)
+      sha = Digest::SHA1.hexdigest('foo')
+      mr1 = create(
+        :merge_request,
+        :merged,
+        target_project: project, merge_commit_sha: sha
+      )
+
+      mr2 = create(:merge_request, :merged, target_project: project)
+      mr_diff = create(:merge_request_diff, merge_request: mr2)
+
+      create(:merge_request_diff_commit, merge_request_diff: mr_diff, sha: sha)
+
+      commits = [double(:commit, id: sha)]
+
+      expect(described_class.new(project).execute(commits)).to eq(sha => mr1)
+    end
   end
 end
