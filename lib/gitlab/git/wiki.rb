@@ -4,41 +4,41 @@ require 'gollum-lib'
 
 module Gitlab
   module Git
-    class CommitterWithHooks < Gollum::Committer
-      attr_reader :gl_wiki
+    # class CommitterWithHooks < Gollum::Committer
+    #   attr_reader :gl_wiki
 
-      def initialize(gl_wiki, options = {})
-        @gl_wiki = gl_wiki
-        super(gl_wiki.gollum_wiki, options)
-      end
+    #   def initialize(gl_wiki, options = {})
+    #     @gl_wiki = gl_wiki
+    #     super(gl_wiki.gollum_wiki, options)
+    #   end
 
-      def commit
-        result = Gitlab::Git::OperationService.new(git_user, gl_wiki.repository).with_branch(
-          @wiki.ref,
-          start_branch_name: @wiki.ref
-        ) do |_start_commit|
-          super(false)
-        end
+    #   def commit
+    #     result = Gitlab::Git::OperationService.new(git_user, gl_wiki.repository).with_branch(
+    #       @wiki.ref,
+    #       start_branch_name: @wiki.ref
+    #     ) do |_start_commit|
+    #       super(false)
+    #     end
 
-        result[:newrev]
-      rescue Gitlab::Git::PreReceiveError => e
-        message = "Hook failed: #{e.message}"
-        raise Gitlab::Git::Wiki::OperationError, message
-      end
+    #     result[:newrev]
+    #   rescue Gitlab::Git::PreReceiveError => e
+    #     message = "Hook failed: #{e.message}"
+    #     raise Gitlab::Git::Wiki::OperationError, message
+    #   end
 
-      private
+    #   private
 
-      def git_user
-        @git_user ||= Gitlab::Git::User.new(@options[:username],
-                                            @options[:name],
-                                            @options[:email],
-                                            gitlab_id)
-      end
+    #   def git_user
+    #     @git_user ||= Gitlab::Git::User.new(@options[:username],
+    #                                         @options[:name],
+    #                                         @options[:email],
+    #                                         gitlab_id)
+    #   end
 
-      def gitlab_id
-        Gitlab::GlId.gl_id_from_id_value(@options[:user_id])
-      end
-    end
+    #   def gitlab_id
+    #     Gitlab::GlId.gl_id_from_id_value(@options[:user_id])
+    #   end
+    # end
 
     class Wiki
       include Gitlab::Git::WrapsGitalyErrors
@@ -47,9 +47,9 @@ module Gitlab
 
       DEFAULT_PAGINATION = Kaminari.config.default_per_page
 
-      CommitDetails = Struct.new(:user_id, :username, :name, :email, :message) do
+      CommitDetails = Struct.new(:user, :user_id, :username, :name, :email, :message) do
         def to_h
-          { user_id: user_id, username: username, name: name, email: email, message: message }
+          { user: user, user_id: user_id, username: username, name: name, email: email, message: message }
         end
       end
 
@@ -105,11 +105,9 @@ module Gitlab
         @repository.exists?
       end
 
+      # Supported
       def write_page(name, format, content, commit_details)
-        assert_type!(format, Symbol)
-        assert_type!(commit_details, CommitDetails)
-
-        with_committer_with_hooks(commit_details) do |committer|
+        with_committer_with_hooks({}) do |committer|
           filename = File.basename(name)
           dir = (tmp_dir = File.dirname(name)) == '.' ? '' : tmp_dir
 
@@ -122,16 +120,27 @@ module Gitlab
         # end
       end
 
+      # Partially supported. There is a bug in the committer after hook
+      # because it tries to access the page but it doesn't exist anymore
       def delete_page(page_path, commit_details)
-        wrapped_gitaly_errors do
-          gitaly_delete_page(page_path, commit_details)
+        with_committer_with_hooks({}) do |committer|
+          gollum_wiki.delete_page(gollum_page_by_path(page_path), { committer: committer })
         end
+        # wrapped_gitaly_errors do
+        #   gitaly_delete_page(page.path, commit_details)
+        # end
       end
 
       def update_page(page_path, title, format, content, commit_details)
-        wrapped_gitaly_errors do
-          gitaly_update_page(page_path, title, format, content, commit_details)
+        with_committer_with_hooks({}) do |committer|
+          page = gollum_page_by_path(page_path)
+          gollum_wiki.update_page(page, page.name, format, content, committer: committer)
+          gollum_wiki.rename_page(page, title, committer: committer)
         end
+        puts "ACABO UPDATE*****"
+        # wrapped_gitaly_errors do
+        #   gitaly_update_page(page_path, title, format, content, commit_details)
+        # end
       end
 
       # Almost supported
@@ -171,6 +180,7 @@ module Gitlab
 
       # Supported
       def page(title:, version: nil, dir: nil)
+        puts "**** ENTRO EN PAGGEGEGE #{version}"
         if version
           version = Gitlab::Git::Commit.find(@repository, version)&.id
           return unless version
@@ -267,7 +277,8 @@ module Gitlab
       end
 
       def committer_with_hooks(commit_details)
-        Gitlab::Git::CommitterWithHooks.new(self, commit_details.to_h)
+        # Gitlab::Git::CommitterWithHooks.new(self, commit_details.to_h)
+        Gitlab::Git::WikiGitalyCommitter.new(self, {})
       end
 
       def with_committer_with_hooks(commit_details)

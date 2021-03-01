@@ -41,6 +41,7 @@ module Gitlab
         # Return the object that +revspec+ points to.  If +revspec+ is an
         # annotated tag, then return the tag's target instead.
         def rev_parse_target(revspec)
+          puts "REVSPEC #{revspec}"
           obj = rugged.rev_parse(revspec)
           Ref.dereference_object(obj)
         end

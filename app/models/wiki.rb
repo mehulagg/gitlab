@@ -193,32 +193,10 @@ class Wiki
   def delete_page(page, message = nil)
     return unless page
 
-    result = begin
-      commit_message = message.presence || default_message(:deleted, page.title)
+    wiki.delete_page(page.path, commit_details(:deleted, message, page.title))
+    after_wiki_activity
 
-      repository.delete_file(
-        user,
-        page.path,
-        branch_name: repository.root_ref,
-        message: commit_message,
-        author_email: user.email,
-        author_name: user.name)
-
-      true
-    rescue Gitlab::Git::Index::IndexError,
-           Gitlab::Git::CommitError,
-           Gitlab::Git::PreReceiveError,
-           Gitlab::Git::CommandError,
-           ArgumentError
-
-      false
-    end
-
-    # wiki.delete_page(page.path, commit_details(:deleted, message, page.title))
-
-    result.tap do |res|
-      after_wiki_activity if res
-    end
+    true
   end
 
   def page_title_and_dir(title)
