@@ -1,5 +1,5 @@
 <script>
-import { __ } from '~/locale';
+import { s__ } from '~/locale';
 
 export default {
   name: 'GeoNodes',
@@ -11,7 +11,7 @@ export default {
   },
   computed: {
     siteTitle() {
-      return this.node.primary ? __('Primary site') : __('Secondary site');
+      return this.node.primary ? s__('Geo|Primary site') : s__('Geo|Secondary site');
     },
   },
 };

@@ -82,7 +82,7 @@ describe('GeoNodesBetaApp', () => {
     });
 
     it('renders a Geo Node component for each node', () => {
-      expect(findGeoNodes().length).toBe(MOCK_NODES.length);
+      expect(findGeoNodes()).toHaveLength(MOCK_NODES.length);
     });
   });
 

@@ -32,14 +32,14 @@ export default {
 
 <template>
   <section>
-    <h3>{{ __('Geo sites') }}</h3>
+    <h3>{{ s__('Geo|Geo sites') }}</h3>
     <div
       class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-md-align-items-center gl-pb-5 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
     >
       <div class="gl-mr-5">
         <span>{{
-          __(
-            'With GitLab Geo, you can install a special read-only and replicated instance anywhere.',
+          s__(
+            'Geo|With GitLab Geo, you can install a special read-only and replicated instance anywhere.',
           )
         }}</span>
         <gl-link class="gl-ml-2" :href="$options.GEO_INFO_URL" target="_blank">{{
@@ -51,8 +51,8 @@ export default {
         variant="confirm"
         :href="newNodeUrl"
         target="_blank"
-        >{{ __('Add site') }}</gl-button
-      >
+        >{{ s__('Geo|Add site') }}
+      </gl-button>
     </div>
     <geo-nodes v-for="node in nodes" :key="node.id" :node="node" />
   </section>
