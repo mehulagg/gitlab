@@ -1,7 +1,7 @@
 ---
 name: diffs_gradual_load
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/48253/
-rollout_issue_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/323053
 milestone: '13.7'
 type: development
 group: group::code review
