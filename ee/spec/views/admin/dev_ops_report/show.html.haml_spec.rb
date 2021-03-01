@@ -27,6 +27,15 @@ RSpec.describe 'admin/dev_ops_report/show.html.haml' do
 
       expect(rendered).not_to have_selector('#devops-adoption')
     end
+
+    it 'shows the timestamp of the latest record' do
+      assign(:metric, create(:dev_ops_report_metric, created_at: Time.utc(2012, 5, 1, 14, 30)).present)
+
+      render
+
+      expect(rendered).to have_selector('.gl-my-3.gl-text-gray-400')
+      expect(rendered).to have_content('Last updated: 2012-05-01 14:30.')
+    end
   end
 
   context 'when show_adoption? returns true' do

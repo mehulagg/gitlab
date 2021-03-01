@@ -10535,6 +10535,9 @@ msgstr ""
 msgid "DevopsReport|DevOps Score"
 msgstr ""
 
+msgid "DevopsReport|DevOps score metrics are based on usage over the last 30 days. Last updated: %{timestamp}."
+msgstr ""
+
 msgid "DevopsReport|Score"
 msgstr ""
 
