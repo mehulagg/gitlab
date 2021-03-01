@@ -3,6 +3,7 @@
 module Types
   class BaseField < GraphQL::Schema::Field
     prepend Gitlab::Graphql::Authorize
+    include Gitlab::Graphql::Visible
     include GitlabStyleDeprecations
 
     argument_class ::Types::BaseArgument
@@ -67,26 +68,7 @@ module Types
       @constant_complexity
     end
 
-    def visible?(context)
-      return false if feature_flag.present? && !Feature.enabled?(feature_flag)
-
-      super
-    end
-
     private
-
-    attr_reader :feature_flag
-
-    def feature_documentation_message(key, description)
-      "#{description} Available only when feature flag `#{key}` is enabled."
-    end
-
-    def check_feature_flag(args)
-      args[:description] = feature_documentation_message(args[:feature_flag], args[:description]) if args[:feature_flag].present?
-      args.delete(:feature_flag)
-
-      args
-    end
 
     def field_complexity(resolver_class, current)
       return current if current.present? && current > 0
