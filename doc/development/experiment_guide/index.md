@@ -125,7 +125,7 @@ in GitLab that can be used for running experiments.
      You can check the state of the feature flag in JavaScript:
 
      ```javascript
-     import { isExperimentEnabled } from '~/experimentation';
+     import { isExperimentEnabled } from '~/experimentation/utils';
 
      if ( isExperimentEnabled('signupFlow') ) {
        // ...
@@ -220,7 +220,7 @@ expect(Gon.tracking_data).to eq(
 Which can then be used for tracking as follows:
 
 ```javascript
-import { isExperimentEnabled } from '~/lib/utils/experimentation';
+import { isExperimentEnabled } from '~/experimentation/utils';
 import Tracking from '~/tracking';
 
 document.addEventListener('DOMContentLoaded', () => {

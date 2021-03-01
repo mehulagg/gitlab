@@ -11,7 +11,7 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
 
   def publish(_result)
     track(:assignment) # track that we've assigned a variant for this context
-    Gon.global.push({ experiment: { name => signature } }, true) # push the experiment data to the client
+    Gon.push({ experiment: { name => signature } }, true) # push the experiment data to the client
   end
 
   def track(action, **event_args)

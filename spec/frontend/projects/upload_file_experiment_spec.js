@@ -1,8 +1,8 @@
-import ExperimentTracking from '~/experiment_tracking';
+import ExperimentTracking from '~/experimentation/experiment_tracking';
 import * as UploadFileExperiment from '~/projects/upload_file_experiment';
 
 const mockExperimentTrackingEvent = jest.fn();
-jest.mock('~/experiment_tracking', () =>
+jest.mock('~/experimentation/experiment_tracking', () =>
   jest.fn().mockImplementation(() => ({
     event: mockExperimentTrackingEvent,
   })),

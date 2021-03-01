@@ -64,8 +64,8 @@ RSpec.describe ApplicationExperiment, :experiment do
       subject.publish(nil)
     end
 
-    it "pushes the experiment knowledge into the client using Gon.global" do
-      expect(Gon.global).to receive(:push).with(
+    it "pushes the experiment knowledge into the client using Gon" do
+      expect(Gon).to receive(:push).with(
         {
           experiment: {
             'namespaced/stub' => { # string key because it can be namespaced

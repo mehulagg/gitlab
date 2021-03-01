@@ -1,4 +1,4 @@
-import ExperimentTracking from '~/experiment_tracking';
+import ExperimentTracking from '~/experimentation/experiment_tracking';
 import Tracking from '~/tracking';
 
 jest.mock('~/tracking');
@@ -27,7 +27,7 @@ afterEach(() => {
 describe('event', () => {
   describe('when experiment data exists for experimentName', () => {
     beforeEach(() => {
-      newGon = { global: { experiment: { sidebar_experiment: 'experiment-data' } } };
+      newGon = { experiment: { sidebar_experiment: 'experiment-data' } };
       setup();
     });
 
@@ -64,7 +64,7 @@ describe('event', () => {
 
   describe('when experiment data does NOT exists for the experimentName', () => {
     beforeEach(() => {
-      newGon = { global: { experiment: { unrelated_experiment: 'not happening' } } };
+      newGon = { experiment: { unrelated_experiment: 'not happening' } };
       setup();
     });
 

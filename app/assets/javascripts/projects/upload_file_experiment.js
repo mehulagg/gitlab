@@ -1,4 +1,4 @@
-import ExperimentTracking from '~/experiment_tracking';
+import ExperimentTracking from '~/experimentation/experiment_tracking';
 
 function trackEvent(eventName) {
   const Tracking = new ExperimentTracking('empty_repo_upload', { label: 'blob-upload-modal' });

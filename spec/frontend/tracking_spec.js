@@ -251,7 +251,7 @@ describe('Tracking', () => {
         key: '2bff73f6bb8cc11156c50a8ba66b9b8b',
       };
 
-      window.gon.global = { experiment: { example: data } };
+      window.gon = { experiment: { example: data } };
       document.querySelector('[data-track-event="click_input3"]').click();
 
       expect(eventSpy).toHaveBeenCalledWith('_category_', 'click_input3', {

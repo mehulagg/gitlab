@@ -1,4 +1,4 @@
-import * as experimentUtils from '~/lib/utils/experimentation';
+import * as experimentUtils from '~/experimentation/utils';
 
 const TEST_KEY = 'abc';
 
