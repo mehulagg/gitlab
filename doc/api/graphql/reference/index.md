@@ -381,7 +381,8 @@ Describes an alert from the project's Alert Management.
 | `eventCount` | Int | Number of events of this alert. |
 | `hosts` | String! => Array | List of hosts the alert came from. |
 | `iid` | ID! | Internal ID of the alert. |
-| `issue` | Issue | Internal GitLab Issue attached to the alert. |
+| `issue` | Issue | Internal GitLab issue attached to the alert. |
+| `issueIid` **{warning-solid}** | ID | **Deprecated:** Use issue field. Deprecated in 13.10. |
 | `metricsDashboardUrl` | String | URL for metrics embed for the alert. |
 | `monitoringTool` | String | Monitoring tool the alert came from. |
 | `notes` | NoteConnection! | All notes on this noteable. |

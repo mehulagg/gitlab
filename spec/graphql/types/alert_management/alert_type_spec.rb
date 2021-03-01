@@ -10,6 +10,7 @@ RSpec.describe GitlabSchema.types['AlertManagementAlert'] do
   it 'exposes the expected fields' do
     expected_fields = %i[
       iid
+      issueIid
       issue
       title
       description
