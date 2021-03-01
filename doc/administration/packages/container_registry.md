@@ -1065,10 +1065,10 @@ CI/CD > Container Registry > Authorization token duration (minutes)**.
 
 ### Docker login attempt fails with: 'token signed by untrusted key'
 
-[Registry relies on GitLab to validate credentials](https://docs.gitlab.com/omnibus/architecture/registry/).
-If the registry fails to authenticate valid login attempts, you'll see the following error message:
+[Registry relies on GitLab to validate credentials](https://docs.gitlab.com/omnibus/architecture/registry/). If the registry fails to authenticate valid login attempts, you'll see the following error message:
 
-```# docker login gitlab.company.com:4567
+```
+# docker login gitlab.company.com:4567
 Username: user
 Password: 
 Error response from daemon: login attempt to https://gitlab.company.com:4567/v2/ failed with status: 401 Unauthorized
@@ -1076,15 +1076,18 @@ Error response from daemon: login attempt to https://gitlab.company.com:4567/v2/
 
 And more specifically, in the `/var/log/gitlab/registry/current` log file:
 
-```1. level=info msg="token signed by untrusted key with ID: "TOKE:NL6Q:7PW6:EXAM:PLET:OKEN:BG27:RCIB:D2S3:EXAM:PLET:OKEN"" 
-2. level=warning msg="error authorizing context: invalid token" go.version=go1.12.7 http.request.host="gitlab.company.com:4567" http.request.id=74613829-2655-4f96-8991-1c9fe33869b8 http.request.method=GET http.request.remoteaddr=10.72.11.20 http.request.uri="/v2/" http.request.useragent="docker/19.03.2 go/go1.12.8 git-commit/6a30dfc kernel/3.10.0-693.2.2.el7.x86_64 os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.2 \(linux\))" 
+```
+level=info msg="token signed by untrusted key with ID: "TOKE:NL6Q:7PW6:EXAM:PLET:OKEN:BG27:RCIB:D2S3:EXAM:PLET:OKEN"" 
+level=warning msg="error authorizing context: invalid token" go.version=go1.12.7 http.request.host="gitlab.company.com:4567" http.request.id=74613829-2655-4f96-8991-1c9fe33869b8 http.request.method=GET http.request.remoteaddr=10.72.11.20 http.request.uri="/v2/" http.request.useragent="docker/19.03.2 go/go1.12.8 git-commit/6a30dfc kernel/3.10.0-693.2.2.el7.x86_64 os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.2 \(linux\))" 
 ```
 
 This means that the contents of the certificate key pair used to encrypt the communication between Registry and GitLab do not align. 
-To check which files are in use:
+
+Check which files are in use:
 
 - grep -A6 'auth:' /var/opt/gitlab/registry/config.yml
-```## Container Registry Certificate
+```
+## Container Registry Certificate
    auth:
      token:
        realm: https://gitlab.my.net/jwt/auth
@@ -1095,7 +1098,8 @@ To check which files are in use:
 ```
 
 - grep -A9 'Container Registry' /var/opt/gitlab/gitlab-rails/etc/gitlab.yml
-```## Container Registry Key
+```
+## Container Registry Key
    registry:
      enabled: true
      host: gitlab.company.com
@@ -1107,13 +1111,13 @@ To check which files are in use:
      notification_secret:
 ```
 
-For the example above, the output of these commands should match:
-```openssl x509 -noout -modulus -in /var/opt/gitlab/registry/gitlab-registry.crt | openssl sha256
+In the example above, the output of these commands should match:
+```
+openssl x509 -noout -modulus -in /var/opt/gitlab/registry/gitlab-registry.crt | openssl sha256
 openssl rsa -noout -modulus -in /var/opt/gitlab/gitlab-rails/etc/gitlab-registry.key | openssl sha256
 ```
 
-If the two pieces of the certificate do not align, remove the files and run `gitlab-ctl reconfigure` to regenerate the pair. 
-If you have overriden the automatically generated self-signed pair with your own certificates and have made sure that their contents align using the commands above, you can delete the 'registry' section in your `/etc/gitlab/gitlab-secrets.json` and run `gitlab-ctl reconfigure`.
+If the two pieces of the certificate do not align, remove the files and run `gitlab-ctl reconfigure` to regenerate the pair. If you have overriden the automatically generated self-signed pair with your own certificates and have made sure that their contents align, you can delete the 'registry' section in your `/etc/gitlab/gitlab-secrets.json` and run `gitlab-ctl reconfigure`.
 
 ### AWS S3 with the GitLab registry error when pushing large images
 
