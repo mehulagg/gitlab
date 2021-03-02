@@ -351,7 +351,9 @@ export default {
         })
         .catch(() => {
           this.isMakingRequest = false;
-          new Flash(__('Something went wrong. Please try again.')); // eslint-disable-line
+          createFlash({
+            message: __('Something went wrong. Please try again.'),
+          });
         });
     },
     handleMergeImmediatelyButtonClick() {
@@ -402,7 +404,9 @@ export default {
           }
         })
         .catch(() => {
-          new Flash(__('Something went wrong while merging this merge request. Please try again.')); // eslint-disable-line
+          createFlash({
+            message: __('Something went wrong while merging this merge request. Please try again.'),
+          });
           stopPolling();
         });
     },
@@ -432,7 +436,9 @@ export default {
           }
         })
         .catch(() => {
-          new Flash(__('Something went wrong while deleting the source branch. Please try again.')); // eslint-disable-line
+          createFlash({
+            message: __('Something went wrong while deleting the source branch. Please try again.'),
+          });
         });
     },
   },

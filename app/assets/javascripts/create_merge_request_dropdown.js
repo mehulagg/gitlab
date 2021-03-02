@@ -1,4 +1,3 @@
-/* eslint-disable no-new */
 import { debounce } from 'lodash';
 import {
   init as initConfidentialMergeRequest,
