@@ -1,5 +1,5 @@
 ---
 title: Add reviewers detail to merge when pipeline succeeds email
-merge_request:
+merge_request: 55463
 author:
 type: added
