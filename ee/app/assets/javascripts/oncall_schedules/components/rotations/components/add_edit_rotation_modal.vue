@@ -8,7 +8,7 @@ import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/qu
 import { updateStoreAfterRotationEdit } from 'ee/oncall_schedules/utils/cache_updates';
 import { isNameFieldValid, getParticipantsForSave } from 'ee/oncall_schedules/utils/common_utils';
 import createFlash, { FLASH_TYPES } from '~/flash';
-import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
+import searchProjectMembersQuery from '~/graphql_shared/queries/project_user_members_search.query.graphql';
 import { format24HourTimeStringFromInt, formatDate } from '~/lib/utils/datetime_utility';
 import { s__, __ } from '~/locale';
 import AddEditRotationForm from './add_edit_rotation_form.vue';
@@ -47,14 +47,15 @@ export default {
   },
   apollo: {
     participants: {
-      query: usersSearchQuery,
+      query: searchProjectMembersQuery,
       variables() {
         return {
+          fullPath: this.projectPath,
           search: this.ptSearchTerm,
         };
       },
-      update({ users: { nodes = [] } = {} }) {
-        return nodes;
+      update({ project: { projectMembers: { nodes = [] } = {} } = {} } = {}) {
+        return nodes.map(({ user }) => ({ ...user }));
       },
       error(error) {
         this.error = error;
@@ -71,7 +72,7 @@ export default {
         participants: [],
         rotationLength: {
           length: 1,
-          unit: this.$options.LENGTH_ENUM.hours,
+          unit: this.$options.LENGTH_ENUM.days,
         },
         startsAt: {
           date: null,
@@ -110,6 +111,19 @@ export default {
         },
       };
     },
+    canFormSubmit() {
+      return (
+        isNameFieldValid(this.form.name) &&
+        this.form.participants.length > 0 &&
+        Boolean(this.form.startsAt.date)
+      );
+    },
+    isFormValid() {
+      return Object.values(this.validationState).every(Boolean) && this.canFormSubmit;
+    },
+    isLoading() {
+      return this.loading || this.$apollo.queries.participants.loading;
+    },
     rotationVariables() {
       const {
         name,
@@ -132,12 +146,6 @@ export default {
         },
         participants: getParticipantsForSave(participants),
       };
-    },
-    isFormValid() {
-      return Object.values(this.validationState).every(Boolean);
-    },
-    isLoading() {
-      return this.loading || this.$apollo.queries.participants.loading;
     },
     title() {
       return this.isEditMode ? this.$options.i18n.editRotation : this.$options.i18n.addRotation;

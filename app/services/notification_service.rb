@@ -66,10 +66,10 @@ class NotificationService
 
   # Notify the owner of the personal access token, when it is about to expire
   # And mark the token with about_to_expire_delivered
-  def access_token_about_to_expire(user)
+  def access_token_about_to_expire(user, token_names)
     return unless user.can?(:receive_notifications)
 
-    mailer.access_token_about_to_expire_email(user).deliver_later
+    mailer.access_token_about_to_expire_email(user, token_names).deliver_later
   end
 
   # Notify the user when at least one of their personal access tokens has expired today
@@ -665,7 +665,12 @@ class NotificationService
   end
 
   def merge_when_pipeline_succeeds(merge_request, current_user)
-    recipients = ::NotificationRecipients::BuildService.build_recipients(merge_request, current_user, action: 'merge_when_pipeline_succeeds')
+    recipients = ::NotificationRecipients::BuildService.build_recipients(
+      merge_request,
+      current_user,
+      action: 'merge_when_pipeline_succeeds',
+      custom_action: :merge_when_pipeline_succeeds
+    )
 
     recipients.each do |recipient|
       mailer.merge_when_pipeline_succeeds_email(recipient.user.id, merge_request.id, current_user.id).deliver_later

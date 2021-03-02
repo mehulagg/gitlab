@@ -355,14 +355,6 @@
   :weight: 1
   :idempotent:
   :tags: []
-- :name: cronjob:releases_create_evidence
-  :feature_category: :release_evidence
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent:
-  :tags: []
 - :name: cronjob:releases_manage_evidence
   :feature_category: :release_evidence
   :has_external_dependencies:
@@ -1816,6 +1808,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: merge_requests_delete_source_branch
+  :feature_category: :source_code_management
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: metrics_dashboard_prune_old_annotations
   :feature_category: :metrics
   :has_external_dependencies:
@@ -1848,8 +1848,24 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: namespaces_onboarding_issue_created
+  :feature_category: :issue_tracking
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: namespaces_onboarding_pipeline_created
   :feature_category: :subgroups
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: namespaces_onboarding_progress
+  :feature_category: :product_analytics
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -2028,6 +2044,22 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: projects_schedule_bulk_repository_shard_moves
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: projects_update_repository_storage
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: prometheus_create_default_alerts
   :feature_category: :incident_management
   :has_external_dependencies:
@@ -2098,6 +2130,14 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 2
+  :idempotent:
+  :tags: []
+- :name: releases_create_evidence
+  :feature_category: :release_evidence
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
   :idempotent:
   :tags: []
 - :name: remote_mirror_notification
@@ -2181,6 +2221,22 @@
   :idempotent: true
   :tags: []
 - :name: snippet_update_repository_storage
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: snippets_schedule_bulk_repository_shard_moves
+  :feature_category: :gitaly
+  :has_external_dependencies:
+  :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: snippets_update_repository_storage
   :feature_category: :gitaly
   :has_external_dependencies:
   :urgency: :throttled

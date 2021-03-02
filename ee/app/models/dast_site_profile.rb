@@ -9,6 +9,7 @@ class DastSiteProfile < ApplicationRecord
   validate :dast_site_project_id_fk
 
   scope :with_dast_site_and_validation, -> { includes(dast_site: :dast_site_validation) }
+  scope :with_name, -> (name) { where(name: name) }
 
   after_destroy :cleanup_dast_site
 
@@ -18,6 +19,12 @@ class DastSiteProfile < ApplicationRecord
     return DastSiteValidation::NONE_STATE unless dast_site_validation
 
     dast_site_validation.state
+  end
+
+  def referenced_in_security_policies
+    return [] unless project.security_orchestration_policy_configuration.present?
+
+    project.security_orchestration_policy_configuration.active_policy_names_with_dast_site_profile(name)
   end
 
   private

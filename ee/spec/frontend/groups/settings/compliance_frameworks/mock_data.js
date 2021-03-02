@@ -127,3 +127,23 @@ export const errorUpdateResponse = {
     },
   },
 };
+
+export const validDeleteResponse = {
+  data: {
+    destroyComplianceFramework: {
+      clientMutationId: null,
+      errors: [],
+      __typename: 'DestroyComplianceFrameworkPayload',
+    },
+  },
+};
+
+export const errorDeleteResponse = {
+  data: {
+    destroyComplianceFramework: {
+      clientMutationId: null,
+      errors: ['graphql error'],
+      __typename: 'DestroyComplianceFrameworkPayload',
+    },
+  },
+};

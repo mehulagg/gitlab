@@ -157,10 +157,7 @@ module EE
 
       def billable
         scope = active.without_bots
-
-        License.with_valid_license do |license|
-          scope = scope.excluding_guests if license.exclude_guests_from_active_count?
-        end
+        scope = scope.excluding_guests if License.current&.exclude_guests_from_active_count?
 
         scope
       end

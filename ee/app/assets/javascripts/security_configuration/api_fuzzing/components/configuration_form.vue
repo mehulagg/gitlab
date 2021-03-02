@@ -17,7 +17,7 @@ import DropdownInput from '../../components/dropdown_input.vue';
 import DynamicFields from '../../components/dynamic_fields.vue';
 import FormInput from '../../components/form_input.vue';
 import { SCAN_MODES, CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
-import createApiFuzzingConfigurationMutation from '../graphql/create_api_fuzzing_configuration.mutation.graphql';
+import apiFuzzingCiConfigurationCreate from '../graphql/api_fuzzing_ci_configuration_create.mutation.graphql';
 import ConfigurationSnippetModal from './configuration_snippet_modal.vue';
 
 export default {
@@ -113,7 +113,7 @@ export default {
           }),
         ),
       },
-      ciYamlEditUrl: '',
+      ciYamlEditPath: '',
       configurationYaml: '',
     };
   },
@@ -173,20 +173,20 @@ export default {
         }
         const {
           data: {
-            createApiFuzzingCiConfiguration: {
-              gitlabCiYamlEditUrl,
+            apiFuzzingCiConfigurationCreate: {
+              gitlabCiYamlEditPath,
               configurationYaml,
               errors = [],
             },
           },
         } = await this.$apollo.mutate({
-          mutation: createApiFuzzingConfigurationMutation,
+          mutation: apiFuzzingCiConfigurationCreate,
           variables: { input },
         });
         if (errors.length) {
           this.showError = true;
         } else {
-          this.ciYamlEditUrl = gitlabCiYamlEditUrl;
+          this.ciYamlEditPath = gitlabCiYamlEditPath;
           this.configurationYaml = configurationYaml;
           this.$refs[CONFIGURATION_SNIPPET_MODAL_ID].show();
         }
@@ -300,7 +300,7 @@ export default {
 
     <configuration-snippet-modal
       :ref="$options.CONFIGURATION_SNIPPET_MODAL_ID"
-      :ci-yaml-edit-url="ciYamlEditUrl"
+      :ci-yaml-edit-url="ciYamlEditPath"
       :yaml="configurationYaml"
     />
   </form>

@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 
+# rubocop: disable RSpec/MultipleMemoizedHelpers
 RSpec.describe Security::MergeReportsService, '#execute' do
   let(:scanner_1) { build(:ci_reports_security_scanner, external_id: 'scanner-1', name: 'Scanner 1') }
   let(:scanner_2) { build(:ci_reports_security_scanner, external_id: 'scanner-2', name: 'Scanner 2') }
@@ -338,3 +339,4 @@ RSpec.describe Security::MergeReportsService, '#execute' do
     end
   end
 end
+# rubocop: enable RSpec/MultipleMemoizedHelpers

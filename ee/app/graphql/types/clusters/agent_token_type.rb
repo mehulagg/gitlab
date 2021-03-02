@@ -24,10 +24,20 @@ module Types
             null: true,
             description: 'The user who created the token.'
 
+      field :description,
+            GraphQL::STRING_TYPE,
+            null: true,
+            description: 'Description of the token.'
+
       field :id,
             ::Types::GlobalIDType[::Clusters::AgentToken],
             null: false,
             description: 'Global ID of the token.'
+
+      field :name,
+            GraphQL::STRING_TYPE,
+            null: true,
+            description: 'Name given to the token.'
 
       def cluster_agent
         Gitlab::Graphql::Loaders::BatchModelLoader.new(::Clusters::Agent, object.agent_id).find

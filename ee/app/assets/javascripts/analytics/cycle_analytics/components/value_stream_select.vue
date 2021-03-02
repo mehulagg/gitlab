@@ -7,6 +7,7 @@ import {
   GlDropdownDivider,
   GlModal,
   GlModalDirective,
+  GlSprintf,
 } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import { sprintf, __, s__ } from '~/locale';
@@ -16,7 +17,7 @@ import ValueStreamForm from './value_stream_form.vue';
 const i18n = {
   DELETE_NAME: s__('DeleteValueStream|Delete %{name}'),
   DELETE_CONFIRMATION: s__(
-    'DeleteValueStream|Are you sure you want to delete "%{name}" Value Stream?',
+    'DeleteValueStream|Are you sure you want to delete the "%{name}" Value Stream?',
   ),
   DELETED: s__("DeleteValueStream|'%{name}' Value Stream deleted"),
   DELETE: __('Delete'),
@@ -33,6 +34,7 @@ export default {
     GlDropdownItem,
     GlDropdownDivider,
     GlModal,
+    GlSprintf,
     ValueStreamForm,
   },
   directives: {
@@ -76,9 +78,6 @@ export default {
     },
     isCustomValueStream() {
       return this.selectedValueStream?.isCustom || false;
-    },
-    deleteSelectedText() {
-      return sprintf(this.$options.i18n.DELETE_NAME, { name: this.selectedValueStreamName });
     },
     deleteConfirmationText() {
       return sprintf(this.$options.i18n.DELETE_CONFIRMATION, {
@@ -160,8 +159,11 @@ export default {
         v-gl-modal-directive="'delete-value-stream-modal'"
         variant="danger"
         data-testid="delete-value-stream"
-        >{{ deleteSelectedText }}</gl-dropdown-item
       >
+        <gl-sprintf :message="$options.i18n.DELETE_NAME">
+          <template #name>{{ selectedValueStreamName }}</template>
+        </gl-sprintf>
+      </gl-dropdown-item>
     </gl-dropdown>
     <gl-button
       v-else
@@ -193,7 +195,11 @@ export default {
       <gl-alert v-if="deleteValueStreamError" variant="danger">{{
         deleteValueStreamError
       }}</gl-alert>
-      <p>{{ deleteConfirmationText }}</p>
+      <p>
+        <gl-sprintf :message="$options.i18n.DELETE_CONFIRMATION">
+          <template #name>{{ selectedValueStreamName }}</template>
+        </gl-sprintf>
+      </p>
     </gl-modal>
   </div>
 </template>

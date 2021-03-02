@@ -11,7 +11,7 @@ module EE
             query: EE::BulkImports::Groups::Graphql::GetEpicAwardEmojiQuery
 
           transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
-          transformer ::BulkImports::Common::Transformers::AwardEmojiTransformer
+          transformer ::BulkImports::Common::Transformers::UserReferenceTransformer
 
           loader EE::BulkImports::Groups::Loaders::EpicAwardEmojiLoader
 

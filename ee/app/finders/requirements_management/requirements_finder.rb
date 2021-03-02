@@ -62,7 +62,11 @@ module RequirementsManagement
     def by_last_test_report_state(items)
       return items unless params[:last_test_report_state]
 
-      items.with_last_test_report_state(params[:last_test_report_state])
+      if params[:last_test_report_state] == 'missing'
+        items.without_test_reports
+      else
+        items.with_last_test_report_state(params[:last_test_report_state])
+      end
     end
 
     def get_authors(username_param)

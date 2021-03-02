@@ -105,7 +105,6 @@ describe('ValueStreamSelect', () => {
 
       it('renders a delete option for custom value streams', () => {
         expect(findDeleteValueStreamButton().exists()).toBe(true);
-        expect(findDeleteValueStreamButton().text()).toBe(`Delete ${selectedValueStream.name}`);
       });
 
       it('renders an edit option for custom value streams', () => {

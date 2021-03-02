@@ -361,7 +361,7 @@ RSpec.describe 'New project', :js do
 
               before do
                 allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
-                create(:gitlab_subscription, :gold, namespace: group1)
+                create(:gitlab_subscription, :ultimate, namespace: group1)
               end
 
               it 'show Group tab in Templates section' do

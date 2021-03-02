@@ -1,6 +1,6 @@
 ---
 key_path: redis_hll_counters.search.i_search_advanced_monthly
-description: Caluated unique users to visit Global Search with AGS enabled by month
+description: Calculated unique users to perform Advanced searches by month
 product_section: enablement
 product_stage: enablement
 product_group: group::global search
@@ -14,4 +14,3 @@ distribution:
 tier:
 - premium
 - ultimate
-skip_validation: true

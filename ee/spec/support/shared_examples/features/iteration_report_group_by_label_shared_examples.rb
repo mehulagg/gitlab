@@ -33,4 +33,19 @@ RSpec.shared_examples 'iteration report group by label' do
     expect(page).to have_content(closed_issue.title)
     expect(page).to have_no_content(other_iteration_issue.title)
   end
+
+  it 'shows ungrouped issues when label `x` is clicked to remove it', :aggregate_failures do
+    within "section[aria-label=\"Issues with label #{label1.title}\"]" do
+      click_button 'Remove label'
+    end
+
+    expect(page).to have_no_button('Collapse issues')
+    expect(page).to have_no_css('.gl-label', text: label1.title)
+    expect(page).to have_no_css('.gl-badge', text: 2)
+
+    expect(page).to have_content(issue.title)
+    expect(page).to have_content(assigned_issue.title)
+    expect(page).to have_content(closed_issue.title)
+    expect(page).to have_no_content(other_iteration_issue.title)
+  end
 end

@@ -83,8 +83,7 @@ module EE
               ::Types::DastSiteValidationType.connection_type,
               null: true,
               resolver: ::Resolvers::DastSiteValidationResolver,
-              description: 'DAST Site Validations associated with the project. Always returns no nodes ' \
-                           'if `security_on_demand_scans_site_validation` is disabled.'
+              description: 'DAST Site Validations associated with the project.'
 
         field :cluster_agent,
               ::Types::Clusters::AgentType,

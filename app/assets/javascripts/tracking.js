@@ -1,9 +1,11 @@
-import { omitBy, isUndefined } from 'lodash';
+import { omitBy, isUndefined, get } from 'lodash';
+
+const standardContext = { ...window.gl?.snowplowStandardContext };
 
 export const STANDARD_CONTEXT = {
-  schema: 'iglu:com.gitlab/gitlab_standard/jsonschema/1-0-3',
+  schema: standardContext.schema,
   data: {
-    environment: process.env.NODE_ENV,
+    ...(standardContext.data || {}),
     source: 'gitlab-javascript',
   },
 };
@@ -28,11 +30,17 @@ const createEventPayload = (el, { suffix = '' } = {}) => {
   let value = el.dataset.trackValue || el.value || undefined;
   if (el.type === 'checkbox' && !el.checked) value = false;
 
+  let context = el.dataset.trackContext;
+  if (el.dataset.trackExperiment) {
+    const data = get(window, ['gon', 'global', 'experiment', el.dataset.trackExperiment]);
+    if (data) context = { schema: 'iglu:com.gitlab/gitlab_experiment/jsonschema/1-0-0', data };
+  }
+
   const data = {
     label: el.dataset.trackLabel,
     property: el.dataset.trackProperty,
     value,
-    context: el.dataset.trackContext,
+    context,
   };
 
   return {
@@ -59,30 +67,51 @@ const eventHandlers = (category, func) => {
   return handlers;
 };
 
+const dispatchEvent = (category = document.body.dataset.page, action = 'generic', data = {}) => {
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  if (!category) throw new Error('Tracking: no category provided for tracking.');
+
+  const { label, property, value } = data;
+  const contexts = [STANDARD_CONTEXT];
+
+  if (data.context) {
+    contexts.push(data.context);
+  }
+
+  return window.snowplow('trackStructEvent', category, action, label, property, value, contexts);
+};
+
 export default class Tracking {
+  static queuedEvents = [];
+  static initialized = false;
+
   static trackable() {
     return !['1', 'yes'].includes(
       window.doNotTrack || navigator.doNotTrack || navigator.msDoNotTrack,
     );
   }
 
+  static flushPendingEvents() {
+    this.initialized = true;
+
+    while (this.queuedEvents.length) {
+      dispatchEvent(...this.queuedEvents.shift());
+    }
+  }
+
   static enabled() {
     return typeof window.snowplow === 'function' && this.trackable();
   }
 
-  static event(category = document.body.dataset.page, action = 'generic', data = {}) {
+  static event(...eventData) {
     if (!this.enabled()) return false;
-    // eslint-disable-next-line @gitlab/require-i18n-strings
-    if (!category) throw new Error('Tracking: no category provided for tracking.');
 
-    const { label, property, value } = data;
-    const contexts = [STANDARD_CONTEXT];
-
-    if (data.context) {
-      contexts.push(data.context);
+    if (!this.initialized) {
+      this.queuedEvents.push(eventData);
+      return false;
     }
 
-    return window.snowplow('trackStructEvent', category, action, label, property, value, contexts);
+    return dispatchEvent(...eventData);
   }
 
   static bindDocument(category = document.body.dataset.page, parent = document) {
@@ -141,6 +170,7 @@ export function initUserTracking() {
   window.snowplow('newTracker', opts.namespace, opts.hostname, opts);
 
   document.dispatchEvent(new Event('SnowplowInitialized'));
+  Tracking.flushPendingEvents();
 }
 
 export function initDefaultTrackers() {

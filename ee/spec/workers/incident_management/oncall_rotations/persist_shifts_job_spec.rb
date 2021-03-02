@@ -73,7 +73,7 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
       # fill in the correct shift history.
       context 'when current time is several shifts after the last saved shift' do
         around do |example|
-          travel_to(existing_shift.ends_at + (3 * rotation.shift_duration)) { example.run }
+          travel_to(existing_shift.ends_at + (3 * rotation.shift_cycle_duration)) { example.run }
         end
 
         context 'when feature flag is not enabled' do
@@ -97,8 +97,8 @@ RSpec.describe IncidentManagement::OncallRotations::PersistShiftsJob do
           expect(rotation.shifts.length).to eq(4)
           expect(first_shift).to eq(existing_shift)
           expect(second_shift.starts_at).to eq(existing_shift.ends_at)
-          expect(third_shift.starts_at).to eq(existing_shift.ends_at + rotation.shift_duration)
-          expect(fourth_shift.starts_at).to eq(existing_shift.ends_at + (2 * rotation.shift_duration))
+          expect(third_shift.starts_at).to eq(existing_shift.ends_at + rotation.shift_cycle_duration)
+          expect(fourth_shift.starts_at).to eq(existing_shift.ends_at + (2 * rotation.shift_cycle_duration))
         end
       end
     end

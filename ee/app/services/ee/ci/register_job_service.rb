@@ -21,6 +21,8 @@ module EE
           # "Hi, we don't have any more builds now,  but not everything is right anyway, so try again".
           # Runner will retry, but again, against replica, and again will check if replication lag did catch-up.
           if !db_all_caught_up && !result.build
+            metrics.increment_queue_operation(:queue_replication_lag)
+
             return ::Ci::RegisterJobService::Result.new(nil, false) # rubocop:disable Cop/AvoidReturnFromBlocks
           end
         end

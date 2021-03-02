@@ -1229,9 +1229,9 @@ RSpec.describe License do
           gl_license.expires_at = Date.tomorrow
         end
 
-        it 'returns nil' do
-          updated = license.update_trial_setting
-          expect(updated).to be_nil
+        it 'does nothing' do
+          license.save
+
           expect(ApplicationSetting.current.license_trial_ends_on).to be_nil
         end
       end
@@ -1248,10 +1248,9 @@ RSpec.describe License do
           expect(described_class.eligible_for_trial?).to be_truthy
         end
 
-        it 'updates the trial setting' do
-          updated = license.update_trial_setting
+        it 'updates the trial setting during create' do
+          license.save
 
-          expect(updated).to be_truthy
           expect(described_class.eligible_for_trial?).to be_falsey
           expect(ApplicationSetting.current.license_trial_ends_on).to eq(tomorrow)
         end
@@ -1267,8 +1266,8 @@ RSpec.describe License do
         end
 
         it 'does not update existing trial setting' do
-          updated = license.update_trial_setting
-          expect(updated).to be_falsey
+          license.save
+
           expect(ApplicationSetting.current.license_trial_ends_on).to eq(yesterday)
         end
 

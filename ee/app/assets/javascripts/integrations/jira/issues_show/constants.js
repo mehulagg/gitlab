@@ -9,3 +9,5 @@ export const issueStateLabels = {
   [issueStates.OPENED]: __('Open'),
   [issueStates.CLOSED]: __('Closed'),
 };
+
+export const labelsFilterParam = 'labels';

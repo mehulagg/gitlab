@@ -45,7 +45,7 @@ RSpec.describe Dast::Profiles::UpdateService do
     context 'when on demand scan licensed feature is not available' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
+        stub_feature_flags(dast_saved_scans: true)
 
         aggregate_failures do
           expect(subject.status).to eq(:error)

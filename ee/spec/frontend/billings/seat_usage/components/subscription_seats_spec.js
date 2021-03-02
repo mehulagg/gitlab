@@ -1,5 +1,6 @@
 import {
   GlPagination,
+  GlDropdown,
   GlTable,
   GlAvatarLink,
   GlAvatarLabeled,
@@ -92,6 +93,7 @@ describe('Subscription Seats', () => {
       user: serializeUser(rowWrapper),
       email: emailWrapper.text(),
       tooltip: emailWrapper.find('span').attributes('title'),
+      dropdownExists: rowWrapper.find(GlDropdown).exists(),
     };
   };
 
@@ -106,7 +108,6 @@ describe('Subscription Seats', () => {
 
     afterEach(() => {
       wrapper.destroy();
-      wrapper = null;
     });
 
     it('correct actions are called on create', () => {
@@ -126,7 +127,6 @@ describe('Subscription Seats', () => {
 
     afterEach(() => {
       wrapper.destroy();
-      wrapper = null;
     });
 
     describe('heading text', () => {
@@ -145,9 +145,12 @@ describe('Subscription Seats', () => {
     });
 
     it('pagination is rendered and passed correct values', () => {
-      expect(findPagination().vm.value).toBe(1);
-      expect(findPagination().props('perPage')).toBe(5);
-      expect(findPagination().props('totalItems')).toBe(300);
+      const pagination = findPagination();
+
+      expect(pagination.props()).toMatchObject({
+        perPage: 5,
+        totalItems: 300,
+      });
     });
   });
 
@@ -163,7 +166,6 @@ describe('Subscription Seats', () => {
         expect(findPagination().exists()).toBe(false);
 
         wrapper.destroy();
-        wrapper = null;
       },
     );
   });
@@ -175,7 +177,6 @@ describe('Subscription Seats', () => {
 
     afterEach(() => {
       wrapper.destroy();
-      wrapper = null;
     });
 
     it('displays table in loading state', () => {

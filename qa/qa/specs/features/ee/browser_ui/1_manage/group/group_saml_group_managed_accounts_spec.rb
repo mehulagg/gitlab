@@ -15,6 +15,8 @@ module QA
           sandbox_group.path = "saml_sso_group_#{SecureRandom.hex(8)}"
         end
 
+        Runtime::Feature.enable(:invite_members_group_modal, group: @group)
+
         @saml_idp_service = Flow::Saml.run_saml_idp_service(@group.path)
 
         @api_client = Runtime::API::Client.new(:gitlab, personal_access_token: Runtime::Env.admin_personal_access_token)

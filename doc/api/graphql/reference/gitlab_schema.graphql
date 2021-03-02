@@ -635,21 +635,6 @@ type AlertManagementHttpIntegration implements AlertManagementIntegration {
   name: String
 
   """
-  Extract alert fields from payload example for custom mapping.
-  """
-  payloadAlertFields: [AlertManagementPayloadAlertField!]
-
-  """
-  The custom mapping of GitLab alert attributes to fields from the payload_example.
-  """
-  payloadAttributeMappings: [AlertManagementPayloadAlertMappingField!]
-
-  """
-  The example of an alert payload.
-  """
-  payloadExample: JsonString
-
-  """
   Token used to authenticate alert notification requests.
   """
   token: String
@@ -663,41 +648,6 @@ type AlertManagementHttpIntegration implements AlertManagementIntegration {
   Endpoint which accepts alert notifications.
   """
   url: String
-}
-
-"""
-The connection type for AlertManagementHttpIntegration.
-"""
-type AlertManagementHttpIntegrationConnection {
-  """
-  A list of edges.
-  """
-  edges: [AlertManagementHttpIntegrationEdge]
-
-  """
-  A list of nodes.
-  """
-  nodes: [AlertManagementHttpIntegration]
-
-  """
-  Information to aid in pagination.
-  """
-  pageInfo: PageInfo!
-}
-
-"""
-An edge in a connection.
-"""
-type AlertManagementHttpIntegrationEdge {
-  """
-  A cursor for use in pagination.
-  """
-  cursor: String!
-
-  """
-  The item at the end of the edge.
-  """
-  node: AlertManagementHttpIntegration
 }
 
 """
@@ -910,31 +860,6 @@ enum AlertManagementPayloadAlertFieldType {
   String field type
   """
   STRING
-}
-
-"""
-Parsed field (with its name) from an alert used for custom mappings
-"""
-type AlertManagementPayloadAlertMappingField {
-  """
-  A GitLab alert field name.
-  """
-  fieldName: AlertManagementPayloadAlertFieldName
-
-  """
-  Human-readable label of the payload path.
-  """
-  label: String
-
-  """
-  Path to value inside payload JSON.
-  """
-  path: [String!]
-
-  """
-  Type of the parsed value.
-  """
-  type: AlertManagementPayloadAlertFieldType
 }
 
 """
@@ -1603,7 +1528,7 @@ enum BlobViewersType {
 }
 
 """
-Represents a project or group issue board
+Represents a project or group board
 """
 type Board {
   """
@@ -3264,6 +3189,16 @@ type CiJob {
   detailedStatus: DetailedStatus
 
   """
+  Duration of the job in seconds.
+  """
+  duration: Int
+
+  """
+  When a job has finished running.
+  """
+  finishedAt: Time
+
+  """
   Name of the job.
   """
   name: String
@@ -3470,11 +3405,6 @@ type ClusterAgent {
   createdAt: Time
 
   """
-  User object, containing information about the person who created the agent.
-  """
-  createdByUser: User
-
-  """
   ID of the cluster agent.
   """
   id: ID!
@@ -3600,11 +3530,6 @@ type ClusterAgentToken {
   Timestamp the token was created.
   """
   createdAt: Time
-
-  """
-  The user who created the token.
-  """
-  createdByUser: User
 
   """
   Global ID of the token.
@@ -4129,8 +4054,7 @@ type ComplianceFramework {
 
   """
   Full path of the compliance pipeline configuration stored in a project
-  repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hipaa`
-  **(ULTIMATE)**.
+  repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hippa`.
   """
   pipelineConfigurationFullPath: String
 }
@@ -4188,8 +4112,7 @@ input ComplianceFrameworkInput {
 
   """
   Full path of the compliance pipeline configuration stored in a project
-  repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hipaa`
-  **(ULTIMATE)**.
+  repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hippa`.
   """
   pipelineConfigurationFullPath: String
 }
@@ -9482,17 +9405,7 @@ Represents an epic board
 """
 type EpicBoard {
   """
-  Whether or not backlog list is hidden.
-  """
-  hideBacklogList: Boolean
-
-  """
-  Whether or not closed list is hidden.
-  """
-  hideClosedList: Boolean
-
-  """
-  Global ID of the epic board.
+  Global ID of the board.
   """
   id: BoardsEpicBoardID!
 
@@ -9527,19 +9440,9 @@ type EpicBoard {
   ): EpicListConnection
 
   """
-  Name of the epic board.
+  Name of the board.
   """
   name: String
-
-  """
-  Web path of the epic board.
-  """
-  webPath: String!
-
-  """
-  Web URL of the epic board.
-  """
-  webUrl: String!
 }
 
 """
@@ -12300,7 +12203,8 @@ type Group {
     First day for which to fetch vulnerability history.
     """
     startDate: ISO8601Date!
-  ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
+  ): VulnerabilitiesCountByDayAndSeverityConnection
+    @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
 
   """
   Represents vulnerable project counts for each grade.
@@ -13071,6 +12975,61 @@ type InstanceSecurityDashboard {
     """
     state: [VulnerabilityState!]
   ): VulnerabilitySeveritiesCount
+}
+
+"""
+Represents a recorded measurement (object count) for the Admins
+"""
+type InstanceStatisticsMeasurement {
+  """
+  Object count.
+  """
+  count: Int!
+
+  """
+  The type of objects being measured.
+  """
+  identifier: MeasurementIdentifier!
+
+  """
+  The time the measurement was recorded.
+  """
+  recordedAt: Time
+}
+
+"""
+The connection type for InstanceStatisticsMeasurement.
+"""
+type InstanceStatisticsMeasurementConnection {
+  """
+  A list of edges.
+  """
+  edges: [InstanceStatisticsMeasurementEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [InstanceStatisticsMeasurement]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type InstanceStatisticsMeasurementEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: InstanceStatisticsMeasurement
 }
 
 """
@@ -14828,11 +14787,6 @@ type Label {
   color: String!
 
   """
-  When this label was created.
-  """
-  createdAt: Time!
-
-  """
   Description of the label (Markdown rendered as HTML for caching).
   """
   description: String
@@ -14856,11 +14810,6 @@ type Label {
   Content of the label.
   """
   title: String!
-
-  """
-  When this label was last updated.
-  """
-  updatedAt: Time!
 }
 
 """
@@ -14902,7 +14851,7 @@ input LabelCreateInput {
   (e.g. #FFAABB) or one of the CSS color names in
   https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#Color_keywords.
   """
-  color: String = "#6699cc"
+  color: String = "#428BCA"
 
   """
   Description of the label.
@@ -15980,21 +15929,6 @@ Identifier of MergeRequest.
 scalar MergeRequestID
 
 """
-New state to apply to a merge request.
-"""
-enum MergeRequestNewState {
-  """
-  Close the merge request if it is open.
-  """
-  CLOSED
-
-  """
-  Open the merge request if it is closed.
-  """
-  OPEN
-}
-
-"""
 Check permissions for the current user on a merge request
 """
 type MergeRequestPermissions {
@@ -16494,11 +16428,6 @@ input MergeRequestUpdateInput {
   projectPath: ID!
 
   """
-  The action to perform to change the state.
-  """
-  state: MergeRequestNewState
-
-  """
   Target branch of the merge request.
   """
   targetBranch: String
@@ -16846,17 +16775,26 @@ enum MoveType {
 }
 
 type Mutation {
-  addAwardEmoji(input: AddAwardEmojiInput!): AddAwardEmojiPayload @deprecated(reason: "Use awardEmojiAdd. Deprecated in 13.2.")
-  addProjectToSecurityDashboard(input: AddProjectToSecurityDashboardInput!): AddProjectToSecurityDashboardPayload
-  adminSidekiqQueuesDeleteJobs(input: AdminSidekiqQueuesDeleteJobsInput!): AdminSidekiqQueuesDeleteJobsPayload
+  addAwardEmoji(input: AddAwardEmojiInput!): AddAwardEmojiPayload
+    @deprecated(reason: "Use awardEmojiAdd. Deprecated in 13.2.")
+  addProjectToSecurityDashboard(
+    input: AddProjectToSecurityDashboardInput!
+  ): AddProjectToSecurityDashboardPayload
+  adminSidekiqQueuesDeleteJobs(
+    input: AdminSidekiqQueuesDeleteJobsInput!
+  ): AdminSidekiqQueuesDeleteJobsPayload
   alertSetAssignees(input: AlertSetAssigneesInput!): AlertSetAssigneesPayload
   alertTodoCreate(input: AlertTodoCreateInput!): AlertTodoCreatePayload
-  apiFuzzingCiConfigurationCreate(input: ApiFuzzingCiConfigurationCreateInput!): ApiFuzzingCiConfigurationCreatePayload
+  apiFuzzingCiConfigurationCreate(
+    input: ApiFuzzingCiConfigurationCreateInput!
+  ): ApiFuzzingCiConfigurationCreatePayload
   awardEmojiAdd(input: AwardEmojiAddInput!): AwardEmojiAddPayload
   awardEmojiRemove(input: AwardEmojiRemoveInput!): AwardEmojiRemovePayload
   awardEmojiToggle(input: AwardEmojiToggleInput!): AwardEmojiTogglePayload
   boardListCreate(input: BoardListCreateInput!): BoardListCreatePayload
-  boardListUpdateLimitMetrics(input: BoardListUpdateLimitMetricsInput!): BoardListUpdateLimitMetricsPayload
+  boardListUpdateLimitMetrics(
+    input: BoardListUpdateLimitMetricsInput!
+  ): BoardListUpdateLimitMetricsPayload
   ciCdSettingsUpdate(input: CiCdSettingsUpdateInput!): CiCdSettingsUpdatePayload
   clusterAgentDelete(input: ClusterAgentDeleteInput!): ClusterAgentDeletePayload
   clusterAgentTokenCreate(input: ClusterAgentTokenCreateInput!): ClusterAgentTokenCreatePayload
@@ -16868,13 +16806,17 @@ type Mutation {
   createBoard(input: CreateBoardInput!): CreateBoardPayload
   createBranch(input: CreateBranchInput!): CreateBranchPayload
   createClusterAgent(input: CreateClusterAgentInput!): CreateClusterAgentPayload
-  createComplianceFramework(input: CreateComplianceFrameworkInput!): CreateComplianceFrameworkPayload
+  createComplianceFramework(
+    input: CreateComplianceFrameworkInput!
+  ): CreateComplianceFrameworkPayload
 
   """
-   Available only when feature flag `custom_emoji` is enabled.
+  Available only when feature flag `custom_emoji` is enabled.
   """
   createCustomEmoji(input: CreateCustomEmojiInput!): CreateCustomEmojiPayload
-  createDevopsAdoptionSegment(input: CreateDevopsAdoptionSegmentInput!): CreateDevopsAdoptionSegmentPayload
+  createDevopsAdoptionSegment(
+    input: CreateDevopsAdoptionSegmentInput!
+  ): CreateDevopsAdoptionSegmentPayload
   createDiffNote(input: CreateDiffNoteInput!): CreateDiffNotePayload
   createEpic(input: CreateEpicInput!): CreateEpicPayload
   createImageDiffNote(input: CreateImageDiffNoteInput!): CreateImageDiffNotePayload
@@ -16899,15 +16841,23 @@ type Mutation {
   dastSiteValidationCreate(input: DastSiteValidationCreateInput!): DastSiteValidationCreatePayload
   dastSiteValidationRevoke(input: DastSiteValidationRevokeInput!): DastSiteValidationRevokePayload
   deleteAnnotation(input: DeleteAnnotationInput!): DeleteAnnotationPayload
-  deleteDevopsAdoptionSegment(input: DeleteDevopsAdoptionSegmentInput!): DeleteDevopsAdoptionSegmentPayload
+  deleteDevopsAdoptionSegment(
+    input: DeleteDevopsAdoptionSegmentInput!
+  ): DeleteDevopsAdoptionSegmentPayload
   designManagementDelete(input: DesignManagementDeleteInput!): DesignManagementDeletePayload
   designManagementMove(input: DesignManagementMoveInput!): DesignManagementMovePayload
   designManagementUpload(input: DesignManagementUploadInput!): DesignManagementUploadPayload
   destroyBoard(input: DestroyBoardInput!): DestroyBoardPayload
   destroyBoardList(input: DestroyBoardListInput!): DestroyBoardListPayload
-  destroyComplianceFramework(input: DestroyComplianceFrameworkInput!): DestroyComplianceFrameworkPayload
-  destroyContainerRepository(input: DestroyContainerRepositoryInput!): DestroyContainerRepositoryPayload
-  destroyContainerRepositoryTags(input: DestroyContainerRepositoryTagsInput!): DestroyContainerRepositoryTagsPayload
+  destroyComplianceFramework(
+    input: DestroyComplianceFrameworkInput!
+  ): DestroyComplianceFrameworkPayload
+  destroyContainerRepository(
+    input: DestroyContainerRepositoryInput!
+  ): DestroyContainerRepositoryPayload
+  destroyContainerRepositoryTags(
+    input: DestroyContainerRepositoryTagsInput!
+  ): DestroyContainerRepositoryTagsPayload
   destroyNote(input: DestroyNoteInput!): DestroyNotePayload
   destroySnippet(input: DestroySnippetInput!): DestroySnippetPayload
 
@@ -16915,18 +16865,25 @@ type Mutation {
   Toggles the resolved state of a discussion
   """
   discussionToggleResolve(input: DiscussionToggleResolveInput!): DiscussionToggleResolvePayload
-  dismissVulnerability(input: DismissVulnerabilityInput!): DismissVulnerabilityPayload @deprecated(reason: "Use vulnerabilityDismiss. Deprecated in 13.5.")
-  environmentsCanaryIngressUpdate(input: EnvironmentsCanaryIngressUpdateInput!): EnvironmentsCanaryIngressUpdatePayload
+  dismissVulnerability(input: DismissVulnerabilityInput!): DismissVulnerabilityPayload
+    @deprecated(reason: "Use vulnerabilityDismiss. Deprecated in 13.5.")
+  environmentsCanaryIngressUpdate(
+    input: EnvironmentsCanaryIngressUpdateInput!
+  ): EnvironmentsCanaryIngressUpdatePayload
   epicAddIssue(input: EpicAddIssueInput!): EpicAddIssuePayload
   epicBoardCreate(input: EpicBoardCreateInput!): EpicBoardCreatePayload
   epicBoardListCreate(input: EpicBoardListCreateInput!): EpicBoardListCreatePayload
   epicSetSubscription(input: EpicSetSubscriptionInput!): EpicSetSubscriptionPayload
   epicTreeReorder(input: EpicTreeReorderInput!): EpicTreeReorderPayload
   exportRequirements(input: ExportRequirementsInput!): ExportRequirementsPayload
-  gitlabSubscriptionActivate(input: GitlabSubscriptionActivateInput!): GitlabSubscriptionActivatePayload
+  gitlabSubscriptionActivate(
+    input: GitlabSubscriptionActivateInput!
+  ): GitlabSubscriptionActivatePayload
   httpIntegrationCreate(input: HttpIntegrationCreateInput!): HttpIntegrationCreatePayload
   httpIntegrationDestroy(input: HttpIntegrationDestroyInput!): HttpIntegrationDestroyPayload
-  httpIntegrationResetToken(input: HttpIntegrationResetTokenInput!): HttpIntegrationResetTokenPayload
+  httpIntegrationResetToken(
+    input: HttpIntegrationResetTokenInput!
+  ): HttpIntegrationResetTokenPayload
   httpIntegrationUpdate(input: HttpIntegrationUpdateInput!): HttpIntegrationUpdatePayload
   issueMove(input: IssueMoveInput!): IssueMovePayload
   issueMoveList(input: IssueMoveListInput!): IssueMoveListPayload
@@ -16944,19 +16901,25 @@ type Mutation {
   labelCreate(input: LabelCreateInput!): LabelCreatePayload
   markAsSpamSnippet(input: MarkAsSpamSnippetInput!): MarkAsSpamSnippetPayload
   mergeRequestCreate(input: MergeRequestCreateInput!): MergeRequestCreatePayload
-  mergeRequestReviewerRereview(input: MergeRequestReviewerRereviewInput!): MergeRequestReviewerRereviewPayload
+  mergeRequestReviewerRereview(
+    input: MergeRequestReviewerRereviewInput!
+  ): MergeRequestReviewerRereviewPayload
   mergeRequestSetAssignees(input: MergeRequestSetAssigneesInput!): MergeRequestSetAssigneesPayload
   mergeRequestSetLabels(input: MergeRequestSetLabelsInput!): MergeRequestSetLabelsPayload
   mergeRequestSetLocked(input: MergeRequestSetLockedInput!): MergeRequestSetLockedPayload
   mergeRequestSetMilestone(input: MergeRequestSetMilestoneInput!): MergeRequestSetMilestonePayload
-  mergeRequestSetSubscription(input: MergeRequestSetSubscriptionInput!): MergeRequestSetSubscriptionPayload
+  mergeRequestSetSubscription(
+    input: MergeRequestSetSubscriptionInput!
+  ): MergeRequestSetSubscriptionPayload
   mergeRequestSetWip(input: MergeRequestSetWipInput!): MergeRequestSetWipPayload
 
   """
   Update attributes of a merge request
   """
   mergeRequestUpdate(input: MergeRequestUpdateInput!): MergeRequestUpdatePayload
-  namespaceIncreaseStorageTemporarily(input: NamespaceIncreaseStorageTemporarilyInput!): NamespaceIncreaseStorageTemporarilyPayload
+  namespaceIncreaseStorageTemporarily(
+    input: NamespaceIncreaseStorageTemporarilyInput!
+  ): NamespaceIncreaseStorageTemporarilyPayload
   oncallRotationCreate(input: OncallRotationCreateInput!): OncallRotationCreatePayload
   oncallRotationDestroy(input: OncallRotationDestroyInput!): OncallRotationDestroyPayload
   oncallScheduleCreate(input: OncallScheduleCreateInput!): OncallScheduleCreatePayload
@@ -16965,22 +16928,35 @@ type Mutation {
   pipelineCancel(input: PipelineCancelInput!): PipelineCancelPayload
   pipelineDestroy(input: PipelineDestroyInput!): PipelineDestroyPayload
   pipelineRetry(input: PipelineRetryInput!): PipelineRetryPayload
-  prometheusIntegrationCreate(input: PrometheusIntegrationCreateInput!): PrometheusIntegrationCreatePayload
-  prometheusIntegrationResetToken(input: PrometheusIntegrationResetTokenInput!): PrometheusIntegrationResetTokenPayload
-  prometheusIntegrationUpdate(input: PrometheusIntegrationUpdateInput!): PrometheusIntegrationUpdatePayload
+  prometheusIntegrationCreate(
+    input: PrometheusIntegrationCreateInput!
+  ): PrometheusIntegrationCreatePayload
+  prometheusIntegrationResetToken(
+    input: PrometheusIntegrationResetTokenInput!
+  ): PrometheusIntegrationResetTokenPayload
+  prometheusIntegrationUpdate(
+    input: PrometheusIntegrationUpdateInput!
+  ): PrometheusIntegrationUpdatePayload
   promoteToEpic(input: PromoteToEpicInput!): PromoteToEpicPayload
   releaseCreate(input: ReleaseCreateInput!): ReleaseCreatePayload
   releaseDelete(input: ReleaseDeleteInput!): ReleaseDeletePayload
   releaseUpdate(input: ReleaseUpdateInput!): ReleaseUpdatePayload
-  removeAwardEmoji(input: RemoveAwardEmojiInput!): RemoveAwardEmojiPayload @deprecated(reason: "Use awardEmojiRemove. Deprecated in 13.2.")
-  removeProjectFromSecurityDashboard(input: RemoveProjectFromSecurityDashboardInput!): RemoveProjectFromSecurityDashboardPayload
+  removeAwardEmoji(input: RemoveAwardEmojiInput!): RemoveAwardEmojiPayload
+    @deprecated(reason: "Use awardEmojiRemove. Deprecated in 13.2.")
+  removeProjectFromSecurityDashboard(
+    input: RemoveProjectFromSecurityDashboardInput!
+  ): RemoveProjectFromSecurityDashboardPayload
 
   """
   Repositions a DiffNote on an image (a `Note` where the `position.positionType` is `"image"`)
   """
   repositionImageDiffNote(input: RepositionImageDiffNoteInput!): RepositionImageDiffNotePayload
-  revertVulnerabilityToDetected(input: RevertVulnerabilityToDetectedInput!): RevertVulnerabilityToDetectedPayload @deprecated(reason: "Use vulnerabilityRevertToDetected. Deprecated in 13.5.")
-  runDastScan(input: RunDASTScanInput!): RunDASTScanPayload @deprecated(reason: "Use DastOnDemandScanCreate. Deprecated in 13.4.")
+  revertVulnerabilityToDetected(
+    input: RevertVulnerabilityToDetectedInput!
+  ): RevertVulnerabilityToDetectedPayload
+    @deprecated(reason: "Use vulnerabilityRevertToDetected. Deprecated in 13.5.")
+  runDastScan(input: RunDASTScanInput!): RunDASTScanPayload
+    @deprecated(reason: "Use DastOnDemandScanCreate. Deprecated in 13.4.")
   terraformStateDelete(input: TerraformStateDeleteInput!): TerraformStateDeletePayload
   terraformStateLock(input: TerraformStateLockInput!): TerraformStateLockPayload
   terraformStateUnlock(input: TerraformStateUnlockInput!): TerraformStateUnlockPayload
@@ -16989,13 +16965,20 @@ type Mutation {
   todoRestore(input: TodoRestoreInput!): TodoRestorePayload
   todoRestoreMany(input: TodoRestoreManyInput!): TodoRestoreManyPayload
   todosMarkAllDone(input: TodosMarkAllDoneInput!): TodosMarkAllDonePayload
-  toggleAwardEmoji(input: ToggleAwardEmojiInput!): ToggleAwardEmojiPayload @deprecated(reason: "Use awardEmojiToggle. Deprecated in 13.2.")
+  toggleAwardEmoji(input: ToggleAwardEmojiInput!): ToggleAwardEmojiPayload
+    @deprecated(reason: "Use awardEmojiToggle. Deprecated in 13.2.")
   updateAlertStatus(input: UpdateAlertStatusInput!): UpdateAlertStatusPayload
   updateBoard(input: UpdateBoardInput!): UpdateBoardPayload
-  updateBoardEpicUserPreferences(input: UpdateBoardEpicUserPreferencesInput!): UpdateBoardEpicUserPreferencesPayload
+  updateBoardEpicUserPreferences(
+    input: UpdateBoardEpicUserPreferencesInput!
+  ): UpdateBoardEpicUserPreferencesPayload
   updateBoardList(input: UpdateBoardListInput!): UpdateBoardListPayload
-  updateComplianceFramework(input: UpdateComplianceFrameworkInput!): UpdateComplianceFrameworkPayload
-  updateContainerExpirationPolicy(input: UpdateContainerExpirationPolicyInput!): UpdateContainerExpirationPolicyPayload
+  updateComplianceFramework(
+    input: UpdateComplianceFrameworkInput!
+  ): UpdateComplianceFrameworkPayload
+  updateContainerExpirationPolicy(
+    input: UpdateContainerExpirationPolicyInput!
+  ): UpdateContainerExpirationPolicyPayload
   updateEpic(input: UpdateEpicInput!): UpdateEpicPayload
 
   """
@@ -17006,7 +16989,9 @@ type Mutation {
   updateImageDiffNote(input: UpdateImageDiffNoteInput!): UpdateImageDiffNotePayload
   updateIssue(input: UpdateIssueInput!): UpdateIssuePayload
   updateIteration(input: UpdateIterationInput!): UpdateIterationPayload
-  updateNamespacePackageSettings(input: UpdateNamespacePackageSettingsInput!): UpdateNamespacePackageSettingsPayload
+  updateNamespacePackageSettings(
+    input: UpdateNamespacePackageSettingsInput!
+  ): UpdateNamespacePackageSettingsPayload
 
   """
   Updates a Note. If the body of the Note contains only quick actions, the Note
@@ -17017,10 +17002,16 @@ type Mutation {
   updateSnippet(input: UpdateSnippetInput!): UpdateSnippetPayload
   vulnerabilityConfirm(input: VulnerabilityConfirmInput!): VulnerabilityConfirmPayload
   vulnerabilityDismiss(input: VulnerabilityDismissInput!): VulnerabilityDismissPayload
-  vulnerabilityExternalIssueLinkCreate(input: VulnerabilityExternalIssueLinkCreateInput!): VulnerabilityExternalIssueLinkCreatePayload
-  vulnerabilityExternalIssueLinkDestroy(input: VulnerabilityExternalIssueLinkDestroyInput!): VulnerabilityExternalIssueLinkDestroyPayload
+  vulnerabilityExternalIssueLinkCreate(
+    input: VulnerabilityExternalIssueLinkCreateInput!
+  ): VulnerabilityExternalIssueLinkCreatePayload
+  vulnerabilityExternalIssueLinkDestroy(
+    input: VulnerabilityExternalIssueLinkDestroyInput!
+  ): VulnerabilityExternalIssueLinkDestroyPayload
   vulnerabilityResolve(input: VulnerabilityResolveInput!): VulnerabilityResolvePayload
-  vulnerabilityRevertToDetected(input: VulnerabilityRevertToDetectedInput!): VulnerabilityRevertToDetectedPayload
+  vulnerabilityRevertToDetected(
+    input: VulnerabilityRevertToDetectedInput!
+  ): VulnerabilityRevertToDetectedPayload
 }
 
 """
@@ -18720,11 +18711,6 @@ type Pipeline {
   Permissions for the current user on the resource
   """
   userPermissions: PipelinePermissions!
-
-  """
-  Indicates if a pipeline has warnings.
-  """
-  warnings: Boolean!
 }
 
 type PipelineAnalytics {
@@ -19072,31 +19058,6 @@ type Project {
     """
     statuses: [AlertManagementStatus!]
   ): AlertManagementAlertConnection
-
-  """
-  HTTP Integrations which can receive alerts for the project.
-  """
-  alertManagementHttpIntegrations(
-    """
-    Returns the elements in the list that come after the specified cursor.
-    """
-    after: String
-
-    """
-    Returns the elements in the list that come before the specified cursor.
-    """
-    before: String
-
-    """
-    Returns the first _n_ elements from the list.
-    """
-    first: Int
-
-    """
-    Returns the last _n_ elements from the list.
-    """
-    last: Int
-  ): AlertManagementHttpIntegrationConnection
 
   """
   Integrations which can receive alerts for the project.
@@ -21552,7 +21513,7 @@ type Query {
   """
   ciConfig(
     """
-    Contents of `.gitlab-ci.yml`.
+    Contents of '.gitlab-ci.yml'.
     """
     content: String!
 
@@ -21637,7 +21598,7 @@ type Query {
   """
   group(
     """
-    The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.
+    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss".
     """
     fullPath: ID!
   ): Group
@@ -21648,8 +21609,7 @@ type Query {
   instanceSecurityDashboard: InstanceSecurityDashboard
 
   """
-  Get statistics on the instance. Deprecated in 13.10: This field was renamed.
-  Use the `usageTrendsMeasurements` field instead..
+  Get statistics on the instance.
   """
   instanceStatisticsMeasurements(
     """
@@ -21686,10 +21646,10 @@ type Query {
     Measurement recorded before this date.
     """
     recordedBefore: Time
-  ): UsageTrendsMeasurementConnection @deprecated(reason: "This field was renamed. Use the `usageTrendsMeasurements` field instead.. Deprecated in 13.10.")
+  ): InstanceStatisticsMeasurementConnection
 
   """
-  Find an Issue.
+  Find an issue.
   """
   issue(
     """
@@ -21728,7 +21688,7 @@ type Query {
   """
   namespace(
     """
-    The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.
+    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss".
     """
     fullPath: ID!
   ): Namespace
@@ -21748,7 +21708,7 @@ type Query {
   """
   project(
     """
-    The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`.
+    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss".
     """
     fullPath: ID!
   ): Project
@@ -21907,46 +21867,6 @@ type Query {
     """
     visibility: VisibilityScopesEnum
   ): SnippetConnection
-
-  """
-  Get statistics on the instance.
-  """
-  usageTrendsMeasurements(
-    """
-    Returns the elements in the list that come after the specified cursor.
-    """
-    after: String
-
-    """
-    Returns the elements in the list that come before the specified cursor.
-    """
-    before: String
-
-    """
-    Returns the first _n_ elements from the list.
-    """
-    first: Int
-
-    """
-    The type of measurement/statistics to retrieve.
-    """
-    identifier: MeasurementIdentifier!
-
-    """
-    Returns the last _n_ elements from the list.
-    """
-    last: Int
-
-    """
-    Measurement recorded after this date.
-    """
-    recordedAfter: Time
-
-    """
-    Measurement recorded before this date.
-    """
-    recordedBefore: Time
-  ): UsageTrendsMeasurementConnection
 
   """
   Find a user.
@@ -22148,7 +22068,8 @@ type Query {
     First day for which to fetch vulnerability history.
     """
     startDate: ISO8601Date!
-  ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
+  ): VulnerabilitiesCountByDayAndSeverityConnection
+    @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
 
   """
   Find a vulnerability.
@@ -23877,19 +23798,8 @@ type SastCiConfigurationOptionsEntityEdge {
 Size of UI component in SAST configuration page
 """
 enum SastUiComponentSize {
-  """
-  The size of UI component in SAST configuration page is large.
-  """
   LARGE
-
-  """
-  The size of UI component in SAST configuration page is medium.
-  """
   MEDIUM
-
-  """
-  The size of UI component in SAST configuration page is small.
-  """
   SMALL
 }
 
@@ -27368,61 +27278,6 @@ type UpdateSnippetPayload {
 
 scalar Upload
 
-"""
-Represents a recorded measurement (object count) for the Admins
-"""
-type UsageTrendsMeasurement {
-  """
-  Object count.
-  """
-  count: Int!
-
-  """
-  The type of objects being measured.
-  """
-  identifier: MeasurementIdentifier!
-
-  """
-  The time the measurement was recorded.
-  """
-  recordedAt: Time
-}
-
-"""
-The connection type for UsageTrendsMeasurement.
-"""
-type UsageTrendsMeasurementConnection {
-  """
-  A list of edges.
-  """
-  edges: [UsageTrendsMeasurementEdge]
-
-  """
-  A list of nodes.
-  """
-  nodes: [UsageTrendsMeasurement]
-
-  """
-  Information to aid in pagination.
-  """
-  pageInfo: PageInfo!
-}
-
-"""
-An edge in a connection.
-"""
-type UsageTrendsMeasurementEdge {
-  """
-  A cursor for use in pagination.
-  """
-  cursor: String!
-
-  """
-  The item at the end of the edge.
-  """
-  node: UsageTrendsMeasurement
-}
-
 type User {
   """
   Merge Requests assigned to the user.
@@ -28476,7 +28331,20 @@ type VulnerabilityConnection {
 """
 Represents a vulnerability detail field. The fields with data will depend on the vulnerability detail type
 """
-union VulnerabilityDetail = VulnerabilityDetailBase | VulnerabilityDetailBoolean | VulnerabilityDetailCode | VulnerabilityDetailCommit | VulnerabilityDetailDiff | VulnerabilityDetailFileLocation | VulnerabilityDetailInt | VulnerabilityDetailList | VulnerabilityDetailMarkdown | VulnerabilityDetailModuleLocation | VulnerabilityDetailTable | VulnerabilityDetailText | VulnerabilityDetailUrl
+union VulnerabilityDetail =
+    VulnerabilityDetailBase
+  | VulnerabilityDetailBoolean
+  | VulnerabilityDetailCode
+  | VulnerabilityDetailCommit
+  | VulnerabilityDetailDiff
+  | VulnerabilityDetailFileLocation
+  | VulnerabilityDetailInt
+  | VulnerabilityDetailList
+  | VulnerabilityDetailMarkdown
+  | VulnerabilityDetailModuleLocation
+  | VulnerabilityDetailTable
+  | VulnerabilityDetailText
+  | VulnerabilityDetailUrl
 
 """
 Represents the vulnerability details base
@@ -28485,7 +28353,7 @@ type VulnerabilityDetailBase {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28495,7 +28363,7 @@ type VulnerabilityDetailBase {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 }
 
 """
@@ -28505,7 +28373,7 @@ type VulnerabilityDetailBoolean {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28515,7 +28383,7 @@ type VulnerabilityDetailBoolean {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 
   """
   Value of the field.
@@ -28530,7 +28398,7 @@ type VulnerabilityDetailCode {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28545,7 +28413,7 @@ type VulnerabilityDetailCode {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 
   """
   Source code.
@@ -28560,7 +28428,7 @@ type VulnerabilityDetailCommit {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28570,7 +28438,7 @@ type VulnerabilityDetailCommit {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 
   """
   The commit SHA value.
@@ -28595,7 +28463,7 @@ type VulnerabilityDetailDiff {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28605,7 +28473,7 @@ type VulnerabilityDetailDiff {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 }
 
 """
@@ -28615,7 +28483,7 @@ type VulnerabilityDetailFileLocation {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28640,7 +28508,7 @@ type VulnerabilityDetailFileLocation {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 }
 
 """
@@ -28650,7 +28518,7 @@ type VulnerabilityDetailInt {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28660,7 +28528,7 @@ type VulnerabilityDetailInt {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 
   """
   Value of the field.
@@ -28675,7 +28543,7 @@ type VulnerabilityDetailList {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28690,7 +28558,7 @@ type VulnerabilityDetailList {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 }
 
 """
@@ -28700,7 +28568,7 @@ type VulnerabilityDetailMarkdown {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28710,7 +28578,7 @@ type VulnerabilityDetailMarkdown {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 
   """
   Value of the Markdown field.
@@ -28725,7 +28593,7 @@ type VulnerabilityDetailModuleLocation {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28740,7 +28608,7 @@ type VulnerabilityDetailModuleLocation {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 
   """
   Offset of the module location.
@@ -28755,7 +28623,7 @@ type VulnerabilityDetailTable {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28770,7 +28638,7 @@ type VulnerabilityDetailTable {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 
   """
   Table rows.
@@ -28785,7 +28653,7 @@ type VulnerabilityDetailText {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28795,7 +28663,7 @@ type VulnerabilityDetailText {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 
   """
   Value of the text field.
@@ -28810,7 +28678,7 @@ type VulnerabilityDetailUrl {
   """
   Description of the field.
   """
-  description: String
+  description: String!
 
   """
   Name of the field.
@@ -28825,7 +28693,7 @@ type VulnerabilityDetailUrl {
   """
   Name of the field.
   """
-  name: String
+  name: String!
 
   """
   Text of the URL.
@@ -29180,7 +29048,13 @@ enum VulnerabilityIssueLinkType {
 """
 Represents a vulnerability location. The fields with data will depend on the vulnerability report type
 """
-union VulnerabilityLocation = VulnerabilityLocationContainerScanning | VulnerabilityLocationCoverageFuzzing | VulnerabilityLocationDast | VulnerabilityLocationDependencyScanning | VulnerabilityLocationSast | VulnerabilityLocationSecretDetection
+union VulnerabilityLocation =
+    VulnerabilityLocationContainerScanning
+  | VulnerabilityLocationCoverageFuzzing
+  | VulnerabilityLocationDast
+  | VulnerabilityLocationDependencyScanning
+  | VulnerabilityLocationSast
+  | VulnerabilityLocationSecretDetection
 
 """
 Represents the location of a vulnerability found by a container security scan

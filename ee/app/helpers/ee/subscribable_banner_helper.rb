@@ -51,7 +51,7 @@ module EE
       ::Gitlab::ExpiringSubscriptionMessage.new(
         subscribable: decorated_subscription,
         signed_in: signed_in?,
-        is_admin: can?(current_user, :owner_access, entity),
+        is_admin: can?(current_user, :owner_access, entity.root_ancestor),
         namespace: current_namespace
       ).message
     end

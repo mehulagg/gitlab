@@ -3,12 +3,11 @@ import { GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
 import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
 import CommitComponent from '~/vue_shared/components/commit.vue';
-import { PIPELINES_TABLE } from '../../constants';
 import eventHub from '../../event_hub';
 import PipelineTriggerer from './pipeline_triggerer.vue';
 import PipelineUrl from './pipeline_url.vue';
-import PipelinesActionsComponent from './pipelines_actions.vue';
 import PipelinesArtifactsComponent from './pipelines_artifacts.vue';
+import PipelinesManualActionsComponent from './pipelines_manual_actions.vue';
 import PipelineStage from './stage.vue';
 import PipelinesTimeago from './time_ago.vue';
 
@@ -22,7 +21,7 @@ export default {
     GlModalDirective,
   },
   components: {
-    PipelinesActionsComponent,
+    PipelinesManualActionsComponent,
     PipelinesArtifactsComponent,
     CommitComponent,
     PipelineStage,
@@ -57,7 +56,6 @@ export default {
       default: null,
     },
   },
-  pipelinesTable: PIPELINES_TABLE,
   data() {
     return {
       isRetrying: false,
@@ -133,12 +131,6 @@ export default {
     commitTitle() {
       return this.pipeline?.commit?.title;
     },
-    pipelineDuration() {
-      return this.pipeline?.details?.duration ?? 0;
-    },
-    pipelineFinishedAt() {
-      return this.pipeline?.details?.finished_at ?? '';
-    },
     pipelineStatus() {
       return this.pipeline?.details?.status ?? {};
     },
@@ -172,6 +164,10 @@ export default {
     handleRetryClick() {
       this.isRetrying = true;
       eventHub.$emit('retryPipeline', this.pipeline.retry_path);
+    },
+    handlePipelineActionRequestComplete() {
+      // warn the pipelines table to update
+      eventHub.$emit('refreshPipelinesTable');
     },
   },
 };
@@ -220,27 +216,23 @@ export default {
             data-testid="widget-mini-pipeline-graph"
           >
             <pipeline-stage
-              :type="$options.pipelinesTable"
               :stage="stage"
               :update-dropdown="updateGraphDropdown"
+              @pipelineActionRequestComplete="handlePipelineActionRequestComplete"
             />
           </div>
         </template>
       </div>
     </div>
 
-    <pipelines-timeago
-      class="gl-text-right"
-      :duration="pipelineDuration"
-      :finished-time="pipelineFinishedAt"
-    />
+    <pipelines-timeago class="gl-text-right" :pipeline="pipeline" />
 
     <div
       v-if="displayPipelineActions"
       class="table-section section-20 table-button-footer pipeline-actions"
     >
       <div class="btn-group table-action-buttons">
-        <pipelines-actions-component v-if="actions.length > 0" :actions="actions" />
+        <pipelines-manual-actions-component v-if="actions.length > 0" :actions="actions" />
 
         <pipelines-artifacts-component
           v-if="pipeline.details.artifacts.length"

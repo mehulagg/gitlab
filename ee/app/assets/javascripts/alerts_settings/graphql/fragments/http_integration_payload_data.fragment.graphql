@@ -1,0 +1,15 @@
+fragment HttpIntegrationPayloadData on AlertManagementHttpIntegration {
+  id
+  payloadExample
+  payloadAttributeMappings {
+    fieldName
+    path
+    type
+    label
+  }
+  payloadAlertFields {
+    path
+    type
+    label
+  }
+}

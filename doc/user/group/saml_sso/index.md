@@ -25,7 +25,8 @@ SAML SSO is only configurable at the top-level group.
 1. Navigate to the group and select **Settings > SAML SSO**.
 1. Configure your SAML server using the **Assertion consumer service URL**, **Identifier**, and **GitLab single sign-on URL**. Alternatively GitLab provides [metadata XML configuration](#metadata-configuration). See [specific identity provider documentation](#providers) for more details.
 1. Configure the SAML response to include a NameID that uniquely identifies each user.
-1. Configure [required assertions](group_managed_accounts.md#assertions) if using [Group Managed Accounts](group_managed_accounts.md).
+1. Configure [required assertions](#assertions) at minimum containing
+   the user's email address.
 1. While the default is enabled for most SAML providers, please ensure the app is set to have [Service Provider](#glossary) initiated calls in order to link existing GitLab accounts.
 1. Once the identity provider is set up, move on to [configuring GitLab](#configuring-gitlab).
 
@@ -52,6 +53,19 @@ Once users have signed into GitLab using the SSO SAML setup, changing the `NameI
 #### NameID Format
 
 We recommend setting the NameID format to `Persistent` unless using a field (such as email) that requires a different format.
+
+### Assertions
+
+For users to be created with the right information with the improved [user access and management](#user-access-and-management),
+the following user details need to be passed to GitLab as SAML assertions.
+
+| Field           | Supported keys |
+|-----------------|----------------|
+| Email (required)| `email`, `mail` |
+| Username        | `username`, `nickname` |
+| Full Name       | `name` |
+| First Name      | `first_name`, `firstname`, `firstName` |
+| Last Name       | `last_name`, `lastname`, `lastName` |
 
 ### Metadata configuration
 
@@ -347,6 +361,11 @@ If a user is a member of multiple SAML groups mapped to the same GitLab group,
 the user gets the highest access level from the groups. For example, if one group
 is linked as `Guest` and another `Maintainer`, a user in both groups gets `Maintainer`
 access.
+
+Users who are not members of any mapped SAML groups are removed from the GitLab group. 
+
+You can prevent accidental member removal. For example, if you have a SAML group link for `Owner` level access
+in a top-level group, you should also set up a group link for all other members.
 
 ## Glossary
 

@@ -68,6 +68,7 @@ export const mockDataSubscription = {
 export const mockDataSeats = {
   data: [
     {
+      id: 2,
       name: 'Administrator',
       username: 'root',
       avatar_url: 'path/to/img_administrator',
@@ -75,6 +76,7 @@ export const mockDataSeats = {
       email: 'administrator@email.com',
     },
     {
+      id: 3,
       name: 'Agustin Walker',
       username: 'lester.orn',
       avatar_url: 'path/to/img_agustin_walker',
@@ -82,6 +84,7 @@ export const mockDataSeats = {
       email: 'agustin_walker@email.com',
     },
     {
+      id: 4,
       name: 'Joella Miller',
       username: 'era',
       avatar_url: 'path/to/img_joella_miller',
@@ -100,6 +103,7 @@ export const mockTableItems = [
   {
     email: 'administrator@email.com',
     user: {
+      id: 2,
       avatar_url: 'path/to/img_administrator',
       name: 'Administrator',
       username: '@root',
@@ -109,6 +113,7 @@ export const mockTableItems = [
   {
     email: 'agustin_walker@email.com',
     user: {
+      id: 3,
       avatar_url: 'path/to/img_agustin_walker',
       name: 'Agustin Walker',
       username: '@lester.orn',
@@ -118,6 +123,7 @@ export const mockTableItems = [
   {
     email: null,
     user: {
+      id: 4,
       avatar_url: 'path/to/img_joella_miller',
       name: 'Joella Miller',
       username: '@era',

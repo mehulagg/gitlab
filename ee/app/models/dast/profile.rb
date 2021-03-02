@@ -10,6 +10,7 @@ module Dast
 
     validates :description, length: { maximum: 255 }
     validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }, presence: true
+    validates :branch_name, length: { maximum: 255 }
     validates :project_id, :dast_site_profile_id, :dast_scanner_profile_id, presence: true
 
     validate :project_ids_match
@@ -17,6 +18,12 @@ module Dast
 
     scope :by_project_id, -> (project_id) do
       where(project_id: project_id)
+    end
+
+    def branch
+      return unless project.repository.exists?
+
+      Dast::Branch.new(project)
     end
 
     private

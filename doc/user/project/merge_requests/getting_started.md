@@ -1,6 +1,6 @@
 ---
 stage: Create
-group: Source Code
+group: Code Review
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: index, reference
 description: "Getting started with Merge Requests."
@@ -60,7 +60,7 @@ request's page at the top-right side:
 - [Close issues automatically](#merge-requests-to-close-issues) when they are merged.
 - Enable the [delete source branch when merge request is accepted](#deleting-the-source-branch) option to keep your repository clean.
 - Enable the [squash commits when merge request is accepted](squash_and_merge.md) option to combine all the commits into one before merging, thus keep a clean commit history in your repository.
-- Set the merge request as a [**Draft**](work_in_progress_merge_requests.md) to avoid accidental merges before it is ready.
+- Set the merge request as a [**Draft**](drafts.md) to avoid accidental merges before it is ready.
 
 After you have created the merge request, you can also:
 
@@ -122,7 +122,7 @@ Requesting a code review is an important part of contributing code. However, dec
 your code and asking for a review are no easy tasks. Using the "assignee" field for both authors and
 reviewers makes it hard for others to determine who's doing what on a merge request.
 
-GitLab Merge Request Reviewers enable you to request a review of your work, and
+The Merge Request Reviewers feature enables you to request a review of your work, and
 see the status of the review. Reviewers help distinguish the roles of the users
 involved in the merge request. In comparison to an **Assignee**, who is directly
 responsible for creating or merging a merge request, a **Reviewer** is a team member
@@ -163,6 +163,13 @@ the author of the merge request can request a new review from the reviewer:
 
 GitLab creates a new [to-do item](../../todos.md) for the reviewer, and sends
 them a notification email.
+
+#### Approval status
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/292936) in GitLab 13.10.
+
+If a user in the reviewer list has approved the merge request, a green tick symbol is
+shown to the right of their name.
 
 ### Merge requests to close issues
 

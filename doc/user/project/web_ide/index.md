@@ -234,7 +234,7 @@ different branch.
 
 When you edit Markdown files in the Web IDE, you can preview your changes by
 clicking the **Preview Markdown** tab above the file editor. The Markdown preview
-supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm).
+supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown).
 
 You can also upload any local images by pasting them directly in the Markdown file.
 The image is uploaded to the same directory and is named `image.png` by default.
@@ -421,7 +421,7 @@ terminal:
   See [this issue](https://gitlab.com/gitlab-org/webide-file-sync/-/issues/7) for
   more information.
 - `$CI_PROJECT_DIR` is a
-  [predefined environment variable](../../../ci/variables/predefined_variables.md)
+  [predefined CI/CD variable](../../../ci/variables/predefined_variables.md)
   for GitLab Runners. This is where your project's repository resides.
 
 After you have configured the web terminal for file syncing, then when the web

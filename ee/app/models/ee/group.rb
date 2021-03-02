@@ -20,7 +20,8 @@ module EE
 
       has_many :epics
       has_many :epic_boards, class_name: 'Boards::EpicBoard', inverse_of: :group
-
+      has_many :iterations
+      has_many :iterations_cadences, class_name: 'Iterations::Cadence'
       has_one :saml_provider
       has_many :scim_identities
       has_many :ip_restrictions, autosave: true
@@ -227,8 +228,7 @@ module EE
     end
 
     def saml_group_sync_available?
-      ::Feature.enabled?(:saml_group_links, self, default_enabled: true) &&
-        feature_available?(:group_saml_group_sync) && root_ancestor.saml_enabled?
+      feature_available?(:group_saml_group_sync) && root_ancestor.saml_enabled?
     end
 
     override :multiple_issue_boards_available?
@@ -484,7 +484,6 @@ module EE
 
     def execute_subgroup_hooks(event)
       return unless subgroup?
-      return unless parent.group? # TODO: Remove this after fixing https://gitlab.com/gitlab-org/gitlab/-/issues/301013
       return unless feature_available?(:group_webhooks)
 
       run_after_commit do

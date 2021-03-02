@@ -116,6 +116,11 @@ module EE
       end
 
       with_scope :subject
+      condition(:security_orchestration_policies_enabled) do
+        @subject.feature_available?(:security_orchestration_policies)
+      end
+
+      with_scope :subject
       condition(:security_dashboard_enabled) do
         @subject.feature_available?(:security_dashboard)
       end
@@ -228,6 +233,10 @@ module EE
       end
 
       rule { can?(:read_project) & iterations_available }.enable :read_iteration
+
+      rule { security_orchestration_policies_enabled & can?(:developer_access) }.policy do
+        enable :security_orchestration_policies
+      end
 
       rule { security_dashboard_enabled & can?(:developer_access) }.policy do
         enable :read_vulnerability

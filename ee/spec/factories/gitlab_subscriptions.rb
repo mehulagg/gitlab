@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :gitlab_subscription do
     namespace
-    association :hosted_plan, factory: :gold_plan
+    association :hosted_plan, factory: :ultimate_plan
     seats { 10 }
     start_date { Date.current }
     end_date { Date.current.advance(years: 1) }

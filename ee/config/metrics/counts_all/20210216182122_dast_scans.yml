@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.secure.dast_scans
-description: 'Counts dast jobs '
+description: 'Counts dast jobs'
 product_section: sec
 product_stage: secure
 product_group: group::static analysis

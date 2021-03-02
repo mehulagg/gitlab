@@ -1,11 +1,18 @@
 <script>
-import { GlToken, GlAvatarLabeled, GlPopover } from '@gitlab/ui';
+import { GlToken, GlAvatar, GlPopover } from '@gitlab/ui';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import { truncate } from '~/lib/utils/text_utility';
 import { __, sprintf } from '~/locale';
+
+export const SHIFT_WIDTHS = {
+  md: 140,
+  sm: 90,
+  xs: 40,
+};
 
 export default {
   components: {
-    GlAvatarLabeled,
+    GlAvatar,
     GlPopover,
     GlToken,
   },
@@ -26,23 +33,37 @@ export default {
       type: Object,
       required: true,
     },
+    shiftWidth: {
+      type: Number,
+      required: true,
+    },
   },
   computed: {
+    assigneeName() {
+      if (this.shiftWidth <= SHIFT_WIDTHS.sm) {
+        return truncate(this.assignee.user.username, 3);
+      }
+
+      return this.assignee.user.username;
+    },
     chevronClass() {
       return `gl-bg-data-viz-${this.assignee.colorPalette}-${this.assignee.colorWeight}`;
     },
-    startsAt() {
-      return sprintf(__('Starts: %{startsAt}'), {
-        startsAt: formatDate(this.rotationAssigneeStartsAt, 'mmmm d, yyyy, h:MMtt Z'),
+    endsAt() {
+      return sprintf(__('Ends: %{endsAt}'), {
+        endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, h:MMtt Z'),
       });
     },
     rotationAssigneeUniqueID() {
       const { _uid } = this;
       return `${this.assignee.user.id}-${_uid}`;
     },
-    endsAt() {
-      return sprintf(__('Ends: %{endsAt}'), {
-        endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, h:MMtt Z'),
+    rotationMobileView() {
+      return this.shiftWidth <= SHIFT_WIDTHS.xs;
+    },
+    startsAt() {
+      return sprintf(__('Starts: %{startsAt}'), {
+        startsAt: formatDate(this.rotationAssigneeStartsAt, 'mmmm d, yyyy, h:MMtt Z'),
       });
     },
   },
@@ -50,29 +71,25 @@ export default {
 </script>
 
 <template>
-  <div
-    class="gl-absolute gl-h-7 gl-mt-3 gl-z-index-1 gl-overflow-hidden"
-    :style="rotationAssigneeStyle"
-  >
+  <div class="gl-absolute gl-h-7 gl-mt-3" :style="rotationAssigneeStyle">
     <gl-token
       :id="rotationAssigneeUniqueID"
       class="gl-w-full gl-h-6 gl-align-items-center"
       :class="chevronClass"
       :view-only="true"
     >
-      <gl-avatar-labeled
-        shape="circle"
-        :size="16"
-        :src="assignee.avatarUrl"
-        :label="assignee.user.username"
-        :title="assignee.user.username"
-      />
+      <div class="gl-display-flex gl-text-white gl-font-weight-normal">
+        <gl-avatar :src="assignee.user.avatarUrl" :size="16" />
+        <span v-if="!rotationMobileView" class="gl-ml-2" data-testid="rotation-assignee-name">{{
+          assigneeName
+        }}</span>
+      </div>
     </gl-token>
     <gl-popover
       :target="rotationAssigneeUniqueID"
       :title="assignee.user.username"
       triggers="hover"
-      placement="left"
+      placement="top"
     >
       <p class="gl-m-0" data-testid="rotation-assignee-starts-at">{{ startsAt }}</p>
       <p class="gl-m-0" data-testid="rotation-assignee-ends-at">{{ endsAt }}</p>

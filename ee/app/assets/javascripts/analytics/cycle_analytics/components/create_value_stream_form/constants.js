@@ -7,7 +7,7 @@ export const i18n = {
   EDIT_FORM_TITLE: s__('CreateValueStreamForm|Edit Value Stream'),
   EDIT_FORM_ACTION: s__('CreateValueStreamForm|Save Value Stream'),
   FORM_CREATED: s__("CreateValueStreamForm|'%{name}' Value Stream created"),
-  FORM_EDITED: s__("CreateValueStreamForm|'%{name}' Value Stream edited"),
+  FORM_EDITED: s__("CreateValueStreamForm|'%{name}' Value Stream saved"),
   RECOVER_HIDDEN_STAGE: s__('CreateValueStreamForm|Recover hidden stage'),
   RESTORE_HIDDEN_STAGE: s__('CreateValueStreamForm|Restore stage'),
   RESTORE_DEFAULTS: s__('CreateValueStreamForm|Restore defaults'),
@@ -37,6 +37,9 @@ export const i18n = {
   ISSUE_STAGE_END: s__('CreateValueStreamForm|Issue stage end'),
   PLAN_STAGE_START: s__('CreateValueStreamForm|Plan stage start'),
   CODE_STAGE_START: s__('CreateValueStreamForm|Code stage start'),
+  DEFAULT_STAGE_FEATURES: s__(
+    'CreateValueStreamForm|Default stages can only be hidden or re-ordered',
+  ),
 };
 
 export const ERRORS = {

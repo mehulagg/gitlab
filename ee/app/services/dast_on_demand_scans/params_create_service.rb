@@ -2,6 +2,8 @@
 
 module DastOnDemandScans
   class ParamsCreateService < BaseContainerService
+    include Gitlab::Utils::StrongMemoize
+
     def execute
       return ServiceResponse.error(message: 'Site Profile was not provided') unless dast_site.present?
       return ServiceResponse.error(message: 'Cannot run active scan against unvalidated target') unless active_scan_allowed?
@@ -23,21 +25,33 @@ module DastOnDemandScans
       ).execute.present?
     end
 
+    def branch
+      strong_memoize(:branch) do
+        params[:branch] || container.default_branch
+      end
+    end
+
     def dast_site
-      @dast_site ||= params[:dast_site_profile]&.dast_site
+      strong_memoize(:dast_site) do
+        params[:dast_site_profile]&.dast_site
+      end
     end
 
     def dast_scanner_profile
-      @dast_scanner_profile ||= params[:dast_scanner_profile]
+      strong_memoize(:dast_scanner_profile) do
+        params[:dast_scanner_profile]
+      end
     end
 
     def url_base
-      @url_base ||= DastSiteValidation.get_normalized_url_base(dast_site&.url)
+      strong_memoize(:url_base) do
+        DastSiteValidation.get_normalized_url_base(dast_site&.url)
+      end
     end
 
     def default_config
       {
-        branch: container.default_branch,
+        branch: branch,
         target_url: dast_site&.url
       }
     end

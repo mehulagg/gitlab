@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
-  let(:cursor) { 'cursor' }
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
+  let_it_be(:cursor) { 'cursor' }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
   let(:bulk_import) { create(:bulk_import, user: user) }
   let(:entity) do
     create(
@@ -39,6 +39,57 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
       end
 
       expect { subject.run }.to change(::Epic, :count).by(2)
+    end
+  end
+
+  describe '#load' do
+    context 'when user is authorized to create the epic' do
+      it 'creates the epic' do
+        author = create(:user, email: 'member@email.com')
+        parent_epic = create(:epic, group: group)
+        child_epic = create(:epic, group: group)
+        label = create(:group_label, group: group)
+        group.add_developer(author)
+
+        data = {
+          'id' => 99,
+          'iid' => 99,
+          'title' => 'epic',
+          'state' => 'opened',
+          'confidential' => false,
+          'author_id' => author.id,
+          'parent' => parent_epic,
+          'children' => [child_epic],
+          'labels' => [
+            label
+          ]
+        }
+
+        expect { subject.load(context, data) }.to change(::Epic, :count).by(1)
+
+        epic = group.epics.find_by_iid(99)
+
+        expect(epic.group).to eq(group)
+        expect(epic.author).to eq(author)
+        expect(epic.title).to eq('epic')
+        expect(epic.state).to eq('opened')
+        expect(epic.confidential).to eq(false)
+        expect(epic.parent).to eq(parent_epic)
+        expect(epic.children).to contain_exactly(child_epic)
+        expect(epic.labels).to contain_exactly(label)
+      end
+    end
+
+    context 'when user is not authorized to create the epic' do
+      before do
+        allow(user).to receive(:can?).with(:admin_epic, group).and_return(false)
+      end
+
+      it 'raises NotAllowedError' do
+        data = extractor_data(has_next_page: false)
+
+        expect { subject.load(context, data) }.to raise_error(::BulkImports::Pipeline::NotAllowedError)
+      end
     end
   end
 
@@ -94,10 +145,6 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
           { klass: BulkImports::Common::Transformers::ProhibitedAttributesTransformer, options: nil },
           { klass: EE::BulkImports::Groups::Transformers::EpicAttributesTransformer, options: nil }
         )
-    end
-
-    it 'has loaders' do
-      expect(described_class.get_loader).to eq(klass: EE::BulkImports::Groups::Loaders::EpicsLoader, options: nil)
     end
   end
 

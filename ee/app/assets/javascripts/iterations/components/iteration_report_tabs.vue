@@ -10,6 +10,10 @@ import { GroupBy, Namespace } from '../constants';
 import IterationReportIssues from './iteration_report_issues.vue';
 
 export default {
+  i18n: {
+    emptyStateDescription: __('Try grouping with different labels'),
+    emptyStateTitle: __('There are no issues with the selected labels'),
+  },
   selectOptions: [
     {
       value: GroupBy.None,
@@ -99,6 +103,10 @@ export default {
         Vue.set(this.selectedLabels, index, label);
       }
     },
+    handleRemoveLabel(labelId) {
+      const index = this.selectedLabels.findIndex((l) => l.id === labelId);
+      this.selectedLabels.splice(index, 1);
+    },
     handleSelectChange() {
       if (this.groupBySelection === GroupBy.None) {
         this.selectedLabels = [];
@@ -177,8 +185,9 @@ export default {
 
       <gl-empty-state
         v-if="showEmptyState"
+        :description="$options.i18n.emptyStateDescription"
         :svg-path="svgPath"
-        :title="__('No issues found for the selected labels')"
+        :title="$options.i18n.emptyStateTitle"
       />
 
       <iteration-report-issues
@@ -190,6 +199,7 @@ export default {
         :iteration-id="iterationId"
         :label="label"
         :namespace-type="namespaceType"
+        @removeLabel="handleRemoveLabel"
         @issuesUpdate="handleIssuesUpdate"
       />
 

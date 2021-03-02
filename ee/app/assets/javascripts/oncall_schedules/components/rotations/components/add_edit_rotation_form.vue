@@ -30,7 +30,12 @@ export const i18n = {
       title: __('Participants'),
       error: s__('OnCallSchedules|Rotation participants cannot be empty'),
     },
-    rotationLength: { title: s__('OnCallSchedules|Rotation length') },
+    rotationLength: {
+      title: s__('OnCallSchedules|Rotation length'),
+      description: s__(
+        'OnCallSchedules|Please note, rotations with shifts that are less than four hours are currently not supported in the weekly view.',
+      ),
+    },
     startsAt: {
       title: __('Starts on'),
       error: s__('OnCallSchedules|Rotation start date cannot be empty'),
@@ -132,6 +137,7 @@ export default {
           :dropdown-items="participants"
           :loading="isLoading"
           container-class="gl-h-13! gl-overflow-y-auto"
+          menu-class="gl-overflow-y-auto"
           @text-input="$emit('filter-participants', $event)"
           @blur="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
           @input="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
@@ -153,6 +159,7 @@ export default {
 
       <gl-form-group
         :label="$options.i18n.fields.rotationLength.title"
+        :description="$options.i18n.fields.rotationLength.description"
         label-size="sm"
         label-for="rotation-length"
       >

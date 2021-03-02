@@ -132,12 +132,12 @@ RSpec.describe EE::UserCalloutsHelper do
     end
   end
 
-  describe '#render_dashboard_gold_trial' do
+  describe '#render_dashboard_ultimate_trial' do
     let_it_be(:namespace) { create(:namespace) }
-    let_it_be(:gold_plan) { create(:gold_plan) }
+    let_it_be(:ultimate_plan) { create(:ultimate_plan) }
     let(:user) { namespace.owner }
 
-    where(:any_namespace_without_trial?, :show_gold_trial?, :user_default_dashboard?, :has_no_trial_or_paid_plan?, :should_render?) do
+    where(:any_namespace_without_trial?, :show_ultimate_trial?, :user_default_dashboard?, :has_no_trial_or_paid_plan?, :should_render?) do
       true  | true  | true  | true  | true
       true  | true  | true  | false | false
       true  | true  | false | true  | false
@@ -158,23 +158,23 @@ RSpec.describe EE::UserCalloutsHelper do
 
     with_them do
       before do
-        allow(helper).to receive(:show_gold_trial?) { show_gold_trial? }
+        allow(helper).to receive(:show_ultimate_trial?) { show_ultimate_trial? }
         allow(helper).to receive(:user_default_dashboard?) { user_default_dashboard? }
         allow(user).to receive(:any_namespace_without_trial?) { any_namespace_without_trial? }
 
         unless has_no_trial_or_paid_plan?
-          create(:gitlab_subscription, hosted_plan: gold_plan, namespace: namespace)
+          create(:gitlab_subscription, hosted_plan: ultimate_plan, namespace: namespace)
         end
       end
 
       it do
         if should_render?
-          expect(helper).to receive(:render).with('shared/gold_trial_callout_content')
+          expect(helper).to receive(:render).with('shared/ultimate_trial_callout_content')
         else
           expect(helper).not_to receive(:render)
         end
 
-        helper.render_dashboard_gold_trial(user)
+        helper.render_dashboard_ultimate_trial(user)
       end
     end
   end

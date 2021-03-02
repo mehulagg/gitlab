@@ -673,6 +673,22 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'security complience policy' do
+    before do
+      stub_licensed_features(security_orchestration_policies: true)
+    end
+
+    context 'with developer or higher role' do
+      where(role: %w[owner maintainer developer])
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to be_allowed(:security_orchestration_policies) }
+      end
+    end
+  end
+
   describe 'read_corpus_management' do
     context 'when corpus_management feature is available' do
       before do

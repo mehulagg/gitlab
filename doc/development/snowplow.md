@@ -11,7 +11,7 @@ This guide provides an overview of how Snowplow works, and implementation detail
 For more information about Product Intelligence, see:
 
 - [Product Intelligence Guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
-- [Usage Ping Guide](usage_ping.md)
+- [Usage Ping Guide](usage_ping/index.md)
 
 More useful links:
 
@@ -358,6 +358,7 @@ There are several tools for developing and testing Snowplow Event
 
 1. For frontend events, in the MR description section, add a screenshot of the event's relevant section using the [Snowplow Analytics Debugger](https://chrome.google.com/webstore/detail/snowplow-analytics-debugg/jbnlcgeengmijcghameodeaenefieedm) Chrome browser extension.
 1. For backend events, please use Snowplow Micro and add the output of the Snowplow Micro good events  `GET http://localhost:9090/micro/good`.
+1. Include a member of the Product Intelligence team as a reviewer of your MR. Mention `@gitlab-org/growth/product_intelligence/engineers` in your MR to request a review.
 
 ### Snowplow Analytics Debugger Chrome Extension
 

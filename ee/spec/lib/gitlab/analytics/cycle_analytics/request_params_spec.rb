@@ -205,4 +205,24 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
     it { expect(subject[:labels]).to eq('["label1","label2"]') }
     it { expect(subject[:author]).to eq('author') }
   end
+
+  describe 'sorting params' do
+    before do
+      params.merge!(sort: 'duration', direction: 'asc')
+    end
+
+    it 'converts sorting params to symbol when passing it to data collector' do
+      data_collector_params = subject.to_data_collector_params
+
+      expect(data_collector_params[:sort]).to eq(:duration)
+      expect(data_collector_params[:direction]).to eq(:asc)
+    end
+
+    it 'adds corting params to data attributes' do
+      data_attributes = subject.to_data_attributes
+
+      expect(data_attributes[:sort]).to eq('duration')
+      expect(data_attributes[:direction]).to eq('asc')
+    end
+  end
 end

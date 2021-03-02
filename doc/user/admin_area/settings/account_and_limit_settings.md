@@ -152,20 +152,20 @@ To set a limit on how long these sessions are valid:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3649) in GitLab Ultimate 12.6.
 
-Users can optionally specify an expiration date for
+Users can optionally specify a lifetime for
 [personal access tokens](../../profile/personal_access_tokens.md).
-This expiration date is not a requirement, and can be set to any arbitrary date.
+This lifetime is not a requirement, and can be set to any arbitrary number of days.
 
 Personal access tokens are the only tokens needed for programmatic access to GitLab.
 However, organizations with security requirements may want to enforce more protection by
 requiring the regular rotation of these tokens.
 
-### Setting a limit
+### Setting a lifetime
 
-Only a GitLab administrator can set a limit. Leaving it empty means
+Only a GitLab administrator can set a lifetime. Leaving it empty means
 there are no restrictions.
 
-To set a limit on how long personal access tokens are valid:
+To set a lifetime on how long personal access tokens are valid:
 
 1. Navigate to **Admin Area > Settings > General**.
 1. Expand the **Account and limit** section.
@@ -190,6 +190,8 @@ You can prevent the use of expired SSH keys with the following steps:
 1. Navigate to **Admin Area > Settings > General**.
 1. Expand the **Account and limit** section.
 1. Select the **Enforce SSH key expiration** checkbox.
+
+Enforcing SSH key expiration immediately disables all expired SSH keys.
 
 For more information, see the following issue on [SSH key expiration](https://gitlab.com/gitlab-org/gitlab/-/issues/320970).
 

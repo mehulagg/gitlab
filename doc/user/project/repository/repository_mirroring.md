@@ -110,7 +110,7 @@ After the mirror is created, this option can currently only be modified via the 
 
 To set up a mirror from GitLab to GitHub, you need to follow these steps:
 
-1. Create a [GitHub personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) with the `public_repo` box checked.
+1. Create a [GitHub personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) with the `public_repo` box checked.
 1. Fill in the **Git repository URL** field using this format: `https://<your_github_username>@github.com/<your_github_group>/<your_github_project>.git`.
 1. Fill in **Password** field with your GitHub personal access token.
 1. Click the **Mirror repository** button.
@@ -219,16 +219,20 @@ to be able to browse its content and its activity using the familiar GitLab inte
 
 To configure mirror pulling for an existing project:
 
-1. Navigate to your project's **Settings > Repository** and expand the **Mirroring repositories**
-   section.
-1. Enter a repository URL.
-1. Select **Pull** from the **Mirror direction** dropdown.
-1. Select an authentication method from the **Authentication method** dropdown, if necessary.
-1. If necessary, check the following boxes:
-   - **Overwrite diverged branches**.
-   - **Trigger pipelines for mirror updates**.
-   - **Only mirror protected branches**.
-1. Click the **Mirror repository** button to save the configuration.
+1. If you [configured two-factor authentication (2FA)](https://docs.github.com/en/github/authenticating-to-github/securing-your-account-with-two-factor-authentication-2fa)
+   for GitHub, create a [personal access token for GitHub](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
+   with the `read_repository` scope. If 2FA is enabled, this personal access
+   token serves as your GitHub password.
+1. In your project, go to **Settings > Repository**, and then expand the
+   **Mirroring repositories** section.
+1. In the **Git repository URL** field, enter a repository URL.
+1. In the **Mirror direction** dropdown, select **Pull**.
+1. In the **Authentication method** dropdown, select your authentication method.
+1. Select from the following checkboxes, if needed:
+   - **Overwrite diverged branches**
+   - **Trigger pipelines for mirror updates**
+   - **Only mirror protected branches**
+1. Select **Mirror repository** to save the configuration.
 
 ![Repository mirroring pull settings screen - upper part](img/repository_mirroring_pull_settings_upper.png)
 
@@ -366,7 +370,7 @@ fingerprints in the open for you to check:
 
 - [AWS CodeCommit](https://docs.aws.amazon.com/codecommit/latest/userguide/regions.html#regions-fingerprints)
 - [Bitbucket](https://support.atlassian.com/bitbucket-cloud/docs/configure-ssh-and-two-step-verification/)
-- [GitHub](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/githubs-ssh-key-fingerprints)
+- [GitHub](https://docs.github.com/en/github/authenticating-to-github/githubs-ssh-key-fingerprints)
 - [GitLab.com](../../gitlab_com/index.md#ssh-host-keys-fingerprints)
 - [Launchpad](https://help.launchpad.net/SSHFingerprints)
 - [Savannah](http://savannah.gnu.org/maintenance/SshAccess/)
@@ -584,3 +588,9 @@ If you receive an "13:Received RST_STREAM with error code 2" while mirroring to 
 ### 4:Deadline Exceeded
 
 When upgrading to GitLab 11.11.8 or newer, a change in how usernames are represented means that you may need to update your mirroring username and password to ensure that `%40` characters are replaced with `@`.
+
+### Connection blocked because server only allows public key authentication
+
+As the error indicates, the connection is getting blocked between GitLab and the remote repository. Even if a [TCP Check](../../../administration/raketasks/maintenance.md#check-tcp-connectivity-to-a-remote-site) is successful, you will need to check any networking components in the route from GitLab to the remote Server to ensure there's no blockage.
+
+For example, we've seen this error when a Firewall was performing a `Deep SSH Inspection` on outgoing packets.

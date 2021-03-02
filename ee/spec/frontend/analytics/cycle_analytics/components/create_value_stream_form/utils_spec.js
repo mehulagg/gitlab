@@ -189,6 +189,10 @@ describe('formatStageDataForSubmission', () => {
     it('will convert all properties to snake case', () => {
       expect(Object.keys(res)).toEqual(['custom', 'name']);
     });
+
+    it('will set custom to `false`', () => {
+      expect(res.custom).toBe(false);
+    });
   });
 
   describe('with a custom stage', () => {
@@ -221,12 +225,12 @@ describe('formatStageDataForSubmission', () => {
 
   describe('isEditing = true ', () => {
     it('will include the `id` if it has a value', () => {
-      [res] = formatStageDataForSubmission([{ ...fakeStage, id: 10 }], true);
+      [res] = formatStageDataForSubmission([{ ...fakeStage, id: 10, custom: true }], true);
       expect(Object.keys(res).includes('id')).toBe(true);
     });
 
     it('will set custom to `true`', () => {
-      [res] = formatStageDataForSubmission([fakeStage], true);
+      [res] = formatStageDataForSubmission([{ ...fakeStage, custom: true }], true);
       expect(res.custom).toBe(true);
     });
   });

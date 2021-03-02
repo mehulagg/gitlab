@@ -10,6 +10,8 @@ class Analytics::CycleAnalytics::GroupValueStream < ApplicationRecord
 
   accepts_nested_attributes_for :stages, allow_destroy: true
 
+  scope :preload_associated_models, -> { includes(:group, stages: [:group, :end_event_label, :start_event_label]) }
+
   def custom?
     name != Analytics::CycleAnalytics::Stages::BaseService::DEFAULT_VALUE_STREAM_NAME
   end

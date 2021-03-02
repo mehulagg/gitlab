@@ -9,6 +9,7 @@ import { mapActions } from 'vuex';
 import BoardSidebar from 'ee_component/boards/components/board_sidebar';
 import toggleLabels from 'ee_component/boards/toggle_labels';
 
+import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import BoardContent from '~/boards/components/board_content.vue';
 import BoardAddIssuesModal from '~/boards/components/modal/index.vue';
 import mountMultipleBoardsSwitcher from '~/boards/mount_multiple_boards_switcher';
@@ -109,6 +110,21 @@ export default () => {
       },
     },
   });
+
+  const createColumnTriggerEl = document.querySelector('.js-create-column-trigger');
+  if (createColumnTriggerEl) {
+    // eslint-disable-next-line no-new
+    new Vue({
+      el: createColumnTriggerEl,
+      components: {
+        BoardAddNewColumnTrigger,
+      },
+      store,
+      render(createElement) {
+        return createElement(BoardAddNewColumnTrigger);
+      },
+    });
+  }
 
   toggleLabels();
 

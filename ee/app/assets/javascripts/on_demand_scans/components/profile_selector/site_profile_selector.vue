@@ -32,8 +32,7 @@ export default {
         const suffix = isValidated
           ? s__('DastProfiles|Validated')
           : s__('DastProfiles|Not Validated');
-        const addSuffix = (str) =>
-          this.glFeatures.securityOnDemandScansSiteValidation ? `${str} (${suffix})` : str;
+        const addSuffix = (str) => `${str} (${suffix})`;
         return {
           ...profile,
           dropdownLabel: addSuffix(`${profile.profileName}: ${profile.targetUrl}`),

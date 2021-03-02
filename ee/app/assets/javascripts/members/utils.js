@@ -14,8 +14,8 @@ export {
   canUpdate,
 } from '~/members/utils';
 
-export const generateBadges = (member, isCurrentUser) => [
-  ...CEGenerateBadges(member, isCurrentUser),
+export const generateBadges = ({ member, isCurrentUser, canManageMembers }) => [
+  ...CEGenerateBadges({ member, isCurrentUser, canManageMembers }),
   {
     show: member.usingLicense,
     text: __('Is using seat'),
