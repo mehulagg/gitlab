@@ -28,6 +28,7 @@ describe('AddEditRotationForm', () => {
             name: true,
             participants: false,
             startsAt: false,
+            rotationLength: false,
           },
           participants,
           form: cloneDeep(formEmptyState),
@@ -61,19 +62,28 @@ describe('AddEditRotationForm', () => {
   const findRestrictedToOptions = () =>
     wrapper.find('[data-testid="restricted-to"]').findAllComponents(GlDropdownItem);
 
-  describe('Rotation form validation', () => {
-    beforeEach(() => {
-      createComponent();
-    });
-
+  describe.only('Rotation form validation', () => {
     it.each`
-      index | type              | validationState | value
-      ${0}  | ${'name'}         | ${true}         | ${'true'}
-      ${1}  | ${'participants'} | ${false}        | ${undefined}
-      ${3}  | ${'startsAt'}     | ${false}        | ${undefined}
+      index | type                | validationState | value
+      ${0}  | ${'name'}           | ${true}         | ${'true'}
+      ${0}  | ${'name'}           | ${false}        | ${undefined}
+      ${1}  | ${'participants'}   | ${true}         | ${'true'}
+      ${1}  | ${'participants'}   | ${false}        | ${undefined}
+      ${3}  | ${'startsAt'}       | ${true}         | ${'true'}
+      ${3}  | ${'startsAt'}       | ${false}        | ${undefined}
+      ${2}  | ${'rotationLength'} | ${true}         | ${'true'}
+      ${2}  | ${'rotationLength'} | ${false}        | ${undefined}
     `(
       'form validation for $type returns $value when passed validate state of $validationState',
-      ({ index, value }) => {
+      ({ index, type, validationState, value }) => {
+        createComponent({
+          props: {
+            validationState: {
+              [type]: validationState,
+            },
+          },
+        });
+
         const formGroup = findRotationFormGroups();
         expect(formGroup.at(index).attributes('state')).toBe(value);
       },
