@@ -34,6 +34,13 @@ export default {
       required: true,
     },
   },
+  data: () => ({
+    tracking: {
+      event: 'click_link',
+      label: 'trial_status_widget',
+      category: 'show_trial_status_in_sidebar',
+    },
+  }),
   computed: {
     widgetTitle() {
       const i18nWidgetTitle = n__(
@@ -53,7 +60,14 @@ export default {
 </script>
 
 <template>
-  <gl-link :id="containerId" :title="widgetTitle" :href="plansHref">
+  <gl-link
+    :id="containerId"
+    :title="widgetTitle"
+    :href="plansHref"
+    :data-track-event="tracking.event"
+    :data-track-label="tracking.label"
+    :data-track-category="tracking.category"
+  >
     <div class="gl-display-flex gl-flex-direction-column gl-align-items-stretch gl-w-full">
       <span class="gl-display-flex gl-align-items-center">
         <span class="nav-icon-container svg-container">

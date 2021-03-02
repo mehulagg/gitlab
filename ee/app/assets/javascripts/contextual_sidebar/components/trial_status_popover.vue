@@ -46,6 +46,11 @@ export default {
   },
   data: () => ({
     disabled: false,
+    tracking: {
+      event: 'click_button',
+      labels: { upgrade: 'upgrade_to_ultimate', compare: 'compare_all_plans' },
+      category: 'show_trial_status_in_sidebar',
+    },
   }),
   i18n: {
     compareAllButtonTitle: s__('Trials|Compare all plans'),
@@ -107,12 +112,16 @@ export default {
 
     <div class="gl-mt-5">
       <gl-button
+        ref="upgradeBtn"
         :href="purchaseHref"
         category="primary"
         variant="confirm"
         size="small"
         class="gl-mb-0"
         block
+        :data-track-event="tracking.event"
+        :data-track-label="tracking.labels.upgrade"
+        :data-track-category="tracking.category"
       >
         <span class="gl-font-sm">
           <gl-sprintf :message="$options.i18n.upgradeButtonTitle">
@@ -122,6 +131,7 @@ export default {
         </span>
       </gl-button>
       <gl-button
+        ref="compareBtn"
         :href="plansHref"
         category="secondary"
         variant="confirm"
@@ -129,6 +139,9 @@ export default {
         class="gl-mb-0"
         block
         :title="$options.i18n.compareAllButtonTitle"
+        :data-track-event="tracking.event"
+        :data-track-label="tracking.labels.compare"
+        :data-track-category="tracking.category"
       >
         <span class="gl-font-sm">{{ $options.i18n.compareAllButtonTitle }}</span>
       </gl-button>
