@@ -117,6 +117,24 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
           MergeRequests::UpdateService.new(project, user, opts).execute(draft_merge_request)
         end
+
+        it 'tracks milestone change' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_milestone_changed_action).once.with(user: user)
+
+          opts[:milestone] = milestone
+
+          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+        end
+
+        it 'track labels change' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_labels_changed_action).once.with(user: user)
+
+          opts[:labels] = [label]
+
+          MergeRequests::UpdateService.new(project, user, opts).execute(merge_request)
+        end
       end
 
       context 'updating milestone' do

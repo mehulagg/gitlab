@@ -45,10 +45,10 @@ module MergeRequests
       handle_reviewers_change(merge_request, old_reviewers) if merge_request.reviewers != old_reviewers
       handle_milestone_change(merge_request)
       handle_draft_status_change(merge_request, changed_fields)
+      handle_label_changes(merge_request, old_labels)
 
       track_title_and_desc_edits(changed_fields)
 
-      notify_if_labels_added(merge_request, old_labels)
       notify_if_mentions_added(merge_request, old_mentioned_users)
 
       # Since #mark_as_unchecked triggers an update action through the MR's
@@ -164,6 +164,8 @@ module MergeRequests
 
       return unless merge_request.previous_changes.include?('milestone_id')
 
+      merge_request_activity_counter.track_milestone_changed_action(user: current_user)
+
       if merge_request.milestone.nil?
         notification_service.async.removed_milestone_merge_request(merge_request, current_user)
       else
@@ -189,6 +191,13 @@ module MergeRequests
 
       new_reviewers = merge_request.reviewers - old_reviewers
       merge_request_activity_counter.track_users_review_requested(users: new_reviewers)
+    end
+
+    def handle_label_changes(merge_request, old_labels)
+      return unless merge_request.previous_changes.include?('label_ids')
+
+      merge_request_activity_counter.track_labels_changed_action(user: current_user)
+      notify_if_labels_added(merge_request, old_labels)
     end
 
     def create_branch_change_note(issuable, branch_type, event_type, old_branch, new_branch)
