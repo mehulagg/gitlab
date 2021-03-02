@@ -120,6 +120,7 @@ describe('On-call schedule', () => {
       rotations: expect.any(Array),
       scheduleIid: mockSchedule.iid,
       loading: wrapper.vm.$apollo.queries.rotations.loading,
+      selectedTimezone: lastTz,
     });
   });
 

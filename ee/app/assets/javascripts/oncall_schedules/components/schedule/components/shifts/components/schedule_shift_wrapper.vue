@@ -11,20 +11,24 @@ export default {
     WeeksScheduleShift,
   },
   props: {
-    timeframeItem: {
-      type: [Date, Object],
-      required: true,
-    },
-    timeframe: {
-      type: Array,
-      required: true,
-    },
     presetType: {
       type: String,
       required: true,
     },
     rotation: {
       type: Object,
+      required: true,
+    },
+    selectedTimezone: {
+      type: Object,
+      required: true,
+    },
+    timeframeItem: {
+      type: [Date, Object],
+      required: true,
+    },
+    timeframe: {
+      type: Array,
       required: true,
     },
   },
@@ -78,6 +82,7 @@ export default {
       :timeframe="timeframe"
       :shift-time-unit-width="shiftTimeUnitWidth"
       :rotation-length="rotationLength"
+      :selected-timezone="selectedTimezone"
     />
   </div>
 </template>
