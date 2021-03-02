@@ -83,6 +83,9 @@ rules:
           group: internal
       alphabetize:
         order: asc
+  filenames/match-regex:
+    - error
+    - "^[a-z_]+(\\.stories|\\.config|\\.documentation|\\.[a-z_]+\\.example|\\.spec)?$"
 overrides:
   - files:
       - '**/spec/**/*'
