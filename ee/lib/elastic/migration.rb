@@ -19,8 +19,8 @@ module Elastic
       raise NotImplementedError, 'Please extend Elastic::Migration'
     end
 
-    def storage_required_bytes
-      raise NotImplementedError, 'Please extend Elastic::Migration' if check_storage?
+    def space_required_bytes
+      raise NotImplementedError, 'Please extend Elastic::Migration' if space_requirements?
     end
 
     private

@@ -42,15 +42,15 @@ RSpec.describe Elastic::Migration, :elastic do
   describe '#storage_required_bytes?' do
     context 'when check_storage! migration option is not set' do
       it 'does not raise exception for original class' do
-        expect { bare_migration.storage_required_bytes }.not_to raise_error
+        expect { bare_migration.space_required_bytes }.not_to raise_error
       end
     end
 
     context 'when check_storage! migration option is set' do
       it 'raises exception for original class' do
-        allow(bare_migration).to receive(:check_storage?).and_return(true)
+        allow(bare_migration).to receive(:space_requirements?).and_return(true)
 
-        expect { bare_migration.storage_required_bytes }.to raise_error(NotImplementedError)
+        expect { bare_migration.space_required_bytes }.to raise_error(NotImplementedError)
       end
     end
   end

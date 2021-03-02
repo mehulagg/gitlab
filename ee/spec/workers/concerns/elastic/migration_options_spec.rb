@@ -33,10 +33,10 @@ RSpec.describe Elastic::MigrationOptions do
     it_behaves_like 'a boolean option', :pause_indexing!
   end
 
-  describe '#check_storage?' do
-    subject { migration_class.new.check_storage? }
+  describe '#space_requirements?' do
+    subject { migration_class.new.space_requirements? }
 
-    it_behaves_like 'a boolean option', :check_storage!
+    it_behaves_like 'a boolean option', :space_requirements!
   end
 
   describe '#throttle_delay' do
