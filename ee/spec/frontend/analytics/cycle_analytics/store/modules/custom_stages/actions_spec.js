@@ -3,7 +3,7 @@ import MockAdapter from 'axios-mock-adapter';
 import * as actions from 'ee/analytics/cycle_analytics/store/modules/custom_stages/actions';
 import * as types from 'ee/analytics/cycle_analytics/store/modules/custom_stages/mutation_types';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { currentGroup, endpoints, rawCustomStage } from '../../../mock_data';
 
@@ -13,11 +13,6 @@ describe('Custom stage actions', () => {
   let state;
   let mock;
   const selectedStage = rawCustomStage;
-
-  const shouldFlashAMessage = (msg, type = null) => {
-    const args = type ? [msg, type] : [msg];
-    expect(createFlash).toHaveBeenCalledWith(...args);
-  };
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
@@ -128,7 +123,9 @@ describe('Custom stage actions', () => {
           response,
         )
         .then(() => {
-          shouldFlashAMessage('There was a problem saving your custom stage, please try again');
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was a problem saving your custom stage, please try again',
+          });
         });
     });
 
@@ -147,7 +144,7 @@ describe('Custom stage actions', () => {
             },
           )
           .then(() => {
-            shouldFlashAMessage("'uh oh' stage already exists");
+            expect(createFlash).toHaveBeenCalledWith({ message: "'uh oh' stage already exists" });
           });
       });
     });
@@ -180,7 +177,9 @@ describe('Custom stage actions', () => {
             response,
           )
           .then(() => {
-            shouldFlashAMessage('There was a problem refreshing the data, please try again');
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'There was a problem refreshing the data, please try again',
+            });
           }));
     });
   });
