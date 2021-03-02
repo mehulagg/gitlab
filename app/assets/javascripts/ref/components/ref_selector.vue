@@ -113,9 +113,16 @@ export default {
       this.search(this.query);
     }, SEARCH_DEBOUNCE_MS);
 
-    this.setEnabledRefTypes(this.enabledRefTypes);
     this.setProjectId(this.projectId);
-    this.search(this.query);
+
+    this.$watch(
+      'enabledRefTypes',
+      () => {
+        this.setEnabledRefTypes(this.enabledRefTypes);
+        this.search(this.query);
+      },
+      { immediate: true },
+    );
   },
   methods: {
     ...mapActions(['setEnabledRefTypes', 'setProjectId', 'setSelectedRef', 'search']),

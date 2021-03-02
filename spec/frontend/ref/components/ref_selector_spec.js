@@ -620,6 +620,22 @@ describe('Ref selector component', () => {
       },
     );
 
+    it('triggers another search if enabled ref types change', async () => {
+      createComponent({ enabledRefTypes: [REF_TYPE_BRANCHES] });
+      await waitForRequests();
+
+      expect(branchesApiCallSpy).toHaveBeenCalledTimes(1);
+      expect(tagsApiCallSpy).not.toHaveBeenCalled();
+
+      wrapper.setProps({
+        enabledRefTypes: [REF_TYPE_BRANCHES, REF_TYPE_TAGS],
+      });
+      await waitForRequests();
+
+      expect(branchesApiCallSpy).toHaveBeenCalledTimes(2);
+      expect(tagsApiCallSpy).toHaveBeenCalledTimes(1);
+    });
+
     it.each`
       enabledRefType       | findVisibleSection     | findHiddenSections
       ${REF_TYPE_BRANCHES} | ${findBranchesSection} | ${[findTagsSection, findCommitsSection]}
