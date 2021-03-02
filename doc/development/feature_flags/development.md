@@ -418,7 +418,7 @@ When we finally enable the flag by default, we set `default_enabled: true` in th
 
 - If the flag was manually enabled before setting `default_enabled: true`, the feature will be enabled. 
 Not because of the `default_enabled: true` value of the flag but because it was manually enabled.
-- If the flag was manually disabled before before setting `default_enabled: true`, the feature will 
+- If the flag was manually disabled before setting `default_enabled: true`, the feature will 
 remain disabled. The `default_enabled: true` value does not take precendence over the explicit `false`
 value set when disabling it manually.
 
