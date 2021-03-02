@@ -1,3 +1,11 @@
+---
+stage: Manage
+group: Access
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+
+type: reference
+---
+
 # GitLab Token overview
 
 This document lists tokens used in GitLab, their purpose and, where applicable, security guidance.
