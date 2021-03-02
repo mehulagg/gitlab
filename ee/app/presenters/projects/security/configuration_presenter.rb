@@ -14,7 +14,6 @@ module Projects
         dast: 'user/application_security/dast/index',
         dast_profiles: 'user/application_security/dast/index',
         dependency_scanning: 'user/application_security/dependency_scanning/index',
-        license_management: 'user/compliance/license_compliance/index',
         license_scanning: 'user/compliance/license_compliance/index',
         sast: 'user/application_security/sast/index',
         secret_detection: 'user/application_security/secret_detection/index',
@@ -28,7 +27,6 @@ module Projects
           dast: _('Analyze a review version of your web application.'),
           dast_profiles: _('Saved scan settings and target site settings which are reusable.'),
           dependency_scanning: _('Analyze your dependencies for known vulnerabilities.'),
-          license_management: _('Search your project dependencies for their licenses and apply policies.'),
           license_scanning: _('Search your project dependencies for their licenses and apply policies.'),
           sast: _('Analyze your source code for known vulnerabilities.'),
           secret_detection: _('Analyze your source code and git history for secrets.'),
@@ -43,7 +41,6 @@ module Projects
           dast: _('Dynamic Application Security Testing (DAST)'),
           dast_profiles: _('DAST Scans'),
           dependency_scanning: _('Dependency Scanning'),
-          license_management: 'License Management',
           license_scanning: _('License Compliance'),
           sast: _('Static Application Security Testing (SAST)'),
           secret_detection: _('Secret Detection'),
@@ -113,9 +110,6 @@ module Projects
           end
         end
 
-        # TODO: remove this line with #8912
-        license_compliance_substitute(scans)
-
         dast_profiles_insert(scans)
       end
 
@@ -123,26 +117,6 @@ module Projects
         return help_page_path('ci/pipelines') unless latest_default_branch_pipeline
 
         project_pipeline_path(self, latest_default_branch_pipeline)
-      end
-
-      # In this method we define if License Compliance feature is configured
-      # by looking into `license_scanning` and `license_management` reports
-      # in 13.0 support for `license_management` report type is scheduled to be dropped.
-      # With this change we won't need this method anymore.
-      def license_compliance_substitute(scans)
-        license_management = scans.find { |scan_type| scan_type[:name] == localized_scan_names[:license_management] }
-        license_compliance_config = license_management.fetch(:configured, false)
-
-        scans.delete(license_management)
-
-        if license_compliance_config
-          scans.map do |scan_type|
-            scan_type[:configured] = true if scan_type[:name] == _('License Compliance')
-            scan_type[:status] = s_('SecurityConfiguration|Enabled') if scan_type[:name] == _('License Compliance')
-          end
-        end
-
-        scans
       end
 
       # DAST On-demand scans is a static (non job) entry.  Add it manually following DAST
