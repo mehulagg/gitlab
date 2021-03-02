@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Repositories
-  # Finder for obtaining commits between two refs, with a Git trailer set.
-  class CommitsWithTrailerFinder
+  # Finder for getting the commits to include in a changelog.
+  class ChangelogCommitsFinder
     # The maximum number of commits to retrieve per page.
     #
     # This value is arbitrarily chosen. Lowering it means more Gitaly calls, but
@@ -44,7 +44,7 @@ module Repositories
     #
     # Example:
     #
-    #     CommitsWithTrailerFinder.new(...).each_page('Signed-off-by') do |commits|
+    #     ChangelogCommitsFinder.new(...).each_page('Changelog') do |commits|
     #       commits.each do |commit|
     #         ...
     #       end
@@ -53,12 +53,22 @@ module Repositories
       return to_enum(__method__, trailer) unless block_given?
 
       offset = 0
+      reverted = Set.new
       response = fetch_commits
 
       while response.any?
         commits = []
 
         response.each do |commit|
+          # If the commit is reverted in the same rage (by a newer commit), we
+          # won't include it. This works here because commits are processed in
+          # reverse order (= newer first).
+          next if reverted.include?(commit.id)
+
+          if (sha = revert_commit_sha(commit))
+            reverted << sha
+          end
+
           commits.push(commit) if commit.trailers.key?(trailer)
         end
 
@@ -77,6 +87,14 @@ module Repositories
       @project
         .repository
         .commits(range, limit: @per_page, offset: offset, trailers: true)
+    end
+
+    def revert_commit_sha(commit)
+      matches = commit.description.match(/^This reverts commit (?<sha>\S+)$/i)
+
+      if matches && matches[:sha]
+        matches[:sha]
+      end
     end
   end
 end

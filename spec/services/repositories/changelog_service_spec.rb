@@ -80,6 +80,60 @@ RSpec.describe Repositories::ChangelogService do
       expect(changelog).to include('Title 1', 'Title 2')
     end
 
+    it "ignores a commit when it's both added and reverted in the same range" do
+      create_commit(
+        project,
+        author2,
+        commit_message: "Title 4\n\nThis reverts commit #{sha4}",
+        actions: [{ action: 'create', content: 'bar', file_path: 'd.txt' }]
+      )
+
+      allow(MergeRequestDiffCommit)
+        .to receive(:oldest_merge_request_id_per_commit)
+        .with(project.id, [commit2.id, commit1.id])
+        .and_return([
+          { sha: sha2, merge_request_id: mr1.id },
+          { sha: sha3, merge_request_id: mr2.id }
+        ])
+
+      described_class
+        .new(project, creator, version: '1.0.0', from: sha1)
+        .execute
+
+      changelog = project.repository.blob_at('master', 'CHANGELOG.md')&.data
+
+      expect(changelog).to include('Title 1', 'Title 2')
+      expect(changelog).not_to include('Title 3', 'Title 4')
+    end
+
+    it 'includes a revert commit when it has a trailer' do
+      revert_sha = create_commit(
+        project,
+        author2,
+        commit_message: "Title 4\n\nThis reverts commit #{sha4}\n\nChangelog: added",
+        actions: [{ action: 'create', content: 'bar', file_path: 'd.txt' }]
+      )
+
+      revert_commit = project.commit(revert_sha)
+
+      allow(MergeRequestDiffCommit)
+        .to receive(:oldest_merge_request_id_per_commit)
+        .with(project.id, [revert_commit.id, commit2.id, commit1.id])
+        .and_return([
+          { sha: sha2, merge_request_id: mr1.id },
+          { sha: sha3, merge_request_id: mr2.id }
+        ])
+
+      described_class
+        .new(project, creator, version: '1.0.0', from: sha1)
+        .execute
+
+      changelog = project.repository.blob_at('master', 'CHANGELOG.md')&.data
+
+      expect(changelog).to include('Title 1', 'Title 2', 'Title 4')
+      expect(changelog).not_to include('Title 3')
+    end
+
     it 'uses the target branch when "to" is unspecified' do
       allow(MergeRequestDiffCommit)
         .to receive(:oldest_merge_request_id_per_commit)
