@@ -38,7 +38,7 @@ const initialAssignees = [
   },
 ];
 
-describe('BoardCardAssigneeDropdown', () => {
+describe('SidebarAssigneesWidget', () => {
   let wrapper;
   let fakeApollo;
 
