@@ -1,5 +1,6 @@
 <script>
 import Cookies from 'js-cookie';
+import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { vulnerabilitiesSeverityCountScopes } from '../constants';
 import AutoFixUserCallout from './auto_fix_user_callout.vue';
@@ -58,6 +59,11 @@ export default {
     },
   },
   vulnerabilitiesSeverityCountScopes,
+  i18n: {
+    notConfigured: s__(
+      'SecurityReports|The vulnerability report displays the latest security report. Use it to find and fix vulnerabilities.',
+    ),
+  },
 };
 </script>
 
@@ -92,6 +98,10 @@ export default {
         />
       </security-dashboard-layout>
     </template>
-    <reports-not-configured v-else :help-path="securityDashboardHelpPath" />
+    <reports-not-configured
+      v-else
+      :help-path="securityDashboardHelpPath"
+      :message="$options.i18n.notConfigured"
+    />
   </div>
 </template>

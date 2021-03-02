@@ -126,13 +126,18 @@ export default {
       minInterval: 1,
     },
   },
+  i18n: {
+    notConfigured: s__(
+      'SecurityReports|The security dashboard displays the latest security report. Use it to find and fix vulnerabilities.',
+    ),
+  },
 };
 </script>
 
 <template>
   <security-charts-layout ref="layout">
     <template v-if="shouldShowEmptyState" #empty-state>
-      <dashboard-not-configured :help-path="helpPath" />
+      <dashboard-not-configured :help-path="helpPath" :message="$options.i18n.notConfigured" />
     </template>
     <template v-else-if="shouldShowCharts">
       <gl-line-chart

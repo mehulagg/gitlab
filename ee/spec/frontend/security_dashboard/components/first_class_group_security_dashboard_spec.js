@@ -1,7 +1,7 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
-import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/group_dashboard_not_configured.vue';
+import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/no_group_projects.vue';
 import FirstClassGroupDashboard from 'ee/security_dashboard/components/first_class_group_security_dashboard.vue';
 import FirstClassGroupVulnerabilities from 'ee/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';

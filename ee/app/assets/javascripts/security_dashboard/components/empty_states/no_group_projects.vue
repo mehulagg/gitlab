@@ -6,12 +6,8 @@ export default {
     GlEmptyState,
     GlLink,
   },
-  inject: ['emptyStateSvgPath'],
+  inject: ['dashboardDocumentation', 'emptyStateSvgPath'],
   props: {
-    helpPath: {
-      type: String,
-      required: true,
-    },
     message: {
       type: String,
       required: true,
@@ -22,12 +18,12 @@ export default {
 
 <template>
   <gl-empty-state
-    :title="s__('SecurityReports|Monitor vulnerabilities in your code')"
+    :title="s__('SecurityReports|Add projects to your group')"
     :svg-path="emptyStateSvgPath"
   >
     <template #description>
       {{ message }}
-      <gl-link :href="helpPath">{{ __('More information') }}</gl-link>
+      <gl-link :href="dashboardDocumentation">{{ __('More information') }}</gl-link>
     </template>
   </gl-empty-state>
 </template>

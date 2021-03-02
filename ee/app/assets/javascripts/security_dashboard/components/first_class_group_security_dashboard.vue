@@ -3,10 +3,11 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import GroupSecurityVulnerabilities from 'ee/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import { s__ } from '~/locale';
 import { vulnerabilitiesSeverityCountScopes } from '../constants';
 import vulnerableProjectsQuery from '../graphql/queries/vulnerable_projects.query.graphql';
 import CsvExportButton from './csv_export_button.vue';
-import DashboardNotConfigured from './empty_states/group_dashboard_not_configured.vue';
+import NoGroupProjects from './empty_states/no_group_projects.vue';
 import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 
 export default {
@@ -15,7 +16,7 @@ export default {
     GroupSecurityVulnerabilities,
     Filters,
     CsvExportButton,
-    DashboardNotConfigured,
+    NoGroupProjects,
     GlLoadingIcon,
     VulnerabilitiesCountList,
   },
@@ -54,7 +55,7 @@ export default {
     };
   },
   computed: {
-    isNotYetConfigured() {
+    isNoProjects() {
       return this.projects.length === 0 && this.projectsWereFetched;
     },
   },
@@ -64,13 +65,18 @@ export default {
     },
   },
   vulnerabilitiesSeverityCountScopes,
+  i18n: {
+    noProjectsMessage: s__(
+      'SecurityReports|The vulnerability report displays the latest security findings for projects you wish to monitor. Add projects to your group to view their vulnerabilities here.',
+    ),
+  },
 };
 </script>
 
 <template>
   <div>
     <gl-loading-icon v-if="!projectsWereFetched" size="lg" class="gl-mt-6" />
-    <dashboard-not-configured v-if="isNotYetConfigured" />
+    <no-group-projects v-if="isNoProjects" :message="$options.i18n.noProjectsMessage" />
     <security-dashboard-layout v-else :class="{ 'gl-display-none': !projectsWereFetched }">
       <template #header>
         <div>
