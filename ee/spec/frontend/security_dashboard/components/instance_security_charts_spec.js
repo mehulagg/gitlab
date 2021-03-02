@@ -1,6 +1,6 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
+import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/no_instance_projects.vue';
 import VulnerabilityChart from 'ee/security_dashboard/components/first_class_vulnerability_chart.vue';
 import VulnerabilitySeverities from 'ee/security_dashboard/components/first_class_vulnerability_severities.vue';
 import InstanceSecurityCharts from 'ee/security_dashboard/components/instance_security_charts.vue';
