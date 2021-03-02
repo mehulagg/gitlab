@@ -131,7 +131,7 @@ export default {
         rotationLength,
         participants,
         startsAt: { date: startDate, time: startTime },
-        endsAt: { date: endDate, time: endstTime },
+        endsAt: { date: endDate, time: endTime },
       } = this.form;
 
       return {
@@ -144,7 +144,7 @@ export default {
         },
         endsAt: {
           date: formatDate(endDate, 'yyyy-mm-dd'),
-          time: format24HourTimeStringFromInt(endstTime),
+          time: format24HourTimeStringFromInt(endTime),
         },
         rotationLength: {
           ...rotationLength,
@@ -160,15 +160,15 @@ export default {
       const startsAt = this.form.startsAt.date?.getTime();
       const endsAt = this.form.endsAt.date?.getTime();
 
-      if (startsAt && endsAt) {
-        if (startsAt < endsAt) {
-          return true;
-        } else if (startsAt === endsAt) {
-          return this.form.startsAt.time < this.form.endsAt.time;
-        }
-        return false;
+      if (!startsAt || !endsAt) {
+        // If start or end is not present, we consider the end date valid
+        return true;
+      } else if (startsAt < endsAt) {
+        return true;
+      } else if (startsAt === endsAt) {
+        return this.form.startsAt.time < this.form.endsAt.time;
       }
-      return true;
+      return false;
     },
   },
   methods: {
