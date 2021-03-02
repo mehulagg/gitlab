@@ -59,9 +59,12 @@ In your `.gitlab-ci.yml` file:
        url: https://staging.example.com
    ```
 
-1. Make a commit.
+1. Trigger a deployment. (For example, by creating and pushing a commit.)
 
 When the job runs, the environment and deployment are created.
+
+NOTE:
+Some characters cannot be used in environment names.
 For more information about the `environment` keywords, see
 [the `.gitlab-ci.yml` keyword reference](../yaml/README.md#environment).
 
@@ -93,11 +96,16 @@ In this example:
   can contain slashes (`/`), you can use this pattern to distinguish between dynamic and static environments.
 - For the `url`, you could use `$CI_COMMIT_REF_NAME`, but because this value
   may contain a `/` or other characters that would not be valid in a domain name or URL,
-  use `$CI_ENVIRONMENT_SLUG` instead.
+  use `$CI_ENVIRONMENT_SLUG` instead. The `$CI_ENVIRONMENT_SLUG` variable is guaranteed to be unique.
 
 You do not have to use the same prefix or only slashes (`/`) in the dynamic environment name.
 However, when you use this format, you can use the [grouping similar environments](#grouping-similar-environments)
 feature.
+
+NOTE:
+Some variables cannot be used as environment names or URLs.
+For more information about the `environment` keywords, see
+[the `.gitlab-ci.yml` keyword reference](../yaml/README.md#environment).
 
 ## Configure manual deployments
 
@@ -178,7 +186,7 @@ If you want to use the name or URL in another job, you can use:
 
 - `$CI_ENVIRONMENT_NAME`. The name defined in the `.gitlab-ci.yml` file.
 - `$CI_ENVIRONMENT_SLUG`. A "cleaned-up" version of the name, suitable for use in URLs,
-  DNS, etc.
+  DNS, etc. This variable is guaranteed to be unique.
 - `$CI_ENVIRONMENT_URL`. The environment's URL, which was specified in the
   `.gitlab-ci.yml` file or automatically assigned.
 
@@ -294,6 +302,8 @@ To view a list of environments and deployments:
 1. Go to the project's **Operations > Environments** page.
 1. To view a list of deployments for an environment, select the environment name.
 
+Deployments show up in this list only after a CI/CD job has created it.
+
 ### Environment rollback
 
 When you roll back a deployment on a specific commit,
@@ -343,14 +353,11 @@ from source files to public pages in the environment set for Review Apps.
 
 ### Stopping an environment
 
-Stopping an environment:
+When you stop an environment:
 
-- Moves it from the list of **Available** environments to the list of **Stopped**
+- It moves from the list of **Available** environments to the list of **Stopped**
   environments on the [**Environments** page](#view-environments-and-deployments).
-- Executes an [`on_stop` action](../yaml/README.md#environmenton_stop), if defined.
-
-Stopping an environment is useful when multiple developers are working on a project at the same time.
-each of them pushing to their own branches, causing many dynamic environments to be created.
+- An [`on_stop` action](../yaml/README.md#environmenton_stop), if defined, is executed.
 
 Dynamic environments stop automatically when their associated branch is
 deleted.
