@@ -1,4 +1,4 @@
----
+ ---
 stage: Verify
 group: Continuous Integration
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
@@ -2322,7 +2322,7 @@ started by a user. You might want to use manual jobs for things like deploying t
 
 To make a job manual, add `when: manual` to its configuration.
 
-Manual jobs are automatically marked as skip, and can be started from the pipeline, job, [environment](../environments/index.md#configuring-manual-deployments),
+Manual jobs are automatically marked as manual, and can be started from the pipeline, job, [environment](../environments/index.md#configuring-manual-deployments),
 and deployment views.
 
 Manual jobs can be either optional or blocking:
