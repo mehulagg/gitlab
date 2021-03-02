@@ -3,7 +3,7 @@ import { mapApprovalSettingsResponse } from 'ee/approvals/mappers';
 import * as baseMutationTypes from 'ee/approvals/stores/modules/base/mutation_types';
 import * as actions from 'ee/approvals/stores/modules/license_compliance/actions';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');
@@ -77,7 +77,10 @@ describe('EE approvals license-compliance actions', () => {
 
       await actions.fetchRules({ rootState: state, dispatch: () => {}, commit: () => {} });
 
-      expect(createFlash).toHaveBeenNthCalledWith(1, expect.any(String));
+      expect(createFlash).toHaveBeenNthCalledWith({
+        message: 1,
+        type: expect.any(String),
+      });
     });
   });
 
@@ -114,7 +117,10 @@ describe('EE approvals license-compliance actions', () => {
 
       await actions.postRule({ rootState: state, dispatch: () => {}, commit: () => {} }, []);
 
-      expect(createFlash).toHaveBeenNthCalledWith(1, expect.any(String));
+      expect(createFlash).toHaveBeenNthCalledWith({
+        message: 1,
+        type: expect.any(String),
+      });
     });
   });
 
@@ -155,7 +161,10 @@ describe('EE approvals license-compliance actions', () => {
 
       await actions.putRule({ rootState: state, dispatch: () => {} }, { id });
 
-      expect(createFlash).toHaveBeenNthCalledWith(1, expect.any(String));
+      expect(createFlash).toHaveBeenNthCalledWith({
+        message: 1,
+        type: expect.any(String),
+      });
     });
   });
 
@@ -184,7 +193,10 @@ describe('EE approvals license-compliance actions', () => {
 
       await actions.deleteRule({ rootState: state, dispatch: () => {} }, deleteUrl);
 
-      expect(createFlash).toHaveBeenNthCalledWith(1, expect.any(String));
+      expect(createFlash).toHaveBeenNthCalledWith({
+        message: 1,
+        type: expect.any(String),
+      });
     });
   });
 
@@ -219,7 +231,10 @@ describe('EE approvals license-compliance actions', () => {
 
       await actions.putFallbackRule({ rootState: state, dispatch: () => {} }, {});
 
-      expect(createFlash).toHaveBeenNthCalledWith(1, expect.any(String));
+      expect(createFlash).toHaveBeenNthCalledWith({
+        message: 1,
+        type: expect.any(String),
+      });
     });
   });
 });

@@ -1,7 +1,7 @@
 import Api from 'ee/api';
 import { noneEpic } from 'ee/vue_shared/constants';
 import boardsStore from '~/boards/stores/boards_store';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { formatDate, timeFor } from '~/lib/utils/datetime_utility';
@@ -35,7 +35,9 @@ export const receiveEpicsSuccess = ({ commit }, data) => {
   commit(types.RECEIVE_EPICS_SUCCESS, { epics });
 };
 export const receiveEpicsFailure = ({ commit }) => {
-  flash(s__('Epics|Something went wrong while fetching group epics.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while fetching group epics.'),
+  });
   commit(types.RECEIVE_EPICS_FAILURE);
 };
 export const fetchEpics = ({ state, dispatch }, search = '') => {
@@ -108,7 +110,9 @@ export const receiveIssueUpdateSuccess = ({ state, commit }, { data, epic, isRem
  * @param {string} errorMessage
  */
 export const receiveIssueUpdateFailure = ({ commit }, errorMessage) => {
-  flash(errorMessage);
+  createFlash({
+    message: errorMessage,
+  });
   commit(types.RECEIVE_ISSUE_UPDATE_FAILURE);
 };
 

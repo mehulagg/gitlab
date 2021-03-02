@@ -13,7 +13,7 @@ import $ from 'jquery';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import Autosave from '~/autosave';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import {
   capitalizeFirstCharacter,
   convertToCamelCase,
@@ -242,7 +242,11 @@ export default {
           .catch(() => {
             this.discard(false);
             const msg = this.$options.i18n.GENERIC_UNSUBMITTABLE_NETWORK;
-            Flash(msg, 'alert', this.$el);
+            createFlash({
+              message: msg,
+              type: 'alert',
+              parent: this.$el,
+            });
             this.note = noteData.data.note.note; // Restore textarea content.
             this.removePlaceholderNotes();
           })
@@ -265,7 +269,11 @@ export default {
 
       toggleState()
         .then(refreshUserMergeRequestCounts)
-        .catch(() => Flash(constants.toggleStateErrorMessage[this.noteableType][this.openState]));
+        .catch(() =>
+          createFlash({
+            message: constants.toggleStateErrorMessage[this.noteableType][this.openState],
+          }),
+        );
     },
     discard(shouldClear = true) {
       // `blur` is needed to clear slash commands autocomplete cache if event fired.

@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '../flash';
+import createFlash from '../flash';
 import initIssuableSidebar from '../init_issuable_sidebar';
 import './merge_conflict_store';
 import syntaxHighlight from '../syntax_highlight';
@@ -92,7 +92,9 @@ export default function initMergeConflicts() {
           })
           .catch(() => {
             mergeConflictsStore.setSubmitState(false);
-            createFlash(__('Failed to save merge conflicts resolutions. Please try again!'));
+            createFlash({
+              message: __('Failed to save merge conflicts resolutions. Please try again!'),
+            });
           });
       },
     },

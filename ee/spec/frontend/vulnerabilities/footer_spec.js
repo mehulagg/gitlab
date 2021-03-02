@@ -9,7 +9,7 @@ import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
 import RelatedJiraIssues from 'ee/vulnerabilities/components/related_jira_issues.vue';
 import StatusDescription from 'ee/vulnerabilities/components/status_description.vue';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import initUserPopovers from '~/user_popovers';
 
@@ -146,7 +146,9 @@ describe('Vulnerability Footer', () => {
       createWrapper();
 
       return axios.waitForAll().then(() => {
-        expect(createFlash).toHaveBeenCalledTimes(1);
+        expect(createFlash).toHaveBeenCalledTimes({
+          message: 1,
+        });
       });
     });
 
@@ -240,7 +242,7 @@ describe('Vulnerability Footer', () => {
 
           expect(historyEntries()).toHaveLength(2);
           expect(mockAxios.history.get).toHaveLength(2);
-          expect(createFlash).toHaveBeenCalled();
+          expect(createFlash).toHaveBeenCalled({});
         });
       });
 

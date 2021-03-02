@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import {
   queryToObject,
@@ -116,7 +116,7 @@ describe('dashboard invalid url parameters', () => {
     createMountedWrapper();
 
     return wrapper.vm.$nextTick().then(() => {
-      expect(createFlash).toHaveBeenCalled();
+      expect(createFlash).toHaveBeenCalled({});
 
       expect(findDateTimePicker().props('value')).toEqual(defaultTimeRange);
 

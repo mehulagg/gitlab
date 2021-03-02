@@ -1,4 +1,4 @@
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';
 import * as types from './mutation_types';
@@ -20,7 +20,9 @@ export const receiveEnvironmentsSuccess = ({ commit }, environments) =>
   commit(types.RECEIVE_ENVIRONMENTS_SUCCESS, environments);
 export const receiveEnvironmentsError = ({ commit }) => {
   commit(types.RECEIVE_ENVIRONMENTS_ERROR);
-  createFlash(s__('ThreatMonitoring|Something went wrong, unable to fetch environments'));
+  createFlash({
+    message: s__('ThreatMonitoring|Something went wrong, unable to fetch environments'),
+  });
 };
 
 const getAllEnvironments = (url, page = 1) =>

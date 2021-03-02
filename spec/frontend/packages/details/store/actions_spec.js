@@ -1,6 +1,6 @@
 import testAction from 'helpers/vuex_action_helper';
 import Api from '~/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { FETCH_PACKAGE_VERSIONS_ERROR } from '~/packages/details/constants';
 import { fetchPackageVersions, deletePackage } from '~/packages/details/store/actions';
 import * as types from '~/packages/details/store/mutation_types';
@@ -74,7 +74,9 @@ describe('Actions Package details store', () => {
             packageEntity.project_id,
             packageEntity.id,
           );
-          expect(createFlash).toHaveBeenCalledWith(FETCH_PACKAGE_VERSIONS_ERROR);
+          expect(createFlash).toHaveBeenCalledWith({
+            message: FETCH_PACKAGE_VERSIONS_ERROR,
+          });
           done();
         },
       );
@@ -96,7 +98,9 @@ describe('Actions Package details store', () => {
       Api.deleteProjectPackage = jest.fn().mockRejectedValue();
 
       testAction(deletePackage, undefined, { packageEntity }, [], [], () => {
-        expect(createFlash).toHaveBeenCalledWith(DELETE_PACKAGE_ERROR_MESSAGE);
+        expect(createFlash).toHaveBeenCalledWith({
+          message: DELETE_PACKAGE_ERROR_MESSAGE,
+        });
         done();
       });
     });

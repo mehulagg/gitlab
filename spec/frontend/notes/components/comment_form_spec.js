@@ -5,7 +5,7 @@ import MockAdapter from 'axios-mock-adapter';
 import { nextTick } from 'vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import CommentForm from '~/notes/components/comment_form.vue';
 import * as constants from '~/notes/constants';
@@ -327,9 +327,9 @@ describe('issue_comment_form component', () => {
 
               await wrapper.vm.$nextTick;
 
-              expect(flash).toHaveBeenCalledWith(
-                `Something went wrong while closing the ${type}. Please try again later.`,
-              );
+              expect(createFlash).toHaveBeenCalledWith({
+                message: `Something went wrong while closing the ${type}. Please try again later.`,
+              });
             });
           });
 
@@ -362,9 +362,9 @@ describe('issue_comment_form component', () => {
 
             await wrapper.vm.$nextTick;
 
-            expect(flash).toHaveBeenCalledWith(
-              `Something went wrong while reopening the ${type}. Please try again later.`,
-            );
+            expect(createFlash).toHaveBeenCalledWith({
+              message: `Something went wrong while reopening the ${type}. Please try again later.`,
+            });
           });
         });
 

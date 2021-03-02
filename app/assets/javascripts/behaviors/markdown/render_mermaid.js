@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import { once } from 'lodash';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import { __, sprintf } from '~/locale';
 
 // Renders diagrams and flowcharts from text using Mermaid in any element with the
@@ -60,7 +60,9 @@ function importMermaidModule() {
       return mermaid;
     })
     .catch((err) => {
-      flash(sprintf(__("Can't load mermaid module: %{err}"), { err }));
+      createFlash({
+        message: sprintf(__("Can't load mermaid module: %{err}"), { err }),
+      });
       // eslint-disable-next-line no-console
       console.error(err);
     });
@@ -171,7 +173,9 @@ function renderMermaids($els) {
       });
     })
     .catch((err) => {
-      flash(sprintf(__('Encountered an error while rendering: %{err}'), { err }));
+      createFlash({
+        message: sprintf(__('Encountered an error while rendering: %{err}'), { err }),
+      });
       // eslint-disable-next-line no-console
       console.error(err);
     });

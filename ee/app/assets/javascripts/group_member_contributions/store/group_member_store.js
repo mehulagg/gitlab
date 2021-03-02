@@ -1,4 +1,4 @@
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
@@ -75,7 +75,9 @@ export default class GroupMemberStore {
       })
       .catch((e) => {
         this.state.isLoading = false;
-        Flash(__('Something went wrong while fetching group member contributions'));
+        createFlash({
+          message: __('Something went wrong while fetching group member contributions'),
+        });
         throw e;
       });
   }

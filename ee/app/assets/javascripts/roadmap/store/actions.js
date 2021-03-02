@@ -1,4 +1,4 @@
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import { s__ } from '~/locale';
 
 import { EXTEND_AS } from '../constants';
@@ -119,7 +119,9 @@ export const receiveEpicsSuccess = (
 };
 export const receiveEpicsFailure = ({ commit }) => {
   commit(types.RECEIVE_EPICS_FAILURE);
-  flash(s__('GroupRoadmap|Something went wrong while fetching epics'));
+  createFlash({
+    message: s__('GroupRoadmap|Something went wrong while fetching epics'),
+  });
 };
 
 export const requestChildrenEpics = ({ commit }, { parentItemId }) => {
@@ -335,7 +337,9 @@ export const receiveMilestonesSuccess = (
 
 export const receiveMilestonesFailure = ({ commit }) => {
   commit(types.RECEIVE_MILESTONES_FAILURE);
-  flash(s__('GroupRoadmap|Something went wrong while fetching milestones'));
+  createFlash({
+    message: s__('GroupRoadmap|Something went wrong while fetching milestones'),
+  });
 };
 
 export const refreshMilestoneDates = ({ commit, state }) => {

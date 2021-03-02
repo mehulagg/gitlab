@@ -2,7 +2,7 @@ import AxiosMockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
 import { TEST_HOST } from 'spec/test_constants';
 import Api from '~/api';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 import axios from '~/lib/utils/axios_utils';
 import * as notesConstants from '~/notes/constants';
@@ -871,7 +871,7 @@ describe('Actions Notes Store', () => {
           .then(() => done.fail('Expected error to be thrown!'))
           .catch((err) => {
             expect(err).toBe(error);
-            expect(Flash).not.toHaveBeenCalled();
+            expect(createFlash).not.toHaveBeenCalled();
           })
           .then(done)
           .catch(done.fail);
@@ -893,11 +893,11 @@ describe('Actions Notes Store', () => {
           )
           .then((resp) => {
             expect(resp.hasFlash).toBe(true);
-            expect(Flash).toHaveBeenCalledWith(
-              'Your comment could not be submitted because something went wrong',
-              'alert',
-              flashContainer,
-            );
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'Your comment could not be submitted because something went wrong',
+              type: 'alert',
+              parent: flashContainer,
+            });
           })
           .catch(() => done.fail('Expected success response!'))
           .then(done)
@@ -919,7 +919,7 @@ describe('Actions Notes Store', () => {
           )
           .then((data) => {
             expect(data).toBe(res);
-            expect(Flash).not.toHaveBeenCalled();
+            expect(createFlash).not.toHaveBeenCalled();
           })
           .then(done)
           .catch(done.fail);
@@ -962,7 +962,7 @@ describe('Actions Notes Store', () => {
           ['resolveDiscussion', { discussionId }],
           ['restartPolling'],
         ]);
-        expect(Flash).not.toHaveBeenCalled();
+        expect(createFlash).not.toHaveBeenCalled();
       });
     });
 
@@ -977,7 +977,11 @@ describe('Actions Notes Store', () => {
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],
         ]);
         expect(dispatch.mock.calls).toEqual([['stopPolling'], ['restartPolling']]);
-        expect(Flash).toHaveBeenCalledWith(TEST_ERROR_MESSAGE, 'alert', flashContainer);
+        expect(createFlash).toHaveBeenCalledWith({
+          message: TEST_ERROR_MESSAGE,
+          type: 'alert',
+          parent: flashContainer,
+        });
       });
     });
 
@@ -992,11 +996,11 @@ describe('Actions Notes Store', () => {
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],
         ]);
         expect(dispatch.mock.calls).toEqual([['stopPolling'], ['restartPolling']]);
-        expect(Flash).toHaveBeenCalledWith(
-          'Something went wrong while applying the suggestion. Please try again.',
-          'alert',
-          flashContainer,
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'Something went wrong while applying the suggestion. Please try again.',
+          type: 'alert',
+          parent: flashContainer,
+        });
       });
     });
 
@@ -1004,7 +1008,7 @@ describe('Actions Notes Store', () => {
       dispatch.mockReturnValue(Promise.reject());
 
       testSubmitSuggestion(done, () => {
-        expect(Flash).not.toHaveBeenCalled();
+        expect(createFlash).not.toHaveBeenCalled();
       });
     });
   });
@@ -1048,7 +1052,7 @@ describe('Actions Notes Store', () => {
           ['restartPolling'],
         ]);
 
-        expect(Flash).not.toHaveBeenCalled();
+        expect(createFlash).not.toHaveBeenCalled();
       });
     });
 
@@ -1066,7 +1070,11 @@ describe('Actions Notes Store', () => {
         ]);
 
         expect(dispatch.mock.calls).toEqual([['stopPolling'], ['restartPolling']]);
-        expect(Flash).toHaveBeenCalledWith(TEST_ERROR_MESSAGE, 'alert', flashContainer);
+        expect(createFlash).toHaveBeenCalledWith({
+          message: TEST_ERROR_MESSAGE,
+          type: 'alert',
+          parent: flashContainer,
+        });
       });
     });
 
@@ -1084,11 +1092,12 @@ describe('Actions Notes Store', () => {
         ]);
 
         expect(dispatch.mock.calls).toEqual([['stopPolling'], ['restartPolling']]);
-        expect(Flash).toHaveBeenCalledWith(
-          'Something went wrong while applying the batch of suggestions. Please try again.',
-          'alert',
-          flashContainer,
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message:
+            'Something went wrong while applying the batch of suggestions. Please try again.',
+          type: 'alert',
+          parent: flashContainer,
+        });
       });
     });
 
@@ -1104,7 +1113,7 @@ describe('Actions Notes Store', () => {
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],
         ]);
 
-        expect(Flash).not.toHaveBeenCalled();
+        expect(createFlash).not.toHaveBeenCalled();
       });
     });
   });
@@ -1248,7 +1257,7 @@ describe('Actions Notes Store', () => {
         )
           .then(() => done.fail('Expected error to be thrown'))
           .catch(() => {
-            expect(Flash).toHaveBeenCalled();
+            expect(createFlash).toHaveBeenCalled({});
             done();
           });
       });

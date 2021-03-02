@@ -2,7 +2,7 @@
 import { GlButton } from '@gitlab/ui';
 import $ from 'jquery';
 import { mapActions } from 'vuex';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import eventHub from '../../event_hub';
 
@@ -49,9 +49,10 @@ export default {
           eventHub.$emit('updateIssuableConfidentiality', confidential);
         })
         .catch((err) => {
-          Flash(
-            err || __('Something went wrong trying to change the confidentiality of this issue'),
-          );
+          createFlash({
+            message:
+              err || __('Something went wrong trying to change the confidentiality of this issue'),
+          });
         })
         .finally(() => {
           this.closeForm();

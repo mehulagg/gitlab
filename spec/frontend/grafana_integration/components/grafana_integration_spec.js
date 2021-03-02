@@ -1,7 +1,7 @@
 import { GlButton } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import GrafanaIntegration from '~/grafana_integration/components/grafana_integration.vue';
 import { createStore } from '~/grafana_integration/store';
 import axios from '~/lib/utils/axios_utils';
@@ -114,10 +114,10 @@ describe('grafana integration component', () => {
           .$nextTick()
           .then(jest.runAllTicks)
           .then(() =>
-            expect(createFlash).toHaveBeenCalledWith(
-              `There was an error saving your changes. ${message}`,
-              'alert',
-            ),
+            expect(createFlash).toHaveBeenCalledWith({
+              message: `There was an error saving your changes. ${message}`,
+              type: 'alert',
+            }),
           );
       });
     });

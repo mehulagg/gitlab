@@ -2,7 +2,7 @@ import MockAdapter from 'axios-mock-adapter';
 import { range } from 'lodash';
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { leftSidebarViews, PERMISSION_READ_MR, MAX_MR_FILES_AUTO_OPEN } from '~/ide/constants';
 import service from '~/ide/services';
 import { createStore } from '~/ide/stores';
@@ -144,7 +144,7 @@ describe('IDE store merge request actions', () => {
         store
           .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'bar' })
           .catch(() => {
-            expect(createFlash).toHaveBeenCalled();
+            expect(createFlash).toHaveBeenCalled({});
             expect(createFlash.mock.calls[0][0]).toBe('Error fetching merge requests for bar');
           })
           .then(done)
@@ -562,7 +562,9 @@ describe('IDE store merge request actions', () => {
 
       openMergeRequest(store, mr)
         .catch(() => {
-          expect(createFlash).toHaveBeenCalledWith(expect.any(String));
+          expect(createFlash).toHaveBeenCalledWith({
+            message: expect.any(String),
+          });
         })
         .then(done)
         .catch(done.fail);

@@ -12,7 +12,7 @@
  * 4. Commit widget
  */
 import { GlDropdown, GlLoadingIcon, GlTooltipDirective, GlIcon } from '@gitlab/ui';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 import eventHub from '../../event_hub';
@@ -77,7 +77,9 @@ export default {
           this.$refs.stageGlDropdown.hide();
           this.isLoading = false;
 
-          Flash(__('Something went wrong on our end.'));
+          createFlash({
+            message: __('Something went wrong on our end.'),
+          });
         });
     },
     isDropdownOpen() {

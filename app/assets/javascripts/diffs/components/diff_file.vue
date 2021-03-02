@@ -2,7 +2,7 @@
 import { GlButton, GlLoadingIcon, GlSafeHtmlDirective as SafeHtml, GlSprintf } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { hasDiff } from '~/helpers/diffs_helper';
 import { diffViewerErrors } from '~/ide/constants';
 import { sprintf } from '~/locale';
@@ -253,7 +253,9 @@ export default {
         })
         .catch(() => {
           this.isLoadingCollapsedDiff = false;
-          createFlash(this.$options.i18n.genericError);
+          createFlash({
+            message: this.$options.i18n.genericError,
+          });
         });
     },
     showForkMessage() {

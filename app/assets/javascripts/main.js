@@ -16,7 +16,7 @@ import { initRails } from '~/lib/utils/rails_ujs';
 import * as popovers from '~/popovers';
 import * as tooltips from '~/tooltips';
 import initAlertHandler from './alert_handler';
-import { deprecatedCreateFlash as Flash, removeFlashClickListener } from './flash';
+import createFlash, { removeFlashClickListener } from './flash';
 import initTodoToggle from './header';
 import initLayoutNav from './layout_nav';
 import {
@@ -244,9 +244,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const ref = xhrObj.status;
 
     if (ref === 401) {
-      Flash(__('You need to be logged in.'));
+      createFlash({
+        message: __('You need to be logged in.'),
+      });
     } else if (ref === 404 || ref === 500) {
-      Flash(__('Something went wrong on our end.'));
+      createFlash({
+        message: __('Something went wrong on our end.'),
+      });
     }
   });
 

@@ -2,7 +2,7 @@
 
 import $ from 'jquery';
 import initPopover from '~/blob/suggest_gitlab_ci_yml';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { disableButtonIfEmptyField, setCookie } from '~/lib/utils/common_utils';
 import { initUploadFileTrigger } from '~/projects/upload_file_experiment';
 import Tracking from '~/tracking';
@@ -77,7 +77,11 @@ export default () => {
         });
         initPopovers();
       })
-      .catch((e) => createFlash(e));
+      .catch((e) =>
+        createFlash({
+          message: e,
+        }),
+      );
 
     cancelLink.on('click', () => {
       window.onbeforeunload = null;

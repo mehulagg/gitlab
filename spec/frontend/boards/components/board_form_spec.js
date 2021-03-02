@@ -8,7 +8,7 @@ import { formType } from '~/boards/constants';
 import createBoardMutation from '~/boards/graphql/board_create.mutation.graphql';
 import destroyBoardMutation from '~/boards/graphql/board_destroy.mutation.graphql';
 import updateBoardMutation from '~/boards/graphql/board_update.mutation.graphql';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -196,7 +196,7 @@ describe('BoardForm', () => {
 
         await waitForPromises();
         expect(visitUrl).not.toHaveBeenCalled();
-        expect(createFlash).toHaveBeenCalled();
+        expect(createFlash).toHaveBeenCalled({});
       });
     });
   });
@@ -292,7 +292,7 @@ describe('BoardForm', () => {
 
       await waitForPromises();
       expect(visitUrl).not.toHaveBeenCalled();
-      expect(createFlash).toHaveBeenCalled();
+      expect(createFlash).toHaveBeenCalled({});
     });
   });
 
@@ -337,7 +337,7 @@ describe('BoardForm', () => {
 
       await waitForPromises();
       expect(visitUrl).not.toHaveBeenCalled();
-      expect(createFlash).toHaveBeenCalled();
+      expect(createFlash).toHaveBeenCalled({});
     });
   });
 });

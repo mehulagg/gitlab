@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { deprecatedCreateFlash as flash } from './flash';
+import createFlash from './flash';
 import axios from './lib/utils/axios_utils';
 import { __ } from './locale';
 
@@ -95,7 +95,10 @@ export default class MiniPipelineGraph {
         if ($(button).parent().hasClass('open')) {
           $(button).dropdown('toggle');
         }
-        flash(__('An error occurred while fetching the builds.'), 'alert');
+        createFlash({
+          message: __('An error occurred while fetching the builds.'),
+          type: 'alert',
+        });
       });
   }
 

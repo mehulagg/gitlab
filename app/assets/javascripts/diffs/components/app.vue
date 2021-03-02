@@ -3,7 +3,7 @@ import { GlLoadingIcon, GlPagination, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Mousetrap from 'mousetrap';
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { isSingleViewStyle } from '~/helpers/diffs_helper';
 import { getParameterByName, parseBoolean } from '~/lib/utils/common_utils';
 import { updateHistory } from '~/lib/utils/url_utility';
@@ -364,7 +364,9 @@ export default {
           this.startDiffRendering();
         })
         .catch(() => {
-          createFlash(__('Something went wrong on our end. Please try again!'));
+          createFlash({
+            message: __('Something went wrong on our end. Please try again!'),
+          });
         });
 
       this.fetchDiffFilesBatch()
@@ -378,7 +380,9 @@ export default {
         })
         .then(() => this.startDiffRendering())
         .catch(() => {
-          createFlash(__('Something went wrong on our end. Please try again!'));
+          createFlash({
+            message: __('Something went wrong on our end. Please try again!'),
+          });
         });
 
       if (this.endpointCoverage) {

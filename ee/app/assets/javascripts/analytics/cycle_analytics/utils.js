@@ -1,6 +1,6 @@
 import dateFormat from 'dateformat';
 import { isNumber } from 'lodash';
-import { hideFlash, deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash, { hideFlash } from '~/flash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import {
   newDate,
@@ -327,7 +327,9 @@ const buildDataError = ({ status = httpStatus.INTERNAL_SERVER_ERROR, error }) =>
  */
 export const flashErrorIfStatusNotOk = ({ error, message }) => {
   if (error?.errorCode !== httpStatus.OK) {
-    createFlash(message);
+    createFlash({
+      message,
+    });
   }
 };
 

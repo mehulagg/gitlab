@@ -1,7 +1,7 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import AuditFilterToken from 'ee/audit_events/components/tokens/shared/audit_filter_token.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 
 jest.mock('~/flash');
@@ -139,9 +139,9 @@ describe('AuditFilterToken', () => {
       });
 
       it('shows a flash error message', () => {
-        expect(createFlash).toHaveBeenCalledWith(
-          'Failed to find foo. Please search for another foo.',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'Failed to find foo. Please search for another foo.',
+        });
       });
     });
 
@@ -152,9 +152,9 @@ describe('AuditFilterToken', () => {
       });
 
       it('shows a flash error message', () => {
-        expect(createFlash).toHaveBeenCalledWith(
-          'Failed to find foo bar. Please search for another foo bar.',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'Failed to find foo bar. Please search for another foo bar.',
+        });
       });
     });
   });
@@ -193,9 +193,9 @@ describe('AuditFilterToken', () => {
       });
 
       it('shows a flash error message', () => {
-        expect(createFlash).toHaveBeenCalledWith(
-          'Failed to find foo. Please search for another foo.',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'Failed to find foo. Please search for another foo.',
+        });
       });
     });
   });

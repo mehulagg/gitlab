@@ -9,7 +9,7 @@ import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
 import GetSnippetQuery from 'shared_queries/snippet/snippet.query.graphql';
 import CaptchaModal from '~/captcha/captcha_modal.vue';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import * as urlUtils from '~/lib/utils/url_utility';
 import SnippetEditApp from '~/snippets/components/edit.vue';
 import SnippetBlobActionsEdit from '~/snippets/components/snippet_blob_actions_edit.vue';
@@ -334,7 +334,9 @@ describe('Snippet Edit app', () => {
           });
 
           expect(urlUtils.redirectTo).not.toHaveBeenCalled();
-          expect(Flash).toHaveBeenCalledWith(expectMessage);
+          expect(createFlash).toHaveBeenCalledWith({
+            message: expectMessage,
+          });
         },
       );
 
@@ -352,9 +354,9 @@ describe('Snippet Edit app', () => {
 
         it('should flash', () => {
           // Apollo automatically wraps the resolver's error in a NetworkError
-          expect(Flash).toHaveBeenCalledWith(
-            `Can't update snippet: Network error: ${TEST_API_ERROR.message}`,
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: `Can't update snippet: Network error: ${TEST_API_ERROR.message}`,
+          });
         });
 
         it('should console error', () => {

@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import groupsSelect from '~/groups_select';
 import initInviteGroupTrigger from '~/invite_members/init_invite_group_trigger';
 import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
@@ -93,6 +93,8 @@ if (window.gon.features.vueProjectMembersList) {
       },
     )
     .catch(() => {
-      flash(__('An error occurred while loading the members, please try again.'));
+      createFlash({
+        message: __('An error occurred while loading the members, please try again.'),
+      });
     });
 }

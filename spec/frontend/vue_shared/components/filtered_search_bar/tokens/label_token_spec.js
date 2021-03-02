@@ -11,7 +11,7 @@ import {
   mockRegularLabel,
   mockLabels,
 } from 'jest/vue_shared/components/sidebar/labels_select_vue/mock_data';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 import {
@@ -143,7 +143,9 @@ describe('LabelToken', () => {
         wrapper.vm.fetchLabelBySearchTerm('foo');
 
         return waitForPromises().then(() => {
-          expect(createFlash).toHaveBeenCalledWith('There was a problem fetching labels.');
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was a problem fetching labels.',
+          });
         });
       });
 

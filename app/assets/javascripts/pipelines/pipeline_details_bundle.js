@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import Translate from '~/vue_shared/translate';
 import PipelineGraphLegacy from './components/graph/graph_component_legacy.vue';
@@ -95,7 +95,9 @@ export default async function initPipelineDetailsBundle() {
 
       createPipelinesDetailApp(SELECTORS.PIPELINE_GRAPH, dataset);
     } catch {
-      Flash(__('An error occurred while loading the pipeline.'));
+      createFlash({
+        message: __('An error occurred while loading the pipeline.'),
+      });
     }
   } else {
     const { default: PipelinesMediator } = await import(
@@ -113,6 +115,8 @@ export default async function initPipelineDetailsBundle() {
     );
     createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
   } catch {
-    Flash(__('An error occurred while loading a section of this page.'));
+    createFlash({
+      message: __('An error occurred while loading a section of this page.'),
+    });
   }
 }

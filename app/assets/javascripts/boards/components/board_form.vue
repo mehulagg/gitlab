@@ -1,6 +1,6 @@
 <script>
 import { GlModal } from '@gitlab/ui';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
@@ -250,7 +250,9 @@ export default {
           });
           visitUrl(this.rootPath);
         } catch {
-          Flash(this.$options.i18n.deleteErrorMessage);
+          createFlash({
+            message: this.$options.i18n.deleteErrorMessage,
+          });
         } finally {
           this.isLoading = false;
         }
@@ -259,7 +261,9 @@ export default {
           const url = await this.createOrUpdateBoard();
           visitUrl(url);
         } catch {
-          Flash(this.$options.i18n.saveErrorMessage);
+          createFlash({
+            message: this.$options.i18n.saveErrorMessage,
+          });
         } finally {
           this.isLoading = false;
         }

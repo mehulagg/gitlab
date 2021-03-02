@@ -4,7 +4,7 @@ import { shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import CreateMergeRequestButton from 'ee/security_configuration/components/create_merge_request_button.vue';
 import waitForPromises from 'helpers/wait_for_promises';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { redirectTo } from '~/lib/utils/url_utility';
 
@@ -103,7 +103,9 @@ describe('CreateMergeRequestButton component', () => {
           });
 
           it('creates a flash message', () => {
-            expect(createFlash).toHaveBeenCalledWith(expect.any(String));
+            expect(createFlash).toHaveBeenCalledWith({
+              message: expect.any(String),
+            });
           });
 
           it('sends the error to Sentry', () => {

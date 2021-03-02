@@ -5,7 +5,7 @@ import CsvExportButton, {
   STORAGE_KEY,
 } from 'ee/security_dashboard/components/csv_export_button.vue';
 import { TEST_HOST } from 'helpers/test_constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import downloader from '~/lib/utils/downloader';
@@ -89,7 +89,9 @@ describe('Csv Button Export', () => {
       await axios.waitForAll();
 
       expect(downloader).not.toHaveBeenCalled();
-      expect(createFlash).toHaveBeenCalledWith('There was an error while generating the report.');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error while generating the report.',
+      });
     });
 
     it('shows the flash error when backend fails to generate the export', async () => {
@@ -98,7 +100,9 @@ describe('Csv Button Export', () => {
       findCsvExportButton().vm.$emit('click');
       await axios.waitForAll();
 
-      expect(createFlash).toHaveBeenCalledWith('There was an error while generating the report.');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error while generating the report.',
+      });
     });
 
     it('displays the export icon when not loading and the loading icon when loading', async () => {

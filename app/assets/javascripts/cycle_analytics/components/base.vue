@@ -1,7 +1,7 @@
 <script>
 import { GlIcon, GlEmptyState, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import Cookies from 'js-cookie';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import banner from './banner.vue';
 import stageCodeComponent from './stage_code_component.vue';
@@ -70,7 +70,9 @@ export default {
   methods: {
     handleError() {
       this.store.setErrorState(true);
-      return new Flash(__('There was an error while fetching value stream analytics data.'));
+      return createFlash({
+        message: __('There was an error while fetching value stream analytics data.'),
+      });
     },
     handleDateSelect(startDate) {
       this.startDate = startDate;

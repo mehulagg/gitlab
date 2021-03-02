@@ -30,7 +30,7 @@ import store from '~/boards/stores';
 import boardsStore from '~/boards/stores/boards_store';
 import ModalStore from '~/boards/stores/modal_store';
 import toggleFocusMode from '~/boards/toggle_focus';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import createDefaultClient from '~/lib/graphql';
 import {
   NavigationType,
@@ -184,7 +184,9 @@ export default () => {
             this.loading = false;
           })
           .catch(() => {
-            Flash(__('An error occurred while fetching the board lists. Please try again.'));
+            createFlash({
+              message: __('An error occurred while fetching the board lists. Please try again.'),
+            });
           });
       },
       updateTokens() {
@@ -228,7 +230,9 @@ export default () => {
             .catch(() => {
               newIssue.setFetchingState('subscriptions', false);
               setWeightFetchingState(newIssue, false);
-              Flash(__('An error occurred while fetching sidebar data'));
+              createFlash({
+                message: __('An error occurred while fetching sidebar data'),
+              });
             });
         }
 
@@ -265,7 +269,9 @@ export default () => {
             })
             .catch(() => {
               issue.setFetchingState('subscriptions', false);
-              Flash(__('An error occurred when toggling the notification subscription'));
+              createFlash({
+                message: __('An error occurred when toggling the notification subscription'),
+              });
             });
         }
       },

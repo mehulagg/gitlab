@@ -8,7 +8,7 @@ import {
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
 
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 
 import { DEFAULT_LABEL_ANY, DEBOUNCE_DELAY } from '../constants';
@@ -69,7 +69,11 @@ export default {
           // return response differently.
           this.authors = Array.isArray(res) ? res : res.data;
         })
-        .catch(() => createFlash(__('There was a problem fetching users.')))
+        .catch(() =>
+          createFlash({
+            message: __('There was a problem fetching users.'),
+          }),
+        )
         .finally(() => {
           this.loading = false;
         });

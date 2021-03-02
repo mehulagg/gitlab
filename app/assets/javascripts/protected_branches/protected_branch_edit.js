@@ -2,7 +2,7 @@ import { find } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 import AccessDropdown from '~/projects/settings/access_dropdown';
-import { deprecatedCreateFlash as flash } from '../flash';
+import createFlash from '../flash';
 import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 
 export default class ProtectedBranchEdit {
@@ -53,7 +53,9 @@ export default class ProtectedBranchEdit {
         this.$codeOwnerToggle.prop('disabled', false);
       })
       .catch(() => {
-        flash(__('Failed to update branch!'));
+        createFlash({
+          message: __('Failed to update branch!'),
+        });
       });
   }
 
@@ -120,7 +122,9 @@ export default class ProtectedBranchEdit {
       .catch(() => {
         this.$allowedToMergeDropdown.enable();
         this.$allowedToPushDropdown.enable();
-        flash(__('Failed to update branch!'));
+        createFlash({
+          message: __('Failed to update branch!'),
+        });
       });
   }
 

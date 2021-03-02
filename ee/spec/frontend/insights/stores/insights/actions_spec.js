@@ -5,7 +5,7 @@ import * as actions from 'ee/insights/stores/modules/insights/actions';
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
 
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 const ERROR_MESSAGE = 'TEST_ERROR_MESSAGE';
@@ -62,9 +62,9 @@ describe('Insights store actions', () => {
         [{ type: 'RECEIVE_CONFIG_ERROR' }],
         [],
         () => {
-          expect(createFlash).toHaveBeenCalledWith(
-            `There was an error fetching configuration for charts: ${ERROR_MESSAGE}`,
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: `There was an error fetching configuration for charts: ${ERROR_MESSAGE}`,
+          });
         },
       );
     });
@@ -77,9 +77,9 @@ describe('Insights store actions', () => {
         expect.any(Array),
         expect.any(Array),
         () => {
-          expect(createFlash).toHaveBeenCalledWith(
-            `There was an error fetching configuration for charts: Unknown Error`,
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: `There was an error fetching configuration for charts: Unknown Error`,
+          });
         },
       );
     });

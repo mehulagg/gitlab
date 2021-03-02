@@ -9,7 +9,7 @@ import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
 
 import { formType } from '~/boards/constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -175,7 +175,7 @@ describe('BoardForm', () => {
 
         await waitForPromises();
         expect(visitUrl).not.toHaveBeenCalled();
-        expect(createFlash).toHaveBeenCalled();
+        expect(createFlash).toHaveBeenCalled({});
       });
     });
   });

@@ -1,4 +1,4 @@
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import initProjectVisibilitySelector from '../../../project_visibility';
 import initProjectNew from '../../../projects/project_new';
@@ -24,5 +24,7 @@ import(
     m.default(el, config);
   })
   .catch(() => {
-    createFlash(__('An error occurred while loading project creation UI'));
+    createFlash({
+      message: __('An error occurred while loading project creation UI'),
+    });
   });

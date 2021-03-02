@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import createStore from '~/notes/stores';
 import EditFormButtons from '~/sidebar/components/confidential/edit_form_buttons.vue';
 import eventHub from '~/sidebar/event_hub';
@@ -138,9 +138,9 @@ describe('Edit Form Buttons', () => {
     });
 
     it('calls flash with the correct message', () => {
-      expect(flash).toHaveBeenCalledWith(
-        'Something went wrong trying to change the confidentiality of this issue',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Something went wrong trying to change the confidentiality of this issue',
+      });
     });
   });
 });

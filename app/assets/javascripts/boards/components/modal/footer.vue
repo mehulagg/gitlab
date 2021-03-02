@@ -1,7 +1,7 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 import footerEEMixin from 'ee_else_ce/boards/mixins/modal_footer';
-import { deprecatedCreateFlash as Flash } from '../../../flash';
+import createFlash from '../../../flash';
 import { __, n__ } from '../../../locale';
 import modalMixin from '../../mixins/modal_mixins';
 import boardsStore from '../../stores/boards_store';
@@ -45,7 +45,9 @@ export default {
 
       // Post the data to the backend
       boardsStore.bulkUpdate(issueIds, req).catch(() => {
-        Flash(__('Failed to update issues, please try again.'));
+        createFlash({
+          message: __('Failed to update issues, please try again.'),
+        });
 
         selectedIssues.forEach((issue) => {
           list.removeIssue(issue);

@@ -1,4 +1,4 @@
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import { differenceInMilliseconds } from '~/lib/utils/datetime_utility';
 import { s__, sprintf } from '~/locale';
 
@@ -81,7 +81,9 @@ class SafeMathRenderer {
 
     if (this.totalMS >= MAX_RENDER_TIME_MS || text.length > MAX_MATH_CHARS) {
       if (!this.flashShown) {
-        flash(RENDER_FLASH_MSG);
+        createFlash({
+          message: RENDER_FLASH_MSG,
+        });
         this.flashShown = true;
       }
 

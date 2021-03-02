@@ -2,7 +2,7 @@ import { shallowMount, mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import VueDraggable from 'vuedraggable';
 import { TEST_HOST } from 'helpers/test_constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { ESC_KEY } from '~/lib/utils/keys';
 import { objectToQuery } from '~/lib/utils/url_utility';
@@ -204,7 +204,7 @@ describe('Dashboard', () => {
       );
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(createFlash).toHaveBeenCalled();
+        expect(createFlash).toHaveBeenCalled({});
       });
     });
 
@@ -294,7 +294,7 @@ describe('Dashboard', () => {
       setupStoreWithData(store);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(createFlash).toHaveBeenCalled();
+        expect(createFlash).toHaveBeenCalled({});
         expect(store.dispatch).not.toHaveBeenCalledWith(
           'monitoringDashboard/setExpandedPanel',
           expect.anything(),

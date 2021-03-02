@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash';
 import { getJSONFixture } from 'helpers/fixtures';
 import testAction from 'helpers/vuex_action_helper';
 import api from '~/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import httpStatus from '~/lib/utils/http_status';
 import { redirectTo } from '~/lib/utils/url_utility';
@@ -161,10 +161,12 @@ describe('Release detail actions', () => {
 
         it(`shows a flash message`, () => {
           return actions.fetchRelease({ commit: jest.fn(), state, rootState: state }).then(() => {
-            expect(createFlash).toHaveBeenCalledTimes(1);
-            expect(createFlash).toHaveBeenCalledWith(
-              'Something went wrong while getting the release details',
-            );
+            expect(createFlash).toHaveBeenCalledTimes({
+              message: 1,
+            });
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'Something went wrong while getting the release details',
+            });
           });
         });
       });
@@ -356,10 +358,12 @@ describe('Release detail actions', () => {
           return actions
             .createRelease({ commit: jest.fn(), dispatch: jest.fn(), state, getters: {} })
             .then(() => {
-              expect(createFlash).toHaveBeenCalledTimes(1);
-              expect(createFlash).toHaveBeenCalledWith(
-                'Something went wrong while creating a new release',
-              );
+              expect(createFlash).toHaveBeenCalledTimes({
+                message: 1,
+              });
+              expect(createFlash).toHaveBeenCalledWith({
+                message: 'Something went wrong while creating a new release',
+              });
             });
         });
       });
@@ -470,10 +474,12 @@ describe('Release detail actions', () => {
 
         it('shows a flash message', () => {
           return actions.updateRelease({ commit, dispatch, state, getters }).then(() => {
-            expect(createFlash).toHaveBeenCalledTimes(1);
-            expect(createFlash).toHaveBeenCalledWith(
-              'Something went wrong while saving the release details',
-            );
+            expect(createFlash).toHaveBeenCalledTimes({
+              message: 1,
+            });
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'Something went wrong while saving the release details',
+            });
           });
         });
       });

@@ -1,6 +1,6 @@
 <script>
 import { debounce } from 'lodash';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 
@@ -76,7 +76,9 @@ export default {
           },
         )
         .catch(() => {
-          flash(__('An error occurred while loading the file'));
+          createFlash({
+            message: __('An error occurred while loading the file'),
+          });
         });
     },
     saveDiffResolution() {

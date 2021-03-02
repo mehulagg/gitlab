@@ -14,7 +14,7 @@ import { FEEDBACK_TYPES, VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/
 import createMockApollo from 'helpers/mock_apollo_helper';
 import UsersMockHelper from 'helpers/user_mock_data_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import download from '~/lib/utils/downloader';
@@ -175,7 +175,9 @@ describe('Vulnerability Header', () => {
         dropdown.vm.$emit('change', { action });
 
         await waitForPromises();
-        expect(createFlash).toHaveBeenCalledTimes(1);
+        expect(createFlash).toHaveBeenCalledTimes({
+          message: 1,
+        });
       });
     });
   });
@@ -260,9 +262,9 @@ describe('Vulnerability Header', () => {
         findGlButton().vm.$emit('click');
         return waitForPromises().then(() => {
           expect(mockAxios.history.post).toHaveLength(1);
-          expect(createFlash).toHaveBeenCalledWith(
-            'There was an error creating the merge request. Please try again.',
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error creating the merge request. Please try again.',
+          });
         });
       });
     });
@@ -402,7 +404,9 @@ describe('Vulnerability Header', () => {
       mockAxios.onGet().replyOnce(500);
 
       return waitForPromises().then(() => {
-        expect(createFlash).toHaveBeenCalledTimes(1);
+        expect(createFlash).toHaveBeenCalledTimes({
+          message: 1,
+        });
         expect(mockAxios.history.get).toHaveLength(1);
       });
     });
@@ -474,7 +478,9 @@ describe('Vulnerability Header', () => {
         wrapper.vm.refreshVulnerability();
         await waitForPromises();
         expect(findBadge().text()).toBe('detected');
-        expect(createFlash).toHaveBeenCalledTimes(1);
+        expect(createFlash).toHaveBeenCalledTimes({
+          message: 1,
+        });
       });
     });
   });

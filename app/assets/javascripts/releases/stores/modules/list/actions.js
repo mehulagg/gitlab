@@ -1,5 +1,5 @@
 import api from '~/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import {
   normalizeHeaders,
   parseIntPagination,
@@ -103,7 +103,9 @@ export const fetchReleasesRest = ({ dispatch, commit, state }, { page }) => {
 
 export const receiveReleasesError = ({ commit }) => {
   commit(types.RECEIVE_RELEASES_ERROR);
-  createFlash(__('An error occurred while fetching the releases. Please try again.'));
+  createFlash({
+    message: __('An error occurred while fetching the releases. Please try again.'),
+  });
 };
 
 export const setSorting = ({ commit }, data) => commit(types.SET_SORTING, data);

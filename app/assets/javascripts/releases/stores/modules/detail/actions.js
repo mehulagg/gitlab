@@ -1,5 +1,5 @@
 import api from '~/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import oneReleaseQuery from '~/releases/queries/one_release.query.graphql';
@@ -43,7 +43,9 @@ export const fetchRelease = ({ commit, state, rootState }) => {
       })
       .catch((error) => {
         commit(types.RECEIVE_RELEASE_ERROR, error);
-        createFlash(s__('Release|Something went wrong while getting the release details'));
+        createFlash({
+          message: s__('Release|Something went wrong while getting the release details'),
+        });
       });
   }
 
@@ -54,7 +56,9 @@ export const fetchRelease = ({ commit, state, rootState }) => {
     })
     .catch((error) => {
       commit(types.RECEIVE_RELEASE_ERROR, error);
-      createFlash(s__('Release|Something went wrong while getting the release details'));
+      createFlash({
+        message: s__('Release|Something went wrong while getting the release details'),
+      });
     });
 };
 
@@ -123,7 +127,9 @@ export const createRelease = ({ commit, dispatch, state, getters }) => {
     })
     .catch((error) => {
       commit(types.RECEIVE_SAVE_RELEASE_ERROR, error);
-      createFlash(s__('Release|Something went wrong while creating a new release'));
+      createFlash({
+        message: s__('Release|Something went wrong while creating a new release'),
+      });
     });
 };
 
@@ -181,7 +187,9 @@ export const updateRelease = ({ commit, dispatch, state, getters }) => {
       })
       .catch((error) => {
         commit(types.RECEIVE_SAVE_RELEASE_ERROR, error);
-        createFlash(s__('Release|Something went wrong while saving the release details'));
+        createFlash({
+          message: s__('Release|Something went wrong while saving the release details'),
+        });
       })
   );
 };
