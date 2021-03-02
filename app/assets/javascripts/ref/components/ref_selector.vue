@@ -44,7 +44,7 @@ export default {
         isArray(val) &&
         // with at least one item
         val.length > 0 &&
-        // and only "branches", "tags", and "commits" are allowed
+        // and only "REF_TYPE_BRANCHES", "REF_TYPE_TAGS", and "REF_TYPE_COMMITS" are allowed
         val.every((item) => ALL_REF_TYPES.includes(item)) &&
         // and no duplicates are allowed
         val.length === new Set(val).size,
