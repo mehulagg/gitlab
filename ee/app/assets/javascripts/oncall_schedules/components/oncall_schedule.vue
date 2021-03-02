@@ -256,6 +256,7 @@ export default {
             :timeframe="timeframe"
             :schedule-iid="schedule.iid"
             :loading="loading"
+            :selected-timezone="selectedTimezone"
           />
         </div>
       </gl-card>
