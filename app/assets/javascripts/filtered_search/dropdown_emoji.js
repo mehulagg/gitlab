@@ -14,11 +14,9 @@ export default class DropdownEmoji extends FilteredSearchDropdown {
         method: 'setData',
         loadingTemplate: this.loadingTemplate,
         onError() {
-          /* eslint-disable no-new */
           createFlash({
             message: __('An error occurred fetching the dropdown data.'),
           });
-          /* eslint-enable no-new */
         },
       },
       Filter: {

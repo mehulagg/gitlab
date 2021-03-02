@@ -353,7 +353,7 @@ export default {
           this.isMakingRequest = false;
           createFlash({
             message: __('Something went wrong. Please try again.'),
-          }); // eslint-disable-line
+          });
         });
     },
     handleMergeImmediatelyButtonClick() {
@@ -406,7 +406,7 @@ export default {
         .catch(() => {
           createFlash({
             message: __('Something went wrong while merging this merge request. Please try again.'),
-          }); // eslint-disable-line
+          });
           stopPolling();
         });
     },
@@ -438,7 +438,7 @@ export default {
         .catch(() => {
           createFlash({
             message: __('Something went wrong while deleting the source branch. Please try again.'),
-          }); // eslint-disable-line
+          });
         });
     },
   },

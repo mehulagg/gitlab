@@ -77,7 +77,7 @@ describe('EE approvals license-compliance actions', () => {
 
       await actions.fetchRules({ rootState: state, dispatch: () => {}, commit: () => {} });
 
-      expect(createFlash).toHaveBeenNthCalledWith(1, expect.any(String));
+      expect(createFlash).toHaveBeenNthCalledWith(1, { message: expect.any(String) });
     });
   });
 
@@ -114,7 +114,7 @@ describe('EE approvals license-compliance actions', () => {
 
       await actions.postRule({ rootState: state, dispatch: () => {}, commit: () => {} }, []);
 
-      expect(createFlash).toHaveBeenNthCalledWith(1, expect.any(String));
+      expect(createFlash).toHaveBeenNthCalledWith(1, { message: expect.any(String) });
     });
   });
 
@@ -155,7 +155,7 @@ describe('EE approvals license-compliance actions', () => {
 
       await actions.putRule({ rootState: state, dispatch: () => {} }, { id });
 
-      expect(createFlash).toHaveBeenNthCalledWith(1, expect.any(String));
+      expect(createFlash).toHaveBeenNthCalledWith(1, { message: expect.any(String) });
     });
   });
 
@@ -184,7 +184,7 @@ describe('EE approvals license-compliance actions', () => {
 
       await actions.deleteRule({ rootState: state, dispatch: () => {} }, deleteUrl);
 
-      expect(createFlash).toHaveBeenNthCalledWith(1, expect.any(String));
+      expect(createFlash).toHaveBeenNthCalledWith(1, { message: expect.any(String) });
     });
   });
 
@@ -219,7 +219,7 @@ describe('EE approvals license-compliance actions', () => {
 
       await actions.putFallbackRule({ rootState: state, dispatch: () => {} }, {});
 
-      expect(createFlash).toHaveBeenNthCalledWith(1, expect.any(String));
+      expect(createFlash).toHaveBeenNthCalledWith(1, { message: expect.any(String) });
     });
   });
 });

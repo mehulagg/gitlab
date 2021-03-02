@@ -195,7 +195,9 @@ describe('EE approvals project settings module actions', () => {
 
       actions.deleteRuleError();
 
-      expect(createFlash.mock.calls[0]).toEqual([expect.stringMatching('error occurred')]);
+      expect(createFlash.mock.calls[0]).toEqual([
+        { message: expect.stringMatching('error occurred') },
+      ]);
     });
   });
 

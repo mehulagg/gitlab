@@ -145,7 +145,9 @@ describe('IDE store merge request actions', () => {
           .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'bar' })
           .catch(() => {
             expect(createFlash).toHaveBeenCalled();
-            expect(createFlash.mock.calls[0][0]).toBe('Error fetching merge requests for bar');
+            expect(createFlash.mock.calls[0][0]).toMatchObject({
+              message: 'Error fetching merge requests for bar',
+            });
           })
           .then(done)
           .catch(done.fail);

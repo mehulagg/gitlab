@@ -4,7 +4,7 @@ import * as actions from 'ee/analytics/cycle_analytics/store/actions';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import {
   currentGroup,
@@ -52,11 +52,6 @@ jest.mock('~/flash');
 describe('Value Stream Analytics actions', () => {
   let state;
   let mock;
-
-  const shouldFlashAMessage = (msg, type = null) => {
-    const args = type ? [msg, type] : [msg];
-    expect(createFlash).toHaveBeenCalledWith(...args);
-  };
 
   beforeEach(() => {
     state = {
@@ -228,7 +223,9 @@ describe('Value Stream Analytics actions', () => {
 
     it('will flash an error message', () => {
       actions.receiveStageDataError({ commit: () => {} }, {});
-      shouldFlashAMessage('There was an error fetching data for the selected stage');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error fetching data for the selected stage',
+      });
     });
   });
 
@@ -295,7 +292,9 @@ describe('Value Stream Analytics actions', () => {
           commit: () => {},
         })
         .then(() => {
-          shouldFlashAMessage('There was an error fetching median data for stages');
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error fetching median data for stages',
+          });
         });
     });
 
@@ -319,7 +318,9 @@ describe('Value Stream Analytics actions', () => {
           commit: () => {},
         })
         .then(() => {
-          shouldFlashAMessage('There was an error fetching value stream analytics stages.');
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error fetching value stream analytics stages.',
+          });
         });
     });
   });
@@ -368,7 +369,7 @@ describe('Value Stream Analytics actions', () => {
         { response },
       );
 
-      shouldFlashAMessage(flashErrorMessage);
+      expect(createFlash).toHaveBeenCalledWith({ message: flashErrorMessage });
     });
   });
 
@@ -411,7 +412,7 @@ describe('Value Stream Analytics actions', () => {
       ${null}
     `('with $data will flash an error', ({ data }) => {
       actions.setDefaultSelectedStage({ getters: { activeStages: data }, dispatch: () => {} }, {});
-      shouldFlashAMessage(flashErrorMessage);
+      expect(createFlash).toHaveBeenCalledWith({ message: flashErrorMessage });
     });
 
     it('will select the first active stage', () => {
@@ -506,7 +507,9 @@ describe('Value Stream Analytics actions', () => {
             },
           )
           .then(() => {
-            shouldFlashAMessage(`'${stageId}' stage already exists`);
+            expect(createFlash).toHaveBeenCalledWith({
+              message: `'${stageId}' stage already exists`,
+            });
           });
       });
 
@@ -521,7 +524,9 @@ describe('Value Stream Analytics actions', () => {
             { status: httpStatusCodes.BAD_REQUEST },
           )
           .then(() => {
-            shouldFlashAMessage('There was a problem saving your custom stage, please try again');
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'There was a problem saving your custom stage, please try again',
+            });
           });
       });
     });
@@ -553,7 +558,10 @@ describe('Value Stream Analytics actions', () => {
             response,
           )
           .then(() => {
-            shouldFlashAMessage('Stage data updated', 'notice');
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'Stage data updated',
+              type: 'notice',
+            });
           });
       });
 
@@ -568,7 +576,9 @@ describe('Value Stream Analytics actions', () => {
               response,
             )
             .then(() => {
-              shouldFlashAMessage('There was a problem refreshing the data, please try again');
+              expect(createFlash).toHaveBeenCalledWith({
+                message: 'There was a problem refreshing the data, please try again',
+              });
             }));
       });
     });
@@ -620,7 +630,9 @@ describe('Value Stream Analytics actions', () => {
 
       it('flashes an error message', () => {
         actions.receiveRemoveStageError({ commit: () => {}, state }, {});
-        shouldFlashAMessage('There was an error removing your custom stage, please try again');
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'There was an error removing your custom stage, please try again',
+        });
       });
     });
   });
@@ -653,7 +665,9 @@ describe('Value Stream Analytics actions', () => {
           },
           {},
         )
-        .then(() => shouldFlashAMessage('Stage removed', 'notice'));
+        .then(() =>
+          expect(createFlash).toHaveBeenCalledWith({ message: 'Stage removed', type: 'notice' }),
+        );
     });
   });
 
@@ -753,7 +767,9 @@ describe('Value Stream Analytics actions', () => {
 
     it('will flash an error message', () => {
       actions.receiveStageMedianValuesError({ commit: () => {} });
-      shouldFlashAMessage('There was an error fetching median data for stages');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error fetching median data for stages',
+      });
     });
   });
 
@@ -891,9 +907,9 @@ describe('Value Stream Analytics actions', () => {
         ],
         [],
       ).then(() => {
-        shouldFlashAMessage(
-          'There was an error updating the stage order. Please try reloading the page.',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'There was an error updating the stage order. Please try reloading the page.',
+        });
       });
     });
   });

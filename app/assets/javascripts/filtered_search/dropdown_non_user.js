@@ -17,11 +17,9 @@ export default class DropdownNonUser extends FilteredSearchDropdown {
         loadingTemplate: this.loadingTemplate,
         preprocessing,
         onError() {
-          /* eslint-disable no-new */
           createFlash({
             message: __('An error occurred fetching the dropdown data.'),
           });
-          /* eslint-enable no-new */
         },
       },
       Filter: {
