@@ -193,6 +193,7 @@
   - "config.ru"
   - "{,ee/}{app,bin,config,db,haml_lint,lib,locale,public,scripts,symbol,vendor}/**/*"
   - "doc/api/graphql/reference/*"  # Files in this folder are auto-generated
+  - "data/whats_new/*.yml"
 
 .qa-patterns: &qa-patterns
   - ".dockerignore"
@@ -222,7 +223,6 @@
   - "{,ee/}rubocop/**/*"
   - "{,ee/}spec/**/*"
   - "{,spec/}tooling/**/*"
-  - "data/whats_new/*.yml"
 
 .code-qa-patterns: &code-qa-patterns
   - "{package.json,yarn.lock}"
