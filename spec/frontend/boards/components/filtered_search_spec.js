@@ -22,6 +22,7 @@ describe('FilteredSearch', () => {
   };
 
   beforeEach(() => {
+    // this needed for actions call for performSearch
     window.gon = { features: {} };
   });
 
@@ -31,18 +32,11 @@ describe('FilteredSearch', () => {
 
   describe('default', () => {
     beforeEach(() => {
-      setFixtures(`<div class="filtered-search-wrapper"></div>`);
       store = createStore();
 
       jest.spyOn(store, 'dispatch');
 
       createComponent();
-    });
-
-    it('adds gl-display-none! to search-filtered-wrapper', () => {
-      expect(document.querySelector('.filtered-search-wrapper').classList).toContain(
-        'gl-display-none!',
-      );
     });
 
     it('finds FilteredSearch', () => {
