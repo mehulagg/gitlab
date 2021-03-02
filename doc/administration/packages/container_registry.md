@@ -1081,7 +1081,7 @@ level=info msg="token signed by untrusted key with ID: "TOKE:NL6Q:7PW6:EXAM:PLET
 level=warning msg="error authorizing context: invalid token" go.version=go1.12.7 http.request.host="gitlab.company.com:4567" http.request.id=74613829-2655-4f96-8991-1c9fe33869b8 http.request.method=GET http.request.remoteaddr=10.72.11.20 http.request.uri="/v2/" http.request.useragent="docker/19.03.2 go/go1.12.8 git-commit/6a30dfc kernel/3.10.0-693.2.2.el7.x86_64 os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.2 \(linux\))" 
 ```
 
-This means that the contents of the certificate key pair used to encrypt the communication between Registry and GitLab do not align. 
+This means that the contents of the two sides of the certificate key pair used to encrypt the authentication token for the Registry by GitLab do not align. 
 
 Check which files are in use:
 
