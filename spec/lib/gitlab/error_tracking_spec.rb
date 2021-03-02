@@ -213,12 +213,18 @@ RSpec.describe Gitlab::ErrorTracking do
             )
           )
         end
+
+        it 'does not filter parameters when sending to Sentry' do
+          track_exception
+
+          expect(sentry_event.dig('extra', 'sidekiq', 'args')).to eq([1, { 'id' => 2, 'name' => 'hello' }, 'some-value', 'another-value'])
+        end
       end
 
       context 'when the args has sensitive information' do
         let(:extra) { { sidekiq: { 'class' => 'UnknownWorker', 'args' => ['sensitive string', 1, 2] } } }
 
-        it 'filters sensitive arguments before sending' do
+        it 'filters sensitive arguments before sending and logging' do
           track_exception
 
           expect(sentry_event.dig('extra', 'sidekiq', 'args')).to eq(['[FILTERED]', 1, 2])
@@ -230,6 +236,30 @@ RSpec.describe Gitlab::ErrorTracking do
               }
             )
           )
+        end
+      end
+    end
+
+    context 'when the error is a GRPC error' do
+      context 'when the GRPC error contains a debug_error_string value' do
+        let(:exception) { GRPC::DeadlineExceeded.new('unknown cause', {}, '{"hello":1}') }
+
+        it 'sets the GRPC debug error string in the Sentry event and adds a custom fingerprint' do
+          track_exception
+
+          expect(sentry_event.dig('extra', 'grpc_debug_error_string')).to eq('{"hello":1}')
+          expect(sentry_event['fingerprint']).to eq(['GRPC::DeadlineExceeded', '4:unknown cause.'])
+        end
+      end
+
+      context 'when the GRPC error does not contain a debug_error_string value' do
+        let(:exception) { GRPC::DeadlineExceeded.new }
+
+        it 'does not do any processing on the event' do
+          track_exception
+
+          expect(sentry_event['extra']).not_to include('grpc_debug_error_string')
+          expect(sentry_event['fingerprint']).to eq(['GRPC::DeadlineExceeded', '4:unknown cause'])
         end
       end
     end
