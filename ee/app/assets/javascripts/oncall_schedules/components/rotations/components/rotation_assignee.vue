@@ -41,6 +41,10 @@ export default {
       type: Number,
       required: true,
     },
+    selectedTimezone: {
+      type: Object,
+      required: true,
+    },
   },
   computed: {
     assigneeName() {
@@ -55,7 +59,9 @@ export default {
     },
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
-        endsAt: formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT),
+        endsAt: `${formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT)} ${
+          this.selectedTimezone.identifier
+        }`,
       });
     },
     rotationAssigneeUniqueID() {
@@ -66,7 +72,9 @@ export default {
     },
     startsAt() {
       return sprintf(__('Starts: %{startsAt}'), {
-        startsAt: formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT),
+        startsAt: `${formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT)} ${
+          this.selectedTimezone.identifier
+        }`,
       });
     },
   },
@@ -94,8 +102,14 @@ export default {
       triggers="hover"
       placement="top"
     >
-      <p class="gl-m-0" data-testid="rotation-assignee-starts-at">{{ startsAt }}</p>
-      <p class="gl-m-0" data-testid="rotation-assignee-ends-at">{{ endsAt }}</p>
+      <div class="gl-ml-n2">
+        <p class="gl-m-0 gl-white-space-nowrap" data-testid="rotation-assignee-starts-at">
+          {{ startsAt }}
+        </p>
+        <p class="gl-m-0 gl-white-space-nowrap" data-testid="rotation-assignee-ends-at">
+          {{ endsAt }}
+        </p>
+      </div>
     </gl-popover>
   </div>
 </template>
