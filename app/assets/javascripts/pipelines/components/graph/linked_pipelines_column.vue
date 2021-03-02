@@ -79,6 +79,17 @@ export default {
           };
         },
         update(data) {
+          /*
+            This check prevents the pipeline from being overwritten
+            when a poll times out and the data returned is empty.
+            This can be removed once the timeout behavior is updated.
+            See: https://gitlab.com/gitlab-org/gitlab/-/issues/323213.
+          */
+
+          if (Object.keys(data).length < 1) {
+            return this.currentPipeline;
+          }
+
           return unwrapPipelineData(projectPath, data);
         },
         result() {
