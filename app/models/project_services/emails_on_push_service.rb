@@ -6,7 +6,10 @@ class EmailsOnPushService < Service
   boolean_accessor :send_from_committer_email
   boolean_accessor :disable_diffs
   prop_accessor :recipients, :branches_to_be_notified
-  validates :recipients, presence: true, if: :valid_recipients?
+  validates :recipients, presence: true, if: :validate_recipients?
+  validate :number_of_receipients_within_limit, if: :validate_recipients?
+
+  before_validation :cleanup_recipients
 
   def title
     s_('EmailsOnPushService|Emails on push')
@@ -69,5 +72,27 @@ class EmailsOnPushService < Service
       { type: 'select', name: 'branches_to_be_notified', choices: branch_choices },
       { type: 'textarea', name: 'recipients', placeholder: s_('EmailsOnPushService|Emails separated by whitespace') }
     ]
+  end
+
+  private
+
+  def valid_recipients
+    recipients.to_s.split.select do |recipient|
+      recipient.include?('@')
+    end
+  end
+
+  def cleanup_recipients
+    self.recipients = valid_recipients.join(' ')
+  end
+
+  def validate_recipients?
+    activated? && !importing?
+  end
+
+  RECIPIENTS_LIMIT = 750
+  def number_of_receipients_within_limit
+    # TODO translate the error
+    errors.add(:recipients, "max number is #{RECIPIENTS_LIMIT}") if valid_recipients.size > RECIPIENTS_LIMIT
   end
 end

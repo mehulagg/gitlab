@@ -455,10 +455,6 @@ class Service < ApplicationRecord
   def validate_belongs_to_project_or_group
     errors.add(:project_id, 'The service cannot belong to both a project and a group') if project_id && group_id
   end
-
-  def valid_recipients?
-    activated? && !importing?
-  end
 end
 
 Service.prepend_if_ee('EE::Service')
