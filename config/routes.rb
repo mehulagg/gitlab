@@ -132,7 +132,22 @@ Rails.application.routes.draw do
     resources :user_callouts, only: [:create]
 
     get 'ide' => 'ide#index'
-    get 'ide/*vueroute' => 'ide#index', format: false
+
+    scope :ide, as: :ide do
+      resources :project, only: [], format: false, constraints: { project_id: Gitlab::PathRegex.full_namespace_route_regex } do
+        get '/merge_requests/:merge_request_id', to: 'ide#index', constraints: { merge_request_id: /\d+/ }
+        get '/', to: 'ide#index'
+
+        %w(edit tree blob).each do |action|
+          get "/#{action}", to: 'ide#index'
+          get "/#{action}/*branch/-/*path", to: 'ide#index'
+          get "/#{action}/*branch/-", to: 'ide#index'
+          get "/#{action}/*branch", to: 'ide#index'
+        end
+      end
+    end
+
+    resource :projects
 
     draw :operations
     draw :jira_connect
