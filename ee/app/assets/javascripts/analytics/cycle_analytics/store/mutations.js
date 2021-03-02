@@ -67,8 +67,7 @@ export default {
     state.stages = [];
   },
   [types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages) {
-    const transformedStages = transformRawStages(stages);
-    state.stages = transformedStages.sort((a, b) => a?.id > b?.id);
+    state.stages = transformRawStages(stages);
   },
   [types.REQUEST_UPDATE_STAGE](state) {
     state.isLoading = true;
