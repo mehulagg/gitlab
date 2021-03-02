@@ -1,5 +1,6 @@
 <script>
 import {
+  GlAlert,
   GlButton,
   GlIcon,
   GlFormCheckbox,
@@ -43,6 +44,7 @@ export default {
     noteSignedOutWidget,
     discussionLockedWidget,
     markdownField,
+    GlAlert,
     GlButton,
     TimelineEntryItem,
     GlIcon,
@@ -66,6 +68,7 @@ export default {
     return {
       note: '',
       noteType: constants.COMMENT,
+      errors: [],
       noteIsConfidential: false,
       isSubmitting: false,
     };
@@ -205,10 +208,11 @@ export default {
       'toggleIssueLocalState',
     ]),
     handleSave(withIssueAction) {
+      this.errors = [];
+
       if (this.note.length) {
         const noteData = {
           endpoint: this.endpoint,
-          flashContainer: this.$el,
           data: {
             note: {
               noteable_type: this.noteableType,
@@ -239,10 +243,22 @@ export default {
               this.toggleIssueState();
             }
           })
-          .catch(() => {
+          .catch(({ response }) => {
+            const errorHandlers = {
+              422: (data) => {
+                if (data.errors?.commands_only?.length) {
+                  this.errors = data.errors.commands_only;
+                }
+              },
+              '*': () => {
+                this.errors = [this.$options.i18n.GENERIC_UNSUBMITTABLE_NETWORK];
+              },
+            };
+            const handler = errorHandlers[response.status] || errorHandlers['*'];
+
+            handler(response.data);
+
             this.discard(false);
-            const msg = this.$options.i18n.GENERIC_UNSUBMITTABLE_NETWORK;
-            Flash(msg, 'alert', this.$el);
             this.note = noteData.data.note.note; // Restore textarea content.
             this.removePlaceholderNotes();
           })
@@ -321,6 +337,9 @@ export default {
     hasEmailParticipants() {
       return this.getNoteableData.issue_email_participants?.length;
     },
+    dismissError(index) {
+      this.errors.splice(index, 1);
+    },
   },
 };
 </script>
@@ -331,7 +350,15 @@ export default {
     <discussion-locked-widget v-else-if="!canCreateNote" :issuable-type="issuableTypeTitle" />
     <ul v-else-if="canCreateNote" class="notes notes-form timeline">
       <timeline-entry-item class="note-form">
-        <div class="flash-container error-alert timeline-content"></div>
+        <gl-alert
+          v-for="(error, index) in errors"
+          :key="index"
+          variant="danger"
+          class="mb-2"
+          @dismiss="() => dismissError(index)"
+        >
+          {{ error }}
+        </gl-alert>
         <div class="timeline-content timeline-content-form">
           <form ref="commentForm" class="new-note common-note-form gfm-form js-main-target-form">
             <comment-field-layout
