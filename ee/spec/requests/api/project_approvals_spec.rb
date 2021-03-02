@@ -20,6 +20,14 @@ RSpec.describe API::ProjectApprovals do
         get api(url, user)
       end
 
+      it 'does not return null values for unmodified boolean fields' do
+        expect(json_response["reset_approvals_on_push"]).not_to be_nil
+        expect(json_response["disable_overriding_approvers_per_merge_request"]).not_to be_nil
+        expect(json_response["merge_requests_author_approval"]).not_to be_nil
+        expect(json_response["merge_requests_disable_committers_approval"]).not_to be_nil
+        expect(json_response["require_password_to_approve"]).not_to be_nil
+      end
+
       it 'returns 200 status' do
         expect(response).to have_gitlab_http_status(:ok)
       end
