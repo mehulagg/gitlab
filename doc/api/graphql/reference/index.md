@@ -70,8 +70,10 @@ Get configured DevOps adoption segments on the instance.
 | ----- | ---- | ----------- |
 | `after` | Returns the elements in the list that come after the specified cursor. | String |
 | `before` | Returns the elements in the list that come before the specified cursor. | String |
+| `directDescendantsOnly` | Limits segments to direct descendants of specified parent | Boolean |
 | `first` | Returns the first _n_ elements from the list. | Int |
 | `last` | Returns the last _n_ elements from the list. | Int |
+| `parentNamespaceId` | Narrow segments scope to only those which have given namespace as a ancestor | NamespaceID |
 
 ### Echo
 

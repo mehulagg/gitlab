@@ -9,24 +9,38 @@ module Resolvers
 
           type Types::Admin::Analytics::DevopsAdoption::SegmentType, null: true
 
-          def resolve
-            authorize!
+          argument :parent_namespace_id, ::Types::GlobalIDType[::Namespace],
+                   required: false,
+                   description: 'Filter by ancestor namespace'
 
-            if segments_feature_available?
-              ::Analytics::DevopsAdoption::Segment.ordered_by_name
-            else
-              ::Analytics::DevopsAdoption::Segment.none
-            end
+          argument :direct_descendants_only, ::GraphQL::BOOLEAN_TYPE,
+                   required: false,
+                   description: 'Limits segments to direct descendants of specified parent'
+
+          def resolve(parent_namespace_id: nil, direct_descendants_only: false)
+            parent = parent_namespace_id&.find
+
+            authorize!(parent)
+
+            ::Analytics::DevopsAdoption::SegmentsFinder.new(current_user, params: {
+              parent_namespace: parent, direct_descendants_only: direct_descendants_only
+            }).execute
           end
 
           private
 
-          def segments_feature_available?
-            License.feature_available?(:instance_level_devops_adoption)
+          def segments_feature_available?(namespace = nil)
+            if namespace
+              License.feature_available?(:group_level_devops_adoption)
+            else
+              License.feature_available?(:instance_level_devops_adoption)
+            end
           end
 
-          def authorize!
-            admin? || raise_resource_not_available_error!
+          def authorize!(parent)
+            unless admin? && segments_feature_available?(parent)
+              raise_resource_not_available_error!
+            end
           end
 
           def admin?
