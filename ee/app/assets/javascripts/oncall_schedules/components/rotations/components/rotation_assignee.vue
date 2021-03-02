@@ -12,7 +12,7 @@ export const SHIFT_WIDTHS = {
 };
 
 const ROTATION_CENTER_CLASS = 'gl-display-flex gl-justify-content-center gl-align-items-center';
-const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM';
+export const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM';
 
 export default {
   ROTATION_CENTER_CLASS,
