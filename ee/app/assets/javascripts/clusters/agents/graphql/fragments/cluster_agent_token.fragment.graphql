@@ -2,6 +2,7 @@ fragment Token on ClusterAgentToken {
   id
   createdAt
   description
+  name
 
   createdByUser {
     name
