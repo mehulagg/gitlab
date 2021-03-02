@@ -18,7 +18,7 @@ module EE
             optional :weight, type: Integer, desc: 'Return issues without the specified weight'
             optional :iteration_id, types: [Integer, String],
                      integer_or_custom_value: ::Iteration::Predefined::ALL.map { |iteration| iteration.name.downcase },
-                     desc: 'Return issues which are assigned to the iteration with the given ID'
+                     desc: 'Return issues which are not assigned to the iteration with the given ID'
             optional :iteration_title, type: String,
                      desc: 'Return issues which are not assigned to the iteration with the given title'
             mutually_exclusive :iteration_id, :iteration_title

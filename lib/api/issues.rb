@@ -20,10 +20,10 @@ module API
         optional :author_username, type: String, desc: 'Return issues which are not authored by the user with the given username'
         mutually_exclusive :author_id, :author_username
 
-        optional :assignee_id, type: Integer, desc: 'Return issues which are assigned to the user with the given ID'
+        optional :assignee_id, type: Integer, desc: 'Return issues which are not assigned to the user with the given ID'
         optional :assignee_username, type: Array[String], check_assignees_count: true,
                  coerce_with: Validations::Validators::CheckAssigneesCount.coerce,
-                 desc: 'Return issues which are assigned to the user with the given username'
+                 desc: 'Return issues which are not assigned to the user with the given username'
         mutually_exclusive :assignee_id, :assignee_username
 
         use :negatable_issue_filter_params_ee
