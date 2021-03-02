@@ -148,6 +148,9 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
 
         context 'checks space required' do
           let(:helper) { Gitlab::Elastic::Helper.new }
+          let(:started) { false }
+          let(:completed) { false }
+          let(:batched) { false }
 
           before do
             allow(Gitlab::Elastic::Helper).to receive(:default).and_return(helper)
@@ -157,16 +160,18 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
 
           it 'halts the migration if there is not enough space' do
             allow(helper).to receive(:cluster_free_size_bytes).and_return(0)
-            expect(migration).to receive(:set_migration_state).with(retry_attempt: 0, halted: true, halted_indexing_unpaused: false)
+            expect(migration).to receive(:set_migration_state).with(halted: true)
+            expect(migration).not_to receive(:migrate)
 
-            migration.migrate
+            subject.perform
           end
 
           it 'runs the migration if there is enough space' do
             allow(helper).to receive(:cluster_free_size_bytes).and_return(20)
             expect(migration).not_to receive(:set_migration_state)
+            expect(migration).to receive(:migrate).once
 
-            migration.migrate
+            subject.perform
           end
         end
       end

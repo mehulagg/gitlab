@@ -36,13 +36,11 @@ module Elastic
           break false
         end
 
-        if migration.space_requirements?
-          expected_free_size = migration.space_required_bytes
-          if elastic_helper.cluster_free_size_bytes < expected_free_size
-            log("You should have at least #{expected_free_size} bytes of storage available to run this migration. Please increase the storage in your Elasticsearch cluster.")
-            fail_migration_halt_error!
-            break false
-          end
+        if migration.space_requirements? && helper.cluster_free_size_bytes < migration.space_required_bytes
+          logger.warn "You should have at least #{migration.space_required_bytes} bytes of free space in the cluster to run this migration. Please increase the storage in your Elasticsearch cluster."
+          migration.set_migration_state(halted: true)
+
+          break false
         end
 
         execute_migration(migration)
