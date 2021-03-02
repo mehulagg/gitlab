@@ -10,6 +10,17 @@ module EE
 
     prepended do
       include UsageStatistics
+
+      state_machine :status do
+        after_transition any => :success do |deployment|
+          deployment.run_after_commit do
+            ::Dora::RefreshDailyMetricsWorker
+              .perform_in(10.seconds, # 5.minutes in production
+                          deployment.environment_id,
+                          Time.current.to_date.to_s)
+          end
+        end
+      end
     end
   end
 end
