@@ -23034,6 +23034,8 @@ CREATE INDEX index_pages_domains_on_verified_at_and_enabled_until ON pages_domai
 
 CREATE INDEX index_pages_domains_on_wildcard ON pages_domains USING btree (wildcard);
 
+CREATE INDEX index_pages_metadata_on_pages_deployment_id_and_deployed ON project_pages_metadata USING btree (pages_deployment_id) WHERE (deployed = true);
+
 CREATE UNIQUE INDEX index_partial_am_alerts_on_project_id_and_fingerprint ON alert_management_alerts USING btree (project_id, fingerprint) WHERE (status <> 2);
 
 CREATE INDEX index_partial_ci_builds_on_user_id_name_parser_features ON ci_builds USING btree (user_id, name) WHERE (((type)::text = 'Ci::Build'::text) AND ((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('secret_detection'::character varying)::text])));
