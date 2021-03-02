@@ -7,6 +7,7 @@ RSpec.describe 'Delete Epic', :js do
   let(:group) { create(:group, :public) }
   let(:epic) { create(:epic, group: group) }
   let!(:epic2) { create(:epic, group: group) }
+  let!(:child_epic) { create(:epic, group: group, parent: epic, author: user) }
 
   before do
     stub_licensed_features(epics: true)
@@ -30,7 +31,7 @@ RSpec.describe 'Delete Epic', :js do
       find('.js-issuable-edit').click
     end
 
-    it 'deletes the issue and redirect to epic list' do
+    it 'deletes the epic and redirect to epic list' do
       page.accept_alert 'Epic will be removed! Are you sure?' do
         find(:button, text: 'Delete').click
       end
@@ -39,6 +40,8 @@ RSpec.describe 'Delete Epic', :js do
 
       expect(find('.issuable-list')).not_to have_content(epic.title)
       expect(find('.issuable-list')).to have_content(epic2.title)
+      # orphans child epics rather than destroying
+      expect(find('.issuable-list')).to have_content(child_epic.title)
     end
   end
 end

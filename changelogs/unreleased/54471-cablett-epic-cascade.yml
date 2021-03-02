@@ -1,0 +1,5 @@
+---
+title: Prevent auto-delete of epic children
+merge_request: 55556
+author:
+type: fixed

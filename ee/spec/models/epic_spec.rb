@@ -296,9 +296,9 @@ RSpec.describe Epic do
   end
 
   context 'hierarchy' do
-    let(:epic1) { create(:epic, group: group) }
-    let(:epic2) { create(:epic, group: group, parent: epic1) }
-    let(:epic3) { create(:epic, group: group, parent: epic2) }
+    let(:epic1) { create(:epic, group: group, author: user) }
+    let(:epic2) { create(:epic, group: group, parent: epic1, author: user) }
+    let(:epic3) { create(:epic, group: group, parent: epic2, author: user) }
 
     describe '#ancestors' do
       it 'returns all ancestors for an epic' do
@@ -317,6 +317,15 @@ RSpec.describe Epic do
 
       it 'returns an empty array if an epic does not have any descendants' do
         expect(epic3.descendants).to be_empty
+      end
+    end
+
+    describe 'destroying a parent epic' do
+      it 'does not destroy the child epics' do
+        epic1.destroy
+
+        expect(epic2.reload.parent).to be_null
+        expect(epic3.reload.parent).to be_null
       end
     end
   end
