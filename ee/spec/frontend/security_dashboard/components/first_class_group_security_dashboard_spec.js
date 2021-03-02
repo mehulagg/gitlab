@@ -1,7 +1,7 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
-import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/group_dashboard_not_configured.vue';
+import ReportNotConfigured from 'ee/security_dashboard/components/group/group_report_not_configured.vue';
 import GroupReport from 'ee/security_dashboard/components/group/group_vulnerability_report.vue';
 import GroupReportVulnerabilities from 'ee/security_dashboard/components/group/group_vulnerability_report_vulnerabilities.vue';
 import Filters from 'ee/security_dashboard/components/shared/vulnerability_report_filters.vue';
@@ -21,7 +21,7 @@ describe('First Class Group Dashboard Component', () => {
   const findCsvExportButton = () => wrapper.find(CsvExportButton);
   const findFilters = () => wrapper.find(Filters);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findEmptyState = () => wrapper.find(DashboardNotConfigured);
+  const findEmptyState = () => wrapper.find(ReportNotConfigured);
   const findVulnerabilitiesCountList = () => wrapper.find(VulnerabilitiesCountList);
 
   const createWrapper = ({ data } = {}) => {
@@ -34,7 +34,7 @@ describe('First Class Group Dashboard Component', () => {
       },
       data,
       stubs: {
-        SecurityDashboardLayout,
+        VulnerabilityReportLayout,
       },
     });
   };

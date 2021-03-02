@@ -1,7 +1,7 @@
 import { within } from '@testing-library/dom';
 import { shallowMount } from '@vue/test-utils';
 import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
-import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
+import ReportNotConfigured from 'ee/security_dashboard/components/instance/instance_report_not_configured.vue';
 import InstanceReport from 'ee/security_dashboard/components/instance/instance_vulnerability_report.vue';
 import InstanceReportVulnerabilities from 'ee/security_dashboard/components/instance/instance_vulnerability_report_vulnerabilities.vue';
 import Filters from 'ee/security_dashboard/components/shared/vulnerability_report_filters.vue';
@@ -19,7 +19,7 @@ describe('First Class Instance Dashboard Component', () => {
 
   const findInstanceVulnerabilities = () => wrapper.find(InstanceReportVulnerabilities);
   const findCsvExportButton = () => wrapper.find(CsvExportButton);
-  const findEmptyState = () => wrapper.find(DashboardNotConfigured);
+  const findEmptyState = () => wrapper.find(ReportNotConfigured);
   const findFilters = () => wrapper.find(Filters);
   const findVulnerabilitiesCountList = () => wrapper.find(VulnerabilitiesCountList);
 

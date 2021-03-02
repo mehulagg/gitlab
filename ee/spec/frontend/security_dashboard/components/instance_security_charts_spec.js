@@ -1,6 +1,6 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
+import ReportNotConfigured from 'ee/security_dashboard/components/instance/instance_report_not_configured.vue';
 import VulnerabilityChart from 'ee/security_dashboard/components/first_class_vulnerability_chart.vue';
 import VulnerabilitySeverities from 'ee/security_dashboard/components/first_class_vulnerability_severities.vue';
 import InstanceSecurityCharts from 'ee/security_dashboard/components/instance_security_charts.vue';
@@ -28,7 +28,7 @@ describe('Instance Security Charts component', () => {
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findVulnerabilityChart = () => wrapper.find(VulnerabilityChart);
   const findVulnerabilitySeverities = () => wrapper.find(VulnerabilitySeverities);
-  const findDashboardNotConfigured = () => wrapper.find(DashboardNotConfigured);
+  const findReportNotConfigured = () => wrapper.find(ReportNotConfigured);
 
   const createWrapper = ({ loading = false } = {}) => {
     wrapper = shallowMount(InstanceSecurityCharts, {
@@ -56,7 +56,7 @@ describe('Instance Security Charts component', () => {
     createWrapper({ loading: true });
 
     const securityChartsLayout = findSecurityChartsLayoutComponent();
-    const dashboardNotConfigured = findDashboardNotConfigured();
+    const dashboardNotConfigured = findReportNotConfigured();
     const loadingIcon = findLoadingIcon();
     const vulnerabilityChart = findVulnerabilityChart();
     const vulnerabilitySeverities = findVulnerabilitySeverities();
@@ -72,7 +72,7 @@ describe('Instance Security Charts component', () => {
     createWrapper();
 
     const securityChartsLayout = findSecurityChartsLayoutComponent();
-    const dashboardNotConfigured = findDashboardNotConfigured();
+    const dashboardNotConfigured = findReportNotConfigured();
     const loadingIcon = findLoadingIcon();
     const vulnerabilityChart = findVulnerabilityChart();
     const vulnerabilitySeverities = findVulnerabilitySeverities();
@@ -90,7 +90,7 @@ describe('Instance Security Charts component', () => {
     await wrapper.vm.$nextTick();
 
     const securityChartsLayout = findSecurityChartsLayoutComponent();
-    const dashboardNotConfigured = findDashboardNotConfigured();
+    const dashboardNotConfigured = findReportNotConfigured();
     const loadingIcon = findLoadingIcon();
     const vulnerabilityChart = findVulnerabilityChart();
     const vulnerabilitySeverities = findVulnerabilitySeverities();

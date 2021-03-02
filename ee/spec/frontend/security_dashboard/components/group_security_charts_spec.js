@@ -1,6 +1,6 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/group_dashboard_not_configured.vue';
+import ReportNotConfigured from 'ee/security_dashboard/components/group/group_report_not_configured.vue';
 import VulnerabilityChart from 'ee/security_dashboard/components/first_class_vulnerability_chart.vue';
 import VulnerabilitySeverities from 'ee/security_dashboard/components/first_class_vulnerability_severities.vue';
 import GroupSecurityCharts from 'ee/security_dashboard/components/group_security_charts.vue';
@@ -28,7 +28,7 @@ describe('Group Security Charts component', () => {
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findVulnerabilityChart = () => wrapper.find(VulnerabilityChart);
   const findVulnerabilitySeverities = () => wrapper.find(VulnerabilitySeverities);
-  const findDashboardNotConfigured = () => wrapper.find(DashboardNotConfigured);
+  const findDashboardNotConfigured = () => wrapper.find(ReportNotConfigured);
 
   const createWrapper = ({ loading = false } = {}) => {
     wrapper = shallowMount(GroupSecurityCharts, {

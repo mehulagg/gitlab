@@ -1,6 +1,6 @@
 import { GlEmptyState, GlButton } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/group_dashboard_not_configured.vue';
+import ReportNotConfigured from 'ee/security_dashboard/components/group/group_report_not_configured.vue';
 
 describe('first class group security dashboard empty state', () => {
   let wrapper;
@@ -8,7 +8,7 @@ describe('first class group security dashboard empty state', () => {
   const emptyStateSvgPath = '/placeholder.svg';
 
   const createWrapper = () =>
-    mount(DashboardNotConfigured, {
+    mount(ReportNotConfigured, {
       provide: {
         dashboardDocumentation,
         emptyStateSvgPath,

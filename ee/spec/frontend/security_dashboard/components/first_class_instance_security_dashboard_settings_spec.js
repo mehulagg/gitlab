@@ -1,7 +1,7 @@
 import { GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import FirstClassInstanceDashboardSettings from 'ee/security_dashboard/components/first_class_instance_security_dashboard_settings.vue';
-import ProjectManager from 'ee/security_dashboard/components/first_class_project_manager/project_manager.vue';
+import InstanceSettings from 'ee/security_dashboard/components/instance/instance_settings.vue';
+import ProjectManager from 'ee/security_dashboard/components/instance/instance_settings_project_manager.vue';
 
 describe('First Class Instance Dashboard Component', () => {
   let wrapper;
@@ -14,7 +14,7 @@ describe('First Class Instance Dashboard Component', () => {
   const findAlert = () => wrapper.find(GlAlert);
 
   const createWrapper = ({ mocks = defaultMocks(), data = {} }) => {
-    return shallowMount(FirstClassInstanceDashboardSettings, {
+    return shallowMount(InstanceSettings, {
       mocks,
       data() {
         return data;

@@ -1,6 +1,6 @@
 import { GlEmptyState, GlButton } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import DashboardHasNoVulnerabilities from 'ee/security_dashboard/components/empty_states/dashboard_has_no_vulnerabilities.vue';
+import ReportHasNoVulnerabilities from 'ee/security_dashboard/components/empty_states/report_has_no_vulnerabilities.vue';
 
 describe('dashboard has no vulnerabilities empty state', () => {
   let wrapper;
@@ -8,7 +8,7 @@ describe('dashboard has no vulnerabilities empty state', () => {
   const dashboardDocumentation = '/path/to/dashboard/documentation';
 
   const createWrapper = () =>
-    mount(DashboardHasNoVulnerabilities, {
+    mount(ReportHasNoVulnerabilities, {
       provide: {
         emptyStateSvgPath,
         dashboardDocumentation,

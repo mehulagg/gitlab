@@ -9,7 +9,7 @@ import { createInvalidProjectMessage } from 'ee/security_dashboard/utils/first_c
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
-import ProjectList from './project_list.vue';
+import ProjectList from './instance_settings_project_list.vue';
 
 export default {
   MINIMUM_QUERY_LENGTH: 3,
