@@ -30,11 +30,11 @@ in [Removed Items](../removed_items.md).
 
 The `Query` type contains the API's top-level entry points for all executable queries.
 
-### ciApplicationSettings
+### `ciApplicationSettings`
 
 CI related settings that apply to the entire instance.
 
-### ciConfig
+### `ciConfig`
 
 Get linted and processed contents of a CI config. Should not be requested more than once per request.
 
@@ -46,7 +46,7 @@ Get linted and processed contents of a CI config. Should not be requested more t
 | `dryRun` | Boolean | Run pipeline creation simulation, or only do static check. |
 | `projectPath` | ID! | The project of the CI config. |
 
-### containerRepository
+### `containerRepository`
 
 Find a container repository.
 
@@ -56,15 +56,15 @@ Find a container repository.
 | ---- | ---- | ----------- |
 | `id` | ContainerRepositoryID! | The global ID of the container repository. |
 
-### currentUser
+### `currentUser`
 
 Get information about current user.
 
-### designManagement
+### `designManagement`
 
 Fields related to design management.
 
-### devopsAdoptionSegments
+### `devopsAdoptionSegments`
 
 Get configured DevOps adoption segments on the instance.
 
@@ -77,7 +77,7 @@ Get configured DevOps adoption segments on the instance.
 | `first` | Int | Returns the first _n_ elements from the list. |
 | `last` | Int | Returns the last _n_ elements from the list. |
 
-### echo
+### `echo`
 
 Text to echo back.
 
@@ -87,7 +87,7 @@ Text to echo back.
 | ---- | ---- | ----------- |
 | `text` | String! | Text to echo back. |
 
-### geoNode
+### `geoNode`
 
 Find a Geo node.
 
@@ -97,7 +97,7 @@ Find a Geo node.
 | ---- | ---- | ----------- |
 | `name` | String | The name of the Geo node. Defaults to the current Geo node name. |
 
-### group
+### `group`
 
 Find a group.
 
@@ -107,11 +107,11 @@ Find a group.
 | ---- | ---- | ----------- |
 | `fullPath` | ID! | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
 
-### instanceSecurityDashboard
+### `instanceSecurityDashboard`
 
 Fields related to Instance Security Dashboard.
 
-### instanceStatisticsMeasurements
+### `instanceStatisticsMeasurements`
 
 Get statistics on the instance. Deprecated in 13.10: This field was renamed. Use the `usageTrendsMeasurements` field instead.
 
@@ -127,7 +127,7 @@ Get statistics on the instance. Deprecated in 13.10: This field was renamed. Use
 | `recordedAfter` | Time | Measurement recorded after this date. |
 | `recordedBefore` | Time | Measurement recorded before this date. |
 
-### issue
+### `issue`
 
 Find an Issue.
 
@@ -137,7 +137,7 @@ Find an Issue.
 | ---- | ---- | ----------- |
 | `id` | IssueID! | The global ID of the Issue. |
 
-### iteration
+### `iteration`
 
 Find an iteration.
 
@@ -147,11 +147,11 @@ Find an iteration.
 | ---- | ---- | ----------- |
 | `id` | IterationID! | Find an iteration by its ID. |
 
-### metadata
+### `metadata`
 
 Metadata about GitLab.
 
-### milestone
+### `milestone`
 
 Find a milestone.
 
@@ -161,7 +161,7 @@ Find a milestone.
 | ---- | ---- | ----------- |
 | `id` | MilestoneID! | Find a milestone by its ID. |
 
-### namespace
+### `namespace`
 
 Find a namespace.
 
@@ -171,7 +171,7 @@ Find a namespace.
 | ---- | ---- | ----------- |
 | `fullPath` | ID! | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
 
-### package
+### `package`
 
 Find a package.
 
@@ -181,7 +181,7 @@ Find a package.
 | ---- | ---- | ----------- |
 | `id` | PackagesPackageID! | The global ID of the package. |
 
-### project
+### `project`
 
 Find a project.
 
@@ -191,7 +191,7 @@ Find a project.
 | ---- | ---- | ----------- |
 | `fullPath` | ID! | The full path of the project, group or namespace, e.g., `gitlab-org/gitlab-foss`. |
 
-### projects
+### `projects`
 
 Find projects visible to the current user.
 
@@ -209,7 +209,7 @@ Find projects visible to the current user.
 | `searchNamespaces` | Boolean | Include namespace in project search. |
 | `sort` | String | Sort order of results. |
 
-### runnerPlatforms
+### `runnerPlatforms`
 
 Supported runner platforms.
 
@@ -222,7 +222,7 @@ Supported runner platforms.
 | `first` | Int | Returns the first _n_ elements from the list. |
 | `last` | Int | Returns the last _n_ elements from the list. |
 
-### runnerSetup
+### `runnerSetup`
 
 Get runner setup instructions.
 
@@ -235,7 +235,7 @@ Get runner setup instructions.
 | `platform` | String! | Platform to generate the instructions for. |
 | `projectId` | ProjectID | Project to register the runner for. |
 
-### snippets
+### `snippets`
 
 Find Snippets visible to the current user.
 
@@ -254,7 +254,7 @@ Find Snippets visible to the current user.
 | `type` | TypeEnum | The type of snippet. |
 | `visibility` | VisibilityScopesEnum | The visibility of the snippet. |
 
-### usageTrendsMeasurements
+### `usageTrendsMeasurements`
 
 Get statistics on the instance.
 
@@ -270,7 +270,7 @@ Get statistics on the instance.
 | `recordedAfter` | Time | Measurement recorded after this date. |
 | `recordedBefore` | Time | Measurement recorded before this date. |
 
-### user
+### `user`
 
 Find a user.
 
@@ -281,7 +281,7 @@ Find a user.
 | `id` | UserID | ID of the User. |
 | `username` | String | Username of the User. |
 
-### users
+### `users`
 
 Find users.
 
@@ -299,7 +299,7 @@ Find users.
 | `sort` | Sort | Sort users by this criteria. |
 | `usernames` | String! => Array | List of usernames. |
 
-### vulnerabilities
+### `vulnerabilities`
 
 Vulnerabilities reported on projects on the current user's instance security dashboard.
 
@@ -320,7 +320,7 @@ Vulnerabilities reported on projects on the current user's instance security das
 | `sort` | VulnerabilitySort | List vulnerabilities by sort order. |
 | `state` | VulnerabilityState! => Array | Filter vulnerabilities by state. |
 
-### vulnerabilitiesCountByDay
+### `vulnerabilitiesCountByDay`
 
 Number of vulnerabilities per day for the projects on the current user's instance security dashboard.
 
@@ -335,7 +335,7 @@ Number of vulnerabilities per day for the projects on the current user's instanc
 | `last` | Int | Returns the last _n_ elements from the list. |
 | `startDate` | ISO8601Date! | First day for which to fetch vulnerability history. |
 
-### vulnerabilitiesCountByDayAndSeverity
+### `vulnerabilitiesCountByDayAndSeverity`
 
 Number of vulnerabilities per severity level, per day, for the projects on the current user's instance security dashboard. Deprecated in 13.3: Use `vulnerabilitiesCountByDay`.
 
@@ -350,7 +350,7 @@ Number of vulnerabilities per severity level, per day, for the projects on the c
 | `last` | Int | Returns the last _n_ elements from the list. |
 | `startDate` | ISO8601Date! | First day for which to fetch vulnerability history. |
 
-### vulnerability
+### `vulnerability`
 
 Find a vulnerability.
 
@@ -371,7 +371,7 @@ For more information, see
 [Object Types and Fields](https://graphql.org/learn/schema/#object-types-and-fields)
 on `graphql.org`.
 
-### AccessLevel
+### `AccessLevel`
 
 Represents the access level of a relationship between a User and object that it is related to.
 
@@ -380,7 +380,7 @@ Represents the access level of a relationship between a User and object that it 
 | `integerValue` | Int | Integer representation of access level. |
 | `stringValue` | AccessLevelEnum | String representation of access level. |
 
-### AddAwardEmojiPayload
+### `AddAwardEmojiPayload`
 
 Autogenerated return type of AddAwardEmoji.
 
@@ -390,7 +390,7 @@ Autogenerated return type of AddAwardEmoji.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### AddProjectToSecurityDashboardPayload
+### `AddProjectToSecurityDashboardPayload`
 
 Autogenerated return type of AddProjectToSecurityDashboard.
 
@@ -400,7 +400,7 @@ Autogenerated return type of AddProjectToSecurityDashboard.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `project` | Project | Project that was added to the Instance Security Dashboard. |
 
-### AdminSidekiqQueuesDeleteJobsPayload
+### `AdminSidekiqQueuesDeleteJobsPayload`
 
 Autogenerated return type of AdminSidekiqQueuesDeleteJobs.
 
@@ -410,7 +410,7 @@ Autogenerated return type of AdminSidekiqQueuesDeleteJobs.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `result` | DeleteJobsResponse | Information about the status of the deletion request. |
 
-### AlertManagementAlert
+### `AlertManagementAlert`
 
 Describes an alert from the project's Alert Management.
 
@@ -441,7 +441,7 @@ Describes an alert from the project's Alert Management.
 | `todos` | TodoConnection | To-do items of the current user for the alert. |
 | `updatedAt` | Time | Timestamp the alert was last updated. |
 
-### AlertManagementAlertStatusCountsType
+### `AlertManagementAlertStatusCountsType`
 
 Represents total number of alerts for the represented categories.
 
@@ -454,7 +454,7 @@ Represents total number of alerts for the represented categories.
 | `resolved` | Int | Number of alerts with status RESOLVED for the project |
 | `triggered` | Int | Number of alerts with status TRIGGERED for the project |
 
-### AlertManagementHttpIntegration
+### `AlertManagementHttpIntegration`
 
 An endpoint and credentials used to accept alerts for a project.
 
@@ -471,7 +471,7 @@ An endpoint and credentials used to accept alerts for a project.
 | `type` | AlertManagementIntegrationType! | Type of integration. |
 | `url` | String | Endpoint which accepts alert notifications. |
 
-### AlertManagementPayloadAlertField
+### `AlertManagementPayloadAlertField`
 
 Parsed field from an alert used for custom mappings.
 
@@ -481,7 +481,7 @@ Parsed field from an alert used for custom mappings.
 | `path` | String! => Array | Path to value inside payload JSON. |
 | `type` | AlertManagementPayloadAlertFieldType | Type of the parsed value. |
 
-### AlertManagementPayloadAlertMappingField
+### `AlertManagementPayloadAlertMappingField`
 
 Parsed field (with its name) from an alert used for custom mappings.
 
@@ -492,7 +492,7 @@ Parsed field (with its name) from an alert used for custom mappings.
 | `path` | String! => Array | Path to value inside payload JSON. |
 | `type` | AlertManagementPayloadAlertFieldType | Type of the parsed value. |
 
-### AlertManagementPrometheusIntegration
+### `AlertManagementPrometheusIntegration`
 
 An endpoint and credentials used to accept Prometheus alerts for a project.
 
@@ -506,7 +506,7 @@ An endpoint and credentials used to accept Prometheus alerts for a project.
 | `type` | AlertManagementIntegrationType! | Type of integration. |
 | `url` | String | Endpoint which accepts alert notifications. |
 
-### AlertSetAssigneesPayload
+### `AlertSetAssigneesPayload`
 
 Autogenerated return type of AlertSetAssignees.
 
@@ -518,7 +518,7 @@ Autogenerated return type of AlertSetAssignees.
 | `issue` | Issue | The issue created after mutation. |
 | `todo` | Todo | The to-do item after mutation. |
 
-### AlertTodoCreatePayload
+### `AlertTodoCreatePayload`
 
 Autogenerated return type of AlertTodoCreate.
 
@@ -530,7 +530,7 @@ Autogenerated return type of AlertTodoCreate.
 | `issue` | Issue | The issue created after mutation. |
 | `todo` | Todo | The to-do item after mutation. |
 
-### ApiFuzzingCiConfiguration
+### `ApiFuzzingCiConfiguration`
 
 Data associated with configuring API fuzzing scans in GitLab CI.
 
@@ -539,7 +539,7 @@ Data associated with configuring API fuzzing scans in GitLab CI.
 | `scanModes` | ApiFuzzingScanMode! => Array | All available scan modes. |
 | `scanProfiles` | ApiFuzzingScanProfile! => Array | All default scan profiles. |
 
-### ApiFuzzingCiConfigurationCreatePayload
+### `ApiFuzzingCiConfigurationCreatePayload`
 
 Autogenerated return type of ApiFuzzingCiConfigurationCreate.
 
@@ -550,7 +550,7 @@ Autogenerated return type of ApiFuzzingCiConfigurationCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `gitlabCiYamlEditPath` | String | The location at which the project's `.gitlab-ci.yml` file can be edited in the browser. |
 
-### ApiFuzzingScanProfile
+### `ApiFuzzingScanProfile`
 
 An API Fuzzing scan profile.
 
@@ -560,7 +560,7 @@ An API Fuzzing scan profile.
 | `name` | String | The unique name of the profile. |
 | `yaml` | String | A syntax highlit HTML representation of the YAML. |
 
-### AwardEmoji
+### `AwardEmoji`
 
 An emoji awarded by a user.
 
@@ -573,7 +573,7 @@ An emoji awarded by a user.
 | `unicodeVersion` | String! | The Unicode version for this emoji. |
 | `user` | User! | The user who awarded the emoji. |
 
-### AwardEmojiAddPayload
+### `AwardEmojiAddPayload`
 
 Autogenerated return type of AwardEmojiAdd.
 
@@ -583,7 +583,7 @@ Autogenerated return type of AwardEmojiAdd.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### AwardEmojiRemovePayload
+### `AwardEmojiRemovePayload`
 
 Autogenerated return type of AwardEmojiRemove.
 
@@ -593,7 +593,7 @@ Autogenerated return type of AwardEmojiRemove.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### AwardEmojiTogglePayload
+### `AwardEmojiTogglePayload`
 
 Autogenerated return type of AwardEmojiToggle.
 
@@ -604,14 +604,14 @@ Autogenerated return type of AwardEmojiToggle.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `toggledOn` | Boolean! | Indicates the status of the emoji. True if the toggle awarded the emoji, and false if the toggle removed the emoji. |
 
-### BaseService
+### `BaseService`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `active` | Boolean | Indicates if the service is active. |
 | `type` | String | Class name of the service. |
 
-### Blob
+### `Blob`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -626,7 +626,7 @@ Autogenerated return type of AwardEmojiToggle.
 | `webPath` | String | Web path of the blob. |
 | `webUrl` | String | Web URL of the blob. |
 
-### Board
+### `Board`
 
 Represents a project or group issue board.
 
@@ -646,7 +646,7 @@ Represents a project or group issue board.
 | `webUrl` | String! | Web URL of the board. |
 | `weight` | Int | Weight of the board. |
 
-### BoardEpic
+### `BoardEpic`
 
 Represents an epic on an issue board.
 
@@ -700,7 +700,7 @@ Represents an epic on an issue board.
 | `webPath` | String! | Web path of the epic. |
 | `webUrl` | String! | Web URL of the epic. |
 
-### BoardEpicUserPreferences
+### `BoardEpicUserPreferences`
 
 Represents user preferences for a board epic.
 
@@ -708,7 +708,7 @@ Represents user preferences for a board epic.
 | ----- | ---- | ----------- |
 | `collapsed` | Boolean! | Indicates epic should be displayed as collapsed. |
 
-### BoardList
+### `BoardList`
 
 Represents a list for an issue board.
 
@@ -730,7 +730,7 @@ Represents a list for an issue board.
 | `title` | String! | Title of the list. |
 | `totalWeight` | Int | Total weight of all issues in the list. |
 
-### BoardListCreatePayload
+### `BoardListCreatePayload`
 
 Autogenerated return type of BoardListCreate.
 
@@ -740,7 +740,7 @@ Autogenerated return type of BoardListCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `list` | BoardList | Issue list in the issue board. |
 
-### BoardListUpdateLimitMetricsPayload
+### `BoardListUpdateLimitMetricsPayload`
 
 Autogenerated return type of BoardListUpdateLimitMetrics.
 
@@ -750,14 +750,14 @@ Autogenerated return type of BoardListUpdateLimitMetrics.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `list` | BoardList | The updated list. |
 
-### Branch
+### `Branch`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `commit` | Commit | Commit for the branch. |
 | `name` | String! | Name of the branch. |
 
-### BurnupChartDailyTotals
+### `BurnupChartDailyTotals`
 
 Represents the total number of issues and their weights for a particular day.
 
@@ -769,19 +769,19 @@ Represents the total number of issues and their weights for a particular day.
 | `scopeCount` | Int! | Number of issues as of this day. |
 | `scopeWeight` | Int! | Total weight of issues as of this day. |
 
-### CiApplicationSettings
+### `CiApplicationSettings`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `keepLatestArtifact` | Boolean | Whether to keep the latest jobs artifacts. |
 
-### CiBuildNeed
+### `CiBuildNeed`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `name` | String | Name of the job we need to complete. |
 
-### CiCdSettingsUpdatePayload
+### `CiCdSettingsUpdatePayload`
 
 Autogenerated return type of CiCdSettingsUpdate.
 
@@ -790,7 +790,7 @@ Autogenerated return type of CiCdSettingsUpdate.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### CiConfig
+### `CiConfig`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -799,7 +799,7 @@ Autogenerated return type of CiCdSettingsUpdate.
 | `stages` | CiConfigStageConnection | Stages of the pipeline. |
 | `status` | CiConfigStatus | Status of linting, can be either valid or invalid. |
 
-### CiConfigGroup
+### `CiConfigGroup`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -807,7 +807,7 @@ Autogenerated return type of CiCdSettingsUpdate.
 | `name` | String | Name of the job group. |
 | `size` | Int | Size of the job group. |
 
-### CiConfigJob
+### `CiConfigJob`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -825,26 +825,26 @@ Autogenerated return type of CiCdSettingsUpdate.
 | `tags` | String! => Array | List of tags that are used to select a runner. |
 | `when` | String | When to run the job. |
 
-### CiConfigJobRestriction
+### `CiConfigJobRestriction`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `refs` | String! => Array | The Git refs the job restriction applies to. |
 
-### CiConfigNeed
+### `CiConfigNeed`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `name` | String | Name of the need. |
 
-### CiConfigStage
+### `CiConfigStage`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `groups` | CiConfigGroupConnection | Groups of jobs for the stage. |
 | `name` | String | Name of the stage. |
 
-### CiGroup
+### `CiGroup`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -853,7 +853,7 @@ Autogenerated return type of CiCdSettingsUpdate.
 | `name` | String | Name of the job group. |
 | `size` | Int | Size of the group. |
 
-### CiJob
+### `CiJob`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -866,14 +866,14 @@ Autogenerated return type of CiCdSettingsUpdate.
 | `pipeline` | Pipeline | Pipeline the job belongs to. |
 | `scheduledAt` | Time | Schedule for the build. |
 
-### CiJobArtifact
+### `CiJobArtifact`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `downloadPath` | String | URL for downloading the artifact's file. |
 | `fileType` | JobArtifactFileType | File type of the artifact. |
 
-### CiStage
+### `CiStage`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -881,7 +881,7 @@ Autogenerated return type of CiCdSettingsUpdate.
 | `groups` | CiGroupConnection | Group of jobs for the stage. |
 | `name` | String | Name of the stage. |
 
-### ClusterAgent
+### `ClusterAgent`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -893,7 +893,7 @@ Autogenerated return type of CiCdSettingsUpdate.
 | `tokens` | ClusterAgentTokenConnection | Tokens associated with the cluster agent. |
 | `updatedAt` | Time | Timestamp the cluster agent was updated. |
 
-### ClusterAgentDeletePayload
+### `ClusterAgentDeletePayload`
 
 Autogenerated return type of ClusterAgentDelete.
 
@@ -902,7 +902,7 @@ Autogenerated return type of ClusterAgentDelete.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### ClusterAgentToken
+### `ClusterAgentToken`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -913,7 +913,7 @@ Autogenerated return type of ClusterAgentDelete.
 | `id` | ClustersAgentTokenID! | Global ID of the token. |
 | `name` | String | Name given to the token. |
 
-### ClusterAgentTokenCreatePayload
+### `ClusterAgentTokenCreatePayload`
 
 Autogenerated return type of ClusterAgentTokenCreate.
 
@@ -924,7 +924,7 @@ Autogenerated return type of ClusterAgentTokenCreate.
 | `secret` | String | Token secret value. Make sure you save it - you won't be able to access it again. |
 | `token` | ClusterAgentToken | Token created after mutation. |
 
-### ClusterAgentTokenDeletePayload
+### `ClusterAgentTokenDeletePayload`
 
 Autogenerated return type of ClusterAgentTokenDelete.
 
@@ -933,7 +933,7 @@ Autogenerated return type of ClusterAgentTokenDelete.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### CodeCoverageActivity
+### `CodeCoverageActivity`
 
 Represents the code coverage activity for a group.
 
@@ -944,7 +944,7 @@ Represents the code coverage activity for a group.
 | `date` | Date! | Date when the code coverage was created. |
 | `projectCount` | Int | Number of projects with code coverage results for the group. |
 
-### CodeCoverageSummary
+### `CodeCoverageSummary`
 
 Represents the code coverage summary for a project.
 
@@ -954,7 +954,7 @@ Represents the code coverage summary for a project.
 | `coverageCount` | Int | Number of different code coverage results available. |
 | `lastUpdatedOn` | Date | Latest date when the code coverage was created for the project. |
 
-### Commit
+### `Commit`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -975,7 +975,7 @@ Represents the code coverage summary for a project.
 | `webPath` | String! | Web path of the commit. |
 | `webUrl` | String! | Web URL of the commit. |
 
-### CommitCreatePayload
+### `CommitCreatePayload`
 
 Autogenerated return type of CommitCreate.
 
@@ -985,7 +985,7 @@ Autogenerated return type of CommitCreate.
 | `commit` | Commit | The commit after mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### ComplianceFramework
+### `ComplianceFramework`
 
 Represents a ComplianceFramework associated with a Project.
 
@@ -997,7 +997,7 @@ Represents a ComplianceFramework associated with a Project.
 | `name` | String! | Name of the compliance framework. |
 | `pipelineConfigurationFullPath` | String | Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/.compliance-gitlab-ci.yml@compliance/hipaa` **(ULTIMATE)**. |
 
-### ComposerMetadata
+### `ComposerMetadata`
 
 Composer metadata.
 
@@ -1006,7 +1006,7 @@ Composer metadata.
 | `composerJson` | PackageComposerJsonType! | Data of the Composer JSON file. |
 | `targetSha` | String! | Target SHA of the package. |
 
-### ConfigureSastPayload
+### `ConfigureSastPayload`
 
 Autogenerated return type of ConfigureSast.
 
@@ -1017,7 +1017,7 @@ Autogenerated return type of ConfigureSast.
 | `status` | String! | Status of creating the commit for the supplied SAST CI configuration. |
 | `successPath` | String | Redirect path to use when the response is successful. |
 
-### ContainerExpirationPolicy
+### `ContainerExpirationPolicy`
 
 A tag expiration policy designed to keep only the images that matter most.
 
@@ -1033,7 +1033,7 @@ A tag expiration policy designed to keep only the images that matter most.
 | `olderThan` | ContainerExpirationPolicyOlderThanEnum | Tags older that this will expire. |
 | `updatedAt` | Time! | Timestamp of when the container expiration policy was updated. |
 
-### ContainerRepository
+### `ContainerRepository`
 
 A container repository.
 
@@ -1052,7 +1052,7 @@ A container repository.
 | `tagsCount` | Int! | Number of tags associated with this image. |
 | `updatedAt` | Time! | Timestamp when the container repository was updated. |
 
-### ContainerRepositoryDetails
+### `ContainerRepositoryDetails`
 
 Details of a container repository.
 
@@ -1072,7 +1072,7 @@ Details of a container repository.
 | `tagsCount` | Int! | Number of tags associated with this image. |
 | `updatedAt` | Time! | Timestamp when the container repository was updated. |
 
-### ContainerRepositoryTag
+### `ContainerRepositoryTag`
 
 A tag from a container repository.
 
@@ -1088,7 +1088,7 @@ A tag from a container repository.
 | `shortRevision` | String | Short revision of the tag. |
 | `totalSize` | BigInt | The size of the tag. |
 
-### CreateAlertIssuePayload
+### `CreateAlertIssuePayload`
 
 Autogenerated return type of CreateAlertIssue.
 
@@ -1100,7 +1100,7 @@ Autogenerated return type of CreateAlertIssue.
 | `issue` | Issue | The issue created after mutation. |
 | `todo` | Todo | The to-do item after mutation. |
 
-### CreateAnnotationPayload
+### `CreateAnnotationPayload`
 
 Autogenerated return type of CreateAnnotation.
 
@@ -1110,7 +1110,7 @@ Autogenerated return type of CreateAnnotation.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### CreateBoardPayload
+### `CreateBoardPayload`
 
 Autogenerated return type of CreateBoard.
 
@@ -1120,7 +1120,7 @@ Autogenerated return type of CreateBoard.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### CreateBranchPayload
+### `CreateBranchPayload`
 
 Autogenerated return type of CreateBranch.
 
@@ -1130,7 +1130,7 @@ Autogenerated return type of CreateBranch.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### CreateClusterAgentPayload
+### `CreateClusterAgentPayload`
 
 Autogenerated return type of CreateClusterAgent.
 
@@ -1140,7 +1140,7 @@ Autogenerated return type of CreateClusterAgent.
 | `clusterAgent` | ClusterAgent | Cluster agent created after mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### CreateComplianceFrameworkPayload
+### `CreateComplianceFrameworkPayload`
 
 Autogenerated return type of CreateComplianceFramework.
 
@@ -1150,7 +1150,7 @@ Autogenerated return type of CreateComplianceFramework.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `framework` | ComplianceFramework | The created compliance framework. |
 
-### CreateCustomEmojiPayload
+### `CreateCustomEmojiPayload`
 
 Autogenerated return type of CreateCustomEmoji.
 
@@ -1160,7 +1160,7 @@ Autogenerated return type of CreateCustomEmoji.
 | `customEmoji` | CustomEmoji | The new custom emoji. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### CreateDevopsAdoptionSegmentPayload
+### `CreateDevopsAdoptionSegmentPayload`
 
 Autogenerated return type of CreateDevopsAdoptionSegment.
 
@@ -1170,7 +1170,7 @@ Autogenerated return type of CreateDevopsAdoptionSegment.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `segment` | DevopsAdoptionSegment | The segment after mutation. |
 
-### CreateDiffNotePayload
+### `CreateDiffNotePayload`
 
 Autogenerated return type of CreateDiffNote.
 
@@ -1180,7 +1180,7 @@ Autogenerated return type of CreateDiffNote.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `note` | Note | The note after mutation. |
 
-### CreateEpicPayload
+### `CreateEpicPayload`
 
 Autogenerated return type of CreateEpic.
 
@@ -1190,7 +1190,7 @@ Autogenerated return type of CreateEpic.
 | `epic` | Epic | The created epic. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### CreateImageDiffNotePayload
+### `CreateImageDiffNotePayload`
 
 Autogenerated return type of CreateImageDiffNote.
 
@@ -1200,7 +1200,7 @@ Autogenerated return type of CreateImageDiffNote.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `note` | Note | The note after mutation. |
 
-### CreateIssuePayload
+### `CreateIssuePayload`
 
 Autogenerated return type of CreateIssue.
 
@@ -1210,7 +1210,7 @@ Autogenerated return type of CreateIssue.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### CreateIterationPayload
+### `CreateIterationPayload`
 
 Autogenerated return type of CreateIteration.
 
@@ -1220,7 +1220,7 @@ Autogenerated return type of CreateIteration.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `iteration` | Iteration | The created iteration. |
 
-### CreateNotePayload
+### `CreateNotePayload`
 
 Autogenerated return type of CreateNote.
 
@@ -1230,7 +1230,7 @@ Autogenerated return type of CreateNote.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `note` | Note | The note after mutation. |
 
-### CreateRequirementPayload
+### `CreateRequirementPayload`
 
 Autogenerated return type of CreateRequirement.
 
@@ -1240,7 +1240,7 @@ Autogenerated return type of CreateRequirement.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `requirement` | Requirement | Requirement after mutation. |
 
-### CreateSnippetPayload
+### `CreateSnippetPayload`
 
 Autogenerated return type of CreateSnippet.
 
@@ -1254,7 +1254,7 @@ Autogenerated return type of CreateSnippet.
 | `spam` | Boolean | Indicates whether the operation was detected as definite spam. There is no option to resubmit the request with a CAPTCHA response. |
 | `spamLogId` | Int | The spam log ID which must be passed along with a valid CAPTCHA response for an operation to be completed. Included only when an operation was not completed because "NeedsCaptchaResponse" is true. |
 
-### CreateTestCasePayload
+### `CreateTestCasePayload`
 
 Autogenerated return type of CreateTestCase.
 
@@ -1264,7 +1264,7 @@ Autogenerated return type of CreateTestCase.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `testCase` | Issue | The test case created. |
 
-### CustomEmoji
+### `CustomEmoji`
 
 A custom emoji uploaded by user.
 
@@ -1275,7 +1275,7 @@ A custom emoji uploaded by user.
 | `name` | String! | The name of the emoji. |
 | `url` | String! | The link to file of the emoji. |
 
-### DastOnDemandScanCreatePayload
+### `DastOnDemandScanCreatePayload`
 
 Autogenerated return type of DastOnDemandScanCreate.
 
@@ -1285,7 +1285,7 @@ Autogenerated return type of DastOnDemandScanCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | String | URL of the pipeline that was created. |
 
-### DastProfile
+### `DastProfile`
 
 Represents a DAST Profile.
 
@@ -1299,7 +1299,7 @@ Represents a DAST Profile.
 | `id` | DastProfileID! | ID of the profile. |
 | `name` | String | The name of the profile. |
 
-### DastProfileBranch
+### `DastProfileBranch`
 
 Represents a DAST Profile Branch.
 
@@ -1308,7 +1308,7 @@ Represents a DAST Profile Branch.
 | `exists` | Boolean | Indicates whether or not the branch exists. |
 | `name` | String | The name of the branch. |
 
-### DastProfileCreatePayload
+### `DastProfileCreatePayload`
 
 Autogenerated return type of DastProfileCreate.
 
@@ -1319,7 +1319,7 @@ Autogenerated return type of DastProfileCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | String | The URL of the pipeline that was created. Requires `runAfterCreate` to be set to `true`. |
 
-### DastProfileDeletePayload
+### `DastProfileDeletePayload`
 
 Autogenerated return type of DastProfileDelete.
 
@@ -1328,7 +1328,7 @@ Autogenerated return type of DastProfileDelete.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DastProfileRunPayload
+### `DastProfileRunPayload`
 
 Autogenerated return type of DastProfileRun.
 
@@ -1338,7 +1338,7 @@ Autogenerated return type of DastProfileRun.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | String | URL of the pipeline that was created. |
 
-### DastProfileUpdatePayload
+### `DastProfileUpdatePayload`
 
 Autogenerated return type of DastProfileUpdate.
 
@@ -1349,7 +1349,7 @@ Autogenerated return type of DastProfileUpdate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | String | The URL of the pipeline that was created. Requires the input argument `runAfterUpdate` to be set to `true` when calling the mutation, otherwise no pipeline will be created. |
 
-### DastScannerProfile
+### `DastScannerProfile`
 
 Represents a DAST scanner profile.
 
@@ -1366,7 +1366,7 @@ Represents a DAST scanner profile.
 | `targetTimeout` | Int | The maximum number of seconds allowed for the site under test to respond to a request. |
 | `useAjaxSpider` | Boolean! | Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider. |
 
-### DastScannerProfileCreatePayload
+### `DastScannerProfileCreatePayload`
 
 Autogenerated return type of DastScannerProfileCreate.
 
@@ -1377,7 +1377,7 @@ Autogenerated return type of DastScannerProfileCreate.
 | `globalId` **{warning-solid}** | DastScannerProfileID | **Deprecated:** Use `id`. Deprecated in 13.6. |
 | `id` | DastScannerProfileID | ID of the scanner profile. |
 
-### DastScannerProfileDeletePayload
+### `DastScannerProfileDeletePayload`
 
 Autogenerated return type of DastScannerProfileDelete.
 
@@ -1386,7 +1386,7 @@ Autogenerated return type of DastScannerProfileDelete.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DastScannerProfileUpdatePayload
+### `DastScannerProfileUpdatePayload`
 
 Autogenerated return type of DastScannerProfileUpdate.
 
@@ -1396,7 +1396,7 @@ Autogenerated return type of DastScannerProfileUpdate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `id` | DastScannerProfileID | ID of the scanner profile. |
 
-### DastSiteProfile
+### `DastSiteProfile`
 
 Represents a DAST Site Profile.
 
@@ -1411,7 +1411,7 @@ Represents a DAST Site Profile.
 | `userPermissions` | DastSiteProfilePermissions! | Permissions for the current user on the resource |
 | `validationStatus` | DastSiteProfileValidationStatusEnum | The current validation status of the site profile. |
 
-### DastSiteProfileCreatePayload
+### `DastSiteProfileCreatePayload`
 
 Autogenerated return type of DastSiteProfileCreate.
 
@@ -1421,7 +1421,7 @@ Autogenerated return type of DastSiteProfileCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `id` | DastSiteProfileID | ID of the site profile. |
 
-### DastSiteProfileDeletePayload
+### `DastSiteProfileDeletePayload`
 
 Autogenerated return type of DastSiteProfileDelete.
 
@@ -1430,7 +1430,7 @@ Autogenerated return type of DastSiteProfileDelete.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DastSiteProfilePermissions
+### `DastSiteProfilePermissions`
 
 Check permissions for the current user on site profile.
 
@@ -1438,7 +1438,7 @@ Check permissions for the current user on site profile.
 | ----- | ---- | ----------- |
 | `createOnDemandDastScan` | Boolean! | Indicates the user can perform `create_on_demand_dast_scan` on this resource |
 
-### DastSiteProfileUpdatePayload
+### `DastSiteProfileUpdatePayload`
 
 Autogenerated return type of DastSiteProfileUpdate.
 
@@ -1448,7 +1448,7 @@ Autogenerated return type of DastSiteProfileUpdate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `id` | DastSiteProfileID | ID of the site profile. |
 
-### DastSiteTokenCreatePayload
+### `DastSiteTokenCreatePayload`
 
 Autogenerated return type of DastSiteTokenCreate.
 
@@ -1460,7 +1460,7 @@ Autogenerated return type of DastSiteTokenCreate.
 | `status` | DastSiteProfileValidationStatusEnum | The current validation status of the target. |
 | `token` | String | Token string. |
 
-### DastSiteValidation
+### `DastSiteValidation`
 
 Represents a DAST Site Validation.
 
@@ -1470,7 +1470,7 @@ Represents a DAST Site Validation.
 | `normalizedTargetUrl` | String | Normalized URL of the target to be validated. |
 | `status` | DastSiteProfileValidationStatusEnum! | Status of the site validation. |
 
-### DastSiteValidationCreatePayload
+### `DastSiteValidationCreatePayload`
 
 Autogenerated return type of DastSiteValidationCreate.
 
@@ -1481,7 +1481,7 @@ Autogenerated return type of DastSiteValidationCreate.
 | `id` | DastSiteValidationID | ID of the site validation. |
 | `status` | DastSiteProfileValidationStatusEnum | The current validation status. |
 
-### DastSiteValidationRevokePayload
+### `DastSiteValidationRevokePayload`
 
 Autogenerated return type of DastSiteValidationRevoke.
 
@@ -1490,7 +1490,7 @@ Autogenerated return type of DastSiteValidationRevoke.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DeleteAnnotationPayload
+### `DeleteAnnotationPayload`
 
 Autogenerated return type of DeleteAnnotation.
 
@@ -1499,7 +1499,7 @@ Autogenerated return type of DeleteAnnotation.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DeleteDevopsAdoptionSegmentPayload
+### `DeleteDevopsAdoptionSegmentPayload`
 
 Autogenerated return type of DeleteDevopsAdoptionSegment.
 
@@ -1508,7 +1508,7 @@ Autogenerated return type of DeleteDevopsAdoptionSegment.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DeleteJobsResponse
+### `DeleteJobsResponse`
 
 The response from the AdminSidekiqQueuesDeleteJobs mutation.
 
@@ -1518,7 +1518,7 @@ The response from the AdminSidekiqQueuesDeleteJobs mutation.
 | `deletedJobs` | Int | The number of matching jobs deleted. |
 | `queueSize` | Int | The queue size after processing. |
 
-### Design
+### `Design`
 
 A single design.
 
@@ -1539,7 +1539,7 @@ A single design.
 | `project` | Project! | The project the design belongs to. |
 | `versions` | DesignVersionConnection! | All versions related to this design ordered newest first. |
 
-### DesignAtVersion
+### `DesignAtVersion`
 
 A design pinned to a specific version. The image field reflects the design as of the associated version.
 
@@ -1558,7 +1558,7 @@ A design pinned to a specific version. The image field reflects the design as of
 | `project` | Project! | The project the design belongs to. |
 | `version` | DesignVersion! | The version this design-at-versions is pinned to. |
 
-### DesignCollection
+### `DesignCollection`
 
 A collection of designs.
 
@@ -1573,14 +1573,14 @@ A collection of designs.
 | `version` | DesignVersion | A specific version. |
 | `versions` | DesignVersionConnection! | All versions related to all designs, ordered newest first. |
 
-### DesignManagement
+### `DesignManagement`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `designAtVersion` | DesignAtVersion | Find a design as of a version. |
 | `version` | DesignVersion | Find a version. |
 
-### DesignManagementDeletePayload
+### `DesignManagementDeletePayload`
 
 Autogenerated return type of DesignManagementDelete.
 
@@ -1590,7 +1590,7 @@ Autogenerated return type of DesignManagementDelete.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `version` | DesignVersion | The new version in which the designs are deleted. |
 
-### DesignManagementMovePayload
+### `DesignManagementMovePayload`
 
 Autogenerated return type of DesignManagementMove.
 
@@ -1600,7 +1600,7 @@ Autogenerated return type of DesignManagementMove.
 | `designCollection` | DesignCollection | The current state of the collection. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DesignManagementUploadPayload
+### `DesignManagementUploadPayload`
 
 Autogenerated return type of DesignManagementUpload.
 
@@ -1611,7 +1611,7 @@ Autogenerated return type of DesignManagementUpload.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `skippedDesigns` | Design! => Array | Any designs that were skipped from the upload due to there being no change to their content since their last version |
 
-### DesignVersion
+### `DesignVersion`
 
 A specific version in which designs were added, modified or deleted.
 
@@ -1623,7 +1623,7 @@ A specific version in which designs were added, modified or deleted.
 | `id` | ID! | ID of the design version. |
 | `sha` | ID! | SHA of the design version. |
 
-### DestroyBoardListPayload
+### `DestroyBoardListPayload`
 
 Autogenerated return type of DestroyBoardList.
 
@@ -1633,7 +1633,7 @@ Autogenerated return type of DestroyBoardList.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `list` | BoardList | The list after mutation. |
 
-### DestroyBoardPayload
+### `DestroyBoardPayload`
 
 Autogenerated return type of DestroyBoard.
 
@@ -1643,7 +1643,7 @@ Autogenerated return type of DestroyBoard.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DestroyComplianceFrameworkPayload
+### `DestroyComplianceFrameworkPayload`
 
 Autogenerated return type of DestroyComplianceFramework.
 
@@ -1652,7 +1652,7 @@ Autogenerated return type of DestroyComplianceFramework.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DestroyContainerRepositoryPayload
+### `DestroyContainerRepositoryPayload`
 
 Autogenerated return type of DestroyContainerRepository.
 
@@ -1662,7 +1662,7 @@ Autogenerated return type of DestroyContainerRepository.
 | `containerRepository` | ContainerRepository! | The container repository policy after scheduling the deletion. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DestroyContainerRepositoryTagsPayload
+### `DestroyContainerRepositoryTagsPayload`
 
 Autogenerated return type of DestroyContainerRepositoryTags.
 
@@ -1672,7 +1672,7 @@ Autogenerated return type of DestroyContainerRepositoryTags.
 | `deletedTagNames` | String! => Array | Deleted container repository tags. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DestroyNotePayload
+### `DestroyNotePayload`
 
 Autogenerated return type of DestroyNote.
 
@@ -1682,7 +1682,7 @@ Autogenerated return type of DestroyNote.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `note` | Note | The note after mutation. |
 
-### DestroySnippetPayload
+### `DestroySnippetPayload`
 
 Autogenerated return type of DestroySnippet.
 
@@ -1692,7 +1692,7 @@ Autogenerated return type of DestroySnippet.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `snippet` | Snippet | The snippet after mutation. |
 
-### DetailedStatus
+### `DetailedStatus`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -1706,7 +1706,7 @@ Autogenerated return type of DestroySnippet.
 | `text` | String | Text of the status. |
 | `tooltip` | String | Tooltip associated with the status. |
 
-### DevopsAdoptionSegment
+### `DevopsAdoptionSegment`
 
 Segment.
 
@@ -1716,7 +1716,7 @@ Segment.
 | `latestSnapshot` | DevopsAdoptionSnapshot | The latest adoption metrics for the segment. |
 | `namespace` | Namespace | Segment namespace. |
 
-### DevopsAdoptionSnapshot
+### `DevopsAdoptionSnapshot`
 
 Snapshot.
 
@@ -1733,7 +1733,7 @@ Snapshot.
 | `securityScanSucceeded` | Boolean! | At least one security scan succeeded. |
 | `startTime` | Time! | The start time for the snapshot where the data points were collected. |
 
-### DiffPosition
+### `DiffPosition`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -1749,7 +1749,7 @@ Snapshot.
 | `x` | Int | X position of the note. |
 | `y` | Int | Y position of the note. |
 
-### DiffRefs
+### `DiffRefs`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -1757,7 +1757,7 @@ Snapshot.
 | `headSha` | String! | SHA of the HEAD at the time the comment was made. |
 | `startSha` | String! | SHA of the branch being compared against. |
 
-### DiffStats
+### `DiffStats`
 
 Changes to a single file.
 
@@ -1767,7 +1767,7 @@ Changes to a single file.
 | `deletions` | Int! | Number of lines deleted from this file. |
 | `path` | String! | File path, relative to repository root. |
 
-### DiffStatsSummary
+### `DiffStatsSummary`
 
 Aggregated summary of changes.
 
@@ -1778,7 +1778,7 @@ Aggregated summary of changes.
 | `deletions` | Int! | Number of lines deleted. |
 | `fileCount` | Int! | Number of files changed. |
 
-### Discussion
+### `Discussion`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -1791,7 +1791,7 @@ Aggregated summary of changes.
 | `resolvedAt` | Time | Timestamp of when the object was resolved. |
 | `resolvedBy` | User | User who resolved the object. |
 
-### DiscussionToggleResolvePayload
+### `DiscussionToggleResolvePayload`
 
 Autogenerated return type of DiscussionToggleResolve.
 
@@ -1801,7 +1801,7 @@ Autogenerated return type of DiscussionToggleResolve.
 | `discussion` | Discussion | The discussion after mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### DismissVulnerabilityPayload
+### `DismissVulnerabilityPayload`
 
 Autogenerated return type of DismissVulnerability.
 
@@ -1811,7 +1811,7 @@ Autogenerated return type of DismissVulnerability.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `vulnerability` | Vulnerability | The vulnerability after dismissal. |
 
-### Environment
+### `Environment`
 
 Describes where code is deployed for a project.
 
@@ -1824,7 +1824,7 @@ Describes where code is deployed for a project.
 | `path` | String! | The path to the environment. |
 | `state` | String! | State of the environment, for example: available/stopped. |
 
-### EnvironmentsCanaryIngressUpdatePayload
+### `EnvironmentsCanaryIngressUpdatePayload`
 
 Autogenerated return type of EnvironmentsCanaryIngressUpdate.
 
@@ -1833,7 +1833,7 @@ Autogenerated return type of EnvironmentsCanaryIngressUpdate.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### Epic
+### `Epic`
 
 Represents an epic.
 
@@ -1886,7 +1886,7 @@ Represents an epic.
 | `webPath` | String! | Web path of the epic. |
 | `webUrl` | String! | Web URL of the epic. |
 
-### EpicAddIssuePayload
+### `EpicAddIssuePayload`
 
 Autogenerated return type of EpicAddIssue.
 
@@ -1897,7 +1897,7 @@ Autogenerated return type of EpicAddIssue.
 | `epicIssue` | EpicIssue | The epic-issue relation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### EpicBoard
+### `EpicBoard`
 
 Represents an epic board.
 
@@ -1911,7 +1911,7 @@ Represents an epic board.
 | `webPath` | String! | Web path of the epic board. |
 | `webUrl` | String! | Web URL of the epic board. |
 
-### EpicBoardCreatePayload
+### `EpicBoardCreatePayload`
 
 Autogenerated return type of EpicBoardCreate.
 
@@ -1921,7 +1921,7 @@ Autogenerated return type of EpicBoardCreate.
 | `epicBoard` | EpicBoard | The created epic board. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### EpicBoardListCreatePayload
+### `EpicBoardListCreatePayload`
 
 Autogenerated return type of EpicBoardListCreate.
 
@@ -1931,7 +1931,7 @@ Autogenerated return type of EpicBoardListCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `list` | EpicList | Epic list in the epic board. |
 
-### EpicDescendantCount
+### `EpicDescendantCount`
 
 Counts of descendent epics.
 
@@ -1942,7 +1942,7 @@ Counts of descendent epics.
 | `openedEpics` | Int | Number of opened child epics. |
 | `openedIssues` | Int | Number of opened epic issues. |
 
-### EpicDescendantWeights
+### `EpicDescendantWeights`
 
 Total weight of open and closed descendant issues.
 
@@ -1951,7 +1951,7 @@ Total weight of open and closed descendant issues.
 | `closedIssues` | Int | Total weight of completed (closed) issues in this epic, including epic descendants. |
 | `openedIssues` | Int | Total weight of opened issues in this epic, including epic descendants. |
 
-### EpicHealthStatus
+### `EpicHealthStatus`
 
 Health status of child issues.
 
@@ -1961,7 +1961,7 @@ Health status of child issues.
 | `issuesNeedingAttention` | Int | Number of issues that need attention. |
 | `issuesOnTrack` | Int | Number of issues on track. |
 
-### EpicIssue
+### `EpicIssue`
 
 Relationship between an epic and an issue.
 
@@ -2025,7 +2025,7 @@ Relationship between an epic and an issue.
 | `webUrl` | String! | Web URL of the issue. |
 | `weight` | Int | Weight of the issue. |
 
-### EpicList
+### `EpicList`
 
 Represents an epic board list.
 
@@ -2040,7 +2040,7 @@ Represents an epic board list.
 | `position` | Int | Position of the list within the board. |
 | `title` | String! | Title of the list. |
 
-### EpicPermissions
+### `EpicPermissions`
 
 Check permissions for the current user on an epic.
 
@@ -2055,7 +2055,7 @@ Check permissions for the current user on an epic.
 | `readEpicIid` | Boolean! | Indicates the user can perform `read_epic_iid` on this resource |
 | `updateEpic` | Boolean! | Indicates the user can perform `update_epic` on this resource |
 
-### EpicSetSubscriptionPayload
+### `EpicSetSubscriptionPayload`
 
 Autogenerated return type of EpicSetSubscription.
 
@@ -2065,7 +2065,7 @@ Autogenerated return type of EpicSetSubscription.
 | `epic` | Epic | The epic after mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### EpicTreeReorderPayload
+### `EpicTreeReorderPayload`
 
 Autogenerated return type of EpicTreeReorder.
 
@@ -2074,7 +2074,7 @@ Autogenerated return type of EpicTreeReorder.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### Event
+### `Event`
 
 Representing an event.
 
@@ -2086,7 +2086,7 @@ Representing an event.
 | `id` | ID! | ID of the event. |
 | `updatedAt` | Time! | When this event was updated. |
 
-### ExportRequirementsPayload
+### `ExportRequirementsPayload`
 
 Autogenerated return type of ExportRequirements.
 
@@ -2095,7 +2095,7 @@ Autogenerated return type of ExportRequirements.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### ExternalIssue
+### `ExternalIssue`
 
 Represents an external issue.
 
@@ -2109,7 +2109,7 @@ Represents an external issue.
 | `updatedAt` | Time | Timestamp of when the issue was updated. |
 | `webUrl` | String | URL to the issue in the external tracker. |
 
-### GeoNode
+### `GeoNode`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2133,7 +2133,7 @@ Represents an external issue.
 | `url` | String | The user-facing URL for this Geo node. |
 | `verificationMaxCapacity` | Int | The maximum concurrency of repository verification for this secondary node. |
 
-### GitlabSubscriptionActivatePayload
+### `GitlabSubscriptionActivatePayload`
 
 Autogenerated return type of GitlabSubscriptionActivate.
 
@@ -2142,7 +2142,7 @@ Autogenerated return type of GitlabSubscriptionActivate.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### GrafanaIntegration
+### `GrafanaIntegration`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2152,7 +2152,7 @@ Autogenerated return type of GitlabSubscriptionActivate.
 | `id` | ID! | Internal ID of the Grafana integration. |
 | `updatedAt` | Time! | Timestamp of the issue's last activity. |
 
-### Group
+### `Group`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2219,7 +2219,7 @@ Autogenerated return type of GitlabSubscriptionActivate.
 | `vulnerabilitySeveritiesCount` | VulnerabilitySeveritiesCount | Counts for each vulnerability severity in the group and its subgroups. |
 | `webUrl` | String! | Web URL of the group. |
 
-### GroupMember
+### `GroupMember`
 
 Represents a Group Membership.
 
@@ -2235,13 +2235,13 @@ Represents a Group Membership.
 | `user` | User! | User that is associated with the member object. |
 | `userPermissions` | GroupPermissions! | Permissions for the current user on the resource |
 
-### GroupPermissions
+### `GroupPermissions`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `readGroup` | Boolean! | Indicates the user can perform `read_group` on this resource |
 
-### GroupReleaseStats
+### `GroupReleaseStats`
 
 Contains release-related statistics about a group.
 
@@ -2250,7 +2250,7 @@ Contains release-related statistics about a group.
 | `releasesCount` | Int | Total number of releases in all descendant projects of the group. Will always return `null` if `group_level_release_statistics` feature flag is disabled |
 | `releasesPercentage` | Int | Percentage of the group's descendant projects that have at least one release. Will always return `null` if `group_level_release_statistics` feature flag is disabled |
 
-### GroupStats
+### `GroupStats`
 
 Contains statistics about a group.
 
@@ -2258,7 +2258,7 @@ Contains statistics about a group.
 | ----- | ---- | ----------- |
 | `releaseStats` | GroupReleaseStats | Statistics related to releases within the group. |
 
-### HttpIntegrationCreatePayload
+### `HttpIntegrationCreatePayload`
 
 Autogenerated return type of HttpIntegrationCreate.
 
@@ -2268,7 +2268,7 @@ Autogenerated return type of HttpIntegrationCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `integration` | AlertManagementHttpIntegration | The HTTP integration. |
 
-### HttpIntegrationDestroyPayload
+### `HttpIntegrationDestroyPayload`
 
 Autogenerated return type of HttpIntegrationDestroy.
 
@@ -2278,7 +2278,7 @@ Autogenerated return type of HttpIntegrationDestroy.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `integration` | AlertManagementHttpIntegration | The HTTP integration. |
 
-### HttpIntegrationResetTokenPayload
+### `HttpIntegrationResetTokenPayload`
 
 Autogenerated return type of HttpIntegrationResetToken.
 
@@ -2288,7 +2288,7 @@ Autogenerated return type of HttpIntegrationResetToken.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `integration` | AlertManagementHttpIntegration | The HTTP integration. |
 
-### HttpIntegrationUpdatePayload
+### `HttpIntegrationUpdatePayload`
 
 Autogenerated return type of HttpIntegrationUpdate.
 
@@ -2298,7 +2298,7 @@ Autogenerated return type of HttpIntegrationUpdate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `integration` | AlertManagementHttpIntegration | The HTTP integration. |
 
-### IncidentManagementOncallRotation
+### `IncidentManagementOncallRotation`
 
 Describes an incident management on-call rotation.
 
@@ -2314,7 +2314,7 @@ Describes an incident management on-call rotation.
 | `shifts` | IncidentManagementOncallShiftConnection | Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month. |
 | `startsAt` | Time | Start date of the on-call rotation. |
 
-### IncidentManagementOncallSchedule
+### `IncidentManagementOncallSchedule`
 
 Describes an incident management on-call schedule.
 
@@ -2326,7 +2326,7 @@ Describes an incident management on-call schedule.
 | `rotations` | IncidentManagementOncallRotationConnection! | On-call rotations for the on-call schedule. |
 | `timezone` | String! | Time zone of the on-call schedule. |
 
-### IncidentManagementOncallShift
+### `IncidentManagementOncallShift`
 
 A block of time for which a participant is on-call.
 
@@ -2336,7 +2336,7 @@ A block of time for which a participant is on-call.
 | `participant` | OncallParticipantType | Participant assigned to the on-call shift. |
 | `startsAt` | Time | Start time of the on-call shift. |
 
-### InstanceSecurityDashboard
+### `InstanceSecurityDashboard`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2345,7 +2345,7 @@ A block of time for which a participant is on-call.
 | `vulnerabilityScanners` | VulnerabilityScannerConnection | Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard. |
 | `vulnerabilitySeveritiesCount` | VulnerabilitySeveritiesCount | Counts for each vulnerability severity from projects selected in Instance Security Dashboard. |
 
-### Issue
+### `Issue`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2405,7 +2405,7 @@ A block of time for which a participant is on-call.
 | `webUrl` | String! | Web URL of the issue. |
 | `weight` | Int | Weight of the issue. |
 
-### IssueMoveListPayload
+### `IssueMoveListPayload`
 
 Autogenerated return type of IssueMoveList.
 
@@ -2415,7 +2415,7 @@ Autogenerated return type of IssueMoveList.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### IssueMovePayload
+### `IssueMovePayload`
 
 Autogenerated return type of IssueMove.
 
@@ -2425,7 +2425,7 @@ Autogenerated return type of IssueMove.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### IssuePermissions
+### `IssuePermissions`
 
 Check permissions for the current user on a issue.
 
@@ -2440,7 +2440,7 @@ Check permissions for the current user on a issue.
 | `reopenIssue` | Boolean! | Indicates the user can perform `reopen_issue` on this resource |
 | `updateIssue` | Boolean! | Indicates the user can perform `update_issue` on this resource |
 
-### IssueSetAssigneesPayload
+### `IssueSetAssigneesPayload`
 
 Autogenerated return type of IssueSetAssignees.
 
@@ -2450,7 +2450,7 @@ Autogenerated return type of IssueSetAssignees.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### IssueSetConfidentialPayload
+### `IssueSetConfidentialPayload`
 
 Autogenerated return type of IssueSetConfidential.
 
@@ -2460,7 +2460,7 @@ Autogenerated return type of IssueSetConfidential.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### IssueSetDueDatePayload
+### `IssueSetDueDatePayload`
 
 Autogenerated return type of IssueSetDueDate.
 
@@ -2470,7 +2470,7 @@ Autogenerated return type of IssueSetDueDate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### IssueSetEpicPayload
+### `IssueSetEpicPayload`
 
 Autogenerated return type of IssueSetEpic.
 
@@ -2480,7 +2480,7 @@ Autogenerated return type of IssueSetEpic.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### IssueSetIterationPayload
+### `IssueSetIterationPayload`
 
 Autogenerated return type of IssueSetIteration.
 
@@ -2490,7 +2490,7 @@ Autogenerated return type of IssueSetIteration.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### IssueSetLockedPayload
+### `IssueSetLockedPayload`
 
 Autogenerated return type of IssueSetLocked.
 
@@ -2500,7 +2500,7 @@ Autogenerated return type of IssueSetLocked.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### IssueSetSeverityPayload
+### `IssueSetSeverityPayload`
 
 Autogenerated return type of IssueSetSeverity.
 
@@ -2510,7 +2510,7 @@ Autogenerated return type of IssueSetSeverity.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### IssueSetSubscriptionPayload
+### `IssueSetSubscriptionPayload`
 
 Autogenerated return type of IssueSetSubscription.
 
@@ -2520,7 +2520,7 @@ Autogenerated return type of IssueSetSubscription.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### IssueSetWeightPayload
+### `IssueSetWeightPayload`
 
 Autogenerated return type of IssueSetWeight.
 
@@ -2530,7 +2530,7 @@ Autogenerated return type of IssueSetWeight.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### IssueStatusCountsType
+### `IssueStatusCountsType`
 
 Represents total number of issues for the represented statuses.
 
@@ -2540,7 +2540,7 @@ Represents total number of issues for the represented statuses.
 | `closed` | Int | Number of issues with status CLOSED for the project |
 | `opened` | Int | Number of issues with status OPENED for the project |
 
-### Iteration
+### `Iteration`
 
 Represents an iteration object.
 
@@ -2562,7 +2562,7 @@ Represents an iteration object.
 | `webPath` | String! | Web path of the iteration. |
 | `webUrl` | String! | Web URL of the iteration. |
 
-### JiraImport
+### `JiraImport`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2574,7 +2574,7 @@ Represents an iteration object.
 | `scheduledBy` | User | User that started the Jira import. |
 | `totalIssueCount` | Int! | Total count of issues that were attempted to import. |
 
-### JiraImportStartPayload
+### `JiraImportStartPayload`
 
 Autogenerated return type of JiraImportStart.
 
@@ -2584,7 +2584,7 @@ Autogenerated return type of JiraImportStart.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `jiraImport` | JiraImport | The Jira import data after mutation. |
 
-### JiraImportUsersPayload
+### `JiraImportUsersPayload`
 
 Autogenerated return type of JiraImportUsers.
 
@@ -2594,7 +2594,7 @@ Autogenerated return type of JiraImportUsers.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `jiraUsers` | JiraUser! => Array | Users returned from Jira, matched by email and name if possible. |
 
-### JiraProject
+### `JiraProject`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2602,7 +2602,7 @@ Autogenerated return type of JiraImportUsers.
 | `name` | String | Name of the Jira project. |
 | `projectId` | Int! | ID of the Jira project. |
 
-### JiraService
+### `JiraService`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2610,7 +2610,7 @@ Autogenerated return type of JiraImportUsers.
 | `projects` | JiraProjectConnection | List of all Jira projects fetched through Jira REST API. |
 | `type` | String | Class name of the service. |
 
-### JiraUser
+### `JiraUser`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2621,7 +2621,7 @@ Autogenerated return type of JiraImportUsers.
 | `jiraDisplayName` | String! | Display name of the Jira user. |
 | `jiraEmail` | String | Email of the Jira user, returned only for users with public emails. |
 
-### Label
+### `Label`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2634,7 +2634,7 @@ Autogenerated return type of JiraImportUsers.
 | `title` | String! | Content of the label. |
 | `updatedAt` | Time! | When this label was last updated. |
 
-### LabelCreatePayload
+### `LabelCreatePayload`
 
 Autogenerated return type of LabelCreate.
 
@@ -2644,7 +2644,7 @@ Autogenerated return type of LabelCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `label` | Label | The label after mutation. |
 
-### MarkAsSpamSnippetPayload
+### `MarkAsSpamSnippetPayload`
 
 Autogenerated return type of MarkAsSpamSnippet.
 
@@ -2654,7 +2654,7 @@ Autogenerated return type of MarkAsSpamSnippet.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `snippet` | Snippet | The snippet after mutation. |
 
-### MergeRequest
+### `MergeRequest`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2743,7 +2743,7 @@ Autogenerated return type of MarkAsSpamSnippet.
 | `webUrl` | String | Web URL of the merge request. |
 | `workInProgress` | Boolean! | Indicates if the merge request is a draft. |
 
-### MergeRequestCreatePayload
+### `MergeRequestCreatePayload`
 
 Autogenerated return type of MergeRequestCreate.
 
@@ -2753,7 +2753,7 @@ Autogenerated return type of MergeRequestCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `mergeRequest` | MergeRequest | The merge request after mutation. |
 
-### MergeRequestDiffRegistry
+### `MergeRequestDiffRegistry`
 
 Represents the Geo sync and verification state of a Merge Request diff.
 
@@ -2768,7 +2768,7 @@ Represents the Geo sync and verification state of a Merge Request diff.
 | `retryCount` | Int | Number of consecutive failed sync attempts of the MergeRequestDiffRegistry |
 | `state` | RegistryState | Sync state of the MergeRequestDiffRegistry |
 
-### MergeRequestPermissions
+### `MergeRequestPermissions`
 
 Check permissions for the current user on a merge request.
 
@@ -2784,7 +2784,7 @@ Check permissions for the current user on a merge request.
 | `revertOnCurrentMergeRequest` | Boolean! | Indicates the user can perform `revert_on_current_merge_request` on this resource |
 | `updateMergeRequest` | Boolean! | Indicates the user can perform `update_merge_request` on this resource |
 
-### MergeRequestReviewerRereviewPayload
+### `MergeRequestReviewerRereviewPayload`
 
 Autogenerated return type of MergeRequestReviewerRereview.
 
@@ -2794,7 +2794,7 @@ Autogenerated return type of MergeRequestReviewerRereview.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `mergeRequest` | MergeRequest | The merge request after mutation. |
 
-### MergeRequestSetAssigneesPayload
+### `MergeRequestSetAssigneesPayload`
 
 Autogenerated return type of MergeRequestSetAssignees.
 
@@ -2804,7 +2804,7 @@ Autogenerated return type of MergeRequestSetAssignees.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `mergeRequest` | MergeRequest | The merge request after mutation. |
 
-### MergeRequestSetLabelsPayload
+### `MergeRequestSetLabelsPayload`
 
 Autogenerated return type of MergeRequestSetLabels.
 
@@ -2814,7 +2814,7 @@ Autogenerated return type of MergeRequestSetLabels.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `mergeRequest` | MergeRequest | The merge request after mutation. |
 
-### MergeRequestSetLockedPayload
+### `MergeRequestSetLockedPayload`
 
 Autogenerated return type of MergeRequestSetLocked.
 
@@ -2824,7 +2824,7 @@ Autogenerated return type of MergeRequestSetLocked.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `mergeRequest` | MergeRequest | The merge request after mutation. |
 
-### MergeRequestSetMilestonePayload
+### `MergeRequestSetMilestonePayload`
 
 Autogenerated return type of MergeRequestSetMilestone.
 
@@ -2834,7 +2834,7 @@ Autogenerated return type of MergeRequestSetMilestone.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `mergeRequest` | MergeRequest | The merge request after mutation. |
 
-### MergeRequestSetSubscriptionPayload
+### `MergeRequestSetSubscriptionPayload`
 
 Autogenerated return type of MergeRequestSetSubscription.
 
@@ -2844,7 +2844,7 @@ Autogenerated return type of MergeRequestSetSubscription.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `mergeRequest` | MergeRequest | The merge request after mutation. |
 
-### MergeRequestSetWipPayload
+### `MergeRequestSetWipPayload`
 
 Autogenerated return type of MergeRequestSetWip.
 
@@ -2854,7 +2854,7 @@ Autogenerated return type of MergeRequestSetWip.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `mergeRequest` | MergeRequest | The merge request after mutation. |
 
-### MergeRequestUpdatePayload
+### `MergeRequestUpdatePayload`
 
 Autogenerated return type of MergeRequestUpdate.
 
@@ -2864,14 +2864,14 @@ Autogenerated return type of MergeRequestUpdate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `mergeRequest` | MergeRequest | The merge request after mutation. |
 
-### Metadata
+### `Metadata`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `revision` | String! | Revision. |
 | `version` | String! | Version. |
 
-### MetricImage
+### `MetricImage`
 
 Represents a metric image upload.
 
@@ -2883,7 +2883,7 @@ Represents a metric image upload.
 | `iid` | ID! | Internal ID of the metric upload. |
 | `url` | String! | URL of the metric source. |
 
-### MetricsDashboard
+### `MetricsDashboard`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2891,7 +2891,7 @@ Represents a metric image upload.
 | `path` | String | Path to a file with the dashboard definition. |
 | `schemaValidationWarnings` | String! => Array | Dashboard schema validation warnings. |
 
-### MetricsDashboardAnnotation
+### `MetricsDashboardAnnotation`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2901,7 +2901,7 @@ Represents a metric image upload.
 | `panelId` | String | ID of a dashboard panel to which the annotation should be scoped. |
 | `startingAt` | Time | Timestamp marking start of annotated time span. |
 
-### Milestone
+### `Milestone`
 
 Represents a milestone.
 
@@ -2922,7 +2922,7 @@ Represents a milestone.
 | `updatedAt` | Time! | Timestamp of last milestone update. |
 | `webPath` | String! | Web path of the milestone. |
 
-### MilestoneStats
+### `MilestoneStats`
 
 Contains statistics about a milestone.
 
@@ -2931,7 +2931,7 @@ Contains statistics about a milestone.
 | `closedIssuesCount` | Int | Number of closed issues associated with the milestone. |
 | `totalIssuesCount` | Int | Total number of issues associated with the milestone. |
 
-### Namespace
+### `Namespace`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2959,7 +2959,7 @@ Contains statistics about a milestone.
 | `totalRepositorySizeExcess` | Float | Total excess repository size of all projects in the root namespace in bytes. |
 | `visibility` | String | Visibility of the namespace. |
 
-### NamespaceIncreaseStorageTemporarilyPayload
+### `NamespaceIncreaseStorageTemporarilyPayload`
 
 Autogenerated return type of NamespaceIncreaseStorageTemporarily.
 
@@ -2969,7 +2969,7 @@ Autogenerated return type of NamespaceIncreaseStorageTemporarily.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `namespace` | Namespace | The namespace after mutation. |
 
-### Note
+### `Note`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -2992,7 +2992,7 @@ Autogenerated return type of NamespaceIncreaseStorageTemporarily.
 | `url` | String | URL to view this Note in the Web UI. |
 | `userPermissions` | NotePermissions! | Permissions for the current user on the resource |
 
-### NotePermissions
+### `NotePermissions`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3003,7 +3003,7 @@ Autogenerated return type of NamespaceIncreaseStorageTemporarily.
 | `repositionNote` | Boolean! | Indicates the user can perform `reposition_note` on this resource |
 | `resolveNote` | Boolean! | Indicates the user can perform `resolve_note` on this resource |
 
-### OncallParticipantType
+### `OncallParticipantType`
 
 The rotation participant and color palette.
 
@@ -3014,7 +3014,7 @@ The rotation participant and color palette.
 | `id` | IncidentManagementOncallParticipantID! | ID of the on-call participant. |
 | `user` | User! | The user who is participating. |
 
-### OncallRotationActivePeriodType
+### `OncallRotationActivePeriodType`
 
 Active period time range for on-call rotation.
 
@@ -3023,7 +3023,7 @@ Active period time range for on-call rotation.
 | `endTime` | String | The end of the rotation active period. |
 | `startTime` | String | The start of the rotation active period. |
 
-### OncallRotationCreatePayload
+### `OncallRotationCreatePayload`
 
 Autogenerated return type of OncallRotationCreate.
 
@@ -3033,7 +3033,7 @@ Autogenerated return type of OncallRotationCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `oncallRotation` | IncidentManagementOncallRotation | The on-call rotation. |
 
-### OncallRotationDestroyPayload
+### `OncallRotationDestroyPayload`
 
 Autogenerated return type of OncallRotationDestroy.
 
@@ -3043,7 +3043,7 @@ Autogenerated return type of OncallRotationDestroy.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `oncallRotation` | IncidentManagementOncallRotation | The on-call rotation. |
 
-### OncallScheduleCreatePayload
+### `OncallScheduleCreatePayload`
 
 Autogenerated return type of OncallScheduleCreate.
 
@@ -3053,7 +3053,7 @@ Autogenerated return type of OncallScheduleCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `oncallSchedule` | IncidentManagementOncallSchedule | The on-call schedule. |
 
-### OncallScheduleDestroyPayload
+### `OncallScheduleDestroyPayload`
 
 Autogenerated return type of OncallScheduleDestroy.
 
@@ -3063,7 +3063,7 @@ Autogenerated return type of OncallScheduleDestroy.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `oncallSchedule` | IncidentManagementOncallSchedule | The on-call schedule. |
 
-### OncallScheduleUpdatePayload
+### `OncallScheduleUpdatePayload`
 
 Autogenerated return type of OncallScheduleUpdate.
 
@@ -3073,7 +3073,7 @@ Autogenerated return type of OncallScheduleUpdate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `oncallSchedule` | IncidentManagementOncallSchedule | The on-call schedule. |
 
-### Package
+### `Package`
 
 Represents a package in the Package Registry.
 
@@ -3091,7 +3091,7 @@ Represents a package in the Package Registry.
 | `version` | String | Version string. |
 | `versions` | PackageWithoutVersionsConnection | The other versions of the package. |
 
-### PackageComposerJsonType
+### `PackageComposerJsonType`
 
 Represents a composer JSON file.
 
@@ -3102,7 +3102,7 @@ Represents a composer JSON file.
 | `type` | String | The type set in the Composer JSON file. |
 | `version` | String | The version set in the Composer JSON file. |
 
-### PackageFileRegistry
+### `PackageFileRegistry`
 
 Represents the Geo sync and verification state of a package file.
 
@@ -3117,7 +3117,7 @@ Represents the Geo sync and verification state of a package file.
 | `retryCount` | Int | Number of consecutive failed sync attempts of the PackageFileRegistry |
 | `state` | RegistryState | Sync state of the PackageFileRegistry |
 
-### PackageSettings
+### `PackageSettings`
 
 Namespace-level Package Registry settings.
 
@@ -3126,7 +3126,7 @@ Namespace-level Package Registry settings.
 | `mavenDuplicateExceptionRegex` | UntrustedRegexp | When maven_duplicates_allowed is false, you can publish duplicate packages with names that match this regex. Otherwise, this setting has no effect. |
 | `mavenDuplicatesAllowed` | Boolean! | Indicates whether duplicate Maven packages are allowed for this namespace. |
 
-### PackageTag
+### `PackageTag`
 
 Represents a package tag.
 
@@ -3137,7 +3137,7 @@ Represents a package tag.
 | `name` | String! | The name of the tag. |
 | `updatedAt` | Time! | The updated date. |
 
-### PackageWithoutVersions
+### `PackageWithoutVersions`
 
 Represents a version of a package in the Package Registry.
 
@@ -3154,7 +3154,7 @@ Represents a version of a package in the Package Registry.
 | `updatedAt` | Time! | Date of most recent update. |
 | `version` | String | Version string. |
 
-### PageInfo
+### `PageInfo`
 
 Information about pagination in a connection.
 
@@ -3165,7 +3165,7 @@ Information about pagination in a connection.
 | `hasPreviousPage` | Boolean! | When paginating backwards, are there more items? |
 | `startCursor` | String | When paginating backwards, the cursor to continue. |
 
-### Pipeline
+### `Pipeline`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3199,7 +3199,7 @@ Information about pagination in a connection.
 | `userPermissions` | PipelinePermissions! | Permissions for the current user on the resource |
 | `warnings` | Boolean! | Indicates if a pipeline has warnings. |
 
-### PipelineAnalytics
+### `PipelineAnalytics`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3215,7 +3215,7 @@ Information about pagination in a connection.
 | `yearPipelinesSuccessful` | Int! => Array | Total yearly successful pipeline count. |
 | `yearPipelinesTotals` | Int! => Array | Total yearly pipeline count. |
 
-### PipelineCancelPayload
+### `PipelineCancelPayload`
 
 Autogenerated return type of PipelineCancel.
 
@@ -3224,7 +3224,7 @@ Autogenerated return type of PipelineCancel.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### PipelineDestroyPayload
+### `PipelineDestroyPayload`
 
 Autogenerated return type of PipelineDestroy.
 
@@ -3233,7 +3233,7 @@ Autogenerated return type of PipelineDestroy.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### PipelinePermissions
+### `PipelinePermissions`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3241,7 +3241,7 @@ Autogenerated return type of PipelineDestroy.
 | `destroyPipeline` | Boolean! | Indicates the user can perform `destroy_pipeline` on this resource |
 | `updatePipeline` | Boolean! | Indicates the user can perform `update_pipeline` on this resource |
 
-### PipelineRetryPayload
+### `PipelineRetryPayload`
 
 Autogenerated return type of PipelineRetry.
 
@@ -3251,7 +3251,7 @@ Autogenerated return type of PipelineRetry.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `pipeline` | Pipeline | The pipeline after mutation. |
 
-### PipelineSecurityReportFinding
+### `PipelineSecurityReportFinding`
 
 Represents vulnerability finding of a security report on the pipeline.
 
@@ -3270,7 +3270,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | `solution` | String | URL to the vulnerability's details page. |
 | `uuid` | String | Name of the vulnerability finding. |
 
-### Project
+### `Project`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3383,7 +3383,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | `webUrl` | String | Web URL of the project. |
 | `wikiEnabled` | Boolean | Indicates if Wikis are enabled for the current user |
 
-### ProjectCiCdSetting
+### `ProjectCiCdSetting`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3392,7 +3392,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | `mergeTrainsEnabled` | Boolean | Whether merge trains are enabled. |
 | `project` | Project | Project the CI/CD settings belong to. |
 
-### ProjectMember
+### `ProjectMember`
 
 Represents a Project Membership.
 
@@ -3408,7 +3408,7 @@ Represents a Project Membership.
 | `user` | User! | User that is associated with the member object. |
 | `userPermissions` | ProjectPermissions! | Permissions for the current user on the resource |
 
-### ProjectPermissions
+### `ProjectPermissions`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3455,7 +3455,7 @@ Represents a Project Membership.
 | `updateWiki` | Boolean! | Indicates the user can perform `update_wiki` on this resource |
 | `uploadFile` | Boolean! | Indicates the user can perform `upload_file` on this resource |
 
-### ProjectStatistics
+### `ProjectStatistics`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3469,7 +3469,7 @@ Represents a Project Membership.
 | `uploadsSize` | Float | Uploads size of the project in bytes. |
 | `wikiSize` | Float | Wiki size of the project in bytes. |
 
-### PrometheusAlert
+### `PrometheusAlert`
 
 The alert condition for Prometheus.
 
@@ -3478,7 +3478,7 @@ The alert condition for Prometheus.
 | `humanizedText` | String! | The human-readable text of the alert condition. |
 | `id` | ID! | ID of the alert condition. |
 
-### PrometheusIntegrationCreatePayload
+### `PrometheusIntegrationCreatePayload`
 
 Autogenerated return type of PrometheusIntegrationCreate.
 
@@ -3488,7 +3488,7 @@ Autogenerated return type of PrometheusIntegrationCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `integration` | AlertManagementPrometheusIntegration | The newly created integration. |
 
-### PrometheusIntegrationResetTokenPayload
+### `PrometheusIntegrationResetTokenPayload`
 
 Autogenerated return type of PrometheusIntegrationResetToken.
 
@@ -3498,7 +3498,7 @@ Autogenerated return type of PrometheusIntegrationResetToken.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `integration` | AlertManagementPrometheusIntegration | The newly created integration. |
 
-### PrometheusIntegrationUpdatePayload
+### `PrometheusIntegrationUpdatePayload`
 
 Autogenerated return type of PrometheusIntegrationUpdate.
 
@@ -3508,7 +3508,7 @@ Autogenerated return type of PrometheusIntegrationUpdate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `integration` | AlertManagementPrometheusIntegration | The newly created integration. |
 
-### PromoteToEpicPayload
+### `PromoteToEpicPayload`
 
 Autogenerated return type of PromoteToEpic.
 
@@ -3519,7 +3519,7 @@ Autogenerated return type of PromoteToEpic.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### Release
+### `Release`
 
 Represents a release.
 
@@ -3540,7 +3540,7 @@ Represents a release.
 | `tagPath` | String | Relative web path to the tag associated with the release. |
 | `upcomingRelease` | Boolean | Indicates the release is an upcoming release. |
 
-### ReleaseAssetLink
+### `ReleaseAssetLink`
 
 Represents an asset link associated with a release.
 
@@ -3553,7 +3553,7 @@ Represents an asset link associated with a release.
 | `name` | String | Name of the link. |
 | `url` | String | URL of the link. |
 
-### ReleaseAssetLinkCreatePayload
+### `ReleaseAssetLinkCreatePayload`
 
 Autogenerated return type of ReleaseAssetLinkCreate.
 
@@ -3563,7 +3563,7 @@ Autogenerated return type of ReleaseAssetLinkCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `link` | ReleaseAssetLink | The asset link after mutation. |
 
-### ReleaseAssets
+### `ReleaseAssets`
 
 A container for all assets associated with a release.
 
@@ -3573,7 +3573,7 @@ A container for all assets associated with a release.
 | `links` | ReleaseAssetLinkConnection | Asset links of the release. |
 | `sources` | ReleaseSourceConnection | Sources of the release. |
 
-### ReleaseCreatePayload
+### `ReleaseCreatePayload`
 
 Autogenerated return type of ReleaseCreate.
 
@@ -3583,7 +3583,7 @@ Autogenerated return type of ReleaseCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `release` | Release | The release after mutation. |
 
-### ReleaseDeletePayload
+### `ReleaseDeletePayload`
 
 Autogenerated return type of ReleaseDelete.
 
@@ -3593,7 +3593,7 @@ Autogenerated return type of ReleaseDelete.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `release` | Release | The deleted release. |
 
-### ReleaseEvidence
+### `ReleaseEvidence`
 
 Evidence for a release.
 
@@ -3604,7 +3604,7 @@ Evidence for a release.
 | `id` | ID! | ID of the evidence. |
 | `sha` | String | SHA1 ID of the evidence hash. |
 
-### ReleaseLinks
+### `ReleaseLinks`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3616,7 +3616,7 @@ Evidence for a release.
 | `openedMergeRequestsUrl` | String | HTTP URL of the merge request page, filtered by this release and `state=open`. |
 | `selfUrl` | String | HTTP URL of the release. |
 
-### ReleaseSource
+### `ReleaseSource`
 
 Represents the source code attached to a release in a particular format.
 
@@ -3625,7 +3625,7 @@ Represents the source code attached to a release in a particular format.
 | `format` | String | Format of the source. |
 | `url` | String | Download URL of the source. |
 
-### ReleaseUpdatePayload
+### `ReleaseUpdatePayload`
 
 Autogenerated return type of ReleaseUpdate.
 
@@ -3635,7 +3635,7 @@ Autogenerated return type of ReleaseUpdate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `release` | Release | The release after mutation. |
 
-### RemoveAwardEmojiPayload
+### `RemoveAwardEmojiPayload`
 
 Autogenerated return type of RemoveAwardEmoji.
 
@@ -3645,7 +3645,7 @@ Autogenerated return type of RemoveAwardEmoji.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### RemoveProjectFromSecurityDashboardPayload
+### `RemoveProjectFromSecurityDashboardPayload`
 
 Autogenerated return type of RemoveProjectFromSecurityDashboard.
 
@@ -3654,7 +3654,7 @@ Autogenerated return type of RemoveProjectFromSecurityDashboard.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### RepositionImageDiffNotePayload
+### `RepositionImageDiffNotePayload`
 
 Autogenerated return type of RepositionImageDiffNote.
 
@@ -3664,7 +3664,7 @@ Autogenerated return type of RepositionImageDiffNote.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `note` | Note | The note after mutation. |
 
-### Repository
+### `Repository`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3673,7 +3673,7 @@ Autogenerated return type of RepositionImageDiffNote.
 | `rootRef` | String | Default branch of the repository. |
 | `tree` | Tree | Tree of the repository. |
 
-### Requirement
+### `Requirement`
 
 Represents a requirement.
 
@@ -3695,7 +3695,7 @@ Represents a requirement.
 | `updatedAt` | Time! | Timestamp of when the requirement was last updated. |
 | `userPermissions` | RequirementPermissions! | Permissions for the current user on the resource |
 
-### RequirementPermissions
+### `RequirementPermissions`
 
 Check permissions for the current user on a requirement.
 
@@ -3707,7 +3707,7 @@ Check permissions for the current user on a requirement.
 | `readRequirement` | Boolean! | Indicates the user can perform `read_requirement` on this resource |
 | `updateRequirement` | Boolean! | Indicates the user can perform `update_requirement` on this resource |
 
-### RequirementStatesCount
+### `RequirementStatesCount`
 
 Counts of requirements by their state.
 
@@ -3716,7 +3716,7 @@ Counts of requirements by their state.
 | `archived` | Int | Number of archived requirements. |
 | `opened` | Int | Number of opened requirements. |
 
-### RevertVulnerabilityToDetectedPayload
+### `RevertVulnerabilityToDetectedPayload`
 
 Autogenerated return type of RevertVulnerabilityToDetected.
 
@@ -3726,7 +3726,7 @@ Autogenerated return type of RevertVulnerabilityToDetected.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `vulnerability` | Vulnerability | The vulnerability after revert. |
 
-### RootStorageStatistics
+### `RootStorageStatistics`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3740,7 +3740,7 @@ Autogenerated return type of RevertVulnerabilityToDetected.
 | `uploadsSize` | Float! | The uploads size in bytes. |
 | `wikiSize` | Float! | The wiki size in bytes. |
 
-### RunDASTScanPayload
+### `RunDASTScanPayload`
 
 Autogenerated return type of RunDASTScan.
 
@@ -3750,14 +3750,14 @@ Autogenerated return type of RunDASTScan.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `pipelineUrl` | String | URL of the pipeline that was created. |
 
-### RunnerArchitecture
+### `RunnerArchitecture`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `downloadLocation` | String! | Download location for the runner for the platform architecture. |
 | `name` | String! | Name of the runner platform architecture. |
 
-### RunnerPlatform
+### `RunnerPlatform`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -3765,14 +3765,14 @@ Autogenerated return type of RunDASTScan.
 | `humanReadableName` | String! | Human readable name of the runner platform. |
 | `name` | String! | Name slug of the runner platform. |
 
-### RunnerSetup
+### `RunnerSetup`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `installInstructions` | String! | Instructions for installing the runner on the specified architecture. |
 | `registerInstructions` | String | Instructions for registering the runner. |
 
-### SastCiConfiguration
+### `SastCiConfiguration`
 
 Represents a CI configuration of SAST.
 
@@ -3782,7 +3782,7 @@ Represents a CI configuration of SAST.
 | `global` | SastCiConfigurationEntityConnection | List of global entities related to SAST configuration. |
 | `pipeline` | SastCiConfigurationEntityConnection | List of pipeline entities related to SAST configuration. |
 
-### SastCiConfigurationAnalyzersEntity
+### `SastCiConfigurationAnalyzersEntity`
 
 Represents an analyzer entity in SAST CI configuration.
 
@@ -3794,7 +3794,7 @@ Represents an analyzer entity in SAST CI configuration.
 | `name` | String | Name of the analyzer. |
 | `variables` | SastCiConfigurationEntityConnection | List of supported variables. |
 
-### SastCiConfigurationEntity
+### `SastCiConfigurationEntity`
 
 Represents an entity in SAST CI configuration.
 
@@ -3809,7 +3809,7 @@ Represents an entity in SAST CI configuration.
 | `type` | String | Type of the field value. |
 | `value` | String | Current value of the entity. |
 
-### SastCiConfigurationOptionsEntity
+### `SastCiConfigurationOptionsEntity`
 
 Represents an entity for options in SAST CI configuration.
 
@@ -3818,7 +3818,7 @@ Represents an entity for options in SAST CI configuration.
 | `label` | String | Label of option entity. |
 | `value` | String | Value of option entity. |
 
-### ScannedResource
+### `ScannedResource`
 
 Represents a resource scanned by a security scan.
 
@@ -3827,7 +3827,7 @@ Represents a resource scanned by a security scan.
 | `requestMethod` | String | The HTTP request method used to access the URL. |
 | `url` | String | The URL scanned by the scanner. |
 
-### SecurityReportSummary
+### `SecurityReportSummary`
 
 Represents summary of a security report.
 
@@ -3841,7 +3841,7 @@ Represents summary of a security report.
 | `sast` | SecurityReportSummarySection | Aggregated counts for the `sast` scan |
 | `secretDetection` | SecurityReportSummarySection | Aggregated counts for the `secret_detection` scan |
 
-### SecurityReportSummarySection
+### `SecurityReportSummarySection`
 
 Represents a section of a summary of a security report.
 
@@ -3852,7 +3852,7 @@ Represents a section of a summary of a security report.
 | `scannedResourcesCsvPath` | String | Path to download all the scanned resources in CSV format. |
 | `vulnerabilitiesCount` | Int | Total number of vulnerabilities. |
 
-### SecurityScanners
+### `SecurityScanners`
 
 Represents a list of security scanners.
 
@@ -3862,7 +3862,7 @@ Represents a list of security scanners.
 | `enabled` | SecurityScannerType! => Array | List of analyzers which are enabled for the project. |
 | `pipelineRun` | SecurityScannerType! => Array | List of analyzers which ran successfully in the latest pipeline. |
 
-### SentryDetailedError
+### `SentryDetailedError`
 
 A Sentry error.
 
@@ -3897,7 +3897,7 @@ A Sentry error.
 | `type` | String! | Type of the error. |
 | `userCount` | Int! | Count of users affected by the error. |
 
-### SentryError
+### `SentryError`
 
 A Sentry error. A simplified version of SentryDetailedError.
 
@@ -3921,7 +3921,7 @@ A Sentry error. A simplified version of SentryDetailedError.
 | `type` | String! | Type of the error. |
 | `userCount` | Int! | Count of users affected by the error. |
 
-### SentryErrorCollection
+### `SentryErrorCollection`
 
 An object containing a collection of Sentry errors, and a detailed error.
 
@@ -3932,14 +3932,14 @@ An object containing a collection of Sentry errors, and a detailed error.
 | `errors` | SentryErrorConnection | Collection of Sentry Errors. |
 | `externalUrl` | String | External URL for Sentry. |
 
-### SentryErrorFrequency
+### `SentryErrorFrequency`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `count` | Int! | Count of errors received since the previously recorded time. |
 | `time` | Time! | Time the error frequency stats were recorded. |
 
-### SentryErrorStackTrace
+### `SentryErrorStackTrace`
 
 An object containing a stack trace entry for a Sentry error.
 
@@ -3949,7 +3949,7 @@ An object containing a stack trace entry for a Sentry error.
 | `issueId` | String! | ID of the Sentry error. |
 | `stackTraceEntries` | SentryErrorStackTraceEntry! => Array | Stack trace entries for the Sentry error. |
 
-### SentryErrorStackTraceContext
+### `SentryErrorStackTraceContext`
 
 An object context for a Sentry error stack trace.
 
@@ -3958,7 +3958,7 @@ An object context for a Sentry error stack trace.
 | `code` | String! | Code number of the context. |
 | `line` | Int! | Line number of the context. |
 
-### SentryErrorStackTraceEntry
+### `SentryErrorStackTraceEntry`
 
 An object containing a stack trace entry for a Sentry error.
 
@@ -3970,7 +3970,7 @@ An object containing a stack trace entry for a Sentry error.
 | `line` | String | Function in which the Sentry error occurred. |
 | `traceContext` | SentryErrorStackTraceContext! => Array | Context of the Sentry error. |
 
-### SentryErrorTags
+### `SentryErrorTags`
 
 State of a Sentry error.
 
@@ -3979,7 +3979,7 @@ State of a Sentry error.
 | `level` | String | Severity level of the Sentry Error. |
 | `logger` | String | Logger of the Sentry Error. |
 
-### Snippet
+### `Snippet`
 
 Represents a snippet entry.
 
@@ -4005,7 +4005,7 @@ Represents a snippet entry.
 | `visibilityLevel` | VisibilityLevelsEnum! | Visibility Level of the snippet. |
 | `webUrl` | String! | Web URL of the snippet. |
 
-### SnippetBlob
+### `SnippetBlob`
 
 Represents the snippet blob.
 
@@ -4024,7 +4024,7 @@ Represents the snippet blob.
 | `simpleViewer` | SnippetBlobViewer! | Blob content simple viewer. |
 | `size` | Int! | Blob size. |
 
-### SnippetBlobViewer
+### `SnippetBlobViewer`
 
 Represents how the blob content should be displayed.
 
@@ -4038,7 +4038,7 @@ Represents how the blob content should be displayed.
 | `tooLarge` | Boolean! | Shows whether the blob too large to be displayed. |
 | `type` | BlobViewersType! | Type of blob viewer. |
 
-### SnippetPermissions
+### `SnippetPermissions`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -4049,7 +4049,7 @@ Represents how the blob content should be displayed.
 | `reportSnippet` | Boolean! | Indicates the user can perform `report_snippet` on this resource |
 | `updateSnippet` | Boolean! | Indicates the user can perform `update_snippet` on this resource |
 
-### SnippetRepositoryRegistry
+### `SnippetRepositoryRegistry`
 
 Represents the Geo sync and verification state of a snippet repository.
 
@@ -4064,7 +4064,7 @@ Represents the Geo sync and verification state of a snippet repository.
 | `snippetRepositoryId` | ID! | ID of the Snippet Repository. |
 | `state` | RegistryState | Sync state of the SnippetRepositoryRegistry |
 
-### StatusAction
+### `StatusAction`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -4074,7 +4074,7 @@ Represents the Geo sync and verification state of a snippet repository.
 | `path` | String | Path for the action. |
 | `title` | String | Title for the action, for example: Retry. |
 
-### Submodule
+### `Submodule`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -4087,7 +4087,7 @@ Represents the Geo sync and verification state of a snippet repository.
 | `type` | EntryType! | Type of tree entry. |
 | `webUrl` | String | Web URL for the sub-module. |
 
-### TaskCompletionStatus
+### `TaskCompletionStatus`
 
 Completion status of tasks.
 
@@ -4096,7 +4096,7 @@ Completion status of tasks.
 | `completedCount` | Int! | Number of completed tasks. |
 | `count` | Int! | Number of total tasks. |
 
-### TerraformState
+### `TerraformState`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -4108,7 +4108,7 @@ Completion status of tasks.
 | `name` | String! | Name of the Terraform state. |
 | `updatedAt` | Time! | Timestamp the Terraform state was updated. |
 
-### TerraformStateDeletePayload
+### `TerraformStateDeletePayload`
 
 Autogenerated return type of TerraformStateDelete.
 
@@ -4117,7 +4117,7 @@ Autogenerated return type of TerraformStateDelete.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### TerraformStateLockPayload
+### `TerraformStateLockPayload`
 
 Autogenerated return type of TerraformStateLock.
 
@@ -4126,7 +4126,7 @@ Autogenerated return type of TerraformStateLock.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### TerraformStateUnlockPayload
+### `TerraformStateUnlockPayload`
 
 Autogenerated return type of TerraformStateUnlock.
 
@@ -4135,7 +4135,7 @@ Autogenerated return type of TerraformStateUnlock.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### TerraformStateVersion
+### `TerraformStateVersion`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -4147,7 +4147,7 @@ Autogenerated return type of TerraformStateUnlock.
 | `serial` | Int | Serial number of the version. |
 | `updatedAt` | Time! | Timestamp the version was updated. |
 
-### TerraformStateVersionRegistry
+### `TerraformStateVersionRegistry`
 
 Represents the Geo sync and verification state of a terraform state version.
 
@@ -4162,7 +4162,7 @@ Represents the Geo sync and verification state of a terraform state version.
 | `state` | RegistryState | Sync state of the TerraformStateVersionRegistry |
 | `terraformStateVersionId` | ID! | ID of the terraform state version. |
 
-### TestReport
+### `TestReport`
 
 Represents a requirement test report.
 
@@ -4173,7 +4173,7 @@ Represents a requirement test report.
 | `id` | ID! | ID of the test report. |
 | `state` | TestReportState! | State of the test report. |
 
-### TimeReportStats
+### `TimeReportStats`
 
 Represents the time report stats for timeboxes.
 
@@ -4183,7 +4183,7 @@ Represents the time report stats for timeboxes.
 | `incomplete` | TimeboxMetrics | Incomplete issues metrics. |
 | `total` | TimeboxMetrics | Total issues metrics. |
 
-### TimeboxMetrics
+### `TimeboxMetrics`
 
 Represents measured stats metrics for timeboxes.
 
@@ -4192,7 +4192,7 @@ Represents measured stats metrics for timeboxes.
 | `count` | Int! | The count metric. |
 | `weight` | Int! | The weight metric. |
 
-### TimeboxReport
+### `TimeboxReport`
 
 Represents a historically accurate report about the timebox.
 
@@ -4201,7 +4201,7 @@ Represents a historically accurate report about the timebox.
 | `burnupTimeSeries` | BurnupChartDailyTotals! => Array | Daily scope and completed totals for burnup charts. |
 | `stats` | TimeReportStats | Represents the time report stats for the timebox. |
 
-### Timelog
+### `Timelog`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -4211,7 +4211,7 @@ Represents a historically accurate report about the timebox.
 | `timeSpent` | Int! | The time spent displayed in seconds. |
 | `user` | User! | The user that logged the time. |
 
-### Todo
+### `Todo`
 
 Representing a to-do entry.
 
@@ -4227,7 +4227,7 @@ Representing a to-do entry.
 | `state` | TodoStateEnum! | State of the to-do item. |
 | `targetType` | TodoTargetEnum! | Target type of the to-do item. |
 
-### TodoCreatePayload
+### `TodoCreatePayload`
 
 Autogenerated return type of TodoCreate.
 
@@ -4237,7 +4237,7 @@ Autogenerated return type of TodoCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `todo` | Todo | The to-do item created. |
 
-### TodoMarkDonePayload
+### `TodoMarkDonePayload`
 
 Autogenerated return type of TodoMarkDone.
 
@@ -4247,7 +4247,7 @@ Autogenerated return type of TodoMarkDone.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `todo` | Todo! | The requested to-do item. |
 
-### TodoRestoreManyPayload
+### `TodoRestoreManyPayload`
 
 Autogenerated return type of TodoRestoreMany.
 
@@ -4258,7 +4258,7 @@ Autogenerated return type of TodoRestoreMany.
 | `todos` | Todo! => Array | Updated to-do items. |
 | `updatedIds` **{warning-solid}** | TodoID! => Array | **Deprecated:** Use to-do items. Deprecated in 13.2. |
 
-### TodoRestorePayload
+### `TodoRestorePayload`
 
 Autogenerated return type of TodoRestore.
 
@@ -4268,7 +4268,7 @@ Autogenerated return type of TodoRestore.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `todo` | Todo! | The requested to-do item. |
 
-### TodosMarkAllDonePayload
+### `TodosMarkAllDonePayload`
 
 Autogenerated return type of TodosMarkAllDone.
 
@@ -4279,7 +4279,7 @@ Autogenerated return type of TodosMarkAllDone.
 | `todos` | Todo! => Array | Updated to-do items. |
 | `updatedIds` **{warning-solid}** | TodoID! => Array | **Deprecated:** Use to-do items. Deprecated in 13.2. |
 
-### ToggleAwardEmojiPayload
+### `ToggleAwardEmojiPayload`
 
 Autogenerated return type of ToggleAwardEmoji.
 
@@ -4290,7 +4290,7 @@ Autogenerated return type of ToggleAwardEmoji.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `toggledOn` | Boolean! | Indicates the status of the emoji. True if the toggle awarded the emoji, and false if the toggle removed the emoji. |
 
-### Tree
+### `Tree`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -4299,7 +4299,7 @@ Autogenerated return type of ToggleAwardEmoji.
 | `submodules` | SubmoduleConnection! | Sub-modules of the tree. |
 | `trees` | TreeEntryConnection! | Trees of the tree. |
 
-### TreeEntry
+### `TreeEntry`
 
 Represents a directory.
 
@@ -4314,7 +4314,7 @@ Represents a directory.
 | `webPath` | String | Web path for the tree entry (directory). |
 | `webUrl` | String | Web URL for the tree entry (directory). |
 
-### UpdateAlertStatusPayload
+### `UpdateAlertStatusPayload`
 
 Autogenerated return type of UpdateAlertStatus.
 
@@ -4326,7 +4326,7 @@ Autogenerated return type of UpdateAlertStatus.
 | `issue` | Issue | The issue created after mutation. |
 | `todo` | Todo | The to-do item after mutation. |
 
-### UpdateBoardEpicUserPreferencesPayload
+### `UpdateBoardEpicUserPreferencesPayload`
 
 Autogenerated return type of UpdateBoardEpicUserPreferences.
 
@@ -4336,7 +4336,7 @@ Autogenerated return type of UpdateBoardEpicUserPreferences.
 | `epicUserPreferences` | BoardEpicUserPreferences | User preferences for the epic in the board after mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### UpdateBoardListPayload
+### `UpdateBoardListPayload`
 
 Autogenerated return type of UpdateBoardList.
 
@@ -4346,7 +4346,7 @@ Autogenerated return type of UpdateBoardList.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `list` | BoardList | Mutated list. |
 
-### UpdateBoardPayload
+### `UpdateBoardPayload`
 
 Autogenerated return type of UpdateBoard.
 
@@ -4356,7 +4356,7 @@ Autogenerated return type of UpdateBoard.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### UpdateComplianceFrameworkPayload
+### `UpdateComplianceFrameworkPayload`
 
 Autogenerated return type of UpdateComplianceFramework.
 
@@ -4366,7 +4366,7 @@ Autogenerated return type of UpdateComplianceFramework.
 | `complianceFramework` | ComplianceFramework | The compliance framework after mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### UpdateContainerExpirationPolicyPayload
+### `UpdateContainerExpirationPolicyPayload`
 
 Autogenerated return type of UpdateContainerExpirationPolicy.
 
@@ -4376,7 +4376,7 @@ Autogenerated return type of UpdateContainerExpirationPolicy.
 | `containerExpirationPolicy` | ContainerExpirationPolicy | The container expiration policy after mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### UpdateEpicPayload
+### `UpdateEpicPayload`
 
 Autogenerated return type of UpdateEpic.
 
@@ -4386,7 +4386,7 @@ Autogenerated return type of UpdateEpic.
 | `epic` | Epic | The epic after mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### UpdateImageDiffNotePayload
+### `UpdateImageDiffNotePayload`
 
 Autogenerated return type of UpdateImageDiffNote.
 
@@ -4396,7 +4396,7 @@ Autogenerated return type of UpdateImageDiffNote.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `note` | Note | The note after mutation. |
 
-### UpdateIssuePayload
+### `UpdateIssuePayload`
 
 Autogenerated return type of UpdateIssue.
 
@@ -4406,7 +4406,7 @@ Autogenerated return type of UpdateIssue.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `issue` | Issue | The issue after mutation. |
 
-### UpdateIterationPayload
+### `UpdateIterationPayload`
 
 Autogenerated return type of UpdateIteration.
 
@@ -4416,7 +4416,7 @@ Autogenerated return type of UpdateIteration.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `iteration` | Iteration | Updated iteration. |
 
-### UpdateNamespacePackageSettingsPayload
+### `UpdateNamespacePackageSettingsPayload`
 
 Autogenerated return type of UpdateNamespacePackageSettings.
 
@@ -4426,7 +4426,7 @@ Autogenerated return type of UpdateNamespacePackageSettings.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `packageSettings` | PackageSettings | The namespace package setting after mutation. |
 
-### UpdateNotePayload
+### `UpdateNotePayload`
 
 Autogenerated return type of UpdateNote.
 
@@ -4436,7 +4436,7 @@ Autogenerated return type of UpdateNote.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `note` | Note | The note after mutation. |
 
-### UpdateRequirementPayload
+### `UpdateRequirementPayload`
 
 Autogenerated return type of UpdateRequirement.
 
@@ -4446,7 +4446,7 @@ Autogenerated return type of UpdateRequirement.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `requirement` | Requirement | Requirement after mutation. |
 
-### UpdateSnippetPayload
+### `UpdateSnippetPayload`
 
 Autogenerated return type of UpdateSnippet.
 
@@ -4460,7 +4460,7 @@ Autogenerated return type of UpdateSnippet.
 | `spam` | Boolean | Indicates whether the operation was detected as definite spam. There is no option to resubmit the request with a CAPTCHA response. |
 | `spamLogId` | Int | The spam log ID which must be passed along with a valid CAPTCHA response for an operation to be completed. Included only when an operation was not completed because "NeedsCaptchaResponse" is true. |
 
-### UsageTrendsMeasurement
+### `UsageTrendsMeasurement`
 
 Represents a recorded measurement (object count) for the Admins.
 
@@ -4470,7 +4470,7 @@ Represents a recorded measurement (object count) for the Admins.
 | `identifier` | MeasurementIdentifier! | The type of objects being measured. |
 | `recordedAt` | Time | The time the measurement was recorded. |
 
-### User
+### `User`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -4497,13 +4497,13 @@ Represents a recorded measurement (object count) for the Admins.
 | `webPath` | String! | Web path of the user. |
 | `webUrl` | String! | Web URL of the user. |
 
-### UserPermissions
+### `UserPermissions`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `createSnippet` | Boolean! | Indicates the user can perform `create_snippet` on this resource |
 
-### UserStatus
+### `UserStatus`
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -4512,7 +4512,7 @@ Represents a recorded measurement (object count) for the Admins.
 | `message` | String | User status message. |
 | `messageHtml` | String | HTML of the user status message |
 
-### VulnerabilitiesCountByDay
+### `VulnerabilitiesCountByDay`
 
 Represents the count of vulnerabilities by severity on a particular day. This data is retained for 365 days.
 
@@ -4527,7 +4527,7 @@ Represents the count of vulnerabilities by severity on a particular day. This da
 | `total` | Int! | Total number of vulnerabilities on a particular day. |
 | `unknown` | Int! | Total number of vulnerabilities on a particular day with unknown severity |
 
-### VulnerabilitiesCountByDayAndSeverity
+### `VulnerabilitiesCountByDayAndSeverity`
 
 Represents the number of vulnerabilities for a particular severity on a particular day. This data is retained for 365 days.
 
@@ -4537,7 +4537,7 @@ Represents the number of vulnerabilities for a particular severity on a particul
 | `day` | ISO8601Date | Date for the count. |
 | `severity` | VulnerabilitySeverity | Severity of the counted vulnerabilities. |
 
-### Vulnerability
+### `Vulnerability`
 
 Represents a vulnerability.
 
@@ -4573,7 +4573,7 @@ Represents a vulnerability.
 | `userPermissions` | VulnerabilityPermissions! | Permissions for the current user on the resource |
 | `vulnerabilityPath` | String | URL to the vulnerability's details page. |
 
-### VulnerabilityConfirmPayload
+### `VulnerabilityConfirmPayload`
 
 Autogenerated return type of VulnerabilityConfirm.
 
@@ -4583,7 +4583,7 @@ Autogenerated return type of VulnerabilityConfirm.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `vulnerability` | Vulnerability | The vulnerability after state change. |
 
-### VulnerabilityDetailBase
+### `VulnerabilityDetailBase`
 
 Represents the vulnerability details base.
 
@@ -4593,7 +4593,7 @@ Represents the vulnerability details base.
 | `fieldName` | String | Name of the field. |
 | `name` | String | Name of the field. |
 
-### VulnerabilityDetailBoolean
+### `VulnerabilityDetailBoolean`
 
 Represents the vulnerability details boolean value.
 
@@ -4604,7 +4604,7 @@ Represents the vulnerability details boolean value.
 | `name` | String | Name of the field. |
 | `value` | Boolean! | Value of the field. |
 
-### VulnerabilityDetailCode
+### `VulnerabilityDetailCode`
 
 Represents the vulnerability details code field.
 
@@ -4616,7 +4616,7 @@ Represents the vulnerability details code field.
 | `name` | String | Name of the field. |
 | `value` | String! | Source code. |
 
-### VulnerabilityDetailCommit
+### `VulnerabilityDetailCommit`
 
 Represents the vulnerability details commit field.
 
@@ -4627,7 +4627,7 @@ Represents the vulnerability details commit field.
 | `name` | String | Name of the field. |
 | `value` | String! | The commit SHA value. |
 
-### VulnerabilityDetailDiff
+### `VulnerabilityDetailDiff`
 
 Represents the vulnerability details diff field.
 
@@ -4639,7 +4639,7 @@ Represents the vulnerability details diff field.
 | `fieldName` | String | Name of the field. |
 | `name` | String | Name of the field. |
 
-### VulnerabilityDetailFileLocation
+### `VulnerabilityDetailFileLocation`
 
 Represents the vulnerability details location within a file in the project.
 
@@ -4652,7 +4652,7 @@ Represents the vulnerability details location within a file in the project.
 | `lineStart` | Int! | Start line number of the file location. |
 | `name` | String | Name of the field. |
 
-### VulnerabilityDetailInt
+### `VulnerabilityDetailInt`
 
 Represents the vulnerability details integer value.
 
@@ -4663,7 +4663,7 @@ Represents the vulnerability details integer value.
 | `name` | String | Name of the field. |
 | `value` | Int! | Value of the field. |
 
-### VulnerabilityDetailList
+### `VulnerabilityDetailList`
 
 Represents the vulnerability details list value.
 
@@ -4674,7 +4674,7 @@ Represents the vulnerability details list value.
 | `items` | VulnerabilityDetail! => Array | List of details. |
 | `name` | String | Name of the field. |
 
-### VulnerabilityDetailMarkdown
+### `VulnerabilityDetailMarkdown`
 
 Represents the vulnerability details Markdown field.
 
@@ -4685,7 +4685,7 @@ Represents the vulnerability details Markdown field.
 | `name` | String | Name of the field. |
 | `value` | String! | Value of the Markdown field. |
 
-### VulnerabilityDetailModuleLocation
+### `VulnerabilityDetailModuleLocation`
 
 Represents the vulnerability details location within a file in the project.
 
@@ -4697,7 +4697,7 @@ Represents the vulnerability details location within a file in the project.
 | `name` | String | Name of the field. |
 | `offset` | Int! | Offset of the module location. |
 
-### VulnerabilityDetailTable
+### `VulnerabilityDetailTable`
 
 Represents the vulnerability details table value.
 
@@ -4709,7 +4709,7 @@ Represents the vulnerability details table value.
 | `name` | String | Name of the field. |
 | `rows` | VulnerabilityDetail! => Array | Table rows. |
 
-### VulnerabilityDetailText
+### `VulnerabilityDetailText`
 
 Represents the vulnerability details text field.
 
@@ -4720,7 +4720,7 @@ Represents the vulnerability details text field.
 | `name` | String | Name of the field. |
 | `value` | String! | Value of the text field. |
 
-### VulnerabilityDetailUrl
+### `VulnerabilityDetailUrl`
 
 Represents the vulnerability details URL field.
 
@@ -4732,7 +4732,7 @@ Represents the vulnerability details URL field.
 | `name` | String | Name of the field. |
 | `text` | String | Text of the URL. |
 
-### VulnerabilityDismissPayload
+### `VulnerabilityDismissPayload`
 
 Autogenerated return type of VulnerabilityDismiss.
 
@@ -4742,7 +4742,7 @@ Autogenerated return type of VulnerabilityDismiss.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `vulnerability` | Vulnerability | The vulnerability after dismissal. |
 
-### VulnerabilityExternalIssueLink
+### `VulnerabilityExternalIssueLink`
 
 Represents an external issue link of a vulnerability.
 
@@ -4752,7 +4752,7 @@ Represents an external issue link of a vulnerability.
 | `id` | VulnerabilitiesExternalIssueLinkID! | GraphQL ID of the external issue link. |
 | `linkType` | VulnerabilityExternalIssueLinkType! | Type of the external issue link. |
 
-### VulnerabilityExternalIssueLinkCreatePayload
+### `VulnerabilityExternalIssueLinkCreatePayload`
 
 Autogenerated return type of VulnerabilityExternalIssueLinkCreate.
 
@@ -4762,7 +4762,7 @@ Autogenerated return type of VulnerabilityExternalIssueLinkCreate.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `externalIssueLink` | VulnerabilityExternalIssueLink | The created external issue link. |
 
-### VulnerabilityExternalIssueLinkDestroyPayload
+### `VulnerabilityExternalIssueLinkDestroyPayload`
 
 Autogenerated return type of VulnerabilityExternalIssueLinkDestroy.
 
@@ -4771,7 +4771,7 @@ Autogenerated return type of VulnerabilityExternalIssueLinkDestroy.
 | `clientMutationId` | String | A unique identifier for the client performing the mutation. |
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 
-### VulnerabilityIdentifier
+### `VulnerabilityIdentifier`
 
 Represents a vulnerability identifier.
 
@@ -4782,7 +4782,7 @@ Represents a vulnerability identifier.
 | `name` | String | Name of the vulnerability identifier. |
 | `url` | String | URL of the vulnerability identifier. |
 
-### VulnerabilityIssueLink
+### `VulnerabilityIssueLink`
 
 Represents an issue link of a vulnerability.
 
@@ -4792,7 +4792,7 @@ Represents an issue link of a vulnerability.
 | `issue` | Issue! | The issue attached to issue link. |
 | `linkType` | VulnerabilityIssueLinkType! | Type of the issue link. |
 
-### VulnerabilityLocationContainerScanning
+### `VulnerabilityLocationContainerScanning`
 
 Represents the location of a vulnerability found by a container security scan.
 
@@ -4802,7 +4802,7 @@ Represents the location of a vulnerability found by a container security scan.
 | `image` | String | Name of the vulnerable container image. |
 | `operatingSystem` | String | Operating system that runs on the vulnerable container image. |
 
-### VulnerabilityLocationCoverageFuzzing
+### `VulnerabilityLocationCoverageFuzzing`
 
 Represents the location of a vulnerability found by a Coverage Fuzzing scan.
 
@@ -4815,7 +4815,7 @@ Represents the location of a vulnerability found by a Coverage Fuzzing scan.
 | `vulnerableClass` | String | Class containing the vulnerability. |
 | `vulnerableMethod` | String | Method containing the vulnerability. |
 
-### VulnerabilityLocationDast
+### `VulnerabilityLocationDast`
 
 Represents the location of a vulnerability found by a DAST scan.
 
@@ -4826,7 +4826,7 @@ Represents the location of a vulnerability found by a DAST scan.
 | `path` | String | URL path and query string of the vulnerable request. |
 | `requestMethod` | String | HTTP method of the vulnerable request. |
 
-### VulnerabilityLocationDependencyScanning
+### `VulnerabilityLocationDependencyScanning`
 
 Represents the location of a vulnerability found by a dependency security scan.
 
@@ -4836,7 +4836,7 @@ Represents the location of a vulnerability found by a dependency security scan.
 | `dependency` | VulnerableDependency | Dependency containing the vulnerability. |
 | `file` | String | Path to the vulnerable file. |
 
-### VulnerabilityLocationSast
+### `VulnerabilityLocationSast`
 
 Represents the location of a vulnerability found by a SAST scan.
 
@@ -4849,7 +4849,7 @@ Represents the location of a vulnerability found by a SAST scan.
 | `vulnerableClass` | String | Class containing the vulnerability. |
 | `vulnerableMethod` | String | Method containing the vulnerability. |
 
-### VulnerabilityLocationSecretDetection
+### `VulnerabilityLocationSecretDetection`
 
 Represents the location of a vulnerability found by a secret detection scan.
 
@@ -4862,7 +4862,7 @@ Represents the location of a vulnerability found by a secret detection scan.
 | `vulnerableClass` | String | Class containing the vulnerability. |
 | `vulnerableMethod` | String | Method containing the vulnerability. |
 
-### VulnerabilityPermissions
+### `VulnerabilityPermissions`
 
 Check permissions for the current user on a vulnerability.
 
@@ -4878,7 +4878,7 @@ Check permissions for the current user on a vulnerability.
 | `readVulnerabilityFeedback` | Boolean! | Indicates the user can perform `read_vulnerability_feedback` on this resource |
 | `updateVulnerabilityFeedback` | Boolean! | Indicates the user can perform `update_vulnerability_feedback` on this resource |
 
-### VulnerabilityResolvePayload
+### `VulnerabilityResolvePayload`
 
 Autogenerated return type of VulnerabilityResolve.
 
@@ -4888,7 +4888,7 @@ Autogenerated return type of VulnerabilityResolve.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `vulnerability` | Vulnerability | The vulnerability after state change. |
 
-### VulnerabilityRevertToDetectedPayload
+### `VulnerabilityRevertToDetectedPayload`
 
 Autogenerated return type of VulnerabilityRevertToDetected.
 
@@ -4898,7 +4898,7 @@ Autogenerated return type of VulnerabilityRevertToDetected.
 | `errors` | String! => Array | Errors encountered during execution of the mutation. |
 | `vulnerability` | Vulnerability | The vulnerability after revert. |
 
-### VulnerabilityScanner
+### `VulnerabilityScanner`
 
 Represents a vulnerability scanner.
 
@@ -4909,7 +4909,7 @@ Represents a vulnerability scanner.
 | `reportType` | VulnerabilityReportType | Type of the vulnerability report. |
 | `vendor` | String | Vendor of the vulnerability scanner. |
 
-### VulnerabilitySeveritiesCount
+### `VulnerabilitySeveritiesCount`
 
 Represents vulnerability counts by severity.
 
@@ -4922,7 +4922,7 @@ Represents vulnerability counts by severity.
 | `medium` | Int | Number of vulnerabilities of MEDIUM severity of the project |
 | `unknown` | Int | Number of vulnerabilities of UNKNOWN severity of the project |
 
-### VulnerableDependency
+### `VulnerableDependency`
 
 Represents a vulnerable dependency. Used in vulnerability location data.
 
@@ -4931,7 +4931,7 @@ Represents a vulnerable dependency. Used in vulnerability location data.
 | `package` | VulnerablePackage | The package associated with the vulnerable dependency. |
 | `version` | String | The version of the vulnerable dependency. |
 
-### VulnerablePackage
+### `VulnerablePackage`
 
 Represents a vulnerable package. Used in vulnerability dependency data.
 
@@ -4939,7 +4939,7 @@ Represents a vulnerable package. Used in vulnerability dependency data.
 | ----- | ---- | ----------- |
 | `name` | String | The name of the vulnerable package. |
 
-### VulnerableProjectsByGrade
+### `VulnerableProjectsByGrade`
 
 Represents vulnerability letter grades with associated projects.
 
@@ -4958,7 +4958,7 @@ For more information, see
 [Enumeration Types](https://graphql.org/learn/schema/#enumeration-types)
 on `graphql.org`.
 
-### AccessLevelEnum
+### `AccessLevelEnum`
 
 Access level to a resource.
 
@@ -4971,7 +4971,7 @@ Access level to a resource.
 | `OWNER` |  |
 | `REPORTER` |  |
 
-### AlertManagementAlertSort
+### `AlertManagementAlertSort`
 
 Values for sorting alerts.
 
@@ -5000,7 +5000,7 @@ Values for sorting alerts.
 | `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
-### AlertManagementDomainFilter
+### `AlertManagementDomainFilter`
 
 Filters the alerts based on given domain.
 
@@ -5009,7 +5009,7 @@ Filters the alerts based on given domain.
 | `operations` | Alerts for operations domain. |
 | `threat_monitoring` | Alerts for threat monitoring domain. |
 
-### AlertManagementIntegrationType
+### `AlertManagementIntegrationType`
 
 Values of types of integrations.
 
@@ -5018,7 +5018,7 @@ Values of types of integrations.
 | `HTTP` | Integration with any monitoring tool. |
 | `PROMETHEUS` | Prometheus integration. |
 
-### AlertManagementPayloadAlertFieldName
+### `AlertManagementPayloadAlertFieldName`
 
 Values for alert field names used in the custom mapping.
 
@@ -5035,7 +5035,7 @@ Values for alert field names used in the custom mapping.
 | `START_TIME` | The time of the incident. |
 | `TITLE` | The title of the incident. |
 
-### AlertManagementPayloadAlertFieldType
+### `AlertManagementPayloadAlertFieldType`
 
 Values for alert field types used in the custom mapping.
 
@@ -5045,7 +5045,7 @@ Values for alert field types used in the custom mapping.
 | `DATETIME` | DateTime field type. |
 | `STRING` | String field type. |
 
-### AlertManagementSeverity
+### `AlertManagementSeverity`
 
 Alert severity values.
 
@@ -5058,7 +5058,7 @@ Alert severity values.
 | `MEDIUM` | Medium severity |
 | `UNKNOWN` | Unknown severity |
 
-### AlertManagementStatus
+### `AlertManagementStatus`
 
 Alert status values.
 
@@ -5069,7 +5069,7 @@ Alert status values.
 | `RESOLVED` | Resolved status |
 | `TRIGGERED` | Triggered status |
 
-### ApiFuzzingScanMode
+### `ApiFuzzingScanMode`
 
 All possible ways to specify the API surface for an API fuzzing scan.
 
@@ -5078,7 +5078,7 @@ All possible ways to specify the API surface for an API fuzzing scan.
 | `HAR` | The API surface is specified by a HAR file. |
 | `OPENAPI` | The API surface is specified by a OPENAPI file. |
 
-### AvailabilityEnum
+### `AvailabilityEnum`
 
 User availability status.
 
@@ -5087,7 +5087,7 @@ User availability status.
 | `BUSY` | Busy |
 | `NOT_SET` | Not Set |
 
-### BlobViewersType
+### `BlobViewersType`
 
 Types of blob viewers.
 
@@ -5097,7 +5097,7 @@ Types of blob viewers.
 | `rich` | Rich blob viewers type. |
 | `simple` | Simple blob viewers type. |
 
-### CiConfigStatus
+### `CiConfigStatus`
 
 Values for YAML processor result.
 
@@ -5106,7 +5106,7 @@ Values for YAML processor result.
 | `INVALID` | The configuration file is not valid. |
 | `VALID` | The configuration file is valid. |
 
-### CommitActionMode
+### `CommitActionMode`
 
 Mode of a commit action.
 
@@ -5118,14 +5118,14 @@ Mode of a commit action.
 | `MOVE` | Move command. |
 | `UPDATE` | Update command. |
 
-### CommitEncoding
+### `CommitEncoding`
 
 | Value | Description |
 | ----- | ----------- |
 | `BASE64` | Base64 encoding. |
 | `TEXT` | Text encoding. |
 
-### ContainerExpirationPolicyCadenceEnum
+### `ContainerExpirationPolicyCadenceEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5135,7 +5135,7 @@ Mode of a commit action.
 | `EVERY_TWO_WEEKS` | Every two weeks |
 | `EVERY_WEEK` | Every week |
 
-### ContainerExpirationPolicyKeepEnum
+### `ContainerExpirationPolicyKeepEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5146,7 +5146,7 @@ Mode of a commit action.
 | `TEN_TAGS` | 10 tags per image name |
 | `TWENTY_FIVE_TAGS` | 25 tags per image name |
 
-### ContainerExpirationPolicyOlderThanEnum
+### `ContainerExpirationPolicyOlderThanEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5155,7 +5155,7 @@ Mode of a commit action.
 | `SEVEN_DAYS` | 7 days until tags are automatically removed |
 | `THIRTY_DAYS` | 30 days until tags are automatically removed |
 
-### ContainerRepositoryCleanupStatus
+### `ContainerRepositoryCleanupStatus`
 
 Status of the tags cleanup of a container repository.
 
@@ -5166,7 +5166,7 @@ Status of the tags cleanup of a container repository.
 | `UNFINISHED` | The tags cleanup has been partially executed. There are still remaining tags to delete. |
 | `UNSCHEDULED` | The tags cleanup is not scheduled. This is the default state. |
 
-### ContainerRepositorySort
+### `ContainerRepositorySort`
 
 Values for sorting container repositories.
 
@@ -5183,7 +5183,7 @@ Values for sorting container repositories.
 | `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
-### ContainerRepositoryStatus
+### `ContainerRepositoryStatus`
 
 Status of a container repository.
 
@@ -5192,14 +5192,14 @@ Status of a container repository.
 | `DELETE_FAILED` | Delete Failed status. |
 | `DELETE_SCHEDULED` | Delete Scheduled status. |
 
-### DastScanTypeEnum
+### `DastScanTypeEnum`
 
 | Value | Description |
 | ----- | ----------- |
 | `ACTIVE` | Active DAST scan. This scan will make active attacks against the target site. |
 | `PASSIVE` | Passive DAST scan. This scan will not make active attacks against the target site. |
 
-### DastSiteProfileValidationStatusEnum
+### `DastSiteProfileValidationStatusEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5209,14 +5209,14 @@ Status of a container repository.
 | `PASSED_VALIDATION` | Site validation process finished successfully. |
 | `PENDING_VALIDATION` | Site validation process has not started. |
 
-### DastSiteValidationStrategyEnum
+### `DastSiteValidationStrategyEnum`
 
 | Value | Description |
 | ----- | ----------- |
 | `HEADER` | Header validation. |
 | `TEXT_FILE` | Text file validation. |
 
-### DataVisualizationColorEnum
+### `DataVisualizationColorEnum`
 
 Color of the data visualization palette.
 
@@ -5228,7 +5228,7 @@ Color of the data visualization palette.
 | `MAGENTA` | Magenta color |
 | `ORANGE` | Orange color |
 
-### DataVisualizationWeightEnum
+### `DataVisualizationWeightEnum`
 
 Weight of the data visualization palette.
 
@@ -5246,7 +5246,7 @@ Weight of the data visualization palette.
 | `WEIGHT_900` | 900 weight |
 | `WEIGHT_950` | 950 weight |
 
-### DesignCollectionCopyState
+### `DesignCollectionCopyState`
 
 Copy state of a DesignCollection.
 
@@ -5256,7 +5256,7 @@ Copy state of a DesignCollection.
 | `IN_PROGRESS` | The DesignCollection is being copied |
 | `READY` | The DesignCollection has no copy in progress |
 
-### DesignVersionEvent
+### `DesignVersionEvent`
 
 Mutation event of a design within a version.
 
@@ -5267,7 +5267,7 @@ Mutation event of a design within a version.
 | `MODIFICATION` | A modification event |
 | `NONE` | No change. |
 
-### DiffPositionType
+### `DiffPositionType`
 
 Type of file the position refers to.
 
@@ -5276,7 +5276,7 @@ Type of file the position refers to.
 | `image` |  |
 | `text` |  |
 
-### EntryType
+### `EntryType`
 
 Type of a tree entry.
 
@@ -5286,7 +5286,7 @@ Type of a tree entry.
 | `commit` |  |
 | `tree` |  |
 
-### EpicSort
+### `EpicSort`
 
 Roadmap sort values.
 
@@ -5297,7 +5297,7 @@ Roadmap sort values.
 | `start_date_asc` | Start date at ascending order. |
 | `start_date_desc` | Start date at descending order. |
 
-### EpicState
+### `EpicState`
 
 State of an epic.
 
@@ -5307,7 +5307,7 @@ State of an epic.
 | `closed` |  |
 | `opened` |  |
 
-### EpicStateEvent
+### `EpicStateEvent`
 
 State event of an epic.
 
@@ -5316,7 +5316,7 @@ State event of an epic.
 | `CLOSE` | Close the epic. |
 | `REOPEN` | Reopen the epic. |
 
-### EpicWildcardId
+### `EpicWildcardId`
 
 Epic ID wildcard values.
 
@@ -5325,7 +5325,7 @@ Epic ID wildcard values.
 | `ANY` | Any epic is assigned. |
 | `NONE` | No epic is assigned. |
 
-### EventAction
+### `EventAction`
 
 Event action.
 
@@ -5345,7 +5345,7 @@ Event action.
 | `REOPENED` | Reopened action |
 | `UPDATED` | Updated action |
 
-### GroupMemberRelation
+### `GroupMemberRelation`
 
 Group member relation.
 
@@ -5355,7 +5355,7 @@ Group member relation.
 | `DIRECT` | Direct members |
 | `INHERITED` | Inherited members |
 
-### HealthStatus
+### `HealthStatus`
 
 Health status of an issue or epic.
 
@@ -5365,7 +5365,7 @@ Health status of an issue or epic.
 | `needsAttention` |  |
 | `onTrack` |  |
 
-### IssuableSeverity
+### `IssuableSeverity`
 
 Incident severity.
 
@@ -5377,7 +5377,7 @@ Incident severity.
 | `MEDIUM` | Medium severity |
 | `UNKNOWN` | Unknown severity |
 
-### IssuableState
+### `IssuableState`
 
 State of a GitLab issue or merge request.
 
@@ -5388,7 +5388,7 @@ State of a GitLab issue or merge request.
 | `locked` | Discussion has been locked. |
 | `opened` | In open state. |
 
-### IssueSort
+### `IssueSort`
 
 Values for sorting issues.
 
@@ -5420,7 +5420,7 @@ Values for sorting issues.
 | `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
-### IssueState
+### `IssueState`
 
 State of a GitLab issue.
 
@@ -5431,7 +5431,7 @@ State of a GitLab issue.
 | `locked` | Discussion has been locked. |
 | `opened` | In open state. |
 
-### IssueStateEvent
+### `IssueStateEvent`
 
 Values for issue state events.
 
@@ -5440,7 +5440,7 @@ Values for issue state events.
 | `CLOSE` | Closes the issue. |
 | `REOPEN` | Reopens the issue. |
 
-### IssueType
+### `IssueType`
 
 Issue type.
 
@@ -5450,7 +5450,7 @@ Issue type.
 | `ISSUE` | Issue issue type |
 | `TEST_CASE` | Test Case issue type |
 
-### IterationState
+### `IterationState`
 
 State of a GitLab iteration.
 
@@ -5462,7 +5462,7 @@ State of a GitLab iteration.
 | `started` |  |
 | `upcoming` |  |
 
-### IterationWildcardId
+### `IterationWildcardId`
 
 Iteration ID wildcard values.
 
@@ -5472,7 +5472,7 @@ Iteration ID wildcard values.
 | `CURRENT` | Current iteration. |
 | `NONE` | No iteration is assigned. |
 
-### JobArtifactFileType
+### `JobArtifactFileType`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5504,7 +5504,7 @@ Iteration ID wildcard values.
 | `TERRAFORM` | TERRAFORM job artifact file type. |
 | `TRACE` | TRACE job artifact file type. |
 
-### ListLimitMetric
+### `ListLimitMetric`
 
 List limit metric setting.
 
@@ -5514,7 +5514,7 @@ List limit metric setting.
 | `issue_count` |  |
 | `issue_weights` |  |
 
-### MeasurementIdentifier
+### `MeasurementIdentifier`
 
 Possible identifier types for a measurement.
 
@@ -5531,7 +5531,7 @@ Possible identifier types for a measurement.
 | `PROJECTS` | Project count. |
 | `USERS` | User count. |
 
-### MergeRequestNewState
+### `MergeRequestNewState`
 
 New state to apply to a merge request.
 
@@ -5540,7 +5540,7 @@ New state to apply to a merge request.
 | `CLOSED` | Close the merge request if it is open. |
 | `OPEN` | Open the merge request if it is closed. |
 
-### MergeRequestSort
+### `MergeRequestSort`
 
 Values for sorting merge requests.
 
@@ -5563,7 +5563,7 @@ Values for sorting merge requests.
 | `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
-### MergeRequestState
+### `MergeRequestState`
 
 State of a GitLab merge request.
 
@@ -5575,7 +5575,7 @@ State of a GitLab merge request.
 | `merged` | Merge Request has been merged. |
 | `opened` | In open state. |
 
-### MilestoneStateEnum
+### `MilestoneStateEnum`
 
 Current state of milestone.
 
@@ -5584,7 +5584,7 @@ Current state of milestone.
 | `active` | Milestone is currently active. |
 | `closed` | Milestone is closed. |
 
-### MoveType
+### `MoveType`
 
 The position to which the adjacent object should be moved.
 
@@ -5593,7 +5593,7 @@ The position to which the adjacent object should be moved.
 | `after` | The adjacent object will be moved after the object that is being moved. |
 | `before` | The adjacent object will be moved before the object that is being moved. |
 
-### MutationOperationMode
+### `MutationOperationMode`
 
 Different toggles for changing mutator behavior.
 
@@ -5603,7 +5603,7 @@ Different toggles for changing mutator behavior.
 | `REMOVE` | Performs a removal operation. |
 | `REPLACE` | Performs a replace operation. |
 
-### NamespaceProjectSort
+### `NamespaceProjectSort`
 
 Values for sorting projects.
 
@@ -5612,7 +5612,7 @@ Values for sorting projects.
 | `SIMILARITY` | Most similar to the search query. |
 | `STORAGE` | Sort by storage size. |
 
-### OncallRotationUnitEnum
+### `OncallRotationUnitEnum`
 
 Rotation length unit of an on-call rotation.
 
@@ -5622,7 +5622,7 @@ Rotation length unit of an on-call rotation.
 | `HOURS` | Hours |
 | `WEEKS` | Weeks |
 
-### PackageTypeEnum
+### `PackageTypeEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5637,7 +5637,7 @@ Rotation length unit of an on-call rotation.
 | `PYPI` | Packages from the PyPI package manager |
 | `RUBYGEMS` | Packages from the Rubygems package manager |
 
-### PipelineConfigSourceEnum
+### `PipelineConfigSourceEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5651,7 +5651,7 @@ Rotation length unit of an on-call rotation.
 | `UNKNOWN_SOURCE` |  |
 | `WEBIDE_SOURCE` |  |
 
-### PipelineStatusEnum
+### `PipelineStatusEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5667,7 +5667,7 @@ Rotation length unit of an on-call rotation.
 | `SUCCESS` |  |
 | `WAITING_FOR_RESOURCE` |  |
 
-### ProjectMemberRelation
+### `ProjectMemberRelation`
 
 Project member relation.
 
@@ -5678,7 +5678,7 @@ Project member relation.
 | `INHERITED` | Inherited members |
 | `INVITED_GROUPS` | Invited Groups members |
 
-### RegistryState
+### `RegistryState`
 
 State of a Geo registry.
 
@@ -5689,7 +5689,7 @@ State of a Geo registry.
 | `STARTED` | Registry currently syncing. |
 | `SYNCED` | Registry that is synced. |
 
-### ReleaseAssetLinkType
+### `ReleaseAssetLinkType`
 
 Type of the link: `other`, `runbook`, `image`, `package`.
 
@@ -5700,7 +5700,7 @@ Type of the link: `other`, `runbook`, `image`, `package`.
 | `PACKAGE` | Package link type |
 | `RUNBOOK` | Runbook link type |
 
-### ReleaseSort
+### `ReleaseSort`
 
 Values for sorting releases.
 
@@ -5711,7 +5711,7 @@ Values for sorting releases.
 | `RELEASED_AT_ASC` | Released at by ascending order. |
 | `RELEASED_AT_DESC` | Released at by descending order. |
 
-### RequirementState
+### `RequirementState`
 
 State of a requirement.
 
@@ -5720,7 +5720,7 @@ State of a requirement.
 | `ARCHIVED` |  |
 | `OPENED` |  |
 
-### RequirementStatusFilter
+### `RequirementStatusFilter`
 
 Status of a requirement based on last test report.
 
@@ -5730,7 +5730,7 @@ Status of a requirement based on last test report.
 | `MISSING` | Requirements without any test report. |
 | `PASSED` |  |
 
-### SastUiComponentSize
+### `SastUiComponentSize`
 
 Size of UI component in SAST configuration page.
 
@@ -5740,7 +5740,7 @@ Size of UI component in SAST configuration page.
 | `MEDIUM` | The size of UI component in SAST configuration page is medium. |
 | `SMALL` | The size of UI component in SAST configuration page is small. |
 
-### SecurityReportTypeEnum
+### `SecurityReportTypeEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5752,7 +5752,7 @@ Size of UI component in SAST configuration page.
 | `SAST` | SAST scan report |
 | `SECRET_DETECTION` | SECRET DETECTION scan report |
 
-### SecurityScannerType
+### `SecurityScannerType`
 
 The type of the security scanner.
 
@@ -5766,7 +5766,7 @@ The type of the security scanner.
 | `SAST` |  |
 | `SECRET_DETECTION` |  |
 
-### SentryErrorStatus
+### `SentryErrorStatus`
 
 State of a Sentry error.
 
@@ -5777,7 +5777,7 @@ State of a Sentry error.
 | `RESOLVED_IN_NEXT_RELEASE` | Error has been ignored until next release. |
 | `UNRESOLVED` | Error is unresolved. |
 
-### ServiceType
+### `ServiceType`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5818,7 +5818,7 @@ State of a Sentry error.
 | `WEBEX_TEAMS_SERVICE` | WebexTeamsService type |
 | `YOUTRACK_SERVICE` | YoutrackService type |
 
-### SnippetBlobActionEnum
+### `SnippetBlobActionEnum`
 
 Type of a snippet blob input action.
 
@@ -5829,7 +5829,7 @@ Type of a snippet blob input action.
 | `move` |  |
 | `update` |  |
 
-### Sort
+### `Sort`
 
 Common sort values.
 
@@ -5844,7 +5844,7 @@ Common sort values.
 | `updated_asc` **{warning-solid}** | **Deprecated:** Use UPDATED_ASC. Deprecated in 13.5. |
 | `updated_desc` **{warning-solid}** | **Deprecated:** Use UPDATED_DESC. Deprecated in 13.5. |
 
-### TestReportState
+### `TestReportState`
 
 State of a test report.
 
@@ -5853,7 +5853,7 @@ State of a test report.
 | `FAILED` |  |
 | `PASSED` |  |
 
-### TodoActionEnum
+### `TodoActionEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5865,14 +5865,14 @@ State of a test report.
 | `mentioned` |  |
 | `unmergeable` |  |
 
-### TodoStateEnum
+### `TodoStateEnum`
 
 | Value | Description |
 | ----- | ----------- |
 | `done` | The state of the todo is done. |
 | `pending` | The state of the todo is pending. |
 
-### TodoTargetEnum
+### `TodoTargetEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5883,14 +5883,14 @@ State of a test report.
 | `ISSUE` | An Issue. |
 | `MERGEREQUEST` | A MergeRequest. |
 
-### TypeEnum
+### `TypeEnum`
 
 | Value | Description |
 | ----- | ----------- |
 | `personal` |  |
 | `project` |  |
 
-### UserState
+### `UserState`
 
 Possible states of a user.
 
@@ -5900,7 +5900,7 @@ Possible states of a user.
 | `blocked` | The user has been blocked and is prevented from using the system. |
 | `deactivated` | The user is no longer active and is unable to use the system. |
 
-### VisibilityLevelsEnum
+### `VisibilityLevelsEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5908,7 +5908,7 @@ Possible states of a user.
 | `private` | Private visibility level. |
 | `public` | Public visibility level. |
 
-### VisibilityScopesEnum
+### `VisibilityScopesEnum`
 
 | Value | Description |
 | ----- | ----------- |
@@ -5916,7 +5916,7 @@ Possible states of a user.
 | `private` |  |
 | `public` |  |
 
-### VulnerabilityDismissalReason
+### `VulnerabilityDismissalReason`
 
 The dismissal reason of the Vulnerability.
 
@@ -5928,7 +5928,7 @@ The dismissal reason of the Vulnerability.
 | `NOT_APPLICABLE` | Other reasons for dismissal |
 | `USED_IN_TESTS` | The Vulnerability is used in tests and does not pose an actual risk |
 
-### VulnerabilityExternalIssueLinkExternalTracker
+### `VulnerabilityExternalIssueLinkExternalTracker`
 
 The external tracker of the external issue link related to a vulnerability.
 
@@ -5936,7 +5936,7 @@ The external tracker of the external issue link related to a vulnerability.
 | ----- | ----------- |
 | `JIRA` | Jira external tracker |
 
-### VulnerabilityExternalIssueLinkType
+### `VulnerabilityExternalIssueLinkType`
 
 The type of the external issue link related to a vulnerability.
 
@@ -5944,7 +5944,7 @@ The type of the external issue link related to a vulnerability.
 | ----- | ----------- |
 | `CREATED` | Created link type |
 
-### VulnerabilityGrade
+### `VulnerabilityGrade`
 
 The grade of the vulnerable project.
 
@@ -5956,7 +5956,7 @@ The grade of the vulnerable project.
 | `D` |  |
 | `F` |  |
 
-### VulnerabilityIssueLinkType
+### `VulnerabilityIssueLinkType`
 
 The type of the issue link related to a vulnerability.
 
@@ -5965,7 +5965,7 @@ The type of the issue link related to a vulnerability.
 | `CREATED` |  |
 | `RELATED` |  |
 
-### VulnerabilityReportType
+### `VulnerabilityReportType`
 
 The type of the security scan that found the vulnerability.
 
@@ -5979,7 +5979,7 @@ The type of the security scan that found the vulnerability.
 | `SAST` |  |
 | `SECRET_DETECTION` |  |
 
-### VulnerabilitySeverity
+### `VulnerabilitySeverity`
 
 The severity of the vulnerability.
 
@@ -5992,7 +5992,7 @@ The severity of the vulnerability.
 | `MEDIUM` |  |
 | `UNKNOWN` |  |
 
-### VulnerabilitySort
+### `VulnerabilitySort`
 
 Vulnerability sort values.
 
@@ -6009,7 +6009,7 @@ Vulnerability sort values.
 | `title_asc` | Title in ascending order. |
 | `title_desc` | Title in descending order. |
 
-### VulnerabilityState
+### `VulnerabilityState`
 
 The state of the vulnerability.
 
