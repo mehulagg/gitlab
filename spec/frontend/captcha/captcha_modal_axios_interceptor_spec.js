@@ -18,21 +18,28 @@ describe('registerCaptchaModalInterceptor', () => {
     spam_log_id: SPAM_LOG_ID,
   };
 
+  const unsupportedMethods = ['get', 'head', 'options'];
+  const supportedMethods = ['patch', 'post', 'put'];
+
   let mock;
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
     mock.onAny('/no-captcha').reply(200, AXIOS_RESPONSE);
-    mock.onGet('/error').reply(404, AXIOS_RESPONSE);
+    mock.onAny('/error').reply(404, AXIOS_RESPONSE);
     mock.onAny('/captcha').reply((config) => {
+      if (!supportedMethods.includes(config.method)) {
+        return [405, { method: config.method }];
+      }
+
       try {
         const { captcha_response, spam_log_id, ...rest } = JSON.parse(config.data);
         // eslint-disable-next-line babel/camelcase
         if (captcha_response === CAPTCHA_RESPONSE && spam_log_id === SPAM_LOG_ID) {
-          return [200, { ...rest, CAPTCHA_SUCCESS }];
+          return [200, { ...rest, method: config.method, CAPTCHA_SUCCESS }];
         }
       } catch (e) {
-        return [400, {}];
+        return [400, { method: config.method }];
       }
 
       return [409, NEEDS_CAPTCHA_RESPONSE];
@@ -44,31 +51,32 @@ describe('registerCaptchaModalInterceptor', () => {
     mock.restore();
   });
 
-  it('successful requests are passed through', async () => {
-    registerCaptchaModalInterceptor(axios);
+  describe.each([...supportedMethods, ...unsupportedMethods])('For HTTP method %s', (method) => {
+    it('successful requests are passed through', async () => {
+      registerCaptchaModalInterceptor(axios);
 
-    const { data, status } = await axios.get('/no-captcha');
+      const { data, status } = await axios[method]('/no-captcha');
 
-    expect(status).toEqual(200);
-    expect(data).toEqual(AXIOS_RESPONSE);
+      expect(status).toEqual(200);
+      expect(data).toEqual(AXIOS_RESPONSE);
+    });
+
+    it('error requests without needs_captcha_response_errors are passed through', async () => {
+      registerCaptchaModalInterceptor(axios);
+
+      await expect(() => axios[method]('/error')).rejects.toThrow(
+        expect.objectContaining({
+          response: expect.objectContaining({ status: 404, data: AXIOS_RESPONSE }),
+        }),
+      );
+    });
   });
 
-  it('error requests without needs_captcha_response_errors are passed through', async () => {
-    registerCaptchaModalInterceptor(axios);
+  describe.each(supportedMethods)('For HTTP method %s', (method) => {
+    describe('error requests with needs_captcha_response_errors', () => {
+      const submittedData = { ID: 12345 };
 
-    await expect(() => axios.get('/error')).rejects.toThrow(
-      expect.objectContaining({
-        response: expect.objectContaining({ status: 404, data: AXIOS_RESPONSE }),
-      }),
-    );
-  });
-
-  describe('error requests with needs_captcha_response_errors', () => {
-    const submittedData = { ID: 12345 };
-
-    it.each(['post', 'patch', 'put'])(
-      're-submits %s request if captcha was solved correctly',
-      async (method) => {
+      it('re-submits request if captcha was solved correctly', async () => {
         waitForCaptchaToBeSolved.mockImplementation(() => Promise.resolve(CAPTCHA_RESPONSE));
         registerCaptchaModalInterceptor(axios);
 
@@ -76,13 +84,10 @@ describe('registerCaptchaModalInterceptor', () => {
 
         expect(waitForCaptchaToBeSolved).toHaveBeenCalledWith(CAPTCHA_SITE_KEY);
 
-        expect(returnedData).toEqual({ ...submittedData, CAPTCHA_SUCCESS });
-      },
-    );
+        expect(returnedData).toEqual({ ...submittedData, CAPTCHA_SUCCESS, method });
+      });
 
-    it.each(['post', 'patch', 'put'])(
-      "does not re-submit %s request if captcha wasn't resolved",
-      async (method) => {
+      it('does not re-submit request if captcha was not solved', async () => {
         const error = new Error('Captcha not solved');
         waitForCaptchaToBeSolved.mockImplementation(() => Promise.reject(error));
         registerCaptchaModalInterceptor(axios);
@@ -90,7 +95,21 @@ describe('registerCaptchaModalInterceptor', () => {
         await expect(() => axios[method]('/captcha', submittedData)).rejects.toThrow(error);
 
         expect(waitForCaptchaToBeSolved).toHaveBeenCalledWith(CAPTCHA_SITE_KEY);
-      },
-    );
+      });
+    });
+  });
+
+  describe.each(unsupportedMethods)('For HTTP method %s', (method) => {
+    it('ignores captcha response', async () => {
+      registerCaptchaModalInterceptor(axios);
+
+      await expect(() => axios[method]('/captcha')).rejects.toThrow(
+        expect.objectContaining({
+          response: expect.objectContaining({ status: 405, data: { method } }),
+        }),
+      );
+
+      expect(waitForCaptchaToBeSolved).not.toHaveBeenCalled();
+    });
   });
 });
