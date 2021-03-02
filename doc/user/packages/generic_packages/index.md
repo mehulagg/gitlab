@@ -40,7 +40,7 @@ Prerequisites:
 - You need to [authenticate with the API](../../../api/README.md#authentication). If authenticating with a deploy token, it must be configured with the `write_package_registry` scope.
 
 ```plaintext
-PUT /projects/:id/packages/generic/:package_name/:package_version/:file_name/:status
+PUT /projects/:id/packages/generic/:package_name/:package_version/:file_name?status=:status
 ```
 
 | Attribute          | Type            | Required | Description                                                                                                                      |
