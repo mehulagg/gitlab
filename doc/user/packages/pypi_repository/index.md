@@ -328,7 +328,7 @@ In these commands, you can use `--extra-index-url` instead of `--index-url`. How
 `--extra-index-url` makes you vulnerable to dependency confusion attacks because it checks the PyPi
 repository for the package before it checks the custom repository. `--extra-index-url` adds the
 provided URL as an additional registry which the client checks if the package is present.
-`--index-url` tells the client to check for the package on the provided url only.
+`--index-url` tells the client to check for the package on the provided URL only.
 
 If you were following the guide and want to install the
 `MyPyPiPackage` package, you can run:
