@@ -26,13 +26,15 @@ RSpec.describe Emails::MergeRequests do
     subject { Notify.merge_when_pipeline_succeeds_email(recipient.id, merge_request.id, current_user.id) }
 
     it "has required details" do
-      expect(subject).to have_content title
-      expect(subject).to have_content merge_request.to_reference
-      expect(subject).to have_content current_user.name
-      expect(subject.html_part).to have_content(assignee.name)
-      expect(subject.text_part).to have_content(assignee.name)
-      expect(subject.html_part).to have_content(reviewer.name)
-      expect(subject.text_part).to have_content(reviewer.name)
+      aggregate_failures do
+        expect(subject).to have_content title
+        expect(subject).to have_content merge_request.to_reference
+        expect(subject).to have_content current_user.name
+        expect(subject.html_part).to have_content(assignee.name)
+        expect(subject.text_part).to have_content(assignee.name)
+        expect(subject.html_part).to have_content(reviewer.name)
+        expect(subject.text_part).to have_content(reviewer.name)
+      end
     end
   end
 
