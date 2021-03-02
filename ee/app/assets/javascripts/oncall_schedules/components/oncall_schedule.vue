@@ -101,9 +101,11 @@ export default {
     };
   },
   computed: {
+    selectedTimezone() {
+      return this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
+    },
     offset() {
-      const selectedTz = this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
-      return __(`(UTC ${selectedTz.formatted_offset})`);
+      return __(`(UTC ${this.selectedTimezone.formatted_offset})`);
     },
     timeframe() {
       return getTimeframeForWeeksView(this.timeframeStartDate);
