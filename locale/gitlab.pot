@@ -31464,12 +31464,6 @@ msgstr ""
 msgid "Trials|You can apply your trial to a new group or an existing group."
 msgstr ""
 
-msgid "Trials|You can apply your trial to a new group or your personal account."
-msgstr ""
-
-msgid "Trials|You can apply your trial to a new group, an existing group, or your personal account."
-msgstr ""
-
 msgid "Trials|You won't get a free trial right now but you can always resume this process by clicking on your avatar and choosing 'Start a free trial'"
 msgstr ""
 
