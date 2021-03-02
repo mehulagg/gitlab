@@ -62,7 +62,7 @@ describe('AddEditRotationForm', () => {
   const findRestrictedToOptions = () =>
     wrapper.find('[data-testid="restricted-to"]').findAllComponents(GlDropdownItem);
 
-  describe.only('Rotation form validation', () => {
+  describe('Rotation form validation', () => {
     it.each`
       index | type                | validationState | value
       ${0}  | ${'name'}           | ${true}         | ${'true'}
