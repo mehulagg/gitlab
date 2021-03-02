@@ -93,9 +93,10 @@ secrets-sast:
     expire_in: 1 week  # GitLab-specific
 
 semgrep:
-  - semgrep --lang=rb --config p/minusworld.ruby-on-rails-xss ./app
-artifacts:
-  paths: sgrep.sarif
+  script:
+    - semgrep --lang=rb --config p/minusworld.ruby-on-rails-xss ./app
+  artifacts:
+    paths: sgrep.sarif
 
 to-gl-report:
   extends: semgrep-sast
