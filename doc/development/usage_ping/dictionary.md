@@ -5589,7 +5589,7 @@ Missing description
 | `value_type` | number |
 | `status` | data_available |
 | `time_frame` | all |
-| `data_source` | Database |
+| `data_source` | Redis |
 | `distribution` |  |
 | `tier` |  |
 | `skip_validation` | true |
@@ -5608,7 +5608,7 @@ Missing description
 | `value_type` | number |
 | `status` | data_available |
 | `time_frame` | all |
-| `data_source` | Database |
+| `data_source` | Redis |
 | `distribution` |  |
 | `tier` |  |
 | `skip_validation` | true |
@@ -5627,7 +5627,7 @@ Missing description
 | `value_type` | number |
 | `status` | data_available |
 | `time_frame` | all |
-| `data_source` | Database |
+| `data_source` | Redis |
 | `distribution` |  |
 | `tier` |  |
 | `skip_validation` | true |
@@ -14557,7 +14557,7 @@ Missing description
 | `value_type` | number |
 | `status` | data_available |
 | `time_frame` | 28d |
-| `data_source` | Redis |
+| `data_source` | Redis_hll |
 | `distribution` |  |
 | `tier` |  |
 | `skip_validation` | true |
@@ -14576,7 +14576,7 @@ Missing description
 | `value_type` | number |
 | `status` | data_available |
 | `time_frame` | 7d |
-| `data_source` | Redis |
+| `data_source` | Redis_hll |
 | `distribution` | ee |
 | `tier` |  |
 | `skip_validation` | true |
@@ -17770,7 +17770,7 @@ Missing description
 | `value_type` | number |
 | `status` | data_available |
 | `time_frame` | 7d |
-| `data_source` | Redis |
+| `data_source` | Redis_hll |
 | `distribution` | ee |
 | `tier` |  |
 | `skip_validation` | true |
@@ -17810,7 +17810,7 @@ Missing description
 | `value_type` | number |
 | `status` | data_available |
 | `time_frame` | 7d |
-| `data_source` | Redis |
+| `data_source` | Redis_hll |
 | `distribution` | ee |
 | `tier` |  |
 | `skip_validation` | true |
@@ -20709,7 +20709,7 @@ Missing description
 | `value_type` | number |
 | `status` | data_available |
 | `time_frame` | 28d |
-| `data_source` | Redis |
+| `data_source` | Redis_hll |
 | `distribution` |  |
 | `tier` |  |
 | `skip_validation` | true |
@@ -20728,7 +20728,7 @@ Missing description
 | `value_type` | number |
 | `status` | data_available |
 | `time_frame` | 7d |
-| `data_source` | Redis |
+| `data_source` | Redis_hll |
 | `distribution` | ee |
 | `tier` |  |
 | `skip_validation` | true |
