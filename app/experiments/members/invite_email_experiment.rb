@@ -7,12 +7,10 @@ module Members
 
     INVITE_TYPE = 'initial_email'
 
-    def rollout_strategy
-      :round_robin
-    end
+    def percentage_rollout
+      return variant_names.first if Feature.enabled?(feature_flag_name, context.project_or_group, type: :experiment, default_enabled: :yaml)
 
-    def variants
-      %i[avatar permission_info control]
+      nil # Returning nil vs. :control is important for not caching and rollouts.
     end
   end
 end
