@@ -620,6 +620,17 @@ describe('Ref selector component', () => {
       },
     );
 
+    it('only calls commitApiCallSpy when REF_TYPE_COMMITS is enabled', async () => {
+      createComponent({ enabledRefTypes: [REF_TYPE_COMMITS] });
+      updateQuery('abcd1234');
+
+      await waitForRequests();
+
+      expect(commitApiCallSpy).toHaveBeenCalledTimes(1);
+      expect(branchesApiCallSpy).not.toHaveBeenCalled();
+      expect(tagsApiCallSpy).not.toHaveBeenCalled();
+    });
+
     it('triggers another search if enabled ref types change', async () => {
       createComponent({ enabledRefTypes: [REF_TYPE_BRANCHES] });
       await waitForRequests();
