@@ -62,7 +62,7 @@ export default {
       required: false,
       default: false,
     },
-    securityApprovalsHelpPagePath: {
+    licenseComplianceDocsPath: {
       type: String,
       required: false,
       default: '',
@@ -167,8 +167,8 @@ export default {
         <div class="pr-3">
           {{ licenseSummaryText }}
           <gl-link
-            v-if="reportContainsBlacklistedLicense && securityApprovalsHelpPagePath"
-            :href="securityApprovalsHelpPagePath"
+            v-if="reportContainsBlacklistedLicense && licenseComplianceDocsPath"
+            :href="licenseComplianceDocsPath"
             class="js-security-approval-help-link"
             target="_blank"
           >

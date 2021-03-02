@@ -17,7 +17,7 @@ localVue.use(Vuex);
 
 describe('License Report MR Widget', () => {
   const apiUrl = `${TEST_HOST}/license_management`;
-  const securityApprovalsHelpPagePath = `${TEST_HOST}/path/to/security/approvals/help`;
+  const licenseComplianceDocsPath = `${TEST_HOST}/path/to/security/approvals/help`;
   let wrapper;
 
   const defaultState = {
@@ -53,7 +53,7 @@ describe('License Report MR Widget', () => {
     licenseManagementSettingsPath: `${TEST_HOST}/lm_settings`,
     fullReportPath: `${TEST_HOST}/path/to/the/full/report`,
     apiUrl,
-    securityApprovalsHelpPagePath,
+    licenseComplianceDocsPath,
   };
 
   const defaultActions = {
@@ -338,12 +338,12 @@ describe('License Report MR Widget', () => {
   });
 
   describe('approval status', () => {
-    const findSecurityApprovalHelpLink = () => wrapper.find('.js-security-approval-help-link');
+    const findLicenseComplianceHelpLink = () => wrapper.find('.js-security-approval-help-link');
 
     it('does not show a link to security approval help page if report does not contain blacklisted licenses', () => {
       mountComponent();
 
-      expect(findSecurityApprovalHelpLink().exists()).toBe(false);
+      expect(findLicenseComplianceHelpLink().exists()).toBe(false);
     });
 
     it('shows a link to security approval help page if report contains blacklisted licenses', () => {
@@ -357,10 +357,10 @@ describe('License Report MR Widget', () => {
         getters,
       });
 
-      const securityApprovalHelpLink = findSecurityApprovalHelpLink();
+      const licenseComplianceHelpLink = findLicenseComplianceHelpLink();
 
-      expect(findSecurityApprovalHelpLink().exists()).toBe(true);
-      expect(securityApprovalHelpLink.attributes('href')).toBe(securityApprovalsHelpPagePath);
+      expect(findLicenseComplianceHelpLink().exists()).toBe(true);
+      expect(licenseComplianceHelpLink.attributes('href')).toBe(licenseComplianceDocsPath);
     });
   });
 });
