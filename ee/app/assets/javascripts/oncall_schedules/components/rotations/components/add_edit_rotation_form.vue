@@ -35,7 +35,7 @@ export const i18n = {
       description: s__(
         'OnCallSchedules|Please note, rotations with shifts that are less than four hours are currently not supported in the weekly view.',
       ),
-      error: s__('OnCallSchedules|Rotation length must be at least 1'),
+      error: s__('OnCallSchedules|Rotation length must be a positive integer'),
     },
     startsAt: {
       title: __('Starts on'),

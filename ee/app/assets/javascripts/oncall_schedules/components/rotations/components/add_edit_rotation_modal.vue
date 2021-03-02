@@ -254,7 +254,8 @@ export default {
       } else if (key === 'startsAt.date') {
         this.validationState.startsAt = Boolean(this.form.startsAt.date);
       } else if (key === 'rotationLength.length') {
-        this.validationState.rotationLength = this.form.rotationLength.length >= 1;
+        const { length } = this.form.rotationLength;
+        this.validationState.rotationLength = length >= 1 && Number.isInteger(length);
       }
     },
     afterCloseModal() {
