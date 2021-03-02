@@ -125,54 +125,16 @@ export default {
 
 <template>
   <div :class="containerClass">
-    <gl-button-group
-      v-if="isCustomNotification"
-      v-gl-tooltip="{ title: buttonTooltip }"
-      data-testid="notification-button"
-      :class="{ disabled: disabled }"
-      :size="buttonSize"
-    >
-      <gl-button
-        v-gl-modal="$options.modalId"
-        :size="buttonSize"
-        :icon="buttonIcon"
-        :loading="isLoading"
-        :disabled="disabled"
-      >
-        <template v-if="buttonText">{{ buttonText }}</template>
-      </gl-button>
-      <gl-dropdown :size="buttonSize" :disabled="disabled">
-        <notifications-dropdown-item
-          v-for="item in notificationLevels"
-          :key="item.level"
-          :level="item.level"
-          :title="item.title"
-          :description="item.description"
-          :notification-level="selectedNotificationLevel"
-          @item-selected="selectItem"
-        />
-        <gl-dropdown-divider />
-        <notifications-dropdown-item
-          :key="$options.customLevel"
-          :level="$options.customLevel"
-          :title="$options.i18n.notificationTitles.custom"
-          :description="$options.i18n.notificationDescriptions.custom"
-          :notification-level="selectedNotificationLevel"
-          @item-selected="selectItem"
-        />
-      </gl-dropdown>
-    </gl-button-group>
-
     <gl-dropdown
-      v-else
-      v-gl-tooltip="{ title: buttonTooltip }"
-      data-testid="notification-button"
-      :text="buttonText"
+      v-gl-modal="$options.modalId"
+      :size="buttonSize"
       :icon="buttonIcon"
       :loading="isLoading"
-      :size="buttonSize"
       :disabled="disabled"
-      :class="{ disabled: disabled }"
+      :split="isCustomNotification"
+      :text="buttonText"
+      v-gl-tooltip="{ title: buttonTooltip }"
+      data-testid="notification-button"
     >
       <notifications-dropdown-item
         v-for="item in notificationLevels"
