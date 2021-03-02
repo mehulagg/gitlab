@@ -67,4 +67,17 @@ describe('LicensePackages', () => {
       expect(buttonEl.innerText.trim()).toBe('2 more');
     });
   });
+
+  describe('template without packages', () => {
+    let vm = createComponent([]);
+
+    it('renders package list with 0 packages', () => {
+      const packagesEl = vm.$el.querySelector('.js-license-dependencies');
+
+      expect(packagesEl).not.toBeNull();
+      expect(packagesEl.innerText.trim()).toBe('');
+    });
+
+    vm.$destroy();
+  });
 });

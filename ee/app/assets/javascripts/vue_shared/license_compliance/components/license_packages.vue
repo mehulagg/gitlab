@@ -17,8 +17,13 @@ export default {
     };
   },
   computed: {
+    hasPackages() {
+      return Boolean(this.packages.length);
+    },
     packageString() {
-      return getPackagesString(this.packages, !this.showAllPackages, this.displayPackageCount);
+      return this.hasPackages
+        ? getPackagesString(this.packages, !this.showAllPackages, this.displayPackageCount)
+        : '';
     },
     remainingPackages() {
       const { packages } = this;
