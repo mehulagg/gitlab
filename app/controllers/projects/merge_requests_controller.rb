@@ -38,7 +38,6 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:default_merge_ref_for_diffs, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:core_security_mr_widget_counts, @project)
     push_frontend_feature_flag(:remove_resolve_note, @project, default_enabled: true)
-    push_frontend_feature_flag(:diffs_gradual_load, @project, default_enabled: true)
     push_frontend_feature_flag(:codequality_backend_comparison, @project, default_enabled: :yaml)
     push_frontend_feature_flag(:suggestions_custom_commit, @project, default_enabled: true)
     push_frontend_feature_flag(:local_file_reviews, default_enabled: :yaml)
