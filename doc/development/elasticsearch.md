@@ -235,9 +235,9 @@ cron worker runs. Default value is 5 minutes.
 - `pause_indexing!` - Pause indexing while the migration runs. This setting will record the indexing setting before
 the migration runs and set it back to that value when the migration is completed.
 
-- `space_requirements!` - Check free space available in the target index when the migration runs. This setting will halt the 
-  migration if the storage required is not available when the migration runs. The migration must provide storage 
-  required (in bytes) by defining a `space_required_bytes` method.
+- `space_requirements!` - Verify that enough free space available in the cluster when the migration runs. This setting 
+  will halt the migration if the storage required is not available when the migration runs. The migration must provide 
+  space required (in bytes) by defining a `space_required_bytes` method.
 
 ```ruby
 # frozen_string_literal: true
