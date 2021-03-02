@@ -23,10 +23,6 @@ module QA
             element :create_new_board_button
           end
 
-          view 'app/assets/javascripts/vue_shared/components/deprecated_modal.vue' do
-            element :save_changes_button
-          end
-
           view 'app/assets/javascripts/vue_shared/components/sidebar/labels_select/base.vue' do
             element :labels_dropdown_content
           end
