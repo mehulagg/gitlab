@@ -35,6 +35,8 @@ module Gitlab
       MR_EDIT_MR_TITLE_ACTION = 'i_code_review_edit_mr_title'
       MR_EDIT_MR_DESC_ACTION = 'i_code_review_edit_mr_desc'
       MR_CREATE_FROM_ISSUE_ACTION = 'i_code_review_user_create_mr_from_issue'
+      MR_ASSIGNEES_CHANGED_ACTION = 'i_code_review_user_assignees_changed'
+      MR_REVIEWERS_CHANGED_ACTION = 'i_code_review_user_reviewers_changed'
 
       class << self
         def track_mr_diffs_action(merge_request:)
@@ -151,6 +153,14 @@ module Gitlab
 
         def track_mr_create_from_issue(user:)
           track_unique_action_by_user(MR_CREATE_FROM_ISSUE_ACTION, user)
+        end
+
+        def track_assignees_changed_action(user:)
+          track_unique_action_by_user(MR_ASSIGNEES_CHANGED_ACTION, user)
+        end
+
+        def track_reviewers_changed_action(user:)
+          track_unique_action_by_user(MR_REVIEWERS_CHANGED_ACTION, user)
         end
 
         private
