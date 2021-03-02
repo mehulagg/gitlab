@@ -8,7 +8,7 @@ import {
   GlIcon,
   GlLoadingIcon,
 } from '@gitlab/ui';
-import { debounce } from 'lodash';
+import { debounce, isArray } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { ALL_REF_TYPES, SEARCH_DEBOUNCE_MS, DEFAULT_I18N } from '../constants';
 import createStore from '../stores';
@@ -32,7 +32,15 @@ export default {
       type: Array,
       required: false,
       default: () => ALL_REF_TYPES,
-      validator: (refTypes) => refTypes.every((refType) => ALL_REF_TYPES.includes(refType)),
+      validator: (val) =>
+        // It has to be an arrray
+        isArray(val) &&
+        // with at least one item
+        val.length > 0 &&
+        // and only "branches", "tags", and "commits" are allowed
+        val.every((item) => ALL_REF_TYPES.includes(item)) &&
+        // and no duplicates are allowed
+        val.length === new Set(val).size,
     },
     value: {
       type: String,
