@@ -43,7 +43,7 @@ export const i18n = {
     endsAt: {
       enableToggle: s__('OnCallSchedules|Enable end date'),
       title: __('Ends on'),
-      error: s__('OnCallSchedules|Rotation end date must come after the start date'),
+      error: s__('OnCallSchedules|Rotation end date/time must come after start date/time'),
     },
     restrictToTime: {
       enableToggle: s__('OnCallSchedules|Restrict to time intervals'),
@@ -256,7 +256,21 @@ export default {
             <gl-datepicker
               class="gl-mr-3"
               @input="$emit('update-rotation-form', { type: 'endsAt.date', value: $event })"
-            />
+            >
+              <template #default="{ formattedDate }">
+                <gl-form-input
+                  class="gl-w-full"
+                  :value="formattedDate"
+                  :placeholder="__(`YYYY-MM-DD`)"
+                  @blur="
+                    $emit('update-rotation-form', {
+                      type: 'endsAt.date',
+                      value: $event.target.value,
+                    })
+                  "
+                />
+              </template>
+            </gl-datepicker>
             <span> {{ __('at') }} </span>
             <gl-dropdown
               data-testid="rotation-end-time"
