@@ -35,6 +35,7 @@ export const i18n = {
       description: s__(
         'OnCallSchedules|Please note, rotations with shifts that are less than four hours are currently not supported in the weekly view.',
       ),
+      error: s__('OnCallSchedules|Rotation length must be at least 1'),
     },
     startsAt: {
       title: __('Starts on'),
@@ -161,6 +162,8 @@ export default {
         :description="$options.i18n.fields.rotationLength.description"
         label-size="sm"
         label-for="rotation-length"
+        :invalid-feedback="$options.i18n.fields.rotationLength.error"
+        :state="validationState.rotationLength"
       >
         <div class="gl-display-flex">
           <gl-form-input
@@ -168,6 +171,7 @@ export default {
             type="number"
             class="gl-w-12 gl-mr-3"
             min="1"
+            number
             :value="1"
             @input="$emit('update-rotation-form', { type: 'rotationLength.length', value: $event })"
           />

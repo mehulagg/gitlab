@@ -93,7 +93,8 @@ export default {
       validationState: {
         name: true,
         participants: true,
-        startsAt: true,
+        length: true,
+        rotationLength: true,
       },
     };
   },
@@ -142,10 +143,7 @@ export default {
           date: formatDate(date, 'yyyy-mm-dd'),
           time: format24HourTimeStringFromInt(time),
         },
-        rotationLength: {
-          ...rotationLength,
-          length: parseInt(rotationLength.length, 10),
-        },
+        rotationLength,
         participants: getParticipantsForSave(participants),
       };
       if (this.form.isRestrictedToTime) {
@@ -255,6 +253,8 @@ export default {
         this.validationState.participants = this.form.participants.length > 0;
       } else if (key === 'startsAt.date') {
         this.validationState.startsAt = Boolean(this.form.startsAt.date);
+      } else if (key === 'rotationLength.length') {
+        this.validationState.rotationLength = this.form.rotationLength.length >= 1;
       }
     },
     afterCloseModal() {

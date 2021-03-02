@@ -20903,6 +20903,9 @@ msgstr ""
 msgid "OnCallSchedules|Rotation length"
 msgstr ""
 
+msgid "OnCallSchedules|Rotation length must be at least 1"
+msgstr ""
+
 msgid "OnCallSchedules|Rotation name cannot be empty"
 msgstr ""
 
