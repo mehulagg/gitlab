@@ -1935,6 +1935,9 @@ msgstr ""
 msgid "Add previously merged commits"
 msgstr ""
 
+msgid "Add projects"
+msgstr ""
+
 msgid "Add reaction"
 msgstr ""
 
@@ -26812,16 +26815,10 @@ msgstr ""
 msgid "SecurityReports|%{firstProject}, %{secondProject}, and %{rest}"
 msgstr ""
 
-msgid "SecurityReports|Add a project to your dashboard"
-msgstr ""
-
 msgid "SecurityReports|Add or remove projects to monitor in the security area. Projects included in this list will have their results displayed in the security dashboard and vulnerability report."
 msgstr ""
 
 msgid "SecurityReports|Add projects"
-msgstr ""
-
-msgid "SecurityReports|Add projects to your group"
 msgstr ""
 
 msgid "SecurityReports|All"
@@ -26837,6 +26834,9 @@ msgid "SecurityReports|Comment deleted on '%{vulnerabilityName}'"
 msgstr ""
 
 msgid "SecurityReports|Comment edited on '%{vulnerabilityName}'"
+msgstr ""
+
+msgid "SecurityReports|Configure security testing"
 msgstr ""
 
 msgid "SecurityReports|Create Jira issue"
@@ -26896,16 +26896,28 @@ msgstr ""
 msgid "SecurityReports|Learn more about setting up your dashboard"
 msgstr ""
 
-msgid "SecurityReports|Monitor vulnerabilities in your code"
+msgid "SecurityReports|Manage and track vulnerabilities identified in projects within your group. Projects with security testing configured will have their results show here."
+msgstr ""
+
+msgid "SecurityReports|Manage and track vulnerabilities identified in your project. Projects with security testing configured will have their results show here."
+msgstr ""
+
+msgid "SecurityReports|Manage and track vulnerabilities identified in your projects’. Add projects you have access to with security testing configured to have their results show here."
+msgstr ""
+
+msgid "SecurityReports|Monitor vulnerabilities in all of your projects"
+msgstr ""
+
+msgid "SecurityReports|Monitor vulnerabilities in your group"
+msgstr ""
+
+msgid "SecurityReports|Monitor vulnerabilities in your project"
 msgstr ""
 
 msgid "SecurityReports|Monitored projects"
 msgstr ""
 
 msgid "SecurityReports|More info"
-msgstr ""
-
-msgid "SecurityReports|More information"
 msgstr ""
 
 msgid "SecurityReports|No activity"
@@ -26969,15 +26981,6 @@ msgid "SecurityReports|Sorry, your filter produced no results"
 msgstr ""
 
 msgid "SecurityReports|Status"
-msgstr ""
-
-msgid "SecurityReports|The security dashboard displays the latest security findings for projects you wish to monitor. Add projects to your group to view their vulnerabilities here."
-msgstr ""
-
-msgid "SecurityReports|The security dashboard displays the latest security findings for projects you wish to monitor. Select \"Edit dashboard\" to add and remove projects."
-msgstr ""
-
-msgid "SecurityReports|The security dashboard displays the latest security report. Use it to find and fix vulnerabilities."
 msgstr ""
 
 msgid "SecurityReports|There was an error adding the comment."

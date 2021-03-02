@@ -258,7 +258,8 @@ module EE
           empty_state_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
           no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
-          project_full_path: project.full_path
+          project_full_path: project.full_path,
+          security_configuration_path: project_security_configuration_path(@project)
         }.merge!(security_dashboard_pipeline_data(project))
       else
         {

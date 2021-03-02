@@ -1,5 +1,5 @@
-import { GlEmptyState, GlButton, GlLink } from '@gitlab/ui';
-import { mount } from '@vue/test-utils';
+import { GlEmptyState } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
 
 describe('first class instance security dashboard empty state', () => {
@@ -9,7 +9,7 @@ describe('first class instance security dashboard empty state', () => {
   const emptyStateSvgPath = '/placeholder.svg';
 
   const createWrapper = () =>
-    mount(DashboardNotConfigured, {
+    shallowMount(DashboardNotConfigured, {
       provide: {
         dashboardDocumentation,
         emptyStateSvgPath,
@@ -18,8 +18,6 @@ describe('first class instance security dashboard empty state', () => {
     });
 
   const findGlEmptyState = () => wrapper.find(GlEmptyState);
-  const findButton = () => wrapper.find(GlButton);
-  const findLink = () => wrapper.find(GlLink);
 
   beforeEach(() => {
     wrapper = createWrapper();
@@ -29,16 +27,18 @@ describe('first class instance security dashboard empty state', () => {
     wrapper.destroy();
   });
 
-  it('contains a GlEmptyState', () => {
+  it('contains a GlEmptyState with the expected props', () => {
+    const { title, description, primaryButtonText, secondaryButtonText } = wrapper.vm.$options.i18n;
+
     expect(findGlEmptyState().exists()).toBe(true);
-    expect(findGlEmptyState().props('svgPath')).toBe(emptyStateSvgPath);
-  });
-
-  it('contains a GlLink with href attribute equal to dashboardDocumentation', () => {
-    expect(findLink().attributes('href')).toBe(dashboardDocumentation);
-  });
-
-  it('contains a GlButton with a link to settings page', () => {
-    expect(findButton().attributes('href')).toBe(instanceDashboardSettingsPath);
+    expect(findGlEmptyState().props()).toMatchObject({
+      title,
+      svgPath: emptyStateSvgPath,
+      description,
+      primaryButtonText,
+      secondaryButtonText,
+      primaryButtonLink: instanceDashboardSettingsPath,
+      secondaryButtonLink: dashboardDocumentation,
+    });
   });
 });

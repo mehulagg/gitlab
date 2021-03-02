@@ -38,6 +38,7 @@ export default (el, dashboardType) => {
     pipelineSecurityBuildsFailedCount,
     pipelineSecurityBuildsFailedPath,
     hasJiraVulnerabilitiesIntegrationEnabled,
+    securityConfigurationPath,
   } = el.dataset;
 
   if (isUnavailable) {
@@ -60,6 +61,7 @@ export default (el, dashboardType) => {
     emptyStateSvgPath,
     notEnabledScannersHelpPath,
     noPipelineRunScannersHelpPath,
+    securityConfigurationPath,
     hasVulnerabilities: parseBoolean(hasVulnerabilities),
     scanners: scanners ? JSON.parse(scanners) : [],
     hasJiraVulnerabilitiesIntegrationEnabled: parseBoolean(

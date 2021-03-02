@@ -4,24 +4,17 @@ import SecurityChartsLayout from 'ee/security_dashboard/components/security_char
 describe('Security Charts Layout component', () => {
   let wrapper;
 
-  const DummyComponent1 = {
+  const DummyComponent = {
     name: 'dummy-component-1',
     template: '<p>dummy component 1</p>',
   };
-  const DummyComponent2 = {
-    name: 'dummy-component-2',
-    template: '<p>dummy component 2</p>',
-  };
 
-  const findSlot = () => wrapper.find(`[data-testid="security-charts-layout"]`);
+  const findComponent = () => wrapper.find(DummyComponent);
+  const findTitle = () => wrapper.find(`[data-testid="title"]`);
 
   const createWrapper = (slots) => {
     wrapper = shallowMount(SecurityChartsLayout, { slots });
   };
-
-  beforeEach(() => {
-    createWrapper({ default: DummyComponent1, 'empty-state': DummyComponent2 });
-  });
 
   afterEach(() => {
     wrapper.destroy();
@@ -29,12 +22,23 @@ describe('Security Charts Layout component', () => {
   });
 
   it('should render the default slot', () => {
-    const slot = findSlot();
-    expect(slot.find(DummyComponent1).exists()).toBe(true);
+    createWrapper({ default: DummyComponent });
+
+    expect(findComponent().find(DummyComponent).exists()).toBe(true);
+    expect(findTitle().exists()).toBe(true);
   });
 
   it('should render the empty-state slot', () => {
-    const slot = findSlot();
-    expect(slot.find(DummyComponent2).exists()).toBe(true);
+    createWrapper({ 'empty-state': DummyComponent });
+
+    expect(findComponent().find(DummyComponent).exists()).toBe(true);
+    expect(findTitle().exists()).toBe(false);
+  });
+
+  it('should render the loading slot', () => {
+    createWrapper({ loading: DummyComponent });
+
+    expect(findComponent().find(DummyComponent).exists()).toBe(true);
+    expect(findTitle().exists()).toBe(false);
   });
 });

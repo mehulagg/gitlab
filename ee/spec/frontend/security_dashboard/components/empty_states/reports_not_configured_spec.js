@@ -6,11 +6,13 @@ describe('reports not configured empty state', () => {
   let wrapper;
   const helpPath = '/help';
   const emptyStateSvgPath = '/placeholder.svg';
+  const securityConfigurationPath = '/configuration';
 
   const createComponent = () => {
     wrapper = shallowMount(ReportsNotConfigured, {
       provide: {
         emptyStateSvgPath,
+        securityConfigurationPath,
       },
       propsData: { helpPath },
     });
@@ -21,14 +23,17 @@ describe('reports not configured empty state', () => {
     createComponent();
   });
 
-  it.each`
-    prop                   | data
-    ${'title'}             | ${'Monitor vulnerabilities in your code'}
-    ${'svgPath'}           | ${emptyStateSvgPath}
-    ${'description'}       | ${'The security dashboard displays the latest security report. Use it to find and fix vulnerabilities.'}
-    ${'primaryButtonLink'} | ${helpPath}
-    ${'primaryButtonText'} | ${'Learn more'}
-  `('passes the correct data to the $prop prop', ({ prop, data }) => {
-    expect(findEmptyState().props(prop)).toBe(data);
+  it('passes the correct data to the empty state component', () => {
+    const { title, description, primaryButtonText, secondaryButtonText } = wrapper.vm.$options.i18n;
+
+    expect(findEmptyState().props()).toMatchObject({
+      title,
+      description,
+      primaryButtonText,
+      secondaryButtonText,
+      svgPath: emptyStateSvgPath,
+      primaryButtonLink: securityConfigurationPath,
+      secondaryButtonLink: helpPath,
+    });
   });
 });
