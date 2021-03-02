@@ -25,6 +25,26 @@ If you have a deployment service like [Kubernetes](../../user/project/clusters/i
 associated with your project, you can use it to assist with your deployments.
 You can even access a [web terminal](#web-terminals) for your environment from within GitLab.
 
+## View environments and deployments
+
+Prerequisites:
+
+- You must have a minimum of [Reporter permission](../../user/permissions.md#project-members-permissions).
+
+To view a list of environments and deployments:
+
+1. Go to the project's **Operations > Environments** page.
+   The environments are displayed.
+
+   ![Environments list](img/environments_list.png)
+
+1. To view a list of deployments for an environment, select the environment name,
+   for example, `staging`.
+
+   ![Deployments list](img/deployments_list.png)
+
+Deployments show up in this list only after a CI/CD job has created them.
+
 ## Types of environments
 
 There are two types of environments:
@@ -33,7 +53,7 @@ There are two types of environments:
 - Dynamic environments have dynamic names. Dynamic environments
   are a fundamental part of [Review apps](../review_apps/index.md).
 
-## Create a static environment
+### Create a static environment
 
 You can create an environment and deployment in the UI or in your `.gitlab-ci.yml` file.
 
@@ -68,10 +88,7 @@ Some characters cannot be used in environment names.
 For more information about the `environment` keywords, see
 [the `.gitlab-ci.yml` keyword reference](../yaml/README.md#environment).
 
-If your environment's name is `production` (all lowercase), it's recorded in
-[Value Stream Analytics](../../user/analytics/value_stream_analytics.md).
-
-## Create a dynamic environment
+### Create a dynamic environment
 
 To create a dynamic name and URL for an environment, you can use
 [predefined CI/CD variables](../variables/predefined_variables.md). For example:
@@ -290,19 +307,6 @@ For more information, see [Protected environments](protected_environments.md).
 
 Once environments are configured, GitLab provides many features for working with them,
 as documented below.
-
-### View environments and deployments
-
-Prerequisites:
-
-- You must have a minimum of [Reporter permission](../../user/permissions.md#project-members-permissions).
-
-To view a list of environments and deployments:
-
-1. Go to the project's **Operations > Environments** page.
-1. To view a list of deployments for an environment, select the environment name.
-
-Deployments show up in this list only after a CI/CD job has created it.
 
 ### Environment rollback
 
