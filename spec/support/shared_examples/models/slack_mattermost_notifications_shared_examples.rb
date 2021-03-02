@@ -109,6 +109,19 @@ RSpec.shared_examples 'slack or mattermost notifications' do |service_name|
       end
     end
 
+    context 'tag_push events' do
+      let(:oldrev) { Gitlab::Git::BLANK_SHA }
+      let(:newrev) { '8a2a6eb295bb170b34c24c76c49ed0e9b2eaf34b' } # gitlab-test: git rev-parse refs/tags/v1.1.0
+      let(:ref) { 'refs/tags/v1.1.0' }
+      let(:data) { Git::TagHooksService.new(project, user, change: { oldrev: oldrev, newrev: newrev, ref: ref }).send(:push_data) }
+
+      it "calls #{service_name} API for push events" do
+        execute_service
+
+        expect(WebMock).to have_requested(:post, stubbed_resolved_hostname).once
+      end
+    end
+
     context 'issue events' do
       let_it_be(:issue) { create(:issue) }
       let(:data) { issue.to_hook_data(user) }
