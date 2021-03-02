@@ -416,9 +416,11 @@ This can cause confusion when changing the flag's `default_enabled` attribute.
 For example, flags are commonly enabled and disabled several times during the development process.
 When we finally enable the flag by default, we set `default_enabled: true` in the YAML file.
 
-- If the flag was manually enabled before, the feature will be enabled. Not because of the new 
-`default_enabled` value of the flag but because it was enabled manually.
-- If the flag was manually disabled before, the feature will remain disabled.
+- If the flag was manually enabled before setting `default_enabled: true`, the feature will be enabled. 
+Not because of the `default_enabled: true` value of the flag but because it was manually enabled.
+- If the flag was manually disabled before before setting `default_enabled: true`, the feature will 
+remain disabled. The `default_enabled: true` value does not take precendence over the explicit `false`
+value set when disabling it manually.
 
 To reset the feature flag to the default status set in its YAML file, remove it using the Rails console
 (`rails c`) as follows:
