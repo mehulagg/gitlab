@@ -10,6 +10,8 @@ export const SHIFT_WIDTHS = {
   xs: 40,
 };
 
+const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM';
+
 export default {
   components: {
     GlAvatar,
@@ -51,7 +53,7 @@ export default {
     },
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
-        endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, h:MMtt Z'),
+        endsAt: formatDate(this.rotationAssigneeEndsAt, TIME_DATE_FORMAT),
       });
     },
     rotationAssigneeUniqueID() {
@@ -63,7 +65,7 @@ export default {
     },
     startsAt() {
       return sprintf(__('Starts: %{startsAt}'), {
-        startsAt: formatDate(this.rotationAssigneeStartsAt, 'mmmm d, yyyy, h:MMtt Z'),
+        startsAt: formatDate(this.rotationAssigneeStartsAt, TIME_DATE_FORMAT),
       });
     },
   },
