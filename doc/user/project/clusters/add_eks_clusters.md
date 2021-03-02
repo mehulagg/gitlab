@@ -140,7 +140,7 @@ To create and add a new Kubernetes cluster to your project, group, or instance:
    1. Click **Review policy**.
    1. Enter a suitable name for this policy, and click **Create Policy**. You can now close this window.
 
-1. In the [IAM Management Console](https://console.aws.amazon.com/iam/home), create an **EKS IAM role**. This role should exist for Amazon EKS clusters to be able to manage AWS EKS cluster's resources on your behalf. To create the IAM role follow the [Amazon EKS cluster IAM role](https://docs.aws.amazon.com/eks/latest/userguide/service_IAM_role.html) instructions.
+1. In the [IAM Management Console](https://console.aws.amazon.com/iam/home), create an **EKS IAM role** following the [Amazon EKS cluster IAM role instructions](https://docs.aws.amazon.com/eks/latest/userguide/service_IAM_role.html). This role should exist so that Kubernetes clusters managed by Amazon EKS can make calls to other AWS services on your behalf to manage the resources that you use with the service.
    In addition to the policies that guide suggests, you must also include the `AmazonEKSClusterPolicy`
    policy for this role in order for GitLab to manage the EKS cluster correctly.
 1. In the [IAM Management Console](https://console.aws.amazon.com/iam/home), create another IAM role which will be used by GitLab to authenticate with AWS. Follow these steps to create it:
