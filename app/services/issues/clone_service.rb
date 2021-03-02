@@ -47,6 +47,7 @@ module Issues
       new_params = {
         id: nil,
         iid: nil,
+        relative_position: nil, # check if the target_project is in the same hierarchy as the source project
         project: target_project,
         author: current_user,
         assignee_ids: original_entity.assignee_ids
