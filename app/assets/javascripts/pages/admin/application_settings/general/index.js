@@ -5,21 +5,38 @@
 import Vue from 'vue';
 import IntegrationHelpText from '~/vue_shared/components/integrations_help_text.vue';
 import initUserInternalRegexPlaceholder from '../account_and_limits';
+import SignupModal from './signup_modal.vue';
 
-document.addEventListener('DOMContentLoaded', () => {
-  initUserInternalRegexPlaceholder();
+function mountGitpodSettings() {
+  const el = document.querySelector('#js-gitpod-settings-help-text');
 
-  const gitpodSettingEl = document.querySelector('#js-gitpod-settings-help-text');
-  if (!gitpodSettingEl) {
-    return;
+  if (!el) {
+    return false;
   }
 
-  // eslint-disable-next-line no-new
-  new Vue({
-    el: gitpodSettingEl,
+  return new Vue({
+    el,
     name: 'GitpodSettings',
     components: {
       IntegrationHelpText,
     },
   });
-});
+}
+
+function mountSignupModal() {
+  const el = document.querySelector('#js-signup-modal');
+
+  if (!el) {
+    return false;
+  }
+
+  return new Vue({
+    el,
+    name: 'SignupSettings',
+    render: (createElement) => createElement(SignupModal),
+  });
+}
+
+initUserInternalRegexPlaceholder();
+mountGitpodSettings();
+mountSignupModal();
