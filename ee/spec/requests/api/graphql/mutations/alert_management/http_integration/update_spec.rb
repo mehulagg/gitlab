@@ -33,14 +33,14 @@ RSpec.describe 'Updating an existing HTTP Integration' do
     }
     graphql_mutation(:http_integration_update, variables) do
       <<~QL
-         clientMutationId
-         errors
-         integration {
-           id
-           name
-           active
-           url
-         }
+        clientMutationId
+        errors
+        integration {
+          id
+          name
+          active
+          url
+        }
       QL
     end
   end
@@ -67,6 +67,54 @@ RSpec.describe 'Updating an existing HTTP Integration' do
   it_behaves_like 'updating an existing HTTP integration'
   it_behaves_like 'validating the payload_example'
   it_behaves_like 'validating the payload_attribute_mappings'
+
+  context 'when the custom mappings attributes are not part of the mutation variables' do
+    let_it_be(:payload_example) do
+      { 'alert' => { 'name' => 'Test alert', 'desc' => 'Description' } }
+    end
+
+    let_it_be(:mapping) do
+      {
+        'title' => { 'path' => %w(alert name), 'type' => 'string', 'label' => 'Title' },
+        'description' => { 'path' => %w(alert desc), 'type' => 'string' }
+      }
+    end
+
+    let_it_be(:integration) do
+      create(:alert_management_http_integration, project: project, payload_example: payload_example, payload_attribute_mapping: mapping)
+    end
+
+    let(:mutation) do
+      variables = {
+        id: GitlabSchema.id_from_object(integration).to_s,
+        name: 'Modified Name'
+      }
+      graphql_mutation(:http_integration_update, variables) do
+        <<~QL
+          clientMutationId
+          errors
+          integration {
+            id
+            name
+          }
+        QL
+      end
+    end
+
+    it 'does not resets the custom mapping attributes', :aggregate_failures do
+      post_graphql_mutation(mutation, current_user: current_user)
+
+      integration_response = mutation_response['integration']
+
+      expect(response).to have_gitlab_http_status(:success)
+      expect(integration_response['id']).to eq(GitlabSchema.id_from_object(integration).to_s)
+      expect(integration_response['name']).to eq('Modified Name')
+
+      integration.reload
+      expect(integration.payload_example).to eq(payload_example)
+      expect(integration.payload_attribute_mapping).to eq(mapping)
+    end
+  end
 
   context 'with the custom mappings feature unavailable' do
     before do
