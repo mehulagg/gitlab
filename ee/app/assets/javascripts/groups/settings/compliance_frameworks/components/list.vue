@@ -107,16 +107,16 @@ export default {
     },
     onDelete(id) {
       this.message = this.$options.i18n.deleteMessage;
-      const idx = this.deletingFrameworks.findIndex((f) => f.id === id);
+      const idx = this.deletingFrameworks.indexOf(id);
       if (idx > -1) {
         this.deletingFrameworks.splice(idx, 1);
       }
     },
     onDeleting() {
-      this.deletingFrameworks.push(this.markedForDeletion);
+      this.deletingFrameworks.push(this.markedForDeletion.id);
     },
-    isDeleting(framework) {
-      return this.deletingFrameworks.includes(framework);
+    isDeleting(id) {
+      return this.deletingFrameworks.includes(id);
     },
   },
   i18n: {
@@ -156,7 +156,7 @@ export default {
           v-for="framework in complianceFrameworks"
           :key="framework.parsedId"
           :framework="framework"
-          :loading="isDeleting(framework)"
+          :loading="isDeleting(framework.id)"
           @delete="markForDeletion"
         />
       </gl-tab>
