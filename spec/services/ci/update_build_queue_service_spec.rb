@@ -26,6 +26,24 @@ RSpec.describe Ci::UpdateBuildQueueService do
       end
 
       it_behaves_like 'refreshes runner'
+
+      it 'avoids running redundant queries' do
+        expect(Ci::Runner).not_to receive(:owned_or_instance_wide)
+
+        subject.execute(build)
+      end
+
+      context 'when feature flag ci_reduce_queries_when_ticking_runner_queue is disabled' do
+        before do
+          stub_feature_flags(ci_reduce_queries_when_ticking_runner_queue: false)
+        end
+
+        it 'runs redundant queries using `owned_or_instance_wide` scope' do
+          expect(Ci::Runner).to receive(:owned_or_instance_wide).and_call_original
+
+          subject.execute(build)
+        end
+      end
     end
   end
 

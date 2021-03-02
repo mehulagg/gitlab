@@ -15,7 +15,11 @@ module Ci
       runners.each do |runner|
         metrics.increment_runner_tick(runner)
 
-        runner.pick_build!(build)
+        if Feature.enabled?(:ci_reduce_queries_when_ticking_runner_queue, default_enabled: :yaml)
+          runner.tick_runner_queue if runner.matches_build?(build)
+        else
+          runner.pick_build!(build)
+        end
       end
     end
   end
