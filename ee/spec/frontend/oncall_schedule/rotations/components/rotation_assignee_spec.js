@@ -2,6 +2,7 @@ import { GlToken, GlAvatar, GlPopover } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import RotationAssignee, {
   SHIFT_WIDTHS,
+  TIME_DATE_FORMAT,
 } from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { formatDate } from '~/lib/utils/datetime_utility';
@@ -21,7 +22,7 @@ describe('RotationAssignee', () => {
   const findName = () => wrapper.findByTestId('rotation-assignee-name');
 
   const formattedDate = (date) => {
-    return formatDate(date, 'mmmm d, yyyy, h:MMtt Z');
+    return formatDate(date, TIME_DATE_FORMAT);
   };
 
   function createComponent({ props = {} } = {}) {

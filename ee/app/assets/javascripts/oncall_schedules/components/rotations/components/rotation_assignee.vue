@@ -10,7 +10,7 @@ export const SHIFT_WIDTHS = {
   xs: 40,
 };
 
-const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM';
+export const TIME_DATE_FORMAT = 'mmmm d, yyyy, HH:MM';
 
 export default {
   components: {
