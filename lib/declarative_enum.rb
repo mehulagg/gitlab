@@ -75,6 +75,10 @@ module DeclarativeEnum
     @definition.to_h
   end
 
+  def definition_descriptions
+    definition.values.map { |value| value[:description] }
+  end
+
   class Builder
     KeyCollisionError = Class.new(StandardError)
 

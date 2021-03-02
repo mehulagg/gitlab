@@ -184,4 +184,29 @@ RSpec.describe Vulnerabilities::FeedbackEntity do
       expect(subject[:finding_uuid]).to eq(finding.uuid)
     end
   end
+
+  context 'when dismissal_reason is not present' do
+    let(:feedback) { build(:vulnerability_feedback, :issue, project: project) }
+
+    it "returns nil" do
+      expect(subject[:finding_uuid]).to be_nil
+    end
+  end
+
+  context 'when dismissal_reason is present' do
+    let(:feedback) { build(:vulnerability_feedback, :dismissal, project: project) }
+
+    it 'exposes dismissal_reason' do
+      expect(subject[:dismissal_reason]).to eq(feedback.dismissal_reason)
+    end
+  end
+
+  context 'when dismissal_reason is present' do
+    let(:feedback) { build(:vulnerability_feedback, :dismissal, project: project) }
+
+    it 'exposes dismissal_reason' do
+      expect(subject[:dismissal_descriptions]).to eq(Vulnerabilities::DismissalReasonEnum.definition.transform_values { |v| v[:description] })
+    end
+  end
+
 end
