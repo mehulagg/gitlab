@@ -15,12 +15,6 @@ export const FIELDS = [
     label: __('Email'),
     thClass: thWidthClass(40),
   },
-  {
-    key: 'actions',
-    label: '',
-    tdClass: 'text-right',
-    customStyle: { width: '35px' },
-  },
 ];
 
 export const REMOVE_MEMBER_MODAL_ID = 'member-remove-modal';

@@ -179,17 +179,6 @@ export default {
           </span>
         </div>
       </template>
-
-      <template #cell(actions)="data">
-        <gl-dropdown icon="ellipsis_h" right data-testid="user-actions">
-          <gl-dropdown-item
-            v-gl-modal="$options.removeMemberModalId"
-            @click="setMemberToRemove(data.item.user)"
-          >
-            {{ __('Remove user') }}
-          </gl-dropdown-item>
-        </gl-dropdown>
-      </template>
     </gl-table>
 
     <gl-pagination
