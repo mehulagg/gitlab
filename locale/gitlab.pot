@@ -14216,16 +14216,13 @@ msgstr ""
 msgid "Grafana response contains invalid json"
 msgstr ""
 
-msgid "GrafanaIntegration|API Token"
+msgid "GrafanaIntegration|API token"
 msgstr ""
 
 msgid "GrafanaIntegration|Active"
 msgstr ""
 
-msgid "GrafanaIntegration|Embed Grafana charts in GitLab issues."
-msgstr ""
-
-msgid "GrafanaIntegration|Enter the Grafana API Token."
+msgid "GrafanaIntegration|Enter the Grafana API token."
 msgstr ""
 
 msgid "GrafanaIntegration|Enter the base URL of the Grafana instance."
@@ -14235,6 +14232,9 @@ msgid "GrafanaIntegration|Grafana URL"
 msgstr ""
 
 msgid "GrafanaIntegration|Grafana authentication"
+msgstr ""
+
+msgid "GrafanaIntegration|Set up Grafana authentication to embed Grafana panels in GitLab Flavored Markdown."
 msgstr ""
 
 msgid "Grant access"
