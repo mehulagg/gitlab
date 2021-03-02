@@ -130,6 +130,7 @@ module TreeHelper
   end
 
   def breadcrumb_data_attributes
+    project = @project.present(current_user: current_user)
     attrs = {
       selected_branch: selected_branch,
       can_push_code: can?(current_user, :push_code, @project).to_s,
@@ -139,7 +140,12 @@ module TreeHelper
       new_dir_path: project_create_dir_path(@project, @ref),
       new_branch_path: new_project_branch_path(@project),
       new_tag_path: new_project_tag_path(@project),
-      can_edit_tree: can_edit_tree?.to_s
+      can_edit_tree: can_edit_tree?.to_s,
+      empty_repo: @project.empty_repo?,
+      ref: @ref,
+      branch_allows_collaboration: @project.branch_allows_collaboration?(current_user, selected_branch),
+      can_push_to_branch: project.can?(current_user, :push_code, @project),
+      project_empty: project.empty_repo?
     }
 
     if can?(current_user, :fork_project, @project) && can?(current_user, :create_merge_request_in, @project)

@@ -65,6 +65,8 @@ export default function setupVueRepositoryList() {
       forkUploadBlobPath,
       uploadPath,
       newDirPath,
+      emptyRepo,
+      branchAllowsCollaboration,
     } = breadcrumbEl.dataset;
 
     router.afterEach(({ params: { path } }) => {
@@ -93,6 +95,8 @@ export default function setupVueRepositoryList() {
             forkUploadBlobPath,
             uploadPath,
             newDirPath,
+            emptyRepo,
+            branchAllowsCollaboration,
           },
         });
       },

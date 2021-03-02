@@ -129,6 +129,16 @@ export default {
       required: false,
       default: null,
     },
+    emptyRepo: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    branchAllowsCollaboration: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   uploadBlobModalId: UPLOAD_BLOB_MODAL_ID,
   data() {
@@ -317,6 +327,13 @@ export default {
       :can-push-code="canPushCode"
       :path="uploadPath"
     />
-    <new-directory-modal :new-dir-path="`test`" />
+    <new-directory-modal
+      :new-dir-path="newDirPath"
+      :origional-branch="origionalBranch"
+      :empty-repo="emptyRepo"
+      :selected-branch="selectedBranch"
+      :branch-allows-collaboration="branchAllowsCollaboration"
+      :can-push-code="canPushCode"
+    />
   </nav>
 </template>
