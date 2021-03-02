@@ -142,10 +142,12 @@ export default {
           date: formatDate(startDate, 'yyyy-mm-dd'),
           time: format24HourTimeStringFromInt(startTime),
         },
-        endsAt: {
-          date: formatDate(endDate, 'yyyy-mm-dd'),
-          time: format24HourTimeStringFromInt(endTime),
-        },
+        endsAt: endDate
+          ? {
+              date: formatDate(endDate, 'yyyy-mm-dd'),
+              time: format24HourTimeStringFromInt(endTime),
+            }
+          : null,
         rotationLength: {
           ...rotationLength,
           length: parseInt(rotationLength.length, 10),
