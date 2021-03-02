@@ -1,0 +1,10 @@
+query BoardMilestones($fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    iterations(includeAncestors: true) {
+      nodes {
+        id
+        title
+      }
+    }
+  }
+}

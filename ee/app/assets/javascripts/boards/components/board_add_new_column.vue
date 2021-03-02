@@ -19,6 +19,7 @@ export default {
   columnTypes: [
     { value: ListType.label, text: __('Label') },
     { value: ListType.milestone, text: __('Milestone') },
+    { value: ListType.iteration, text: __('Iteration') },
   ],
   components: {
     BoardAddNewColumnForm,
@@ -39,7 +40,15 @@ export default {
     };
   },
   computed: {
-    ...mapState(['labels', 'labelsLoading', 'milestones', 'milestonesLoading', 'isEpicBoard']),
+    ...mapState([
+      'labels',
+      'labelsLoading',
+      'milestones',
+      'milestonesLoading',
+      'iterations',
+      'iterationsLoading',
+      'isEpicBoard',
+    ]),
     ...mapGetters(['getListByTypeId', 'shouldUseGraphQL']),
 
     labelTypeSelected() {
@@ -47,6 +56,9 @@ export default {
     },
     milestoneTypeSelected() {
       return this.columnType === ListType.milestone;
+    },
+    iterationTypeSelected() {
+      return this.columnType === ListType.iteration;
     },
 
     selectedLabel() {
@@ -61,6 +73,12 @@ export default {
       }
       return this.milestones.find(({ id }) => id === this.selectedId);
     },
+    selectedIteration() {
+      if (!this.iterationTypeSelected) {
+        return null;
+      }
+      return this.iterations.find(({ id }) => id === this.selectedId);
+    },
     selectedItem() {
       if (!this.selectedId) {
         return null;
@@ -70,6 +88,9 @@ export default {
       }
       if (this.milestoneTypeSelected) {
         return this.selectedMilestone;
+      }
+      if (this.iterationTypeSelected) {
+        return this.selectedIteration;
       }
       return null;
     },
@@ -86,11 +107,14 @@ export default {
     },
 
     loading() {
-      if (this.columnType === ListType.label) {
+      if (this.labelTypeSelected) {
         return this.labelsLoading;
       }
-      if (this.columnType === ListType.milestone) {
+      if (this.milestoneTypeSelected) {
         return this.milestonesLoading;
+      }
+      if (this.iterationTypeSelected) {
+        return this.iterationsLoading;
       }
       return false;
     },
@@ -102,6 +126,10 @@ export default {
 
       if (this.milestoneTypeSelected) {
         return __('A milestone list displays issues in the selected milestone.');
+      }
+
+      if (this.iterationTypeSelected) {
+        return __('An iteration list displays issues in the selected iteration.');
       }
 
       return null;
@@ -116,6 +144,10 @@ export default {
         return __('Select milestone');
       }
 
+      if (this.iterationTypeSelected) {
+        return __('Select iteration');
+      }
+
       return null;
     },
 
@@ -126,6 +158,10 @@ export default {
 
       if (this.milestoneTypeSelected) {
         return __('Search milestones');
+      }
+
+      if (this.iterationTypeSelected) {
+        return __('Search iterations');
       }
 
       return null;
@@ -140,6 +176,7 @@ export default {
       'fetchLabels',
       'highlightList',
       'setAddColumnFormVisibility',
+      'fetchIterations',
       'fetchMilestones',
     ]),
     highlight(listId) {
@@ -185,6 +222,11 @@ export default {
             ...this.selectedMilestone,
             id: getIdFromGraphQLId(this.selectedMilestone.id),
           };
+        } else if (this.iterationTypeSelected) {
+          listObj.iteration = {
+            ...this.selectedIteration,
+            id: getIdFromGraphQLId(this.selectedIteration.id),
+          };
         }
 
         boardsStore.new(listObj);
@@ -193,6 +235,9 @@ export default {
 
     filterItems(searchTerm) {
       switch (this.columnType) {
+        case ListType.iteration:
+          this.fetchIterations(searchTerm);
+          break;
         case ListType.milestone:
           this.fetchMilestones(searchTerm);
           break;
@@ -252,6 +297,9 @@ export default {
       <div v-else-if="selectedMilestone" class="gl-text-truncate">
         {{ selectedMilestone.title }}
       </div>
+      <div v-else-if="selectedIteration" class="gl-text-truncate">
+        {{ selectedIteration.title }}
+      </div>
     </template>
 
     <template slot="items">
@@ -280,6 +328,16 @@ export default {
           >
             <gl-form-radio :value="milestone.id" class="gl-mb-0 gl-mr-3" />
             <span>{{ milestone.title }}</span>
+          </label>
+        </template>
+        <template v-if="iterationTypeSelected">
+          <label
+            v-for="iteration in iterations"
+            :key="iteration.id"
+            class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
+          >
+            <gl-form-radio :value="iteration.id" class="gl-mb-0 gl-mr-3" />
+            <span>{{ iteration.title }}</span>
           </label>
         </template>
       </gl-form-radio-group>

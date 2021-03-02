@@ -15,4 +15,6 @@ export default () => ({
   isEpicBoard: false,
   milestones: [],
   milestonesLoading: false,
+  iterations: [],
+  iterationsLoading: false,
 });

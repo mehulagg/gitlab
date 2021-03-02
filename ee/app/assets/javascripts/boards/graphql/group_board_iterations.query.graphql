@@ -1,0 +1,10 @@
+query BoardIteartions($fullPath: ID!) {
+  group(fullPath: $fullPath) {
+    iterations {
+      nodes {
+        id
+        title
+      }
+    }
+  }
+}

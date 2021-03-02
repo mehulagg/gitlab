@@ -12,10 +12,12 @@ RSpec.describe 'User adds milestone lists', :js do
   let_it_be(:user) { create(:user) }
 
   let_it_be(:milestone) { create(:milestone, group: group) }
+  let_it_be(:iteration) { create(:iteration, group: group) }
 
   let_it_be(:group_backlog_list) { create(:backlog_list, board: group_board) }
 
   let_it_be(:issue) { create(:issue, project: project, milestone: milestone) }
+  let_it_be(:issue2) { create(:issue, project: project, iteration: iteration) }
 
   before_all do
     project.add_maintainer(user)
@@ -56,16 +58,30 @@ RSpec.describe 'User adds milestone lists', :js do
 
       select('Milestone', from: 'List type')
 
-      add_milestone_list(milestone)
+      add_list(milestone)
 
       wait_for_all_requests
 
       expect(page).to have_selector('.board', text: milestone.title)
       expect(find('.board:nth-child(2) .board-card')).to have_content(issue.title)
     end
+
+    it 'creates iteration column' do
+      click_button button_text
+      wait_for_all_requests
+
+      select('Iteration', from: 'List type')
+
+      add_list(iteration)
+
+      wait_for_all_requests
+
+      expect(page).to have_selector('.board', text: iteration.title)
+      expect(find('.board:nth-child(2) .board-card')).to have_content(issue2.title)
+    end
   end
 
-  def add_milestone_list(milestone)
+  def add_list(milestone)
     page.within('.board-add-new-list') do
       find('label', text: milestone.title).click
       click_button 'Add'
