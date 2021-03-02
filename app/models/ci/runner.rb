@@ -267,6 +267,16 @@ module Ci
       token[0...8] if token
     end
 
+    def tag_list
+      return super unless Feature.enabled?(:ci_preload_runner_tags, default_enabled: :yaml)
+
+      if tags.loaded?
+        tags.map(&:name)
+      else
+        super
+      end
+    end
+
     def has_tags?
       tag_list.any?
     end

@@ -115,4 +115,43 @@ RSpec.describe Ci::UpdateBuildQueueService do
       it_behaves_like 'does not refresh runner'
     end
   end
+
+  context 'avoids N+1 queries', :request_store do
+    let!(:build) { create(:ci_build, pipeline: pipeline, tag_list: %w[a b]) }
+    let!(:project_runner) { create(:ci_runner, :project, :online, projects: [project], tag_list: %w[a b c]) }
+
+    context 'when ci_preload_runner_tags and ci_reduce_queries_when_ticking_runner_queue are enabled' do
+      before do
+        stub_feature_flags(
+          ci_reduce_queries_when_ticking_runner_queue: true,
+          ci_preload_runner_tags: true
+        )
+      end
+
+      it 'does execute the same amount of queries regardless of number of runners' do
+        control_count = ActiveRecord::QueryRecorder.new { subject.execute(build) }.count
+
+        create_list(:ci_runner, 10, :project, :online, projects: [project], tag_list: %w[b c d])
+
+        expect { subject.execute(build) }.not_to exceed_all_query_limit(control_count)
+      end
+    end
+
+    context 'when ci_preload_runner_tags and ci_reduce_queries_when_ticking_runner_queue are disabled' do
+      before do
+        stub_feature_flags(
+          ci_reduce_queries_when_ticking_runner_queue: false,
+          ci_preload_runner_tags: false
+        )
+      end
+
+      it 'does execute more queries for more runners' do
+        control_count = ActiveRecord::QueryRecorder.new { subject.execute(build) }.count
+
+        create_list(:ci_runner, 10, :project, :online, projects: [project], tag_list: %w[b c d])
+
+        expect { subject.execute(build) }.to exceed_all_query_limit(control_count)
+      end
+    end
+  end
 end
