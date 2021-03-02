@@ -42,6 +42,8 @@ RSpec.describe Gitlab::ErrorTracking do
     }
   end
 
+  let(:sentry_event) { Gitlab::Json.parse(Raven.client.transport.events.last[1]) }
+
   before do
     stub_sentry_settings
 
@@ -219,8 +221,6 @@ RSpec.describe Gitlab::ErrorTracking do
         it 'filters sensitive arguments before sending' do
           track_exception
 
-          sentry_event = Gitlab::Json.parse(Raven.client.transport.events.last[1])
-
           expect(sentry_event.dig('extra', 'sidekiq', 'args')).to eq(['[FILTERED]', 1, 2])
           expect(Gitlab::ErrorTracking::Logger).to have_received(:error).with(
             hash_including(
@@ -238,23 +238,19 @@ RSpec.describe Gitlab::ErrorTracking do
       let(:exception) { ActiveRecord::StatementInvalid.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1') }
 
       it 'injects the normalized sql query into extra' do
-        allow(Raven.client.transport).to receive(:send_event) do |event|
-          expect(event.extra).to include(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
-        end
-
         track_exception
+
+        expect(sentry_event.dig('extra', 'sql')).to eq('SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
       end
     end
 
     context 'when the `ActiveRecord::StatementInvalid` is wrapped in another exception' do
-      let(:exception) { RuntimeError.new(cause: ActiveRecord::StatementInvalid.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1')) }
-
       it 'injects the normalized sql query into extra' do
-        allow(Raven.client.transport).to receive(:send_event) do |event|
-          expect(event.extra).to include(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
-        end
+        allow(exception).to receive(:cause).and_return(ActiveRecord::StatementInvalid.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1'))
 
         track_exception
+
+        expect(sentry_event.dig('extra', 'sql')).to eq('SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
       end
     end
   end
