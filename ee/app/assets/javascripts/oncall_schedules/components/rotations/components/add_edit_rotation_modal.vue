@@ -156,7 +156,7 @@ export default {
     title() {
       return this.isEditMode ? this.$options.i18n.editRotation : this.$options.i18n.addRotation;
     },
-    startDateIsBeforeEndDate() {
+    isEndDateValid() {
       const startsAt = this.form.startsAt.date?.getTime();
       const endsAt = this.form.endsAt.date?.getTime();
 
@@ -266,9 +266,9 @@ export default {
         this.validationState.participants = this.form.participants.length > 0;
       } else if (key === 'startsAt.date' || key === 'startsAt.time') {
         this.validationState.startsAt = Boolean(this.form.startsAt.date);
-        this.validationState.endsAt = this.startDateIsBeforeEndDate;
+        this.validationState.endsAt = this.isEndDateValid;
       } else if (key === 'endsAt.date' || key === 'endsAt.time') {
-        this.validationState.endsAt = this.startDateIsBeforeEndDate;
+        this.validationState.endsAt = this.isEndDateValid;
       }
     },
   },
