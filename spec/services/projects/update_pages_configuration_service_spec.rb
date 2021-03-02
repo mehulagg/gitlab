@@ -34,12 +34,28 @@ RSpec.describe Projects::UpdatePagesConfigurationService do
           expect(subject).to include(status: :success)
         end
 
-        it "doesn't update configuration files if updates on legacy storage are disabled" do
-          stub_feature_flags(pages_update_legacy_storage: false)
+        shared_examples 'not updating config files' do
+          it "doesn't update configuration files if updates on legacy storage are disabled" do
+            expect(service).not_to receive(:update_file)
 
-          expect(service).not_to receive(:update_file)
+            expect(subject).to include(status: :success)
+          end
+        end
 
-          expect(subject).to include(status: :success)
+        context 'when the pages_update_legacy_storage FF is disabled' do
+          before do
+            stub_feature_flags(pages_update_legacy_storage: false)
+          end
+
+          it_behaves_like 'not updating config files'
+        end
+
+        context 'when local_store Pages setting is not enabled' do
+          before do
+            allow(Settings.pages.local_store).to receive(:enabled).and_return(false)
+          end
+
+          it_behaves_like 'not updating config files'
         end
       end
 

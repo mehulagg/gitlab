@@ -52,12 +52,28 @@ RSpec.describe PagesUpdateConfigurationWorker do
       described_class.perform_async(project.id)
     end
 
-    it "doesn't schedule a worker if updates on legacy storage are disabled", :sidekiq_inline do
-      stub_feature_flags(pages_update_legacy_storage: false)
+    shared_examples 'not scheduling a worker' do
+      it "doesn't schedule a worker if updates on legacy storage are disabled", :sidekiq_inline do
+        expect(Projects::UpdatePagesConfigurationService).not_to receive(:new)
 
-      expect(Projects::UpdatePagesConfigurationService).not_to receive(:new)
+        described_class.perform_async(project.id)
+      end
+    end
 
-      described_class.perform_async(project.id)
+    context 'when the pages_update_legacy_storage FF is disabled' do
+      before do
+        stub_feature_flags(pages_update_legacy_storage: false)
+      end
+
+      it_behaves_like 'not scheduling a worker'
+    end
+
+    context 'when local_store Pages setting is not enabled' do
+      before do
+        allow(Settings.pages.local_store).to receive(:enabled).and_return(false)
+      end
+
+      it_behaves_like 'not scheduling a worker'
     end
   end
 end

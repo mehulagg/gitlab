@@ -24,16 +24,32 @@ RSpec.describe Pages::DeleteService do
     expect(project.pages_deployed?).to be(false)
   end
 
-  it "doesn't remove anything from the legacy storage if updates on it are disabled", :sidekiq_inline do
-    stub_feature_flags(pages_update_legacy_storage: false)
+  shared_examples 'not removing anything from legacy storage' do
+    it "doesn't remove anything from the legacy storage", :sidekiq_inline do
+      expect(project.pages_deployed?).to be(true)
 
-    expect(project.pages_deployed?).to be(true)
+      expect(PagesWorker).not_to receive(:perform_in)
 
-    expect(PagesWorker).not_to receive(:perform_in)
+      service.execute
 
-    service.execute
+      expect(project.pages_deployed?).to be(false)
+    end
+  end
 
-    expect(project.pages_deployed?).to be(false)
+  context 'when the pages_update_legacy_storage FF is disabled' do
+    before do
+      stub_feature_flags(pages_update_legacy_storage: false)
+    end
+
+    it_behaves_like 'not removing anything from legacy storage'
+  end
+
+  context 'when local_store Pages setting is not enabled' do
+    before do
+      allow(Settings.pages.local_store).to receive(:enabled).and_return(false)
+    end
+
+    it_behaves_like 'not removing anything from legacy storage'
   end
 
   it 'deletes all domains', :sidekiq_inline do

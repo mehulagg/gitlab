@@ -4161,13 +4161,29 @@ RSpec.describe Project, factory_default: :keep do
       expect { project.legacy_remove_pages }.to change { pages_metadatum.reload.deployed }.from(true).to(false)
     end
 
-    it 'does nothing if updates on legacy storage are disabled' do
-      stub_feature_flags(pages_update_legacy_storage: false)
+    shared_examples 'doing nothing if legacy storage disabled' do
+      it 'does nothing if updates on legacy storage are disabled' do
+        expect(Gitlab::PagesTransfer).not_to receive(:new)
+        expect(PagesWorker).not_to receive(:perform_in)
 
-      expect(Gitlab::PagesTransfer).not_to receive(:new)
-      expect(PagesWorker).not_to receive(:perform_in)
+        project.legacy_remove_pages
+      end
+    end
 
-      project.legacy_remove_pages
+    context 'when the pages_update_legacy_storage FF is disabled' do
+      before do
+        stub_feature_flags(pages_update_legacy_storage: false)
+      end
+
+      it_behaves_like 'doing nothing if legacy storage disabled'
+    end
+
+    context 'when local_store Pages setting is not enabled' do
+      before do
+        allow(Settings.pages.local_store).to receive(:enabled).and_return(false)
+      end
+
+      it_behaves_like 'doing nothing if legacy storage disabled'
     end
 
     it 'is run when the project is destroyed' do

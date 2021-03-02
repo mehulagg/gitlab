@@ -55,13 +55,29 @@ RSpec.describe Projects::UpdatePagesService do
         end
       end
 
-      it "doesn't deploy to legacy storage if it's disabled" do
-        stub_feature_flags(pages_update_legacy_storage: false)
+      shared_examples 'not deploying to legacy storage' do
+        it "doesn't deploy to legacy storage if it's disabled" do
+          expect(execute).to eq(:success)
+          expect(project.pages_deployed?).to be_truthy
 
-        expect(execute).to eq(:success)
-        expect(project.pages_deployed?).to be_truthy
+          expect(File.exist?(File.join(project.pages_path, 'public', 'index.html'))).to eq(false)
+        end
+      end
 
-        expect(File.exist?(File.join(project.pages_path, 'public', 'index.html'))).to eq(false)
+      context 'when pages_update_legacy_storage FF disabled' do
+        before do
+          stub_feature_flags(pages_update_legacy_storage: false)
+        end
+
+        it_behaves_like 'not deploying to legacy storage'
+      end
+
+      context 'when local_store Pages setting is not enabled' do
+        before do
+          allow(Settings.pages.local_store).to receive(:enabled).and_return(false)
+        end
+
+        it_behaves_like 'not deploying to legacy storage'
       end
 
       it 'creates pages_deployment and saves it in the metadata' do
