@@ -254,7 +254,7 @@ module Ci
     def can_pick?(build)
       # run `matches_build?` checks before, since they are cheaper
       # than `assignable_for?`.
-      matches_build?(build) && assignable_for?(build.project_id)
+      matches_build?(build) && (instance_type? || assignable_for?(build.project_id))
     end
 
     def matches_build?(build)
