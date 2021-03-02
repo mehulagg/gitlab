@@ -4,6 +4,9 @@
 #   - template: Security/Dependency-Scanning.gitlab-ci.yml
 #   - template: Security/DAST.gitlab-ci.yml
 
+variables:
+  SAST_EXPERIMENTAL_FEATURES: true
+
 # We need to duplicate this job's definition because the rules
 # defined in the extended jobs rely on local YAML anchors
 # (`*if-default-refs`)
@@ -88,6 +91,16 @@ secrets-sast:
     reports:
       sast: gl-secret-detection-report.json
     expire_in: 1 week  # GitLab-specific
+
+semgrep:
+  - semgrep --lang=rb --config p/minusworld.ruby-on-rails-xss ./app
+artifacts:
+  paths: sgrep.sarif
+
+to-gl-report:
+  extends: semgrep-sast
+  script:
+    - /analyzer convert sgrep.sarif > ../gl-sast-report.json
 
 # We need to duplicate this job's definition because the rules
 # defined in the extended jobs rely on local YAML anchors
