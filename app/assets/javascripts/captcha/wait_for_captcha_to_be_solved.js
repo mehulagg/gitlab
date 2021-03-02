@@ -1,6 +1,6 @@
 import Vue from 'vue';
+import CaptchaModal from '~/captcha/captcha_modal.vue';
 import { __ } from '~/locale';
-
 /**
  * Opens a Captcha Modal with provided captchaSiteKey.
  *
@@ -19,6 +19,7 @@ export default function waitForCaptchaToBeSolved(captchaSiteKey) {
     const receivedCaptchaResponse = (captchaResponse) => {
       // Cleaning up the modal from the DOM
       captchaModalVueInstance.$destroy();
+      captchaModalVueInstance.$el.remove();
       captchaModalElement.remove();
 
       if (captchaResponse) {
@@ -38,7 +39,7 @@ export default function waitForCaptchaToBeSolved(captchaSiteKey) {
     captchaModalVueInstance = new Vue({
       el: captchaModalElement,
       components: {
-        CaptchaModal: () => import('~/captcha/captcha_modal.vue'),
+        CaptchaModal,
       },
       render: (createElement) => {
         return createElement('captcha-modal', {
