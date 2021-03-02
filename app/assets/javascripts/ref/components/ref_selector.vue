@@ -10,7 +10,14 @@ import {
 } from '@gitlab/ui';
 import { debounce, isArray } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { ALL_REF_TYPES, SEARCH_DEBOUNCE_MS, DEFAULT_I18N } from '../constants';
+import {
+  ALL_REF_TYPES,
+  SEARCH_DEBOUNCE_MS,
+  DEFAULT_I18N,
+  REF_TYPE_BRANCHES,
+  REF_TYPE_TAGS,
+  REF_TYPE_COMMITS,
+} from '../constants';
 import createStore from '../stores';
 import RefResultsSection from './ref_results_section.vue';
 
@@ -76,13 +83,22 @@ export default {
       };
     },
     showBranchesSection() {
-      return Boolean(this.matches.branches.totalCount > 0 || this.matches.branches.error);
+      return (
+        this.enabledRefTypes.includes(REF_TYPE_BRANCHES) &&
+        Boolean(this.matches.branches.totalCount > 0 || this.matches.branches.error)
+      );
     },
     showTagsSection() {
-      return Boolean(this.matches.tags.totalCount > 0 || this.matches.tags.error);
+      return (
+        this.enabledRefTypes.includes(REF_TYPE_TAGS) &&
+        Boolean(this.matches.tags.totalCount > 0 || this.matches.tags.error)
+      );
     },
     showCommitsSection() {
-      return Boolean(this.matches.commits.totalCount > 0 || this.matches.commits.error);
+      return (
+        this.enabledRefTypes.includes(REF_TYPE_COMMITS) &&
+        Boolean(this.matches.commits.totalCount > 0 || this.matches.commits.error)
+      );
     },
     showNoResults() {
       return !this.showBranchesSection && !this.showTagsSection && !this.showCommitsSection;

@@ -647,6 +647,21 @@ describe('Ref selector component', () => {
       expect(tagsApiCallSpy).toHaveBeenCalledTimes(1);
     });
 
+    it('if a ref type becomes disabled, its section is hidden, even if it had some results in store', async () => {
+      createComponent({ enabledRefTypes: [REF_TYPE_BRANCHES, REF_TYPE_COMMITS] });
+      updateQuery('abcd1234');
+      await waitForRequests();
+
+      expect(findBranchesSection().exists()).toBe(true);
+      expect(findCommitsSection().exists()).toBe(true);
+
+      wrapper.setProps({ enabledRefTypes: [REF_TYPE_COMMITS] });
+      await waitForRequests();
+
+      expect(findBranchesSection().exists()).toBe(false);
+      expect(findCommitsSection().exists()).toBe(true);
+    });
+
     it.each`
       enabledRefType       | findVisibleSection     | findHiddenSections
       ${REF_TYPE_BRANCHES} | ${findBranchesSection} | ${[findTagsSection, findCommitsSection]}
