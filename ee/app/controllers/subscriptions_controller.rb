@@ -84,7 +84,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def client
-    Gitlab::SubscriptionPortal::Client
+    Gitlab::SubscriptionPortal::Clients::HTTP
   end
 
   def customer_portal_new_subscription_url

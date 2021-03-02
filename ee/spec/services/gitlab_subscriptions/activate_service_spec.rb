@@ -13,7 +13,7 @@ RSpec.describe GitlabSubscriptions::ActivateService do
   let(:activation_code) { 'activation_code' }
 
   def stub_client_activate
-    expect(Gitlab::SubscriptionPortal::Client).to receive(:activate)
+    expect(Gitlab::SubscriptionPortal::Clients::Graphql).to receive(:activate)
       .with(activation_code)
       .and_return(response)
   end
@@ -64,7 +64,7 @@ RSpec.describe GitlabSubscriptions::ActivateService do
 
     it 'returns error' do
       allow(Gitlab).to receive(:com?).and_return(true)
-      expect(Gitlab::SubscriptionPortal::Client).not_to receive(:activate)
+      expect(Gitlab::SubscriptionPortal::Clients::Graphql).not_to receive(:activate)
 
       expect(subject.execute(activation_code)).to eq(response)
     end
@@ -75,7 +75,7 @@ RSpec.describe GitlabSubscriptions::ActivateService do
     let(:cloud_license_enabled) { false }
 
     it 'returns error' do
-      expect(Gitlab::SubscriptionPortal::Client).not_to receive(:activate)
+      expect(Gitlab::SubscriptionPortal::Clients::Graphql).not_to receive(:activate)
 
       expect(subject.execute(activation_code)).to eq(response)
     end
@@ -83,7 +83,7 @@ RSpec.describe GitlabSubscriptions::ActivateService do
 
   context 'when error is raised' do
     it 'captures error' do
-      expect(Gitlab::SubscriptionPortal::Client).to receive(:activate).and_raise('foo')
+      expect(Gitlab::SubscriptionPortal::Clients::Graphql).to receive(:activate).and_raise('foo')
 
       expect(subject.execute(activation_code)).to eq({ success: false, errors: ['foo'] })
     end

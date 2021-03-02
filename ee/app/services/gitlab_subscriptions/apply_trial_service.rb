@@ -18,7 +18,7 @@ module GitlabSubscriptions
     private
 
     def client
-      Gitlab::SubscriptionPortal::Client
+      Gitlab::SubscriptionPortal::Clients::HTTP
     end
 
     def record_onboarding_progress(namespace_id)

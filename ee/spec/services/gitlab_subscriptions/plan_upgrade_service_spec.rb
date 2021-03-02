@@ -11,7 +11,7 @@ RSpec.describe GitlabSubscriptions::PlanUpgradeService do
     using RSpec::Parameterized::TableSyntax
 
     before do
-      allow(Gitlab::SubscriptionPortal::Client).to receive(:plan_upgrade_offer).and_return(response)
+      allow(Gitlab::SubscriptionPortal::Clients::Graphql).to receive(:plan_upgrade_offer).and_return(response)
     end
 
     context 'when the response is a failure' do
@@ -48,7 +48,7 @@ RSpec.describe GitlabSubscriptions::PlanUpgradeService do
         end
 
         before do
-          expect(Gitlab::SubscriptionPortal::Client).to receive(:plan_upgrade_offer).once.and_return(response)
+          expect(Gitlab::SubscriptionPortal::Clients::Graphql).to receive(:plan_upgrade_offer).once.and_return(response)
         end
 
         it 'returns the correct values' do

@@ -16,7 +16,7 @@ RSpec.describe GitlabSubscriptions::ApplyTrialService do
 
   describe '#execute' do
     before do
-      allow(Gitlab::SubscriptionPortal::Client).to receive(:generate_trial).and_return(response)
+      allow(Gitlab::SubscriptionPortal::Clients::HTTP).to receive(:generate_trial).and_return(response)
     end
 
     context 'trial applied successfully' do

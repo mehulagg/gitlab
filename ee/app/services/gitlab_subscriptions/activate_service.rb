@@ -29,7 +29,7 @@ module GitlabSubscriptions
     private
 
     def client
-      Gitlab::SubscriptionPortal::Client
+      Gitlab::SubscriptionPortal::Clients::Graphql
     end
 
     def error(message)

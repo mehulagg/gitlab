@@ -43,7 +43,7 @@ RSpec.describe SubscriptionsController do
       before do
         sign_in(user)
         client_response = { success: true, data: { signature: 'x', token: 'y' } }
-        allow(Gitlab::SubscriptionPortal::Client).to receive(:payment_form_params).with('cc').and_return(client_response)
+        allow(Gitlab::SubscriptionPortal::Clients::HTTP).to receive(:payment_form_params).with('cc').and_return(client_response)
       end
 
       it { is_expected.to have_gitlab_http_status(:ok) }
@@ -67,7 +67,7 @@ RSpec.describe SubscriptionsController do
       before do
         sign_in(user)
         client_response = { success: true, data: { credit_card_type: 'Visa' } }
-        allow(Gitlab::SubscriptionPortal::Client).to receive(:payment_method).with('xx').and_return(client_response)
+        allow(Gitlab::SubscriptionPortal::Clients::HTTP).to receive(:payment_method).with('xx').and_return(client_response)
       end
 
       it { is_expected.to have_gitlab_http_status(:ok) }
