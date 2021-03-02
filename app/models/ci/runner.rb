@@ -252,9 +252,15 @@ module Ci
     end
 
     def can_pick?(build)
+      # run `matches_build?` checks before, since they are cheaper
+      # than `assignable_for?`.
+      matches_build?(build) && assignable_for?(build.project_id)
+    end
+
+    def matches_build?(build)
       return false if self.ref_protected? && !build.protected?
 
-      assignable_for?(build.project_id) && accepting_tags?(build)
+      accepting_tags?(build)
     end
 
     def only_for?(project)
@@ -303,6 +309,7 @@ module Ci
       self.update_columns(values) if persist_cached_data?
     end
 
+    # TODO: delete when ci_reduce_queries_when_ticking_runner_queue Feature Flag is removed.
     def pick_build!(build)
       if can_pick?(build)
         tick_runner_queue
