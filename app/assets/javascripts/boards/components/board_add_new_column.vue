@@ -30,7 +30,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['labels', 'labelsLoading', 'isEpicBoard']),
+    ...mapState(['labels', 'labelsLoading']),
     ...mapGetters(['getListByLabelId', 'shouldUseGraphQL']),
 
     selectedLabel() {
@@ -69,7 +69,7 @@ export default {
   methods: {
     ...mapActions(['createList', 'fetchLabels', 'highlightList', 'setAddColumnFormVisibility']),
     highlight(listId) {
-      if (this.shouldUseGraphQL || this.isEpicBoard) {
+      if (this.shouldUseGraphQL) {
         this.highlightList(listId);
       } else {
         const list = boardsStore.state.lists.find(({ id }) => id === listId);
@@ -92,7 +92,7 @@ export default {
         return;
       }
 
-      if (this.shouldUseGraphQL || this.isEpicBoard) {
+      if (this.shouldUseGraphQL) {
         this.createList({ labelId: this.selectedId });
       } else {
         const listObj = {

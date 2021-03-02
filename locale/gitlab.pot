@@ -1340,6 +1340,9 @@ msgstr ""
 msgid "A merge request hasn't yet been merged"
 msgstr ""
 
+msgid "A milestone list displays issues in the selected milestone."
+msgstr ""
+
 msgid "A new Auto DevOps pipeline has been created, go to %{pipelines_link_start}Pipelines page%{pipelines_link_end} for details"
 msgstr ""
 
@@ -12526,6 +12529,9 @@ msgstr ""
 msgid "Failed to load labels. Please try again."
 msgstr ""
 
+msgid "Failed to load milestones."
+msgstr ""
+
 msgid "Failed to load milestones. Please try again."
 msgstr ""
 
@@ -18020,6 +18026,9 @@ msgid "List settings"
 msgstr ""
 
 msgid "List the merge requests that must be merged before this one."
+msgstr ""
+
+msgid "List type"
 msgstr ""
 
 msgid "List view"
