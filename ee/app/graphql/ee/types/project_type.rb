@@ -128,7 +128,7 @@ module EE
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
 
         field :api_fuzzing_ci_configuration,
-              ::Types::CiConfiguration::ApiFuzzingType,
+              ::Types::AppSec::Fuzzing::Api::CiConfigurationType,
               null: true,
               description: 'API fuzzing configuration for the project.',
               feature_flag: :api_fuzzing_configuration_ui
