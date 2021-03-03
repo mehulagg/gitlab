@@ -38,10 +38,21 @@ module Security
       vulnerability_findings_by_uuid = project.vulnerability_findings
         .where(uuid: finding_uuids) # rubocop: disable CodeReuse/ActiveRecord
         .to_h { |vf| [vf.uuid, vf] }
+      remediations_by_checksum = find_existing_remediations_for(@report.findings)
 
       @report.findings.map do |finding|
-        create_vulnerability_finding(vulnerability_findings_by_uuid, finding)&.id
+        create_vulnerability_finding(
+          vulnerability_findings_by_uuid,
+          remediations_by_checksum,
+          finding
+        )&.id
       end.compact.uniq
+    end
+
+    def find_existing_remediations_for(findings)
+      checksums = findings.flat_map { |f| f.remediations.map(&:checksum) }
+
+      project.vulnerability_remediations.by_checksum(checksums).to_h { |r| [r.checksum, r] }
     end
 
     def mark_as_resolved_except(vulnerability_ids)
@@ -51,7 +62,7 @@ module Security
              .update_all(resolved_on_default_branch: true)
     end
 
-    def create_vulnerability_finding(vulnerability_findings_by_uuid, finding)
+    def create_vulnerability_finding(vulnerability_findings_by_uuid, remediations_by_checksum, finding)
       unless finding.valid?
         put_warning_for(finding)
         return
@@ -66,7 +77,7 @@ module Security
       update_vulnerability_scanner(finding)
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
-      reset_remediations_for(vulnerability_finding, finding)
+      reset_remediations_for(finding, vulnerability_finding, remediations_by_checksum)
 
       # The maximum number of identifiers is not used in validation
       # we just want to ignore the rest if a finding has more than that.
@@ -140,28 +151,19 @@ module Security
     rescue ActiveRecord::RecordNotUnique
     end
 
-    def reset_remediations_for(vulnerability_finding, finding)
-      existing_remediations = find_existing_remediations_for(finding)
-      new_remediations = build_new_remediations_for(finding, existing_remediations)
+    def reset_remediations_for(finding, vulnerability_finding, remediations_by_checksum)
+      existing_remediations = remediations_by_checksum.values
+      existing_remediation_checksums = remediations_by_checksum.keys
+      new_remediations = build_new_remediations_for(finding.remediations, existing_remediation_checksums)
 
       vulnerability_finding.remediations = existing_remediations + new_remediations
     end
 
-    def find_existing_remediations_for(finding)
-      checksums = finding.remediations.map(&:checksum)
-
-      @project.vulnerability_remediations.by_checksum(checksums)
-    end
-
-    def build_new_remediations_for(finding, existing_remediations)
-      find_missing_remediations_for(finding, existing_remediations)
-        .map { |remediation| build_vulnerability_remediation(remediation) }
-    end
-
-    def find_missing_remediations_for(finding, existing_remediations)
-      existing_remediation_checksums = existing_remediations.map(&:checksum)
-
-      finding.remediations.select { |remediation| !remediation.checksum.in?(existing_remediation_checksums) }
+    def build_new_remediations_for(current_remediations, existing_remediation_checksums)
+      missing_remediations = current_remediations.select do |remediation|
+        !remediation.checksum.in?(existing_remediation_checksums)
+      end
+      missing_remediations.map { |remediation| build_vulnerability_remediation(remediation) }
     end
 
     def build_vulnerability_remediation(remediation)
@@ -238,4 +240,6 @@ module Security
       project.security_setting.auto_fix_enabled_types.include?(report.type.to_sym)
     end
   end
+
+  StoreReportService.prepend(Measurable)
 end
