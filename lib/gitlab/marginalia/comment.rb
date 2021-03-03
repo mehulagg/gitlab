@@ -4,6 +4,10 @@
 module Gitlab
   module Marginalia
     module Comment
+      def update_route!(route)
+        self.marginalia_route = route
+      end
+
       private
 
       def jid
@@ -36,6 +40,18 @@ module Gitlab
         else
           job
         end
+      end
+
+      def route
+        marginalia_route
+      end
+
+      def marginalia_route
+        Thread.current[:marginalia_route]
+      end
+
+      def marginalia_route=(route)
+        Thread.current[:marginalia_route] = route
       end
     end
   end

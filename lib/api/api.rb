@@ -44,6 +44,9 @@ module API
     before do
       header['X-Frame-Options'] = 'SAMEORIGIN'
       header['X-Content-Type-Options'] = 'nosniff'
+
+      ::Marginalia.application_name = 'api'
+      Marginalia::Comment.update_route!(route&.pattern&.origin)
     end
 
     before do
