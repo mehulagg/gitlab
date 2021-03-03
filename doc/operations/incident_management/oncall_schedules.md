@@ -4,11 +4,11 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# On-call Schedule Management **(ULTIMATE)**
+# On-call Schedule Management **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4544) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.10.
 
-Most businesses are becoming tech companies where they have a software service that they provide to their customers. Software services do not get "turned off" at the end of the business day - customers expect 24/7 reliable availability. When things go wrong, you need a team (or multiple!) that can quickly and effectively respond to service outages.
+On-call Schedule management allows yu to create schedules for responders to rotate on-call responsibilities. Maintain the availabity of your software services by putting your teams on-call. When things go wrong, your team will be notified immediately so that they can quickly respond to service outages and disruptions.
 
 If you have at least Maintainer [permissions](../../user/permissions.md), to create an
 schedule, you have one option to do this manually.
