@@ -163,7 +163,6 @@ export default {
     v-bind="$attrs"
     :header-text="i18n.dropdownHeader"
     class="ref-selector"
-    menu-class="dropdown-extended-height"
     @shown="focusSearchBox"
   >
     <template #button-content>
