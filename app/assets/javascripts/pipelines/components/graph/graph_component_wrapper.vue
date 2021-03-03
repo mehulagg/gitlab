@@ -70,7 +70,7 @@ export default {
           this.showAlert = false;
         }
       },
-      error(err) {
+      error() {
         this.reportFailure(LOAD_FAILURE);
       },
     },
