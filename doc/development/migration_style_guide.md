@@ -1028,34 +1028,15 @@ D, [2020-07-06T00:37:12.653648 #130101] DEBUG -- :   ↳ config/initializers/con
 
 ## High traffic tables
 
-Here's a list of current [high-traffic tables](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L3). 
+Here's a list of current [high-traffic tables](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L4). 
 
 Determining what tables are high-traffic can be difficult. Self-managed instances might use
 different features of GitLab with different usage patterns, thus making assumptions based 
-on GitLab.com is not enough. You may suggest a new high-traffic table by using one or more of 
-the below metrics and comparing to the current high-traffic table.
+on GitLab.com is not enough. You may suggest a new high-traffic table by using supporting metrics
+in comparison to the existing ones.
 
-### Check write traffic ON pg_stat_user_tables
+[The Thanos dashboard which lists top 500 per read operations](https://thanos.gitlab.net/graph?g0.range_input=2h&g0.max_source_resolution=0s&g0.expr=topk(500%2C%20sum%20by%20(relname)%20(rate(pg_stat_user_tables_seq_tup_read%7Benvironment%3D%22gprd%22%7D%5B12h%5D)%20%2B%20rate(pg_stat_user_tables_idx_scan%7Benvironment%3D%22gprd%22%7D%5B12h%5D)%20%2B%20rate(pg_stat_user_tables_idx_tup_fetch%7Benvironment%3D%22gprd%22%7D%5B12h%5D)))&g0.tab=1) may help with identifying a high-traffic table.
 
-This requires access to the primary database.
+Any table which has some high read operation compared to current [high-traffic tables](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L4) tables might a good candidate.
 
-```sql
-gitlabhq_production=# select relname, n_tup_upd, n_tup_del, n_tup_ins from pg_stat_user_tables order by n_tup_upd + n_tup_del + n_tup_ins desc limit 10;
-          relname           | n_tup_upd | n_tup_del | n_tup_ins 
-----------------------------+-----------+-----------+-----------
-```
 
-### Check average monthly updates
-
-This can be checked on the replica.
-
-```sql
-SELECT avg(count) FROM
-(
-  SELECT date_trunc('month', updated_at),
-      count(*) as count
-from <TABLE_NAME>
-where updated_at > '2020-03-01'
-  AND updated_at < '2020-06-01'
-group by 1) monthly_counts;
-```
