@@ -536,3 +536,14 @@ html.group-epics-roadmap-html {
   color: var(--gray-500, $gray-500);
   padding-top: $gl-spacing-scale-1;
 }
+
+.roadmap-daterange-picker {
+  // This override is needed specifically for
+  // Roadmap daterange as we want date picker
+  // to take up entire width from dropdown.
+  // And picker by default has `d-inline-block`
+  // applied.
+  .gl-datepicker {
+    display: block !important;
+  }
+}

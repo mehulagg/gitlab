@@ -2,7 +2,9 @@
 import {
   GlFormGroup,
   GlSegmentedControl,
+  GlDaterangePicker,
   GlDropdown,
+  GlDropdownForm,
   GlDropdownItem,
   GlDropdownDivider,
 } from '@gitlab/ui';
@@ -43,7 +45,9 @@ export default {
   components: {
     GlFormGroup,
     GlSegmentedControl,
+    GlDaterangePicker,
     GlDropdown,
+    GlDropdownForm,
     GlDropdownItem,
     GlDropdownDivider,
     FilteredSearchBar,
@@ -101,6 +105,17 @@ export default {
     <div
       class="epics-details-filters filtered-search-block gl-display-flex gl-flex-direction-column flex-xl-row row-content-block second-block"
     >
+      <gl-dropdown
+        icon="calendar"
+        class="gl-mr-3 gl-md-mr-0 gl-md-mb-2"
+        :header-text="__('Roadmap date range')"
+      >
+        <gl-dropdown-form class="roadmap-daterange-picker">
+          <div class="gl-p-4">
+            <gl-daterange-picker label-class="gl-display-block" start-picker-class="gl-mb-5" />
+          </div>
+        </gl-dropdown-form>
+      </gl-dropdown>
       <gl-form-group class="mb-0">
         <gl-segmented-control
           :checked="presetType"
