@@ -402,6 +402,12 @@ debug why the migration was halted and make any changes before retrying the migr
 fixed the cause of the failure, click "Retry migration", and the migration will be scheduled to be retried
 in the background.
 
+If there appears to be no way you can get the migration to succeed you may
+consider the [last resort to recreate the index from
+scratch](#last-resort-to-recreate-an-index). This may allow you to skip over
+the problem because a newly created index will skip all migrations as the index
+will be recreated with the correct up to date schema.
+
 ### All migrations must be finished before doing a major upgrade
 
 Before doing a major version upgrade of GitLab you should have completed all
@@ -893,3 +899,35 @@ Improvements to the `code_analyzer` pattern and filters are being discussed in [
 ### Some binary files may not be searchable by name
 
 In GitLab 13.9, a change was made where [binary file names are being indexed](https://gitlab.com/gitlab-org/gitlab/-/issues/301083). However, without indexing all projects' data from scratch, only binary files that are added or updated after the GitLab 13.9 release are searchable.
+
+### Last resort to recreate an index
+
+There may be cases where somehow data never got indexed and it's not in the
+queue or the index is somehow in a state where migrations just simply cannot
+proceed. It is always best to try to troubleshoot the root cause of the problem
+using above [troubleshooting](#troubleshooting) steps.
+
+If there are no other options then you always have the option of recreating the
+entire index from scratch. If you have a small GitLab installation this can
+sometimes be a quick way to resolve a problem but if you have a large GitLab
+installation then this will likely take a very long time to complete. Until the
+index is fully recreated your index will not be serving correct search results
+so you may want to disable **Search with Elasticsearch** while it is running.
+
+If you are sure you've read the above caveats and want to proceed then you
+should run the following rake task to recreate the entire index from scratch:
+
+**For Omnibus installations**
+
+```shell
+# WARNING DO NOT RUN THIS UNTIL YOU READ ABOVE DESCRIPTION
+sudo gitlab-rake gitlab:elastic:index
+```
+
+**For installations from source**
+
+```shell
+# WARNING DO NOT RUN THIS UNTIL YOU READ ABOVE DESCRIPTION
+cd /home/git/gitlab
+sudo -u git -H bundle exec rake gitlab:elastic:index
+```
