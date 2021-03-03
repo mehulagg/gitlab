@@ -2,6 +2,7 @@ import { GlLoadingIcon, GlSearchBoxByType, GlDropdownItem, GlIcon } from '@gitla
 import { mount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import { merge } from 'lodash';
 import Vuex from 'vuex';
 import { trimText } from 'helpers/text_helper';
 import { ENTER_KEY } from '~/lib/utils/keys';
@@ -34,26 +35,30 @@ describe('Ref selector component', () => {
   let commitApiCallSpy;
   let requestSpies;
 
-  const createComponent = (props = {}, attrs = {}) => {
-    wrapper = mount(RefSelector, {
-      propsData: {
-        projectId,
-        value: '',
-        ...props,
-      },
-      attrs,
-      listeners: {
-        // simulate a parent component v-model binding
-        input: (selectedRef) => {
-          wrapper.setProps({ value: selectedRef });
+  const createComponent = (mountOverrides = {}) => {
+    wrapper = mount(
+      RefSelector,
+      merge(
+        {
+          propsData: {
+            projectId,
+            value: '',
+          },
+          listeners: {
+            // simulate a parent component v-model binding
+            input: (selectedRef) => {
+              wrapper.setProps({ value: selectedRef });
+            },
+          },
+          stubs: {
+            GlSearchBoxByType: true,
+          },
+          localVue,
+          store: createStore(),
         },
-      },
-      stubs: {
-        GlSearchBoxByType: true,
-      },
-      localVue,
-      store: createStore(),
-    });
+        mountOverrides,
+      ),
+    );
   };
 
   beforeEach(() => {
@@ -183,7 +188,7 @@ describe('Ref selector component', () => {
       const id = 'git-ref';
 
       beforeEach(() => {
-        createComponent({}, { id });
+        createComponent({ attrs: { id } });
 
         return waitForRequests();
       });
@@ -197,7 +202,7 @@ describe('Ref selector component', () => {
       const preselectedRef = fixtures.branches[0].name;
 
       beforeEach(() => {
-        createComponent({ value: preselectedRef });
+        createComponent({ propsData: { value: preselectedRef } });
 
         return waitForRequests();
       });
@@ -611,7 +616,7 @@ describe('Ref selector component', () => {
     `(
       'only calls $reqsCalled requests when $enabledRefTypes are enabled',
       async ({ enabledRefTypes, reqsCalled, reqsNotCalled }) => {
-        createComponent({ enabledRefTypes });
+        createComponent({ propsData: { enabledRefTypes } });
 
         await waitForRequests();
 
@@ -621,7 +626,7 @@ describe('Ref selector component', () => {
     );
 
     it('only calls commitApiCallSpy when REF_TYPE_COMMITS is enabled', async () => {
-      createComponent({ enabledRefTypes: [REF_TYPE_COMMITS] });
+      createComponent({ propsData: { enabledRefTypes: [REF_TYPE_COMMITS] } });
       updateQuery('abcd1234');
 
       await waitForRequests();
@@ -632,7 +637,7 @@ describe('Ref selector component', () => {
     });
 
     it('triggers another search if enabled ref types change', async () => {
-      createComponent({ enabledRefTypes: [REF_TYPE_BRANCHES] });
+      createComponent({ propsData: { enabledRefTypes: [REF_TYPE_BRANCHES] } });
       await waitForRequests();
 
       expect(branchesApiCallSpy).toHaveBeenCalledTimes(1);
@@ -648,7 +653,7 @@ describe('Ref selector component', () => {
     });
 
     it('if a ref type becomes disabled, its section is hidden, even if it had some results in store', async () => {
-      createComponent({ enabledRefTypes: [REF_TYPE_BRANCHES, REF_TYPE_COMMITS] });
+      createComponent({ propsData: { enabledRefTypes: [REF_TYPE_BRANCHES, REF_TYPE_COMMITS] } });
       updateQuery('abcd1234');
       await waitForRequests();
 
@@ -670,7 +675,7 @@ describe('Ref selector component', () => {
     `(
       'hides section headers if a single ref type is enabled',
       async ({ enabledRefType, findVisibleSection, findHiddenSections }) => {
-        createComponent({ enabledRefTypes: [enabledRefType] });
+        createComponent({ propsData: { enabledRefTypes: [enabledRefType] } });
         updateQuery('abcd1234');
         await waitForRequests();
 
@@ -681,5 +686,103 @@ describe('Ref selector component', () => {
         );
       },
     );
+  });
+
+  describe('events', () => {
+    describe('is-loading-updated', () => {
+      it('emits an is-loading event when the component starts and stops loading', async () => {
+        createComponent();
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.emitted('is-loading-updated')).toEqual([[true]]);
+
+        await waitForRequests();
+
+        expect(wrapper.emitted('is-loading-updated')).toEqual([[true], [false]]);
+      });
+    });
+
+    describe('matches-updated', () => {
+      it('emits a matches-updated event when the component updates its list of search results', async () => {
+        createComponent();
+
+        await waitForRequests();
+
+        expect(wrapper.emitted('matches-updated')).toEqual([[wrapper.vm.matches]]);
+      });
+    });
+
+    describe('query-updated', () => {
+      it('emits a query-updated event when the user has updates the search query', async () => {
+        createComponent();
+
+        await waitForRequests();
+
+        expect(wrapper.emitted('query-updated')).toBeUndefined();
+
+        // Simulate the user typing in the search query letter-by-letter.
+        // The component debounces the search, so the `query-updated` event
+        // should only be called once the component actually makes a request.
+        updateQuery('a');
+        updateQuery('ab');
+        updateQuery('abc');
+        updateQuery('abcd');
+
+        await waitForRequests();
+
+        expect(wrapper.emitted('query-updated')).toEqual([['abcd']]);
+      });
+    });
+  });
+
+  describe('validation state', () => {
+    const invalidClass = '.gl-inset-border-1-red-500\\!';
+    const findInvalidClass = () => wrapper.find(invalidClass);
+
+    describe('valid state', () => {
+      describe('when the state prop is not provided', () => {
+        it('does not render a red border', () => {
+          createComponent();
+
+          expect(findInvalidClass().exists()).toBe(false);
+        });
+      });
+
+      describe('when the state prop is true', () => {
+        it('does not render a red border', () => {
+          createComponent({ propsData: { state: true } });
+
+          expect(findInvalidClass().exists()).toBe(false);
+        });
+      });
+    });
+
+    describe('invalid state', () => {
+      it('renders the dropdown with a red border if the state prop is false', () => {
+        createComponent({ propsData: { state: false } });
+
+        expect(findInvalidClass().exists()).toBe(true);
+      });
+    });
+  });
+
+  describe('footer slot', () => {
+    const testId = 'data-testid="footer-content"';
+    const footerContent = 'This is the footer content';
+
+    beforeEach(() => {
+      createComponent({
+        slots: {
+          footer: `<div ${testId}>${footerContent}</div>`,
+        },
+      });
+
+      return waitForRequests();
+    });
+
+    it('allows custom content to be shown at the bottom of the dropdown using the footer slot', () => {
+      expect(wrapper.find(`[${testId}]`).text()).toBe(footerContent);
+    });
   });
 });
