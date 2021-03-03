@@ -112,6 +112,7 @@ export default {
         :img-src="latestPipeline && latestPipeline.commit.author_gravatar_url"
         :img-alt="lastCommit.author_name"
         :tooltip-text="lastCommit.author_name"
+        use-deprecated-sizes
       />
       {{ lastCommit.author_name }}
       <time

@@ -11,6 +11,7 @@ exports[`Blob Header Filepath rendering matches the snapshot 1`] = `
     filemode=""
     filename="foo/bar/dummy.md"
     size="18"
+    use-deprecated-sizes=""
   />
    
   <strong
