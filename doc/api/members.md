@@ -237,7 +237,7 @@ Example response:
 
 Gets a list of group members that count as billable. The list includes members in the subgroup or subproject.
 
-This API endpoint works on top-level groups only. It does not work on sub-groups.
+This API endpoint works on top-level groups only. It does not work on subgroups.
 
 NOTE:
 Unlike other API endpoints, billable members is updated once per day at 12:00 UTC.
