@@ -10,6 +10,7 @@ RSpec.describe GitlabSchema.types['ComplianceFramework'] do
     name
     description
     color
+    pipeline_configuration_full_path
   ]
 
   it 'has the correct fields' do

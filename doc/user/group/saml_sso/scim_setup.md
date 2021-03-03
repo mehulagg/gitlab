@@ -5,9 +5,9 @@ group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# SCIM provisioning using SAML SSO for GitLab.com groups **(SILVER ONLY)**
+# SCIM provisioning using SAML SSO for GitLab.com groups **(PREMIUM SAAS)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9388) in [GitLab.com Silver](https://about.gitlab.com/pricing/) 11.10.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9388) in GitLab Premium 11.10.
 
 System for Cross-domain Identity Management (SCIM), is an open standard that enables the
 automation of user provisioning. When SCIM is provisioned for a GitLab group, membership of
@@ -161,6 +161,11 @@ The Okta GitLab application currently only supports SCIM. Continue
 using the separate Okta [SAML SSO](index.md) configuration along with the new SCIM
 application described above.
 
+### OneLogin
+
+OneLogin provides a "GitLab (SaaS)" app in their catalog, which includes a SCIM integration.
+As the app is developed by OneLogin, please reach out to OneLogin if you encounter issues.
+
 ## User access and linking setup
 
 The following diagram is a general outline on what happens when you add users to your SCIM app:
@@ -203,6 +208,10 @@ graph TD
   B -->|No| C[Nothing to do]
   B -->|Yes| D[GitLab removes user from GitLab group]
 ```
+
+During the synchronization process, all of your users get GitLab accounts, welcoming them
+to their respective groups, with an invitation email. When implementing SCIM provisioning,
+you may want to warn your security-conscious employees about this email.
 
 ## Troubleshooting
 
@@ -260,7 +269,7 @@ It is important not to update these to incorrect values, since this will cause u
 
 Individual users can follow the instructions in the ["SAML authentication failed: User has already been taken"](index.md#i-need-to-change-my-saml-app) section.
 
-Alternatively, users can be removed from the SCIM app which will delink all removed users. Sync can then be turned on for the new SCIM app to [link existing users](#user-access-and-linking-setup).
+Alternatively, users can be removed from the SCIM app which de-links all removed users. Sync can then be turned on for the new SCIM app to [link existing users](#user-access-and-linking-setup).
 
 ### The SCIM app is throwing `"User has already been taken","status":409` error message
 

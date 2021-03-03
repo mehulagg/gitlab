@@ -1174,7 +1174,7 @@ table a code {
   padding: 0;
   background-color: #dbdbdb;
 }
-.dropdown-menu .badge.badge-pill + span:not(.badge.badge-pill) {
+.dropdown-menu .badge.badge-pill + span:not(.badge):not(.badge-pill) {
   margin-right: 40px;
 }
 .dropdown-select {
@@ -2141,11 +2141,6 @@ table.code {
 .login-page .omniauth-container .omniauth-btn {
   width: 100%;
   padding: 8px;
-}
-.login-page .omniauth-container .omniauth-btn img {
-  width: 1.125rem;
-  height: 1.125rem;
-  margin-right: 16px;
 }
 .login-page .new-session-tabs {
   display: flex;

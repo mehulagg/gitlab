@@ -1,8 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
-import waitForPromises from 'helpers/wait_for_promises';
 import { GlDropdownItem, GlTokenSelector, GlFormGroup, GlToggle } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import AddEditRotationForm from 'ee/oncall_schedules/components/rotations/components/add_edit_rotation_form.vue';
 import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
+import waitForPromises from 'helpers/wait_for_promises';
 import { participants, getOncallSchedulesQueryResponse } from '../../mocks/apollo_mock';
 
 const projectPath = 'group/project';
@@ -40,7 +40,7 @@ describe('AddEditRotationForm', () => {
             date: null,
             time: 0,
           },
-          endsOn: {
+          endsAt: {
             date: null,
             time: 0,
           },
@@ -160,7 +160,7 @@ describe('AddEditRotationForm', () => {
       await wrapper.vm.$nextTick();
       const emittedEvent = wrapper.emitted('update-rotation-form');
       expect(emittedEvent).toHaveLength(1);
-      expect(emittedEvent[0][0]).toEqual({ type: 'endsOn.time', value: option + 1 });
+      expect(emittedEvent[0][0]).toEqual({ type: 'endsAt.time', value: option + 1 });
     });
 
     it('should add a checkmark to a selected end time', async () => {
@@ -168,7 +168,7 @@ describe('AddEditRotationForm', () => {
       const time = 5;
       wrapper.setProps({
         form: {
-          endsOn: {
+          endsAt: {
             time,
           },
           startsAt: {
@@ -221,7 +221,7 @@ describe('AddEditRotationForm', () => {
 
       wrapper.setProps({
         form: {
-          endsOn: {
+          endsAt: {
             time: 0,
           },
           startsAt: {

@@ -1,15 +1,19 @@
+import { within, fireEvent } from '@testing-library/dom';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
-import { within } from '@testing-library/dom';
 import { merge } from 'lodash';
 import VueApollo from 'vue-apollo';
-import createApolloProvider from 'helpers/mock_apollo_helper';
-import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validations.query.graphql';
-import Component from 'ee/security_configuration/dast_profiles/components/dast_site_profiles_list.vue';
 import ProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
+import Component from 'ee/security_configuration/dast_profiles/components/dast_site_profiles_list.vue';
 import { updateSiteProfilesStatuses } from 'ee/security_configuration/dast_profiles/graphql/cache_utils';
-import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
-import { siteProfiles } from '../mocks/mock_data';
+import {
+  DAST_SITE_VALIDATION_STATUS,
+  DAST_SITE_VALIDATION_MODAL_ID,
+  DAST_SITE_VALIDATION_REVOKE_MODAL_ID,
+} from 'ee/security_configuration/dast_site_validation/constants';
+import dastSiteValidationsQuery from 'ee/security_configuration/dast_site_validation/graphql/dast_site_validations.query.graphql';
+import createApolloProvider from 'helpers/mock_apollo_helper';
 import * as responses from '../mocks/apollo_mock';
+import { siteProfiles } from '../mocks/mock_data';
 
 jest.mock('ee/security_configuration/dast_profiles/graphql/cache_utils', () => ({
   updateSiteProfilesStatuses: jest.fn(),
@@ -26,6 +30,7 @@ describe('EE - DastSiteProfileList', () => {
     tableLabel: 'Site profiles',
     fields: [{ key: 'profileName' }, { key: 'targetUrl' }, { key: 'validationStatus' }],
     profilesPerPage: 10,
+    noProfilesMessage: 'no site profiles created yet',
     errorMessage: '',
     errorDetails: [],
     fullPath: '/namespace/project',
@@ -47,9 +52,6 @@ describe('EE - DastSiteProfileList', () => {
       merge(
         {
           propsData: defaultProps,
-          provide: {
-            glFeatures: { securityOnDemandScansSiteValidation: true },
-          },
         },
         { ...options, localVue, apolloProvider },
       ),
@@ -102,7 +104,7 @@ describe('EE - DastSiteProfileList', () => {
     expect(inputHandler).toHaveBeenCalled();
   });
 
-  describe('with site validation enabled', () => {
+  describe('site validation', () => {
     const [pendingValidation, inProgressValidation] = siteProfiles;
     const urlsPendingValidation = [
       pendingValidation.normalizedTargetUrl,
@@ -130,27 +132,73 @@ describe('EE - DastSiteProfileList', () => {
     });
 
     describe.each`
-      status           | statusEnum                                | label                  | hasValidateButton
-      ${'no'}          | ${DAST_SITE_VALIDATION_STATUS.NONE}       | ${''}                  | ${true}
-      ${'pending'}     | ${DAST_SITE_VALIDATION_STATUS.PENDING}    | ${'Validating...'}     | ${false}
-      ${'in-progress'} | ${DAST_SITE_VALIDATION_STATUS.INPROGRESS} | ${'Validating...'}     | ${false}
-      ${'passed'}      | ${DAST_SITE_VALIDATION_STATUS.PASSED}     | ${'Validated'}         | ${false}
-      ${'failed'}      | ${DAST_SITE_VALIDATION_STATUS.FAILED}     | ${'Validation failed'} | ${true}
-    `('profile with $status validation', ({ statusEnum, label, hasValidateButton }) => {
-      const profile = siteProfiles.find(({ validationStatus }) => validationStatus === statusEnum);
+      status           | statusEnum                                | statusLabel            | buttonLabel            | isBtnDisabled
+      ${'no'}          | ${DAST_SITE_VALIDATION_STATUS.NONE}       | ${''}                  | ${'Validate'}          | ${false}
+      ${'pending'}     | ${DAST_SITE_VALIDATION_STATUS.PENDING}    | ${'Validating...'}     | ${'Validate'}          | ${true}
+      ${'in-progress'} | ${DAST_SITE_VALIDATION_STATUS.INPROGRESS} | ${'Validating...'}     | ${'Validate'}          | ${true}
+      ${'passed'}      | ${DAST_SITE_VALIDATION_STATUS.PASSED}     | ${'Validated'}         | ${'Revoke validation'} | ${false}
+      ${'failed'}      | ${DAST_SITE_VALIDATION_STATUS.FAILED}     | ${'Validation failed'} | ${'Retry validation'}  | ${false}
+    `(
+      'profile with $status validation',
+      ({ statusEnum, statusLabel, buttonLabel, isBtnDisabled }) => {
+        const profile = siteProfiles.find(
+          ({ validationStatus }) => validationStatus === statusEnum,
+        );
 
-      it(`should show correct label`, () => {
-        const validationStatusCell = getTableRowForProfile(profile).cells[2];
-        expect(validationStatusCell.innerText).toContain(label);
-      });
-
-      it(`should ${hasValidateButton ? 'not ' : ''} disable validate button`, () => {
-        const actionsCell = getTableRowForProfile(profile).cells[3];
-        const validateButton = within(actionsCell).queryByRole('button', {
-          name: /validate|Retry validation/i,
+        it(`should have correct status label`, () => {
+          const validationStatusCell = getTableRowForProfile(profile).cells[2];
+          expect(validationStatusCell.innerText).toContain(statusLabel);
         });
 
-        expect(validateButton.hasAttribute('disabled')).toBe(!hasValidateButton);
+        it('show have correct button label', () => {
+          const actionsCell = getTableRowForProfile(profile).cells[3];
+          const validateButton = within(actionsCell).queryByRole('button', {
+            name: buttonLabel,
+          });
+          expect(validateButton).toExist();
+        });
+
+        it(`should ${isBtnDisabled ? '' : 'not '}disable ${buttonLabel} button`, () => {
+          const actionsCell = getTableRowForProfile(profile).cells[3];
+          const validateButton = within(actionsCell).queryByRole('button', {
+            name: buttonLabel,
+          });
+
+          expect(validateButton.hasAttribute('disabled')).toBe(isBtnDisabled);
+        });
+      },
+    );
+
+    describe('Actions', () => {
+      beforeEach(() => {
+        wrapper.vm.showModal = jest.fn();
+        jest.clearAllMocks();
+      });
+
+      it('validate button should open correct modal', async () => {
+        const profile = siteProfiles.find(
+          ({ validationStatus }) => validationStatus === DAST_SITE_VALIDATION_STATUS.NONE,
+        );
+        const actionsCell = getTableRowForProfile(profile).cells[3];
+        const validateButton = within(actionsCell).queryByRole('button', {
+          name: /validate/i,
+        });
+        await fireEvent.click(validateButton);
+
+        expect(wrapper.vm.showModal).toHaveBeenCalledWith(DAST_SITE_VALIDATION_MODAL_ID);
+      });
+
+      it('revoke validation button should open correct modal', async () => {
+        const profile = siteProfiles.find(
+          ({ validationStatus }) => validationStatus === DAST_SITE_VALIDATION_STATUS.PASSED,
+        );
+        const actionsCell = getTableRowForProfile(profile).cells[3];
+        const validateButton = within(actionsCell).queryByRole('button', {
+          name: /revoke validation/i,
+        });
+        await fireEvent.click(validateButton);
+
+        expect(wrapper.vm.showModal).toHaveBeenCalledWith(DAST_SITE_VALIDATION_REVOKE_MODAL_ID);
       });
     });
 
@@ -177,23 +225,5 @@ describe('EE - DastSiteProfileList', () => {
         });
       },
     );
-  });
-
-  describe('without site validation enabled', () => {
-    beforeEach(() => {
-      createFullComponent({
-        provide: {
-          glFeatures: { securityOnDemandScansSiteValidation: false },
-        },
-        propsData: { siteProfiles },
-      });
-    });
-
-    it.each(siteProfiles)('profile %# should not have validate button and status', (profile) => {
-      const [, , validationStatusCell, actionsCell] = getTableRowForProfile(profile).cells;
-
-      expect(within(actionsCell).queryByRole('button', { name: /validate/i })).toBe(null);
-      expect(validationStatusCell.innerText).toBe('');
-    });
   });
 });

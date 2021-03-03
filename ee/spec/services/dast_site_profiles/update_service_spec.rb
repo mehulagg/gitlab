@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe DastSiteProfiles::UpdateService do
-  let(:project) { dast_site_profile.project }
+  let(:project) { dast_profile.project }
   let(:user) { create(:user) }
-  let(:dast_site_profile) { create(:dast_site_profile) }
+  let(:dast_profile) { create(:dast_site_profile) }
 
   let(:new_profile_name) { SecureRandom.hex }
   let(:new_target_url) { generate(:url) }
@@ -17,7 +17,7 @@ RSpec.describe DastSiteProfiles::UpdateService do
   describe '#execute' do
     subject do
       described_class.new(project, user).execute(
-        id: dast_site_profile.id,
+        id: dast_profile.id,
         profile_name: new_profile_name,
         target_url: new_target_url
       )
@@ -74,7 +74,7 @@ RSpec.describe DastSiteProfiles::UpdateService do
 
       context 'when the dast_site_profile doesn\'t exist' do
         before do
-          dast_site_profile.destroy!
+          dast_profile.destroy!
         end
 
         it 'returns an error status' do
@@ -99,6 +99,8 @@ RSpec.describe DastSiteProfiles::UpdateService do
           expect(message).to eq('Insufficient permissions')
         end
       end
+
+      include_examples 'restricts modification if referenced by policy', :modify
     end
   end
 end

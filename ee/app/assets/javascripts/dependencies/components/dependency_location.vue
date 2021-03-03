@@ -2,7 +2,6 @@
 import { GlIcon, GlLink, GlPopover, GlIntersperse } from '@gitlab/ui';
 import { n__ } from '~/locale';
 import DependencyPathViewer from './dependency_path_viewer.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export const VISIBLE_DEPENDENCY_COUNT = 2;
 
@@ -15,7 +14,6 @@ export default {
     GlPopover,
     GlIntersperse,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     location: {
       type: Object,
@@ -27,10 +25,10 @@ export default {
       return this.location.ancestors || [];
     },
     hasAncestors() {
-      return this.glFeatures.pathToVulnerableDependency && this.ancestors.length > 0;
+      return this.ancestors.length > 0;
     },
     isTopLevelDependency() {
-      return this.glFeatures.pathToVulnerableDependency && this.location.top_level;
+      return this.location.top_level;
     },
     visibleDependencies() {
       return this.ancestors.slice(0, VISIBLE_DEPENDENCY_COUNT);
@@ -39,7 +37,7 @@ export default {
       return Math.max(0, this.ancestors.length - VISIBLE_DEPENDENCY_COUNT);
     },
     showMoreLink() {
-      return this.glFeatures.pathToVulnerableDependency && this.remainingDependenciesCount > 0;
+      return this.remainingDependenciesCount > 0;
     },
     nMoreMessage() {
       return n__('Dependencies|%d more', 'Dependencies|%d more', this.remainingDependenciesCount);

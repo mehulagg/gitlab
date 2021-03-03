@@ -61,7 +61,7 @@ The following are important notes about 2FA:
   2FA for the project. For example, if project *P* belongs to 2FA-enabled group *A* and
   is shared with 2FA-disabled group *B*, members of group *B* can access project *P*
   without 2FA. To ensure this scenario doesn't occur,
-  [prevent sharing of projects](../user/group/index.md#share-with-group-lock)
+  [prevent sharing of projects](../user/group/index.md#prevent-a-project-from-being-shared-with-groups)
   for the 2FA-enabled group.
 - If you add additional members to a project within a group or subgroup that has
   2FA enabled, 2FA is **not** required for those individually added members.
@@ -110,9 +110,10 @@ Each scenario can be a third-level heading, e.g. `### Getting error message X`.
 If you have none to add when creating a doc, leave this section in place
 but commented out to help encourage others to add to it in the future. -->
 
-## Two-factor Authentication (2FA) for Git over SSH operations
+## Two-factor Authentication (2FA) for Git over SSH operations **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/270554) in GitLab 13.7.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/299088) from GitLab Free to GitLab Premium in 13.9.
 > - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
@@ -128,8 +129,15 @@ verification can be done via a GitLab Shell command:
 ssh git@<hostname> 2fa_verify
 ```
 
-Once the OTP is verified, Git over SSH operations can be used for 15 minutes
-with the associated SSH key.
+Once the OTP is verified, Git over SSH operations can be used for a session duration of
+15 minutes (default) with the associated SSH key.
+
+### Security limitation
+
+2FA does not protect users with compromised *private* SSH keys.
+
+Once an OTP is verified, anyone can run Git over SSH with that private SSH key for
+the configured [session duration](../user/admin_area/settings/account_and_limit_settings.md#customize-session-duration-for-git-operations-when-2fa-is-enabled). 
 
 ### Enable or disable Two-factor Authentication (2FA) for Git operations
 
@@ -149,3 +157,8 @@ To disable it:
 ```ruby
 Feature.disable(:two_factor_for_cli)
 ```
+
+The feature flag affects these features:
+
+- [Two-factor Authentication (2FA) for Git over SSH operations](#two-factor-authentication-2fa-for-git-over-ssh-operations).
+- [Customize session duration for Git Operations when 2FA is enabled](../user/admin_area/settings/account_and_limit_settings.md#customize-session-duration-for-git-operations-when-2fa-is-enabled).

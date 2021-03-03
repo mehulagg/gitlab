@@ -76,6 +76,28 @@ RSpec.describe 'epics swimlanes', :js do
     end
   end
 
+  context 'issue cards' do
+    let(:issue_card) { first("[data-testid='board-epic-lane-issues'] [data-testid='board_card']") }
+
+    before do
+      wait_for_all_requests
+
+      issue_card.click
+    end
+
+    it 'highlights an issue card on click' do
+      expect(issue_card[:class]).to include('is-active')
+      expect(issue_card[:class]).not_to include('multi-select')
+    end
+
+    it 'unhighlights a selected issue card on click' do
+      issue_card.click
+
+      expect(issue_card[:class]).not_to include('is-active')
+      expect(issue_card[:class]).not_to include('multi-select')
+    end
+  end
+
   context 'add issue to swimlanes list' do
     it 'displays new issue button' do
       expect(first('.board')).to have_selector('.issue-count-badge-add-button', count: 1)

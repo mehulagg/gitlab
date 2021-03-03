@@ -6,26 +6,29 @@ RSpec.describe 'Scoped issue boards', :js do
   include FilteredSearchHelpers
   include MobileHelpers
 
-  let(:user) { create(:user) }
-  let(:group) { create(:group, :public) }
-  let(:project) { create(:project, :public, namespace: group) }
-  let(:project_2) { create(:project, :public, namespace: group) }
-  let!(:project_label) { create(:label, project: project, name: 'Planning') }
-  let!(:group_label) { create(:group_label, group: group, name: 'Group Label') }
-  let!(:milestone) { create(:milestone, project: project) }
-  let!(:board) { create(:board, project: project, name: 'Project board') }
-  let!(:group_board) { create(:board, group: group, name: 'Group board') }
-  let!(:filtered_board) { create(:board, project: project_2, name: 'Filtered board', milestone: milestone, assignee: user, weight: 2) }
-  let!(:issue) { create(:issue, project: project) }
-  let!(:issue_milestone) { create(:closed_issue, project: project, milestone: milestone) }
-  let!(:assigned_issue) { create(:issue, project: project, assignees: [user]) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group, :public) }
+  let_it_be(:project) { create(:project, :public, namespace: group) }
+  let_it_be(:project_2) { create(:project, :public, namespace: group) }
+  let_it_be(:project_label) { create(:label, project: project, name: 'Planning') }
+  let_it_be(:group_label) { create(:group_label, group: group, name: 'Group Label') }
+  let_it_be(:milestone) { create(:milestone, project: project) }
+  let_it_be(:board) { create(:board, project: project, name: 'Project board') }
+  let_it_be(:group_board) { create(:board, group: group, name: 'Group board') }
+  let_it_be(:filtered_board) { create(:board, project: project_2, name: 'Filtered board', milestone: milestone, assignee: user, weight: 2) }
+  let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:issue_milestone) { create(:closed_issue, project: project, milestone: milestone) }
+  let_it_be(:assigned_issue) { create(:issue, project: project, assignees: [user]) }
 
   let(:edit_board) { find('.btn', text: 'Edit board') }
   let(:view_scope) { find('.btn', text: 'View scope') }
   let(:board_title) { find('.boards-selector-wrapper .dropdown-menu-toggle') }
 
   before do
-    allow_any_instance_of(ApplicationHelper).to receive(:collapsed_sidebar?).and_return(true)
+    allow_next_instance_of(ApplicationHelper) do |helper|
+      allow(helper).to receive(:collapsed_sidebar?).and_return(true)
+    end
+
     stub_licensed_features(scoped_issue_board: true)
   end
 

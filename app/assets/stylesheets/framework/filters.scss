@@ -265,6 +265,7 @@
   flex: 1;
   position: relative;
   min-width: 0;
+  height: 2rem;
   background-color: $input-bg;
 }
 
@@ -453,7 +454,7 @@
 .search-token-target-branch {
   .value {
     font-family: $monospace-font;
-    font-size: 13px;
+    font-size: $gl-font-size-monospace;
   }
 }
 
@@ -472,6 +473,15 @@
     // See https://gitlab.com/gitlab-org/gitlab-ui/-/issues/908
     .input-group-prepend + .gl-filtered-search-scrollable {
       border-radius: 0;
+    }
+  }
+
+  .sort-dropdown-container {
+    // This property is set to have borders
+    // around sort dropdown match with filter
+    // input field.
+    .gl-button {
+      box-shadow: inset 0 0 0 1px $gray-400;
     }
   }
 

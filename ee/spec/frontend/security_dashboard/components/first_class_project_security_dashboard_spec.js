@@ -1,6 +1,6 @@
 import { GlBanner } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
 import { within } from '@testing-library/dom';
+import { shallowMount } from '@vue/test-utils';
 import Cookies from 'js-cookie';
 import AutoFixUserCallout from 'ee/security_dashboard/components/auto_fix_user_callout.vue';
 import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';

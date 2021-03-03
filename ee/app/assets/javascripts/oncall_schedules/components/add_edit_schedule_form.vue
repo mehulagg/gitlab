@@ -1,5 +1,4 @@
 <script>
-import { isEqual, isEmpty } from 'lodash';
 import {
   GlForm,
   GlFormGroup,
@@ -8,6 +7,7 @@ import {
   GlDropdownItem,
   GlSearchBoxByType,
 } from '@gitlab/ui';
+import { isEqual, isEmpty } from 'lodash';
 import { s__, __ } from '~/locale';
 import { getFormattedTimezone } from '../utils/common_utils';
 

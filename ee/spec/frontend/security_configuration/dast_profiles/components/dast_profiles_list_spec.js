@@ -16,6 +16,7 @@ describe('EE - DastProfilesList', () => {
       profiles: [],
       tableLabel: 'Profiles Table',
       fields: [{ key: 'profileName' }, { key: 'targetUrl' }, { key: 'validationStatus' }],
+      noProfilesMessage: 'no profiles created yet',
       hasMorePages: false,
       profilesPerPage: 10,
       errorMessage: '',

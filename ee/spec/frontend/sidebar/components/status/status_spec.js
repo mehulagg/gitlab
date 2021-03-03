@@ -1,7 +1,7 @@
 import { GlDropdown, GlDropdownItem, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import Status from 'ee/sidebar/components/status/status.vue';
-import { healthStatus, healthStatusTextMap } from 'ee/sidebar/constants';
+import { healthStatus, healthStatusTextMap, I18N_DROPDOWN } from 'ee/sidebar/constants';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 const getStatusText = (wrapper) => wrapper.find('.value .text-plain').text();
@@ -182,7 +182,7 @@ describe('Status', () => {
       });
 
       it('shows "None"', () => {
-        expect(wrapper.find('.no-value').text()).toBe('None');
+        expect(wrapper.find('.no-value').text()).toBe(I18N_DROPDOWN.noneText);
       });
 
       it('shows "Status" in the tooltip', () => {
@@ -258,9 +258,9 @@ describe('Status', () => {
       });
 
       it('shows text to ask the user to pick an option', () => {
-        const message = 'Assign health status';
-
-        expect(getDropdownElement(wrapper).find('.health-title').text()).toContain(message);
+        expect(getDropdownElement(wrapper).props('headerText')).toBe(
+          I18N_DROPDOWN.dropdownHeaderText,
+        );
       });
 
       it('hides form when the `edit` button is clicked', async () => {

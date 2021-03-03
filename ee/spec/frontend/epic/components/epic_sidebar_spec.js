@@ -1,6 +1,6 @@
+import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import Vuex from 'vuex';
-import { shallowMount } from '@vue/test-utils';
 
 import EpicSidebar from 'ee/epic/components/epic_sidebar.vue';
 import { dateTypes } from 'ee/epic/constants';

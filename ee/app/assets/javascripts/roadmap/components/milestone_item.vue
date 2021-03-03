@@ -1,11 +1,11 @@
 <script>
 import { GlIcon, GlPopover } from '@gitlab/ui';
 import { __ } from '~/locale';
-import CommonMixin from '../mixins/common_mixin';
-import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
-import MonthsPresetMixin from '../mixins/months_preset_mixin';
-import WeeksPresetMixin from '../mixins/weeks_preset_mixin';
 import { TIMELINE_CELL_MIN_WIDTH, SCROLL_BAR_SIZE } from '../constants';
+import CommonMixin from '../mixins/common_mixin';
+import MonthsPresetMixin from '../mixins/months_preset_mixin';
+import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
+import WeeksPresetMixin from '../mixins/weeks_preset_mixin';
 
 export default {
   cellWidth: TIMELINE_CELL_MIN_WIDTH,

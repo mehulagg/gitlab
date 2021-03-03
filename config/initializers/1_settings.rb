@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../settings'
 require_relative '../object_store_settings'
 require_relative '../smime_signature_settings'
@@ -12,6 +14,7 @@ Settings.encrypted_settings['path'] = Settings.absolute(Settings.encrypted_setti
 
 Settings['ldap'] ||= Settingslogic.new({})
 Settings.ldap['enabled'] = false if Settings.ldap['enabled'].nil?
+Settings.ldap['servers'] ||= Settingslogic.new({})
 Settings.ldap['prevent_ldap_sign_in'] = false if Settings.ldap['prevent_ldap_sign_in'].blank?
 Settings.ldap['secret_file'] = Settings.absolute(Settings.ldap['secret_file'] || File.join(Settings.encrypted_settings['path'], "ldap.yaml.enc"))
 
@@ -308,6 +311,13 @@ Settings.pages['storage_path']      = Settings.pages['path']
 Settings.pages['object_store']      = ObjectStoreSettings.legacy_parse(Settings.pages['object_store'])
 
 #
+# GitLab documentation
+#
+Settings['gitlab_docs'] ||= Settingslogic.new({})
+Settings.gitlab_docs['enabled'] ||= false
+Settings.gitlab_docs['host'] = nil unless Settings.gitlab_docs.enabled
+
+#
 # Geo
 #
 Gitlab.ee do
@@ -415,7 +425,7 @@ Settings.cron_jobs['stuck_ci_jobs_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['stuck_ci_jobs_worker']['cron'] ||= '0 * * * *'
 Settings.cron_jobs['stuck_ci_jobs_worker']['job_class'] = 'StuckCiJobsWorker'
 Settings.cron_jobs['pipeline_schedule_worker'] ||= Settingslogic.new({})
-Settings.cron_jobs['pipeline_schedule_worker']['cron'] ||= '19 * * * *'
+Settings.cron_jobs['pipeline_schedule_worker']['cron'] ||= '3-59/10 * * * *'
 Settings.cron_jobs['pipeline_schedule_worker']['job_class'] = 'PipelineScheduleWorker'
 Settings.cron_jobs['expire_build_artifacts_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['expire_build_artifacts_worker']['cron'] ||= '*/7 * * * *'
@@ -444,6 +454,9 @@ Settings.cron_jobs['personal_access_tokens_expired_notification_worker']['job_cl
 Settings.cron_jobs['repository_archive_cache_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['repository_archive_cache_worker']['cron'] ||= '0 * * * *'
 Settings.cron_jobs['repository_archive_cache_worker']['job_class'] = 'RepositoryArchiveCacheWorker'
+Settings.cron_jobs['packages_composer_cache_cleanup_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['packages_composer_cache_cleanup_worker']['cron'] ||= '30 * * * *'
+Settings.cron_jobs['packages_composer_cache_cleanup_worker']['job_class'] = 'Packages::Composer::CacheCleanupWorker'
 Settings.cron_jobs['import_export_project_cleanup_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['import_export_project_cleanup_worker']['cron'] ||= '0 * * * *'
 Settings.cron_jobs['import_export_project_cleanup_worker']['job_class'] = 'ImportExportProjectCleanupWorker'
@@ -520,7 +533,7 @@ Settings.cron_jobs['users_create_statistics_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['users_create_statistics_worker']['cron'] ||= '2 15 * * *'
 Settings.cron_jobs['users_create_statistics_worker']['job_class'] = 'Users::CreateStatisticsWorker'
 Settings.cron_jobs['authorized_project_update_periodic_recalculate_worker'] ||= Settingslogic.new({})
-Settings.cron_jobs['authorized_project_update_periodic_recalculate_worker']['cron'] ||= '45 1 * * 6'
+Settings.cron_jobs['authorized_project_update_periodic_recalculate_worker']['cron'] ||= '45 1 1,15 * *'
 Settings.cron_jobs['authorized_project_update_periodic_recalculate_worker']['job_class'] = 'AuthorizedProjectUpdate::PeriodicRecalculateWorker'
 Settings.cron_jobs['update_container_registry_info_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['update_container_registry_info_worker']['cron'] ||= '0 0 * * *'
@@ -531,9 +544,9 @@ Settings.cron_jobs['postgres_dynamic_partitions_creator']['job_class'] ||= 'Part
 Settings.cron_jobs['ci_platform_metrics_update_cron_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['ci_platform_metrics_update_cron_worker']['cron'] ||= '47 9 * * *'
 Settings.cron_jobs['ci_platform_metrics_update_cron_worker']['job_class'] = 'CiPlatformMetricsUpdateCronWorker'
-Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker'] ||= Settingslogic.new({})
-Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker']['cron'] ||= '50 23 */1 * *'
-Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker']['job_class'] ||= 'Analytics::InstanceStatistics::CountJobTriggerWorker'
+Settings.cron_jobs['analytics_usage_trends_count_job_trigger_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['analytics_usage_trends_count_job_trigger_worker']['cron'] ||= '50 23 */1 * *'
+Settings.cron_jobs['analytics_usage_trends_count_job_trigger_worker']['job_class'] ||= 'Analytics::UsageTrends::CountJobTriggerWorker'
 Settings.cron_jobs['member_invitation_reminder_emails_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['member_invitation_reminder_emails_worker']['cron'] ||= '0 0 * * *'
 Settings.cron_jobs['member_invitation_reminder_emails_worker']['job_class'] = 'MemberInvitationReminderEmailsWorker'
@@ -543,6 +556,15 @@ Settings.cron_jobs['schedule_merge_request_cleanup_refs_worker']['job_class'] = 
 Settings.cron_jobs['manage_evidence_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['manage_evidence_worker']['cron'] ||= '0 * * * *'
 Settings.cron_jobs['manage_evidence_worker']['job_class'] = 'Releases::ManageEvidenceWorker'
+Settings.cron_jobs['user_status_cleanup_batch_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['user_status_cleanup_batch_worker']['cron'] ||= '* * * * *'
+Settings.cron_jobs['user_status_cleanup_batch_worker']['job_class'] = 'UserStatusCleanup::BatchWorker'
+
+Gitlab.com do
+  Settings.cron_jobs['namespaces_in_product_marketing_emails_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['namespaces_in_product_marketing_emails_worker']['cron'] ||= '0 9 * * *'
+  Settings.cron_jobs['namespaces_in_product_marketing_emails_worker']['job_class'] = 'Namespaces::InProductMarketingEmailsWorker'
+end
 
 Gitlab.ee do
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker'] ||= Settingslogic.new({})
@@ -596,6 +618,9 @@ Gitlab.ee do
   Settings.cron_jobs['incident_sla_exceeded_check_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['incident_sla_exceeded_check_worker']['cron'] ||= '*/2 * * * *'
   Settings.cron_jobs['incident_sla_exceeded_check_worker']['job_class'] = 'IncidentManagement::IncidentSlaExceededCheckWorker'
+  Settings.cron_jobs['incident_management_persist_oncall_rotation_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['incident_management_persist_oncall_rotation_worker']['cron'] ||= '*/5 * * * *'
+  Settings.cron_jobs['incident_management_persist_oncall_rotation_worker']['job_class'] = 'IncidentManagement::OncallRotations::PersistAllRotationsShiftsJob'
   Settings.cron_jobs['import_software_licenses_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['import_software_licenses_worker']['cron'] ||= '0 3 * * 0'
   Settings.cron_jobs['import_software_licenses_worker']['job_class'] = 'ImportSoftwareLicensesWorker'
@@ -685,7 +710,10 @@ Settings.workhorse['secret_file'] ||= Rails.root.join('.gitlab_workhorse_secret'
 # GitLab KAS
 #
 Settings['gitlab_kas'] ||= Settingslogic.new({})
+Settings.gitlab_kas['enabled'] ||= false
 Settings.gitlab_kas['secret_file'] ||= Rails.root.join('.gitlab_kas_secret')
+Settings.gitlab_kas['external_url'] ||= 'wss://kas.example.com'
+Settings.gitlab_kas['internal_url'] ||= 'grpc://localhost:8153'
 
 #
 # Repositories
@@ -807,6 +835,7 @@ Settings.forti_token_cloud['enabled'] = false if Settings.forti_token_cloud['ena
 Settings['extra'] ||= Settingslogic.new({})
 Settings.extra['matomo_site_id'] ||= Settings.extra['piwik_site_id'] if Settings.extra['piwik_site_id'].present?
 Settings.extra['matomo_url'] ||= Settings.extra['piwik_url'] if Settings.extra['piwik_url'].present?
+Settings.extra['matomo_disable_cookies'] = false if Settings.extra['matomo_disable_cookies'].nil?
 
 #
 # Rack::Attack settings

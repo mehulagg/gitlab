@@ -1,8 +1,8 @@
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
-import BoardList from './board_list.vue';
 import { isListDraggable } from '../boards_util';
+import BoardList from './board_list.vue';
 
 export default {
   components: {
@@ -31,10 +31,13 @@ export default {
     },
   },
   computed: {
-    ...mapState(['filterParams']),
-    ...mapGetters(['getIssuesByList']),
-    listIssues() {
-      return this.getIssuesByList(this.list.id);
+    ...mapState(['filterParams', 'highlightedLists']),
+    ...mapGetters(['getBoardItemsByList']),
+    highlighted() {
+      return this.highlightedLists.includes(this.list.id);
+    },
+    listItems() {
+      return this.getBoardItemsByList(this.list.id);
     },
     isListDraggable() {
       return isListDraggable(this.list);
@@ -43,14 +46,33 @@ export default {
   watch: {
     filterParams: {
       handler() {
-        this.fetchIssuesForList({ listId: this.list.id });
+        if (this.list.id) {
+          this.fetchItemsForList({ listId: this.list.id });
+        }
       },
       deep: true,
       immediate: true,
     },
+    'list.id': {
+      handler(id) {
+        if (id) {
+          this.fetchItemsForList({ listId: this.list.id });
+        }
+      },
+    },
+    highlighted: {
+      handler(highlighted) {
+        if (highlighted) {
+          this.$nextTick(() => {
+            this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        }
+      },
+      immediate: true,
+    },
   },
   methods: {
-    ...mapActions(['fetchIssuesForList']),
+    ...mapActions(['fetchItemsForList']),
   },
 };
 </script>
@@ -68,12 +90,13 @@ export default {
   >
     <div
       class="board-inner gl-display-flex gl-flex-direction-column gl-relative gl-h-full gl-rounded-base"
+      :class="{ 'board-column-highlighted': highlighted }"
     >
       <board-list-header :can-admin-list="canAdminList" :list="list" :disabled="disabled" />
       <board-list
         ref="board-list"
         :disabled="disabled"
-        :issues="listIssues"
+        :board-items="listItems"
         :list="list"
         :can-admin-list="canAdminList"
       />

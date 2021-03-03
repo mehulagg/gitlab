@@ -1,6 +1,0 @@
----
-title: Rename internal api endpoint in order align it with the new logic shared among
-  agentk modules.
-merge_request: 50703
-author:
-type: changed

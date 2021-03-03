@@ -68,24 +68,30 @@ export const mockDataSubscription = {
 export const mockDataSeats = {
   data: [
     {
+      id: 2,
       name: 'Administrator',
       username: 'root',
       avatar_url: 'path/to/img_administrator',
       web_url: 'path/to/administrator',
       email: 'administrator@email.com',
+      last_activity_on: '2020-03-01',
     },
     {
+      id: 3,
       name: 'Agustin Walker',
       username: 'lester.orn',
       avatar_url: 'path/to/img_agustin_walker',
       web_url: 'path/to/agustin_walker',
       email: 'agustin_walker@email.com',
+      last_activity_on: '2020-03-01',
     },
     {
+      id: 4,
       name: 'Joella Miller',
       username: 'era',
       avatar_url: 'path/to/img_joella_miller',
       web_url: 'path/to/joella_miller',
+      last_activity_on: null,
       email: null,
     },
   ],
@@ -100,28 +106,34 @@ export const mockTableItems = [
   {
     email: 'administrator@email.com',
     user: {
+      id: 2,
       avatar_url: 'path/to/img_administrator',
       name: 'Administrator',
       username: '@root',
       web_url: 'path/to/administrator',
+      last_activity_on: '2020-03-01',
     },
   },
   {
     email: 'agustin_walker@email.com',
     user: {
+      id: 3,
       avatar_url: 'path/to/img_agustin_walker',
       name: 'Agustin Walker',
       username: '@lester.orn',
       web_url: 'path/to/agustin_walker',
+      last_activity_on: '2020-03-01',
     },
   },
   {
     email: null,
     user: {
+      id: 4,
       avatar_url: 'path/to/img_joella_miller',
       name: 'Joella Miller',
       username: '@era',
       web_url: 'path/to/joella_miller',
+      last_activity_on: null,
     },
   },
 ];

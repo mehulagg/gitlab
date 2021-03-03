@@ -85,17 +85,6 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
                                                 { key: 'VAR2', value: 'var 2', public: true },
                                                 { key: 'VAR3', value: 'var 3', public: true }])
       end
-
-      context 'when FF ci_rules_variables is disabled' do
-        before do
-          stub_feature_flags(ci_rules_variables: false)
-        end
-
-        it do
-          is_expected.to include(yaml_variables: [{ key: 'VAR1', value: 'var 1', public: true },
-                                                  { key: 'VAR2', value: 'var 2', public: true }])
-        end
-      end
     end
 
     context 'with cache:key' do
@@ -383,14 +372,25 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
     end
 
     context 'when job is a bridge' do
-      let(:attributes) do
+      let(:base_attributes) do
         {
           name: 'rspec', ref: 'master', options: { trigger: 'my/project' }, scheduling_type: :stage
         }
       end
 
+      let(:attributes) { base_attributes }
+
       it { is_expected.to be_a(::Ci::Bridge) }
       it { is_expected.to be_valid }
+
+      context 'when job belongs to a resource group' do
+        let(:attributes) { base_attributes.merge(resource_group_key: 'iOS') }
+
+        it 'returns a job with resource group' do
+          expect(subject.resource_group).not_to be_nil
+          expect(subject.resource_group.key).to eq('iOS')
+        end
+      end
     end
 
     it 'memoizes a resource object' do

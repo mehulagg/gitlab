@@ -43,4 +43,27 @@ RSpec.describe Projects::MergeRequestsController do
       end
     end
   end
+
+  describe 'GET #index' do
+    def get_index
+      get project_merge_requests_path(project, state: 'opened')
+    end
+
+    it 'avoids N+1' do
+      other_user = create(:user)
+      create(:merge_request, :unique_branches, target_project: project, source_project: project)
+      create_list(:approval_project_rule, 5, project: project, users: [user, other_user], approvals_required: 2)
+      create_list(:approval_merge_request_rule, 5, merge_request: merge_request, users: [user, other_user], approvals_required: 2)
+
+      control_count = ActiveRecord::QueryRecorder.new { get_index }.count
+
+      create_list(:approval, 10)
+      create(:approval_project_rule, project: project, users: [user, other_user], approvals_required: 2)
+      create_list(:merge_request, 20, :unique_branches, target_project: project, source_project: project).each do |mr|
+        create(:approval_merge_request_rule, merge_request: mr, users: [user, other_user], approvals_required: 2)
+      end
+
+      expect { get_index }.not_to exceed_query_limit(control_count)
+    end
+  end
 end

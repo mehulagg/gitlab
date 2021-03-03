@@ -25,10 +25,6 @@ module QA
       attribute :template_name
       attribute :import
 
-      attribute :default_branch do
-        api_response[:default_branch] || Runtime::Env.default_branch
-      end
-
       attribute :group do
         Group.fabricate!
       end
@@ -224,6 +220,10 @@ module QA
         parse_body(get(Runtime::API::Request.new(api_client, api_commits_path).url))
       end
 
+      def default_branch
+        reload!.api_response[:default_branch] || Runtime::Env.default_branch
+      end
+
       def import_status
         response = get Runtime::API::Request.new(api_client, "/projects/#{id}/import").url
 
@@ -270,10 +270,6 @@ module QA
 
       def pipelines
         parse_body(get(Runtime::API::Request.new(api_client, api_pipelines_path).url))
-      end
-
-      def share_with_group(invitee, access_level = Resource::Members::AccessLevel::DEVELOPER)
-        post Runtime::API::Request.new(api_client, "/projects/#{id}/share").url, { group_id: invitee.id, group_access: access_level }
       end
 
       private

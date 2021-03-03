@@ -5,16 +5,16 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: concepts, howto
 ---
 
-# Building Docker images with GitLab CI/CD
+# Use Docker to build Docker images
 
-You can use GitLab CI/CD with Docker Engine to build and test Docker-based projects.
+You can use GitLab CI/CD with Docker to build and test Docker images.
 
 For example, you might want to:
 
-1. Create an application image.
-1. Run tests against the created image.
-1. Push image to a remote registry.
-1. Deploy to a server from the pushed image.
+1. Create a Docker image of your application.
+1. Run tests against the image.
+1. Push the image to a remote registry.
+1. Use the image to deploy your application to a server.
 
 Or, if your application already has a `Dockerfile`, you can
 use it to create and test an image:
@@ -27,7 +27,7 @@ docker push my-registry:5000/my-image
 ```
 
 To run Docker commands in your CI/CD jobs, you must configure
-GitLab Runner to enable `docker` support.
+GitLab Runner to support `docker` commands.
 
 ## Enable Docker commands in your CI/CD jobs
 
@@ -126,7 +126,7 @@ not without its own challenges:
   instance of Docker engine so they don't conflict with each other. But this
   also means that jobs can be slower because there's no caching of layers.
 - By default, Docker 17.09 and higher uses `--storage-driver overlay2` which is
-  the recommended storage driver. See [Using the overlayfs driver](#use-the-overlayfs-driver)
+  the recommended storage driver. See [Using the OverlayFS driver](#use-the-overlayfs-driver)
   for details.
 - Since the `docker:19.03.12-dind` container and the runner container don't share their
   root file system, the job's working directory can be used as a mount point for
@@ -801,7 +801,7 @@ NOTE:
 The shared runners on GitLab.com use the `overlay2` driver by default.
 
 By default, when using `docker:dind`, Docker uses the `vfs` storage driver which
-copies the filesystem on every run. This is a disk-intensive operation
+copies the file system on every run. This is a disk-intensive operation
 which can be avoided if a different driver is used, for example `overlay2`.
 
 ### Requirements
@@ -830,7 +830,7 @@ which can be avoided if a different driver is used, for example `overlay2`.
 ### Use the OverlayFS driver per project
 
 You can enable the driver for each project individually by using the `DOCKER_DRIVER`
-environment [variable](../yaml/README.md#variables) in `.gitlab-ci.yml`:
+[CI/CD variable](../yaml/README.md#variables) in `.gitlab-ci.yml`:
 
 ```yaml
 variables:
@@ -872,4 +872,4 @@ If:
 - This is the first time setting it up, carefully read
   [using Docker in Docker workflow](#use-the-docker-executor-with-the-docker-image-docker-in-docker).
 - You are upgrading from v18.09 or earlier, read our
-  [upgrade guide](https://about.gitlab.com/releases/2019/07/31/docker-in-docker-with-docker-19-dot-03/).
+  [upgrade guide](https://about.gitlab.com/blog/2019/07/31/docker-in-docker-with-docker-19-dot-03/).

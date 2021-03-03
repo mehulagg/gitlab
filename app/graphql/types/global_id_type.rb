@@ -46,7 +46,7 @@ module Types
 
       @id_types[model_class] ||= Class.new(self) do
         graphql_name "#{model_class.name.gsub(/::/, '')}ID"
-        description "Identifier of #{model_class.name}"
+        description "Identifier of #{model_class.name}."
 
         self.define_singleton_method(:to_s) do
           graphql_name
@@ -67,7 +67,10 @@ module Types
         end
 
         self.define_singleton_method(:suitable?) do |gid|
-          gid&.model_class&.ancestors&.include?(model_class)
+          next false if gid.nil?
+
+          gid.model_name.safe_constantize.present? &&
+            gid.model_class.ancestors.include?(model_class)
         end
 
         self.define_singleton_method(:coerce_input) do |string, ctx|

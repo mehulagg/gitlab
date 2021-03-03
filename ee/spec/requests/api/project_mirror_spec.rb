@@ -293,7 +293,6 @@ RSpec.describe API::ProjectMirror do
           context 'when repository_mirrors feature is not available' do
             before do
               stub_licensed_features(repository_mirrors: false)
-              project_mirrored.clear_memoization(:licensed_feature_available)
             end
 
             it_behaves_like 'an API endpoint that does not trigger pull mirroring operation', :bad_request
@@ -302,7 +301,6 @@ RSpec.describe API::ProjectMirror do
           context 'when repository_mirrors feature is available' do
             before do
               stub_licensed_features(repository_mirrors: true)
-              project_mirrored.clear_memoization(:licensed_feature_available)
             end
 
             it_behaves_like 'an API endpoint that triggers pull mirroring operation'

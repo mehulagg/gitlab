@@ -9,13 +9,9 @@ module EE
         can?(current_user, :owner_access, group) && member.user&.using_gitlab_com_seat?(group)
       end
 
-      expose :group_sso do |member|
-        member.user&.group_sso?(group)
-      end
+      expose :group_sso?, as: :group_sso
 
-      expose :group_managed_account do |member|
-        member.user&.group_managed_account?
-      end
+      expose :group_managed_account?, as: :group_managed_account
 
       expose :can_override do |member|
         member.can_override?

@@ -4,15 +4,12 @@ import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_li
 import PolicyDrawer from 'ee/threat_monitoring/components/policy_editor/policy_drawer.vue';
 import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
 import createStore from 'ee/threat_monitoring/store';
-import { useFakeDate } from 'helpers/fake_date';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { mockPoliciesResponse } from '../mock_data';
 
 const mockData = mockPoliciesResponse.map((policy) => convertObjectPropsToCamelCase(policy));
 
 describe('NetworkPolicyList component', () => {
-  useFakeDate();
-
   let store;
   let wrapper;
 

@@ -31,6 +31,8 @@ GitLab has been tested on a number of object storage providers:
   HTTP Range Requests from working with CI job artifacts](https://gitlab.com/gitlab-org/gitlab/-/issues/223806).
   Be sure to upgrade to GitLab v13.3.0 or above if you use S3 storage with this hardware.
 
+- Ceph S3 prior to [Kraken 11.0.2](https://ceph.com/releases/kraken-11-0-2-released/) does not support the [Upload Copy Part API](https://gitlab.com/gitlab-org/gitlab/-/issues/300604). You may need to [disable multi-threaded copying](#multi-threaded-copying).
+
 ## Configuration guides
 
 There are two ways of specifying object storage configuration in GitLab:
@@ -75,8 +77,7 @@ types. If you want to use local storage for specific object types, you can
 
 Most types of objects, such as CI artifacts, LFS files, upload
 attachments, and so on can be saved in object storage by specifying a single
-credential for object storage with multiple buckets. A [different bucket
-for each type must be used](#use-separate-buckets).
+credential for object storage with multiple buckets.
 
 When the consolidated form is:
 
@@ -551,19 +552,18 @@ supported by consolidated configuration form, refer to the following guides:
 | [Merge request diffs](merge_request_diffs.md#using-object-storage) | Yes |
 | [Mattermost](https://docs.mattermost.com/administration/config-settings.html#file-storage)| No |
 | [Packages](packages/index.md#using-object-storage) (optional feature) | Yes |
-| [Dependency Proxy](packages/dependency_proxy.md#using-object-storage) (optional feature) **(PREMIUM ONLY)** | Yes |
-| [Pseudonymizer](pseudonymizer.md#configuration) (optional feature) **(ULTIMATE ONLY)** | No |
+| [Dependency Proxy](packages/dependency_proxy.md#using-object-storage) (optional feature) **(PREMIUM SELF)** | Yes |
+| [Pseudonymizer](pseudonymizer.md#configuration) (optional feature) **(ULTIMATE SELF)** | No |
 | [Autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
 | [Terraform state files](terraform_state.md#using-object-storage) | Yes |
 | [GitLab Pages content](pages/index.md#using-object-storage) | Yes |
 
-### Other alternatives to filesystem storage
+### Other alternatives to file system storage
 
 If you're working to [scale out](reference_architectures/index.md) your GitLab implementation,
 or add fault tolerance and redundancy, you may be
-looking at removing dependencies on block or network filesystems.
-See the following additional guides and
-[note that Pages requires disk storage](#gitlab-pages-requires-nfs):
+looking at removing dependencies on block or network file systems.
+See the following additional guides:
 
 1. Make sure the [`git` user home directory](https://docs.gitlab.com/omnibus/settings/configuration.html#moving-the-home-directory-for-a-user) is on local disk.
 1. Configure [database lookup of SSH keys](operations/fast_ssh_key_lookup.md)
@@ -575,19 +575,12 @@ See the following additional guides and
 ### Use separate buckets
 
 Using separate buckets for each data type is the recommended approach for GitLab.
+This ensures there are no collisions across the various types of data GitLab stores.
+There are plans to [enable the use of a single bucket](https://gitlab.com/gitlab-org/gitlab/-/issues/292958)
+in the future.
 
-A limitation of our configuration is that each use of object storage is separately configured.
-[We have an issue for improving this](https://gitlab.com/gitlab-org/gitlab/-/issues/23345)
-and easily using one bucket with separate folders is one improvement that this might bring.
-
-There is at least one specific issue with using the same bucket:
-when GitLab is deployed with the Helm chart restore from backup
-[will not properly function](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer)
-unless separate buckets are used.
-
-One risk of using a single bucket would be that if your organisation decided to
-migrate GitLab to the Helm deployment in the future. GitLab would run, but the situation with
-backups might not be realised until the organisation had a critical requirement for the backups to work.
+Helm-based installs require separate buckets to
+[handle backup restorations](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer)
 
 ### S3 API compatibility issues
 
@@ -597,17 +590,6 @@ with the Fog library that GitLab uses. Symptoms include an error in `production.
 ```plaintext
 411 Length Required
 ```
-
-### GitLab Pages requires NFS
-
-If you're working to add more GitLab servers for [scaling or fault tolerance](reference_architectures/index.md)
-and one of your requirements is [GitLab Pages](../user/project/pages/index.md) this currently requires
-NFS. There is [work in progress](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/196)
-to remove this dependency. In the future, GitLab Pages may use
-[object storage](https://gitlab.com/gitlab-org/gitlab/-/issues/208135).
-
-The dependency on disk storage also prevents Pages being deployed using the
-[GitLab Helm chart](https://gitlab.com/gitlab-org/charts/gitlab/-/issues/37).
 
 ### Incremental logging is required for CI to use object storage
 
@@ -774,7 +756,6 @@ To set up an instance profile:
                "Action": [
                    "s3:PutObject",
                    "s3:GetObject",
-                   "s3:AbortMultipartUpload",
                    "s3:DeleteObject"
                ],
                "Resource": "arn:aws:s3:::test-bucket/*"
@@ -786,3 +767,18 @@ To set up an instance profile:
 1. [Attach this role](https://aws.amazon.com/premiumsupport/knowledge-center/attach-replace-ec2-instance-profile/)
    to the EC2 instance hosting your GitLab instance.
 1. Configure GitLab to use it via the `use_iam_profile` configuration option.
+
+### Multi-threaded copying
+
+GitLab uses the [S3 Upload Part Copy API](https://docs.aws.amazon.com/AmazonS3/latest/API/API_UploadPartCopy.html)
+to accelerate the copying of files within a bucket. Ceph S3 [prior to Kraken 11.0.2](https://ceph.com/releases/kraken-11-0-2-released/)
+does not support this and [returns a 404 error when files are copied during the upload process](https://gitlab.com/gitlab-org/gitlab/-/issues/300604).
+
+The feature can be disabled using the `:s3_multithreaded_uploads`
+feature flag. To disable the feature, ask a GitLab administrator with
+[Rails console access](feature_flags.md#how-to-enable-and-disable-features-behind-flags)
+to run the following command:
+
+```ruby
+Feature.disable(:s3_multithreaded_uploads)
+```

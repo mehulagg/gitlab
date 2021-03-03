@@ -416,7 +416,7 @@ production: &base
   ## Gravatar
   ## If using gravatar.com, there's nothing to change here. For Libravatar
   ## you'll need to provide the custom URLs. For more information,
-  ## see: https://docs.gitlab.com/ee/customization/libravatar.html
+  ## see: https://docs.gitlab.com/ee/administration/libravatar.html
   gravatar:
     # Gravatar/Libravatar URLs: possible placeholders: %{hash} %{size} %{email} %{username}
     # plain_url: "http://..."     # default: https://www.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon
@@ -435,7 +435,7 @@ production: &base
       cron: "0 * * * *"
     # Execute scheduled triggers
     pipeline_schedule_worker:
-      cron: "19 * * * *"
+      cron: "3-59/10 * * * *"
     # Remove expired build artifacts
     expire_build_artifacts_worker:
       cron: "*/7 * * * *"
@@ -590,7 +590,7 @@ production: &base
       # enabled: true
       # primary_api_url: http://localhost:5000/ # internal address to the primary registry, will be used by GitLab to directly communicate with primary registry API
 
-  ## Feature Flag https://docs.gitlab.com/ee/user/project/operations/feature_flags.html
+  ## Feature Flag https://docs.gitlab.com/ee/operations/feature_flags.html
   feature_flags:
     unleash:
       # enabled: false
@@ -1159,9 +1159,16 @@ production: &base
     # secret_file: /home/git/gitlab/.gitlab_workhorse_secret
 
   gitlab_kas:
+    # enabled: true
     # File that contains the secret key for verifying access for gitlab-kas.
     # Default is '.gitlab_kas_secret' relative to Rails.root (i.e. root of the GitLab app).
     # secret_file: /home/git/gitlab/.gitlab_kas_secret
+
+    # The URL to the external KAS API (used by the Kubernetes agents)
+    # external_url: wss://kas.example.com
+
+    # The URL to the internal KAS API (used by the GitLab backend)
+    # internal_url: grpc://localhost:8153
 
   ## GitLab Elasticsearch settings
   elasticsearch:
@@ -1242,6 +1249,7 @@ production: &base
     ## Matomo analytics.
     # matomo_url: '_your_matomo_url'
     # matomo_site_id: '_your_matomo_site_id'
+    # matomo_disable_cookies: false
 
   rack_attack:
     git_basic_auth:

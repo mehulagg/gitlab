@@ -1,7 +1,10 @@
 <script>
+// This is a false violation of @gitlab/no-runtime-template-compiler, since it
+// extends a valid Vue single file component.
+/* eslint-disable @gitlab/no-runtime-template-compiler */
 import BoardListHeaderFoss from '~/boards/components/board_list_header_deprecated.vue';
-import { __, sprintf, s__ } from '~/locale';
 import boardsStore from '~/boards/stores/boards_store';
+import { __, sprintf, s__ } from '~/locale';
 
 export default {
   extends: BoardListHeaderFoss,

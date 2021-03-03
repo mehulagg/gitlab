@@ -30,10 +30,15 @@
   color: var(--gray-500, $gray-500);
 }
 
+[data-page$='epic_boards:show'],
 .issue-boards-page {
   .content-wrapper {
     padding-bottom: 0;
   }
+}
+
+[data-page$='epic_boards:show'] .filter-form {
+  display: none;
 }
 
 .boards-app {
@@ -136,6 +141,47 @@
   font-size: $issue-boards-font-size;
   background: var(--gray-10, $gray-10);
   border: 1px solid var(--gray-100, $gray-100);
+}
+
+// to highlight columns we have animated pulse of box-shadow
+// we don't want to actually animate the box-shadow property
+// because that causes costly repaints. Instead we can add a
+// pseudo-element that is the same size as our element, then
+// animate opacity/transform to give a soothing single pulse
+.board-column-highlighted::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: -1;
+  box-shadow: 0 0 6px 3px $blue-200;
+  animation-name: board-column-flash-border;
+  animation-duration: 1.2s;
+  animation-fill-mode: forwards;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes board-column-flash-border {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  25%,
+  75% {
+    opacity: 1;
+    transform: scale(0.99);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .board-header {
@@ -474,7 +520,7 @@
   }
 }
 
-.board-issue-path.js-show-tooltip {
+.board-item-path.js-show-tooltip {
   cursor: help;
 }
 

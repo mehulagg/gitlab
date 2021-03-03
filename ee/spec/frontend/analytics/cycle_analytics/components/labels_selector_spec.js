@@ -101,14 +101,14 @@ describe('Value Stream Analytics LabelsSelector', () => {
       });
 
       it('will emit the "selectLabel" event', () => {
-        expect(wrapper.emitted('selectLabel')).toBeUndefined();
+        expect(wrapper.emitted('select-label')).toBeUndefined();
 
         const elem = wrapper.findAll('.dropdown-item').at(1);
         elem.trigger('click');
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.emitted('selectLabel').length > 0).toBe(true);
-          expect(wrapper.emitted('selectLabel')[0]).toContain(groupLabels[1].id);
+          expect(wrapper.emitted('select-label').length > 0).toBe(true);
+          expect(wrapper.emitted('select-label')[0]).toContain(groupLabels[1].id);
         });
       });
     });

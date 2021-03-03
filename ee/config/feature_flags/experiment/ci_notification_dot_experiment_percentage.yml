@@ -1,8 +1,0 @@
----
-name: ci_notification_dot_experiment_percentage
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/27626
-rollout_issue_url: https://gitlab.com/gitlab-org/growth/team-tasks/-/issues/101
-milestone: '12.10'
-type: experiment
-group: group::expansion
-default_enabled: false

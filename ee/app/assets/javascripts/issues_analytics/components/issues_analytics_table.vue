@@ -12,12 +12,12 @@ import {
   GlLabel,
 } from '@gitlab/ui';
 
-import axios from '~/lib/utils/axios_utils';
-import { s__, n__ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { getDayDifference } from '~/lib/utils/datetime_utility';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
+import { s__, n__ } from '~/locale';
 
 const DEFAULT_API_URL_PARAMS = { with_labels_details: true, per_page: 100 };
 const SYMBOL = {

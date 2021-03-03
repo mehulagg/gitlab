@@ -20,7 +20,7 @@ module API
     default_format :json
 
     authenticate_with do |accept|
-      accept.token_types(:personal_access_token, :deploy_token, :job_token)
+      accept.token_types(:personal_access_token_with_username, :deploy_token_with_username, :job_token_with_username)
             .sent_through(:http_basic_auth)
     end
 
@@ -62,8 +62,9 @@ module API
             file_name: PACKAGE_FILENAME
           )
 
-          package = ::Packages::Nuget::CreatePackageService.new(project_or_group, current_user, declared_params.merge(build: current_authenticated_job))
-                                                           .execute
+          package = ::Packages::CreateTemporaryPackageService.new(
+            project_or_group, current_user, declared_params.merge(build: current_authenticated_job)
+          ).execute(:nuget, name: ::Packages::Nuget::TEMPORARY_PACKAGE_NAME)
 
           package_file = ::Packages::CreatePackageFileService.new(package, file_params.merge(build: current_authenticated_job))
                                                              .execute

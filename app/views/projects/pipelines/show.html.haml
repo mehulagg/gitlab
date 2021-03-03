@@ -6,7 +6,7 @@
 - add_page_specific_style 'page_bundles/reports'
 - add_page_specific_style 'page_bundles/ci_status'
 
-- if Feature.enabled?(:graphql_pipeline_details, @project)
+- if Feature.enabled?(:graphql_pipeline_details, @project, default_enabled: :yaml) || Feature.enabled?(:graphql_pipeline_details_users, @current_user, default_enabled: :yaml)
   - add_page_startup_graphql_call('pipelines/get_pipeline_details', { projectPath: @project.full_path, iid: @pipeline.iid })
 
 .js-pipeline-container{ data: { controller_action: "#{controller.action_name}" } }
@@ -26,4 +26,4 @@
 
   = render "projects/pipelines/with_tabs", pipeline: @pipeline, pipeline_has_errors: pipeline_has_errors
 
-.js-pipeline-details-vue{ data: { endpoint: project_pipeline_path(@project, @pipeline, format: :json), pipeline_project_path: @project.full_path, pipeline_iid: @pipeline.iid } }
+.js-pipeline-details-vue{ data: { endpoint: project_pipeline_path(@project, @pipeline, format: :json), metrics_path: namespace_project_ci_prometheus_metrics_histograms_path(namespace_id: @project.namespace, project_id: @project, format: :json), pipeline_project_path: @project.full_path, pipeline_iid: @pipeline.iid, graphql_resource_etag: graphql_etag_pipeline_path(@pipeline) } }

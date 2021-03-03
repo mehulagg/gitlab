@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Set up a development environment
+# Set up a development environment **(FREE)**
 
 The following are required to install and test the app:
 
@@ -19,10 +19,12 @@ The following are required to install and test the app:
   - [GDK with Gitpod](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/gitpod.md)
     documentation.
 
-  You **must not** use tunneling tools such as Serveo or `ngrok`. These are
+  You **must not** use tunneling tools such as
+  <!-- vale gitlab.Spelling = NO --> Serveo <!-- vale gitlab.Spelling = YES -->
+  or `ngrok`. These are
   security risks, and must not be run on developer laptops.
 
-  Jira requires all connections to the app host to be over SSL, so if you set up
+  Jira requires all connections to the app host to be over SSL. If you set up
   your own environment, remember to enable SSL and an appropriate certificate.
 
 ## Install the app in Jira

@@ -1,8 +1,7 @@
-.gl-mb-5.info-well.dark-well
-  .gl-display-flex.gl-justify-content-space-between.gl-align-items-center.gl-p-5
+.h3.gl-mb-5= _('License overview')
+.gl-mb-5.gl-card
+  .gl-display-flex.gl-justify-content-space-between.gl-align-items-center.gl-card-body
     %div
-      %h4.gl-mt-0
-        = _('License overview')
       %p.gl-mb-0
         = sprite_icon('license', css_class: 'gl-fill-gray-700')
         %span.gl-ml-3
@@ -15,4 +14,4 @@
           %strong= @license.licensee['Name']
           = "(#{@license.licensee['Email']})"
     %div
-      = link_to 'View details', admin_license_path, class: "gl-button btn btn-secondary"
+      = link_to 'View details', admin_license_path, class: "gl-button btn btn-default"

@@ -1,12 +1,10 @@
 <script>
 import { GlAlert, GlButton, GlEmptyState, GlLoadingIcon, GlModalDirective } from '@gitlab/ui';
-import mockRotations from '../../../../../spec/frontend/oncall_schedule/mocks/mock_rotation.json';
-import * as Sentry from '~/sentry/wrapper';
+import * as Sentry from '@sentry/browser';
+import { s__ } from '~/locale';
+import getOncallSchedulesWithRotationsQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import AddScheduleModal from './add_edit_schedule_modal.vue';
 import OncallSchedule from './oncall_schedule.vue';
-import { s__ } from '~/locale';
-import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
-import { fetchPolicies } from '~/lib/graphql';
 
 export const addScheduleModalId = 'addScheduleModal';
 
@@ -26,7 +24,6 @@ export const i18n = {
 };
 
 export default {
-  mockRotations,
   i18n,
   addScheduleModalId,
   components: {
@@ -49,8 +46,7 @@ export default {
   },
   apollo: {
     schedule: {
-      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
-      query: getOncallSchedulesQuery,
+      query: getOncallSchedulesWithRotationsQuery,
       variables() {
         return {
           projectPath: this.projectPath,
@@ -88,7 +84,7 @@ export default {
       >
         {{ $options.i18n.successNotification.description }}
       </gl-alert>
-      <oncall-schedule :schedule="schedule" :rotations="$options.mockRotations" />
+      <oncall-schedule :schedule="schedule" />
     </template>
 
     <gl-empty-state

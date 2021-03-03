@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require './spec/support/sidekiq_middleware'
 
 class Gitlab::Seeder::Vulnerabilities

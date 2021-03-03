@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import component from '~/registry/explorer/components/delete_button.vue';
 
@@ -58,6 +58,7 @@ describe('delete_button', () => {
           title: 'Foo title',
           variant: 'danger',
           disabled: 'true',
+          category: 'secondary',
         });
       });
 

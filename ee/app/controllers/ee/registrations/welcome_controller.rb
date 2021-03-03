@@ -5,11 +5,22 @@ module EE
     module WelcomeController
       extend ::Gitlab::Utils::Override
 
+      TRIAL_ONBOARDING_BOARD_NAME = 'GitLab onboarding'
+
       def trial_getting_started
         project = learn_gitlab_project
         return access_denied! unless current_user.id == project.creator_id
 
         render locals: { learn_gitlab_project: learn_gitlab_project }
+      end
+
+      def trial_onboarding_board
+        project = learn_gitlab_project
+        return access_denied! unless current_user.id == project.creator_id
+
+        board = project.boards.find_by_name(TRIAL_ONBOARDING_BOARD_NAME)
+        path = board ? project_board_path(project, board) : project_boards_path(project)
+        redirect_to path
       end
 
       private
@@ -27,6 +38,15 @@ module EE
         end
 
         clean_params
+      end
+
+      override :show_signup_onboarding?
+      def show_signup_onboarding?
+        !helpers.in_subscription_flow? &&
+          !helpers.in_invitation_flow? &&
+          !helpers.in_oauth_flow? &&
+          !helpers.in_trial_flow? &&
+          helpers.signup_onboarding_enabled?
       end
 
       def learn_gitlab_project

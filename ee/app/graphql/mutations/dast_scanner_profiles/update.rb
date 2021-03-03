@@ -3,7 +3,7 @@
 module Mutations
   module DastScannerProfiles
     class Update < BaseMutation
-      include ResolvesProject
+      include FindsProject
 
       graphql_name 'DastScannerProfileUpdate'
 
@@ -53,7 +53,7 @@ module Mutations
         # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
         gid = ::Types::GlobalIDType[::DastScannerProfile].coerce_isolated_input(service_args[:id])
 
-        project = authorized_find!(full_path: full_path)
+        project = authorized_find!(full_path)
 
         service = ::DastScannerProfiles::UpdateService.new(project, current_user)
         result = service.execute(**service_args, id: gid.model_id)
@@ -63,12 +63,6 @@ module Mutations
         else
           { errors: result.errors }
         end
-      end
-
-      private
-
-      def find_object(full_path:)
-        resolve_project(full_path: full_path)
       end
     end
   end

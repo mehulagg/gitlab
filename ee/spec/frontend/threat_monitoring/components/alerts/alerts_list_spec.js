@@ -1,9 +1,10 @@
 import { GlIntersectionObserver, GlSkeletonLoading } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import AlertsList from 'ee/threat_monitoring/components/alerts/alerts_list.vue';
 import AlertFilters from 'ee/threat_monitoring/components/alerts/alert_filters.vue';
 import AlertStatus from 'ee/threat_monitoring/components/alerts/alert_status.vue';
+import AlertsList from 'ee/threat_monitoring/components/alerts/alerts_list.vue';
 import { DEFAULT_FILTERS } from 'ee/threat_monitoring/components/alerts/constants';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { mockAlerts } from '../../mock_data';
 
 const alerts = mockAlerts;
@@ -29,41 +30,43 @@ describe('AlertsList component', () => {
   };
   const defaultProps = { filters: DEFAULT_FILTERS };
 
-  const findAlertFilters = () => wrapper.find(AlertFilters);
-  const findUnconfiguredAlert = () => wrapper.find("[data-testid='threat-alerts-unconfigured']");
-  const findErrorAlert = () => wrapper.find("[data-testid='threat-alerts-error']");
-  const findStartedAtColumn = () => wrapper.find("[data-testid='threat-alerts-started-at']");
-  const findStartedAtColumnHeader = () =>
-    wrapper.find("[data-testid='threat-alerts-started-at-header']");
-  const findIdColumn = () => wrapper.find("[data-testid='threat-alerts-id']");
-  const findStatusColumn = () => wrapper.find(AlertStatus);
-  const findStatusColumnHeader = () => wrapper.find("[data-testid='threat-alerts-status-header']");
-  const findEmptyState = () => wrapper.find("[data-testid='threat-alerts-empty-state']");
-  const findGlIntersectionObserver = () => wrapper.find(GlIntersectionObserver);
-  const findGlSkeletonLoading = () => wrapper.find(GlSkeletonLoading);
+  const findAlertFilters = () => wrapper.findComponent(AlertFilters);
+  const findUnconfiguredAlert = () => wrapper.findByTestId('threat-alerts-unconfigured');
+  const findErrorAlert = () => wrapper.findByTestId('threat-alerts-error');
+  const findStartedAtColumn = () => wrapper.findByTestId('threat-alerts-started-at');
+  const findStartedAtColumnHeader = () => wrapper.findByTestId('threat-alerts-started-at-header');
+  const findIdColumn = () => wrapper.findByTestId('threat-alerts-id');
+  const findEventCountColumn = () => wrapper.findByTestId('threat-alerts-event-count');
+  const findStatusColumn = () => wrapper.findComponent(AlertStatus);
+  const findStatusColumnHeader = () => wrapper.findByTestId('threat-alerts-status-header');
+  const findEmptyState = () => wrapper.findByTestId('threat-alerts-empty-state');
+  const findGlIntersectionObserver = () => wrapper.findComponent(GlIntersectionObserver);
+  const findGlSkeletonLoading = () => wrapper.findComponent(GlSkeletonLoading);
 
   const createWrapper = ({ $apollo = apolloMock, data = {}, stubs = {} } = {}) => {
-    wrapper = mount(AlertsList, {
-      mocks: {
-        $apollo,
-      },
-      propsData: defaultProps,
-      provide: {
-        documentationPath: '#',
-        projectPath: '#',
-      },
-      stubs: {
-        AlertStatus: true,
-        AlertFilters: true,
-        GlAlert: true,
-        GlLoadingIcon: true,
-        GlIntersectionObserver: true,
-        ...stubs,
-      },
-      data() {
-        return data;
-      },
-    });
+    wrapper = extendedWrapper(
+      mount(AlertsList, {
+        mocks: {
+          $apollo,
+        },
+        propsData: defaultProps,
+        provide: {
+          documentationPath: '#',
+          projectPath: '#',
+        },
+        stubs: {
+          AlertStatus: true,
+          AlertFilters: true,
+          GlAlert: true,
+          GlLoadingIcon: true,
+          GlIntersectionObserver: true,
+          ...stubs,
+        },
+        data() {
+          return data;
+        },
+      }),
+    );
   };
 
   afterEach(() => {
@@ -95,6 +98,7 @@ describe('AlertsList component', () => {
     it('does show all columns', () => {
       expect(findStartedAtColumn().exists()).toBe(true);
       expect(findIdColumn().exists()).toBe(true);
+      expect(findEventCountColumn().exists()).toBe(true);
       expect(findStatusColumn().exists()).toBe(true);
     });
 
@@ -133,6 +137,10 @@ describe('AlertsList component', () => {
 
       expect(wrapper.vm.sort).toBe('STATUS_ASC');
       expect(findStatusColumnHeader().attributes('aria-sort')).toBe('ascending');
+    });
+
+    it('navigates to the alert details page on title click', () => {
+      expect(findIdColumn().attributes('href')).toBe('/alerts/01');
     });
   });
 

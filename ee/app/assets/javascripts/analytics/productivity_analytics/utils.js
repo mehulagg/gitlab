@@ -1,5 +1,5 @@
-import { flatten } from 'lodash';
 import dateFormat from 'dateformat';
+import { flatten } from 'lodash';
 import { getDayDifference, getDateInPast } from '~/lib/utils/datetime_utility';
 import { median } from '~/lib/utils/number_utils';
 import { dateFormats } from '../shared/constants';

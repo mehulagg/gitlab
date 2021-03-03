@@ -62,9 +62,6 @@ export default {
     canBeBatched() {
       return Boolean(this.glFeatures.batchSuggestions);
     },
-    canAddCustomCommitMessage() {
-      return this.glFeatures.suggestionsCustomCommit;
-    },
     isApplying() {
       return this.isApplyingSingle || this.isApplyingBatch;
     },
@@ -88,6 +85,7 @@ export default {
     applySuggestion(message) {
       if (!this.canApply) return;
       this.isApplyingSingle = true;
+
       this.$emit('apply', this.applySuggestionCallback, message);
     },
     applySuggestionCallback() {
@@ -131,6 +129,7 @@ export default {
       <gl-button
         v-gl-tooltip.viewport="__('This also resolves all related threads')"
         class="btn-inverted js-apply-batch-btn btn-grouped"
+        data-qa-selector="apply_suggestions_batch_button"
         :disabled="isApplying"
         variant="success"
         @click="applySuggestionBatch"
@@ -145,29 +144,19 @@ export default {
       <gl-button
         v-if="suggestionsCount > 1 && canBeBatched && !isDisableButton"
         class="btn-inverted js-add-to-batch-btn btn-grouped"
+        data-qa-selector="add_suggestion_batch_button"
         :disabled="isDisableButton"
         @click="addSuggestionToBatch"
       >
         {{ __('Add suggestion to batch') }}
       </gl-button>
       <apply-suggestion
-        v-if="canAddCustomCommitMessage"
+        v-if="isLoggedIn"
         :disabled="isDisableButton"
         :default-commit-message="defaultCommitMessage"
         class="gl-ml-3"
         @apply="applySuggestion"
       />
-      <span v-else v-gl-tooltip.viewport="tooltipMessage" tabindex="0">
-        <gl-button
-          v-if="isLoggedIn"
-          class="btn-inverted js-apply-btn btn-grouped"
-          :disabled="isDisableButton"
-          variant="success"
-          @click="applySuggestion"
-        >
-          {{ __('Apply suggestion') }}
-        </gl-button>
-      </span>
     </div>
   </div>
 </template>

@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Infrastructure as code with Terraform and GitLab
+# Infrastructure as code with Terraform and GitLab **(FREE)**
 
 ## Motivation
 
@@ -26,6 +26,8 @@ variables:
   # If not using GitLab's HTTP backend, remove this line and specify TF_HTTP_* variables
   TF_STATE_NAME: default
   TF_CACHE_KEY: default
+  # If your terraform files are in a subdirectory, set TF_ROOT accordingly
+  # TF_ROOT: terraform/production
 ```
 
 This template uses `.latest.`, instead of stable, and may include breaking changes.
@@ -39,11 +41,20 @@ This template also includes some opinionated decisions, which you can override:
   [run the Terraform commands](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform/Base.latest.gitlab-ci.yml)
   `init`, `validate`, `plan`, `plan-json`, and `apply`. The `apply` command only runs on `master`.
 
+This video from January 2021 walks you through all the GitLab Terraform integration features:
+
+<div class="video-fallback">
+  See the video: <a href="https://www.youtube.com/watch?v=iGXjUrkkzDI">Terraform with GitLab</a>.
+</div>
+<figure class="video-container">
+  <iframe src="https://www.youtube.com/embed/iGXjUrkkzDI" frameborder="0" allowfullscreen="true"> </iframe>
+</figure>
+
 ## GitLab Managed Terraform state
 
-[Terraform remote backends](https://www.terraform.io/docs/backends/index.html)
+[Terraform remote backends](https://www.terraform.io/docs/language/settings/backends/index.html)
 enable you to store the state file in a remote, shared store. GitLab uses the
-[Terraform HTTP backend](https://www.terraform.io/docs/backends/types/http.html)
+[Terraform HTTP backend](https://www.terraform.io/docs/language/settings/backends/http.html)
 to securely store the state files in local storage (the default) or
 [the remote store of your choice](../../administration/terraform_state.md).
 

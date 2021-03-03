@@ -1,15 +1,15 @@
 <script>
+import { GlLabel, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { sortBy } from 'lodash';
 import { mapState } from 'vuex';
-import { GlLabel, GlTooltipDirective, GlIcon } from '@gitlab/ui';
-import issueCardInner from 'ee_else_ce/boards/mixins/issue_card_inner';
+import boardCardInner from 'ee_else_ce/boards/mixins/board_card_inner';
+import { isScopedLabel } from '~/lib/utils/common_utils';
 import { sprintf, __, n__ } from '~/locale';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import UserAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
+import boardsStore from '../stores/boards_store';
 import IssueDueDate from './issue_due_date.vue';
 import IssueTimeEstimate from './issue_time_estimate_deprecated.vue';
-import boardsStore from '../stores/boards_store';
-import { isScopedLabel } from '~/lib/utils/common_utils';
 
 export default {
   components: {
@@ -24,7 +24,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [issueCardInner],
+  mixins: [boardCardInner],
   inject: ['groupId', 'rootPath'],
   props: {
     issue: {
@@ -207,7 +207,7 @@ export default {
           />
           <issue-time-estimate v-if="issue.timeEstimate" :estimate="issue.timeEstimate" />
           <issue-card-weight
-            v-if="validIssueWeight"
+            v-if="validIssueWeight(issue)"
             :weight="issue.weight"
             @click="filterByWeight(issue.weight)"
           />

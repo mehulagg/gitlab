@@ -1,5 +1,5 @@
-import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import DuplicateDashboardForm from '~/monitoring/components/duplicate_dashboard_form.vue';
 
 import { dashboardGitResponse } from '../mock_data';
@@ -23,7 +23,7 @@ describe('DuplicateDashboardForm', () => {
     findByRef(ref).setValue(val);
   };
   const setChecked = (value) => {
-    const input = wrapper.find(`.form-check-input[value="${value}"]`);
+    const input = wrapper.find(`.custom-control-input[value="${value}"]`);
     input.element.checked = true;
     input.trigger('click');
     input.trigger('change');

@@ -6,6 +6,7 @@ import defaultState from 'ee/epic/store/state';
 import epicUtils from 'ee/epic/utils/epic_utils';
 
 import testAction from 'helpers/vuex_action_helper';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 import axios from '~/lib/utils/axios_utils';
 
 import { mockEpicMeta, mockEpicData } from '../mock_data';
@@ -216,7 +217,7 @@ describe('Epic Store Actions', () => {
       actions.triggerIssuableEvent({}, data);
 
       expect(epicUtils.triggerDocumentEvent).toHaveBeenCalledWith(
-        'issuable_vue_app:change',
+        EVENT_ISSUABLE_VUE_APP_CHANGE,
         data.isEpicOpen,
       );
 

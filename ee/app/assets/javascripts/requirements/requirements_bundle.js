@@ -1,7 +1,7 @@
-import Vue from 'vue';
-import VueApollo from 'vue-apollo';
 import { GlToast } from '@gitlab/ui';
 import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 

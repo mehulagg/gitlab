@@ -10,15 +10,17 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import produce from 'immer';
-import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
-import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
-import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES } from './constants';
+import { convertToSnakeCase } from '~/lib/utils/text_utility';
+import { joinPaths } from '~/lib/utils/url_utility';
+import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
+import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES, DOMAIN } from './constants';
 
 export default {
   PAGE_SIZE,
+  DOMAIN,
   i18n: {
     FIELDS,
     MESSAGES,
@@ -48,6 +50,7 @@ export default {
           firstPageSize: this.$options.PAGE_SIZE,
           projectPath: this.projectPath,
           sort: this.sort,
+          domain: this.$options.DOMAIN,
           ...this.filters,
         };
       },
@@ -127,6 +130,9 @@ export default {
     handleStatusUpdate() {
       this.$apollo.queries.alerts.refetch();
     },
+    alertDetailsUrl({ iid }) {
+      return joinPaths(window.location.pathname, 'alerts', iid);
+    },
   },
 };
 </script>
@@ -177,12 +183,19 @@ export default {
       </template>
 
       <template #cell(alertLabel)="{ item }">
-        <div
-          class="gl-word-break-all"
+        <gl-link
+          class="gl-word-break-all gl-text-body!"
           :title="`${item.iid} - ${item.title}`"
+          :href="alertDetailsUrl(item)"
           data-testid="threat-alerts-id"
         >
           {{ item.title }}
+        </gl-link>
+      </template>
+
+      <template #cell(eventCount)="{ item }">
+        <div data-testid="threat-alerts-event-count">
+          {{ item.eventCount }}
         </div>
       </template>
 

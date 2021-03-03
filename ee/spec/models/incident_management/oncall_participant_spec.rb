@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe IncidentManagement::OncallParticipant do
   let_it_be(:rotation) { create(:incident_management_oncall_rotation) }
   let_it_be(:user) { create(:user) }
+  let_it_be(:participant) { create(:incident_management_oncall_participant, rotation: rotation) }
 
   subject { build(:incident_management_oncall_participant, rotation: rotation, user: user) }
 
@@ -39,14 +40,26 @@ RSpec.describe IncidentManagement::OncallParticipant do
   end
 
   describe 'scopes' do
-    describe '.ordered_asc' do
-      let_it_be(:participant1) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-      let_it_be(:participant2) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-      let_it_be(:participant3) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
+    let_it_be(:removed_participant) { create(:incident_management_oncall_participant, :removed, rotation: rotation) }
 
-      subject { described_class.ordered_asc }
+    describe '.not_removed' do
+      subject { described_class.not_removed }
 
-      it { is_expected.to eq([participant1, participant2, participant3]) }
+      it { is_expected.to contain_exactly(participant) }
+    end
+
+    describe '.removed' do
+      subject { described_class.removed }
+
+      it { is_expected.to contain_exactly(removed_participant) }
+    end
+  end
+
+  describe '#mark_as_removed' do
+    subject { participant.mark_as_removed }
+
+    it 'updates is_removed to true' do
+      expect { subject }.to change { participant.reload.is_removed }.to(true)
     end
   end
 

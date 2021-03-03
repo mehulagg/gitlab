@@ -2,7 +2,6 @@
 
 module Types
   module AlertManagement
-    # rubocop: disable Graphql/AuthorizeTypes
     class PayloadAlertFieldInputType < BaseInputObject
       graphql_name 'AlertManagementPayloadAlertFieldInput'
       description 'Field that are available while modifying the custom mapping attributes for an HTTP integration'

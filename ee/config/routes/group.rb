@@ -11,6 +11,8 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       patch :override, on: :member
     end
 
+    resources :compliance_frameworks, only: [:new]
+
     get '/analytics', to: redirect('groups/%{group_id}/-/analytics/value_stream_analytics')
     resource :contribution_analytics, only: [:show]
 
@@ -26,14 +28,16 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
           member do
             get :duration_chart
             get :median
+            get :average
             get :records
           end
         end
-        resources :value_streams, only: [:index, :create, :destroy] do
+        resources :value_streams, only: [:index, :create, :update, :destroy] do
           resources :stages, only: [:index, :create, :update, :destroy] do
             member do
               get :duration_chart
               get :median
+              get :average
               get :records
             end
           end
@@ -137,6 +141,8 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         get :recent
       end
     end
+
+    resources :epic_boards, only: [:index, :show]
 
     namespace :security do
       resource :dashboard, only: [:show], controller: :dashboard

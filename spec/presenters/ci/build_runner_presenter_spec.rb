@@ -17,7 +17,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
   describe '#artifacts' do
     context "when option contains archive-type artifacts" do
-      let(:build) { create(:ci_build, options: { artifacts: archive } ) }
+      let(:build) { create(:ci_build, options: { artifacts: archive }) }
 
       it 'presents correct hash' do
         expect(presenter.artifacts.first).to include(archive_expectation)
@@ -249,7 +249,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
         it 'returns the correct refspecs' do
           is_expected.to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
-                                          "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
+                                         "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
         end
       end
     end
@@ -269,6 +269,30 @@ RSpec.describe Ci::BuildRunnerPresenter do
           .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                               "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
       end
+    end
+  end
+
+  describe '#variables' do
+    subject { presenter.variables }
+
+    let(:build) { create(:ci_build) }
+
+    it 'returns a Collection' do
+      is_expected.to be_an_instance_of(Gitlab::Ci::Variables::Collection)
+    end
+  end
+
+  describe '#runner_variables' do
+    subject { presenter.runner_variables }
+
+    let(:build) { create(:ci_build) }
+
+    it 'returns an array' do
+      is_expected.to be_an_instance_of(Array)
+    end
+
+    it 'returns the expected variables' do
+      is_expected.to eq(presenter.variables.to_runner_variables)
     end
   end
 end

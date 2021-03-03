@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import createStore from 'ee/vue_shared/dashboards/store';
 import DashboardComponent from 'ee/operations/components/dashboard/dashboard.vue';
+import createStore from 'ee/vue_shared/dashboards/store';
 
 // eslint-disable-next-line no-new
 new Vue({

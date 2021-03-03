@@ -1,10 +1,10 @@
 import { mount, shallowMount } from '@vue/test-utils';
+import { GRAPHQL } from '~/pipelines/components/graph/constants';
 import PipelineGraph from '~/pipelines/components/graph/graph_component.vue';
-import StageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
 import JobItem from '~/pipelines/components/graph/job_item.vue';
 import LinkedPipelinesColumn from '~/pipelines/components/graph/linked_pipelines_column.vue';
+import StageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
 import LinksLayer from '~/pipelines/components/graph_shared/links_layer.vue';
-import { GRAPHQL } from '~/pipelines/components/graph/constants';
 import {
   generateResponse,
   mockPipelineResponse,
@@ -20,6 +20,17 @@ describe('graph component', () => {
 
   const defaultProps = {
     pipeline: generateResponse(mockPipelineResponse, 'root/fungi-xoxo'),
+    configPaths: {
+      metricsPath: '',
+      graphqlResourceEtag: 'this/is/a/path',
+    },
+  };
+
+  const defaultData = {
+    measurements: {
+      width: 800,
+      height: 800,
+    },
   };
 
   const createComponent = ({
@@ -34,7 +45,10 @@ describe('graph component', () => {
         ...props,
       },
       data() {
-        return { ...data };
+        return {
+          ...defaultData,
+          ...data,
+        };
       },
       provide: {
         dataMethod: GRAPHQL,

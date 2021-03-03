@@ -14,8 +14,8 @@ describe('Subscription Details', () => {
   let wrapper;
 
   const availablePlans = [
-    { id: 'firstPlanId', code: 'bronze', price_per_year: 48 },
-    { id: 'secondPlanId', code: 'silver', price_per_year: 228 },
+    { id: 'firstPlanId', code: 'bronze', price_per_year: 48, name: 'bronze' },
+    { id: 'secondPlanId', code: 'silver', price_per_year: 228, name: 'silver' },
   ];
 
   const groupData = [

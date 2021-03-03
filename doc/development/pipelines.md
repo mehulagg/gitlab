@@ -1,12 +1,12 @@
 ---
 stage: none
-group: unassigned
+group: Engineering Productivity
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Pipelines for the GitLab project
 
-Pipelines for <https://gitlab.com/gitlab-org/gitlab> and <https://gitlab.com/gitlab-org/gitlab-foss> (as well as the
+Pipelines for [`gitlab-org/gitlab`](https://gitlab.com/gitlab-org/gitlab) and [`gitlab-org/gitlab-foss`](https://gitlab.com/gitlab-org/gitlab-foss) (as well as the
 `dev` instance's mirrors) are configured in the usual
 [`.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml)
 which itself includes files under
@@ -19,7 +19,7 @@ as much as possible.
 
 ## Overview
 
-Pipelines for the GitLab project are created using the [`workflow:rules` keyword](../ci/yaml/README.md#workflowrules)
+Pipelines for the GitLab project are created using the [`workflow:rules` keyword](../ci/yaml/README.md#workflow)
 feature of the GitLab CI/CD.
 
 Pipelines are always created for the following scenarios:
@@ -29,7 +29,7 @@ Pipelines are always created for the following scenarios:
 - Tags.
 - Stable, `auto-deploy`, and security branches.
 
-Pipeline creation is also affected by the following CI variables:
+Pipeline creation is also affected by the following CI/CD variables:
 
 - If `$FORCE_GITLAB_CI` is set, pipelines are created.
 - If `$GITLAB_INTERNAL` is not set, pipelines are not created.
@@ -37,14 +37,14 @@ Pipeline creation is also affected by the following CI variables:
 No pipeline is created in any other cases (for example, when pushing a branch with no
 MR for it).
 
-The source of truth for these workflow rules is defined in <https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml>.
+The source of truth for these workflow rules is defined in [`.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
 
 ### Pipelines for Merge Requests
 
 In general, pipelines for an MR fall into one or more of the following types,
 depending on the changes made in the MR:
 
-- [Docs-only MR pipeline](#docs-only-mr-pipeline): This is typically created for an MR that only changes documentation.
+- [Documentation only MR pipeline](#documentation-only-mr-pipeline): This is typically created for an MR that only changes documentation.
 - [Code-only MR pipeline](#code-only-mr-pipeline): This is typically created for an MR that only changes code, either backend or frontend.
 - [Frontend-only MR pipeline](#frontend-only-mr-pipeline): This is typically created for an MR that only changes frontend code.
 - [QA-only MR pipeline](#qa-only-mr-pipeline): This is typically created for an MR that only changes end to end tests related code.
@@ -53,23 +53,27 @@ We use the [`rules:`](../ci/yaml/README.md#rules) and [`needs:`](../ci/yaml/READ
 to determine the jobs that need to be run in a pipeline. Note that an MR that includes multiple types of changes would
 have a pipelines that include jobs from multiple types (e.g. a combination of docs-only and code-only pipelines).
 
-#### Docs-only MR pipeline
+#### Documentation only MR pipeline
 
-Reference pipeline: <https://gitlab.com/gitlab-org/gitlab/pipelines/135236627>
+[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/-/pipelines/250546928):
 
 ```mermaid
 graph LR
   subgraph "No needed jobs";
     1-1["danger-review (2.3 minutes)"];
     click 1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8100542&udv=0"
-    1-50["docs lint (9 minutes)"];
-    click 1-50 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356757&udv=0"
-  end
+    1-2["docs-lint markdown (1.5 minutes)"];
+    click 1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=10224335&udv=0"
+    1-3["docs-lint links (6 minutes)"];
+    click 1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356757&udv=0"
+    1-4["ui-docs-links lint (2.5 minutes)"];
+    click 1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=10823717&udv=1020379"
+   end
 ```
 
 #### Code-only MR pipeline
 
-Reference pipeline: <https://gitlab.com/gitlab-org/gitlab/pipelines/136295694>
+[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/pipelines/136295694)
 
 ```mermaid
 graph RL;
@@ -107,7 +111,7 @@ graph RL;
     class 1-6 criticalPath;
   end
 
-  2_1-1["graphql-reference-verify (5 minutes)"];
+  2_1-1["graphql-verify (4 minutes)"];
   click 2_1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356715&udv=0"
   2_1-2["memory-static (4.75 minutes)"];
   click 2_1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356721&udv=0"
@@ -173,7 +177,7 @@ graph RL;
 
 #### Frontend-only MR pipeline
 
-Reference pipeline: <https://gitlab.com/gitlab-org/gitlab/pipelines/134661039>
+[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/pipelines/134661039):
 
 ```mermaid
 graph RL;
@@ -212,7 +216,7 @@ graph RL;
     class 1-6 criticalPath;
   end
 
-  2_1-1["graphql-reference-verify (5 minutes)"];
+  2_1-1["graphql-verify (4 minutes)"];
   click 2_1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356715&udv=0"
   2_1-2["memory-static (4.75 minutes)"];
   click 2_1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356721&udv=0"
@@ -304,7 +308,7 @@ graph RL;
 
 #### QA-only MR pipeline
 
-Reference pipeline: <https://gitlab.com/gitlab-org/gitlab/pipelines/134645109>
+[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/pipelines/134645109):
 
 ```mermaid
 graph RL;
@@ -341,7 +345,7 @@ graph RL;
     class 1-5 criticalPath;
   end
 
-  2_1-1["graphql-reference-verify (5 minutes)"];
+  2_1-1["graphql-verify (4 minutes)"];
   click 2_1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356715&udv=0"
   subgraph "Needs `setup-test-env`";
     2_1-1 --> 1-6;
@@ -410,10 +414,10 @@ The `rspec fail-fast` is a no-op if there are more than 10 test files related to
 Merge Request. This prevents `rspec fail-fast` duration from exceeding the average
 `rspec` job duration and defeating its purpose.
 
-This number can be overridden by setting a CI variable named `RSPEC_FAIL_FAST_TEST_FILE_COUNT_THRESHOLD`.
+This number can be overridden by setting a CI/CD variable named `RSPEC_FAIL_FAST_TEST_FILE_COUNT_THRESHOLD`.
 
 NOTE:
-This experiment is only enabled when the CI variable `RSPEC_FAIL_FAST_ENABLED=true` is set.
+This experiment is only enabled when the CI/CD variable `RSPEC_FAIL_FAST_ENABLED=true` is set.
 
 #### Determining related test files in a Merge Request
 
@@ -422,7 +426,7 @@ We are using a custom mapping between source file to test files, maintained in t
 
 ### PostgreSQL versions testing
 
-Even though [Omnibus defaults to PG12 for new installs and upgrades](https://docs.gitlab.com/omnibus/package-information/postgresql_versions.md),
+Even though [Omnibus defaults to PG12 for new installs and upgrades](https://docs.gitlab.com/omnibus/package-information/postgresql_versions.html),
 our test suite is currently running against PG11, since GitLab.com still runs on PG11.
 
 We do run our test suite against PG12 on nightly scheduled pipelines as well as upon specific
@@ -493,6 +497,7 @@ request, be sure to start the `dont-interrupt-me` job before pushing.
 1. We currently have several different caches defined in
    [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/global.gitlab-ci.yml),
    with fixed keys:
+   - `.setup-test-env-cache`.
    - `.rails-cache`.
    - `.static-analysis-cache`.
    - `.coverage-cache`
@@ -500,6 +505,7 @@ request, be sure to start the `dont-interrupt-me` job before pushing.
    - `.yarn-cache`.
    - `.assets-compile-cache` (the key includes `${NODE_ENV}` so it's actually two different caches).
 1. Only 6 specific jobs, running in 2-hourly scheduled pipelines, are pushing (i.e. updating) to the caches:
+   - `update-setup-test-env-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-rails-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-static-analysis-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-coverage-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
@@ -525,8 +531,7 @@ several reasons:
 The pre-clone step works by using the `CI_PRE_CLONE_SCRIPT` variable
 [defined by GitLab.com shared runners](../user/gitlab_com/index.md#pre-clone-script).
 
-The `CI_PRE_CLONE_SCRIPT` is currently defined as a project CI/CD
-variable:
+The `CI_PRE_CLONE_SCRIPT` is currently defined as a project CI/CD variable:
 
 ```shell
 echo "Downloading archived master..."
@@ -584,8 +589,8 @@ runner, or [you can incur network egress charges](https://cloud.google.com/stora
 
 The current stages are:
 
-- `sync`: This stage is used to synchronize changes from <https://gitlab.com/gitlab-org/gitlab> to
-  <https://gitlab.com/gitlab-org/gitlab-foss>.
+- `sync`: This stage is used to synchronize changes from [`gitlab-org/gitlab`](https://gitlab.com/gitlab-org/gitlab) to
+  [`gitlab-org/gitlab-foss`](https://gitlab.com/gitlab-org/gitlab-foss).
 - `prepare`: This stage includes jobs that prepare artifacts that are needed by
   jobs in subsequent stages.
 - `build-images`: This stage includes jobs that prepare Docker images
@@ -614,7 +619,9 @@ that is deployed in stage `review`.
 
 The default image is defined in [`.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
 
+<!-- vale gitlab.Spelling = NO -->
 It includes Ruby, Go, Git, Git LFS, Chrome, Node, Yarn, PostgreSQL, and Graphics Magick.
+<!-- vale gitlab.Spelling = YES -->
 
 The images used in our pipelines are configured in the
 [`gitlab-org/gitlab-build-images`](https://gitlab.com/gitlab-org/gitlab-build-images)
@@ -624,11 +631,30 @@ for redundancy.
 The current version of the build images can be found in the
 ["Used by GitLab section"](https://gitlab.com/gitlab-org/gitlab-build-images/blob/master/.gitlab-ci.yml).
 
+### Dependency Proxy
+
+Some of the jobs are using images from Docker Hub, where we also use
+`${GITLAB_DEPENDENCY_PROXY}` as a prefix to the image path, so that we pull
+images from our [Dependency Proxy](../user/packages/dependency_proxy/index.md).
+
+`${GITLAB_DEPENDENCY_PROXY}` is a group CI/CD variable defined in
+[`gitlab-org`](https://gitlab.com/gitlab-org) as
+`${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/`. This means when we use an image
+defined as:
+
+```yaml
+image: ${GITLAB_DEPENDENCY_PROXY}alpine:edge
+```
+
+Projects in the `gitlab-org` group pull from the Dependency Proxy, while
+forks that reside on any other personal namespaces or groups fall back to
+Docker Hub unless `${GITLAB_DEPENDENCY_PROXY}` is also defined there.
+
 ### Default variables
 
-In addition to the [predefined variables](../ci/variables/predefined_variables.md),
+In addition to the [predefined CI/CD variables](../ci/variables/predefined_variables.md),
 each pipeline includes default variables defined in
-<https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml>.
+[`.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
 
 ### Common job definitions
 
@@ -640,6 +666,7 @@ that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-key
 |------------------|-------------|
 | `.default-retry` | Allows a job to [retry](../ci/yaml/README.md#retry) upon `unknown_failure`, `api_failure`, `runner_system_failure`, `job_execution_timeout`, or `stuck_or_timeout_failure`. |
 | `.default-before_script` | Allows a job to use a default `before_script` definition suitable for Ruby/Rails tasks that may need a database running (e.g. tests). |
+| `.setup-test-env-cache` | Allows a job to use a default `cache` definition suitable for setting up test environment for subsequent Ruby/Rails tasks. |
 | `.rails-cache` | Allows a job to use a default `cache` definition suitable for Ruby/Rails tasks. |
 | `.static-analysis-cache` | Allows a job to use a default `cache` definition suitable for static analysis tasks. |
 | `.coverage-cache` | Allows a job to use a default `cache` definition suitable for coverage tasks. |
@@ -651,7 +678,7 @@ that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-key
 | `.use-pg12` | Allows a job to use the `postgres:12` and `redis:4.0-alpine` services. |
 | `.use-pg12-ee` | Same as `.use-pg12` but also use the `docker.elastic.co/elasticsearch/elasticsearch:7.9.2` services. |
 | `.use-kaniko` | Allows a job to use the `kaniko` tool to build Docker images. |
-| `.as-if-foss` | Simulate the FOSS project by setting the `FOSS_ONLY='1'` environment variable. |
+| `.as-if-foss` | Simulate the FOSS project by setting the `FOSS_ONLY='1'` CI/CD variable. |
 | `.use-docker-in-docker` | Allows a job to use Docker in Docker. |
 
 ### `rules`, `if:` conditions and `changes:` patterns
@@ -659,7 +686,7 @@ that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-key
 We're using the [`rules` keyword](../ci/yaml/README.md#rules) extensively.
 
 All `rules` definitions are defined in
-<https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rules.gitlab-ci.yml>,
+[`rules.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rules.gitlab-ci.yml),
 then included in individual jobs via [`extends`](../ci/yaml/README.md#extends).
 
 The `rules` definitions are composed of `if:` conditions and `changes:` patterns,
@@ -676,13 +703,13 @@ and included in `rules` definitions via [YAML anchors](../ci/yaml/README.md#anch
 | `if-not-canonical-namespace`                                 | Matches if the project isn't in the canonical (`gitlab-org/`) or security (`gitlab-org/security`) namespace. | Use to create a job for forks (by using `when: on_success|manual`), or **not** create a job for forks (by using `when: never`). |
 | `if-not-ee`                                                  | Matches if the project isn't EE (i.e. project name isn't `gitlab` or `gitlab-ee`). | Use to create a job only in the FOSS project (by using `when: on_success|manual`), or **not** create a job if the project is EE (by using `when: never`). |
 | `if-not-foss`                                                | Matches if the project isn't FOSS (i.e. project name isn't `gitlab-foss`, `gitlab-ce`, or `gitlabhq`). | Use to create a job only in the EE project (by using `when: on_success|manual`), or **not** create a job if the project is FOSS (by using `when: never`). |
-| `if-default-refs`                                            | Matches if the pipeline is for `master`, `/^[\d-]+-stable(-ee)?$/` (stable branches), `/^\d+-\d+-auto-deploy-\d+$/` (auto-deploy branches), `/^security\//` (security branches), merge requests, and tags. | Note that jobs aren't created for branches with this default configuration. |
-| `if-master-refs`                                             | Matches if the current branch is `master`. | |
-| `if-master-push`                                             | Matches if the current branch is `master` and pipeline source is `push`. | |
-| `if-master-schedule-2-hourly`                                | Matches if the current branch is `master` and pipeline runs on a 2-hourly schedule. | |
-| `if-master-schedule-nightly`                                 | Matches if the current branch is `master` and pipeline runs on a nightly schedule. | |
+| `if-default-refs`                                            | Matches if the pipeline is for `master`, `main`, `/^[\d-]+-stable(-ee)?$/` (stable branches), `/^\d+-\d+-auto-deploy-\d+$/` (auto-deploy branches), `/^security\//` (security branches), merge requests, and tags. | Note that jobs aren't created for branches with this default configuration. |
+| `if-master-refs`                                             | Matches if the current branch is `master` or `main`. | |
+| `if-master-push`                                             | Matches if the current branch is `master` or `main` and pipeline source is `push`. | |
+| `if-master-schedule-2-hourly`                                | Matches if the current branch is `master` or `main` and pipeline runs on a 2-hourly schedule. | |
+| `if-master-schedule-nightly`                                 | Matches if the current branch is `master` or `main` and pipeline runs on a nightly schedule. | |
 | `if-auto-deploy-branches`                                    | Matches if the current branch is an auto-deploy one. | |
-| `if-master-or-tag`                                           | Matches if the pipeline is for the `master` branch or for a tag. | |
+| `if-master-or-tag`                                           | Matches if the pipeline is for the `master` or `main` branch or for a tag. | |
 | `if-merge-request`                                           | Matches if the pipeline is for a merge request. | |
 | `if-merge-request-title-as-if-foss`                          | Matches if the pipeline is for a merge request and the MR title includes "RUN AS-IF-FOSS". | |
 | `if-merge-request-title-update-caches`                       | Matches if the pipeline is for a merge request and the MR title includes "UPDATE CACHE". | |
@@ -691,14 +718,14 @@ and included in `rules` definitions via [YAML anchors](../ci/yaml/README.md#anch
 | `if-security-schedule`                                       | Matches if the pipeline is for a security scheduled pipeline. | |
 | `if-nightly-master-schedule`                                 | Matches if the pipeline is for a `master` scheduled pipeline with `$NIGHTLY` set. | |
 | `if-dot-com-gitlab-org-schedule`                             | Limits jobs creation to scheduled pipelines for the `gitlab-org` group on GitLab.com. | |
-| `if-dot-com-gitlab-org-master`                               | Limits jobs creation to the `master` branch for the `gitlab-org` group on GitLab.com. | |
+| `if-dot-com-gitlab-org-master`                               | Limits jobs creation to the `master` or `main` branch for the `gitlab-org` group on GitLab.com. | |
 | `if-dot-com-gitlab-org-merge-request`                        | Limits jobs creation to merge requests for the `gitlab-org` group on GitLab.com. | |
 | `if-dot-com-gitlab-org-and-security-tag`                     | Limits job creation to tags for the `gitlab-org` and `gitlab-org/security` groups on GitLab.com. | |
 | `if-dot-com-gitlab-org-and-security-merge-request`           | Limit jobs creation to merge requests for the `gitlab-org` and `gitlab-org/security` groups on GitLab.com. | |
 | `if-dot-com-gitlab-org-and-security-tag`                     | Limit jobs creation to tags for the `gitlab-org` and `gitlab-org/security` groups on GitLab.com. | |
 | `if-dot-com-ee-schedule`                                     | Limits jobs to scheduled pipelines for the `gitlab-org/gitlab` project on GitLab.com. | |
 | `if-cache-credentials-schedule`                              | Limits jobs to scheduled pipelines with the `$CI_REPO_CACHE_CREDENTIALS` variable set. | |
-| `if-rspec-fail-fast-disabled`                                | Limits jobs to pipelines with `$RSPEC_FAIL_FAST_ENABLED` variable not set to `"true"`. | |
+| `if-rspec-fail-fast-disabled`                                | Limits jobs to pipelines with `$RSPEC_FAIL_FAST_ENABLED` CI/CD variable not set to `"true"`. | |
 | `if-rspec-fail-fast-skipped`                                 | Matches if the pipeline is for a merge request and the MR title includes "SKIP RSPEC FAIL-FAST". | |
 | `if-security-pipeline-merge-result`                          | Matches if the pipeline is for a security merge request triggered by `@gitlab-release-tools-bot`. | |
 

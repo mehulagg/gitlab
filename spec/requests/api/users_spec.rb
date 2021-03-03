@@ -320,6 +320,18 @@ RSpec.describe API::Users do
         expect(json_response).to all(include('state' => /(blocked|ldap_blocked)/))
       end
 
+      it "returns an array of external users" do
+        create(:user)
+        external_user = create(:user, external: true)
+
+        get api("/users?external=true", user)
+
+        expect(response).to match_response_schema('public_api/v4/user/basics')
+        expect(response).to include_pagination_headers
+        expect(json_response.size).to eq(1)
+        expect(json_response[0]['id']).to eq(external_user.id)
+      end
+
       it "returns one user" do
         get api("/users?username=#{omniauth_user.username}", user)
 
@@ -652,6 +664,34 @@ RSpec.describe API::Users do
         expect(response).to match_response_schema('public_api/v4/user/basic')
         expect(json_response.keys).not_to include 'created_at'
       end
+
+      it "returns the `followers` field for public users" do
+        get api("/users/#{user.id}")
+
+        expect(response).to match_response_schema('public_api/v4/user/basic')
+        expect(json_response.keys).to include 'followers'
+      end
+
+      it "does not return the `followers` field for private users" do
+        get api("/users/#{private_user.id}")
+
+        expect(response).to match_response_schema('public_api/v4/user/basic')
+        expect(json_response.keys).not_to include 'followers'
+      end
+
+      it "returns the `following` field for public users" do
+        get api("/users/#{user.id}")
+
+        expect(response).to match_response_schema('public_api/v4/user/basic')
+        expect(json_response.keys).to include 'following'
+      end
+
+      it "does not return the `following` field for private users" do
+        get api("/users/#{private_user.id}")
+
+        expect(response).to match_response_schema('public_api/v4/user/basic')
+        expect(json_response.keys).not_to include 'following'
+      end
     end
 
     it "returns a 404 error if user id not found" do
@@ -684,6 +724,128 @@ RSpec.describe API::Users do
     context 'when finding the user by username (case insensitive)' do
       it_behaves_like 'rendering user status' do
         let(:path) { "/users/#{user.username.upcase}/status" }
+      end
+    end
+  end
+
+  describe 'POST /users/:id/follow' do
+    let(:followee) { create(:user) }
+
+    context 'on an unfollowed user' do
+      it 'follows the user' do
+        post api("/users/#{followee.id}/follow", user)
+
+        expect(user.followees).to contain_exactly(followee)
+        expect(response).to have_gitlab_http_status(:created)
+      end
+    end
+
+    context 'on a followed user' do
+      before do
+        user.follow(followee)
+      end
+
+      it 'does not change following' do
+        post api("/users/#{followee.id}/follow", user)
+
+        expect(user.followees).to contain_exactly(followee)
+        expect(response).to have_gitlab_http_status(:not_modified)
+      end
+    end
+  end
+
+  describe 'POST /users/:id/unfollow' do
+    let(:followee) { create(:user) }
+
+    context 'on a followed user' do
+      before do
+        user.follow(followee)
+      end
+
+      it 'unfollow the user' do
+        post api("/users/#{followee.id}/unfollow", user)
+
+        expect(user.followees).to be_empty
+        expect(response).to have_gitlab_http_status(:created)
+      end
+    end
+
+    context 'on an unfollowed user' do
+      it 'does not change following' do
+        post api("/users/#{followee.id}/unfollow", user)
+
+        expect(user.followees).to be_empty
+        expect(response).to have_gitlab_http_status(:not_modified)
+      end
+    end
+  end
+
+  describe 'GET /users/:id/followers' do
+    let(:follower) { create(:user) }
+
+    context 'user has followers' do
+      it 'lists followers' do
+        follower.follow(user)
+
+        get api("/users/#{user.id}/followers", user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to include_pagination_headers
+        expect(json_response).to be_an Array
+      end
+
+      it 'do not lists followers if profile is private' do
+        follower.follow(private_user)
+
+        get api("/users/#{private_user.id}/followers", user)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 User Not Found')
+      end
+    end
+
+    context 'user does not have any follower' do
+      it 'does list nothing' do
+        get api("/users/#{user.id}/followers", user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to include_pagination_headers
+        expect(json_response).to be_empty
+      end
+    end
+  end
+
+  describe 'GET /users/:id/following' do
+    let(:followee) { create(:user) }
+
+    context 'user has followers' do
+      it 'lists following user' do
+        user.follow(followee)
+
+        get api("/users/#{user.id}/following", user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to include_pagination_headers
+        expect(json_response).to be_an Array
+      end
+
+      it 'do not lists following user if profile is private' do
+        user.follow(private_user)
+
+        get api("/users/#{private_user.id}/following", user)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 User Not Found')
+      end
+    end
+
+    context 'user does not have any follower' do
+      it 'does list nothing' do
+        get api("/users/#{user.id}/following", user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to include_pagination_headers
+        expect(json_response).to be_empty
       end
     end
   end
@@ -788,6 +950,18 @@ RSpec.describe API::Users do
 
       expect(new_user).not_to eq(nil)
       expect(new_user.private_profile?).to eq(true)
+    end
+
+    it "creates user with view_diffs_file_by_file" do
+      post api('/users', admin), params: attributes_for(:user, view_diffs_file_by_file: true)
+
+      expect(response).to have_gitlab_http_status(:created)
+
+      user_id = json_response['id']
+      new_user = User.find(user_id)
+
+      expect(new_user).not_to eq(nil)
+      expect(new_user.user_preference.view_diffs_file_by_file?).to eq(true)
     end
 
     it "does not create user with invalid email" do
@@ -1102,6 +1276,13 @@ RSpec.describe API::Users do
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(user.reload.private_profile).to eq(true)
+    end
+
+    it "updates viewing diffs file by file" do
+      put api("/users/#{user.id}", admin), params: { view_diffs_file_by_file: true }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(user.reload.user_preference.view_diffs_file_by_file?).to eq(true)
     end
 
     it "updates private profile to false when nil is given" do
@@ -2565,7 +2746,7 @@ RSpec.describe API::Users do
           it 'does not approve a deactivated user' do
             expect { approve }.not_to change { deactivated_user.reload.state }
             expect(response).to have_gitlab_http_status(:conflict)
-            expect(json_response['message']).to eq('The user you are trying to approve is not pending an approval')
+            expect(json_response['message']).to eq('The user you are trying to approve is not pending approval')
           end
         end
 
@@ -2585,7 +2766,7 @@ RSpec.describe API::Users do
           it 'returns 201' do
             expect { approve }.not_to change { user.reload.state }
             expect(response).to have_gitlab_http_status(:conflict)
-            expect(json_response['message']).to eq('The user you are trying to approve is not pending an approval')
+            expect(json_response['message']).to eq('The user you are trying to approve is not pending approval')
           end
         end
 
@@ -2595,7 +2776,7 @@ RSpec.describe API::Users do
           it 'returns 403' do
             expect { approve }.not_to change { blocked_user.reload.state }
             expect(response).to have_gitlab_http_status(:conflict)
-            expect(json_response['message']).to eq('The user you are trying to approve is not pending an approval')
+            expect(json_response['message']).to eq('The user you are trying to approve is not pending approval')
           end
         end
 
@@ -2605,7 +2786,7 @@ RSpec.describe API::Users do
           it 'returns 403' do
             expect { approve }.not_to change { ldap_blocked_user.reload.state }
             expect(response).to have_gitlab_http_status(:conflict)
-            expect(json_response['message']).to eq('The user you are trying to approve is not pending an approval')
+            expect(json_response['message']).to eq('The user you are trying to approve is not pending approval')
           end
         end
 
@@ -2865,6 +3046,35 @@ RSpec.describe API::Users do
 
       expect(response).to have_gitlab_http_status(:success)
       expect(user.reload.status).to be_nil
+    end
+
+    context 'when clear_status_after is given' do
+      it 'sets the clear_status_at column' do
+        freeze_time do
+          expected_clear_status_at = 3.hours.from_now
+
+          put api('/user/status', user), params: { emoji: 'smirk', message: 'hello world', clear_status_after: '3_hours' }
+
+          expect(response).to have_gitlab_http_status(:success)
+          expect(user.status.reload.clear_status_at).to be_within(1.minute).of(expected_clear_status_at)
+          expect(Time.parse(json_response["clear_status_at"])).to be_within(1.minute).of(expected_clear_status_at)
+        end
+      end
+
+      it 'unsets the clear_status_at column' do
+        user.create_status!(clear_status_at: 5.hours.ago)
+
+        put api('/user/status', user), params: { emoji: 'smirk', message: 'hello world', clear_status_after: nil }
+
+        expect(response).to have_gitlab_http_status(:success)
+        expect(user.status.reload.clear_status_at).to be_nil
+      end
+
+      it 'raises error when unknown status value is given' do
+        put api('/user/status', user), params: { emoji: 'smirk', message: 'hello world', clear_status_after: 'wrong' }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+      end
     end
   end
 

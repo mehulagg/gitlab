@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Getting started with Auto DevOps
+# Getting started with Auto DevOps **(FREE)**
 
 This step-by-step guide helps you use [Auto DevOps](index.md) to
 deploy a project hosted on GitLab.com to Google Kubernetes Engine.
@@ -51,7 +51,7 @@ those projects provide a bare-bones application built on some well-known framewo
 
 1. Give your project a name, optionally a description, and make it public so that
    you can take advantage of the features available in the
-   [GitLab Gold plan](https://about.gitlab.com/pricing/#gitlab-com).
+   [GitLab Ultimate plan](https://about.gitlab.com/pricing/).
 
    ![Create project](img/guide_create_project_v12_3.png)
 
@@ -177,7 +177,7 @@ The jobs are separated into stages:
   - The `test` job runs unit and integration tests by detecting the language and
     framework ([Auto Test](stages.md#auto-test))
   - The `code_quality` job checks the code quality and is allowed to fail
-    ([Auto Code Quality](stages.md#auto-code-quality)) **(STARTER)**
+    ([Auto Code Quality](stages.md#auto-code-quality))
   - The `container_scanning` job checks the Docker container if it has any
     vulnerabilities and is allowed to fail ([Auto Container Scanning](stages.md#auto-container-scanning))
   - The `dependency_scanning` job checks if the application has any dependencies
@@ -222,7 +222,7 @@ you to common environment tasks:
 - **Terminal** (**{terminal}**) - Opens a [web terminal](../../ci/environments/index.md#web-terminals)
   session inside the container where the application is running
 - **Re-deploy to environment** (**{repeat}**) - For more information, see
-  [Retrying and rolling back](../../ci/environments/index.md#retrying-and-rolling-back)
+  [Retrying and rolling back](../../ci/environments/index.md#retry-or-roll-back-a-deployment)
 - **Stop environment** (**{stop}**) - For more information, see
   [Stopping an environment](../../ci/environments/index.md#stopping-an-environment)
 
@@ -234,8 +234,8 @@ takes you to the pod's logs page.
 
 NOTE:
 The example shows only one pod hosting the application at the moment, but you can add
-more pods by defining the [`REPLICAS` variable](customize.md#environment-variables)
-in **Settings > CI/CD > Environment variables**.
+more pods by defining the [`REPLICAS` CI/CD variable](customize.md#cicd-variables)
+in **Settings > CI / CD > Variables**.
 
 ### Work with branches
 
@@ -307,7 +307,7 @@ and customized to fit your workflow. Here are some helpful resources for further
 1. [Auto DevOps](index.md)
 1. [Multiple Kubernetes clusters](index.md#using-multiple-kubernetes-clusters)
 1. [Incremental rollout to production](customize.md#incremental-rollout-to-production) **(PREMIUM)**
-1. [Disable jobs you don't need with environment variables](customize.md#environment-variables)
+1. [Disable jobs you don't need with CI/CD variables](customize.md#cicd-variables)
 1. [Use a static IP for your cluster](../../user/clusters/applications.md#using-a-static-ip)
 1. [Use your own buildpacks to build your application](customize.md#custom-buildpacks)
 1. [Prometheus monitoring](../../user/project/integrations/prometheus.md)

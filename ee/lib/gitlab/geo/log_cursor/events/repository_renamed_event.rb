@@ -10,7 +10,7 @@ module Gitlab
           def process
             return unless event.project_id
 
-            job_id = rename_repository unless skippable?
+            job_id = rename_repository unless registry_exists?
             log_event(job_id)
           end
 
@@ -31,7 +31,7 @@ module Gitlab
               project_id: event.project_id,
               old_path: event.old_path_with_namespace,
               new_path: event.new_path_with_namespace,
-              skippable: skippable?,
+              skippable: registry_exists?,
               job_id: job_id)
           end
         end

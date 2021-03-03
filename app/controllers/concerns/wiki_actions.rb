@@ -36,8 +36,7 @@ module WikiActions
 
     # NOTE: We want to include wiki page views in the same counter as the other
     # Event-based wiki actions tracked through TrackUniqueEvents, so we use the same event name.
-    track_redis_hll_event :show, name: Gitlab::UsageDataCounters::TrackUniqueEvents::WIKI_ACTION.to_s,
-      feature: :track_unique_wiki_page_views, feature_default_enabled: true
+    track_redis_hll_event :show, name: Gitlab::UsageDataCounters::TrackUniqueEvents::WIKI_ACTION.to_s
 
     helper_method :view_file_button, :diff_file_html_data
 
@@ -113,10 +112,11 @@ module WikiActions
         wiki_page_path(wiki, page)
       )
     else
+      @error = response.message
       render 'shared/wikis/edit'
     end
   rescue WikiPage::PageChangedError, WikiPage::PageRenameError => e
-    @error = e
+    @error = e.message
     render 'shared/wikis/edit'
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables

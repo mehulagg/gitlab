@@ -1,4 +1,4 @@
-import { GlButton, GlSprintf } from '@gitlab/ui';
+import { GlButton, GlLink, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import UsageStatistics from 'ee/storage_counter/components/usage_statistics.vue';
 import UsageStatisticsCard from 'ee/storage_counter/components/usage_statistics_card.vue';
@@ -21,12 +21,15 @@ describe('Usage Statistics component', () => {
       stubs: {
         UsageStatisticsCard,
         GlSprintf,
+        GlLink,
       },
     });
   };
 
   const getStatisticsCards = () => wrapper.findAll(UsageStatisticsCard);
   const getStatisticsCard = (testId) => wrapper.find(`[data-testid="${testId}"]`);
+  const findGlLinkInCard = (cardName) =>
+    getStatisticsCard(cardName).find('[data-testid="statistics-card-footer"]').find(GlLink);
 
   describe('with purchaseStorageUrl passed', () => {
     beforeEach(() => {
@@ -43,24 +46,20 @@ describe('Usage Statistics component', () => {
       expect(getStatisticsCards()).toHaveLength(3);
     });
 
-    it('renders text in total usage card footer', () => {
-      expect(
-        getStatisticsCard('totalUsage').find('[data-testid="statisticsCardFooter"]').text(),
-      ).toMatchInterpolatedText(
-        'This is the total amount of storage used across your projects within this namespace.',
-      );
+    it('renders URL in total usage card footer', () => {
+      const url = findGlLinkInCard('total-usage');
+
+      expect(url.attributes('href')).toBe('/help/user/usage_quotas');
     });
 
-    it('renders text in excess usage card footer', () => {
-      expect(
-        getStatisticsCard('excessUsage').find('[data-testid="statisticsCardFooter"]').text(),
-      ).toMatchInterpolatedText(
-        'This is the total amount of storage used by projects above the free 978.8KiB storage limit.',
-      );
+    it('renders URL in excess usage card footer', () => {
+      const url = findGlLinkInCard('excess-usage');
+
+      expect(url.attributes('href')).toBe('/help/user/usage_quotas#excess-storage-usage');
     });
 
     it('renders button in purchased usage card footer', () => {
-      expect(getStatisticsCard('purchasedUsage').find(GlButton).exists()).toBe(true);
+      expect(getStatisticsCard('purchased-usage').find(GlButton).exists()).toBe(true);
     });
   });
 
@@ -70,8 +69,13 @@ describe('Usage Statistics component', () => {
         purchaseStorageUrl: null,
       });
     });
+
+    afterEach(() => {
+      wrapper.destroy();
+    });
+
     it('does not render purchased usage card if purchaseStorageUrl is not provided', () => {
-      expect(getStatisticsCard('purchasedUsage').exists()).toBe(false);
+      expect(getStatisticsCard('purchased-usage').exists()).toBe(false);
     });
   });
 });

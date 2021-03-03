@@ -31,9 +31,34 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
   end
 
   shared_examples 'deleting the project with pipeline and build' do
-    context 'with pipeline and build', :sidekiq_inline do # which has optimistic locking
+    context 'with pipeline and build related records', :sidekiq_inline do # which has optimistic locking
       let!(:pipeline) { create(:ci_pipeline, project: project) }
-      let!(:build) { create(:ci_build, :artifacts, pipeline: pipeline) }
+      let!(:build) { create(:ci_build, :artifacts, :with_runner_session, pipeline: pipeline) }
+      let!(:trace_chunks) { create(:ci_build_trace_chunk, build: build) }
+      let!(:job_variables) { create(:ci_job_variable, job: build) }
+      let!(:report_result) { create(:ci_build_report_result, build: build) }
+      let!(:pending_state) { create(:ci_build_pending_state, build: build) }
+
+      it 'deletes build related records' do
+        expect { destroy_project(project, user, {}) }.to change { Ci::Build.count }.by(-1)
+          .and change { Ci::BuildTraceChunk.count }.by(-1)
+          .and change { Ci::JobArtifact.count }.by(-2)
+          .and change { Ci::JobVariable.count }.by(-1)
+          .and change { Ci::BuildPendingState.count }.by(-1)
+          .and change { Ci::BuildReportResult.count }.by(-1)
+          .and change { Ci::BuildRunnerSession.count }.by(-1)
+      end
+
+      it 'avoids N+1 queries', skip: 'skipped until fixed in https://gitlab.com/gitlab-org/gitlab/-/issues/24644' do
+        recorder = ActiveRecord::QueryRecorder.new { destroy_project(project, user, {}) }
+
+        project = create(:project, :repository, namespace: user.namespace)
+        pipeline = create(:ci_pipeline, project: project)
+        builds = create_list(:ci_build, 3, :artifacts, pipeline: pipeline)
+        create_list(:ci_build_trace_chunk, 3, build: builds[0])
+
+        expect { destroy_project(project, project.owner, {}) }.not_to exceed_query_limit(recorder)
+      end
 
       it_behaves_like 'deleting the project'
     end
@@ -65,6 +90,12 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
 
     it 'invalidates personal_project_count cache' do
       expect(user).to receive(:invalidate_personal_projects_count)
+
+      destroy_project(project, user, {})
+    end
+
+    it 'performs cancel for project ci pipelines' do
+      expect(::Ci::AbortProjectPipelinesService).to receive_message_chain(:new, :execute).with(project)
 
       destroy_project(project, user, {})
     end

@@ -1,8 +1,8 @@
 <script>
-import { __ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import summaryStatsQuery from '../graphql/iteration_issues_summary.query.graphql';
+import { __ } from '~/locale';
 import { Namespace, Unit } from '../constants';
+import summaryStatsQuery from '../graphql/iteration_issues_summary.query.graphql';
 
 export default {
   apollo: {

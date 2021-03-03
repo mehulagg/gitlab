@@ -118,6 +118,10 @@ module EE
                 },
                 if: proc { License.current&.restricted_user_count? }
 
+      validates :git_two_factor_session_expiry,
+                presence: true,
+                numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 10080 }
+
       after_commit :update_personal_access_tokens_lifetime, if: :saved_change_to_max_personal_access_token_lifetime?
       after_commit :resume_elasticsearch_indexing
     end
@@ -151,7 +155,9 @@ module EE
           enforce_namespace_storage_limit: false,
           enforce_pat_expiration: true,
           geo_node_allowed_ips: '0.0.0.0/0, ::/0',
+          git_two_factor_session_expiry: 15,
           lock_memberships_to_ldap: false,
+          maintenance_mode: false,
           max_personal_access_token_lifetime: nil,
           mirror_capacity_threshold: Settings.gitlab['mirror_capacity_threshold'],
           mirror_max_capacity: Settings.gitlab['mirror_max_capacity'],
@@ -353,8 +359,7 @@ module EE
     end
 
     def should_apply_user_signup_cap?
-      ::Feature.enabled?(:admin_new_user_signups_cap, default_enabled: true ) &&
-        ::Gitlab::CurrentSettings.new_user_signups_cap.present?
+      ::Gitlab::CurrentSettings.new_user_signups_cap.present?
     end
 
     private

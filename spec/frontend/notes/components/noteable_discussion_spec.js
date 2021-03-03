@@ -1,13 +1,13 @@
-import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
-import mockDiffFile from 'jest/diffs/mock_data/diff_file';
+import { nextTick } from 'vue';
 import { trimText } from 'helpers/text_helper';
-import createStore from '~/notes/stores';
-import NoteableDiscussion from '~/notes/components/noteable_discussion.vue';
+import mockDiffFile from 'jest/diffs/mock_data/diff_file';
 import DiscussionNotes from '~/notes/components/discussion_notes.vue';
 import ReplyPlaceholder from '~/notes/components/discussion_reply_placeholder.vue';
 import ResolveWithIssueButton from '~/notes/components/discussion_resolve_with_issue_button.vue';
 import NoteForm from '~/notes/components/note_form.vue';
+import NoteableDiscussion from '~/notes/components/noteable_discussion.vue';
+import createStore from '~/notes/stores';
 import '~/behaviors/markdown/render_gfm';
 import {
   noteableDataMock,
@@ -65,7 +65,7 @@ describe('noteable_discussion component', () => {
       expect(wrapper.vm.isReplying).toEqual(false);
 
       const replyPlaceholder = wrapper.find(ReplyPlaceholder);
-      replyPlaceholder.vm.$emit('onClick');
+      replyPlaceholder.vm.$emit('focus');
       await nextTick();
 
       expect(wrapper.vm.isReplying).toEqual(true);

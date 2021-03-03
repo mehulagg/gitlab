@@ -1,6 +1,7 @@
 import { isNumber, isString } from 'lodash';
-import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __ } from '~/locale';
+import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
 import base from '~/vue_merge_request_widget/mixins/ready_to_merge';
 
 export const MERGE_DISABLED_TEXT_UNAPPROVED = __(
@@ -49,10 +50,17 @@ export default {
       }
       return __('Merge when pipeline succeeds');
     },
+    pipelineId() {
+      if (this.glFeatures.mergeRequestWidgetGraphql) {
+        return getIdFromGraphQLId(this.pipeline.id);
+      }
+
+      return this.pipeline.id;
+    },
     shouldRenderMergeTrainHelperText() {
       return (
         this.pipeline &&
-        isNumber(this.pipeline.id) &&
+        isNumber(this.pipelineId) &&
         isString(this.pipeline.path) &&
         this.preferredAutoMergeStrategy === MTWPS_MERGE_STRATEGY &&
         !this.stateData.autoMergeEnabled

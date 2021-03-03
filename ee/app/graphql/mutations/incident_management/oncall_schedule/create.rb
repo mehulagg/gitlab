@@ -4,7 +4,7 @@ module Mutations
   module IncidentManagement
     module OncallSchedule
       class Create < OncallScheduleBase
-        include ResolvesProject
+        include FindsProject
 
         graphql_name 'OncallScheduleCreate'
 
@@ -25,19 +25,13 @@ module Mutations
                  description: 'The timezone of the on-call schedule.'
 
         def resolve(args)
-          project = authorized_find!(full_path: args[:project_path])
+          project = authorized_find!(args[:project_path])
 
           response ::IncidentManagement::OncallSchedules::CreateService.new(
             project,
             current_user,
             args.slice(:name, :description, :timezone)
           ).execute
-        end
-
-        private
-
-        def find_object(full_path:)
-          resolve_project(full_path: full_path)
         end
       end
     end

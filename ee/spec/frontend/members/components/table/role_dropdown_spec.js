@@ -1,8 +1,8 @@
 import { GlDropdown } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import LdapDropdownItem from 'ee/members/components/ldap/ldap_dropdown_item.vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import { member } from 'jest/members/mock_data';
-import LdapDropdownItem from 'ee/members/components/ldap/ldap_dropdown_item.vue';
 import RoleDropdown from '~/members/components/table/role_dropdown.vue';
 
 describe('RoleDropdown', () => {

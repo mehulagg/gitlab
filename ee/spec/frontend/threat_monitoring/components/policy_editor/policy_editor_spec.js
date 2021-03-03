@@ -11,10 +11,10 @@ import {
 import fromYaml from 'ee/threat_monitoring/components/policy_editor/lib/from_yaml';
 import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
+import PolicyAlertPicker from 'ee/threat_monitoring/components/policy_editor/policy_alert_picker.vue';
 import PolicyEditorApp from 'ee/threat_monitoring/components/policy_editor/policy_editor.vue';
 import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
 import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
-import PolicyAlertPicker from 'ee/threat_monitoring/components/policy_editor/policy_alert_picker.vue';
 import createStore from 'ee/threat_monitoring/store';
 import { redirectTo } from '~/lib/utils/url_utility';
 
@@ -23,6 +23,25 @@ jest.mock('~/lib/utils/url_utility');
 describe('PolicyEditorApp component', () => {
   let store;
   let wrapper;
+  const l7manifest = `apiVersion: cilium.io/v2
+  kind: CiliumNetworkPolicy
+metadata:
+  name: limit-inbound-ip
+spec:
+  endpointSelector: {}
+  ingress:
+  - toPorts:
+    - ports:
+      - port: '80'
+        protocol: TCP
+      - port: '443'
+        protocol: TCP
+      rules:
+        http:
+        - headers:
+          - 'X-Forwarded-For: 192.168.1.1'
+    fromEntities:
+    - cluster`;
 
   const factory = ({ propsData, provide = {}, state, data } = {}) => {
     store = createStore();
@@ -38,6 +57,7 @@ describe('PolicyEditorApp component', () => {
     wrapper = shallowMount(PolicyEditorApp, {
       propsData: {
         threatMonitoringPath: '/threat-monitoring',
+        projectId: '21',
         ...propsData,
       },
       provide: {
@@ -124,6 +144,8 @@ kind: CiliumNetworkPolicy
 description: test description
 metadata:
   name: test-policy
+  labels:
+    app.gitlab.com/proj: '21'
 spec:
   endpointSelector:
     matchLabels:
@@ -147,7 +169,25 @@ spec:
             matchLabels: 'foo:bar',
           },
         ],
+        labels: { 'app.gitlab.com/proj': '21' },
       });
+    });
+
+    it('saves L7 policies', async () => {
+      factory({
+        data: () => ({
+          editorMode: EditorModeYAML,
+          yamlEditorValue: l7manifest,
+        }),
+      });
+      findSavePolicy().vm.$emit('click');
+
+      await wrapper.vm.$nextTick();
+      expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/createPolicy', {
+        environmentId: -1,
+        policy: { manifest: l7manifest },
+      });
+      expect(redirectTo).toHaveBeenCalledWith('/threat-monitoring');
     });
   });
 

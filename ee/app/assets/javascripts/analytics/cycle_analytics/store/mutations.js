@@ -1,6 +1,6 @@
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { transformRawStages, prepareStageErrors } from '../utils';
 import * as types from './mutation_types';
-import { transformRawStages } from '../utils';
 
 export default {
   [types.SET_FEATURE_FLAGS](state, featureFlags) {
@@ -67,7 +67,8 @@ export default {
     state.stages = [];
   },
   [types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages) {
-    state.stages = transformRawStages(stages);
+    const transformedStages = transformRawStages(stages);
+    state.stages = transformedStages.sort((a, b) => a?.id > b?.id);
   },
   [types.REQUEST_UPDATE_STAGE](state) {
     state.isLoading = true;
@@ -92,6 +93,7 @@ export default {
       createdBefore: endDate = null,
       selectedProjects = [],
       selectedValueStream = {},
+      defaultStageConfig = [],
     } = {},
   ) {
     state.isLoading = true;
@@ -100,6 +102,7 @@ export default {
     state.selectedValueStream = selectedValueStream;
     state.startDate = startDate;
     state.endDate = endDate;
+    state.defaultStageConfig = defaultStageConfig;
   },
   [types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS](state) {
     state.isLoading = false;
@@ -120,14 +123,29 @@ export default {
     state.isCreatingValueStream = true;
     state.createValueStreamErrors = {};
   },
-  [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { errors } = {}) {
+  [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { data: { stages = [] }, errors = {} }) {
+    const { stages: stageErrors = {}, ...rest } = errors;
+    state.createValueStreamErrors = { ...rest, stages: prepareStageErrors(stages, stageErrors) };
     state.isCreatingValueStream = false;
-    state.createValueStreamErrors = errors;
   },
   [types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS](state, valueStream) {
     state.isCreatingValueStream = false;
     state.createValueStreamErrors = {};
-    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream);
+    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream, { deep: true });
+  },
+  [types.REQUEST_UPDATE_VALUE_STREAM](state) {
+    state.isEditingValueStream = true;
+    state.createValueStreamErrors = {};
+  },
+  [types.RECEIVE_UPDATE_VALUE_STREAM_ERROR](state, { data: { stages = [] }, errors = {} }) {
+    const { stages: stageErrors = {}, ...rest } = errors;
+    state.createValueStreamErrors = { ...rest, stages: prepareStageErrors(stages, stageErrors) };
+    state.isEditingValueStream = false;
+  },
+  [types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS](state, valueStream) {
+    state.isEditingValueStream = false;
+    state.createValueStreamErrors = {};
+    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream, { deep: true });
   },
   [types.REQUEST_DELETE_VALUE_STREAM](state) {
     state.isDeletingValueStream = true;
@@ -143,7 +161,7 @@ export default {
     state.selectedValueStream = null;
   },
   [types.SET_SELECTED_VALUE_STREAM](state, valueStream) {
-    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream);
+    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream, { deep: true });
   },
   [types.REQUEST_VALUE_STREAMS](state) {
     state.isLoadingValueStreams = true;

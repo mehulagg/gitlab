@@ -15,7 +15,8 @@ RSpec.describe 'Create a Compliance Framework' do
       params: {
         name: 'GDPR',
         description: 'Example Description',
-        color: '#ABC123'
+        color: '#ABC123',
+        pipeline_configuration_full_path: '.compliance-gitlab-ci.yml@compliance/hipaa'
       }
     )
   end
@@ -31,12 +32,13 @@ RSpec.describe 'Create a Compliance Framework' do
       expect { subject }.to change { namespace.compliance_management_frameworks.count }.by 1
     end
 
-    it 'returns the newly created framework' do
+    it 'returns the newly created framework', :aggregate_failures do
       subject
 
       expect(mutation_response['framework']['color']).to eq '#ABC123'
       expect(mutation_response['framework']['name']).to eq 'GDPR'
       expect(mutation_response['framework']['description']).to eq 'Example Description'
+      expect(mutation_response['framework']['pipelineConfigurationFullPath']).to eq '.compliance-gitlab-ci.yml@compliance/hipaa'
     end
   end
 
@@ -51,7 +53,7 @@ RSpec.describe 'Create a Compliance Framework' do
 
   context 'feature is licensed' do
     before do
-      stub_licensed_features(custom_compliance_frameworks: true)
+      stub_licensed_features(custom_compliance_frameworks: true, evaluate_group_level_compliance_pipeline: true)
     end
 
     context 'feature is disabled' do

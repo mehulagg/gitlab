@@ -28,14 +28,14 @@ RSpec.describe Gitlab::ApplicationContext do
     end
 
     it 'falls back to a projects namespace plan when a project is passed but no namespace' do
-      create(:gitlab_subscription, :silver, namespace: project.namespace)
+      create(:gitlab_subscription, :premium, namespace: project.namespace)
       project.actual_plan_name
       context = described_class.new(project: project)
 
       expect(result(context))
         .to include(project: project.full_path,
                     root_namespace: project.full_path_components.first,
-                    subscription_plan: 'silver')
+                    subscription_plan: 'premium')
     end
   end
 

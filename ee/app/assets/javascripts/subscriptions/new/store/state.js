@@ -1,11 +1,11 @@
-import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { STEPS, TAX_RATE } from '../constants';
 
 const parsePlanData = (planData) =>
   JSON.parse(planData).map((plan) => ({
     value: plan.id,
-    text: capitalizeFirstCharacter(plan.code),
+    text: capitalizeFirstCharacter(plan.name),
     pricePerUserPerYear: plan.price_per_year,
   }));
 

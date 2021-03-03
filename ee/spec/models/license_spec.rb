@@ -71,7 +71,7 @@ RSpec.describe License do
         let(:new_license) do
           gl_license = build(
             :gitlab_license,
-            starts_at: Date.today,
+            starts_at: Date.current,
             restrictions: { active_user_count: 10, previous_user_count: previous_user_count }
           )
 
@@ -122,7 +122,7 @@ RSpec.describe License do
     describe "Historical active user count" do
       let(:active_user_count) { described_class.current.daily_billable_users_count + 10 }
       let(:date)              { described_class.current.starts_at }
-      let!(:historical_data)  { HistoricalData.create!(recorded_at: date, active_user_count: active_user_count) }
+      let!(:historical_data)  { create(:historical_data, recorded_at: date, active_user_count: active_user_count) }
 
       context "when there is no active user count restriction" do
         it "is valid" do
@@ -303,7 +303,7 @@ RSpec.describe License do
     describe 'downgrade' do
       context 'when more users were added in previous period' do
         before do
-          HistoricalData.create!(recorded_at: described_class.current.starts_at - 6.months, active_user_count: 15)
+          create(:historical_data, recorded_at: described_class.current.starts_at - 6.months, active_user_count: 15)
 
           set_restrictions(restricted_user_count: 5, previous_user_count: 10)
         end
@@ -315,7 +315,7 @@ RSpec.describe License do
 
       context 'when no users were added in the previous period' do
         before do
-          HistoricalData.create!(recorded_at: 6.months.ago, active_user_count: 15)
+          create(:historical_data, recorded_at: 6.months.ago, active_user_count: 15)
 
           set_restrictions(restricted_user_count: 10, previous_user_count: 15)
         end
@@ -350,6 +350,36 @@ RSpec.describe License do
           future_dated_license.destroy
 
           expect(Gitlab::SafeRequestStore.read(:future_dated_license)).to be_nil
+        end
+      end
+    end
+
+    describe '#reset_previous', :request_store do
+      let!(:previous_license) do
+        create(
+          :license,
+          data: create(:gitlab_license, starts_at: Date.new(1969, 1, 1), expires_at: Date.new(1969, 12, 31)).export)
+      end
+
+      before do
+        described_class.previous
+
+        expect(Gitlab::SafeRequestStore.read(:previous_license)).to be_present
+      end
+
+      context 'when a license is created' do
+        it 'deletes the previous_license value in Gitlab::SafeRequestStore' do
+          create(:license)
+
+          expect(Gitlab::SafeRequestStore.read(:previous_license)).to be_nil
+        end
+      end
+
+      context 'when a license is destroyed' do
+        it 'deletes the previous_license value in Gitlab::SafeRequestStore' do
+          previous_license.destroy
+
+          expect(Gitlab::SafeRequestStore.read(:previous_license)).to be_nil
         end
       end
     end
@@ -555,6 +585,62 @@ RSpec.describe License do
           future_dated_license = create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export)
 
           expect(described_class.future_dated).to eq(future_dated_license)
+        end
+      end
+    end
+
+    describe '.previous' do
+      before do
+        described_class.reset_previous
+      end
+
+      context 'when there is no license' do
+        it 'returns nil' do
+          allow(described_class).to receive(:last_hundred).and_return([])
+
+          expect(described_class.previous).to be_nil
+        end
+      end
+
+      context 'when the license is invalid' do
+        it 'returns nil' do
+          license = build(
+            :license,
+            data: build(:gitlab_license, starts_at: Date.new(1969, 1, 1), expires_at: Date.new(1969, 12, 31)).export
+          )
+
+          allow(described_class).to receive(:last_hundred).and_return([license])
+          allow(license).to receive(:valid?).and_return(false)
+
+          expect(described_class.previous).to be_nil
+        end
+      end
+
+      context 'when the license is valid' do
+        context 'when only a current and a future dated license exist' do
+          before do
+            create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export)
+          end
+
+          it 'returns nil' do
+            expect(described_class.previous).to be_nil
+          end
+        end
+
+        context 'when license is not a future dated or the current one' do
+          it 'returns the the previous license' do
+            previous_license = create(
+              :license,
+              data: create(:gitlab_license, starts_at: Date.new(2000, 1, 1), expires_at: Date.new(2000, 12, 31)).export
+            )
+            # create another license since the last uploaded license is considered the current one
+            create(
+              :license,
+              data: create(:gitlab_license, starts_at: Date.new(2001, 1, 1), expires_at: Date.new(2001, 12, 31)).export
+            )
+
+            expect(described_class.previous).to eq(previous_license)
+          end
         end
       end
     end
@@ -878,6 +964,150 @@ RSpec.describe License do
     end
   end
 
+  describe '#historical_data' do
+    subject(:historical_data_count) { license.historical_data.count }
+
+    let_it_be(:now) { DateTime.new(2014, 12, 15) }
+    let_it_be(:license) { create(:license, starts_at: Date.new(2014, 7, 1), expires_at: Date.new(2014, 12, 31)) }
+
+    before_all do
+      (1..12).each do |i|
+        create(:historical_data, recorded_at: Date.new(2014, i, 1), active_user_count: i * 100)
+      end
+
+      create(:historical_data, recorded_at: license.starts_at - 1.day, active_user_count: 1)
+      create(:historical_data, recorded_at: license.expires_at + 1.day, active_user_count: 2)
+      create(:historical_data, recorded_at: now - 1.year - 1.day, active_user_count: 3)
+      create(:historical_data, recorded_at: now + 1.day, active_user_count: 4)
+    end
+
+    around do |example|
+      travel_to(now) { example.run }
+    end
+
+    context 'with using parameters' do
+      it 'returns correct number of records within the given range' do
+        from = Date.new(2014, 8, 1)
+        to = Date.new(2014, 11, 30)
+
+        expect(license.historical_data(from: from, to: to).count).to eq(4)
+      end
+    end
+
+    context 'with a license that has a start and end date' do
+      it 'returns correct number of records within the license range' do
+        expect(historical_data_count).to eq(7)
+      end
+    end
+
+    context 'with a license that has no start date' do
+      let_it_be(:license) { create(:license, starts_at: nil, expires_at: Date.new(2014, 12, 31)) }
+
+      it 'returns correct number of records starting a year ago to license\s expiration date' do
+        expect(historical_data_count).to eq(14)
+      end
+    end
+
+    context 'with a license that has no end date' do
+      let_it_be(:license) { create(:license, starts_at: Date.new(2014, 7, 1), expires_at: nil) }
+
+      it 'returns correct number of records from the license\'s start date to today' do
+        expect(historical_data_count).to eq(6)
+      end
+    end
+  end
+
+  describe '#historical_max' do
+    subject(:historical_max) { license.historical_max }
+
+    let(:license) { create(:license, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month) }
+
+    context 'when using parameters' do
+      before do
+        (1..12).each do |i|
+          create(:historical_data, recorded_at: Date.new(2014, i, 1), active_user_count: i * 100)
+        end
+      end
+
+      it 'returns max user count for the given time range' do
+        from = Date.new(2014, 6, 1)
+        to = Date.new(2014, 9, 1)
+
+        expect(license.historical_max(from: from, to: to)).to eq(900)
+      end
+    end
+
+    context 'with different plans for the license' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:gl_plan, :expected_count) do
+        ::License::STARTER_PLAN  | 2
+        ::License::PREMIUM_PLAN  | 2
+        ::License::ULTIMATE_PLAN | 1
+      end
+
+      with_them do
+        let(:plan) { gl_plan }
+        let(:license) do
+          create(:license, plan: plan, starts_at: Date.current - 1.month, expires_at: Date.current + 1.month)
+        end
+
+        before do
+          license
+
+          create(:group_member, :guest)
+          create(:group_member, :reporter)
+
+          HistoricalData.track!
+        end
+
+        it 'does not count guest users' do
+          expect(historical_max).to eq(expected_count)
+        end
+      end
+    end
+
+    context 'with data inside and outside of the license period' do
+      before do
+        create(:historical_data, recorded_at: license.starts_at.ago(2.days), active_user_count: 20)
+        create(:historical_data, recorded_at: license.starts_at.in(2.days), active_user_count: 10)
+        create(:historical_data, recorded_at: license.starts_at.in(5.days), active_user_count: 15)
+        create(:historical_data, recorded_at: license.expires_at.in(2.days), active_user_count: 25)
+      end
+
+      it 'returns max value for active_user_count for within the license period only' do
+        expect(historical_max).to eq(15)
+      end
+    end
+
+    context 'when license has no start date' do
+      let(:license) { create(:license, starts_at: nil, expires_at: Date.current + 1.month) }
+
+      before do
+        create(:historical_data, recorded_at: Date.yesterday.ago(1.year), active_user_count: 15)
+        create(:historical_data, recorded_at: Date.current.ago(1.year), active_user_count: 12)
+        create(:historical_data, recorded_at: license.expires_at.ago(2.days), active_user_count: 10)
+      end
+
+      it 'returns max value for active_user_count from up to a year ago' do
+        expect(historical_max).to eq(12)
+      end
+    end
+
+    context 'when license has no expiration date' do
+      let(:license) { create(:license, starts_at: Date.current.ago(1.month), expires_at: nil) }
+
+      before do
+        create(:historical_data, recorded_at: license.starts_at.in(2.days), active_user_count: 10)
+        create(:historical_data, recorded_at: Date.tomorrow, active_user_count: 15)
+      end
+
+      it 'returns max value for active_user_count until today' do
+        expect(historical_max).to eq(10)
+      end
+    end
+  end
+
   describe '#maximum_user_count' do
     let(:now) { Date.current }
 
@@ -892,28 +1122,28 @@ RSpec.describe License do
     end
 
     it 'returns the billable users count' do
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 2)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 2)
 
       expect(license.maximum_user_count).to eq(2)
     end
 
     it 'returns the daily billable users count when it is higher than historical data' do
       create(:historical_data, active_user_count: 50)
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 100)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 100)
 
       expect(license.maximum_user_count).to eq(100)
     end
 
     it 'returns historical data when it is higher than the billable users count' do
       create(:historical_data, active_user_count: 100)
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 50)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 50)
 
       expect(license.maximum_user_count).to eq(100)
     end
 
     it 'returns the correct value when historical data and billable users are equal' do
       create(:historical_data, active_user_count: 100)
-      create(:instance_statistics_measurement, identifier: :billable_users, count: 100)
+      create(:usage_trends_measurement, identifier: :billable_users, count: 100)
 
       expect(license.maximum_user_count).to eq(100)
     end
@@ -927,9 +1157,9 @@ RSpec.describe License do
     end
 
     it 'uses only the most recent billable users entry' do
-      create(:instance_statistics_measurement, recorded_at: license.expires_at - 3.months, identifier: :billable_users, count: 150)
+      create(:usage_trends_measurement, recorded_at: license.expires_at - 3.months, identifier: :billable_users, count: 150)
       create(:historical_data, recorded_at: license.expires_at - 3.months, active_user_count: 140)
-      create(:instance_statistics_measurement, recorded_at: license.expires_at - 2.months, identifier: :billable_users, count: 100)
+      create(:usage_trends_measurement, recorded_at: license.expires_at - 2.months, identifier: :billable_users, count: 100)
 
       expect(license.maximum_user_count).to eq(140)
     end
@@ -999,9 +1229,9 @@ RSpec.describe License do
           gl_license.expires_at = Date.tomorrow
         end
 
-        it 'returns nil' do
-          updated = license.update_trial_setting
-          expect(updated).to be_nil
+        it 'does nothing' do
+          license.save
+
           expect(ApplicationSetting.current.license_trial_ends_on).to be_nil
         end
       end
@@ -1018,10 +1248,9 @@ RSpec.describe License do
           expect(described_class.eligible_for_trial?).to be_truthy
         end
 
-        it 'updates the trial setting' do
-          updated = license.update_trial_setting
+        it 'updates the trial setting during create' do
+          license.save
 
-          expect(updated).to be_truthy
           expect(described_class.eligible_for_trial?).to be_falsey
           expect(ApplicationSetting.current.license_trial_ends_on).to eq(tomorrow)
         end
@@ -1037,8 +1266,8 @@ RSpec.describe License do
         end
 
         it 'does not update existing trial setting' do
-          updated = license.update_trial_setting
-          expect(updated).to be_falsey
+          license.save
+
           expect(ApplicationSetting.current.license_trial_ends_on).to eq(yesterday)
         end
 

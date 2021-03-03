@@ -2,25 +2,28 @@
 
 module IncidentManagement
   module OncallRotations
-    class CreateService
+    class CreateService < OncallRotations::BaseService
       MAXIMUM_PARTICIPANTS = 100
 
       # @param schedule [IncidentManagement::OncallSchedule]
       # @param project [Project]
-      # @param current_user [User]
+      # @param user [User]
       # @param params [Hash<Symbol,Any>]
       # @param params - name [String] The name of the on-call rotation.
       # @param params - length [Integer] The length of the rotation.
       # @param params - length_unit [String] The unit of the rotation length. (One of 'hours', days', 'weeks')
       # @param params - starts_at [DateTime] The datetime the rotation starts on.
+      # @param params - ends_at [DateTime] The datetime the rotation ends on.
+      # @param params - active_period_start [String] The time the on-call shifts should start, for example: "08:00"
+      # @param params - active_period_end [String] The time the on-call shifts should end, for example: "17:00"
       # @param params - participants [Array<hash>] An array of hashes defining participants of the on-call rotations.
       # @option opts  - participant [User] The user who is part of the rotation
       # @option opts  - color_palette [String] The color palette to assign to the on-call user, for example: "blue".
       # @option opts  - color_weight [String] The color weight to assign to for the on-call user, for example "500". Max 4 chars.
-      def initialize(schedule, project, current_user, params)
+      def initialize(schedule, project, user, params)
         @schedule = schedule
         @project = project
-        @current_user = current_user
+        @user = user
         @rotation_params = params.except(:participants)
         @participants_params = Array(params[:participants])
       end
@@ -49,15 +52,7 @@ module IncidentManagement
 
       private
 
-      attr_reader :schedule, :project, :current_user, :rotation_params, :participants_params
-
-      def allowed?
-        Ability.allowed?(current_user, :admin_incident_management_oncall_schedule, project)
-      end
-
-      def available?
-        ::Gitlab::IncidentManagement.oncall_schedules_available?(project)
-      end
+      attr_reader :schedule, :project, :user, :rotation_params, :participants_params
 
       def duplicated_users?
         users = participants_params.map { |participant| participant[:user] }
@@ -98,14 +93,6 @@ module IncidentManagement
         OncallParticipant.insert_all(participant_rows(participants))
       end
 
-      def error(message)
-        ServiceResponse.error(message: message)
-      end
-
-      def success(oncall_rotation)
-        ServiceResponse.success(payload: { oncall_rotation: oncall_rotation })
-      end
-
       def error_participant_has_no_permission
         error('A participant has insufficient permissions to access the project')
       end
@@ -120,10 +107,6 @@ module IncidentManagement
 
       def error_no_permissions
         error(_('You have insufficient permissions to create an on-call rotation for this project'))
-      end
-
-      def error_no_license
-        error(_('Your license does not support on-call rotations'))
       end
 
       def error_in_validation(object)

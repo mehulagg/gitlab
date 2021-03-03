@@ -18,7 +18,7 @@ module EE
       end
 
       condition(:export_user_permissions_available) do
-        ::License.feature_available?(:export_user_permissions) && ::Feature.enabled?(:export_user_permissions_feature_flag)
+        ::License.feature_available?(:export_user_permissions)
       end
 
       rule { ~anonymous & operations_dashboard_available }.enable :read_operations_dashboard
@@ -28,6 +28,7 @@ module EE
         enable :destroy_licenses
         enable :read_all_geo
         enable :manage_devops_adoption_segments
+        enable :manage_subscription
       end
 
       rule { admin & pages_size_limit_available }.enable :update_max_pages_size

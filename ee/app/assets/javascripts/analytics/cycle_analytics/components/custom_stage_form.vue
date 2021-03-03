@@ -1,6 +1,4 @@
 <script>
-import { mapGetters, mapState } from 'vuex';
-import { isEqual } from 'lodash';
 import {
   GlLoadingIcon,
   GlDropdown,
@@ -9,12 +7,15 @@ import {
   GlSprintf,
   GlButton,
 } from '@gitlab/ui';
+import { isEqual } from 'lodash';
+import Vue from 'vue';
+import { mapGetters, mapState } from 'vuex';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
-import CustomStageFormFields from './create_value_stream_form/custom_stage_fields.vue';
-import { validateStage, initializeFormData } from './create_value_stream_form/utils';
-import { defaultFields, ERRORS, I18N } from './create_value_stream_form/constants';
 import { STAGE_ACTIONS } from '../constants';
 import { getAllowedEndEvents, getLabelEventsIdentifiers, isLabelEvent } from '../utils';
+import { defaultFields, ERRORS, i18n } from './create_value_stream_form/constants';
+import CustomStageFormFields from './create_value_stream_form/custom_stage_fields.vue';
+import { validateStage, initializeFormData } from './create_value_stream_form/utils';
 
 export default {
   components: {
@@ -98,10 +99,10 @@ export default {
       return !endEvents.length || !endEvents.includes(endEventIdentifier);
     },
     saveStageText() {
-      return this.isEditingCustomStage ? I18N.BTN_UPDATE_STAGE : I18N.BTN_ADD_STAGE;
+      return this.isEditingCustomStage ? i18n.BTN_UPDATE_STAGE : i18n.BTN_ADD_STAGE;
     },
     formTitle() {
-      return this.isEditingCustomStage ? I18N.TITLE_EDIT_STAGE : I18N.TITLE_ADD_STAGE;
+      return this.isEditingCustomStage ? i18n.TITLE_EDIT_STAGE : i18n.TITLE_ADD_STAGE;
     },
     hasHiddenStages() {
       return this.hiddenStages.length;
@@ -155,7 +156,7 @@ export default {
     handleRecoverStage(id) {
       this.$emit(STAGE_ACTIONS.UPDATE, { id, hidden: false });
     },
-    handleUpdateFields(field, value) {
+    handleUpdateFields({ field, value }) {
       this.fields = { ...this.fields, [field]: value };
 
       const newErrors = validateStage({ ...this.fields, custom: true });
@@ -163,10 +164,10 @@ export default {
         this.fields.startEventIdentifier && this.eventMismatchError
           ? [ERRORS.INVALID_EVENT_PAIRS]
           : newErrors.endEventIdentifier;
-      this.errors = { ...this.errors, ...newErrors };
+      Vue.set(this, 'errors', newErrors);
     },
   },
-  I18N,
+  i18n,
 };
 </script>
 <template>
@@ -177,12 +178,12 @@ export default {
     <div class="gl-mb-1 gl-display-flex gl-justify-content-space-between gl-align-items-center">
       <h4>{{ formTitle }}</h4>
       <gl-dropdown
-        :text="$options.I18N.RECOVER_HIDDEN_STAGE"
+        :text="$options.i18n.RECOVER_HIDDEN_STAGE"
         data-testid="recover-hidden-stage-dropdown"
         right
       >
         <gl-dropdown-section-header>{{
-          $options.I18N.RECOVER_STAGE_TITLE
+          $options.i18n.RECOVER_STAGE_TITLE
         }}</gl-dropdown-section-header>
         <template v-if="hasHiddenStages">
           <gl-dropdown-item
@@ -192,15 +193,17 @@ export default {
             >{{ stage.title }}</gl-dropdown-item
           >
         </template>
-        <p v-else class="gl-mx-5 gl-my-3">{{ $options.I18N.RECOVER_STAGES_VISIBLE }}</p>
+        <p v-else class="gl-mx-5 gl-my-3">{{ $options.i18n.RECOVER_STAGES_VISIBLE }}</p>
       </gl-dropdown>
     </div>
     <custom-stage-form-fields
-      :fields="fields"
-      :label-events="labelEvents"
+      :index="0"
+      :total-stages="1"
+      :stage="fields"
       :errors="errors"
-      :events="events"
-      @update="handleUpdateFields"
+      :stage-events="events"
+      @input="handleUpdateFields"
+      @select-label="({ field, value }) => handleUpdateFields({ field, value })"
     />
     <div>
       <gl-button
@@ -209,7 +212,7 @@ export default {
         data-testid="cancel-custom-stage"
         @click="handleCancel"
       >
-        {{ $options.I18N.BTN_CANCEL }}
+        {{ $options.i18n.BTN_CANCEL }}
       </gl-button>
       <gl-button
         :disabled="!isComplete || !isDirty"

@@ -6,7 +6,7 @@ module Types
 
     field :report, Types::TimeboxReportType, null: true,
           resolver: ::Resolvers::TimeboxReportResolver,
-          description: 'Historically accurate report about the timebox',
+          description: 'Historically accurate report about the timebox.',
           complexity: 175
   end
 end

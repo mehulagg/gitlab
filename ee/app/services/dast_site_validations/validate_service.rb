@@ -24,8 +24,7 @@ module DastSiteValidations
     private
 
     def allowed?
-      container.feature_available?(:security_on_demand_scans) &&
-        Feature.enabled?(:security_on_demand_scans_site_validation, container, default_enabled: :yaml)
+      container.feature_available?(:security_on_demand_scans)
     end
 
     def dast_site_validation
@@ -41,7 +40,7 @@ module DastSiteValidations
 
       case dast_site_validation.validation_strategy
       when 'text_file'
-        response.content_type == 'text/plain' && response.body == token
+        response.content_type == 'text/plain' && response.body.rstrip == token
       when 'header'
         response.headers[DastSiteValidation::HEADER] == token
       else

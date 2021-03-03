@@ -21,7 +21,7 @@ RSpec.describe GitlabSchema.types['Query'] do
       user
       users
       issue
-      instance_statistics_measurements
+      usage_trends_measurements
       runner_platforms
     ]
 
@@ -65,11 +65,11 @@ RSpec.describe GitlabSchema.types['Query'] do
     end
   end
 
-  describe 'instance_statistics_measurements field' do
-    subject { described_class.fields['instanceStatisticsMeasurements'] }
+  describe 'usage_trends_measurements field' do
+    subject { described_class.fields['usageTrendsMeasurements'] }
 
-    it 'returns instance statistics measurements' do
-      is_expected.to have_graphql_type(Types::Admin::Analytics::InstanceStatistics::MeasurementType.connection_type)
+    it 'returns usage trends measurements' do
+      is_expected.to have_graphql_type(Types::Admin::Analytics::UsageTrends::MeasurementType.connection_type)
     end
   end
 
@@ -95,9 +95,9 @@ RSpec.describe GitlabSchema.types['Query'] do
     it { is_expected.to have_graphql_type(Types::ContainerRepositoryDetailsType) }
   end
 
-  describe 'package_composer_details field' do
-    subject { described_class.fields['packageComposerDetails'] }
+  describe 'package field' do
+    subject { described_class.fields['package'] }
 
-    it { is_expected.to have_graphql_type(Types::Packages::Composer::DetailsType) }
+    it { is_expected.to have_graphql_type(Types::Packages::PackageType) }
   end
 end

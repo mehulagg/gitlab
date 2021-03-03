@@ -1,0 +1,17 @@
+---
+key_path: usage_activity_by_stage.secure.user_dependency_scanning_jobs
+description: no idea, Count of Dependency Scanning jobs run, it implies user but AFAIK
+  we don't track per user
+product_section: sec
+product_stage: secure
+product_group: group::composition analysis
+product_category: dependency_scanning
+value_type: number
+status: data_available
+time_frame: all
+data_source:
+distribution:
+- ee
+tier:
+- ultimate
+skip_validation: true

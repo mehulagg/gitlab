@@ -5,13 +5,12 @@ Gitlab::Seeder.quiet do
 
   next if groups.empty?
 
-  segment_groups_1 = groups.sample(2)
-  segment_groups_2 = groups.sample(3)
+  groups = groups.sample(2)
 
   ActiveRecord::Base.transaction do
     segments = [
-      Analytics::DevopsAdoption::Segment.create(name: 'Segment 1', groups: segment_groups_1),
-      Analytics::DevopsAdoption::Segment.create(name: 'Segment 2', groups: segment_groups_2)
+      Analytics::DevopsAdoption::Segment.create(namespace: groups.first),
+      Analytics::DevopsAdoption::Segment.create(namespace: groups.last)
     ]
 
     if segments.any?(&:invalid?)

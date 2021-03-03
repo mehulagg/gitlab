@@ -133,6 +133,10 @@ class MergeRequestWidgetEntity < Grape::Entity
     help_page_path('user/application_security/index.md', anchor: 'viewing-security-scan-information-in-merge-requests')
   end
 
+  expose :enabled_reports do |merge_request|
+    merge_request.enabled_reports
+  end
+
   private
 
   delegate :current_user, to: :request
@@ -153,7 +157,7 @@ class MergeRequestWidgetEntity < Grape::Entity
   end
 
   def use_merge_base_with_merged_results?
-    object.actual_head_pipeline&.merge_request_event_type == :merged_result
+    object.actual_head_pipeline&.merged_result_pipeline?
   end
 
   def head_pipeline_downloadable_path_for_report_type(file_type)

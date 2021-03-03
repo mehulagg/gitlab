@@ -1,5 +1,4 @@
 <script>
-import { throttle } from 'lodash';
 import {
   GlLoadingIcon,
   GlSearchBoxByType,
@@ -9,15 +8,17 @@ import {
   GlDropdownItem,
   GlModalDirective,
 } from '@gitlab/ui';
+import { throttle } from 'lodash';
 
-import httpStatusCodes from '~/lib/utils/http_status';
+import BoardForm from 'ee_else_ce/boards/components/board_form.vue';
 
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import projectQuery from '../graphql/project_boards.query.graphql';
-import groupQuery from '../graphql/group_boards.query.graphql';
+import axios from '~/lib/utils/axios_utils';
+import httpStatusCodes from '~/lib/utils/http_status';
 
-import boardsStore from '../stores/boards_store';
-import BoardForm from './board_form.vue';
+import eventHub from '../eventhub';
+import groupQuery from '../graphql/group_boards.query.graphql';
+import projectQuery from '../graphql/project_boards.query.graphql';
 
 const MIN_BOARDS_TO_VIEW_RECENT = 10;
 
@@ -35,6 +36,7 @@ export default {
   directives: {
     GlModalDirective,
   },
+  inject: ['fullPath', 'recentBoardsEndpoint'],
   props: {
     currentBoard: {
       type: Object,
@@ -99,12 +101,11 @@ export default {
       scrollFadeInitialized: false,
       boards: [],
       recentBoards: [],
-      state: boardsStore.state,
       throttledSetScrollFade: throttle(this.setScrollFade, this.throttleDuration),
       contentClientHeight: 0,
       maxPosition: 0,
-      store: boardsStore,
       filterTerm: '',
+      currentPage: '',
     };
   },
   computed: {
@@ -114,16 +115,16 @@ export default {
     loading() {
       return this.loadingRecentBoards || Boolean(this.loadingBoards);
     },
-    currentPage() {
-      return this.state.currentPage;
-    },
     filteredBoards() {
       return this.boards.filter((board) =>
         board.name.toLowerCase().includes(this.filterTerm.toLowerCase()),
       );
     },
     board() {
-      return this.state.currentBoard;
+      return this.currentBoard;
+    },
+    showCreate() {
+      return this.multipleIssueBoardsAvailable;
     },
     showDelete() {
       return this.boards.length > 1;
@@ -148,11 +149,29 @@ export default {
     },
   },
   created() {
-    boardsStore.setCurrentBoard(this.currentBoard);
+    eventHub.$on('showBoardModal', this.showPage);
+  },
+  beforeDestroy() {
+    eventHub.$off('showBoardModal', this.showPage);
   },
   methods: {
     showPage(page) {
-      boardsStore.showPage(page);
+      this.currentPage = page;
+    },
+    cancel() {
+      this.showPage('');
+    },
+    boardUpdate(data) {
+      if (!data?.[this.parentType]) {
+        return [];
+      }
+      return data[this.parentType].boards.edges.map(({ node }) => ({
+        id: getIdFromGraphQLId(node.id),
+        name: node.name,
+      }));
+    },
+    boardQuery() {
+      return this.groupId ? groupQuery : projectQuery;
     },
     loadBoards(toggleDropdown = true) {
       if (toggleDropdown && this.boards.length > 0) {
@@ -161,26 +180,21 @@ export default {
 
       this.$apollo.addSmartQuery('boards', {
         variables() {
-          return { fullPath: this.state.endpoints.fullPath };
+          return { fullPath: this.fullPath };
         },
-        query() {
-          return this.groupId ? groupQuery : projectQuery;
-        },
+        query: this.boardQuery,
         loadingKey: 'loadingBoards',
-        update(data) {
-          if (!data?.[this.parentType]) {
-            return [];
-          }
-          return data[this.parentType].boards.edges.map(({ node }) => ({
-            id: getIdFromGraphQLId(node.id),
-            name: node.name,
-          }));
-        },
+        update: this.boardUpdate,
       });
 
+      this.loadRecentBoards();
+    },
+    loadRecentBoards() {
       this.loadingRecentBoards = true;
-      boardsStore
-        .recentBoards()
+      // Follow up to fetch recent boards using GraphQL
+      // https://gitlab.com/gitlab-org/gitlab/-/issues/300985
+      axios
+        .get(this.recentBoardsEndpoint)
         .then((res) => {
           this.recentBoards = res.data;
         })
@@ -316,7 +330,7 @@ export default {
           <gl-dropdown-divider />
 
           <gl-dropdown-item
-            v-if="multipleIssueBoardsAvailable"
+            v-if="showCreate"
             v-gl-modal-directive="'board-config-modal'"
             data-qa-selector="create_new_board_button"
             @click.prevent="showPage('new')"
@@ -346,6 +360,8 @@ export default {
         :weights="weights"
         :enable-scoped-labels="enabledScopedLabels"
         :current-board="currentBoard"
+        :current-page="currentPage"
+        @cancel="cancel"
       />
     </span>
   </div>

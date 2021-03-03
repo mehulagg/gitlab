@@ -1,6 +1,10 @@
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { s__ } from '~/locale';
 
+import { EXTEND_AS } from '../constants';
+import epicChildEpics from '../queries/epicChildEpics.query.graphql';
+import groupEpics from '../queries/groupEpics.query.graphql';
+import groupMilestones from '../queries/groupMilestones.query.graphql';
 import * as epicUtils from '../utils/epic_utils';
 import * as roadmapItemUtils from '../utils/roadmap_item_utils';
 import {
@@ -8,12 +12,6 @@ import {
   sortEpics,
   extendTimeframeForPreset,
 } from '../utils/roadmap_utils';
-
-import { EXTEND_AS } from '../constants';
-
-import groupEpics from '../queries/groupEpics.query.graphql';
-import epicChildEpics from '../queries/epicChildEpics.query.graphql';
-import groupMilestones from '../queries/groupMilestones.query.graphql';
 
 import * as types from './mutation_types';
 
@@ -45,6 +43,7 @@ const fetchGroupEpics = (
     variables = {
       ...variables,
       ...filterParams,
+      first: gon.roadmap_epics_limit + 1,
     };
   }
 

@@ -32,7 +32,7 @@ describe('Filter component', () => {
     wrapper = null;
   });
 
-  describe('filters', () => {
+  describe('severity', () => {
     beforeEach(() => {
       createWrapper();
     });

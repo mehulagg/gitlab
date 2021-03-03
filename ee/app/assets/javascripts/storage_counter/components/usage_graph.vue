@@ -1,7 +1,7 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
-import { s__ } from '~/locale';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
+import { s__ } from '~/locale';
 
 export default {
   components: {

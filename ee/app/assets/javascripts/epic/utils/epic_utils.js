@@ -1,11 +1,12 @@
 import $ from 'jquery';
 import Cookies from 'js-cookie';
 
-import { __, s__, sprintf } from '~/locale';
-
+import { sanitize } from '~/lib/dompurify';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
+
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { dateInWords, parsePikadayDate } from '~/lib/utils/datetime_utility';
+import { __, s__, sprintf } from '~/locale';
 
 import { dateTypes } from '../constants';
 
@@ -54,8 +55,9 @@ const getDateFromMilestonesTooltip = ({
   dueDateSourcingMilestoneDates,
   dueDateTimeFromMilestones,
 }) => {
-  const dateSourcingMilestoneTitle =
-    dateType === dateTypes.start ? startDateSourcingMilestoneTitle : dueDateSourcingMilestoneTitle;
+  const dateSourcingMilestoneTitle = sanitize(
+    dateType === dateTypes.start ? startDateSourcingMilestoneTitle : dueDateSourcingMilestoneTitle,
+  );
   const sourcingMilestoneDates =
     dateType === dateTypes.start ? startDateSourcingMilestoneDates : dueDateSourcingMilestoneDates;
 

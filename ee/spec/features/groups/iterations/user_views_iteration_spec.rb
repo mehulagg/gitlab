@@ -29,7 +29,7 @@ RSpec.describe 'User views iteration' do
       before do
         sign_in(current_user)
 
-        visit group_iteration_path(iteration.group, iteration.iid)
+        visit group_iteration_path(iteration.group, iteration.id)
       end
 
       it 'shows iteration info' do
@@ -85,7 +85,8 @@ RSpec.describe 'User views iteration' do
       before do
         sign_in(user)
 
-        visit group_iteration_path(iteration.group, iteration.iid)
+        visit group_iteration_path(iteration.group, iteration.id)
+        wait_for_requests
       end
 
       it_behaves_like 'iteration report group by label'
@@ -99,7 +100,7 @@ RSpec.describe 'User views iteration' do
     end
 
     it 'shows page not found' do
-      visit group_iteration_path(iteration.group, iteration.iid)
+      visit group_iteration_path(iteration.group, iteration.id)
 
       expect(page).to have_title('Not Found')
       expect(page).to have_content('Page Not Found')

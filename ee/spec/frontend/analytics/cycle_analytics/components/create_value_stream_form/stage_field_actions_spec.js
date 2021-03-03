@@ -1,23 +1,27 @@
 import { shallowMount } from '@vue/test-utils';
 import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
-const defaultIndex = 0;
 const stageCount = 3;
 
 describe('StageFieldActions', () => {
-  function createComponent({ index = defaultIndex }) {
-    return shallowMount(StageFieldActions, {
-      propsData: {
-        index,
-        stageCount,
-      },
-    });
+  function createComponent({ index = 0, canRemove = false }) {
+    return extendedWrapper(
+      shallowMount(StageFieldActions, {
+        propsData: {
+          index,
+          stageCount,
+          canRemove,
+        },
+      }),
+    );
   }
 
   let wrapper = null;
-  const findMoveDownBtn = () => wrapper.find('[data-testid^="stage-action-move-down"]');
-  const findMoveUpBtn = () => wrapper.find('[data-testid^="stage-action-move-up"]');
-  const findHideBtn = () => wrapper.find('[data-testid^="stage-action-hide"]');
+  const findMoveDownBtn = (index = 0) => wrapper.findByTestId(`stage-action-move-down-${index}`);
+  const findMoveUpBtn = (index = 0) => wrapper.findByTestId(`stage-action-move-up-${index}`);
+  const findHideBtn = (index = 0) => wrapper.findByTestId(`stage-action-hide-${index}`);
+  const findRemoveBtn = (index = 0) => wrapper.findByTestId(`stage-action-remove-${index}`);
 
   beforeEach(() => {
     wrapper = createComponent({});
@@ -38,6 +42,10 @@ describe('StageFieldActions', () => {
 
   it('will render the hide action', () => {
     expect(findHideBtn().exists()).toBe(true);
+  });
+
+  it('does not render the remove action', () => {
+    expect(findRemoveBtn().exists()).toBe(false);
   });
 
   it('disables the move up button', () => {
@@ -65,7 +73,21 @@ describe('StageFieldActions', () => {
     });
 
     it('disables the move down button', () => {
-      expect(findMoveDownBtn().props('disabled')).toBe(true);
+      expect(findMoveDownBtn(2).props('disabled')).toBe(true);
+    });
+  });
+
+  describe('when canRemove=true', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ canRemove: true });
+    });
+
+    it('will render the remove action', () => {
+      expect(findRemoveBtn().exists()).toBe(true);
+    });
+
+    it('does not render the hide action', () => {
+      expect(findHideBtn().exists()).toBe(false);
     });
   });
 });

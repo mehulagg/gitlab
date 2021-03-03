@@ -1,13 +1,13 @@
 <script>
-import DismissalNote from 'ee/vue_shared/security_reports/components/dismissal_note.vue';
+import { GlModal } from '@gitlab/ui';
 import DismissalCommentBoxToggle from 'ee/vue_shared/security_reports/components/dismissal_comment_box_toggle.vue';
 import DismissalCommentModalFooter from 'ee/vue_shared/security_reports/components/dismissal_comment_modal_footer.vue';
+import DismissalNote from 'ee/vue_shared/security_reports/components/dismissal_note.vue';
 import IssueNote from 'ee/vue_shared/security_reports/components/issue_note.vue';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import ModalFooter from 'ee/vue_shared/security_reports/components/modal_footer.vue';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card_vuex.vue';
 import VulnerabilityDetails from 'ee/vue_shared/security_reports/components/vulnerability_details.vue';
-import { GlModal } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { VULNERABILITY_MODAL_ID } from './constants';
 
@@ -196,6 +196,7 @@ export default {
     ref="modal"
     :modal-id="$options.VULNERABILITY_MODAL_ID"
     :title="modal.title"
+    size="lg"
     data-qa-selector="vulnerability_modal_content"
     class="modal-security-report-dast"
     v-bind="$attrs"

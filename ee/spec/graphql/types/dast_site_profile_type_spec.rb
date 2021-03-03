@@ -6,7 +6,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   let_it_be(:dast_site_profile) { create(:dast_site_profile) }
   let_it_be(:project) { dast_site_profile.project }
   let_it_be(:user) { create(:user) }
-  let_it_be(:fields) { %i[id profileName targetUrl editPath validationStatus userPermissions normalizedTargetUrl] }
+  let_it_be(:fields) { %i[id profileName targetUrl editPath validationStatus userPermissions normalizedTargetUrl referencedInSecurityPolicies] }
 
   subject do
     GitlabSchema.execute(
@@ -25,7 +25,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   end
 
   specify { expect(described_class.graphql_name).to eq('DastSiteProfile') }
-  specify { expect(described_class).to require_graphql_authorizations(:create_on_demand_dast_scan) }
+  specify { expect(described_class).to require_graphql_authorizations(:read_on_demand_scans) }
   specify { expect(described_class).to expose_permissions_using(Types::PermissionTypes::DastSiteProfile) }
 
   it { expect(described_class).to have_graphql_fields(fields) }
@@ -47,6 +47,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
                 editPath
                 validationStatus
                 normalizedTargetUrl
+                referencedInSecurityPolicies
               }
             }
           }

@@ -1,8 +1,8 @@
-import { nextTick } from 'vue';
-import Vuex from 'vuex';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { merge } from 'lodash';
+import { nextTick } from 'vue';
+import Vuex from 'vuex';
 import Filters from 'ee/security_dashboard/components/filters.vue';
 import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';

@@ -4,8 +4,8 @@ import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
 import merge from 'lodash/merge';
 import { createMockClient } from 'mock-apollo-client';
 import VueApollo from 'vue-apollo';
-import DastSiteProfileForm from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_profile_form.vue';
 import DastSiteAuthSection from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_auth_section.vue';
+import DastSiteProfileForm from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_profile_form.vue';
 import dastSiteProfileCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_update.mutation.graphql';
 import { siteProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
@@ -20,6 +20,7 @@ localVue.use(VueApollo);
 const [siteProfileOne] = siteProfiles;
 const fullPath = 'group/project';
 const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_profiles`;
+const onDemandScansPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans`;
 const profileName = 'My DAST site profile';
 const targetUrl = 'http://example.com';
 const excludedUrls = 'http://example.com/logout';
@@ -28,6 +29,7 @@ const requestHeaders = 'my-new-header=something';
 const defaultProps = {
   profilesLibraryPath,
   fullPath,
+  onDemandScansPath,
 };
 
 const defaultRequestHandlers = {

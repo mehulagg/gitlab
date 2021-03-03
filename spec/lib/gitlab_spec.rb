@@ -95,6 +95,26 @@ RSpec.describe Gitlab do
     end
   end
 
+  describe '.com' do
+    subject { described_class.com { true } }
+
+    before do
+      allow(described_class).to receive(:com?).and_return(gl_com)
+    end
+
+    context 'when on GitLab.com' do
+      let(:gl_com) { true }
+
+      it { is_expected.to be true }
+    end
+
+    context 'when not on GitLab.com' do
+      let(:gl_com) { false }
+
+      it { is_expected.to be_nil }
+    end
+  end
+
   describe '.staging?' do
     subject { described_class.staging? }
 
@@ -332,19 +352,24 @@ RSpec.describe Gitlab do
 
   describe '.maintenance_mode?' do
     it 'returns true when maintenance mode is enabled' do
-      stub_application_setting(maintenance_mode: true)
+      stub_maintenance_mode_setting(true)
 
       expect(described_class.maintenance_mode?).to eq(true)
     end
 
     it 'returns false when maintenance mode is disabled' do
-      stub_application_setting(maintenance_mode: false)
+      stub_maintenance_mode_setting(false)
 
       expect(described_class.maintenance_mode?).to eq(false)
     end
 
-    it 'returns false when maintenance mode feature flag is disabled' do
-      stub_feature_flags(maintenance_mode: false)
+    it 'returns false when maintenance mode column is not present' do
+      stub_maintenance_mode_setting(true)
+
+      allow(::Gitlab::CurrentSettings.current_application_settings)
+        .to receive(:respond_to?)
+        .with(:maintenance_mode, false)
+        .and_return(false)
 
       expect(described_class.maintenance_mode?).to eq(false)
     end

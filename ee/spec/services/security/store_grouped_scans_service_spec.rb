@@ -70,6 +70,33 @@ RSpec.describe Security::StoreGroupedScansService do
         end
       end
 
+      context 'when the artifacts are sast' do
+        let_it_be(:sast_artifact_1) { create(:ee_ci_job_artifact, :sast, job: create(:ee_ci_build)) }
+        let_it_be(:sast_artifact_2) { create(:ee_ci_job_artifact, :sast, job: create(:ee_ci_build)) }
+        let_it_be(:sast_artifact_3) { create(:ee_ci_job_artifact, :sast, job: create(:ee_ci_build)) }
+        let(:scanner_1) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'unknown') }
+        let(:scanner_2) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'bandit') }
+        let(:scanner_3) { instance_double(::Gitlab::Ci::Reports::Security::Scanner, external_id: 'semgrep') }
+        let(:mock_report_1) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_1) }
+        let(:mock_report_2) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_2) }
+        let(:mock_report_3) { instance_double(::Gitlab::Ci::Reports::Security::Report, primary_scanner: scanner_3) }
+        let(:artifacts) { [sast_artifact_1, sast_artifact_2, sast_artifact_3] }
+
+        before do
+          allow(sast_artifact_1).to receive(:security_report).and_return(mock_report_1)
+          allow(sast_artifact_2).to receive(:security_report).and_return(mock_report_2)
+          allow(sast_artifact_3).to receive(:security_report).and_return(mock_report_3)
+        end
+
+        it 'calls the Security::StoreScanService with ordered artifacts' do
+          store_scan_group
+
+          expect(Security::StoreScanService).to have_received(:execute).with(sast_artifact_2, empty_set, false).ordered
+          expect(Security::StoreScanService).to have_received(:execute).with(sast_artifact_3, empty_set, true).ordered
+          expect(Security::StoreScanService).to have_received(:execute).with(sast_artifact_1, empty_set, true).ordered
+        end
+      end
+
       context 'when the artifacts are dependency_scanning' do
         let(:report_type) { :dependency_scanning }
         let(:build_4) { create(:ee_ci_build, name: 'Report 0') }

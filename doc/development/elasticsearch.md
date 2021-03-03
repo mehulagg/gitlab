@@ -4,7 +4,7 @@ group: Global Search
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Elasticsearch knowledge **(STARTER ONLY)**
+# Elasticsearch knowledge **(PREMIUM SELF)**
 
 This area is to maintain a compendium of useful information when working with Elasticsearch.
 
@@ -13,9 +13,9 @@ the [Elasticsearch integration documentation](../integration/elasticsearch.md#en
 
 ## Deep Dive
 
-In June 2019, Mario de la Ossa hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`) on the GitLab [Elasticsearch integration](../integration/elasticsearch.md) to share his domain specific knowledge with anyone who may work in this part of the codebase in the future. You can find the [recording on YouTube](https://www.youtube.com/watch?v=vrvl-tN2EaA), and the slides on [Google Slides](https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit) and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf). Everything covered in this deep dive was accurate as of GitLab 12.0, and while specific details may have changed since then, it should still serve as a good introduction.
+In June 2019, Mario de la Ossa hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`) on the GitLab [Elasticsearch integration](../integration/elasticsearch.md) to share his domain specific knowledge with anyone who may work in this part of the codebase in the future. You can find the <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [recording on YouTube](https://www.youtube.com/watch?v=vrvl-tN2EaA), and the slides on [Google Slides](https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit) and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf). Everything covered in this deep dive was accurate as of GitLab 12.0, and while specific details may have changed since then, it should still serve as a good introduction.
 
-In August 2020, a second Deep Dive was hosted, focusing on [GitLab-specific architecture for multi-indices support](#zero-downtime-reindexing-with-multiple-indices). The [recording on YouTube](https://www.youtube.com/watch?v=0WdPR9oB2fg) and the [slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive/) are available. Everything covered in this deep dive was accurate as of GitLab 13.3.
+In August 2020, a second Deep Dive was hosted, focusing on [GitLab-specific architecture for multi-indices support](#zero-downtime-reindexing-with-multiple-indices). The <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [recording on YouTube](https://www.youtube.com/watch?v=0WdPR9oB2fg) and the [slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive/) are available. Everything covered in this deep dive was accurate as of GitLab 13.3.
 
 ## Supported Versions
 
@@ -69,7 +69,7 @@ The `whitespace` tokenizer was selected in order to have more control over how t
 Please see the `code` filter for an explanation on how tokens are split.
 
 NOTE:
-Currently the [Elasticsearch code_analyzer doesn't account for all code cases](../integration/elasticsearch.md#known-issues).
+The [Elasticsearch code_analyzer doesn't account for all code cases](../integration/elasticsearch.md#elasticsearch-code_analyzer-doesnt-account-for-all-code-cases).
 
 #### `code_search_analyzer`
 
@@ -184,7 +184,7 @@ If the current version is `v12p1`, and we need to create a new version for `v12p
 1. Change the namespace for files under `v12p1` folder from `Latest` to `V12p1`
 1. Make changes to files under the `latest` folder as needed
 
-## Creating a new Global Search migration
+## Creating a new Advanced Search migration
 
 > This functionality was introduced by [#234046](https://gitlab.com/gitlab-org/gitlab/-/issues/234046).
 
@@ -210,7 +210,7 @@ class MigrationName < Elastic::Migration
 end
 ```
 
-Applied migrations are stored in `gitlab-#{RAILS_ENV}-migrations` index. All unexecuted migrations
+Applied migrations are stored in `gitlab-#{RAILS_ENV}-migrations` index. All migrations not executed
 are applied by the [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
 cron worker sequentially.
 
@@ -219,7 +219,9 @@ Any update to the Elastic index mappings should be replicated in [`Elastic::Late
 Migrations can be built with a retry limit and have the ability to be [failed and marked as halted](https://gitlab.com/gitlab-org/gitlab/-/blob/66e899b6637372a4faf61cfd2f254cbdd2fb9f6d/ee/lib/elastic/migration.rb#L40).
 Any data or index cleanup needed to support migration retries should be handled within the migration.
 
-### Migration options supported by the [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
+### Migration options supported by the `Elastic::MigrationWorker`
+
+[`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb) supports the following migration options:
 
 - `batched!` - Allow the migration to run in batches. If set, the [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
 will re-enqueue itself with a delay which is set using the `throttle_delay` option described below. The batching
@@ -229,6 +231,9 @@ must be handled within the `migrate` method, this setting controls the re-enqueu
 enough time to finish. Additionally, the time should be less than 30 minutes since that is how often the
 [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
 cron worker runs. Default value is 5 minutes.
+
+- `pause_indexing!` - Pause indexing while the migration runs. This setting will record the indexing setting before
+the migration runs and set it back to that value when the migration is completed.
 
 ```ruby
 # frozen_string_literal: true
@@ -241,6 +246,45 @@ class BatchedMigrationName < Elastic::Migration
   # ...
 end
 ```
+
+### Multi-version compatibility
+
+These Elasticsearch migrations, like any other GitLab changes, need to support the case where
+[multiple versions of the application are running at the same time](multi_version_compatibility.md).
+
+Depending on the order of deployment, it's possible that the migration
+has started or finished and there's still a server running the application code from before the
+migration. We need to take this into consideration until we can [ensure all Elasticsearch migrations
+start after the deployment has finished](https://gitlab.com/gitlab-org/gitlab/-/issues/321619).
+
+### Reverting a migration
+
+Because Elasticsearch does not support transactions, we always need to design our
+migrations to accommodate a situation where the application
+code is reverted after the migration has started or after it is finished.
+
+For this reason we generally defer destructive actions (for example, deletions after
+some data is moved) to a later merge request after the migrations have
+completed successfully. To be safe, for self-managed customers we should also
+defer it to another release if there is risk of important data loss.
+
+### Best practices for Elasticsearch migrations
+
+Follow these best practices for best results:
+
+- When working in batches, keep the batch size under 9,000 documents
+  and `throttle_delay` over 3 minutes. The bulk indexer is set to run
+  every 1 minute and process a batch of 10,000 documents. These limits
+  allow the bulk indexer time to process records before another migration
+  batch is attempted.
+- To ensure that document counts are up to date, it is recommended to refresh
+  the index before checking if a migration is completed.
+- Add logging statements to each migration when the migration starts, when a
+  completion check occurs, and when the migration is completed. These logs
+  are helpful when debugging issues with migrations.
+- Pause indexing if you're using any Elasticsearch Reindex API operations.
+- Consider adding a retry limit if there is potential for the migration to fail.
+  This ensures that migrations can be halted if an issue occurs.
 
 ## Performance Monitoring
 
@@ -337,7 +381,7 @@ cluster.routing.allocation.disk.watermark.low: 15gb
 cluster.routing.allocation.disk.watermark.high: 10gb
 ```
 
-Restart Elasticsearch, and the `read_only_allow_delete` will clear on it's own.
+Restart Elasticsearch, and the `read_only_allow_delete` will clear on its own.
 
 _from "Disk-based Shard Allocation | Elasticsearch Reference" [5.6](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/disk-allocator.html#disk-allocator) and [6.x](https://www.elastic.co/guide/en/elasticsearch/reference/6.7/disk-allocator.html)_
 
@@ -351,7 +395,7 @@ simply reindex everything from scratch.
 
 If your Elasticsearch index is incredibly large it may be too time consuming or
 cause too much downtime to reindex from scratch. There aren't any built in
-mechanisms for automatically finding discrepencies and resyncing an
+mechanisms for automatically finding discrepancies and resyncing an
 Elasticsearch index if it gets out of sync but one tool that may be useful is
 looking at the logs for all the updates that occurred in a time range you
 believe may have been missed. This information is very low level and only

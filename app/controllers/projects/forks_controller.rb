@@ -16,6 +16,10 @@ class Projects::ForksController < Projects::ApplicationController
 
   feature_category :source_code_management
 
+  before_action do
+    push_frontend_feature_flag(:fork_project_form)
+  end
+
   def index
     @total_forks_count    = project.forks.size
     @public_forks_count   = project.forks.public_only.size
@@ -86,13 +90,19 @@ class Projects::ForksController < Projects::ApplicationController
 
   def fork_service
     strong_memoize(:fork_service) do
-      ::Projects::ForkService.new(project, current_user, namespace: fork_namespace)
+      ::Projects::ForkService.new(project, current_user, fork_params)
     end
   end
 
   def fork_namespace
     strong_memoize(:fork_namespace) do
       Namespace.find(params[:namespace_key]) if params[:namespace_key].present?
+    end
+  end
+
+  def fork_params
+    params.permit(:path, :name, :description, :visibility).tap do |param|
+      param[:namespace] = fork_namespace
     end
   end
 

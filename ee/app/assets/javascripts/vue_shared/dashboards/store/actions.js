@@ -1,9 +1,9 @@
-import Visibility from 'visibilityjs';
 import { find } from 'lodash';
+import Visibility from 'visibilityjs';
 import Api from '~/api';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, n__, sprintf } from '~/locale';
 import * as types from './mutation_types';
 
@@ -73,7 +73,7 @@ export const receiveAddProjectsToDashboardSuccess = ({ dispatch, state }, data) 
     createFlash(
       sprintf(
         s__(
-          'Dashboard|Unable to add %{invalidProjects}. This dashboard is available for public projects, and private projects in groups with a Silver plan.',
+          'Dashboard|Unable to add %{invalidProjects}. This dashboard is available for public projects, and private projects in groups with a Premium plan.',
         ),
         {
           invalidProjects,

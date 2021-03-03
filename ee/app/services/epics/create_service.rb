@@ -6,6 +6,7 @@ module Epics
       set_date_params
 
       epic = group.epics.new
+
       create(epic)
     end
 
@@ -19,6 +20,11 @@ module Epics
       epic.run_after_commit do
         NewEpicWorker.perform_async(epic.id, user.id)
       end
+    end
+
+    def after_create(epic)
+      assign_parent_epic_for(epic)
+      assign_child_epic_for(epic)
     end
 
     def set_date_params

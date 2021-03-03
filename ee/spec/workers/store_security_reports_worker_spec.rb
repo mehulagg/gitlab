@@ -18,18 +18,17 @@ RSpec.describe StoreSecurityReportsWorker do
   describe '#revoke_secret_detection_token?' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:pipeline, :token_revocation_enabled, :secret_detection_vulnerability_found, :expected_result) do
-      Object.new  | true  | true  | true
-      Object.new  | true  | false | false
-      Object.new  | false | true  | false
-      Object.new  | false | false | false
-      nil         | true  | true  | false
-      nil         | true  | false | false
-      nil         | false | true  | false
-      nil         | false | false | false
+    where(:visibility, :token_revocation_enabled, :secret_detection_vulnerability_found) do
+      booleans = [true, true, false, false].permutation(2).to_a.uniq
+      [:public, :private, nil].flat_map do |vis|
+        booleans.map { |bools| [vis, *bools] }
+      end
     end
 
     with_them do
+      let(:pipeline) { build(:ci_pipeline, project: build(:project, :repository, visibility)) if visibility }
+      let(:expected_result) { [visibility, token_revocation_enabled, secret_detection_vulnerability_found] == [:public, true, true] }
+
       before do
         stub_application_setting(secret_detection_token_revocation_enabled: token_revocation_enabled)
 

@@ -1,10 +1,10 @@
-import Vuex from 'vuex';
-import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
 import { GlLink, GlModal } from '@gitlab/ui';
+import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
 import merge from 'lodash/merge';
-import waitForPromises from 'helpers/wait_for_promises';
-import createStore from 'ee/issue_show/components/incidents/store';
+import Vuex from 'vuex';
 import MetricsImage from 'ee/issue_show/components/incidents/metrics_image.vue';
+import createStore from 'ee/issue_show/components/incidents/store';
+import waitForPromises from 'helpers/wait_for_promises';
 
 const defaultProps = {
   id: 1,

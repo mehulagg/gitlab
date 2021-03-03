@@ -1,6 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
-
 import { GlModal } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import ImportRequirementsModal from 'ee/requirements/components/import_requirements_modal.vue';
 

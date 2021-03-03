@@ -4,9 +4,9 @@
 
 %section.settings.no-animate#pipeline-subscriptions{ class: ('expanded' if expanded) }
   .settings-header
-    %h4
+    %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
       = _("Pipeline subscriptions")
-    %button.btn.gl-button.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
     %p
       - default_branch_docs = link_to(_("default branch"), help_page_path('user/project/repository/branches/index.md', anchor: 'default-branch'))

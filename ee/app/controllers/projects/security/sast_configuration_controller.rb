@@ -3,6 +3,7 @@
 module Projects
   module Security
     class SastConfigurationController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
       include CreatesCommit
       include SecurityDashboardsPermissions
 

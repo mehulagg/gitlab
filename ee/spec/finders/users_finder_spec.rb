@@ -13,13 +13,13 @@ RSpec.describe UsersFinder do
         it 'returns ldap users by default' do
           users = described_class.new(normal_user).execute
 
-          expect(users).to contain_exactly(normal_user, blocked_user, omniauth_user, ldap_user, internal_user, admin_user)
+          expect(users).to contain_exactly(normal_user, blocked_user, omniauth_user, external_user, ldap_user, internal_user, admin_user)
         end
 
         it 'returns only non-ldap users with skip_ldap: true' do
           users = described_class.new(normal_user, skip_ldap: true).execute
 
-          expect(users).to contain_exactly(normal_user, blocked_user, omniauth_user, internal_user, admin_user)
+          expect(users).to contain_exactly(normal_user, blocked_user, omniauth_user, external_user, internal_user, admin_user)
         end
       end
     end

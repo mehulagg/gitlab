@@ -1,12 +1,12 @@
-import Vuex from 'vuex';
+import { GlFormInput, GlModal } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import merge from 'lodash/merge';
-import { GlFormInput, GlModal } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
-import MetricsTab from 'ee/issue_show/components/incidents/metrics_tab.vue';
+import Vuex from 'vuex';
 import MetricsImage from 'ee/issue_show/components/incidents/metrics_image.vue';
-import createStore from 'ee/issue_show/components/incidents/store';
+import MetricsTab from 'ee/issue_show/components/incidents/metrics_tab.vue';
 import { getMetricImages } from 'ee/issue_show/components/incidents/service';
+import createStore from 'ee/issue_show/components/incidents/store';
+import waitForPromises from 'helpers/wait_for_promises';
 import UploadDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
 import { fileList, initialData } from './mock_data';
 

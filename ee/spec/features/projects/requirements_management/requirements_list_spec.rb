@@ -5,7 +5,8 @@ require 'spec_helper'
 RSpec.describe 'Requirements list', :js do
   let_it_be(:user) { create(:user) }
   let_it_be(:user_guest) { create(:user) }
-  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:public_project) { create(:project, :public) }
   let_it_be(:requirement1) { create(:requirement, project: project, title: 'Some requirement-1', description: 'Sample description', author: user, created_at: 5.days.ago, updated_at: 2.days.ago) }
   let_it_be(:requirement2) { create(:requirement, project: project, title: 'Some requirement-2', description: 'Sample description', author: user, created_at: 6.days.ago, updated_at: 2.days.ago) }
   let_it_be(:requirement3) { create(:requirement, project: project, title: 'Some requirement-3', description: 'Sample description', author: user, created_at: 7.days.ago, updated_at: 2.days.ago) }
@@ -278,6 +279,19 @@ RSpec.describe 'Requirements list', :js do
 
     it 'open tab does not show button "New requirement"' do
       expect(page).not_to have_selector('.nav-controls button.js-new-requirement')
+    end
+  end
+
+  context 'when accessing project as logged out user' do
+    before do
+      sign_out user
+
+      visit project_requirements_management_requirements_path(public_project)
+      wait_for_requests
+    end
+
+    it 'renders the empty state' do
+      expect(page).to have_selector('.requirements-empty-state-container')
     end
   end
 end

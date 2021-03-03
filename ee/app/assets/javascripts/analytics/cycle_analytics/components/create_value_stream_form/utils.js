@@ -1,6 +1,15 @@
-import { isStartEvent, getAllowedEndEvents, eventToOption, eventsByIdentifier } from '../../utils';
-import { I18N, ERRORS, defaultErrors, defaultFields, NAME_MAX_LENGTH } from './constants';
+import { isEqual, pick } from 'lodash';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { DEFAULT_STAGE_NAMES } from '../../constants';
+import { isStartEvent, getAllowedEndEvents, eventToOption, eventsByIdentifier } from '../../utils';
+import {
+  i18n,
+  ERRORS,
+  defaultErrors,
+  defaultFields,
+  NAME_MAX_LENGTH,
+  formFieldKeys,
+} from './constants';
 
 /**
  * @typedef {Object} CustomStageEvents
@@ -22,7 +31,7 @@ import { DEFAULT_STAGE_NAMES } from '../../constants';
  * @returns {DropdownData[]} array of start events formatted for dropdowns
  */
 export const startEventOptions = (eventsList) => [
-  { value: null, text: I18N.SELECT_START_EVENT },
+  { value: null, text: i18n.SELECT_START_EVENT },
   ...eventsList.filter(isStartEvent).map(eventToOption),
 ];
 
@@ -37,7 +46,7 @@ export const startEventOptions = (eventsList) => [
 export const endEventOptions = (eventsList, startEventIdentifier) => {
   const endEvents = getAllowedEndEvents(eventsList, startEventIdentifier);
   return [
-    { value: null, text: I18N.SELECT_END_EVENT },
+    { value: null, text: i18n.SELECT_END_EVENT },
     ...eventsByIdentifier(eventsList, endEvents).map(eventToOption),
   ];
 };
@@ -88,24 +97,20 @@ export const validateStage = (fields) => {
   if (fields?.name) {
     if (fields.name.length > NAME_MAX_LENGTH) {
       newErrors.name = [ERRORS.MAX_LENGTH];
-    } else {
-      newErrors.name =
-        fields?.custom && DEFAULT_STAGE_NAMES.includes(fields.name.toLowerCase())
-          ? [ERRORS.STAGE_NAME_EXISTS]
-          : [];
+    }
+    if (fields?.custom && DEFAULT_STAGE_NAMES.includes(fields.name.toLowerCase())) {
+      newErrors.name = [ERRORS.STAGE_NAME_EXISTS];
     }
   } else {
-    newErrors.name = [ERRORS.MIN_LENGTH];
+    newErrors.name = [ERRORS.STAGE_NAME_MIN_LENGTH];
   }
 
   if (fields?.startEventIdentifier) {
-    newErrors.endEventIdentifier = [];
+    if (!fields?.endEventIdentifier) {
+      newErrors.endEventIdentifier = [ERRORS.END_EVENT_REQUIRED];
+    }
   } else {
     newErrors.endEventIdentifier = [ERRORS.START_EVENT_REQUIRED];
-  }
-
-  if (fields?.startEventIdentifier && fields?.endEventIdentifier) {
-    newErrors.endEventIdentifier = [];
   }
   return newErrors;
 };
@@ -115,15 +120,124 @@ export const validateStage = (fields) => {
  * returned as an array in a object with key`name`
  *
  * @param {Object} fields key value pair of form field values
- * @returns {Object} key value pair of form fields with an array of errors
+ * @returns {Array} an array of errors
  */
 export const validateValueStreamName = ({ name = '' }) => {
-  const errors = { name: [] };
+  const errors = [];
   if (name.length > NAME_MAX_LENGTH) {
-    errors.name.push(ERRORS.MAX_LENGTH);
+    errors.push(ERRORS.MAX_LENGTH);
   }
   if (!name.length) {
-    errors.name.push(ERRORS.MIN_LENGTH);
+    errors.push(ERRORS.VALUE_STREAM_NAME_MIN_LENGTH);
   }
   return errors;
 };
+
+/**
+ * Formats the value stream stages for submission, ensures that the
+ * 'custom' property is set when we are editing, we include the `id` if its
+ * set and all fields are converted to snake case
+ *
+ * @param {Array} stages array of value stream stages
+ * @param {Boolean} isEditing flag to indicate if we are editing a value stream or creating
+ * @returns {Array} the array prepared to be submitted for persistence
+ */
+export const formatStageDataForSubmission = (stages, isEditing = false) => {
+  return stages.map(({ id = null, custom = false, name, ...rest }) => {
+    let editProps = { custom };
+    if (isEditing) {
+      // We can add a new stage to the value stream when either creating, or editing
+      // If a new stage has been added then at this point, the `id` won't exist
+      // The new stage is still `custom` but wont have an id until the form submits and its persisted to the DB
+      editProps = id ? { id, custom: true } : { custom: true };
+    }
+    // While we work on https://gitlab.com/gitlab-org/gitlab/-/issues/321959 we should not allow editing default
+    return custom
+      ? convertObjectPropsToSnakeCase({ ...rest, ...editProps, name })
+      : convertObjectPropsToSnakeCase({ ...editProps, name, custom: false });
+  });
+};
+
+/**
+ * Checks an array of value stream stages to see if there are
+ * any differences in the values they contain
+ *
+ * @param {Array} stages array of value stream stages
+ * @param {Array} stages array of value stream stages
+ * @returns {Boolean} returns true if there is a difference in the 2 arrays
+ */
+export const hasDirtyStage = (currentStages, originalStages) => {
+  const cs = currentStages.map((s) => pick(s, formFieldKeys));
+  const os = originalStages.map((s) => pick(s, formFieldKeys));
+  return !isEqual(cs, os);
+};
+
+/**
+ * Checks if the target name matches the name of any of the value
+ * stream stages passed in
+ *
+ * @param {Array} stages array of value stream stages
+ * @param {String} targetName name we are searching for
+ * @returns {Object} returns the found object or null
+ */
+const findStageByName = (stages, targetName = '') =>
+  stages.find(({ name }) => name.toLowerCase().trim() === targetName.toLowerCase().trim());
+
+/**
+ * Returns a valid custom value stream stage
+ *
+ * @param {Object} stage a raw value stream stage retrieved from the vuex store
+ * @returns {Object} the same stage with fields adjusted for the value stream form
+ */
+const prepareCustomStage = ({ startEventLabel = {}, endEventLabel = {}, ...rest }) => ({
+  ...rest,
+  startEventLabelId: startEventLabel?.id || null,
+  endEventLabelId: endEventLabel?.id || null,
+  isDefault: false,
+});
+
+/**
+ * Returns a valid default value stream stage
+ *
+ * @param {Object} stage a raw value stream stage retrieved from the vuex store
+ * @returns {Object} the same stage with fields adjusted for the value stream form
+ */
+const prepareDefaultStage = (defaultStageConfig, { name, ...rest }) => {
+  // default stages currently dont have any label based events
+  const stage = findStageByName(defaultStageConfig, name) || null;
+  if (!stage) return {};
+  const { startEventIdentifier = null, endEventIdentifier = null } = stage;
+  return {
+    ...rest,
+    name,
+    startEventIdentifier,
+    endEventIdentifier,
+    isDefault: true,
+  };
+};
+
+/**
+ * Returns a valid array of value stream stages for
+ * use in the value stream form
+ *
+ * @param {Array} stage an array of raw value stream stages retrieved from the vuex store
+ * @param {Array} stage an array of raw value stream stages retrieved from the vuex store
+ * @returns {Object} the same stage with fields adjusted for the value stream form
+ */
+export const generateInitialStageData = (defaultStageConfig, selectedValueStreamStages) =>
+  selectedValueStreamStages.map(
+    ({ startEventIdentifier = null, endEventIdentifier = null, custom = false, ...rest }) => {
+      const stageData =
+        custom && startEventIdentifier && endEventIdentifier
+          ? prepareCustomStage({ ...rest, startEventIdentifier, endEventIdentifier })
+          : prepareDefaultStage(defaultStageConfig, rest);
+
+      if (stageData?.name) {
+        return {
+          ...stageData,
+          custom,
+        };
+      }
+      return {};
+    },
+  );

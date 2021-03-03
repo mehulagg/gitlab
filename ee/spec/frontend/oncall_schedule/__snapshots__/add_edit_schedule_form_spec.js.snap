@@ -14,7 +14,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
   >
     <gl-form-input-stub
       id="schedule-name"
-      value="Test schedule"
+      value="Test schedule from query"
     />
   </gl-form-group-stub>
    

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :elastic do
     desc "GitLab | Elasticsearch | Index everything at once"
@@ -58,14 +60,11 @@ namespace :gitlab do
     end
 
     desc "GitLab | Elasticsearch | Create empty indexes and assigns an alias for each"
-    task :create_empty_index, [:target_name] => [:environment] do |t, args|
+    task create_empty_index: [:environment] do |t, args|
       with_alias = ENV["SKIP_ALIAS"].nil?
       options = {}
 
-      # only create an index at the specified name
-      options[:index_name] = args[:target_name] unless with_alias
-
-      helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
+      helper = Gitlab::Elastic::Helper.default
       index_name = helper.create_empty_index(with_alias: with_alias, options: options)
 
       # with_alias is used to support interacting with a specific index (such as when reclaiming the production index
@@ -87,8 +86,8 @@ namespace :gitlab do
     end
 
     desc "GitLab | Elasticsearch | Delete all indexes"
-    task :delete_index, [:target_name] => [:environment] do |t, args|
-      helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
+    task delete_index: [:environment] do |t, args|
+      helper = Gitlab::Elastic::Helper.default
 
       if helper.delete_index
         puts "Index/alias '#{helper.target_name}' has been deleted".color(:green)
@@ -113,7 +112,7 @@ namespace :gitlab do
     end
 
     desc "GitLab | Elasticsearch | Recreate indexes"
-    task :recreate_index, [:target_name] => [:environment] do |t, args|
+    task recreate_index: [:environment] do |t, args|
       Rake::Task["gitlab:elastic:delete_index"].invoke(*args)
       Rake::Task["gitlab:elastic:create_empty_index"].invoke(*args)
     end
@@ -148,6 +147,35 @@ namespace :gitlab do
       else
         puts 'Did not find the current running reindexing job.'
       end
+    end
+
+    desc "GitLab | Elasticsearch | List pending migrations"
+    task list_pending_migrations: :environment do
+      pending_migrations = ::Elastic::DataMigrationService.pending_migrations
+
+      if pending_migrations.any?
+        puts 'Pending migrations:'
+        pending_migrations.each do |migration|
+          puts migration.name
+        end
+      else
+        puts 'There are no pending migrations.'
+      end
+    end
+
+    desc "GitLab | Elasticsearch | Estimate Cluster size"
+    task estimate_cluster_size: :environment do
+      include ActionView::Helpers::NumberHelper
+
+      total_size = Namespace::RootStorageStatistics.sum(:repository_size).to_i
+      total_size_human = number_to_human_size(total_size, delimiter: ',', precision: 1, significant: false)
+
+      estimated_cluster_size = total_size * 0.5
+      estimated_cluster_size_human = number_to_human_size(estimated_cluster_size, delimiter: ',', precision: 1, significant: false)
+
+      puts "This GitLab instance repository size is #{total_size_human}."
+      puts "By our estimates for such repository size, your cluster size should be at least #{estimated_cluster_size_human}.".color(:green)
+      puts 'Please note that it is possible to index only selected namespaces/projects by using Elasticsearch indexing restrictions.'
     end
 
     def project_id_batches(&blk)

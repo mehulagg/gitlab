@@ -1,6 +1,7 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
 import { __ } from '~/locale';
+import { reportToSentry } from '../graph/utils';
 import LinksInner from './links_inner.vue';
 
 export default {
@@ -42,13 +43,16 @@ export default {
       }, 0);
     },
     showAlert() {
-      return !this.showLinkedLayers && !this.alertDismissed;
+      return !this.containerZero && !this.showLinkedLayers && !this.alertDismissed;
     },
     showLinkedLayers() {
       return (
         !this.containerZero && (this.showLinksOverride || this.numGroups < this.$options.MAX_GROUPS)
       );
     },
+  },
+  errorCaptured(err, _vm, info) {
+    reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
   methods: {
     dismissAlert() {
@@ -66,6 +70,7 @@ export default {
     v-if="showLinkedLayers"
     :container-measurements="containerMeasurements"
     :pipeline-data="pipelineData"
+    :total-groups="numGroups"
     v-bind="$attrs"
     v-on="$listeners"
   >
@@ -74,13 +79,15 @@ export default {
   <div v-else>
     <gl-alert
       v-if="showAlert"
-      class="gl-w-max-content gl-ml-4"
+      class="gl-ml-4 gl-mb-4"
       :primary-button-text="$options.i18n.showLinksAnyways"
       @primaryAction="overrideShowLinks"
       @dismiss="dismissAlert"
     >
       {{ $options.i18n.tooManyJobs }}
     </gl-alert>
-    <slot></slot>
+    <div class="gl-display-flex gl-relative">
+      <slot></slot>
+    </div>
   </div>
 </template>

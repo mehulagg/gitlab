@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import apolloProvider from './graphql/provider';
 import DastSiteProfileForm from './components/dast_site_profile_form.vue';
+import apolloProvider from './graphql/provider';
 
 export default () => {
   const el = document.querySelector('.js-dast-site-profile-form');
@@ -9,11 +9,12 @@ export default () => {
     return;
   }
 
-  const { fullPath, profilesLibraryPath } = el.dataset;
+  const { fullPath, profilesLibraryPath, onDemandScansPath } = el.dataset;
 
   const props = {
     fullPath,
     profilesLibraryPath,
+    onDemandScansPath,
   };
 
   if (el.dataset.siteProfile) {

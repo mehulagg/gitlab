@@ -1,11 +1,12 @@
-import { mount } from '@vue/test-utils';
 import { GlCard } from '@gitlab/ui';
-import { useFakeDate } from 'helpers/fake_date';
-import RotationsListSection from 'ee/oncall_schedules/components/schedule/components/rotations_list_section.vue';
-import CurrentDayIndicator from 'ee/oncall_schedules/components/schedule/components/current_day_indicator.vue';
+import { mount } from '@vue/test-utils';
 import RotationsAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
+import CurrentDayIndicator from 'ee/oncall_schedules/components/schedule/components/current_day_indicator.vue';
+import RotationsListSection from 'ee/oncall_schedules/components/schedule/components/rotations_list_section.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
+import { useFakeDate } from 'helpers/fake_date';
+import { scheduleIid } from '../../mocks/apollo_mock';
 import mockRotations from '../../mocks/mock_rotation.json';
 
 describe('RotationsListSectionComponent', () => {
@@ -22,6 +23,7 @@ describe('RotationsListSectionComponent', () => {
       propsData: {
         presetType,
         timeframe,
+        scheduleIid,
         rotations: [mockRotations[0]],
       },
       provide: {
@@ -33,7 +35,7 @@ describe('RotationsListSectionComponent', () => {
     });
   }
 
-  const findTimelineCells = () => wrapper.findAll('[data-testid="timelineCell"]');
+  const findTimelineCells = () => wrapper.findAll('[data-testid="timeline-cell"]');
   const findRotationAssignees = () => wrapper.findAllComponents(RotationsAssignee);
   const findCurrentDayIndicatorContent = () =>
     wrapper.find('[data-testid="current-day-indicator"]');
@@ -45,8 +47,9 @@ describe('RotationsListSectionComponent', () => {
   });
 
   describe('when the timeframe includes today', () => {
+    useFakeDate(2021, 0, 14);
+
     beforeEach(() => {
-      useFakeDate(2021, 0, 14);
       createComponent();
     });
 
@@ -75,8 +78,9 @@ describe('RotationsListSectionComponent', () => {
   });
 
   describe('when the timeframe does not include today', () => {
+    useFakeDate(2021, 0, 31);
+
     beforeEach(() => {
-      useFakeDate(2021, 0, 31);
       createComponent();
     });
 

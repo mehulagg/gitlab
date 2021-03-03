@@ -22,7 +22,7 @@ cannot be used to authenticate with GitHub as an external CI/CD repository.
 ## Connect with Personal Access Token
 
 Personal access tokens can only be used to connect GitHub.com
-repositories to GitLab, and the GitHub user must have the [owner role](https://docs.github.com/en/free-pro-team@latest/github/getting-started-with-github/access-permissions-on-github).
+repositories to GitLab, and the GitHub user must have the [owner role](https://docs.github.com/en/github/getting-started-with-github/access-permissions-on-github).
 
 To perform a one-off authorization with GitHub to grant GitLab access your
 repositories:
@@ -35,13 +35,13 @@ repositories:
    your project, update commit statuses, and create a web hook to notify
    GitLab of new commits.
 
-1. In GitLab, go to the [new project page](../../gitlab-basics/create-project.md#create-a-project-in-gitlab), select the **CI/CD for external repository** tab, and then click
+1. In GitLab, go to the [new project page](../../user/project/working_with_projects.md#create-a-project), select the **CI/CD for external repository** tab, and then click
    **GitHub**.
 
 1. Paste the token into the **Personal access token** field and click **List
    Repositories**. Click **Connect** to select the repository.
 
-1. In GitHub, add a `.gitlab-ci.yml` to [configure GitLab CI/CD](../quick_start/README.md).
+1. In GitHub, add a `.gitlab-ci.yml` to [configure GitLab CI/CD](../quick_start/index.md).
 
 GitLab:
 

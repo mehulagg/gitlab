@@ -7,6 +7,25 @@ RSpec.describe InviteMembersHelper do
   let_it_be(:developer) { create(:user, developer_projects: [project]) }
   let(:owner) { project.owner }
 
+  before do
+    helper.extend(Gitlab::Experimentation::ControllerConcern)
+  end
+
+  describe '#show_invite_members_track_event' do
+    it 'shows values when can directly invite members' do
+      allow(helper).to receive(:directly_invite_members?).and_return(true)
+
+      expect(helper.show_invite_members_track_event).to eq 'show_invite_members'
+    end
+
+    it 'shows values when can indirectly invite members' do
+      allow(helper).to receive(:directly_invite_members?).and_return(false)
+      allow(helper).to receive(:indirectly_invite_members?).and_return(true)
+
+      expect(helper.show_invite_members_track_event).to eq 'show_invite_members_version_b'
+    end
+  end
+
   context 'with project' do
     before do
       assign(:project, project)
@@ -202,7 +221,6 @@ RSpec.describe InviteMembersHelper do
 
       before do
         allow(helper).to receive(:experiment_tracking_category_and_group) { '_track_property_' }
-        allow(helper).to receive(:tracking_label)
         allow(helper).to receive(:current_user) { owner }
       end
 

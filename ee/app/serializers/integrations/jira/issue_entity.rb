@@ -3,8 +3,10 @@
 module Integrations
   module Jira
     class IssueEntity < Grape::Entity
-      expose :project_id do |_jira_issue, options|
-        options[:project].id
+      include RequestAwareEntity
+
+      expose :project_id do |_jira_issue|
+        project.id
       end
 
       expose :title do |jira_issue|
@@ -30,27 +32,22 @@ module Integrations
       expose :labels do |jira_issue|
         jira_issue.labels.map do |name|
           {
+            title: name,
             name: name,
             color: '#EBECF0',
             text_color: '#283856'
-
           }
         end
       end
 
       expose :author do |jira_issue|
-        {
-          name: jira_issue.reporter.displayName,
-          web_url: author_web_url(jira_issue)
-        }
+        jira_user(jira_issue, :reporter)
       end
 
       expose :assignees do |jira_issue|
         if jira_issue.assignee.present?
           [
-            {
-              name: jira_issue.assignee.displayName
-            }
+            jira_user(jira_issue, :assignee)
           ]
         else
           []
@@ -58,7 +55,15 @@ module Integrations
       end
 
       expose :web_url do |jira_issue|
-        "#{base_web_url(jira_issue)}/browse/#{jira_issue.key}"
+        "#{base_web_url}/browse/#{jira_issue.key}"
+      end
+
+      expose :gitlab_web_url do |jira_issue|
+        if ::Feature.enabled?(:jira_issues_show_integration, project, default_enabled: :yaml)
+          project_integrations_jira_issue_path(project, jira_issue.key)
+        else
+          nil
+        end
       end
 
       expose :references do |jira_issue|
@@ -73,24 +78,33 @@ module Integrations
 
       private
 
-      def author_web_url(jira_issue)
+      # rubocop:disable GitlabSecurity/PublicSend
+      def jira_user(jira_issue, user_type)
+        {
+          name: jira_issue.public_send(user_type).displayName,
+          web_url: jira_web_url(jira_issue, user_type),
+          avatar_url: jira_issue.public_send(user_type).avatarUrls['48x48']
+        }
+      end
+
+      def jira_web_url(jira_issue, user_type)
         # There are differences between Jira Cloud and Jira Server URLs and responses.
         # accountId is only available on Jira Cloud.
         # https://community.atlassian.com/t5/Jira-Questions/How-to-find-account-id-on-jira-on-premise/qaq-p/1168652
-        if jira_issue.reporter.try(:accountId)
-          "#{base_web_url(jira_issue)}/people/#{jira_issue.reporter.accountId}"
+        if jira_issue.public_send(user_type).try(:accountId)
+          "#{base_web_url}/people/#{jira_issue.public_send(user_type).accountId}"
         else
-          "#{base_web_url(jira_issue)}/secure/ViewProfile.jspa?name=#{jira_issue.reporter.name}"
+          "#{base_web_url}/secure/ViewProfile.jspa?name=#{jira_issue.public_send(user_type).name}"
         end
       end
+      # rubocop:enable GitlabSecurity/PublicSend
 
-      def base_web_url(jira_issue)
-        site_url = jira_issue.client.options[:site].delete_suffix('/')
-        context_path = jira_issue.client.options[:context_path].to_s.delete_prefix('/')
+      def base_web_url
+        @base_web_url ||= project.jira_service.url
+      end
 
-        return site_url if context_path.empty?
-
-        [site_url, context_path].join('/')
+      def project
+        @project ||= options[:project]
       end
     end
   end

@@ -104,17 +104,17 @@ RSpec.describe EE::WelcomeHelper do
     end
   end
 
-  shared_context 'with the onboarding issues experiment' do
-    let(:onboarding_issues_experiment_enabled) { false }
+  shared_context 'with signup onboarding' do
+    let(:signup_onboarding_enabled) { false }
 
     before do
-      allow(helper).to receive(:onboarding_issues_experiment_enabled?).and_return(onboarding_issues_experiment_enabled)
+      allow(helper).to receive(:signup_onboarding_enabled?).and_return(signup_onboarding_enabled)
     end
   end
 
   describe '#show_signup_flow_progress_bar?' do
     include_context 'with the various user flows'
-    include_context 'with the onboarding issues experiment'
+    include_context 'with signup onboarding'
 
     subject { helper.show_signup_flow_progress_bar? }
 
@@ -128,8 +128,8 @@ RSpec.describe EE::WelcomeHelper do
       end
 
       with_them do
-        context 'regardless of if the onboarding issues experiment is enabled' do
-          where(onboarding_issues_experiment_enabled: [true, false])
+        context 'regardless of signup onboarding' do
+          where(signup_onboarding_enabled: [true, false])
 
           with_them do
             it { is_expected.to be_truthy }
@@ -147,8 +147,8 @@ RSpec.describe EE::WelcomeHelper do
         end
 
         with_them do
-          context 'regardless of if the onboarding issues experiment is enabled' do
-            where(onboarding_issues_experiment_enabled: [true, false])
+          context 'regardless of signup onboarding' do
+            where(signup_onboarding_enabled: [true, false])
 
             with_them do
               it { is_expected.to be_falsey }
@@ -158,13 +158,13 @@ RSpec.describe EE::WelcomeHelper do
       end
 
       context 'and not in the invitation, oauth, or trial flow' do
-        where(:onboarding_issues_experiment_enabled, :result) do
+        where(:signup_onboarding_enabled, :result) do
           true  | true
           false | false
         end
 
         with_them do
-          it 'depends on whether or not the onboarding issues experiment is enabled' do
+          it 'depends on whether or not signup onboarding is enabldd' do
             is_expected.to eq(result)
           end
         end
@@ -174,7 +174,7 @@ RSpec.describe EE::WelcomeHelper do
 
   describe '#welcome_submit_button_text' do
     include_context 'with the various user flows'
-    include_context 'with the onboarding issues experiment'
+    include_context 'with signup onboarding'
 
     subject { helper.welcome_submit_button_text }
 
@@ -185,8 +185,8 @@ RSpec.describe EE::WelcomeHelper do
       end
 
       with_them do
-        context 'regardless of if the onboarding issues experiment is enabled' do
-          where(onboarding_issues_experiment_enabled: [true, false])
+        context 'regardless of signup onboarding' do
+          where(signup_onboarding_enabled: [true, false])
 
           with_them do
             it { is_expected.to eq('Continue') }
@@ -203,8 +203,8 @@ RSpec.describe EE::WelcomeHelper do
         end
 
         with_them do
-          context 'regardless of if the onboarding issues experiment is enabled' do
-            where(onboarding_issues_experiment_enabled: [true, false])
+          context 'regardless of signup onboarding' do
+            where(signup_onboarding_enabled: [true, false])
 
             with_them do
               it { is_expected.to eq('Get started!') }
@@ -214,13 +214,13 @@ RSpec.describe EE::WelcomeHelper do
       end
 
       context 'and not in the invitation or oauth flow' do
-        where(:onboarding_issues_experiment_enabled, :result) do
+        where(:signup_onboarding_enabled, :result) do
           true  | 'Continue'
           false | 'Get started!'
         end
 
         with_them do
-          it 'depends on whether or not the onboarding issues experiment is enabled' do
+          it 'depends on whether or not signup onboarding is enabled' do
             is_expected.to eq(result)
           end
         end
@@ -231,7 +231,7 @@ RSpec.describe EE::WelcomeHelper do
   describe '#data_attributes_for_progress_bar_js_component' do
     before do
       allow(helper).to receive(:in_subscription_flow?).and_return(options_enabled)
-      allow(helper).to receive(:onboarding_issues_experiment_enabled?).and_return(options_enabled)
+      allow(helper).to receive(:signup_onboarding_enabled?).and_return(options_enabled)
     end
 
     subject { helper.tag(:div, data: helper.data_attributes_for_progress_bar_js_component) }
@@ -243,7 +243,7 @@ RSpec.describe EE::WelcomeHelper do
 
     with_them do
       it 'always includes both attributes with stringified boolean values' do
-        is_expected.to eq(%{<div data-is-in-subscription-flow="#{attr_values}" data-is-onboarding-issues-experiment-enabled="#{attr_values}" />})
+        is_expected.to eq(%{<div data-is-in-subscription-flow="#{attr_values}" data-is-signup-onboarding-enabled="#{attr_values}" />})
       end
     end
   end
@@ -277,6 +277,42 @@ RSpec.describe EE::WelcomeHelper do
     end
 
     it 'returns true if query param trial_flow is not set' do
+      allow(helper).to receive(:params).and_return({})
+
+      is_expected.to eq(false)
+    end
+  end
+
+  describe '#signup_onboarding_enabled?' do
+    subject { helper.signup_onboarding_enabled? }
+
+    where(:is_com, :feature_flag_enabled, :result) do
+      true  | true  | true
+      true  | false | false
+      false | true  | false
+      false | false | false
+    end
+
+    with_them do
+      before do
+        expect(Gitlab).to receive(:com?).and_return(is_com)
+        stub_feature_flags(signup_onboarding: feature_flag_enabled)
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#already_showed_trial_activation?' do
+    subject { helper.already_showed_trial_activation? }
+
+    it 'returns true if query param hide_trial_activation_banner is set to true' do
+      allow(helper).to receive(:params).and_return({ hide_trial_activation_banner: 'true' })
+
+      is_expected.to eq(true)
+    end
+
+    it 'returns true if query param hide_trial_activation_banner is not set' do
       allow(helper).to receive(:params).and_return({})
 
       is_expected.to eq(false)

@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
+import LdapOverrideButton from 'ee/members/components/ldap/ldap_override_button.vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import { member } from 'jest/members/mock_data';
-import LdapOverrideButton from 'ee/members/components/ldap/ldap_override_button.vue';
 import UserActionButtons from '~/members/components/action_buttons/user_action_buttons.vue';
 
 describe('UserActionButtons', () => {

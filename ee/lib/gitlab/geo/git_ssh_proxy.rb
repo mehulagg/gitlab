@@ -134,8 +134,7 @@ module Gitlab
 
       def base_headers
         @base_headers ||= {
-          'Geo-GL-Id' => gl_id,
-          'Authorization' => Gitlab::Geo::BaseRequest.new(scope: auth_scope).authorization
+          'Authorization' => Gitlab::Geo::BaseRequest.new(scope: auth_scope, gl_id: gl_id).authorization
         }
       end
 

@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlAlert } from '@gitlab/ui';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__, sprintf } from '~/locale';
 
 export default {
@@ -15,11 +16,6 @@ export default {
     quotaLimit: {
       type: Number,
       required: true,
-    },
-    runnersPath: {
-      type: String,
-      required: false,
-      default: null,
     },
     projectPath: {
       type: String,
@@ -42,6 +38,11 @@ export default {
         ),
         { quotaUsed: this.quotaUsed, quotaLimit: this.quotaLimit },
       );
+    },
+    runnersPath() {
+      return helpPagePath('ci/runners/README.html', {
+        anchor: 'set-maximum-job-timeout-for-a-runner',
+      });
     },
   },
 };

@@ -119,11 +119,10 @@ module API
     def find_project!(id)
       project = find_project(id)
 
-      if can?(current_user, :read_project, project)
-        project
-      else
-        not_found!('Project')
-      end
+      return project if can?(current_user, :read_project, project)
+      return unauthorized! if authenticate_non_public?
+
+      not_found!('Project')
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -139,11 +138,10 @@ module API
     def find_group!(id)
       group = find_group(id)
 
-      if can?(current_user, :read_group, group)
-        group
-      else
-        not_found!('Group')
-      end
+      return group if can?(current_user, :read_group, group)
+      return unauthorized! if authenticate_non_public?
+
+      not_found!('Group')
     end
 
     def check_namespace_access(namespace)
@@ -469,7 +467,7 @@ module API
     def handle_api_exception(exception)
       if report_exception?(exception)
         define_params_for_grape_middleware
-        Gitlab::ErrorTracking.with_context(current_user) do
+        Gitlab::ApplicationContext.with_context(user: current_user) do
           Gitlab::ErrorTracking.track_exception(exception)
         end
       end
@@ -655,6 +653,10 @@ module API
 
     def secret_token
       Gitlab::Shell.secret_token
+    end
+
+    def authenticate_non_public?
+      route_authentication_setting[:authenticate_non_public] && !current_user
     end
 
     def send_git_blob(repository, blob)

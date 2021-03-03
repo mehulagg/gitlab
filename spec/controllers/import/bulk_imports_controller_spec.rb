@@ -59,7 +59,14 @@ RSpec.describe Import::BulkImportsController do
               parsed_response: [
                 { 'id' => 1, 'full_name' => 'group1', 'full_path' => 'full/path/group1', 'web_url' => 'http://demo.host/full/path/group1' },
                 { 'id' => 2, 'full_name' => 'group2', 'full_path' => 'full/path/group2', 'web_url' => 'http://demo.host/full/path/group1' }
-              ]
+              ],
+              headers: {
+                'x-next-page' => '2',
+                'x-page' => '1',
+                'x-per-page' => '20',
+                'x-total' => '37',
+                'x-total-pages' => '2'
+              }
             )
           end
 
@@ -79,6 +86,17 @@ RSpec.describe Import::BulkImportsController do
             get :status, format: :json
 
             expect(json_response).to eq({ importable_data: client_response.parsed_response }.as_json)
+          end
+
+          it 'forwards pagination headers' do
+            get :status, format: :json
+
+            expect(response.headers['x-per-page']).to eq client_response.headers['x-per-page']
+            expect(response.headers['x-page']).to eq client_response.headers['x-page']
+            expect(response.headers['x-next-page']).to eq client_response.headers['x-next-page']
+            expect(response.headers['x-prev-page']).to eq client_response.headers['x-prev-page']
+            expect(response.headers['x-total']).to eq client_response.headers['x-total']
+            expect(response.headers['x-total-pages']).to eq client_response.headers['x-total-pages']
           end
 
           context 'when filtering' do
@@ -105,7 +123,7 @@ RSpec.describe Import::BulkImportsController do
             it 'denies network request' do
               get :status
 
-              expect(controller).to redirect_to(new_group_path)
+              expect(controller).to redirect_to(new_group_path(anchor: 'import-group-pane'))
               expect(flash[:alert]).to eq('Specified URL cannot be used: "Only allowed schemes are http, https"')
             end
           end
@@ -166,8 +184,15 @@ RSpec.describe Import::BulkImportsController do
       end
 
       describe 'POST create' do
-        let(:instance_url) { "http://fake-intance" }
+        let(:instance_url) { "http://fake-instance" }
+        let(:bulk_import) { create(:bulk_import) }
         let(:pat) { "fake-pat" }
+        let(:bulk_import_params) do
+          [{ "source_type" => "group_entity",
+            "source_full_path" => "full_path",
+            "destination_name" => "destination_name",
+            "destination_namespace" => "root" }]
+        end
 
         before do
           session[:bulk_import_gitlab_access_token] = pat
@@ -175,20 +200,28 @@ RSpec.describe Import::BulkImportsController do
         end
 
         it 'executes BulkImportService' do
-          bulk_import_params = [{ "source_type" => "group_entity",
-            "source_full_path" => "full_path",
-            "destination_name" =>
-            "destination_name",
-            "destination_namespace" => "root" }]
-
           expect_next_instance_of(
             BulkImportService, user, bulk_import_params, { url: instance_url, access_token: pat }) do |service|
-            expect(service).to receive(:execute)
+            allow(service).to receive(:execute).and_return(ServiceResponse.success(payload: bulk_import))
           end
 
           post :create, params: { bulk_import: bulk_import_params }
 
           expect(response).to have_gitlab_http_status(:ok)
+          expect(response.body).to eq({ id: bulk_import.id }.to_json)
+        end
+
+        it 'returns error when validation fails' do
+          error_response = ServiceResponse.error(message: 'Record invalid', http_status: :unprocessable_entity)
+          expect_next_instance_of(
+            BulkImportService, user, bulk_import_params, { url: instance_url, access_token: pat }) do |service|
+            allow(service).to receive(:execute).and_return(error_response)
+          end
+
+          post :create, params: { bulk_import: bulk_import_params }
+
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
+          expect(response.body).to eq({ error: 'Record invalid' }.to_json)
         end
       end
     end

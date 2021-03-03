@@ -5,7 +5,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 <!-- markdownlint-disable MD044 -->
+<!-- vale gitlab.Spelling = NO -->
 # The .gitlab-ci.yml file
+<!-- vale gitlab.Spelling = YES -->
 <!-- markdownlint-enable MD044 -->
 
 To use GitLab CI/CD, you need:
@@ -82,7 +84,7 @@ displayed by GitLab:
 ![pipeline status](img/pipeline_status.png)
 
 If anything goes wrong, you can
-[roll back](../environments/index.md#retrying-and-rolling-back) the changes:
+[roll back](../environments/index.md#retry-or-roll-back-a-deployment) the changes:
 
 ![rollback button](img/rollback.png)
 

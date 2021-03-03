@@ -23,6 +23,9 @@ export default {
       fallbackApprovalsRequired: (state) => state.approvals.fallbackApprovalsRequired,
     }),
   },
+  mounted() {
+    this.$root.$emit('hidden-inputs-mounted');
+  },
   INPUT_ID,
   INPUT_SOURCE_ID,
   INPUT_NAME,

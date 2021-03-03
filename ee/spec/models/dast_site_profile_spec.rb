@@ -16,6 +16,7 @@ RSpec.describe DastSiteProfile, type: :model do
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
     it { is_expected.to validate_presence_of(:project_id) }
     it { is_expected.to validate_presence_of(:dast_site_id) }
+    it { is_expected.to validate_presence_of(:name) }
 
     context 'when the project_id and dast_site.project_id do not match' do
       let(:project) { create(:project) }
@@ -48,6 +49,13 @@ RSpec.describe DastSiteProfile, type: :model do
           expect(subject.status).to eq('failed') # ensures guard passed
           expect(recorder.count).to be_zero
         end
+      end
+    end
+
+    describe '.with_name' do
+      it 'returns the dast_site_profiles with given name' do
+        result = DastSiteProfile.with_name(subject.name)
+        expect(result).to eq([subject])
       end
     end
   end
@@ -87,6 +95,32 @@ RSpec.describe DastSiteProfile, type: :model do
     context 'when dast_site_validation association does exist' do
       it 'is dast_site_validation#state' do
         expect(subject.status).to eq(subject.dast_site_validation.state)
+      end
+    end
+  end
+
+  describe '#referenced_in_security_policies' do
+    context 'there is no security_orchestration_policy_configuration assigned to project' do
+      it 'returns empty array' do
+        expect(subject.referenced_in_security_policies).to eq([])
+      end
+    end
+
+    context 'there is security_orchestration_policy_configuration assigned to project' do
+      let(:security_orchestration_policy_configuration) { instance_double(Security::OrchestrationPolicyConfiguration, present?: true, active_policy_names_with_dast_site_profile: ['Policy Name']) }
+
+      before do
+        allow(subject.project).to receive(:security_orchestration_policy_configuration).and_return(security_orchestration_policy_configuration)
+      end
+
+      it 'calls security_orchestration_policy_configuration.active_policy_names_with_dast_site_profile with profile name' do
+        expect(security_orchestration_policy_configuration).to receive(:active_policy_names_with_dast_site_profile).with(subject.name)
+
+        subject.referenced_in_security_policies
+      end
+
+      it 'returns the referenced policy name' do
+        expect(subject.referenced_in_security_policies).to eq(['Policy Name'])
       end
     end
   end

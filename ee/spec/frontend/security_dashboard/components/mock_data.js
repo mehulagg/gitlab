@@ -37,6 +37,9 @@ export const generateVulnerabilities = () => [
     issueLinks: {
       nodes: [{ issue: { iid: 15 } }],
     },
+    externalIssueLinks: {
+      nodes: [{ issue: { iid: 15, externalTracker: 'jira' } }],
+    },
   },
   {
     id: 'id_1',

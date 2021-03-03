@@ -1,9 +1,12 @@
 <script>
-import { GlBadge, GlButton, GlButtonGroup, GlTabs, GlTab } from '@gitlab/ui';
+import { GlBadge, GlButton, GlButtonGroup, GlTabs, GlTab, GlTooltipDirective } from '@gitlab/ui';
 
 import { FilterState } from '../constants';
 
 export default {
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   FilterState,
   components: {
     GlBadge,
@@ -28,11 +31,6 @@ export default {
     canCreateRequirement: {
       type: Boolean,
       required: false,
-    },
-    showUploadCsv: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
   },
   computed: {
@@ -88,14 +86,16 @@ export default {
     <div v-if="isOpenTab && canCreateRequirement" class="nav-controls">
       <gl-button-group>
         <gl-button
-          v-if="showUploadCsv"
+          v-gl-tooltip
+          :title="__('Export as CSV')"
           category="secondary"
           :disabled="showCreateForm"
           icon="export"
           @click="$emit('click-export-requirements')"
         />
         <gl-button
-          v-if="showUploadCsv"
+          v-gl-tooltip
+          :title="__('Import requirements')"
           category="secondary"
           class="js-import-requirements qa-import-requirements-button"
           :disabled="showCreateForm"

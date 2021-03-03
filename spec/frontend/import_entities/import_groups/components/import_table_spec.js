@@ -1,24 +1,47 @@
+import {
+  GlEmptyState,
+  GlLoadingIcon,
+  GlSearchBoxByClick,
+  GlSprintf,
+  GlDropdown,
+  GlDropdownItem,
+} from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import { GlLoadingIcon } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
 import createMockApollo from 'helpers/mock_apollo_helper';
-import ImportTableRow from '~/import_entities/import_groups/components/import_table_row.vue';
-import ImportTable from '~/import_entities/import_groups/components/import_table.vue';
-import setTargetNamespaceMutation from '~/import_entities/import_groups/graphql/mutations/set_target_namespace.mutation.graphql';
-import setNewNameMutation from '~/import_entities/import_groups/graphql/mutations/set_new_name.mutation.graphql';
-import importGroupMutation from '~/import_entities/import_groups/graphql/mutations/import_group.mutation.graphql';
-
+import { stubComponent } from 'helpers/stub_component';
+import waitForPromises from 'helpers/wait_for_promises';
 import { STATUSES } from '~/import_entities/constants';
+import ImportTable from '~/import_entities/import_groups/components/import_table.vue';
+import ImportTableRow from '~/import_entities/import_groups/components/import_table_row.vue';
+import importGroupMutation from '~/import_entities/import_groups/graphql/mutations/import_group.mutation.graphql';
+import setNewNameMutation from '~/import_entities/import_groups/graphql/mutations/set_new_name.mutation.graphql';
+import setTargetNamespaceMutation from '~/import_entities/import_groups/graphql/mutations/set_target_namespace.mutation.graphql';
+import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
 
 import { availableNamespacesFixture, generateFakeEntry } from '../graphql/fixtures';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
 
+const GlDropdownStub = stubComponent(GlDropdown, {
+  template: '<div><h1 ref="text"><slot name="button-content"></slot></h1><slot></slot></div>',
+});
+
 describe('import table', () => {
   let wrapper;
   let apolloProvider;
+
+  const SOURCE_URL = 'https://demo.host';
+  const FAKE_GROUP = generateFakeEntry({ id: 1, status: STATUSES.NONE });
+  const FAKE_GROUPS = [
+    generateFakeEntry({ id: 1, status: STATUSES.NONE }),
+    generateFakeEntry({ id: 2, status: STATUSES.FINISHED }),
+  ];
+  const FAKE_PAGE_INFO = { page: 1, perPage: 20, total: 40, totalPages: 2 };
+
+  const findPaginationDropdown = () => wrapper.findComponent(GlDropdown);
+  const findPaginationDropdownText = () => findPaginationDropdown().find({ ref: 'text' }).text();
 
   const createComponent = ({ bulkImportSourceGroups }) => {
     apolloProvider = createMockApollo([], {
@@ -34,6 +57,14 @@ describe('import table', () => {
     });
 
     wrapper = shallowMount(ImportTable, {
+      propsData: {
+        groupPathRegex: /.*/,
+        sourceUrl: SOURCE_URL,
+      },
+      stubs: {
+        GlSprintf,
+        GlDropdown: GlDropdownStub,
+      },
       localVue,
       apolloProvider,
     });
@@ -62,25 +93,46 @@ describe('import table', () => {
     expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
   });
 
-  it('renders import row for each group in response', async () => {
-    const FAKE_GROUPS = [
-      generateFakeEntry({ id: 1, status: STATUSES.NONE }),
-      generateFakeEntry({ id: 2, status: STATUSES.FINISHED }),
-    ];
+  it('renders message about empty state when no groups are available for import', async () => {
     createComponent({
-      bulkImportSourceGroups: () => FAKE_GROUPS,
+      bulkImportSourceGroups: () => ({
+        nodes: [],
+        pageInfo: FAKE_PAGE_INFO,
+      }),
+    });
+    await waitForPromises();
+
+    expect(wrapper.find(GlEmptyState).props().title).toBe('You have no groups to import');
+  });
+
+  it('renders import row for each group in response', async () => {
+    createComponent({
+      bulkImportSourceGroups: () => ({
+        nodes: FAKE_GROUPS,
+        pageInfo: FAKE_PAGE_INFO,
+      }),
     });
     await waitForPromises();
 
     expect(wrapper.findAll(ImportTableRow)).toHaveLength(FAKE_GROUPS.length);
   });
 
-  describe('converts row events to mutation invocations', () => {
-    const FAKE_GROUP = generateFakeEntry({ id: 1, status: STATUSES.NONE });
+  it('does not render status string when result list is empty', async () => {
+    createComponent({
+      bulkImportSourceGroups: jest.fn().mockResolvedValue({
+        nodes: [],
+        pageInfo: FAKE_PAGE_INFO,
+      }),
+    });
+    await waitForPromises();
 
+    expect(wrapper.text()).not.toContain('Showing 1-0');
+  });
+
+  describe('converts row events to mutation invocations', () => {
     beforeEach(() => {
       createComponent({
-        bulkImportSourceGroups: () => [FAKE_GROUP],
+        bulkImportSourceGroups: () => ({ nodes: [FAKE_GROUP], pageInfo: FAKE_PAGE_INFO }),
       });
       return waitForPromises();
     });
@@ -98,6 +150,131 @@ describe('import table', () => {
         mutation,
         variables,
       });
+    });
+  });
+
+  describe('pagination', () => {
+    const bulkImportSourceGroupsQueryMock = jest
+      .fn()
+      .mockResolvedValue({ nodes: [FAKE_GROUP], pageInfo: FAKE_PAGE_INFO });
+
+    beforeEach(() => {
+      createComponent({
+        bulkImportSourceGroups: bulkImportSourceGroupsQueryMock,
+      });
+      return waitForPromises();
+    });
+
+    it('correctly passes pagination info from query', () => {
+      expect(wrapper.find(PaginationLinks).props().pageInfo).toStrictEqual(FAKE_PAGE_INFO);
+    });
+
+    it('renders pagination dropdown', () => {
+      expect(findPaginationDropdown().exists()).toBe(true);
+    });
+
+    it('updates page size when selected in Dropdown', async () => {
+      const otherOption = wrapper.findAllComponents(GlDropdownItem).at(1);
+      expect(otherOption.text()).toMatchInterpolatedText('50 items per page');
+
+      otherOption.vm.$emit('click');
+      await waitForPromises();
+
+      expect(findPaginationDropdownText()).toMatchInterpolatedText('50 items per page');
+    });
+
+    it('updates page when page change is requested', async () => {
+      const REQUESTED_PAGE = 2;
+      wrapper.find(PaginationLinks).props().change(REQUESTED_PAGE);
+
+      await waitForPromises();
+      expect(bulkImportSourceGroupsQueryMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ page: REQUESTED_PAGE }),
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+
+    it('updates status text when page is changed', async () => {
+      const REQUESTED_PAGE = 2;
+      bulkImportSourceGroupsQueryMock.mockResolvedValue({
+        nodes: [FAKE_GROUP],
+        pageInfo: {
+          page: 2,
+          total: 38,
+          perPage: 20,
+          totalPages: 2,
+        },
+      });
+      wrapper.find(PaginationLinks).props().change(REQUESTED_PAGE);
+      await waitForPromises();
+
+      expect(wrapper.text()).toContain('Showing 21-21 of 38 groups from');
+    });
+  });
+
+  describe('filters', () => {
+    const bulkImportSourceGroupsQueryMock = jest
+      .fn()
+      .mockResolvedValue({ nodes: [FAKE_GROUP], pageInfo: FAKE_PAGE_INFO });
+
+    beforeEach(() => {
+      createComponent({
+        bulkImportSourceGroups: bulkImportSourceGroupsQueryMock,
+      });
+      return waitForPromises();
+    });
+
+    const findFilterInput = () => wrapper.find(GlSearchBoxByClick);
+
+    it('properly passes filter to graphql query when search box is submitted', async () => {
+      createComponent({
+        bulkImportSourceGroups: bulkImportSourceGroupsQueryMock,
+      });
+      await waitForPromises();
+
+      const FILTER_VALUE = 'foo';
+      findFilterInput().vm.$emit('submit', FILTER_VALUE);
+      await waitForPromises();
+
+      expect(bulkImportSourceGroupsQueryMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ filter: FILTER_VALUE }),
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+
+    it('updates status string when search box is submitted', async () => {
+      createComponent({
+        bulkImportSourceGroups: bulkImportSourceGroupsQueryMock,
+      });
+      await waitForPromises();
+
+      const FILTER_VALUE = 'foo';
+      findFilterInput().vm.$emit('submit', FILTER_VALUE);
+      await waitForPromises();
+
+      expect(wrapper.text()).toContain('Showing 1-1 of 40 groups matching filter "foo" from');
+    });
+
+    it('properly resets filter in graphql query when search box is cleared', async () => {
+      const FILTER_VALUE = 'foo';
+      findFilterInput().vm.$emit('submit', FILTER_VALUE);
+      await waitForPromises();
+
+      bulkImportSourceGroupsQueryMock.mockClear();
+      await apolloProvider.defaultClient.resetStore();
+      findFilterInput().vm.$emit('clear');
+      await waitForPromises();
+
+      expect(bulkImportSourceGroupsQueryMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ filter: '' }),
+        expect.anything(),
+        expect.anything(),
+      );
     });
   });
 });

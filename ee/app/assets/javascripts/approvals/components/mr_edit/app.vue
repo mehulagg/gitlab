@@ -1,49 +1,39 @@
 <script>
-import { uniqueId } from 'lodash';
-import {
-  GlIcon,
-  GlButton,
-  GlCollapse,
-  GlCollapseToggleDirective,
-  GlSafeHtmlDirective,
-} from '@gitlab/ui';
+import { GlSafeHtmlDirective, GlAccordion, GlAccordionItem, GlSprintf, GlLink } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { helpPagePath } from '~/helpers/help_page_helper';
+import { __, n__, sprintf, s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { __, n__, sprintf } from '~/locale';
 import App from '../app.vue';
 import MrRules from './mr_rules.vue';
 import MrRulesHiddenInputs from './mr_rules_hidden_inputs.vue';
 
 export default {
   components: {
-    GlIcon,
-    GlButton,
-    GlCollapse,
+    GlAccordion,
+    GlAccordionItem,
+    GlSprintf,
+    GlLink,
     App,
     MrRules,
     MrRulesHiddenInputs,
   },
   directives: {
-    CollapseToggle: GlCollapseToggleDirective,
     SafeHtml: GlSafeHtmlDirective,
   },
   mixins: [glFeatureFlagsMixin()],
-  data() {
-    return {
-      collapseId: uniqueId('approval-rules-expandable-section-'),
-      isCollapsed: false,
-    };
-  },
   computed: {
     ...mapState({
       rules: (state) => state.approvals.rules,
       canOverride: (state) => state.settings.canOverride,
+      canUpdateApprovers: (state) => state.settings.canUpdateApprovers,
+      showCodeOwnerTip: (state) => state.settings.showCodeOwnerTip,
     }),
-    toggleIcon() {
-      return this.isCollapsed ? 'chevron-down' : 'chevron-right';
+    accordionTitle() {
+      return s__('ApprovalRule|Approval rules');
     },
     isCollapseFeatureEnabled() {
-      return this.glFeatures.mergeRequestReviewers && this.glFeatures.mrCollapsedApprovalRules;
+      return this.glFeatures.mrCollapsedApprovalRules;
     },
     hasOptionalRules() {
       return this.rules.every((r) => r.approvalsRequired === 0);
@@ -110,6 +100,7 @@ export default {
       return null;
     },
   },
+  codeOwnerHelpPage: helpPagePath('user/project/code_owners'),
 };
 </script>
 
@@ -120,26 +111,36 @@ export default {
       class="gl-mb-0 gl-text-gray-500"
       data-testid="collapsedSummaryText"
     ></p>
-    <gl-button
-      v-if="canOverride"
-      v-collapse-toggle="collapseId"
-      variant="link"
-      button-text-classes="flex"
-    >
-      <gl-icon :name="toggleIcon" class="mr-1" />
-      <span>{{ s__('ApprovalRule|Approval rules') }}</span>
-    </gl-button>
 
-    <gl-collapse
-      :id="collapseId"
-      v-model="isCollapsed"
-      class="gl-mt-3 gl-ml-5 gl-mb-5 gl-transition-medium"
-    >
-      <app>
-        <mr-rules slot="rules" />
-        <mr-rules-hidden-inputs slot="footer" />
-      </app>
-    </gl-collapse>
+    <gl-accordion>
+      <gl-accordion-item :title="accordionTitle">
+        <app>
+          <mr-rules slot="rules" />
+          <div slot="footer">
+            <mr-rules-hidden-inputs />
+            <div
+              v-if="canUpdateApprovers && showCodeOwnerTip"
+              class="form-text text-muted"
+              data-testid="codeowners-tip"
+            >
+              <gl-sprintf
+                :message="
+                  __(
+                    'Tip: add a %{linkStart}CODEOWNERS%{linkEnd} to automatically add approvers based on file paths and file types.',
+                  )
+                "
+              >
+                <template #link="{ content }">
+                  <gl-link :href="$options.codeOwnerHelpPage" target="_blank">{{
+                    content
+                  }}</gl-link>
+                </template>
+              </gl-sprintf>
+            </div>
+          </div>
+        </app>
+      </gl-accordion-item>
+    </gl-accordion>
   </div>
   <app v-else>
     <mr-rules slot="rules" />

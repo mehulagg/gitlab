@@ -1,10 +1,10 @@
 <script>
 import LinkedGraphWrapper from '../graph_shared/linked_graph_wrapper.vue';
 import LinksLayer from '../graph_shared/links_layer.vue';
+import { DOWNSTREAM, MAIN, UPSTREAM, ONE_COL_WIDTH } from './constants';
 import LinkedPipelinesColumn from './linked_pipelines_column.vue';
 import StageColumnComponent from './stage_column_component.vue';
-import { DOWNSTREAM, MAIN, UPSTREAM } from './constants';
-import { reportToSentry } from './utils';
+import { reportToSentry, validateConfigPaths } from './utils';
 
 export default {
   name: 'PipelineGraph',
@@ -15,14 +15,19 @@ export default {
     StageColumnComponent,
   },
   props: {
-    isLinkedPipeline: {
-      type: Boolean,
-      required: false,
-      default: false,
+    configPaths: {
+      type: Object,
+      required: true,
+      validator: validateConfigPaths,
     },
     pipeline: {
       type: Object,
       required: true,
+    },
+    isLinkedPipeline: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     type: {
       type: String,
@@ -66,6 +71,12 @@ export default {
     hasUpstreamPipelines() {
       return Boolean(this.pipeline?.upstream?.length > 0);
     },
+    metricsConfig() {
+      return {
+        path: this.configPaths.metricsPath,
+        collectMetrics: true,
+      };
+    },
     // The show downstream check prevents showing redundant linked columns
     showDownstreamPipelines() {
       return (
@@ -86,11 +97,11 @@ export default {
     reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
   mounted() {
-    this.measurements = this.getMeasurements();
+    this.getMeasurements();
   },
   methods: {
     getMeasurements() {
-      return {
+      this.measurements = {
         width: this.$refs[this.containerId].scrollWidth,
         height: this.$refs[this.containerId].scrollHeight,
       };
@@ -100,6 +111,13 @@ export default {
     },
     setJob(jobName) {
       this.hoveredJobName = jobName;
+    },
+    slidePipelineContainer() {
+      this.$refs.mainPipelineContainer.scrollBy({
+        left: ONE_COL_WIDTH,
+        top: 0,
+        behavior: 'smooth',
+      });
     },
     togglePipelineExpanded(jobName, expanded) {
       this.pipelineExpanded = {
@@ -116,13 +134,15 @@ export default {
 <template>
   <div class="js-pipeline-graph">
     <div
-      class="gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
-      :class="{ 'gl-pipeline-min-h gl-py-5': !isLinkedPipeline }"
+      ref="mainPipelineContainer"
+      class="gl-display-flex gl-position-relative gl-bg-gray-10 gl-white-space-nowrap"
+      :class="{ 'gl-pipeline-min-h gl-py-5 gl-overflow-auto': !isLinkedPipeline }"
     >
       <linked-graph-wrapper>
         <template #upstream>
           <linked-pipelines-column
             v-if="showUpstreamPipelines"
+            :config-paths="configPaths"
             :linked-pipelines="upstreamPipelines"
             :column-title="__('Upstream')"
             :type="$options.pipelineTypeConstants.UPSTREAM"
@@ -137,6 +157,7 @@ export default {
               :container-id="containerId"
               :container-measurements="measurements"
               :highlighted-job="hoveredJobName"
+              :metrics-config="metricsConfig"
               default-link-color="gl-stroke-transparent"
               @error="onError"
               @highlightedJobsChange="updateHighlightedJobs"
@@ -153,6 +174,7 @@ export default {
                 :pipeline-id="pipeline.id"
                 @refreshPipelineGraph="$emit('refreshPipelineGraph')"
                 @jobHover="setJob"
+                @updateMeasurements="getMeasurements"
               />
             </links-layer>
           </div>
@@ -160,11 +182,14 @@ export default {
         <template #downstream>
           <linked-pipelines-column
             v-if="showDownstreamPipelines"
+            class="gl-mr-6"
+            :config-paths="configPaths"
             :linked-pipelines="downstreamPipelines"
             :column-title="__('Downstream')"
             :type="$options.pipelineTypeConstants.DOWNSTREAM"
             @downstreamHovered="setJob"
             @pipelineExpandToggle="togglePipelineExpanded"
+            @scrollContainer="slidePipelineContainer"
             @error="onError"
           />
         </template>

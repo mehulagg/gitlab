@@ -46,12 +46,14 @@ RSpec.describe Boards::UpdateService, services: true do
 
     it 'filters unpermitted params when scoped issue board is not enabled' do
       stub_licensed_features(scoped_issue_board: false)
-      params = { milestone_id: double, iteration_id: double, assignee_id: double, label_ids: double, weight: double, hide_backlog_list: true, hide_closed_list: true }
+      unpermitted_params = { milestone_id: double, iteration_id: double, assignee_id: double, label_ids: double, weight: double }
+      permitted_params = { hide_backlog_list: true, hide_closed_list: true }
+      params = unpermitted_params.merge(permitted_params)
 
       service = described_class.new(project, double, params)
       service.execute(board)
 
-      expected_attributes = { milestone: nil, iteration: nil, assignee: nil, labels: [], hide_backlog_list: false, hide_closed_list: false }
+      expected_attributes = { milestone: nil, iteration: nil, assignee: nil, labels: [], hide_backlog_list: true, hide_closed_list: true }
       expect(board.reload).to have_attributes(expected_attributes)
     end
 

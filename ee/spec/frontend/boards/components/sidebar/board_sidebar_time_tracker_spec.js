@@ -24,7 +24,7 @@ describe('BoardSidebarTimeTracker', () => {
 
   beforeEach(() => {
     store = createStore();
-    store.state.issues = {
+    store.state.boardItems = {
       1: {
         timeEstimate: 3600,
         totalTimeSpent: 1800,

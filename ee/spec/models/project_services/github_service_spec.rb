@@ -70,9 +70,9 @@ RSpec.describe GithubService do
     end
   end
 
-  describe '#detailed_description' do
+  describe '#help' do
     it 'links to mirroring settings' do
-      expect(subject.detailed_description).to match(/href=.*mirroring/)
+      expect(subject.help).to match(/href=.*mirroring/)
     end
   end
 

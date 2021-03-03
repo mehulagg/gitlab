@@ -10,7 +10,7 @@ import TimeboxSummaryCards from 'ee/burndown_chart/components/timebox_summary_ca
 import { useFakeDate } from 'helpers/fake_date';
 import { day1, day2, day3, day4 } from '../mock_data';
 
-function fakeDate({ date }) {
+function useFakeDateFromDay({ date }) {
   const [year, month, day] = date.split('-');
 
   useFakeDate(year, month - 1, day);
@@ -39,7 +39,7 @@ describe('burndown_chart', () => {
     burndownEventsPath: '/api/v4/projects/1234/milestones/1/burndown_events',
   };
 
-  const createComponent = ({ props = {}, data = {} } = {}) => {
+  const createComponent = ({ props = {}, data = {}, loading = false } = {}) => {
     wrapper = shallowMount(BurnCharts, {
       propsData: {
         ...defaultProps,
@@ -49,7 +49,7 @@ describe('burndown_chart', () => {
         $apollo: {
           queries: {
             report: {
-              loading: false,
+              loading,
             },
           },
         },
@@ -67,6 +67,20 @@ describe('burndown_chart', () => {
   afterEach(() => {
     mock.restore();
     wrapper.destroy();
+  });
+
+  it('passes loading=true through to charts', () => {
+    createComponent({ loading: true });
+
+    expect(findBurndownChart().props('loading')).toBe(true);
+    expect(findBurnupChart().props('loading')).toBe(true);
+  });
+
+  it('passes loading=false through to charts', () => {
+    createComponent({ loading: false });
+
+    expect(findBurndownChart().props('loading')).toBe(false);
+    expect(findBurnupChart().props('loading')).toBe(false);
   });
 
   it('includes Issues and Issue weight buttons', () => {
@@ -201,12 +215,12 @@ describe('burndown_chart', () => {
 
   // some separate tests for the update function since it has a bunch of logic
   describe('padSparseBurnupData function', () => {
+    useFakeDateFromDay(day4);
+
     beforeEach(() => {
       createComponent({
         props: { startDate: day1.date, dueDate: day4.date },
       });
-
-      fakeDate(day4);
     });
 
     it('pads data from startDate if no startDate values', () => {
@@ -236,15 +250,18 @@ describe('burndown_chart', () => {
       });
     });
 
-    it('if dueDate is in the future, pad data up to current date using last existing value', () => {
-      fakeDate(day3);
+    describe('when dueDate is in the future', () => {
+      // day3 is before the day4 we set to dueDate in the beforeEach
+      useFakeDateFromDay(day3);
 
-      const result = wrapper.vm.padSparseBurnupData([day1, day2]);
+      it('pad data up to current date using last existing value', () => {
+        const result = wrapper.vm.padSparseBurnupData([day1, day2]);
 
-      expect(result.length).toBe(3);
-      expect(result[2]).toEqual({
-        ...day2,
-        date: day3.date,
+        expect(result.length).toBe(3);
+        expect(result[2]).toEqual({
+          ...day2,
+          date: day3.date,
+        });
       });
     });
 

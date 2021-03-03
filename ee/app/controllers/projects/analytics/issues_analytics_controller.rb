@@ -29,10 +29,6 @@ class Projects::Analytics::IssuesAnalyticsController < Projects::ApplicationCont
 
   private
 
-  def authorize_read_issue_analytics!
-    render_404 unless project.feature_available?(:issues_analytics)
-  end
-
   def finder_type
     IssuesFinder
   end

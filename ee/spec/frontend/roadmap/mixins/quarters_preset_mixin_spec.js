@@ -1,9 +1,9 @@
+import { shallowMount } from '@vue/test-utils';
 import EpicItemTimelineComponent from 'ee/roadmap/components/epic_item_timeline.vue';
 import { PRESET_TYPES } from 'ee/roadmap/constants';
 import { getTimeframeForQuartersView } from 'ee/roadmap/utils/roadmap_utils';
 
 import { mockTimeframeInitialDate, mockEpic } from 'ee_jest/roadmap/mock_data';
-import { shallowMount } from '@vue/test-utils';
 
 const mockTimeframeQuarters = getTimeframeForQuartersView(mockTimeframeInitialDate);
 

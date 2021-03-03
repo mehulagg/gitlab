@@ -15,14 +15,14 @@ module QA
       end
 
       def fabricate!
-        Page::Main::Menu.perform(&:click_settings_link)
+        Page::Main::Menu.perform(&:click_edit_profile_link)
         Page::Profile::Menu.perform(&:click_access_tokens)
 
         Page::Profile::PersonalAccessTokens.perform do |token_page|
           token_page.fill_token_name(name || 'api-test-token')
           token_page.check_api
           # Expire in 2 days just in case the token is created just before midnight
-          token_page.fill_expiry_date(Date.today + 2)
+          token_page.fill_expiry_date(Time.now.utc.to_date + 2)
           token_page.click_create_token_button
         end
       end

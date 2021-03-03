@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlBadge } from '@gitlab/ui';
-import { SCAN_TYPE } from 'ee/security_configuration/dast_scanner_profiles/constants';
+import { shallowMount } from '@vue/test-utils';
 import DastScanTypeBadge from 'ee/security_configuration/dast_profiles/components/dast_scan_type_badge.vue';
+import { SCAN_TYPE } from 'ee/security_configuration/dast_scanner_profiles/constants';
 
 describe('EE - DastScanTypeBadge', () => {
   let wrapper;

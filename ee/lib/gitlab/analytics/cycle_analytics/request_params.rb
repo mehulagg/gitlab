@@ -16,6 +16,8 @@ module Gitlab
           :created_after,
           :author_username,
           :milestone_title,
+          :sort,
+          :direction,
           label_name: [].freeze,
           assignee_username: [].freeze,
           project_ids: [].freeze
@@ -35,6 +37,8 @@ module Gitlab
         attribute :group
         attribute :current_user
         attribute :value_stream
+        attribute :sort
+        attribute :direction
 
         FINDER_PARAM_NAMES.each do |param_name|
           attribute param_name
@@ -62,7 +66,9 @@ module Gitlab
             current_user: current_user,
             from: created_after,
             to: created_before,
-            project_ids: project_ids
+            project_ids: project_ids,
+            sort: sort&.to_sym,
+            direction: direction&.to_sym
           }.merge(attributes.symbolize_keys.slice(*FINDER_PARAM_NAMES))
         end
 
@@ -77,6 +83,8 @@ module Gitlab
             attrs[:assignees] = assignee_username.to_json if assignee_username.present?
             attrs[:author] = author_username if author_username.present?
             attrs[:milestone] = milestone_title if milestone_title.present?
+            attrs[:sort] = sort if sort.present?
+            attrs[:direction] = direction if direction.present?
           end
         end
 

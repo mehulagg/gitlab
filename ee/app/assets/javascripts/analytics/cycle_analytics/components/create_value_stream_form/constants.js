@@ -1,21 +1,23 @@
 import { __, s__, sprintf } from '~/locale';
-import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 
 export const NAME_MAX_LENGTH = 100;
 
-export const I18N = {
-  FORM_TITLE: __('Create Value Stream'),
+export const i18n = {
+  FORM_TITLE: s__('CreateValueStreamForm|Create Value Stream'),
+  EDIT_FORM_TITLE: s__('CreateValueStreamForm|Edit Value Stream'),
+  EDIT_FORM_ACTION: s__('CreateValueStreamForm|Save Value Stream'),
   FORM_CREATED: s__("CreateValueStreamForm|'%{name}' Value Stream created"),
+  FORM_EDITED: s__("CreateValueStreamForm|'%{name}' Value Stream saved"),
   RECOVER_HIDDEN_STAGE: s__('CreateValueStreamForm|Recover hidden stage'),
   RESTORE_HIDDEN_STAGE: s__('CreateValueStreamForm|Restore stage'),
-  RESTORE_STAGES: s__('CreateValueStreamForm|Restore defaults'),
+  RESTORE_DEFAULTS: s__('CreateValueStreamForm|Restore defaults'),
   RECOVER_STAGE_TITLE: s__('CreateValueStreamForm|Default stages'),
   RECOVER_STAGES_VISIBLE: s__('CreateValueStreamForm|All default stages are currently visible'),
   SELECT_START_EVENT: s__('CreateValueStreamForm|Select start event'),
   SELECT_END_EVENT: s__('CreateValueStreamForm|Select end event'),
-  FORM_FIELD_NAME_LABEL: s__('CreateValueStreamForm|Name'),
-  FORM_FIELD_NAME_PLACEHOLDER: s__('CreateValueStreamForm|Enter a name for the stage'),
-  FIELD_STAGE_NAME_PLACEHOLDER: s__('CreateValueStreamForm|Enter stage name'),
+  FORM_FIELD_NAME_LABEL: s__('CreateValueStreamForm|Value Stream name'),
+  FORM_FIELD_NAME_PLACEHOLDER: s__('CreateValueStreamForm|Enter value stream name'),
+  FORM_FIELD_STAGE_NAME_PLACEHOLDER: s__('CreateValueStreamForm|Enter stage name'),
   FORM_FIELD_START_EVENT: s__('CreateValueStreamForm|Start event'),
   FORM_FIELD_START_EVENT_LABEL: s__('CreateValueStreamForm|Start event label'),
   FORM_FIELD_END_EVENT: s__('CreateValueStreamForm|End event'),
@@ -24,19 +26,30 @@ export const I18N = {
   DEFAULT_FIELD_END_EVENT_LABEL: s__('CreateValueStreamForm|End event: '),
   BTN_UPDATE_STAGE: s__('CreateValueStreamForm|Update stage'),
   BTN_ADD_STAGE: s__('CreateValueStreamForm|Add stage'),
+  BTN_ADD_ANOTHER_STAGE: s__('CreateValueStreamForm|Add another stage'),
   TITLE_EDIT_STAGE: s__('CreateValueStreamForm|Editing stage'),
   TITLE_ADD_STAGE: s__('CreateValueStreamForm|New stage'),
   BTN_CANCEL: __('Cancel'),
   STAGE_INDEX: s__('CreateValueStreamForm|Stage %{index}'),
   HIDDEN_DEFAULT_STAGE: s__('CreateValueStreamForm|%{name} (default)'),
+  TEMPLATE_DEFAULT: s__('CreateValueStreamForm|Create from default template'),
+  TEMPLATE_BLANK: s__('CreateValueStreamForm|Create from no template'),
+  ISSUE_STAGE_END: s__('CreateValueStreamForm|Issue stage end'),
+  PLAN_STAGE_START: s__('CreateValueStreamForm|Plan stage start'),
+  CODE_STAGE_START: s__('CreateValueStreamForm|Code stage start'),
+  DEFAULT_STAGE_FEATURES: s__(
+    'CreateValueStreamForm|Default stages can only be hidden or re-ordered',
+  ),
 };
 
 export const ERRORS = {
-  MIN_LENGTH: s__('CreateValueStreamForm|Name is required'),
+  VALUE_STREAM_NAME_MIN_LENGTH: s__('CreateValueStreamForm|Name is required'),
+  STAGE_NAME_MIN_LENGTH: s__('CreateValueStreamForm|Stage name is required'),
   MAX_LENGTH: sprintf(s__('CreateValueStreamForm|Maximum length %{maxLength} characters'), {
     maxLength: NAME_MAX_LENGTH,
   }),
   START_EVENT_REQUIRED: s__('CreateValueStreamForm|Please select a start event first'),
+  END_EVENT_REQUIRED: s__('CreateValueStreamForm|Please select an end event'),
   STAGE_NAME_EXISTS: s__('CreateValueStreamForm|Stage name already exists'),
   INVALID_EVENT_PAIRS: s__(
     'CreateValueStreamForm|Start event changed, please select a valid end event',
@@ -48,67 +61,48 @@ export const STAGE_SORT_DIRECTION = {
   DOWN: 'DOWN',
 };
 
-export const defaultErrors = {
-  id: [],
-  name: [],
-  startEventIdentifier: [],
-  startEventLabelId: [],
-  endEventIdentifier: [],
-  endEventLabelId: [],
-};
+export const formFieldKeys = [
+  'id',
+  'name',
+  'startEventIdentifier',
+  'endEventIdentifier',
+  'startEventLabelId',
+  'endEventLabelId',
+];
 
-export const defaultFields = {
-  id: null,
-  name: null,
-  startEventIdentifier: null,
-  startEventLabelId: null,
-  endEventIdentifier: null,
-  endEventLabelId: null,
-};
+export const defaultFields = formFieldKeys.reduce((acc, field) => ({ ...acc, [field]: null }), {});
+export const defaultErrors = formFieldKeys.reduce((acc, field) => ({ ...acc, [field]: [] }), {});
 
-const defaultStageCommonFields = { custom: false, hidden: false };
+export const defaultCustomStageFields = { ...defaultFields, custom: true };
 
-/**
- * These stage configs are copied from the https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/cycle_analytics
- * This is a stopgap solution and we should eventually provide these from an API endpoint
- *
- * More information: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49094#note_464116439
- */
-const BASE_DEFAULT_STAGE_CONFIG = [
+export const PRESET_OPTIONS_DEFAULT = 'default';
+export const PRESET_OPTIONS_BLANK = 'blank';
+export const PRESET_OPTIONS = [
   {
-    id: 'issue',
-    startEventIdentifier: ['issue_created'],
-    endEventIdentifier: ['issue_first_associated_with_milestone', 'issue_first_added_to_board'],
+    text: i18n.TEMPLATE_DEFAULT,
+    value: PRESET_OPTIONS_DEFAULT,
   },
   {
-    id: 'plan',
-    startEventIdentifier: ['issue_first_associated_with_milestone', 'issue_first_added_to_board'],
-    endEventIdentifier: ['issue_first_mentioned_in_commit'],
-  },
-  {
-    id: 'code',
-    startEventIdentifier: ['issue_first_mentioned_in_commit'],
-    endEventIdentifier: ['merge_request_created'],
-  },
-  {
-    id: 'test',
-    startEventIdentifier: ['merge_request_last_build_started'],
-    endEventIdentifier: ['merge_request_last_build_finished'],
-  },
-  {
-    id: 'review',
-    startEventIdentifier: ['merge_request_created'],
-    endEventIdentifier: ['merge_request_merged'],
-  },
-  {
-    id: 'staging',
-    startEventIdentifier: ['merge_request_merged'],
-    endEventIdentifier: ['merge_request_first_deployed_to_production'],
+    text: i18n.TEMPLATE_BLANK,
+    value: PRESET_OPTIONS_BLANK,
   },
 ];
 
-export const DEFAULT_STAGE_CONFIG = BASE_DEFAULT_STAGE_CONFIG.map(({ id, ...rest }) => ({
-  ...rest,
-  ...defaultStageCommonFields,
-  name: capitalizeFirstCharacter(id),
-}));
+// These events can only be set on the back end, they are used in the
+// initial configuration of some default stages, but should not be
+// selectable by users via the form, they are added here only for display
+// purposes when we are editing a default value stream
+export const ADDITIONAL_DEFAULT_STAGE_EVENTS = [
+  {
+    identifier: 'issue_stage_end',
+    name: i18n.ISSUE_STAGE_END,
+  },
+  {
+    identifier: 'plan_stage_start',
+    name: i18n.PLAN_STAGE_START,
+  },
+  {
+    identifier: 'code_stage_start',
+    name: i18n.CODE_STAGE_START,
+  },
+];

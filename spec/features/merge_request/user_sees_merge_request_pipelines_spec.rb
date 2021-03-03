@@ -26,6 +26,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
   end
 
   before do
+    stub_feature_flags(new_pipelines_table: false)
     stub_application_setting(auto_devops_enabled: false)
     stub_ci_pipeline_yaml_file(YAML.dump(config))
     project.add_maintainer(user)
@@ -160,7 +161,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
 
         it 'merges the merge request' do
           expect(page).to have_content('Merged by')
-          expect(page).to have_link('Revert')
+          expect(page).to have_button('Revert')
         end
       end
 
@@ -357,7 +358,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
 
         it 'merges the merge request' do
           expect(page).to have_content('Merged by')
-          expect(page).to have_link('Revert')
+          expect(page).to have_button('Revert')
         end
       end
 

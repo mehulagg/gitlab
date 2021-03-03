@@ -235,4 +235,68 @@ RSpec.describe Projects::ThreatMonitoringController do
       end
     end
   end
+
+  describe 'GET threat monitoring alerts' do
+    subject { get :alert_details, params: { namespace_id: project.namespace, project_id: project, id: '5' } }
+
+    context 'with authorized user' do
+      before do
+        project.add_developer(user)
+        sign_in(user)
+      end
+
+      context 'when feature is available' do
+        before do
+          stub_licensed_features(threat_monitoring: true)
+        end
+
+        it 'renders the show template' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to render_template(:alert_details)
+        end
+      end
+
+      context 'when feature is not available' do
+        before do
+          stub_licensed_features(threat_monitoring: true)
+          stub_feature_flags(threat_monitoring_alerts: false)
+        end
+
+        it 'returns 404' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
+    context 'with unauthorized user' do
+      before do
+        sign_in(user)
+      end
+
+      context 'when feature is available' do
+        before do
+          stub_licensed_features(threat_monitoring: true)
+        end
+
+        it 'returns 404' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
+    context 'with anonymous user' do
+      it 'returns 302' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:found)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
 end

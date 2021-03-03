@@ -16,6 +16,7 @@ module Ci
     include ShaAttribute
     include FromUnion
     include UpdatedAtFilterable
+    include EachBatch
 
     MAX_OPEN_MERGE_REQUESTS_REFS = 4
 
@@ -227,7 +228,7 @@ module Ci
 
         pipeline.run_after_commit do
           PipelineHooksWorker.perform_async(pipeline.id)
-          ExpirePipelineCacheWorker.perform_async(pipeline.id) if pipeline.cacheable?
+          ExpirePipelineCacheWorker.perform_async(pipeline.id)
         end
       end
 
@@ -250,6 +251,7 @@ module Ci
       after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
         pipeline.run_after_commit do
           ::Ci::PipelineArtifacts::CoverageReportWorker.perform_async(pipeline.id)
+          ::Ci::PipelineArtifacts::CreateQualityReportWorker.perform_async(pipeline.id)
         end
       end
 
@@ -571,7 +573,7 @@ module Ci
     end
 
     def cancel_running(retries: nil)
-      retry_optimistic_lock(cancelable_statuses, retries) do |cancelable|
+      retry_optimistic_lock(cancelable_statuses, retries, name: 'ci_pipeline_cancel_running') do |cancelable|
         cancelable.find_each do |job|
           yield(job) if block_given?
           job.cancel
@@ -675,7 +677,7 @@ module Ci
 
     def number_of_warnings
       BatchLoader.for(id).batch(default_value: 0) do |pipeline_ids, loader|
-        ::Ci::Build.where(commit_id: pipeline_ids)
+        ::CommitStatus.where(commit_id: pipeline_ids)
           .latest
           .failed_but_allowed
           .group(:commit_id)
@@ -742,7 +744,7 @@ module Ci
     end
 
     def set_status(new_status)
-      retry_optimistic_lock(self) do
+      retry_optimistic_lock(self, name: 'ci_pipeline_set_status') do
         case new_status
         when 'created' then nil
         when 'waiting_for_resource' then request_resource
@@ -802,7 +804,7 @@ module Ci
           variables.concat(merge_request.predefined_variables)
         end
 
-        if Gitlab::Ci::Features.pipeline_open_merge_requests?(project) && open_merge_requests_refs.any?
+        if open_merge_requests_refs.any?
           variables.append(key: 'CI_OPEN_MERGE_REQUESTS', value: open_merge_requests_refs.join(','))
         end
 
@@ -936,6 +938,12 @@ module Ci
         .first
     end
 
+    def self_with_ancestors_and_descendants(same_project: false)
+      ::Gitlab::Ci::PipelineObjectHierarchy
+        .new(self.class.unscoped.where(id: id), options: { same_project: same_project })
+        .all_objects
+    end
+
     def bridge_triggered?
       source_bridge.present?
     end
@@ -959,7 +967,7 @@ module Ci
 
     def detailed_status(current_user)
       Gitlab::Ci::Status::Pipeline::Factory
-        .new(self, current_user)
+        .new(self.present, current_user)
         .fabricate!
     end
 
@@ -995,18 +1003,20 @@ module Ci
     end
 
     def has_coverage_reports?
-      pipeline_artifacts&.has_report?(:code_coverage)
+      pipeline_artifacts&.report_exists?(:code_coverage)
     end
 
     def can_generate_coverage_reports?
       has_reports?(Ci::JobArtifact.coverage_reports)
     end
 
-    def has_codequality_reports?
-      pipeline_artifacts&.has_report?(:code_quality)
+    def has_codequality_mr_diff_report?
+      pipeline_artifacts&.report_exists?(:code_quality_mr_diff)
     end
 
     def can_generate_codequality_reports?
+      return false unless ::Gitlab::Ci::Features.display_quality_on_mr_diff?(project)
+
       has_reports?(Ci::JobArtifact.codequality_reports)
     end
 
@@ -1113,7 +1123,7 @@ module Ci
       detached_merge_request_pipeline? && !merge_request_ref?
     end
 
-    def merge_request_pipeline?
+    def merged_result_pipeline?
       merge_request? && target_sha.present?
     end
 
@@ -1153,7 +1163,7 @@ module Ci
       return unless merge_request?
 
       strong_memoize(:merge_request_event_type) do
-        if merge_request_pipeline?
+        if merged_result_pipeline?
           :merged_result
         elsif detached_merge_request_pipeline?
           :detached
@@ -1163,10 +1173,6 @@ module Ci
 
     def persistent_ref
       @persistent_ref ||= PersistentRef.new(pipeline: self)
-    end
-
-    def cacheable?
-      !dangling?
     end
 
     def dangling?
@@ -1211,6 +1217,21 @@ module Ci
     end
     # rubocop:enable Rails/FindEach
 
+    # EE-only
+    def merge_train_pipeline?
+      false
+    end
+
+    def security_reports(report_types: [])
+      reports_scope = report_types.empty? ? ::Ci::JobArtifact.security_reports : ::Ci::JobArtifact.security_reports(file_types: report_types)
+
+      ::Gitlab::Ci::Reports::Security::Reports.new(self).tap do |security_reports|
+        latest_report_builds(reports_scope).each do |build|
+          build.collect_security_reports!(security_reports)
+        end
+      end
+    end
+
     private
 
     def add_message(severity, content)
@@ -1228,7 +1249,7 @@ module Ci
     def merge_request_diff_sha
       return unless merge_request?
 
-      if merge_request_pipeline?
+      if merged_result_pipeline?
         source_sha
       else
         sha

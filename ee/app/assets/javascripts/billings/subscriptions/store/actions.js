@@ -1,8 +1,7 @@
-import ApiEe from 'ee/api';
-import Api from '~/api';
-import * as types from './mutation_types';
+import Api from 'ee/api';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
+import * as types from './mutation_types';
 
 export const setNamespaceId = ({ commit }, namespaceId) => {
   commit(types.SET_NAMESPACE_ID, namespaceId);
@@ -14,7 +13,7 @@ export const setNamespaceId = ({ commit }, namespaceId) => {
 export const fetchSubscription = ({ dispatch, state }) => {
   dispatch('requestSubscription');
 
-  return ApiEe.userSubscription(state.namespaceId)
+  return Api.userSubscription(state.namespaceId)
     .then(({ data }) => dispatch('receiveSubscriptionSuccess', data))
     .catch(() => dispatch('receiveSubscriptionError'));
 };

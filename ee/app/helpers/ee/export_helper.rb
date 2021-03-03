@@ -6,7 +6,7 @@ module EE
 
     override :group_export_descriptions
     def group_export_descriptions
-      super + [_('Epics'), _('Events')]
+      super + [_('Epics'), _('Events'), _('Group Wikis')]
     end
   end
 end

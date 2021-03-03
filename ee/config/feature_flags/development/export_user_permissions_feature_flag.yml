@@ -1,8 +1,0 @@
----
-name: export_user_permissions_feature_flag
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49399
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/292436
-milestone: '13.7'
-type: development
-group: group::compliance
-default_enabled: false

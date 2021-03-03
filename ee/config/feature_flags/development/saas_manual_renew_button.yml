@@ -1,8 +1,0 @@
----
-name: saas_manual_renew_button
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/48610
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/288804
-milestone: '13.7'
-type: development
-group: group::fulfillment
-default_enabled: false

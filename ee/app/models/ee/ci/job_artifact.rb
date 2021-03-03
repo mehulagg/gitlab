@@ -17,8 +17,6 @@ module EE
       DEPENDENCY_LIST_REPORT_FILE_TYPES = %w[dependency_scanning].freeze
       METRICS_REPORT_FILE_TYPES = %w[metrics].freeze
       CONTAINER_SCANNING_REPORT_TYPES = %w[container_scanning].freeze
-      SAST_REPORT_TYPES = %w[sast].freeze
-      SECRET_DETECTION_REPORT_TYPES = %w[secret_detection].freeze
       DAST_REPORT_TYPES = %w[dast].freeze
       REQUIREMENTS_REPORT_FILE_TYPES = %w[requirements].freeze
       COVERAGE_FUZZING_REPORT_TYPES = %w[coverage_fuzzing].freeze
@@ -44,14 +42,6 @@ module EE
 
       scope :container_scanning_reports, -> do
         with_file_types(CONTAINER_SCANNING_REPORT_TYPES)
-      end
-
-      scope :sast_reports, -> do
-        with_file_types(SAST_REPORT_TYPES)
-      end
-
-      scope :secret_detection_reports, -> do
-        with_file_types(SECRET_DETECTION_REPORT_TYPES)
       end
 
       scope :dast_reports, -> do

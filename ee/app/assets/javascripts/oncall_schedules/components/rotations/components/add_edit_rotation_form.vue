@@ -18,8 +18,8 @@ import {
   CHEVRON_SKIPPING_SHADE_ENUM,
   CHEVRON_SKIPPING_PALETTE_ENUM,
 } from 'ee/oncall_schedules/constants';
-import { s__, __ } from '~/locale';
 import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
 
 export const i18n = {
   selectParticipant: s__('OnCallSchedules|Select participant'),
@@ -30,14 +30,20 @@ export const i18n = {
       title: __('Participants'),
       error: s__('OnCallSchedules|Rotation participants cannot be empty'),
     },
-    rotationLength: { title: s__('OnCallSchedules|Rotation length') },
+    rotationLength: {
+      title: s__('OnCallSchedules|Rotation length'),
+      description: s__(
+        'OnCallSchedules|Please note, rotations with shifts that are less than four hours are currently not supported in the weekly view.',
+      ),
+    },
     startsAt: {
       title: __('Starts on'),
       error: s__('OnCallSchedules|Rotation start date cannot be empty'),
     },
-    endsOn: {
+    endsAt: {
       enableToggle: s__('OnCallSchedules|Enable end date'),
       title: __('Ends on'),
+      error: s__('OnCallSchedules|Rotation end date/time must come after start date/time'),
     },
     restrictToTime: {
       enableToggle: s__('OnCallSchedules|Restrict to time intervals'),
@@ -132,6 +138,7 @@ export default {
           :dropdown-items="participants"
           :loading="isLoading"
           container-class="gl-h-13! gl-overflow-y-auto"
+          menu-class="gl-overflow-y-auto"
           @text-input="$emit('filter-participants', $event)"
           @blur="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
           @input="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
@@ -153,6 +160,7 @@ export default {
 
       <gl-form-group
         :label="$options.i18n.fields.rotationLength.title"
+        :description="$options.i18n.fields.rotationLength.description"
         label-size="sm"
         label-for="rotation-length"
       >
@@ -224,10 +232,10 @@ export default {
         </div>
       </gl-form-group>
     </div>
-    <div class="gl-w-fit-content">
+    <div class="gl-display-inline-block">
       <gl-toggle
         v-model="endDateEnabled"
-        :label="$options.i18n.fields.endsOn.enableToggle"
+        :label="$options.i18n.fields.endsAt.enableToggle"
         label-position="left"
         class="gl-mb-5"
       />
@@ -235,31 +243,46 @@ export default {
       <gl-card
         v-if="endDateEnabled"
         data-testid="rotation-ends-on"
-        class="gl-border-gray-400 gl-bg-gray-10 gl-w-fit-content"
+        class="gl-border-gray-400 gl-bg-gray-10"
       >
         <gl-form-group
-          :label="$options.i18n.fields.endsOn.title"
+          :label="$options.i18n.fields.endsAt.title"
           label-size="sm"
-          :invalid-feedback="$options.i18n.fields.endsOn.error"
+          :state="validationState.endsAt"
+          :invalid-feedback="$options.i18n.fields.endsAt.error"
           class="gl-mb-0"
         >
           <div class="gl-display-flex gl-align-items-center">
             <gl-datepicker
               class="gl-mr-3"
-              @input="$emit('update-rotation-form', { type: 'endsOn.date', value: $event })"
-            />
+              @input="$emit('update-rotation-form', { type: 'endsAt.date', value: $event })"
+            >
+              <template #default="{ formattedDate }">
+                <gl-form-input
+                  class="gl-w-full"
+                  :value="formattedDate"
+                  :placeholder="__(`YYYY-MM-DD`)"
+                  @blur="
+                    $emit('update-rotation-form', {
+                      type: 'endsAt.date',
+                      value: $event.target.value,
+                    })
+                  "
+                />
+              </template>
+            </gl-datepicker>
             <span> {{ __('at') }} </span>
             <gl-dropdown
               data-testid="rotation-end-time"
-              :text="format24HourTimeStringFromInt(form.endsOn.time)"
+              :text="format24HourTimeStringFromInt(form.endsAt.time)"
               class="gl-px-3"
             >
               <gl-dropdown-item
                 v-for="time in $options.HOURS_IN_DAY"
                 :key="time"
-                :is-checked="form.endsOn.time === time"
+                :is-checked="form.endsAt.time === time"
                 is-check-item
-                @click="$emit('update-rotation-form', { type: 'endsOn.time', value: time })"
+                @click="$emit('update-rotation-form', { type: 'endsAt.time', value: time })"
               >
                 <span class="gl-white-space-nowrap">
                   {{ format24HourTimeStringFromInt(time) }}</span
@@ -287,7 +310,7 @@ export default {
         <gl-form-group
           :label="$options.i18n.fields.restrictToTime.title"
           label-size="sm"
-          :invalid-feedback="$options.i18n.fields.endsOn.error"
+          :invalid-feedback="$options.i18n.fields.endsAt.error"
           class="gl-mb-0"
         >
           <div class="gl-display-flex gl-align-items-center">

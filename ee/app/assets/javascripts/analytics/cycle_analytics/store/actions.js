@@ -1,8 +1,7 @@
 import Api from 'ee/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __, sprintf } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
-import * as types from './mutation_types';
+import { __, sprintf } from '~/locale';
 import { FETCH_VALUE_STREAM_DATA } from '../constants';
 import {
   removeFlash,
@@ -11,6 +10,7 @@ import {
   checkForDataError,
   flashErrorIfStatusNotOk,
 } from '../utils';
+import * as types from './mutation_types';
 
 const appendExtension = (path) => (path.indexOf('.') > -1 ? path : `${path}.json`);
 
@@ -41,9 +41,8 @@ export const setDateRange = ({ commit, dispatch }, { skipFetch = false, startDat
 };
 
 export const requestStageData = ({ commit }) => commit(types.REQUEST_STAGE_DATA);
-export const receiveStageDataSuccess = ({ commit }, data) => {
+export const receiveStageDataSuccess = ({ commit }, data) =>
   commit(types.RECEIVE_STAGE_DATA_SUCCESS, data);
-};
 
 export const receiveStageDataError = ({ commit }, error) => {
   const { message = '' } = error;
@@ -351,7 +350,25 @@ export const createValueStream = ({ commit, dispatch, getters }, data) => {
     .then(({ data: newValueStream }) => dispatch('receiveCreateValueStreamSuccess', newValueStream))
     .catch(({ response } = {}) => {
       const { data: { message, payload: { errors } } = null } = response;
-      commit(types.RECEIVE_CREATE_VALUE_STREAM_ERROR, { message, errors });
+      commit(types.RECEIVE_CREATE_VALUE_STREAM_ERROR, { message, errors, data });
+    });
+};
+
+export const updateValueStream = (
+  { commit, dispatch, getters },
+  { id: valueStreamId, ...data },
+) => {
+  const { currentGroupPath } = getters;
+  commit(types.REQUEST_UPDATE_VALUE_STREAM);
+
+  return Api.cycleAnalyticsUpdateValueStream({ groupId: currentGroupPath, valueStreamId, data })
+    .then(({ data: newValueStream }) => {
+      commit(types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS, newValueStream);
+      return dispatch('fetchCycleAnalyticsData');
+    })
+    .catch(({ response } = {}) => {
+      const { data: { message, payload: { errors } } = null } = response;
+      commit(types.RECEIVE_UPDATE_VALUE_STREAM_ERROR, { message, errors, data });
     });
 };
 

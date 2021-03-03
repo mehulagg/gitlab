@@ -174,15 +174,21 @@ module MergeRequestsHelper
     end
   end
 
-  def merge_request_reviewers_enabled?
-    Feature.enabled?(:merge_request_reviewers, default_enabled: :yaml)
+  def reviewers_label(merge_request, include_value: true)
+    reviewers = merge_request.reviewers
+    reviewer_label = 'Reviewer'.pluralize(reviewers.count)
+
+    if include_value
+      sanitized_list = sanitize_name(reviewers.map(&:name).to_sentence)
+      "#{reviewer_label}: #{sanitized_list}"
+    else
+      reviewer_label
+    end
   end
 
   private
 
   def review_requested_merge_requests_count
-    return 0 unless merge_request_reviewers_enabled?
-
     current_user.review_requested_open_merge_requests_count
   end
 

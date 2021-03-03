@@ -34,6 +34,8 @@ module Vulnerabilities
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
+    has_many :fingerprints, class_name: 'Vulnerabilities::FindingFingerprint', inverse_of: :finding
+
     serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
 
     attr_writer :sha
@@ -369,7 +371,20 @@ module Vulnerabilities
     # We will eventually have only UUIDv5 values for the `uuid`
     # attribute of the finding records.
     def uuid_v5
-      Gitlab::UUID.v5?(uuid) ? uuid : Gitlab::UUID.v5(uuid_v5_name)
+      if Gitlab::UUID.v5?(uuid)
+        uuid
+      else
+        ::Security::VulnerabilityUUID.generate(
+          report_type: report_type,
+          primary_identifier_fingerprint: primary_identifier.fingerprint,
+          location_fingerprint: location_fingerprint,
+          project_id: project_id
+        )
+      end
+    end
+
+    def pipeline_branch
+      pipelines&.last&.sha || project.default_branch
     end
 
     protected
@@ -386,15 +401,6 @@ module Vulnerabilities
         category: report_type,
         project_fingerprint: project_fingerprint
       }
-    end
-
-    def uuid_v5_name
-      [
-        report_type,
-        primary_identifier.fingerprint,
-        location_fingerprint,
-        project_id
-      ].join('-')
     end
   end
 end

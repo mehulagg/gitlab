@@ -1,20 +1,17 @@
 <script>
 import { GlModal, GlAlert } from '@gitlab/ui';
 import { set } from 'lodash';
-import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
 import createOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/create_oncall_schedule_rotation.mutation.graphql';
 import updateOncallScheduleRotationMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule_rotation.mutation.graphql';
-import { LENGTH_ENUM } from 'ee/oncall_schedules/constants';
-import {
-  updateStoreAfterRotationAdd,
-  updateStoreAfterRotationEdit,
-} from 'ee/oncall_schedules/utils/cache_updates';
-import { isNameFieldValid } from 'ee/oncall_schedules/utils/common_utils';
-import { s__, __ } from '~/locale';
+import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import { updateStoreAfterRotationEdit } from 'ee/oncall_schedules/utils/cache_updates';
+import { isNameFieldValid, getParticipantsForSave } from 'ee/oncall_schedules/utils/common_utils';
 import createFlash, { FLASH_TYPES } from '~/flash';
-import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
+import searchProjectMembersQuery from '~/graphql_shared/queries/project_user_members_search.query.graphql';
+import { format24HourTimeStringFromInt, formatDate } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
 import AddEditRotationForm from './add_edit_rotation_form.vue';
-import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
 
 export const i18n = {
   rotationCreated: s__('OnCallSchedules|Successfully created a new rotation'),
@@ -50,14 +47,15 @@ export default {
   },
   apollo: {
     participants: {
-      query: usersSearchQuery,
+      query: searchProjectMembersQuery,
       variables() {
         return {
+          fullPath: this.projectPath,
           search: this.ptSearchTerm,
         };
       },
-      update({ users: { nodes = [] } = {} }) {
-        return nodes;
+      update({ project: { projectMembers: { nodes = [] } = {} } = {} } = {}) {
+        return nodes.map(({ user }) => ({ ...user }));
       },
       error(error) {
         this.error = error;
@@ -74,13 +72,13 @@ export default {
         participants: [],
         rotationLength: {
           length: 1,
-          unit: this.$options.LENGTH_ENUM.hours,
+          unit: this.$options.LENGTH_ENUM.days,
         },
         startsAt: {
           date: null,
           time: 0,
         },
-        endsOn: {
+        endsAt: {
           date: null,
           time: 0,
         },
@@ -94,6 +92,7 @@ export default {
         name: true,
         participants: true,
         startsAt: true,
+        endsAt: true,
       },
     };
   },
@@ -113,51 +112,75 @@ export default {
         },
       };
     },
-    rotationVariables() {
-      return {
-        projectPath: this.projectPath,
-        scheduleIid: this.schedule.iid,
-        name: this.form.name,
-        startsAt: {
-          ...this.form.startsAt,
-          time: format24HourTimeStringFromInt(this.form.startsAt.time),
-        },
-        rotationLength: {
-          ...this.form.rotationLength,
-          length: parseInt(this.form.rotationLength.length, 10),
-        },
-        participants: this.form.participants.map(({ username }) => ({
-          username,
-          // eslint-disable-next-line @gitlab/require-i18n-strings
-          colorWeight: 'WEIGHT_500',
-          colorPalette: 'BLUE',
-        })),
-      };
+    canFormSubmit() {
+      return (
+        isNameFieldValid(this.form.name) &&
+        this.form.participants.length > 0 &&
+        Boolean(this.form.startsAt.date)
+      );
     },
     isFormValid() {
-      return Object.values(this.validationState).every(Boolean);
+      return Object.values(this.validationState).every(Boolean) && this.canFormSubmit;
     },
     isLoading() {
       return this.loading || this.$apollo.queries.participants.loading;
     },
+    rotationVariables() {
+      const {
+        name,
+        rotationLength,
+        participants,
+        startsAt: { date: startDate, time: startTime },
+        endsAt: { date: endDate, time: endTime },
+      } = this.form;
+
+      return {
+        projectPath: this.projectPath,
+        scheduleIid: this.schedule.iid,
+        name,
+        startsAt: {
+          date: formatDate(startDate, 'yyyy-mm-dd'),
+          time: format24HourTimeStringFromInt(startTime),
+        },
+        endsAt: endDate
+          ? {
+              date: formatDate(endDate, 'yyyy-mm-dd'),
+              time: format24HourTimeStringFromInt(endTime),
+            }
+          : null,
+        rotationLength: {
+          ...rotationLength,
+          length: parseInt(rotationLength.length, 10),
+        },
+        participants: getParticipantsForSave(participants),
+      };
+    },
     title() {
       return this.isEditMode ? this.$options.i18n.editRotation : this.$options.i18n.addRotation;
+    },
+    isEndDateValid() {
+      const startsAt = this.form.startsAt.date?.getTime();
+      const endsAt = this.form.endsAt.date?.getTime();
+
+      if (!startsAt || !endsAt) {
+        // If start or end is not present, we consider the end date valid
+        return true;
+      } else if (startsAt < endsAt) {
+        return true;
+      } else if (startsAt === endsAt) {
+        return this.form.startsAt.time < this.form.endsAt.time;
+      }
+      return false;
     },
   },
   methods: {
     createRotation() {
       this.loading = true;
-      const { projectPath, schedule } = this;
 
       this.$apollo
         .mutate({
           mutation: createOncallScheduleRotationMutation,
-          variables: { OncallRotationCreateInput: this.rotationVariables },
-          update(store, { data }) {
-            updateStoreAfterRotationAdd(store, getOncallSchedulesQuery, data, schedule.iid, {
-              projectPath,
-            });
-          },
+          variables: { input: this.rotationVariables },
         })
         .then(
           ({
@@ -172,6 +195,7 @@ export default {
             }
 
             this.$refs.addEditScheduleRotationModal.hide();
+            this.$emit('fetchRotationShifts');
             return createFlash({
               message: this.$options.i18n.rotationCreated,
               type: FLASH_TYPES.SUCCESS,
@@ -192,11 +216,16 @@ export default {
       this.$apollo
         .mutate({
           mutation: updateOncallScheduleRotationMutation,
-          variables: { OncallRotationUpdateInput: this.rotationVariables },
+          variables: { input: this.rotationVariables },
           update(store, { data }) {
-            updateStoreAfterRotationEdit(store, getOncallSchedulesQuery, data, schedule.iid, {
-              projectPath,
-            });
+            updateStoreAfterRotationEdit(
+              store,
+              getOncallSchedulesWithRotationsQuery,
+              { ...data, scheduleIid: schedule.iid },
+              {
+                projectPath,
+              },
+            );
           },
         })
         .then(
@@ -237,8 +266,11 @@ export default {
         this.validationState.name = isNameFieldValid(this.form.name);
       } else if (key === 'participants') {
         this.validationState.participants = this.form.participants.length > 0;
-      } else if (key === 'startsAt.date') {
+      } else if (key === 'startsAt.date' || key === 'startsAt.time') {
         this.validationState.startsAt = Boolean(this.form.startsAt.date);
+        this.validationState.endsAt = this.isEndDateValid;
+      } else if (key === 'endsAt.date' || key === 'endsAt.time') {
+        this.validationState.endsAt = this.isEndDateValid;
       }
     },
   },

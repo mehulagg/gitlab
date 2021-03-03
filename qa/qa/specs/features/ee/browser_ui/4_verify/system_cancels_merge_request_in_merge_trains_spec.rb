@@ -69,6 +69,7 @@ module QA
       end
 
       before do
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
         Flow::Login.sign_in
         project.visit!
         Flow::MergeRequest.enable_merge_trains

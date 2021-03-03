@@ -11,6 +11,8 @@ query group(
   $scanner: [String!]
   $state: [VulnerabilityState!]
   $sort: VulnerabilitySort
+  $hasIssues: Boolean
+  $hasResolution: Boolean
 ) {
   group(fullPath: $fullPath) {
     vulnerabilities(
@@ -22,6 +24,8 @@ query group(
       state: $state
       projectId: $projectId
       sort: $sort
+      hasIssues: $hasIssues
+      hasResolution: $hasResolution
     ) {
       nodes {
         ...Vulnerability

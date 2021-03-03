@@ -1,13 +1,13 @@
 /* eslint-disable consistent-return */
+import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import $ from 'jquery';
 import { escape } from 'lodash';
-import fuzzaldrinPlus from 'fuzzaldrin-plus';
-import { visitUrl } from '~/lib/utils/url_utility';
 import { isObject } from '~/lib/utils/type_utility';
-import renderItem from './render';
-import { GitLabDropdownRemote } from './gl_dropdown_remote';
-import { GitLabDropdownInput } from './gl_dropdown_input';
+import { visitUrl } from '~/lib/utils/url_utility';
 import { GitLabDropdownFilter } from './gl_dropdown_filter';
+import { GitLabDropdownInput } from './gl_dropdown_input';
+import { GitLabDropdownRemote } from './gl_dropdown_remote';
+import renderItem from './render';
 
 const LOADING_CLASS = 'is-loading';
 
@@ -29,6 +29,26 @@ const FILTER_INPUT = '.dropdown-input .dropdown-input-field:not(.dropdown-no-fil
 
 const NO_FILTER_INPUT = '.dropdown-input .dropdown-input-field.dropdown-no-filter';
 
+let mouseEventListenersAdded = false;
+let mousedownTarget = null;
+let mouseupTarget = null;
+
+function addGlobalMouseEventListeners() {
+  // Remember mousedown and mouseup locations.
+  // Required in the `hide.bs.dropdown` listener for
+  // dropdown close prevention in some cases.
+  document.addEventListener('mousedown', ({ target }) => {
+    mousedownTarget = target;
+  });
+  document.addEventListener('mouseup', ({ target }) => {
+    mouseupTarget = target;
+  });
+  document.addEventListener('click', () => {
+    mousedownTarget = null;
+    mouseupTarget = null;
+  });
+}
+
 export class GitLabDropdown {
   constructor(el1, options) {
     let selector;
@@ -36,9 +56,14 @@ export class GitLabDropdown {
     this.el = el1;
     this.options = options;
     this.updateLabel = this.updateLabel.bind(this);
-    this.hidden = this.hidden.bind(this);
     this.opened = this.opened.bind(this);
+    this.hide = this.hide.bind(this);
+    this.hidden = this.hidden.bind(this);
     this.shouldPropagate = this.shouldPropagate.bind(this);
+    if (!mouseEventListenersAdded) {
+      addGlobalMouseEventListeners();
+      mouseEventListenersAdded = true;
+    }
     self = this;
     selector = $(this.el).data('target');
     this.dropdown = selector != null ? $(selector) : $(this.el).parent();
@@ -132,6 +157,7 @@ export class GitLabDropdown {
     }
     // Event listeners
     this.dropdown.on('shown.bs.dropdown', this.opened);
+    this.dropdown.on('hide.bs.dropdown', this.hide);
     this.dropdown.on('hidden.bs.dropdown', this.hidden);
     $(this.el).on('update.label', this.updateLabel);
     this.dropdown.on('click', '.dropdown-menu, .dropdown-menu-close', this.shouldPropagate);
@@ -334,6 +360,21 @@ export class GitLabDropdown {
     $menu.css('bottom', '100%');
   }
 
+  hide(e) {
+    // Prevent dropdowns with a search from being closed when the
+    // mousedown event happened inside the dropdown box and only
+    // the mouseup event did not.
+    if (this.options.search && mousedownTarget) {
+      const isIn = (element, $possibleContainer) => Boolean($possibleContainer.has(element).length);
+      const $menu = this.dropdown.find('.dropdown-menu');
+      const mousedownInsideDropdown = isIn(mousedownTarget, $menu);
+      const mouseupOutsideDropdown = !isIn(mouseupTarget, $menu);
+      if (mousedownInsideDropdown && mouseupOutsideDropdown) {
+        e.preventDefault();
+      }
+    }
+  }
+
   hidden(e) {
     this.resetRows();
     this.removeArrowKeyEvent();
@@ -437,6 +478,7 @@ export class GitLabDropdown {
       groupName = el.data('group');
       if (groupName) {
         selectedIndex = el.data('index');
+        this.selectedIndex = selectedIndex;
         selectedObject = this.renderedData[groupName][selectedIndex];
       } else {
         selectedIndex = el.closest('li').index();

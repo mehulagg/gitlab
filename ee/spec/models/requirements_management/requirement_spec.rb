@@ -76,6 +76,47 @@ RSpec.describe RequirementsManagement::Requirement do
         it { is_expected.to contain_exactly(requirement_one) }
       end
     end
+
+    describe '.with_last_test_report_state' do
+      let_it_be(:requirement1) { create(:requirement) }
+      let_it_be(:requirement2) { create(:requirement) }
+      let_it_be(:requirement3) { create(:requirement) }
+
+      before do
+        create(:test_report, requirement: requirement1, state: :passed)
+        create(:test_report, requirement: requirement1, state: :failed)
+        create(:test_report, requirement: requirement2, state: :failed)
+        create(:test_report, requirement: requirement2, state: :passed)
+        create(:test_report, requirement: requirement3, state: :passed)
+      end
+
+      subject { described_class.with_last_test_report_state(state) }
+
+      context 'for passed state' do
+        let(:state) { 'passed' }
+
+        it { is_expected.to contain_exactly(requirement2, requirement3) }
+      end
+
+      context 'for failed state' do
+        let(:state) { 'failed' }
+
+        it { is_expected.to contain_exactly(requirement1) }
+      end
+    end
+  end
+
+  describe '.without_test_reports' do
+    let_it_be(:requirement1) { create(:requirement) }
+    let_it_be(:requirement2) { create(:requirement) }
+
+    before do
+      create(:test_report, requirement: requirement2, state: :passed)
+    end
+
+    it 'returns requirements without test reports' do
+      expect(described_class.without_test_reports).to contain_exactly(requirement1)
+    end
   end
 
   describe '#last_test_report_state' do

@@ -1,5 +1,5 @@
-import { __ } from '~/locale';
 import FilteredSearchTokenKeys from '~/filtered_search/filtered_search_token_keys';
+import { __ } from '~/locale';
 
 const tokenKeys = [
   {

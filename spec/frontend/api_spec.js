@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
 import Api from '~/api';
+import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
 
 describe('Api', () => {
@@ -260,6 +260,28 @@ describe('Api', () => {
     });
   });
 
+  describe('groupLabels', () => {
+    it('fetches group labels', (done) => {
+      const options = { params: { search: 'foo' } };
+      const expectedGroup = 'gitlab-org';
+      const expectedUrl = `${dummyUrlRoot}/groups/${expectedGroup}/-/labels`;
+      mock.onGet(expectedUrl).reply(httpStatus.OK, [
+        {
+          id: 1,
+          title: 'Foo Label',
+        },
+      ]);
+
+      Api.groupLabels(expectedGroup, options)
+        .then((res) => {
+          expect(res.length).toBe(1);
+          expect(res[0].title).toBe('Foo Label');
+        })
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
   describe('namespaces', () => {
     it('fetches namespaces', (done) => {
       const query = 'dummy query';
@@ -460,6 +482,30 @@ describe('Api', () => {
     });
   });
 
+  describe('projectShareWithGroup', () => {
+    it('invites a group to share access with the authenticated project', () => {
+      const projectId = 1;
+      const sharedGroupId = 99;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/share`;
+      const options = {
+        group_id: sharedGroupId,
+        group_access: 10,
+        expires_at: undefined,
+      };
+
+      jest.spyOn(axios, 'post');
+
+      mock.onPost(expectedUrl).reply(200, {
+        status: 'success',
+      });
+
+      return Api.projectShareWithGroup(projectId, options).then(({ data }) => {
+        expect(data.status).toBe('success');
+        expect(axios.post).toHaveBeenCalledWith(expectedUrl, options);
+      });
+    });
+  });
+
   describe('projectMilestones', () => {
     it('fetches project milestones', (done) => {
       const projectId = 1;
@@ -612,6 +658,30 @@ describe('Api', () => {
         expect(response.length).toBe(1);
         expect(response[0].name).toBe('test');
         done();
+      });
+    });
+  });
+
+  describe('groupShareWithGroup', () => {
+    it('invites a group to share access with the authenticated group', () => {
+      const groupId = 1;
+      const sharedGroupId = 99;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/share`;
+      const options = {
+        group_id: sharedGroupId,
+        group_access: 10,
+        expires_at: undefined,
+      };
+
+      jest.spyOn(axios, 'post');
+
+      mock.onPost(expectedUrl).reply(200, {
+        status: 'success',
+      });
+
+      return Api.groupShareWithGroup(groupId, options).then(({ data }) => {
+        expect(data.status).toBe('success');
+        expect(axios.post).toHaveBeenCalledWith(expectedUrl, options);
       });
     });
   });

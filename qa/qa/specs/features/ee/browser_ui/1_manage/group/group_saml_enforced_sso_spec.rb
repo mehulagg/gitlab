@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Manage', :group_saml, :orchestrated do
+  # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+  RSpec.describe 'Manage', :group_saml, :orchestrated, :requires_admin do
     describe 'Group SAML SSO - Enforced SSO' do
       include Support::Api
 
@@ -12,6 +13,8 @@ module QA
           @group = Resource::Sandbox.fabricate_via_api! do |sandbox_group|
             sandbox_group.path = "saml_sso_group_#{SecureRandom.hex(8)}"
           end
+
+          Runtime::Feature.enable(:invite_members_group_modal, group: @group)
 
           @developer_user = Resource::User.fabricate_via_api!
 

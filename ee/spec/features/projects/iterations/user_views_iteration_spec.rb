@@ -17,13 +17,7 @@ RSpec.describe 'User views iteration' do
   let_it_be(:other_iteration_issue) { create(:issue, project: project, iteration: other_iteration) }
   let_it_be(:other_project_issue) { create(:issue, project: project_2, iteration: iteration, assignees: [user], labels: [label1]) }
 
-  context 'with license', :js do
-    before do
-      stub_licensed_features(iterations: true)
-      sign_in(user)
-      visit project_iterations_inherited_path(project, iteration.id)
-    end
-
+  RSpec.shared_examples 'render iteration page' do
     context 'view an iteration' do
       it 'shows iteration info' do
         aggregate_failures 'shows iteration info and dates' do
@@ -56,9 +50,31 @@ RSpec.describe 'User views iteration' do
         end
       end
     end
+  end
+
+  context 'with license', :js do
+    let(:url) { project_iteration_path(project, iteration.id) }
+
+    before do
+      stub_licensed_features(iterations: true)
+      sign_in(user)
+      visit url
+      wait_for_requests
+    end
+
+    it_behaves_like 'render iteration page'
 
     context 'when grouping by label' do
       it_behaves_like 'iteration report group by label'
+    end
+
+    context 'with old routes' do
+      # for backward compatibility we redirect /-/iterations/inherited/ID to /-/iterations/ID and render iteration page
+      let(:url) { "#{project_path(project)}/-/iterations/inherited/#{iteration.id}" }
+
+      it { expect(current_path).to eq("#{project_path(project)}/-/iterations/#{iteration.id}") }
+
+      it_behaves_like 'render iteration page'
     end
   end
 
@@ -69,7 +85,7 @@ RSpec.describe 'User views iteration' do
     end
 
     it 'shows page not found' do
-      visit project_iterations_inherited_path(project, iteration.id)
+      visit project_iteration_path(project, iteration.id)
 
       expect(page).to have_title('Not Found')
       expect(page).to have_content('Page Not Found')

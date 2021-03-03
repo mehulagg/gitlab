@@ -21,8 +21,9 @@ module API
         get do
           authorize! :admin_merge_request_approval_settings, user_group
 
-          present user_group.group_merge_request_approval_setting,
-            with: ::API::Entities::GroupMergeRequestApprovalSetting
+          setting = GroupMergeRequestApprovalSetting.find_or_initialize_by_group(user_group)
+
+          present setting, with: ::API::Entities::GroupMergeRequestApprovalSetting
         end
 
         desc 'Update existing merge request approval setting' do

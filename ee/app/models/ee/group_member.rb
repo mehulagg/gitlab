@@ -91,8 +91,8 @@ module EE
     end
 
     def email_does_not_match_any_allowed_domains(email)
-      _("email '%{email}' does not match the allowed domains of %{email_domains}" %
-        { email: email, email_domains: ::Gitlab::Utils.to_exclusive_sentence(group_allowed_email_domains.map(&:domain)) })
+      n_("email '%{email}' does not match the allowed domain of %{email_domains}", "email '%{email}' does not match the allowed domains: %{email_domains}", group_allowed_email_domains.size) %
+        { email: email, email_domains: group_allowed_email_domains.map(&:domain).join(', ') }
     end
 
     def email_not_verified

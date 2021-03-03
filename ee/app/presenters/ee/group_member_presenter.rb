@@ -5,10 +5,14 @@ module EE
     extend ::Gitlab::Utils::Override
 
     def group_sso?
+      return false unless member.user.present?
+
       member.user.group_sso?(source)
     end
 
     def group_managed_account?
+      return false unless member.user.present?
+
       member.user.group_managed_account?
     end
 

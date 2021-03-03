@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Serverless
+# Serverless **(FREE)**
 
 > Introduced in GitLab 11.5.
 
@@ -396,7 +396,7 @@ kubectl create secret generic my-secrets -n "$KUBE_NAMESPACE" --from-literal MY_
 
 #### Part of deployment job
 
-You can extend your `.gitlab-ci.yml` to create the secrets during deployment using the [environment variables](../../../../ci/variables/README.md)
+You can extend your `.gitlab-ci.yml` to create the secrets during deployment using the [CI/CD variables](../../../../ci/variables/README.md)
 stored securely under your GitLab project.
 
 ```yaml

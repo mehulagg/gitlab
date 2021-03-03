@@ -1,9 +1,16 @@
 <script>
 import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.query.graphql';
-import LinkedPipeline from './linked_pipeline.vue';
 import { LOAD_FAILURE } from '../../constants';
-import { UPSTREAM } from './constants';
-import { unwrapPipelineData, toggleQueryPollingByVisibility, reportToSentry } from './utils';
+import { ONE_COL_WIDTH, UPSTREAM } from './constants';
+import LinkedPipeline from './linked_pipeline.vue';
+import {
+  getQueryHeaders,
+  reportToSentry,
+  serializeGqlErr,
+  toggleQueryPollingByVisibility,
+  unwrapPipelineData,
+  validateConfigPaths,
+} from './utils';
 
 export default {
   components: {
@@ -14,6 +21,11 @@ export default {
     columnTitle: {
       type: String,
       required: true,
+    },
+    configPaths: {
+      type: Object,
+      required: true,
+      validator: validateConfigPaths,
     },
     linkedPipelines: {
       type: Array,
@@ -39,6 +51,7 @@ export default {
     'gl-pl-3',
     'gl-mb-5',
   ],
+  minWidth: `${ONE_COL_WIDTH}px`,
   computed: {
     columnClass() {
       const positionValues = {
@@ -47,18 +60,21 @@ export default {
       };
       return `graph-position-${this.graphPosition} ${positionValues[this.graphPosition]}`;
     },
-    graphPosition() {
-      return this.isUpstream ? 'left' : 'right';
-    },
-    isUpstream() {
-      return this.type === UPSTREAM;
-    },
     computedTitleClasses() {
       const positionalClasses = this.isUpstream
         ? ['gl-w-full', 'gl-text-right', 'gl-linked-pipeline-padding']
         : [];
 
       return [...this.$options.titleClasses, ...positionalClasses];
+    },
+    graphPosition() {
+      return this.isUpstream ? 'left' : 'right';
+    },
+    isUpstream() {
+      return this.type === UPSTREAM;
+    },
+    minWidth() {
+      return this.isUpstream ? 0 : this.$options.minWidth;
     },
   },
   methods: {
@@ -68,6 +84,9 @@ export default {
       this.$apollo.addSmartQuery('currentPipeline', {
         query: getPipelineDetails,
         pollInterval: 10000,
+        context() {
+          return getQueryHeaders(this.configPaths.graphqlResourceEtag);
+        },
         variables() {
           return {
             projectPath,
@@ -79,13 +98,16 @@ export default {
         },
         result() {
           this.loadingPipelineId = null;
+          this.$emit('scrollContainer');
         },
-        error(err, _vm, _key, type) {
+        error({ gqlError }, _vm, _key, type) {
           this.$emit('error', LOAD_FAILURE);
 
           reportToSentry(
             'linked_pipelines_column',
-            `error type: ${LOAD_FAILURE}, error: ${err}, apollo error type: ${type}`,
+            `error type: ${LOAD_FAILURE}, error: ${serializeGqlErr(
+              gqlError,
+            )}, apollo error type: ${type}`,
           );
         },
       });
@@ -130,6 +152,9 @@ export default {
 
       this.$emit('pipelineExpandToggle', jobName, expanded);
     },
+    showContainer(id) {
+      return this.isExpanded(id) || this.isLoadingPipeline(id);
+    },
   },
 };
 </script>
@@ -158,11 +183,16 @@ export default {
             @pipelineClicked="onPipelineClick(pipeline)"
             @pipelineExpandToggle="onPipelineExpandToggle"
           />
-          <div v-if="isExpanded(pipeline.id)" class="gl-display-inline-block">
+          <div
+            v-if="showContainer(pipeline.id)"
+            :style="{ minWidth }"
+            class="gl-display-inline-block"
+          >
             <pipeline-graph
-              v-if="currentPipeline"
+              v-if="isExpanded(pipeline.id)"
               :type="type"
               class="d-inline-block gl-mt-n2"
+              :config-paths="configPaths"
               :pipeline="currentPipeline"
               :is-linked-pipeline="true"
             />

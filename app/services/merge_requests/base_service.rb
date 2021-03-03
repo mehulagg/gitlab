@@ -108,7 +108,7 @@ module MergeRequests
     def filter_reviewer(merge_request)
       return if params[:reviewer_ids].blank?
 
-      unless can_admin_issuable?(merge_request) && merge_request.allows_reviewers?
+      unless can_admin_issuable?(merge_request)
         params.delete(:reviewer_ids)
 
         return
@@ -181,7 +181,7 @@ module MergeRequests
       }
 
       if exception
-        Gitlab::ErrorTracking.with_context(current_user) do
+        Gitlab::ApplicationContext.with_context(user: current_user) do
           Gitlab::ErrorTracking.track_exception(exception, data)
         end
 

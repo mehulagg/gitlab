@@ -21,7 +21,7 @@ Personal access tokens expire on the date you define, at midnight UTC.
 - GitLab runs a check at 01:00 AM UTC every day to identify personal access tokens that expire in under seven days. The owners of these tokens are notified by email.
 - GitLab runs a check at 02:00 AM UTC every day to identify personal access tokens that expired on the current date. The owners of these tokens are notified by email.
 - In GitLab Ultimate, administrators may [limit the lifetime of personal access tokens](../admin_area/settings/account_and_limit_settings.md#limiting-lifetime-of-personal-access-tokens).
-- In GitLab Ultimate, administrators may [toggle enforcement of personal access token expiry](../admin_area/settings/account_and_limit_settings.md#optional-enforcement-of-personal-access-token-expiry).
+- In GitLab Ultimate, administrators may [toggle enforcement of personal access token expiration](../admin_area/settings/account_and_limit_settings.md#optional-non-enforcement-of-personal-access-token-expiration).
 
 For examples of how you can use a personal access token to authenticate with the API, see the following section from our [API Docs](../../api/README.md#personalproject-access-tokens).
 
@@ -33,13 +33,14 @@ You can create as many personal access tokens as you like from your GitLab
 profile.
 
 1. Sign in to GitLab.
-1. In the upper-right corner, click your avatar and select **Settings**.
-1. On the  **User Settings** menu, select **Access Tokens**.
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **Access Tokens**.
 1. Choose a name and optional expiry date for the token.
 1. Choose the [desired scopes](#limiting-scopes-of-a-personal-access-token).
-1. Click the **Create personal access token** button.
+1. Select **Create personal access token**.
 1. Save the personal access token somewhere safe. If you navigate away or refresh
-your page, and you did not save the token, you must create a new one.
+   your page, and you did not save the token, you must create a new one.
 
 ### Revoking a personal access token
 

@@ -7,7 +7,7 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
   include_context 'with a mocked GitLab instance'
 
   before do
-    stub_application_setting(maintenance_mode: true)
+    stub_maintenance_mode_setting(true)
   end
 
   context 'normal requests to a read-only GitLab instance' do

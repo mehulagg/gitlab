@@ -16,12 +16,14 @@ RSpec.describe Notify do
   let_it_be(:user, reload: true) { create(:user) }
   let_it_be(:current_user, reload: true) { create(:user, email: "current@email.com", name: 'www.example.com') }
   let_it_be(:assignee, reload: true) { create(:user, email: 'assignee@example.com', name: 'John Doe') }
+  let_it_be(:reviewer, reload: true) { create(:user, email: 'reviewer@example.com', name: 'Jane Doe') }
 
   let_it_be(:merge_request) do
     create(:merge_request, source_project: project,
                            target_project: project,
                            author: current_user,
                            assignees: [assignee],
+                           reviewers: [reviewer],
                            description: 'Awesome description')
   end
 
@@ -342,6 +344,7 @@ RSpec.describe Notify do
             is_expected.to have_body_text(project_merge_request_path(project, merge_request))
             is_expected.to have_body_text(merge_request.source_branch)
             is_expected.to have_body_text(merge_request.target_branch)
+            is_expected.to have_body_text(reviewer.name)
           end
         end
 
@@ -905,6 +908,28 @@ RSpec.describe Notify do
           is_expected.to have_body_text project.full_name
           is_expected.to have_body_text project_member.human_access.downcase
           is_expected.to have_body_text project_member.invite_token
+          is_expected.to have_link('Join now', href: invite_url(project_member.invite_token, invite_type: Members::InviteEmailExperiment::INVITE_TYPE))
+        end
+
+        it 'contains invite link for the avatar', :experiment do
+          stub_experiments('members/invite_email': :avatar)
+
+          is_expected.not_to have_content('You are invited!')
+          is_expected.not_to have_body_text 'What is a GitLab'
+        end
+
+        it 'contains invite link for the avatar', :experiment do
+          stub_experiments('members/invite_email': :permission_info)
+
+          is_expected.not_to have_content('You are invited!')
+          is_expected.to have_body_text 'What is a GitLab'
+          is_expected.to have_body_text 'What can I do with'
+        end
+
+        it 'has invite link for the control group' do
+          stub_experiments('members/invite_email': :control)
+
+          is_expected.to have_content('You are invited!')
         end
       end
 

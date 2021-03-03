@@ -4,7 +4,7 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Webhooks
+# Webhooks **(FREE)**
 
 Project webhooks allow you to trigger a percent-encoded URL if, for example, new code is pushed or
 a new issue is created. You can configure webhooks to listen for specific events
@@ -31,7 +31,7 @@ update a backup mirror, or even deploy to your production server.
 
 Webhooks are available:
 
-- Per project, at a project's **Settings > Webhooks** menu. **(CORE)**
+- Per project, at a project's **Settings > Webhooks** menu. **(FREE)**
 - Additionally per group, at a group's **Settings > Webhooks** menu. **(PREMIUM)**
 
 NOTE:
@@ -1029,6 +1029,9 @@ X-Gitlab-Event: Wiki Page Hook
 
 ### Pipeline events
 
+In [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/53159)
+and later, the pipeline webhook returns only the latest jobs.
+
 Triggered on status change of Pipeline.
 
 **Request Header**:
@@ -1130,6 +1133,10 @@ X-Gitlab-Event: Pipeline Hook
          "artifacts_file":{
             "filename": null,
             "size": null
+         },
+         "environment": {
+           "name": "production",
+           "action": "start"
          }
       },
       {
@@ -1151,15 +1158,21 @@ X-Gitlab-Event: Pipeline Hook
             "email": "admin@example.com"
          },
          "runner": {
-            "id":380987,
-            "description":"shared-runners-manager-6.gitlab.com",
-            "active":true,
-            "is_shared":true
+            "id": 380987,
+            "description": "shared-runners-manager-6.gitlab.com",
+            "active": true,
+            "is_shared": true,
+            "tags": [
+              "linux",
+              "docker",
+              "shared-runner"
+            ]
          },
          "artifacts_file":{
             "filename": null,
             "size": null
-         }
+         },
+         "environment": null
       },
       {
          "id": 378,
@@ -1183,12 +1196,17 @@ X-Gitlab-Event: Pipeline Hook
             "id":380987,
             "description":"shared-runners-manager-6.gitlab.com",
             "active":true,
-            "is_shared":true
+            "is_shared":true,
+            "tags": [
+              "linux",
+              "docker"
+            ]
          },
          "artifacts_file":{
             "filename": null,
             "size": null
-         }
+         },
+         "environment": null
       },
       {
          "id": 376,
@@ -1209,15 +1227,20 @@ X-Gitlab-Event: Pipeline Hook
             "email": "admin@example.com"
          },
          "runner": {
-            "id":380987,
-            "description":"shared-runners-manager-6.gitlab.com",
-            "active":true,
-            "is_shared":true
+            "id": 380987,
+            "description": "shared-runners-manager-6.gitlab.com",
+            "active": true,
+            "is_shared": true,
+            "tags": [
+              "linux",
+              "docker"
+            ]
          },
          "artifacts_file":{
             "filename": null,
             "size": null
-         }
+         },
+         "environment": null
       },
       {
          "id": 379,
@@ -1241,6 +1264,10 @@ X-Gitlab-Event: Pipeline Hook
          "artifacts_file":{
             "filename": null,
             "size": null
+         },
+         "environment": {
+           "name": "staging",
+           "action": "start"
          }
       }
    ]
@@ -1308,8 +1335,13 @@ X-Gitlab-Event: Job Hook
     "active": true,
     "is_shared": false,
     "id": 380987,
-    "description": "shared-runners-manager-6.gitlab.com"
-  }
+    "description": "shared-runners-manager-6.gitlab.com",
+    "tags": [
+      "linux",
+      "docker"
+    ]
+  },
+  "environment": null
 }
 ```
 
@@ -1467,6 +1499,74 @@ X-Gitlab-Event: Member Hook
   "event_name": "user_remove_from_group"
 }
 ```
+
+### Subgroup events **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/260419) in GitLab 13.9.
+
+Subgroup events are triggered when:
+
+- A [subgroup is created in a group](#subgroup-created-in-a-group)
+- A [subgroup is removed from a group](#subgroup-removed-from-a-group)
+
+#### Subgroup created in a group
+
+**Request Header**:
+
+```plaintext
+X-Gitlab-Event: Subgroup Hook
+```
+
+**Request Body**:
+
+```json
+{
+
+  "created_at": "2021-01-20T09:40:12Z",
+  "updated_at": "2021-01-20T09:40:12Z",
+  "event_name": "subgroup_create",
+  "name": "subgroup1",
+  "path": "subgroup1",
+  "full_path": "group1/subgroup1",
+  "group_id": 10,
+  "parent_group_id": 7,
+  "parent_name": "group1",
+  "parent_path": "group1",
+  "parent_full_path": "group1"
+
+}
+```
+
+#### Subgroup removed from a group
+
+**Request Header**:
+
+```plaintext
+X-Gitlab-Event: Subgroup Hook
+```
+
+**Request Body**:
+
+```json
+{
+
+  "created_at": "2021-01-20T09:40:12Z",
+  "updated_at": "2021-01-20T09:40:12Z",
+  "event_name": "subgroup_destroy",
+  "name": "subgroup1",
+  "path": "subgroup1",
+  "full_path": "group1/subgroup1",
+  "group_id": 10,
+  "parent_group_id": 7,
+  "parent_name": "group1",
+  "parent_path": "group1",
+  "parent_full_path": "group1"
+
+}
+```
+
+NOTE:
+Webhooks for when a [subgroup is removed from a group](#subgroup-removed-from-a-group) are not triggered when a [subgroup is transferred to a new parent group](../../group/index.md#transfer-a-group)
 
 ### Feature Flag events
 

@@ -1,7 +1,7 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import initialStore from 'ee/billings/subscriptions/store';
 import SubscriptionApp from 'ee/billings/subscriptions/components/app.vue';
+import initialStore from 'ee/billings/subscriptions/store';
 import * as types from 'ee/billings/subscriptions/store/mutation_types';
 import { mockDataSeats } from 'ee_jest/billings/mock_data';
 

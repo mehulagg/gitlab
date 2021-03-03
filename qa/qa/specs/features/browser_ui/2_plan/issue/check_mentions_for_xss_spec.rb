@@ -18,9 +18,11 @@ module QA
 
     describe 'check xss occurence in @mentions in issues', :requires_admin do
       before do
+        Runtime::Feature.enable(:invite_members_group_modal)
+
         Flow::Login.sign_in
 
-        Flow::Project.add_member(project: project, username: user.username)
+        project.add_member(user)
 
         Resource::Issue.fabricate_via_api! do |issue|
           issue.project = project

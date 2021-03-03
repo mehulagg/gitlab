@@ -1,13 +1,6 @@
 <script>
 import { GlPopover, GlProgressBar, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import { generateKey } from '../utils/epic_utils';
-
-import CommonMixin from '../mixins/common_mixin';
-import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
-import MonthsPresetMixin from '../mixins/months_preset_mixin';
-import WeeksPresetMixin from '../mixins/weeks_preset_mixin';
-
 import {
   EPIC_DETAILS_CELL_WIDTH,
   PERCENTAGE,
@@ -15,6 +8,12 @@ import {
   SMALL_TIMELINE_BAR,
   TIMELINE_CELL_MIN_WIDTH,
 } from '../constants';
+import CommonMixin from '../mixins/common_mixin';
+
+import MonthsPresetMixin from '../mixins/months_preset_mixin';
+import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
+import WeeksPresetMixin from '../mixins/weeks_preset_mixin';
+import { generateKey } from '../utils/epic_utils';
 
 export default {
   cellWidth: TIMELINE_CELL_MIN_WIDTH,

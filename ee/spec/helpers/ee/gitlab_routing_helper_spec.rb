@@ -152,4 +152,24 @@ RSpec.describe EE::GitlabRoutingHelper do
       expect(subject).to eq "http://localhost/#{vulnerability.project.namespace.path}/#{vulnerability.project.name}/-/security/vulnerabilities/#{vulnerability.id}"
     end
   end
+
+  describe '#usage_quotas_path' do
+    it 'returns the group usage quota path for a group namespace' do
+      group = build(:group)
+
+      expect(usage_quotas_path(group)).to eq("/groups/#{group.full_path}/-/usage_quotas")
+    end
+
+    it 'returns the profile usage quotas path for any other namespace' do
+      namespace = build(:namespace)
+
+      expect(usage_quotas_path(namespace)).to eq('/-/profile/usage_quotas')
+    end
+
+    it 'returns the path with any args supplied' do
+      namespace = build(:namespace)
+
+      expect(usage_quotas_path(namespace, foo: 'bar', anchor: 'quotas-tab')).to eq('/-/profile/usage_quotas?foo=bar#quotas-tab')
+    end
+  end
 end

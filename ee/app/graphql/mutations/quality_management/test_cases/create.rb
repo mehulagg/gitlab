@@ -4,7 +4,7 @@ module Mutations
   module QualityManagement
     module TestCases
       class Create < BaseMutation
-        include ResolvesProject
+        include FindsProject
 
         graphql_name 'CreateTestCase'
 
@@ -33,7 +33,7 @@ module Mutations
 
         def resolve(args)
           project_path = args.delete(:project_path)
-          project = authorized_find!(full_path: project_path)
+          project = authorized_find!(project_path)
 
           result = ::QualityManagement::TestCases::CreateService.new(
             project,
@@ -47,12 +47,6 @@ module Mutations
             test_case: test_case&.persisted? ? test_case : nil,
             errors: Array.wrap(result.message)
           }
-        end
-
-        private
-
-        def find_object(full_path:)
-          resolve_project(full_path: full_path)
         end
       end
     end

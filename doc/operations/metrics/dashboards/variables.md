@@ -4,7 +4,7 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Using variables **(CORE)**
+# Using variables **(FREE)**
 
 ## Query variables
 
@@ -16,7 +16,7 @@ Queries that continue to use the old format display no data.
 
 ## Predefined variables
 
-GitLab supports a limited set of [CI variables](../../../ci/variables/README.md)
+GitLab supports a limited set of [CI/CD variables](../../../ci/variables/README.md)
 in the Prometheus query. This is particularly useful for identifying a specific
 environment, for example with `ci_environment_slug`. Variables for Prometheus queries
 must be lowercase. The supported variables are:

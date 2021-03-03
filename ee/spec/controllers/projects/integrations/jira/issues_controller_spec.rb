@@ -38,6 +38,14 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       expect(response).to render_template(:index)
     end
 
+    it 'tracks usage' do
+      expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+        .to receive(:track_event)
+        .with('i_ecosystem_jira_service_list_issues', values: user.id)
+
+      get :index, params: { namespace_id: project.namespace, project_id: project }
+    end
+
     context 'when project has moved' do
       let(:new_project) { create(:project) }
 
@@ -73,6 +81,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       it 'renders bad request for IntegrationError' do
         expect_any_instance_of(Projects::Integrations::Jira::IssuesFinder).to receive(:execute)
           .and_raise(Projects::Integrations::Jira::IssuesFinder::IntegrationError, 'Integration error')
+        expect(Gitlab::ErrorTracking).to receive(:track_exception)
 
         get :index, params: { namespace_id: project.namespace, project_id: project }, format: :json
 
@@ -83,6 +92,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       it 'renders bad request for RequestError' do
         expect_any_instance_of(Projects::Integrations::Jira::IssuesFinder).to receive(:execute)
           .and_raise(Projects::Integrations::Jira::IssuesFinder::RequestError, 'Request error')
+        expect(Gitlab::ErrorTracking).to receive(:track_exception)
 
         get :index, params: { namespace_id: project.namespace, project_id: project }, format: :json
 
@@ -169,6 +179,51 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
             let(:expected_params) { { 'state' => 'opened', 'sort' => 'created_date' } }
           end
         end
+      end
+    end
+  end
+
+  describe 'GET #show' do
+    context 'when `jira_issues_show_integration` feature is disabled' do
+      before do
+        stub_feature_flags(jira_issues_show_integration: false)
+      end
+
+      it 'returns 404 status' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when `jira_issues_show_integration` feature is enabled' do
+      let(:jira_issue) { { 'from' => 'jira' } }
+      let(:issue_json) { { 'from' => 'backend' } }
+
+      before do
+        stub_feature_flags(jira_issues_show_integration: true)
+
+        expect_next_found_instance_of(JiraService) do |service|
+          expect(service).to receive(:find_issue).with('1', rendered_fields: true).and_return(jira_issue)
+        end
+
+        expect_next_instance_of(Integrations::Jira::IssueDetailSerializer) do |serializer|
+          expect(serializer).to receive(:represent).with(jira_issue, project: project).and_return(issue_json)
+        end
+      end
+
+      it 'renders `show` template' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
+
+        expect(assigns(:issue_json)).to eq(issue_json)
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to render_template(:show)
+      end
+
+      it 'returns JSON response' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1, format: :json }
+
+        expect(json_response).to eq(issue_json)
       end
     end
   end

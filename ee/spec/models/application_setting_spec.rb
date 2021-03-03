@@ -93,6 +93,17 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(-1).for(:new_user_signups_cap) }
     it { is_expected.not_to allow_value(2.5).for(:new_user_signups_cap) }
 
+    it { is_expected.to allow_value(1).for(:git_two_factor_session_expiry) }
+    it { is_expected.to allow_value(10).for(:git_two_factor_session_expiry) }
+    it { is_expected.to allow_value(10079).for(:git_two_factor_session_expiry) }
+    it { is_expected.to allow_value(10080).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(nil).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value("value").for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(2.5).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(-5).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(0).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(10081).for(:git_two_factor_session_expiry) }
+
     describe 'when additional email text is enabled' do
       before do
         stub_licensed_features(email_additional_text: true)
@@ -357,24 +368,31 @@ RSpec.describe ApplicationSetting do
       end
 
       context 'namespaces' do
-        let(:namespaces) { create_list(:namespace, 2) }
-        let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: namespaces.last }
+        context 'with personal namespaces' do
+          let(:namespaces) { create_list(:namespace, 2) }
+          let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: namespaces.last }
 
-        it 'tells you if a namespace is allowed to be indexed' do
-          expect(setting.elasticsearch_indexes_namespace?(namespaces.last)).to be_truthy
-          expect(setting.elasticsearch_indexes_namespace?(namespaces.first)).to be_falsey
+          it 'tells you if a namespace is allowed to be indexed' do
+            expect(setting.elasticsearch_indexes_namespace?(namespaces.last)).to be_truthy
+            expect(setting.elasticsearch_indexes_namespace?(namespaces.first)).to be_falsey
+          end
         end
 
-        it 'returns namespaces that are allowed to be indexed' do
-          child_namespace = create(:namespace, parent: namespaces.first)
-          create :elasticsearch_indexed_namespace, namespace: child_namespace
+        context 'with groups' do
+          let(:groups) { create_list(:group, 2) }
+          let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: groups.last }
 
-          child_namespace_indexed_through_parent = create(:namespace, parent: namespaces.last)
+          it 'returns groups that are allowed to be indexed' do
+            child_group = create(:group, parent: groups.first)
+            create :elasticsearch_indexed_namespace, namespace: child_group
 
-          expect(setting.elasticsearch_limited_namespaces).to match_array(
-            [namespaces.last, child_namespace, child_namespace_indexed_through_parent])
-          expect(setting.elasticsearch_limited_namespaces(true)).to match_array(
-            [namespaces.last, child_namespace])
+            child_group_indexed_through_parent = create(:group, parent: groups.last)
+
+            expect(setting.elasticsearch_limited_namespaces).to match_array(
+              [groups.last, child_group, child_group_indexed_through_parent])
+            expect(setting.elasticsearch_limited_namespaces(true)).to match_array(
+              [groups.last, child_group])
+          end
         end
 
         describe '#elasticsearch_indexes_project?' do
@@ -755,30 +773,26 @@ RSpec.describe ApplicationSetting do
   describe '#should_apply_user_signup_cap?' do
     subject { setting.should_apply_user_signup_cap? }
 
-    context 'when feature admin_new_user_signups_cap is disabled' do
-      before do
-        stub_feature_flags(admin_new_user_signups_cap: false)
-      end
+    before do
+      allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+    end
+
+    context 'when new_user_signups_cap setting is nil' do
+      let(:new_user_signups_cap) { nil }
 
       it { is_expected.to be false }
     end
 
-    context 'when feature admin_new_user_signups_cap is enabled' do
-      before do
-        allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
-      end
+    context 'when new_user_signups_cap setting is set to any number' do
+      let(:new_user_signups_cap) { 10 }
 
-      context 'when new_user_signups_cap setting is nil' do
-        let(:new_user_signups_cap) { nil }
+      it { is_expected.to be true }
+    end
+  end
 
-        it { is_expected.to be false }
-      end
-
-      context 'when new_user_signups_cap setting is set to any number' do
-        let(:new_user_signups_cap) { 10 }
-
-        it { is_expected.to be true }
-      end
+  describe 'maintenance mode setting' do
+    it 'defaults to false' do
+      expect(subject.maintenance_mode).to be false
     end
   end
 end

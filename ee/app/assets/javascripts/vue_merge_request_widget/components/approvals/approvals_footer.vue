@@ -67,10 +67,11 @@ export default {
 
 <template>
   <div>
-    <div class="mr-widget-extension d-flex align-items-center pl-3">
+    <div class="mr-widget-extension d-flex align-items-center pl-3 gl-py-3">
       <!-- TODO: simplify button classes once https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1029 is completed -->
       <gl-button
         class="gl-mr-3"
+        size="small"
         :class="{ 'gl-shadow-none!': shouldShowLoadingSpinner }"
         :aria-label="ariaLabel"
         :loading="shouldShowLoadingSpinner"

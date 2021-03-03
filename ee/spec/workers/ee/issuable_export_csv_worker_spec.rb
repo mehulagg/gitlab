@@ -10,14 +10,15 @@ RSpec.describe IssuableExportCsvWorker do
   subject { described_class.new.perform(issuable_type, user.id, project.id, params) }
 
   context 'when issuable type is :requirement' do
-    let(:issuable_type) { :requirement }
+    let(:issuable_type) { 'requirement' }
 
     it 'emails a CSV' do
       expect { subject }.to change(ActionMailer::Base.deliveries, :size).by(1)
     end
 
     it 'calls the Requirements export service' do
-      expect(RequirementsManagement::ExportCsvService).to receive(:new).with(anything, project).once.and_call_original
+      expect(RequirementsManagement::ExportCsvService)
+        .to receive(:new).with(anything, project, []).once.and_call_original
 
       subject
     end
@@ -26,6 +27,19 @@ RSpec.describe IssuableExportCsvWorker do
       expect(RequirementsManagement::RequirementsFinder).to receive(:new).once.and_call_original
 
       subject
+    end
+
+    context 'with selected fields are present' do
+      let(:selected_fields) { %w(Title Description State') }
+
+      it 'calls the Requirements export service with selected fields' do
+        params[:selected_fields] = selected_fields
+
+        expect(RequirementsManagement::ExportCsvService)
+          .to receive(:new).with(anything, project, selected_fields).once.and_call_original
+
+        subject
+      end
     end
 
     context 'with record not found' do

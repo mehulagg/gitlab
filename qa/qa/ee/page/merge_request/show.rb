@@ -225,9 +225,12 @@ module QA
           end
 
           def merge_via_merge_train
+            # Revisit after merge page re-architect is done https://gitlab.com/gitlab-org/gitlab/-/issues/300042
+            # To remove page refresh logic if possible
             wait_until_ready_to_merge
+            wait_until { !find_element(:merge_button).has_text?("when pipeline succeeds") }
 
-            click_element(:merge_button, text: "Start merge train")
+            click_element(:merge_button)
 
             finished_loading?
           end

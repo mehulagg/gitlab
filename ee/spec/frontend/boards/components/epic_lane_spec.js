@@ -16,15 +16,15 @@ describe('EpicLane', () => {
 
   const updateBoardEpicUserPreferencesSpy = jest.fn();
 
-  const createStore = ({ isLoading = false, issuesByListId = mockIssuesByListId }) => {
+  const createStore = ({ isLoading = false, boardItemsByListId = mockIssuesByListId }) => {
     return new Vuex.Store({
       actions: {
         fetchIssuesForEpic: jest.fn(),
         updateBoardEpicUserPreferences: updateBoardEpicUserPreferencesSpy,
       },
       state: {
-        issuesByListId,
-        issues,
+        boardItemsByListId,
+        boardItems: issues,
         epicsFlags: {
           [mockEpic.id]: { isLoading },
         },
@@ -36,9 +36,9 @@ describe('EpicLane', () => {
   const createComponent = ({
     props = {},
     isLoading = false,
-    issuesByListId = mockIssuesByListId,
+    boardItemsByListId = mockIssuesByListId,
   } = {}) => {
-    const store = createStore({ isLoading, issuesByListId });
+    const store = createStore({ isLoading, boardItemsByListId });
 
     const defaultProps = {
       epic: mockEpic,
@@ -125,7 +125,7 @@ describe('EpicLane', () => {
     });
 
     it('does not render when issuesCount is 0', () => {
-      createComponent({ issuesByListId: {} });
+      createComponent({ boardItemsByListId: {} });
       expect(findByTestId('board-epic-lane').exists()).toBe(false);
     });
   });

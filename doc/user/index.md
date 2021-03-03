@@ -31,10 +31,10 @@ For more information, see [All GitLab Features](https://about.gitlab.com/feature
 To get familiar with the concepts needed to develop code on GitLab, read the following articles:
 
 - [Demo: Mastering Code Review With GitLab](https://about.gitlab.com/blog/2017/03/17/demo-mastering-code-review-with-gitlab/).
-- [GitLab Workflow: An Overview](https://about.gitlab.com/blog/2016/10/25/gitlab-workflow-an-overview/#gitlab-workflow-use-case-scenario).
+- [GitLab Workflow: An Overview](https://about.gitlab.com/topics/version-control/what-is-gitlab-workflow/#gitlab-workflow-a-use-case-scenario).
 - [Tutorial: It's all connected in GitLab](https://about.gitlab.com/blog/2016/03/08/gitlab-tutorial-its-all-connected/): an overview on code collaboration with GitLab.
 - [Trends in Version Control Land: Microservices](https://about.gitlab.com/blog/2016/08/16/trends-in-version-control-land-microservices/).
-- [Trends in Version Control Land: Innersourcing](https://about.gitlab.com/blog/2016/07/07/trends-version-control-innersourcing/).
+- [Trends in Version Control Land: Innersourcing](https://about.gitlab.com/topics/version-control/what-is-innersource/).
 
 ## Use cases
 
@@ -43,7 +43,7 @@ GitLab is a Git-based platform that integrates a great number of essential tools
 - Hosting code in repositories with version control.
 - Tracking proposals for new implementations, bug reports, and feedback with a
   fully featured [Issue Tracker](project/issues/index.md#issues-list).
-- Organizing and prioritizing with [Issue Boards](project/issues/index.md#issue-boards).
+- Organizing and prioritizing with [Issue Boards](project/issue_board.md).
 - Reviewing code in [Merge Requests](project/merge_requests/index.md) with live-preview changes per
   branch with [Review Apps](../ci/review_apps/index.md).
 - Building, testing, and deploying with built-in [Continuous Integration](../ci/README.md).
@@ -61,7 +61,7 @@ With GitLab Enterprise Edition, you can also:
   - [Multiple Issue Boards](project/issue_board.md#multiple-issue-boards).
 - Create formal relationships between issues with [Related Issues](project/issues/related_issues.md).
 - Use [Burndown Charts](project/milestones/burndown_and_burnup_charts.md) to track progress during a sprint or while working on a new version of their software.
-- Leverage [Elasticsearch](../integration/elasticsearch.md) with [Advanced Search](search/advanced_global_search.md) and [Advanced Search Syntax](search/advanced_search_syntax.md) for faster, more advanced code search across your entire GitLab instance.
+- Leverage [Elasticsearch](../integration/elasticsearch.md) with [Advanced Search](search/advanced_search.md) for faster, more advanced code search across your entire GitLab instance.
 - [Authenticate users with Kerberos](../integration/kerberos.md).
 - [Mirror a repository](project/repository/repository_mirroring.md) from elsewhere on your local server.
 - View your entire CI/CD pipeline involving more than one project with [Multiple-Project Pipelines](../ci/multi_project_pipelines.md).
@@ -82,6 +82,14 @@ There are several types of users in GitLab:
 - [GitLab Administrator](../administration/index.md) with full access to
   self-managed instances' features and settings.
 - [Internal users](../development/internal_users.md).
+
+## User activity
+
+You can follow or unfollow other users from their [user profiles](profile/index.md#user-profile).
+To see their activity in the top-level Activity view, select Follow or Unfollow, and select
+the Followed Users tab:
+
+![Follow users](img/activity_followed_users_v13_9.png)
 
 ## Projects
 

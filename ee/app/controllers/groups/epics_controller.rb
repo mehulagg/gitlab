@@ -18,7 +18,7 @@ class Groups::EpicsController < Groups::ApplicationController
   after_action :log_epic_show, only: :show
 
   before_action do
-    push_frontend_feature_flag(:vue_issuable_epic_sidebar, @group)
+    push_frontend_feature_flag(:vue_epics_list, @group, type: :development, default_enabled: :yaml)
   end
 
   feature_category :epics

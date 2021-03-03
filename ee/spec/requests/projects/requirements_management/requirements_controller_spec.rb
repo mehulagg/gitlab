@@ -5,10 +5,10 @@ require 'spec_helper'
 RSpec.describe Projects::RequirementsManagement::RequirementsController do
   include WorkhorseHelpers
 
+  include_context 'workhorse headers'
+
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :public) }
-  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-  let(:workhorse_headers) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
 
   shared_examples 'response with 404 status' do
     it 'returns 404' do
@@ -23,10 +23,6 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
     let(:params) { { namespace_id: project.namespace.id, path: 'test' } }
 
     subject { upload_file(file, workhorse_headers, params) }
-
-    before do
-      stub_feature_flags(import_requirements_csv: true)
-    end
 
     context 'unauthorized' do
       context 'when user is not signed in' do
@@ -102,14 +98,6 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
       end
     end
 
-    context 'when requirements import FF is disabled' do
-      before do
-        stub_feature_flags(import_requirements_csv: false)
-      end
-
-      it_behaves_like 'response with 404 status'
-    end
-
     def upload_file(file, headers = {}, params = {})
       workhorse_finalize(
         import_csv_project_requirements_management_requirements_path(project),
@@ -128,34 +116,33 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
         headers: workhorse_headers
     end
 
-    context 'with an authorized user' do
+    before do
+      login_as(user)
+      stub_licensed_features(requirements: true)
+    end
+
+    context 'with authorized user' do
       before do
         project.add_reporter(user)
       end
 
-      context 'when feature is available' do
-        before do
-          stub_licensed_features(requirements: true)
-          stub_feature_flags(import_requirements_csv: true)
-        end
-
+      context 'when requirements feature is enabled' do
         it_behaves_like 'handle uploads authorize request' do
           let(:uploader_class) { FileUploader }
           let(:maximum_size) { Gitlab::CurrentSettings.max_attachment_size.megabytes }
         end
       end
 
-      context 'when feature is disabled' do
+      context 'when requirements feature is disabled' do
         before do
-          stub_licensed_features(requirements: true)
-          stub_feature_flags(import_requirements_csv: true)
+          stub_licensed_features(requirements: false)
         end
 
         it_behaves_like 'response with 404 status'
       end
     end
 
-    context 'with an authorized user' do
+    context 'with unauthorized user' do
       it_behaves_like 'response with 404 status'
     end
   end

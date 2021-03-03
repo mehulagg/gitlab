@@ -1,7 +1,7 @@
 <script>
 import { SCAN_TYPE_LABEL } from 'ee/security_configuration/dast_scanner_profiles/constants';
-import ProfileSelector from './profile_selector.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import ProfileSelector from './profile_selector.vue';
 
 export default {
   name: 'OnDemandScansScannerProfileSelector',
@@ -27,10 +27,7 @@ export default {
   computed: {
     formattedProfiles() {
       return this.profiles.map((profile) => {
-        const addSuffix = (str) =>
-          this.glFeatures.securityOnDemandScansSiteValidation
-            ? `${str} (${SCAN_TYPE_LABEL[profile.scanType]})`
-            : str;
+        const addSuffix = (str) => `${str} (${SCAN_TYPE_LABEL[profile.scanType]})`;
         return {
           ...profile,
           dropdownLabel: addSuffix(profile.profileName),
@@ -56,7 +53,8 @@ export default {
         'OnDemandScans|No profile yet. In order to create a new scan, you need to have at least one completed scanner profile.',
       )
     }}</template>
-    <template #new-profile>{{ s__('OnDemandScans|Create a new scanner profile') }}</template>
+    <template #new-profile>{{ s__('OnDemandScans|Create new scanner profile') }}</template>
+    <template #manage-profile>{{ s__('OnDemandScans|Manage scanner profiles') }}</template>
     <template #summary>
       <slot name="summary"></slot>
     </template>

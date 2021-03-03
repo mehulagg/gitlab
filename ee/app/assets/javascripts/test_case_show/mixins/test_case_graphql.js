@@ -1,12 +1,12 @@
 import Api from '~/api';
 import createFlash from '~/flash';
-import { s__ } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 
-import projectTestCase from '../queries/project_test_case.query.graphql';
-import updateTestCase from '../queries/update_test_case.mutation.graphql';
 import markTestCaseTodoDone from '../queries/mark_test_case_todo_done.mutation.graphql';
 import moveTestCase from '../queries/move_test_case.mutation.graphql';
+import projectTestCase from '../queries/project_test_case.query.graphql';
+import updateTestCase from '../queries/update_test_case.mutation.graphql';
 
 export default {
   apollo: {

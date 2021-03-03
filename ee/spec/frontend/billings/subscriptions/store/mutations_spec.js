@@ -1,7 +1,7 @@
-import createState from 'ee/billings/subscriptions/store/state';
+import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import * as types from 'ee/billings/subscriptions/store/mutation_types';
 import mutations from 'ee/billings/subscriptions/store/mutations';
-import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
+import createState from 'ee/billings/subscriptions/store/state';
 import { mockDataSubscription } from 'ee_jest/billings/mock_data';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
@@ -51,10 +51,10 @@ describe('EE billings subscription module mutations', () => {
       state.tables[key].rows.map(({ columns }) => getColumnValues(columns));
 
     describe.each`
-      desc                        | subscription                  | tableKey
-      ${'with Gold subscription'} | ${mockDataSubscription.gold}  | ${TABLE_TYPE_DEFAULT}
-      ${'with Free plan'}         | ${mockDataSubscription.free}  | ${TABLE_TYPE_FREE}
-      ${'with Gold trial'}        | ${mockDataSubscription.trial} | ${TABLE_TYPE_TRIAL}
+      desc                            | subscription                  | tableKey
+      ${'with Ultimate subscription'} | ${mockDataSubscription.gold}  | ${TABLE_TYPE_DEFAULT}
+      ${'with Free plan'}             | ${mockDataSubscription.free}  | ${TABLE_TYPE_FREE}
+      ${'with Ultimate trial'}        | ${mockDataSubscription.trial} | ${TABLE_TYPE_TRIAL}
     `('$desc', ({ subscription, tableKey }) => {
       beforeEach(() => {
         state.isLoadingSubscription = true;

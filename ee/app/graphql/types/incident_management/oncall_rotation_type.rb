@@ -23,6 +23,11 @@ module Types
             null: true,
             description: 'Start date of the on-call rotation.'
 
+      field :ends_at,
+            Types::TimeType,
+            null: true,
+            description: 'End date and time of the on-call rotation.'
+
       field :length,
             GraphQL::INT_TYPE,
             null: true,
@@ -33,10 +38,21 @@ module Types
             null: true,
             description: 'Unit of the on-call rotation length.'
 
+      field :active_period,
+            Types::IncidentManagement::OncallRotationActivePeriodType,
+            null: true,
+            description: 'Active period for the on-call rotation.'
+
       field :participants,
             ::Types::IncidentManagement::OncallParticipantType.connection_type,
             null: true,
             description: 'Participants of the on-call rotation.'
+
+      field :shifts,
+            ::Types::IncidentManagement::OncallShiftType.connection_type,
+            null: true,
+            description: 'Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month.',
+            resolver: ::Resolvers::IncidentManagement::OncallShiftsResolver
     end
   end
 end

@@ -1,10 +1,10 @@
 import { shallowMount, mount } from '@vue/test-utils';
-import { discussionMock } from '../mock_data';
 import DiscussionActions from '~/notes/components/discussion_actions.vue';
 import ReplyPlaceholder from '~/notes/components/discussion_reply_placeholder.vue';
 import ResolveDiscussionButton from '~/notes/components/discussion_resolve_button.vue';
 import ResolveWithIssueButton from '~/notes/components/discussion_resolve_with_issue_button.vue';
 import createStore from '~/notes/stores';
+import { discussionMock } from '../mock_data';
 
 // NOTE: clone mock_data so that it is not accidentally mutated
 const createDiscussionMock = (props = {}) =>
@@ -96,7 +96,7 @@ describe('DiscussionActions', () => {
 
     it('emits showReplyForm event when clicking on reply placeholder', () => {
       jest.spyOn(wrapper.vm, '$emit');
-      wrapper.find(ReplyPlaceholder).find('button').trigger('click');
+      wrapper.find(ReplyPlaceholder).find('textarea').trigger('focus');
       expect(wrapper.vm.$emit).toHaveBeenCalledWith('showReplyForm');
     });
 

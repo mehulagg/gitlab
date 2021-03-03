@@ -1,15 +1,12 @@
-import initSidebarBundle from 'ee/sidebar/sidebar_bundle';
 import trackShowInviteMemberLink from 'ee/projects/track_invite_members';
+import initSidebarBundle from 'ee/sidebar/sidebar_bundle';
 
-import initRelatedIssues from '~/related_issues';
 import initShow from '~/pages/projects/issues/show';
+import initRelatedIssues from '~/related_issues';
 import UserCallout from '~/user_callout';
 
 initShow();
-
-if (gon.features && !gon.features.vueIssuableSidebar) {
-  initSidebarBundle();
-}
+initSidebarBundle();
 initRelatedIssues();
 
 // eslint-disable-next-line no-new

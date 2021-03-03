@@ -130,10 +130,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
   describe "#deploys" do
     context 'with from date' do
       before do
-        travel_to(5.days.ago) { create(:deployment, :success, project: project) }
-        travel_to(5.days.from_now) { create(:deployment, :success, project: project) }
-        travel_to(5.days.ago) { create(:deployment, :success, project: project_2) }
-        travel_to(5.days.from_now) { create(:deployment, :success, project: project_2) }
+        travel_to(5.days.ago) { create(:deployment, :success, project: project, finished_at: Time.zone.now) }
+        travel_to(5.days.from_now) { create(:deployment, :success, project: project, finished_at: Time.zone.now) }
+        travel_to(5.days.ago) { create(:deployment, :success, project: project_2, finished_at: Time.zone.now) }
+        travel_to(5.days.from_now) { create(:deployment, :success, project: project_2, finished_at: Time.zone.now) }
       end
 
       it "finds the number of deploys made created after it" do
@@ -149,7 +149,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
       context 'with subgroups' do
         before do
           travel_to(5.days.from_now) do
-            create(:deployment, :success, project: create(:project, :repository, namespace: create(:group, parent: group)))
+            create(:deployment, :success, finished_at: Time.zone.now, project: create(:project, :repository, namespace: create(:group, parent: group)))
           end
         end
 
@@ -161,7 +161,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
       context 'with projects specified in options' do
         before do
           travel_to(5.days.from_now) do
-            create(:deployment, :success, project: create(:project, :repository, namespace: group, name: 'not_applicable'))
+            create(:deployment, :success, finished_at: Time.zone.now, project: create(:project, :repository, namespace: group, name: 'not_applicable'))
           end
         end
 
@@ -184,7 +184,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
     context 'with other projects' do
       before do
         travel_to(5.days.from_now) do
-          create(:deployment, :success, project: create(:project, :repository, namespace: create(:group)))
+          create(:deployment, :success, finished_at: Time.zone.now, project: create(:project, :repository, namespace: create(:group)))
         end
       end
 
@@ -192,50 +192,50 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
         expect(subject.second[:value]).to eq('-')
       end
     end
-  end
 
-  describe '#deployment_frequency' do
-    let(:from) { 6.days.ago }
-    let(:to) { nil }
+    describe '#deployment_frequency' do
+      let(:from) { 6.days.ago }
+      let(:to) { nil }
 
-    subject do
-      described_class.new(group, options: {
-        from: from,
-        to: to,
-        current_user: user
-      }).data.third
-    end
-
-    it 'includes the unit: `per day`' do
-      expect(subject[:unit]).to eq(_('per day'))
-    end
-
-    before do
-      travel_to(5.days.ago) do
-        create(:deployment, :success, project: project)
+      subject do
+        described_class.new(group, options: {
+          from: from,
+          to: to,
+          current_user: user
+        }).data.third
       end
-    end
 
-    context 'when `to` is nil' do
-      it 'includes range until now' do
-        # 1 deployment over 7 days
-        expect(subject[:value]).to eq('0.1')
+      it 'includes the unit: `per day`' do
+        expect(subject[:unit]).to eq(_('per day'))
       end
-    end
-
-    context 'when `to` is given' do
-      let(:from) { 10.days.ago }
-      let(:to) { 10.days.from_now }
 
       before do
-        travel_to(5.days.from_now) do
-          create(:deployment, :success, project: project)
+        travel_to(5.days.ago) do
+          create(:deployment, :success, finished_at: Time.zone.now, project: project)
         end
       end
 
-      it 'returns deployment frequency within `from` and `to` range' do
-        # 2 deployments over 20 days
-        expect(subject[:value]).to eq('0.1')
+      context 'when `to` is nil' do
+        it 'includes range until now' do
+          # 1 deployment over 7 days
+          expect(subject[:value]).to eq('0.1')
+        end
+      end
+
+      context 'when `to` is given' do
+        let(:from) { 10.days.ago }
+        let(:to) { 10.days.from_now }
+
+        before do
+          travel_to(5.days.from_now) do
+            create(:deployment, :success, finished_at: Time.zone.now, project: project)
+          end
+        end
+
+        it 'returns deployment frequency within `from` and `to` range' do
+          # 2 deployments over 20 days
+          expect(subject[:value]).to eq('0.1')
+        end
       end
     end
   end

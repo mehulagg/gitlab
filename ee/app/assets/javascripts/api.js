@@ -5,6 +5,7 @@ import { ContentTypeMultipartFormData } from '~/lib/utils/headers';
 export default {
   ...Api,
   geoNodesPath: '/api/:version/geo_nodes',
+  geoNodesStatusPath: '/api/:version/geo_nodes/status',
   geoReplicationPath: '/api/:version/geo_replication/:replicable',
   ldapGroupsPath: '/api/:version/ldap/:provider/groups.json',
   subscriptionPath: '/api/:version/namespaces/:id/gitlab_subscription',
@@ -48,6 +49,7 @@ export default {
   issueMetricImagesPath: '/api/:version/projects/:id/issues/:issue_iid/metric_images',
   issueMetricSingleImagePath:
     '/api/:version/projects/:id/issues/:issue_iid/metric_images/:image_id',
+  billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
 
   userSubscription(namespaceId) {
     const url = Api.buildUrl(this.subscriptionPath).replace(':id', encodeURIComponent(namespaceId));
@@ -194,6 +196,13 @@ export default {
     return axios.post(url, data);
   },
 
+  cycleAnalyticsUpdateValueStream({ groupId, valueStreamId, data }) {
+    const url = Api.buildUrl(this.cycleAnalyticsValueStreamPath)
+      .replace(':id', groupId)
+      .replace(':value_stream_id', valueStreamId);
+    return axios.put(url, data);
+  },
+
   cycleAnalyticsDeleteValueStream(groupId, valueStreamId) {
     const url = Api.buildUrl(this.cycleAnalyticsValueStreamPath)
       .replace(':id', groupId)
@@ -317,6 +326,16 @@ export default {
     return axios.post(url);
   },
 
+  getGeoNodes() {
+    const url = Api.buildUrl(this.geoNodesPath);
+    return axios.get(url);
+  },
+
+  getGeoNodesStatus() {
+    const url = Api.buildUrl(this.geoNodesStatusPath);
+    return axios.get(url);
+  },
+
   createGeoNode(node) {
     const url = Api.buildUrl(this.geoNodesPath);
     return axios.post(url, node);
@@ -377,5 +396,32 @@ export default {
       .replace(':image_id', encodeURIComponent(imageId));
 
     return axios.delete(individualMetricImageUrl);
+  },
+
+  fetchBillableGroupMembersList(namespaceId, options = {}, callback = () => {}) {
+    const url = Api.buildUrl(this.billableGroupMembersPath).replace(':id', namespaceId);
+    const defaults = {
+      per_page: Api.DEFAULT_PER_PAGE,
+      page: 1,
+    };
+
+    const passedOptions = options;
+
+    // calling search API with empty string will not return results
+    if (!passedOptions.search) {
+      passedOptions.search = undefined;
+    }
+
+    return axios
+      .get(url, {
+        params: {
+          ...defaults,
+          ...passedOptions,
+        },
+      })
+      .then(({ data, headers }) => {
+        callback(data);
+        return { data, headers };
+      });
   },
 };

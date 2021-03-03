@@ -1,0 +1,122 @@
+@import 'page_bundles/mixins_and_variables_and_functions';
+
+.discover-box {
+  .discover-image-carousel {
+    padding-top: $gl-padding-24;
+    padding-bottom: $gl-padding-24;
+    max-width: $security-and-compliance-carousel-image-carousel-width;
+
+    @media (min-width: map-get($grid-breakpoints, lg)) {
+      padding-top: $gl-padding-32;
+      padding-bottom: $gl-padding-32;
+    }
+  }
+
+  .discover-title {
+    margin-top: $gl-spacing-scale-8;
+    margin-bottom: $gl-spacing-scale-8;
+  }
+
+  .discover-carousels {
+    padding-left: $gl-padding-32;
+    padding-right: $gl-padding-32;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .discover-carousel-img {
+    margin-bottom: $gl-padding-12;
+    border-radius: $border-radius-default;
+  }
+
+  .discover-button {
+    width: $security-and-compliance-carousel-image-discover-button-width;
+  }
+
+  .discover-buttons {
+    max-width: $security-and-compliance-carousel-image-discover-buttons-max-width;
+  }
+
+  .discover-footer {
+    margin: $gl-spacing-scale-8 auto $gl-spacing-scale-1;
+    max-width: $security-and-compliance-carousel-image-discover-footer-max-width;
+  }
+
+  .discover-feedback {
+    width: $security-and-compliance-carousel-image-discover-feedback-width;
+    bottom: $gl-spacing-scale-5;
+    right: $gl-spacing-scale-5;
+    text-align: right;
+  }
+
+  .discover-text-carousel {
+    max-width: $security-and-compliance-carousel-image-discover-text-carousel-max-width;
+
+    .carousel-caption {
+      height: $security-and-compliance-carousel-image-discover-text-carousel-caption-height;
+      max-width: $security-and-compliance-carousel-image-discover-text-carousel-caption-max-width;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  .carousel-control-next-icon,
+  .carousel-control-prev-icon {
+    width: $security-and-compliance-carousel-control-icon-width;
+
+    @media (min-width: map-get($grid-breakpoints, md)) {
+      width: inherit;
+    }
+  }
+
+  .carousel-control-next {
+    right: $security-and-compliance-carousel-control-position;
+  }
+
+  .carousel-control-prev {
+    left: $security-and-compliance-carousel-control-position;
+  }
+
+  .discover-carousel {
+    margin-bottom: $gl-spacing-scale-7;
+
+    .carousel-inner {
+      width: $security-and-compliance-carousel-inner-width;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .carousel-indicators {
+      bottom: $security-and-compliance-carousel-indicators-bottom;
+
+      @media (min-width: map-get($grid-breakpoints, lg)) {
+        bottom: $security-and-compliance-carousel-indicators-bottom-lg;
+      }
+
+      li {
+        background-color: $gray-500;
+        width: $security-and-compliance-carousel-indicators-dimension;
+        height: $security-and-compliance-carousel-indicators-dimension;
+        border-radius: $security-and-compliance-carousel-indicators-border-radius;
+        margin-right: $gl-spacing-scale-5;
+
+        @media (min-width: map-get($grid-breakpoints, md)) {
+          width: $gl-spacing-scale-3;
+          height: $gl-spacing-scale-3;
+        }
+      }
+
+      .active {
+        background-color: $gray-500;
+      }
+    }
+
+    .carousel-control-prev-icon {
+      background-image: $security-and-compliance-carousel-prev-icon-background;
+    }
+
+    .carousel-control-next-icon {
+      background-image: $security-and-compliance-carousel-next-icon-background;
+    }
+  }
+}

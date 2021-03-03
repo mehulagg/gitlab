@@ -1,4 +1,78 @@
-import { transformBoardConfig } from 'ee/boards/boards_util';
+import {
+  formatListEpics,
+  formatEpicListsPageInfo,
+  transformBoardConfig,
+} from 'ee/boards/boards_util';
+import { mockLabel } from './mock_data';
+
+const listId = 'gid://gitlab/Boards::EpicList/3';
+
+describe('formatListEpics', () => {
+  it('formats raw response from list epics for state', () => {
+    const rawEpicsInLists = {
+      nodes: [
+        {
+          id: 'gid://gitlab/Boards::EpicList/3',
+          epics: {
+            edges: [
+              {
+                node: {
+                  title: 'epic title',
+                  id: 'gid://gitlab/Epic/1',
+                  labels: {
+                    nodes: [mockLabel],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    const result = formatListEpics(rawEpicsInLists);
+
+    expect(result).toEqual({
+      boardItems: {
+        1: {
+          assignees: [],
+          id: 1,
+          labels: [mockLabel],
+          title: 'epic title',
+        },
+      },
+      listData: { [listId]: [1] },
+      listItemsCount: 1,
+    });
+  });
+});
+
+describe('formatEpicListsPageInfo', () => {
+  it('formats raw pageInfo response from epics for state', () => {
+    const rawEpicsInListsPageInfo = {
+      nodes: [
+        {
+          id: listId,
+          epics: {
+            pageInfo: {
+              endCursor: 'MjA',
+              hasNextPage: true,
+            },
+          },
+        },
+      ],
+    };
+
+    const result = formatEpicListsPageInfo(rawEpicsInListsPageInfo);
+
+    expect(result).toEqual({
+      [listId]: {
+        endCursor: 'MjA',
+        hasNextPage: true,
+      },
+    });
+  });
+});
 
 describe('transformBoardConfig', () => {
   beforeEach(() => {

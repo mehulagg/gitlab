@@ -139,6 +139,10 @@ module ProjectsHelper
     project_nav_tabs.include? name
   end
 
+  def any_project_nav_tab?(tabs)
+    tabs.any? { |tab| project_nav_tab?(tab) }
+  end
+
   def project_for_deploy_key(deploy_key)
     if deploy_key.has_access_to?(@project)
       @project
@@ -267,10 +271,6 @@ module ProjectsHelper
     "xcode://clone?repo=#{CGI.escape(default_url_to_repo(project))}"
   end
 
-  def link_to_filter_repo
-    link_to 'git filter-repo', 'https://github.com/newren/git-filter-repo', target: '_blank', rel: 'noopener noreferrer'
-  end
-
   def explore_projects_tab?
     current_page?(explore_projects_path) ||
       current_page?(trending_explore_projects_path) ||
@@ -378,6 +378,25 @@ module ProjectsHelper
 
   private
 
+  def can_read_security_configuration?(project, current_user)
+    show_security_and_compliance_config? &&
+      can?(current_user, :access_security_and_compliance, project) &&
+      can?(current_user, :read_security_configuration, project)
+  end
+
+  def show_security_and_compliance_config?
+    ::Feature.enabled?(:secure_security_and_compliance_configuration_page_on_ce, @subject, default_enabled: :yaml)
+  end
+
+  def get_project_security_nav_tabs(project, current_user)
+    if can_read_security_configuration?(project, current_user)
+      [:security_and_compliance, :security_configuration]
+    else
+      []
+    end
+  end
+
+  # rubocop:disable Metrics/CyclomaticComplexity
   def get_project_nav_tabs(project, current_user)
     nav_tabs = [:home]
 
@@ -385,6 +404,8 @@ module ProjectsHelper
       nav_tabs += [:files, :commits, :network, :graphs, :forks] if can?(current_user, :download_code, project)
       nav_tabs << :releases if can?(current_user, :read_release, project)
     end
+
+    nav_tabs += get_project_security_nav_tabs(project, current_user)
 
     if project.repo_exists? && can?(current_user, :read_merge_request, project)
       nav_tabs << :merge_requests
@@ -417,8 +438,11 @@ module ProjectsHelper
 
     nav_tabs += package_nav_tabs(project, current_user)
 
+    nav_tabs << :learn_gitlab if learn_gitlab_experiment_enabled?(project)
+
     nav_tabs
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
 
   def package_nav_tabs(project, current_user)
     [].tap do |tabs|
@@ -627,7 +651,8 @@ module ProjectsHelper
       metricsDashboardAccessLevel: feature.metrics_dashboard_access_level,
       operationsAccessLevel: feature.operations_access_level,
       showDefaultAwardEmojis: project.show_default_award_emojis?,
-      allowEditingCommitMessages: project.allow_editing_commit_messages?
+      allowEditingCommitMessages: project.allow_editing_commit_messages?,
+      securityAndComplianceAccessLevel: project.security_and_compliance_access_level
     }
   end
 
@@ -649,9 +674,12 @@ module ProjectsHelper
       pagesAvailable: Gitlab.config.pages.enabled,
       pagesAccessControlEnabled: Gitlab.config.pages.access_control,
       pagesAccessControlForced: ::Gitlab::Pages.access_control_is_forced?,
-      pagesHelpPath: help_page_path('user/project/pages/introduction', anchor: 'gitlab-pages-access-control')
+      pagesHelpPath: help_page_path('user/project/pages/introduction', anchor: 'gitlab-pages-access-control'),
+      securityAndComplianceAvailable: show_security_and_compliance_toggle?
     }
   end
+
+  alias_method :show_security_and_compliance_toggle?, :show_security_and_compliance_config?
 
   def project_permissions_panel_data_json(project)
     project_permissions_panel_data(project).to_json.html_safe
@@ -697,6 +725,12 @@ module ProjectsHelper
   def filter_starrer_path(options = {})
     options = params.slice(:sort).merge(options).permit!
     "#{request.path}?#{options.to_param}"
+  end
+
+  def sidebar_security_configuration_paths
+    %w[
+      projects/security/configuration#show
+    ]
   end
 
   def sidebar_projects_paths
@@ -761,6 +795,10 @@ module ProjectsHelper
       tracings
       terraform
     ]
+  end
+
+  def sidebar_security_paths
+    %w[projects/security/configuration#show]
   end
 
   def user_can_see_auto_devops_implicitly_enabled_banner?(project, user)

@@ -40,6 +40,48 @@ RSpec.describe Projects::CreateService, '#execute' do
     end
   end
 
+  describe 'setting name and path' do
+    subject(:project) { create_project(user, opts) }
+
+    context 'when both are set' do
+      let(:opts) { { name: 'one', path: 'two' } }
+
+      it 'keeps them as specified' do
+        expect(project.name).to eq('one')
+        expect(project.path).to eq('two')
+      end
+    end
+
+    context 'when path is set' do
+      let(:opts) { { path: 'one.two_three-four' } }
+
+      it 'sets name == path' do
+        expect(project.path).to eq('one.two_three-four')
+        expect(project.name).to eq(project.path)
+      end
+    end
+
+    context 'when name is a valid path' do
+      let(:opts) { { name: 'one.two_three-four' } }
+
+      it 'sets path == name' do
+        expect(project.name).to eq('one.two_three-four')
+        expect(project.path).to eq(project.name)
+      end
+    end
+
+    context 'when name is not a valid path' do
+      let(:opts) { { name: 'one.two_three-four and five' } }
+
+      # TODO: Retained for backwards compatibility. Remove in API v5.
+      #       See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52725
+      it 'parameterizes the name' do
+        expect(project.name).to eq('one.two_three-four and five')
+        expect(project.path).to eq('one-two_three-four-and-five')
+      end
+    end
+  end
+
   context 'user namespace' do
     it do
       project = create_project(user, opts)
@@ -307,27 +349,38 @@ RSpec.describe Projects::CreateService, '#execute' do
   context 'default visibility level' do
     let(:group) { create(:group, :private) }
 
-    before do
-      stub_application_setting(default_project_visibility: Gitlab::VisibilityLevel::INTERNAL)
-      group.add_developer(user)
+    using RSpec::Parameterized::TableSyntax
 
-      opts.merge!(
-        visibility: 'private',
-        name: 'test',
-        namespace: group,
-        path: 'foo'
-      )
+    where(:case_name, :group_level, :project_level) do
+      [
+        ['in public group',   Gitlab::VisibilityLevel::PUBLIC,   Gitlab::VisibilityLevel::INTERNAL],
+        ['in internal group', Gitlab::VisibilityLevel::INTERNAL, Gitlab::VisibilityLevel::INTERNAL],
+        ['in private group',  Gitlab::VisibilityLevel::PRIVATE,  Gitlab::VisibilityLevel::PRIVATE]
+      ]
     end
 
-    it 'creates a private project' do
-      project = create_project(user, opts)
+    with_them do
+      before do
+        stub_application_setting(default_project_visibility: Gitlab::VisibilityLevel::INTERNAL)
+        group.add_developer(user)
+        group.update!(visibility_level: group_level)
 
-      expect(project).to respond_to(:errors)
+        opts.merge!(
+          name: 'test',
+          namespace: group,
+          path: 'foo'
+        )
+      end
 
-      expect(project.errors.any?).to be(false)
-      expect(project.visibility_level).to eq(Gitlab::VisibilityLevel::PRIVATE)
-      expect(project.saved?).to be(true)
-      expect(project.valid?).to be(true)
+      it 'creates project with correct visibility level', :aggregate_failures do
+        project = create_project(user, opts)
+
+        expect(project).to respond_to(:errors)
+        expect(project.errors).to be_blank
+        expect(project.visibility_level).to eq(project_level)
+        expect(project).to be_saved
+        expect(project).to be_valid
+      end
     end
   end
 
@@ -419,7 +472,7 @@ RSpec.describe Projects::CreateService, '#execute' do
     context 'when another repository already exists on disk' do
       let(:opts) do
         {
-          name: 'Existing',
+          name: 'existing',
           namespace_id: user.namespace.id
         }
       end

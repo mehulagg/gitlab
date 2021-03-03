@@ -2,10 +2,10 @@
 
 import $ from 'jquery';
 import Cookies from 'js-cookie';
+import { fixTitle, hide } from '~/tooltips';
 import { deprecatedCreateFlash as flash } from './flash';
 import axios from './lib/utils/axios_utils';
 import { sprintf, s__, __ } from './locale';
-import { fixTitle, hide } from '~/tooltips';
 
 function Sidebar() {
   this.toggleTodo = this.toggleTodo.bind(this);
@@ -26,6 +26,8 @@ Sidebar.prototype.removeListeners = function () {
   // eslint-disable-next-line @gitlab/no-global-event-off
   this.sidebar.off('hidden.gl.dropdown');
   // eslint-disable-next-line @gitlab/no-global-event-off
+  this.sidebar.off('hiddenGlDropdown');
+  // eslint-disable-next-line @gitlab/no-global-event-off
   $('.dropdown').off('loading.gl.dropdown');
   // eslint-disable-next-line @gitlab/no-global-event-off
   $('.dropdown').off('loaded.gl.dropdown');
@@ -37,6 +39,7 @@ Sidebar.prototype.addEventListeners = function () {
 
   this.sidebar.on('click', '.sidebar-collapsed-icon', this, this.sidebarCollapseClicked);
   this.sidebar.on('hidden.gl.dropdown', this, this.onSidebarDropdownHidden);
+  this.sidebar.on('hiddenGlDropdown', this, this.onSidebarDropdownHidden);
 
   $document.on('click', '.js-sidebar-toggle', this.sidebarToggleClicked);
   return $(document)
@@ -123,7 +126,7 @@ Sidebar.prototype.todoUpdateDone = function (data) {
       .data('deletePath', deletePath);
 
     if ($el.hasClass('has-tooltip')) {
-      fixTitle($el);
+      fixTitle(el);
     }
 
     if (typeof $el.data('isCollapsed') !== 'undefined') {

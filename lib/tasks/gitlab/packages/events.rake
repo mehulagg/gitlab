@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'logger'
 
 desc "GitLab | Packages | Events | Generate hll counter events file for packages"
@@ -49,8 +51,7 @@ namespace :gitlab do
                 "name" => event_name,
                 "category" => "#{originator_type}_packages",
                 "aggregation" => "weekly",
-                "redis_slot" => "package",
-                "feature_flag" => "collect_package_events_redis"
+                "redis_slot" => "package"
               }
             end
 

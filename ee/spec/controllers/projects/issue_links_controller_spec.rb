@@ -10,7 +10,7 @@ RSpec.describe Projects::IssueLinksController do
   let_it_be(:issue2) { create(:issue, project: project) }
 
   describe 'GET #index' do
-    let_it_be(:issue_link) { create(:issue_link, source: issue1, target: issue2, link_type: 'is_blocked_by') }
+    let_it_be(:issue_link) { create(:issue_link, source: issue1, target: issue2, link_type: 'blocks') }
 
     def get_link(user, issue)
       sign_in(user)
@@ -35,7 +35,7 @@ RSpec.describe Projects::IssueLinksController do
 
       link = json_response.first
       expect(link['id']).to eq(issue2.id)
-      expect(link['link_type']).to eq('is_blocked_by')
+      expect(link['link_type']).to eq('blocks')
     end
   end
 

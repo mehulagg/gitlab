@@ -259,6 +259,10 @@ class Note < ApplicationRecord
     noteable_type == 'AlertManagement::Alert'
   end
 
+  def for_project_snippet?
+    noteable.is_a?(ProjectSnippet)
+  end
+
   def for_personal_snippet?
     noteable.is_a?(PersonalSnippet)
   end
@@ -315,6 +319,7 @@ class Note < ApplicationRecord
 
   def noteable_assignee_or_author?(user)
     return false unless user
+    return false unless noteable.respond_to?(:author_id)
     return noteable.assignee_or_author?(user) if [MergeRequest, Issue].include?(noteable.class)
 
     noteable.author_id == user.id
@@ -542,7 +547,7 @@ class Note < ApplicationRecord
   end
 
   def skip_notification?
-    review.present?
+    review.present? || author.blocked? || author.ghost?
   end
 
   private

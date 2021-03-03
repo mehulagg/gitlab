@@ -30,6 +30,21 @@ RSpec.describe GroupMember do
           expect(build(:group_member, group: group, user: acme_user)).to be_valid
         end
 
+        it 'shows proper error message' do
+          group_member = build(:group_member, group: group, user: gmail_user)
+
+          expect(group_member).to be_invalid
+          expect(group_member.errors[:user]).to include("email 'test@gmail.com' does not match the allowed domains: gitlab.com, acme.com")
+        end
+
+        it 'shows proper error message for single domain limitation' do
+          group.allowed_email_domains.last.destroy!
+          group_member = build(:group_member, group: group, user: gmail_user)
+
+          expect(group_member).to be_invalid
+          expect(group_member.errors[:user]).to include("email 'test@gmail.com' does not match the allowed domain of gitlab.com")
+        end
+
         it 'invited email must match at least one of the allowed domain emails' do
           expect(build(:group_member, group: group, user: nil, invite_email: 'user@gmail.com')).to be_invalid
           expect(build(:group_member, group: group, user: nil, invite_email: 'user@gitlab.com')).to be_valid
@@ -239,7 +254,7 @@ RSpec.describe GroupMember do
   end
 
   context 'group member webhooks', :sidekiq_inline do
-    let_it_be(:group) { create(:group_with_plan, plan: :gold_plan) }
+    let_it_be(:group) { create(:group_with_plan, plan: :ultimate_plan) }
     let_it_be(:group_hook) { create(:group_hook, group: group, member_events: true) }
     let_it_be(:user) { create(:user) }
 
@@ -346,7 +361,7 @@ RSpec.describe GroupMember do
   end
 
   context 'group member welcome email', :sidekiq_inline do
-    let_it_be(:group) { create(:group_with_plan, plan: :gold_plan) }
+    let_it_be(:group) { create(:group_with_plan, plan: :ultimate_plan) }
     let(:user) { create(:user) }
 
     context 'when user is provisioned by group' do
@@ -391,7 +406,7 @@ RSpec.describe GroupMember do
         user_id: group_member.user.id,
         group_access: group_member.human_access,
         expires_at: group_member.expires_at&.xmlschema,
-        group_plan: 'gold',
+        group_plan: 'ultimate',
         event_name: event
       }.to_json
     }

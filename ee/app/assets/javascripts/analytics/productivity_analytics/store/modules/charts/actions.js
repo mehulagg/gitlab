@@ -1,8 +1,8 @@
 import axios from '~/lib/utils/axios_utils';
-import * as types from './mutation_types';
 import { getDateInPast } from '~/lib/utils/datetime_utility';
 import { chartKeys, scatterPlotAddonQueryDays } from '../../../constants';
 import { transformScatterData } from '../../../utils';
+import * as types from './mutation_types';
 
 /**
  * Fetches data for all charts except for the main chart

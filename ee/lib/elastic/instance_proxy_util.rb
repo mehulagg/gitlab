@@ -54,6 +54,22 @@ module Elastic
       nil
     end
 
+    # protect against missing project_feature and set visibility to PRIVATE
+    # if the project_feature is missing on a project
+    def safely_read_project_feature_for_elasticsearch(feature)
+      if target.project.project_feature
+        target.project.project_feature.access_level(feature)
+      else
+        logger.warn(
+          message: 'Project is missing ProjectFeature',
+          project_id: target.project_id,
+          id: target.id,
+          class: target.class
+        )
+        ProjectFeature::PRIVATE
+      end
+    end
+
     def apply_field_limit(result)
       return result unless result.is_a? String
 

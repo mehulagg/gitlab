@@ -28,6 +28,7 @@ FactoryBot.define do
       forking_access_level { ProjectFeature::ENABLED }
       merge_requests_access_level { ProjectFeature::ENABLED }
       repository_access_level { ProjectFeature::ENABLED }
+      analytics_access_level { ProjectFeature::ENABLED }
       pages_access_level do
         visibility_level == Gitlab::VisibilityLevel::PUBLIC ? ProjectFeature::ENABLED : ProjectFeature::PRIVATE
       end
@@ -39,7 +40,7 @@ FactoryBot.define do
       group_runners_enabled { nil }
       merge_pipelines_enabled { nil }
       merge_trains_enabled { nil }
-      ci_keep_latest_artifact { nil }
+      keep_latest_artifact { nil }
       import_status { nil }
       import_jid { nil }
       import_correlation_id { nil }
@@ -63,7 +64,8 @@ FactoryBot.define do
         repository_access_level: evaluator.repository_access_level,
         pages_access_level: evaluator.pages_access_level,
         metrics_dashboard_access_level: evaluator.metrics_dashboard_access_level,
-        operations_access_level: evaluator.operations_access_level
+        operations_access_level: evaluator.operations_access_level,
+        analytics_access_level: evaluator.analytics_access_level
       }
 
       project.build_project_feature(hash)
@@ -84,7 +86,7 @@ FactoryBot.define do
       project.group_runners_enabled = evaluator.group_runners_enabled unless evaluator.group_runners_enabled.nil?
       project.merge_pipelines_enabled = evaluator.merge_pipelines_enabled unless evaluator.merge_pipelines_enabled.nil?
       project.merge_trains_enabled = evaluator.merge_trains_enabled unless evaluator.merge_trains_enabled.nil?
-      project.ci_keep_latest_artifact = evaluator.ci_keep_latest_artifact unless evaluator.ci_keep_latest_artifact.nil?
+      project.keep_latest_artifact = evaluator.keep_latest_artifact unless evaluator.keep_latest_artifact.nil?
       project.restrict_user_defined_variables = evaluator.restrict_user_defined_variables unless evaluator.restrict_user_defined_variables.nil?
 
       if evaluator.import_status
@@ -192,7 +194,7 @@ FactoryBot.define do
             filename,
             content,
             message: "Automatically created file #{filename}",
-            branch_name: 'master'
+            branch_name: project.default_branch_or_master
           )
         end
       end
@@ -335,6 +337,9 @@ FactoryBot.define do
     trait(:operations_enabled)           { operations_access_level { ProjectFeature::ENABLED } }
     trait(:operations_disabled)          { operations_access_level { ProjectFeature::DISABLED } }
     trait(:operations_private)           { operations_access_level { ProjectFeature::PRIVATE } }
+    trait(:analytics_enabled)           { analytics_access_level { ProjectFeature::ENABLED } }
+    trait(:analytics_disabled)          { analytics_access_level { ProjectFeature::DISABLED } }
+    trait(:analytics_private)           { analytics_access_level { ProjectFeature::PRIVATE } }
 
     trait :auto_devops do
       association :auto_devops, factory: :project_auto_devops

@@ -169,4 +169,32 @@ RSpec.shared_examples 'a blob replicator' do
       end
     end
   end
+
+  describe '#calculate_checksum' do
+    context 'when the file is locally stored' do
+      context 'when the file exists' do
+        it 'returns hexdigest of the file' do
+          expected = described_class.model.hexdigest(subject.carrierwave_uploader.path)
+
+          expect(subject.calculate_checksum).to eq(expected)
+        end
+      end
+
+      context 'when the file does not exist' do
+        it 'raises an error' do
+          allow(subject).to receive(:file_exists?).and_return(false)
+
+          expect { subject.calculate_checksum }.to raise_error('File is not checksummable')
+        end
+      end
+    end
+
+    context 'when the file is remotely stored' do
+      it 'raises an error' do
+        allow(subject.carrierwave_uploader).to receive(:file_storage?).and_return(false)
+
+        expect { subject.calculate_checksum }.to raise_error('File is not checksummable')
+      end
+    end
+  end
 end

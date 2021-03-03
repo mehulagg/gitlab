@@ -3,6 +3,14 @@
 import Vue from 'vue';
 import '~/boards/models/list';
 
+export const mockLabel = {
+  id: 'gid://gitlab/GroupLabel/121',
+  title: 'To Do',
+  color: '#F0AD4E',
+  textColor: '#FFFFFF',
+  description: null,
+};
+
 export const mockLists = [
   {
     id: 'gid://gitlab/List/1',
@@ -22,13 +30,7 @@ export const mockLists = [
     position: 0,
     listType: 'label',
     collapsed: false,
-    label: {
-      id: 'gid://gitlab/GroupLabel/121',
-      title: 'To Do',
-      color: '#F0AD4E',
-      textColor: '#FFFFFF',
-      description: null,
-    },
+    label: mockLabel,
     maxIssueCount: 0,
     assignee: null,
     milestone: null,
@@ -94,7 +96,7 @@ export const rawIssue = {
 
 export const mockIssue = {
   id: '436',
-  iid: 27,
+  iid: '27',
   title: 'Issue 1',
   referencePath: '#27',
   dueDate: null,
@@ -106,6 +108,7 @@ export const mockIssue = {
   labels,
   epic: {
     id: 'gid://gitlab/Epic/41',
+    iid: 2,
   },
 };
 
@@ -123,6 +126,7 @@ export const mockIssue2 = {
   labels,
   epic: {
     id: 'gid://gitlab/Epic/40',
+    iid: 1,
   },
 };
 
@@ -170,6 +174,9 @@ export const mockEpic = {
   },
   issues: [mockIssue],
 };
+
+export const mockIssueWithEpic = { ...mockIssue3, epic: { id: mockEpic.id, iid: mockEpic.iid } };
+export const mockAssignedEpic = { ...mockIssueWithEpic.epic, title: mockEpic.title };
 
 export const mockEpics = [
   {

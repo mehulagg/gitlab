@@ -21,17 +21,13 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
     end
 
     context 'when SKIP_ALIAS environment variable is set' do
-      let(:secondary_index_name) { "gitlab-test-#{Time.now.strftime("%Y%m%d-%H%M")}"}
-
       before do
         stub_env('SKIP_ALIAS', '1')
       end
 
       after do
-        es_helper.delete_index(index_name: secondary_index_name)
+        es_helper.client.indices.delete(index: "#{es_helper.target_name}*")
       end
-
-      subject { run_rake_task('gitlab:elastic:create_empty_index', secondary_index_name) }
 
       it 'does not alias the new index' do
         expect { subject }.not_to change { es_helper.alias_exists?(name: es_helper.target_name) }
@@ -42,10 +38,6 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
         es_helper.delete_index(index_name: migration_index_name)
 
         expect { subject }.not_to change { es_helper.index_exists?(index_name: migration_index_name) }
-      end
-
-      it 'creates an index at the specified name' do
-        expect { subject }.to change { es_helper.index_exists?(index_name: secondary_index_name) }.from(false).to(true)
       end
 
       Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.each do |class_name|
@@ -77,13 +69,13 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
 
     it 'marks all migrations as completed' do
       expect(Elastic::DataMigrationService).to receive(:mark_all_as_completed!).and_call_original
-      expect(Elastic::MigrationRecord.persisted_versions(completed: true)).to eq([])
+      expect(Elastic::MigrationRecord.load_versions(completed: true)).to eq([])
 
       subject
       refresh_index!
 
       migrations = Elastic::DataMigrationService.migrations.map(&:version)
-      expect(Elastic::MigrationRecord.persisted_versions(completed: true)).to eq(migrations)
+      expect(Elastic::MigrationRecord.load_versions(completed: true)).to eq(migrations)
     end
   end
 
@@ -213,6 +205,44 @@ RSpec.describe 'gitlab:elastic namespace rake tasks', :elastic do
       it 'just prints a message' do
         expect { subject }.to output("Did not find the current running reindexing job.\n").to_stdout
       end
+    end
+  end
+
+  describe 'list_pending_migrations' do
+    subject { run_rake_task('gitlab:elastic:list_pending_migrations') }
+
+    context 'when there are pending migrations' do
+      let(:pending_migration1) { ::Elastic::DataMigrationService.migrations[1] }
+      let(:pending_migration2) { ::Elastic::DataMigrationService.migrations[2] }
+
+      before do
+        pending_migration1.save!(completed: false)
+        pending_migration2.save!(completed: false)
+      end
+
+      it 'outputs pending migrations' do
+        expect { subject }.to output(/#{pending_migration1.name}\n#{pending_migration2.name}/).to_stdout
+      end
+    end
+
+    context 'when there is no pending migrations' do
+      it 'outputs message there are no pending migrations' do
+        expect { subject }.to output(/There are no pending migrations./).to_stdout
+      end
+    end
+  end
+
+  describe 'estimate_cluster_size' do
+    subject { run_rake_task('gitlab:elastic:estimate_cluster_size') }
+
+    before do
+      create(:namespace_root_storage_statistics, repository_size: 1.megabyte)
+      create(:namespace_root_storage_statistics, repository_size: 10.megabyte)
+      create(:namespace_root_storage_statistics, repository_size: 30.megabyte)
+    end
+
+    it 'outputs estimates' do
+      expect { subject }.to output(/your cluster size should be at least 20.5 MB/).to_stdout
     end
   end
 end

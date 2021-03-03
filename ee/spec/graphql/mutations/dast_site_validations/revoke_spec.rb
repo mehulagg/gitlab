@@ -55,16 +55,6 @@ RSpec.describe Mutations::DastSiteValidations::Revoke do
 
           subject
         end
-
-        context 'when on demand scan site validations feature is not enabled' do
-          it 'raises an exception' do
-            stub_feature_flags(security_on_demand_scans_site_validation: false)
-
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable) do |err|
-              expect(err.message).to eq('Feature disabled: security_on_demand_scans_site_validation')
-            end
-          end
-        end
       end
     end
   end

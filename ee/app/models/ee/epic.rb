@@ -67,11 +67,10 @@ module EE
       alias_attribute :parent_ids, :parent_id
       alias_method :issuing_parent, :group
 
-      scope :for_ids, -> (ids) { where(id: ids) }
       scope :in_parents, -> (parent_ids) { where(parent_id: parent_ids) }
       scope :inc_group, -> { includes(:group) }
       scope :in_selected_groups, -> (groups) { where(group_id: groups) }
-      scope :in_milestone, -> (milestone_id) { joins(:issues).where(issues: { milestone_id: milestone_id }) }
+      scope :in_milestone, -> (milestone_id) { joins(:issues).where(issues: { milestone_id: milestone_id }).distinct }
       scope :in_issues, -> (issues) { joins(:epic_issues).where(epic_issues: { issue_id: issues }).distinct }
       scope :has_parent, -> { where.not(parent_id: nil) }
       scope :iid_starts_with, -> (query) { where("CAST(iid AS VARCHAR) LIKE ?", "#{sanitize_sql_like(query)}%") }
@@ -271,6 +270,20 @@ module EE
 
       def search(query)
         fuzzy_search(query, [:title, :description])
+      end
+
+      def ids_for_base_and_decendants(epic_ids)
+        ::Gitlab::ObjectHierarchy.new(self.id_in(epic_ids)).base_and_descendants.pluck(:id)
+      end
+
+      def issue_metadata_for_epics(epic_ids:, limit:)
+        records = self.id_in(epic_ids)
+          .left_joins(epic_issues: :issue)
+          .group("epics.id", "epics.iid", "epics.parent_id", "epics.state_id", "issues.state_id")
+          .select("epics.id, epics.iid, epics.parent_id, epics.state_id AS epic_state_id, issues.state_id AS issues_state_id, COUNT(issues) AS issues_count, SUM(COALESCE(issues.weight, 0)) AS issues_weight_sum")
+          .limit(limit)
+
+        records.map { |record| record.attributes.with_indifferent_access }
       end
     end
 

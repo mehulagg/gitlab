@@ -20,7 +20,7 @@ RSpec.describe GitlabSchema.types['Project'] do
       vulnerabilities vulnerability_scanners requirement_states_count
       vulnerability_severities_count packages compliance_frameworks vulnerabilities_count_by_day
       security_dashboard_path iterations cluster_agents repository_size_excess actual_repository_size_limit
-      code_coverage_summary
+      code_coverage_summary api_fuzzing_ci_configuration
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -218,7 +218,7 @@ RSpec.describe GitlabSchema.types['Project'] do
       end
       frameworks = results.flat_map(&:to_a)
 
-      expect(frameworks).to match_array(projects.flat_map(&:compliance_management_frameworks))
+      expect(frameworks).to match_array(projects.flat_map(&:compliance_management_framework))
     end
   end
 

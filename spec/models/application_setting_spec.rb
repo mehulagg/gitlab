@@ -105,14 +105,29 @@ RSpec.describe ApplicationSetting do
 
     it { is_expected.not_to allow_value(false).for(:hashed_storage_enabled) }
 
-    it { is_expected.not_to allow_value(101).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value('90').for(:repository_storages_weighted_default) }
-    it { is_expected.not_to allow_value(-1).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(100).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(0).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(50).for(:repository_storages_weighted_default) }
-    it { is_expected.to allow_value(nil).for(:repository_storages_weighted_default) }
-    it { is_expected.not_to allow_value({ default: 100, shouldntexist: 50 }).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => 0).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => 50).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => 100).for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => '90').for(:repository_storages_weighted) }
+    it { is_expected.to allow_value('default' => nil).for(:repository_storages_weighted) }
+    it { is_expected.not_to allow_value('default' => -1).for(:repository_storages_weighted).with_message("value for 'default' must be between 0 and 100") }
+    it { is_expected.not_to allow_value('default' => 101).for(:repository_storages_weighted).with_message("value for 'default' must be between 0 and 100") }
+    it { is_expected.not_to allow_value('default' => 100, shouldntexist: 50).for(:repository_storages_weighted).with_message("can't include: shouldntexist") }
+
+    it { is_expected.to allow_value(400).for(:notes_create_limit) }
+    it { is_expected.not_to allow_value('two').for(:notes_create_limit) }
+    it { is_expected.not_to allow_value(nil).for(:notes_create_limit) }
+    it { is_expected.not_to allow_value(5.5).for(:notes_create_limit) }
+    it { is_expected.not_to allow_value(-2).for(:notes_create_limit) }
+
+    def many_usernames(num = 100)
+      Array.new(num) { |i| "username#{i}" }
+    end
+
+    it { is_expected.to allow_value(many_usernames(100)).for(:notes_create_limit_allowlist) }
+    it { is_expected.not_to allow_value(many_usernames(101)).for(:notes_create_limit_allowlist) }
+    it { is_expected.not_to allow_value(nil).for(:notes_create_limit_allowlist) }
+    it { is_expected.to allow_value([]).for(:notes_create_limit_allowlist) }
 
     context 'help_page_documentation_base_url validations' do
       it { is_expected.to allow_value(nil).for(:help_page_documentation_base_url) }
@@ -362,7 +377,7 @@ RSpec.describe ApplicationSetting do
       end
     end
 
-    it_behaves_like 'an object with email-formated attributes', :abuse_notification_email do
+    it_behaves_like 'an object with email-formatted attributes', :abuse_notification_email do
       subject { setting }
     end
 
@@ -661,6 +676,32 @@ RSpec.describe ApplicationSetting do
         end
       end
 
+      describe '#asset_proxy_allowlist' do
+        context 'when given an Array' do
+          it 'sets the domains and adds current running host' do
+            setting.asset_proxy_allowlist = ['example.com', 'assets.example.com']
+            expect(setting.asset_proxy_allowlist).to eq(['example.com', 'assets.example.com', 'localhost'])
+          end
+        end
+
+        context 'when given a String' do
+          it 'sets multiple domains with spaces' do
+            setting.asset_proxy_allowlist = 'example.com *.example.com'
+            expect(setting.asset_proxy_allowlist).to eq(['example.com', '*.example.com', 'localhost'])
+          end
+
+          it 'sets multiple domains with newlines and a space' do
+            setting.asset_proxy_allowlist = "example.com\n *.example.com"
+            expect(setting.asset_proxy_allowlist).to eq(['example.com', '*.example.com', 'localhost'])
+          end
+
+          it 'sets multiple domains with commas' do
+            setting.asset_proxy_allowlist = "example.com, *.example.com"
+            expect(setting.asset_proxy_allowlist).to eq(['example.com', '*.example.com', 'localhost'])
+          end
+        end
+      end
+
       describe '#ci_jwt_signing_key' do
         it { is_expected.not_to allow_value('').for(:ci_jwt_signing_key) }
         it { is_expected.not_to allow_value('invalid RSA key').for(:ci_jwt_signing_key) }
@@ -943,16 +984,47 @@ RSpec.describe ApplicationSetting do
 
   it_behaves_like 'application settings examples'
 
-  describe 'repository_storages_weighted_attributes' do
-    it 'returns the keys for repository_storages_weighted' do
-      expect(subject.class.repository_storages_weighted_attributes).to eq([:repository_storages_weighted_default])
+  describe 'kroki_format_supported?' do
+    it 'returns true when Excalidraw is enabled' do
+      subject.kroki_formats_excalidraw = true
+      expect(subject.kroki_format_supported?('excalidraw')).to eq(true)
+    end
+
+    it 'returns true when BlockDiag is enabled' do
+      subject.kroki_formats_blockdiag = true
+      # format "blockdiag" aggregates multiple diagram types: actdiag, blockdiag, nwdiag...
+      expect(subject.kroki_format_supported?('actdiag')).to eq(true)
+      expect(subject.kroki_format_supported?('blockdiag')).to eq(true)
+    end
+
+    it 'returns false when BlockDiag is disabled' do
+      subject.kroki_formats_blockdiag = false
+      # format "blockdiag" aggregates multiple diagram types: actdiag, blockdiag, nwdiag...
+      expect(subject.kroki_format_supported?('actdiag')).to eq(false)
+      expect(subject.kroki_format_supported?('blockdiag')).to eq(false)
+    end
+
+    it 'returns false when the diagram type is optional and not enabled' do
+      expect(subject.kroki_format_supported?('bpmn')).to eq(false)
+    end
+
+    it 'returns true when the diagram type is enabled by default' do
+      expect(subject.kroki_format_supported?('vegalite')).to eq(true)
+      expect(subject.kroki_format_supported?('nomnoml')).to eq(true)
+      expect(subject.kroki_format_supported?('unknown-diagram-type')).to eq(false)
+    end
+
+    it 'returns false when the diagram type is unknown' do
+      expect(subject.kroki_format_supported?('unknown-diagram-type')).to eq(false)
     end
   end
 
-  it 'does not allow to set weight for non existing storage' do
-    setting.repository_storages_weighted = { invalid_storage: 100 }
-
-    expect(setting).not_to be_valid
-    expect(setting.errors.messages[:repository_storages_weighted]).to match_array(["can't include: invalid_storage"])
+  describe 'kroki_formats' do
+    it 'returns the value for kroki_formats' do
+      subject.kroki_formats = { blockdiag: true, bpmn: false, excalidraw: true }
+      expect(subject.kroki_formats_blockdiag).to eq(true)
+      expect(subject.kroki_formats_bpmn).to eq(false)
+      expect(subject.kroki_formats_excalidraw).to eq(true)
+    end
   end
 end

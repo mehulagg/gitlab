@@ -1,8 +1,13 @@
 <script>
-import { GlLabel } from '@gitlab/ui';
+import { GlLabel, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { s__ } from '~/locale';
 
 export default {
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   components: {
+    GlButton,
     GlLabel,
   },
   props: {
@@ -10,11 +15,18 @@ export default {
       type: Object,
       required: true,
     },
+    loading: {
+      type: Boolean,
+      required: true,
+    },
   },
   computed: {
     isScoped() {
       return this.framework.name.includes('::');
     },
+  },
+  i18n: {
+    deleteFramework: s__('ComplianceFrameworks|Delete framework'),
   },
 };
 </script>
@@ -28,10 +40,23 @@ export default {
         :background-color="framework.color"
         :title="framework.name"
         :scoped="isScoped"
+        :disabled="loading"
       />
     </div>
     <p class="gl-w-full gl-m-0!" data-testid="compliance-framework-description">
       {{ framework.description }}
     </p>
+    <div>
+      <gl-button
+        v-gl-tooltip="$options.i18n.deleteFramework"
+        :loading="loading"
+        :disabled="loading"
+        :aria-label="$options.i18n.deleteFramework"
+        data-testid="compliance-framework-delete-button"
+        icon="remove"
+        category="tertiary"
+        @click="$emit('delete', framework)"
+      />
+    </div>
   </div>
 </template>

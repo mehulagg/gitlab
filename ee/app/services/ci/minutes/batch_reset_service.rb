@@ -99,11 +99,15 @@ module Ci
       end
 
       def reset_shared_runners_seconds!(namespaces)
-        namespace_relation = NamespaceStatistics.for_namespaces(namespaces)
-        namespace_relation.update_all(shared_runners_seconds: 0, shared_runners_seconds_last_reset: Time.current)
+        NamespaceStatistics
+          .for_namespaces(namespaces)
+          .with_any_ci_minutes_used
+          .update_all(shared_runners_seconds: 0, shared_runners_seconds_last_reset: Time.current)
 
-        project_relation = ::ProjectStatistics.for_namespaces(namespaces)
-        project_relation.update_all(shared_runners_seconds: 0, shared_runners_seconds_last_reset: Time.current)
+        ::ProjectStatistics
+          .for_namespaces(namespaces)
+          .with_any_ci_minutes_used
+          .update_all(shared_runners_seconds: 0, shared_runners_seconds_last_reset: Time.current)
       end
 
       def reset_ci_minutes_notifications!(namespaces)

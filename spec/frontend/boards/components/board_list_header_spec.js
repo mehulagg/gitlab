@@ -1,5 +1,6 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 import { mockLabelList } from 'jest/boards/mock_data';
 import BoardListHeader from '~/boards/components/board_list_header.vue';
@@ -14,6 +15,7 @@ describe('Board List Header Component', () => {
   let store;
 
   const updateListSpy = jest.fn();
+  const toggleListCollapsedSpy = jest.fn();
 
   afterEach(() => {
     wrapper.destroy();
@@ -43,42 +45,49 @@ describe('Board List Header Component', () => {
 
     if (withLocalStorage) {
       localStorage.setItem(
-        `boards.${boardId}.${listMock.listType}.${listMock.id}.expanded`,
-        (!collapsed).toString(),
+        `boards.${boardId}.${listMock.listType}.${listMock.id}.collapsed`,
+        collapsed.toString(),
       );
     }
 
     store = new Vuex.Store({
       state: {},
-      actions: { updateList: updateListSpy },
+      actions: { updateList: updateListSpy, toggleListCollapsed: toggleListCollapsedSpy },
       getters: {},
     });
 
-    wrapper = shallowMount(BoardListHeader, {
-      store,
-      localVue,
-      propsData: {
-        disabled: false,
-        list: listMock,
-      },
-      provide: {
-        boardId,
-        weightFeatureAvailable: false,
-        currentUserId,
-      },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(BoardListHeader, {
+        store,
+        localVue,
+        propsData: {
+          disabled: false,
+          list: listMock,
+        },
+        provide: {
+          boardId,
+          weightFeatureAvailable: false,
+          currentUserId,
+        },
+      }),
+    );
   };
 
   const isCollapsed = () => wrapper.vm.list.collapsed;
-  const isExpanded = () => !isCollapsed;
 
   const findAddIssueButton = () => wrapper.find({ ref: 'newIssueBtn' });
   const findTitle = () => wrapper.find('.board-title');
-  const findCaret = () => wrapper.find('.board-title-caret');
+  const findCaret = () => wrapper.findByTestId('board-title-caret');
 
   describe('Add issue button', () => {
     const hasNoAddButton = [ListType.closed];
-    const hasAddButton = [ListType.backlog, ListType.label, ListType.milestone, ListType.assignee];
+    const hasAddButton = [
+      ListType.backlog,
+      ListType.label,
+      ListType.milestone,
+      ListType.iteration,
+      ListType.assignee,
+    ];
 
     it.each(hasNoAddButton)('does not render when List Type is `%s`', (listType) => {
       createComponent({ listType });
@@ -108,40 +117,29 @@ describe('Board List Header Component', () => {
   });
 
   describe('expanding / collapsing the column', () => {
-    it('does not collapse when clicking the header', async () => {
+    it('should display collapse icon when column is expanded', async () => {
       createComponent();
 
-      expect(isCollapsed()).toBe(false);
+      const icon = findCaret();
 
-      wrapper.find('[data-testid="board-list-header"]').trigger('click');
-
-      await wrapper.vm.$nextTick();
-
-      expect(isCollapsed()).toBe(false);
+      expect(icon.props('icon')).toBe('chevron-right');
     });
 
-    it('collapses expanded Column when clicking the collapse icon', async () => {
-      createComponent();
-
-      expect(isCollapsed()).toBe(false);
-
-      findCaret().vm.$emit('click');
-
-      await wrapper.vm.$nextTick();
-
-      expect(isCollapsed()).toBe(true);
-    });
-
-    it('expands collapsed Column when clicking the expand icon', async () => {
+    it('should display expand icon when column is collapsed', async () => {
       createComponent({ collapsed: true });
 
-      expect(isCollapsed()).toBe(true);
+      const icon = findCaret();
+
+      expect(icon.props('icon')).toBe('chevron-down');
+    });
+
+    it('should dispatch toggleListCollapse when clicking the collapse icon', async () => {
+      createComponent();
 
       findCaret().vm.$emit('click');
 
       await wrapper.vm.$nextTick();
-
-      expect(isCollapsed()).toBe(false);
+      expect(toggleListCollapsedSpy).toHaveBeenCalledTimes(1);
     });
 
     it("when logged in it calls list update and doesn't set localStorage", async () => {
@@ -151,7 +149,7 @@ describe('Board List Header Component', () => {
       await wrapper.vm.$nextTick();
 
       expect(updateListSpy).toHaveBeenCalledTimes(1);
-      expect(localStorage.getItem(`${wrapper.vm.uniqueKey}.expanded`)).toBe(null);
+      expect(localStorage.getItem(`${wrapper.vm.uniqueKey}.collapsed`)).toBe(null);
     });
 
     it("when logged out it doesn't call list update and sets localStorage", async () => {
@@ -161,13 +159,13 @@ describe('Board List Header Component', () => {
       await wrapper.vm.$nextTick();
 
       expect(updateListSpy).not.toHaveBeenCalled();
-      expect(localStorage.getItem(`${wrapper.vm.uniqueKey}.expanded`)).toBe(String(isExpanded()));
+      expect(localStorage.getItem(`${wrapper.vm.uniqueKey}.collapsed`)).toBe(String(isCollapsed()));
     });
   });
 
   describe('user can drag', () => {
     const cannotDragList = [ListType.backlog, ListType.closed];
-    const canDragList = [ListType.label, ListType.milestone, ListType.assignee];
+    const canDragList = [ListType.label, ListType.milestone, ListType.iteration, ListType.assignee];
 
     it.each(cannotDragList)(
       'does not have user-can-drag-class so user cannot drag list',

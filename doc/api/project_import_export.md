@@ -5,14 +5,14 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, api
 ---
 
-# Project import/export API
+# Project import/export API **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41899) in GitLab 10.6.
 
 See also:
 
 - [Project import/export documentation](../user/project/settings/import_export.md).
-- [Project import/export administration Rake tasks](../administration/raketasks/project_import_export.md). **(CORE ONLY)**
+- [Project import/export administration Rake tasks](../administration/raketasks/project_import_export.md). **(FREE SELF)**
 
 ## Schedule an export
 

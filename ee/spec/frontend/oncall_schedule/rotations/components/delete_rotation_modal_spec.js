@@ -1,18 +1,19 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import createMockApollo from 'helpers/mock_apollo_helper';
 import { GlModal, GlAlert, GlSprintf } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import waitForPromises from 'helpers/wait_for_promises';
-import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
-import destroyOncallRotationMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_rotation.mutation.graphql';
 import DeleteRotationModal, {
   i18n,
 } from 'ee/oncall_schedules/components/rotations/components/delete_rotation_modal.vue';
 import { deleteRotationModalId } from 'ee/oncall_schedules/constants';
+import destroyOncallRotationMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_rotation.mutation.graphql';
+import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import {
   getOncallSchedulesQueryResponse,
   destroyRotationResponse,
   destroyRotationResponseWithErrors,
+  scheduleIid,
 } from '../../mocks/apollo_mock';
 import mockRotations from '../../mocks/mock_rotation.json';
 
@@ -50,6 +51,7 @@ describe('DeleteRotationModal', () => {
       },
       propsData: {
         modalId: deleteRotationModalId,
+        scheduleIid,
         rotation,
         ...props,
       },
@@ -93,6 +95,7 @@ describe('DeleteRotationModal', () => {
       propsData: {
         rotation,
         modalId: deleteRotationModalId,
+        scheduleIid,
       },
       provide: {
         projectPath,
@@ -106,6 +109,7 @@ describe('DeleteRotationModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   it('renders delete rotation modal layout', () => {
@@ -125,7 +129,7 @@ describe('DeleteRotationModal', () => {
       expect(mutate).toHaveBeenCalledWith({
         mutation: expect.any(Object),
         update: expect.anything(),
-        variables: { iid: rotation.id, projectPath },
+        variables: { id: rotation.id, projectPath, scheduleIid },
       });
     });
 

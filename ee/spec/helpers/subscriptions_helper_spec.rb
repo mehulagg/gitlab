@@ -45,7 +45,7 @@ RSpec.describe SubscriptionsHelper do
 
     it { is_expected.to include(setup_for_company: 'false') }
     it { is_expected.to include(full_name: 'First Last') }
-    it { is_expected.to include(available_plans: '[{"id":"bronze_id","code":"bronze","price_per_year":48.0}]') }
+    it { is_expected.to include(available_plans: '[{"id":"bronze_id","code":"bronze","price_per_year":48.0,"name":"Bronze Plan"}]') }
     it { is_expected.to include(plan_id: 'bronze_id') }
     it { is_expected.to include(namespace_id: group.id.to_s) }
     it { is_expected.to include(group_data: %Q{[{"id":#{group.id},"name":"My Namespace","users":1}]}) }
@@ -78,7 +78,7 @@ RSpec.describe SubscriptionsHelper do
         }
       end
 
-      it { is_expected.to include(available_plans: '[{"id":"bronze_id","code":"bronze","price_per_year":48.0,"deprecated":true}]') }
+      it { is_expected.to include(available_plans: '[{"id":"bronze_id","code":"bronze","price_per_year":48.0,"deprecated":true,"name":"Bronze Plan"}]') }
     end
 
     context 'when ff purchase_deprecated_plans is enabled' do
@@ -86,7 +86,7 @@ RSpec.describe SubscriptionsHelper do
         stub_feature_flags(hide_deprecated_billing_plans: true)
       end
 
-      it { is_expected.to include(available_plans: '[{"id":"bronze_id","code":"bronze","price_per_year":48.0}]') }
+      it { is_expected.to include(available_plans: '[{"id":"bronze_id","code":"bronze","price_per_year":48.0,"name":"Bronze Plan"}]') }
 
       context 'when bronze_plan is deprecated' do
         let(:bronze_plan) do

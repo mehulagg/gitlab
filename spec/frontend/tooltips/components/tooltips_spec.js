@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlTooltip } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { useMockMutationObserver } from 'helpers/mock_dom_observer';
 import Tooltips from '~/tooltips/components/tooltips.vue';
 
@@ -216,5 +216,15 @@ describe('tooltips/components/tooltips.vue', () => {
 
     wrapper.destroy();
     expect(observersCount()).toBe(0);
+  });
+
+  it('exposes hidden event', async () => {
+    buildWrapper();
+    wrapper.vm.addTooltips([createTooltipTarget()]);
+
+    await wrapper.vm.$nextTick();
+
+    wrapper.findComponent(GlTooltip).vm.$emit('hidden');
+    expect(wrapper.emitted('hidden')).toHaveLength(1);
   });
 });

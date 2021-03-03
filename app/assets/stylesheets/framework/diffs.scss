@@ -1035,7 +1035,6 @@ table.code {
     auto;
 
   // Retina cursor
-  // scss-lint:disable DuplicateProperty
   cursor: image-set(image-url('illustrations/image_comment_light_cursor.svg') 1x,
   image-url('illustrations/image_comment_light_cursor@2x.svg') 2x) $image-comment-cursor-left-offset $image-comment-cursor-top-offset,
     auto;
@@ -1135,10 +1134,6 @@ table.code {
     .notes > .badge.badge-pill {
       display: block;
     }
-  }
-
-  .note-edit-form {
-    margin-left: $note-icon-gutter-width;
   }
 }
 

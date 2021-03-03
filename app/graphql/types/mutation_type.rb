@@ -15,6 +15,7 @@ module Types
     mount_mutation Mutations::AlertManagement::HttpIntegration::Update
     mount_mutation Mutations::AlertManagement::HttpIntegration::ResetToken
     mount_mutation Mutations::AlertManagement::HttpIntegration::Destroy
+    mount_mutation Mutations::Security::CiConfiguration::ConfigureSast
     mount_mutation Mutations::AlertManagement::PrometheusIntegration::Create
     mount_mutation Mutations::AlertManagement::PrometheusIntegration::Update
     mount_mutation Mutations::AlertManagement::PrometheusIntegration::ResetToken
@@ -23,6 +24,7 @@ module Types
     mount_mutation Mutations::AwardEmojis::Toggle
     mount_mutation Mutations::Boards::Create
     mount_mutation Mutations::Boards::Destroy
+    mount_mutation Mutations::Boards::Update
     mount_mutation Mutations::Boards::Issues::IssueMoveList
     mount_mutation Mutations::Boards::Lists::Create
     mount_mutation Mutations::Boards::Lists::Update
@@ -50,6 +52,7 @@ module Types
     mount_mutation Mutations::MergeRequests::SetSubscription
     mount_mutation Mutations::MergeRequests::SetWip, calls_gitaly: true
     mount_mutation Mutations::MergeRequests::SetAssignees
+    mount_mutation Mutations::MergeRequests::ReviewerRereview
     mount_mutation Mutations::Metrics::Dashboard::Annotations::Create
     mount_mutation Mutations::Metrics::Dashboard::Annotations::Delete
     mount_mutation Mutations::Notes::Create::Note, calls_gitaly: true
@@ -68,6 +71,7 @@ module Types
     mount_mutation Mutations::Releases::Create
     mount_mutation Mutations::Releases::Update
     mount_mutation Mutations::Releases::Delete
+    mount_mutation Mutations::ReleaseAssetLinks::Create
     mount_mutation Mutations::Terraform::State::Delete
     mount_mutation Mutations::Terraform::State::Lock
     mount_mutation Mutations::Terraform::State::Unlock
@@ -97,5 +101,4 @@ module Types
 end
 
 ::Types::MutationType.prepend(::Types::DeprecatedMutations)
-::Types::MutationType.prepend_if_ee('EE::Types::DeprecatedMutations')
 ::Types::MutationType.prepend_if_ee('::EE::Types::MutationType')

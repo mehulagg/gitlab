@@ -7,9 +7,9 @@ module Types
     description 'Total weight of open and closed descendant issues'
 
     field :opened_issues, GraphQL::INT_TYPE, null: true,
-          description: 'Total weight of opened issues in this epic, including epic descendants'
+          description: 'Total weight of opened issues in this epic, including epic descendants.'
     field :closed_issues, GraphQL::INT_TYPE, null: true,
-          description: 'Total weight of completed (closed) issues in this epic, including epic descendants'
+          description: 'Total weight of completed (closed) issues in this epic, including epic descendants.'
   end
   # rubocop: enable Graphql/AuthorizeTypes
 end

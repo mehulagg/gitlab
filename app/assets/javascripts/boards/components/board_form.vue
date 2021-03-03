@@ -1,17 +1,17 @@
 <script>
 import { GlModal } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import { visitUrl } from '~/lib/utils/url_utility';
-import { getParameterByName } from '~/lib/utils/common_utils';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
-import boardsStore from '~/boards/stores/boards_store';
+import { getParameterByName } from '~/lib/utils/common_utils';
+import { visitUrl } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
 import { fullLabelId, fullBoardId } from '../boards_util';
+import { formType } from '../constants';
 
-import BoardConfigurationOptions from './board_configuration_options.vue';
-import updateBoardMutation from '../graphql/board_update.mutation.graphql';
 import createBoardMutation from '../graphql/board_create.mutation.graphql';
 import destroyBoardMutation from '../graphql/board_destroy.mutation.graphql';
+import updateBoardMutation from '../graphql/board_update.mutation.graphql';
+import BoardConfigurationOptions from './board_configuration_options.vue';
 
 const boardDefaults = {
   id: false,
@@ -24,12 +24,6 @@ const boardDefaults = {
   weight: null,
   hide_backlog_list: false,
   hide_closed_list: false,
-};
-
-const formType = {
-  new: 'new',
-  delete: 'delete',
-  edit: 'edit',
 };
 
 export default {
@@ -100,11 +94,14 @@ export default {
       type: Object,
       required: true,
     },
+    currentPage: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
       board: { ...boardDefaults, ...this.currentBoard },
-      currentPage: boardsStore.state.currentPage,
       isLoading: false,
     };
   },
@@ -164,41 +161,48 @@ export default {
     currentMutation() {
       return this.board.id ? updateBoardMutation : createBoardMutation;
     },
-    mutationVariables() {
+    baseMutationVariables() {
       const { board } = this;
-      /* eslint-disable @gitlab/require-i18n-strings */
-      let baseMutationVariables = {
+      const variables = {
         name: board.name,
         hideBacklogList: board.hide_backlog_list,
         hideClosedList: board.hide_closed_list,
       };
 
-      if (this.scopedIssueBoardFeatureEnabled) {
-        baseMutationVariables = {
-          ...baseMutationVariables,
-          weight: board.weight,
-          assigneeId: board.assignee?.id ? convertToGraphQLId('User', board.assignee.id) : null,
-          milestoneId:
-            board.milestone?.id || board.milestone?.id === 0
-              ? convertToGraphQLId('Milestone', board.milestone.id)
-              : null,
-          labelIds: board.labels.map(fullLabelId),
-          iterationId: board.iteration_id
-            ? convertToGraphQLId('Iteration', board.iteration_id)
-            : null,
-        };
-      }
-      /* eslint-enable @gitlab/require-i18n-strings */
       return board.id
         ? {
-            ...baseMutationVariables,
+            ...variables,
             id: fullBoardId(board.id),
           }
         : {
-            ...baseMutationVariables,
-            projectPath: this.projectId ? this.fullPath : null,
-            groupPath: this.groupId ? this.fullPath : null,
+            ...variables,
+            projectPath: this.projectId ? this.fullPath : undefined,
+            groupPath: this.groupId ? this.fullPath : undefined,
           };
+    },
+    boardScopeMutationVariables() {
+      /* eslint-disable @gitlab/require-i18n-strings */
+      return {
+        weight: this.board.weight,
+        assigneeId: this.board.assignee?.id
+          ? convertToGraphQLId('User', this.board.assignee.id)
+          : null,
+        milestoneId:
+          this.board.milestone?.id || this.board.milestone?.id === 0
+            ? convertToGraphQLId('Milestone', this.board.milestone.id)
+            : null,
+        labelIds: this.board.labels.map(fullLabelId),
+        iterationId: this.board.iteration_id
+          ? convertToGraphQLId('Iteration', this.board.iteration_id)
+          : null,
+      };
+      /* eslint-enable @gitlab/require-i18n-strings */
+    },
+    mutationVariables() {
+      return {
+        ...this.baseMutationVariables,
+        ...(this.scopedIssueBoardFeatureEnabled ? this.boardScopeMutationVariables : {}),
+      };
     },
   },
   mounted() {
@@ -211,6 +215,16 @@ export default {
     setIteration(iterationId) {
       this.board.iteration_id = iterationId;
     },
+    boardCreateResponse(data) {
+      return data.createBoard.board.webPath;
+    },
+    boardUpdateResponse(data) {
+      const path = data.updateBoard.board.webPath;
+      const param = getParameterByName('group_by')
+        ? `?group_by=${getParameterByName('group_by')}`
+        : '';
+      return `${path}${param}`;
+    },
     async createOrUpdateBoard() {
       const response = await this.$apollo.mutate({
         mutation: this.currentMutation,
@@ -218,14 +232,10 @@ export default {
       });
 
       if (!this.board.id) {
-        return response.data.createBoard.board.webPath;
+        return this.boardCreateResponse(response.data);
       }
 
-      const path = response.data.updateBoard.board.webPath;
-      const param = getParameterByName('group_by')
-        ? `?group_by=${getParameterByName('group_by')}`
-        : '';
-      return `${path}${param}`;
+      return this.boardUpdateResponse(response.data);
     },
     async submit() {
       if (this.board.name.length === 0) return;
@@ -256,7 +266,7 @@ export default {
       }
     },
     cancel() {
-      boardsStore.showPage('');
+      this.$emit('cancel');
     },
     resetFormState() {
       if (this.isNewForm) {
@@ -308,6 +318,7 @@ export default {
       <board-configuration-options
         :hide-backlog-list.sync="board.hide_backlog_list"
         :hide-closed-list.sync="board.hide_closed_list"
+        :readonly="readonly"
       />
 
       <board-scope

@@ -1,6 +1,6 @@
 <script>
-import { isEmpty } from 'lodash';
 import { GlSprintf, GlModal, GlAlert } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
 import destroyOncallRotationMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_rotation.mutation.graphql';
 import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import { updateStoreAfterRotationDelete } from 'ee/oncall_schedules/utils/cache_updates';
@@ -28,6 +28,10 @@ export default {
       required: true,
       validator: (rotation) =>
         isEmpty(rotation) || [rotation.id, rotation.name, rotation.startsAt].every(Boolean),
+    },
+    scheduleIid: {
+      type: String,
+      required: true,
     },
     modalId: {
       type: String,
@@ -61,6 +65,7 @@ export default {
       const {
         projectPath,
         rotation: { id },
+        scheduleIid,
       } = this;
 
       this.loading = true;
@@ -68,11 +73,19 @@ export default {
         .mutate({
           mutation: destroyOncallRotationMutation,
           variables: {
-            iid: id,
+            id,
+            scheduleIid,
             projectPath,
           },
           update(store, { data }) {
-            updateStoreAfterRotationDelete(store, getOncallSchedulesQuery, data, { projectPath });
+            updateStoreAfterRotationDelete(
+              store,
+              getOncallSchedulesQuery,
+              { ...data, scheduleIid },
+              {
+                projectPath,
+              },
+            );
           },
         })
         .then(({ data: { oncallRotationDestroy } = {} } = {}) => {

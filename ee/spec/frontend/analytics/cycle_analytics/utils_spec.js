@@ -16,6 +16,7 @@ import {
   toggleSelectedLabel,
   transformStagesForPathNavigation,
   prepareTimeMetricsData,
+  prepareStageErrors,
 } from 'ee/analytics/cycle_analytics/utils';
 import { toYmd } from 'ee/analytics/shared/utils';
 import { getDatesInRange } from '~/lib/utils/datetime_utility';
@@ -173,6 +174,29 @@ describe('Value Stream Analytics utils', () => {
         expect(t.name.length > 0).toBe(true);
         expect(t.name).toEqual(t.title);
       });
+    });
+  });
+
+  describe('prepareStageErrors', () => {
+    const stages = [{ name: 'stage 1' }, { name: 'stage 2' }, { name: 'stage 3' }];
+    const nameError = { name: "Can't be blank" };
+    const stageErrors = { 1: nameError };
+
+    it('returns an object for each stage', () => {
+      const res = prepareStageErrors(stages, stageErrors);
+      expect(res[0]).toEqual({});
+      expect(res[1]).toEqual(nameError);
+      expect(res[2]).toEqual({});
+    });
+
+    it('returns the same number of error objects as stages', () => {
+      const res = prepareStageErrors(stages, stageErrors);
+      expect(res.length).toEqual(stages.length);
+    });
+
+    it('returns an empty object for each stage if there are no errors', () => {
+      const res = prepareStageErrors(stages, {});
+      expect(res).toEqual([{}, {}, {}]);
     });
   });
 

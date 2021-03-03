@@ -29,7 +29,6 @@ RSpec.describe 'Resource weight events', :js do
         target_project.add_maintainer(user)
 
         add_note("/weight 2")
-        wait_for_requests
 
         add_note("/weight 3\n/move #{target_project.full_path}")
       end

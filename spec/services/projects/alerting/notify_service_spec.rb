@@ -36,7 +36,7 @@ RSpec.describe Projects::Alerting::NotifyService do
 
     subject { service.execute(token, nil) }
 
-    shared_examples 'notifcations are handled correctly' do
+    shared_examples 'notifications are handled correctly' do
       context 'with valid token' do
         let(:token) { integration.token }
         let(:incident_management_setting) { double(send_email?: email_enabled, create_issue?: issue_enabled, auto_close_incident?: auto_close_enabled) }
@@ -85,6 +85,15 @@ RSpec.describe Projects::Alerting::NotifyService do
           it_behaves_like 'creates an alert management alert'
           it_behaves_like 'assigns the alert properties'
 
+          it 'passes the integration to alert processing' do
+            expect(Gitlab::AlertManagement::Payload)
+              .to receive(:parse)
+              .with(project, payload.to_h, integration: integration)
+              .and_call_original
+
+            subject
+          end
+
           it 'creates a system note corresponding to alert creation' do
             expect { subject }.to change(Note, :count).by(1)
             expect(Note.last.note).to include(payload_raw.fetch(:monitoring_tool))
@@ -110,6 +119,7 @@ RSpec.describe Projects::Alerting::NotifyService do
               end
 
               it_behaves_like 'does not an create alert management alert'
+              it_behaves_like 'creates single system note based on the source of the alert'
 
               context 'auto_close_enabled setting enabled' do
                 let(:auto_close_enabled) { true }
@@ -121,6 +131,8 @@ RSpec.describe Projects::Alerting::NotifyService do
                   expect(alert.resolved?).to eq(true)
                   expect(alert.ended_at).to eql(ended_at)
                 end
+
+                it_behaves_like 'creates status-change system note for an auto-resolved alert'
 
                 context 'related issue exists' do
                   let(:alert) { create(:alert_management_alert, :with_issue, project: project, fingerprint: fingerprint_sha) }
@@ -200,10 +212,7 @@ RSpec.describe Projects::Alerting::NotifyService do
               )
             end
 
-            it 'creates a system note corresponding to alert creation' do
-              expect { subject }.to change(Note, :count).by(1)
-              expect(Note.last.note).to include(source)
-            end
+            it_behaves_like 'creates single system note based on the source of the alert'
           end
         end
 
@@ -259,7 +268,7 @@ RSpec.describe Projects::Alerting::NotifyService do
 
       subject { service.execute(token, integration) }
 
-      it_behaves_like 'notifcations are handled correctly' do
+      it_behaves_like 'notifications are handled correctly' do
         let(:source) { integration.name }
       end
 

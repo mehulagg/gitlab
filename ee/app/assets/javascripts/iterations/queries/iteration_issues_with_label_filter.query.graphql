@@ -1,4 +1,4 @@
-#import "./iteration_issues.fragment.graphql"
+#import "./iteration_issues_with_labels.fragment.graphql"
 
 query IterationIssuesWithLabelFilter(
   $fullPath: ID!
@@ -20,7 +20,7 @@ query IterationIssuesWithLabelFilter(
       last: $lastPageSize
       includeSubgroups: true
     ) {
-      ...IterationIssues
+      ...IterationIssuesWithLabels
     }
   }
   project(fullPath: $fullPath) @skip(if: $isGroup) {
@@ -32,7 +32,7 @@ query IterationIssuesWithLabelFilter(
       first: $firstPageSize
       last: $lastPageSize
     ) {
-      ...IterationIssues
+      ...IterationIssuesWithLabels
     }
   }
 }

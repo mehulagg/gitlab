@@ -4,10 +4,10 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# PyPI packages in the Package Registry
+# PyPI packages in the Package Registry **(FREE)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208747) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208747) in GitLab Premium 12.10.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Free in 13.3.
 
 Publish PyPI packages in your project’s Package Registry. Then install the
 packages whenever you need to use them as a dependency.
@@ -317,18 +317,24 @@ more than once, a `404 Bad Request` error occurs.
 To install the latest version of a package, use the following command:
 
 ```shell
-pip install --extra-index-url https://__token__:<personal_access_token>@gitlab.example.com/api/v4/projects/<project_id>/packages/pypi/simple --no-deps <package_name>
+pip install --index-url https://__token__:<personal_access_token>@gitlab.example.com/api/v4/projects/<project_id>/packages/pypi/simple --no-deps <package_name>
 ```
 
 - `<package_name>` is the package name.
 - `<personal_access_token>` is a personal access token with the `read_api` scope.
 - `<project_id>` is the project ID.
 
+In these commands, you can use `--extra-index-url` instead of `--index-url`. However, using
+`--extra-index-url` makes you vulnerable to dependency confusion attacks because it checks the PyPi
+repository for the package before it checks the custom repository. `--extra-index-url` adds the
+provided URL as an additional registry which the client checks if the package is present.
+`--index-url` tells the client to check for the package on the provided URL only.
+
 If you were following the guide and want to install the
 `MyPyPiPackage` package, you can run:
 
 ```shell
-pip install mypypipackage --no-deps --extra-index-url https://__token__:<personal_access_token>@gitlab.example.com/api/v4/projects/<your_project_id>/packages/pypi/simple
+pip install mypypipackage --no-deps --index-url https://__token__:<personal_access_token>@gitlab.example.com/api/v4/projects/<your_project_id>/packages/pypi/simple
 ```
 
 This message indicates that the package was installed successfully:

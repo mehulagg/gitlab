@@ -4,14 +4,9 @@ import produce from 'immer';
 import { __ } from '~/locale';
 import securityScannersQuery from '../graphql/queries/project_security_scanners.query.graphql';
 import vulnerabilitiesQuery from '../graphql/queries/project_vulnerabilities.query.graphql';
-import vulnerabilitiesQueryAutoFix from '../graphql/queries/project_vulnerabilities_autofix.query.graphql';
 import { preparePageInfo } from '../helpers';
 import { VULNERABILITIES_PER_PAGE } from '../store/constants';
 import VulnerabilityList from './vulnerability_list.vue';
-
-const query = gon?.features?.secureVulnerabilityAutofixIndicator
-  ? vulnerabilitiesQueryAutoFix
-  : vulnerabilitiesQuery;
 
 export default {
   name: 'ProjectVulnerabilitiesApp',
@@ -21,7 +16,14 @@ export default {
     GlIntersectionObserver,
     VulnerabilityList,
   },
-  inject: ['projectFullPath'],
+  inject: {
+    projectFullPath: {
+      default: '',
+    },
+    hasJiraVulnerabilitiesIntegrationEnabled: {
+      default: false,
+    },
+  },
   props: {
     filters: {
       type: Object,
@@ -41,12 +43,13 @@ export default {
   },
   apollo: {
     vulnerabilities: {
-      query,
+      query: vulnerabilitiesQuery,
       variables() {
         return {
           fullPath: this.projectFullPath,
           first: VULNERABILITIES_PER_PAGE,
           sort: this.sort,
+          includeExternalIssueLinks: this.hasJiraVulnerabilitiesIntegrationEnabled,
           ...this.filters,
         };
       },
@@ -92,20 +95,29 @@ export default {
       return `${this.sortBy}_${this.sortDirection}`;
     },
   },
+  watch: {
+    filters() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
+    },
+    sort() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
+    },
+  },
   methods: {
     fetchNextPage() {
       if (this.pageInfo.hasNextPage) {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            const results = produce(fetchMoreResult, (draftData) => {
+            return produce(fetchMoreResult, (draftData) => {
               // eslint-disable-next-line no-param-reassign
               draftData.project.vulnerabilities.nodes = [
                 ...previousResult.project.vulnerabilities.nodes,
                 ...draftData.project.vulnerabilities.nodes,
               ];
             });
-            return results;
           },
         });
       }

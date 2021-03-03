@@ -7,14 +7,14 @@ module Gitlab
     include WebpackHelper
 
     def add_gon_variables
-      gon.api_version            = 'v4'
-      gon.default_avatar_url     = default_avatar_url
-      gon.max_file_size          = Gitlab::CurrentSettings.max_attachment_size
-      gon.asset_host             = ActionController::Base.asset_host
-      gon.webpack_public_path    = webpack_public_path
-      gon.relative_url_root      = Gitlab.config.gitlab.relative_url_root
-      gon.shortcuts_path         = Gitlab::Routing.url_helpers.help_page_path('shortcuts')
-      gon.user_color_scheme      = Gitlab::ColorSchemes.for_user(current_user).css_class
+      gon.api_version             = 'v4'
+      gon.default_avatar_url      = default_avatar_url
+      gon.max_file_size           = Gitlab::CurrentSettings.max_attachment_size
+      gon.asset_host              = ActionController::Base.asset_host
+      gon.webpack_public_path     = webpack_public_path
+      gon.relative_url_root       = Gitlab.config.gitlab.relative_url_root
+      gon.user_color_scheme       = Gitlab::ColorSchemes.for_user(current_user).css_class
+      gon.markdown_surround_selection = current_user&.markdown_surround_selection
 
       if Gitlab.config.sentry.enabled
         gon.sentry_dsn           = Gitlab.config.sentry.clientside_dsn
@@ -33,6 +33,7 @@ module Gitlab
       gon.suggested_label_colors = LabelsHelper.suggested_colors
       gon.first_day_of_week      = current_user&.first_day_of_week || Gitlab::CurrentSettings.first_day_of_week
       gon.ee                     = Gitlab.ee?
+      gon.dot_com                = Gitlab.com?
 
       if current_user
         gon.current_user_id = current_user.id
@@ -43,11 +44,9 @@ module Gitlab
 
       # Initialize gon.features with any flags that should be
       # made globally available to the frontend
-      push_frontend_feature_flag(:webperf_experiment, default_enabled: false)
       push_frontend_feature_flag(:snippets_binary_blob, default_enabled: false)
       push_frontend_feature_flag(:usage_data_api, default_enabled: true)
       push_frontend_feature_flag(:security_auto_fix, default_enabled: false)
-      push_frontend_feature_flag(:gl_tooltips, default_enabled: :yaml)
     end
 
     # Exposes the state of a feature flag to the frontend code.

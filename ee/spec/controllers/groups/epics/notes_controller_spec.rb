@@ -99,6 +99,11 @@ RSpec.describe Groups::Epics::NotesController do
         expect(parsed_response[:errors]).to be_nil
       end
     end
+
+    it_behaves_like 'request exceeding rate limit', :clean_gitlab_redis_cache do
+      let(:params) { request_params.except(:format) }
+      let(:request_full_path) { group_epic_notes_path(group, epic) }
+    end
   end
 
   describe 'PUT update' do

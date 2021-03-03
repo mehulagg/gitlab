@@ -14,7 +14,6 @@ class TrialsController < ApplicationController
 
   def new
     record_experiment_user(:remove_known_trial_form_fields, remove_known_trial_form_fields_context)
-    record_experiment_user(:trimmed_skip_trial_copy)
     record_experiment_user(:trial_registration_with_social_signin, trial_registration_with_social_signin_context)
   end
 
@@ -42,11 +41,11 @@ class TrialsController < ApplicationController
 
     if @result&.dig(:success)
       record_experiment_user(:remove_known_trial_form_fields, namespace_id: @namespace.id)
-      record_experiment_user(:trimmed_skip_trial_copy, namespace_id: @namespace.id)
       record_experiment_user(:trial_registration_with_social_signin, namespace_id: @namespace.id)
+      record_experiment_user(:trial_onboarding_issues, namespace_id: @namespace.id)
       record_experiment_conversion_event(:remove_known_trial_form_fields)
-      record_experiment_conversion_event(:trimmed_skip_trial_copy)
       record_experiment_conversion_event(:trial_registration_with_social_signin)
+      record_experiment_conversion_event(:trial_onboarding_issues)
 
       redirect_to group_url(@namespace, { trial: true })
     else

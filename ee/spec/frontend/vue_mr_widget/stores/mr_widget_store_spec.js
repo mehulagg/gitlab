@@ -1,7 +1,7 @@
 import MergeRequestStore from 'ee/vue_merge_request_widget/stores/mr_widget_store';
 import mockData from 'ee_jest/vue_mr_widget/mock_data';
-import { stateKey } from '~/vue_merge_request_widget/stores/state_maps';
 import { convertToCamelCase } from '~/lib/utils/text_utility';
+import { stateKey } from '~/vue_merge_request_widget/stores/state_maps';
 
 describe('MergeRequestStore', () => {
   let store;

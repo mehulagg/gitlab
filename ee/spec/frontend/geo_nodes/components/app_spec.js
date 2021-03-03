@@ -8,6 +8,7 @@ import GeoNodesService from 'ee/geo_nodes/service/geo_nodes_service';
 import GeoNodesStore from 'ee/geo_nodes/store/geo_nodes_store';
 import mountComponent from 'helpers/vue_mount_component_helper';
 import axios from '~/lib/utils/axios_utils';
+import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
 import '~/vue_shared/plugins/global_toast';
 
 import {
@@ -398,7 +399,7 @@ describe('AppComponent', () => {
         expect(vm.modalTitle).toBe(modalTitle);
       });
 
-      it('emits `bv::show::modal` when actionType is `toggle` and node is enabled', () => {
+      it(`emits ${BV_SHOW_MODAL} when actionType is "toggle" and node is enabled`, () => {
         node.enabled = true;
         vm.showNodeActionModal({
           actionType: NODE_ACTIONS.TOGGLE,
@@ -409,7 +410,7 @@ describe('AppComponent', () => {
           modalTitle,
         });
 
-        expect(rootEmit).toHaveBeenCalledWith('bv::show::modal', vm.modalId);
+        expect(rootEmit).toHaveBeenCalledWith(BV_SHOW_MODAL, vm.modalId);
       });
 
       it('calls toggleNode when actionType is `toggle` and node.enabled is `false`', () => {
@@ -428,7 +429,7 @@ describe('AppComponent', () => {
         expect(vm.toggleNode).toHaveBeenCalledWith(vm.targetNode);
       });
 
-      it('emits `bv::show::modal` when actionType is not `toggle`', () => {
+      it(`emits ${BV_SHOW_MODAL} when actionType is not "toggle"`, () => {
         node.enabled = true;
         vm.showNodeActionModal({
           actionType: NODE_ACTIONS.REMOVE,
@@ -438,16 +439,16 @@ describe('AppComponent', () => {
           modalActionLabel,
         });
 
-        expect(rootEmit).toHaveBeenCalledWith('bv::show::modal', vm.modalId);
+        expect(rootEmit).toHaveBeenCalledWith(BV_SHOW_MODAL, vm.modalId);
       });
     });
 
     describe('hideNodeActionModal', () => {
-      it('emits `bv::hide::modal`', () => {
+      it(`emits ${BV_HIDE_MODAL}`, () => {
         const rootEmit = jest.spyOn(vm.$root, '$emit');
         vm.hideNodeActionModal();
 
-        expect(rootEmit).toHaveBeenCalledWith('bv::hide::modal', vm.modalId);
+        expect(rootEmit).toHaveBeenCalledWith(BV_HIDE_MODAL, vm.modalId);
       });
     });
 

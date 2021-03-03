@@ -1,6 +1,6 @@
 import { property, isEqual } from 'lodash';
-import { truncatePathMiddleToLength } from '~/lib/utils/text_utility';
 import { diffModes, diffViewerModes } from '~/ide/constants';
+import { truncatePathMiddleToLength } from '~/lib/utils/text_utility';
 import {
   LINE_POSITION_LEFT,
   LINE_POSITION_RIGHT,
@@ -283,7 +283,7 @@ export function addContextLines(options) {
  * Trims the first char of the `richText` property when it's either a space or a diff symbol.
  * @param {Object} line
  * @returns {Object}
- * @deprecated
+ * @deprecated Use `line.rich_text = line.rich_text ? line.rich_text.replace(/^[+ -]/, '') : undefined;` instead!. For more information, see https://gitlab.com/gitlab-org/gitlab/-/issues/299329
  */
 export function trimFirstCharOfLineContent(line = {}) {
   // eslint-disable-next-line no-param-reassign

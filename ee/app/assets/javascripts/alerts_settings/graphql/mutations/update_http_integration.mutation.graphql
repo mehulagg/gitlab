@@ -1,0 +1,24 @@
+#import "~/alerts_settings/graphql/fragments/http_integration_item.fragment.graphql"
+
+mutation updateHttpIntegration(
+  $id: ID!
+  $name: String!
+  $active: Boolean!
+  $payloadExample: JsonString
+  $payloadAttributeMappings: [AlertManagementPayloadAlertFieldInput!]
+) {
+  httpIntegrationUpdate(
+    input: {
+      id: $id
+      name: $name
+      active: $active
+      payloadExample: $payloadExample
+      payloadAttributeMappings: $payloadAttributeMappings
+    }
+  ) {
+    errors
+    integration {
+      ...HttpIntegrationItem
+    }
+  }
+}

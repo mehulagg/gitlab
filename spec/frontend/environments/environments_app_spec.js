@@ -1,11 +1,11 @@
 import { mount, shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import EnableReviewAppModal from '~/environments/components/enable_review_app_modal.vue';
 import Container from '~/environments/components/container.vue';
-import EmptyState from '~/environments/components/empty_state.vue';
-import EnvironmentsApp from '~/environments/components/environments_app.vue';
 import DeployBoard from '~/environments/components/deploy_board.vue';
+import EmptyState from '~/environments/components/empty_state.vue';
+import EnableReviewAppModal from '~/environments/components/enable_review_app_modal.vue';
+import EnvironmentsApp from '~/environments/components/environments_app.vue';
 import axios from '~/lib/utils/axios_utils';
 import { environment, folder } from './mock_data';
 
@@ -97,13 +97,21 @@ describe('Environment', () => {
           jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
 
           wrapper.find('.gl-pagination li:nth-child(3) .page-link').trigger('click');
-          expect(wrapper.vm.updateContent).toHaveBeenCalledWith({ scope: 'available', page: '2' });
+          expect(wrapper.vm.updateContent).toHaveBeenCalledWith({
+            scope: 'available',
+            page: '2',
+            nested: true,
+          });
         });
 
         it('should make an API request when using tabs', () => {
           jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
           findEnvironmentsTabStopped().trigger('click');
-          expect(wrapper.vm.updateContent).toHaveBeenCalledWith({ scope: 'stopped', page: '1' });
+          expect(wrapper.vm.updateContent).toHaveBeenCalledWith({
+            scope: 'stopped',
+            page: '1',
+            nested: true,
+          });
         });
 
         it('should not make the same API request when clicking on the current scope tab', () => {

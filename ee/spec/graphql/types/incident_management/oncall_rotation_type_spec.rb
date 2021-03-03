@@ -12,9 +12,12 @@ RSpec.describe GitlabSchema.types['IncidentManagementOncallRotation'] do
       id
       name
       starts_at
+      ends_at
       length
       length_unit
       participants
+      active_period
+      shifts
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)

@@ -1,7 +1,11 @@
 import { GlBadge } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
+import Vue from 'vue';
+import Vuex from 'vuex';
 import { member as memberMock } from 'jest/members/mock_data';
 import UserAvatar from '~/members/components/avatars/user_avatar.vue';
+
+Vue.use(Vuex);
 
 describe('UserAvatar', () => {
   let wrapper;
@@ -12,6 +16,11 @@ describe('UserAvatar', () => {
         isCurrentUser: false,
         ...propsData,
       },
+      store: new Vuex.Store({
+        state: {
+          canManageMembers: true,
+        },
+      }),
     });
   };
 

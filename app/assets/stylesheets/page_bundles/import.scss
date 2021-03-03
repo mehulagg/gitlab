@@ -1,5 +1,12 @@
 @import 'mixins_and_variables_and_functions';
 
+// Fixing double scrollbar issue
+// See https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1156 and
+// https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54837
+.import-entities-namespace-dropdown.show.dropdown .dropdown-menu {
+  max-height: initial;
+}
+
 .import-jobs-to-col {
   width: 39%;
 }
@@ -12,35 +19,6 @@
   width: 1%;
 }
 
-.import-project-name-input {
-  border-radius: 0 $border-radius-default $border-radius-default 0;
-  position: relative;
-  left: -1px;
-  max-width: 300px;
-}
-
-.import-slash-divider {
-  background-color: $gray-lightest;
-  border: 1px solid $border-color;
-}
-
-.import-row {
-  height: 55px;
-}
-
-.import-table {
-  .import-jobs-from-col,
-  .import-jobs-to-col,
-  .import-jobs-status-col,
-  .import-jobs-cta-col {
-    border-bottom-width: 1px;
-    padding-left: $gl-padding;
-  }
-}
-
-.import-projects-loading-icon {
-  margin-top: $gl-padding-32;
-}
 
 .import-entities-target-select {
   &.disabled {

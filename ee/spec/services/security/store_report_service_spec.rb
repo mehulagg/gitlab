@@ -30,11 +30,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations) do
-      'with SAST report'                | :sast                            | 3 | 17 | 33 | 39 | 33 | 0
-      'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0
-      'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1
-      'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0
+    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :fingerprints) do
+      'with SAST report'                | :sast                            | 3 | 17 | 33 | 39 | 33 | 0 | 2
+      'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0
+      'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0
+      'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0
     end
 
     with_them do
@@ -62,8 +62,12 @@ RSpec.describe Security::StoreReportService, '#execute' do
         expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
       end
 
-      it 'inserts all vulnerabilties' do
+      it 'inserts all vulnerabilities' do
         expect { subject }.to change { Vulnerability.count }.by(findings)
+      end
+
+      it 'inserts all fingerprints' do
+        expect { subject }.to change { Vulnerabilities::FindingFingerprint.count }.by(fingerprints)
       end
     end
 
@@ -111,10 +115,18 @@ RSpec.describe Security::StoreReportService, '#execute' do
   context 'with existing data from previous pipeline' do
     let(:scanner) { build(:vulnerabilities_scanner, project: project, external_id: 'bandit', name: 'Bandit') }
     let(:identifier) { build(:vulnerabilities_identifier, project: project, fingerprint: 'e6dd15eda2137be0034977a85b300a94a4f243a3') }
+    let(:different_identifier) { build(:vulnerabilities_identifier, project: project, fingerprint: 'fa47ee81f079e5c38ea6edb700b44eaeb62f67ee') }
     let!(:new_artifact) { create(:ee_ci_job_artifact, :sast, job: new_build) }
     let(:new_build) { create(:ci_build, pipeline: new_pipeline) }
     let(:new_pipeline) { create(:ci_pipeline, project: project) }
     let(:new_report) { new_pipeline.security_reports.get_report(report_type.to_s, artifact) }
+    let(:existing_fingerprint) { create(:vulnerabilities_finding_fingerprint, finding: finding) }
+    let(:unsupported_fingerprint) do
+      create(:vulnerabilities_finding_fingerprint,
+        finding: finding,
+        algorithm_type: ::Vulnerabilities::FindingFingerprint.algorithm_types[:location])
+    end
+
     let(:trait) { :sast }
 
     let!(:finding) do
@@ -124,10 +136,32 @@ RSpec.describe Security::StoreReportService, '#execute' do
         primary_identifier: identifier,
         scanner: scanner,
         project: project,
+        uuid: "80571acf-8660-4bc8-811a-1d8dec9ab6f4",
         location_fingerprint: 'd869ba3f0b3347eb2749135a437dc07c8ae0f420')
     end
 
     let!(:vulnerability) { create(:vulnerability, findings: [finding], project: project) }
+
+    let(:desired_uuid) do
+      Security::VulnerabilityUUID.generate(
+        report_type: finding.report_type,
+        primary_identifier_fingerprint: finding.primary_identifier.fingerprint,
+        location_fingerprint: finding.location_fingerprint,
+        project_id: finding.project_id
+      )
+    end
+
+    let!(:finding_with_uuidv5) do
+      create(:vulnerabilities_finding,
+        pipelines: [pipeline],
+        identifiers: [different_identifier],
+        primary_identifier: different_identifier,
+        scanner: scanner,
+        project: project,
+        location_fingerprint: '34661e23abcf78ff80dfcc89d0700437612e3f88')
+    end
+
+    let!(:vulnerability_with_uuid5) { create(:vulnerability, findings: [finding_with_uuidv5], project: project) }
 
     before do
       project.add_developer(user)
@@ -135,6 +169,16 @@ RSpec.describe Security::StoreReportService, '#execute' do
     end
 
     subject { described_class.new(new_pipeline, new_report).execute }
+
+    it 'does not change existing UUIDv5' do
+      expect { subject }.not_to change(finding_with_uuidv5, :uuid)
+    end
+
+    it 'updates UUIDv4 to UUIDv5' do
+      subject
+
+      expect(finding.reload.uuid).to eq(desired_uuid)
+    end
 
     it 'inserts only new scanners and reuse existing ones' do
       expect { subject }.to change { Vulnerabilities::Scanner.count }.by(2)
@@ -158,11 +202,38 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     it 'updates existing findings with new data' do
       subject
+
       expect(finding.reload).to have_attributes(severity: 'medium', name: 'Probable insecure usage of temp file/directory.')
+    end
+
+    it 'updates fingerprints to match new values' do
+      existing_fingerprint
+      unsupported_fingerprint
+
+      expect(finding.fingerprints.count).to eq(2)
+      fingerprint_algs = finding.fingerprints.map(&:algorithm_type).sort
+      expect(fingerprint_algs).to eq(%w[hash location])
+
+      subject
+
+      finding.reload
+      existing_fingerprint.reload
+
+      # check that unsupported algorithm is not deleted
+      expect(finding.fingerprints.count).to eq(3)
+      fingerprint_algs = finding.fingerprints.sort.map(&:algorithm_type)
+      expect(fingerprint_algs).to eq(%w[hash location scope_offset])
+
+      # check that the existing hash fingerprint was updated/reused
+      expect(existing_fingerprint.id).to eq(finding.fingerprints.min.id)
+
+      # check that the unsupported fingerprint was not deleted
+      expect(::Vulnerabilities::FindingFingerprint.exists?(unsupported_fingerprint.id)).to eq(true)
     end
 
     it 'updates existing vulnerability with new data' do
       subject
+
       expect(vulnerability.reload).to have_attributes(severity: 'medium', title: 'Probable insecure usage of temp file/directory.', title_html: 'Probable insecure usage of temp file/directory.')
     end
 

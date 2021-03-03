@@ -1,0 +1,5 @@
+---
+title: Jira Issues List page shows Web URL links instead of API URL
+merge_request: 54434
+author:
+type: fixed

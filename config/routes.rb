@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sidekiq/web'
 require 'sidekiq/cron/web'
 require 'product_analytics/collector_app'
@@ -48,6 +50,7 @@ Rails.application.routes.draw do
     resource :welcome, only: [:show, :update], controller: 'welcome' do
       Gitlab.ee do
         get :trial_getting_started, on: :collection
+        get :trial_onboarding_board, on: :collection
       end
     end
 
@@ -55,14 +58,16 @@ Rails.application.routes.draw do
 
     Gitlab.ee do
       resources :groups, only: [:new, :create]
+      resources :group_invites, only: [:new, :create]
       resources :projects, only: [:new, :create]
     end
   end
 
   # Search
-  get 'search' => 'search#show'
+  get 'search' => 'search#show', as: :search
   get 'search/autocomplete' => 'search#autocomplete', as: :search_autocomplete
   get 'search/count' => 'search#count', as: :search_count
+  get 'search/opensearch' => 'search#opensearch', as: :search_opensearch
 
   # JSON Web Token
   get 'jwt/auth' => 'jwt#auth'
@@ -158,11 +163,9 @@ Rails.application.routes.draw do
         get :db_spin
         get :sleep
         get :kill
+        post :gc
       end
     end
-
-    # Notification settings
-    resources :notification_settings, only: [:create, :update]
 
     resources :invites, only: [:show], constraints: { id: /[A-Za-z0-9_-]+/ } do
       member do
@@ -275,6 +278,7 @@ Rails.application.routes.draw do
   draw :dashboard
   draw :user
   draw :project
+  draw :unmatched_project
 
   # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/210024
   scope as: 'deprecated' do
@@ -287,7 +291,28 @@ Rails.application.routes.draw do
     get '/sitemap' => 'sitemap#show', format: :xml
   end
 
+  # Creates shorthand helper methods for project resources.
+  # For example; for the `namespace_project_path` this also creates `project_path`.
+  #
+  # TODO: We don't need the `Gitlab::Routing` module at all as we can use
+  # the `direct` DSL method of Rails to define url helpers. Move all the
+  # custom url helpers to use the `direct` DSL method and remove the `Gitlab::Routing`.
+  # For more information: https://gitlab.com/gitlab-org/gitlab/-/issues/299583
+  Gitlab::Application.routes.set.filter_map { |route| route.name if route.name&.include?('namespace_project') }.each do |name|
+    new_name = name.sub('namespace_project', 'project')
+
+    direct(new_name) do |project, *args|
+      # This is due to a bug I've found in Rails.
+      # For more information: https://gitlab.com/gitlab-org/gitlab/-/issues/299591
+      args.pop if args.last == {}
+
+      send("#{name}_url", project&.namespace, project, *args)
+    end
+  end
+
   root to: "root#index"
 
   get '*unmatched_route', to: 'application#route_not_found'
 end
+
+Gitlab::Routing.add_helpers(TimeboxesRoutingHelper)

@@ -115,6 +115,19 @@ describe('DependenciesApp component', () => {
   const expectNoDependenciesTables = () => expect(findDependenciesTables()).toHaveLength(0);
   const expectNoHeader = () => expect(findHeader().exists()).toBe(false);
 
+  const expectEmptyStateDescription = () => {
+    expect(wrapper.html()).toContain(
+      'The dependency list details information about the components used within your project.',
+    );
+  };
+
+  const expectEmptyStateLink = () => {
+    const emptyStateLink = wrapper.find(GlLink);
+    expect(emptyStateLink.html()).toContain('More Information');
+    expect(emptyStateLink.attributes('href')).toBe(TEST_HOST);
+    expect(emptyStateLink.attributes('target')).toBe('_blank');
+  };
+
   const expectDependenciesTable = () => {
     const tables = findDependenciesTables();
     expect(tables).toHaveLength(1);
@@ -157,6 +170,8 @@ describe('DependenciesApp component', () => {
       it('shows only the empty state', () => {
         expectComponentWithProps(GlEmptyState, { svgPath: basicAppProps.emptyStateSvgPath });
         expectComponentPropsToMatchSnapshot(GlEmptyState);
+        expectEmptyStateDescription();
+        expectEmptyStateLink();
         expectNoHeader();
         expectNoDependenciesTables();
       });

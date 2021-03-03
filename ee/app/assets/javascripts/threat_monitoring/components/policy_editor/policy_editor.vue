@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import {
   GlFormGroup,
   GlFormSelect,
@@ -12,26 +11,28 @@ import {
   GlModal,
   GlModalDirective,
 } from '@gitlab/ui';
-import { s__, __, sprintf } from '~/locale';
+import { mapState, mapActions } from 'vuex';
 import { redirectTo } from '~/lib/utils/url_utility';
+import { s__, __, sprintf } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import EnvironmentPicker from '../environment_picker.vue';
 import NetworkPolicyEditor from '../network_policy_editor.vue';
-import PolicyRuleBuilder from './policy_rule_builder.vue';
-import PolicyPreview from './policy_preview.vue';
-import PolicyActionPicker from './policy_action_picker.vue';
-import PolicyAlertPicker from './policy_alert_picker.vue';
-import DimDisableContainer from './dim_disable_container.vue';
 import {
   EditorModeRule,
   EditorModeYAML,
   EndpointMatchModeAny,
   RuleTypeEndpoint,
+  ProjectIdLabel,
 } from './constants';
-import toYaml from './lib/to_yaml';
+import DimDisableContainer from './dim_disable_container.vue';
 import fromYaml from './lib/from_yaml';
-import { buildRule } from './lib/rules';
 import humanizeNetworkPolicy from './lib/humanize';
+import { buildRule } from './lib/rules';
+import toYaml from './lib/to_yaml';
+import PolicyActionPicker from './policy_action_picker.vue';
+import PolicyAlertPicker from './policy_alert_picker.vue';
+import PolicyPreview from './policy_preview.vue';
+import PolicyRuleBuilder from './policy_rule_builder.vue';
 
 export default {
   components: {
@@ -64,6 +65,10 @@ export default {
       required: false,
       default: null,
     },
+    projectId: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     const policy = this.existingPolicy
@@ -76,8 +81,9 @@ export default {
           endpointLabels: '',
           rules: [],
           annotations: '',
+          labels: '',
         };
-
+    policy.labels = { [ProjectIdLabel]: this.projectId };
     return {
       editorMode: EditorModeRule,
       yamlEditorValue: '',
@@ -170,7 +176,9 @@ export default {
     },
     savePolicy() {
       const saveFn = this.isEditing ? this.updatePolicy : this.createPolicy;
-      const policy = { manifest: toYaml(this.policy) };
+      const policy = {
+        manifest: this.editorMode === EditorModeYAML ? this.yamlEditorValue : toYaml(this.policy),
+      };
       if (this.isEditing) {
         policy.name = this.existingPolicy.name;
       }

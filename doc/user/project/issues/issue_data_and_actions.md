@@ -23,13 +23,13 @@ The numbers in the image correspond to the following features:
 - **1.** [Issue actions](#issue-actions)
 - **2.** [To Do](#to-do)
 - **3.** [Assignee](#assignee)
-  - **3.1.** [Multiple Assignees **(STARTER)**](#multiple-assignees)
-- **4.** [Epic **(PREMIUM)**](#epic)
+  - **3.1.** [Multiple Assignees](#multiple-assignees)
+- **4.** [Epic](#epic)
 - **5.** [Milestone](#milestone)
 - **6.** [Time tracking](#time-tracking)
 - **7.** [Due date](#due-date)
 - **8.** [Labels](#labels)
-- **9.** [Weight **(STARTER)**](#weight)
+- **9.** [Weight](#weight)
 - **10.** [Confidentiality](#confidentiality)
 - **11.** [Lock issue](#lock-issue)
 - **12.** [Participants](#participants)
@@ -86,7 +86,7 @@ An issue can be assigned to:
 
 - Yourself.
 - Another person.
-- [Many people](#multiple-assignees). **(STARTER)**
+- [Many people](#multiple-assignees). **(PREMIUM)**
 
 The assignees can be changed as often as needed. The idea is that the assignees are
 responsible for that issue until it's reassigned to someone else to take it from there.
@@ -96,7 +96,7 @@ NOTE:
 If a user is not member of that project, it can only be
 assigned to them if they created the issue themselves.
 
-#### Multiple Assignees **(STARTER)**
+#### Multiple Assignees **(PREMIUM)**
 
 Often, multiple people work on the same issue together. This can be difficult
 to track in large teams where there is shared ownership of an issue.
@@ -129,7 +129,7 @@ element. Due dates can be changed as many times as needed.
 ### Labels
 
 Categorize issues by giving them [labels](../labels.md). They help to organize workflows,
-and they enable you to work with the [GitLab Issue Board](index.md#issue-boards).
+and they enable you to work with the [GitLab Issue Board](../issue_board.md).
 
 Group Labels, which allow you to use the same labels for all projects in the same
 group, can also be given to issues. They work exactly the same, but are immediately
@@ -138,7 +138,7 @@ available to all projects in the group.
 If a label doesn't exist yet, you can create one by clicking **Edit**
 followed by **Create new label** in the dropdown menu.
 
-### Weight **(STARTER)**
+### Weight **(PREMIUM)**
 
 [Assign a weight](issue_weight.md) to an issue.
 Larger values are used to indicate more effort is required to complete the issue. Only
@@ -161,13 +161,8 @@ or were mentioned in the description or threads.
 
 ### Notifications
 
-Click on the icon to enable/disable [notifications](../../profile/notifications.md#issue--epics--merge-request-events)
+Select the toggle to enable or disable [notifications](../../profile/notifications.md#notifications-on-issues-merge-requests-and-epics)
 for the issue. Notifications are automatically enabled after you participate in the issue in any way.
-
-- **Enable**: If you are not a participant in the discussion on that issue, but
-  want to receive notifications on each update, subscribe to it.
-- **Disable**: If you are receiving notifications for updates to that issue but no
-  longer want to receive them, unsubscribe from it.
 
 ### Reference
 
@@ -191,16 +186,17 @@ This icon is only displayed if the user has permission to edit the issue.
 ### Description
 
 The plain text title and description of the issue fill the top center of the issue page.
-The description fully supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm),
+The description fully supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown),
 allowing many formatting options.
 
-> [In GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/issues/10103) and later, changes to an issue's description are listed in the [issue history](#issue-history). **(STARTER)**
+[In GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/issues/10103) and later, changes to an
+issue's description are listed in the [issue history](#issue-history). **(PREMIUM)**
 
 ### Mentions
 
 You can mention a user or a group present in your GitLab instance with `@username` or
 `@groupname`. All mentioned users are notified via to-do items and emails,
-unless they have disabled all notifications in their profile settings.
+unless they have disabled all [notifications](#notifications) in their user settings.
 This is controlled in the [notification settings](../../profile/notifications.md).
 
 Mentions for yourself (the current logged in user) are highlighted
@@ -244,8 +240,8 @@ Also:
 
 - You can mention a user or a group present in your GitLab instance with
   `@username` or `@groupname` and they are notified via to-do items
-  and emails, unless they have [disabled all notifications](#notifications)
-  in their profile settings.
+  and emails, unless they have disabled all [notifications](#notifications)
+  in their user settings.
 - Mentions for yourself (the current logged-in user) are highlighted
   in a different color, which allows you to quickly see which comments involve you.
 
@@ -253,7 +249,7 @@ Also:
 
 ### Create Merge Request
 
-Create a new branch and [**Draft** merge request](../merge_requests/work_in_progress_merge_requests.md)
+Create a new branch and [**Draft** merge request](../merge_requests/drafts.md)
 in one action. The branch is named `issuenumber-title` by default, but you can
 choose any name, and GitLab verifies that it is not already in use. The merge request
 inherits the milestone and labels of the issue, and is set to automatically
@@ -285,13 +281,13 @@ or newest items to be shown first.
 ### Comments
 
 Collaborate in the issue by posting comments in its thread. This text field also fully
-supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm).
+supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown).
 
 ### Submit comment, start a thread, or comment and close
 
 After you write a comment, you can:
 
-- Click **Comment** and to publish your comment.
+- Click **Comment** to publish your comment.
 - Choose **Start thread** from the dropdown list and start a new [thread](../../discussions/index.md#threaded-discussions)
   in that issue's main thread to discuss specific points. This invites other participants
   to reply directly to your thread, keeping related comments grouped together.
@@ -305,7 +301,7 @@ You can also close the issue from here, so you don't need to scroll to the top o
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/31103) in GitLab 12.3.
 
 You can attach and remove Zoom meetings to issues using the `/zoom` and `/remove_zoom` [quick actions](../quick_actions.md) as part of
-[GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm).
+[GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown).
 
 Attaching a [Zoom](https://zoom.us) call an issue
 results in a **Join Zoom meeting** button at the top of the issue, just under the header.

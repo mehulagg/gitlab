@@ -76,7 +76,7 @@ module Elastic
 
         query_hash = {
           query: { bool: bool_expr },
-          size: per,
+          size: (options[:count_only] ? 0 : per),
           from: per * (page - 1),
           sort: [:_score]
         }
@@ -91,14 +91,13 @@ module Elastic
           bool_expr[:must] = { match_all: {} }
           query_hash[:track_scores] = true
         else
-          bool_expr[:must] = {
-            simple_query_string: {
-              _name: context.name(:commit, :match, :search_terms),
-              fields: fields,
-              query: query_with_prefix,
-              default_operator: :and
-            }
-          }
+          bool_expr = apply_simple_query_string(
+            name: context.name(:commit, :match, :search_terms),
+            fields: fields,
+            query: query_with_prefix,
+            bool_expr: bool_expr,
+            count_only: options[:count_only]
+          )
         end
 
         # add the document type filter
@@ -117,7 +116,7 @@ module Elastic
 
         options[:order] = :default if options[:order].blank?
 
-        if options[:highlight]
+        if options[:highlight] && !options[:count_only]
           es_fields = fields.map { |field| field.split('^').first }.each_with_object({}) do |field, memo|
             memo[field.to_sym] = {}
           end
@@ -150,20 +149,18 @@ module Elastic
         bool_expr = ::Gitlab::Elastic::BoolExpr.new
         query_hash = {
           query: { bool: bool_expr },
-          size: per,
+          size: (options[:count_only] ? 0 : per),
           from: per * (page - 1),
           sort: [:_score]
         }
 
-        # add the term matching
-        bool_expr[:must] = {
-          simple_query_string: {
-            _name: context.name(:blob, :match, :search_terms),
-            query: query.term,
-            default_operator: :and,
-            fields: %w[blob.content blob.file_name blob.path]
-          }
-        }
+        bool_expr = apply_simple_query_string(
+          name: context.name(:blob, :match, :search_terms),
+          query: query.term,
+          fields: %w[blob.content blob.file_name blob.path],
+          bool_expr: bool_expr,
+          count_only: options[:count_only]
+        )
 
         # If there is a :current_user set in the `options`, we can assume
         # we need to do a project visibility check.
@@ -192,7 +189,7 @@ module Elastic
 
         options[:order] = :default if options[:order].blank?
 
-        if options[:highlight]
+        if options[:highlight] && !options[:count_only]
           query_hash[:highlight] = {
             pre_tags: [HIGHLIGHT_START_TAG],
             post_tags: [HIGHLIGHT_END_TAG],
@@ -264,6 +261,27 @@ module Elastic
       # Indexed commit does not include project_id
       def project_id_for_commit_or_blob(result, type)
         result.dig('_source', 'project_id') || result.dig('_source', type, 'rid').to_i
+      end
+
+      def apply_simple_query_string(name:, fields:, query:, bool_expr:, count_only:)
+        fields = remove_fields_boost(fields) if count_only
+
+        simple_query_string = {
+          simple_query_string: {
+            _name: name,
+            fields: fields,
+            query: query,
+            default_operator: :and
+          }
+        }
+
+        bool_expr.tap do |expr|
+          if count_only
+            expr[:filter] << simple_query_string
+          else
+            expr[:must] = simple_query_string
+          end
+        end
       end
     end
   end

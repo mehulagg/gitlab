@@ -1,5 +1,5 @@
-import { produce } from 'immer';
 import gql from 'graphql-tag';
+import { produce } from 'immer';
 import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
 
 /**

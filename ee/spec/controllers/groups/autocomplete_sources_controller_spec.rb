@@ -28,7 +28,7 @@ RSpec.describe Groups::AutocompleteSourcesController do
 
       expect(json_response).to be_an(Array)
       expect(json_response.first).to include(
-        'iid' => epic.iid, 'title' => epic.title
+        'iid' => epic.iid, 'title' => epic.title, 'reference' => epic.to_reference(epic.group)
       )
     end
   end

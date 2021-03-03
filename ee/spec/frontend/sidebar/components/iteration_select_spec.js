@@ -1,53 +1,130 @@
-import { GlDropdown, GlDropdownItem, GlButton, GlLink, GlSearchBoxByType } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { GlDropdown, GlDropdownItem, GlDropdownText, GlLink, GlSearchBoxByType } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
+
 import IterationSelect from 'ee/sidebar/components/iteration_select.vue';
-import { iterationSelectTextMap } from 'ee/sidebar/constants';
-import setIterationOnIssue from 'ee/sidebar/queries/set_iteration_on_issue.mutation.graphql';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { iterationSelectTextMap, iterationDisplayState } from 'ee/sidebar/constants';
+import groupIterationsQuery from 'ee/sidebar/queries/group_iterations.query.graphql';
+import currentIterationQuery from 'ee/sidebar/queries/issue_iteration.query.graphql';
+import setIssueIterationMutation from 'ee/sidebar/queries/set_iteration_on_issue.mutation.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import waitForPromises from 'helpers/wait_for_promises';
+import createFlash from '~/flash';
+
+import {
+  mockIssue,
+  mockIterationsResponse,
+  mockIteration2,
+  mockMutationResponse,
+  emptyIterationsResponse,
+  noCurrentIterationResponse,
+} from '../mock_data';
 
 jest.mock('~/flash');
 
+const localVue = createLocalVue();
+
 describe('IterationSelect', () => {
   let wrapper;
+  let mockApollo;
+  let showDropdown;
+
   const promiseData = { issueSetIteration: { issue: { iteration: { id: '123' } } } };
   const firstErrorMsg = 'first error';
   const promiseWithErrors = {
     ...promiseData,
     issueSetIteration: { ...promiseData.issueSetIteration, errors: [firstErrorMsg] },
   };
+
   const mutationSuccess = () => jest.fn().mockResolvedValue({ data: promiseData });
   const mutationError = () => jest.fn().mockRejectedValue();
   const mutationSuccessWithErrors = () => jest.fn().mockResolvedValue({ data: promiseWithErrors });
-  const toggleDropdown = (spy = () => {}) =>
-    wrapper.find(GlButton).vm.$emit('click', { stopPropagation: spy });
+
+  const findGlLink = () => wrapper.find(GlLink);
+  const findDropdown = () => wrapper.find(GlDropdown);
+  const findDropdownText = () => wrapper.find(GlDropdownText);
+  const findSearchBox = () => wrapper.find(GlSearchBoxByType);
+  const findAllDropdownItems = () => wrapper.findAll(GlDropdownItem);
+  const findDropdownItemWithText = (text) =>
+    findAllDropdownItems().wrappers.find((x) => x.text() === text);
+
+  const findIterationItems = () => wrapper.findByTestId('iteration-items');
+  const findSelectedIteration = () => wrapper.findByTestId('select-iteration');
+  const findNoIterationItem = () => wrapper.findByTestId('no-iteration-item');
+  const findLoadingIconTitle = () => wrapper.findByTestId('loading-icon-title');
+  const findLoadingIconDropdown = () => wrapper.findByTestId('loading-icon-dropdown');
+  const findEditButton = () => wrapper.findByTestId('iteration-edit-link');
+
+  const toggleDropdown = async (spy = () => {}) => {
+    findEditButton().vm.$emit('click', { stopPropagation: spy });
+
+    await wrapper.vm.$nextTick();
+  };
+
+  const createComponentWithApollo = async ({
+    props = { canEdit: true },
+    requestHandlers = [],
+    currentIterationSpy = jest.fn().mockResolvedValue(noCurrentIterationResponse),
+    groupIterationsSpy = jest.fn().mockResolvedValue(mockIterationsResponse),
+  } = {}) => {
+    localVue.use(VueApollo);
+    mockApollo = createMockApollo([
+      [currentIterationQuery, currentIterationSpy],
+      [groupIterationsQuery, groupIterationsSpy],
+      ...requestHandlers,
+    ]);
+
+    wrapper = extendedWrapper(
+      shallowMount(IterationSelect, {
+        localVue,
+        apolloProvider: mockApollo,
+        propsData: {
+          groupPath: mockIssue.groupPath,
+          projectPath: mockIssue.projectPath,
+          issueIid: mockIssue.iid,
+          ...props,
+        },
+      }),
+    );
+
+    showDropdown = jest.spyOn(wrapper.vm, 'showDropdown').mockImplementation();
+  };
 
   const createComponent = ({
     data = {},
     mutationPromise = mutationSuccess,
+    queries = {},
     props = { canEdit: true },
-  }) => {
-    wrapper = shallowMount(IterationSelect, {
-      data() {
-        return data;
-      },
-      propsData: {
-        ...props,
-        groupPath: '',
-        projectPath: '',
-        issueIid: '',
-      },
-      mocks: {
-        $options: {
-          noIterationItem: [],
+    stubs = { GlSearchBoxByType },
+  } = {}) => {
+    wrapper = extendedWrapper(
+      shallowMount(IterationSelect, {
+        data() {
+          return data;
         },
-        $apollo: {
-          mutate: mutationPromise(),
+        propsData: {
+          groupPath: '',
+          projectPath: '',
+          issueIid: '',
+          ...props,
         },
-      },
-      stubs: {
-        GlSearchBoxByType,
-      },
-    });
+        mocks: {
+          $apollo: {
+            mutate: mutationPromise(),
+            queries: {
+              currentIteration: { loading: false },
+              iterations: { loading: false },
+              ...queries,
+            },
+          },
+        },
+        stubs,
+      }),
+    );
+
+    showDropdown = jest.spyOn(wrapper.vm, 'showDropdown').mockImplementation();
   };
 
   afterEach(() => {
@@ -56,34 +133,83 @@ describe('IterationSelect', () => {
   });
 
   describe('when not editing', () => {
-    it('shows the current iteration', () => {
+    beforeEach(() => {
       createComponent({
         data: {
-          iterations: [{ id: 'id', title: 'title' }],
-          currentIteration: { id: 'id', title: 'title' },
+          currentIteration: { id: 'id', title: 'title', webUrl: 'webUrl' },
+        },
+        stubs: {
+          GlDropdown,
         },
       });
+    });
 
-      expect(wrapper.find('[data-testid="select-iteration"]').text()).toBe('title');
+    it('shows the current iteration', () => {
+      expect(findSelectedIteration().text()).toBe('title');
     });
 
     it('links to the current iteration', () => {
+      expect(findGlLink().attributes().href).toBe('webUrl');
+    });
+
+    it('does not show a loading spinner next to the iteration heading', () => {
+      expect(findLoadingIconTitle().exists()).toBe(false);
+    });
+
+    it('shows a loading spinner while fetching the current iteration', () => {
       createComponent({
-        data: {
-          iterations: [{ id: 'id', title: 'title', webUrl: 'webUrl' }],
-          currentIteration: { id: 'id', title: 'title', webUrl: 'webUrl' },
+        queries: {
+          currentIteration: { loading: true },
+        },
+        stubs: {
+          GlDropdown,
         },
       });
 
-      expect(wrapper.find(GlLink).attributes().href).toBe('webUrl');
+      expect(findLoadingIconTitle().exists()).toBe(true);
+    });
+
+    it('shows the title of the selected iteration while updating', () => {
+      createComponent({
+        data: {
+          updating: true,
+          selectedTitle: 'Some iteration title',
+        },
+        queries: {
+          currentIteration: { loading: false },
+        },
+        stubs: {
+          GlDropdown,
+        },
+      });
+
+      expect(findLoadingIconTitle().exists()).toBe(true);
+      expect(findSelectedIteration().text()).toBe('Some iteration title');
+    });
+
+    describe('when current iteration does not exist', () => {
+      it('renders "None" as the selected iteration title', () => {
+        createComponent({
+          stubs: {
+            GlDropdown,
+          },
+        });
+
+        expect(findSelectedIteration().text()).toBe('None');
+      });
     });
   });
 
   describe('when a user cannot edit', () => {
     it('cannot find the edit button', () => {
-      createComponent({ props: { canEdit: false } });
+      createComponent({
+        props: { canEdit: false },
+        stubs: {
+          GlDropdown,
+        },
+      });
 
-      expect(wrapper.find(GlButton).exists()).toBe(false);
+      expect(findEditButton().exists()).toBe(false);
     });
   });
 
@@ -91,69 +217,75 @@ describe('IterationSelect', () => {
     it('opens the dropdown on click of the edit button', async () => {
       createComponent({ props: { canEdit: true } });
 
-      expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
+      expect(findDropdown().isVisible()).toBe(false);
 
-      toggleDropdown();
+      await toggleDropdown();
 
-      await wrapper.vm.$nextTick();
-      expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
+      expect(findDropdown().isVisible()).toBe(true);
+      expect(showDropdown).toHaveBeenCalledTimes(1);
     });
 
-    it('focuses on the input', async () => {
+    it('focuses on the input on click of the edit button', async () => {
       createComponent({ props: { canEdit: true } });
+      const setFocus = jest.spyOn(wrapper.vm, 'setFocus').mockImplementation();
 
-      const spy = jest.spyOn(wrapper.vm.$refs.search, 'focusInput');
+      await toggleDropdown();
 
-      toggleDropdown();
+      findDropdown().vm.$emit('shown');
 
       await wrapper.vm.$nextTick();
-      expect(spy).toHaveBeenCalled();
+
+      expect(setFocus).toHaveBeenCalledTimes(1);
     });
 
     it('stops propagation of the click event to avoid opening milestone dropdown', async () => {
       const spy = jest.fn();
       createComponent({ props: { canEdit: true } });
 
-      expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
+      expect(findDropdown().isVisible()).toBe(false);
 
-      toggleDropdown(spy);
+      await toggleDropdown(spy);
 
-      await wrapper.vm.$nextTick();
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
     describe('when user is editing', () => {
       describe('when rendering the dropdown', () => {
-        it('shows GlDropdown', () => {
-          createComponent({ props: { canEdit: true }, data: { editing: true } });
+        it('shows a loading spinner while fetching a list of iterations', async () => {
+          createComponent({
+            queries: {
+              iterations: { loading: true },
+            },
+          });
 
-          expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
+          await toggleDropdown();
+
+          expect(findLoadingIconDropdown().exists()).toBe(true);
         });
 
         describe('GlDropdownItem with the right title and id', () => {
           const id = 'id';
           const title = 'title';
 
-          beforeEach(() => {
+          beforeEach(async () => {
             createComponent({
               data: { iterations: [{ id, title }], currentIteration: { id, title } },
             });
+
+            await toggleDropdown();
+          });
+
+          it('does not show a loading spinner', () => {
+            expect(findLoadingIconDropdown().exists()).toBe(false);
           });
 
           it('renders title $title', () => {
-            expect(
-              wrapper
-                .findAll(GlDropdownItem)
-                .filter((w) => w.text() === title)
-                .at(0)
-                .text(),
-            ).toBe(title);
+            expect(findDropdownItemWithText(title).text()).toBe(title);
           });
 
           it('checks the correct dropdown item', () => {
             expect(
-              wrapper
-                .findAll(GlDropdownItem)
+              findAllDropdownItems()
                 .filter((w) => w.props('isChecked') === true)
                 .at(0)
                 .text(),
@@ -162,22 +294,28 @@ describe('IterationSelect', () => {
         });
 
         describe('when no data is assigned', () => {
-          beforeEach(() => {
-            createComponent({});
+          beforeEach(async () => {
+            createComponent();
+
+            await toggleDropdown();
           });
 
           it('finds GlDropdownItem with "No iteration"', () => {
-            expect(wrapper.find(GlDropdownItem).text()).toBe('No iteration');
+            expect(findNoIterationItem().text()).toBe('No iteration');
           });
 
           it('"No iteration" is checked', () => {
-            expect(wrapper.find(GlDropdownItem).props('isChecked')).toBe(true);
+            expect(findNoIterationItem().props('isChecked')).toBe(true);
+          });
+
+          it('does not render any dropdown item', () => {
+            expect(findIterationItems().exists()).toBe(false);
           });
         });
 
         describe('when clicking on dropdown item', () => {
           describe('when currentIteration is equal to iteration id', () => {
-            it('does not call setIssueIteration mutation', () => {
+            it('does not call setIssueIteration mutation', async () => {
               createComponent({
                 data: {
                   iterations: [{ id: 'id', title: 'title' }],
@@ -185,49 +323,15 @@ describe('IterationSelect', () => {
                 },
               });
 
-              wrapper
-                .findAll(GlDropdownItem)
-                .filter((w) => w.text() === 'title')
-                .at(0)
-                .vm.$emit('click');
+              await toggleDropdown();
+
+              findDropdownItemWithText('title').vm.$emit('click');
 
               expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledTimes(0);
             });
           });
 
           describe('when currentIteration is not equal to iteration id', () => {
-            describe('when success', () => {
-              beforeEach(() => {
-                createComponent({
-                  data: {
-                    iterations: [
-                      { id: 'id', title: 'title' },
-                      { id: '123', title: '123' },
-                    ],
-                    currentIteration: '123',
-                  },
-                });
-
-                wrapper
-                  .findAll(GlDropdownItem)
-                  .filter((w) => w.text() === 'title')
-                  .at(0)
-                  .vm.$emit('click');
-              });
-
-              it('calls setIssueIteration mutation', () => {
-                expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
-                  mutation: setIterationOnIssue,
-                  variables: { projectPath: '', iterationId: 'id', iid: '' },
-                });
-              });
-
-              it('sets the value returned from the mutation to currentIteration', async () => {
-                await wrapper.vm.$nextTick();
-                expect(wrapper.vm.currentIteration).toBe('123');
-              });
-            });
-
             describe('when error', () => {
               const bootstrapComponent = (mutationResp) => {
                 createComponent({
@@ -247,14 +351,12 @@ describe('IterationSelect', () => {
                 ${'top-level error'}        | ${mutationError}             | ${iterationSelectTextMap.iterationSelectFail}
                 ${'user-recoverable error'} | ${mutationSuccessWithErrors} | ${firstErrorMsg}
               `(`$description`, ({ mutationResp, expectedMsg }) => {
-                beforeEach(() => {
+                beforeEach(async () => {
                   bootstrapComponent(mutationResp);
 
-                  wrapper
-                    .findAll(GlDropdownItem)
-                    .filter((w) => w.text() === 'title')
-                    .at(0)
-                    .vm.$emit('click');
+                  await toggleDropdown();
+
+                  findDropdownItemWithText('title').vm.$emit('click');
                 });
 
                 it('calls createFlash with $expectedMsg', async () => {
@@ -268,108 +370,169 @@ describe('IterationSelect', () => {
       });
 
       describe('when a user is searching', () => {
-        beforeEach(() => {
-          createComponent({});
-        });
+        describe('when search result is not found', () => {
+          it('renders "No iterations found"', async () => {
+            createComponent();
 
-        it('sets the search term', async () => {
-          wrapper.find(GlSearchBoxByType).vm.$emit('input', 'testing');
+            await toggleDropdown();
 
-          await wrapper.vm.$nextTick();
-          expect(wrapper.vm.searchTerm).toBe('testing');
+            findSearchBox().vm.$emit('input', 'non existing iterations');
+
+            await wrapper.vm.$nextTick();
+
+            expect(findDropdownText().text()).toBe('No iterations found');
+          });
         });
       });
 
       describe('when the user off clicks', () => {
         describe('when the dropdown is open', () => {
           beforeEach(async () => {
-            createComponent({});
+            createComponent();
 
-            toggleDropdown();
-
-            await wrapper.vm.$nextTick();
+            await toggleDropdown();
           });
 
           it('closes the dropdown', async () => {
-            expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
+            expect(findDropdown().isVisible()).toBe(true);
 
-            toggleDropdown();
+            await toggleDropdown();
 
-            await wrapper.vm.$nextTick();
-            expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
+            expect(findDropdown().isVisible()).toBe(false);
           });
+        });
+      });
+
+      // A user might press "ESC" to hide the dropdown.
+      // We need to make sure that
+      // toggleDropdown() gets called to set 'editing' to 'false'
+      describe('when the dropdown emits "hidden"', () => {
+        beforeEach(async () => {
+          createComponent();
+
+          await toggleDropdown();
+        });
+
+        it('should hide the dropdown', async () => {
+          expect(findDropdown().isVisible()).toBe(true);
+
+          findDropdown().vm.$emit('hidden');
+          await wrapper.vm.$nextTick();
+
+          expect(findDropdown().isVisible()).toBe(false);
         });
       });
     });
 
-    describe('apollo schema', () => {
-      describe('iterations', () => {
-        describe('when iterations is passed the wrong data object', () => {
-          beforeEach(() => {
-            createComponent({});
+    describe('With mock apollo', () => {
+      let error;
+
+      beforeEach(() => {
+        jest.spyOn(Sentry, 'captureException');
+        error = new Error('mayday');
+      });
+
+      describe('when clicking on dropdown item', () => {
+        describe('when currentIteration is not equal to iteration id', () => {
+          let setIssueIterationSpy;
+
+          describe('when update is successful', () => {
+            setIssueIterationSpy = jest.fn().mockResolvedValue(mockMutationResponse);
+            beforeEach(async () => {
+              createComponentWithApollo({
+                requestHandlers: [[setIssueIterationMutation, setIssueIterationSpy]],
+              });
+
+              await toggleDropdown();
+              jest.runOnlyPendingTimers();
+              await wrapper.vm.$nextTick();
+
+              findDropdownItemWithText(mockIteration2.title).vm.$emit('click');
+            });
+
+            it('calls setIssueIteration mutation', () => {
+              expect(setIssueIterationSpy).toHaveBeenCalledWith({
+                iid: mockIssue.iid,
+                iterationId: mockIteration2.id,
+                projectPath: mockIssue.projectPath,
+              });
+            });
+
+            it('sets the value returned from the mutation to currentIteration', async () => {
+              expect(findSelectedIteration().text()).toBe(mockIteration2.title);
+            });
           });
-
-          it.each([
-            [{}, iterationSelectTextMap.noIterationItem],
-            [{ group: {} }, iterationSelectTextMap.noIterationItem],
-            [{ group: { iterations: {} } }, iterationSelectTextMap.noIterationItem],
-            [
-              { group: { iterations: { nodes: ['nodes'] } } },
-              [...iterationSelectTextMap.noIterationItem, 'nodes'],
-            ],
-          ])('when %j as an argument it returns %j', (data, value) => {
-            const { update } = wrapper.vm.$options.apollo.iterations;
-
-            expect(update(data)).toEqual(value);
-          });
-        });
-
-        it('contains debounce', () => {
-          createComponent({});
-
-          const { debounce } = wrapper.vm.$options.apollo.iterations;
-
-          expect(debounce).toBe(250);
-        });
-
-        it('returns the correct values based on the schema', () => {
-          createComponent({});
-
-          const { update } = wrapper.vm.$options.apollo.iterations;
-          // needed to access this.$options in update
-          const boundUpdate = update.bind(wrapper.vm);
-
-          expect(boundUpdate({ group: { iterations: { nodes: [] } } })).toEqual(
-            iterationSelectTextMap.noIterationItem,
-          );
         });
       });
 
-      describe('currentIteration', () => {
-        describe('when passes an object that doesnt contain the correct values', () => {
-          beforeEach(() => {
-            createComponent({});
+      describe('currentIterations', () => {
+        it('should call createFlash and Sentry if currentIterations query fails', async () => {
+          createComponentWithApollo({
+            currentIterationSpy: jest.fn().mockRejectedValue(error),
           });
 
-          it.each([
-            [{}, undefined],
-            [{ project: { issue: {} } }, undefined],
-            [{ project: { issue: { iteration: {} } } }, {}],
-          ])('when %j as an argument it returns %j', (data, value) => {
-            const { update } = wrapper.vm.$options.apollo.currentIteration;
+          await waitForPromises();
 
-            expect(update(data)).toEqual(value);
+          expect(createFlash).toHaveBeenNthCalledWith(1, {
+            message: wrapper.vm.$options.i18n.currentIterationFetchError,
           });
+          expect(Sentry.captureException.mock.calls[0][0].networkError).toBe(error);
+        });
+      });
+
+      describe('iterations', () => {
+        let groupIterationsSpy;
+
+        it('should call createFlash and Sentry if iterations query fails', async () => {
+          createComponentWithApollo({
+            groupIterationsSpy: jest.fn().mockRejectedValue(error),
+          });
+
+          await toggleDropdown();
+          jest.runOnlyPendingTimers();
+          await waitForPromises();
+
+          expect(createFlash).toHaveBeenNthCalledWith(1, {
+            message: wrapper.vm.$options.i18n.iterationsFetchError,
+          });
+          expect(Sentry.captureException.mock.calls[0][0].networkError).toBe(error);
         });
 
-        describe('when iteration has an id', () => {
-          it('returns the id', () => {
-            createComponent({});
+        it('only fetches iterations when dropdown is opened', async () => {
+          groupIterationsSpy = jest.fn().mockResolvedValueOnce(emptyIterationsResponse);
+          createComponentWithApollo({ groupIterationsSpy });
 
-            const { update } = wrapper.vm.$options.apollo.currentIteration;
+          await wrapper.vm.$nextTick();
+          jest.runOnlyPendingTimers();
 
-            expect(update({ project: { issue: { iteration: { id: '123' } } } })).toEqual({
-              id: '123',
+          expect(groupIterationsSpy).not.toHaveBeenCalled();
+
+          await toggleDropdown();
+          jest.runOnlyPendingTimers();
+
+          expect(groupIterationsSpy).toHaveBeenCalled();
+        });
+
+        describe('when a user is searching', () => {
+          const mockSearchTerm = 'foobar';
+
+          beforeEach(async () => {
+            groupIterationsSpy = jest.fn().mockResolvedValueOnce(emptyIterationsResponse);
+            createComponentWithApollo({ groupIterationsSpy });
+
+            await toggleDropdown();
+          });
+
+          it('sends a groupIterations query with the entered search term "foo"', async () => {
+            findSearchBox().vm.$emit('input', mockSearchTerm);
+
+            await wrapper.vm.$nextTick();
+            jest.runOnlyPendingTimers();
+
+            expect(groupIterationsSpy).toHaveBeenNthCalledWith(1, {
+              fullPath: mockIssue.groupPath,
+              title: `"${mockSearchTerm}"`,
+              state: iterationDisplayState,
             });
           });
         });
@@ -377,3 +540,4 @@ describe('IterationSelect', () => {
     });
   });
 });
+//

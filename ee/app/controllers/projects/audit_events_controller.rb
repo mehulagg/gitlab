@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Projects::AuditEventsController < Projects::ApplicationController
+  include SecurityAndCompliancePermissions
   include Gitlab::Utils::StrongMemoize
   include LicenseHelper
   include AuditEvents::EnforcesValidDateParams

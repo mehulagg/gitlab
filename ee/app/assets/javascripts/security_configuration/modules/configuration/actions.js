@@ -1,4 +1,4 @@
-import * as Sentry from '~/sentry/wrapper';
+import * as Sentry from '@sentry/browser';
 import axios from '~/lib/utils/axios_utils';
 import * as types from './mutation_types';
 

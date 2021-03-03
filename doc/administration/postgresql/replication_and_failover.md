@@ -4,7 +4,7 @@ group: Database
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# PostgreSQL replication and failover with Omnibus GitLab **(PREMIUM ONLY)**
+# PostgreSQL replication and failover with Omnibus GitLab **(PREMIUM SELF)**
 
 This document focuses on configuration supported with [GitLab Premium](https://about.gitlab.com/pricing/), using the Omnibus GitLab package.
 If you're a Community Edition or Starter user, consider using a cloud hosted solution.
@@ -46,7 +46,7 @@ Each database node runs three services:
 
 `PostgreSQL` - The database itself.
 
-`Patroni` - Communicates with other patroni services in the cluster and handles
+`Patroni` - Communicates with other Patroni services in the cluster and handles
 failover when issues with the leader server occurs. The failover procedure
 consists of:
 
@@ -900,7 +900,12 @@ You can switch an exiting database cluster to use Patroni instead of repmgr with
    ```
 
 1. Repeat the last two steps for all replica nodes. `gitlab.rb` should look the same on all nodes.
-1. Optional: You can remove `gitlab_repmgr` database and role on the primary.
+1. If present, remove the `gitlab_repmgr` database and role on the primary. If you don't delete the `gitlab_repmgr`
+   database, upgrading PostgreSQL 11 to 12 will fail with:
+
+   ```plaintext
+   could not load library "$libdir/repmgr_funcs": ERROR:  could not access file "$libdir/repmgr_funcs": No such file or directory
+   ```
 
 ### Upgrading PostgreSQL major version in a Patroni cluster
 

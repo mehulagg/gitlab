@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 class Elastic::ReindexingTask < ApplicationRecord
+  include IgnorableColumns
+
   self.table_name = 'elastic_reindexing_tasks'
+
+  ignore_columns %i[documents_count index_name_from index_name_to elastic_task documents_count_target], remove_with: '14.0', remove_after: '2021-04-22'
 
   has_many :subtasks, class_name: 'Elastic::ReindexingSubtask', foreign_key: :elastic_reindexing_task_id
 

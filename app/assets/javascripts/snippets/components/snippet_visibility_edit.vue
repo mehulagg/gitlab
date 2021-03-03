@@ -1,7 +1,7 @@
 <script>
 import { GlIcon, GlFormGroup, GlFormRadio, GlFormRadioGroup, GlLink } from '@gitlab/ui';
-import { defaultSnippetVisibilityLevels } from '../utils/blob';
 import { SNIPPET_LEVELS_RESTRICTED, SNIPPET_LEVELS_DISABLED } from '~/snippets/constants';
+import { defaultSnippetVisibilityLevels } from '../utils/blob';
 
 export default {
   components: {
@@ -55,7 +55,12 @@ export default {
         >
           <div class="d-flex align-items-center">
             <gl-icon :size="16" :name="option.icon" />
-            <span class="font-weight-bold ml-1 js-visibility-option">{{ option.label }}</span>
+            <span
+              class="font-weight-bold ml-1 js-visibility-option"
+              data-qa-selector="visibility_content"
+              :data-qa-visibility="option.label"
+              >{{ option.label }}</span
+            >
           </div>
           <template #help>{{
             isProjectSnippet && option.description_project

@@ -161,7 +161,7 @@ RSpec.describe 'group epic roadmap', :js do
     before do
       create_list(:epic, 2, group: group, start_date: 10.days.ago, end_date: 1.day.ago)
       visit group_roadmap_path(group)
-      wait_for_requests
+
       execute_script("gon.roadmap_epics_limit = 1;")
     end
 

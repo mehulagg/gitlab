@@ -1,8 +1,8 @@
 import { LICENSE_CHECK_NAME } from 'ee/approvals/constants';
 import axios from '~/lib/utils/axios_utils';
 import pollUntilComplete from '~/lib/utils/poll_until_complete';
-import * as types from './mutation_types';
 import { LICENSE_APPROVAL_STATUS } from '../constants';
+import * as types from './mutation_types';
 import { convertToOldReportFormat } from './utils';
 
 export const setAPISettings = ({ commit }, data) => {

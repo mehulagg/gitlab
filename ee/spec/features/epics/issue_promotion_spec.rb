@@ -63,8 +63,6 @@ RSpec.describe 'Issue promotion', :js do
       it 'promotes the issue' do
         add_note('/promote')
 
-        wait_for_requests
-
         epic = Epic.last
 
         expect(page).to have_content 'Promoted issue to an epic.'
@@ -81,8 +79,6 @@ RSpec.describe 'Issue promotion', :js do
 
         it 'promotes the issue' do
           add_note('/promote')
-
-          wait_for_requests
 
           epic = Epic.last
 
@@ -114,8 +110,6 @@ RSpec.describe 'Issue promotion', :js do
 
       it 'promotes the issue' do
         add_note('/promote')
-
-        wait_for_requests
 
         epic = Epic.last
 

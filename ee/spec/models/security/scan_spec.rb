@@ -28,6 +28,16 @@ RSpec.describe Security::Scan do
     it { is_expected.to match_array(expected_scans) }
   end
 
+  describe '.latest_successful_by_build' do
+    let!(:first_successful_scan) { create(:security_scan, build: create(:ci_build, :success, :retried)) }
+    let!(:second_successful_scan) { create(:security_scan, build: create(:ci_build, :success)) }
+    let!(:failed_scan) { create(:security_scan, build: create(:ci_build, :failed)) }
+
+    subject { described_class.latest_successful_by_build }
+
+    it { is_expected.to match_array([second_successful_scan]) }
+  end
+
   describe '.has_dismissal_feedback' do
     let(:scan_1) { create(:security_scan) }
     let(:scan_2) { create(:security_scan) }

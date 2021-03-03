@@ -29,7 +29,6 @@ describe('OnDemandScansScannerProfileSelector', () => {
           provide: {
             scannerProfilesLibraryPath: TEST_LIBRARY_PATH,
             newScannerProfilePath: TEST_NEW_PATH,
-            glFeatures: { securityOnDemandScansSiteValidation: true },
           },
           slots: {
             summary: `<div>${profiles[0].profileName}'s summary</div>`,
@@ -88,29 +87,6 @@ describe('OnDemandScansScannerProfileSelector', () => {
         value: null,
       });
       expect(sel.attributes()).toMatchObject(TEST_ATTRS);
-    });
-
-    describe('feature flag disabled', () => {
-      beforeEach(() => {
-        createComponent({
-          propsData: { profiles },
-          provide: {
-            glFeatures: { securityOnDemandScansSiteValidation: false },
-          },
-        });
-      });
-
-      it('renders profile selector', () => {
-        const sel = findProfileSelector();
-
-        expect(sel.props()).toEqual({
-          libraryPath: TEST_LIBRARY_PATH,
-          newProfilePath: TEST_NEW_PATH,
-          profiles: scannerProfiles.map((x) => ({ ...x, dropdownLabel: `${x.profileName}` })),
-          value: null,
-        });
-        expect(sel.attributes()).toMatchObject(TEST_ATTRS);
-      });
     });
   });
 });

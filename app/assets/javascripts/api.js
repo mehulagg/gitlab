@@ -1,7 +1,7 @@
-import axios from './lib/utils/axios_utils';
-import { joinPaths } from './lib/utils/url_utility';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
+import axios from './lib/utils/axios_utils';
+import { joinPaths } from './lib/utils/url_utility';
 
 const DEFAULT_PER_PAGE = 20;
 
@@ -24,6 +24,7 @@ const Api = {
   projectPackagesPath: '/api/:version/projects/:id/packages',
   projectPackagePath: '/api/:version/projects/:id/packages/:package_id',
   groupProjectsPath: '/api/:version/groups/:id/projects.json',
+  groupSharePath: '/api/:version/groups/:id/share',
   projectsPath: '/api/:version/projects.json',
   projectPath: '/api/:version/projects/:id',
   forkedProjectsPath: '/api/:version/projects/:id/forks',
@@ -39,6 +40,7 @@ const Api = {
   projectRunnersPath: '/api/:version/projects/:id/runners',
   projectProtectedBranchesPath: '/api/:version/projects/:id/protected_branches',
   projectSearchPath: '/api/:version/projects/:id/search',
+  projectSharePath: '/api/:version/projects/:id/share',
   projectMilestonesPath: '/api/:version/projects/:id/milestones',
   projectIssuePath: '/api/:version/projects/:id/issues/:issue_iid',
   mergeRequestsPath: '/api/:version/merge_requests',
@@ -81,8 +83,10 @@ const Api = {
   usageDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
   featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
   featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
-  billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
   containerRegistryDetailsPath: '/api/:version/registry/repositories/:id/',
+  projectNotificationSettingsPath: '/api/:version/projects/:id/notification_settings',
+  groupNotificationSettingsPath: '/api/:version/groups/:id/notification_settings',
+  notificationSettingsPath: '/api/:version/notification_settings',
 
   group(groupId, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
@@ -179,9 +183,9 @@ const Api = {
       });
   },
 
-  groupLabels(namespace) {
+  groupLabels(namespace, options = {}) {
     const url = Api.buildUrl(Api.groupLabelsPath).replace(':namespace_path', namespace);
-    return axios.get(url).then(({ data }) => data);
+    return axios.get(url, options).then(({ data }) => data);
   },
 
   // Return namespaces list. Filtered by query
@@ -363,6 +367,16 @@ const Api = {
     });
   },
 
+  projectShareWithGroup(id, options = {}) {
+    const url = Api.buildUrl(Api.projectSharePath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, {
+      expires_at: options.expires_at,
+      group_access: options.group_access,
+      group_id: options.group_id,
+    });
+  },
+
   projectMilestones(id, params = {}) {
     const url = Api.buildUrl(Api.projectMilestonesPath).replace(':id', encodeURIComponent(id));
 
@@ -424,6 +438,16 @@ const Api = {
       });
   },
 
+  groupShareWithGroup(id, options = {}) {
+    const url = Api.buildUrl(Api.groupSharePath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, {
+      expires_at: options.expires_at,
+      group_access: options.group_access,
+      group_id: options.group_id,
+    });
+  },
+
   commit(id, sha, params = {}) {
     const url = Api.buildUrl(this.commitPath)
       .replace(':id', encodeURIComponent(id))
@@ -442,10 +466,11 @@ const Api = {
     });
   },
 
-  applySuggestion(id, message) {
+  applySuggestion(id, message = '') {
     const url = Api.buildUrl(Api.applySuggestionPath).replace(':id', encodeURIComponent(id));
+    const params = { commit_message: message };
 
-    return axios.put(url, { commit_message: message });
+    return axios.put(url, params);
   },
 
   applySuggestionBatch(ids) {
@@ -879,31 +904,32 @@ const Api = {
     return axios.delete(url);
   },
 
-  fetchBillableGroupMembersList(namespaceId, options = {}, callback = () => {}) {
-    const url = Api.buildUrl(this.billableGroupMembersPath).replace(':id', namespaceId);
-    const defaults = {
-      per_page: DEFAULT_PER_PAGE,
-      page: 1,
-    };
+  async updateNotificationSettings(projectId, groupId, data = {}) {
+    let url = Api.buildUrl(this.notificationSettingsPath);
 
-    const passedOptions = options;
-
-    // calling search API with empty string will not return results
-    if (!passedOptions.search) {
-      passedOptions.search = undefined;
+    if (projectId) {
+      url = Api.buildUrl(this.projectNotificationSettingsPath).replace(':id', projectId);
+    } else if (groupId) {
+      url = Api.buildUrl(this.groupNotificationSettingsPath).replace(':id', groupId);
     }
 
-    return axios
-      .get(url, {
-        params: {
-          ...defaults,
-          ...passedOptions,
-        },
-      })
-      .then(({ data, headers }) => {
-        callback(data);
-        return { data, headers };
-      });
+    const result = await axios.put(url, data);
+
+    return result;
+  },
+
+  async getNotificationSettings(projectId, groupId) {
+    let url = Api.buildUrl(this.notificationSettingsPath);
+
+    if (projectId) {
+      url = Api.buildUrl(this.projectNotificationSettingsPath).replace(':id', projectId);
+    } else if (groupId) {
+      url = Api.buildUrl(this.groupNotificationSettingsPath).replace(':id', groupId);
+    }
+
+    const result = await axios.get(url);
+
+    return result;
   },
 };
 

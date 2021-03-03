@@ -10,7 +10,10 @@ This document outlines the style guide for the GitLab [GraphQL API](../api/graph
 
 ## How GitLab implements GraphQL
 
+<!-- vale gitlab.Spelling = NO -->
 We use the [GraphQL Ruby gem](https://graphql-ruby.org/) written by [Robert Mosolgo](https://github.com/rmosolgo/).
+<!-- vale gitlab.Spelling = YES -->
+In addition, we have a subscription to [GraphQL Pro](https://graphql.pro/). For details see [GraphQL Pro subscription](graphql_guide/graphql_pro.md).
 
 All GraphQL queries are directed to a single endpoint
 ([`app/controllers/graphql_controller.rb#execute`](https://gitlab.com/gitlab-org/gitlab/blob/master/app%2Fcontrollers%2Fgraphql_controller.rb)),
@@ -21,6 +24,7 @@ which is exposed as an API endpoint at `/api/graphql`.
 In March 2019, Nick Thomas hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`)
 on the GitLab [GraphQL API](../api/graphql/index.md) to share his domain specific knowledge
 with anyone who may work in this part of the codebase in the future. You can find the
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 [recording on YouTube](https://www.youtube.com/watch?v=-9L_1MWrjkg), and the slides on
 [Google Slides](https://docs.google.com/presentation/d/1qOTxpkTdHIp1CRjuTvO-aXg0_rUtzE3ETfLUdnBB5uQ/edit)
 and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/8e78ea7f326b2ef649e7d7d569c26d56/GraphQL_Deep_Dive__Create_.pdf).
@@ -41,6 +45,55 @@ can be shared.
 
 It's also possible to add a `private_token` to the query string, or
 add a `HTTP_PRIVATE_TOKEN` header.
+
+## Limits
+
+Several limits apply to the GraphQL API and some of these can be overridden
+by developers.
+
+### Max page size
+
+By default, [connections](#connection-types) can only return
+at most a maximum number of records defined in
+[`app/graphql/gitlab_schema.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/gitlab_schema.rb)
+per page.
+
+Developers can [specify a custom max page size](#page-size-limit) when defining
+a connection.
+
+### Max complexity
+
+Complexity is explained [on our client-facing API page](../api/graphql/index.md#max-query-complexity).
+
+Fields default to adding `1` to a query's complexity score, but developers can
+[specify a custom complexity](#field-complexity) when defining a field.
+
+To estimate the complexity of a query, you can run the
+[`gitlab:graphql:analyze`](rake_tasks.md#analyze-graphql-queries)
+Rake task.
+
+### Request timeout
+
+Requests time out at 30 seconds.
+
+## Breaking changes
+
+The GitLab GraphQL API is [versionless](https://graphql.org/learn/best-practices/#versioning) which means
+developers must familiarize themselves with our [deprecation cycle of breaking changes](#breaking-changes).
+
+Breaking changes are:
+
+- Removing or renaming a field, argument, enum value or mutation.
+- Changing the type of a field, argument or enum value.
+- Raising the [complexity](#max-complexity) of a field or complexity multipliers in a resolver.
+- Changing the [max page size](#page-size-limit) of a connection.
+- Lowering the global limits for query complexity and depth.
+- Anything else that can result in queries hitting a limit that previously was allowed.
+
+Fields that use the [`feature_flag` property](#feature_flag-property) and the flag is disabled by default are exempt
+from the deprecation process, and can be removed at any time without notice.
+
+See the [deprecating fields and enum values](#deprecating-fields-arguments-and-enum-values) section for how to deprecate items.
 
 ## Global IDs
 
@@ -281,6 +334,61 @@ Use the functionality the framework provides unless there is a compelling reason
 
 For example, instead of `latest_pipeline`, use `pipelines(last: 1)`.
 
+#### Page size limit
+
+By default, the API returns at most a maximum number of records defined in
+[`app/graphql/gitlab_schema.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/gitlab_schema.rb)
+per page within a connection and this will also be the default number of records
+returned per page if no limiting arguments (`first:` or `last:`) are provided by a client.
+
+The `max_page_size` argument can be used to specify a different page size limit
+for a connection.
+
+WARNING:
+It's better to change the frontend client, or product requirements, to not need large amounts of
+records per page than it is to raise the `max_page_size`, as the default is set to ensure
+the GraphQL API remains performant.
+
+For example:
+
+```ruby
+field :tags,
+  Types::ContainerRepositoryTagType.connection_type,
+  null: true,
+  description: 'Tags of the container repository',
+  max_page_size: 20
+```
+
+### Field complexity
+
+The GitLab GraphQL API uses a _complexity_ score to limit performing overly complex queries.
+Complexity is described in [our client documentation](../api/graphql/index.md#max-query-complexity) on the topic.
+
+Complexity limits are defined in [`app/graphql/gitlab_schema.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/gitlab_schema.rb).
+
+By default, fields will add `1` to a query's complexity score. This can be overridden by
+[providing a custom `complexity`](https://graphql-ruby.org/queries/complexity_and_depth.html) value for a field.
+
+Developers should specify higher complexity for fields that cause more _work_ to be performed
+by the server in order to return data. Fields that represent data that can be returned
+with little-to-no _work_, for example in most cases; `id` or `title`, can be given a complexity of `0`.
+
+### `calls_gitaly`
+
+Fields that have the potential to perform a [Gitaly](../administration/gitaly/index.md) call when resolving _must_ be marked as
+such by passing `calls_gitaly: true` to `field` when defining it.
+
+For example:
+
+```ruby
+field :blob, type: Types::Snippets::BlobType,
+      description: 'Snippet blob',
+      null: false,
+      calls_gitaly: true
+```
+
+This will increment the [`complexity` score](#field-complexity) of the field by `1`.
+
 ### Exposing permissions for a type
 
 To expose permissions the current user has on a resource, you can call
@@ -401,15 +509,18 @@ def foo
 end
 ```
 
-## Deprecating fields and enum values
+## Deprecating fields, arguments, and enum values
 
 The GitLab GraphQL API is versionless, which means we maintain backwards
-compatibility with older versions of the API with every change. Rather
-than removing a field or [enum value](#enums), we need to _deprecate_ it instead.
-The deprecated parts of the schema can then be removed in a future release
-in accordance with the [GitLab deprecation process](../api/graphql/index.md#deprecation-process).
+compatibility with older versions of the API with every change.
 
-Fields and enum values are deprecated using the `deprecated` property.
+Rather than removing fields, arguments, or [enum values](#enums), they
+must be _deprecated_ instead.
+
+The deprecated parts of the schema can then be removed in a future release
+in accordance with the [GitLab deprecation process](../api/graphql/index.md#deprecation-and-removal-process).
+
+Fields, arguments, and enum values are deprecated using the `deprecated` property.
 The value of the property is a `Hash` of:
 
 - `reason` - Reason for the deprecation.
@@ -429,14 +540,15 @@ is appended to the `description`.
 
 ### Deprecation reason style guide
 
-Where the reason for deprecation is due to the field or enum value being
-replaced, the `reason` must be:
+Where the reason for deprecation is due to the field, argument, or enum value being
+replaced, the `reason` must indicate the replacement. For example, the
+following is a `reason` for a replaced field:
 
 ```plaintext
 Use `otherFieldName`
 ```
 
-Example:
+Examples:
 
 ```ruby
 field :designs, ::Types::DesignManagement::DesignCollectionType, null: true,
@@ -455,8 +567,8 @@ module Types
 end
 ```
 
-If the field is not being replaced by another field, a descriptive
-deprecation `reason` should be given.
+If the field, argument, or enum value being deprecated is not being replaced,
+a descriptive deprecation `reason` should be given.
 
 See also [Aliasing and deprecating mutations](#aliasing-and-deprecating-mutations).
 
@@ -505,7 +617,7 @@ end
 ```
 
 Enum values can be deprecated using the
-[`deprecated` keyword](#deprecating-fields-and-enum-values).
+[`deprecated` keyword](#deprecating-fields-arguments-and-enum-values).
 
 ### Defining GraphQL enums dynamically from Rails enums
 
@@ -1478,7 +1590,7 @@ mount_aliased_mutation 'BarMutation', Mutations::FooMutation
 ```
 
 This allows us to rename a mutation and continue to support the old name,
-when coupled with the [`deprecated`](#deprecating-fields-and-enum-values)
+when coupled with the [`deprecated`](#deprecating-fields-arguments-and-enum-values)
 argument.
 
 Example:
@@ -1599,7 +1711,7 @@ full stack:
 - An argument or scalar's [`prepare`](#validating-arguments) applies correctly.
 - Logic in a resolver or mutation's [`#ready?` method](#correct-use-of-resolverready) applies correctly.
 - An [argument's `default_value`](https://graphql-ruby.org/fields/arguments.html) applies correctly.
-- Objects resolve performantly and there are no N+1 issues.
+- Objects resolve successfully, and there are no N+1 issues.
 
 When adding a query, you can use the `a working graphql query` shared example to test if the query
 renders valid results.

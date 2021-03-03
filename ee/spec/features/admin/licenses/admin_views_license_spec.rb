@@ -27,24 +27,52 @@ RSpec.describe "Admin views license" do
 
   context "when license is regular" do
     let_it_be(:license) { create(:license) }
+    let_it_be(:reference_date) { Date.parse('2020-01-22') }
 
-    before do
-      visit(admin_license_path)
-    end
+    context "when license is expired" do
+      let_it_be(:license) { build(:license, data: build(:gitlab_license, expires_at: reference_date - 1.day).export).save!(validate: false) }
 
-    context "when license expired" do
-      let_it_be(:license) { build(:license, data: build(:gitlab_license, expires_at: Date.yesterday).export).save!(validate: false) }
+      it do
+        travel_to(reference_date) do
+          visit(admin_license_path)
 
-      it { expect(page).to have_content("Your subscription expired!") }
+          expect(page).to have_content("Your subscription expired!")
+          expect(page).to have_link 'Renew subscription', href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions"
+        end
+      end
 
       context "when license blocks changes" do
-        let_it_be(:license) { build(:license, data: build(:gitlab_license, expires_at: Date.yesterday, block_changes_at: Date.today).export).save!(validate: false) }
+        let_it_be(:license) { build(:license, data: build(:gitlab_license, expires_at: reference_date - 1.week).export).save!(validate: false) }
 
-        it { expect(page).to have_content "You didn't renew your subscription so it was downgraded to the GitLab Core Plan" }
+        it do
+          travel_to(reference_date) do
+            visit(admin_license_path)
+
+            expect(page).to have_content "You have 7 days to renew your subscription."
+            expect(page).to have_link 'Renew subscription', href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions"
+          end
+        end
+      end
+
+      context "when license blocks changes" do
+        let_it_be(:license) { build(:license, data: build(:gitlab_license, expires_at: reference_date - 4.weeks, block_changes_at: reference_date - 1.day).export).save!(validate: false) }
+
+        it do
+          travel_to(reference_date) do
+            visit(admin_license_path)
+
+            expect(page).to have_content "You didn't renew your subscription so it was downgraded to the GitLab Core Plan"
+            expect(page).to have_link 'Upgrade your plan', href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions"
+          end
+        end
       end
     end
 
     context "when viewing license history", :aggregate_failures do
+      before do
+        visit(admin_license_path)
+      end
+
       it "shows licensee" do
         license_history = page.find("#license_history")
 

@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe API::GroupMergeRequestApprovalSettings do
-  let_it_be(:group) { create(:group) }
+  let_it_be_with_reload(:group) { create(:group) }
   let_it_be(:user) { create(:user) }
   let_it_be(:setting) { create(:group_merge_request_approval_setting, group: group) }
 
@@ -46,6 +46,19 @@ RSpec.describe API::GroupMergeRequestApprovalSettings do
           get api(url, user)
 
           expect(response).to match_response_schema('public_api/v4/group_merge_request_approval_settings', dir: 'ee')
+        end
+
+        context 'when the group does not have existing settings' do
+          before do
+            group.group_merge_request_approval_setting.delete
+          end
+
+          it 'returns in-memory default settings', :aggregate_failures do
+            get api(url, user)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['allow_author_approval']).to eq(false)
+          end
         end
       end
 

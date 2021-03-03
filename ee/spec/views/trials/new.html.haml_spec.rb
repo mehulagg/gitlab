@@ -10,7 +10,6 @@ RSpec.describe 'trials/new.html.haml' do
   before do
     allow(view).to receive(:current_user) { user }
     allow(view).to receive(:experiment_enabled?).with(:remove_known_trial_form_fields).and_return(remove_known_trial_form_fields_enabled)
-    allow(view).to receive(:experiment_enabled?).with(:trimmed_skip_trial_copy)
 
     render
   end

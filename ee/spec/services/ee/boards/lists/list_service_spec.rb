@@ -90,26 +90,6 @@ RSpec.describe Boards::Lists::ListService do
       end
     end
 
-    shared_examples 'hidden lists' do
-      let!(:list) { create(:list, board: board, label: label) }
-
-      context 'when hide_backlog_list is true' do
-        it 'hides backlog list' do
-          board.update(hide_backlog_list: true)
-
-          expect(execute_service).to match_array([board.closed_list, list])
-        end
-      end
-
-      context 'when hide_closed_list is true' do
-        it 'hides closed list' do
-          board.update(hide_closed_list: true)
-
-          expect(execute_service).to match_array([board.backlog_list, list])
-        end
-      end
-    end
-
     context 'when board parent is a project' do
       let(:user) { create(:user) }
       let(:project) { create(:project) }
@@ -120,7 +100,6 @@ RSpec.describe Boards::Lists::ListService do
       it_behaves_like 'list service for board with assignee lists'
       it_behaves_like 'list service for board with milestone lists'
       it_behaves_like 'list service for board with iteration lists'
-      it_behaves_like 'hidden lists'
     end
 
     context 'when board parent is a group' do
@@ -133,7 +112,6 @@ RSpec.describe Boards::Lists::ListService do
       it_behaves_like 'list service for board with assignee lists'
       it_behaves_like 'list service for board with milestone lists'
       it_behaves_like 'list service for board with iteration lists'
-      it_behaves_like 'hidden lists'
     end
   end
 end

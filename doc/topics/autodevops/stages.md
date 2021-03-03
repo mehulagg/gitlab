@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Stages of Auto DevOps
+# Stages of Auto DevOps **(FREE)**
 
 The following sections describe the stages of [Auto DevOps](index.md).
 Read them carefully to understand how each one works.
@@ -53,7 +53,7 @@ For the requirements of other languages and frameworks, read the
 
 NOTE:
 If Auto Build fails despite the project meeting the buildpack requirements, set
-a project variable `TRACE=true` to enable verbose logging, which may help you
+a project CI/CD variable `TRACE=true` to enable verbose logging, which may help you
 troubleshoot.
 
 ### Auto Build using Cloud Native Buildpacks (beta)
@@ -62,9 +62,9 @@ troubleshoot.
 
 Auto Build supports building your application using [Cloud Native Buildpacks](https://buildpacks.io)
 through the [`pack` command](https://github.com/buildpacks/pack). To use Cloud Native Buildpacks,
-set the CI variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_ENABLED` to a non-empty
+set the CI/CD variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_ENABLED` to a non-empty
 value. The default builder is `heroku/buildpacks:18` but a different builder
-can be selected using the CI variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_BUILDER`.
+can be selected using the CI/CD variable `AUTO_DEVOPS_BUILD_IMAGE_CNB_BUILDER`.
 
 Cloud Native Buildpacks (CNBs) are an evolution of Heroku buildpacks, and
 GitLab expects them to eventually supersede Herokuish-based builds within Auto DevOps. For more
@@ -103,7 +103,9 @@ NOTE:
 Not all buildpacks supported by [Auto Build](#auto-build) are supported by Auto Test.
 Auto Test uses [Herokuish](https://gitlab.com/gitlab-org/gitlab/-/issues/212689), *not*
 Cloud Native Buildpacks, and only buildpacks that implement the
+<!-- vale gitlab.Spelling = NO -->
 [Testpack API](https://devcenter.heroku.com/articles/testpack-api) are supported.
+<!-- vale gitlab.Spelling = YES -->
 
 ### Currently supported languages
 
@@ -135,7 +137,7 @@ might want to use a [custom buildpack](customize.md#custom-buildpacks).
 
 ## Auto Code Quality
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in [GitLab](https://about.gitlab.com/pricing/) 9.3.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in GitLab 13.2.
 
 Auto Code Quality uses the
@@ -284,7 +286,7 @@ see the documentation.
 ### Overriding the DAST target
 
 To use a custom target instead of the auto-deployed review apps,
-set a `DAST_WEBSITE` environment variable to the URL for DAST to scan.
+set a `DAST_WEBSITE` CI/CD variable to the URL for DAST to scan.
 
 WARNING:
 If [DAST Full Scan](../../user/application_security/dast/index.md#full-scan) is
@@ -297,10 +299,10 @@ data loss or corruption.
 
 You can disable DAST:
 
-- On all branches by setting the `DAST_DISABLED` environment variable to `"true"`.
+- On all branches by setting the `DAST_DISABLED` CI/CD variable to `"true"`.
 - Only on the default branch by setting the `DAST_DISABLED_FOR_DEFAULT_BRANCH`
-  environment variable to `"true"`.
-- Only on feature branches by setting `REVIEW_DISABLED` environment variable to
+  variable to `"true"`.
+- Only on feature branches by setting `REVIEW_DISABLED` variable to
   `"true"`. This also disables the Review App.
 
 ## Auto Browser Performance Testing **(PREMIUM)**
@@ -336,7 +338,7 @@ uploads the report as an artifact.
 
 Some initial setup is required. A [k6](https://k6.io/) test needs to be
 written that's tailored to your specific application. The test also needs to be
-configured so it can pick up the environment's dynamic URL via an environment variable.
+configured so it can pick up the environment's dynamic URL via a CI/CD variable.
 
 Any load performance test result differences between the source and target branches are also
 [shown in the merge request widget](../../user/project/merge_requests/load_performance_testing.md).
@@ -356,7 +358,7 @@ default, but the
 [Auto DevOps template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml)
 contains job definitions for these tasks if you want to enable them.
 
-You can use [environment variables](customize.md#environment-variables) to automatically
+You can use [CI/CD variables](customize.md#cicd-variables) to automatically
 scale your pod replicas, and to apply custom arguments to the Auto DevOps `helm upgrade`
 commands. This is an easy way to
 [customize the Auto Deploy Helm chart](customize.md#custom-helm-chart).
@@ -377,6 +379,12 @@ This can cause confusion with Helm not detecting the change and subsequent
 deploys with Auto DevOps can undo your changes. Also, if you change something
 and want to undo it by deploying again, Helm may not detect that anything changed
 in the first place, and thus not realize that it needs to re-apply the old configuration.
+
+WARNING:
+GitLab 14.0 [renews the Auto Deploy template](https://gitlab.com/gitlab-org/gitlab/-/issues/232788).
+This might cause an unexpected failure on your Auto DevOps project due to the breaking changes on
+the v2 `auto-deploy-image`. Follow [the upgrade guide](upgrading_auto_deploy_dependencies.md#upgrade-guide)
+to upgrade your environments before upgrading to GitLab 14.0.
 
 ### GitLab deploy tokens
 
@@ -434,7 +442,7 @@ On GitLab 12.9 and 12.10, opting into
 `AUTO_DEVOPS_POSTGRES_CHANNEL` version `2` deletes the version `1` PostgreSQL
 database. Follow the [guide to upgrading PostgreSQL](upgrading_postgresql.md)
 to back up and restore your database before opting into version `2` (On
-GitLab 13.0, an additional variable is required to trigger the database
+GitLab 13.0, an additional CI/CD variable is required to trigger the database
 deletion).
 
 ### Migrations
@@ -442,7 +450,7 @@ deletion).
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/21955) in GitLab 11.4
 
 You can configure database initialization and migrations for PostgreSQL to run
-within the application pod by setting the project variables `DB_INITIALIZE` and
+within the application pod by setting the project CI/CD variables `DB_INITIALIZE` and
 `DB_MIGRATE` respectively.
 
 If present, `DB_INITIALIZE` is run as a shell command within an application pod
@@ -494,7 +502,7 @@ access to a Redis instance. Auto DevOps doesn't deploy this instance for you, so
 you must:
 
 - Maintain your own Redis instance.
-- Set a CI variable `K8S_SECRET_REDIS_URL`, which is the URL of this instance,
+- Set a CI/CD variable `K8S_SECRET_REDIS_URL`, which is the URL of this instance,
   to ensure it's passed into your deployments.
 
 After configuring your worker to respond to health checks, run a Sidekiq
@@ -521,7 +529,8 @@ workers:
 
 ### Network Policy
 
-> [Introduced](https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/merge_requests/30) in GitLab 12.7.
+- [Introduced](https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/merge_requests/30) in GitLab 12.7.
+- [Deprecated](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/merge_requests/184) in GitLab 13.9.
 
 By default, all Kubernetes pods are
 [non-isolated](https://kubernetes.io/docs/concepts/services-networking/network-policies/#isolated-and-non-isolated-pods),
@@ -567,6 +576,76 @@ networkPolicy:
         - namespaceSelector:
             matchLabels:
               app.gitlab.com/managed_by: gitlab
+```
+
+For more information on installing Network Policies, see
+[Install Cilium using GitLab CI/CD](../../user/clusters/applications.md#install-cilium-using-gitlab-cicd).
+
+### Cilium Network Policy
+
+> [Introduced](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/merge_requests/184) in GitLab 13.9.
+
+By default, all Kubernetes pods are
+[non-isolated](https://kubernetes.io/docs/concepts/services-networking/network-policies/#isolated-and-non-isolated-pods),
+and accept traffic to and from any source. You can use
+[CiliumNetworkPolicy](https://docs.cilium.io/en/v1.8/concepts/kubernetes/policy/#ciliumnetworkpolicy)
+to restrict connections to and from selected pods, namespaces, and the internet.
+
+#### Requirements
+
+As the default network plugin for Kubernetes (`kubenet`)
+[does not implement](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#kubenet)
+support for it, you must have [Cilium](https://docs.cilium.io/en/v1.8/intro/) as your Kubernetes network plugin. 
+
+The [Cilium](https://cilium.io/) network plugin can be
+installed as a [cluster application](../../user/clusters/applications.md#install-cilium-using-gitlab-cicd)
+to enable support for network policies.
+
+#### Configuration
+
+You can enable deployment of a network policy by setting the following
+in the `.gitlab/auto-deploy-values.yaml` file:
+
+```yaml
+ciliumNetworkPolicy:
+  enabled: true
+```
+
+The default policy deployed by the Auto Deploy pipeline allows
+traffic within a local namespace, and from the `gitlab-managed-apps`
+namespace. All other inbound connections are blocked. Outbound
+traffic (for example, to the internet) is not affected by the default policy.
+
+You can also provide a custom [policy specification](https://docs.cilium.io/en/v1.8/policy/language/#simple-ingress-allow)
+in the `.gitlab/auto-deploy-values.yaml` file, for example:
+
+```yaml
+ciliumNetworkPolicy:
+  enabled: true
+  spec:
+    endpointSelector:
+      matchLabels:
+        app.gitlab.com/env: staging
+    ingress:
+      - fromEndpoints:
+        - matchLabels:
+            app.gitlab.com/managed_by: gitlab
+```
+
+#### Enabling Alerts
+
+You can also enable alerts. Network policies with alerts are considered only if
+[GitLab Kubernetes Agent](https://docs.gitlab.com/13.6/ee/user/clusters/agent/)
+has been integrated.
+
+You can enable alerts as follows:
+
+```yaml
+ciliumNetworkPolicy:
+  enabled: true
+  alerts:
+    enabled: true
+
 ```
 
 For more information on installing Network Policies, see
@@ -680,5 +759,5 @@ You can follow the [code intelligence epic](https://gitlab.com/groups/gitlab-org
 for updates.
 
 This stage is enabled by default. You can disable it by adding the
-`CODE_INTELLIGENCE_DISABLED` environment variable. Read more about
+`CODE_INTELLIGENCE_DISABLED` CI/CD variable. Read more about
 [disabling Auto DevOps jobs](../../topics/autodevops/customize.md#disable-jobs).

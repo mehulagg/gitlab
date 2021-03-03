@@ -91,6 +91,10 @@
 
 .board-swimlanes {
   overflow-x: auto;
+
+  .board-add-new-list {
+    height: calc(100% - 1rem);
+  }
 }
 
 $epic-icons-spacing: 40px;

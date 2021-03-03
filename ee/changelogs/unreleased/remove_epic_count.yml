@@ -1,5 +1,0 @@
----
-title: Speed up roadmap show page by removing an extra epic count check
-merge_request: 51610
-author:
-type: performance

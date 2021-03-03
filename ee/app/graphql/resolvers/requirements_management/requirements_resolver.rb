@@ -16,6 +16,10 @@ module Resolvers
                required: false,
                description: 'List of IIDs of requirements, e.g., [1, 2].'
 
+      argument :last_test_report_state, ::Types::RequirementsManagement::RequirementStatusFilterEnum,
+               required: false,
+               description: 'The state of latest requirement test report.'
+
       def resolve_with_lookahead(**args)
         # The project could have been loaded in batch by `BatchLoader`.
         # At this point we need the `id` of the project to query for issues, so

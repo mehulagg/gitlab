@@ -98,7 +98,7 @@ RSpec.describe Ci::Build do
 
     %w(success drop cancel).each do |event|
       it "for event #{event}", :sidekiq_might_not_need_inline do
-        expect(UpdateBuildMinutesService)
+        expect(Ci::Minutes::UpdateBuildMinutesService)
           .to receive(:new).and_call_original
 
         job.public_send(event)
@@ -142,7 +142,7 @@ RSpec.describe Ci::Build do
 
       context 'when there is a plan for the group' do
         it 'GITLAB_FEATURES should include the features for that plan' do
-          is_expected.to include({ key: 'GITLAB_FEATURES', value: anything, public: true, masked: false })
+          expect(subject.to_runner_variables).to include({ key: 'GITLAB_FEATURES', value: anything, public: true, masked: false })
           features_variable = subject.find { |v| v[:key] == 'GITLAB_FEATURES' }
           expect(features_variable[:value]).to include('multiple_ldap_servers')
         end
@@ -467,12 +467,6 @@ RSpec.describe Ci::Build do
       let(:merge_request) { create(:merge_request, :with_merge_request_pipeline) }
 
       it { is_expected.to be true }
-    end
-
-    context 'with pipeline for merge train' do
-      let(:merge_request) { create(:merge_request, :on_train, :with_merge_train_pipeline) }
-
-      it { is_expected.to be false }
     end
   end
 

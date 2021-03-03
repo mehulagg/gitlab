@@ -3,8 +3,8 @@ LABEL maintainer="GitLab Quality Department <quality@gitlab.com>"
 
 ENV DEBIAN_FRONTEND="noninteractive"
 ENV DOCKER_VERSION="17.09.0-ce"
-ENV CHROME_VERSION="84.0.4147.89-1"
-ENV CHROME_DRIVER_VERSION="84.0.4147.30"
+ENV CHROME_VERSION="87.0.4280.141-1"
+ENV CHROME_DRIVER_VERSION="87.0.4280.88"
 ENV CHROME_DEB="google-chrome-stable_${CHROME_VERSION}_amd64.deb"
 ENV CHROME_URL="https://s3.amazonaws.com/gitlab-google-chrome-stable/${CHROME_DEB}"
 
@@ -36,6 +36,14 @@ RUN curl --silent --show-error --fail -O "${CHROME_URL}" && \
 RUN wget -q "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip"
 RUN unzip chromedriver_linux64.zip -d /usr/local/bin
 RUN rm -f chromedriver_linux64.zip
+
+##
+# Install root certificate
+#
+RUN mkdir -p /usr/share/ca-certificates/gitlab
+ADD ./qa/tls_certificates/authority/ca.crt /usr/share/ca-certificates/gitlab/
+RUN echo 'gitlab/ca.crt' >> /etc/ca-certificates.conf
+RUN chmod -R 644 /usr/share/ca-certificates/gitlab && update-ca-certificates
 
 ##
 # Install gcloud and kubectl CLI used in Auto DevOps test to create K8s

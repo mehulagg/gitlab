@@ -5,16 +5,20 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto, reference
 ---
 
-# Deploy Boards **(CORE)**
+# Deploy Boards **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1589) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.0.
-> - [Moved](<https://gitlab.com/gitlab-org/gitlab/-/issues/212320>) to GitLab Core in 13.8.
+> - [Moved](<https://gitlab.com/gitlab-org/gitlab/-/issues/212320>) to GitLab Free in 13.8.
 
 GitLab Deploy Boards offer a consolidated view of the current health and
 status of each CI [environment](../../ci/environments/index.md) running on [Kubernetes](https://kubernetes.io), displaying the status
 of the pods in the deployment. Developers and other teammates can view the
 progress and status of a rollout, pod by pod, in the workflow they already use
 without any need to access Kubernetes.
+
+NOTE:
+If you have a Kubernetes cluster, you can Auto Deploy applications to production
+environments by using [Auto DevOps](../../topics/autodevops/index.md).
 
 ## Overview
 
@@ -86,14 +90,14 @@ To display the Deploy Boards for a specific [environment](../../ci/environments/
    [`kubernetes`](https://docs.gitlab.com/runner/executors/kubernetes.html) executor.
 1. Configure the [Kubernetes integration](clusters/index.md) in your project for the
    cluster. The Kubernetes namespace is of particular note as you need it
-   for your deployment scripts (exposed by the `KUBE_NAMESPACE` environment variable).
+   for your deployment scripts (exposed by the `KUBE_NAMESPACE` deployment variable).
 1. Ensure Kubernetes annotations of `app.gitlab.com/env: $CI_ENVIRONMENT_SLUG`
    and `app.gitlab.com/app: $CI_PROJECT_PATH_SLUG` are applied to the
    deployments, replica sets, and pods, where `$CI_ENVIRONMENT_SLUG` and
-   `$CI_PROJECT_PATH_SLUG` are the values of the CI variables. This is so we can
+   `$CI_PROJECT_PATH_SLUG` are the values of the CI/CD variables. This is so we can
    lookup the proper environment in a cluster/namespace which may have more
    than one. These resources should be contained in the namespace defined in
-   the Kubernetes service setting. You can use an [Autodeploy](../../topics/autodevops/stages.md#auto-deploy) `.gitlab-ci.yml`
+   the Kubernetes service setting. You can use an [Auto deploy](../../topics/autodevops/stages.md#auto-deploy) `.gitlab-ci.yml`
    template which has predefined stages and commands to use, and automatically
    applies the annotations. Each project must have a unique namespace in
    Kubernetes as well. The image below demonstrates how this is shown inside
@@ -158,7 +162,7 @@ version of your application.
 
 ## Further reading
 
-- [GitLab Autodeploy](../../topics/autodevops/stages.md#auto-deploy)
-- [GitLab CI/CD environment variables](../../ci/variables/README.md)
+- [GitLab Auto deploy](../../topics/autodevops/stages.md#auto-deploy)
+- [GitLab CI/CD variables](../../ci/variables/README.md)
 - [Environments and deployments](../../ci/environments/index.md)
 - [Kubernetes deploy example](https://gitlab.com/gitlab-examples/kubernetes-deploy)

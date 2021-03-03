@@ -1,23 +1,53 @@
 import Vue from 'vue';
-import { parseBoolean } from '~/lib/utils/common_utils';
+import ForkForm from './components/fork_form.vue';
 import ForkGroupsList from './components/fork_groups_list.vue';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const mountElement = document.getElementById('fork-groups-mount-element');
+const mountElement = document.getElementById('fork-groups-mount-element');
 
-  const { endpoint, canCreateProject } = mountElement.dataset;
+if (gon.features.forkProjectForm) {
+  const {
+    endpoint,
+    newGroupPath,
+    projectFullPath,
+    visibilityHelpPath,
+    projectId,
+    projectName,
+    projectPath,
+    projectDescription,
+    projectVisibility,
+  } = mountElement.dataset;
 
-  const hasReachedProjectLimit = !parseBoolean(canCreateProject);
+  // eslint-disable-next-line no-new
+  new Vue({
+    el: mountElement,
+    render(h) {
+      return h(ForkForm, {
+        props: {
+          endpoint,
+          newGroupPath,
+          projectFullPath,
+          visibilityHelpPath,
+          projectId,
+          projectName,
+          projectPath,
+          projectDescription,
+          projectVisibility,
+        },
+      });
+    },
+  });
+} else {
+  const { endpoint } = mountElement.dataset;
 
-  return new Vue({
+  // eslint-disable-next-line no-new
+  new Vue({
     el: mountElement,
     render(h) {
       return h(ForkGroupsList, {
         props: {
           endpoint,
-          hasReachedProjectLimit,
         },
       });
     },
   });
-});
+}

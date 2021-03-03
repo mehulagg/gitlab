@@ -1,14 +1,15 @@
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { mapState, mapGetters, mapActions } from 'vuex';
+import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 
 import { __ } from '~/locale';
 
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
-import epicUtils from '../utils/epic_utils';
 import { statusType } from '../constants';
+import epicUtils from '../utils/epic_utils';
 
 export default {
   directives: {
@@ -58,7 +59,7 @@ export default {
      * across the UI so we directly call `requestEpicStatusChangeSuccess` action
      * to update store state.
      */
-    epicUtils.bindDocumentEvent('issuable_vue_app:change', (e, isClosed) => {
+    epicUtils.bindDocumentEvent(EVENT_ISSUABLE_VUE_APP_CHANGE, (e, isClosed) => {
       const isEpicOpen = e.detail ? !e.detail.isClosed : !isClosed;
       this.requestEpicStatusChangeSuccess({
         state: isEpicOpen ? statusType.open : statusType.close,

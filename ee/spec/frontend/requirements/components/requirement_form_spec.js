@@ -1,8 +1,8 @@
-import { nextTick } from 'vue';
 import { GlDrawer, GlFormCheckbox } from '@gitlab/ui';
 import { getByText } from '@testing-library/dom';
 import { shallowMount } from '@vue/test-utils';
 import $ from 'jquery';
+import { nextTick } from 'vue';
 
 import RequirementForm from 'ee/requirements/components/requirement_form.vue';
 import RequirementStatusBadge from 'ee/requirements/components/requirement_status_badge.vue';

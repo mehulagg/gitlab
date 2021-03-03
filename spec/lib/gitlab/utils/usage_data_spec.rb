@@ -58,6 +58,16 @@ RSpec.describe Gitlab::Utils::UsageData do
       expect(described_class.estimate_batch_distinct_count(relation, 'column')).to eq(5)
     end
 
+    it 'yield provided block with PostgresHll::Buckets' do
+      buckets = Gitlab::Database::PostgresHll::Buckets.new
+
+      allow_next_instance_of(Gitlab::Database::PostgresHll::BatchDistinctCounter) do |instance|
+        allow(instance).to receive(:execute).and_return(buckets)
+      end
+
+      expect { |block| described_class.estimate_batch_distinct_count(relation, 'column', &block) }.to yield_with_args(buckets)
+    end
+
     context 'quasi integration test for different counting parameters' do
       # HyperLogLog http://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf algorithm
       # used in estimate_batch_distinct_count produce probabilistic
@@ -173,6 +183,24 @@ RSpec.describe Gitlab::Utils::UsageData do
     end
   end
 
+  describe '#add' do
+    it 'adds given values' do
+      expect(described_class.add(1, 3)).to eq(4)
+    end
+
+    it 'adds given values' do
+      expect(described_class.add).to eq(0)
+    end
+
+    it 'returns the fallback value when adding fails' do
+      expect(described_class.add(nil, 3)).to eq(-1)
+    end
+
+    it 'returns the fallback value one of the arguments is negative' do
+      expect(described_class.add(-1, 1)).to eq(-1)
+    end
+  end
+
   describe '#alt_usage_data' do
     it 'returns the fallback when it gets an error' do
       expect(described_class.alt_usage_data { raise StandardError } ).to eq(-1)
@@ -191,6 +219,12 @@ RSpec.describe Gitlab::Utils::UsageData do
     context 'with block given' do
       it 'returns the fallback when it gets an error' do
         expect(described_class.redis_usage_data { raise ::Redis::CommandError } ).to eq(-1)
+      end
+
+      it 'returns the fallback when Redis HLL raises any error' do
+        stub_const("Gitlab::Utils::UsageData::FALLBACK", 15)
+
+        expect(described_class.redis_usage_data { raise Gitlab::UsageDataCounters::HLLRedisCounter::CategoryMismatch } ).to eq(15)
       end
 
       it 'returns the evaluated block when given' do

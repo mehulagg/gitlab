@@ -27,8 +27,6 @@ module EE
     def get_project_nav_tabs(project, current_user)
       nav_tabs = super
 
-      nav_tabs += get_project_security_nav_tabs(project, current_user)
-
       if can?(current_user, :read_code_review_analytics, project)
         nav_tabs << :code_review
       end
@@ -68,6 +66,11 @@ module EE
       super.merge(
         requirementsAvailable: project.feature_available?(:requirements)
       )
+    end
+
+    override :show_security_and_compliance_toggle?
+    def show_security_and_compliance_toggle?
+      super || show_audit_events?(@project)
     end
 
     override :default_url_to_repo
@@ -117,13 +120,13 @@ module EE
     end
 
     def permanent_delete_message(project)
-      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}immediately%{strongClose}, including its repositories and all content: issues, merge requests, etc.')
+      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}immediately%{strongClose}, including its repositories and all related resources, including issues, merge requests, etc.')
       html_escape(message) % remove_message_data(project)
     end
 
     def marked_for_removal_message(project)
       date = permanent_deletion_date(Time.now.utc)
-      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}on %{date}%{strongClose}, including its repositories and all content: issues, merge requests, etc.')
+      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}on %{date}%{strongClose}, including its repositories and all related resources, including issues, merge requests, etc.')
       html_escape(message) % remove_message_data(project).merge(date: date)
     end
 
@@ -158,10 +161,11 @@ module EE
       @project.feature_available?(:merge_trains)
     end
 
+    override :sidebar_security_paths
     def sidebar_security_paths
-      %w[
-        projects/security/configuration#show
+      super + %w[
         projects/security/sast_configuration#show
+        projects/security/api_fuzzing_configuration#show
         projects/security/vulnerabilities#show
         projects/security/vulnerability_report#index
         projects/security/dashboard#index
@@ -178,6 +182,7 @@ module EE
         projects/threat_monitoring#show
         projects/threat_monitoring#new
         projects/threat_monitoring#edit
+        projects/threat_monitoring#alert_details
         projects/audit_events#index
       ]
     end
@@ -196,10 +201,11 @@ module EE
       ]
     end
 
+    override :sidebar_security_configuration_paths
     def sidebar_security_configuration_paths
-      %w[
-        projects/security/configuration#show
+      super + %w[
         projects/security/sast_configuration#show
+        projects/security/api_fuzzing_configuration#show
         projects/security/dast_profiles#show
         projects/security/dast_site_profiles#new
         projects/security/dast_site_profiles#edit
@@ -233,6 +239,7 @@ module EE
       if project.vulnerabilities.none?
         {
           has_vulnerabilities: 'false',
+          has_jira_vulnerabilities_integration_enabled: project.configured_to_create_issues_from_vulnerabilities?.to_s,
           empty_state_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
           no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
@@ -241,6 +248,7 @@ module EE
       else
         {
           has_vulnerabilities: 'true',
+          has_jira_vulnerabilities_integration_enabled: project.configured_to_create_issues_from_vulnerabilities?.to_s,
           project: { id: project.id, name: project.name },
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: api_v4_security_projects_vulnerability_exports_path(id: project.id),
@@ -251,7 +259,8 @@ module EE
           no_pipeline_run_scanners_help_path: new_project_pipeline_path(project),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
           auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
-          auto_fix_mrs_path: project_merge_requests_path(@project, label_name: 'GitLab-auto-fix')
+          auto_fix_mrs_path: project_merge_requests_path(@project, label_name: 'GitLab-auto-fix'),
+          scanners: VulnerabilityScanners::ListService.new(project).execute.to_json
         }.merge!(security_dashboard_pipeline_data(project))
       end
     end
@@ -319,12 +328,20 @@ module EE
 
     private
 
+    override :can_read_security_configuration?
+    def can_read_security_configuration?(project, current_user)
+      super || (project.feature_available?(:security_dashboard) &&
+        can?(current_user, :read_project_security_dashboard, project))
+    end
+
+    override :get_project_security_nav_tabs
     def get_project_security_nav_tabs(project, current_user)
-      nav_tabs = []
+      return [] unless can?(current_user, :access_security_and_compliance, project)
+
+      nav_tabs = super.union([:security_and_compliance])
 
       if can?(current_user, :read_project_security_dashboard, project)
         nav_tabs << :security
-        nav_tabs << :security_configuration
       end
 
       if can?(current_user, :read_on_demand_scans, @project)

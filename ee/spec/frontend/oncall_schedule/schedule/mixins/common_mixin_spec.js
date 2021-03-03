@@ -1,14 +1,19 @@
 import { shallowMount } from '@vue/test-utils';
+import { DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 import { useFakeDate } from 'helpers/fake_date';
-import { DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
+import * as dateTimeUtility from '~/lib/utils/datetime_utility';
 
 describe('Schedule Common Mixins', () => {
   // January 3rd, 2018
   useFakeDate(2018, 0, 3);
-  const today = new Date();
 
+  let today;
   let wrapper;
+
+  beforeEach(() => {
+    today = new Date();
+  });
 
   const component = {
     template: `<span></span>`,
@@ -37,6 +42,24 @@ describe('Schedule Common Mixins', () => {
       expect(wrapper.vm.$options.currentDate).toEqual(today);
     });
   });
+
+  describe('isToday', () => {
+    it('returns true when date is today', () => {
+      const result = true;
+      jest.spyOn(dateTimeUtility, 'isToday').mockReturnValue(result);
+      mountComponent();
+
+      expect(wrapper.vm.isToday).toBe(result);
+    });
+    it('returns false when date is NOT today', () => {
+      const result = false;
+      jest.spyOn(dateTimeUtility, 'isToday').mockReturnValue(result);
+      mountComponent();
+
+      expect(wrapper.vm.isToday).toBe(result);
+    });
+  });
+
   describe('hasToday', () => {
     it('returns true when today (January 3rd, 2018) is within the set week (January 1st, 2018)', () => {
       // January 1st, 2018

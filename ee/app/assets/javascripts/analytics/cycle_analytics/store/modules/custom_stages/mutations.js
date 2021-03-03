@@ -1,6 +1,6 @@
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import * as types from './mutation_types';
 import { transformRawStages } from '../../../utils';
+import * as types from './mutation_types';
 
 const extractFormFields = (rawStage = {}) => {
   const [
@@ -66,6 +66,8 @@ export default {
   },
   [types.RECEIVE_CREATE_STAGE_ERROR](state) {
     state.isSavingCustomStage = false;
+    state.isCreatingCustomStage = false;
+    state.isEditingCustomStage = false;
   },
   [types.RECEIVE_CREATE_STAGE_SUCCESS](state) {
     state.formErrors = null;

@@ -1,5 +1,5 @@
-import { mount, shallowMount } from '@vue/test-utils';
 import { GlModal } from '@gitlab/ui';
+import { mount, shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import IssueNote from 'ee/vue_shared/security_reports/components/issue_note.vue';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
@@ -26,6 +26,13 @@ describe('Security Reports modal', () => {
     });
     modal = wrapper.find(GlModal);
   };
+
+  describe('modal', () => {
+    it('renders a large modal', () => {
+      mountComponent({ modal: createState().modal }, mount);
+      expect(modal.props('size')).toBe('lg');
+    });
+  });
 
   describe('with permissions', () => {
     describe('with dismissed issue', () => {
@@ -108,6 +115,8 @@ describe('Security Reports modal', () => {
       });
 
       describe('with merge request created', () => {
+        const findActionButton = () => wrapper.find('[data-testid=create-issue-button]');
+
         it('renders the issue button as a single button', (done) => {
           const propsData = {
             modal: createState().modal,
@@ -122,11 +131,9 @@ describe('Security Reports modal', () => {
           Vue.nextTick()
             .then(() => {
               expect(wrapper.find('.js-split-button').exists()).toBe(false);
-              expect(wrapper.find('.js-action-button').exists()).toBe(true);
-              expect(wrapper.find('.js-action-button').text()).not.toContain(
-                'Resolve with merge request',
-              );
-              expect(wrapper.find('.js-action-button').text()).toContain('Create issue');
+              expect(findActionButton().exists()).toBe(true);
+              expect(findActionButton().text()).not.toContain('Resolve with merge request');
+              expect(findActionButton().text()).toContain('Create issue');
               done();
             })
             .catch(done.fail);

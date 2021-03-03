@@ -1,16 +1,16 @@
 import Api from 'ee/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import toast from '~/vue_shared/plugins/global_toast';
-import { __, sprintf } from '~/locale';
 import {
   parseIntPagination,
   normalizeHeaders,
   convertObjectPropsToCamelCase,
 } from '~/lib/utils/common_utils';
+import { __, sprintf } from '~/locale';
+import toast from '~/vue_shared/plugins/global_toast';
+import { FILTER_STATES, PREV, NEXT, DEFAULT_PAGE_SIZE } from '../constants';
 import buildReplicableTypeQuery from '../graphql/replicable_type_query_builder';
 import { gqClient } from '../utils';
 import * as types from './mutation_types';
-import { FILTER_STATES, PREV, NEXT, DEFAULT_PAGE_SIZE } from '../constants';
 
 // Fetch Replicable Items
 export const requestReplicableItems = ({ commit }) => commit(types.REQUEST_REPLICABLE_ITEMS);

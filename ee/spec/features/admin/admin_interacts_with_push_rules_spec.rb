@@ -15,7 +15,7 @@ RSpec.describe "Admin interacts with push rules" do
 
   push_rules_with_titles = {
     reject_unsigned_commits: "Reject unsigned commits",
-    commit_committer_check: "Committer restriction"
+    commit_committer_check: "Reject unverified users"
   }
 
   push_rules_with_titles.each do |rule_attr, title|
@@ -46,7 +46,7 @@ RSpec.describe "Admin interacts with push rules" do
     end
 
     it "creates new rule" do
-      fill_in("Commit message", with: "my_string")
+      fill_in("Require expression in commit messages", with: "my_string")
       click_button("Save Push Rules")
 
       expect(page).to have_selector("input[value='my_string']")

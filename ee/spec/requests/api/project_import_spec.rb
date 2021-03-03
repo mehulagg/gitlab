@@ -6,14 +6,13 @@ RSpec.describe API::ProjectImport do
   include ExternalAuthorizationServiceHelpers
   include WorkhorseHelpers
 
+  include_context 'workhorse headers'
+
   let(:user) { create(:user) }
   let(:namespace) { create(:group) }
 
   let(:file) { File.join('spec', 'features', 'projects', 'import_export', 'test_project_export.tar.gz') }
   let(:file_name) { 'project_export.tar.gz' }
-
-  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-  let(:workhorse_headers) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
 
   let(:file_upload) { fixture_file_upload(file) }
 

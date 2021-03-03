@@ -1,8 +1,8 @@
+import { GlTokenSelector } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
-import { GlTokenSelector } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
 import { stubComponent } from 'helpers/stub_component';
+import waitForPromises from 'helpers/wait_for_promises';
 import * as UserApi from '~/api/user_api';
 import MembersTokenSelect from '~/invite_members/components/members_token_select.vue';
 
@@ -37,7 +37,7 @@ describe('MembersTokenSelect', () => {
     wrapper = null;
   });
 
-  const findTokenSelector = () => wrapper.find(GlTokenSelector);
+  const findTokenSelector = () => wrapper.findComponent(GlTokenSelector);
 
   describe('rendering the token-selector component', () => {
     it('renders with the correct props', () => {

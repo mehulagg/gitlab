@@ -1,13 +1,11 @@
 /* eslint-disable import/export */
 import { invert } from 'lodash';
-import { reportTypeToSecurityReportTypeEnum as reportTypeToSecurityReportTypeEnumCE } from '~/vue_shared/security_reports/constants';
+import {
+  reportTypeToSecurityReportTypeEnum as reportTypeToSecurityReportTypeEnumCE,
+  REPORT_TYPE_API_FUZZING,
+} from '~/vue_shared/security_reports/constants';
 
 export * from '~/vue_shared/security_reports/constants';
-
-/**
- * Security scan report types, as provided by the backend.
- */
-export const REPORT_TYPE_API_FUZZING = 'api_fuzzing';
 
 /**
  * SecurityReportTypeEnum values for use with GraphQL.

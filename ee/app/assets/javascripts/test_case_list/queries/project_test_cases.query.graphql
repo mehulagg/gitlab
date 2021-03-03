@@ -17,6 +17,16 @@ query projectIssues(
 ) {
   project(fullPath: $projectPath) {
     name
+    issueStatusCounts(
+      types: $types
+      authorUsername: $authorUsername
+      labelName: $labelName
+      search: $search
+    ) {
+      opened
+      closed
+      all
+    }
     issues(
       types: $types
       state: $state

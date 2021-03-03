@@ -37,6 +37,10 @@ module EE
         @subject.feature_available?(:group_activity_analytics)
       end
 
+      condition(:dora4_analytics_available) do
+        @subject.feature_available?(:dora4_analytics)
+      end
+
       condition(:can_owners_manage_ldap, scope: :global) do
         ::Gitlab::CurrentSettings.allow_group_owners_to_manage_ldap?
       end
@@ -117,6 +121,18 @@ module EE
 
       condition(:over_storage_limit, scope: :subject) { @subject.over_storage_limit? }
 
+      condition(:eligible_for_trial, scope: :subject) { @subject.eligible_for_trial? }
+
+      condition(:compliance_framework_available) do
+        @subject.feature_available?(:custom_compliance_frameworks) &&
+          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject)
+      end
+
+      condition(:group_level_compliance_pipeline_available) do
+        @subject.feature_available?(:evaluate_group_level_compliance_pipeline) &&
+          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject, default_enabled: :yaml)
+      end
+
       rule { public_group | logged_in_viewable }.policy do
         enable :read_wiki
         enable :download_wiki_code
@@ -128,7 +144,7 @@ module EE
       end
 
       rule { reporter }.policy do
-        enable :admin_list
+        enable :admin_issue_board_list
         enable :view_productivity_analytics
         enable :view_type_of_work_charts
         enable :read_group_timelogs
@@ -158,6 +174,9 @@ module EE
       rule { has_access & group_activity_analytics_available }
         .enable :read_group_activity_analytics
 
+      rule { reporter & dora4_analytics_available }
+        .enable :read_dora4_analytics
+
       rule { reporter & group_repository_analytics_available }
         .enable :read_group_repository_analytics
 
@@ -179,7 +198,7 @@ module EE
       rule { can?(:read_group) & epics_available }.policy do
         enable :read_epic
         enable :read_epic_board
-        enable :read_epic_list
+        enable :read_epic_board_list
       end
 
       rule { can?(:read_group) & iterations_available }.enable :read_iteration
@@ -195,6 +214,8 @@ module EE
         enable :update_epic
         enable :read_confidential_epic
         enable :destroy_epic_link
+        enable :admin_epic_board
+        enable :admin_epic_board_list
       end
 
       rule { reporter & subepics_available }.policy do
@@ -211,6 +232,7 @@ module EE
         prevent :admin_epic
         prevent :update_epic
         prevent :destroy_epic
+        prevent :admin_epic_board_list
       end
 
       rule { auditor }.policy do
@@ -266,7 +288,7 @@ module EE
         prevent :read_group
       end
 
-      rule { ip_enforcement_prevents_access & ~owner }.policy do
+      rule { ip_enforcement_prevents_access & ~owner & ~auditor }.policy do
         prevent :read_group
       end
 
@@ -310,6 +332,8 @@ module EE
 
       rule { admin & is_gitlab_com }.enable :update_subscription_limit
 
+      rule { maintainer & eligible_for_trial }.enable :start_trial
+
       rule { over_storage_limit }.policy do
         prevent :create_projects
         prevent :create_epic
@@ -317,7 +341,7 @@ module EE
         prevent :admin_milestone
         prevent :upload_file
         prevent :admin_label
-        prevent :admin_list
+        prevent :admin_issue_board_list
         prevent :admin_issue
         prevent :admin_pipeline
         prevent :add_cluster
@@ -328,6 +352,9 @@ module EE
         prevent :create_deploy_token
         prevent :create_subgroup
       end
+
+      rule { can?(:owner_access) & compliance_framework_available }.enable :admin_compliance_framework
+      rule { can?(:owner_access) & group_level_compliance_pipeline_available }.enable :admin_compliance_pipeline_configuration
     end
 
     override :lookup_access_level!

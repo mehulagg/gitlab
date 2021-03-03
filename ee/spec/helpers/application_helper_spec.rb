@@ -22,7 +22,7 @@ RSpec.describe ApplicationHelper do
       context 'maintenance mode' do
         context 'enabled' do
           before do
-            stub_application_setting(maintenance_mode: true)
+            stub_maintenance_mode_setting(true)
           end
 
           it 'returns default message' do
@@ -48,7 +48,7 @@ RSpec.describe ApplicationHelper do
 
         context 'disabled' do
           it 'returns nil' do
-            stub_application_setting(maintenance_mode: false)
+            stub_maintenance_mode_setting(false)
 
             expect(helper.read_only_message).to be_nil
           end
@@ -60,7 +60,7 @@ RSpec.describe ApplicationHelper do
       context 'maintenance mode on' do
         it 'returns messages for both' do
           expect(Gitlab::Geo).to receive(:secondary?).twice { true }
-          stub_application_setting(maintenance_mode: true)
+          stub_maintenance_mode_setting(true)
 
           expect(helper.read_only_message).to match(/you must visit the primary site/)
           expect(helper.read_only_message).to match(/#{default_maintenance_mode_message}/)

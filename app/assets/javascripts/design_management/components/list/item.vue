@@ -1,7 +1,7 @@
 <script>
 import { GlLoadingIcon, GlIcon, GlIntersectionObserver, GlTooltipDirective } from '@gitlab/ui';
-import Timeago from '~/vue_shared/components/time_ago_tooltip.vue';
 import { n__, __ } from '~/locale';
+import Timeago from '~/vue_shared/components/time_ago_tooltip.vue';
 import { DESIGN_ROUTE_NAME } from '../../router/constants';
 
 export default {
@@ -133,7 +133,7 @@ export default {
     <div
       class="card-body gl-p-0 gl-display-flex gl-align-items-center gl-justify-content-center gl-overflow-hidden gl-relative"
     >
-      <div v-if="icon.name" data-testid="design-event" class="design-event gl-absolute">
+      <div v-if="icon.name" data-testid="design-event" class="gl-top-5 gl-right-5 gl-absolute">
         <span :title="icon.tooltip" :aria-label="icon.tooltip">
           <gl-icon
             :name="icon.name"

@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { within } from '@testing-library/dom';
+import { shallowMount } from '@vue/test-utils';
 import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/instance_dashboard_not_configured.vue';
 import FirstClassInstanceDashboard from 'ee/security_dashboard/components/first_class_instance_security_dashboard.vue';

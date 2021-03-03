@@ -64,4 +64,10 @@ RSpec.describe 'EE-specific project routing' do
       expect(get("/gitlab/gitlabhq/-/integrations/jira/issues")).to route_to('projects/integrations/jira/issues#index', namespace_id: 'gitlab', project_id: 'gitlabhq')
     end
   end
+
+  describe Projects::Security::PoliciesController, 'routing' do
+    it 'to #show' do
+      expect(get('/gitlab/gitlabhq/-/security/policy')).to route_to('projects/security/policies#show', namespace_id: 'gitlab', project_id: 'gitlabhq')
+    end
+  end
 end

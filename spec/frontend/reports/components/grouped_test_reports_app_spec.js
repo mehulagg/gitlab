@@ -5,11 +5,11 @@ import GroupedTestReportsApp from '~/reports/components/grouped_test_reports_app
 import { getStoreConfig } from '~/reports/store';
 
 import { failedReport } from '../mock_data/mock_data';
-import successTestReports from '../mock_data/no_failures_report.json';
-import newFailedTestReports from '../mock_data/new_failures_report.json';
-import recentFailuresTestReports from '../mock_data/recent_failures_report.json';
-import newErrorsTestReports from '../mock_data/new_errors_report.json';
 import mixedResultsTestReports from '../mock_data/new_and_fixed_failures_report.json';
+import newErrorsTestReports from '../mock_data/new_errors_report.json';
+import newFailedTestReports from '../mock_data/new_failures_report.json';
+import successTestReports from '../mock_data/no_failures_report.json';
+import recentFailuresTestReports from '../mock_data/recent_failures_report.json';
 import resolvedFailures from '../mock_data/resolved_failures.json';
 
 const localVue = createLocalVue();
@@ -18,12 +18,11 @@ localVue.use(Vuex);
 describe('Grouped test reports app', () => {
   const endpoint = 'endpoint.json';
   const pipelinePath = '/path/to/pipeline';
-  const Component = localVue.extend(GroupedTestReportsApp);
   let wrapper;
   let mockStore;
 
   const mountComponent = ({ props = { pipelinePath } } = {}) => {
-    wrapper = mount(Component, {
+    wrapper = mount(GroupedTestReportsApp, {
       store: mockStore,
       localVue,
       propsData: {
@@ -43,7 +42,7 @@ describe('Grouped test reports app', () => {
   const findHeader = () => wrapper.find('[data-testid="report-section-code-text"]');
   const findExpandButton = () => wrapper.find('[data-testid="report-section-expand-button"]');
   const findFullTestReportLink = () => wrapper.find('[data-testid="group-test-reports-full-link"]');
-  const findSummaryDescription = () => wrapper.find('[data-testid="test-summary-row-description"]');
+  const findSummaryDescription = () => wrapper.find('[data-testid="summary-row-description"]');
   const findIssueDescription = () => wrapper.find('[data-testid="test-issue-body-description"]');
   const findAllIssueDescriptions = () =>
     wrapper.findAll('[data-testid="test-issue-body-description"]');

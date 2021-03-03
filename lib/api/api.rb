@@ -30,7 +30,7 @@ module API
                   ]
 
     allow_access_with_scope :api
-    allow_access_with_scope :read_api, if: -> (request) { request.get? }
+    allow_access_with_scope :read_api, if: -> (request) { request.get? || request.head? }
     prefix :api
 
     version 'v3', using: :path do
@@ -66,6 +66,10 @@ module API
 
     before do
       set_peek_enabled_for_current_request
+    end
+
+    after do
+      Gitlab::UsageDataCounters::VSCodeExtensionActivityUniqueCounter.track_api_request_when_trackable(user_agent: request&.user_agent, user: @current_user)
     end
 
     # The locale is set to the current user's locale when `current_user` is loaded
@@ -143,7 +147,7 @@ module API
 
       # Only overwrite `text/plain+deprecated`
       if content_types[api_format] == 'text/plain+deprecated'
-        if Feature.enabled?(:api_always_use_application_json)
+        if Feature.enabled?(:api_always_use_application_json, default_enabled: :yaml)
           content_type 'application/json'
         else
           content_type 'text/plain'
@@ -165,6 +169,7 @@ module API
       mount ::API::AccessRequests
       mount ::API::Admin::Ci::Variables
       mount ::API::Admin::InstanceClusters
+      mount ::API::Admin::PlanLimits
       mount ::API::Admin::Sidekiq
       mount ::API::Appearance
       mount ::API::Applications
@@ -268,6 +273,8 @@ module API
       mount ::API::Release::Links
       mount ::API::RemoteMirrors
       mount ::API::Repositories
+      mount ::API::ResourceAccessTokens
+      mount ::API::RubygemPackages
       mount ::API::Search
       mount ::API::Services
       mount ::API::Settings
@@ -313,4 +320,4 @@ module API
   end
 end
 
-API::API.prepend_if_ee('::EE::API::API')
+API::API.prepend_ee_mod

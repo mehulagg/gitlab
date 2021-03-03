@@ -312,14 +312,14 @@ configuration.
 
 The different supported drivers are:
 
-| Driver     | Description                         |
-|------------|-------------------------------------|
-| filesystem | Uses a path on the local filesystem |
-| Azure      | Microsoft Azure Blob Storage        |
-| gcs        | Google Cloud Storage                |
-| s3         | Amazon Simple Storage Service. Be sure to configure your storage bucket with the correct [S3 Permission Scopes](https://docs.docker.com/registry/storage-drivers/s3/#s3-permission-scopes). |
-| swift      | OpenStack Swift Object Storage      |
-| oss        | Aliyun OSS                          |
+| Driver       | Description                          |
+|--------------|--------------------------------------|
+| `filesystem` | Uses a path on the local file system |
+| `Azure`      | Microsoft Azure Blob Storage         |
+| `gcs`        | Google Cloud Storage                 |
+| `s3`         | Amazon Simple Storage Service. Be sure to configure your storage bucket with the correct [S3 Permission Scopes](https://docs.docker.com/registry/storage-drivers/s3/#s3-permission-scopes). |
+| `swift`      | OpenStack Swift Object Storage       |
+| `oss`        | Aliyun OSS                           |
 
 Although most S3 compatible services (like [MinIO](https://min.io/)) should work with the Container Registry, we only guarantee support for AWS S3. Because we cannot assert the correctness of third-party S3 implementations, we can debug issues, but we cannot patch the registry unless an issue is reproducible against an AWS S3 bucket.
 
@@ -1144,7 +1144,7 @@ project or branch name. Special characters can include:
 - Trailing hyphen/dash
 - Double hyphen/dash
 
-To get around this, you can [change the group path](../../user/group/index.md#changing-a-groups-path),
+To get around this, you can [change the group path](../../user/group/index.md#change-a-groups-path),
 [change the project path](../../user/project/settings/index.md#renaming-a-repository) or change the
 branch name. Another option is to create a [push rule](../../push_rules/push_rules.md) to prevent
 this at the instance level.

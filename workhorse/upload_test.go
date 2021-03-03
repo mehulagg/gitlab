@@ -234,7 +234,7 @@ func TestLfsUpload(t *testing.T) {
 	reqBody := "test data"
 	rspBody := "test success"
 	oid := "916f0027a575074ce72a331777c3478d6513f786a591bd892da1a577bf2335f9"
-	resource := fmt.Sprintf("/gitlab-org/gitlab-test.git/gitlab-lfs/objects/%s/%d", oid, len(reqBody))
+	resource := fmt.Sprintf("/%s/gitlab-lfs/objects/%s/%d", testRepo, oid, len(reqBody))
 
 	lfsApiResponse := fmt.Sprintf(
 		`{"TempPath":%q, "LfsOid":%q, "LfsSize": %d}`,
@@ -360,9 +360,9 @@ func TestLfsUploadRouting(t *testing.T) {
 	}
 }
 
-func packageUploadTestServer(t *testing.T, resource string, reqBody string, rspBody string) *httptest.Server {
+func packageUploadTestServer(t *testing.T, method string, resource string, reqBody string, rspBody string) *httptest.Server {
 	return testhelper.TestServerWithHandler(regexp.MustCompile(`.`), func(w http.ResponseWriter, r *http.Request) {
-		require.Equal(t, r.Method, "PUT")
+		require.Equal(t, r.Method, method)
 		apiResponse := fmt.Sprintf(
 			`{"TempPath":%q, "Size": %d}`, scratchDir, len(reqBody),
 		)
@@ -398,17 +398,17 @@ func packageUploadTestServer(t *testing.T, resource string, reqBody string, rspB
 	})
 }
 
-func testPackageFileUpload(t *testing.T, resource string) {
+func testPackageFileUpload(t *testing.T, method string, resource string) {
 	reqBody := "test data"
 	rspBody := "test success"
 
-	ts := packageUploadTestServer(t, resource, reqBody, rspBody)
+	ts := packageUploadTestServer(t, method, resource, reqBody, rspBody)
 	defer ts.Close()
 
 	ws := startWorkhorseServer(ts.URL)
 	defer ws.Close()
 
-	req, err := http.NewRequest("PUT", ws.URL+resource, strings.NewReader(reqBody))
+	req, err := http.NewRequest(method, ws.URL+resource, strings.NewReader(reqBody))
 	require.NoError(t, err)
 
 	resp, err := http.DefaultClient.Do(req)
@@ -423,15 +423,19 @@ func testPackageFileUpload(t *testing.T, resource string) {
 }
 
 func TestPackageFilesUpload(t *testing.T) {
-	routes := []string{
-		"/api/v4/packages/conan/v1/files",
-		"/api/v4/projects/2412/packages/conan/v1/files",
-		"/api/v4/projects/2412/packages/maven/v1/files",
-		"/api/v4/projects/2412/packages/generic/mypackage/0.0.1/myfile.tar.gz",
-		"/api/v4/projects/2412/-/packages/debian/incoming/libsample0_1.2.3~alpha2-1_amd64.deb",
+	routes := []struct {
+		method   string
+		resource string
+	}{
+		{"PUT", "/api/v4/packages/conan/v1/files"},
+		{"PUT", "/api/v4/projects/2412/packages/conan/v1/files"},
+		{"PUT", "/api/v4/projects/2412/packages/maven/v1/files"},
+		{"PUT", "/api/v4/projects/2412/packages/generic/mypackage/0.0.1/myfile.tar.gz"},
+		{"PUT", "/api/v4/projects/2412/packages/debian/libsample0_1.2.3~alpha2-1_amd64.deb"},
+		{"POST", "/api/v4/projects/2412/packages/rubygems/api/v1/gems/sample.gem"},
 	}
 
 	for _, r := range routes {
-		testPackageFileUpload(t, r)
+		testPackageFileUpload(t, r.method, r.resource)
 	}
 }

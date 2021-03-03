@@ -1,19 +1,12 @@
 <script>
-import {
-  GlButton,
-  GlDeprecatedDropdownItem,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownDivider,
-} from '@gitlab/ui';
-import { s__ } from '~/locale';
-import { healthStatusTextMap } from '../../constants';
+import { GlDropdownItem, GlDropdown, GlDropdownDivider } from '@gitlab/ui';
+import { healthStatusTextMap, I18N_DROPDOWN } from '../../constants';
 
 export default {
   components: {
-    GlButton,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
-    GlDeprecatedDropdownDivider,
+    GlDropdown,
+    GlDropdownItem,
+    GlDropdownDivider,
   },
   props: {
     isEditable: {
@@ -44,23 +37,16 @@ export default {
   },
   computed: {
     statusText() {
-      return this.status ? healthStatusTextMap[this.status] : s__('Sidebar|None');
+      return this.status ? healthStatusTextMap[this.status] : this.$options.i18n.noneText;
     },
     dropdownText() {
       if (this.status === null) {
-        return s__('No status');
+        return this.$options.i18n.noStatusText;
       }
 
-      return this.status ? healthStatusTextMap[this.status] : s__('Select health status');
-    },
-    tooltipText() {
-      let tooltipText = s__('Sidebar|Health status');
-
-      if (this.status) {
-        tooltipText += `: ${this.statusText}`;
-      }
-
-      return tooltipText;
+      return this.status
+        ? healthStatusTextMap[this.status]
+        : this.$options.i18n.selectPlaceholderText;
     },
   },
   watch: {
@@ -81,56 +67,40 @@ export default {
       return this.status === status;
     },
   },
+  i18n: I18N_DROPDOWN,
 };
 </script>
 
 <template>
-  <div class="dropdown dropdown-menu-selectable">
-    <gl-deprecated-dropdown
+  <div class="dropdown">
+    <gl-dropdown
       ref="dropdown"
-      class="w-100"
+      class="gl-w-full"
+      :header-text="$options.i18n.dropdownHeaderText"
       :text="dropdownText"
       @keydown.esc.native="hideDropdown"
       @hide="hideDropdown"
     >
-      <div class="dropdown-title gl-display-flex">
-        <span class="health-title gl-ml-auto">{{ s__('Sidebar|Assign health status') }}</span>
-        <gl-button
-          :aria-label="__('Close')"
-          variant="link"
-          class="dropdown-title-button dropdown-menu-close gl-ml-auto gl-text-gray-200!"
-          icon="close"
-          @click="hideDropdown"
-        />
-      </div>
+      <gl-dropdown-item
+        :is-check-item="true"
+        :is-checked="isSelected(null)"
+        @click="handleDropdownClick(null)"
+      >
+        {{ $options.i18n.noStatusText }}
+      </gl-dropdown-item>
 
-      <div class="dropdown-content dropdown-body">
-        <gl-deprecated-dropdown-item @click="handleDropdownClick(null)">
-          <gl-button
-            variant="link"
-            class="dropdown-item health-dropdown-item"
-            :class="{ 'is-active': isSelected(null) }"
-          >
-            {{ s__('Sidebar|No status') }}
-          </gl-button>
-        </gl-deprecated-dropdown-item>
+      <gl-dropdown-divider />
 
-        <gl-deprecated-dropdown-divider class="divider health-divider" />
-
-        <gl-deprecated-dropdown-item
-          v-for="option in statusOptions"
-          :key="option.key"
-          @click="handleDropdownClick(option.key)"
-        >
-          <gl-button
-            variant="link"
-            class="dropdown-item health-dropdown-item"
-            :class="{ 'is-active': isSelected(option.key) }"
-          >
-            {{ option.value }}
-          </gl-button>
-        </gl-deprecated-dropdown-item>
-      </div>
-    </gl-deprecated-dropdown>
+      <gl-dropdown-item
+        v-for="option in statusOptions"
+        :key="option.key"
+        :is-check-item="true"
+        :is-checked="isSelected(option.key)"
+        data-testid="health-status-dropdown-item"
+        @click="handleDropdownClick(option.key)"
+      >
+        {{ option.value }}
+      </gl-dropdown-item>
+    </gl-dropdown>
   </div>
 </template>

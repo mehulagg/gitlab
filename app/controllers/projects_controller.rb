@@ -14,7 +14,7 @@ class ProjectsController < Projects::ApplicationController
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show]
 
-  before_action :whitelist_query_limiting, only: [:create]
+  before_action :whitelist_query_limiting, only: [:show, :create]
   before_action :authenticate_user!, except: [:index, :show, :activity, :refs, :resolve, :unfoldered_environment_names]
   before_action :redirect_git_extension, only: [:show]
   before_action :project, except: [:index, :new, :create, :resolve]
@@ -32,7 +32,6 @@ class ProjectsController < Projects::ApplicationController
   before_action :export_rate_limit, only: [:export, :download_export, :generate_new_export]
 
   before_action only: [:edit] do
-    push_frontend_feature_flag(:approval_suggestions, @project, default_enabled: true)
     push_frontend_feature_flag(:allow_editing_commit_messages, @project)
   end
 
@@ -71,6 +70,11 @@ class ProjectsController < Projects::ApplicationController
     @project = ::Projects::CreateService.new(current_user, project_params(attributes: project_params_create_attributes)).execute
 
     if @project.saved?
+      experiment(:new_project_readme, actor: current_user).track(
+        :created,
+        property: active_new_project_tab,
+        value: project_params[:initialize_with_readme].to_i
+      )
       redirect_to(
         project_path(@project, custom_import_params),
         notice: _("Project '%{project_name}' was successfully created.") % { project_name: @project.name }
@@ -325,6 +329,11 @@ class ProjectsController < Projects::ApplicationController
     if can?(current_user, :download_code, @project)
       return render 'projects/no_repo' unless @project.repository_exists?
 
+      if @project.can_current_user_push_to_default_branch?
+        property = @project.empty_repo? ? 'empty' : 'nonempty'
+        experiment(:empty_repo_upload, project: @project).track(:view_project_show, property: property)
+      end
+
       if @project.empty_repo?
         record_experiment_user(:invite_members_empty_project_version_a)
 
@@ -389,6 +398,15 @@ class ProjectsController < Projects::ApplicationController
       metrics_dashboard_access_level
       analytics_access_level
       operations_access_level
+      security_and_compliance_access_level
+    ]
+  end
+
+  def project_setting_attributes
+    %i[
+      show_default_award_emojis
+      squash_option
+      allow_editing_commit_messages
     ]
   end
 
@@ -429,11 +447,7 @@ class ProjectsController < Projects::ApplicationController
       :suggestion_commit_message,
       :packages_enabled,
       :service_desk_enabled,
-      project_setting_attributes: %i[
-        show_default_award_emojis
-        squash_option
-        allow_editing_commit_messages
-      ]
+      project_setting_attributes: project_setting_attributes
     ] + [project_feature_attributes: project_feature_attributes]
   end
 
@@ -493,17 +507,19 @@ class ProjectsController < Projects::ApplicationController
     render_404 unless Gitlab::CurrentSettings.project_export_enabled?
   end
 
+  # Redirect from localhost/group/project.git to localhost/group/project
   def redirect_git_extension
-    # Redirect from
-    #   localhost/group/project.git
-    # to
-    #   localhost/group/project
-    #
-    redirect_to request.original_url.sub(%r{\.git/?\Z}, '') if params[:format] == 'git'
+    return unless params[:format] == 'git'
+
+    # `project` calls `find_routable!`, so this will trigger the usual not-found
+    # behaviour when the user isn't authorized to see the project
+    return unless project
+
+    redirect_to(request.original_url.sub(%r{\.git/?\Z}, ''))
   end
 
   def whitelist_query_limiting
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42440')
+    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/20826')
   end
 
   def present_project

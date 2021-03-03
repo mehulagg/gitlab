@@ -3,10 +3,10 @@ import { within } from '@testing-library/dom';
 import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import Vuex from 'vuex';
+import LdapOverrideConfirmationModal from 'ee/members/components/ldap/ldap_override_confirmation_modal.vue';
+import { LDAP_OVERRIDE_CONFIRMATION_MODAL_ID } from 'ee/members/constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import { member } from 'jest/members/mock_data';
-import { LDAP_OVERRIDE_CONFIRMATION_MODAL_ID } from 'ee/members/constants';
-import LdapOverrideConfirmationModal from 'ee/members/components/ldap/ldap_override_confirmation_modal.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

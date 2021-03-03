@@ -6,6 +6,7 @@ require 'graphql/rake_task'
 
 namespace :gitlab do
   OUTPUT_DIR = Rails.root.join("doc/api/graphql/reference")
+  TEMP_SCHEMA_DIR = Rails.root.join('tmp/tests/graphql')
   TEMPLATES_DIR = 'lib/gitlab/graphql/docs/templates/'
 
   # Make all feature flags enabled so that all feature flag
@@ -27,13 +28,49 @@ namespace :gitlab do
   GraphQL::RakeTask.new(
     schema_name: 'GitlabSchema',
     dependencies: [:environment, :enable_feature_flags],
-    directory: OUTPUT_DIR,
+    directory: TEMP_SCHEMA_DIR,
     idl_outfile: "gitlab_schema.graphql",
     json_outfile: "gitlab_schema.json"
   )
 
   namespace :graphql do
-    desc 'Gitlab | GraphQL | Validate queries'
+    desc 'GitLab | GraphQL | Analyze queries'
+    task analyze: [:environment, :enable_feature_flags] do |t, args|
+      queries = if args.to_a.present?
+                  args.to_a.flat_map { |path| Gitlab::Graphql::Queries.find(path) }
+                else
+                  Gitlab::Graphql::Queries.all
+                end
+
+      queries.each do |defn|
+        $stdout.puts defn.file
+        summary, errs = defn.validate(GitlabSchema)
+
+        if summary == :client_query
+          $stdout.puts " - client query"
+        elsif errs.present?
+          $stdout.puts " - invalid query".color(:red)
+        else
+          complexity = defn.complexity(GitlabSchema)
+          color = case complexity
+                  when 0..GitlabSchema::DEFAULT_MAX_COMPLEXITY
+                    :green
+                  when GitlabSchema::DEFAULT_MAX_COMPLEXITY..GitlabSchema::AUTHENTICATED_COMPLEXITY
+                    :yellow
+                  when GitlabSchema::AUTHENTICATED_COMPLEXITY..GitlabSchema::ADMIN_COMPLEXITY
+                    :orange
+                  else
+                    :red
+                  end
+
+          $stdout.puts " - complexity: #{complexity}".color(color)
+        end
+
+        $stdout.puts ""
+      end
+    end
+
+    desc 'GitLab | GraphQL | Validate queries'
     task validate: [:environment, :enable_feature_flags] do |t, args|
       queries = if args.to_a.present?
                   args.to_a.flat_map { |path| Gitlab::Graphql::Queries.find(path) }
@@ -48,10 +85,10 @@ namespace :gitlab do
         when :client_query
           warn("SKIP  #{defn.file}: client query")
         else
-          warn("OK    #{defn.file}") if errs.empty?
+          warn("#{'OK'.color(:green)}    #{defn.file}") if errs.empty?
           errs.each do |err|
             warn(<<~MSG)
-            ERROR #{defn.file}: #{err.message} (at #{err.path.join('.')})
+            #{'ERROR'.color(:red)} #{defn.file}: #{err.message} (at #{err.path.join('.')})
             MSG
           end
         end
@@ -94,18 +131,8 @@ namespace :gitlab do
       end
     end
 
-    desc 'GitLab | GraphQL | Check if GraphQL schemas are up to date'
-    task check_schema: [:environment, :enable_feature_flags] do
-      idl_doc = File.read(Rails.root.join(OUTPUT_DIR, 'gitlab_schema.graphql'))
-      json_doc = File.read(Rails.root.join(OUTPUT_DIR, 'gitlab_schema.json'))
-
-      if idl_doc == GitlabSchema.to_definition && json_doc == GitlabSchema.to_json
-        puts "GraphQL schema is up to date"
-      else
-        format_output('GraphQL schema is outdated! Please update it by running `bundle exec rake gitlab:graphql:schema:dump`.')
-        abort
-      end
-    end
+    desc 'GitLab | GraphQL | Update GraphQL docs and schema'
+    task update_all: [:compile_docs, 'schema:dump']
   end
 end
 

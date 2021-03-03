@@ -144,7 +144,7 @@ RSpec.describe LicenseMonitoringHelper do
     it 'reports overage when the most recent billable user count is higher than the historical max active users' do
       license = setup_license(starts_at: now - 3.months, expires_at: now + 9.months, max_users: 40)
       create(:historical_data, recorded_at: license.expires_at - 2.months, active_user_count: 45)
-      create(:instance_statistics_measurement, recorded_at: now - 1.day, identifier: :billable_users, count: 70)
+      create(:usage_trends_measurement, recorded_at: now - 1.day, identifier: :billable_users, count: 70)
 
       expect(helper.users_over_license).to eq(30)
     end

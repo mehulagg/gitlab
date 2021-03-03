@@ -72,9 +72,9 @@ RSpec.describe Projects::TransferService do
     context 'when visibility level changes' do
       let_it_be(:group) { create(:group, :private) }
 
-      it 'reindexes the project and associated issues' do
+      it 'reindexes the project and associated issues and notes' do
         expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
-        expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+        expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, %w[issues notes])
 
         subject.execute(group)
       end

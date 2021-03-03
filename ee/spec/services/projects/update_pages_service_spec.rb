@@ -3,9 +3,8 @@
 require "spec_helper"
 
 RSpec.describe Projects::UpdatePagesService do
-  let(:root_namespace) { create(:namespace, max_pages_size: 300) }
-  let(:namespace) { create(:namespace, parent: root_namespace, max_pages_size: 200) }
-  let(:project) { create(:project, :repository, namespace: namespace, max_pages_size: 250) }
+  let(:group) { create(:group, :nested, max_pages_size: 200) }
+  let(:project) { create(:project, :repository, namespace: group, max_pages_size: 250) }
   let(:pipeline) { create(:ci_pipeline, project: project, sha: project.commit('HEAD').sha) }
   let(:build) { create(:ci_build, pipeline: pipeline, ref: 'HEAD') }
 

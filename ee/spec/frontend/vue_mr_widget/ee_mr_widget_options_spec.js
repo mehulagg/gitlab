@@ -1,7 +1,12 @@
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { nextTick } from 'vue';
+import Vue, { nextTick } from 'vue';
+import VueApollo from 'vue-apollo';
+import PerformanceIssueBody from 'ee/vue_merge_request_widget/components/performance_issue_body.vue';
 import MrWidgetOptions from 'ee/vue_merge_request_widget/mr_widget_options.vue';
+// Force Jest to transpile and cache
+// eslint-disable-next-line no-unused-vars
+import _GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
 import {
   sastDiffSuccessMock,
   dastDiffSuccessMock,
@@ -11,26 +16,31 @@ import {
   coverageFuzzingDiffSuccessMock,
   apiFuzzingDiffSuccessMock,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { trimText } from 'helpers/text_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import { securityReportDownloadPathsQueryResponse } from 'jest/vue_shared/security_reports/mock_data';
 
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
+
+// Force Jest to transpile and cache
+// eslint-disable-next-line no-unused-vars
+import _Deployment from '~/vue_merge_request_widget/components/deployment/deployment.vue';
+import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_download_paths.query.graphql';
+
 import mockData, {
   baseBrowserPerformance,
   headBrowserPerformance,
   baseLoadPerformance,
   headLoadPerformance,
-  pipelineJobs,
 } from './mock_data';
 
-// Force Jest to transpile and cache
-// eslint-disable-next-line import/order, no-unused-vars
-import _GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
-// eslint-disable-next-line no-unused-vars
-import _Deployment from '~/vue_merge_request_widget/components/deployment/deployment.vue';
+jest.mock('~/vue_shared/components/help_popover.vue');
+
+Vue.use(VueApollo);
 
 const SAST_SELECTOR = '.js-sast-widget';
 const DAST_SELECTOR = '.js-dast-widget';
@@ -363,6 +373,13 @@ describe('ee merge request widget options', () => {
           });
         });
 
+        it('should render performance issue body component', (done) => {
+          setImmediate(() => {
+            expect(wrapper.find(PerformanceIssueBody).exists()).toBe(true);
+            done();
+          });
+        });
+
         describe('text connector', () => {
           it('should only render information about fixed issues', (done) => {
             setImmediate(() => {
@@ -518,6 +535,10 @@ describe('ee merge request widget options', () => {
           expect(trimText(wrapper.find('.js-load-performance-widget .js-code-text').text())).toBe(
             'Load performance test metrics: 1 degraded, 1 same, 2 improved',
           );
+        });
+
+        it('should render performance issue body component', () => {
+          expect(wrapper.find(PerformanceIssueBody).exists()).toBe(true);
         });
 
         describe('text connector', () => {
@@ -999,15 +1020,12 @@ describe('ee merge request widget options', () => {
   });
 
   describe('CE security report', () => {
-    const PIPELINE_JOBS_ENDPOINT = `/api/undefined/projects/${mockData.target_project_id}/pipelines/${mockData.pipeline.id}/jobs`;
-
     describe.each`
-      context                               | canReadVulnerabilities | hasPipeline | featureFlag | shouldRender
-      ${'user cannot read vulnerabilities'} | ${false}               | ${true}     | ${true}     | ${true}
-      ${'user can read vulnerabilities'}    | ${true}                | ${true}     | ${true}     | ${false}
-      ${'no pipeline'}                      | ${false}               | ${false}    | ${true}     | ${false}
-      ${'the feature flag is disabled'}     | ${false}               | ${true}     | ${false}    | ${false}
-    `('given $context', ({ canReadVulnerabilities, hasPipeline, featureFlag, shouldRender }) => {
+      context                               | canReadVulnerabilities | hasPipeline | shouldRender
+      ${'user cannot read vulnerabilities'} | ${false}               | ${true}     | ${true}
+      ${'user can read vulnerabilities'}    | ${true}                | ${true}     | ${false}
+      ${'no pipeline'}                      | ${false}               | ${false}    | ${false}
+    `('given $context', ({ canReadVulnerabilities, hasPipeline, shouldRender }) => {
       beforeEach(() => {
         gl.mrWidgetData = {
           ...mockData,
@@ -1015,10 +1033,15 @@ describe('ee merge request widget options', () => {
           pipeline: hasPipeline ? mockData.pipeline : undefined,
         };
 
-        gon.features = { coreSecurityMrWidget: featureFlag };
-
-        mock.onGet(PIPELINE_JOBS_ENDPOINT).replyOnce(200, pipelineJobs);
-        createComponent({ propsData: { mrData: gl.mrWidgetData } });
+        createComponent({
+          propsData: { mrData: gl.mrWidgetData },
+          apolloProvider: createMockApollo([
+            [
+              securityReportDownloadPathsQuery,
+              async () => ({ data: securityReportDownloadPathsQueryResponse }),
+            ],
+          ]),
+        });
 
         return waitForPromises();
       });

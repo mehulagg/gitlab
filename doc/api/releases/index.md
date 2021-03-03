@@ -350,7 +350,7 @@ Example response:
 
 ## Create a release
 
-Create a Release. You need push access to the repository to create a Release.
+Create a release. Developer level access to the project is required to create a release.
 
 ```plaintext
 POST /projects/:id/releases
@@ -486,7 +486,7 @@ Example response:
 }
 ```
 
-### Group milestones **(PREMIUM ONLY)**
+### Group milestones **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235391) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
 
@@ -495,7 +495,7 @@ array for [Create a release](#create-a-release) and [Update a release](#update-a
 API calls. Only milestones associated with the project's group may be specified, and
 adding milestones for ancestor groups raises an error.
 
-## Collect release evidence **(PREMIUM ONLY)**
+## Collect release evidence **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/199065) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
 
@@ -524,7 +524,7 @@ Example response:
 
 ## Update a release
 
-Update a Release.
+Update a release. Developer level access to the project is required to update a release.
 
 ```plaintext
 PUT /projects/:id/releases/:tag_name
@@ -631,7 +631,7 @@ Example response:
 
 ## Delete a Release
 
-Delete a Release. Deleting a Release doesn't delete the associated tag.
+Delete a release. Deleting a release doesn't delete the associated tag. Maintainer level access to the project is required to delete a release.
 
 ```plaintext
 DELETE /projects/:id/releases/:tag_name

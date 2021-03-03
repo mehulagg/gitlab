@@ -1,20 +1,36 @@
 import { GlDrawer } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
+import BoardSidebarIterationSelect from 'ee_component/boards/components/sidebar/board_sidebar_iteration_select.vue';
 import { stubComponent } from 'helpers/stub_component';
-import waitForPromises from 'helpers/wait_for_promises';
-import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
-import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
-import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
-import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
+import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
+import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
+import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
 import { ISSUABLE } from '~/boards/constants';
-import { createStore } from '~/boards/stores';
+import { mockIssue } from '../mock_data';
 
 describe('ee/BoardContentSidebar', () => {
   let wrapper;
   let store;
+
+  const createStore = ({ mockGetters = {}, mockActions = {} } = {}) => {
+    store = new Vuex.Store({
+      state: {
+        sidebarType: ISSUABLE,
+        issues: { [mockIssue.id]: mockIssue },
+        activeId: mockIssue.id,
+      },
+      getters: {
+        activeIssue: () => mockIssue,
+        isSidebarOpen: () => true,
+        ...mockGetters,
+      },
+      actions: mockActions,
+    });
+  };
 
   const createComponent = () => {
     wrapper = shallowMount(BoardContentSidebar, {
@@ -42,11 +58,7 @@ describe('ee/BoardContentSidebar', () => {
   };
 
   beforeEach(() => {
-    store = createStore();
-    store.state.sidebarType = ISSUABLE;
-    store.state.issues = { 1: { title: 'One', referencePath: 'path', assignees: [] } };
-    store.state.activeId = '1';
-
+    createStore();
     createComponent();
   });
 
@@ -59,12 +71,15 @@ describe('ee/BoardContentSidebar', () => {
     expect(wrapper.find(GlDrawer).exists()).toBe(true);
   });
 
-  it('applies an open attribute', () => {
-    expect(wrapper.find(GlDrawer).props('open')).toBe(true);
+  it('does not render GlDrawer when isSidebarOpen is false', () => {
+    createStore({ mockGetters: { isSidebarOpen: () => false } });
+    createComponent();
+
+    expect(wrapper.find(GlDrawer).exists()).toBe(false);
   });
 
-  it('renders BoardAssigneeDropdown', () => {
-    expect(wrapper.find(BoardAssigneeDropdown).exists()).toBe(true);
+  it('applies an open attribute', () => {
+    expect(wrapper.find(GlDrawer).props('open')).toBe(true);
   });
 
   it('renders BoardSidebarLabelsSelect', () => {
@@ -87,15 +102,27 @@ describe('ee/BoardContentSidebar', () => {
     expect(wrapper.find(BoardSidebarMilestoneSelect).exists()).toBe(true);
   });
 
-  describe('when we emit close', () => {
-    it('hides GlDrawer', async () => {
-      expect(wrapper.find(GlDrawer).props('open')).toBe(true);
+  it('renders BoardSidebarIterationSelect', () => {
+    expect(wrapper.find(BoardSidebarIterationSelect).exists()).toBe(true);
+  });
 
+  describe('when we emit close', () => {
+    let toggleBoardItem;
+
+    beforeEach(() => {
+      toggleBoardItem = jest.fn();
+      createStore({ mockActions: { toggleBoardItem } });
+      createComponent();
+    });
+
+    it('calls toggleBoardItem with correct parameters', async () => {
       wrapper.find(GlDrawer).vm.$emit('close');
 
-      await waitForPromises();
-
-      expect(wrapper.find(GlDrawer).exists()).toBe(false);
+      expect(toggleBoardItem).toHaveBeenCalledTimes(1);
+      expect(toggleBoardItem).toHaveBeenCalledWith(expect.any(Object), {
+        boardItem: mockIssue,
+        sidebarType: ISSUABLE,
+      });
     });
   });
 });

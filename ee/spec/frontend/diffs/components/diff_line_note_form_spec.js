@@ -38,6 +38,7 @@ describe('EE DiffLineNoteForm', () => {
               diff_refs: {
                 head_sha: headSha || null,
               },
+              highlighted_diff_lines: [],
             })),
           },
         },

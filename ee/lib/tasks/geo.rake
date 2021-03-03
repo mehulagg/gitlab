@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 task spec: ['geo:db:test:prepare']
 
 namespace :geo do

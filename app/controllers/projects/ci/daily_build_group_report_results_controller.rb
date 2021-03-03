@@ -1,11 +1,6 @@
 # frozen_string_literal: true
 
 class Projects::Ci::DailyBuildGroupReportResultsController < Projects::ApplicationController
-  include Gitlab::Utils::StrongMemoize
-
-  MAX_ITEMS = 1000
-  REPORT_WINDOW = 90.days
-
   before_action :authorize_read_build_report_results!
   before_action :validate_param_type!
 
@@ -40,33 +35,21 @@ class Projects::Ci::DailyBuildGroupReportResultsController < Projects::Applicati
   end
 
   def report_results
-    Ci::DailyBuildGroupReportResultsFinder.new(**finder_params).execute
+    ::Ci::DailyBuildGroupReportResultsFinder.new(
+      params: finder_params,
+      current_user: current_user
+    ).execute
   end
 
   def finder_params
     {
-      current_user: current_user,
       project: project,
-      ref_path: params.require(:ref_path),
-      start_date: start_date,
-      end_date: end_date,
-      limit: MAX_ITEMS
+      coverage: true,
+      start_date: params[:start_date],
+      end_date: params[:end_date],
+      ref_path: params[:ref_path],
+      sort: true
     }
-  end
-
-  def start_date
-    strong_memoize(:start_date) do
-      start_date = Date.parse(params.require(:start_date))
-
-      # The start_date cannot be older than `end_date - 90 days`
-      [start_date, end_date - REPORT_WINDOW].max
-    end
-  end
-
-  def end_date
-    strong_memoize(:end_date) do
-      Date.parse(params.require(:end_date))
-    end
   end
 
   def allowed_param_types

@@ -10,6 +10,8 @@ query instance(
   $scanner: [String!]
   $state: [VulnerabilityState!]
   $sort: VulnerabilitySort
+  $hasIssues: Boolean
+  $hasResolution: Boolean
 ) {
   vulnerabilities(
     after: $after
@@ -20,6 +22,8 @@ query instance(
     projectId: $projectId
     scanner: $scanner
     sort: $sort
+    hasIssues: $hasIssues
+    hasResolution: $hasResolution
   ) {
     nodes {
       ...Vulnerability

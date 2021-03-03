@@ -19,8 +19,8 @@ describe('EpicsSwimlanes', () => {
     return new Vuex.Store({
       state: {
         epics: mockEpics,
-        issuesByListId: mockIssuesByListId,
-        issues,
+        boardItemsByListId: mockIssuesByListId,
+        boardItems: issues,
         pageInfoByListId: {
           'gid://gitlab/List/1': {},
           'gid://gitlab/List/2': {},

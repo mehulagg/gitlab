@@ -2,8 +2,8 @@
 import { mapGetters } from 'vuex';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __ } from '~/locale';
-import Status from './status.vue';
 import { OPENED, REOPENED } from '~/notes/constants';
+import Status from './status.vue';
 
 export default {
   components: {

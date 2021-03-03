@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Admin::Geo::NodesBetaController do
+RSpec.describe Admin::Geo::NodesBetaController, :geo do
   include AdminModeHelper
 
   let_it_be(:admin) { create(:admin) }
@@ -27,7 +27,7 @@ RSpec.describe Admin::Geo::NodesBetaController do
           get admin_geo_nodes_beta_path
 
           expect(response).to render_template(:index)
-          expect(response.body).to include('Geo Nodes Beta')
+          expect(response.body).to include('Geo sites')
         end
       end
 

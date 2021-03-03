@@ -1,8 +1,7 @@
-import { mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import LinkedPipelinesMiniList from 'ee/vue_shared/components/linked_pipelines_mini_list.vue';
 import mockData from 'ee_jest/vue_mr_widget/mock_data';
-import { trimText } from 'helpers/text_helper';
-import pipelineComponent from '~/vue_merge_request_widget/components/mr_widget_pipeline.vue';
+import MrWidgetPipeline from '~/vue_merge_request_widget/components/mr_widget_pipeline.vue';
 import mockLinkedPipelines from '../vue_shared/components/linked_pipelines_mock_data';
 
 describe('MRWidgetPipeline', () => {
@@ -11,10 +10,10 @@ describe('MRWidgetPipeline', () => {
   const findPipelineInfoContainer = () => wrapper.find('[data-testid="pipeline-info-container"');
   const findPipelinesMiniList = () => wrapper.find(LinkedPipelinesMiniList);
 
-  function createComponent(pipeline) {
-    wrapper = mount(pipelineComponent, {
+  const createWrapper = (props) => {
+    wrapper = shallowMount(MrWidgetPipeline, {
       propsData: {
-        pipeline,
+        pipeline: mockData,
         pipelineCoverageDelta: undefined,
         hasCi: true,
         ciStatus: 'success',
@@ -22,9 +21,10 @@ describe('MRWidgetPipeline', () => {
         sourceBranch: undefined,
         mrTroubleshootingDocsPath: 'help',
         ciTroubleshootingDocsPath: 'help2',
+        ...props,
       },
     });
-  }
+  };
 
   afterEach(() => {
     wrapper.destroy();
@@ -45,12 +45,11 @@ describe('MRWidgetPipeline', () => {
         pipeline.details.name = 'Merge train pipeline';
         pipeline.merge_request_event_type = 'merge_train';
 
-        createComponent(pipeline);
+        createWrapper({ pipeline });
 
         const expected = `Merge train pipeline #${pipeline.id} ${pipeline.details.status.label} for ${pipeline.commit.short_id}`;
-        const actual = trimText(findPipelineInfoContainer().text());
 
-        expect(actual).toBe(expected);
+        expect(findPipelineInfoContainer().text()).toMatchInterpolatedText(expected);
       });
     });
 
@@ -59,12 +58,11 @@ describe('MRWidgetPipeline', () => {
         pipeline.details.name = 'Merged result pipeline';
         pipeline.merge_request_event_type = 'merged_result';
 
-        createComponent(pipeline);
+        createWrapper({ pipeline });
 
         const expected = `Merged result pipeline #${pipeline.id} ${pipeline.details.status.label} for ${pipeline.commit.short_id}`;
-        const actual = trimText(findPipelineInfoContainer().text());
 
-        expect(actual).toBe(expected);
+        expect(findPipelineInfoContainer().text()).toMatchInterpolatedText(expected);
       });
     });
   });
@@ -74,7 +72,7 @@ describe('MRWidgetPipeline', () => {
       beforeEach(() => {
         const pipeline = { ...mockData.pipeline, triggered_by: mockLinkedPipelines.triggered_by };
 
-        createComponent(pipeline);
+        createWrapper({ pipeline });
       });
 
       it('should render the linked pipelines mini list', () => {
@@ -98,7 +96,7 @@ describe('MRWidgetPipeline', () => {
       beforeEach(() => {
         const pipeline = { ...mockData.pipeline, triggered: mockLinkedPipelines.triggered };
 
-        createComponent(pipeline);
+        createWrapper({ pipeline });
       });
 
       it('should render the linked pipelines mini list', () => {

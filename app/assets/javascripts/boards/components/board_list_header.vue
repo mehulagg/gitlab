@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlButtonGroup,
@@ -9,14 +8,16 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { n__, s__, __ } from '~/locale';
-import AccessorUtilities from '../../lib/utils/accessor';
-import IssueCount from './issue_count.vue';
-import eventHub from '../eventhub';
-import sidebarEventHub from '~/sidebar/event_hub';
-import { inactiveId, LIST, ListType } from '../constants';
-import { isScopedLabel } from '~/lib/utils/common_utils';
+import { mapActions, mapState } from 'vuex';
 import { isListDraggable } from '~/boards/boards_util';
+import { isScopedLabel, parseBoolean } from '~/lib/utils/common_utils';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
+import { n__, s__, __ } from '~/locale';
+import sidebarEventHub from '~/sidebar/event_hub';
+import AccessorUtilities from '../../lib/utils/accessor';
+import { inactiveId, LIST, ListType } from '../constants';
+import eventHub from '../eventhub';
+import IssueCount from './issue_count.vue';
 
 export default {
   i18n: {
@@ -68,7 +69,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['activeId']),
+    ...mapState(['activeId', 'isEpicBoard']),
     isLoggedIn() {
       return Boolean(this.currentUserId);
     },
@@ -85,22 +86,25 @@ export default {
       return !this.disabled && this.listType !== ListType.closed;
     },
     showMilestoneListDetails() {
-      return (
-        this.listType === ListType.milestone &&
-        this.list.milestone &&
-        (!this.list.collapsed || !this.isSwimlanesHeader)
-      );
+      return this.listType === ListType.milestone && this.list.milestone && this.showListDetails;
     },
     showAssigneeListDetails() {
-      return (
-        this.listType === ListType.assignee && (!this.list.collapsed || !this.isSwimlanesHeader)
-      );
+      return this.listType === ListType.assignee && this.showListDetails;
     },
-    issuesCount() {
+    showIterationListDetails() {
+      return this.listType === ListType.iteration && this.showListDetails;
+    },
+    showListDetails() {
+      return !this.list.collapsed || !this.isSwimlanesHeader;
+    },
+    itemsCount() {
       return this.list.issuesCount;
     },
-    issuesTooltipLabel() {
-      return n__(`%d issue`, `%d issues`, this.issuesCount);
+    countIcon() {
+      return 'issues';
+    },
+    itemsTooltipLabel() {
+      return n__(`%d issue`, `%d issues`, this.itemsCount);
     },
     chevronTooltip() {
       return this.list.collapsed ? this.$options.i18n.expand : this.$options.i18n.collapse;
@@ -109,7 +113,7 @@ export default {
       return this.list.collapsed ? 'chevron-down' : 'chevron-right';
     },
     isNewIssueShown() {
-      return this.listType === ListType.backlog || this.showListHeaderButton;
+      return (this.listType === ListType.backlog || this.showListHeaderButton) && !this.isEpicBoard;
     },
     isSettingsShown() {
       return (
@@ -130,8 +134,14 @@ export default {
       return !this.disabled && isListDraggable(this.list);
     },
   },
+  created() {
+    const localCollapsed = parseBoolean(localStorage.getItem(`${this.uniqueKey}.collapsed`));
+    if ((!this.isLoggedIn || this.isEpicBoard) && localCollapsed) {
+      this.toggleListCollapsed({ listId: this.list.id, collapsed: true });
+    }
+  },
   methods: {
-    ...mapActions(['updateList', 'setActiveId']),
+    ...mapActions(['updateList', 'setActiveId', 'toggleListCollapsed']),
     openSidebarSettings() {
       if (this.activeId === inactiveId) {
         sidebarEventHub.$emit('sidebar.closeAll');
@@ -147,9 +157,10 @@ export default {
       eventHub.$emit(`toggle-issue-form-${this.list.id}`);
     },
     toggleExpanded() {
-      this.list.collapsed = !this.list.collapsed;
+      const collapsed = !this.list.collapsed;
+      this.toggleListCollapsed({ listId: this.list.id, collapsed });
 
-      if (!this.isLoggedIn) {
+      if (!this.isLoggedIn || this.isEpicBoard) {
         this.addToLocalStorage();
       } else {
         this.updateListFunction();
@@ -157,11 +168,11 @@ export default {
 
       // When expanding/collapsing, the tooltip on the caret button sometimes stays open.
       // Close all tooltips manually to prevent dangling tooltips.
-      this.$root.$emit('bv::hide::tooltip');
+      this.$root.$emit(BV_HIDE_TOOLTIP);
     },
     addToLocalStorage() {
       if (AccessorUtilities.isLocalStorageAccessSafe()) {
-        localStorage.setItem(`${this.uniqueKey}.expanded`, !this.list.collapsed);
+        localStorage.setItem(`${this.uniqueKey}.collapsed`, this.list.collapsed);
       }
     },
     updateListFunction() {
@@ -201,6 +212,7 @@ export default {
         class="board-title-caret no-drag gl-cursor-pointer"
         category="tertiary"
         size="small"
+        data-testid="board-title-caret"
         @click="toggleExpanded"
       />
       <!-- EE start -->
@@ -214,6 +226,17 @@ export default {
         }"
       >
         <gl-icon name="timer" />
+      </span>
+
+      <span
+        v-if="showIterationListDetails"
+        aria-hidden="true"
+        :class="{
+          'gl-mt-3 gl-rotate-90': list.collapsed,
+          'gl-mr-2': !list.collapsed,
+        }"
+      >
+        <gl-icon name="iteration" />
       </span>
 
       <a
@@ -288,11 +311,11 @@ export default {
         <div v-if="list.maxIssueCount !== 0">
           •
           <gl-sprintf :message="__('%{issuesSize} with a limit of %{maxIssueCount}')">
-            <template #issuesSize>{{ issuesTooltipLabel }}</template>
+            <template #issuesSize>{{ itemsTooltipLabel }}</template>
             <template #maxIssueCount>{{ list.maxIssueCount }}</template>
           </gl-sprintf>
         </div>
-        <div v-else>• {{ issuesTooltipLabel }}</div>
+        <div v-else>• {{ itemsTooltipLabel }}</div>
         <div v-if="weightFeatureAvailable">
           •
           <gl-sprintf :message="__('%{totalWeight} total weight')">
@@ -310,13 +333,13 @@ export default {
         }"
       >
         <span class="gl-display-inline-flex">
-          <gl-tooltip :target="() => $refs.issueCount" :title="issuesTooltipLabel" />
-          <span ref="issueCount" class="issue-count-badge-count">
-            <gl-icon class="gl-mr-2" name="issues" />
-            <issue-count :issues-size="issuesCount" :max-issue-count="list.maxIssueCount" />
+          <gl-tooltip :target="() => $refs.itemCount" :title="itemsTooltipLabel" />
+          <span ref="itemCount" class="issue-count-badge-count">
+            <gl-icon class="gl-mr-2" :name="countIcon" />
+            <issue-count :issues-size="itemsCount" :max-issue-count="list.maxIssueCount" />
           </span>
           <!-- EE start -->
-          <template v-if="weightFeatureAvailable">
+          <template v-if="weightFeatureAvailable && !isEpicBoard">
             <gl-tooltip :target="() => $refs.weightTooltip" :title="weightCountToolTip" />
             <span ref="weightTooltip" class="gl-display-inline-flex gl-ml-3">
               <gl-icon class="gl-mr-2" name="weight" />

@@ -1,6 +1,6 @@
 import { sortBy } from 'lodash';
-import { ListType } from './constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { ListType, NOT_FILTER } from './constants';
 
 export function getMilestone() {
   return null;
@@ -36,11 +36,11 @@ export function formatIssue(issue) {
 }
 
 export function formatListIssues(listIssues) {
-  const issues = {};
-  let listIssuesCount;
+  const boardItems = {};
+  let listItemsCount;
 
   const listData = listIssues.nodes.reduce((map, list) => {
-    listIssuesCount = list.issues.count;
+    listItemsCount = list.issues.count;
     let sortedIssues = list.issues.edges.map((issueNode) => ({
       ...issueNode.node,
     }));
@@ -58,14 +58,14 @@ export function formatListIssues(listIssues) {
           assignees: i.assignees?.nodes || [],
         };
 
-        issues[id] = listIssue;
+        boardItems[id] = listIssue;
 
         return id;
       }),
     };
   }, {});
 
-  return { listData, issues, listIssuesCount };
+  return { listData, boardItems, listItemsCount };
 }
 
 export function formatListsPageInfo(lists) {
@@ -144,6 +144,17 @@ export function isListDraggable(list) {
   return list.listType !== ListType.backlog && list.listType !== ListType.closed;
 }
 
+export function transformNotFilters(filters) {
+  return Object.keys(filters)
+    .filter((key) => key.startsWith(NOT_FILTER))
+    .reduce((obj, key) => {
+      return {
+        ...obj,
+        [key.substring(4, key.length - 1)]: filters[key],
+      };
+    }, {});
+}
+
 // EE-specific feature. Find the implementation in the `ee/`-folder
 export function transformBoardConfig() {
   return '';
@@ -157,4 +168,5 @@ export default {
   fullLabelId,
   fullIterationId,
   isListDraggable,
+  transformNotFilters,
 };
