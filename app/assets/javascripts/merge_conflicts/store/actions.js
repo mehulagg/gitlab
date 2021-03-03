@@ -32,9 +32,9 @@ export const submitResolvedConflicts = async ({ commit, getters }, resolveConfli
     const { data } = await axios.post(resolveConflictsPath, getters.getCommitData);
     window.location.assign(data.redirect_to);
   } catch (e) {
+    commit(types.SET_SUBMIT_STATE, false);
     createFlash({ message: __('Failed to save merge conflicts resolutions. Please try again!') });
   }
-  commit(types.SET_SUBMIT_STATE, false);
 };
 
 export const setLoadingState = ({ commit }, isLoading) => {
