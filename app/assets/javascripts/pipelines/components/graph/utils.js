@@ -32,6 +32,16 @@ const reportToSentry = (component, failureType) => {
   });
 };
 
+const serializeGqlErr = (gqlError) => {
+  const { locations, message, path } = gqlError;
+
+  return `
+    ${message}.
+    Locations: ${locations.flatMap(loc => Object.entries(loc)).flat(2).join(' ')}.
+    Path: ${path.join(', ')}.
+  `;
+}
+
 const toggleQueryPollingByVisibility = (queryRef, interval = 10000) => {
   const stopStartQuery = (query) => {
     if (!Visibility.hidden()) {
@@ -82,6 +92,7 @@ const validateConfigPaths = (value) => value.graphqlResourceEtag?.length > 0;
 export {
   getQueryHeaders,
   reportToSentry,
+  serializeGqlErr,
   toggleQueryPollingByVisibility,
   unwrapPipelineData,
   validateConfigPaths,

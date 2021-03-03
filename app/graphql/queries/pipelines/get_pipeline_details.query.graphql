@@ -25,7 +25,7 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
     __typename
     pipeline(iid: $iid) {
       __typename
-      id
+      idm
       iid
       downstream {
         __typename
