@@ -402,6 +402,15 @@ debug why the migration was halted and make any changes before retrying the migr
 fixed the cause of the failure, click "Retry migration", and the migration will be scheduled to be retried
 in the background.
 
+### All migrations must be finished before doing a major upgrade
+
+Before doing a major version upgrade of GitLab you should have completed all
+migrations that exist up until the latest minor version before that major
+version. If you have halted migrations these will need to be resolved and
+[retried](#retry-a-halted-migration) before proceeding with a major version
+upgrade. Read more about [upgrading to a new major
+version](../update/index.md#upgrading-to-a-new-major-version).
+
 ## GitLab Advanced Search Rake tasks
 
 Rake tasks are available to:
