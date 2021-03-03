@@ -40,11 +40,11 @@ See [this video](https://youtu.be/-BkEhghP-kM) for an in-depth overview and inve
 
 Please note that `toMatchObject` actually changes the nature of the assertion and won't fail if some items are **missing** from the expectation.
 
-## Vue component mount issues
+## Using @gitlab/ui issues
 
 ### When rendering a component that uses GlFilteredSearch and the component or its parent uses Vue Apollo
 
-When trying to render our gitlab-ui component GlFilteredSearch, I was getting an error in the provide function:
+When trying to render our @gitlab/ui component GlFilteredSearch, you might get an error in the component's `provide` function:
 
 `cannot read suggestionsListClass of undefined`
 
@@ -65,6 +65,3 @@ VueApollo will skip manually running `provide()` if it sees that an `apolloProvi
     },
   );
 ```
-
-
-
