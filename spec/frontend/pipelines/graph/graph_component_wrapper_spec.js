@@ -121,4 +121,36 @@ describe('Pipeline graph wrapper', () => {
       expect(wrapper.vm.$apollo.queries.pipeline.refetch).toHaveBeenCalled();
     });
   });
+
+  fdescribe('when query times out', () => {
+    beforeEach(async () => {
+      const failSucceedFail = jest.fn()
+        .mockResolvedValueOnce({ errors: [{ message: 'timeout' }] })
+        .mockResolvedValueOnce(mockPipelineResponse)
+        .mockResolvedValueOnce({ errors: [{ message: 'timeout' }] })
+
+      createComponentWithApollo(failSucceedFail);
+      await wrapper.vm.$nextTick();
+    });
+
+    it('shows correct errors and does not overwrite populated data when data is empty', async () => {
+
+        /* fails at first, shows error, no data yet */
+        expect(getAlert().exists()).toBe(true);
+        expect(getGraph().exists()).toBe(false);
+
+        /* succeeds, clears error, shows graph */
+        wrapper.vm.$apollo.queries.pipeline.refetch();
+        await wrapper.vm.$nextTick();
+        expect(getAlert().exists()).toBe(false);
+        expect(getGraph().exists()).toBe(true);
+
+        /* fails again, alert retuns but data persists */
+        wrapper.vm.$apollo.queries.pipeline.refetch();
+        await wrapper.vm.$nextTick();
+        expect(getAlert().exists()).toBe(true);
+        expect(getGraph().exists()).toBe(true);
+
+    });
+  });
 });
