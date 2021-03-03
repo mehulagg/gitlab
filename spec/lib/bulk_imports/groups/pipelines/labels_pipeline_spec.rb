@@ -3,11 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe BulkImports::Groups::Pipelines::LabelsPipeline do
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
-  let(:cursor) { 'cursor' }
-  let(:timestamp) { Time.new(2020, 01, 01).utc }
-  let(:entity) do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+
+  let_it_be(:entity) do
     create(
       :bulk_import_entity,
       source_full_path: 'source/full/path',
@@ -17,7 +16,17 @@ RSpec.describe BulkImports::Groups::Pipelines::LabelsPipeline do
     )
   end
 
-  let(:context) { BulkImports::Pipeline::Context.new(entity) }
+  let_it_be(:tracker) do
+    create(
+      :bulk_import_tracker,
+      entity: entity,
+      pipeline_name: described_class.name
+    )
+  end
+
+  let(:context) { BulkImports::Pipeline::Context.new(tracker) }
+  let(:cursor) { 'cursor' }
+  let(:timestamp) { Time.new(2020, 01, 01).utc }
 
   subject { described_class.new(context) }
 
@@ -60,38 +69,6 @@ RSpec.describe BulkImports::Groups::Pipelines::LabelsPipeline do
       expect(label.color).to eq('#428BCA')
       expect(label.created_at).to eq(timestamp)
       expect(label.updated_at).to eq(timestamp)
-    end
-  end
-
-  describe '#after_run' do
-    context 'when extracted data has next page' do
-      it 'updates tracker information and runs pipeline again' do
-        data = extractor_data(title: 'label', has_next_page: true, cursor: cursor)
-
-        expect(subject).to receive(:run)
-
-        subject.after_run(data)
-
-        tracker = entity.trackers.find_by(relation: :labels)
-
-        expect(tracker.has_next_page).to eq(true)
-        expect(tracker.next_page).to eq(cursor)
-      end
-    end
-
-    context 'when extracted data has no next page' do
-      it 'updates tracker information and does not run pipeline' do
-        data = extractor_data(title: 'label', has_next_page: false)
-
-        expect(subject).not_to receive(:run)
-
-        subject.after_run(data)
-
-        tracker = entity.trackers.find_by(relation: :labels)
-
-        expect(tracker.has_next_page).to eq(false)
-        expect(tracker.next_page).to be_nil
-      end
     end
   end
 

@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline do
-  let_it_be(:cursor) { 'cursor' }
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:epic) { create(:epic, group: group) }
@@ -20,7 +19,8 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline do
     )
   end
 
-  let_it_be(:context) { BulkImports::Pipeline::Context.new(entity) }
+  let_it_be(:tracker) { create(:bulk_import_tracker, entity: entity) }
+  let(:context) { BulkImports::Pipeline::Context.new(tracker) }
 
   before do
     stub_licensed_features(epics: true)
@@ -39,12 +39,10 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline do
 
   describe '#run' do
     it 'imports epic award emoji' do
-      data = extractor_data(has_next_page: false, cursor: cursor)
-
       allow_next_instance_of(BulkImports::Common::Extractors::GraphqlExtractor) do |extractor|
         allow(extractor)
           .to receive(:extract)
-          .and_return(data)
+          .and_return(extracted_data)
       end
 
       expect { subject.run }.to change(::AwardEmoji, :count).by(1)
@@ -52,46 +50,46 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline do
     end
   end
 
-  describe '#after_run' do
-    context 'when extracted data has next page' do
-      it 'updates tracker information and runs pipeline again' do
-        data = extractor_data(has_next_page: true, cursor: cursor)
+  context 'when extracted data many pages' do
+    it 'runs pipeline for the second page' do
+      first_page = extracted_data(has_next_page: true)
+      last_page = extracted_data
 
-        expect(subject).to receive(:run)
-
-        subject.after_run(data)
-
-        page_tracker = entity.trackers.find_by(relation: tracker)
-
-        expect(page_tracker.has_next_page).to eq(true)
-        expect(page_tracker.next_page).to eq(cursor)
+      allow_next_instance_of(BulkImports::Common::Extractors::GraphqlExtractor) do |extractor|
+        allow(extractor)
+          .to receive(:extract)
+          .and_return(first_page, last_page)
       end
+
+      subject.run
     end
+  end
 
-    context 'when extracted data has no next page' do
-      it 'updates tracker information and does not run pipeline' do
-        data = extractor_data(has_next_page: false)
+  context 'when there is many epics to import' do
+    let_it_be(:second_epic) { create(:epic, group: group) }
 
-        expect(subject).not_to receive(:run)
-
-        subject.after_run(data)
-
-        page_tracker = entity.trackers.find_by(relation: tracker)
-
-        expect(page_tracker.has_next_page).to eq(false)
-        expect(page_tracker.next_page).to be_nil
+    it 'runs the pipeline for the next epic' do
+      allow_next_instance_of(BulkImports::Common::Extractors::GraphqlExtractor) do |extractor|
+        allow(extractor)
+          .to receive(:extract)
+          .twice # for each epic
+          .and_return(extracted_data)
       end
 
-      it 'updates context with next epic iid' do
-        epic2 = create(:epic, group: group)
-        data = extractor_data(has_next_page: false)
+      expect(context.extra)
+        .to receive(:[]=)
+        .with(:epic_iid, epic.iid)
+        .and_call_original
+      expect(context.extra)
+        .to receive(:[]=)
+        .with(:epic_iid, second_epic.iid)
+        .and_call_original
+      expect(context.extra)
+        .to receive(:[]=)
+        .with(:epic_iid, nil)
+        .and_call_original
 
-        expect(subject).to receive(:run)
-
-        subject.after_run(data)
-
-        expect(context.extra[:epic_iid]).to eq(epic2.iid)
-      end
+      subject.run
     end
   end
 
@@ -122,11 +120,11 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline do
     end
   end
 
-  def extractor_data(has_next_page:, cursor: nil)
+  def extracted_data(has_next_page: false)
     data = [{ 'name' => 'thumbsup' }]
 
     page_info = {
-      'end_cursor' => cursor,
+      'end_cursor' => 'cursor',
       'has_next_page' => has_next_page
     }
 

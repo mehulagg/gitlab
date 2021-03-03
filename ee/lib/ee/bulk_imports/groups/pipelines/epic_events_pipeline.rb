@@ -48,15 +48,6 @@ module EE
           end
 
           def after_run(extracted_data)
-            iid = context.extra[:epic_iid]
-            tracker = "epic_#{iid}_events"
-
-            context.entity.update_tracker_for(
-              relation: tracker,
-              has_next_page: extracted_data.has_next_page?,
-              next_page: extracted_data.next_page
-            )
-
             set_next_epic unless extracted_data.has_next_page?
 
             if extracted_data.has_next_page? || context.extra[:epic_iid]

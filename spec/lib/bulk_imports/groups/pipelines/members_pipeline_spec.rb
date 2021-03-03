@@ -5,13 +5,31 @@ require 'spec_helper'
 RSpec.describe BulkImports::Groups::Pipelines::MembersPipeline do
   let_it_be(:member_user1) { create(:user, email: 'email1@email.com') }
   let_it_be(:member_user2) { create(:user, email: 'email2@email.com') }
-
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let_it_be(:cursor) { 'cursor' }
   let_it_be(:bulk_import) { create(:bulk_import, user: user) }
-  let_it_be(:entity) { create(:bulk_import_entity, bulk_import: bulk_import, group: group) }
-  let_it_be(:context) { BulkImports::Pipeline::Context.new(entity) }
+
+  let_it_be(:entity) do
+    create(
+      :bulk_import_entity,
+      source_full_path: 'source/full/path',
+      destination_name: 'My Destination Group',
+      destination_namespace: group.full_path,
+      group: group,
+      bulk_import: bulk_import
+    )
+  end
+
+  let_it_be(:tracker) do
+    create(
+      :bulk_import_tracker,
+      entity: entity,
+      pipeline_name: described_class.name
+    )
+  end
+
+  let(:context) { BulkImports::Pipeline::Context.new(tracker) }
+  let(:cursor) { 'cursor' }
 
   subject { described_class.new(context) }
 

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe EE::BulkImports::Groups::Graphql::GetEpicEventsQuery do
   it 'has a valid query' do
-    context = BulkImports::Pipeline::Context.new(create(:bulk_import_entity), epic_iid: 1)
+    context = BulkImports::Pipeline::Context.new(create(:bulk_import_tracker), epic_iid: 1)
 
     result = GitlabSchema.execute(
       described_class.to_s,
