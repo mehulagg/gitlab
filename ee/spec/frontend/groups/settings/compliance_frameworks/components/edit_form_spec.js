@@ -104,6 +104,7 @@ describe('EditForm', () => {
         name: frameworkFoundResponse.name,
         pipelineConfigurationFullPath: frameworkFoundResponse.pipelineConfigurationFullPath,
         pipelineConfigurationFullPathEnabled: true,
+        submitButtonText: 'Save changes',
       });
       expect(findForm().exists()).toBe(true);
     });

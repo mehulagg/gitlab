@@ -67,6 +67,16 @@ describe('CreateForm', () => {
     wrapper.destroy();
   });
 
+  describe('initialized', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('sets the submit button text on the form', () => {
+      expect(findForm().props('submitButtonText')).toBe('Add framework');
+    });
+  });
+
   describe('loading', () => {
     beforeEach(() => {
       wrapper = createComponent();

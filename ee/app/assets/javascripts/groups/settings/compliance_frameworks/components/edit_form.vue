@@ -2,6 +2,7 @@
 import * as Sentry from '@sentry/browser';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { __ } from '~/locale';
 
 import { FETCH_ERROR, SAVE_ERROR } from '../constants';
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
@@ -143,6 +144,9 @@ export default {
       this.saving = false;
     },
   },
+  i18n: {
+    submitButtonText: __('Save changes'),
+  },
 };
 </script>
 <template>
@@ -155,6 +159,7 @@ export default {
       :description.sync="formData.description"
       :pipeline-configuration-full-path.sync="formData.pipelineConfigurationFullPath"
       :color.sync="formData.color"
+      :submit-button-text="$options.i18n.submitButtonText"
       @submit="onSubmit"
     />
   </form-status>
