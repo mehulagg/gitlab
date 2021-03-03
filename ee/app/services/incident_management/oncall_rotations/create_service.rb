@@ -57,10 +57,6 @@ module IncidentManagement
       def error_no_permissions
         error(_('You have insufficient permissions to create an on-call rotation for this project'))
       end
-
-      def error_in_validation(object)
-        error(object.errors.full_messages.to_sentence)
-      end
     end
   end
 end
