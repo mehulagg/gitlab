@@ -1,12 +1,15 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlSprintf, GlLink } from '@gitlab/ui';
 import emptyStateSVG from 'icons/_mr_widget_empty_state.svg';
+import { helpPagePath } from '~/helpers/help_page_helper';
 
 export default {
   name: 'MRWidgetNothingToMerge',
   components: {
     GlButton,
+    GlSprintf,
+    GlLink,
   },
   props: {
     mr: {
@@ -17,6 +20,7 @@ export default {
   data() {
     return { emptyStateSVG };
   },
+  ciHelpPage: helpPagePath('/ci/introduction/index.html'),
 };
 </script>
 
@@ -30,18 +34,20 @@ export default {
       </div>
       <div class="text col-md-7 order-md-first col-12">
         <p class="highlight">
-          {{
-            s__(
-              'mrWidgetNothingToMerge|This merge request contains no changes.',
-            )
-          }}
+          {{ s__('mrWidgetNothingToMerge|This merge request contains no changes.') }}
         </p>
         <p>
-          {{
-            s__(
-              'mrWidgetNothingToMerge|Use merge requests to propose changes to your project and discuss those changes with your team. To make changes to files, push a new commit or update the merge request to use a different branch.',
-            )
-          }}
+          <gl-sprintf
+            :message="
+              s__(
+                'mrWidgetNothingToMerge|Use merge requests to propose changes to your project and discuss them with your team. With %{linkStart}CI/CD%{linkEnd}, automatically test your changes before being merged.',
+              )
+            "
+          >
+            <template #link="{ content }">
+              <gl-link :href="$options.ciHelpPage" target="_blank">{{ content }}</gl-link>
+            </template>
+          </gl-sprintf>
         </p>
         <div>
           <gl-button
