@@ -96,8 +96,15 @@ locked against deletion and kept regardless of the expiry time.
 When disabled, the latest artifacts for any **new** successful or fixed pipelines
 are allowed to expire.
 
+To change the setting to keep the latest artifacts:
+
 This setting takes precedence over the [project level setting](../../../ci/pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs).
 If disabled at the instance level, you cannot enable this per-project.
+
+1. Go to **Admin Area > Settings > CI/CD**.
+1. Expand **Continuous Integration and Deployment**.
+1. Uncheck or check **Keep the latest artifacts for all jobs in the latest successful pipelines**.
+1. Click **Save changes** for the changes to take effect.
 
 When you disable the feature, the latest artifacts do not immediately expire.
 A new pipeline must run before the latest artifacts can expire and be deleted.
