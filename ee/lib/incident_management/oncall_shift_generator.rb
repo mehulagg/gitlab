@@ -15,7 +15,7 @@ module IncidentManagement
     # @param ends_at [ActiveSupport::TimeWithZone]
     # @return [IncidentManagement::OncallShift]
     def for_timeframe(starts_at:, ends_at:)
-      starts_at = [apply_timezone(starts_at), rotation_starts_at].max
+      starts_at = limit_start_time(apply_timezone(starts_at))
       ends_at = limit_end_time(apply_timezone(ends_at))
 
       return [] unless starts_at < ends_at
@@ -129,14 +129,13 @@ module IncidentManagement
           #     expected_shift_count = 14          -> pretend it's a 2-week rotation
           #     shift_count = 2                    -> we're calculating the shift for the 3rd day
           # starts_at = Monday 00:00:00 + 8.hours + 2.days => Thursday 08:00:00
-
           starts_at, ends_at = rotation.active_period.for_date(shift_cycle_starts_at + shift_count.days)
 
-          shift_for(participant, [rotation.starts_at, starts_at].max, limit_end_time(ends_at))
+          shift_for(participant, starts_at, ends_at)
         end
       else
         # This is the normal shift start/end times
-        shift_cycle_ends_at = limit_end_time(shift_cycle_starts_at + shift_cycle_duration)
+        shift_cycle_ends_at = shift_cycle_starts_at + shift_cycle_duration
 
         shift_for(participant, shift_cycle_starts_at, shift_cycle_ends_at)
       end
@@ -157,8 +156,8 @@ module IncidentManagement
       IncidentManagement::OncallShift.new(
         rotation: rotation,
         participant: participant,
-        starts_at: starts_at,
-        ends_at: ends_at
+        starts_at: limit_start_time(starts_at),
+        ends_at: limit_end_time(ends_at)
       )
     end
 
@@ -167,6 +166,10 @@ module IncidentManagement
     # @return [Integer]
     def participant_rank(elapsed_shifts_count)
       elapsed_shifts_count % participants.length
+    end
+
+    def limit_start_time(expected_starts_at)
+      [expected_starts_at, rotation_starts_at].max
     end
 
     def limit_end_time(expected_ends_at)
