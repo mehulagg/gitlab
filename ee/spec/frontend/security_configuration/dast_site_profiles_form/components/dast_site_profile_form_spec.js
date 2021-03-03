@@ -12,6 +12,7 @@ import { siteProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
 import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
 import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import * as urlUtility from '~/lib/utils/url_utility';
 
 const localVue = createLocalVue();
@@ -45,20 +46,19 @@ describe('DastSiteProfileForm', () => {
   const withinComponent = () => within(wrapper.element);
 
   const findForm = () => wrapper.find(GlForm);
-  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   const findByNameAttribute = (name) => wrapper.find(`[name="${name}"]`);
 
-  const findProfileNameInput = () => findByTestId('profile-name-input');
-  const findTargetUrlInput = () => findByTestId('target-url-input');
-  const findExcludedUrlsInput = () => findByTestId('excluded-urls-input');
-  const findRequestHeadersInput = () => findByTestId('request-headers-input');
-  const findAuthCheckbox = () => findByTestId('auth-enable-checkbox');
-  const findSubmitButton = () => findByTestId('dast-site-profile-form-submit-button');
-  const findCancelButton = () => findByTestId('dast-site-profile-form-cancel-button');
+  const findProfileNameInput = () => wrapper.findByTestId('profile-name-input');
+  const findTargetUrlInput = () => wrapper.findByTestId('target-url-input');
+  const findExcludedUrlsInput = () => wrapper.findByTestId('excluded-urls-input');
+  const findRequestHeadersInput = () => wrapper.findByTestId('request-headers-input');
+  const findAuthCheckbox = () => wrapper.findByTestId('auth-enable-checkbox');
+  const findSubmitButton = () => wrapper.findByTestId('dast-site-profile-form-submit-button');
+  const findCancelButton = () => wrapper.findByTestId('dast-site-profile-form-cancel-button');
   const findAuthSection = () => wrapper.find(DastSiteAuthSection);
   const findCancelModal = () => wrapper.find(GlModal);
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
-  const findAlert = () => findByTestId('dast-site-profile-form-alert');
+  const findAlert = () => wrapper.findByTestId('dast-site-profile-form-alert');
 
   const setFieldValue = async (field, value) => {
     await field.setValue(value);
@@ -120,7 +120,7 @@ describe('DastSiteProfileForm', () => {
       },
     );
 
-    wrapper = mountFn(DastSiteProfileForm, mountOpts);
+    wrapper = extendedWrapper(mountFn(DastSiteProfileForm, mountOpts));
   };
   const createComponent = componentFactory();
   const createFullComponent = componentFactory(mount);
