@@ -145,7 +145,7 @@ By default, we authorize at the edges. Checking an existing ability may make sen
 
 As an aside, most endpoints can be cleanly categorized as a CRUD (create, read, update, destroy) action on a resource. The services and abilities follow suit, which is why many are named like `Projects::CreateService` or `:read_project`.
 
-Say, for example, we extract the whole endpoint into a service. The `can?` check will now be in the service. Say the service reuses an existing finder, which we are modifying for our purposes. Should we make the finder check an ability?
+Say, for example, we extract the whole endpoint into a service returning a [ServiceResponse](reusing_abstractions.html#serviceresponse). The `can?` check will now be in the service. Say the service reuses an existing finder, which we are modifying for our purposes. Should we make the finder check an ability?
 
 - If the finder doesn't accept `current_user`, and therefore doesn't check permissions, then probably no.
 - If the finder accepts `current_user`, and doesn't check permissions, then it would be a good idea to double check other usages of the finder, and we might consider adding authorization.
