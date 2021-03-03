@@ -721,7 +721,7 @@ To enable prevent project forking:
 - **Webhooks**: Configure [webhooks](../project/integrations/webhooks.md) for your group.
 - **Kubernetes cluster integration**: Connect your GitLab group with [Kubernetes clusters](clusters/index.md).
 - **Audit Events**: View [Audit Events](../../administration/audit_events.md)
-  for the group. **(PREMIUM SELF)**
+  for the group. **(PREMIUM)**
 - **Pipelines quota**: Keep track of the [pipeline quota](../admin_area/settings/continuous_integration.md) for the group.
 - **Integrations**: Configure [integrations](../admin_area/settings/project_integration_management.md) for your group.
 
