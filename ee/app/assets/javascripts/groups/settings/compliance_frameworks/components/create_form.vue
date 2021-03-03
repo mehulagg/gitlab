@@ -42,6 +42,7 @@ export default {
   },
   methods: {
     setError(error, userFriendlyText) {
+      this.saving = false;
       this.errorMessage = userFriendlyText;
       Sentry.captureException(error);
     },
@@ -71,14 +72,11 @@ export default {
         if (error) {
           this.setError(new Error(error), error);
         } else {
-          this.saving = false;
           visitUrl(this.groupEditPath);
         }
       } catch (e) {
         this.setError(e, SAVE_ERROR);
       }
-
-      this.saving = false;
     },
   },
   i18n: {

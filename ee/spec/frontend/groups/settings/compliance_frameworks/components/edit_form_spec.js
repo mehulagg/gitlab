@@ -184,7 +184,7 @@ describe('EditForm', () => {
       expect(Sentry.captureException.mock.calls[0][0]).toStrictEqual(sentrySaveError);
     });
 
-    it('saves inputted values and redirects', async () => {
+    it('saves inputted values, redirects and continues to show loading while redirecting', async () => {
       wrapper = createComponent([
         [getComplianceFrameworkQuery, fetchOne],
         [updateComplianceFrameworkMutation, update],
@@ -193,7 +193,7 @@ describe('EditForm', () => {
       await submitForm(name, description, pipelineConfigurationFullPath, color);
 
       expect(update).toHaveBeenCalledWith(updateProps);
-      expect(findFormStatus().props('loading')).toBe(false);
+      expect(findFormStatus().props('loading')).toBe(true);
       expect(visitUrl).toHaveBeenCalledWith(propsData.groupEditPath);
     });
   });
