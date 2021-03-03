@@ -238,6 +238,5 @@ module Security
       project.security_setting.auto_fix_enabled_types.include?(report.type.to_sym)
     end
   end
-
   StoreReportService.prepend(Measurable)
 end
