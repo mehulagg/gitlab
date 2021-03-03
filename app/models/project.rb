@@ -146,6 +146,10 @@ class Project < ApplicationRecord
   has_one :last_event, -> {order 'events.created_at DESC'}, class_name: 'Event'
   has_many :boards
 
+  has_one :import_type_relation,
+    class_name: 'Projects::ImportType',
+    autosave: true
+
   # Project services
   has_one :campfire_service
   has_one :datadog_service
@@ -582,7 +586,11 @@ class Project < ApplicationRecord
     preload(:project_feature, :route, namespace: [:route, :owner])
   }
 
-  scope :imported_from, -> (type) { where(import_type: type) }
+  scope :imported_from, -> (type) {
+    left_outer_joins(:import_type_relation)
+      .where('project_import_types.name = :type OR projects.import_type = :type', type: type)
+  }
+
   scope :with_tracing_enabled, -> { joins(:tracing_setting) }
   scope :with_enabled_error_tracking, -> { joins(:error_tracking_setting).where(project_error_tracking_settings: { enabled: true }) }
 
@@ -1109,6 +1117,16 @@ class Project < ApplicationRecord
 
   def safe_import_url
     Gitlab::UrlSanitizer.new(import_url).masked_url
+  end
+
+  def import_type=(value)
+    (import_type_relation || build_import_type_relation).tap do |relation|
+      relation.name = value
+    end
+  end
+
+  def import_type
+    read_attribute(:import_type).presence || import_type_relation&.name
   end
 
   def bare_repository_import?

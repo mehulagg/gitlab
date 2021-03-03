@@ -16103,6 +16103,24 @@ CREATE SEQUENCE project_import_data_id_seq
 
 ALTER SEQUENCE project_import_data_id_seq OWNED BY project_import_data.id;
 
+CREATE TABLE project_import_types (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    name text NOT NULL,
+    CONSTRAINT check_e7406c7d8b CHECK ((char_length(name) <= 255))
+);
+
+CREATE SEQUENCE project_import_types_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE project_import_types_id_seq OWNED BY project_import_types.id;
+
 CREATE TABLE project_incident_management_settings (
     project_id integer NOT NULL,
     create_issue boolean DEFAULT false NOT NULL,
@@ -19343,6 +19361,8 @@ ALTER TABLE ONLY project_group_links ALTER COLUMN id SET DEFAULT nextval('projec
 
 ALTER TABLE ONLY project_import_data ALTER COLUMN id SET DEFAULT nextval('project_import_data_id_seq'::regclass);
 
+ALTER TABLE ONLY project_import_types ALTER COLUMN id SET DEFAULT nextval('project_import_types_id_seq'::regclass);
+
 ALTER TABLE ONLY project_incident_management_settings ALTER COLUMN project_id SET DEFAULT nextval('project_incident_management_settings_project_id_seq'::regclass);
 
 ALTER TABLE ONLY project_mirror_data ALTER COLUMN id SET DEFAULT nextval('project_mirror_data_id_seq'::regclass);
@@ -20808,6 +20828,9 @@ ALTER TABLE ONLY project_group_links
 
 ALTER TABLE ONLY project_import_data
     ADD CONSTRAINT project_import_data_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY project_import_types
+    ADD CONSTRAINT project_import_types_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY project_incident_management_settings
     ADD CONSTRAINT project_incident_management_settings_pkey PRIMARY KEY (project_id);
@@ -23115,6 +23138,10 @@ CREATE INDEX index_project_group_links_on_project_id ON project_group_links USIN
 
 CREATE INDEX index_project_import_data_on_project_id ON project_import_data USING btree (project_id);
 
+CREATE UNIQUE INDEX index_project_import_types_on_project_id ON project_import_types USING btree (project_id);
+
+CREATE INDEX index_project_import_types_on_project_id_and_created_at ON project_import_types USING btree (project_id, created_at);
+
 CREATE INDEX index_project_mirror_data_on_last_successful_update_at ON project_mirror_data USING btree (last_successful_update_at);
 
 CREATE INDEX index_project_mirror_data_on_last_update_at_and_retry_count ON project_mirror_data USING btree (last_update_at, retry_count);
@@ -25229,6 +25256,9 @@ ALTER TABLE ONLY issuable_severities
 
 ALTER TABLE ONLY saml_providers
     ADD CONSTRAINT fk_rails_306d459be7 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY project_import_types
+    ADD CONSTRAINT fk_rails_30f4eb699e FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY resource_state_events
     ADD CONSTRAINT fk_rails_3112bba7dc FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
