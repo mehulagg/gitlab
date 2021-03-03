@@ -299,9 +299,32 @@ To create a value stream:
 1. Navigate to your group's **Analytics > Value Stream**.
 1. Click the Value stream dropdown and select **Create new Value Stream**
 1. Fill in a name for the new Value Stream
+   - We can [customize the stages](#creating-a-value-stream-with-stages) with the `value_stream_analytics_extended_form` feature flag enabled
 1. Click the **Create Value Stream** button.
 
 ![New value stream](img/new_value_stream_v13_3.png "Creating a new value stream")
+
+#### Creating a value stream with stages
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55572) in GitLab 13.10.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../administration/feature_flags.md). **(FREE SELF)**
+
+A default value stream template is available, additional stages can be added to this template or alternatively we can start from a blank template.
+
+To create a value stream with stages:
+
+1. A default configuration is selected by default, alternatively we can select 'Create from no template' to create a value stream from scratch
+![VSA template](img/vsa_template_v13_10.png "VSA template")
+   - Default stages in the value stream can be hidden or re-ordered
+![Default stage actions](img/vsa_default_stage_v13_10.png "Default stage actions")
+   - New stages can be added by clicking the 'Add another stage' button
+   - The name, start and end events for the stage can be selected
+![Custom stage actions](img/vsa_custom_stage_v13_10.png "Custom stage actions")
+1. Click the **Create Value Stream** button to save the value stream.
+
+![Extended create value stream form](img/extended_value_stream_form_v13_10.png "Extended create value stream form")
 
 ### Deleting a value stream
 
