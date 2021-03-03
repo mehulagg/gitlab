@@ -11681,7 +11681,7 @@ CREATE TABLE dast_site_profiles (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     name text NOT NULL,
-    authentication_enabled boolean,
+    authentication_enabled boolean DEFAULT false NOT NULL,
     excluded_urls text,
     request_headers text,
     CONSTRAINT check_07ae59ac33 CHECK ((char_length(excluded_urls) <= 1024)),
