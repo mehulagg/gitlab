@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Create', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/30226', type: :bug } do
+  RSpec.describe 'Create' do
     describe 'Merge request rebasing' do
       it 'user rebases source branch of merge request', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1274' do
         Flow::Login.sign_in
