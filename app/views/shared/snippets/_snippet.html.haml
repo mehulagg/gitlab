@@ -1,6 +1,5 @@
 - link_project = local_assigns.fetch(:link_project, false)
 - notes_count = @noteable_meta_data[snippet.id].user_notes_count
-- file_count = snippet.statistics.nil? ? 1 : snippet.statistics.file_count
 
 %li.snippet-row.py-3{ data: { qa_selector: 'snippet_link', qa_snippet_title: snippet.title } }
   = image_tag avatar_icon_for_user(snippet.author), class: "avatar s40 d-none d-sm-block", alt: ''
@@ -11,9 +10,7 @@
 
     %ul.controls
       %li
-        %span{ title: pluralize(file_count, 'file'), data: { toggle: 'tooltip', container: 'body' }}
-          = sprite_icon('documents', css_class: 'gl-vertical-align-text-bottom')
-          = file_count
+        = snippet_file_count(snippet)
       %li
         = link_to gitlab_snippet_path(snippet, anchor: 'notes'), class: ('no-comments' if notes_count == 0) do
           = sprite_icon('comments', css_class: 'gl-vertical-align-text-bottom')

@@ -68,4 +68,17 @@ module SnippetsHelper
             title: 'Download',
             rel: 'noopener noreferrer')
   end
+
+  def snippet_file_count(snippet)
+    return if snippet.statistics.nil?
+
+    file_count = snippet.statistics.file_count
+    tooltip = "#{file_count} #{'file'.pluralize(file_count)}"
+
+    tag.span(class: 'file_count', title: tooltip, data: { toggle: 'tooltip', container: 'body'}) do
+      concat(sprite_icon('documents', css_class: 'gl-vertical-align-middle'))
+      concat(' ')
+      concat(file_count)
+    end
+  end
 end
