@@ -149,7 +149,8 @@ module API
             else
               Gitlab::Metrics.add_event(:build_not_found)
               header 'X-GitLab-Last-Update', new_update
-              no_content!
+              # no_content!
+              body Gitlab::ApplicationContext.current.to_json
             end
           else
             # We received build that is invalid due to concurrency conflict
