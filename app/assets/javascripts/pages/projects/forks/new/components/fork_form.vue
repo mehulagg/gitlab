@@ -19,6 +19,7 @@ import axios from '~/lib/utils/axios_utils';
 import csrf from '~/lib/utils/csrf';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
+import { kebabCase } from 'lodash';
 
 const PRIVATE_VISIBILITY = 'private';
 const INTERNAL_VISIBILITY = 'internal';
