@@ -7,9 +7,19 @@ module Gitlab
         SAFE_CONTEXT_KEYS = %i[current_user].freeze
 
         def resolve(object:, arguments:, context:)
-          object.try(:present, field.owner, safe_context_values(context))
+          attrs = safe_context_values(context)
 
-          yield(object, arguments)
+          # We need to handle the object being either a Schema::Object or an
+          # inner Schema::Object#object. This depends on whether the field
+          # has a @resolver_proc or not.
+          if object.is_a?(::Types::BaseObject)
+            object.present(field.owner, attrs)
+            yield(object, arguments)
+          else
+            # This is the legacy code-path, hit if the field has a @resolver_proc
+            presented = field.owner.try(:present, object, attrs) || object
+            yield(presented, arguments)
+          end
         end
 
         private

@@ -13,22 +13,24 @@ module Gitlab
           @presenter_class
         end
 
-        def self.wrap(object, attrs)
+        def self.present(object, attrs)
+          klass = @presenter_class
+          return object if !klass || object.is_a?(klass)
+
           @presenter_class.new(object, **attrs)
         end
       end
 
-      def present(object_type, attrs)
-        klass = object_type.try(:presenter_class)
-        return if !klass || object.is_a?(klass)
-
-        self.unwrapped ||= object
-        # The @object variable is not exposed through a setter
-        @object = object_type.wrap(unwrapped, attrs) # rubocop: disable Gitlab/ModuleWithInstanceVariables
-      end
-
       def unpresented
         unwrapped || object
+      end
+
+      def present(object_type, attrs)
+        return unless object_type.respond_to?(:present)
+
+        self.unwrapped ||= object
+        # @object belongs to Schema::Object, which does not expose a writer.
+        @object = object_type.present(unwrapped, attrs) # rubocop: disable Gitlab/ModuleWithInstanceVariables
       end
 
       private
