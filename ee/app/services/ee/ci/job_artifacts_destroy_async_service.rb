@@ -2,7 +2,7 @@
 
 module EE
   module Ci
-    module JobArtifactsParallelDestroyBatchService
+    module JobArtifactsDestroyAsyncService
       extend ::Gitlab::Utils::Override
 
       private

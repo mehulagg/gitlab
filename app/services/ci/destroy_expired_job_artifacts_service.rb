@@ -33,7 +33,7 @@ module Ci
 
     def destroy_job_artifacts_with_slow_iteration(start_at)
       Ci::JobArtifact.expired_before(start_at).each_batch(of: BATCH_SIZE, column: :expire_at, order: :desc) do |relation, index|
-        artifacts = relation.unlocked.with_destroy_preloads.to_a
+        artifacts = relation.unlocked
 
         @removed_artifacts_count += parallel_destroy_batch(artifacts)[:size] if artifacts.any?
         break if loop_timeout?(start_at)
@@ -42,7 +42,7 @@ module Ci
     end
 
     def parallel_destroy_batch(artifacts)
-      Ci::JobArtifactsParallelDestroyBatchService.new(artifacts).execute
+      Ci::JobArtifactsDestroyAsyncService.new(artifacts).execute
     end
 
     def loop_timeout?(start_at)

@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::JobArtifactsParallelDestroyBatchService do
+RSpec.describe Ci::JobArtifactsDestroyAsyncService do
   include ExclusiveLeaseHelpers
 
-  let(:service) { described_class.new([artifact], pick_up_at: Time.current) }
+  let(:service) { described_class.new(Ci::JobArtifact.all, pick_up_at: Time.current) }
 
   describe '.execute' do
     subject { service.execute }
@@ -37,9 +37,9 @@ RSpec.describe Ci::JobArtifactsParallelDestroyBatchService do
       end
 
       it 'reports metrics for destroyed artifacts' do
-        counter = service.send(:destroyed_artifacts_counter)
-
-        expect(counter).to receive(:increment).with({}, 1).and_call_original
+        expect_next_instance_of(Gitlab::Ci::Artifacts::Metrics) do |metrics|
+          expect(metrics).to receive(:increment_destroyed_artifacts).with(1).and_call_original
+        end
 
         subject
       end
@@ -62,7 +62,7 @@ RSpec.describe Ci::JobArtifactsParallelDestroyBatchService do
     end
 
     context 'when there are no artifacts' do
-      let(:service) { described_class.new([], pick_up_at: Time.current) }
+      let(:service) { described_class.new(Ci::JobArtifact.none, pick_up_at: Time.current) }
 
       before do
         artifact.destroy!

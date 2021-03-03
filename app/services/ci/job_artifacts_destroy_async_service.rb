@@ -1,16 +1,20 @@
 # frozen_string_literal: true
 
 module Ci
-  class JobArtifactsParallelDestroyBatchService
+  class JobArtifactsDestroyAsyncService
     include BaseServiceUtility
     include ::Gitlab::Utils::StrongMemoize
 
-    # Runs a subprocess and applies handlers for stdout and stderr
+    # Adds a batch of job artifacts to the ci_deleted_objects table
+    # for asyncronous destruction of the objects in ObjectStorage via Ci::DeleteObjectsService
+    # and then deletes the batch of related ci_job_artifacts records.
     # Params:
-    # +job_artifacts+:: Array of job artifacts for Object deletion
+    # +job_artifacts+:: A relation of job artifacts to destroy
     # +pick_up_at+:: When to pick up for deletion of files
+    # Returns:
+    # +Hash+:: A hash with status and size keys
     def initialize(job_artifacts, pick_up_at: nil)
-      @job_artifacts = job_artifacts
+      @job_artifacts = job_artifacts.with_destroy_preloads.to_a
       @pick_up_at = pick_up_at
     end
 
@@ -43,18 +47,13 @@ module Ci
     end
 
     def increment_monitoring_statistics(size)
-      destroyed_artifacts_counter.increment({}, size)
+      metrics.increment_destroyed_artifacts(size)
     end
 
-    def destroyed_artifacts_counter
-      strong_memoize(:destroyed_artifacts_counter) do
-        name = :destroyed_job_artifacts_count_total
-        comment = 'Counter of destroyed expired job artifacts'
-
-        ::Gitlab::Metrics.counter(name, comment)
-      end
+    def metrics
+      @metrics ||= ::Gitlab::Ci::Artifacts::Metrics.new
     end
   end
 end
 
-Ci::JobArtifactsParallelDestroyBatchService.prepend_if_ee('EE::Ci::JobArtifactsParallelDestroyBatchService')
+Ci::JobArtifactsDestroyAsyncService.prepend_if_ee('EE::Ci::JobArtifactsDestroyAsyncService')

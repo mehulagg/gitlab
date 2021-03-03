@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::JobArtifactsParallelDestroyBatchService do
+RSpec.describe Ci::JobArtifactsDestroyAsyncService do
   describe '.execute' do
     subject { service.execute }
 
-    let(:service) { described_class.new([artifact], pick_up_at: Time.current) }
+    let(:service) { described_class.new(Ci::JobArtifact.all, pick_up_at: Time.current) }
 
     let_it_be(:artifact) { create(:ci_job_artifact) }
     let_it_be(:security_scan) { create(:security_scan, build: artifact.job) }
