@@ -65,10 +65,36 @@ and you can [customize the payload](#customize-the-alert-payload-outside-of-gitl
    1. _(Optional)_ To generate a test alert to test the new integration, enter a
       sample payload, then click **Save and test alert payload**. Valid JSON is required.
    1. Click **Save Integration**.
+      1. _(Optional)_ To generate a test alert to test the new integration, or to map
+      fields from your monitoring tool's alert to GitLab fields, enter a sample payload
+      and click **Submit payload**. Valid JSON is required.
+
+      NOTE:
+      If you update a sample payload, you must also remap the fields.
+
+   1. _(Optional)_ If you provided a valid sample payload, select each value in
+      **Payload alert key** to [map to a **GitLab alert key**](#map-fields-in-custom-alerts).
+      Define both a mapping and fallback for the **Title** field, because a title is
+      required to trigger an alert.
+   1. To save your integration, you can:
+      - Click **Save and test alert payload** to save your configuration and send a test alert.
+      - Click **Save Integration** to save the alert without sending a test alert.
 
 The new HTTP Endpoint displays in the [integrations list](#integrations-list).
 You can edit the integration by selecting the **{pencil}** pencil icon on the right
 side of the integrations list.
+
+#### Map fields in custom alerts
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4443) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.8.
+
+You can integrate your monitoring tool's alert format with GitLab alerts. To show the
+correct information in the [Alert list](alerts.md) and the
+[Alert Details page](alerts.md#alert-details-page), map your alert's fields to
+GitLab fields when you [create an HTTP endpoint](#http-endpoints):
+
+![Alert Management List](img/custom_alert_mapping_v13_8.png)
+
 
 ### External Prometheus integration
 
