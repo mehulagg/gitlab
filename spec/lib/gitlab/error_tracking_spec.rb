@@ -7,6 +7,7 @@ require 'raven/transports/dummy'
 RSpec.describe Gitlab::ErrorTracking do
   let(:exception) { RuntimeError.new('boom') }
   let(:issue_url) { 'http://gitlab.com/gitlab-org/gitlab-foss/issues/1' }
+  let(:extra) { { issue_url: issue_url, some_other_info: 'info' } }
 
   let(:user) { create(:user) }
 
@@ -135,8 +136,6 @@ RSpec.describe Gitlab::ErrorTracking do
   end
 
   describe '.track_exception' do
-    let(:extra) { { issue_url: issue_url, some_other_info: 'info' } }
-
     subject(:track_exception) { described_class.track_exception(exception, extra) }
 
     before do
@@ -194,6 +193,55 @@ RSpec.describe Gitlab::ErrorTracking do
         expect(Raven).to have_received(:capture_exception).with(
           exception, a_hash_including(extra: a_hash_including(extra))
         )
+      end
+    end
+
+    context 'when the error is kind of an `ActiveRecord::StatementInvalid`' do
+      let(:exception) { ActiveRecord::StatementInvalid.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1') }
+
+      it 'injects the normalized sql query into extra' do
+        track_exception
+
+        expect(sentry_event.dig('extra', 'sql')).to eq('SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
+      end
+    end
+
+    context 'when the `ActiveRecord::StatementInvalid` is wrapped in another exception' do
+      it 'injects the normalized sql query into extra' do
+        allow(exception).to receive(:cause).and_return(ActiveRecord::StatementInvalid.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1'))
+
+        track_exception
+
+        expect(sentry_event.dig('extra', 'sql')).to eq('SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
+      end
+    end
+  end
+
+  shared_examples 'event processors' do
+    subject(:track_exception) { described_class.track_exception(exception, extra) }
+
+    before do
+      allow(Raven).to receive(:capture_exception).and_call_original
+      allow(Gitlab::ErrorTracking::Logger).to receive(:error)
+    end
+
+    context 'custom GitLab context when using Raven.capture_exception directly' do
+      subject(:raven_capture_exception) { Raven.capture_exception(exception) }
+
+      it 'merges a default set of tags into the existing tags' do
+        allow(Raven.context).to receive(:tags).and_return(foo: 'bar')
+
+        raven_capture_exception
+
+        expect(sentry_event['tags']).to include('correlation_id', 'feature_category', 'foo', 'locale', 'program')
+      end
+
+      it 'merges the current user information into the existing user information' do
+        Raven.user_context(id: -1)
+
+        raven_capture_exception
+
+        expect(sentry_event['user']).to eq('id' => -1, 'username' => user.username)
       end
     end
 
@@ -263,25 +311,21 @@ RSpec.describe Gitlab::ErrorTracking do
         end
       end
     end
+  end
 
-    context 'when the error is kind of an `ActiveRecord::StatementInvalid`' do
-      let(:exception) { ActiveRecord::StatementInvalid.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1') }
-
-      it 'injects the normalized sql query into extra' do
-        track_exception
-
-        expect(sentry_event.dig('extra', 'sql')).to eq('SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
-      end
+  context 'with sentry_processors_before_send enabled' do
+    before do
+      stub_feature_flags(sentry_processors_before_send: true)
     end
 
-    context 'when the `ActiveRecord::StatementInvalid` is wrapped in another exception' do
-      it 'injects the normalized sql query into extra' do
-        allow(exception).to receive(:cause).and_return(ActiveRecord::StatementInvalid.new(sql: 'SELECT "users".* FROM "users" WHERE "users"."id" = 1 AND "users"."foo" = $1'))
+    include_examples 'event processors'
+  end
 
-        track_exception
-
-        expect(sentry_event.dig('extra', 'sql')).to eq('SELECT "users".* FROM "users" WHERE "users"."id" = $2 AND "users"."foo" = $1')
-      end
+  context 'with sentry_processors_before_send disabled' do
+    before do
+      stub_feature_flags(sentry_processors_before_send: false)
     end
+
+    include_examples 'event processors'
   end
 end
