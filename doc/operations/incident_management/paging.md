@@ -34,3 +34,7 @@ send additional email notifications to project members with the **Developer** ro
 1. In the **Alert Integration** tab, select the **Send a separate email notification to Developers**
    check box.
 1. Select **Save changes**.
+
+## Paging **(PREMIUM)**
+
+In projects that have an [on-call schedule](/oncall_schedules.md) configured, on-call responders will be paged via email for triggered alerts. The on-call responder(s) will recieve one email for triggered alerts.
