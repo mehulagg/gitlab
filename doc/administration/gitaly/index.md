@@ -126,29 +126,7 @@ The following list depicts the network architecture of Gitaly:
 - Authentication is done through a static token which is shared among the Gitaly and GitLab Rails
   nodes.
 
-```mermaid
-graph TD
-    subgraph App Node
-    D[default] ----> | 80 / 443 | A{GitLab Rails}
-    A --> | 8075 / 9999 | D
-    end
-
-    subgraph Gitaly Node 1
-    G1[gitaly1]
-    end
-
-    subgraph Gitaly Node2
-    G2[gitaly2]
-    end
-
-    A ----> |  8075 / 9999 | G1
-    D --> | 8075 / 9999 | G1
-    G1 ----> | 80 / 443 | A
-    G1 --> | 8075 / 9999 | D
-    G1 --> | 8075 / 9999 | G2
-    G2 ----> | 80 / 443 | A
-    G2 --> | 8075 / 9999 | D
-```
+![Gitaly network architecture diagram](img/gitaly_network_color_13_9.png)
 
 WARNING:
 Gitaly servers must not be exposed to the public internet as Gitaly's network traffic is unencrypted
