@@ -105,7 +105,6 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
              
             <div
               class="gl-popover"
-              title="nora.schaden"
             >
               <p
                 class="gl-m-0"
@@ -151,7 +150,6 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
              
             <div
               class="gl-popover"
-              title="racheal.loving"
             >
               <p
                 class="gl-m-0"

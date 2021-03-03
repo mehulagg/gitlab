@@ -76,4 +76,24 @@ RSpec.describe Dast::Profile, type: :model do
       end
     end
   end
+
+  describe 'instance methods' do
+    describe '#branch' do
+      context 'when the associated project does not have a repository' do
+        it 'returns nil' do
+          expect(subject.branch).to be_nil
+        end
+      end
+
+      context 'when the associated project has a repository' do
+        let_it_be(:project) { create(:project, :repository) }
+
+        subject { create(:dast_profile, project: project) }
+
+        it 'returns a Dast::Branch' do
+          expect(subject.branch).to be_a(Dast::Branch)
+        end
+      end
+    end
+  end
 end

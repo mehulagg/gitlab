@@ -41,6 +41,9 @@ RSpec.describe User do
     it { is_expected.to delegate_method(:show_whitespace_in_diffs).to(:user_preference) }
     it { is_expected.to delegate_method(:show_whitespace_in_diffs=).to(:user_preference).with_arguments(:args) }
 
+    it { is_expected.to delegate_method(:view_diffs_file_by_file).to(:user_preference) }
+    it { is_expected.to delegate_method(:view_diffs_file_by_file=).to(:user_preference).with_arguments(:args) }
+
     it { is_expected.to delegate_method(:tab_width).to(:user_preference) }
     it { is_expected.to delegate_method(:tab_width=).to(:user_preference).with_arguments(:args) }
 
@@ -58,6 +61,9 @@ RSpec.describe User do
 
     it { is_expected.to delegate_method(:experience_level).to(:user_preference) }
     it { is_expected.to delegate_method(:experience_level=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:markdown_surround_selection).to(:user_preference) }
+    it { is_expected.to delegate_method(:markdown_surround_selection=).to(:user_preference).with_arguments(:args) }
 
     it { is_expected.to delegate_method(:job_title).to(:user_detail).allow_nil }
     it { is_expected.to delegate_method(:job_title=).to(:user_detail).with_arguments(:args).allow_nil }
@@ -1828,7 +1834,7 @@ RSpec.describe User do
   end
 
   describe '.instance_access_request_approvers_to_be_notified' do
-    let_it_be(:admin_list) { create_list(:user, 12, :admin, :with_sign_ins) }
+    let_it_be(:admin_issue_board_list) { create_list(:user, 12, :admin, :with_sign_ins) }
 
     it 'returns up to the ten most recently active instance admins' do
       active_admins_in_recent_sign_in_desc_order = User.admins.active.order_recent_sign_in.limit(10)
@@ -2489,6 +2495,38 @@ RSpec.describe User do
       it 'shows correct avatar url' do
         expect(user.avatar_url).to eq(user.avatar.url)
         expect(user.avatar_url(only_path: false)).to eq([Gitlab.config.gitlab.url, user.avatar.url].join)
+      end
+    end
+  end
+
+  describe "#clear_avatar_caches" do
+    let(:user) { create(:user) }
+
+    context "when :avatar_cache_for_email flag is enabled" do
+      before do
+        stub_feature_flags(avatar_cache_for_email: true)
+      end
+
+      it "clears the avatar cache when saving" do
+        allow(user).to receive(:avatar_changed?).and_return(true)
+
+        expect(Gitlab::AvatarCache).to receive(:delete_by_email).with(*user.verified_emails)
+
+        user.update(avatar: fixture_file_upload('spec/fixtures/dk.png'))
+      end
+    end
+
+    context "when :avatar_cache_for_email flag is disabled" do
+      before do
+        stub_feature_flags(avatar_cache_for_email: false)
+      end
+
+      it "doesn't attempt to clear the avatar cache" do
+        allow(user).to receive(:avatar_changed?).and_return(true)
+
+        expect(Gitlab::AvatarCache).not_to receive(:delete_by_email)
+
+        user.update(avatar: fixture_file_upload('spec/fixtures/dk.png'))
       end
     end
   end

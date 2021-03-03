@@ -25,7 +25,7 @@ module EE
               def perform!
                 return unless limit.exceeded?
 
-                retry_optimistic_lock(pipeline) do
+                retry_optimistic_lock(pipeline, name: 'ci_pipeline_chain_limit_activity') do
                   pipeline.drop!(:activity_limit_exceeded)
                   limit.log_error!(project_id: project.id, plan: project.actual_plan_name)
                 end

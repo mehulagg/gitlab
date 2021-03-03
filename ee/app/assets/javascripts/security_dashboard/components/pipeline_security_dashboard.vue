@@ -3,7 +3,6 @@ import { GlEmptyState } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import { fetchPolicies } from '~/lib/graphql';
 import { s__ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import pipelineSecurityReportSummaryQuery from '../graphql/queries/pipeline_security_report_summary.query.graphql';
 import SecurityDashboard from './security_dashboard_vuex.vue';
 import SecurityReportsSummary from './security_reports_summary.vue';
@@ -15,7 +14,6 @@ export default {
     SecurityReportsSummary,
     SecurityDashboard,
   },
-  mixins: [glFeatureFlagsMixin()],
   apollo: {
     securityReportSummary: {
       query: pipelineSecurityReportSummaryQuery,
@@ -29,9 +27,6 @@ export default {
       update(data) {
         const summary = data?.project?.pipeline?.securityReportSummary;
         return summary && Object.keys(summary).length ? summary : null;
-      },
-      skip() {
-        return !this.glFeatures.pipelinesSecurityReportSummary;
       },
     },
   },

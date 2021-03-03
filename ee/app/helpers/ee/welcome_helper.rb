@@ -20,6 +20,10 @@ module EE
       params[:trial] == 'true'
     end
 
+    def already_showed_trial_activation?
+      params[:hide_trial_activation_banner] == 'true'
+    end
+
     def in_invitation_flow?
       redirect_path.present? && redirect_path.starts_with?('/-/invites/')
     end

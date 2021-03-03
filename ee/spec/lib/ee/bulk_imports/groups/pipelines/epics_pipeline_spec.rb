@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
+RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline, :clean_gitlab_redis_cache do
   let_it_be(:cursor) { 'cursor' }
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
@@ -30,7 +30,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
   describe '#run' do
     it 'imports group epics into destination group' do
       first_page = extractor_data(has_next_page: true, cursor: cursor)
-      last_page = extractor_data(has_next_page: false)
+      last_page = extractor_data(has_next_page: false, page: 2)
 
       allow_next_instance_of(BulkImports::Common::Extractors::GraphqlExtractor) do |extractor|
         allow(extractor)
@@ -93,6 +93,20 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
     end
   end
 
+  describe '#transform' do
+    it 'caches epic source id in redis' do
+      data = { 'id' => 'gid://gitlab/Epic/1', 'iid' => 1 }
+      cache_key = "bulk_import:#{bulk_import.id}:entity:#{entity.id}:epic:#{data['iid']}"
+      source_params = { source_id: '1' }.to_json
+
+      ::Gitlab::Redis::Cache.with do |redis|
+        expect(redis).to receive(:set).with(cache_key, source_params, ex: ::BulkImports::Pipeline::CACHE_KEY_EXPIRATION)
+      end
+
+      subject.transform(context, data)
+    end
+  end
+
   describe '#after_run' do
     context 'when extracted data has next page' do
       it 'updates tracker information and runs pipeline again' do
@@ -148,9 +162,11 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
     end
   end
 
-  def extractor_data(has_next_page:, cursor: nil)
+  def extractor_data(has_next_page:, cursor: nil, page: 1)
     data = [
       {
+        'id' => "gid://gitlab/Epic/#{page}",
+        'iid' => page,
         'title' => 'epic1',
         'state' => 'closed',
         'confidential' => true,

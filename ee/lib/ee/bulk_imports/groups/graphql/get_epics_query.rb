@@ -21,6 +21,7 @@ module EE
                     has_next_page: hasNextPage
                   }
                   nodes {
+                    id
                     iid
                     title
                     description

@@ -50,8 +50,8 @@ export const currentTimeframeEndsAt = (timeframeStart, presetType) => {
  * => true
  *
  */
-export const shiftShouldRender = (shiftRangeOverlap = {}) => {
-  return Boolean(shiftRangeOverlap?.hoursOverlap);
+export const shiftShouldRender = (shiftRangeOverlap) => {
+  return Boolean(shiftRangeOverlap.hoursOverlap);
 };
 
 /**
@@ -225,7 +225,7 @@ export const weekDisplayShiftLeft = (
  * @returns {Number}
  *
  * @example
- * weekDisplayShiftWidth(false, { daysOverlap: 3 }, false , 50)
+ * weekDisplayShiftWidth(false, { daysOverlap: 3, hoursOverlap: 72, overlapEndDate: 1610496000000 }, false , 50)
  * => 148
  *
  */
@@ -242,7 +242,7 @@ export const weekDisplayShiftWidth = (
     );
   }
 
-  const widthOffset = shiftStartDateOutOfRange ? 1 : 0;
-
+  const shiftEndsAtMidnight = new Date(shiftRangeOverlap.overlapEndDate).getHours() === 0;
+  const widthOffset = shiftStartDateOutOfRange && !shiftEndsAtMidnight ? 1 : 0;
   return shiftTimeUnitWidth * (shiftRangeOverlap.daysOverlap - widthOffset) - ASSIGNEE_SPACER;
 };

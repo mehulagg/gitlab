@@ -27,6 +27,13 @@ describe('Security Reports modal', () => {
     modal = wrapper.find(GlModal);
   };
 
+  describe('modal', () => {
+    it('renders a large modal', () => {
+      mountComponent({ modal: createState().modal }, mount);
+      expect(modal.props('size')).toBe('lg');
+    });
+  });
+
   describe('with permissions', () => {
     describe('with dismissed issue', () => {
       beforeEach(() => {

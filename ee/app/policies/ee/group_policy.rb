@@ -144,7 +144,7 @@ module EE
       end
 
       rule { reporter }.policy do
-        enable :admin_list
+        enable :admin_issue_board_list
         enable :view_productivity_analytics
         enable :view_type_of_work_charts
         enable :read_group_timelogs
@@ -288,7 +288,7 @@ module EE
         prevent :read_group
       end
 
-      rule { ip_enforcement_prevents_access & ~owner }.policy do
+      rule { ip_enforcement_prevents_access & ~owner & ~auditor }.policy do
         prevent :read_group
       end
 
@@ -341,7 +341,7 @@ module EE
         prevent :admin_milestone
         prevent :upload_file
         prevent :admin_label
-        prevent :admin_list
+        prevent :admin_issue_board_list
         prevent :admin_issue
         prevent :admin_pipeline
         prevent :add_cluster

@@ -73,7 +73,7 @@ export default {
     rotations: {
       query: getShiftsForRotations,
       variables() {
-        this.timeframeStartDate.setHours(0, 0, 0, 0);
+        this.timeframeStartDate.setHours(1, 0, 0, 0);
         const startsAt = this.timeframeStartDate;
         const endsAt = nWeeksAfter(startsAt, 2);
 

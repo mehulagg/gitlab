@@ -20,6 +20,12 @@ module Dast
       where(project_id: project_id)
     end
 
+    def branch
+      return unless project.repository.exists?
+
+      Dast::Branch.new(project)
+    end
+
     private
 
     def project_ids_match

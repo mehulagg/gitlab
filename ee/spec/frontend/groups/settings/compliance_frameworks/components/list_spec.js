@@ -213,13 +213,18 @@ describe('List', () => {
         expect(findDeleteModal().vm.show).toHaveBeenCalled();
       });
 
-      describe('and the item is being deleted', () => {
+      describe('and multiple items are being deleted', () => {
         beforeEach(() => {
-          findDeleteModal().vm.$emit('deleting');
+          findListItems().wrappers.forEach((listItem) => {
+            listItem.vm.$emit('delete', listItem.props('framework'));
+            findDeleteModal().vm.$emit('deleting');
+          });
         });
 
-        it('sets "loading" to true on the marked list item', () => {
-          expect(findListItem().props('loading')).toBe(true);
+        it('sets "loading" to true on the deleting list items', () => {
+          expect(findListItems().wrappers.every((listItem) => listItem.props('loading'))).toBe(
+            true,
+          );
         });
 
         describe('and an error occurred', () => {
@@ -238,8 +243,12 @@ describe('List', () => {
 
         describe('and the item was successfully deleted', () => {
           beforeEach(async () => {
-            findDeleteModal().vm.$emit('delete');
+            findDeleteModal().vm.$emit('delete', framework.id);
             await waitForPromises();
+          });
+
+          it('sets "loading" to false on the deleted list item', () => {
+            expect(findListItem().props('loading')).toBe(false);
           });
 
           it('shows the alert for the success message', () => {
