@@ -45,9 +45,10 @@ describe('DastSiteProfileForm', () => {
 
   const withinComponent = () => within(wrapper.element);
 
-  const findForm = () => wrapper.find(GlForm);
+  const findForm = () => wrapper.findComponent(GlForm);
+  const findAuthSection = () => wrapper.findComponent(DastSiteAuthSection);
+  const findCancelModal = () => wrapper.findComponent(GlModal);
   const findByNameAttribute = (name) => wrapper.find(`[name="${name}"]`);
-
   const findProfileNameInput = () => wrapper.findByTestId('profile-name-input');
   const findTargetUrlInput = () => wrapper.findByTestId('target-url-input');
   const findExcludedUrlsInput = () => wrapper.findByTestId('excluded-urls-input');
@@ -55,10 +56,8 @@ describe('DastSiteProfileForm', () => {
   const findAuthCheckbox = () => wrapper.findByTestId('auth-enable-checkbox');
   const findSubmitButton = () => wrapper.findByTestId('dast-site-profile-form-submit-button');
   const findCancelButton = () => wrapper.findByTestId('dast-site-profile-form-cancel-button');
-  const findAuthSection = () => wrapper.find(DastSiteAuthSection);
-  const findCancelModal = () => wrapper.find(GlModal);
-  const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
   const findAlert = () => wrapper.findByTestId('dast-site-profile-form-alert');
+  const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
 
   const setFieldValue = async (field, value) => {
     await field.setValue(value);
