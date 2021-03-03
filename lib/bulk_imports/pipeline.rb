@@ -13,12 +13,13 @@ module BulkImports
 
     def initialize(context)
       @context = context
+      @tracker = context.tracker
     end
 
     included do
       private
 
-      attr_reader :context
+      attr_reader :context, :tracker
 
       # Fetch pipeline extractor.
       # An extractor is defined either by instance `#extract(context)` method

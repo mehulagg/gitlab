@@ -10085,11 +10085,17 @@ ALTER SEQUENCE bulk_import_failures_id_seq OWNED BY bulk_import_failures.id;
 CREATE TABLE bulk_import_trackers (
     id bigint NOT NULL,
     bulk_import_entity_id bigint NOT NULL,
-    relation text NOT NULL,
+    relation text,
     next_page text,
     has_next_page boolean DEFAULT false NOT NULL,
+    jid text,
+    pipeline_name text,
+    stage smallint NOT NULL,
+    status smallint NOT NULL,
     CONSTRAINT check_2d45cae629 CHECK ((char_length(relation) <= 255)),
+    CONSTRAINT check_328a4e67b0 CHECK ((char_length(pipeline_name) <= 255)),
     CONSTRAINT check_40aeaa600b CHECK ((char_length(next_page) <= 255)),
+    CONSTRAINT check_603f91cb06 CHECK ((char_length(jid) <= 255)),
     CONSTRAINT check_next_page_requirement CHECK (((has_next_page IS FALSE) OR (next_page IS NOT NULL)))
 );
 
@@ -23980,6 +23986,8 @@ CREATE UNIQUE INDEX uniq_pkgs_debian_project_distributions_project_id_and_codena
 CREATE UNIQUE INDEX uniq_pkgs_debian_project_distributions_project_id_and_suite ON packages_debian_project_distributions USING btree (project_id, suite);
 
 CREATE UNIQUE INDEX unique_merge_request_metrics_by_merge_request_id ON merge_request_metrics USING btree (merge_request_id);
+
+CREATE UNIQUE INDEX unique_pipeline_per_stage_per_entity ON bulk_import_trackers USING btree (bulk_import_entity_id, pipeline_name, stage);
 
 CREATE INDEX user_follow_users_followee_id_idx ON user_follow_users USING btree (followee_id);
 

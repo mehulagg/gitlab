@@ -8,9 +8,18 @@ module BulkImports
       end
 
       def execute
-        context = BulkImports::Pipeline::Context.new(entity)
+        pipelines.each.with_index do |pipeline, stage|
+          tracker = entity.trackers.create!(
+            pipeline_name: pipeline,
+            stage: stage
+          )
 
-        pipelines.each { |pipeline| pipeline.new(context).run }
+          context = BulkImports::Pipeline::Context.new(tracker)
+
+          pipeline.new(context).run
+
+          tracker.finish!
+        end
 
         entity.finish!
       end

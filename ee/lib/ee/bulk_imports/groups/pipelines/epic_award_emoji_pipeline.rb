@@ -17,7 +17,8 @@ module EE
 
           # rubocop: disable CodeReuse/ActiveRecord
           def initialize(context)
-            @context = context
+            super
+
             @group = context.group
             @epic_iids = @group.epics.order(iid: :desc).pluck(:iid)
 
@@ -25,11 +26,7 @@ module EE
           end
 
           def after_run(extracted_data)
-            iid = context.extra[:epic_iid]
-            tracker = "epic_#{iid}_award_emoji"
-
-            context.entity.update_tracker_for(
-              relation: tracker,
+            tracker.update(
               has_next_page: extracted_data.has_next_page?,
               next_page: extracted_data.next_page
             )

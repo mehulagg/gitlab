@@ -14,19 +14,19 @@ module BulkImports
 
         extracted_data = extracted_data_from
 
-        extracted_data&.each do |entry|
-          transformers.each do |transformer|
-            entry = run_pipeline_step(:transformer, transformer.class.name) do
-              transformer.transform(context, entry)
+        if extracted_data
+          extracted_data.each do |entry|
+            transformers.each do |transformer|
+              entry = run_pipeline_step(:transformer, transformer.class.name) do
+                transformer.transform(context, entry)
+              end
+            end
+
+            run_pipeline_step(:loader, loader.class.name) do
+              loader.load(context, entry)
             end
           end
 
-          run_pipeline_step(:loader, loader.class.name) do
-            loader.load(context, entry)
-          end
-        end
-
-        if respond_to?(:after_run)
           run_pipeline_step(:after_run) do
             after_run(extracted_data)
           end
@@ -46,8 +46,10 @@ module BulkImports
 
         yield
       rescue MarkedAsFailedError
+        tracker.fail_op!
         log_skip(step => class_name)
       rescue => e
+        tracker.fail_op!
         log_import_failure(e, step)
 
         mark_as_failed if abort_on_failure?
@@ -58,6 +60,17 @@ module BulkImports
       def extracted_data_from
         run_pipeline_step(:extractor, extractor.class.name) do
           extractor.extract(context)
+        end
+      end
+
+      def after_run(extracted_data)
+        tracker.update(
+          has_next_page: extracted_data.has_next_page?,
+          next_page: extracted_data.next_page
+        )
+
+        if extracted_data.has_next_page?
+          run
         end
       end
 
@@ -91,6 +104,8 @@ module BulkImports
           exception_message: exception.message.truncate(255),
           correlation_id_value: Labkit::Correlation::CorrelationId.current_or_new_id
         }
+
+        warn(attributes)
 
         BulkImports::Failure.create(attributes)
       end

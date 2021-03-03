@@ -14,7 +14,8 @@ module EE
           transformer ::BulkImports::Common::Transformers::UserReferenceTransformer, reference: 'author'
 
           def initialize(context)
-            @context = context
+            super
+
             @group = context.group
             @epic_iids = @group.epics.order(iid: :desc).pluck(:iid) # rubocop: disable CodeReuse/ActiveRecord
 
@@ -48,11 +49,7 @@ module EE
           end
 
           def after_run(extracted_data)
-            iid = context.extra[:epic_iid]
-            tracker = "epic_#{iid}_events"
-
-            context.entity.update_tracker_for(
-              relation: tracker,
+            tracker.update(
               has_next_page: extracted_data.has_next_page?,
               next_page: extracted_data.next_page
             )
