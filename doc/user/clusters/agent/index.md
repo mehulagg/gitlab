@@ -69,7 +69,7 @@ For more details, please refer to our [full architecture documentation](https://
 
 The setup process involves a few steps to enable GitOps deployments:
 
-1. [Install the Agent server](#install-the-kubernetes-agent-server).
+1. [Install the Agent server](#install-the-kubernetes-agent-server) once per GitLab instance.
 1. [Define a configuration repository](#define-a-configuration-repository).
 1. [Create an Agent record in GitLab](#create-an-agent-record-in-gitlab).
 1. [Generate and copy a Secret token used to connect to the Agent](#create-the-kubernetes-secret).
@@ -94,14 +94,14 @@ The available `agentk` and `kas` versions can be found in
 
 ### Install the Kubernetes Agent Server
 
+NOTE:
+GitLab includes the KAS on GitLab.com already. If you are interested in using the GitLab Kubernetes Agent on gitlab.com, you can move to setting up the configuration repository for your agent.
+
 The GitLab Kubernetes Agent Server (KAS) can be deployed using [Omnibus
 GitLab](https://docs.gitlab.com/omnibus/) or the [GitLab
 chart](https://gitlab.com/gitlab-org/charts/gitlab). If you don't already have
 GitLab installed, please refer to our [installation
 documentation](https://docs.gitlab.com/ee/install/README.html).
-
-NOTE:
-GitLab plans to include the KAS on [GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/3834).
 
 #### Install with Omnibus
 
@@ -232,6 +232,9 @@ the Agent in subsequent steps. You can create an Agent record either:
 ### Install the Agent into the cluster
 
 Next, install the in-cluster component of the Agent. 
+
+NOTE:
+For gitlab.com users, KAS is available at `wss://kas.gitlab.com`.
 
 #### One-liner installation
 
