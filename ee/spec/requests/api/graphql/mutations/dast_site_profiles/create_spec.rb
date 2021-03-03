@@ -15,7 +15,8 @@ RSpec.describe 'Creating a DAST Site Profile' do
       mutation_name,
       full_path: full_path,
       profile_name: profile_name,
-      target_url: target_url
+      target_url: target_url,
+      excluded_urls: "#{target_url}/signout"
     )
   end
 
