@@ -95,7 +95,6 @@ GitLab fields when you [create an HTTP endpoint](#http-endpoints):
 
 ![Alert Management List](img/custom_alert_mapping_v13_8.png)
 
-
 ### External Prometheus integration
 
 For GitLab versions 13.1 and greater, read
