@@ -123,13 +123,15 @@ into different features like Merge Requests and CI flow.
 
 ## Where should permissions be checked?
 
-By default, controllers, API endpoints, and GraphQL types/fields are responsible for authorization. See [Secure Coding Guidelines > Permissions](secure_coding_guidelines.md#permissions).
+By default, Rails controllers, Grape API resources, and [GraphQL types or fields](api_graphql_styleguide.md#authorization) are responsible for authorization. See [Secure Coding Guidelines > Permissions](secure_coding_guidelines.md#permissions).
 
 ### Considerations
 
-- Many actions are completely or partially extracted to services, finders, and other classes, so it is normal to do permission checks "downstream".
+- Many actions are completely or partially extracted to services, finders, and other classes, so it is normal to do permission checks "downstream". In fact, when extracting an action into a service, authorization should be included to avoid duplication when the service is reused.
 - Often, authorization logic must be incorporated in DB queries to filter records.
 - `DeclarativePolicy` rules are relatively performant, but conditions may perform database calls.
+  However it is acceptable to repeat authorization calls. Results are cached for the duration of the
+  request, so repeating an authorization call on the same object does not require any IO.
 - Multiple permission checks across layers can be difficult to reason about, which is its own security risk. For example, duplicate authorization logic could diverge.
 
 ### Tips
@@ -138,7 +140,7 @@ By default, controllers, API endpoints, and GraphQL types/fields are responsible
 
 ### Example: Adding a new API endpoint
 
-By default, we authorize at the endpoint. Checking an existing ability may make sense; if not, then we probably need to add one.
+By default, we authorize at the edges. Checking an existing ability may make sense; if not, then we probably need to add one.
 
 As an aside, most endpoints can be cleanly categorized as a CRUD (create, read, update, destroy) action on a resource. The services and abilities follow suit, which is why many are named like `Projects::CreateService` or `:read_project`.
 
