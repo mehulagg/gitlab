@@ -1,6 +1,6 @@
 GIT
   remote: https://gitlab.com/gitlab-com/gl-security/engineering-and-research/automation-team/spam/spamcheck
-  revision: a0237c3f8e3f0194d73f7b4c7be9574ea20a6442
+  revision: 5d16d0e5b9eb8ed8826e13cf8ebf7f1873917d50
   branch: 40-eurie-publish-protobuf-as-gem
   specs:
     spamcheck (0.1.0)

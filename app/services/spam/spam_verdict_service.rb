@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'spamcheck'
 
 module Spam
   class SpamVerdictService
@@ -44,23 +43,27 @@ module Spam
       return if endpoint_url.blank?
 
       begin
-        result = Gitlab::HTTP.post(endpoint_url, body: verdict_params.to_json, headers: { 'Content-Type' => 'application/json' })
+        binding.pry
+        result = client.is_issue_spam?(target: target, user: user, context:context)
+        #result = Gitlab::HTTP.post(endpoint_url, body: verdict_params.to_json, headers: { 'Content-Type' => 'application/json' })
         return unless result
 
-        json_result = Gitlab::Json.parse(result).with_indifferent_access
-        json_result = { verdict: ALLOW } if json_result.empty? # gRPC doesn't encode default values if they're 0 (which ALLOW is)
+        #json_result = Gitlab::Json.parse(result).with_indifferent_access
+        #json_result = { verdict: ALLOW } if json_result.empty? # gRPC doesn't encode default values if they're 0 (which ALLOW is)
         # @TODO metrics/logging
         # Expecting:
         # error: (string or nil)
         # verdict: (string or nil)
         # @TODO log if json_result[:error]
 
-        json_result[:verdict]&.downcase
+        #json_result[:verdict]&.downcase
+        result.verdict.downcase
+        # TODO what do do if error is not nil?
       rescue *Gitlab::HTTP::HTTP_ERRORS => e
         # @TODO: log error via try_post https://gitlab.com/gitlab-org/gitlab/-/issues/219223
         Gitlab::ErrorTracking.log_exception(e)
         nil
-      rescue
+      rescue => e
         # @TODO log
         ALLOW
       end
@@ -73,8 +76,8 @@ module Spam
 
       emails = user.emails.map { |email| { email: email.email, verified: !email.confirmed_at.nil? } }
       
-      case context[:target].to_sym
-      when :issue
+      case target.class
+      when Issue
         issue = Spamcheck::Issue.new()
         issue.title = target.spam_title
         issue.description = target.spam_description
@@ -103,6 +106,10 @@ module Spam
 
     def endpoint_url
       @endpoint_url ||= Gitlab::CurrentSettings.current_application_settings.spam_check_endpoint_url
+    end
+
+    def client
+      @client ||= Gitlab::SpamcheckClient::Client.new(endpoint_url: endpoint_url)
     end
 
     def action_to_enum(action_str)

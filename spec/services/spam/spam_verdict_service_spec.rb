@@ -2,6 +2,8 @@
 
 require 'spec_helper'
 
+require 'spamcheck'
+
 RSpec.describe Spam::SpamVerdictService do
   include_context 'includes Spam constants'
 
@@ -160,15 +162,24 @@ RSpec.describe Spam::SpamVerdictService do
       before do
         stub_application_setting(spam_check_endpoint_enabled: true)
         stub_application_setting(spam_check_endpoint_url: "http://www.spamcheckurl.com/spam_check")
-        stub_request(:post, /.*spamcheckurl.com.*/).to_return( body: spam_check_body.to_json, status: spam_check_http_status )
+        # stub_request(:post, /.*spamcheckurl.com.*/).to_return( body: spam_check_body.to_json, status: spam_check_http_status )
       end
 
       context 'if the endpoint is accessible' do
         let(:spam_check_http_status) { 200 }
-        let(:error) { nil }
+        let(:error) { '' }
         let(:verdict) { nil }
-        let(:spam_check_body) do
-          { verdict: verdict, error: error }
+        let(:spam_check_response) do
+          spam_verdict = ::Spamcheck::SpamVerdict.new
+          spam_verdict.verdict = verdict
+          spam_verdict.error = error
+          spam_verdict
+        end
+
+        before do
+          allow_next_instance_of(Gitlab::SpamcheckClient) do |instance|
+            allow(instance).to receive(:is_issue_spam?).and_return(spam_check_response)
+          end 
         end
 
         context 'the result is a valid verdict' do
@@ -179,28 +190,11 @@ RSpec.describe Spam::SpamVerdictService do
           end
         end
 
-        # gRPC doesn't encode the default value of a field if it's 0, which ALLOW is
-        context 'the result is an empty hash' do
-          let(:spam_check_body) { {} }
-
-          it 'returns the ALLOW verdict' do
-            expect(subject).to eq ALLOW
-          end
-        end
-
         context 'the verdict is an unexpected string' do
           let(:verdict) { 'this is fine' }
 
           it 'returns the string' do
             expect(subject).to eq verdict
-          end
-        end
-
-        context 'the JSON is malformed' do
-          let(:spam_check_body) { 'this is fine' }
-
-          it 'returns allow' do
-            expect(subject).to eq ALLOW
           end
         end
 
