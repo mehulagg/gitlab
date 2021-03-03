@@ -44,6 +44,18 @@ RSpec.describe Gitlab::Checks::LfsCheck do
 
         it 'skips integrity check' do
           expect(project.repository).not_to receive(:new_objects)
+          expect_any_instance_of(Gitlab::Git::LfsChanges).not_to receive(:new_pointers)
+
+          subject.validate!
+        end
+      end
+
+      context 'deletion 2' do
+        let(:changes) { { oldrev: oldrev, newrev: Gitlab::Git::BLANK_SHA, ref: ref } }
+
+        it 'skips integrity check' do
+          expect(project.repository).not_to receive(:new_objects)
+          expect_any_instance_of(Gitlab::Git::LfsChanges).not_to receive(:new_pointers)
 
           subject.validate!
         end
