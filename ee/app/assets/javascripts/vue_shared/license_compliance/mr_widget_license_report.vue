@@ -1,5 +1,5 @@
 <script>
-import { GlLink, GlIcon } from '@gitlab/ui';
+import { GlLink, GlIcon, GlButton } from '@gitlab/ui';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
@@ -16,6 +16,7 @@ export default {
   componentNames,
   store,
   components: {
+    GlButton,
     GlLink,
     ReportItem,
     ReportSection,
@@ -177,25 +178,26 @@ export default {
         </div>
       </template>
       <template v-if="showActionButtons" #action-buttons>
-        <div class="gl-display-flex gl-mr-3">
-          <a
-            v-if="licenseManagementSettingsPath"
-            :class="{ 'gl-mr-3': fullReportPath }"
-            :href="licenseManagementSettingsPath"
-            class="btn btn-default btn-sm js-manage-licenses"
-            data-qa-selector="manage_licenses_button"
-          >
-            {{ s__('ciReport|Manage licenses') }}
-          </a>
-          <a
-            v-if="fullReportPath"
-            :href="fullReportPath"
-            target="_blank"
-            class="btn btn-default btn-sm js-full-report"
-          >
-            {{ s__('ciReport|View full report') }} <gl-icon :size="16" name="external-link" />
-          </a>
-        </div>
+        <gl-button
+          v-if="fullReportPath"
+          :href="fullReportPath"
+          target="_blank"
+          class="btn gl-mr-3 report-btn btn-default btn-md gl-button"
+        >
+          <gl-icon :size="16" class="gl-mr-2" name="external-link" />{{
+            s__('ciReport|View full report')
+          }}
+        </gl-button>
+        <gl-button
+          v-if="licenseManagementSettingsPath"
+          :class="{
+            'js-collapse-btn btn float-right btn-sm align-self-center qa-expand-report-button': fullReportPath,
+          }"
+          :href="licenseManagementSettingsPath"
+          data-qa-selector="manage_licenses_button"
+        >
+          {{ s__('ciReport|Manage licenses') }}
+        </gl-button>
       </template>
     </report-section>
   </div>
