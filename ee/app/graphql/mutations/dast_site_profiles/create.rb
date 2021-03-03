@@ -28,9 +28,15 @@ module Mutations
                description: 'The URLs to skip during an authenticated scan. Will be ignored ' \
                             'if `security_dast_site_profiles_additional_fields` feature flag is disabled.'
 
+      argument :request_headers, GraphQL::STRING_TYPE,
+               required: false,
+               description: 'Comma-separated list of request header names and values to be ' \
+                            'added to every request made by DAST. Will be ignored ' \
+                            'if `security_dast_site_profiles_additional_fields` feature flag is disabled.'
+
       authorize :create_on_demand_dast_scan
 
-      def resolve(full_path:, profile_name:, target_url: nil, excluded_urls: nil)
+      def resolve(full_path:, profile_name:, target_url: nil, excluded_urls: nil, request_headers: nil)
         project = authorized_find!(full_path)
 
         service = ::DastSiteProfiles::CreateService.new(project, current_user)
