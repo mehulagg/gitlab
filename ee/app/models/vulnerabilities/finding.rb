@@ -332,12 +332,17 @@ module Vulnerabilities
       end
     end
 
-    alias_method :==, :eql? # eql? is necessary in some cases like array intersection
+    alias_method :==, :eql?
 
     def eql?(other)
-      other.report_type == report_type &&
-        other.location_fingerprint == location_fingerprint &&
-        other.first_fingerprint == first_fingerprint
+      return false unless other.report_type == report_type && other.first_fingerprint == first_fingerprint
+
+      if ::Feature.enabled?(:vulnerability_finding_fingerprints)
+        # TODO add the uuid + 'hash' fingerprint type
+        matches_fingerprints(other.fingerprints, other.uuid)
+      else
+        other.location_fingerprint == location_fingerprint
+      end
     end
 
     # Array.difference (-) method uses hash and eql? methods to do comparison
@@ -378,6 +383,41 @@ module Vulnerabilities
       pipelines&.last&.sha || project.default_branch
     end
 
+    # this should match the same code as in ee/lib/gitlab/ci/reports/security/finding.rb
+    def matches_fingerprints(other_fingerprints, other_uuid)
+      other_fingerprint_types = other_fingerprints.index_by(&:algorithm_type)
+
+      # highest first
+      match_result = nil
+      fingerprints.sort_by(&:priority).reverse_each do |fingerprint|
+        matching_other_fingerprint = other_fingerprint_types[fingerprint.algorithm_type]
+        next if matching_other_fingerprint.nil?
+
+        match_result = matching_other_fingerprint == fingerprint
+        break
+      end
+
+      if match_result.nil?
+        Set.new([uuid, *fingerprint_uuids]).include?(other_uuid)
+      else
+        match_result
+      end
+    end
+
+    def fingerprint_uuids
+      fingerprints.map do |fingerprint|
+        hex_sha = fingerprint.fingerprint_hex
+        Gitlab::UUID.v5(uuid_v5_name(location_fingerprint_value: hex_sha))
+      end
+    end
+
+    def fingerprint_uuids_and_priorities
+      fingerprints.map do |fingerprint|
+        hex_sha = fingerprint.fingerprint_sha256.unpack1("H*")
+        [Gitlab::UUID.v5(uuid_v5_name(location_fingerprint_value: hex_sha)), fingerprint.priority]
+      end
+    end
+
     protected
 
     def first_fingerprint
@@ -392,6 +432,15 @@ module Vulnerabilities
         category: report_type,
         project_fingerprint: project_fingerprint
       }
+    end
+
+    def uuid_v5_name(location_fingerprint_value: nil)
+      [
+        report_type,
+        (primary_identifier || identifiers.first).fingerprint,
+        location_fingerprint_value || location_fingerprint,
+        project_id
+      ].join('-')
     end
   end
 end
