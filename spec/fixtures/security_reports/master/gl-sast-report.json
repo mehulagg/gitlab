@@ -37,8 +37,11 @@
             "start_line": 1,
             "end_line": 1,
             "fingerprints": [
-              { "algorithm": "hash", "value": "HASHVALUE" },
-              { "algorithm": "scope_offset", "value": "python/hardcoded/hardcoded-tmp.py:ClassA:method_b:2" }
+              { "algorithm": "location", "value": "python/hardcoded/hardcoded-tmp.py:1:1" },
+              {
+                "algorithm": "scope_offset",
+                "value": "python/hardcoded/hardcoded-tmp.py:ClassA:method_b:2"
+              }
             ]
           }
         ]

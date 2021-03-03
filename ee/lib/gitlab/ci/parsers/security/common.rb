@@ -80,11 +80,20 @@ module Gitlab
             links = create_links(data['links'])
             location = create_location(data['location'] || {})
             remediations = create_remediations(data['remediations'])
-            fingerprints = create_fingerprints(tracking_data(data))
+            fingerprints = create_fingerprints(location, tracking_data(data))
+
+            if ::Feature.enabled?(:vulnerability_finding_fingerprints) && !fingerprints.empty?
+              # NOT the fingerprint_sha256 - the compare key is hashed
+              # to create the project_fingerprint
+              highest_priority_fingerprint = fingerprints.max_by(&:priority)
+              uuid = calculate_uuid_v5(identifiers.first, highest_priority_fingerprint.fingerprint_hex)
+            else
+              uuid = calculate_uuid_v5(identifiers.first, location&.fingerprint)
+            end
 
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
-                uuid: calculate_uuid_v5(identifiers.first, location),
+                uuid: uuid,
                 report_type: report.type,
                 name: finding_name(data, identifiers, location),
                 compare_key: data['cve'] || '',
@@ -99,13 +108,15 @@ module Gitlab
                 raw_metadata: data.to_json,
                 metadata_version: report_version,
                 details: data['details'] || {},
-                fingerprints: fingerprints))
+                fingerprints: fingerprints,
+                project_id: report.project_id))
           end
 
-          def create_fingerprints(tracking)
-            return [] if tracking.nil? || tracking['items'].nil?
+          def create_fingerprints(location, tracking)
+            tracking ||= { 'items' => [] }
 
             fingerprint_algorithms = Hash.new { |hash, key| hash[key] = [] }
+
             tracking['items'].each do |item|
               next unless item.key?('fingerprints')
 
@@ -115,18 +126,19 @@ module Gitlab
               end
             end
 
+            if fingerprint_algorithms.empty?
+              is_location = [:file_path, :start_line].all? { |x| location.respond_to?(x) }
+              type = is_location ? 'location' : 'hash'
+              fingerprint_algorithms[type] = [location.fingerprint_data]
+            end
+
             fingerprint_algorithms.map do |algorithm, values|
               value = values.join('|')
-              begin
-                fingerprint = ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(
-                  algorithm_type: algorithm,
-                  fingerprint_value: value
-                )
-                fingerprint.valid? ? fingerprint : nil
-              rescue ArgumentError => e
-                Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
-                nil
-              end
+              fingerprint = ::Gitlab::Ci::Reports::Security::FindingFingerprint.new(
+                algorithm_type: algorithm,
+                fingerprint_value: value
+              )
+              fingerprint.valid? ? fingerprint : nil
             end.compact
           end
 
@@ -193,6 +205,10 @@ module Gitlab
             raise NotImplementedError
           end
 
+          def create_tracking_location(tracking_data, fingerprint)
+            Reports::Security::Locations::Tracking.new(tracking_data, fingerprint)
+          end
+
           def finding_name(data, identifiers, location)
             return data['message'] if data['message'].present?
             return data['name'] if data['name'].present?
@@ -201,11 +217,11 @@ module Gitlab
             "#{identifier.name} in #{location&.fingerprint_path}"
           end
 
-          def calculate_uuid_v5(primary_identifier, location)
+          def calculate_uuid_v5(primary_identifier, location_fingerprint)
             uuid_v5_name_components = {
               report_type: report.type,
               primary_identifier_fingerprint: primary_identifier&.fingerprint,
-              location_fingerprint: location&.fingerprint,
+              location_fingerprint: location_fingerprint,
               project_id: report.project_id
             }
 
