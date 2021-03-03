@@ -624,7 +624,8 @@ Then in `resources.yml`:
             path: myCA.pem
 ```
 
-Alternatively, you can mount the certificate file at a different location and include it using the `--ca-cert-file` agent parameter:
+Alternatively, you can mount the certificate file at a different location and include it using the
+`--ca-cert-file` agent parameter:
 
 ```plaintext
       containers:
