@@ -238,7 +238,8 @@ Example response:
 Gets a list of group members that count as billable. The list includes members in the subgroup or subproject.
 
 NOTE:
-Unlike other API endpoints, billable members is updated once per day at 12:00 UTC.
+- Unlike other API endpoints, billable members is updated once per day at 12:00 UTC.
+- This API currently only works on top-level groups. It will not work on sub-groups.
 
 This function takes [pagination](README.md#pagination) parameters `page` and `per_page` to restrict the list of users.
 
