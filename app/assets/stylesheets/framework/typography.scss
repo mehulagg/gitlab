@@ -472,8 +472,17 @@
       outline: none;
 
       &::after {
-        content: image-url('icon_anchor.svg');
         visibility: hidden;
+        position: unset;
+        display: inline-flex;
+        height: 16px;
+        width: 16px;
+        background-color: $text-color;
+        mask-image: asset_url('icons-stacked.svg#link');
+        mask-repeat: no-repeat;
+        mask-size: cover;
+        mask-position: center;
+        content: '';
       }
     }
 

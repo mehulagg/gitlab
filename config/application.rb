@@ -233,6 +233,7 @@ module Gitlab
     # Import gitlab-svgs directly from vendored directory
     config.assets.paths << "#{config.root}/node_modules/@gitlab/svgs/dist"
     config.assets.precompile << "icons.svg"
+    config.assets.precompile << "icons-stacked.svg"
     config.assets.precompile << "icons.json"
     config.assets.precompile << "illustrations/*.svg"
 

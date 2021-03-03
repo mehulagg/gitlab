@@ -236,18 +236,33 @@ ul.related-merge-requests > li {
 .issue-details {
   .card-title {
     a.anchor {
-      left: -16px;
-      top: 4px;
+      float: left;
+      margin-left: -16px;
+      text-decoration: none;
       outline: none;
 
       &::after {
-        content: image-url('icon_anchor.svg');
         visibility: hidden;
+        position: unset;
+        display: inline-flex;
+        height: 12px;
+        width: 12px;
+        background-color: $text-color;
+        mask-image: asset_url('icons-stacked.svg#link');
+        mask-repeat: no-repeat;
+        mask-size: cover;
+        mask-position: center;
+        content: '';
       }
     }
 
     &:hover > a.anchor::after {
       visibility: visible;
+    }
+
+    > a.anchor:focus::after {
+      visibility: visible;
+      outline: auto;
     }
   }
 }
