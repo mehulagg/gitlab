@@ -92,6 +92,10 @@ class NotifyPreview < ActionMailer::Preview
     Notify.merge_request_status_email(user.id, merge_request.id, 'closed', user.id).message
   end
 
+  def merge_request_unmergeable_email
+    Notify.merge_request_unmergeable_email(user.id, merge_request.id, 'conflict').message
+  end
+
   def merged_merge_request_email
     Notify.merged_merge_request_email(user.id, merge_request.id, user.id).message
   end
