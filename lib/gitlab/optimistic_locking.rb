@@ -3,6 +3,7 @@
 module Gitlab
   module OptimisticLocking
     MAX_RETRIES = 100
+    BUCKETS = [1, 2, 3, 5, 10, 50].freeze
 
     module_function
 
@@ -41,10 +42,22 @@ module Gitlab
         name: name,
         retries: retry_attempts,
         time_s: elapsed_time)
+
+      retry_lock_histogram.observe({}, retry_attempts)
     end
 
     def retry_lock_logger
       @retry_lock_logger ||= Gitlab::Services::Logger.build
+    end
+
+    def retry_lock_histogram
+      @retry_lock_histogram ||=
+        Gitlab::Metrics.histogram(
+          :gitlab_optimistic_locking_retries,
+          'Amount of retry attempts to execute optimistic lock',
+          {},
+          [1, 2, 3, 5, 10, 50]
+        )
     end
   end
 end
