@@ -1,6 +1,7 @@
 import { GlCard } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
+import GeoNodeProgressBar from 'ee/geo_nodes_beta/components/details/geo_node_progress_bar.vue';
 import GeoNodePrimaryOtherInfo from 'ee/geo_nodes_beta/components/details/primary_node/geo_node_primary_other_info.vue';
 import {
   MOCK_PRIMARY_VERSION,
@@ -45,7 +46,7 @@ describe('GeoNodePrimaryOtherInfo', () => {
   });
 
   const findGlCard = () => wrapper.find(GlCard);
-  const findGeoNodeProgressBar = () => wrapper.find('[data-testid="replication-progress-bar"]');
+  const findGeoNodeProgressBar = () => wrapper.find(GeoNodeProgressBar);
   const findReplicationSlotWAL = () => wrapper.find('[data-testid="replicationSlotWAL"]');
 
   describe('template', () => {

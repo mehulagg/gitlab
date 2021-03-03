@@ -3,6 +3,7 @@ import { GlCard, GlIcon, GlPopover, GlLink } from '@gitlab/ui';
 import { mapGetters } from 'vuex';
 import { HELP_INFO_URL } from 'ee/geo_nodes_beta/constants';
 import { sprintf, s__ } from '~/locale';
+import GeoNodeProgressBar from '../geo_node_progress_bar.vue';
 
 export default {
   name: 'GeoNodeVerificationInfo',
@@ -11,6 +12,7 @@ export default {
     GlIcon,
     GlPopover,
     GlLink,
+    GeoNodeProgressBar,
   },
   props: {
     node: {
@@ -52,7 +54,11 @@ export default {
     </template>
     <div v-for="bar in verificationInfoBars" :key="bar.title" class="gl-mb-5">
       <span data-testid="verificationBarTitle">{{ buildTitle(bar.title) }}</span>
-      <p data-testid="verification-progress-bar">{{ s__('Geo|Progress Bar Placeholder') }}</p>
+      <geo-node-progress-bar
+        class="gl-mt-3"
+        :title="`${bar.title} checksum`"
+        :values="bar.values"
+      />
     </div>
   </gl-card>
 </template>

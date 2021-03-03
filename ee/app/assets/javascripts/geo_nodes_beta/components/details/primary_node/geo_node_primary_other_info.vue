@@ -2,11 +2,13 @@
 import { GlCard } from '@gitlab/ui';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { s__ } from '~/locale';
+import GeoNodeProgressBar from '../geo_node_progress_bar.vue';
 
 export default {
   name: 'GeoNodePrimaryOtherInfo',
   components: {
     GlCard,
+    GeoNodeProgressBar,
   },
   props: {
     node: {
@@ -38,7 +40,11 @@ export default {
     </template>
     <div class="gl-mb-5">
       <span>{{ replicationSlots.title }}</span>
-      <p data-testid="replication-progress-bar">{{ s__('Geo|Progress Bar Placeholder') }}</p>
+      <geo-node-progress-bar
+        class="gl-mt-3"
+        :title="replicationSlots.title"
+        :values="replicationSlots.values"
+      />
     </div>
     <div
       v-if="node.replicationSlotsMaxRetainedWalBytes"

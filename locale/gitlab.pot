@@ -13935,6 +13935,12 @@ msgstr ""
 msgid "Geo|Not synced yet"
 msgstr ""
 
+msgid "Geo|Nothing to synchronize"
+msgstr ""
+
+msgid "Geo|Number of %{title}"
+msgstr ""
+
 msgid "Geo|Pending synchronization"
 msgstr ""
 
@@ -13950,9 +13956,6 @@ msgstr ""
 msgid "Geo|Primary site"
 msgstr ""
 
-msgid "Geo|Progress Bar Placeholder"
-msgstr ""
-
 msgid "Geo|Project"
 msgstr ""
 
@@ -13963,6 +13966,9 @@ msgid "Geo|Projects in certain groups"
 msgstr ""
 
 msgid "Geo|Projects in certain storage shards"
+msgstr ""
+
+msgid "Geo|Queued"
 msgstr ""
 
 msgid "Geo|Redownload"
@@ -14035,6 +14041,9 @@ msgid "Geo|The node is currently %{minutes_behind} behind the primary node."
 msgstr ""
 
 msgid "Geo|There are no %{replicable_type} to show"
+msgstr ""
+
+msgid "Geo|Total"
 msgstr ""
 
 msgid "Geo|Tracking database entry will be removed. Are you sure?"
