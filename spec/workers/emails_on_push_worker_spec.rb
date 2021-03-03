@@ -164,6 +164,17 @@ RSpec.describe EmailsOnPushWorker, :mailer do
           expect(email_recipients).to contain_exactly("johndoe@example.com", "janedoe@example.com")
         end
       end
+
+      context 'when the recipient addresses contains duplicates' do
+        let(:recipients) { 'duplic@te.com duplic@te.com duplic@te.com duplic@te.com' }
+
+        it 'only sends the email once' do
+          perform
+
+          expect(ActionMailer::Base.deliveries.count).to eq(1)
+          expect(email_recipients).to contain_exactly('duplic@te.com')
+        end
+      end
     end
   end
 end
