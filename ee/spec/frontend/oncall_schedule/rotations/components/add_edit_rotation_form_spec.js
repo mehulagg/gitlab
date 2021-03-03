@@ -69,10 +69,10 @@ describe('AddEditRotationForm', () => {
       ${0}  | ${'name'}           | ${false}        | ${undefined}
       ${1}  | ${'participants'}   | ${true}         | ${'true'}
       ${1}  | ${'participants'}   | ${false}        | ${undefined}
-      ${3}  | ${'startsAt'}       | ${true}         | ${'true'}
-      ${3}  | ${'startsAt'}       | ${false}        | ${undefined}
       ${2}  | ${'rotationLength'} | ${true}         | ${'true'}
       ${2}  | ${'rotationLength'} | ${false}        | ${undefined}
+      ${3}  | ${'startsAt'}       | ${true}         | ${'true'}
+      ${3}  | ${'startsAt'}       | ${false}        | ${undefined}
     `(
       'form validation for $type returns $value when passed validate state of $validationState',
       ({ index, type, validationState, value }) => {
