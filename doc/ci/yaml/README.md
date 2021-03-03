@@ -2322,7 +2322,8 @@ started by a user. You might want to use manual jobs for things like deploying t
 
 To make a job manual, add `when: manual` to its configuration.
 
-Manual jobs are automatically marked as manual, and can be started from the pipeline, job, [environment](../environments/index.md#configuring-manual-deployments),
+When the pipeline starts, manual jobs display as skipped and do not run automatically.
+They can be started from the pipeline, job, [environment](../environments/index.md#configuring-manual-deployments),
 and deployment views.
 
 Manual jobs can be either optional or blocking:
