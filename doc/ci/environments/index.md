@@ -43,7 +43,7 @@ To view a list of environments and deployments:
 
    ![Deployments list](img/deployments_list.png)
 
-Deployments show up in this list only after a CI/CD job has created them.
+Deployments show up in this list only after a deployment job has created them.
 
 ## Types of environments
 
