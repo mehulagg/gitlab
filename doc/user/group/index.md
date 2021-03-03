@@ -248,7 +248,7 @@ For a group, you can view how many merge requests, issues, and members were crea
 
 These Group Activity Analytics can be enabled with the `group_activity_analytics` [feature flag](../../development/feature_flags/development.md#enabling-a-feature-flag-locally-in-development).
 
-![Recent Group Activity](img/group_activity_analytics_v12_10.png)
+![Recent Group Activity](img/group_activity_analytics_v13_10.png)
 
 ### View group activity
 
@@ -310,7 +310,7 @@ To create group links via CN:
 <!-- vale gitlab.Spelling = NO -->
 
 1. Select the **LDAP Server** for the link.
-1. As the **Sync method**, select `LDAP Group cn` 
+1. As the **Sync method**, select `LDAP Group cn`.
 1. In the **LDAP Group cn** text input box, begin typing the CN of the group. There is a dropdown menu with matching CNs within the configured `group_base`. Select your CN from this list.
 1. In the **LDAP Access** section, select the [permission level](../permissions.md) for users synced in this group.
 1. Select the **Add Synchronization** button.
