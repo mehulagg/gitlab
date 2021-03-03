@@ -11,8 +11,8 @@ import dastSiteProfileUpdateMutation from 'ee/security_configuration/dast_site_p
 import { siteProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
 import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
 import { TEST_HOST } from 'helpers/test_constants';
-import waitForPromises from 'helpers/wait_for_promises';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 import * as urlUtility from '~/lib/utils/url_utility';
 
 const localVue = createLocalVue();
