@@ -39,7 +39,7 @@ export default {
   data() {
     return {
       markedForDeletion: {},
-      deletingFrameworks: [],
+      deletingFrameworksIds: [],
       complianceFrameworks: [],
       error: '',
       message: '',
@@ -70,7 +70,7 @@ export default {
   },
   computed: {
     isLoading() {
-      return this.$apollo.loading && this.deletingFrameworks.length === 0;
+      return this.$apollo.loading && this.deletingFrameworksIds.length === 0;
     },
     hasLoaded() {
       return !this.isLoading && !this.error;
@@ -107,16 +107,16 @@ export default {
     },
     onDelete(id) {
       this.message = this.$options.i18n.deleteMessage;
-      const idx = this.deletingFrameworks.indexOf(id);
+      const idx = this.deletingFrameworksIds.indexOf(id);
       if (idx > -1) {
-        this.deletingFrameworks.splice(idx, 1);
+        this.deletingFrameworksIds.splice(idx, 1);
       }
     },
     onDeleting() {
-      this.deletingFrameworks.push(this.markedForDeletion.id);
+      this.deletingFrameworksIds.push(this.markedForDeletion.id);
     },
     isDeleting(id) {
-      return this.deletingFrameworks.includes(id);
+      return this.deletingFrameworksIds.includes(id);
     },
   },
   i18n: {

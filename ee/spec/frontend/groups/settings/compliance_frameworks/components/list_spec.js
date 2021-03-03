@@ -222,9 +222,9 @@ describe('List', () => {
         });
 
         it('sets "loading" to true on the deleting list items', () => {
-          findListItems().wrappers.forEach((listItem) => {
-            expect(listItem.props('loading')).toBe(true);
-          });
+          expect(findListItems().wrappers.every((listItem) => listItem.props('loading'))).toBe(
+            true,
+          );
         });
 
         describe('and an error occurred', () => {
