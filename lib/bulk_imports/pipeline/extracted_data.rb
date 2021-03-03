@@ -3,7 +3,7 @@
 module BulkImports
   module Pipeline
     class ExtractedData
-      attr_reader :data
+      attr_reader :data, :page_info
 
       def initialize(data: nil, page_info: {})
         @data = Array.wrap(data)
