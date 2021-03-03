@@ -78,7 +78,7 @@ This feature might not be available to you. Check the **version history** note a
 <Feature Name> is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default**. This feature
 may change or be removed without notice in a future version of GitLab. Data
-corruption or performance degradation may occur when enabling a feature which
+corruption, stability degradation, or performance degradation may occur when enabling a feature which
 is disabled by default. This is not covered by GitLab support.
 [GitLab administrators with access to the GitLab Rails console](<replace with path to>/administration/feature_flags.md)
 can enable it.
@@ -113,7 +113,7 @@ default:
 - Say whether it's recommended for production use.
 - Document how to disable and enable it.
 - Add a warning to the user saying that the feature might be disabled.
-- Warn that the feature will be enabled permanently in a future version of GitLab.
+- Warn if the feature will be enabled permanently in a future version of GitLab.
 
 For example, for a feature initially deployed disabled by default, that became
 enabled by default, that is enabled on GitLab.com, and is ready for production
@@ -142,7 +142,7 @@ This feature might not be available to you. Check the **version history** note a
 <Feature Name> is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](<replace with path to>/administration/feature_flags.md)
-can opt to disable it. It will be enabled permanently in a future
+can opt to disable it. It is intended to be enabled permanently in a future
 version of GitLab, without the option to disable it.
 
 To enable it:
