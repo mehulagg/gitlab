@@ -13,13 +13,13 @@ import {
   GlFormRadioGroup,
   GlFormSelect,
 } from '@gitlab/ui';
+import { kebabCase } from 'lodash';
 import { buildApiUrl } from '~/api/api_utils';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import csrf from '~/lib/utils/csrf';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import { kebabCase } from 'lodash';
 
 const PRIVATE_VISIBILITY = 'private';
 const INTERNAL_VISIBILITY = 'internal';
@@ -145,6 +145,9 @@ export default {
       if (this.projectAllowedVisibility.includes(visibility)) {
         this.fork.visibility = visibility;
       }
+    },
+    'fork.name': function (newVal) {
+      this.fork.slug = kebabCase(newVal);
     },
   },
   mounted() {

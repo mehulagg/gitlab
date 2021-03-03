@@ -2,6 +2,7 @@ import { GlForm, GlFormInputGroup } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { kebabCase } from 'lodash';
 import createFlash from '~/flash';
 import httpStatus from '~/lib/utils/http_status';
 import * as urlUtility from '~/lib/utils/url_utility';
@@ -199,6 +200,35 @@ describe('ForkForm component', () => {
       expect(optionsArray).toHaveLength(MOCK_NAMESPACES_RESPONSE.length + 1);
       expect(optionsArray.at(1).text()).toBe(MOCK_NAMESPACES_RESPONSE[0].name);
       expect(optionsArray.at(2).text()).toBe(MOCK_NAMESPACES_RESPONSE[1].name);
+    });
+  });
+
+  describe('project slug', () => {
+    beforeEach(() => {
+      mockGetRequest();
+    });
+
+    it('is set from prop and not render kebab case of project name initally', () => {
+      const projectPath = 'some-other-project-slug';
+
+      createComponent({
+        projectPath,
+      });
+
+      expect(wrapper.vm.fork.slug).toBe(projectPath);
+      expect(wrapper.vm.fork.slug).not.toBe(kebabCase(wrapper.vm.fork.name));
+    });
+
+    it('is the kebab case when project name changes', async () => {
+      const name = 'hello there';
+
+      createComponent();
+
+      wrapper.vm.fork.name = name;
+
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.vm.fork.slug).toBe(kebabCase(name));
     });
   });
 
