@@ -3,10 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Pages::Settings do
+  let(:settings) { double(path: 'the path', local_store: 'local store') }
+
   describe '#path' do
     subject { described_class.new(settings).path }
-
-    let(:settings) { double(path: 'the path') }
 
     it { is_expected.to eq('the path') }
 
@@ -19,6 +19,14 @@ RSpec.describe Gitlab::Pages::Settings do
       it 'raises a DiskAccessDenied exception' do
         expect { subject }.to raise_error(described_class::DiskAccessDenied)
       end
+    end
+  end
+
+  describe '#local_store' do
+    subject(:local_store) { described_class.new(settings).local_store }
+
+    it 'is an instance of Gitlab::Pages::LocalStore' do
+      expect(local_store).to be_a(Gitlab::Pages::LocalStore)
     end
   end
 end
