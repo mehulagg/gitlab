@@ -31,7 +31,7 @@ RSpec.describe 'Delete Epic', :js do
     end
 
     it 'deletes the issue and redirect to epic list' do
-      page.accept_alert 'Epic will be removed! Are you sure?' do
+      page.accept_alert 'Epic will be removed. Any descendants will also be deleted! Are you sure?' do
         find(:button, text: 'Delete').click
       end
 

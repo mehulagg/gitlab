@@ -51,9 +51,13 @@ export default {
       eventHub.$emit('close.form');
     },
     deleteIssuable() {
-      const confirmMessage = sprintf(__('%{issuableType} will be removed! Are you sure?'), {
-        issuableType: issuableTypes[this.issuableType],
-      });
+      const confirmMessage = sprintf(
+        __('%{issuableType} will be removed%{warning}! Are you sure?'),
+        {
+          issuableType: issuableTypes[this.issuableType],
+          warning: this.issuableType === 'epic' ? __('. Any descendants will also be deleted') : '',
+        },
+      );
       // eslint-disable-next-line no-alert
       if (window.confirm(confirmMessage)) {
         this.deleteLoading = true;
