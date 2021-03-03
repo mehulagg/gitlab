@@ -17,28 +17,24 @@ module Gitlab
     end
 
     def aes256_gcm_encrypt(value, nonce: nil)
-      aes256_gcm_encrypt_using_static_nonce(value)
+      if nonce
+        create_encrypted_token(value, nonce)
+      else
+        aes256_gcm_encrypt_using_static_nonce(value)
+      end
     end
 
-    def aes256_gcm_decrypt(value)
+    def aes256_gcm_decrypt(value, nonce: nil)
       return unless value
 
-      nonce = Feature.enabled?(:dynamic_nonce_creation) ? dynamic_nonce(value) : AES256_GCM_IV_STATIC
+      iv = nonce || AES256_GCM_IV_STATIC
       encrypted_token = Base64.decode64(value)
-      decrypted_token = Encryptor.decrypt(AES256_GCM_OPTIONS.merge(value: encrypted_token, iv: nonce))
+      decrypted_token = Encryptor.decrypt(AES256_GCM_OPTIONS.merge(value: encrypted_token, iv: iv))
       decrypted_token
-    end
-
-    def dynamic_nonce(value)
-      TokenWithIv.find_nonce_by_hashed_token(value) || AES256_GCM_IV_STATIC
     end
 
     def aes256_gcm_encrypt_using_static_nonce(value)
       create_encrypted_token(value, AES256_GCM_IV_STATIC)
-    end
-
-    def read_only?
-      Gitlab::Database.read_only?
     end
 
     def create_encrypted_token(value, iv)
