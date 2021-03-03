@@ -10,6 +10,8 @@ FactoryBot.define do
       "#{FFaker::Product.product_name.truncate(200)} - #{i}"
     end
 
+    excluded_urls { "#{dast_site.url}/sign-out,#{dast_site.url}/hidden" }
+
     trait :with_dast_site_validation do
       dast_site { association :dast_site, :with_dast_site_validation, project: project }
     end

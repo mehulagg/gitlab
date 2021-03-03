@@ -1356,6 +1356,7 @@ Represents a DAST Site Profile.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `editPath` | String | Relative web path to the edit page of a site profile. |
+| `excludedUrls` | String | The URLs to skip during an authenticated scan. Will always return `null` if `security_dast_site_profiles_additional_fields` feature flag is disabled. |
 | `id` | DastSiteProfileID! | ID of the site profile. |
 | `normalizedTargetUrl` | String | Normalized URL of the target to be scanned. |
 | `profileName` | String | The name of the site profile. |

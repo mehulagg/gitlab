@@ -6,7 +6,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   let_it_be(:dast_site_profile) { create(:dast_site_profile) }
   let_it_be(:project) { dast_site_profile.project }
   let_it_be(:user) { create(:user) }
-  let_it_be(:fields) { %i[id profileName targetUrl editPath validationStatus userPermissions normalizedTargetUrl referencedInSecurityPolicies] }
+  let_it_be(:fields) { %i[id profileName targetUrl editPath excludedUrls validationStatus userPermissions normalizedTargetUrl referencedInSecurityPolicies] }
 
   subject do
     GitlabSchema.execute(
@@ -45,6 +45,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
                 profileName
                 targetUrl
                 editPath
+                excludedUrls
                 validationStatus
                 normalizedTargetUrl
                 referencedInSecurityPolicies
@@ -82,6 +83,22 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
         path = "/#{project.full_path}/-/security/configuration/dast_profiles/dast_site_profiles/#{dast_site_profile.id}/edit"
 
         expect(first_dast_site_profile['editPath']).to eq(path)
+      end
+    end
+
+    describe 'excludedUrls field' do
+      context 'when the feature flag is disabled' do
+        it 'is nil' do
+          stub_feature_flags(security_dast_site_profiles_additional_fields: false)
+
+          expect(first_dast_site_profile['excludedUrls']).to eq(nil)
+        end
+      end
+
+      context 'when the feature flag is enabled' do
+        it 'is the excluded urls' do
+          expect(first_dast_site_profile['excludedUrls']).to eq(dast_site_profile.excluded_urls)
+        end
       end
     end
 
