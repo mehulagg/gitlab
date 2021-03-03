@@ -38,7 +38,11 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
       let!(:job_variables) { create(:ci_job_variable, job: build) }
       let!(:report_result) { create(:ci_build_report_result, build: build) }
       let!(:pending_state) { create(:ci_build_pending_state, build: build) }
-
+      
+      before do
+        build.job_artifacts.first.update!(project: project)
+      end
+      
       it 'deletes build related records' do
         expect { destroy_project(project, user, {}) }.to change { Ci::Build.count }.by(-1)
           .and change { Ci::BuildTraceChunk.count }.by(-1)
@@ -49,7 +53,7 @@ RSpec.describe Projects::DestroyService, :aggregate_failures do
           .and change { Ci::BuildRunnerSession.count }.by(-1)
       end
 
-      it 'avoids N+1 queries', skip: 'skipped until fixed in https://gitlab.com/gitlab-org/gitlab/-/issues/24644' do
+      it 'avoids N+1 queries' do#, skip: 'skipped until fixed in https://gitlab.com/gitlab-org/gitlab/-/issues/24644' do
         recorder = ActiveRecord::QueryRecorder.new { destroy_project(project, user, {}) }
 
         project = create(:project, :repository, namespace: user.namespace)

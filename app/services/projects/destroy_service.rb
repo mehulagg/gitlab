@@ -120,6 +120,7 @@ module Projects
       trash_relation_repositories!
       trash_project_repositories!
 
+      Ci::DestroyProjectJobArtifactsService.new(project).execute
       # Rails attempts to load all related records into memory before
       # destroying: https://github.com/rails/rails/issues/22510
       # This ensures we delete records in batches.
