@@ -58,10 +58,10 @@ There are several components that work in concert for the Agent to accomplish Gi
 These repositories might be the same GitLab project or separate projects.
 
 NOTE:
-GitLab recommends you use the same GitLab project for the agent configuration
-and manifest repositories. Our backlog contains issues for adding support for
+GitLab recommends to use a shared, single repository as the agent configuration
+and manifest projects. Otherwise, the manifest repository should be public as the agent is allowed to read only its own configuration repository. Our backlog contains issues for adding support for
 [private manifest repositories outside of the configuration project](https://gitlab.com/gitlab-org/gitlab/-/issues/220912) and
-[group level agents](https://gitlab.com/gitlab-org/gitlab/-/issues/283885).
+[group level agents](https://gitlab.com/gitlab-org/gitlab/-/issues/283885). Please, contribute to these issues if you need support for it!
 
 For more details, please refer to our [full architecture documentation](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/architecture.md#high-level-architecture) in the Agent project.
 
