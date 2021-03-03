@@ -86,7 +86,7 @@ Breaking changes are:
 - Removing or renaming a field, argument, enum value or mutation.
 - Changing the type of a field, argument or enum value.
 - Raising the [complexity](#max-complexity) of a field or complexity multipliers in a resolver.
-- Changing a field from being _not_ nullable (`null: false`) to nullable (`null: true`).
+- Changing a field from being _not_ nullable (`null: false`) to nullable (`null: true`). Note that we should always [prefer defining nullable fields](#nullable-fields).
 - Changing an argument from being optional (`required: false`) to being required (`required: true`).
 - Changing the [max page size](#page-size-limit) of a connection.
 - Lowering the global limits for query complexity and depth.
