@@ -374,7 +374,7 @@ standard Rails migration helper methods. Calling more than one migration
 helper is not a problem if they're executed on the same table.
 
 Using the `with_lock_retries` helper method is advised when a database
-migration involves one of the [high-traffic tables](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L3).
+migration involves one of the [high-traffic tables](#high-traffic-tables).
 
 Example changes:
 
@@ -606,7 +606,7 @@ we have to employ `add_concurrent_foreign_key` and `add_concurrent_index`
 instead of `add_reference`.
 
 If you have a new or empty table that doesn't reference a
-[high-traffic table](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L3),
+[high-traffic table](#high-traffic-tables),
 we recommend that you use `add_reference` in a single-transaction migration. You can
 combine it with other operations that don't require `disable_ddl_transaction!`.
 
@@ -709,11 +709,8 @@ Dropping a database table is uncommon, and the `drop_table` method
 provided by Rails is generally considered safe. Before dropping the table,
 please consider the following:
 
-If your table has foreign keys on a high-traffic table (like `projects`), then
-the `DROP TABLE` statement might fail with **statement timeout** error. Determining
-what tables are high traffic can be difficult. Self-managed instances might
-use different features of GitLab with different usage patterns, thus making
-assumptions based on GitLab.com is not enough.
+If your table has foreign keys on a [high-traffic](#high-traffic-tables) table (like `projects`), then
+the `DROP TABLE` statement might fail with **statement timeout** error. 
 
 Table **has no records** (feature was never in use) and **no foreign
 keys**:
@@ -1027,4 +1024,46 @@ D, [2020-07-06T00:37:12.650641 #130101] DEBUG -- :   AddAndSeedMyColumn::User Lo
 D, [2020-07-06T00:37:12.653459 #130101] DEBUG -- :   AddAndSeedMyColumn::User Update (0.5ms)  UPDATE "users" SET "updated_at" = $1 WHERE "users"."id" = $2  [["updated_at", "2020-07-05 23:37:12.652297"], ["id", 1]]
 D, [2020-07-06T00:37:12.653648 #130101] DEBUG -- :   ↳ config/initializers/config_initializers_active_record_locking.rb:13:in `_update_row'
 == 20200705232821 AddAndSeedMyColumn: migrated (0.1706s) =====================
+```
+
+## High traffic tables
+
+Here's a list of current [high-traffic tables](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L3). 
+
+Determining what tables are high-traffic can be difficult. Self-managed instances might use
+different features of GitLab with different usage patterns, thus making assumptions based 
+on GitLab.com is not enough. You may suggest a new high-traffic table by using one or more of 
+the below metrics and comparing to the current high-traffic table.
+
+
+### Check write traffic ON pg_stat_user_tables
+
+This requires access to the primary database
+
+```sql
+gitlabhq_production=# select relname, n_tup_upd, n_tup_del, n_tup_ins from pg_stat_user_tables order by n_tup_upd + n_tup_del + n_tup_ins desc limit 10;
+          relname           | n_tup_upd | n_tup_del | n_tup_ins 
+----------------------------+-----------+-----------+-----------
+ project_mirror_data        | 159714131 |      6644 |     32324
+ ci_builds                  |  97658456 |   4881342 |  17297879
+ ci_build_trace_sections    |         0 |  17372152 |  87745345
+ merge_request_diff_commits |         0 |   2871777 |  78061674
+ merge_request_diff_files   |         0 |  24295732 |  53545740
+ project_daily_statistics   |  71784522 |     80458 |   2200662
+ ci_job_artifacts           |  19110012 |   4873891 |  19108603
+ ci_stages                  |  22489886 |   2506181 |   8470501
+ project_statistics         |  32416950 |     62680 |    227363
+```
+
+### Check Average monthly updates
+
+```sql
+SELECT avg(count) FROM
+(
+  SELECT date_trunc('month', updated_at),
+      count(*) as count
+from <TABLE_NAME>
+where updated_at > '2020-03-01'
+  AND updated_at < '2020-06-01'
+group by 1) monthly_counts;
 ```
