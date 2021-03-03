@@ -92,7 +92,6 @@ describe('merge conflicts actions', () => {
         {},
         [
           { type: types.SET_SUBMIT_STATE, payload: true },
-          { type: types.SET_SUBMIT_STATE, payload: false },
         ],
         [],
         () => {
