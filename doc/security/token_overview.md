@@ -9,19 +9,22 @@ type: reference
 
 This document lists tokens used in GitLab, their purpose and, where applicable, security guidance.
 
-## [Personal access token](../user/profile/personal_access_tokens.md)
+## Personal access tokens
 
-You can create Personal access tokens to authenticate with the GitLab API, repositories and the GitLab registry. You can also use personal access tokens with Git to authenticate over HTTP(S).
+You can create [Personal access tokens](../user/profile/personal_access_tokens.md) to authenticate with:
 
-Personal access tokens can be limited in scope and expiration time. They inherit their permissions from the user that created them.
+- The GitLab API.
+- GitLab repositories.
+- The GitLab registry.
 
-Personal access tokens can be centrally managed via the [Credentials inventory](../user/admin_area/credentials_inventory.md).
+You can limit the scope and expiration date of your personal access tokens. By default,
+they inherit permissions from the user who created them.
 
-## [OAuth2 token](../api/oauth2.md)
+## OAuth2 tokens
 
-GitLab can serve as an OAuth2 provider to allow other services to access the GitLab API on a user’s behalf. Services can use a [variety of OAuth2 flows](../api/oauth2.md#supported-oauth2-flows) to request [OAuth2 tokens](../api/oauth2.md#access-gitlab-api-with-access-token).
+GitLab can serve as an [OAuth2 provider](../api/oauth2.md) to allow other services to access the GitLab API on a user’s behalf.
 
-OAuth2 tokens can be limited in scope and expiration time. They inherit their permissions from the user that granted them.
+You can limit the scope and lifetime of your OAuth2 tokens.
 
 ## [Impersonation token](../api/README.md#impersonation-tokens)
 
@@ -29,15 +32,18 @@ Impersonation tokens are a type of personal access token that can be created onl
 
 Impersonation tokens can be limited in scope and expiration time. They inherit their permissions from the user they were created for.
 
-## [Project access token](../user/project/settings/project_access_tokens.md#project-access-tokens)
+## Project access tokens
 
-Project access tokens are scoped to a project and can be used to authenticate with the GitLab API, the project repository and the GitLab registry. You can also use project access tokens with Git to authenticate over HTTP(S).
+[Project access tokens](../user/project/settings/project_access_tokens.md#project-access-tokens)
+are scoped to a project. As with [Personal access tokens](#personal-access-tokens), you can use them to authenticate with:
 
-Project access tokens can be limited in scope and expiration time. When you create a project Access Token, GitLab creates a [project bot user](../user/project/settings/project_access_tokens.md#project-bot-users). Project bot users are service accounts and do not count as licensed seats. They have maintainer permissions on the project they were created in.
+- The GitLab API.
+- GitLab repositories.
+- The GitLab registry.
 
-Project access tokens can be managed by project maintainers and owners.
-
-Project access tokens can be centrally managed via the [Credentials inventory](../user/admin_area/credentials_inventory.md).
+You can limit the scope and expiration date of project access tokens. When you
+create a project access token, GitLab creates a [project bot user](../user/project/settings/project_access_tokens.md#project-bot-users). Project
+bot users are service accounts and do not count as licensed seats.
 
 ## [Deploy Token](../user/project/deploy_tokens/index.md)
 
@@ -71,9 +77,13 @@ In case of Docker Machine/Kubernetes/VirtualBox/Parallels/SSH executors, the exe
 
 Malicious access to a runner's file system may expose the `config.toml` file and thus the authentication token, allowing an attacker to [clone the runner](https://docs.gitlab.com/runner/security/#cloning-a-runner).
 
-## [Job Token](../user/project/new_ci_build_permissions_model.md#job-token)
+## CI/CD job token
 
-The job token is a short lived token only valid for the duration of the job. It is able to access a limited amount of [APIs](../api/README.md#gitlab-ci-job-token). The job token is used for authentication, while authorization is provided by the user triggering the job.
+The [CI/CD](https://docs.gitlab.com/ee/api/README.html#gitlab-ci-job-token) job token
+is a short lived token only valid for the duration of a job. It gives a CI/CD job
+access to a limited amount of [API endpoints](../api/README.md#gitlab-ci-job-token).
+API authentication uses the job token, by using the authorization of the user
+triggering the job.
 
 The job token is secured by its short life-time and limited scope. It could possibly be leaked if multiple jobs run on the same machine ([like with the shell runner](https://docs.gitlab.com/runner/security/#usage-of-shell-executor)). On Docker Machine runners, configuring [`MaxBuilds=1`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnersmachine-section) is recommended to make sure runner machines only ever run one build and are destroyed afterwards. This may impact performance, as provisioning machines takes some time.
 
@@ -93,6 +103,5 @@ This table shows available scopes per token. Scopes can be limited further on to
 | Runner Authentication Token | 🚫          | 🚫               | 🚫                 |
 | Job Token                   | ✴️(2)       | 🚫               | 🚫                 |
 
-(1) Limited to one project the token has been configured for
-
-(2) Limited to certain [endpoints](../api/README.md#gitlab-ci-job-token)
+1. Limited to the one project.
+1. Limited to certain [endpoints](../api/README.md#gitlab-ci-job-token).
