@@ -44,6 +44,7 @@ describe('BoardCardAssigneeDropdown', () => {
 
   const findAssignees = () => wrapper.findComponent(IssuableAssignees);
   const findEditableItem = () => wrapper.findComponent(SidebarEditableItem);
+  const findDropdown = () => wrapper.findComponent(MultiSelectDropdown);
   const findAssigneesLoading = () => wrapper.find('[data-testid="loading-assignees"]');
   const findParticipantsLoading = () => wrapper.find('[data-testid="loading-participants"]');
   const findSelectedParticipants = () => wrapper.findAll('[data-testid="selected-participant"]');
@@ -204,6 +205,12 @@ describe('BoardCardAssigneeDropdown', () => {
         createComponent();
         await waitForPromises();
         expandDropdown();
+      });
+
+      it('collapses the widget on multiselect dropdown toggle event', async () => {
+        findDropdown().vm.$emit('toggle');
+        await nextTick();
+        expect(findDropdown().isVisible()).toBe(false);
       });
 
       it('renders participants list with correct amount of selected and unselected', async () => {
