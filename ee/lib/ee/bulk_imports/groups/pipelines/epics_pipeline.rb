@@ -24,8 +24,7 @@ module EE
           end
 
           def after_run(extracted_data)
-            context.entity.update_tracker_for(
-              relation: :epics,
+            tracker.update(
               has_next_page: extracted_data.has_next_page?,
               next_page: extracted_data.next_page
             )

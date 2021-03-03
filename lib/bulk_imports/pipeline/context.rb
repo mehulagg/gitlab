@@ -3,17 +3,25 @@
 module BulkImports
   module Pipeline
     class Context
-      attr_reader :entity, :bulk_import
       attr_accessor :extra
 
-      def initialize(entity, extra = {})
-        @entity = entity
-        @bulk_import = entity.bulk_import
+      attr_reader :tracker
+
+      def initialize(tracker, extra = {})
+        @tracker = tracker
         @extra = extra
+      end
+
+      def entity
+        tracker.entity
       end
 
       def group
         entity.group
+      end
+
+      def bulk_import
+        entity.bulk_import
       end
 
       def current_user

@@ -47,8 +47,9 @@ RSpec.describe BulkImports::Pipeline::Runner do
     end
 
     context 'when entity is not marked as failed' do
-      let(:entity) { create(:bulk_import_entity) }
-      let(:context) { BulkImports::Pipeline::Context.new(entity) }
+      let(:tracker) { create(:bulk_import_tracker) }
+      let(:context) { BulkImports::Pipeline::Context.new(tracker) }
+      let(:entity) { tracker.entity }
 
       it 'runs pipeline extractor, transformer, loader' do
         extracted_data = BulkImports::Pipeline::ExtractedData.new(data: { foo: :bar })
@@ -125,8 +126,9 @@ RSpec.describe BulkImports::Pipeline::Runner do
       end
 
       context 'when exception is raised' do
-        let(:entity) { create(:bulk_import_entity, :created) }
-        let(:context) { BulkImports::Pipeline::Context.new(entity) }
+        let(:tracker) { create(:bulk_import_tracker) }
+        let(:context) { BulkImports::Pipeline::Context.new(tracker) }
+        let(:entity) { tracker.entity }
 
         before do
           allow_next_instance_of(BulkImports::Extractor) do |extractor|
@@ -183,16 +185,17 @@ RSpec.describe BulkImports::Pipeline::Runner do
     end
 
     context 'when entity is marked as failed' do
-      let(:entity) { create(:bulk_import_entity) }
-      let(:context) { BulkImports::Pipeline::Context.new(entity) }
+      let(:tracker) { create(:bulk_import_tracker) }
+      let(:context) { BulkImports::Pipeline::Context.new(tracker) }
+      let(:entity) { tracker.entity }
 
       it 'logs and returns without execution' do
         allow(entity).to receive(:failed?).and_return(true)
 
         expect_next_instance_of(Gitlab::Import::Logger) do |logger|
-          expect(logger).to receive(:info)
+          expect(logger).to receive(:warn)
             .with(
-              message: 'Skipping due to failed pipeline status',
+              message: 'Skipping pipeline due to failed entity',
               pipeline_class: 'BulkImports::MyPipeline',
               bulk_import_entity_id: entity.id,
               bulk_import_entity_type: 'group_entity'

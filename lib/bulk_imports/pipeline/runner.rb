@@ -26,7 +26,7 @@ module BulkImports
           end
         end
 
-        if respond_to?(:after_run)
+        if extracted_data && respond_to?(:after_run)
           run_pipeline_step(:after_run) do
             after_run(extracted_data)
           end
@@ -34,7 +34,7 @@ module BulkImports
 
         info(message: 'Pipeline finished')
       rescue MarkedAsFailedError
-        log_skip
+        skip!
       end
 
       private # rubocop:disable Lint/UselessAccessModifier
@@ -46,10 +46,11 @@ module BulkImports
 
         yield
       rescue MarkedAsFailedError
-        log_skip(step => class_name)
+        skip!(pipeline_step: step, step_class: class_name)
       rescue => e
         log_import_failure(e, step)
 
+        tracker.fail_op!
         mark_as_failed if abort_on_failure?
 
         nil
@@ -62,7 +63,7 @@ module BulkImports
       end
 
       def mark_as_failed
-        warn(message: 'Pipeline failed', pipeline_class: pipeline)
+        warn(message: 'Pipeline failed')
 
         context.entity.fail_op!
       end
@@ -73,13 +74,12 @@ module BulkImports
         false
       end
 
-      def log_skip(extra = {})
-        log = {
-          message: 'Skipping due to failed pipeline status',
-          pipeline_class: pipeline
-        }.merge(extra)
+      def skip!(extra = {})
+        warn({
+          message: 'Skipping pipeline due to failed entity'
+        }.merge(extra))
 
-        info(log)
+        tracker.skip!
       end
 
       def log_import_failure(exception, step)

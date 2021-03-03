@@ -28,7 +28,11 @@ class BulkImports::Tracker < ApplicationRecord
       transition created: :started
     end
 
+    # When applying the concurrent model,
+    # remove the created => finished trasaction
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/323384
     event :finish do
+      transition created: :finished
       transition started: :finished
       transition failed: :failed
       transition skipped: :skipped

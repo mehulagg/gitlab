@@ -5,7 +5,8 @@ require 'spec_helper'
 RSpec.describe BulkImports::Groups::Graphql::GetGroupQuery do
   describe '#variables' do
     let(:entity) { double(source_full_path: 'test', bulk_import: nil) }
-    let(:context) { BulkImports::Pipeline::Context.new(entity) }
+    let(:tracker) { double(entity: entity) }
+    let(:context) { BulkImports::Pipeline::Context.new(tracker) }
 
     it 'returns query variables based on entity information' do
       expected = { full_path: entity.source_full_path }

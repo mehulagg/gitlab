@@ -68,17 +68,6 @@ class BulkImports::Entity < ApplicationRecord
     end
   end
 
-  def update_tracker_for(relation:, has_next_page:, next_page: nil)
-    attributes = {
-      relation: relation,
-      has_next_page: has_next_page,
-      next_page: next_page,
-      bulk_import_entity_id: id
-    }
-
-    trackers.upsert(attributes, unique_by: %i[bulk_import_entity_id relation])
-  end
-
   def has_next_page?(relation)
     trackers.find_by(relation: relation)&.has_next_page
   end
