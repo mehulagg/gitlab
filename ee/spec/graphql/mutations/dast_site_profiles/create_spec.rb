@@ -24,7 +24,8 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
       mutation.resolve(
         full_path: full_path,
         profile_name: profile_name,
-        target_url: target_url
+        target_url: target_url,
+        excluded_urls: 'https://example.com/signout'
       )
     end
 
@@ -50,8 +51,10 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
           service = double(described_class)
           result = double('result', success?: false, errors: [])
 
+          service_params = { name: profile_name, target_url: target_url, excluded_urls: 'https://example.com/signout' }
+
           expect(DastSiteProfiles::CreateService).to receive(:new).and_return(service)
-          expect(service).to receive(:execute).with(name: profile_name, target_url: target_url).and_return(result)
+          expect(service).to receive(:execute).with(service_params).and_return(result)
 
           subject
         end
@@ -67,6 +70,26 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
             )
 
             expect(response[:errors]).to include('Name has already been taken')
+          end
+        end
+
+        context "when excluded_urls='https://example.com/signout'" do
+          context 'when the feature flag dast_branch_selection is disabled' do
+            it 'does not set the branch_name' do
+              stub_feature_flags(security_dast_site_profiles_additional_fields: false)
+
+              subject
+
+              expect(dast_site_profile.excluded_urls).to be_nil
+            end
+          end
+
+          context 'when the feature flag dast_branch_selection is enabled' do
+            it 'sets the excluded_urls' do
+              subject
+
+              expect(dast_site_profile.excluded_urls).to eq('https://example.com/signout')
+            end
           end
         end
       end
