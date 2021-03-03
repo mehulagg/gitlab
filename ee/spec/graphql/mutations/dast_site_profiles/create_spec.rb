@@ -9,6 +9,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
   let(:full_path) { project.full_path }
   let(:profile_name) { SecureRandom.hex }
   let(:target_url) { generate(:url) }
+  let(:excluded_urls) { "#{target_url}/signout" }
   let(:dast_site_profile) { DastSiteProfile.find_by(project: project, name: profile_name) }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
@@ -25,7 +26,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
         full_path: full_path,
         profile_name: profile_name,
         target_url: target_url,
-        excluded_urls: 'https://example.com/signout'
+        excluded_urls: excluded_urls
       )
     end
 
@@ -51,7 +52,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
           service = double(described_class)
           result = double('result', success?: false, errors: [])
 
-          service_params = { name: profile_name, target_url: target_url, excluded_urls: 'https://example.com/signout' }
+          service_params = { name: profile_name, target_url: target_url, excluded_urls: excluded_urls }
 
           expect(DastSiteProfiles::CreateService).to receive(:new).and_return(service)
           expect(service).to receive(:execute).with(service_params).and_return(result)
@@ -73,7 +74,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
           end
         end
 
-        context "when excluded_urls='https://example.com/signout'" do
+        context "when excluded_urls is supplied as a param" do
           context 'when the feature flag dast_branch_selection is disabled' do
             it 'does not set the branch_name' do
               stub_feature_flags(security_dast_site_profiles_additional_fields: false)
@@ -88,7 +89,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
             it 'sets the excluded_urls' do
               subject
 
-              expect(dast_site_profile.excluded_urls).to eq('https://example.com/signout')
+              expect(dast_site_profile.excluded_urls).to eq(excluded_urls)
             end
           end
         end
