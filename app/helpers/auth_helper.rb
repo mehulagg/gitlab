@@ -126,7 +126,7 @@ module AuthHelper
     end
   end
 
-  def experiment_enabled_button_based_providers
+  def trial_enabled_button_based_providers
     enabled_button_based_providers & %w(google_oauth2 github).freeze
   end
 
