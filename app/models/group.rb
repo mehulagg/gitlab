@@ -525,16 +525,29 @@ class Group < Namespace
     }
   end
 
-  def ci_variables_for(ref, project)
+  def ci_variables_for(ref, project, environment: nil)
     cache_key = "ci_variables_for:group:#{self&.id}:project:#{project&.id}:ref:#{ref}"
 
     ::Gitlab::SafeRequestStore.fetch(cache_key) do
-      list_of_ids = [self] + ancestors
-      variables = Ci::GroupVariable.where(group: list_of_ids)
-      variables = variables.unprotected unless project.protected_for?(ref)
-      variables = variables.group_by(&:group_id)
-      list_of_ids.reverse.flat_map { |group| variables[group.id] }.compact
+      uncached_ci_variables_for(ref, project, environment: environment)
     end
+  end
+
+  def uncached_ci_variables_for(ref, project, environment: nil)
+    list_of_ids = [self] + ancestors
+    variables = Ci::GroupVariable.where(group: list_of_ids)
+    variables = variables.unprotected unless project.protected_for?(ref)
+
+    if Feature.enabled?(:scoped_group_variables, self)
+      variables = if environment
+                    variables.on_environment(environment)
+                  else
+                    variables.where(environment_scope: '*')
+                  end
+    end
+
+    variables = variables.group_by(&:group_id)
+    list_of_ids.reverse.flat_map { |group| variables[group.id] }.compact
   end
 
   def group_member(user)
