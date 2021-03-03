@@ -17,6 +17,7 @@ FactoryBot.define do
     category { 'sast' }
     project_fingerprint { generate(:project_fingerprint) }
     vulnerability_data { { category: 'sast' } }
+    finding_uuid { Gitlab::UUID.v5(SecureRandom.hex) }
 
     trait :dismissal do
       feedback_type { 'dismissal' }

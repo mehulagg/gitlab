@@ -22,8 +22,6 @@ module Gitlab
               @start_line = start_line
             end
 
-            private
-
             def fingerprint_data
               "#{file_path}:#{start_line}:#{end_line}"
             end
