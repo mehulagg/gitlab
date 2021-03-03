@@ -1,0 +1,5 @@
+---
+title: Fix gitlab-shell panic when log file not writable
+merge_request: 55674
+author:
+type: fixed
