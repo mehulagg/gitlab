@@ -129,6 +129,7 @@ By default, Rails controllers, Grape API resources, and [GraphQL types or fields
 
 - Many actions are completely or partially extracted to services, finders, and other classes, so it is normal to do permission checks "downstream". In fact, when extracting an action into a service, authorization should be included to avoid duplication when the service is reused.
 - Often, authorization logic must be incorporated in DB queries to filter records.
+- At the moment, quick actions duplicate permissions checks. For example, see this [issue to refactor and consolidate rebase permission checks](https://gitlab.com/gitlab-org/gitlab/-/issues/296034)
 - `DeclarativePolicy` rules are relatively performant, but conditions may perform database calls.
   However it is acceptable to repeat authorization calls. Results are cached for the duration of the
   request, so repeating an authorization call on the same object does not require any IO.
