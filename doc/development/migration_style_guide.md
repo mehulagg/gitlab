@@ -710,7 +710,7 @@ provided by Rails is generally considered safe. Before dropping the table,
 please consider the following:
 
 If your table has foreign keys on a [high-traffic](#high-traffic-tables) table (like `projects`), then
-the `DROP TABLE` statement might fail with **statement timeout** error. 
+the `DROP TABLE` statement is likely to stall concurrent traffic until it fails with **statement timeout** error.
 
 Table **has no records** (feature was never in use) and **no foreign
 keys**:
