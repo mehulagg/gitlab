@@ -255,7 +255,7 @@ export default {
         this.validationState.startsAt = Boolean(this.form.startsAt.date);
       } else if (key === 'rotationLength.length') {
         const { length } = this.form.rotationLength;
-        this.validationState.rotationLength = length >= 1 && Number.isInteger(length);
+        this.validationState.rotationLength = length > 0 && Number.isInteger(length);
       }
     },
     afterCloseModal() {
