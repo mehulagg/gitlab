@@ -37,4 +37,4 @@ send additional email notifications to project members with the **Developer** ro
 
 ## Paging **(PREMIUM)**
 
-In projects that have an [on-call schedule](/oncall_schedules.md) configured, on-call responders will be paged via email for triggered alerts. The on-call responder(s) will recieve one email for triggered alerts.
+In projects that have an [on-call schedule](oncall_schedules.md) configured, on-call responders will be paged via email for triggered alerts. The on-call responder(s) will recieve one email for triggered alerts.
