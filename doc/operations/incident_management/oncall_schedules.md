@@ -22,13 +22,7 @@ Set-up an on-call schedule for your team to add rotations to.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230857) in GitLab 13.10.
 
 1. Go to **Operations > On-call Schedules**, and select **Add a schedule**.
-
-   ![Schedule Empty State](img/oncall_schedule_empty_state_v13_10.png)
-
 1. In the **Add a schedule** modal, enter a schedule **name**, **description** and select a **timezone**.
-
-    ![Schedule Create](img/oncall_schedule_create_v13_10.png)
-
 1. You have now created an empty schedule with no rotations. This will render the below empty state prompting you to create rotations.
 
    ![Schedule Empty Grid](img/oncall_schedule_empty_grid_v13_10.png)
@@ -41,16 +35,12 @@ Set-up an on-call schedule for your team to add rotations to.
 1. In the **Edit a schedule** modal, update your schedule **name**, **description** and select a new **timezone** if needed.
 1. Click the **Edit schedule** button to save your changes.
 
-   ![Schedule Edit](img/oncall_schedule_edit_schedule_v13_10.png)
-
 ### Delete a schedule
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262850) in GitLab 13.10.
 
 1. Go to **Operations > On-call Schedules**, and select **Trash can** icon on the top right of the schedule card.
 1. In the **Delete Schedule** modal, click the **Delete schedule** button to save your changes and delete the current schedule.
-
-   ![Schedule Delete](img/oncall_schedule_delete_schedule_v13_10.png)
 
 ## Rotations
 
@@ -64,8 +54,6 @@ Add rotations to an existing schedule to put your team members on-call.
 1. In the **Add a rotation** modal, enter a **Name**, select your needed **Participants**, enter the **Rotation length** and finally the **Starts on** time/date.
 1. Rotations can also be enabled to have fixed **Start/End** dates which can be enabled via the toggle and the end of the modal.
 1. Rotations can also be enabled to be restricted to **Time intervals** which can be enabled via the toggle and the end of the modal.
-
-   ![Schedule Add Rotation](img/oncall_schedule_add_rotation_v13_10.png)
 
 | Modal Option | Value | Type | 
 | ------ | ------ | ------ |
@@ -83,16 +71,12 @@ Add rotations to an existing schedule to put your team members on-call.
 1. Go to **Operations > On-call Schedules**, and click the **Add a rotation** button on the top right of the current schedule.
 1. In the **Add a rotation** modal toggle the **Enable end date** option and then select a start/end date for the rotation being created.
 
-  ![Schedule Rotation Start/End Date](img/oncall_schedule_start_end_date_v13_10.png)
-
 #### Rotation Time Intervals
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262859) in GitLab 13.10.
 
 1. Go to **Operations > On-call Schedules**, and click the **Add a rotation** button on the top right of the current schedule.
 1. In the **Add a rotation** modal toggle the **Restrict to time intervals** option and then select a start/end time for each rotation shift to be restricted to.
-
-  ![Schedule Rotation Time Interval](img/oncall_schedule_time_interval_v13_10.png)
 
 ### Rotation Edit
 
@@ -108,8 +92,6 @@ Add rotations to an existing schedule to put your team members on-call.
 1. Go to **Operations > On-call Schedules**, and select **Trash Can** icon on the right of the rotation title that you want to delete.
 1. In the **Delete Rotation** modal, click the **Delete rotation** button to save your changes and remove the currently selected rotation.
 
-   ![Schedule Rotation Delete](img/oncall_schedule_delete_rotation_v13_10.png)
-
 ### Schedule Rotation Views(Daily, Hourly)
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/262860) in GitLab 13.10.
@@ -118,12 +100,6 @@ Add rotations to an existing schedule to put your team members on-call.
 1. To swap views please use the toggle in the top right of the schedule card. 
 1. By default, `2 weeks` are selected. 
 1. Rotation shift participants can be hovered over to view their individual shift details(Starts on/Ends On/Name).
-
-**2 Week Grid View**
-
-  ![2 Week Grid View](img/oncall_schedule_weekly_grid.png)
-
-**1 Day Grid View**
 
    ![1 Day Grid View](img/oncall_schedule_day_grid_v13_10.png)
 
@@ -140,5 +116,3 @@ Add rotations to an existing schedule to put your team members on-call.
 
 1. Go to **Operations > On-call Schedules**, and select **Trash Can** icon on the right of the rotation title that you want to delete.
 1. In the **Delete Rotation** modal, click the **Delete rotation** button to save your changes and remove the currently selected rotation.
-
-   ![Schedule Rotation Delete](img/oncall_schedule_delete_rotation_v13_10.png)
