@@ -172,6 +172,7 @@ export default {
             class="gl-w-12 gl-mr-3"
             min="1"
             number
+            no-wheel
             :value="1"
             @input="$emit('update-rotation-form', { type: 'rotationLength.length', value: $event })"
           />
