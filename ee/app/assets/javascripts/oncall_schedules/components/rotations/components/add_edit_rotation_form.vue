@@ -104,9 +104,9 @@ export default {
   },
   methods: {
     format24HourTimeStringFromInt,
-  },
-  updateRotationForm(type, value) {
-    this.$emit('update-rotation-form', { type, value });
+    updateRotationForm(type, value) {
+      this.$emit('update-rotation-form', { type, value });
+    },
   },
 };
 </script>

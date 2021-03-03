@@ -37,6 +37,9 @@ describe('AddEditRotationForm', () => {
       provide: {
         projectPath,
       },
+      stubs: {
+        GlToggle,
+      },
     });
   };
 
@@ -130,11 +133,11 @@ describe('AddEditRotationForm', () => {
   describe('Rotation end time', () => {
     it('toggles end time visibility', async () => {
       createComponent();
-      const toggle = findEndDateToggle().vm;
-      toggle.$emit('change', false);
+      expect(findEndDateToggle().props().value).toBe(false);
       expect(findRotationEndsContainer().exists()).toBe(false);
-      toggle.$emit('change', true);
-      await wrapper.vm.$nextTick();
+      await findEndDateToggle().trigger('click');
+
+      expect(findEndDateToggle().exists()).toBe(true);
       expect(findRotationEndsContainer().exists()).toBe(true);
     });
 
