@@ -52,18 +52,6 @@ RSpec.describe Projects::Security::SastConfigurationController do
 
         expect(response.body).to have_active_sub_navigation('Configuration')
       end
-
-      context 'with feature flag disabled' do
-        before do
-          stub_feature_flags(sast_configuration_ui: false)
-        end
-
-        it 'returns a 404 for an HTML request' do
-          request
-
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
-      end
     end
 
     context 'with unauthorized user' do

@@ -32,35 +32,24 @@ describe('ManageFeature component', () => {
   const findCreateMergeRequestButton = () => wrapper.find(CreateMergeRequestButton);
   const findTestId = (id) => wrapper.find(`[data-testid="${id}"]`);
 
-  describe('given sastConfigurationUi feature flag is enabled', () => {
-    const featureFlagEnabled = {
-      provide: {
-        glFeatures: {
-          sastConfigurationUi: true,
-        },
-      },
-    };
+  describe.each`
+    configured | expectedTestId
+    ${true}    | ${'configureButton'}
+    ${false}   | ${'enableButton'}
+  `('given feature.configured is $configured', ({ configured, expectedTestId }) => {
+    describe('given a configuration path', () => {
+      beforeEach(() => {
+        [feature] = generateFeatures(1, { configured, configuration_path: 'foo' });
 
-    describe.each`
-      configured | expectedTestId
-      ${true}    | ${'configureButton'}
-      ${false}   | ${'enableButton'}
-    `('given feature.configured is $configured', ({ configured, expectedTestId }) => {
-      describe('given a configuration path', () => {
-        beforeEach(() => {
-          [feature] = generateFeatures(1, { configured, configuration_path: 'foo' });
-
-          createComponent({
-            ...featureFlagEnabled,
-            propsData: { feature },
-          });
+        createComponent({
+          propsData: { feature },
         });
+      });
 
-        it('shows a button to configure the feature', () => {
-          const button = findTestId(expectedTestId);
-          expect(button.exists()).toBe(true);
-          expect(button.attributes('href')).toBe(feature.configuration_path);
-        });
+      it('shows a button to configure the feature', () => {
+        const button = findTestId(expectedTestId);
+        expect(button.exists()).toBe(true);
+        expect(button.attributes('href')).toBe(feature.configuration_path);
       });
     });
   });

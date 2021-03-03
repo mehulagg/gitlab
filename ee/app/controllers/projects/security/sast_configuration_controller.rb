@@ -9,7 +9,6 @@ module Projects
 
       alias_method :vulnerable, :project
 
-      before_action :ensure_sast_configuration_enabled!, except: [:create]
       before_action :authorize_edit_tree!, only: [:create]
 
       feature_category :static_application_security_testing
@@ -29,12 +28,6 @@ module Projects
             format.json { render json: { message: _("failed"), filePath: '' } }
           end
         end
-      end
-
-      private
-
-      def ensure_sast_configuration_enabled!
-        not_found unless ::Feature.enabled?(:sast_configuration_ui, project, default_enabled: true)
       end
     end
   end
