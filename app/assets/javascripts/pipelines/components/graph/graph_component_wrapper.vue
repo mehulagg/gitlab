@@ -4,6 +4,7 @@ import getPipelineDetails from 'shared_queries/pipelines/get_pipeline_details.qu
 import { __ } from '~/locale';
 import { DEFAULT, DRAW_FAILURE, LOAD_FAILURE } from '../../constants';
 import PipelineGraph from './graph_component.vue';
+import PipelineList from './graph_list.vue';
 import {
   getQueryHeaders,
   reportToSentry,
@@ -17,6 +18,7 @@ export default {
     GlAlert,
     GlLoadingIcon,
     PipelineGraph,
+    PipelineList,
   },
   inject: {
     graphqlResourceEtag: {
@@ -98,6 +100,9 @@ export default {
       */
       return this.$apollo.queries.pipeline.loading && !this.pipeline;
     },
+    showPipelineList() {
+      return true;
+    }
   },
   mounted() {
     toggleQueryPollingByVisibility(this.$apollo.queries.pipeline);
@@ -126,12 +131,20 @@ export default {
       {{ alert.text }}
     </gl-alert>
     <gl-loading-icon v-if="showLoadingIcon" class="gl-mx-auto gl-my-4" size="lg" />
-    <pipeline-graph
-      v-if="pipeline"
-      :config-paths="configPaths"
-      :pipeline="pipeline"
-      @error="reportFailure"
-      @refreshPipelineGraph="refreshPipelineGraph"
-    />
+    <template v-if="pipeline">
+      <pipeline-list
+        v-if="showPipelineList"
+        :pipeline="pipeline"
+      />
+      <pipeline-graph
+        v-else
+        :config-paths="configPaths"
+        :pipeline="pipeline"
+        @error="reportFailure"
+        @refreshPipelineGraph="refreshPipelineGraph"
+      />
+    </template>
+
+
   </div>
 </template>

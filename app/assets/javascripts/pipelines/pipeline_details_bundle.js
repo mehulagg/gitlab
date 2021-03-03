@@ -94,7 +94,8 @@ export default async function initPipelineDetailsBundle() {
       );
 
       createPipelinesDetailApp(SELECTORS.PIPELINE_GRAPH, dataset);
-    } catch {
+    } catch (err) {
+      console.log(err);
       Flash(__('An error occurred while loading the pipeline.'));
     }
   } else {
