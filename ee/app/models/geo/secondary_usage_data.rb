@@ -23,4 +23,8 @@ class Geo::SecondaryUsageData < Geo::TrackingBase
       end
     end
   end
+
+  def self.update_metrics!
+    # This should go through and collect metrics
+  end
 end
